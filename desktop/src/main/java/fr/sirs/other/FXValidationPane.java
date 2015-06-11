@@ -249,19 +249,23 @@ public class FXValidationPane extends BorderPane {
                                 if (vSummary.getElementId() == null) {
                                     if(!docu.getValid()){
                                         final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer l'élément ?", ButtonType.NO, ButtonType.YES);
+                                        confirm.setResizable(true);
                                         final Optional<ButtonType> res = confirm.showAndWait();
                                         if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                                             repo.remove(docu);
                                             table.getItems().remove(vSummary);
                                         }
                                     }else{
-                                        new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez supprimer que les éléments invalides.", ButtonType.OK).showAndWait();
+                                        final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez supprimer que les éléments invalides.", ButtonType.OK);
+                                        alert.setResizable(true);
+                                        alert.showAndWait();
                                     }
                                 } // Sinon, c'est que l'élément est inclus quelque part dans le document et il faut le rechercher.
                                 else {
                                     final Element elt = docu.getChildById(vSummary.getElementId());
                                     if(!elt.getValid()){
                                         final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer l'élément ?", ButtonType.NO, ButtonType.YES);
+                                        confirm.setResizable(true);
                                         final Optional<ButtonType> res = confirm.showAndWait();
                                         if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                                             elt.getParent().removeChild(elt);
@@ -269,7 +273,9 @@ public class FXValidationPane extends BorderPane {
                                             table.getItems().remove(vSummary);
                                         }
                                     } else{
-                                        new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez supprimer que les éléments invalides.", ButtonType.OK).showAndWait();
+                                        final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez supprimer que les éléments invalides.", ButtonType.OK);
+                                        alert.setResizable(true);
+                                        alert.showAndWait();
                                     }
                                 }
                             }

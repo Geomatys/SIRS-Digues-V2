@@ -204,7 +204,9 @@ public class FXDataImportPane extends BorderPane {
                 } else if (layerChooser.layerNames.getItems().size() > 1) {
                     dialog.showAndWait();
                 } else {
-                    new Alert(Alert.AlertType.INFORMATION, "Aucune donnée trouvée pour les paramètres définis.", ButtonType.OK).showAndWait();
+                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune donnée trouvée pour les paramètres définis.", ButtonType.OK);
+                    alert.setResizable(true);
+                    alert.showAndWait();
                 }
             });
         });

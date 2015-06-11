@@ -185,6 +185,7 @@ public class ExportMenu extends TreeMenuItem {
                         } catch (MalformedURLException | DataStoreException ex) {
                             Loggers.DATA.log(Level.WARNING, ex.getMessage(),ex);
                             final Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage(), ButtonType.OK);
+                            alert.setResizable(true);
                             alert.showAndWait();
                         }
 

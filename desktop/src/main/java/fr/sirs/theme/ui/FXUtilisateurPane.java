@@ -139,7 +139,9 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
                 || ui_login.getText()==null 
                 || "".equals(ui_login.getText())){
             ui_labelLogin.setTextFill(Color.RED);
-            new Alert(Alert.AlertType.INFORMATION, "Vous devez renseigner l'identifiant.", ButtonType.CLOSE).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Vous devez renseigner l'identifiant.", ButtonType.CLOSE);
+            alert.setResizable(true);
+            alert.showAndWait();
             throw new Exception("L'identifiant utilisateur n'a pas été renseigné ! Modification non enregistrée.");
         }
         
@@ -151,7 +153,9 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
             for(final Utilisateur utilisateur : utilisateurs){
                 if(ui_login.getText().equals(utilisateur.getLogin())){
                     ui_labelLogin.setTextFill(Color.RED);
-                    new Alert(Alert.AlertType.INFORMATION, "L'identifiant "+ui_login.getText()+" existe déjà dans la base locale.", ButtonType.CLOSE).showAndWait();
+                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "L'identifiant "+ui_login.getText()+" existe déjà dans la base locale.", ButtonType.CLOSE);
+                    alert.setResizable(true);
+                    alert.showAndWait();
                     throw new Exception("L'identifiant "+ui_login.getText()+" existe déjà dans la base locale. ! Modification non enregistrée.");
                 }
             }
@@ -166,7 +170,9 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
                     || ui_passwordConfirm == null
                     || !ui_password.getText().equals(ui_passwordConfirm.getText())){
                 ui_labelConfirm.setTextFill(Color.RED);
-                new Alert(Alert.AlertType.INFORMATION, "Le mot de passe et sa confirmation ne correspondent pas.", ButtonType.CLOSE).showAndWait();
+                final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le mot de passe et sa confirmation ne correspondent pas.", ButtonType.CLOSE);
+                alert.setResizable(true);
+                alert.showAndWait();
                 throw new Exception("Les mots de passe ne correspondent pas ! Modification non enregistrée.");
             } 
             else{

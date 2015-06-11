@@ -86,7 +86,9 @@ public class FXAdminQueryPane extends BorderPane {
     public FXAdminQueryPane() throws IOException {
         super();
         if (!Role.ADMIN.equals(Injector.getSession().getRole())) {
-            new Alert(Alert.AlertType.ERROR, "Ce panneau est reservé aux administrateurs !", ButtonType.OK).show();
+            final Alert alert = new Alert(Alert.AlertType.ERROR, "Ce panneau est reservé aux administrateurs !", ButtonType.OK);
+            alert.setResizable(true);
+            alert.show();
             setCenter(new Label("Seuls les administrateurs peuvent utiliser ce panneau."));
             return;
         }

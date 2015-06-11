@@ -75,7 +75,9 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
                 store = new CSVFeatureStore(file, "no namespace", separator);
                 uiPaneConfig.setDisable(false);
             }else{
-                new Alert(Alert.AlertType.ERROR, "Le fichier sélectionné n'est pas un shp, csv ou txt", ButtonType.OK).showAndWait();
+                final Alert alert = new Alert(Alert.AlertType.ERROR, "Le fichier sélectionné n'est pas un shp, csv ou txt", ButtonType.OK);
+                alert.setResizable(true);
+                alert.showAndWait();
                 return;
             }
             
@@ -124,7 +126,9 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
             
         } catch(Exception ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-            new Alert(Alert.AlertType.ERROR, ex.getMessage(), ButtonType.OK).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage(), ButtonType.OK);
+            alert.setResizable(true);
+            alert.showAndWait();
         }
     }
     

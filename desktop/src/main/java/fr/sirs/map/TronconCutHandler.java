@@ -151,6 +151,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
             // finish button is bound to troncon property state to avoid null value here.
             final TronconDigue troncon = editPane.tronconProperty().get();
             final Alert confirmCut = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment découper le tronçon ? Si oui, vos modifications seront enregistrées.", ButtonType.YES, ButtonType.NO);
+            confirmCut.setResizable(true);
             confirmCut.showAndWait();
             final ButtonType result = confirmCut.getResult();
             if(result==ButtonType.YES){
@@ -168,6 +169,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                         d = GeotkFX.newExceptionDialog(null, submitted.getException());
                     } else {
                         d = new Alert(Alert.AlertType.ERROR, "Cause : erreur inconnue.", ButtonType.OK);
+                        d.setResizable(true);
                     }
                     d.setHeaderText("Le découpage de " + troncon.getLibelle() + " n'a pas pu être mené à son terme.");
                     d.show();
@@ -175,9 +177,11 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
 
                 // TODO : show a popup on success.
                 submitted.setOnSucceeded((Event event) -> {
-                    new Alert(Alert.AlertType.INFORMATION,
+                    final Alert alert = new Alert(Alert.AlertType.INFORMATION,
                             "Le découpage du tronçon \"" + troncon.getLibelle() + "\" s'est terminé avec succcès.",
-                            ButtonType.OK).showAndWait();
+                            ButtonType.OK);
+                    alert.setResizable(true);
+                    alert.showAndWait();
                     try {
                         Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(LocalDateTime.now(), map);
                     } catch (Exception ex) {
@@ -283,6 +287,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                     Alert.AlertType.CONFIRMATION,
                     "Confirmer la fin du mode édition.",
                     ButtonType.YES, ButtonType.NO);
+            confirmUninstall.setResizable(true);
             if (ButtonType.YES.equals(confirmUninstall.showAndWait().get())) {
                 editPane.tronconProperty().set(null);
             }

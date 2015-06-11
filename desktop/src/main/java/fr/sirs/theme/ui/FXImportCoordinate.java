@@ -87,7 +87,9 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
                 store = new CSVFeatureStore(file, "no namespace", separator);
                 
             }else{
-                new Alert(Alert.AlertType.ERROR, "Le fichier sélectionné n'est pas un shp, csv ou txt", ButtonType.OK).showAndWait();
+                final Alert alert = new Alert(Alert.AlertType.ERROR, "Le fichier sélectionné n'est pas un shp, csv ou txt", ButtonType.OK);
+                alert.setResizable(true);
+                alert.showAndWait();
                 return;
             }
             
@@ -146,7 +148,9 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
             
         }catch(Exception ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-            new Alert(Alert.AlertType.ERROR, ex.getMessage(), ButtonType.OK).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage(), ButtonType.OK);
+            alert.setResizable(true);
+            alert.showAndWait();
             return;
         }
         
@@ -194,7 +198,9 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
 
         }catch(TransformException | FactoryException ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-            new Alert(Alert.AlertType.ERROR, ex.getMessage(), ButtonType.OK).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage(), ButtonType.OK);
+            alert.setResizable(true);
+            alert.showAndWait();
         }
 
         return geom;

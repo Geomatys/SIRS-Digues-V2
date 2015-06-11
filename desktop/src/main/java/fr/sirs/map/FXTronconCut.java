@@ -205,8 +205,10 @@ public class FXTronconCut extends VBox {
                     new Function() {
 
                         public Object apply(Object t) {
-                            final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
-                                    ButtonType.NO, ButtonType.YES).showAndWait().get();
+                            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
+                                    ButtonType.NO, ButtonType.YES);
+                            alert.setResizable(true);
+                            final ButtonType res = alert.showAndWait().get();
                             if (ButtonType.YES == res) {
                                 uiCutTable.getItems().remove(t);
                             }

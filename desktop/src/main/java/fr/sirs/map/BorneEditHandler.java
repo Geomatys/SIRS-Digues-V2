@@ -220,10 +220,11 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
      */
     @Override
     public boolean uninstall(final FXMap component) {
-        
+        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.", 
+                        ButtonType.YES,ButtonType.NO);
+        alert.setResizable(true);
         if(editPane.tronconProperty().get()==null || 
-                ButtonType.YES.equals(new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.", 
-                        ButtonType.YES,ButtonType.NO).showAndWait().get())){
+                ButtonType.YES.equals(alert.showAndWait().get())){
         
             super.uninstall(component);
             component.removeEventHandler(MouseEvent.ANY, mouseInputListener);

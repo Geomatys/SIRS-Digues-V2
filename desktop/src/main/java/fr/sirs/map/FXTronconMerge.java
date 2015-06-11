@@ -65,6 +65,7 @@ public class FXTronconMerge extends VBox{
     public void processMerge() {
         
         final Alert confirmCut = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment fusionner les tronçons ? Si oui, vos modifications seront enregistrées.", ButtonType.YES, ButtonType.NO);
+        confirmCut.setResizable(true);
         confirmCut.showAndWait();
         final ButtonType result = confirmCut.getResult();
         if(result==ButtonType.YES){

@@ -180,12 +180,15 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
 
     /**
      * {@inheritDoc }
+     * @param component
+     * @return 
      */
     @Override
     public boolean uninstall(final FXMap component) {
+        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition ? Les modifications non sauvegardées seront perdues.", 
+                        ButtonType.YES,ButtonType.NO);
         if (tronconProperty.get()==null || 
-                ButtonType.YES.equals(new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition ? Les modifications non sauvegardées seront perdues.", 
-                        ButtonType.YES,ButtonType.NO).showAndWait().get())) {
+                ButtonType.YES.equals(alert.showAndWait().get())) {
             super.uninstall(component);
             component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
             component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);

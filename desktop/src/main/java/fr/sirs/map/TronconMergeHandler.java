@@ -105,9 +105,11 @@ public class TronconMergeHandler extends FXAbstractNavigationHandler {
      */
     @Override
     public boolean uninstall(final FXMap component) {
+        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.", 
+                        ButtonType.YES,ButtonType.NO);
+        alert.setResizable(true);
         if(editPane.getTroncons().isEmpty() || 
-                ButtonType.YES.equals(new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.", 
-                        ButtonType.YES,ButtonType.NO).showAndWait().get())){
+                ButtonType.YES.equals(alert.showAndWait().get())){
             super.uninstall(component);
             component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
             component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);

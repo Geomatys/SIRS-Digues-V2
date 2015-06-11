@@ -73,7 +73,9 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
 
             Element elementDocument = elementProperty.get().getCouchDBDocument();
             if (elementDocument == null) {
-                new Alert(Alert.AlertType.INFORMATION, "Un objet ne peut être sauvegardé sans tronçon valide.", ButtonType.OK).show();
+                final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Un objet ne peut être sauvegardé sans tronçon valide.", ButtonType.OK);
+                alert.setResizable(true);
+                alert.show();
                 return;
             }
 
@@ -112,7 +114,9 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
             tab.getMap().focusOnElement(object);
             tab.show();
         } else {
-            new Alert(Alert.AlertType.INFORMATION, "L'élément courant n'est pas positionable sur la carte.", ButtonType.OK).show();
+            final Alert alert = new Alert(Alert.AlertType.INFORMATION, "L'élément courant n'est pas positionable sur la carte.", ButtonType.OK);
+            alert.setResizable(true);
+            alert.show();
         }
     }
     

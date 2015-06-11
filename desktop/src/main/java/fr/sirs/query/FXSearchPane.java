@@ -362,7 +362,9 @@ public class FXSearchPane extends BorderPane {
         }
         
         if (queries.isEmpty()) {
-            new Alert(Alert.AlertType.INFORMATION, "Aucune requête disponible.", ButtonType.OK).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune requête disponible.", ButtonType.OK);
+            alert.setResizable(true);
+            alert.showAndWait();
         } else {
             final Dialog dia = new Dialog();
             final FXQueryTable table = new FXQueryTable(queries);
@@ -483,7 +485,9 @@ public class FXSearchPane extends BorderPane {
                 
             } else if(uiToggleSQL.isSelected()) {
                 if(h2Store==null) {
-                    new Alert(Alert.AlertType.INFORMATION, "Veuillez attendre que la connexion à la base de donnée SQL soit établie.", ButtonType.OK).show();
+                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Veuillez attendre que la connexion à la base de donnée SQL soit établie.", ButtonType.OK);
+                    alert.setResizable(true);
+                    alert.show();
                 } else {
                     final String query = getCurrentSQLQuery();
                     searchSQL(query);
@@ -570,6 +574,7 @@ public class FXSearchPane extends BorderPane {
     private FeatureMapLayer searchSQLLayer(String query){
         if(!query.toLowerCase().startsWith("select")){
             final Alert alert = new Alert(Alert.AlertType.WARNING,"Uniquement les requêtes SELECT sont possibles.",ButtonType.CLOSE);
+            alert.setResizable(true);
             alert.showAndWait();
             return null;
         }

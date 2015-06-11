@@ -376,7 +376,9 @@ public class FXLauncherPane extends BorderPane {
     @FXML
     void connectDistant(ActionEvent event) {
         if (uiDistantName.getText().trim().isEmpty()) {
-            new Alert(Alert.AlertType.ERROR, "Veuillez remplir le nom de la base de donnée.", ButtonType.OK).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.ERROR, "Veuillez remplir le nom de la base de donnée.", ButtonType.OK);
+            alert.setResizable(true);
+            alert.showAndWait();
             return;
         }
 
@@ -396,18 +398,24 @@ public class FXLauncherPane extends BorderPane {
     void createEmpty(ActionEvent event) {
         final String dbName = cleanDbName(uiNewName.getText());
         if (dbName.isEmpty()) {
-            new Alert(Alert.AlertType.ERROR, "Veuillez remplir le nom de la base de donnée.", ButtonType.OK).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.ERROR, "Veuillez remplir le nom de la base de donnée.", ButtonType.OK);
+            alert.setResizable(true);
+            alert.showAndWait();
             return;
         }
 
         if (listLocalDatabases().contains(dbName)) {
-            new Alert(Alert.AlertType.ERROR, "Le nom de la base de données est déjà utilisé.", ButtonType.OK).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.ERROR, "Le nom de la base de données est déjà utilisé.", ButtonType.OK);
+            alert.setResizable(true);
+            alert.showAndWait();
             return;
         }
 
         if ("".equals(uiCreatePassword.getText())
                 || !uiCreatePassword.getText().equals(uiCreateConfirmPassword.getText())) {
-            new Alert(Alert.AlertType.ERROR, "Veuillez entrer, puis confirmer un mot de passe administrateur.", ButtonType.OK).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.ERROR, "Veuillez entrer, puis confirmer un mot de passe administrateur.", ButtonType.OK);
+            alert.setResizable(true);
+            alert.showAndWait();
             return;
         }
 
@@ -467,18 +475,24 @@ public class FXLauncherPane extends BorderPane {
     synchronized void createFromAccess(ActionEvent event) {
         final String dbName = cleanDbName(uiImportName.getText());
         if (dbName.isEmpty()) {
-            new Alert(Alert.AlertType.ERROR, "Veuillez remplir le nom de la base de donnée.", ButtonType.OK).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.ERROR, "Veuillez remplir le nom de la base de donnée.", ButtonType.OK);
+            alert.setResizable(true);
+            alert.showAndWait();
             return;
         }
 
         if (listLocalDatabases().contains(dbName)) {
-            new Alert(Alert.AlertType.ERROR, "Le nom de la base de données est déjà utilisé.", ButtonType.OK).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.ERROR, "Le nom de la base de données est déjà utilisé.", ButtonType.OK);
+            alert.setResizable(true);
+            alert.showAndWait();
             return;
         }
 
         if ("".equals(uiImportPassword.getText())
                 || !uiImportPassword.getText().equals(uiImportConfirmPassword.getText())) {
-            new Alert(Alert.AlertType.ERROR, "Veuillez entrer, puis confirmer un mot de passe administrateur.", ButtonType.OK).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.ERROR, "Veuillez entrer, puis confirmer un mot de passe administrateur.", ButtonType.OK);
+            alert.setResizable(true);
+            alert.showAndWait();
             return;
         }
 
@@ -588,7 +602,9 @@ public class FXLauncherPane extends BorderPane {
             (SIRS.LOADER = new Loader(database)).start(null);
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Cannot run desktop application with database : " + database, ex);
-            new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());
+            alert.setResizable(true);
+            alert.showAndWait();
         }
     }
 
@@ -751,9 +767,11 @@ public class FXLauncherPane extends BorderPane {
                     }, new Function<String, String>() {
 
                         public String apply(String toDelete) {
-                            final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
-                                    ButtonType.NO, ButtonType.YES).showAndWait().get();
-                            if (ButtonType.YES == res) {
+                            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
+                                    ButtonType.NO, ButtonType.YES);
+                            alert.setResizable(true);
+                            
+                            if (ButtonType.YES == alert.showAndWait().get()) {
                                 try {
                                     deleteDatabase(toDelete);
                                 } catch (Exception ex) {
@@ -787,7 +805,7 @@ public class FXLauncherPane extends BorderPane {
                             if (result.isPresent() && !result.get().isEmpty()) {
                                 final String destDbName = result.get();
 
-                                Alert alert = new Alert(
+                                final Alert alert = new Alert(
                                         Alert.AlertType.WARNING,
                                         "Vous allez ajouter vos données dans une base DÉJÀ EXISTANTE. Êtes-vous sûr ?",
                                         ButtonType.NO, ButtonType.YES);
@@ -804,10 +822,12 @@ public class FXLauncherPane extends BorderPane {
                                         final ReplicationStatus copyStatus = localRegistry.copyDatabase(sourceDb, destDbName);
                                         if (!copyStatus.isOk()) {
                                             localRegistry.cancelCopy(copyStatus);
-                                            new Alert(
+                                            final Alert alerte = new Alert(
                                                     Alert.AlertType.WARNING,
                                                     "Un problème est survenu pendant la copie. Certaines données pourraient ne pas avoir été copiées.",
-                                                    ButtonType.NO, ButtonType.YES).show();
+                                                    ButtonType.NO, ButtonType.YES);
+                                            alerte.setResizable(true);
+                                            alerte.show();
                                         }
                                         updateLocalDbList();
                                     } catch (IOException ex) {
@@ -896,7 +916,9 @@ public class FXLauncherPane extends BorderPane {
                         localRegistry.dropDatabase(dbName);
                         hide();
                     } else {
-                        new Alert(Alert.AlertType.ERROR, "Échec d'identification.", ButtonType.CLOSE).showAndWait();
+                        final Alert alert = new Alert(Alert.AlertType.ERROR, "Échec d'identification.", ButtonType.CLOSE);
+                        alert.setResizable(true);
+                        alert.showAndWait();
                     }
 
                 } catch (Exception ex) {

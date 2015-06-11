@@ -463,8 +463,10 @@ public class FXSystemeReperagePane extends BorderPane {
                     new Function<SystemeReperageBorne, SystemeReperageBorne>() {
 
                         public SystemeReperageBorne apply(SystemeReperageBorne t) {
-                            final ButtonType res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
-                                    ButtonType.NO, ButtonType.YES).showAndWait().get();
+                            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
+                                    ButtonType.NO, ButtonType.YES);
+                            alert.setResizable(true);
+                            final ButtonType res = alert.showAndWait().get();
                             if (ButtonType.YES == res) {
                                 final SystemeReperage sr = systemeReperageProperty().get();
                                 sr.getSystemeReperageBornes().remove(t);

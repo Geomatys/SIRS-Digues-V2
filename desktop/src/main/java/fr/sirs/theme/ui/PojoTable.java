@@ -358,13 +358,17 @@ public class PojoTable extends BorderPane {
         uiDelete.setOnAction((ActionEvent event) -> {
             final Element[] elements = ((List<Element>) uiTable.getSelectionModel().getSelectedItems()).toArray(new Element[0]);
             if (elements.length > 0) {
-                final Optional<ButtonType> res = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
-                        ButtonType.NO, ButtonType.YES).showAndWait();
+                final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
+                        ButtonType.NO, ButtonType.YES);
+                alert.setResizable(true);
+                final Optional<ButtonType> res = alert.showAndWait();
                 if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                         deletePojos(elements);
                 }
             } else {
-                new Alert(Alert.AlertType.INFORMATION, "Aucune entrée sélectionnée. Pas de suppression possible.").showAndWait();
+                final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée sélectionnée. Pas de suppression possible.");
+                alert.setResizable(true);
+                alert.showAndWait();
             }
         });
         uiDelete.disableProperty().bind(editableProperty.not());
@@ -699,7 +703,9 @@ public class PojoTable extends BorderPane {
         if (Boolean.TRUE.equals(session.needValidationProperty().get())) {
             if (session.getUtilisateur() == null || session.getUtilisateur().getId() == null || !session.getUtilisateur().getId().equals(pojo.getAuthor())
                     || pojo.getValid()) {
-                new Alert(Alert.AlertType.INFORMATION, "En tant qu'utilisateur externe, vous ne pouvez supprimer que des éléments invalidés dont vous êtes l'auteur.", ButtonType.OK).showAndWait();
+                final Alert alert = new Alert(Alert.AlertType.INFORMATION, "En tant qu'utilisateur externe, vous ne pouvez supprimer que des éléments invalidés dont vous êtes l'auteur.", ButtonType.OK);
+                alert.setResizable(true);
+                alert.showAndWait();
                 return false;
             }
         }
@@ -815,7 +821,9 @@ public class PojoTable extends BorderPane {
             
             uiTable.getItems().add(newlyCreated);
         } else {
-            new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.").showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
+            alert.setResizable(true);
+            alert.showAndWait();
         }
         return (Element) result;
     }
@@ -825,6 +833,7 @@ public class PojoTable extends BorderPane {
             Injector.getSession().showEditionTab(pojo);
         } catch (Exception ex) {
             Dialog d = new Alert(Alert.AlertType.ERROR, "Impossible d'afficher un éditeur", ButtonType.OK);
+            d.setResizable(true);
             d.showAndWait();
             throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
         }
@@ -1100,6 +1109,7 @@ public class PojoTable extends BorderPane {
                             } else {
                                 confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer le lien ?", ButtonType.NO, ButtonType.YES);
                             }
+                            confirm.setResizable(true);
                             final Optional<ButtonType> res = confirm.showAndWait();
                             if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                                 deletePojos(t);
@@ -1239,7 +1249,9 @@ public class PojoTable extends BorderPane {
             if (result!=null && result instanceof Element) {
                 uiTable.getItems().add((Element) result);
             } else {
-                new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.").showAndWait();
+                final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
+                alert.setResizable(true);
+                alert.showAndWait();
             }
             return (Element) result;
         }

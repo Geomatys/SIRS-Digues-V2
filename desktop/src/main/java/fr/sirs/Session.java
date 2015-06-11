@@ -262,7 +262,9 @@ public class Session extends SessionCore {
         final Optional<? extends Element> element = getElement(object);
         if (element.isPresent()){
             if(element.get() instanceof ReferenceType) {
-                new Alert(Alert.AlertType.INFORMATION, "Les références ne sont pas éditables.", ButtonType.CLOSE).showAndWait();
+                final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Les références ne sont pas éditables.", ButtonType.CLOSE);
+                alert.setResizable(true);
+                alert.showAndWait();                       
             } else {
                 getFrame().addTab(getOrCreateElementTab(element.get()));
             }
@@ -285,11 +287,15 @@ public class Session extends SessionCore {
                                         final Utilisateur utilisateur = (Utilisateur) pojo;
                                         // On interdit la suppression de l'utilisateur courant !
                                         if(utilisateur.equals(session.getUtilisateur())){
-                                            new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer votre propre compte.", ButtonType.CLOSE).showAndWait();                       
+                                            final Alert alert = new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer votre propre compte.", ButtonType.CLOSE);
+                                            alert.setResizable(true);
+                                            alert.showAndWait();                       
                                         } 
                                         // On interdit également la suppression de l'invité par défaut !
                                         else if (UtilisateurRepository.GUEST_USER.equals(utilisateur)){
-                                            new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer le compte de l'invité par défaut.", ButtonType.CLOSE).showAndWait();
+                                            final Alert alert = new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer le compte de l'invité par défaut.", ButtonType.CLOSE);
+                                            alert.setResizable(true);
+                                            alert.showAndWait();                       
                                         }
                                         else{
                                             pojoList.add(pojo);

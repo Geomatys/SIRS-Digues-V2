@@ -267,13 +267,17 @@ public class FXImportBornesPane extends BorderPane {
     @FXML
     void importBornes(ActionEvent event) {
         if (selection == null || selection.isEmpty()) {
-            new Alert(Alert.AlertType.INFORMATION, "Aucune borne à importer.", ButtonType.OK).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune borne à importer.", ButtonType.OK);
+            alert.setResizable(true);
+            alert.showAndWait();
             return;
         }
 
         final Object selectedTd = uiTronconBox.getSelectionModel().getSelectedItem();
         if (selectedTd == null) {
-            new Alert(Alert.AlertType.INFORMATION, "Veuillez sélectionner un tronçon.", ButtonType.OK).showAndWait();
+            final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Veuillez sélectionner un tronçon.", ButtonType.OK);
+            alert.setResizable(true);
+            alert.showAndWait();
             return;
         }
 
@@ -355,11 +359,14 @@ Injector.getSession().getProjection(),
             }
         };
         try {
+            final Alert alert;
             if (Boolean.TRUE.equals(TaskManager.INSTANCE.submit(importTask).get())) {
-                new Alert(Alert.AlertType.INFORMATION, "L'import est terminé.", ButtonType.OK).showAndWait();
+                alert = new Alert(Alert.AlertType.INFORMATION, "L'import est terminé.", ButtonType.OK);
             } else {
-                new Alert(Alert.AlertType.WARNING, "Aucune borne n'a pu être importée.", ButtonType.OK).showAndWait();
+                alert = new Alert(Alert.AlertType.WARNING, "Aucune borne n'a pu être importée.", ButtonType.OK);
             }
+            alert.setResizable(true);
+            alert.showAndWait();
         } catch (Exception ex) {
             GeotkFX.newExceptionDialog("Une erreur s'est produite pendant l'import des bornes.", ex).show();
         }

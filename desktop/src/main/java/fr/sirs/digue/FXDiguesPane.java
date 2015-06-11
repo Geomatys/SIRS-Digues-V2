@@ -152,8 +152,8 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
                     "La suppression de la digue "+se.getLibelle()+" ne supprimera pas les digues qui la compose, "
                    +"celles ci seront déplacées dans le groupe 'Non classés. Confirmer la suppression ?",
-                    ButtonType.YES, ButtonType.NO
-            );
+                    ButtonType.YES, ButtonType.NO);
+            alert.setResizable(true);
             final ButtonType res = alert.showAndWait().get();
             if (res == ButtonType.YES) {
                 session.getRepositoryForClass(SystemeEndiguement.class).remove(se);
@@ -164,8 +164,8 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
                     "La suppression de la digue "+digue.getLibelle()+" ne supprimera pas les tronçons qui la compose, "
                    +"ceux ci seront déplacés dans le groupe 'Non classés. Confirmer la suppression ?",
-                    ButtonType.YES, ButtonType.NO
-            );
+                    ButtonType.YES, ButtonType.NO);
+            alert.setResizable(true);
             final ButtonType res = alert.showAndWait().get();
             if (res == ButtonType.YES) {
                 //on enleve la reference a la digue dans les troncons
@@ -181,8 +181,8 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             final TronconDigue td = (TronconDigue) obj;
             final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
                     "Confirmer la suppression du tronçon "+td.getLibelle()+" ?",
-                    ButtonType.YES, ButtonType.NO
-            );
+                    ButtonType.YES, ButtonType.NO);
+            alert.setResizable(true);
             final ButtonType res = alert.showAndWait().get();
             if (res == ButtonType.YES) {
                 session.getRepositoryForClass(TronconDigue.class).remove(td);

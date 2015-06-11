@@ -88,9 +88,15 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
             // Another task still running
             } else if (task != null && !task.isDone()) {
                 if (Platform.isFxApplicationThread()) {
-                    new Alert(Alert.AlertType.INFORMATION, ALREADY_RUNNING_TEXT, ButtonType.OK).show();
+                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, ALREADY_RUNNING_TEXT, ButtonType.OK);
+                    alert.setResizable(true);
+                    alert.show();
                 } else {
-                    Platform.runLater(()->new Alert(Alert.AlertType.INFORMATION, ALREADY_RUNNING_TEXT, ButtonType.OK).show());
+                    Platform.runLater(()-> {
+                        final Alert alert = new Alert(Alert.AlertType.INFORMATION, ALREADY_RUNNING_TEXT, ButtonType.OK);
+                        alert.setResizable(true);
+                        alert.show();
+                            });
                 }
                 previousValue = oldValue;
                 troncon.setSystemeRepDefautId(oldValue);
@@ -102,6 +108,7 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
                     @Override
                     protected Optional<ButtonType> call() throws Exception {
                         final Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, CONFIRMATION_TEXT, ButtonType.NO, ButtonType.YES);
+                        confirmation.setResizable(true);
                         return confirmation.showAndWait();
                     }
 

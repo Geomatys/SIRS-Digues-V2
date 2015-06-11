@@ -432,10 +432,12 @@ public class DatabaseRegistry {
                 }
                 
                 if (localInfo.getRemoteDatabase() != null && !localInfo.getRemoteDatabase().equals(distant)) {
-                    Optional<ButtonType> showAndWait = new Alert(
+                    final Alert alert = new Alert(
                             Alert.AlertType.WARNING, 
                             "Vous êtes sur le point de changer le point de synchronisation de la base de données.", 
-                            ButtonType.CANCEL, ButtonType.OK).showAndWait();
+                            ButtonType.CANCEL, ButtonType.OK);
+                    final Optional<ButtonType> showAndWait = alert.showAndWait();
+                    
                     if (showAndWait.isPresent() && showAndWait.get().equals(ButtonType.OK)) {
                         cancelAllSynchronizations(localPath);
                     } else {
