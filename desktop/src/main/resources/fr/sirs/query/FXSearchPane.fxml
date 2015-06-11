@@ -160,7 +160,7 @@
                            <font>
                               <Font name="System Bold" size="13.0" />
                            </font></Label>
-                        <Button fx:id="uiOpen" mnemonicParsing="false" onAction="#openSQLQuery" text="Ouvrir" GridPane.rowIndex="1">
+                        <Button fx:id="uiOpen" mnemonicParsing="false" onAction="#openSQLQuery" text="Parcourir les requêtes" GridPane.rowIndex="1">
                            <styleClass>
                               <String fx:value="buttonbar-button" />
                               <String fx:value="label-header" />
@@ -172,17 +172,10 @@
                               <String fx:value="label-header" />
                            </styleClass>
                         </Button>
-                        <Button fx:id="uiExportQueries" alignment="CENTER" mnemonicParsing="false" onAction="#exportSQLQueries" text="Exporter" GridPane.columnIndex="2" GridPane.rowIndex="1">
-                           <styleClass>
-                              <String fx:value="buttonbar-button" />
-                              <String fx:value="label-header" />
-                           </styleClass>
-                        </Button>
                      </children>
                      <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" />
                         <ColumnConstraints hgrow="SOMETIMES" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
                      </columnConstraints>
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

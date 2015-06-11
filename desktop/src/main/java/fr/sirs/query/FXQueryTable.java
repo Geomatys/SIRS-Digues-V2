@@ -24,6 +24,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import org.geotoolkit.gui.javafx.util.FXTableView;
@@ -41,7 +42,9 @@ public class FXQueryTable extends BorderPane{
 
     public final TableView<SQLQuery> table = new FXTableView<>();
     /** A button to import queries from a chosen properties file. */
-    private final Button uiImportQueries = new Button("Import");
+    private final Button uiImportQueries = new Button("Importer");
+    /** A button to export queries to a chosen properties file. */
+    private final Button uiExportQueries = new Button("Exporter");
     
     public FXQueryTable(List<SQLQuery> queries) {
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -75,10 +78,14 @@ public class FXQueryTable extends BorderPane{
                 }
             }
         });
-        
+
+        final HBox box = new HBox(10,uiImportQueries,uiExportQueries);
+        box.setPadding(new Insets(10, 10, 10, 10));
         uiImportQueries.setTooltip(new Tooltip("Importer des requêtes SQL depuis un fichier."));
         uiImportQueries.setOnAction(this::importRequests);
-        setBottom(uiImportQueries);
+        uiExportQueries.setTooltip(new Tooltip("Exporter les requêtes SQL dans un fichier."));
+        uiExportQueries.setOnAction(this::exportRequests);
+        setBottom(box);
         
         setPadding(new Insets(5));
     }
@@ -97,7 +104,28 @@ public class FXQueryTable extends BorderPane{
             }
         }
     }
-    
+
+    private void exportRequests(ActionEvent e) {
+        save();
+        final List<SQLQuery> selected = table.getSelectionModel().getSelectedItems();
+        if (selected == null || selected.isEmpty()) {
+            new Alert(Alert.AlertType.INFORMATION, "Aucune requête sélectionnée pour l'export.", ButtonType.OK).show();
+        } else {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Fichier d'export");
+            chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Fichier de propriétés Java", ".properties"));
+            File outputFile = chooser.showSaveDialog(null);
+            if (outputFile != null) {
+                try {
+                    SQLQueries.saveQueriesInFile(selected, outputFile.toPath());
+                } catch (IOException ex) {
+                    SIRS.LOGGER.log(Level.WARNING, "Impossible de sauvegarder les requêtes sélectionnées.", ex);
+                    GeotkFX.newExceptionDialog("Impossible de sauvegarder les requêtes sélectionnées.", ex).show();
+                }
+            }
+        }
+    }
+
     public void save(){
         try {
             SQLQueries.saveQueriesLocally(getLocalQueries());

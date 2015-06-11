@@ -16,10 +16,7 @@ import fr.sirs.core.model.SQLQuery;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.index.ElementHit;
 import fr.sirs.theme.ui.ObjectTable;
-import fr.sirs.theme.ui.PojoTable;
-import fr.sirs.util.FXPreviewToElementTableColumn;
 import fr.sirs.util.SirsStringConverter;
-import fr.sirs.util.SirsTableCell;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +27,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -38,7 +34,6 @@ import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -60,9 +55,6 @@ import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
@@ -80,7 +72,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.sis.storage.DataStoreException;
 import org.elasticsearch.action.search.SearchResponse;
@@ -118,7 +109,7 @@ import org.opengis.filter.Filter;
 public class FXSearchPane extends BorderPane {
 
     public static final Image ICON_SAVE    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_SAVE_ALIAS,22,Color.WHITE),null);
-    public static final Image ICON_OPEN    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_FOLDER_OPEN,22,Color.WHITE),null);
+    public static final Image ICON_OPEN    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_LIST_UL,22,Color.WHITE),null);
     public static final Image ICON_EXPORT  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_UPLOAD,22,Color.WHITE),null);
     public static final Image ICON_MODEL   = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_SHARE_ALT_SQUARE,22,Color.WHITE),null);
     public static final Image ICON_CARTO   = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COMPASS,22,Color.WHITE),null);
@@ -157,7 +148,6 @@ public class FXSearchPane extends BorderPane {
     @FXML private ComboBox<String> uiTableChoice;
     @FXML private BorderPane uiFilterPane;
     @FXML private TextArea uiSQLText;
-    @FXML private Button uiExportQueries;
     private FXSQLFilterEditor uiFilterEditor;
     
     
@@ -214,7 +204,6 @@ public class FXSearchPane extends BorderPane {
         uiOpen.setGraphic(new ImageView(ICON_OPEN));
         uiExportModel.setGraphic(new ImageView(ICON_EXPORT));
         uiRefreshModel.setGraphic(new ImageView(ICON_REFRESH));
-        uiExportQueries.setGraphic(new ImageView(ICON_EXPORT));
         uiViewModel.setGraphic(new ImageView(ICON_MODEL));
         
         // VISIBILITY RULES
@@ -375,68 +364,19 @@ public class FXSearchPane extends BorderPane {
             final FXQueryTable table = new FXQueryTable(queries);
             final DialogPane pane = new DialogPane();
             pane.setPrefSize(700, 400);
-            pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+            final ButtonType bt = new ButtonType("Ouvrir");
+            pane.getButtonTypes().addAll(bt, ButtonType.CLOSE);
             pane.setContent(table);
             dia.setDialogPane(pane);
             dia.setTitle("Liste des requêtes");
 
             final Optional res = dia.showAndWait();
-            if (res.isPresent() && ButtonType.OK.equals(res.get())) {
+            table.save();
+            if (res.isPresent() && bt.equals(res.get())) {
                 //sauvegarde s'il y a eu des changements
-                table.save();
                 final SQLQuery selected = table.getSelection();
                 if (selected != null) {
                     uiSQLText.setText(selected.sql.get());
-                }
-            }
-        }
-    }
-            
-    @FXML
-    private void exportSQLQueries(ActionEvent event) {
-        // Load available queries
-        final List<SQLQuery> queries;
-        try {
-            queries = SQLQueries.getLocalQueries();
-            queries.addAll(Injector.getSession().getSqlQueryRepository().getAll());
-        } catch (IOException ex) {
-            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-            GeotkFX.newExceptionDialog("Une erreur s'est produite pendant la création de la liste des requêtes.", ex).show();
-            return;
-        }
-        if (queries.isEmpty()) {
-            new Alert(Alert.AlertType.INFORMATION, "Aucune requête disponible.", ButtonType.OK).showAndWait();
-        } else {
-            final Dialog dia = new Dialog();
-            final FXQueryTable table = new FXQueryTable(queries);
-            table.table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-            final DialogPane pane = new DialogPane();
-            pane.setPrefSize(700, 400);
-            pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-            pane.setContent(table);
-            dia.setDialogPane(pane);
-            dia.setTitle("Liste des requêtes");
-
-            final Optional res = dia.showAndWait();
-            if (res.isPresent() && ButtonType.OK.equals(res.get())) {
-                // Save system local if some queries has been deleted.
-                table.save();
-                final List<SQLQuery> selected = table.table.getSelectionModel().getSelectedItems();
-                if (selected == null || selected.isEmpty()) {
-                    new Alert(Alert.AlertType.INFORMATION, "Aucune requête sélectionnée pour l'export.", ButtonType.OK).show();
-                } else {
-                    FileChooser chooser = new FileChooser();
-                    chooser.setTitle("Fichier d'export");
-                    chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Fichier de propriétés Java", ".properties"));
-                    File outputFile = chooser.showSaveDialog(null);
-                    if (outputFile != null) {
-                        try {
-                            SQLQueries.saveQueriesInFile(selected, outputFile.toPath());
-                        } catch (IOException ex) {
-                            SIRS.LOGGER.log(Level.WARNING, "Impossible de sauvegarder les requêtes sélectionnées.", ex);
-                            GeotkFX.newExceptionDialog("Impossible de sauvegarder les requêtes sélectionnées.", ex).show();
-                        }
-                    }
                 }
             }
         }
