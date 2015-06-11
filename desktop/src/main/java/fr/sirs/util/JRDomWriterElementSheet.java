@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.xml.parsers.DocumentBuilder;
@@ -260,7 +261,8 @@ public class JRDomWriterElementSheet {
         
         // Sets the title.------------------------------------------------------
         final String className;
-        final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName());
+        final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName(), Locale.getDefault(),
+                Thread.currentThread().getContextClassLoader());
         if(resourceBundle!=null){
             className = (resourceBundle.containsKey(BUNDLE_KEY_CLASS)) ?
                     resourceBundle.getString(BUNDLE_KEY_CLASS) : classToMap.getSimpleName();
@@ -290,7 +292,8 @@ public class JRDomWriterElementSheet {
      */
     private void writeDetail(final Class classToMap, List<String> avoidFields) {
         
-        final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName());
+        final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName(), Locale.getDefault(),
+                Thread.currentThread().getContextClassLoader());
         
         // Loops over the method looking for setters (based on the field names).
         final Method[] methods = classToMap.getMethods();

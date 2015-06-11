@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -63,7 +64,7 @@ public class FXMainFrame extends BorderPane {
 
     public static final Image ICON_ALL  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TABLE,16,FontAwesomeIcons.DEFAULT_COLOR),null);
     private final Session session = Injector.getBean(Session.class);
-    private final ResourceBundle bundle = ResourceBundle.getBundle(FXMainFrame.class.getName());
+    private final ResourceBundle bundle = ResourceBundle.getBundle(FXMainFrame.class.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
     
     @FXML private MenuButton uiThemesLocalized;
     @FXML private MenuButton uiThemesUnlocalized;
@@ -182,7 +183,7 @@ public class FXMainFrame extends BorderPane {
     
     private enum Choice{REFERENCE, MODEL};
     private MenuItem toMenuItem(final Class clazz, final Choice typeOfSummary){
-        final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName());
+        final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
         final MenuItem item = new MenuItem(bdl.getString(BUNDLE_KEY_CLASS));
         final EventHandler<ActionEvent> handler;
         

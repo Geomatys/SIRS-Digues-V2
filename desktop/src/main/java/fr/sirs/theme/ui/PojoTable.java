@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -1161,7 +1162,8 @@ public class PojoTable extends BorderPane {
             super();
             setTitle("Choix de l'élément");
             
-            final ResourceBundle bundle = ResourceBundle.getBundle(pojoClass.getName());
+            final ResourceBundle bundle = ResourceBundle.getBundle(pojoClass.getName(), Locale.getDefault(),
+                    Thread.currentThread().getContextClassLoader());
             final String prefix = bundle.getString(BUNDLE_KEY_CLASS_ABREGE)+" : ";
             final ComboBox<Preview> comboBox;
             if(tronconSourceProperty.get()==null){

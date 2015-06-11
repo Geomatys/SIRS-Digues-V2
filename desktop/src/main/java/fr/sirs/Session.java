@@ -33,6 +33,7 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
@@ -337,7 +338,7 @@ public class Session extends SessionCore {
     public FXFreeTab getOrCreateDesignationTab(final Class<? extends Element> clazz){
         try {
             return openDesignationPanes.getOrCreate(clazz, new Callable<FXFreeTab>() {
-                final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName());
+                final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
                 @Override
                 public FXFreeTab call() throws Exception {
                     final FXFreeTab tab = new FXFreeTab("Désignations du type " + bdl.getString(BUNDLE_KEY_CLASS));
@@ -353,7 +354,7 @@ public class Session extends SessionCore {
     public FXFreeTab getOrCreateReferenceTypeTab(final Class<? extends ReferenceType> clazz){
         try {
             return openReferencePanes.getOrCreate(clazz, new Callable<FXFreeTab>() {
-                final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName());
+                final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
                 @Override
                 public FXFreeTab call() throws Exception {
                     final FXFreeTab tab = new FXFreeTab(bdl.getString(BUNDLE_KEY_CLASS));

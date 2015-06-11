@@ -45,6 +45,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.MissingResourceException;
@@ -444,7 +445,8 @@ public class JRDomWriterQueryResultSheet {
             // If there isn't resource bundles (or not for the curruen table), try to generate.
             if (bundles.get(tableName) == null) {
                 if (bundlePrefix != null) {
-                    bundles.put(tableName, ResourceBundle.getBundle(bundlePrefix + tableName));
+                    bundles.put(tableName, ResourceBundle.getBundle(bundlePrefix + tableName, Locale.getDefault(),
+                            Thread.currentThread().getContextClassLoader()));
                 }
             }
         }

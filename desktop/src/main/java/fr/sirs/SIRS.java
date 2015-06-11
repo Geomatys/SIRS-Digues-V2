@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -164,7 +165,8 @@ public final class SIRS extends SirsCore {
         
         // If possible, initialize traduction bundle.
         if (modelClass != null) {
-            loader.setResources(ResourceBundle.getBundle(modelClass.getName()));
+            loader.setResources(ResourceBundle.getBundle(modelClass.getName(), Locale.getDefault(),
+                    Thread.currentThread().getContextClassLoader()));
         }
         
         try {

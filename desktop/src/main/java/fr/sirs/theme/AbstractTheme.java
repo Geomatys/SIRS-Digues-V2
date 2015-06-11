@@ -8,6 +8,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.Parent;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -89,7 +90,8 @@ public abstract class AbstractTheme extends Theme {
 
 
     protected static <T extends Positionable> ThemeManager<T> generateThemeManager(final Class<T> themeClass){
-        final ResourceBundle bundle = ResourceBundle.getBundle(themeClass.getCanonicalName());
+        final ResourceBundle bundle = ResourceBundle.getBundle(themeClass.getCanonicalName(), Locale.getDefault(),
+                Thread.currentThread().getContextClassLoader());
         final Function<String, ObservableList<T>> extractor = (String linearId) -> {
             final List<T> result = ((AbstractPositionableRepository<T>) Injector.getSession().getRepositoryForClass(themeClass)).getByLinearId(linearId);
             final ObservableList<T> observableResult = FXCollections.observableArrayList();

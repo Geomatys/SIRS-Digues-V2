@@ -13,6 +13,7 @@ import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -43,7 +44,7 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
     private final ReferenceChecker referenceChecker;
         
     public FXReferencePane(final Class<T> type) {
-        final ResourceBundle bundle = ResourceBundle.getBundle(type.getName());
+        final ResourceBundle bundle = ResourceBundle.getBundle(type.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
         referenceChecker = session.getReferenceChecker();
         references = new ReferencePojoTable(type, bundle.getString(BUNDLE_KEY_CLASS));
         references.editableProperty().set(false);

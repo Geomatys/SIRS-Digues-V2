@@ -10,6 +10,7 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.util.FXPreviewToElementTableColumn;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -42,7 +43,8 @@ public class FXDesignationPane extends BorderPane {
     private enum Choice {DOUBLON, ALL};
 
     public FXDesignationPane(final Class type) {
-        final ResourceBundle previewBundle = ResourceBundle.getBundle(Preview.class.getName());
+        final ResourceBundle previewBundle = ResourceBundle.getBundle(Preview.class.getName(),
+                Locale.getDefault(), Thread.currentThread().getContextClassLoader());
 
         previews = repository.getByClass(type);
 

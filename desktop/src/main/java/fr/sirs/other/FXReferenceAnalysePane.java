@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -44,7 +45,8 @@ public class FXReferenceAnalysePane extends BorderPane {
     private final Map<String, ResourceBundle> bundles = new HashMap<>();
         
     public FXReferenceAnalysePane(final ReferenceType reference) {
-        final ResourceBundle bundle = ResourceBundle.getBundle(ReferenceUsage.class.getName());
+        final ResourceBundle bundle = ResourceBundle.getBundle(ReferenceUsage.class.getName(), Locale.getDefault(),
+                Thread.currentThread().getContextClassLoader());
         
         try {
             final Method getId = reference.getClass().getMethod("getId");
@@ -96,7 +98,7 @@ public class FXReferenceAnalysePane extends BorderPane {
                             @Override
                             public ObservableValue<String> call(TableColumn.CellDataFeatures<ReferenceUsage, String> param) {
                                 String type = param.getValue().getType();
-                                if(bundles.get(type)==null) bundles.put(type, ResourceBundle.getBundle(type));
+                                if(bundles.get(type)==null) bundles.put(type, ResourceBundle.getBundle(type, Locale.getDefault(), Thread.currentThread().getContextClassLoader()));
                                 type = bundles.get(type).getString(BUNDLE_KEY_CLASS);
                                 return new SimpleObjectProperty(type);
                             }
@@ -114,7 +116,7 @@ public class FXReferenceAnalysePane extends BorderPane {
                         usages.getColumns().add(labelColumn);
                         setCenter(usages);
 
-                        final ResourceBundle topBundle = ResourceBundle.getBundle(reference.getClass().getName());
+                        final ResourceBundle topBundle = ResourceBundle.getBundle(reference.getClass().getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
                         final Label uiTitle = new Label("Usages dans la base de la référence \""+ ((AvecLibelle)reference).getLibelle()+"\" ("+topBundle.getString(BUNDLE_KEY_CLASS)+")");
                         uiTitle.getStyleClass().add("pojotable-header");
                         uiTitle.setAlignment(Pos.CENTER);

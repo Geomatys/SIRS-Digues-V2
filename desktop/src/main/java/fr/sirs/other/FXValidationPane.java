@@ -20,6 +20,7 @@ import fr.sirs.util.FXPreviewToElementTableColumn;
 import fr.sirs.util.SirsTableCell;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -64,7 +65,7 @@ public class FXValidationPane extends BorderPane {
     private enum Choice{VALID, INVALID, ALL};
 
     public FXValidationPane() {
-        final ResourceBundle previewBundle = ResourceBundle.getBundle(Preview.class.getName());
+        final ResourceBundle previewBundle = ResourceBundle.getBundle(Preview.class.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
 
         table = new TableView<>();
         table.setEditable(false);
@@ -214,7 +215,7 @@ public class FXValidationPane extends BorderPane {
             return null;
         }
         if (bundles.get(type) == null) {
-            bundles.put(type, ResourceBundle.getBundle(type));
+            bundles.put(type, ResourceBundle.getBundle(type, Locale.getDefault(), Thread.currentThread().getContextClassLoader()));
         }
         return bundles.get(type);
     }

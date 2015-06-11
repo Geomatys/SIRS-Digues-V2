@@ -17,6 +17,7 @@ import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.SIRSDocument;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Predicate;
@@ -45,7 +46,8 @@ public class PositionDocumentTheme extends TronconTheme {
     private static <T extends Positionable, D extends SIRSDocument> ThemeManager<T> generateThemeManager(final Class<T> themeClass, Class<D> documentClass){
         final String title;
         if(documentClass!=null){
-            final ResourceBundle bundle = ResourceBundle.getBundle(documentClass.getCanonicalName());
+            final ResourceBundle bundle = ResourceBundle.getBundle(documentClass.getCanonicalName(), Locale.getDefault(),
+                    Thread.currentThread().getContextClassLoader());
             title = bundle.getString(SIRS.BUNDLE_KEY_CLASS);
         } else{
             title = "Sans document associé";
