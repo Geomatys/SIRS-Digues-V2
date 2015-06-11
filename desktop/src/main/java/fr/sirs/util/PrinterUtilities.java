@@ -73,17 +73,17 @@ public class PrinterUtilities {
         
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile(featureCollection.getFeatureType().getName().getLocalPart(), PDF_EXTENSION);
-        fout.deleteOnExit();
         
-        final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, new FileOutputStream(fout));
-        final Map<String, Object> parameters = new HashMap<>();
-        parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
-        parameters.put("TABLE_DATA_SOURCE", new FeatureCollectionDataSource(featureCollection));
-        
-        
-        final JasperPrint print = JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());
-        JasperReportService.generate(print, output);
+        try (final FileOutputStream outStream = new FileOutputStream(fout)) {
+            final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
+            final Map<String, Object> parameters = new HashMap<>();
+            parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
+            parameters.put("TABLE_DATA_SOURCE", new FeatureCollectionDataSource(featureCollection));
+
+            final JasperPrint print = JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());
+            JasperReportService.generate(print, output);
 //        JasperReportService.generateReport(report, featureCollection, parameters, output);
+        }
         return fout;
     }
     
@@ -127,10 +127,10 @@ public class PrinterUtilities {
         
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile(element.getClass().getSimpleName(), PDF_EXTENSION);
-        fout.deleteOnExit();
-        
-        final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, new FileOutputStream(fout));
-        JasperReportService.generate(print, output);
+        try (final FileOutputStream outStream = new FileOutputStream(fout)) {
+            final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
+            JasperReportService.generate(print, output);
+        }
         return fout;
     }
     

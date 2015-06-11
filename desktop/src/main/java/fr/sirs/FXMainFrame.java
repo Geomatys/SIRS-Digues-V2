@@ -386,7 +386,6 @@ public class FXMainFrame extends BorderPane {
     private void printFeatures(){
         try {
             final File fileToPrint = PrinterUtilities.print(session.getFeaturesToPrint(), null);
-            fileToPrint.deleteOnExit();
             Desktop.getDesktop().open(fileToPrint);
         } catch (Exception ex) {
             Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, ex);
@@ -412,7 +411,6 @@ public class FXMainFrame extends BorderPane {
 
             try {
                 fileToPrint = PrinterUtilities.print(element, avoidFields, session.getPreviews(), new SirsStringConverter());
-                fileToPrint.deleteOnExit();
                 Desktop.getDesktop().open(fileToPrint);
             } catch (Exception e) {
                 Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, e);
