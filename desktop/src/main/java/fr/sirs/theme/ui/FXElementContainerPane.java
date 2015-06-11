@@ -165,7 +165,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
                 try {
                     // Choose the pane adapted to the specific structure.
                     final String className = "fr.sirs.theme.ui.FX" + newValue.getClass().getSimpleName() + "Pane";
-                    final Class controllerClass = Class.forName(className);
+                    final Class controllerClass = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
                     final Constructor cstr = controllerClass.getConstructor(newValue.getClass());
                     specificThemePane = (FXElementPane) cstr.newInstance(newValue);
                     specificThemePane.disableFieldsProperty().bind(disableFieldsProperty());

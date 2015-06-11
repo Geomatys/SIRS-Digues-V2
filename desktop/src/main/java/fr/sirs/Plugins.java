@@ -92,7 +92,7 @@ public class Plugins {
             // TODO : Keep list of jars in a static variable to perform scan only once ?
             URL[] libs = Files.walk(SirsCore.PLUGINS_PATH).filter(Plugins::isJar).map(Plugins::toURL).toArray(URL[]::new);
             if (libs.length > 0) {
-                ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
+                ClassLoader parentLoader = Plugins.class.getClassLoader();
                 final URLClassLoader newLoader = new URLClassLoader(libs, parentLoader);
                 Thread.currentThread().setContextClassLoader(newLoader);
             }

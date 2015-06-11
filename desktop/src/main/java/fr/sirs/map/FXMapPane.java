@@ -314,7 +314,7 @@ public class FXMapPane extends BorderPane {
                     final Preview previewLabel = previews.get(documentId);
                     Class documentClass = null; 
                     try {
-                        documentClass = Class.forName(previewLabel.getElementClass());
+                        documentClass = Class.forName(previewLabel.getElementClass(), true, Thread.currentThread().getContextClassLoader());
                     } catch (ClassNotFoundException ex) {
                         SIRS.LOGGER.log(Level.WARNING, null, ex);
                     }

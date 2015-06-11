@@ -38,7 +38,7 @@ public final class ElementHit {
     }
 
     public Class geteElementClass() throws ClassNotFoundException {
-        return Class.forName(clazz);
+        return Class.forName(clazz, true, Thread.currentThread().getContextClassLoader());
     }
     
 }

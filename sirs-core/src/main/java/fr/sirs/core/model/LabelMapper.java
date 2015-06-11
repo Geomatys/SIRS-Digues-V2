@@ -1,5 +1,6 @@
 package fr.sirs.core.model;
 
+import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import org.apache.sis.util.ArgumentChecks;
@@ -20,7 +21,7 @@ public class LabelMapper {
     public final void setModelClass(final Class modelClass) {
         ArgumentChecks.ensureNonNull("Input model class", modelClass);
         this.modelClass = modelClass;
-        bundle = ResourceBundle.getBundle(modelClass.getName());
+        bundle = ResourceBundle.getBundle(modelClass.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
     }
     
     public Class getModelClass() {return this.modelClass;}

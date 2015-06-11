@@ -93,7 +93,7 @@ public class DocumentChangeEmiter {
  
     private static Optional<Class<?>> asClass(String clazz) {
         try {
-            return Optional.of(Class.forName(clazz));
+            return Optional.of(Class.forName(clazz, true, Thread.currentThread().getContextClassLoader()));
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             return Optional.empty();

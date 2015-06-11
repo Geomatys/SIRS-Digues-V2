@@ -602,7 +602,7 @@ public class CorePlugin extends Plugin {
         for(Name name : store.getNames()){
             final Class<? extends AbstractPositionDocument> positionDocumentClass;  
             try {
-                positionDocumentClass = (Class<? extends AbstractPositionDocument>) Class.forName(MODEL_PACKAGE+"."+name.getLocalPart());
+                positionDocumentClass = (Class<? extends AbstractPositionDocument>) Class.forName(MODEL_PACKAGE+"."+name.getLocalPart(), true, Thread.currentThread().getContextClassLoader());
                 for(final Class documentClass : documentClasses.get(positionDocumentClass)){
                     final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.filtered(name, new DocumentFilter(documentClass)));
                     if(col.getFeatureType()!=null){

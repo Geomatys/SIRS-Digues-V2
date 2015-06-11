@@ -137,7 +137,7 @@ public class SirsStringConverter extends StringConverter {
                 final Preview preview = Injector.getSession().getPreviews().get(((PositionDocument)source).getSirsdocument());
                 if(preview!=null && preview.getElementClass()!=null){
                     try {
-                        final LabelMapper documentLabelMapper = getLabelMapperForClass(Class.forName(preview.getElementClass()));
+                        final LabelMapper documentLabelMapper = getLabelMapperForClass(Class.forName(preview.getElementClass(), true, Thread.currentThread().getContextClassLoader()));
                         if(documentLabelMapper!=null){
                             prefixedDesignation+=" ["+documentLabelMapper.mapClassName()+"] ";
                         }
@@ -175,7 +175,7 @@ public class SirsStringConverter extends StringConverter {
      */
     private static LabelMapper getLabelMapperForClass(final String className){
         try {
-            return getLabelMapperForClass(Class.forName(className));
+            return getLabelMapperForClass(Class.forName(className,  true, Thread.currentThread().getContextClassLoader()));
         } catch (ClassNotFoundException ex) {
             SIRS.LOGGER.log(Level.WARNING, null, ex);
         }

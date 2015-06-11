@@ -492,7 +492,7 @@ public class ReferenceChecker extends Task<Void> {
         for (final String name : names) {
             final String className = MODEL_PACKAGE + "." + name;
             try {
-                classes.add((Class<ReferenceType>) Class.forName(className));
+                classes.add((Class<ReferenceType>) Class.forName(className, true, Thread.currentThread().getContextClassLoader()));
             } catch (ClassNotFoundException ex) {
                 serverClassNameReferencesNotLocal.add(className);
             }

@@ -261,7 +261,7 @@ public final class SIRS extends SirsCore {
         try {
 //            final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().
             final Preview summary = Injector.getSession().getPreviews().get(documentId);
-            final Class clazz = Class.forName(summary.getElementClass());
+            final Class clazz = Class.forName(summary.getElementClass(), true, Thread.currentThread().getContextClassLoader());
             if(clazz==ProfilTravers.class){
                 return FXCollections.observableList(Injector.getSession().getPositionProfilTraversRepository().getByDocumentId(documentId));
             } else {

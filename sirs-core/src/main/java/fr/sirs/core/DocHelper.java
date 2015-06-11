@@ -93,7 +93,7 @@ public class DocHelper {
     
     public static Optional<Class<?>> asClass(String clazz) {
         try {
-            return Optional.of(Class.forName(clazz));
+            return Optional.of(Class.forName(clazz, true, Thread.currentThread().getContextClassLoader()));
         } catch (ClassNotFoundException e) {
             LOGGER.debug("Cannot get class from name : "+clazz, e);
             return Optional.empty();
