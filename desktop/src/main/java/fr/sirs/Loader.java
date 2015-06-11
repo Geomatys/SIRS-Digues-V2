@@ -212,7 +212,12 @@ public class Loader extends Application {
         
         final Stage mainStage = new Stage();
         mainStage.titleProperty().bind(Bindings.createStringBinding(() -> {
-            StringBuilder builder = new StringBuilder("SIRS-Digues V2 - Utilisateur ");
+            StringBuilder builder = new StringBuilder("SIRS-Digues 2");
+            final String version = SIRS.getVersion();
+            if (version != null && !version.isEmpty()) {
+                builder.append(" v").append(version);
+            }
+            builder.append(" - Utilisateur ");
             Utilisateur user = session.utilisateurProperty().get();
             if (user == null || user.equals(UtilisateurRepository.GUEST_USER)) {
                 builder.append("invité");

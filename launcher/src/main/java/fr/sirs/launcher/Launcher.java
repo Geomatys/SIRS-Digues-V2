@@ -7,7 +7,6 @@ import java.io.IOException;
 
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
@@ -65,12 +64,16 @@ public class Launcher extends Application {
         final Scene scene = new Scene(stackPane);
         scene.setFill(null);
 
+        String version = SIRS.getVersion();
+        if (version == null)
+            version = "";
+        
         final Stage splashStage = new Stage();
-        splashStage.setTitle("SIRS");
+        splashStage.setTitle("SIRS "+version);
         splashStage.initStyle(StageStyle.TRANSPARENT);
         splashStage.setScene(scene);
 
-        primaryStage.setTitle("SIRS");
+        primaryStage.setTitle("SIRS "+version);
         primaryStage.setOnCloseRequest((WindowEvent event) -> {
             System.exit(0);
         });
