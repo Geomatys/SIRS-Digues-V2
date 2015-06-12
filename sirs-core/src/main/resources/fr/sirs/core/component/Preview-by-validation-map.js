@@ -20,7 +20,7 @@ function(doc) {
         if(object.nom) label = object.nom;
         else if(object.libelle) label = object.libelle;
         else if(object.login) label = object.login;
-        if(object.valid) emit(object.valid, {docId: object._id, docClass: object['@class'], elementId: object._id, elementClass: object['@class'], author: object.author, valid: object.valid, designation: object.designation, libelle: label});
+        if(object.valid!=null) emit(object.valid, {docId: object._id, docClass: object['@class'], elementId: object._id, elementClass: object['@class'], author: object.author, valid: object.valid, designation: object.designation, libelle: label});
     }
 
     /**

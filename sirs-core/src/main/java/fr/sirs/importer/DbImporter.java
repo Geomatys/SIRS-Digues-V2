@@ -484,17 +484,8 @@ public class DbImporter {
 
     public DbImporter(final CouchDbConnector couchDbConnector) throws IOException {
         this.couchDbConnector = couchDbConnector;
-//        repositories.put(Digue.class, new DigueRepository(couchDbConnector));
         repositories.put(TronconDigue.class, new TronconDigueRepository(couchDbConnector));
         repositories.put(BorneDigue.class, new BorneDigueRepository(couchDbConnector));
-//        final List<Class<? extends Element>> elementClasses = SessionCore.getElements();
-//        for(final Class<? extends Element> elementClass : elementClasses){
-//            try{
-//                repositories.put(elementClass, InjectorCore.getBean(SessionCore.class).getRepositoryForClass(elementClass));
-//            }catch(Exception ex){
-//                SirsCore.LOGGER.log(Level.FINE, "No repo for class "+elementClass);
-//            }
-//        }
     }
     
     public void setDatabase(final Database accessDatabase, 
@@ -526,12 +517,10 @@ public class DbImporter {
         typeCoteImporter = new TypeCoteImporter(accessDatabase, couchDbConnector);
         tronconGestionDigueImporter = new TronconGestionDigueImporter(
                 accessDatabase, couchDbConnector, 
-                (TronconDigueRepository) repositories.get(TronconDigue.class), 
-                (DigueRepository) repositories.get(Digue.class), 
+                (TronconDigueRepository) repositories.get(TronconDigue.class),
                 (BorneDigueRepository) repositories.get(BorneDigue.class), 
                 digueImporter, tronconDigueGeomImporter, systemeReperageImporter, 
-                borneDigueImporter, organismeImporter, intervenantImporter, 
-                typeCoteImporter, evenementHydrauliqueImporter);
+                borneDigueImporter, organismeImporter);
         
         tronconGestionDigueGardienImporter = new GardienTronconGestionImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter,

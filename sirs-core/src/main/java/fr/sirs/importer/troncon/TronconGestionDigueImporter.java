@@ -4,7 +4,6 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
 import fr.sirs.core.component.BorneDigueRepository;
-import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Digue;
@@ -20,12 +19,9 @@ import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.DigueImporter;
 import fr.sirs.importer.DocumentsUpdatable;
 import fr.sirs.importer.GenericImporter;
-import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TronconDigueGeomImporter;
-import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
-import fr.sirs.importer.TypeCoteImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,31 +44,24 @@ implements DocumentsUpdatable {
     private final TypeRiveImporter typeRiveImporter;
     private final SystemeReperageImporter systemeReperageImporter;
     private final TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter;
-//    private final TronconGestionDigueCommuneImporter tronconGestionDigueCommuneImporter;
     private final DigueImporter digueImporter;
     private final BorneDigueImporter borneDigueImporter;
-//    private final CommuneImporter communeImporter;
     
-//    private final DigueRepository digueRepository;
     private final TronconDigueRepository tronconDigueRepository;
     private final BorneDigueRepository borneDigueRepository;
     
     public TronconGestionDigueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
             final TronconDigueRepository tronconDigueRepository,
-            final DigueRepository digueRepository,
             final BorneDigueRepository borneDigueRepository,
             final DigueImporter digueImporter,
             final TronconDigueGeomImporter tronconDigueGeomImporter, 
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter, 
-            final OrganismeImporter organismeImporter,
-            final IntervenantImporter intervenantImporter,
-            final TypeCoteImporter typeCoteImporter,
-            final EvenementHydrauliqueImporter evenementHydrauliqueImporter){
+            final OrganismeImporter organismeImporter){
         super(accessDatabase, couchDbConnector);
         this.tronconDigueRepository = tronconDigueRepository;
-//        this.digueRepository = digueRepository;
+        
         this.borneDigueRepository = borneDigueRepository;
         this.digueImporter = digueImporter;
         this.tronconDigueGeomImporter = tronconDigueGeomImporter;
@@ -82,11 +71,7 @@ implements DocumentsUpdatable {
         this.borneDigueImporter = borneDigueImporter;
         tronconGestionDigueGestionnaireImporter = new TronconGestionDigueGestionnaireImporter(
                 accessDatabase, couchDbConnector, organismeImporter);
-//        communeImporter = new CommuneImporter(accessDatabase, couchDbConnector);
-//        this.tronconGestionDigueCommuneImporter = new TronconGestionDigueCommuneImporter(
-//                accessDatabase, couchDbConnector, systemeReperageImporter, 
-//                borneDigueImporter, communeImporter, 
-//                typeCoteImporter);
+        
     }
     
     public BorneDigueRepository getBorneDigueRepository(){return borneDigueRepository;}
@@ -189,10 +174,6 @@ implements DocumentsUpdatable {
             final List<GestionTroncon> gestions = gestionsByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(gestions!=null) tronconDigue.setGestions(gestions);
             
-//            final List<PeriodeCommune> communesTroncons = communes.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-//            if(communesTroncons!=null) tronconDigue.setCommunes(communesTroncons);
-            // Fin des communes
-            
             final List<BorneDigue> bornes = bornesByTroncon.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             if(bornes != null){
                 final List<String> bornesIds = new ArrayList<>();
@@ -222,7 +203,6 @@ implements DocumentsUpdatable {
                 couchDbConnector.create(d);
                 tronconDigue.setDigueId(d.getId());
             }
-            
             
             // Set the geometry
             tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
