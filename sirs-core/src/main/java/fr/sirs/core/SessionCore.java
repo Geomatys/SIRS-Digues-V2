@@ -92,12 +92,10 @@ public class SessionCore extends SessionGen {
         this.applicationContext=applicationContext;
     }
     
-//    @Override
-//    public <T extends Element> AbstractSIRSRepository<T> getRepositoryForClass(Class<T> elementType) {
-//        AbstractSIRSRepository repo = this.applicationContext.getBeansOfType(AbstractSIRSRepository.class).get(COMPONENT_PACKAGE+"."+elementType.getSimpleName()+"Repository");
-//        System.out.println("repo :: "+repo);
-//        return repo;
-//    }
+    @Override
+    public <T extends Element> AbstractSIRSRepository<T> getRepositoryForClass(Class<T> elementType) {
+        return applicationContext.getBeansOfType(AbstractSIRSRepository.class).get(COMPONENT_PACKAGE+"."+elementType.getSimpleName()+"Repository");
+    }
 
     private final CouchDbConnector connector;
     

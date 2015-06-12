@@ -12,7 +12,7 @@ import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.PluginInfo;
 import fr.sirs.core.model.Role;
 import fr.sirs.SIRS;
-import static fr.sirs.SIRS.PASSWORD_ENCRYPT_ALGO;
+import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
@@ -31,8 +31,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -457,16 +455,10 @@ public class FXLauncherPane extends BorderPane {
     }
 
     private void createDefaultUsers(final UtilisateurRepository utilisateurRepository, final String adminLogin, final String adminPassword) {
-        MessageDigest messageDigest = null;
-        try {
-            messageDigest = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO);
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(FXLauncherPane.class.getName()).log(Level.SEVERE, null, ex);
-        }
 
         final Utilisateur administrateur = ElementCreator.createAnonymValidElement(Utilisateur.class);
         administrateur.setLogin(adminLogin);
-        administrateur.setPassword(new String(messageDigest.digest(adminPassword.getBytes())));
+        administrateur.setPassword(hexaMD5(adminPassword));
         administrateur.setRole(Role.ADMIN);
         utilisateurRepository.add(administrateur);
     }
@@ -514,7 +506,6 @@ public class FXLauncherPane extends BorderPane {
                 DbImporter importer = new DbImporter(couchDbConnector);
                 importer.setDatabase(DatabaseBuilder.open(mainDbFile),
                         DatabaseBuilder.open(cartoDbFile), uiImportCRS.crsProperty().get());
-                importer.cleanDb();
                 importer.importation();
                 SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
                 sirsDBInfoRepository.setSRID(epsgCode);
@@ -898,12 +889,10 @@ public class FXLauncherPane extends BorderPane {
 
                 try (final ConfigurableApplicationContext ctx = localRegistry.connectToSirsDatabase(dbName, false, false, false)) {
 
-                    final UtilisateurRepository utilisateurRepository = ctx.getBean(Session.class).getUtilisateurRepository();
-
-                    final MessageDigest messageDigest = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO);
+                    final UtilisateurRepository utilisateurRepository = (UtilisateurRepository) ctx.getBean(Session.class).getRepositoryForClass(Utilisateur.class);
 
                     final List<Utilisateur> utilisateurs = utilisateurRepository.getByLogin(login.getText());
-                    final String encryptedPassword = new String(messageDigest.digest(password.getText().getBytes()));
+                    final String encryptedPassword = hexaMD5(password.getText());
                     boolean allowedToDropDB = false;
                     for (final Utilisateur utilisateur : utilisateurs) {
                         if (encryptedPassword.equals(utilisateur.getPassword())) {

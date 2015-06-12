@@ -55,6 +55,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.geotoolkit.font.FontAwesomeIcons;
@@ -143,7 +144,7 @@ public class FXMainFrame extends BorderPane {
                 uiDesignation.getItems().add(toMenuItem(elementClass, Choice.MODEL));
             }
         }
-
+        
         uiAdmin.getItems().addAll(uiUserAdmin, uiValidation, uiReference, uiDesignation);
         uiAdmin.visibleProperty().bind(Bindings.createBooleanBinding(() -> {
             Utilisateur user = session.utilisateurProperty().get();

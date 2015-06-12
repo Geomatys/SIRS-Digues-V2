@@ -3,8 +3,6 @@ package fr.sirs.importer;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
@@ -487,16 +485,16 @@ public class DbImporter {
     public DbImporter(final CouchDbConnector couchDbConnector) throws IOException {
         this.couchDbConnector = couchDbConnector;
 //        repositories.put(Digue.class, new DigueRepository(couchDbConnector));
-//        repositories.put(TronconDigue.class, new TronconDigueRepository(couchDbConnector));
-//        repositories.put(BorneDigue.class, new BorneDigueRepository(couchDbConnector));
-        List<Class<? extends Element>> elementClasses = SessionCore.getElements();
-        for(final Class<? extends Element> elementClass : elementClasses){
-            try{
-            repositories.put(elementClass, InjectorCore.getBean(SessionCore.class).getRepositoryForClass(elementClass));
-            }catch(Exception ex){
-                SirsCore.LOGGER.log(Level.FINE, "No repo for class "+elementClass);
-    }
-        }
+        repositories.put(TronconDigue.class, new TronconDigueRepository(couchDbConnector));
+        repositories.put(BorneDigue.class, new BorneDigueRepository(couchDbConnector));
+//        final List<Class<? extends Element>> elementClasses = SessionCore.getElements();
+//        for(final Class<? extends Element> elementClass : elementClasses){
+//            try{
+//                repositories.put(elementClass, InjectorCore.getBean(SessionCore.class).getRepositoryForClass(elementClass));
+//            }catch(Exception ex){
+//                SirsCore.LOGGER.log(Level.FINE, "No repo for class "+elementClass);
+//            }
+//        }
     }
     
     public void setDatabase(final Database accessDatabase, 
@@ -665,20 +663,6 @@ public class DbImporter {
 
     public Database getCartoDatabase() {
         return this.accessCartoDatabase;
-    }
-    
-    public void cleanRepo(final CouchDbRepositorySupport repository) {
-        final List<Object> objects = new ArrayList<>();
-        repository.getAll().stream().forEach((refRive) -> {
-            objects.add(BulkDeleteDocument.of(refRive));
-        });
-        couchDbConnector.executeBulk(objects);
-    }
-    
-    public void cleanDb(){
-        for(final CouchDbRepositorySupport repo : repositories.values()){
-            cleanRepo(repo);
-        }
     }
     
     public void importation() throws IOException, AccessDbImporterException{

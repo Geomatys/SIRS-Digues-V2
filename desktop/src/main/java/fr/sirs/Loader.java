@@ -1,7 +1,7 @@
 package fr.sirs;
 
-import static fr.sirs.SIRS.PASSWORD_ENCRYPT_ALGO;
 
+import static fr.sirs.SIRS.hexaMD5;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -36,7 +36,6 @@ import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.SirsStringConverter;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Objects;
@@ -123,7 +122,7 @@ public class Loader extends Application {
                 controller.uiConnexion.setDisable(true);
                 try {
                     final Session session = Injector.getBean(Session.class);
-                    final UtilisateurRepository utilisateurRepository = session.getUtilisateurRepository();
+                    final UtilisateurRepository utilisateurRepository = (UtilisateurRepository) session.getRepositoryForClass(Utilisateur.class);
 
                     controller.uiLogInfo.setText("Recherche…");
                     final List<Utilisateur> candidateUsers = utilisateurRepository.getByLogin(controller.uiLogin.getText());
@@ -140,14 +139,7 @@ public class Loader extends Application {
                         if (passwordText == null || passwordText.isEmpty()) {
                             encryptedPassword = null;                            
                         } else {
-                            try {
-                                final MessageDigest messageDigest = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO);
-                                encryptedPassword = new String(messageDigest.digest(passwordText.getBytes()));
-                            } catch (NoSuchAlgorithmException ex) {
-                                SirsCore.LOGGER.log(Level.SEVERE, "Un problème est survenu lors de la récupération du mot de passe. Impossible de procéder à la connexion.", ex);
-                                GeotkFX.newExceptionDialog("Un problème est survenu lors de la récupération du mot de passe. Impossible de procéder à la connexion.", ex);
-                                return;
-                            }
+                            encryptedPassword = hexaMD5(passwordText);
                         }
 
                         Utilisateur user = null;

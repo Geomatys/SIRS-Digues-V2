@@ -53,7 +53,7 @@ implements DocumentsUpdatable {
     private final BorneDigueImporter borneDigueImporter;
 //    private final CommuneImporter communeImporter;
     
-    private final DigueRepository digueRepository;
+//    private final DigueRepository digueRepository;
     private final TronconDigueRepository tronconDigueRepository;
     private final BorneDigueRepository borneDigueRepository;
     
@@ -72,7 +72,7 @@ implements DocumentsUpdatable {
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter){
         super(accessDatabase, couchDbConnector);
         this.tronconDigueRepository = tronconDigueRepository;
-        this.digueRepository = digueRepository;
+//        this.digueRepository = digueRepository;
         this.borneDigueRepository = borneDigueRepository;
         this.digueImporter = digueImporter;
         this.tronconDigueGeomImporter = tronconDigueGeomImporter;
@@ -219,7 +219,7 @@ implements DocumentsUpdatable {
                 }
             } else {
                 final Digue d = createAnonymValidElement(Digue.class);
-                digueRepository.add(d);
+                couchDbConnector.create(d);
                 tronconDigue.setDigueId(d.getId());
             }
             

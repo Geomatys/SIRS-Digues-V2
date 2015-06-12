@@ -2,11 +2,10 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import static fr.sirs.SIRS.PASSWORD_ENCRYPT_ALGO;
+import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
 import fr.sirs.core.model.*;
 import fr.sirs.util.SirsStringConverter;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import javafx.beans.binding.BooleanBinding;
@@ -26,7 +25,6 @@ import javafx.scene.paint.Color;
  */
 public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
 
-    private final MessageDigest messageDigest;
     private final BooleanProperty administrableProperty = new SimpleBooleanProperty(this, "administrableProperty", false);
     private final Session session = Injector.getSession();
 
@@ -58,7 +56,6 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         SIRS.loadFXML(this, Utilisateur.class);
         
         elementProperty().addListener(this::initFields);
-        messageDigest = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO);
         
         this.elementProperty().set(utilisateur);
         if(utilisateur!=null){
@@ -124,14 +121,6 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         
     }
 
-    private String digest(final String toEncrypt) {
-        if (messageDigest == null) {
-            return toEncrypt;
-        } else {
-            return new String(messageDigest.digest((toEncrypt).getBytes()));
-        }
-    }
-
     @Override
     public void preSave() throws Exception {        
         // Interdiction d'un indentifiant vide.
@@ -176,9 +165,10 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
                 throw new Exception("Les mots de passe ne correspondent pas ! Modification non enregistrée.");
             } 
             else{
-                elementProperty.get().setPassword(digest(ui_password.getText()));
+                elementProperty.get().setPassword(hexaMD5(ui_password.getText()));
                 ui_labelConfirm.setTextFill(Color.BLACK);
             }
         }
     }
+    
 }

@@ -26,6 +26,8 @@ import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -310,5 +312,18 @@ public final class SIRS extends SirsCore {
         comboBox.setItems(items);
         comboBox.getSelectionModel().select(current);
         ComboBoxCompletion.autocomplete(comboBox);
+    }
+    
+    public static String hexaMD5(final String toEncrypt){
+        StringBuilder sb = new StringBuilder();
+        try {
+            byte[] encrypted = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO).digest(toEncrypt.getBytes());
+            for (byte b : encrypted) {
+                sb.append(String.format("%02X", b));
+            }
+        } catch (NoSuchAlgorithmException ex) {
+            SIRS.LOGGER.log(Level.SEVERE, null, ex);
+        }
+        return sb.toString();
     }
 }

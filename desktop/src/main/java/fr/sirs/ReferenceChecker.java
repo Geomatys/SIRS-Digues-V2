@@ -332,12 +332,14 @@ public class ReferenceChecker extends Task<Void> {
 
         private List<ReferenceType> readReferenceFile(final File file) throws FileNotFoundException, IOException {
             
-            final Iterable<CSVRecord> records = CSVFormat.EXCEL.withHeader().parse(new InputStreamReader(new FileInputStream(file), "UTF-8"));
             final List<ReferenceType> fileRefs = new ArrayList<>();
             
-            for (final CSVRecord record : records) {
-                final ReferenceType referenceInstance = buildReferenceInstance(record);
-                if(referenceInstance!=null) fileRefs.add(referenceInstance);
+            try(final InputStream inputStream = new FileInputStream(file)){
+                final Iterable<CSVRecord> records = CSVFormat.EXCEL.withHeader().parse(new InputStreamReader(inputStream, "UTF-8"));
+                for (final CSVRecord record : records) {
+                    final ReferenceType referenceInstance = buildReferenceInstance(record);
+                    if(referenceInstance!=null) fileRefs.add(referenceInstance);
+                }
             }
             return fileRefs;
         }
@@ -450,13 +452,13 @@ public class ReferenceChecker extends Task<Void> {
         }
 
         final File file = File.createTempFile("tempReference", ".csv"); 
-        file.deleteOnExit();
+        
         final URLConnection connection = url.openConnection();
         try{
-            try (final InputStream inputStream = connection.getInputStream()) {
+            try (final InputStream inputStream = connection.getInputStream();
+                final FileOutputStream fos = new FileOutputStream(file)) {
 
                 final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                final FileOutputStream fos = new FileOutputStream(file);
                 final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fos);
 
                 int r = 0;
@@ -532,17 +534,20 @@ public class ReferenceChecker extends Task<Void> {
         }
 
         final List<String> result = new ArrayList<>();
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+        
+        try(final InputStream inputStream = new FileInputStream(file)){
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
 
-        while (true) {
-            final String line = bufferedReader.readLine();
-            
-            if (line == null) {
-                break;
+            while (true) {
+                final String line = bufferedReader.readLine();
+
+                if (line == null) {
+                    break;
+                }
+
+                result.add(line.replaceAll("\\s", ""));
+
             }
-
-            result.add(line.replaceAll("\\s", ""));
-
         }
         return result;
     }
