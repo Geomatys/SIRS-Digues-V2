@@ -7,9 +7,11 @@ import org.geotoolkit.gui.javafx.util.FXBooleanCell;
 import com.sun.javafx.property.PropertyReference;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import fr.sirs.CorePlugin;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import fr.sirs.StructBeanSupplier;
 import static fr.sirs.SIRS.AUTHOR_FIELD;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS_ABREGE;
 import static fr.sirs.SIRS.COMMENTAIRE_FIELD;
@@ -22,6 +24,7 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.Crete;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
@@ -34,11 +37,14 @@ import fr.sirs.core.model.PrZPointImporter;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
+import fr.sirs.map.ExportMenu;
+import fr.sirs.map.ExportTask;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.io.File;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -56,6 +62,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -103,6 +110,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -111,10 +119,17 @@ import jidefx.scene.control.field.NumberField;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.geotoolkit.data.FeatureStoreFinder;
+import org.geotoolkit.data.FileFeatureStoreFactory;
+import org.geotoolkit.data.bean.BeanFeatureSupplier;
+import org.geotoolkit.data.bean.BeanStore;
+import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXEnumTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
+import org.geotoolkit.map.FeatureMapLayer;
+import org.geotoolkit.map.MapBuilder;
 
 /**
  *
@@ -162,7 +177,8 @@ public class PojoTable extends BorderPane {
     protected final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
     protected final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH_WHITE));
     protected final Button uiImport = new Button(null, new ImageView(SIRS.ICON_IMPORT_WHITE));
-    protected final HBox searchEditionToolbar = new HBox(uiFicheMode, uiImport, uiSearch, uiAdd, uiDelete);
+    protected final Button uiExport = new Button(null, new ImageView(SIRS.ICON_EXPORT_WHITE));
+    protected final HBox searchEditionToolbar = new HBox(uiFicheMode, uiImport, uiExport, uiSearch, uiAdd, uiDelete);
     
     // Barre de gauche : navigation dans le parcours de fiches
     protected FXElementPane elementPane = null;
@@ -486,6 +502,38 @@ public class PojoTable extends BorderPane {
                 dialog.show();
             }
         });
+
+        uiExport.getStyleClass().add(BUTTON_STYLE);
+        uiExport.setTooltip(new Tooltip("Sauvegarder en CSV"));
+        uiExport.disableProperty().bind(Bindings.isNull(uiTable.getSelectionModel().selectedItemProperty()));
+        uiExport.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                final DirectoryChooser chooser = new DirectoryChooser();
+                chooser.setTitle(GeotkFX.getString(org.geotoolkit.gui.javafx.contexttree.menu.ExportItem.class, "folder"));
+                final File folder = chooser.showDialog(null);
+
+                if(folder!=null){
+                    try{
+                        final BeanFeatureSupplier sup = new StructBeanSupplier(pojoClass, () -> new ArrayList(uiTable.getSelectionModel().getSelectedItems()));
+                        final BeanStore store = new BeanStore(sup);
+                        final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(false)
+                                .getFeatureCollection(QueryBuilder.all(store.getNames().iterator().next())));
+                        layer.setName(store.getNames().iterator().next().getLocalPart());
+
+                        FileFeatureStoreFactory factory = (FileFeatureStoreFactory) FeatureStoreFinder.getFactoryById("csv");
+                        TaskManager.INSTANCE.submit(new ExportTask(layer, folder, factory));
+                    } catch (Exception ex) {
+                        Dialog d = new Alert(Alert.AlertType.ERROR, "Impossible de créer le fichier CSV", ButtonType.OK);
+                        d.setResizable(true);
+                        d.showAndWait();
+                        throw new UnsupportedOperationException("Failed to create csv store : " + ex.getMessage(), ex);
+                    }
+                }
+            }
+        });
+
         
         if(PointZ.class.isAssignableFrom(pojoClass)){
             uiTable.getColumns().add(new DistanceComputedPropertyColumn());

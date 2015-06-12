@@ -6,28 +6,43 @@ import fr.sirs.SIRS;
 import static fr.sirs.SIRS.AUTHOR_FIELD;
 import static fr.sirs.SIRS.FOREIGN_PARENT_ID_FIELD;
 import static fr.sirs.SIRS.VALID_FIELD;
+import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.Preview;
 import fr.sirs.index.ElementHit;
+import fr.sirs.map.ExportTask;
 import static fr.sirs.theme.ui.PojoTable.editElement;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.io.File;
 import java.lang.reflect.Method;
+import java.util.AbstractCollection;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.logging.Level;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
@@ -42,9 +57,20 @@ import javafx.scene.layout.HBox;
 import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.DirectoryChooser;
 import javafx.util.Callback;
+import org.geotoolkit.data.FeatureStoreFinder;
+import org.geotoolkit.data.FileFeatureStoreFactory;
+import org.geotoolkit.data.bean.BeanFeatureSupplier;
+import org.geotoolkit.data.bean.BeanStore;
+import org.geotoolkit.data.query.QueryBuilder;
+import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
+import org.geotoolkit.gui.javafx.util.TaskManager;
+import org.geotoolkit.internal.GeotkFX;
+import org.geotoolkit.map.FeatureMapLayer;
+import org.geotoolkit.map.MapBuilder;
 
 /**
  *
@@ -60,7 +86,8 @@ public class ObjectTable extends BorderPane {
 
     // Barre de droite : manipulation du tableau et passage en mode parcours de fiche
     protected final ToggleButton uiFicheMode = new ToggleButton(null, new ImageView(SIRS.ICON_FILE_WHITE));
-    protected final HBox searchEditionToolbar = new HBox(uiFicheMode);
+    protected final Button uiExport = new Button(null, new ImageView(SIRS.ICON_EXPORT_WHITE));
+    protected final HBox searchEditionToolbar = new HBox(uiFicheMode,uiExport);
     private final LabelMapper labelMapper;
 
     // Barre de gauche : navigation dans le parcours de fiches
@@ -94,7 +121,7 @@ public class ObjectTable extends BorderPane {
         uiTable.setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
         uiTable.setPlaceholder(new Label(""));
         uiTable.setTableMenuButtonVisible(true);
-        uiTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         
         final EditColumn editCol = new EditColumn(this::editPojo);
         uiTable.getColumns().add(editCol);
@@ -167,7 +194,95 @@ public class ObjectTable extends BorderPane {
 
         topPane.setLeft(navigationToolbar);
 
+        uiExport.getStyleClass().add(BUTTON_STYLE);
+        uiExport.setTooltip(new Tooltip("Sauvegarder en CSV"));
+        uiExport.disableProperty().bind(Bindings.isNull(uiTable.getSelectionModel().selectedItemProperty()));
+        uiExport.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                final DirectoryChooser chooser = new DirectoryChooser();
+                chooser.setTitle(GeotkFX.getString(org.geotoolkit.gui.javafx.contexttree.menu.ExportItem.class, "folder"));
+                final File folder = chooser.showDialog(null);
+
+                if(folder!=null){
+                    try{
+                        //il y a plusieurs types différent dans cette liste
+                        final ObservableList lst = FXCollections.observableArrayList(uiTable.getSelectionModel().getSelectedItems());
+                        final Map<Class,BeanFeatureSupplier> suppliers = new HashMap<>();
+                        for(Object o : lst){
+                            final Class clazz;
+                            if(o instanceof ElementHit){
+                                clazz = ((ElementHit)o).geteElementClass();
+                            }else if(o instanceof Preview){
+                                clazz = Class.forName(((Preview)o).getDocClass());
+                            }else{
+                                clazz = null;
+                            }
+
+                            if(clazz!=null && !suppliers.containsKey(clazz)){
+                                final Predicate filter = new Predicate() {
+                                    @Override
+                                    public boolean test(Object o) {
+                                        try{
+                                            Class candidate = null;
+                                            if(o instanceof ElementHit){
+                                                candidate = ((ElementHit)o).geteElementClass();
+                                            }else if(o instanceof Preview){
+                                                candidate = Class.forName(((Preview)o).getDocClass());
+                                            }
+                                            return clazz.equals(candidate);
+                                        }catch(Exception ex){
+                                            //will not happen
+                                            return false;
+                                        }
+                                    }
+                                };
+                                final Collection col = new AbstractCollection() {
+                                    @Override
+                                    public Iterator iterator() {
+                                        return lst.stream().filter(filter).map(ObjectTable::fullElement).iterator();
+                                    }
+
+                                    @Override
+                                    public int size() {
+                                        return lst.filtered(filter).size();
+                                    }
+                                };
+                                final BeanFeatureSupplier sup = new StructBeanSupplier(clazz, () -> col);
+                                suppliers.put(clazz, sup);
+                            }
+                        }
+
+                        final BeanStore store = new BeanStore(suppliers.values().toArray(new BeanFeatureSupplier[0]));
+                        for(Name n : store.getNames()){
+                            final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(false)
+                                    .getFeatureCollection(QueryBuilder.all(n)));
+                            layer.setName(n.getLocalPart());
+
+                            FileFeatureStoreFactory factory = (FileFeatureStoreFactory) FeatureStoreFinder.getFactoryById("csv");
+                            TaskManager.INSTANCE.submit(new ExportTask(layer, folder, factory));
+                        }
+                    } catch (Exception ex) {
+                        Dialog d = new Alert(Alert.AlertType.ERROR, "Impossible de créer le fichier CSV", ButtonType.OK);
+                        d.setResizable(true);
+                        d.showAndWait();
+                        throw new UnsupportedOperationException("Failed to create csv store : " + ex.getMessage(), ex);
+                    }
+                }
+            }
+        });
+
         uiFicheMode.setSelected(false);
+    }
+
+    private static Object fullElement(Object cdt){
+        Optional<? extends Element> ele = Injector.getSession().getElement(cdt);
+        if(ele.isPresent()){
+            return ele.get();
+        }else{
+            return null;
+        }
     }
 
     private void updateFiche(){

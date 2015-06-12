@@ -3,18 +3,8 @@ package fr.sirs;
 import com.vividsolutions.jts.geom.Geometry;
 import static fr.sirs.SIRS.DATE_DEBUT_FIELD;
 import static fr.sirs.SIRS.DATE_FIN_FIELD;
-import static fr.sirs.SIRS.MODEL_PACKAGE;
 import static fr.sirs.SIRS.SIRSDOCUMENT_REFERENCE;
-import java.io.IOException;
-import java.sql.SQLException;
-
-import javafx.scene.image.Image;
-import org.geotoolkit.data.bean.BeanStore;
-
-import fr.sirs.core.component.DocumentChangeEmiter;
-import fr.sirs.core.component.DocumentListener;
-import fr.sirs.theme.ContactsTheme;
-import fr.sirs.theme.EvenementsHydrauliquesTheme;
+import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
@@ -26,8 +16,6 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoir;
 import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.EchelleLimnimetrique;
-import fr.sirs.core.model.PositionDocument;
-import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
@@ -48,14 +36,16 @@ import fr.sirs.core.model.OuvrageTelecomEnergie;
 import fr.sirs.core.model.OuvrageVoirie;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.PiedFrontFrancBord;
+import fr.sirs.core.model.PositionDocument;
+import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.RapportEtude;
-import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
+import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.SIRSDocument;
 import fr.sirs.core.model.SommetRisberme;
@@ -65,30 +55,29 @@ import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
-import fr.sirs.theme.TronconTheme;
+import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DocumentTheme;
+import fr.sirs.theme.EvenementsHydrauliquesTheme;
 import fr.sirs.theme.PositionDocumentTheme;
-
+import fr.sirs.theme.TronconTheme;
 import java.awt.Color;
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javafx.event.ActionEvent;
 import javafx.scene.control.MenuItem;
-
+import javafx.scene.image.Image;
 import javax.measure.unit.NonSI;
-
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArraysExt;
@@ -97,6 +86,7 @@ import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
+import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -113,15 +103,11 @@ import org.geotoolkit.style.MutableStyle;
 import org.geotoolkit.style.MutableStyleFactory;
 import org.geotoolkit.style.RandomStyleBuilder;
 import org.geotoolkit.style.StyleConstants;
-
 import static org.geotoolkit.style.StyleConstants.*;
 import org.opengis.filter.Filter;
-
 import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.Id;
 import org.opengis.filter.FilterVisitor;
 import org.opengis.filter.expression.Expression;
-import org.opengis.filter.identity.FeatureId;
 import org.opengis.style.Fill;
 import org.opengis.style.Graphic;
 import org.opengis.style.GraphicStroke;
@@ -472,57 +458,6 @@ public class CorePlugin extends Plugin {
         
     }
 
-    /**
-     * A data supplier for {@link BeanStore}. It listens on application {@link DocumentChangeEmiter} to be notified when data is updated.
-     * 
-     * TODO : Optimization : the change emitter fire too many events, which will cause CPU overload at update.
-     */
-    private static class StructBeanSupplier extends BeanFeatureSupplier implements DocumentListener {
-
-        public StructBeanSupplier(Class clazz, final Supplier<Iterable> callable) {
-            super(clazz, "id", "geometry", 
-                (PropertyDescriptor t) -> MAPPROPERTY_PREDICATE.test(t),
-                null, Injector.getSession().getProjection(), callable::get);
-            Injector.getDocumentChangeEmiter().addListener(this);
-        }
-
-        @Override
-        public void documentCreated(Map<Class, List<Element>> added) {
-            if (added == null) return;
-            final Id filter = getIdFilter(added);
-            if (filter != null) {
-                fireFeaturesAdded(filter);
-            }
-        }
-
-        @Override
-        public void documentChanged(Map<Class, List<Element>> changed) {
-            if (changed == null) return;
-            final Id filter = getIdFilter(changed);
-            if (filter != null) {
-                fireFeaturesUpdated(filter);
-            }
-        }
-
-        @Override
-        public void documentDeleted(Map<Class, List<Element>> deleteObject) {
-            if (deleteObject == null) return;
-            final Id filter = getIdFilter(deleteObject);
-            if (filter != null) {
-                fireFeaturesDeleted(filter);
-            }
-        }
-        
-        private final Id getIdFilter(final Map<Class, List<Element>> elementMap) {
-            final List<Element> elements = elementMap.get(getBeanClass());
-            if (elements == null || elements.isEmpty()) return null;
-            final HashSet<FeatureId> fIds = new HashSet<>();
-            for (Element e : elements) {
-                fIds.add(FF.featureId(e.getId()));
-            }
-            return FF.id(fIds);
-        }
-    }
     
     private List<MapLayer> buildLayers(FeatureStore store, String layerName, MutableStyle baseStyle, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
         final List<MapLayer> layers = new ArrayList<>();
