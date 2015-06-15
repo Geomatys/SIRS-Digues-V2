@@ -5,8 +5,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SessionGen;
@@ -50,8 +48,6 @@ import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.ProprieteTroncon;
 import java.util.Iterator;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.elasticsearch.common.geo.ShapesAvailability;
 import org.geotoolkit.referencing.LinearReferencing;
 
 /**

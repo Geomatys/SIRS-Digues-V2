@@ -14,10 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.stage.FileChooser;
 import org.geotoolkit.gui.javafx.util.AbstractPathTextField;
@@ -82,6 +80,13 @@ public class FXFileTextField extends AbstractPathTextField {
         }
     }
     
-    
+    public URI getURI() {
+        try{
+            return getURIForText(getText());
+        } catch(Exception e){
+            SIRS.LOGGER.log(Level.FINEST, "Unable to build URI from "+getText());
+            return null;
+        }
+    }
     
 }
