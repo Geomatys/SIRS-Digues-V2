@@ -28,7 +28,9 @@
                                 <Label minWidth="-Infinity" text="Mise à jour :" textFill="WHITE" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                                 <TextField fx:id="libelle" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                 <Label text="Nom :" textFill="WHITE" GridPane.rowIndex="1" />
-                        <FXDateField fx:id="date_maj" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="3" GridPane.rowIndex="1" /> 
+                        <FXDateField fx:id="date_maj" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                        <Label text="Désignation :" textFill="WHITE" GridPane.rowIndex="2" />
+                        <TextField fx:id="uiDesignation" GridPane.columnIndex="1" GridPane.rowIndex="2" /> 
                             </children>
                             <columnConstraints>
                                 <ColumnConstraints hgrow="NEVER" />
@@ -45,6 +47,7 @@
                             <rowConstraints>
                         <RowConstraints vgrow="NEVER" />
                                 <RowConstraints vgrow="NEVER" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
                             </rowConstraints>
                         </GridPane>
                     </center>

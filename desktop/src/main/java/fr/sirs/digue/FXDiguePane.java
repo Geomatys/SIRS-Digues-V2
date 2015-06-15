@@ -31,6 +31,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
     @Autowired private Session session;
 
     @FXML private TextField libelle;
+    @FXML private TextField uiDesignation;
     @FXML private FXDateField date_maj;
     @FXML private HTMLEditor uiComment;
     
@@ -48,6 +49,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
         disableFieldsProperty().bind(uiMode.editionState().not());
         
         libelle.disableProperty().bind(disableFieldsProperty());
+        uiDesignation.disableProperty().bind(disableFieldsProperty());
         uiComment.disableProperty().bind(disableFieldsProperty());
         table.editableProperty().bind(disableFieldsProperty().not());
         
@@ -80,12 +82,16 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
         
         if (oldValue != null) {
             this.libelle.textProperty().unbindBidirectional(oldValue.libelleProperty());
+            this.uiDesignation.textProperty().unbindBidirectional(oldValue.designationProperty());
             this.date_maj.valueProperty().unbindBidirectional(oldValue.dateMajProperty());
         }
         
         if (newValue != null) {
             // Binding digue name.----------------------------------------------
             this.libelle.textProperty().bindBidirectional(newValue.libelleProperty());
+
+            // Binding digue name.----------------------------------------------
+            this.uiDesignation.textProperty().bindBidirectional(newValue.designationProperty());
 
             // Display levee's update date.-------------------------------------
             this.date_maj.valueProperty().bindBidirectional(newValue.dateMajProperty());
@@ -146,7 +152,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
             field.setOnAction((ActionEvent event) -> {
                 if (secondAction) {
                     commitEdit(field.getValue());
-}
+                }
                 secondAction = !secondAction;
             });
         }
