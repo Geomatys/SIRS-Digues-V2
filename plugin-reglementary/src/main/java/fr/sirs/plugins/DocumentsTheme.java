@@ -1,5 +1,6 @@
 package fr.sirs.plugins;
 
+import fr.sirs.ui.calendar.CalendarView;
 import fr.sirs.Injector;
 import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
@@ -9,6 +10,8 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
+
+import java.util.Date;
 
 /**
  * Panneau regroupant les fonctionnalités de suivi de documents.
@@ -23,6 +26,9 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
         super("Suivi des documents", "Suivi des documents", BUTTON_IMAGE);
     }
 
+    /**
+     * Panneau déployé au clic sur le bouton du menu correspondant à ce thème.
+     */
     @Override
     public Parent createPane() {
         final BorderPane borderPane = new BorderPane();
@@ -37,16 +43,28 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
         return borderPane;
     }
 
+    /**
+     * Génère l'onglet présentant la liste des obligations réglementaires.
+     */
     private Tab buildListTab() {
         final Tab listTab = new Tab("Liste");
+        listTab.setClosable(false);
         final ObligationReglementaireRepository orr = new ObligationReglementaireRepository(Injector.getSession().getConnector());
         final ObligationsPojoTable obligationsPojoTable = new ObligationsPojoTable(orr);
         listTab.setContent(obligationsPojoTable);
         return listTab;
     }
 
+    /**
+     * Génère l'onglet présentant le calendrier.
+     */
     private Tab buildCalendarTab() {
         final Tab calendarTab = new Tab("Calendrier");
+        calendarTab.setClosable(false);
+        final CalendarView calendarView = new CalendarView();
+        calendarView.setShowTodayButton(false);
+        calendarView.getCalendar().setTime(new Date());
+        calendarTab.setContent(calendarView);
         return calendarTab;
     }
 }
