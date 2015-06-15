@@ -13,13 +13,11 @@ import net.iharder.Base64;
 import org.geotoolkit.db.FilterToSQL;
 import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.factory.FactoryFinder;
-import org.geotoolkit.feature.type.DefaultName;
 import org.geotoolkit.filter.DefaultPropertyIsLike;
 import org.apache.sis.util.ObjectConverters;
 import org.geotoolkit.feature.type.AttributeDescriptor;
 import org.geotoolkit.feature.type.ComplexType;
 import org.geotoolkit.feature.type.GeometryDescriptor;
-import org.geotoolkit.feature.type.Name;
 import org.opengis.filter.And;
 import org.opengis.filter.ExcludeFilter;
 import org.opengis.filter.Filter;
@@ -79,8 +77,10 @@ import org.apache.sis.util.logging.Logging;
 import static org.geotoolkit.db.JDBCFeatureStore.JDBC_PROPERTY_RELATION;
 import org.geotoolkit.db.reverse.RelationMetaModel;
 import org.geotoolkit.feature.type.AssociationType;
+import org.geotoolkit.feature.type.NamesExt;
 import org.geotoolkit.feature.type.PropertyDescriptor;
 import org.geotoolkit.filter.DefaultPropertyName;
+import org.opengis.util.GenericName;
 
 /**
  * Convert filters and expressions in SQL.
@@ -271,16 +271,16 @@ public class SirsFilterToSQL implements FilterToSQL {
     @Override
     public StringBuilder visit(PropertyName candidate, Object o) {
         final StringBuilder sb = toStringBuilder(o);
-        final Name name = DefaultName.valueOf(candidate.getPropertyName());
+        final GenericName name = NamesExt.valueOf(candidate.getPropertyName());
         
         //split the path
-        final String str = name.getLocalPart();        
+        final String str = name.tip().toString();
         int indexOf = str.indexOf('/');
         final String[] parts = str.split("/");
         
         if(parts.length==1){
             sb.append('"');
-            sb.append(name.getLocalPart());
+            sb.append(name.tip().toString());
             sb.append('"');
         }else{
             //make sub queries
@@ -488,7 +488,7 @@ public class SirsFilterToSQL implements FilterToSQL {
         final StringBuilder subsb = new StringBuilder();
         if(exp instanceof PropertyName){
             final PropertyName prop = ((PropertyName)exp);
-            final String path = DefaultName.valueOf(prop.getPropertyName()).getLocalPart();
+            final String path = NamesExt.valueOf(prop.getPropertyName()).tip().toString();
             
             final int index = path.indexOf('/');
             if(index<0){

@@ -31,7 +31,6 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.data.session.Session;
 import org.geotoolkit.data.shapefile.ShapefileFeatureStore;
 import org.geotoolkit.feature.Feature;
-import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.LayerListener;
 import org.geotoolkit.map.MapBuilder;
@@ -41,6 +40,7 @@ import org.geotoolkit.style.RandomStyleBuilder;
 import org.geotoolkit.util.collection.CollectionChangeEvent;
 import org.opengis.feature.PropertyType;
 import org.opengis.filter.Id;
+import org.opengis.util.GenericName;
 
 /**
  *
@@ -82,7 +82,7 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
             }
             
             final Session session = store.createSession(true);
-            final Name typeName = store.getNames().iterator().next();
+            final GenericName typeName = store.getNames().iterator().next();
             final FeatureCollection col = session.getFeatureCollection(QueryBuilder.all(typeName));
             final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, RandomStyleBuilder.createDefaultVectorStyle(col.getFeatureType()));
             uiTable.init(layer);

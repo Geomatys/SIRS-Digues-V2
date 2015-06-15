@@ -56,10 +56,9 @@ import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.canvas.painter.SolidColorPainter;
 import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.factory.Hints;
-import org.geotoolkit.feature.type.DefaultName;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.feature.type.GeometryDescriptor;
-import org.geotoolkit.feature.type.Name;
+import org.geotoolkit.feature.type.NamesExt;
 import org.geotoolkit.filter.identity.DefaultFeatureId;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
@@ -392,11 +391,11 @@ public class FXMapPane extends BorderPane {
             final FeatureType fType = fLayer.getCollection().getFeatureType();
             final GenericName typeName = fType.getName();
             QueryBuilder queryBuilder = new QueryBuilder(
-                    new DefaultName(typeName.scope().toString(), typeName.head().toString()));
+                    NamesExt.create(typeName.scope().toString(), typeName.head().toString()));
             queryBuilder.setFilter(idFilter);
             GeometryDescriptor geomDescriptor = fType.getGeometryDescriptor();
             if (geomDescriptor != null) {
-                queryBuilder.setProperties(new Name[]{geomDescriptor.getName()});
+                queryBuilder.setProperties(new GenericName[]{geomDescriptor.getName()});
             } else {
                 return false; // no zoom possible
             }

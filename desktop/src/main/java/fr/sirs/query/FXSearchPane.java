@@ -88,9 +88,8 @@ import org.geotoolkit.db.FilterToSQL;
 import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.db.h2.H2FeatureStore;
 import org.geotoolkit.feature.Feature;
-import org.geotoolkit.feature.type.DefaultName;
 import org.geotoolkit.feature.type.FeatureType;
-import org.geotoolkit.feature.type.Name;
+import org.geotoolkit.feature.type.NamesExt;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.layer.FXFeatureTable;
@@ -103,6 +102,7 @@ import org.geotoolkit.map.MapItem;
 import org.geotoolkit.style.MutableStyle;
 import org.opengis.feature.PropertyType;
 import org.opengis.filter.Filter;
+import org.opengis.util.GenericName;
 
 /**
  *
@@ -313,9 +313,9 @@ public class FXSearchPane extends BorderPane {
         Task<ObservableList> h2Names = TaskManager.INSTANCE.submit("Connexion à la base de données", ()-> {
             h2Store = (H2FeatureStore) H2Helper.getStore(session.getConnector());
             
-            final Set<Name> names = h2Store.getNames();
+            final Set<GenericName> names = h2Store.getNames();
             final ObservableList observableNames = FXCollections.observableArrayList();
-            for(Name n : names) observableNames.add(n.getLocalPart());
+            for(GenericName n : names) observableNames.add(n.tip().toString());
             Collections.sort(observableNames);
             
             SIRS.LOGGER.fine("RDBMS CONNEXION FINISHED");
@@ -583,7 +583,7 @@ public class FXSearchPane extends BorderPane {
         }
         
         final Query fsquery = org.geotoolkit.data.query.QueryBuilder.language(
-                JDBCFeatureStore.CUSTOM_SQL, query, new DefaultName("requete"));
+                JDBCFeatureStore.CUSTOM_SQL, query, NamesExt.create("requete"));
         final FeatureCollection col = h2Store.createSession(false).getFeatureCollection(fsquery);
         final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, getStyleForType(col.getFeatureType()));
         layer.setName(query);

@@ -381,7 +381,7 @@ public class FXSQLFilterEditor extends GridPane {
     public static String getName(final PropertyDescriptor pDesc) {
         final RelationMetaModel relation = (RelationMetaModel) pDesc.getUserData().get(JDBC_PROPERTY_RELATION);
         if (relation == null || relation.isImported()) {
-            return pDesc.getName().getLocalPart();
+            return pDesc.getName().tip().toString();
         }
         return "";
     }

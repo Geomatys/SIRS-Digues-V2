@@ -1,6 +1,5 @@
 package fr.sirs.owc;
 
-import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
 import fr.sirs.Plugin;
 import fr.sirs.Plugins;
@@ -15,11 +14,8 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
-import org.geotoolkit.coverage.CoverageReference;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
-import org.geotoolkit.data.bean.BeanFeatureSupplier;
-import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.data.query.Selector;
@@ -27,8 +23,7 @@ import org.geotoolkit.data.query.Source;
 import org.geotoolkit.data.query.TextStatement;
 import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.display2d.GO2Utilities;
-import org.geotoolkit.feature.type.DefaultName;
-import org.geotoolkit.feature.type.Name;
+import org.geotoolkit.feature.type.NamesExt;
 import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -40,10 +35,12 @@ import org.geotoolkit.ogc.xml.v110.FilterType;
 import org.geotoolkit.owc.xml.v10.OfferingType;
 import org.geotoolkit.se.xml.v110.ParameterValueType;
 import org.geotoolkit.sld.xml.StyleXmlIO;
+import org.geotoolkit.storage.coverage.CoverageReference;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
 import org.opengis.filter.expression.PropertyName;
 import org.opengis.util.FactoryException;
+import org.opengis.util.GenericName;
 import org.w3._2005.atom.ContentType;
 import org.w3c.dom.Element;
 
@@ -138,7 +135,7 @@ public class OwcExtensionSirs extends OwcExtension {
             try {
                 final FeatureStore h2Store = H2Helper.getStore(session.getConnector());
                 final Query fsquery = org.geotoolkit.data.query.QueryBuilder.language(
-                    JDBCFeatureStore.CUSTOM_SQL, sqlQuery, new DefaultName("requete"));
+                    JDBCFeatureStore.CUSTOM_SQL, sqlQuery, NamesExt.create("requete"));
                 final FeatureCollection col = h2Store.createSession(false).getFeatureCollection(fsquery);
                 mapLayer = MapBuilder.createFeatureLayer(col);
             } catch (SQLException ex) {
@@ -231,7 +228,7 @@ public class OwcExtensionSirs extends OwcExtension {
         return STYLE_XML_IO.getTransformerXMLv110().visit(filter);
     }
         
-    private static Name getTypeName(MapLayer layer){
+    private static GenericName getTypeName(MapLayer layer){
         if(layer instanceof FeatureMapLayer){
             final FeatureMapLayer fml = (FeatureMapLayer) layer;
             final Source source = fml.getCollection().getSource();

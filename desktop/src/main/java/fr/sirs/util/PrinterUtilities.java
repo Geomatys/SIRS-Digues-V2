@@ -150,7 +150,7 @@ public class PrinterUtilities {
         // Creates the Jasper Reports specific template from the generic template.
         final JRDomWriterQueryResultSheet writer = new JRDomWriterQueryResultSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_QUERY));
         writer.setFieldsInterline(2);
-        final File template = File.createTempFile(featureCollection.getFeatureType().getName().getLocalPart(), JRXML_EXTENSION);
+        final File template = File.createTempFile(featureCollection.getFeatureType().getName().tip().toString(), JRXML_EXTENSION);
         template.deleteOnExit();
         writer.setOutput(template);
         writer.write(featureCollection.getFeatureType(), avoidFields);
@@ -161,7 +161,7 @@ public class PrinterUtilities {
         final FeatureType type = entry.getValue();
         
         // Generate the report -------------------------------------------------
-        final File fout = File.createTempFile(featureCollection.getFeatureType().getName().getLocalPart(), PDF_EXTENSION);
+        final File fout = File.createTempFile(featureCollection.getFeatureType().getName().tip().toString(), PDF_EXTENSION);
         
         try (final FileOutputStream outStream = new FileOutputStream(fout)) {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);

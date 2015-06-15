@@ -52,14 +52,14 @@ import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
 
 import org.ektorp.CouchDbConnector;
-import org.geotoolkit.coverage.CoverageReference;
-import org.geotoolkit.coverage.CoverageStore;
 import org.geotoolkit.display2d.ext.DefaultBackgroundTemplate;
 import org.geotoolkit.display2d.ext.legend.DefaultLegendTemplate;
-import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.osmtms.OSMTileMapClient;
+import org.geotoolkit.storage.coverage.CoverageReference;
+import org.geotoolkit.storage.coverage.CoverageStore;
 import org.geotoolkit.style.DefaultDescription;
+import org.opengis.util.GenericName;
 
 /**
  * La session contient toutes les données chargées dans l'instance courante de 
@@ -184,7 +184,7 @@ public class Session extends SessionCore {
                 mapContext.items().add(0,backgroundGroup);
                 final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
 
-                for (Name n : store.getNames()) {
+                for (GenericName n : store.getNames()) {
                     final CoverageReference cr = store.getCoverageReference(n);
                     final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
                     cml.setName("Open Street Map");

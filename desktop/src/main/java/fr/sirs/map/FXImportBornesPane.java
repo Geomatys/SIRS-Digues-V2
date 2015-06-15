@@ -47,7 +47,6 @@ import org.geotoolkit.data.shapefile.ShapefileFeatureStore;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.feature.type.GeometryDescriptor;
-import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.layer.FXFeatureTable;
 import org.geotoolkit.internal.GeotkFX;
@@ -64,6 +63,7 @@ import org.opengis.feature.PropertyType;
 import org.opengis.filter.Id;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
+import org.opengis.util.GenericName;
 
 /**
  * Un panneau permettant d'ouvrir un fichier Shapefile (.shp) pour en extraire 
@@ -185,13 +185,13 @@ public class FXImportBornesPane extends BorderPane {
 //                return;
 //            }
                 final Session session = store.createSession(true);
-                final Set<Name> names = store.getNames();
+                final Set<GenericName> names = store.getNames();
                 if (names == null || names.isEmpty()) {
                     throw new IllegalArgumentException("Aucune donnée vectorielle trouvée dans le fichier.");
                 }
                 
                 // On s'assure que le fichier en entrée contient des points.
-                final Name n = names.iterator().next();
+                final GenericName n = names.iterator().next();
                 GeometryDescriptor geometryDescriptor = store.getFeatureType(n).getGeometryDescriptor();
                 if (geometryDescriptor == null || !Geometry.class.isAssignableFrom(geometryDescriptor.getType().getBinding())) {
                     throw new IllegalArgumentException("Aucune donnée vectorielle trouvée dans le fichier.");

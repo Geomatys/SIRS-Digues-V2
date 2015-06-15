@@ -64,13 +64,13 @@ import org.geotoolkit.data.FileFeatureStoreFactory;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.QueryBuilder;
-import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
+import org.opengis.util.GenericName;
 
 /**
  *
@@ -255,10 +255,10 @@ public class ObjectTable extends BorderPane {
                         }
 
                         final BeanStore store = new BeanStore(suppliers.values().toArray(new BeanFeatureSupplier[0]));
-                        for(Name n : store.getNames()){
+                        for(GenericName n : store.getNames()){
                             final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(false)
                                     .getFeatureCollection(QueryBuilder.all(n)));
-                            layer.setName(n.getLocalPart());
+                            layer.setName(n.tip().toString());
 
                             FileFeatureStoreFactory factory = (FileFeatureStoreFactory) FeatureStoreFinder.getFactoryById("csv");
                             TaskManager.INSTANCE.submit(new ExportTask(layer, folder, factory));

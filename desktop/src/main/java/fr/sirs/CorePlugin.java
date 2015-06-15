@@ -90,7 +90,6 @@ import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
-import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.filter.DefaultLiteral;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -116,6 +115,7 @@ import org.opengis.style.Mark;
 import org.opengis.style.PointSymbolizer;
 import org.opengis.style.Stroke;
 import org.opengis.style.TextSymbolizer;
+import org.opengis.util.GenericName;
 
 /**
  *
@@ -437,7 +437,7 @@ public class CorePlugin extends Plugin {
             // Sinon il doit s'agir d'une position de document, mais qui ne réfère pas un document.
             else if(AbstractPositionDocument.class.isAssignableFrom(clazz) 
                     && !AbstractPositionDocumentAssociable.class.isAssignableFrom(clazz)){
-                return clazz.getSimpleName().equals(beanFeature.getType().getName().getLocalPart());
+                return clazz.getSimpleName().equals(beanFeature.getType().getName().tip().toString());
             }
             return false;
         }
@@ -453,7 +453,7 @@ public class CorePlugin extends Plugin {
     private List<MapLayer> buildLayers(FeatureStore store, String layerName, MutableStyle baseStyle, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);
-        for(Name name : store.getNames()){
+        for(GenericName name : store.getNames()){
             final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.all(name));
             final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
             final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
@@ -481,7 +481,7 @@ public class CorePlugin extends Plugin {
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);
         int i=0;
-        for(Name name : store.getNames()){
+        for(GenericName name : store.getNames()){
             final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.all(name));
             final int d = (int)((i%colors.length)*1.5);
             final MutableStyle baseStyle = createStructureStyle(colors[i%colors.length]);
@@ -499,8 +499,8 @@ public class CorePlugin extends Plugin {
             fml.setVisible(visible);
             fml.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             
-            final String str = nameMap.get(name.getLocalPart());
-            fml.setName(str!=null ? str : name.getLocalPart());
+            final String str = nameMap.get(name.tip().toString());
+            fml.setName(str!=null ? str : name.tip().toString());
             
             if(selectionStyle!=null) fml.setSelectionStyle(selectionStyle);
             
@@ -525,10 +525,10 @@ public class CorePlugin extends Plugin {
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);
         int i=0;
-        for(Name name : store.getNames()){
+        for(GenericName name : store.getNames()){
             final Class<? extends AbstractPositionDocument> positionDocumentClass;  
             try {
-                positionDocumentClass = (Class<? extends AbstractPositionDocument>) Class.forName(MODEL_PACKAGE+"."+name.getLocalPart(), true, Thread.currentThread().getContextClassLoader());
+                positionDocumentClass = (Class<? extends AbstractPositionDocument>) Class.forName(MODEL_PACKAGE+"."+name.tip().toString(), true, Thread.currentThread().getContextClassLoader());
                 for(final Class documentClass : documentClasses.get(positionDocumentClass)){
                     final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.filtered(name, new DocumentFilter(documentClass)));
                     if(col.getFeatureType()!=null){

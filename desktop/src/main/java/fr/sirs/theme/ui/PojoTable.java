@@ -543,7 +543,7 @@ public class PojoTable extends BorderPane {
                         final BeanStore store = new BeanStore(sup);
                         final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(false)
                                 .getFeatureCollection(QueryBuilder.all(store.getNames().iterator().next())));
-                        layer.setName(store.getNames().iterator().next().getLocalPart());
+                        layer.setName(store.getNames().iterator().next().tip().toString());
 
                         FileFeatureStoreFactory factory = (FileFeatureStoreFactory) FeatureStoreFinder.getFactoryById("csv");
                         TaskManager.INSTANCE.submit(new ExportTask(layer, folder, factory));

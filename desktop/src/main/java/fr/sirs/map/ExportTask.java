@@ -29,12 +29,12 @@ import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.FeatureUtilities;
 import org.geotoolkit.feature.Property;
 import org.geotoolkit.feature.type.FeatureType;
-import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.internal.Loggers;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.storage.FactoryMetadata;
 import org.geotoolkit.temporal.object.TemporalUtilities;
 import org.opengis.geometry.Geometry;
+import org.opengis.util.GenericName;
 
 /**
  *
@@ -104,7 +104,7 @@ public class ExportTask extends Task<Boolean> {
                     continue;
                 }
                 final FeatureType inType = col.getFeatureType();
-                final String inTypeName = inType.getName().getLocalPart();
+                final String inTypeName = inType.getName().tip().toString();
                 //output file path
                 File file = new File(folder, inTypeName + factory.getFileExtensions()[0]);
                 //if file exist, add date aside it
@@ -122,7 +122,7 @@ public class ExportTask extends Task<Boolean> {
                 //create output type
                 store.createFeatureType(inType.getName(), inType);
                 final FeatureType outType = store.getFeatureType(inTypeName);
-                final Name outName = outType.getName();
+                final GenericName outName = outType.getName();
                 //write datas
                 final Session session = store.createSession(false);
                 session.addFeatures(outName, col);

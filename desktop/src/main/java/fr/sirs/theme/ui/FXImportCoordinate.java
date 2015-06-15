@@ -30,7 +30,6 @@ import org.geotoolkit.data.session.Session;
 import org.geotoolkit.data.shapefile.ShapefileFeatureStore;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.feature.Feature;
-import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.LayerListener;
@@ -46,6 +45,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
+import org.opengis.util.GenericName;
 
 /**
  *
@@ -94,11 +94,11 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
             }
             
             final Session session = store.createSession(true);
-            final Set<Name> typeNames = store.getNames();
+            final Set<GenericName> typeNames = store.getNames();
             if (typeNames == null || typeNames.isEmpty()) {
                 throw new IllegalArgumentException("Impossible de trouver des données dans le fichier d'entrée.");
             }
-            final Name typeName = typeNames.iterator().next();
+            final GenericName typeName = typeNames.iterator().next();
             final FeatureCollection col = session.getFeatureCollection(QueryBuilder.all(typeName));
             final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, RandomStyleBuilder.createDefaultVectorStyle(col.getFeatureType()));
             uiTable.init(layer);
