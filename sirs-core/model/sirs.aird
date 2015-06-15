@@ -5650,7 +5650,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_u5W_8BAREeW7v-Nas9kQpg" name="longitudeMin : EDouble = 0.0" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@56ab501e{platform:/resource/sirs-core/model/sirs.ecore#//Positionable/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_u5W_8BAREeW7v-Nas9kQpg" name="longitudeMin : EDouble = 0.0" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Positionable/longitudeMin"/>
           <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Positionable/longitudeMin"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_DR_F8BASEeW7v-Nas9kQpg" labelAlignment="LEFT">
