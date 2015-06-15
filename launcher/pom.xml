@@ -58,6 +58,7 @@
                     <needMenu>true</needMenu>
                     <jvmArgs>
                         <jvmArg>-Xmx1G</jvmArg>
+                        <jvmArg>-Djava.net.useSystemProxies=true</jvmArg>
                     </jvmArgs>
                 </configuration>
             </plugin>
