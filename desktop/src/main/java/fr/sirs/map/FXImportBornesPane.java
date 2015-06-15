@@ -399,6 +399,7 @@ Injector.getSession().getProjection(),
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setScene(new Scene(panel));
         dialog.initOwner(Injector.getSession().getFrame().getScene().getWindow());
+        dialog.sizeToScene();
         dialog.showAndWait();
     }
 }
