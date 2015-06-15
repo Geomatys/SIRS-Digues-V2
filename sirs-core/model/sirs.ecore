@@ -1511,7 +1511,7 @@
     <eAnnotations source="generation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ObjetStructure" abstract="true" eSuperTypes="#//ObjetGerable">
+  <eClassifiers xsi:type="ecore:EClass" name="ObjetStructure" abstract="true" eSuperTypes="#//ObjetPhotographiable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObjetGerable" abstract="true" eSuperTypes="#//ObjetPhotographiable">

@@ -22,9 +22,6 @@ import fr.sirs.importer.link.ElementReseauConventionImporter;
 import fr.sirs.importer.link.ElementReseauGardienImporter;
 import fr.sirs.importer.link.ElementReseauGestionnaireImporter;
 import fr.sirs.importer.link.ElementReseauProprietaireImporter;
-import fr.sirs.importer.link.ElementStructureGardienImporter;
-import fr.sirs.importer.link.ElementStructureGestionnaireImporter;
-import fr.sirs.importer.link.ElementStructureProprietaireImporter;
 import fr.sirs.importer.link.GenericEntityLinker;
 import fr.sirs.importer.link.LaisseCrueJournalImporter;
 import fr.sirs.importer.link.LigneEauJournalImporter;
@@ -131,9 +128,6 @@ public class DbImporter {
     private ElementReseauGardienImporter elementReseauGardienImporter;
     private ElementReseauGestionnaireImporter elementReseauGestionnaireImporter;
     private ElementReseauProprietaireImporter elementReseauProprietaireImporter;
-    private ElementStructureGardienImporter elementStructureGardienImporter;
-    private ElementStructureGestionnaireImporter elementStructureGestionnaireImporter;
-    private ElementStructureProprietaireImporter elementStructureProprietaireImporter;
     private PrestationIntervenantImporter prestationIntervenantImporter;
     private MarcheFinanceurImporter marcheFinanceurImporter;
     private MarcheMaitreOeuvreImporter marcheMaitreOeuvreImporter;
@@ -181,9 +175,9 @@ public class DbImporter {
      ELEMENT_RESEAU_VOIE_SUR_DIGUE,
      ELEMENT_STRUCTURE,
 //     ELEMENT_STRUCTURE_ABONDANCE_ESSENCE, // Végétation (module à part)
-     ELEMENT_STRUCTURE_GARDIEN,
-     ELEMENT_STRUCTURE_GESTIONNAIRE,
-     ELEMENT_STRUCTURE_PROPRIETAIRE,
+//     ELEMENT_STRUCTURE_GARDIEN, // Pas dans le nouveau modèle
+//     ELEMENT_STRUCTURE_GESTIONNAIRE, // Pas dans le nouveau modèle
+//     ELEMENT_STRUCTURE_PROPRIETAIRE, // Pas dans le nouveau modèle
      EVENEMENT_HYDRAU,
 //     Export_Output,
 //     Export_Output_SHAPE_Index,
@@ -599,21 +593,6 @@ public class DbImporter {
                 objetManager.getElementReseauImporter(), 
                 intervenantImporter, organismeImporter);
         linkers.add(elementReseauProprietaireImporter);
-        elementStructureGardienImporter = new ElementStructureGardienImporter(
-                accessDatabase, couchDbConnector, 
-                objetManager.getElementStructureImporter(), 
-                intervenantImporter);
-        linkers.add(elementStructureGardienImporter);
-        elementStructureGestionnaireImporter = new ElementStructureGestionnaireImporter(
-                accessDatabase, couchDbConnector, 
-                objetManager.getElementStructureImporter(), 
-                organismeImporter);
-        linkers.add(elementStructureGestionnaireImporter);
-        elementStructureProprietaireImporter = new ElementStructureProprietaireImporter(
-                accessDatabase, couchDbConnector, 
-                objetManager.getElementStructureImporter(), 
-                intervenantImporter, organismeImporter);
-        linkers.add(elementStructureProprietaireImporter);
         prestationIntervenantImporter = new PrestationIntervenantImporter(
                 accessDatabase, couchDbConnector, 
                 objetManager.getPrestationImporter(), 

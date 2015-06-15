@@ -48,7 +48,7 @@ import org.ektorp.support.CouchDbRepositorySupport;
  * @author Alexis Manin (Geomatys)
  * @param <T> The type of object managed by the current repository implementation.
  */
-public abstract class AbstractSIRSRepository<T extends Identifiable> extends CouchDbRepositorySupport<T> implements Repository<T> {
+public abstract class AbstractSIRSRepository<T extends Identifiable> extends CouchDbRepositorySupport<T> {
 
     protected final Cache<String, T> cache = new Cache(20, 0, false);
 
@@ -230,15 +230,14 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     /**
      * Return the class of the managed object type.
      * @return 
-     * @deprecated Use upper defined method getHandledType()
      */
-    @Override @Deprecated
-    public abstract Class<T> getModelClass();
+    public Class<T> getModelClass(){
+        return type;
+    }
     
     /**
      * Create a new instance of Pojo in memory. No creation in database.
      * @return 
      */
-    @Override
     public abstract T create();
 }
