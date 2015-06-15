@@ -6,6 +6,7 @@ import static fr.sirs.SIRS.COUCH_DB_DOCUMENT_FIELD;
 import static fr.sirs.SIRS.DOCUMENT_ID_FIELD;
 import static fr.sirs.SIRS.GEOMETRY_FIELD;
 import static fr.sirs.SIRS.ID_FIELD;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import javafx.geometry.Pos;
@@ -422,6 +423,7 @@ public class FXMainFrame extends BorderPane {
     @FXML
     public void openAppInfo() {
         final Stage infoStage = new Stage();
+        infoStage.getIcons().add(SirsCore.ICON);
         infoStage.setTitle("À propos");
         infoStage.initStyle(StageStyle.UTILITY);
         infoStage.setScene(new Scene(new FXAboutPane()));

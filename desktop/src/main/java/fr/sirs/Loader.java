@@ -36,7 +36,6 @@ import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.SirsStringConverter;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Objects;
 import javafx.beans.binding.Bindings;
@@ -63,11 +62,13 @@ public class Loader extends Application {
         // Initialize splash screen
         splashStage = new Stage(StageStyle.TRANSPARENT);
         splashStage.setTitle("SIRS-Digues V2");
+        splashStage.getIcons().add(SirsCore.ICON);
         splashStage.initStyle(StageStyle.TRANSPARENT);
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        if(primaryStage!=null) primaryStage.getIcons().add(SirsCore.ICON);
         // perform initialization and plugin loading tasks
         final Task initTask = new LoadingTask();
         showLoadingStage(initTask);
@@ -203,6 +204,7 @@ public class Loader extends Application {
         Scene mainScene = new Scene(frame);
         
         final Stage mainStage = new Stage();
+        mainStage.getIcons().add(SirsCore.ICON);
         mainStage.titleProperty().bind(Bindings.createStringBinding(() -> {
             StringBuilder builder = new StringBuilder("SIRS-Digues 2");
             final String version = SIRS.getVersion();

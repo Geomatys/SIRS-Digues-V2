@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.scene.image.Image;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
@@ -49,6 +50,7 @@ public class SirsCore {
     public static final String COMPONENT_PACKAGE="fr.sirs.core.component";
     
     public static final String SPRING_CONTEXT = "classpath:/fr/sirs/spring/application-context.xml";
+    public static final Image ICON = new Image(SirsCore.class.getResource("/fr/sirs/icon.png").toString());
     
     public static final Path CONFIGURATION_PATH;    
     static {

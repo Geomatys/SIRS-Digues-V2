@@ -91,6 +91,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
     public BorneEditHandler(final FXMap map) {
         super(map);
         session = Injector.getSession();
+        dialog.getIcons().add(SirsCore.ICON);
         
         editPane = new FXSystemeReperagePane(map);
         

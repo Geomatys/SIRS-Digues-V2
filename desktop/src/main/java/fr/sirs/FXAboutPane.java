@@ -1,5 +1,6 @@
 package fr.sirs;
 
+import fr.sirs.core.SirsCore;
 import java.awt.Desktop;
 import java.net.URI;
 import java.util.logging.Level;
@@ -42,6 +43,7 @@ public class FXAboutPane extends BorderPane {
             } else {
                 final WebView webView = new WebView();
                 final Stage infoStage = new Stage();
+                infoStage.getIcons().add(SirsCore.ICON);
                 infoStage.setTitle("Site communautaire");
                 infoStage.setScene(new Scene(webView));
                 infoStage.show();

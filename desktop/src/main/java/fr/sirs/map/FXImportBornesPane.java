@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.CRS_WGS84;
+import fr.sirs.core.SirsCore;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
@@ -393,6 +394,7 @@ Injector.getSession().getProjection(),
         final FXImportBornesPane panel = new FXImportBornesPane();
         final Stage dialog = new Stage();
         dialog.setTitle("Import de bornes");
+        dialog.getIcons().add(SirsCore.ICON);
         dialog.setResizable(true);
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setScene(new Scene(panel));

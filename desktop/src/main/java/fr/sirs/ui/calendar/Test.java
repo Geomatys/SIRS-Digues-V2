@@ -1,5 +1,6 @@
 package fr.sirs.ui.calendar;
 
+import fr.sirs.core.SirsCore;
 import javafx.application.Application;
 import javafx.geometry.HPos;
 import javafx.scene.Scene;
@@ -30,6 +31,7 @@ public class Test extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        primaryStage.getIcons().add(SirsCore.ICON);
         final GridPane grid = new GridPane();
 
         final Button control1 = new Button();

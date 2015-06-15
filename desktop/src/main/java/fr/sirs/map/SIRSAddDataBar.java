@@ -5,6 +5,7 @@
  */
 package fr.sirs.map;
 
+import fr.sirs.core.SirsCore;
 import java.util.List;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
@@ -48,6 +49,7 @@ public class SIRSAddDataBar extends ToolBar implements ListChangeListener<MapLay
         /*
          * INIT DIALOG FOR LAYER CHOICE. 
          */
+        importStage.getIcons().add(SirsCore.ICON);
         importStage.setTitle("Importer une donnée");
         importStage.setResizable(true);
         importStage.initModality(Modality.APPLICATION_MODAL);

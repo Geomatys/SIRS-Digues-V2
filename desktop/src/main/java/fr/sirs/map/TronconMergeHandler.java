@@ -4,6 +4,7 @@ package fr.sirs.map;
 import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
 import fr.sirs.Session;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.TronconDigue;
 import java.util.HashSet;
 import java.util.Set;
@@ -134,7 +135,8 @@ public class TronconMergeHandler extends FXAbstractNavigationHandler {
         final BorderPane dialogContent = new BorderPane();
         dialogContent.setCenter(editPane);
         dialogContent.setBottom(babar);
-        
+
+        dialog.getIcons().add(SirsCore.ICON);
         dialog.setTitle("Fusion de tronçons");
         dialog.setResizable(true);
         dialog.initModality(Modality.NONE);

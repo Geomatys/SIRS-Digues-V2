@@ -37,6 +37,7 @@ public class Launcher extends Application {
     
     @Override
     public void start(Stage primaryStage) throws Exception {
+        primaryStage.getIcons().add(SirsCore.ICON);
         SLF4JBridgeHandler.removeHandlersForRootLogger();  // (since SLF4J 1.6.5)
 
         // add SLF4JBridgeHandler to j.u.l's root logger, should be done once during
@@ -69,6 +70,7 @@ public class Launcher extends Application {
             version = "";
         
         final Stage splashStage = new Stage();
+        splashStage.getIcons().add(SirsCore.ICON);
         splashStage.setTitle("SIRS "+version);
         splashStage.initStyle(StageStyle.TRANSPARENT);
         splashStage.setScene(scene);
