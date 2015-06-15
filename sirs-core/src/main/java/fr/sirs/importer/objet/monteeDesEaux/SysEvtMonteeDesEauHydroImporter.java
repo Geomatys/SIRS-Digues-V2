@@ -115,11 +115,11 @@ class SysEvtMonteeDesEauHydroImporter extends GenericMonteeDesEauxImporter {
         }
 
         if (row.getDouble(Columns.PR_CALCULE.toString()) != null) {
-            monteeEaux.setPR_debut(row.getDouble(Columns.PR_CALCULE.toString()).floatValue());
+            monteeEaux.setPrDebut(row.getDouble(Columns.PR_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_CALCULE.toString()) != null) {
-            monteeEaux.setPR_fin(row.getDouble(Columns.PR_CALCULE.toString()).floatValue());
+            monteeEaux.setPrFin(row.getDouble(Columns.PR_CALCULE.toString()).floatValue());
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();

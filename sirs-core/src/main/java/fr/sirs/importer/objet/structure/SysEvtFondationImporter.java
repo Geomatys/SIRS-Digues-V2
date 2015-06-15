@@ -191,11 +191,11 @@ class SysEvtFondationImporter extends GenericStructureImporter<Fondation> {
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            fondation.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            fondation.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            fondation.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            fondation.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();

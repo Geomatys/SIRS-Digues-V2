@@ -198,11 +198,11 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            conduiteFermee.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            conduiteFermee.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            conduiteFermee.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            conduiteFermee.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();

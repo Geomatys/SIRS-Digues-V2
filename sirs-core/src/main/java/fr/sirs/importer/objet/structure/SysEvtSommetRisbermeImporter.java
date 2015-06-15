@@ -197,11 +197,11 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            sommetRisberme.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            sommetRisberme.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            sommetRisberme.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            sommetRisberme.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();

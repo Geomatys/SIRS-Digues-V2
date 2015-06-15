@@ -197,11 +197,11 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            talusRisberme.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            talusRisberme.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            talusRisberme.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            talusRisberme.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();

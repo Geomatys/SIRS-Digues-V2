@@ -240,12 +240,12 @@ public class TronconUtilsTest extends CouchDBTestCase {
         // PR début Crête = (PR(borne1) - PR(borne0)) / DistanceProjetée(borne0, borne1) * distanceProjetée(borne0, crête) + PR(borne0)
         // PR début Crête = (10 - 0) / 50 * 0.5 + 0
         // PR début Crête = 0.1
-        assertEquals("PR de début de la Crête", -0.1, crete.getPR_debut(), DELTA);
+        assertEquals("PR de début de la Crête", -0.1, crete.getPrDebut(), DELTA);
         
         // PR fin Crête = (PR(borne2) - PR(borne1)) / DistanceProjetée(borne2, borne1) * distanceProjetée(borne2, crête) + PR(borne2)
         // PR fin Crête = (20 - 10) / 48 * 0.3 + 20
         // PR fin Crête = 0.1
-        assertEquals("PR de fin de la Crête", 20.0625, crete.getPR_fin(), DELTA);
+        assertEquals("PR de fin de la Crête", 20.0625, crete.getPrFin(), DELTA);
         
         LinearReferencing.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(LinearReferencingUtilities.asLineString(troncon.getGeometry()));        
         float fictivePR = TronconUtils.computePR(segments, sr, GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(19, 0)), (BorneDigueRepository) session.getRepositoryForClass(BorneDigue.class));

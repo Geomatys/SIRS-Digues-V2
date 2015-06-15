@@ -853,8 +853,8 @@ public class FXPositionablePane extends BorderPane {
                         uiDistanceStart.valueProperty().bindBidirectional(newValue.borne_debut_distanceProperty());
                         uiDistanceEnd.valueProperty().bindBidirectional(newValue.borne_fin_distanceProperty());
                         
-                        prDebut.set(newValue.getPR_debut());
-                        prFin.set(newValue.getPR_fin());
+                        prDebut.set(newValue.getPrDebut());
+                        prFin.set(newValue.getPrFin());
                         // Mise à jour automatique de la liste des SRs si le parent
                         // du positionable change.
                         if (newValue.parentProperty() != null) {
@@ -931,11 +931,11 @@ public class FXPositionablePane extends BorderPane {
         
         // Do not bind them bidirectionally to avoid affecting cached objects if 
         // we do not save changes.
-        pos.pR_debutProperty().setValue(prDebut.get());
-        pos.pR_finProperty().setValue(prFin.get());
+        pos.prDebutProperty().setValue(prDebut.get());
+        pos.prFinProperty().setValue(prFin.get());
         
         //maj de la geometrie du positionable
-        final LineString structGeom = LinearReferencingUtilities.buildGeometry(getTroncon().getGeometry(), pos, Injector.getSession().getBorneDigueRepository());
+        final LineString structGeom = LinearReferencingUtilities.buildGeometry(getTroncon().getGeometry(), pos, (BorneDigueRepository) Injector.getSession().getRepositoryForClass(BorneDigue.class));
         pos.setGeometry(structGeom);        
     }
 

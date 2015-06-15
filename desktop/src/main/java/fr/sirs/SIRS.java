@@ -93,10 +93,13 @@ public final class SIRS extends SirsCore {
     // Champs spéciaux des classes utilisés dans le code
     public static final String DATE_DEBUT_FIELD = "date_debut";
     public static final String DATE_FIN_FIELD = "date_fin";
+    public static final String DATE_MAJ_FIELD = "dateMaj";
     
     public static final String GEOMETRY_FIELD = "geometry";
     public static final String DOCUMENT_ID_FIELD = "documentId";
     public static final String ID_FIELD = "id";
+    public static final String REVISION_FIELD = "revision";
+    public static final String PARENT_FIELD = "parent";
     public static final String COUCH_DB_DOCUMENT_FIELD = "couchDBDocument";
     public static final String LINEAR_ID_FIELD = "linearId";
     public static final String VALID_FIELD = "valid";
@@ -104,8 +107,14 @@ public final class SIRS extends SirsCore {
     public static final String FOREIGN_PARENT_ID_FIELD = "foreignParentId";
     public static final String COMMENTAIRE_FIELD = "commentaire";
     public static final String DESIGNATION_FIELD = "designation";
-    public static final String PR_DEBUT_FIELD = "PR_debut";
-    public static final String PR_FIN_FIELD = "PR_fin";
+    public static final String PR_DEBUT_FIELD = "prDebut";
+    public static final String PR_FIN_FIELD = "prFin";
+    public static final String POSITION_DEBUT_FIELD = "positionDebut";
+    public static final String POSITION_FIN_FIELD = "positionFin";
+    public static final String LONGITUDE_MIN_FIELD = "longitudeMin";
+    public static final String LONGITUDE_MAX_FIELD = "longitudeMax";
+    public static final String LATITUDE_MIN_FIELD = "latitudeMin";
+    public static final String LATITUDE_MAX_FIELD = "latitudeMax";
     
     public static final String SIRSDOCUMENT_REFERENCE = "sirsdocument";
     public static final String BORNE_IDS_REFERENCE = "borneIds";

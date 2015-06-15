@@ -187,11 +187,11 @@ class SysEvtPiedFrontFrancBordImporter extends GenericStructureImporter<PiedFron
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            pied.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            pied.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            pied.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            pied.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();

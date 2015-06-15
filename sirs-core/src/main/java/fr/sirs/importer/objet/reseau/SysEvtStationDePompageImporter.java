@@ -181,11 +181,11 @@ class SysEvtStationDePompageImporter extends GenericReseauImporter<StationPompag
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            stationPompage.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            stationPompage.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            stationPompage.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            stationPompage.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();

@@ -188,11 +188,11 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            pointAcces.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            pointAcces.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            pointAcces.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            pointAcces.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();

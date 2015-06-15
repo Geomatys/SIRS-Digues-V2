@@ -136,11 +136,11 @@ public class ProprietaireTronconGestionImporter extends GenericPeriodeLocaliseeI
             }
 
              if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                propriete.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+                propriete.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
 
             if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                propriete.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+                propriete.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
 
             if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {

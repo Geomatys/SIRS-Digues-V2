@@ -188,11 +188,11 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            reseau.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            reseau.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            reseau.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            reseau.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();

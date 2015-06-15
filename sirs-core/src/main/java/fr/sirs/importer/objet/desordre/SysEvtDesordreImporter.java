@@ -146,7 +146,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
             desordre.setBorne_debut_distance(row.getDouble(Columns.DIST_BORNEREF_DEBUT.toString()).floatValue());
         }
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            desordre.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            desordre.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.ID_BORNEREF_FIN.toString()) != null) {
@@ -159,7 +159,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
             desordre.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
         }
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            desordre.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            desordre.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {

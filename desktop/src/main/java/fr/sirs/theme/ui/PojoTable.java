@@ -7,16 +7,19 @@ import org.geotoolkit.gui.javafx.util.FXBooleanCell;
 import com.sun.javafx.property.PropertyReference;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import fr.sirs.CorePlugin;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.StructBeanSupplier;
 import static fr.sirs.SIRS.AUTHOR_FIELD;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS_ABREGE;
-import static fr.sirs.SIRS.COMMENTAIRE_FIELD;
+import static fr.sirs.SIRS.DATE_MAJ_FIELD;
 import static fr.sirs.SIRS.DESIGNATION_FIELD;
 import static fr.sirs.SIRS.FOREIGN_PARENT_ID_FIELD;
+import static fr.sirs.SIRS.LATITUDE_MAX_FIELD;
+import static fr.sirs.SIRS.LATITUDE_MIN_FIELD;
+import static fr.sirs.SIRS.LONGITUDE_MAX_FIELD;
+import static fr.sirs.SIRS.LONGITUDE_MIN_FIELD;
 import static fr.sirs.SIRS.PR_DEBUT_FIELD;
 import static fr.sirs.SIRS.PR_FIN_FIELD;
 import static fr.sirs.SIRS.VALID_FIELD;
@@ -24,7 +27,6 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.Crete;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
@@ -37,7 +39,6 @@ import fr.sirs.core.model.PrZPointImporter;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
-import fr.sirs.map.ExportMenu;
 import fr.sirs.map.ExportTask;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
@@ -57,7 +58,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -141,7 +141,9 @@ public class PojoTable extends BorderPane {
     
     private static final String BUTTON_STYLE = "buttonbar-button";
     
-    private static final String[] COLUMNS_TO_IGNORE = new String[] {AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD};    
+    private static final String[] COLUMNS_TO_IGNORE = new String[] {
+        AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD, 
+        LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD, DATE_MAJ_FIELD};    
     private static final String[] COLUMNS_TO_PRIORIZE = new String[] {DESIGNATION_FIELD, PR_DEBUT_FIELD, PR_FIN_FIELD};
     
     protected final Class pojoClass;

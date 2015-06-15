@@ -174,11 +174,11 @@ class SysEvtRapportEtudesImporter extends GenericPositionDocumentImporter<Positi
         position.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            position.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            position.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            position.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            position.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();

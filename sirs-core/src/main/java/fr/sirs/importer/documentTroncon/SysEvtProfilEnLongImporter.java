@@ -177,11 +177,11 @@ class SysEvtProfilEnLongImporter extends GenericPositionDocumentImporter<ProfilL
         profilLong.setLinearId(troncon.getId());
         
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            profilLong.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            profilLong.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            profilLong.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            profilLong.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         final GeometryFactory geometryFactory = new GeometryFactory();

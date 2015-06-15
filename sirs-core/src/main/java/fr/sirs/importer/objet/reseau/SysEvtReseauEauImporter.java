@@ -183,11 +183,11 @@ class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydrauliqueCie
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            reseauEau.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            reseauEau.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            reseauEau.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            reseauEau.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();

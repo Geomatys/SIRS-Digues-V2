@@ -831,12 +831,11 @@ public class TronconUtils {
         final String srid = objInfo.getTroncon().getSystemeRepDefautId();        
         ArgumentChecks.ensureNonEmpty("SRID ", srid);
         
-        BorneDigueRepository borneRepo = session.getBorneDigueRepository();        
-        SystemeReperageRepository srRepo = session.getSystemeReperageRepository();
-        SystemeReperage currentSR = srRepo.get(srid);
+        BorneDigueRepository borneRepo = (BorneDigueRepository) session.getRepositoryForClass(BorneDigue.class);   
+        SystemeReperage currentSR = session.getRepositoryForClass(SystemeReperage.class).get(srid);
         
-        targetPos.setPR_debut(computePR(linearSegments, currentSR, objInfo.getGeoPointStart(), borneRepo));
-        targetPos.setPR_fin(computePR(linearSegments, currentSR, objInfo.getGeoPointEnd(), borneRepo));
+        targetPos.setPrDebut(computePR(linearSegments, currentSR, objInfo.getGeoPointStart(), borneRepo));
+        targetPos.setPrFin(computePR(linearSegments, currentSR, objInfo.getGeoPointEnd(), borneRepo));
     }
     
     /**

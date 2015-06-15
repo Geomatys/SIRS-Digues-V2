@@ -234,9 +234,6 @@ public class CorePlugin extends Plugin {
             // Propriétés et gardiennages de troncons
             suppliers.put(ProprieteTroncon.class, getSupplierForClass.apply(ProprieteTroncon.class));
             suppliers.put(GardeTroncon.class, getSupplierForClass.apply(GardeTroncon.class));
-
-            // Emprises communales
-//            suppliers.put(PeriodeCommune.class, new StructBeanSupplier(PeriodeCommune.class, () -> repository.getAllFromView(PeriodeCommune.class)));
     }
     
     @Override
@@ -249,20 +246,20 @@ public class CorePlugin extends Plugin {
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
             final Map<Class<? extends AbstractPositionDocument>, List<Class>> mapDesTypesDeDocs = new HashMap<>();
-            final List<Class> documentTronconsList = new ArrayList<>();
-            documentTronconsList.add(Convention.class);
-            documentTronconsList.add(ArticleJournal.class);
-            documentTronconsList.add(Marche.class);
-            documentTronconsList.add(RapportEtude.class);
-            documentTronconsList.add(DocumentGrandeEchelle.class);
+            final List<Class> positionDocumentList = new ArrayList<>();
+            positionDocumentList.add(Convention.class);
+            positionDocumentList.add(ArticleJournal.class);
+            positionDocumentList.add(Marche.class);
+            positionDocumentList.add(RapportEtude.class);
+            positionDocumentList.add(DocumentGrandeEchelle.class);
             
-            for(final Class elementClass : documentTronconsList){
+            for(final Class elementClass : positionDocumentList){
                 final LabelMapper mapper = new LabelMapper(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
-            final List<Class> documentTronconProfilTraversList = new ArrayList<>();
-            documentTronconProfilTraversList.add(ProfilTravers.class);
-            for(final Class elementClass : documentTronconProfilTraversList){
+            final List<Class> positionProfilTraversList = new ArrayList<>();
+            positionProfilTraversList.add(ProfilTravers.class);
+            for(final Class elementClass : positionProfilTraversList){
                 final LabelMapper mapper = new LabelMapper(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
@@ -272,8 +269,8 @@ public class CorePlugin extends Plugin {
                 final LabelMapper mapper = new LabelMapper(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
-            mapDesTypesDeDocs.put(PositionDocument.class, documentTronconsList);
-            mapDesTypesDeDocs.put(PositionProfilTravers.class, documentTronconProfilTraversList);
+            mapDesTypesDeDocs.put(PositionDocument.class, positionDocumentList);
+            mapDesTypesDeDocs.put(PositionProfilTravers.class, positionProfilTraversList);
             mapDesTypesDeDocs.put(ProfilLong.class, profilLongList);
             
             final Color[] colors = new Color[]{

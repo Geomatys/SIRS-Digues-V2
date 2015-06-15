@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Positionable;
 
 import java.awt.geom.PathIterator;
@@ -38,7 +39,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      * @param repo The {@link BorneDigueRepository} to use to retrieve input {@link Positionable} bornes.
      * @return A line string for the given structure. Never null.
      */
-    public static LineString buildGeometry(Geometry tronconGeom, Positionable structure, BorneDigueRepository repo) {
+    public static LineString buildGeometry(Geometry tronconGeom, Positionable structure, AbstractSIRSRepository<BorneDigue> repo) {
         
         final LineString troncon = asLineString(tronconGeom);
         SegmentInfo[] segments = buildSegments(troncon);
@@ -56,8 +57,8 @@ public final class LinearReferencingUtilities extends LinearReferencing {
             
         } else {
             //reconstruction a partir de bornes et de distances
-            BorneDigue borneDebut = (structure.getBorneDebutId()!=null) ? repo.get(structure.getBorneDebutId()) : null;
-            BorneDigue borneFin = (structure.getBorneFinId()!=null) ? repo.get(structure.getBorneFinId()) : null;
+            final BorneDigue borneDebut = (structure.getBorneDebutId()!=null) ? repo.get(structure.getBorneDebutId()) : null;
+            final BorneDigue borneFin = (structure.getBorneFinId()!=null) ? repo.get(structure.getBorneFinId()) : null;
             if(borneDebut==null && borneFin==null){
                 //aucune borne définie, on ne peut pas calculer la géométrie
                 return null;

@@ -204,11 +204,11 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            piedDigue.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            piedDigue.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            piedDigue.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            piedDigue.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {

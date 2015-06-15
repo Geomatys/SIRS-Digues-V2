@@ -163,11 +163,11 @@ public class PhotoLocaliseeEnPrImporter extends PhotoImporter {
             }
             
             if (row.getDouble(Columns.PR_PHOTO.toString()) != null) {
-                photo.setPR_debut(row.getDouble(Columns.PR_PHOTO.toString()).floatValue());
+                photo.setPrDebut(row.getDouble(Columns.PR_PHOTO.toString()).floatValue());
             }
             
             if (row.getDouble(Columns.PR_PHOTO.toString()) != null) {
-                photo.setPR_fin(row.getDouble(Columns.PR_PHOTO.toString()).floatValue());
+                photo.setPrFin(row.getDouble(Columns.PR_PHOTO.toString()).floatValue());
             }
             
             if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {

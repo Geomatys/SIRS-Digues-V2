@@ -12,6 +12,7 @@ import static fr.sirs.core.TronconUtils.getPositionDocumentList;
 import static fr.sirs.core.TronconUtils.getProprieteList;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AvecForeignParent;
+import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.SystemeReperage;
@@ -252,7 +253,7 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
             for(final Class c : listes.keySet()){
                 InjectorCore.getBean(SessionCore.class).getRepositoryForClass(c).executeBulk(listes.get(c));
             }
-            InjectorCore.getBean(SessionCore.class).getTronconDigueRepository().update(troncon);
+            InjectorCore.getBean(SessionCore.class).getRepositoryForClass(TronconDigue.class).update(troncon);
             
             return true;
         }
@@ -260,18 +261,18 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
         private void recomputePositionable(final Positionable current, final LinearReferencing.SegmentInfo[] linear){
             try{
                 final SessionGen session = InjectorCore.getBean(SessionGen.class);
-                final SystemeReperage sr = session.getSystemeReperageRepository().get(troncon.getSystemeRepDefautId());
+                final SystemeReperage sr = session.getRepositoryForClass(SystemeReperage.class).get(troncon.getSystemeRepDefautId());
 
                 final TronconUtils.PosInfo position = new TronconUtils.PosInfo(current, troncon, linear, session);
 
                 final Point startPoint = position.getGeoPointStart();
-                current.setPR_debut(TronconUtils.computePR(linear, sr, startPoint, session.getBorneDigueRepository()));
+                current.setPrDebut(TronconUtils.computePR(linear, sr, startPoint, (BorneDigueRepository) session.getRepositoryForClass(BorneDigue.class)));
 
                 final Point endPoint = position.getGeoPointEnd();
                 if (startPoint.equals(endPoint)) {
-                    current.setPR_fin(current.getPR_fin());
+                    current.setPrFin(current.getPrFin());
                 } else {
-                    current.setPR_fin(TronconUtils.computePR(linear, sr, endPoint, session.getBorneDigueRepository()));
+                    current.setPrFin(TronconUtils.computePR(linear, sr, endPoint,  (BorneDigueRepository) session.getRepositoryForClass(BorneDigue.class)));
                 }
             } catch (RuntimeException ex){
                 SirsCore.LOGGER.log(Level.FINE, ex.getMessage());

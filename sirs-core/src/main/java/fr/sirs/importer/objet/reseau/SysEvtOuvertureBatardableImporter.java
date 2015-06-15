@@ -176,11 +176,11 @@ class SysEvtOuvertureBatardableImporter extends GenericReseauImporter<OuvertureB
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            ouverture.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            ouverture.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            ouverture.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            ouverture.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();

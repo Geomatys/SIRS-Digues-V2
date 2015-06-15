@@ -278,7 +278,7 @@ public class Session extends SessionCore {
                 case USERS:
                     return openAdminTabs.getOrCreate(AdminTab.USERS, () -> {
                         final FXFreeTab tab = new FXFreeTab(title);
-                        final PojoTable usersTable = new PojoTable(getUtilisateurRepository(), "Table des utilisateurs"){
+                        final PojoTable usersTable = new PojoTable(getRepositoryForClass(Utilisateur.class), "Table des utilisateurs"){
                             @Override
                             protected void deletePojos(final Element... pojos) {
                                 final List<Element> pojoList = new ArrayList<>();

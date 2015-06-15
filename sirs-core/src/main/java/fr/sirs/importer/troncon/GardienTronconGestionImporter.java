@@ -118,11 +118,11 @@ public class GardienTronconGestionImporter extends GenericPeriodeLocaliseeImport
             }
 
             if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                garde.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+                garde.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
 
             if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                garde.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+                garde.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
 
             if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {

@@ -100,11 +100,11 @@ class TronconGestionDigueCommuneImporter extends GenericPeriodeLocaliseeImporter
 //            }
 //            
 //            if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-//                periode.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+//                periode.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
 //            }
 //            
 //            if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-//                periode.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+//                periode.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
 //            }
 //            
 //            GeometryFactory geometryFactory = new GeometryFactory();

@@ -118,11 +118,11 @@ public class TronconGestionDigueSyndicatImporter extends GenericPeriodeLocalisee
             }
             
             if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-                periodeSyndicale.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+                periodeSyndicale.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
             }
 
             if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-                periodeSyndicale.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+                periodeSyndicale.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
             }
 
             if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {

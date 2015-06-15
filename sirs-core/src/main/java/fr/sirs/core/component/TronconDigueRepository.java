@@ -64,14 +64,10 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     public static final String STREAM_LIGHT = "streamLight";
     public static final String BY_DIGUE_ID = "byDigueId";
     
-//    private final HashMap<String, Callable<List<? extends PeriodeLocaliseeTroncon>>> viewMapPeriodesTroncon = new HashMap<>();
-    
     @Autowired
     public TronconDigueRepository(CouchDbConnector db) {
         super(TronconDigue.class, db);
         initStandardDesignDocument();
-//        viewMapPeriodesTroncon.put(GARDE_TRONCON, this::getAllGardes);
-//        viewMapPeriodesTroncon.put(PROPRIETE_TRONCON, this::getAllProprietes);
     }
 
     public List<TronconDigue> getByDigue(final Digue digue) {

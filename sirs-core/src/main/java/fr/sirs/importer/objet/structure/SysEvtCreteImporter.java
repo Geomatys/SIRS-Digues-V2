@@ -193,11 +193,11 @@ class SysEvtCreteImporter extends GenericStructureImporter<Crete> {
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            crete.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            crete.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            crete.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            crete.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {

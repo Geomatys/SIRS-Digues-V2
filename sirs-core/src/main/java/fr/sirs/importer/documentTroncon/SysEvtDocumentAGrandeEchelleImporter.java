@@ -174,11 +174,11 @@ class SysEvtDocumentAGrandeEchelleImporter extends GenericPositionDocumentImport
         position.setLinearId(troncon.getId());
         
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            position.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            position.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            position.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            position.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         final GeometryFactory geometryFactory = new GeometryFactory();

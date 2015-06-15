@@ -183,11 +183,11 @@ class SysEvtAutreOuvrageHydrauliqueImporter extends GenericReseauImporter<Ouvrag
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
-            ouvrage.setPR_debut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
+            ouvrage.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
 
         if (row.getDouble(Columns.PR_FIN_CALCULE.toString()) != null) {
-            ouvrage.setPR_fin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
+            ouvrage.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
         GeometryFactory geometryFactory = new GeometryFactory();
