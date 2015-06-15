@@ -171,7 +171,7 @@ public class CorePlugin extends Plugin {
 
     private synchronized void loadDataSuppliers() {
         suppliers.clear();
-            final TronconDigueRepository repository = getSession().getTronconDigueRepository();
+            final TronconDigueRepository repository = (TronconDigueRepository) getSession().getRepositoryForClass(TronconDigue.class);
             
             final Function<Class<? extends Element>, StructBeanSupplier> getSupplierForClass = (Class<? extends Element> c) ->{
                 return new StructBeanSupplier(c, () -> getSession().getRepositoryForClass(c).getAll());

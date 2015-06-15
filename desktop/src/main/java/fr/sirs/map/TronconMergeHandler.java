@@ -194,7 +194,7 @@ public class TronconMergeHandler extends FXAbstractNavigationHandler {
                     Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
                     if(bean instanceof TronconDigue){
                         //on recupere le troncon complet, celui ci n'est qu'une mise a plat
-                        bean = session.getTronconDigueRepository().get(((TronconDigue)bean).getDocumentId());
+                        bean = session.getRepositoryForClass(TronconDigue.class).get(((TronconDigue) bean).getDocumentId());
                         if(!editPane.getTroncons().contains(bean)){
                             editPane.getTroncons().add((TronconDigue)bean);
                         }

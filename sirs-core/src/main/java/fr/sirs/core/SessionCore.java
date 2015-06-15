@@ -92,9 +92,22 @@ public class SessionCore extends SessionGen {
         this.applicationContext=applicationContext;
     }
     
-    @Override
     public <T extends Element> AbstractSIRSRepository<T> getRepositoryForClass(Class<T> elementType) {
         return applicationContext.getBeansOfType(AbstractSIRSRepository.class).get(COMPONENT_PACKAGE+"."+elementType.getSimpleName()+"Repository");
+    }
+    
+    public AbstractSIRSRepository getRepositoryForType(String type) {
+        Class c;
+        try {
+            c = Class.forName(type);
+        } catch (ClassNotFoundException ex1) {
+            try {
+                c = Class.forName(SirsCore.MODEL_PACKAGE+"."+type);
+            } catch (ClassNotFoundException ex2) {
+                throw new IllegalArgumentException("No repository can be found for argument "+type);
+            }
+        }
+        return getRepositoryForClass(c);
     }
 
     private final CouchDbConnector connector;

@@ -229,12 +229,12 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
         final List<Preview> digues = session.getPreviews().getByClass(Digue.class);
         final ComboBox<Preview> diguesChoice = new ComboBox<>(FXCollections.observableList(digues));
         final ComboBox<RefRive> rives = new ComboBox<RefRive>(
-                FXCollections.observableList(session.getRefRiveRepository().getAll()));
+                FXCollections.observableList(session.getRepositoryForClass(RefRive.class).getAll()));
         
         final SirsStringConverter strConverter = new SirsStringConverter();
         diguesChoice.setConverter(strConverter);
         diguesChoice.setEditable(true);
-        new ComboBoxCompletion(diguesChoice);
+        ComboBoxCompletion.autocomplete(diguesChoice);
         rives.setConverter(strConverter);
 
         final TextField nameField = new TextField();
@@ -357,7 +357,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                         final Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
                         if (bean instanceof TronconDigue) {
                             //on recupere le troncon complet, celui ci n'est qu'une mise a plat
-                            tronconProperty.set(session.getTronconDigueRepository().get(((TronconDigue) bean).getDocumentId()));
+                            tronconProperty.set(session.getRepositoryForClass(TronconDigue.class).get(((TronconDigue) bean).getDocumentId()));
                         }
                     }
 
@@ -383,7 +383,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                             tmpTroncon.setGeometry(geom);
 
                             //sauvegarde du troncon
-                            session.getTronconDigueRepository().add(tmpTroncon);
+                            session.getRepositoryForClass(TronconDigue.class).add(tmpTroncon);
                             TronconUtils.updateSRElementaire(tmpTroncon, session);
                             
                             // Prepare l'edition du tronçon
@@ -447,7 +447,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                             invert.setOnAction((ActionEvent ae) -> {
                                 // HACK : On est forcé de sauvegarder le tronçon pour mettre à jour le SR élémentaire.
                                 tronconProperty.get().setGeometry(editGeometry.geometry.reverse());
-                                session.getTronconDigueRepository().update(tronconProperty.get());
+                                session.getRepositoryForClass(TronconDigue.class).update(tronconProperty.get());
                                 TronconUtils.updateSRElementaire(tronconProperty.get(), session);
                                 tronconProperty.set(null);
                             });
@@ -460,7 +460,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                             final MenuItem saveItem = new MenuItem("Sauvegarder les modifications");
                             saveItem.setOnAction((ActionEvent event) -> {
                                 tronconProperty.get().setGeometry(editGeometry.geometry);
-                                session.getTronconDigueRepository().update(tronconProperty.get());
+                                session.getRepositoryForClass(TronconDigue.class).update(tronconProperty.get());
 
                                 TronconUtils.updateSRElementaire(tronconProperty.get(), session);
                                 //on recalcule les geometries des positionables du troncon.
@@ -489,7 +489,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                     }
                     final MenuItem deleteItem = new MenuItem("Supprimer tronçon", new ImageView(GeotkFX.ICON_DELETE));
                     deleteItem.setOnAction((ActionEvent event) -> {
-                        session.getTronconDigueRepository().remove(tronconProperty.get());
+                        session.getRepositoryForClass(TronconDigue.class).remove(tronconProperty.get());
                         tronconProperty.set(null);
                     });
                     popup.getItems().add(deleteItem);

@@ -3,7 +3,9 @@ package fr.sirs.core;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SessionGen;
+import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.ElementCreator;
@@ -42,7 +44,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         troncon = ElementCreator.createAnonymValidElement(TronconDigue.class);
         troncon.setLibelle("TC");
         troncon.setGeometry(GF.createLineString(new Coordinate[]{new Coordinate(0, 0),new Coordinate(100, 0)}));
-        session.getTronconDigueRepository().add(troncon);
+        session.getRepositoryForClass(TronconDigue.class).add(troncon);
         
         //creation des bornes
         borne0 = ElementCreator.createAnonymValidElement( BorneDigue.class);
@@ -54,9 +56,9 @@ public class TronconUtilsTest extends CouchDBTestCase {
         borne2 = ElementCreator.createAnonymValidElement( BorneDigue.class);
         borne2.setLibelle("B2");
         borne2.setGeometry(GF.createPoint(new Coordinate(99, -3)));
-        session.getBorneDigueRepository().add(borne0);
-        session.getBorneDigueRepository().add(borne1);
-        session.getBorneDigueRepository().add(borne2);
+        session.getRepositoryForClass(BorneDigue.class).add(borne0);
+        session.getRepositoryForClass(BorneDigue.class).add(borne1);
+        session.getRepositoryForClass(BorneDigue.class).add(borne2);
         
         //creation du systeme de reperage
         sr = ElementCreator.createAnonymValidElement( SystemeReperage.class);
@@ -74,7 +76,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         sr.getSystemeReperageBornes().add(srb0);
         sr.getSystemeReperageBornes().add(srb1);
         sr.getSystemeReperageBornes().add(srb2);
-        session.getSystemeReperageRepository().add(sr, troncon);
+        ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).add(sr, troncon);
         
         //on ajoute une crète
         crete = ElementCreator.createAnonymValidElement( Crete.class);
@@ -86,8 +88,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         crete.setBorneDebutId(borne0.getDocumentId());
         crete.setBorneFinId(borne2.getDocumentId());
         
-//        troncon.getStructures().add(crete);
-        session.getTronconDigueRepository().update(troncon);
+        session.getRepositoryForClass(TronconDigue.class).update(troncon);
     }
     
     @Test
@@ -95,7 +96,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         final SessionGen session = new SessionGen(connector);
                 
         //le troncon doit etre a jour avec la liste des bornes
-        troncon = session.getTronconDigueRepository().get(troncon.getDocumentId());
+        troncon = session.getRepositoryForClass(TronconDigue.class).get(troncon.getDocumentId());
         final String[] tcbids = troncon.getBorneIds().toArray(new String[0]);
         assertEquals(3, tcbids.length);
         assertEquals(borne0.getId(), tcbids[0]);
@@ -104,7 +105,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         
         //on vérifie qu'on reconstruit bien la geometrie
         assertTrue(GF.createLineString(new Coordinate[]{new Coordinate(0.5, 0),new Coordinate(99.3, 0)}).equalsExact( 
-                LinearReferencingUtilities.buildGeometry(troncon.getGeometry(), crete, session.getBorneDigueRepository())
+                LinearReferencingUtilities.buildGeometry(troncon.getGeometry(), crete, (BorneDigueRepository) session.getRepositoryForClass(BorneDigue.class))
                 ,DELTA));
     }
     
@@ -127,7 +128,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         assertEquals(1, cut0brs.length);
         assertEquals(borne0.getDocumentId(), cut0brs[0]);
         
-        final List<SystemeReperage> cut0Srs = session.getSystemeReperageRepository().getByLinear(cut0);
+        final List<SystemeReperage> cut0Srs = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).getByLinear(cut0);
         assertEquals(1, cut0Srs.size());
         final SystemeReperage cut0sr = cut0Srs.get(0);
         assertNotEquals(sr.getDocumentId(), cut0sr.getDocumentId());
@@ -136,7 +137,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         assertEquals(1, cut0srbs.size());
         final SystemeReperageBorne cut0srb = cut0srbs.get(0);
         assertEquals(0.0f, cut0srb.getValeurPR(), DELTA);
-        final BorneDigue cut0b0 = session.getBorneDigueRepository().get(cut0srb.getBorneId());
+        final BorneDigue cut0b0 = session.getRepositoryForClass(BorneDigue.class).get(cut0srb.getBorneId());
         assertEquals(borne0.getDocumentId(), cut0b0.getDocumentId());
         assertEquals("B0", cut0b0.getLibelle());
         assertTrue(GF.createPoint(new Coordinate(1, 1)).equals(cut0b0.getGeometry()));
@@ -160,7 +161,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         
         //le troncon d'origine ne doit pas avoir changé
         assertTrue(GF.createLineString(new Coordinate[]{new Coordinate(0.5, 0),new Coordinate(99.3, 0)}).equalsExact( 
-                LinearReferencingUtilities.buildGeometry(troncon.getGeometry(), crete, session.getBorneDigueRepository())
+                LinearReferencingUtilities.buildGeometry(troncon.getGeometry(), crete, (BorneDigueRepository) session.getRepositoryForClass(BorneDigue.class))
                 ,DELTA));
         
         //seconde decoupe -----------------------------------------------------
@@ -176,7 +177,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         assertTrue("Cut troncon shares its bornes with its parent.", cut1brs.contains(borne1.getDocumentId()));
         assertTrue("Cut troncon shares its bornes with its parent.", cut1brs.contains(borne2.getDocumentId()));
         
-        final List<SystemeReperage> cut1Srs = session.getSystemeReperageRepository().getByLinear(cut1);
+        final List<SystemeReperage> cut1Srs = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).getByLinear(cut1);
         assertEquals(1, cut1Srs.size());
         final SystemeReperage cut1sr = cut1Srs.get(0);
         assertNotEquals(sr.getDocumentId(), cut1sr.getDocumentId());
@@ -193,8 +194,8 @@ public class TronconUtilsTest extends CouchDBTestCase {
         final SystemeReperageBorne cut1srb1 = cut1srbs.get(0);
         assertEquals(10.0f, cut1srb0.getValeurPR(), DELTA);
         assertEquals(20.0f, cut1srb1.getValeurPR(), DELTA);
-        final BorneDigue cut1b0 = session.getBorneDigueRepository().get(cut1srb0.getBorneId());
-        final BorneDigue cut1b1 = session.getBorneDigueRepository().get(cut1srb1.getBorneId());
+        final BorneDigue cut1b0 = session.getRepositoryForClass(BorneDigue.class).get(cut1srb0.getBorneId());
+        final BorneDigue cut1b1 = session.getRepositoryForClass(BorneDigue.class).get(cut1srb1.getBorneId());
         assertEquals("Cut troncon shares its bornes with its parent.", borne1.getDocumentId(), cut1b0.getDocumentId());
         assertEquals("Cut troncon shares its bornes with its parent.", borne2.getDocumentId(), cut1b1.getDocumentId());
         assertEquals("B1", cut1b0.getLibelle());
@@ -220,7 +221,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         
         //le troncon d'origine ne doit pas avoir changé
         assertTrue(GF.createLineString(new Coordinate[]{new Coordinate(0.5, 0),new Coordinate(99.3, 0)}).equalsExact( 
-                LinearReferencingUtilities.buildGeometry(troncon.getGeometry(), crete, session.getBorneDigueRepository())
+                LinearReferencingUtilities.buildGeometry(troncon.getGeometry(), crete, (BorneDigueRepository) session.getRepositoryForClass(BorneDigue.class))
                 ,DELTA));
     }
     
@@ -247,7 +248,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
         assertEquals("PR de fin de la Crête", 20.0625, crete.getPR_fin(), DELTA);
         
         LinearReferencing.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(LinearReferencingUtilities.asLineString(troncon.getGeometry()));        
-        float fictivePR = TronconUtils.computePR(segments, sr, GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(19, 0)), session.getBorneDigueRepository());
+        float fictivePR = TronconUtils.computePR(segments, sr, GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(19, 0)), (BorneDigueRepository) session.getRepositoryForClass(BorneDigue.class));
         
         // PR fictif = (PR(borne1) - PR(borne0)) / DistanceProjetée(borne1, borne0) * distanceProjetée(borne0, Point fictif) + PR(borne0)
         // PR fictif = (10 - 0) / 50 * 18 + 0
