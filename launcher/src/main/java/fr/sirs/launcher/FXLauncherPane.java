@@ -503,12 +503,12 @@ public class FXLauncherPane extends BorderPane {
                 final File mainDbFile = new File(uiImportDBData.getText());
                 final File cartoDbFile = new File(uiImportDBCarto.getText());
                 final CouchDbConnector couchDbConnector = appCtx.getBean(CouchDbConnector.class);
+                SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
+                sirsDBInfoRepository.setSRID(epsgCode);
                 DbImporter importer = new DbImporter(couchDbConnector);
                 importer.setDatabase(DatabaseBuilder.open(mainDbFile),
                         DatabaseBuilder.open(cartoDbFile), uiImportCRS.crsProperty().get());
                 importer.importation();
-                SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
-                sirsDBInfoRepository.setSRID(epsgCode);
                 final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
 
                 createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());

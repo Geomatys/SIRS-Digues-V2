@@ -274,8 +274,6 @@ public class DatabaseRegistry {
             final ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext(
                     new String[]{SirsCore.SPRING_CONTEXT}, parentContext);
 
-            appContext.getBean(SirsDBInfoRepository.class).get().ifPresent(info -> SirsCore.LOGGER.info(info.toString()));
-
             if (initIndex) {
                 ElasticSearchEngine elasticEngine = new ElasticSearchEngine(
                         couchDbUrl.getHost(), (couchDbUrl.getPort() < 0) ? 5984 : couchDbUrl.getPort(), dbContext, username, userPass);
