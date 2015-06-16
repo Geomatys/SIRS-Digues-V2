@@ -1,3 +1,19 @@
+.calendar-header{
+    -fx-background-color: #E4E4E4;
+}
+
+.calendar-navigation-arrow{
+    -fx-background-color: #076CB4;
+}
+
+.calendar-navigation-title{
+    -fx-font-weight: bold;
+}
+
+.calendar-weekdays{
+    -fx-text-fill: #AEAEAE;
+}
+
 .calendar-cell{
     -fx-background-color: none;
     -fx-background-image: none;
@@ -11,9 +27,10 @@
 }
 
 .calendar-cell-today{
-    -fx-background-color: #aF7454;
+    -fx-background-color: #FFD2D2;
+    -fx-border-color: #FFD2D2;
 }
 
 .calendar-cell-has-events{
-    -fx-background-color: palegoldenrod;
+    -fx-background-color: #FFFFCC;
 }

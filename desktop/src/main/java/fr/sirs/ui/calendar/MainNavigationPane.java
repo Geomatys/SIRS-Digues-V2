@@ -11,6 +11,7 @@ import javafx.scene.layout.Priority;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 
+import java.awt.*;
 import java.util.Calendar;
 
 /**
@@ -19,14 +20,21 @@ import java.util.Calendar;
  * @author Christian Schudt
  */
 final class MainNavigationPane extends HBox {
-    private static final ImageView ICON_PREVIOUS  = new ImageView(SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_ANGLE_LEFT, 16,
-            FontAwesomeIcons.DEFAULT_COLOR), null));
-    private static final ImageView ICON_NEXT  = new ImageView(SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_ANGLE_RIGHT, 16,
-            FontAwesomeIcons.DEFAULT_COLOR), null));
-
+    private static final String CSS_CALENDAR_NAVIGATION_ARROW = "calendar-navigation-arrow";
     private static final String CSS_CALENDAR_NAVIGATION_BUTTON = "calendar-navigation-button";
     private static final String CSS_CALENDAR_NAVIGATION_TITLE = "calendar-navigation-title";
     private static final String CSS_CALENDAR_HEADER = "calendar-header";
+    private static final String CSS_BUTTON_BAR = "buttonbar-button";
+
+    private static final Color ARROW_COLOR = new Color(7, 108, 180);
+    private static final ImageView ICON_PREVIOUS = new ImageView(
+            SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CARET_LEFT, 16, ARROW_COLOR), null));
+    private static final ImageView ICON_NEXT = new ImageView(
+            SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CARET_RIGHT, 16, ARROW_COLOR), null));
+    static {
+        ICON_PREVIOUS.getStyleClass().add(CSS_CALENDAR_NAVIGATION_ARROW);
+        ICON_NEXT.getStyleClass().add(CSS_CALENDAR_NAVIGATION_ARROW);
+    }
 
     private CalendarView calendarView;
     Button titleButton;
@@ -38,6 +46,7 @@ final class MainNavigationPane extends HBox {
 
         titleButton = new Button();
         titleButton.getStyleClass().add(CSS_CALENDAR_NAVIGATION_TITLE);
+        titleButton.getStyleClass().add(CSS_BUTTON_BAR);
         titleButton.textProperty().bind(calendarView.title);
 
         titleButton.setOnAction(actionEvent -> {
@@ -104,6 +113,7 @@ final class MainNavigationPane extends HBox {
         button.setGraphic(direction > 0 ? ICON_NEXT : ICON_PREVIOUS);
 
         button.getStyleClass().add(CSS_CALENDAR_NAVIGATION_BUTTON);
+        button.getStyleClass().add(CSS_BUTTON_BAR);
         return button;
     }
 

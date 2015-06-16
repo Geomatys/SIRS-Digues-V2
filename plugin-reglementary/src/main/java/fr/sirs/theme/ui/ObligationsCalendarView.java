@@ -3,6 +3,8 @@ package fr.sirs.theme.ui;
 import fr.sirs.Injector;
 import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.model.ObligationReglementaire;
+import fr.sirs.core.model.Preview;
+import fr.sirs.plugins.DocumentsTheme;
 import fr.sirs.ui.calendar.CalendarEvent;
 import fr.sirs.ui.calendar.CalendarView;
 import javafx.collections.FXCollections;
@@ -21,8 +23,7 @@ import java.util.List;
 public final class ObligationsCalendarView extends CalendarView {
     private static final Image ICON_DOC = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_FILE, 16,
             FontAwesomeIcons.DEFAULT_COLOR), null);
-    // TODO: ajouter l'icone pour les travaux quand ce type d'obligations pourra être choisi.
-    //private static final ImageView ICON_WORK  = new ImageView(new Image(""));
+    private static final Image ICON_WORK = new Image(DocumentsTheme.class.getResourceAsStream("images/roadworks.png"));
 
     public ObligationsCalendarView() {
         super();
@@ -42,13 +43,27 @@ public final class ObligationsCalendarView extends CalendarView {
                     obligation.getDateEcheance();
             if (eventDate != null) {
                 final StringBuilder sb = new StringBuilder();
+                Image image = ICON_DOC;
                 if (obligation.getTypeId() != null) {
-                    sb.append(obligation.getTypeId());
+                    final Preview previewType = Injector.getSession().getPreviews().get(obligation.getTypeId());
+                    if (previewType != null) {
+                        final String libelType = previewType.getLibelle();
+                        sb.append(libelType);
+                        if ("Travaux".equalsIgnoreCase(libelType)) {
+                            image = ICON_WORK;
+                        }
+                    }
                 }
                 if (obligation.getSystemeEndiguementId() != null) {
-                    sb.append(" - ").append(obligation.getSystemeEndiguementId());
+                    final Preview previewSE = Injector.getSession().getPreviews().get(obligation.getSystemeEndiguementId());
+                    if (previewSE != null) {
+                        if (!sb.toString().isEmpty()) {
+                            sb.append(" - ");
+                        }
+                        sb.append(previewSE.getLibelle());
+                    }
                 }
-                calEvents.add(new CalendarEvent(eventDate, sb.toString(), obligation.getTypeId(), ICON_DOC));
+                calEvents.add(new CalendarEvent(eventDate, sb.toString(), obligation.getTypeId(), image));
             }
         }
         return calEvents;

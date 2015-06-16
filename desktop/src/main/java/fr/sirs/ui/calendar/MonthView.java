@@ -6,6 +6,7 @@ import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
@@ -115,7 +116,7 @@ final class MonthView extends DatePane {
             Label label = new Label();
             label.getStyleClass().add(CSS_CALENDAR_WEEKDAYS);
             label.setMaxWidth(Double.MAX_VALUE);
-            label.setAlignment(Pos.CENTER);
+            label.setAlignment(Pos.CENTER_LEFT);
             add(label, i + colOffset, 0);
         }
 
@@ -206,13 +207,13 @@ final class MonthView extends DatePane {
 
         // Ignore the week day row and the week number column
         for (int i = numberOfDaysPerWeek + (calendarView.getShowWeeks() ? 1 : 0); i < getChildren().size(); i++) {
-            final Date currentDate = calendar.getTime();
+            //final Date currentDate = calendar.getTime();
             if (i % (numberOfDaysPerWeek + 1) == 0 && (calendarView.getShowWeeks())) {
                 Label label = (Label) getChildren().get(i);
                 label.setText(Integer.toString(calendar.get(Calendar.WEEK_OF_YEAR)));
             } else {
                 Button control = (Button) getChildren().get(i);
-                control.setTooltip(new Tooltip(dateFormat.format(currentDate)));
+                //control.setTooltip(new Tooltip(dateFormat.format(currentDate)));
                 control.setPrefWidth(150);
                 control.setPrefHeight(100);
                 control.setMaxWidth(Region.USE_PREF_SIZE);
@@ -261,9 +262,15 @@ final class MonthView extends DatePane {
                     for (int j=0; j<eventsForDate.size(); j++) {
                         final CalendarEvent event = eventsForDate.get(j);
                         if (event.getImage() != null) {
-                            gridBtn.add(new ImageView(event.getImage()), 0, j+1);
+                            final ImageView imgView = new ImageView(event.getImage());
+                            imgView.setFitHeight(16);
+                            gridBtn.add(imgView, 0, j+1);
                         }
-                        gridBtn.add(new Label(event.getTitle()), 1, j+1);
+                        final Label titleLbl = new Label(event.getTitle());
+                        titleLbl.setTooltip(new Tooltip(event.getTitle()));
+                        titleLbl.setMaxWidth(100);
+                        titleLbl.setTextOverrun(OverrunStyle.ELLIPSIS);
+                        gridBtn.add(titleLbl, 1, j+1);
                     }
                 } else {
                     control.getStyleClass().remove(CSS_CALENDAR_DAY_HAS_EVENTS);
