@@ -59,6 +59,7 @@
                     <jvmArgs>
                         <jvmArg>-Xmx1G</jvmArg>
                         <jvmArg>-Djava.net.useSystemProxies=true</jvmArg>
+                        <jvmArg>-Djava.system.class.loader=fr.sirs.core.plugins.PluginLoader</jvmArg>
                     </jvmArgs>
                 </configuration>
             </plugin>

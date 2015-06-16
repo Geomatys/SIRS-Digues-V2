@@ -589,7 +589,6 @@ public class FXLauncherPane extends BorderPane {
 
     private static void runDesktop(final String database) {
         try {
-            Plugins.loadPlugins();
             (SIRS.LOADER = new Loader(database)).start(null);
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Cannot run desktop application with database : " + database, ex);
@@ -693,7 +692,7 @@ public class FXLauncherPane extends BorderPane {
             }
             args.add("-classpath");
             args.add(System.getProperty("java.class.path"));
-            LOGGER.log(Level.INFO, command);
+            args.add("-Djava.system.class.loader=fr.sirs.core.plugins.PluginLoader");
             if (jarPattern.matcher(command).matches()) {
                 args.add("-jar");
             }

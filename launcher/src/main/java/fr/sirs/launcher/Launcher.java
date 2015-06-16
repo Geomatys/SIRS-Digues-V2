@@ -3,6 +3,7 @@ package fr.sirs.launcher;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.plugins.PluginLoader;
 import java.io.IOException;
 
 import java.util.UUID;
@@ -11,6 +12,7 @@ import java.util.logging.Level;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.geometry.Pos;
@@ -37,7 +39,7 @@ public class Launcher extends Application {
     
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.getIcons().add(SirsCore.ICON);
+        primaryStage.getIcons().add(SIRS.ICON);
         SLF4JBridgeHandler.removeHandlersForRootLogger();  // (since SLF4J 1.6.5)
 
         // add SLF4JBridgeHandler to j.u.l's root logger, should be done once during
@@ -56,7 +58,7 @@ public class Launcher extends Application {
 
         ProgressIndicator progressIndicator = new ProgressIndicator();
         progressIndicator.setBackground(Background.EMPTY);
-        Label splashLabel = new Label("Initialisation de la base EPSG");
+        final Label splashLabel = new Label("Initialisation de la base EPSG");
         final VBox vbox = new VBox(progressIndicator, splashLabel);
         vbox.setSpacing(10);
         vbox.setAlignment(Pos.CENTER);
@@ -70,7 +72,7 @@ public class Launcher extends Application {
             version = "";
         
         final Stage splashStage = new Stage();
-        splashStage.getIcons().add(SirsCore.ICON);
+        splashStage.getIcons().add(SIRS.ICON);
         splashStage.setTitle("SIRS "+version);
         splashStage.initStyle(StageStyle.TRANSPARENT);
         splashStage.setScene(scene);
@@ -90,6 +92,11 @@ public class Launcher extends Application {
             @Override
             protected Boolean call() throws Exception {
                 SirsCore.initEpsgDB();
+                final ClassLoader scl = ClassLoader.getSystemClassLoader();
+                if (scl instanceof PluginLoader) {
+                    Platform.runLater(()-> splashLabel.setText("Chargement des plugins"));
+                    ((PluginLoader)scl).loadPlugins();
+                }
                 return true;
             }
         };

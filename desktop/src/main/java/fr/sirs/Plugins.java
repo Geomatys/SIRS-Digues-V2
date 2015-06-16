@@ -31,8 +31,6 @@ public class Plugins {
     private static Map<String, Plugin> REGISTERED_PLUGINS;
     private static List<Theme> THEMES;
     
-    private static final Pattern JAR_PATTERN = Pattern.compile("(?i).*(\\.jar)$");
-    
     /**
      * Récupérer la liste des plugins.
      * 
@@ -85,29 +83,5 @@ public class Plugins {
     public static void clearCache() {
         THEMES = null;
         REGISTERED_PLUGINS = null;
-    }
-
-    public static void loadPlugins() throws IOException, IllegalStateException {
-        if (Files.isDirectory(SirsCore.PLUGINS_PATH)) {
-            // TODO : Keep list of jars in a static variable to perform scan only once ?
-            URL[] libs = Files.walk(SirsCore.PLUGINS_PATH).filter(Plugins::isJar).map(Plugins::toURL).toArray(URL[]::new);
-            if (libs.length > 0) {
-                ClassLoader parentLoader = Plugins.class.getClassLoader();
-                final URLClassLoader newLoader = new URLClassLoader(libs, parentLoader);
-                Thread.currentThread().setContextClassLoader(newLoader);
-            }
-        }
-    }
-    
-    public static boolean isJar(final Path input) {
-        return Files.isRegularFile(input) && JAR_PATTERN.matcher(input.getFileName().toString()).matches();
-    }
-    
-    public static URL toURL(final Path input) {
-        try {
-            return input.toUri().toURL();
-        } catch (MalformedURLException ex) {
-            throw new IllegalStateException(ex);
-        }
     }
 }
