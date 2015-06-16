@@ -232,7 +232,7 @@ public class PojoTable extends BorderPane {
     
     /** Task object designed for asynchronous update of the elements contained in the table. */
     protected Task tableUpdater;
-    
+
     public PojoTable(final Class pojoClass, final String title) {
         this(pojoClass, title, null);
     }
@@ -280,6 +280,8 @@ public class PojoTable extends BorderPane {
                 else{
                     getStyleClass().removeAll("invalidRow");
                 }
+                disableProperty().unbind();
+                disableProperty().bind(itemProperty().isNull());
             }
         });
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -304,7 +306,6 @@ public class PojoTable extends BorderPane {
         
         uiTable.getColumns().add(deleteColumn);
         uiTable.getColumns().add((TableColumn) editCol);
-        
         try {
             //contruction des colonnes editable
             final HashMap<String, PropertyDescriptor> properties = SIRS.listSimpleProperties(this.pojoClass);
@@ -880,7 +881,14 @@ public class PojoTable extends BorderPane {
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
                 if (Worker.State.SUCCEEDED.equals(newValue)) {
                     Platform.runLater(() -> {
-                        uiTable.setItems(filteredValues);
+                        //we set the list to null, otherwise if we have 2 lists of size 0, equal method is true and we won't have any event.
+                        if(filteredValues.isEmpty()){
+                            final ObservableList l = FXCollections.observableArrayList();
+                            l.add(null);
+                            uiTable.setItems(l);
+                        }else{
+                            uiTable.setItems(filteredValues);
+                        }
                         uiSearch.setGraphic(searchNone);
                     });
                 } else if (Worker.State.FAILED.equals(newValue) || Worker.State.CANCELLED.equals(newValue)) {
@@ -1258,10 +1266,14 @@ public class PojoTable extends BorderPane {
                 try {
                     final Method propertyAccessor = ref.ref().getMethod(desc.getName()+"Property");
                     setCellValueFactory((CellDataFeatures<Element, Object> param) -> {
-                        try {
-                            return (ObservableValue) propertyAccessor.invoke(param.getValue());
-                        } catch (Exception ex) {
-                            SirsCore.LOGGER.log(Level.WARNING, null, ex);
+                        if(param!=null && param.getValue()!=null && propertyAccessor!=null){
+                            try {
+                                return (ObservableValue) propertyAccessor.invoke(param.getValue());
+                            } catch (Exception ex) {
+                                SirsCore.LOGGER.log(Level.WARNING, null, ex);
+                                return null;
+                            }
+                        }else{
                             return null;
                         }
                     });
@@ -1320,7 +1332,7 @@ public class PojoTable extends BorderPane {
                 final boolean realDelete = createNewProperty.get();
                 return new ButtonTableCell<>(false, 
                         realDelete ? new ImageView(GeotkFX.ICON_DELETE) : new ImageView(GeotkFX.ICON_UNLINK), 
-                        (Element t) -> true, 
+                        (Element t) -> t!=null,
                         (Element t) -> {
                             final Alert confirm;
                             if (realDelete) {
@@ -1364,7 +1376,7 @@ public class PojoTable extends BorderPane {
                 public TableCell call(TableColumn param) {
                     return new ButtonTableCell(
                             false, new ImageView(SIRS.ICON_EDIT_BLACK),
-                            (Object t) -> true, (Object t) -> {
+                            (Object t) -> t!=null, (Object t) -> {
                                 editFct.accept(t);
                                 return t;
                             });
