@@ -20,6 +20,7 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Tooltip;
@@ -251,8 +252,18 @@ public class FXMainFrame extends BorderPane {
      * @param theme
      * @return
      */
-    private Button toButton(final AbstractPluginsButtonTheme theme) {
-        final Button button = new Button(theme.getName());
+    private ButtonBase toButton(final AbstractPluginsButtonTheme theme) {
+        final ButtonBase button;
+        if (theme.getSubThemes() != null && !theme.getSubThemes().isEmpty()) {
+            button = new MenuButton(theme.getName());
+            for (final Theme t : theme.getSubThemes()) {
+                ((MenuButton) button).getItems().add(toMenuItem(t));
+            }
+        } else {
+            button = new Button(theme.getName());
+            button.setOnAction(new DisplayTheme(theme));
+        }
+
         if (theme.getDescription() != null && !theme.getDescription().isEmpty()) {
             button.setTooltip(new Tooltip(theme.getDescription()));
         }
@@ -277,7 +288,6 @@ public class FXMainFrame extends BorderPane {
         button.setAlignment(Pos.CENTER);
         button.getStyleClass().add("buttonbar-button");
 
-        button.setOnAction(new DisplayTheme(theme));
         return button;
     }
 
