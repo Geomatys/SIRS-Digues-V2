@@ -105,8 +105,6 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
 
         // * role
         ui_role.valueProperty().bindBidirectional(newValue.roleProperty());
-//        ui_role.setEditable(element.equals(Injector.getSession().getUtilisateur()));
-
     }
     
     private class SecurityBinding extends BooleanBinding{
@@ -137,8 +135,8 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
         // Sinon, si on est susceptible d'avoir modifié le login.
         else if(!ui_login.getText().equals(currentEditedUserLogin)){ 
             
-            session.getUtilisateurRepository().clearCache();
-            final List<Utilisateur> utilisateurs = session.getUtilisateurRepository().getAll();
+            session.getRepositoryForClass(Utilisateur.class).clearCache();
+            final List<Utilisateur> utilisateurs = session.getRepositoryForClass(Utilisateur.class).getAll();
             for(final Utilisateur utilisateur : utilisateurs){
                 if(ui_login.getText().equals(utilisateur.getLogin())){
                     ui_labelLogin.setTextFill(Color.RED);
@@ -163,7 +161,7 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
                 alert.setResizable(true);
                 alert.showAndWait();
                 throw new Exception("Les mots de passe ne correspondent pas ! Modification non enregistrée.");
-            } 
+            }
             else{
                 elementProperty.get().setPassword(hexaMD5(ui_password.getText()));
                 ui_labelConfirm.setTextFill(Color.BLACK);
