@@ -89,6 +89,7 @@ public final class SIRS extends SirsCore {
     public static final Image ICON_LINK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXTERNAL_LINK, 16, Color.BLACK),null);
     
     public static final String CSS_PATH = "/fr/sirs/theme.css";
+    public static final String CSS_PATH_CALENDAR = "/fr/sirs/calendar.css";
     
     // Champs spéciaux des classes utilisés dans le code
     public static final String DATE_DEBUT_FIELD = "date_debut";

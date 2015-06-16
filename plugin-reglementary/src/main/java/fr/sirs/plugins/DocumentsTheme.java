@@ -1,5 +1,7 @@
 package fr.sirs.plugins;
 
+import fr.sirs.SIRS;
+import fr.sirs.theme.ui.ObligationsCalendarView;
 import fr.sirs.ui.calendar.CalendarView;
 import fr.sirs.Injector;
 import fr.sirs.core.component.ObligationReglementaireRepository;
@@ -61,7 +63,8 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
     private Tab buildCalendarTab() {
         final Tab calendarTab = new Tab("Calendrier");
         calendarTab.setClosable(false);
-        final CalendarView calendarView = new CalendarView();
+        final CalendarView calendarView = new ObligationsCalendarView();
+        calendarView.getStylesheets().add(SIRS.CSS_PATH_CALENDAR);
         calendarView.setShowTodayButton(false);
         calendarView.getCalendar().setTime(new Date());
         calendarTab.setContent(calendarView);

@@ -1,0 +1,19 @@
+.calendar-cell{
+    -fx-background-color: none;
+    -fx-background-image: none;
+    -fx-border-color: lightgray;
+    -fx-border-radius: none;
+    -fx-border-width: 1px;
+}
+
+.calendar-cell-other-month{
+    -fx-background-color: lightgray;
+}
+
+.calendar-cell-today{
+    -fx-background-color: #aF7454;
+}
+
+.calendar-cell-has-events{
+    -fx-background-color: palegoldenrod;
+}

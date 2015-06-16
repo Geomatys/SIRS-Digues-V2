@@ -1,29 +1,21 @@
 package fr.sirs.ui.calendar;
 
 import javafx.beans.Observable;
+import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.StrokeLineCap;
-import javafx.scene.shape.StrokeType;
-
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Responsible for displaying the days of a month.
@@ -33,6 +25,8 @@ import java.util.Date;
 final class MonthView extends DatePane {
 
     private static final String CSS_CALENDAR_MONTH_VIEW = "calendar-month-view";
+    private static final String CSS_CALENDAR_DAY = "calendar-cell";
+    private static final String CSS_CALENDAR_DAY_HAS_EVENTS = "calendar-cell-has-events";
     private static final String CSS_CALENDAR_DAY_CURRENT_MONTH = "calendar-cell-current-month";
     private static final String CSS_CALENDAR_DAY_OTHER_MONTH = "calendar-cell-other-month";
     private static final String CSS_CALENDAR_TODAY = "calendar-cell-today";
@@ -206,7 +200,8 @@ final class MonthView extends DatePane {
                 Priority.NEVER, HPos.RIGHT, true);
         final ColumnConstraints colLargeTxtEventCstr = new ColumnConstraints(Region.USE_PREF_SIZE, Region.USE_COMPUTED_SIZE, Double.MAX_VALUE,
                 Priority.ALWAYS, HPos.LEFT, true);
-        final Border btnBorder = new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, null, new BorderWidths(1)));
+
+        final ObservableList<CalendarEvent> events = calendarView.getCalendarEvents();
 
         // Ignore the week day row and the week number column
         for (int i = numberOfDaysPerWeek + (calendarView.getShowWeeks() ? 1 : 0); i < getChildren().size(); i++) {
@@ -227,8 +222,7 @@ final class MonthView extends DatePane {
                 gridBtn.getColumnConstraints().add(colLargeTxtEventCstr);
                 gridBtn.getColumnConstraints().add(colSmallCstr);
                 control.setGraphic(gridBtn);
-                control.setBackground(Background.EMPTY);
-                control.setBorder(btnBorder);
+                control.getStyleClass().add(CSS_CALENDAR_DAY);
 
                 boolean disabled = calendarView.getDisabledWeekdays().contains(calendar.get(Calendar.DAY_OF_WEEK));
 
@@ -260,6 +254,17 @@ final class MonthView extends DatePane {
                     control.getStyleClass().add(CSS_CALENDAR_SELECTED);
                 }
 
+                final List<CalendarEvent> eventsForDate = calendarView.getCalendarEventsForCalendarDate(calendar, events);
+                if (!eventsForDate.isEmpty()) {
+                    control.getStyleClass().add(CSS_CALENDAR_DAY_HAS_EVENTS);
+                    for (int j=0; j<eventsForDate.size(); j++) {
+                        final CalendarEvent event = eventsForDate.get(j);
+                        if (event.getImage() != null) {
+                            gridBtn.add(event.getImage(), 0, j+1);
+                        }
+                        gridBtn.add(new Label(event.getTitle()), 1, j+1);
+                    }
+                }
 
                 control.setUserData(calendar.getTime());
                 calendar.add(Calendar.DATE, 1);

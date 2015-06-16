@@ -7,9 +7,9 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -260,6 +260,37 @@ public class CalendarView extends VBox {
 
     public void setShowWeeks(boolean showWeeks) {
         this.showWeeks.set(showWeeks);
+    }
+
+    /**
+     * Return an empty list for calendar events. Subclasses should override this method and return
+     * the wished list of events.
+     *
+     * @return By default an empty list.
+     */
+    public ObservableList<CalendarEvent> getCalendarEvents() {
+        return FXCollections.observableArrayList();
+    }
+
+    /**
+     * Get all calendar events defined for the choosen date.
+     *
+     * @see #getCalendarEvents()
+     * @param calendar Calendar date.
+     * @param events All available events.
+     * @return Events list for this date.
+     */
+    public final ObservableList<CalendarEvent> getCalendarEventsForCalendarDate(final Calendar calendar,
+                                                                                final ObservableList<CalendarEvent> events) {
+        final ObservableList<CalendarEvent> finalEvents = FXCollections.observableArrayList();
+        for (final CalendarEvent event : events) {
+            final LocalDateTime d = event.getDate();
+            if (d != null && d.getDayOfMonth() == calendar.get(Calendar.DAY_OF_MONTH) && d.getMonthValue() == calendar.get(Calendar.MONTH) &&
+                    d.getYear() == calendar.get(Calendar.YEAR)) {
+                finalEvents.add(event);
+            }
+        }
+        return finalEvents;
     }
 
     /**

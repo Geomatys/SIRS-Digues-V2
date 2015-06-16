@@ -1,5 +1,6 @@
 package fr.sirs.ui.calendar;
 
+import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
 import javafx.application.Application;
 import javafx.geometry.HPos;
@@ -25,6 +26,9 @@ import javafx.stage.Stage;
  * Created by cedr on 12/06/15.
  */
 public class Test extends Application {
+    private static final String CSS_CALENDAR_DAY = "calendar-cell";
+    private static final String CSS_CALENDAR_TODAY = "calendar-cell-today";
+
     public static void main(String[] args){
         launch(args);
     }
@@ -33,6 +37,7 @@ public class Test extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.getIcons().add(SirsCore.ICON);
         final GridPane grid = new GridPane();
+        grid.getStylesheets().add(SIRS.CSS_PATH_CALENDAR);
 
         final Button control1 = new Button();
         control1.setPrefWidth(150);
@@ -51,8 +56,10 @@ public class Test extends Application {
         gridBtn.getColumnConstraints().add(new ColumnConstraints(Region.USE_PREF_SIZE, Region.USE_COMPUTED_SIZE, Region.USE_PREF_SIZE,
                 Priority.NEVER, HPos.RIGHT, true));
         control1.setGraphic(gridBtn);
-        control1.setBackground(Background.EMPTY);
-        control1.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, null, new BorderWidths(1))));
+        //control1.setBackground(Background.EMPTY);
+        //control1.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, null, new BorderWidths(1))));
+        control1.getStyleClass().add(CSS_CALENDAR_TODAY);
+        control1.getStyleClass().add(CSS_CALENDAR_DAY);
         grid.add(control1, 0, 0);
 
         final Button control2 = new Button();
@@ -61,8 +68,9 @@ public class Test extends Application {
         control2.setMaxWidth(Region.USE_PREF_SIZE);
         control2.setMaxHeight(Region.USE_PREF_SIZE);
         control2.setText("2");
-        control2.setBackground(Background.EMPTY);
-        control2.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, null, new BorderWidths(1))));
+        //control2.setBackground(Background.EMPTY);
+        //control2.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, null, new BorderWidths(1))));
+        control2.getStyleClass().add(CSS_CALENDAR_DAY);
         grid.add(control2, 0, 1);
 
         final Button control3 = new Button();
@@ -71,8 +79,9 @@ public class Test extends Application {
         control3.setMaxWidth(Region.USE_PREF_SIZE);
         control3.setMaxHeight(Region.USE_PREF_SIZE);
         control3.setText("3");
-        control3.setBackground(Background.EMPTY);
-        control3.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, null, new BorderWidths(1))));
+        //control3.setBackground(Background.EMPTY);
+        //control3.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, null, new BorderWidths(1))));
+        control3.getStyleClass().add(CSS_CALENDAR_DAY);
         grid.add(control3, 1, 0);
 
         final Button control4 = new Button();
@@ -81,8 +90,9 @@ public class Test extends Application {
         control4.setMaxWidth(Region.USE_PREF_SIZE);
         control4.setMaxHeight(Region.USE_PREF_SIZE);
         control4.setText("4");
-        control4.setBackground(Background.EMPTY);
-        control4.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, null, new BorderWidths(1))));
+        //control4.setBackground(Background.EMPTY);
+        //control4.setBorder(new Border(new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, null, new BorderWidths(1))));
+        control4.getStyleClass().add(CSS_CALENDAR_DAY);
         grid.add(control4, 1, 1);
 
         primaryStage.setScene(new Scene(new BorderPane(grid), 500, 400));
