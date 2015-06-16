@@ -1,7 +1,6 @@
 package fr.sirs.ui.calendar;
 
-import javafx.scene.image.ImageView;
-
+import javafx.scene.image.Image;
 import java.time.LocalDateTime;
 
 /**
@@ -13,13 +12,13 @@ public class CalendarEvent {
     private final LocalDateTime date;
     private final String title;
     private final String type;
-    private final ImageView image;
+    private final Image image;
 
     public CalendarEvent(final LocalDateTime date, final String title, final String type) {
         this(date, title, type, null);
     }
 
-    public CalendarEvent(final LocalDateTime date, final String title, final String type, final ImageView image) {
+    public CalendarEvent(final LocalDateTime date, final String title, final String type, final Image image) {
         this.date = date;
         this.title = title;
         this.type = type;
@@ -38,7 +37,7 @@ public class CalendarEvent {
         return type;
     }
 
-    public ImageView getImage() {
+    public Image getImage() {
         return image;
     }
 

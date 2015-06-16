@@ -8,18 +8,21 @@ import fr.sirs.ui.calendar.CalendarView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
  * @author Cédric Briançon (Geomatys)
  */
 public final class ObligationsCalendarView extends CalendarView {
-    private static final ImageView ICON_DOC  = new ImageView(SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_FILE, 16,
-            FontAwesomeIcons.DEFAULT_COLOR), null));
+    private static final Image ICON_DOC = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_FILE, 16,
+            FontAwesomeIcons.DEFAULT_COLOR), null);
+    // TODO: ajouter l'icone pour les travaux quand ce type d'obligations pourra être choisi.
+    //private static final ImageView ICON_WORK  = new ImageView(new Image(""));
 
     public ObligationsCalendarView() {
         super();
@@ -35,8 +38,18 @@ public final class ObligationsCalendarView extends CalendarView {
         final ObligationReglementaireRepository orr = new ObligationReglementaireRepository(Injector.getSession().getConnector());
         final List<ObligationReglementaire> obligations = orr.getAll();
         for (final ObligationReglementaire obligation : obligations) {
-            calEvents.add(new CalendarEvent(obligation.getDateRealisation(), obligation.getDesignation(),
-                    "doc", ICON_DOC));
+            final LocalDateTime eventDate = obligation.getDateRealisation() != null ? obligation.getDateRealisation() :
+                    obligation.getDateEcheance();
+            if (eventDate != null) {
+                final StringBuilder sb = new StringBuilder();
+                if (obligation.getTypeId() != null) {
+                    sb.append(obligation.getTypeId());
+                }
+                if (obligation.getSystemeEndiguementId() != null) {
+                    sb.append(" - ").append(obligation.getSystemeEndiguementId());
+                }
+                calEvents.add(new CalendarEvent(eventDate, sb.toString(), obligation.getTypeId(), ICON_DOC));
+            }
         }
         return calEvents;
     }

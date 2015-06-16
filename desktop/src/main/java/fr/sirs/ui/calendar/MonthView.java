@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -260,7 +261,7 @@ final class MonthView extends DatePane {
                     for (int j=0; j<eventsForDate.size(); j++) {
                         final CalendarEvent event = eventsForDate.get(j);
                         if (event.getImage() != null) {
-                            gridBtn.add(event.getImage(), 0, j+1);
+                            gridBtn.add(new ImageView(event.getImage()), 0, j+1);
                         }
                         gridBtn.add(new Label(event.getTitle()), 1, j+1);
                     }
