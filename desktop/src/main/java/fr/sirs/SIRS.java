@@ -336,4 +336,13 @@ public final class SIRS extends SirsCore {
         }
         return sb.toString();
     }
+    
+    public static String binaryMD5(final String toEncrypt){
+        try {
+            return new String(MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO).digest(toEncrypt.getBytes()));
+        } catch (NoSuchAlgorithmException ex) {
+            SIRS.LOGGER.log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
 }

@@ -12,6 +12,7 @@ import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.PluginInfo;
 import fr.sirs.core.model.Role;
 import fr.sirs.SIRS;
+import static fr.sirs.SIRS.binaryMD5;
 import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
@@ -897,6 +898,18 @@ public class FXLauncherPane extends BorderPane {
                         if (encryptedPassword.equals(utilisateur.getPassword())) {
                             allowedToDropDB = true;
                             break;
+                        }
+                    }
+                    
+                    // Disposition transitoire destinée à permettre l'effacement des bases pour une personne dont le mot de passe a précédemment été enregistré en binaire.
+                    // Seulement en cas d'échec de l'indentification en hexadécimal
+                    final String binaryEncryptedPassword = binaryMD5(password.getText());
+                    if(!allowedToDropDB){
+                        for (final Utilisateur utilisateur : utilisateurs) {
+                            if (binaryEncryptedPassword.equals(utilisateur.getPassword())) {
+                                allowedToDropDB = true;
+                                break;
+                            }
                         }
                     }
 
