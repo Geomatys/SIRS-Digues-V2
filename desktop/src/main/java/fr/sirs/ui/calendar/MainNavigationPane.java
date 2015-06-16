@@ -1,12 +1,15 @@
 package fr.sirs.ui.calendar;
 
 import javafx.beans.binding.BooleanBinding;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
+import org.geotoolkit.font.FontAwesomeIcons;
+import org.geotoolkit.font.IconBuilder;
 
 import java.util.Calendar;
 
@@ -16,8 +19,11 @@ import java.util.Calendar;
  * @author Christian Schudt
  */
 final class MainNavigationPane extends HBox {
+    private static final ImageView ICON_PREVIOUS  = new ImageView(SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_ANGLE_LEFT, 16,
+            FontAwesomeIcons.DEFAULT_COLOR), null));
+    private static final ImageView ICON_NEXT  = new ImageView(SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_ANGLE_RIGHT, 16,
+            FontAwesomeIcons.DEFAULT_COLOR), null));
 
-    private static final String CSS_CALENDAR_NAVIGATION_ARROW = "calendar-navigation-arrow";
     private static final String CSS_CALENDAR_NAVIGATION_BUTTON = "calendar-navigation-button";
     private static final String CSS_CALENDAR_NAVIGATION_TITLE = "calendar-navigation-title";
     private static final String CSS_CALENDAR_HEADER = "calendar-header";
@@ -93,14 +99,10 @@ final class MainNavigationPane extends HBox {
             calendarView.calendarDate.set(calendar.getTime());
         });
 
-        // Make a region, so that -fx-shape can be applied from CSS.
-        Region rectangle = new Region();
-        rectangle.setMaxWidth(Control.USE_PREF_SIZE);
-        rectangle.setMaxHeight(Control.USE_PREF_SIZE);
-        rectangle.setRotate(direction < 0 ? 90 : 270);
-        rectangle.getStyleClass().add(CSS_CALENDAR_NAVIGATION_ARROW);
-        // Set that region as the button graphic.
-        button.setGraphic(rectangle);
+        button.setMaxWidth(Control.USE_PREF_SIZE);
+        button.setMaxHeight(Control.USE_PREF_SIZE);
+        button.setGraphic(direction > 0 ? ICON_NEXT : ICON_PREVIOUS);
+
         button.getStyleClass().add(CSS_CALENDAR_NAVIGATION_BUTTON);
         return button;
     }

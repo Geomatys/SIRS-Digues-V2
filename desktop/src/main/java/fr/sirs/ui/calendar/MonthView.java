@@ -264,6 +264,8 @@ final class MonthView extends DatePane {
                         }
                         gridBtn.add(new Label(event.getTitle()), 1, j+1);
                     }
+                } else {
+                    control.getStyleClass().remove(CSS_CALENDAR_DAY_HAS_EVENTS);
                 }
 
                 control.setUserData(calendar.getTime());
@@ -284,15 +286,7 @@ final class MonthView extends DatePane {
 
         // Start with 1 instead of 0, since the first element in the array is empty.
         for (int i = 1; i < weekDays.length; i++) {
-            // Get the first character only.
-            
-            // FIX submitted by Masayuki Ueki for Japanese language as they only have one character
-            String shortWeekDay = "";
-            if (weekDays[i].length() > 2) {
-                shortWeekDay = weekDays[i].substring(0, 2);
-            } else {
-                shortWeekDay = weekDays[i];
-            }
+            String shortWeekDay = weekDays[i];
 
             // Shift the index according to the first day of week.
             int j = i - calendarView.getCalendar().getFirstDayOfWeek();
