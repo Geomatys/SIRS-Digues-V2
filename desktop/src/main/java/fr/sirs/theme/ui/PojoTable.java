@@ -7,6 +7,7 @@ import org.geotoolkit.gui.javafx.util.FXBooleanCell;
 import com.sun.javafx.property.PropertyReference;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
@@ -40,6 +41,7 @@ import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
 import fr.sirs.map.ExportTask;
+import fr.sirs.theme.ColumnOrder;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
 import fr.sirs.util.property.Reference;
@@ -49,6 +51,7 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -144,7 +147,6 @@ public class PojoTable extends BorderPane {
     private static final String[] COLUMNS_TO_IGNORE = new String[] {
         AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD, 
         LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD, DATE_MAJ_FIELD};    
-    private static final String[] COLUMNS_TO_PRIORIZE = new String[] {DESIGNATION_FIELD, PR_DEBUT_FIELD, PR_FIN_FIELD};
     
     protected final Class pojoClass;
     protected final AbstractSIRSRepository repo;
@@ -287,20 +289,17 @@ public class PojoTable extends BorderPane {
             for (final String key : COLUMNS_TO_IGNORE) {
                 properties.remove(key);
             }
-            
-            // Ensuite on ajoute les champs à prioriser
-            for (final String toPriorize : COLUMNS_TO_PRIORIZE) {
-                getPropertyColumn(properties.remove(toPriorize))
-                        .ifPresent(column -> uiTable.getColumns().add(column));                
-            }
-            
+
+            final ArrayList<String> colNames = new ArrayList<>(properties.keySet());
+            final List<TableColumn> cols = new ArrayList<>();
+
             // On donne toutes les informations de position.
             if (Positionable.class.isAssignableFrom(this.pojoClass)) {
                 final Set<String> positionableKeys = SIRS.listSimpleProperties(Positionable.class).keySet();
                 final ArrayList<TableColumn> positionColumns = new ArrayList<>();
                 for (final String key : positionableKeys) {
                     getPropertyColumn(properties.remove(key)).ifPresent(column -> {
-                        uiTable.getColumns().add(column);
+                        cols.add(column);
                         positionColumns.add(column);
                     });
                 }
@@ -327,9 +326,16 @@ public class PojoTable extends BorderPane {
             }
 
             for (final PropertyDescriptor desc : properties.values()) {
-                getPropertyColumn(desc)
-                        .ifPresent(column -> uiTable.getColumns().add(column));  
+                getPropertyColumn(desc).ifPresent(column -> cols.add(column));
             }
+
+            //on tri les colonnes
+            final List<String> order = ColumnOrder.sort(this.pojoClass.getSimpleName(),colNames);
+            for(String colName : order){
+                final TableColumn column = getColumn(colName, cols);
+                if(column!=null) uiTable.getColumns().add(column);
+            }
+
         } catch (IntrospectionException ex) {
             SIRS.LOGGER.log(Level.WARNING, "property columns cannot be created.", ex);
         }
@@ -888,7 +894,17 @@ public class PojoTable extends BorderPane {
             throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
         }
     }
-    
+
+    private static TableColumn getColumn(final String name, Collection<TableColumn> cols) {
+        for(TableColumn col : cols){
+            if(name.equals(col.getId())){
+                return col;
+            }
+        }
+        return null;
+    }
+
+
     protected Optional<TableColumn> getPropertyColumn(final PropertyDescriptor desc) {
         if (desc != null) {
             final TableColumn col;
@@ -898,6 +914,7 @@ public class PojoTable extends BorderPane {
                 col = new PropertyColumn(desc);
                 col.sortableProperty().bind(importPointProperty.not());
             }
+            col.setId(desc.getName());
             return Optional.of(col);
         }
         return Optional.empty();
@@ -1120,7 +1137,9 @@ public class PojoTable extends BorderPane {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
                 } else if (LocalDateTime.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
-                }else {
+                } else if (Point.class.isAssignableFrom(type)) {
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXPointCell());
+                } else {
                     isEditable = false;
                 }
                 

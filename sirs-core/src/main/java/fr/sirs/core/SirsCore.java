@@ -1,5 +1,6 @@
 package fr.sirs.core;
 
+import com.vividsolutions.jts.geom.Point;
 import fr.sirs.util.property.Internal;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -206,7 +207,8 @@ public class SirsCore {
         int.class,
         float.class,
         double.class,
-        LocalDateTime.class
+        LocalDateTime.class,
+        Point.class
     };
 
     /**
