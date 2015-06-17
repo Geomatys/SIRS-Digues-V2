@@ -521,7 +521,7 @@ public class FXSystemeReperagePane extends BorderPane {
             setCellFactory(new Callback<TableColumn<SystemeReperageBorne, Number>, TableCell<SystemeReperageBorne, Number>>() {
                 @Override
                 public TableCell<SystemeReperageBorne, Number> call(TableColumn<SystemeReperageBorne, Number> param) {
-                    return new FXNumberCell<SystemeReperageBorne>(NumberField.NumberType.Normal);
+                    return new FXNumberCell<SystemeReperageBorne>(Double.class);
                 }
             });
             

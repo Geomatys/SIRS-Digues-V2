@@ -32,6 +32,7 @@ import javafx.scene.control.DialogPane;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -39,7 +40,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
-import jidefx.scene.control.field.NumberField;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 import org.geotoolkit.gui.javafx.util.FXLocalDateTimeField;
 import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
@@ -81,12 +81,9 @@ public class FXSystemeEndiguementPane extends BorderPane {
         uiPopulation.disableProperty().bind(binding);
         uiDecret.disableProperty().bind(binding);
         uiTechnique.disableProperty().bind(binding);
-        
-        uiProtection.numberTypeProperty().set(NumberField.NumberType.Normal);
-        uiProtection.minValueProperty().set(0);
 
-        uiPopulation.numberTypeProperty().set(NumberField.NumberType.Integer);
-        uiPopulation.minValueProperty().set(0);
+        uiProtection.getSpinner().setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE));
+        uiPopulation.getSpinner().setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
         
         uiTabDigues.setContent(uiDigueTable);
         uiDigueTable.editableProperty().bind(uiEditMode.editionState());

@@ -1189,7 +1189,7 @@ public class PojoTable extends BorderPane {
         
     private static abstract class ComputedPropertyColumn extends TableColumn<Element, Double>{
         public ComputedPropertyColumn(){
-            setCellFactory((TableColumn<Element, Double> param) -> new FXNumberCell(NumberField.NumberType.Normal));
+            setCellFactory((TableColumn<Element, Double> param) -> new FXNumberCell(Double.class));
             setEditable(false);
         }
     }
@@ -1290,11 +1290,11 @@ public class PojoTable extends BorderPane {
                 } else if (String.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXStringCell());
                 } else if (Integer.class.isAssignableFrom(type) || int.class.isAssignableFrom(type)) {
-                    setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Integer));
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(Integer.class));
                 } else if (Float.class.isAssignableFrom(type) || float.class.isAssignableFrom(type)) {
-                    setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell.Float(NumberField.NumberType.Normal));
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell.Float());
                 } else if (Double.class.isAssignableFrom(type) || double.class.isAssignableFrom(type)) {
-                    setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(NumberField.NumberType.Normal));
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(Double.class));
                 } else if (LocalDateTime.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
                 } else if (Point.class.isAssignableFrom(type)) {

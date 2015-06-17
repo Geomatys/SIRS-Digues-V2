@@ -1091,15 +1091,15 @@ public class FXPositionablePane extends BorderPane {
                 if((amontSelectedProperty.get() && uiDistance.valueProperty().get().doubleValue() > startBorneProj.distanceAlongLinear)
                         // cas aval pour le début : distance saisie supérieure à la longueur du tronçon - la distance de la borne de depart depuis le début du tronçon
                         || (!amontSelectedProperty.get() && uiDistance.valueProperty().get().doubleValue() > (tronconLength-startBorneProj.distanceAlongLinear))){
-                    uiDistance.getNumberField().setStyle("-fx-text-fill: #cc0000");
-                    uiDistance.getNumberField().setTooltip(new Tooltip("La distance saisie est en-dehors du tronçon."));
+                    uiDistance.getSpinner().setStyle("-fx-text-fill: #cc0000");
+                    uiDistance.getSpinner().setTooltip(new Tooltip("La distance saisie est en-dehors du tronçon."));
                     imageProperty.set(ICON_EXCLAMATION_TRIANGLE);
                 }
 
                 // Dans les autres cas, on restaure le texte en noir.
                 else {
-                    uiDistance.getNumberField().setStyle("-fx-text-fill: #000000");
-                    uiDistance.getNumberField().setTooltip(null);
+                    uiDistance.getSpinner().setStyle("-fx-text-fill: #000000");
+                    uiDistance.getSpinner().setTooltip(null);
                     imageProperty.set(ICON_CHECK_CIRCLE);
                 }
             }
