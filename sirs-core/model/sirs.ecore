@@ -1243,13 +1243,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ProfilFrontFrancBord" eSuperTypes="#//ObjetPhotographiable">
-    <eAnnotations source="generation"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeProfilFrancBordId"
-        eType="#//RefProfilFrancBord"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeLargeurFrancBord" eType="#//RefLargeurFrancBord"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Epi" eSuperTypes="#//ObjetStructure">
     <eAnnotations source="generation"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>

@@ -9,7 +9,6 @@ import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.ObjetPhotographiable;
-import fr.sirs.core.model.ProfilFrontFrancBord;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
@@ -32,7 +31,6 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<ObjetPhot
     private final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter;
     private final SysEvtLargeurFrancBordImporter largeurFrancBordImporter;
     private final TypeProfilFrancBordImporter typeProfilFrontFrancBordImporter;
-    private final SysEvtProfilFrontFrancBordImporter profilFrontFrancBordImporter;
 
     public ElementGeometrieImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
@@ -52,10 +50,6 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<ObjetPhot
                 typeLargeurFrancBordImporter);
         typeProfilFrontFrancBordImporter = new TypeProfilFrancBordImporter(
                 accessDatabase, couchDbConnector);
-        profilFrontFrancBordImporter = new SysEvtProfilFrontFrancBordImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter,
-                systemeReperageImporter, borneDigueImporter, typeSourceImporter, 
-                typeProfilFrontFrancBordImporter);
     }
 
     private enum Columns {
@@ -138,8 +132,6 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<ObjetPhot
         final Class typeStructure = this.typeElementGeometryImporter.getTypeReferences().get(row.getInt(Columns.ID_TYPE_ELEMENT_GEOMETRIE.toString()));
         if(typeStructure==LargeurFrancBord.class){
             return largeurFrancBordImporter.importRow(row);
-        } else if(typeStructure==ProfilFrontFrancBord.class){
-            return profilFrontFrancBordImporter.importRow(row);
         } else{
             SirsCore.LOGGER.log(Level.SEVERE, typeStructure+" : Type de géométrie incohérent.");
             return null;

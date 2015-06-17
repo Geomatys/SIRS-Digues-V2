@@ -7,7 +7,6 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.core.model.LargeurFrancBord;
-import fr.sirs.core.model.ProfilFrontFrancBord;
 import fr.sirs.importer.GenericTypeInternalImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,9 +64,9 @@ class TypeElementGeometryImporter extends GenericTypeInternalImporter<Class> {
                     case 1:
                         classe = LargeurFrancBord.class;
                         break;
-                    case 2:
-                        classe = ProfilFrontFrancBord.class;
-                        break;
+//                    case 2:
+//                        classe = ProfilFrontFrancBord.class;
+//                        break;
 //                    case 3:
 //                        classe = Distance.class;
 //                        break;

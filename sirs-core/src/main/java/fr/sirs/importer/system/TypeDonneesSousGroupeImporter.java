@@ -25,7 +25,6 @@ import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Prestation;
-import fr.sirs.core.model.ProfilFrontFrancBord;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
@@ -148,7 +147,7 @@ public class TypeDonneesSousGroupeImporter extends GenericImporter {
             case SYS_EVT_STATION_DE_POMPAGE: return StationPompage.class;
             case SYS_EVT_VOIE_SUR_DIGUE: return VoieDigue.class;
             // GEOMETRIES
-            case SYS_EVT_PROFIL_FRONT_FRANC_BORD: return ProfilFrontFrancBord.class;
+//            case SYS_EVT_PROFIL_FRONT_FRANC_BORD: return ProfilFrontFrancBord.class;
             case SYS_EVT_LARGEUR_FRANC_BORD: return LargeurFrancBord.class;
             // DESORDRES
             case SYS_EVT_DESORDRE: return Desordre.class;
