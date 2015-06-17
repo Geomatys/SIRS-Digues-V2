@@ -4,6 +4,7 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;
 import javafx.scene.layout.HBox;
@@ -292,6 +293,15 @@ public class CalendarView extends VBox {
         }
         return finalEvents;
     }
+
+    /**
+     * Show actions popup when clicking on a calendar event. By default do nothing.
+     * Subclasses should override this method to do something.
+     *
+     * @param calendarEvent Calendar event on which user has clicked. Should not be {@code null}.
+     * @param parent Parent node on which to attach the popup. Should not be {@code null}.
+     */
+    public void showCalendarPopupForEvent(final CalendarEvent calendarEvent, final Node parent) {}
 
     /**
      * Package internal properties.

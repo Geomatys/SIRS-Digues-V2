@@ -9,6 +9,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -133,15 +135,15 @@ final class MonthView extends DatePane {
 
             // iterate through the columns
             for (int colIndex = 0; colIndex < numberOfDaysPerWeek; colIndex++) {
-                final Button button = new Button();
-                button.setMaxWidth(Double.MAX_VALUE);
-                button.setMaxHeight(Double.MAX_VALUE);
+                final GridPane grid = new GridPane();
+                grid.setMaxWidth(Double.MAX_VALUE);
+                grid.setMaxHeight(Double.MAX_VALUE);
 
-                setVgrow(button, Priority.ALWAYS);
-                setHgrow(button, Priority.ALWAYS);
-                button.setOnAction(actionEvent -> calendarView.selectedDate.set((Date) button.getUserData()));
+                setVgrow(grid, Priority.ALWAYS);
+                setHgrow(grid, Priority.ALWAYS);
+                //button.setOnAction(actionEvent -> calendarView.selectedDate.set((Date) button.getUserData()));
                 // add the button, starting at second row.
-                add(button, colIndex + colOffset, rowIndex + 1);
+                add(grid, colIndex + colOffset, rowIndex + 1);
             }
         }
 
@@ -212,19 +214,17 @@ final class MonthView extends DatePane {
                 Label label = (Label) getChildren().get(i);
                 label.setText(Integer.toString(calendar.get(Calendar.WEEK_OF_YEAR)));
             } else {
-                Button control = (Button) getChildren().get(i);
+                final GridPane gridBtn = (GridPane) getChildren().get(i);
                 //control.setTooltip(new Tooltip(dateFormat.format(currentDate)));
-                control.setPrefWidth(150);
-                control.setPrefHeight(100);
-                control.setMaxWidth(Region.USE_PREF_SIZE);
-                control.setMaxHeight(Region.USE_PREF_SIZE);
-                final GridPane gridBtn = new GridPane();
-                gridBtn.add(new Label(Integer.toString(calendar.get(Calendar.DAY_OF_MONTH))), 2, 0);
-                gridBtn.getColumnConstraints().add(colSmallCstr);
+                gridBtn.setPrefWidth(150);
+                gridBtn.setPrefHeight(100);
+                gridBtn.setMaxWidth(Region.USE_PREF_SIZE);
+                gridBtn.setMaxHeight(Region.USE_PREF_SIZE);
+                gridBtn.getStyleClass().add(CSS_CALENDAR_DAY);
+
+                gridBtn.add(new Label(Integer.toString(calendar.get(Calendar.DAY_OF_MONTH))), 1, 0);
                 gridBtn.getColumnConstraints().add(colLargeTxtEventCstr);
                 gridBtn.getColumnConstraints().add(colSmallCstr);
-                control.setGraphic(gridBtn);
-                control.getStyleClass().add(CSS_CALENDAR_DAY);
 
                 boolean disabled = calendarView.getDisabledWeekdays().contains(calendar.get(Calendar.DAY_OF_WEEK));
 
@@ -235,48 +235,52 @@ final class MonthView extends DatePane {
                         disabled = true;
                     }
                 }
+                gridBtn.setDisable(disabled);
 
-                control.setDisable(disabled);
-
-                control.getStyleClass().remove(CSS_CALENDAR_DAY_CURRENT_MONTH);
-                control.getStyleClass().remove(CSS_CALENDAR_DAY_OTHER_MONTH);
-                control.getStyleClass().remove(CSS_CALENDAR_TODAY);
-                control.getStyleClass().remove(CSS_CALENDAR_SELECTED);
+                gridBtn.getStyleClass().remove(CSS_CALENDAR_DAY_CURRENT_MONTH);
+                gridBtn.getStyleClass().remove(CSS_CALENDAR_DAY_OTHER_MONTH);
+                gridBtn.getStyleClass().remove(CSS_CALENDAR_TODAY);
+                gridBtn.getStyleClass().remove(CSS_CALENDAR_SELECTED);
+                gridBtn.getStyleClass().remove(CSS_CALENDAR_DAY_HAS_EVENTS);
 
                 if (calendar.get(Calendar.MONTH) == month) {
-                    control.getStyleClass().add(CSS_CALENDAR_DAY_CURRENT_MONTH);
+                    gridBtn.getStyleClass().add(CSS_CALENDAR_DAY_CURRENT_MONTH);
                 } else {
-                    control.getStyleClass().add(CSS_CALENDAR_DAY_OTHER_MONTH);
+                    gridBtn.getStyleClass().add(CSS_CALENDAR_DAY_OTHER_MONTH);
                 }
 
                 if (calendar.get(Calendar.YEAR) == todayYear && calendar.get(Calendar.MONTH) == todayMonth && calendar.get(Calendar.DATE) == todayDay) {
-                    control.getStyleClass().add(CSS_CALENDAR_TODAY);
+                    gridBtn.getStyleClass().add(CSS_CALENDAR_TODAY);
                 }
                 if (calendar.get(Calendar.YEAR) == selectedYear && calendar.get(Calendar.MONTH) == selectedMonth && calendar.get(Calendar.DATE) == selectedDay) {
-                    control.getStyleClass().add(CSS_CALENDAR_SELECTED);
+                    gridBtn.getStyleClass().add(CSS_CALENDAR_SELECTED);
                 }
 
                 final List<CalendarEvent> eventsForDate = calendarView.getCalendarEventsForCalendarDate(calendar, events);
                 if (!eventsForDate.isEmpty()) {
-                    control.getStyleClass().add(CSS_CALENDAR_DAY_HAS_EVENTS);
+                    gridBtn.getStyleClass().add(CSS_CALENDAR_DAY_HAS_EVENTS);
                     for (int j=0; j<eventsForDate.size(); j++) {
-                        final CalendarEvent event = eventsForDate.get(j);
-                        if (event.getImage() != null) {
-                            final ImageView imgView = new ImageView(event.getImage());
+                        final CalendarEvent calendarEvent = eventsForDate.get(j);
+                        final Button control = new Button();
+                        if (calendarEvent.getImage() != null) {
+                            final ImageView imgView = new ImageView(calendarEvent.getImage());
                             imgView.setFitHeight(16);
-                            gridBtn.add(imgView, 0, j+1);
+                            control.setGraphic(imgView);
                         }
-                        final Label titleLbl = new Label(event.getTitle());
-                        titleLbl.setTooltip(new Tooltip(event.getTitle()));
-                        titleLbl.setMaxWidth(100);
-                        titleLbl.setTextOverrun(OverrunStyle.ELLIPSIS);
-                        gridBtn.add(titleLbl, 1, j+1);
+                        control.setTextOverrun(OverrunStyle.ELLIPSIS);
+                        control.setText(calendarEvent.getTitle());
+                        control.setTooltip(new Tooltip(calendarEvent.getTitle()));
+                        control.setOnMouseClicked(event -> calendarView.showCalendarPopupForEvent(calendarEvent, control));
+                        control.setBackground(Background.EMPTY);
+                        control.setBorder(Border.EMPTY);
+                        control.setMaxWidth(130);
+                        gridBtn.add(control, 0, j+1);
                     }
                 } else {
-                    control.getStyleClass().remove(CSS_CALENDAR_DAY_HAS_EVENTS);
+                    gridBtn.getStyleClass().remove(CSS_CALENDAR_DAY_HAS_EVENTS);
                 }
 
-                control.setUserData(calendar.getTime());
+                gridBtn.setUserData(calendar.getTime());
                 calendar.add(Calendar.DATE, 1);
             }
         }

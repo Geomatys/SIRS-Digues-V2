@@ -11,6 +11,8 @@ import fr.sirs.ui.calendar.CalendarView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
@@ -69,5 +71,24 @@ public final class ObligationsCalendarView extends CalendarView {
             }
         }
         return calEvents;
+    }
+
+    /**
+     * Affiche une fenêtre présentant les choix possibles pour cet évènement sur le calendrier.
+     *
+     * @param calendarEvent Evènement du calendrier concerné.
+     * @param parent Noeud parent sur lequel la fenêtre sera accrochée.
+     */
+    @Override
+    public void showCalendarPopupForEvent(final CalendarEvent calendarEvent, final Node parent) {
+        final ObligationsCalendarPopupEvent popup = new ObligationsCalendarPopupEvent(calendarEvent);
+        popup.setAutoHide(true);
+        final Point2D popupPos = parent.localToScreen(0, 20);
+        if (popupPos != null) {
+            popup.sizeToScene();
+            popup.show(parent, popupPos.getX() ,popupPos.getY());
+        } else {
+            popup.show(parent, 200, 200);
+        }
     }
 }
