@@ -14,9 +14,7 @@ import fr.sirs.core.model.FrontFrancBord;
 import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.SommetRisberme;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObjetStructure;
-import fr.sirs.core.model.PiedFrontFrancBord;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.importer.DbImporter;
@@ -52,7 +50,6 @@ public class ElementStructureImporter extends GenericStructureImporter<ObjetStru
     private final SysEvtEpisImporter sysEvtEpiImporter;
     private final SysEvtOuvrageRevancheImporter sysEvtOuvrageRevancheImporter;
     private final SysEvtTalusFrancBordImporter sysEvtTalusFrancBordImporter;
-    private final SysEvtPiedFrontFrancBordImporter sysEvtPiedFrontFrancBordImporter;
 
     public ElementStructureImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
@@ -122,11 +119,6 @@ public class ElementStructureImporter extends GenericStructureImporter<ObjetStru
                 typeSourceImporter, typeCoteImporter, typePositionImporter,
                 typeMateriauImporter, typeNatureImporter,
                 typeFonctionImporter);
-        sysEvtPiedFrontFrancBordImporter = new SysEvtPiedFrontFrancBordImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter,
-                systemeReperageImporter, borneDigueImporter,
-                typeSourceImporter, typeCoteImporter, typePositionImporter,
-                typeMateriauImporter, typeNatureImporter);
     }
 
     private enum Columns {
@@ -286,8 +278,6 @@ public class ElementStructureImporter extends GenericStructureImporter<ObjetStru
             return sysEvtOuvrageRevancheImporter.importRow(row);
         } else if (typeStructure == PiedDigue.class) {
             return sysEvtPiedDeDigueImporter.importRow(row);
-        } else if (typeStructure == PiedFrontFrancBord.class) {
-            return sysEvtPiedFrontFrancBordImporter.importRow(row);
         } else if (typeStructure == SommetRisberme.class) {
             return sysEvtSommetRisbermeImporter.importRow(row);
         } else if (typeStructure == TalusDigue.class) {

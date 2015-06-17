@@ -23,7 +23,6 @@ import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.OuvrageTelecomEnergie;
 import fr.sirs.core.model.OuvrageVoirie;
 import fr.sirs.core.model.PiedDigue;
-import fr.sirs.core.model.PiedFrontFrancBord;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Prestation;
@@ -130,7 +129,7 @@ public class TypeDonneesSousGroupeImporter extends GenericImporter {
             case SYS_EVT_FONDATION: return Fondation.class;
             case SYS_EVT_OUVRAGE_REVANCHE: return OuvrageRevanche.class;
             case SYS_EVT_PIED_DE_DIGUE: return PiedDigue.class;
-            case SYS_EVT_PIED_FRONT_FRANC_BORD: return PiedFrontFrancBord.class;
+//            case SYS_EVT_PIED_FRONT_FRANC_BORD: return PiedFrontFrancBord.class;
             case SYS_EVT_SOMMET_RISBERME: return SommetRisberme.class;
             case SYS_EVT_TALUS_DIGUE: return TalusDigue.class;
             case SYS_EVT_TALUS_FRANC_BORD: return FrontFrancBord.class;

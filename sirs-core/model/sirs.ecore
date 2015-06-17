@@ -1294,11 +1294,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PiedFrontFrancBord" eSuperTypes="#//ObjetStructure">
-    <eAnnotations source="generation"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MaitreOeuvreMarche">
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionMaitreOeuvre" eType="#//RefFonctionMaitreOeuvre"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeId" lowerBound="1"
