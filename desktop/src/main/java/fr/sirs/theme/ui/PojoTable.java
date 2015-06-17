@@ -45,8 +45,11 @@ import fr.sirs.map.ExportTask;
 import fr.sirs.theme.ColumnOrder;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.SirsTableCell;
+import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.Reference;
+import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.lang.reflect.Method;
@@ -98,6 +101,7 @@ import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Separator;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -105,12 +109,14 @@ import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -120,6 +126,9 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import jidefx.scene.control.field.NumberField;
+import org.apache.sis.feature.AbstractIdentifiedType;
+import org.apache.sis.feature.DefaultAssociationRole;
+import org.apache.sis.feature.DefaultAttributeType;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -128,12 +137,16 @@ import org.geotoolkit.data.FileFeatureStoreFactory;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.QueryBuilder;
+import org.geotoolkit.feature.FeatureTypeBuilder;
+import org.geotoolkit.gui.javafx.filter.FXFilterBuilder;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXEnumTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
+import org.opengis.feature.PropertyType;
+import org.opengis.filter.Filter;
 
 /**
  *
@@ -174,7 +187,10 @@ public class PojoTable extends BorderPane {
     /* Importer des points. Default : false */
     protected final BooleanProperty importPointProperty = new SimpleBooleanProperty(false);
     
-        
+    /** Composant de filtrage. Propose de filtrer la liste d'objets actuels en éditant des contraintes sur leur propriété. */
+    protected FXFilterBuilder uiFilterBuilder;
+    protected final TitledPane uiFilterPane = new TitledPane();
+    
     // Icônes de la barre d'action
     
     // Barre de droite : manipulation du tableau et passage en mode parcours de fiche
@@ -349,7 +365,7 @@ public class PojoTable extends BorderPane {
          */
         uiSearch.textProperty().bind(currentSearch);
         uiSearch.getStyleClass().add(BUTTON_STYLE);
-        uiSearch.setOnAction((ActionEvent event) -> {search();});
+        uiSearch.setOnAction((ActionEvent event) -> {searchText();});
         uiSearch.getStyleClass().add("label-header");
         uiSearch.setTooltip(new Tooltip("Rechercher un terme dans la table"));
         uiSearch.disableProperty().bind(searchableProperty.not());
@@ -399,8 +415,6 @@ public class PojoTable extends BorderPane {
         });
         uiDelete.disableProperty().bind(editableProperty.not());
         
-        topPane = new BorderPane(uiTitle,null,searchEditionToolbar,null,null);
-        setTop(topPane);
         uiTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         uiTable.setMaxWidth(Double.MAX_VALUE);
         uiTable.setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
@@ -549,7 +563,33 @@ public class PojoTable extends BorderPane {
             uiTable.getColumns().add(new DistanceComputedPropertyColumn());
         }
         
-        topPane.setLeft(navigationToolbar);
+        final HBox titleBoxing = new HBox(uiTitle);
+        titleBoxing.setAlignment(Pos.CENTER);        
+        final VBox titleAndFilterBox = new VBox(titleBoxing);
+        
+        try {
+            initFilterPane();
+
+            final Button applyFilterBtn = new Button("Filtrer");
+            final Separator separator = new Separator(Orientation.VERTICAL);
+            separator.setVisible(false);
+            final HBox confirmationBox = new HBox(separator, applyFilterBtn);
+            HBox.setHgrow(separator, Priority.ALWAYS);
+            final VBox filterContent = new VBox(10, uiFilterBuilder, confirmationBox);
+
+            uiFilterPane.setText("Filtrer");
+            uiFilterPane.setContent(filterContent);
+            uiFilterPane.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
+            
+            titleAndFilterBox.getChildren().add(uiFilterPane);
+            applyFilterBtn.setOnAction(event -> setTableItems(() -> allValues));        
+        } catch (Exception e) {
+            SIRS.LOGGER.log(Level.WARNING, "Filter panel cannot be initialized !", e);
+        }
+        
+        titleAndFilterBox.setFillWidth(true);
+        topPane = new BorderPane(null, titleAndFilterBox, searchEditionToolbar, null, navigationToolbar);
+        setTop(topPane);
     }
     
     /**
@@ -638,11 +678,52 @@ public class PojoTable extends BorderPane {
         return importPointProperty;
     }
     
+    public void setFilterBuilder(final FXFilterBuilder newFilterBuilder) {
+        uiFilterBuilder = newFilterBuilder;
+        uiFilterPane.setContent(uiFilterBuilder);
+    }
+    
+    protected void initFilterPane() throws IntrospectionException {
+        if (uiFilterBuilder == null) {
+            uiFilterBuilder = new FXFilterBuilder();
+        }
+
+        // If 
+        ObservableList<PropertyType> props = uiFilterBuilder.getAvailableProperties();
+        if (props.isEmpty()) {
+            final BeanInfo info = Introspector.getBeanInfo(pojoClass);
+            for (final PropertyDescriptor desc : info.getPropertyDescriptors()) {
+                final Method readMethod = desc.getReadMethod();
+                if (readMethod != null) {
+                    // Do not filter on java standard property like getClass(), etc.
+                    if (readMethod.getAnnotation(Internal.class) != null
+                            || readMethod.getDeclaringClass().equals(Object.class))
+                        continue;
+
+                    final HashMap identification = new HashMap(1);
+                    identification.put(AbstractIdentifiedType.NAME_KEY, desc.getName());
+                    // If we've got a reference to another document, property is declared as an association.
+                    Reference annot = readMethod.getAnnotation(Reference.class);
+                    if (annot != null) {
+                        final FeatureTypeBuilder builder = new FeatureTypeBuilder();
+                        builder.setName(desc.getName());
+                        builder.add("class", annot.ref());
+                        props.add(new DefaultAssociationRole(
+                                identification, builder.buildFeatureType(), 0, 1));
+                    } else {
+                        props.add(new DefaultAttributeType(
+                                identification, desc.getPropertyType(), 0, 1, null, null));
+                    }
+                }
+            }
+        }
+    }
+    
     /**
      * Called when user click on the search icon. Prepare the popup with the textfield
      * to type research into. 
      */
-    protected void search(){
+    protected void searchText(){
         if(uiSearch.getGraphic()!= searchNone){
             //une recherche est deja en cours
             return;
@@ -706,13 +787,32 @@ public class PojoTable extends BorderPane {
         tableUpdater = new TaskManager.MockTask("Recherche...", () -> {
 
             allValues = producer.get();
+            if (allValues == null || allValues.isEmpty()) {
+                Platform.runLater(() -> {
+                    uiTable.setItems(allValues);
+                    uiSearch.setGraphic(searchNone);
+                });
+            }
 
+            // Apply filter on properties
+            Filter tmpFilter = null;
+            if (uiFilterBuilder != null) {
+                try {
+                    tmpFilter = uiFilterBuilder.getFilter();
+                } catch (Exception e) {
+                    SIRS.LOGGER.log(Level.FINE, "No ffilter can be built for pojotable on "+pojoClass, e);
+                }
+            }
+            final Filter firstFilter = tmpFilter;            
+            
             final Thread currentThread = Thread.currentThread();
             if (currentThread.isInterrupted()) {
                 return;
             }
+            
+            // Apply "Plain text" filter 
             final String str = currentSearch.get();
-            if (str == null || str.isEmpty() || allValues == null || allValues.isEmpty()) {
+            if ((str == null || str.isEmpty()) && firstFilter == null) {
                 filteredValues = allValues;
             } else {
                 final Set<String> result = new HashSet<>();
@@ -725,9 +825,17 @@ public class PojoTable extends BorderPane {
                 if (currentThread.isInterrupted()) {
                     return;
                 }
-                filteredValues = allValues.filtered((Element t) -> {
-                    return result.contains(t.getDocumentId());
-                });
+                
+                final Predicate<Element> filterPredicate;
+                if (firstFilter == null) {
+                    filterPredicate = element -> result.contains(element.getId());
+                } else if (str == null || str.isEmpty()) {
+                    filterPredicate = element -> firstFilter.evaluate(element);
+                } else {
+                    filterPredicate = element -> result.contains(element.getId()) && firstFilter.evaluate(element);
+                }
+                
+                filteredValues = allValues.filtered(filterPredicate);
             }
         });
         
