@@ -93,6 +93,7 @@ public class SessionCore extends SessionGen {
     }
     
     public <T extends Element> AbstractSIRSRepository<T> getRepositoryForClass(Class<T> elementType) {
+        System.out.println(elementType);
         return applicationContext.getBeansOfType(AbstractSIRSRepository.class).get(COMPONENT_PACKAGE+"."+elementType.getSimpleName()+"Repository");
     }
     
