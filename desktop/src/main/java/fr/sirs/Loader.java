@@ -295,7 +295,6 @@ public class Loader extends Application {
                 updateMessage("Chargement et création des index ...");
                 final ConfigurableApplicationContext context = 
                         new DatabaseRegistry().connectToSirsDatabase(databaseName, true, true, true);
-                Injector.getSession().setApplicationContext(context);
 
                 // LOAD PLUGINS ////////////////////////////////////////////////
                 for (Plugin plugin : plugins) {

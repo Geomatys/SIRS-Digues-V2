@@ -16,7 +16,6 @@ import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AvecForeignParent;
-import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.GardeTroncon;
@@ -44,6 +43,9 @@ import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.IdentifiedObjects;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
@@ -58,7 +60,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * 
  * @author Johann Sorel
  */
-public class SessionCore extends SessionGen {
+public class SessionCore extends SessionGen implements ApplicationContextAware {
     
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES DROITS
@@ -86,10 +88,12 @@ public class SessionCore extends SessionGen {
     public ElementCreator getElementCreator(){return elementCreator;}
     ////////////////////////////////////////////////////////////////////////////
     
-    private ConfigurableApplicationContext applicationContext;
-    public ConfigurableApplicationContext getApplicationContext(){return applicationContext;}
-    public void setApplicationContext(final ConfigurableApplicationContext applicationContext) {
-        this.applicationContext=applicationContext;
+    private ApplicationContext applicationContext;
+    public ApplicationContext getApplicationContext(){return applicationContext;}
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+            this.applicationContext = applicationContext;
     }
     
     public <T extends Element> AbstractSIRSRepository<T> getRepositoryForClass(Class<T> elementType) {
