@@ -7,6 +7,10 @@ package fr.sirs.map;
 
 import fr.sirs.core.SirsCore;
 import java.util.List;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
@@ -52,10 +56,14 @@ public class SIRSAddDataBar extends ToolBar implements ListChangeListener<MapLay
         importStage.getIcons().add(SirsCore.ICON);
         importStage.setTitle("Importer une donnée");
         importStage.setResizable(true);
-        importStage.initModality(Modality.APPLICATION_MODAL);
+        importStage.initModality(Modality.NONE);
         importStage.initOwner(map.getScene() != null? map.getScene().getWindow() : null);
         
+        importStage.setMaxWidth(Double.MAX_VALUE);
+        importStage.sizeToScene();
+        
         final FXDataImportPane importPane = new FXDataImportPane();
+        importPane.configurationProperty().addListener((observable, oldValue, newValue) -> importStage.sizeToScene());
         importStage.setScene(new Scene(importPane));
         
         // We listen on import panel to be noticed when new layers are added.
@@ -64,6 +72,7 @@ public class SIRSAddDataBar extends ToolBar implements ListChangeListener<MapLay
     
     private void onAction(ActionEvent e) {
         importStage.show();
+        importStage.requestFocus();
     }
 
     @Override

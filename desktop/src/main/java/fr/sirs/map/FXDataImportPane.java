@@ -4,6 +4,7 @@ import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
 import java.util.logging.Level;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -38,6 +39,9 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.storage.DataStoreFactory;
+import org.opengis.parameter.GeneralParameterDescriptor;
+import org.opengis.parameter.GeneralParameterValue;
+import org.opengis.parameter.ParameterDescriptor;
 import org.opengis.parameter.ParameterValueGroup;
 
 /**
@@ -151,6 +155,10 @@ public class FXDataImportPane extends BorderPane {
         
         finishBtn.disableProperty().bind(layerChooser.layerNames.getSelectionModel().selectedItemProperty().isNull());
         dialog.setScene(new Scene(dialogContent));
+    }
+    
+    public SimpleObjectProperty<ParameterValueGroup> configurationProperty() {
+        return parameterEditor.inputGroup;
     }
     
     @FXML
