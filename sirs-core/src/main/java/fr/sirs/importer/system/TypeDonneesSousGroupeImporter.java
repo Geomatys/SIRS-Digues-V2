@@ -10,7 +10,6 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
-import fr.sirs.core.model.FrontFrancBord;
 import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.LigneEau;
@@ -132,7 +131,7 @@ public class TypeDonneesSousGroupeImporter extends GenericImporter {
 //            case SYS_EVT_PIED_FRONT_FRANC_BORD: return PiedFrontFrancBord.class;
             case SYS_EVT_SOMMET_RISBERME: return SommetRisberme.class;
             case SYS_EVT_TALUS_DIGUE: return TalusDigue.class;
-            case SYS_EVT_TALUS_FRANC_BORD: return FrontFrancBord.class;
+//            case SYS_EVT_TALUS_FRANC_BORD: return FrontFrancBord.class;
             case SYS_EVT_TALUS_RISBERME: return TalusRisberme.class;
 //            case SYS_EVT_BRISE_LAME:
             // RESEAUX

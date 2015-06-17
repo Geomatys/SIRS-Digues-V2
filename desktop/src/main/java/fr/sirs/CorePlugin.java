@@ -19,7 +19,6 @@ import fr.sirs.core.model.EchelleLimnimetrique;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
-import fr.sirs.core.model.FrontFrancBord;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.LaisseCrue;
@@ -194,7 +193,7 @@ public class CorePlugin extends Plugin {
             suppliers.put(Deversoir.class, getSupplierForClass.apply(Deversoir.class));
 
             // Franc-bords
-            suppliers.put(FrontFrancBord.class, getSupplierForClass.apply(FrontFrancBord.class));
+            suppliers.put(LargeurFrancBord.class, getSupplierForClass.apply(LargeurFrancBord.class));
 
             // Réseaux de voirie
             suppliers.put(VoieAcces.class, getSupplierForClass.apply(VoieAcces.class));
@@ -311,7 +310,7 @@ public class CorePlugin extends Plugin {
             
             // Franc-bords
             final BeanStore fbStore = new BeanStore(
-                    suppliers.get(FrontFrancBord.class));
+                    suppliers.get(LargeurFrancBord.class));
             final MapItem fbLayer = MapBuilder.createItem();
             fbLayer.setName("Francs-bords");
             fbLayer.items().addAll( buildLayers(fbStore, nameMap, colors, createStructureSelectionStyle(),false) );
@@ -581,7 +580,7 @@ public class CorePlugin extends Plugin {
     public void load() throws SQLException, IOException {
         loadDataSuppliers();
         themes.add(new TronconTheme("Structure", Crete.class, OuvrageRevanche.class, TalusDigue.class, SommetRisberme.class, TalusRisberme.class, PiedDigue.class, Fondation.class, Epi.class, Deversoir.class));
-        themes.add(new TronconTheme("Franc-bord", FrontFrancBord.class, LargeurFrancBord.class));
+        themes.add(new TronconTheme("Franc-bord", LargeurFrancBord.class));
         themes.add(new TronconTheme("Réseau de voirie", VoieAcces.class, OuvrageFranchissement.class, OuvertureBatardable.class, VoieDigue.class, OuvrageVoirie.class));
         themes.add(new TronconTheme("Réseau et ouvrage", StationPompage.class, ReseauHydrauliqueFerme.class, OuvrageHydrauliqueAssocie.class, ReseauTelecomEnergie.class, OuvrageTelecomEnergie.class, ReseauHydrauliqueCielOuvert.class, OuvrageParticulier.class, EchelleLimnimetrique.class));
         themes.add(new TronconTheme("Désordre", Desordre.class));

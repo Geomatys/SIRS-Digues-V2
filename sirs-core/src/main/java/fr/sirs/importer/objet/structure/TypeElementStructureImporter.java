@@ -9,7 +9,6 @@ import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
-import fr.sirs.core.model.FrontFrancBord;
 import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.SommetRisberme;
@@ -81,9 +80,9 @@ class TypeElementStructureImporter extends GenericTypeInternalImporter<Class> {
                     case SYS_EVT_PIED_DE_DIGUE:
                         classe = PiedDigue.class;
                         break;
-                    case SYS_EVT_TALUS_FRANC_BORD:
-                        classe = FrontFrancBord.class; 
-                        break;
+//                    case SYS_EVT_TALUS_FRANC_BORD:
+//                        classe = FrontFrancBord.class; 
+//                        break;
 //                    case SYS_EVT_PIED_FRONT_FRANC_BORD:
 //                        classe = PiedFrontFrancBord.class; 
 //                        break;
@@ -104,13 +103,14 @@ class TypeElementStructureImporter extends GenericTypeInternalImporter<Class> {
                         break;
                     default:
                         // Dans la table de l'Isère, on trouve SYS_EVT_FRONT_FRANC_BORD qui n'existe pas et qui semble correspondre à SYS_EVT_TALUS_FRANC_BORD
-                        if("SYS_EVT_FRONT_FRANC_BORD".equals(row.getString(Columns.NOM_TABLE_EVT.toString()))){
-                            classe = FrontFrancBord.class;
-                        }
-                        else {
-                            System.out.println(row.getString(Columns.NOM_TABLE_EVT.toString()));
+//                        if("SYS_EVT_FRONT_FRANC_BORD".equals(row.getString(Columns.NOM_TABLE_EVT.toString()))){
+//                            classe = FrontFrancBord.class;
+//                        }
+//                        else {
+//                            System.out.println(row.getString(Columns.NOM_TABLE_EVT.toString()));
+                            SirsCore.LOGGER.log(Level.FINE, "Pas de classe correspondante pour la table {0}", row.getString(Columns.NOM_TABLE_EVT.toString()));
                             classe = null;
-                        }
+//                        }
                 }
                 types.put(row.getInt(String.valueOf(Columns.ID_TYPE_ELEMENT_STRUCTURE.toString())), classe);
             } catch (IllegalArgumentException e) {

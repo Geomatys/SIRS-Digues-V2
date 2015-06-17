@@ -1283,17 +1283,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="FrontFrancBord" eSuperTypes="#//ObjetStructure">
-    <eAnnotations source="generation"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="penteInterieure" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="#//RefFonction"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MaitreOeuvreMarche">
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionMaitreOeuvre" eType="#//RefFonctionMaitreOeuvre"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeId" lowerBound="1"

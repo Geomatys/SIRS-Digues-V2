@@ -10,7 +10,6 @@ import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Epi;
 import fr.sirs.core.model.Fondation;
-import fr.sirs.core.model.FrontFrancBord;
 import fr.sirs.core.model.OuvrageRevanche;
 import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.SommetRisberme;
@@ -49,7 +48,6 @@ public class ElementStructureImporter extends GenericStructureImporter<ObjetStru
     private final SysEvtFondationImporter sysEvtFondationImporter;
     private final SysEvtEpisImporter sysEvtEpiImporter;
     private final SysEvtOuvrageRevancheImporter sysEvtOuvrageRevancheImporter;
-    private final SysEvtTalusFrancBordImporter sysEvtTalusFrancBordImporter;
 
     public ElementStructureImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
@@ -113,12 +111,6 @@ public class ElementStructureImporter extends GenericStructureImporter<ObjetStru
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter, typePositionImporter,
                 typeMateriauImporter, typeNatureImporter);
-        sysEvtTalusFrancBordImporter = new SysEvtTalusFrancBordImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter,
-                systemeReperageImporter, borneDigueImporter,
-                typeSourceImporter, typeCoteImporter, typePositionImporter,
-                typeMateriauImporter, typeNatureImporter,
-                typeFonctionImporter);
     }
 
     private enum Columns {
@@ -282,8 +274,6 @@ public class ElementStructureImporter extends GenericStructureImporter<ObjetStru
             return sysEvtSommetRisbermeImporter.importRow(row);
         } else if (typeStructure == TalusDigue.class) {
             return sysEvtTalusDigueImporter.importRow(row);
-        } else if (typeStructure == FrontFrancBord.class) {
-            return sysEvtTalusFrancBordImporter.importRow(row);
         } else if (typeStructure == TalusRisberme.class) {
             return sysEvtTalusRisbermeImporter.importRow(row);
         } else {
