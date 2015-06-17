@@ -5,17 +5,21 @@ import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.component.ContactRepository;
-import fr.sirs.core.component.OrganismeRepository;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.util.SirsTableCell;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -24,6 +28,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
+import javafx.util.Callback;
 import org.geotoolkit.gui.javafx.util.FXDateField;
 
 /**
@@ -52,8 +57,8 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
     
     private final PojoTable organismeTable;
     
-    private final ContactRepository contactRepository;
-    private final OrganismeRepository orgRepository;
+    private final AbstractSIRSRepository<Contact> contactRepository;
+    private final AbstractSIRSRepository<Organisme> orgRepository;
     
     final ObservableList<Element> orgsOfContact = FXCollections.observableArrayList();
     
@@ -69,8 +74,8 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         SIRS.loadFXML(this);
         date_maj.setDisable(true);
         
-        this.contactRepository = session.getContactRepository();
-        this.orgRepository = session.getOrganismeRepository();
+        this.contactRepository = session.getRepositoryForClass(Contact.class);
+        this.orgRepository = session.getRepositoryForClass(Organisme.class);
         
         uiMode.requireEditionForElement(contact);
         disableFieldsProperty().bind(uiMode.editionState().not());
@@ -185,14 +190,25 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         public ContactOrganismeTable() {
             super(ContactOrganisme.class, "Liste des organismes");
             editableProperty().bind(uiFicheMode.selectedProperty());
+            
+            final TableColumn<Element, String> organismeColumn = new TableColumn<>("Organisme");
+            organismeColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, String>, ObservableValue<String>>() {
+
+                @Override
+                public ObservableValue<String> call(TableColumn.CellDataFeatures<Element, String> param) {
+                    final ContactOrganisme co = (ContactOrganisme) param.getValue();
+                    if(co.getParent()!=null) return new SimpleStringProperty(co.getParent().getId());
+                    return null;
+                }
+            });
+            organismeColumn.setCellFactory((TableColumn<Element, String> param) -> new SirsTableCell<>());
+            uiTable.getColumns().add(organismeColumn);
+            
             setTableItems(() -> orgsOfContact);          
         }
 
         @Override
         protected void editPojo(Object pojo) {
-            if (!(pojo instanceof ContactOrganisme)) {
-                return;
-            }
             final ContactOrganisme co = (ContactOrganisme) pojo;
             co.contactIdProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
                 if (!elementProperty.get().getId().equals(newValue)) {
@@ -214,21 +230,32 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         
         @Override
         protected void deletePojos(Element... pojos) {
+            final List<Organisme> modifiedOrganisms = new ArrayList<>();
             for(final Element pojo : pojos){
                 // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
                 // l'élément et que celui-ci soit invalide, sinon, on court-circuite
                 // la suppression.
-                if(!authoriseElementDeletion(pojo)) continue;
-                orgsOfContact.remove(pojo);
+                if(authoriseElementDeletion(pojo)) {
+                    final Organisme org = (Organisme) pojo.getParent();
+                    org.removeChild(pojo);
+                    if(!modifiedOrganisms.contains(org)) modifiedOrganisms.add(org);
+                    orgsOfContact.remove(pojo);
+                }
             }
+            
+            session.getRepositoryForClass(Organisme.class).executeBulk(modifiedOrganisms);
         }
 
         @Override
         protected ContactOrganisme createPojo() {
             final ContactOrganisme co = Injector.getSession().getElementCreator().createElement(ContactOrganisme.class);
+            co.getId(); // Necessary to initialize element Id
             co.setValid(!session.needValidationProperty().get());
             co.setAuthor(session.getUtilisateur() == null? null : session.getUtilisateur().getId());
             co.setContactId(elementProperty.get().getId());
+            final Organisme org = session.getRepositoryForClass(Organisme.class).getOne();
+            co.setDocumentId(org.getId());
+            org.addChild(co);
             co.setDateDebutIntervenant(LocalDateTime.now());
             orgsOfContact.add(co);
             return co;

@@ -329,11 +329,11 @@ public class SessionCore extends SessionGen {
     public Optional<? extends Element> getElement(final Object toGetElementFor) {
         if (toGetElementFor instanceof Element) {
             return getCompleteElement((Element)toGetElementFor);
-            
-        } else if (toGetElementFor instanceof Preview) {
-            Preview summary = (Preview) toGetElementFor;
-            AbstractSIRSRepository repository = getRepositoryForType(summary.getDocClass());
-            Identifiable tmp = repository.get(summary.getDocId());
+        } 
+        else if (toGetElementFor instanceof Preview) {
+            final Preview summary = (Preview) toGetElementFor;
+            final AbstractSIRSRepository repository = getRepositoryForType(summary.getDocClass());
+            final Identifiable tmp = repository.get(summary.getDocId());
             if (tmp instanceof Element) {
                 if (summary.getElementId() != null) {
                     return Optional.of(((Element)tmp).getChildById(summary.getElementId()));
@@ -343,9 +343,9 @@ public class SessionCore extends SessionGen {
             }
             
         } else if (toGetElementFor instanceof ElementHit) {
-            ElementHit hit = (ElementHit) toGetElementFor;
-            AbstractSIRSRepository repository = getRepositoryForType(hit.getElementClassName());
-            Identifiable tmp = repository.get(hit.getDocumentId());
+            final ElementHit hit = (ElementHit) toGetElementFor;
+            final AbstractSIRSRepository repository = getRepositoryForType(hit.getElementClassName());
+            final Identifiable tmp = repository.get(hit.getDocumentId());
             if (tmp instanceof Element) {
                 return Optional.of((Element)tmp);
             }

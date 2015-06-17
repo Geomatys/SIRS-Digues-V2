@@ -240,4 +240,20 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * @return 
      */
     public abstract T create();
+    
+    /**
+     * Return one element of T type.
+     * If such elements exist into the database, this method returns the first found of all.
+     * If such elements do not exist into the database, this method creates a new one, adds it to the database and returns it.
+     * @return 
+     */
+    public T getOne(){
+        final T one = getAll().get(0);
+        if (one==null) {
+            final T other = create();
+            add(other);
+            return other;
+        }
+        else return one;
+    }
 }

@@ -14,6 +14,7 @@ import fr.sirs.Injector;
 import fr.sirs.StructBeanSupplier;
 import static fr.sirs.SIRS.AUTHOR_FIELD;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS_ABREGE;
+import static fr.sirs.SIRS.COMMENTAIRE_FIELD;
 import static fr.sirs.SIRS.DATE_MAJ_FIELD;
 import static fr.sirs.SIRS.DESIGNATION_FIELD;
 import static fr.sirs.SIRS.FOREIGN_PARENT_ID_FIELD;
@@ -146,7 +147,9 @@ public class PojoTable extends BorderPane {
     
     private static final String[] COLUMNS_TO_IGNORE = new String[] {
         AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD, 
-        LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD, DATE_MAJ_FIELD};    
+        LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD, 
+        DATE_MAJ_FIELD, COMMENTAIRE_FIELD};
+    private static final String[] COLUMNS_TO_PRIORIZE = new String[] {DESIGNATION_FIELD, PR_DEBUT_FIELD, PR_FIN_FIELD};
     
     protected final Class pojoClass;
     protected final AbstractSIRSRepository repo;
@@ -238,7 +241,6 @@ public class PojoTable extends BorderPane {
         } else {
             this.repo = repo;
         }
-        
         searchRunning.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         searchRunning.setPrefSize(22, 22);
         searchRunning.setStyle("-fx-progress-color: white;");
@@ -782,9 +784,10 @@ public class PojoTable extends BorderPane {
             // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
             // l'élément et que celui-ci soit invalide, sinon, on court-circuite
             // la suppression.
-            if(!authoriseElementDeletion(pojo)) continue;
-            deletor.accept(pojo);
-            items.remove(pojo);
+            if(authoriseElementDeletion(pojo)){
+                deletor.accept(pojo);
+                items.remove(pojo);
+            }
         }
     }
     

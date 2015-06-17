@@ -3,6 +3,8 @@ package fr.sirs.util;
 
 import fr.sirs.Injector;
 import fr.sirs.Session;
+import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperageBorne;
 import java.util.concurrent.ExecutorService;
@@ -21,6 +23,8 @@ import org.geotoolkit.gui.javafx.util.FXTableCell;
 /**
  *
  * @author Johann Sorel (Geomatys)
+ * @param <S>
+ * @param <T>
  */
 public class SirsTableCell<S, T> extends FXTableCell<S, T> {
     
@@ -62,13 +66,13 @@ public class SirsTableCell<S, T> extends FXTableCell<S, T> {
                 graphic = null;
             } else {
                 graphic = new ImageView(ICON_LINK);
+                    final Session session = Injector.getBean(Session.class);
                 if (item instanceof SystemeReperageBorne) {
                     final SystemeReperageBorne srb = (SystemeReperageBorne) item;
-                    final Session session = Injector.getBean(Session.class);
-                    text = session.getBorneDigueRepository().get(srb.getBorneId()).getLibelle();
+                    text = session.getRepositoryForClass(BorneDigue.class).get(srb.getBorneId()).getLibelle();
                 } else if (item instanceof String) {
                     // On essaye de récupérer le preview label : si le résultat n'est pas nul, c'est que l'item est bien un id
-                    final Preview tmpPreview = Injector.getSession().getPreviews().get((String) item);
+                    final Preview tmpPreview = session.getPreviews().get((String) item);
                     if (tmpPreview != null) {
                         text = tmpPreview.getLibelle();
                     } else {
