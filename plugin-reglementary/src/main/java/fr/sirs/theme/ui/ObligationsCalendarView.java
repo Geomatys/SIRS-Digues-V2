@@ -4,6 +4,7 @@ import fr.sirs.Injector;
 import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.RefTypeObligationReglementaire;
 import fr.sirs.plugins.DocumentsTheme;
 import fr.sirs.ui.calendar.CalendarEvent;
 import fr.sirs.ui.calendar.CalendarView;
@@ -45,11 +46,12 @@ public final class ObligationsCalendarView extends CalendarView {
                 final StringBuilder sb = new StringBuilder();
                 Image image = ICON_DOC;
                 if (obligation.getTypeId() != null) {
-                    final Preview previewType = Injector.getSession().getPreviews().get(obligation.getTypeId());
-                    if (previewType != null) {
-                        final String libelType = previewType.getLibelle();
-                        sb.append(libelType);
-                        if ("Travaux".equalsIgnoreCase(libelType)) {
+                    final RefTypeObligationReglementaire oblType =
+                            Injector.getSession().getRepositoryForClass(RefTypeObligationReglementaire.class).get(obligation.getTypeId());
+                    if (oblType != null) {
+                        final String oblTypeAbreg = oblType.getAbrege();
+                        sb.append(oblTypeAbreg);
+                        if ("TRA".equalsIgnoreCase(oblTypeAbreg)) {
                             image = ICON_WORK;
                         }
                     }
