@@ -213,3 +213,7 @@
     -fx-background-insets: 1 1 2 1;
     -fx-padding: 0.20em;
 }
+
+.spinner > .decrement-arrow-button, .increment-arrow-button {
+    -fx-background-color:transparent
+}
