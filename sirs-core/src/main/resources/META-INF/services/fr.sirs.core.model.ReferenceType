@@ -7,6 +7,7 @@ fr.sirs.core.model.RefEcoulement
 fr.sirs.core.model.RefEvenementHydraulique
 fr.sirs.core.model.RefFonctionMaitreOeuvre
 fr.sirs.core.model.RefFonction
+fr.sirs.core.model.RefFonctionDeversoir
 fr.sirs.core.model.RefFrequenceEvenementHydraulique
 fr.sirs.core.model.RefImplantation
 fr.sirs.core.model.RefLargeurFrancBord
@@ -29,6 +30,7 @@ fr.sirs.core.model.RefPositionProfilLongSurDigue
 fr.sirs.core.model.RefPrestation
 fr.sirs.core.model.RefProfilFrancBord
 fr.sirs.core.model.RefProprietaire
+fr.sirs.core.model.RefRaccordementDigue
 fr.sirs.core.model.RefRapportEtude
 fr.sirs.core.model.RefReferenceHauteur
 fr.sirs.core.model.RefReseauHydroCielOuvert
