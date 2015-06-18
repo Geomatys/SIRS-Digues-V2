@@ -568,20 +568,39 @@ public class PojoTable extends BorderPane {
         final VBox titleAndFilterBox = new VBox(titleBoxing);
         
         try {
-            initFilterPane();
+            initFilterBuilder();
 
+            final Button resetFilterBtn = new Button("Réinitialiser");
             final Button applyFilterBtn = new Button("Filtrer");
+            resetFilterBtn.getStyleClass().addAll("label-header", "buttonbar-button", "white-rounded");
+            applyFilterBtn.getStyleClass().addAll("label-header", "buttonbar-button", "white-rounded");
             final Separator separator = new Separator(Orientation.VERTICAL);
+            separator.setMaxWidth(Double.MAX_VALUE);
             separator.setVisible(false);
-            final HBox confirmationBox = new HBox(separator, applyFilterBtn);
+            final HBox confirmationBox = new HBox(5, separator, resetFilterBtn, applyFilterBtn);
             HBox.setHgrow(separator, Priority.ALWAYS);
             final VBox filterContent = new VBox(10, uiFilterBuilder, confirmationBox);
-
+            filterContent.getStyleClass().add("filter-root");
             uiFilterPane.setText("Filtrer");
             uiFilterPane.setContent(filterContent);
             uiFilterPane.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
             
             titleAndFilterBox.getChildren().add(uiFilterPane);
+            resetFilterBtn.setOnAction(event -> {
+                final ObservableList<Node> vBoxChildren = filterContent.getChildren();
+                final int indexOfBuilder = vBoxChildren.indexOf(uiFilterBuilder);
+                if (vBoxChildren.size() > indexOfBuilder) {
+                    vBoxChildren.remove(indexOfBuilder);
+                    uiFilterBuilder = null;
+                    try {
+                        initFilterBuilder();
+                        vBoxChildren.add(indexOfBuilder, uiFilterBuilder);
+                    } catch (Exception e) {
+                        GeotkFX.newExceptionDialog("Une erreur inattendue est survenue.", e).show();
+                    }
+                    applyFilterBtn.fire();
+                }
+            });     
             applyFilterBtn.setOnAction(event -> setTableItems(() -> allValues));        
         } catch (Exception e) {
             SIRS.LOGGER.log(Level.WARNING, "Filter panel cannot be initialized !", e);
@@ -683,12 +702,25 @@ public class PojoTable extends BorderPane {
         uiFilterPane.setContent(uiFilterBuilder);
     }
     
-    protected void initFilterPane() throws IntrospectionException {
+    protected void initFilterBuilder() throws IntrospectionException {
         if (uiFilterBuilder == null) {
-            uiFilterBuilder = new FXFilterBuilder();
+            uiFilterBuilder = new FXFilterBuilder() {
+                @Override
+                protected String getTitle(PropertyType candidate) {
+                    if (candidate == null || candidate.getName() == null || candidate.getName().head() == null) return "";
+                    String pName = candidate.getName().head().toString();
+                    if (labelMapper != null) {
+                        final String pTitle = labelMapper.mapPropertyName(pName);
+                        if (pTitle != null) {
+                            return pTitle;
+                        }
+                    }
+                    return pName;
+                }
+            };
         }
 
-        // If 
+        // If no property has been given for filtering, we analyze model class to find them.
         ObservableList<PropertyType> props = uiFilterBuilder.getAvailableProperties();
         if (props.isEmpty()) {
             final BeanInfo info = Introspector.getBeanInfo(pojoClass);

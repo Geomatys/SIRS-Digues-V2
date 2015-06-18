@@ -214,6 +214,30 @@
     -fx-padding: 0.20em;
 }
 
+// Deactivate background of arrow buttons of spinners.
 .spinner > .decrement-arrow-button, .increment-arrow-button {
     -fx-background-color:transparent
+}
+
+.titled-pane {
+    -fx-background-color: #AAAAAA;
+    -fx-background-radius: 7;
+    -fx-border-color: transparent;
+    -fx-text-fill: white;
+}
+
+.titled-pane > .title {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.filter-root {
+    -fx-background-color:#AAAAAA;
+    -fx-background-radius: 0 0 7 7;
+    -fx-border-color: transparent;
+}
+
+.white-rounded {
+    -fx-border-color: white;
+    -fx-border-radius: 5;
 }
