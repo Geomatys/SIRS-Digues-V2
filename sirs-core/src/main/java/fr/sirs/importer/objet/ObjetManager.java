@@ -26,6 +26,7 @@ import fr.sirs.importer.objet.prestation.PrestationImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.objet.structure.ElementStructureImporter;
 import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
+import fr.sirs.importer.objet.link.ElementReseauPointAccesImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,6 +63,7 @@ public class ObjetManager {
     private final ElementReseauAutreOuvrageHydrauImporter elementReseauAutreOuvrageHydrauImporter;
     private final ElementReseauReseauEauImporter elementReseauReseauEauImporter;
     private final ElementReseauVoieSurDigueImporter elementReseauVoieSurDigueImporter;
+    private final ElementReseauPointAccesImporter elementReseauPointAccesImporter;
     private final DesordrePrestationImporter desordrePrestationImporter;
     private final List<GenericObjetLinker> linkers = new ArrayList<>();
     
@@ -149,6 +151,9 @@ public class ObjetManager {
         elementReseauVoieSurDigueImporter = new ElementReseauVoieSurDigueImporter(
                 accessDatabase, couchDbConnector, reseauImporter);
         linkers.add(elementReseauVoieSurDigueImporter);
+        elementReseauPointAccesImporter = new ElementReseauPointAccesImporter(
+                accessDatabase, couchDbConnector, reseauImporter);
+        linkers.add(elementReseauPointAccesImporter);
         desordrePrestationImporter = new DesordrePrestationImporter(
                 accessDatabase, couchDbConnector, prestationImporter, 
                 desordreImporter);

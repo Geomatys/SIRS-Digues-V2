@@ -506,6 +506,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeStockantId" eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageRevancheIds" upperBound="-1"
         eType="#//OuvrageRevanche" eOpposite="#//OuvrageRevanche/ouvertureBatardableIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageFranchissementIds"
+        upperBound="-1" eType="#//OuvrageFranchissement" eOpposite="#//OuvrageFranchissement/ouvertureBatardableIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageFranchissement" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -520,6 +522,14 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="usageId" eType="#//RefUsageVoie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="crueSubmersionIds" upperBound="-1"
         eType="#//EvenementHydraulique"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="voieAccesIds" upperBound="-1"
+        eType="#//VoieAcces" eOpposite="#//VoieAcces/ouvrageFranchissementIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageVoirieIds" upperBound="-1"
+        eType="#//OuvrageVoirie" eOpposite="#//OuvrageVoirie/ouvrageFranchissementIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="voieDigueIds" upperBound="-1"
+        eType="#//VoieDigue" eOpposite="#//VoieDigue/ouvrageFranchissementIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvertureBatardableIds"
+        upperBound="-1" eType="#//OuvertureBatardable" eOpposite="#//OuvertureBatardable/ouvrageFranchissementIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="VoieAcces" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -530,6 +540,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="usageId" eType="#//RefUsageVoie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="crueSubmersionIds" upperBound="-1"
         eType="#//EvenementHydraulique"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageFranchissementIds"
+        upperBound="-1" eType="#//OuvrageFranchissement" eOpposite="#//OuvrageFranchissement/voieAccesIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="VoieDigue" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -540,11 +552,15 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="usageId" eType="#//RefUsageVoie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="crueSubmersionIds" upperBound="-1"
         eType="#//EvenementHydraulique"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageFranchissementIds"
+        upperBound="-1" eType="#//OuvrageFranchissement" eOpposite="#//OuvrageFranchissement/voieDigueIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageVoirie" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageVoirieId" eType="#//RefOuvrageVoirie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageFranchissementIds"
+        upperBound="-1" eType="#//OuvrageFranchissement" eOpposite="#//OuvrageFranchissement/ouvrageVoirieIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="StationPompage" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>

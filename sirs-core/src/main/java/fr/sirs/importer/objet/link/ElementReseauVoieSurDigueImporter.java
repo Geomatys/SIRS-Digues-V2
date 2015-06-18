@@ -38,8 +38,8 @@ public class ElementReseauVoieSurDigueImporter extends GenericObjetLinker {
 
     private enum Columns {
         ID_ELEMENT_RESEAU,
-ID_ELEMENT_RESEAU_VOIE_SUR_DIGUE,
-DATE_DERNIERE_MAJ
+        ID_ELEMENT_RESEAU_VOIE_SUR_DIGUE,
+        DATE_DERNIERE_MAJ
     };
     
     @Override
@@ -76,11 +76,13 @@ DATE_DERNIERE_MAJ
                     if(reseau instanceof ReseauHydrauliqueFerme){
                         final ReseauHydrauliqueFerme reseauFerme = (ReseauHydrauliqueFerme) reseau;
                         reseauFerme.getReseauHydrauliqueCielOuvertIds().add(voieDigue.getId());
-                
                         associations.add(new AbstractMap.SimpleEntry<>(reseauVoieDigue, reseauFerme));
                     }
-                    if(reseau instanceof OuvrageFranchissement){
-                        SirsCore.LOGGER.log(Level.FINE, "Supprimé du modèle.");
+                    else if(reseau instanceof OuvrageFranchissement){
+                        final OuvrageFranchissement ouvrageVoirie = (OuvrageFranchissement) reseau;
+                        ouvrageVoirie.getOuvrageVoirieIds().add(voieDigue.getId());
+                        voieDigue.getOuvrageFranchissementIds().add(ouvrageVoirie.getId());
+                        associations.add(new AbstractMap.SimpleEntry<>(reseauVoieDigue, ouvrageVoirie));
                     }
                     else {
                         throw new AccessDbImporterException("Bad type");
