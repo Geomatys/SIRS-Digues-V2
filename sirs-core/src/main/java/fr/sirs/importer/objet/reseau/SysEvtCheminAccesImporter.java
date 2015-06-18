@@ -15,6 +15,7 @@ import fr.sirs.importer.BorneDigueImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.RefCote;
+import fr.sirs.core.model.RefMateriau;
 import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
@@ -28,6 +29,7 @@ import fr.sirs.importer.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
+import fr.sirs.importer.objet.TypeMateriauImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,12 +61,13 @@ class SysEvtCheminAccesImporter extends GenericReseauImporter<VoieAcces> {
             final SourceInfoImporter typeSourceImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter,
+            final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter,
             final TypeUsageVoieImporter typeUsageVoieImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter,
-                typePositionImporter, typeNatureImporter);
+                typePositionImporter, typeMateriauImporter, typeNatureImporter);
         this.typeUsageVoieImporter = typeUsageVoieImporter;
     }
 
@@ -162,7 +165,7 @@ class SysEvtCheminAccesImporter extends GenericReseauImporter<VoieAcces> {
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
         final Map<Integer, RefCote> typesCote = typeCoteImporter.getTypeReferences();
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
-        final Map<Integer, RefNature> typesNature = typeNatureImporter.getTypeReferences();
+        final Map<Integer, RefMateriau> typesMateriau = typeMateriauImporter.getTypeReferences();
 
         final Map<Integer, RefUsageVoie> typesUsages = typeUsageVoieImporter.getTypeReferences();
 
@@ -277,7 +280,7 @@ class SysEvtCheminAccesImporter extends GenericReseauImporter<VoieAcces> {
         }
 
         if (row.getInt(Columns.ID_TYPE_NATURE.toString()) != null) {
-            voie.setNatureId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
+            voie.setMateriauId(typesMateriau.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
         }
 
         voie.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));

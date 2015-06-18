@@ -2,6 +2,8 @@ package fr.sirs.theme;
 
 import fr.sirs.Injector;
 import fr.sirs.Session;
+import fr.sirs.core.model.Contact;
+import fr.sirs.core.model.Organisme;
 import fr.sirs.theme.ui.PojoTable;
 import javafx.scene.Parent;
 import javafx.scene.control.Tab;
@@ -25,9 +27,9 @@ public class ContactsTheme extends Theme {
         final TabPane tabPane = new TabPane();
         
         final Session session = Injector.getSession();
-        final PojoTable tableContact = new PojoTable(session.getContactRepository(),"Personnes physiques");
+        final PojoTable tableContact = new PojoTable(session.getRepositoryForClass(Contact.class),"Personnes physiques");
         tableContact.editableProperty().bind(session.nonGeometryEditionProperty());
-        final PojoTable tableOrganisme = new PojoTable(session.getOrganismeRepository(),"Organismes");
+        final PojoTable tableOrganisme = new PojoTable(session.getRepositoryForClass(Organisme.class),"Organismes");
         tableOrganisme.editableProperty().bind(session.nonGeometryEditionProperty());
         
         final Tab tabIntervenant = new Tab("Personnes physiques");

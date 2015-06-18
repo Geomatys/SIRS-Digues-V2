@@ -59,7 +59,7 @@ class SysEvtOuvrageTelecommunicationImporter extends GenericReseauImporter<Ouvra
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter,
-                typePositionImporter, null);
+                typePositionImporter, null, null);
         this.typeOuvrageTelecomImporter = typeReseauTelecomImporter;
     }
 

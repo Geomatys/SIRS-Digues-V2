@@ -2,7 +2,7 @@
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="core" nsURI="http://fr.sirs/core" nsPrefix="sirs">
   <eClassifiers xsi:type="ecore:EClass" name="Utilisateur">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="login" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -19,7 +19,7 @@
     <eLiterals name="EXTERN"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SystemeEndiguement">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -40,7 +40,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Digue">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -53,7 +53,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TronconDigue">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -76,7 +76,7 @@
         eType="#//GestionTroncon" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SystemeReperage">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value=""/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -90,7 +90,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Organisme">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="adresse" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -113,7 +113,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Contact">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true "/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="adresse" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -163,7 +163,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="BorneDigue">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true&#xA;"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -208,7 +208,7 @@
     </eStructuralFeatures>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LevePositionProfilTravers">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="cotePiedDigueRiviere" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteSommetRisbermeRiviere"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
@@ -240,7 +240,7 @@
     </eOperations>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Desordre" eSuperTypes="#//Objet">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lieuDit" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
@@ -301,12 +301,12 @@
         eType="#//GardeObjet" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LargeurFrancBord" eSuperTypes="#//ObjetPhotographiable">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeLargeurFrancBord" eType="#//RefLargeurFrancBord"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Prestation" eSuperTypes="#//ObjetPhotographiable">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="coutMetre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="coutGlobal" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
@@ -329,7 +329,7 @@
         upperBound="-1" eType="#//DocumentGrandeEchelle"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PositionDocument" eSuperTypes="#//AbstractPositionDocumentAssociable">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//SIRSDefaultDocument"/>
   </eClassifiers>
@@ -347,12 +347,12 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Epi" eSuperTypes="#//ObjetStructure">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Deversoir" eSuperTypes="#//ObjetStructure">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="#//RefFonctionDeversoir"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="raccordementId" eType="#//RefRaccordementDigue"/>
@@ -390,7 +390,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Crete" eSuperTypes="#//ObjetStructure">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="#//RefFonction"/>
@@ -398,7 +398,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageRevanche" eSuperTypes="#//ObjetStructure">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteurMurette" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
@@ -411,7 +411,7 @@
         upperBound="-1" eType="#//OuvertureBatardable" eOpposite="#//OuvertureBatardable/ouvrageRevancheIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TalusDigue" eSuperTypes="#//ObjetStructure">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurSommet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
@@ -430,7 +430,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauBasId" eType="#//RefMateriau"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TalusRisberme" eSuperTypes="#//ObjetStructure">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurSommet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
@@ -449,7 +449,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauBasId" eType="#//RefMateriau"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SommetRisberme" eSuperTypes="#//ObjetStructure">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
@@ -459,7 +459,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Fondation" eSuperTypes="#//ObjetStructure">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
@@ -468,7 +468,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PiedDigue" eSuperTypes="#//ObjetStructure">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
@@ -482,11 +482,11 @@
         eType="#//Convention"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EchelleLimnimetrique" eSuperTypes="#//ObjetReseau">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvertureBatardable" eSuperTypes="#//ObjetReseau">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="zSeuil" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
@@ -508,7 +508,7 @@
         eType="#//OuvrageRevanche" eOpposite="#//OuvrageRevanche/ouvertureBatardableIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageFranchissement" eSuperTypes="#//ObjetReseau">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionHautId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionBasId" eType="#//RefPosition"/>
@@ -522,17 +522,17 @@
         eType="#//EvenementHydraulique"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="VoieAcces" eSuperTypes="#//ObjetReseau">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numeroSecteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="usageId" eType="#//RefUsageVoie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="crueSubmersionIds" upperBound="-1"
         eType="#//EvenementHydraulique"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="VoieDigue" eSuperTypes="#//ObjetReseau">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeVoieDigueId" eType="#//RefVoieDigue"/>
@@ -542,12 +542,12 @@
         eType="#//EvenementHydraulique"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageVoirie" eSuperTypes="#//ObjetReseau">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageVoirieId" eType="#//RefOuvrageVoirie"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="StationPompage" eSuperTypes="#//ObjetReseau">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="pompes" upperBound="-1"
         eType="#//Pompe" containment="true"/>
@@ -567,7 +567,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReseauHydrauliqueFerme" eSuperTypes="#//ObjetReseau">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="diametre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="autorise" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
@@ -585,7 +585,7 @@
         upperBound="-1" eType="#//OuvrageHydrauliqueAssocie" eOpposite="#//OuvrageHydrauliqueAssocie/reseauHydrauliqueFermeIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageHydrauliqueAssocie" eSuperTypes="#//ObjetReseau">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageHydroAssocieId"
         eType="#//RefOuvrageHydrauliqueAssocie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
@@ -593,7 +593,7 @@
         upperBound="-1" eType="#//ReseauHydrauliqueFerme" eOpposite="#//ReseauHydrauliqueFerme/ouvrageHydrauliqueAssocieIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReseauTelecomEnergie" eSuperTypes="#//ObjetReseau">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeReseauTelecomEnergieId"
@@ -604,7 +604,7 @@
         upperBound="-1" eType="#//OuvrageTelecomEnergie" eOpposite="#//OuvrageTelecomEnergie/reseauTelecomEnergieIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageTelecomEnergie" eSuperTypes="#//ObjetReseau">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageTelecomEnergieId"
         eType="#//RefOuvrageTelecomEnergie"/>
@@ -612,7 +612,7 @@
         upperBound="-1" eType="#//ReseauTelecomEnergie" eOpposite="#//ReseauTelecomEnergie/ouvrageTelecomEnergieIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReseauHydrauliqueCielOuvert" eSuperTypes="#//ObjetReseau">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeReseauHydroCielOuvertId"
         eType="#//RefReseauHydroCielOuvert"/>
@@ -620,7 +620,7 @@
         upperBound="-1" eType="#//ReseauHydrauliqueFerme" eOpposite="#//ReseauHydrauliqueFerme/reseauHydrauliqueCielOuvertIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageParticulier" eSuperTypes="#//ObjetReseau">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageParticulierId"
         eType="#//RefOuvrageParticulier"/>
@@ -632,7 +632,7 @@
         eType="#//ArticleJournal"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LaisseCrue" eSuperTypes="#//ObjetMesure">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="positionLaisse" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -642,7 +642,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="observateurId" eType="#//Contact"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EvenementHydraulique">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -682,7 +682,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MonteeEaux" eSuperTypes="#//ObjetMesure">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="echelleLimnimetriqueId"
         eType="#//EchelleLimnimetrique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="mesures" upperBound="-1"
@@ -704,7 +704,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LigneEau" eSuperTypes="#//ObjetMesure #//PrZPointImporter">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="referenceHauteurId" eType="#//RefReferenceHauteur"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="mesuresXYZ" upperBound="-1"
@@ -718,7 +718,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepDzId" eType="#//SystemeReperage"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Convention" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -733,7 +733,7 @@
         eType="#//Contact"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Marche" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -750,7 +750,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="maitreOuvrageId" eType="#//Organisme"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RapportEtude" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="auteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -763,7 +763,7 @@
         eType="#//Prestation" eOpposite="#//Prestation/rapportEtudeIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DocumentGrandeEchelle" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="reference_calque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -774,7 +774,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ArticleJournal" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="auteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -786,7 +786,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SIRSDocument" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EClass" name="ProfilTravers" eSuperTypes="#//SIRSDocument">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -805,7 +805,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="SIRSDefaultDocument" abstract="true"
       interface="true" eSuperTypes="#//SIRSDocument"/>
   <eClassifiers xsi:type="ecore:EClass" name="LeveProfilTravers" eSuperTypes="#//SIRSReferenceProfil">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateLevee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeCreateurId" eType="#//Organisme"/>
@@ -829,7 +829,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="referenceCalque" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PositionProfilTravers" eSuperTypes="#//AbstractPositionDocumentAssociable">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//ProfilTravers"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
@@ -866,7 +866,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ProfilLong" eSuperTypes="#//SIRSReferenceProfil #//AbstractPositionDocument #//PrZPointImporter">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateLevee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeCreateurId" eType="#//Organisme"/>
@@ -920,7 +920,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReferenceType" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EClass" name="RefVoieDigue" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -931,7 +931,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefUsageVoie" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -942,7 +942,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefUtilisationConduite" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true&#xA;"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -953,7 +953,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefUrgence" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -964,7 +964,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefSystemeReleveProfil" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -974,7 +974,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefSeuil" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -985,7 +985,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefRive" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -995,7 +995,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefRevetement" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1006,7 +1006,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefReseauTelecomEnergie" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1017,7 +1017,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefReseauHydroCielOuvert" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1028,7 +1028,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefRapportEtude" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1039,7 +1039,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefProprietaire" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1049,7 +1049,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefProfilFrancBord" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1060,7 +1060,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeProfilTravers" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1070,7 +1070,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefPrestation" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1080,7 +1080,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefPosition" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1091,7 +1091,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageVoirie" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1102,7 +1102,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageTelecomEnergie" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1113,7 +1113,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageParticulier" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1124,7 +1124,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageHydrauliqueAssocie" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1135,7 +1135,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOuvrageFranchissement" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1146,7 +1146,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrientationVent" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1157,7 +1157,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrientationOuvrage" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1168,7 +1168,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefNatureBatardeaux" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1179,7 +1179,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefMateriau" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1190,7 +1190,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefNature" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1201,7 +1201,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefMoyenManipBatardeaux" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1212,7 +1212,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefLargeurFrancBord" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1223,7 +1223,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeGlissiere" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1234,7 +1234,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefFrequenceEvenementHydraulique" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1245,7 +1245,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefEvenementHydraulique" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1256,7 +1256,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefDocumentGrandeEchelle" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1266,7 +1266,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeDesordre" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1277,7 +1277,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefCote" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1288,7 +1288,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefConvention" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1298,7 +1298,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefConduiteFermee" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1317,7 +1317,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefEcoulement" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1328,7 +1328,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeDocument" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1338,13 +1338,13 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ProprieteTroncon" eSuperTypes="#//GardeTroncon">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeId" lowerBound="1"
         eType="#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeProprietaireId" eType="#//RefProprietaire"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefSource" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1355,7 +1355,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefImplantation" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1366,7 +1366,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefFonction" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1376,7 +1376,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefReferenceHauteur" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1387,7 +1387,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefFonctionMaitreOeuvre" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1397,7 +1397,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilTravers" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1407,7 +1407,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefDevers" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1418,7 +1418,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrigineProfilLong" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1428,7 +1428,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeTroncon" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1445,7 +1445,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefPositionProfilLongSurDigue" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -1456,7 +1456,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefOrientationPhoto" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1486,7 +1486,7 @@
     </eStructuralFeatures>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Syndicat">
-    <eAnnotations source="generation">
+    <eAnnotations source="couchDBDocument">
       <details key="document" value="true "/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1496,12 +1496,12 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="GardeTroncon" eSuperTypes="#//PeriodeLocaliseeTroncon">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="contactId" lowerBound="1"
         eType="#//Contact"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SyndicTroncon" eSuperTypes="#//PeriodeLocaliseeTroncon">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="syndicatId" lowerBound="1"
         eType="#//Syndicat"/>
   </eClassifiers>
@@ -1541,7 +1541,7 @@
     </eOperations>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefFonctionDeversoir" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1549,7 +1549,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefRaccordementDigue" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="generation"/>
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>

@@ -37,6 +37,7 @@ import fr.sirs.importer.TypeCoteImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
+import fr.sirs.importer.objet.TypeMateriauImporter;
 import static fr.sirs.importer.objet.reseau.TypeOuvrageParticulierImporter.ECHELLE_LIMNIMETRIQUE;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
@@ -103,11 +104,12 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
             final SourceInfoImporter typeSourceImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter,
+            final TypeMateriauImporter typeMateriauImporter,
             final TypeNatureImporter typeNatureImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter,
-                typePositionImporter, typeNatureImporter);
+                typePositionImporter, typeMateriauImporter, typeNatureImporter);
         this.organismeImporter = organismeImporter;
         this.intervenantImporter = intervenantImporter;
 
@@ -157,8 +159,8 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
         sysEvtCheminAccesImporter = new SysEvtCheminAccesImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, typeSourceImporter,
-                typeCoteImporter, typePositionImporter, typeNatureImporter,
-                typeUsageVoieImporter);
+                typeCoteImporter, typePositionImporter, typeMateriauImporter, 
+                typeNatureImporter, typeUsageVoieImporter);
         typeOrientationOuvrageFranchissementImporter = new TypeOrientationOuvrageFranchissementImporter(
                 accessDatabase, couchDbConnector);
         typeRevetementImporter = new TypeRevetementImporter(accessDatabase,

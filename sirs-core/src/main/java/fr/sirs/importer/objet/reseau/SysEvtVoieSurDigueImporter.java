@@ -67,7 +67,7 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter,
-                typePositionImporter, null);
+                typePositionImporter, null, null);
         this.typeUsageVoieImporter = typeUsageVoieImporter;
         this.typeRevetementImporter = typeRevetementImporter;
         this.typeVoieSurDigueImporter = typeVoieSurDigueImporter;

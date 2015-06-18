@@ -103,7 +103,8 @@ public class ObjetManager {
                 couchDbConnector, tronconGestionDigueImporter, 
                 systemeReperageImporter, borneDigueImporter, 
                 organismeImporter, intervenantImporter, sourceInfoImporter, 
-                typeCoteImporter, typePositionImporter, typeNatureImporter);
+                typeCoteImporter, typePositionImporter, typeMateriauImporter, 
+                typeNatureImporter);
         importers.add(reseauImporter);
         prestationImporter = new PrestationImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, 

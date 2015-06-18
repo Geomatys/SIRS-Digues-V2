@@ -4258,7 +4258,7 @@
             </children>
             <styles xmi:type="notation:ConnectorStyle" xmi:id="_SF0RAQO5EeWAFpz-FySxiw" routing="Tree"/>
             <styles xmi:type="notation:FontStyle" xmi:id="_SF0RAgO5EeWAFpz-FySxiw" fontName="Ubuntu" fontHeight="8"/>
-            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_SF0RAwO5EeWAFpz-FySxiw" points="[1440, -5, 1440, -5]$[1085, 410, 1085, 410]"/>
+            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_SF0RAwO5EeWAFpz-FySxiw" points="[0, 24, 339, -126]$[0, 116, 339, -34]$[-338, 116, 1, -34]$[-338, 131, 1, -19]"/>
             <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_SF2GMAO5EeWAFpz-FySxiw" id="(0.5,0.5)"/>
           </edges>
           <edges xmi:type="notation:Edge" xmi:id="_IfYQUAO7EeWAFpz-FySxiw" type="4001" element="_Ie_OwAO7EeWAFpz-FySxiw" source="_ef8-wL2iEeSRmJa8Rh2teQ" target="__qRQ0AO6EeWAFpz-FySxiw">
@@ -4760,565 +4760,565 @@
       </ownedAnnotationEntries>
       <ownedAnnotationEntries xmi:type="description:AnnotationEntry" xmi:id="_DO-gIEfeEeSoXJiONqf-1A" source="DANNOTATION_CUSTOMIZATION_KEY">
         <data xmi:type="diagram:ComputedStyleDescriptionRegistry" xmi:id="_DO_HMEfeEeSoXJiONqf-1A">
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y53a0hWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WYyswhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y53a0xWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WYyswxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y53a1BWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WYysxBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y54o8hWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WYz64hW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y54o8xWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WYz64xW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y54o9BWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WYz65BW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y553EhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY1JAhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y553ExWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY1JAxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y553FBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY1JBBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y56eIhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY1JDhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y56eIxWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY1JDxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y56eJBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY1JEBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y56eLhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY1wEhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y56eLxWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY1wExW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y56eMBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY1wFBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y57FMhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY1wHhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y57FMxWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY1wHxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y57FNBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY1wIBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y57FPhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY1wKhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y57FPxWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY1wKxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y57FQBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY1wLBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y586YhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY3lQRW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y586YxWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY3lQhW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y586ZBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY3lQxW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y59hchWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY4MUhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y59hcxWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY4MUxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y59hdBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY4MVBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y5_9shWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY6BghW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y5_9sxWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY6BgxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y5_9tBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY6BhBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6AkwhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY6okhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6AkwxWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY6okxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6AkxBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY6olBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6BL0hWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY7PohW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6BL0xWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY7PoxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6BL1BWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY7PpBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6By4hWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY72sRW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6By4xWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY72shW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6By5BWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY72sxW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6By7hWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY72vRW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6By7xWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY72vhW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6By8BWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY72vxW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6DBAhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY9E0hW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6DBAxWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY9E0xW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6DBBBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY9E1BW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6EPIhWYEeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY9r4hW6EeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6EPIxWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY9r4xW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6EPJBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY9r5BW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6E2MhWYEeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY-S8hW6EeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6E2MxWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY-S8xW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6E2NBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY-S9BW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6FdQhWYEeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY-6AhW6EeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6FdQxWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY-6AxW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6FdRBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY-6BBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6GEUhWYEeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY-6DhW6EeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6GEUxWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY-6DxW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6GEVBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY-6EBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6GrYBWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WY_hEhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6GrYRWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WY_hExW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6GrYhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WY_hFBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6GrbBWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WZAIJxW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6GrbRWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WZAIKBW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6GrbhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WZAIKRW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6HSchWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WZAvMhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6HScxWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WZAvMxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6HSdBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WZAvNBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6IgkRWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WZAvPhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6IgkhWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WZAvPxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6IgkxWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WZAvQBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6IgnRWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WZB9UhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6IgnhWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WZB9UxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6IgnxWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WZB9VBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6JushWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WZB9XhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6JusxWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WZB9XxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6JutBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WZB9YBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6KVwhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WZDLchW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6KVwxWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WZDLcxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6KVxBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WZDLdBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6K80hWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WZDyghW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6K80xWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WZDygxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6K81BWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WZDyhBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6Lj4hWYEeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WZDyjhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6Lj4xWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WZDyjxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6Lj5BWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WZDykBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6MK8hWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WZEZkhW6EeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6MK8xWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WZEZkxW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6MK9BWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WZEZlBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6SRkRWYEeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WZFAohW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6SRkhWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WZFAoxW6EeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6SRkxWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WZFApBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6SRnRWYEeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WZFnshW6EeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6SRnhWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WZFnsxW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6SRnxWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WZFntBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_Y6S4ohWYEeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WZGOwhW6EeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_Y6S4oxWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WZGOwxW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_Y6S4pBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WZGOxBW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
-          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_85-zEhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" sizeComputationExpression="1" routingStyle="manhattan">
+          <computedStyleDescriptions xmi:type="style:EdgeStyleDescription" xmi:id="_WZG10hW6EeWV5_2gWqHPSw" sizeComputationExpression="1" routingStyle="manhattan">
             <strokeColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
-            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_85-zExWYEeWV5_2gWqHPSw" showIcon="false" labelExpression="service:render">
+            <centerLabelStyleDescription xmi:type="style:CenterLabelStyleDescription" xmi:id="_WZG10xW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false" labelExpression="service:render">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </centerLabelStyleDescription>
-            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_85-zFBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
+            <endLabelStyleDescription xmi:type="style:EndLabelStyleDescription" xmi:id="_WZG11BW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false" labelExpression="service:eKeysLabel">
               <labelColor xmi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='dark_blue']"/>
             </endLabelStyleDescription>
           </computedStyleDescriptions>
           <cache xmi:type="diagram:DiagramElementMapping2ModelElement" xmi:id="_3FTjIEfeEeSoXJiONqf-1A">
             <key xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y53a0BWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WYyswBW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//TronconDigue/gestions"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y53a0RWYEeWV5_2gWqHPSw" key="_kaot8N0yEeS5tN-iaIY7-w">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y53a1RWYEeWV5_2gWqHPSw" value="_Y53a0hWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WYyswRW6EeWV5_2gWqHPSw" key="_kaot8N0yEeS5tN-iaIY7-w">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WYysxRW6EeWV5_2gWqHPSw" value="_WYyswhW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y54o8BWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WYz64BW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//SystemeReperage/systemeReperageBornes"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y54o8RWYEeWV5_2gWqHPSw" key="_Jc8c0GM-EeSFhsNlhvvJ5w">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y54o9RWYEeWV5_2gWqHPSw" value="_Y54o8hWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WYz64RW6EeWV5_2gWqHPSw" key="_Jc8c0GM-EeSFhsNlhvvJ5w">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WYz65RW6EeWV5_2gWqHPSw" value="_WYz64hW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y553EBWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY1JABW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//Organisme/contactOrganisme"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y553ERWYEeWV5_2gWqHPSw" key="_5KL9YFUCEeSyt_5RCl16VA">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y553FRWYEeWV5_2gWqHPSw" value="_Y553EhWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY1JARW6EeWV5_2gWqHPSw" key="_5KL9YFUCEeSyt_5RCl16VA">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY1JBRW6EeWV5_2gWqHPSw" value="_WY1JAhW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y56eIBWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY1JDBW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//ObjetPhotographiable/photos"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y56eIRWYEeWV5_2gWqHPSw" key="_Owc1IH-KEeSOeabJ-GPliw">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y56eJRWYEeWV5_2gWqHPSw" value="_Y56eIhWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY1JDRW6EeWV5_2gWqHPSw" key="_Owc1IH-KEeSOeabJ-GPliw">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY1JERW6EeWV5_2gWqHPSw" value="_WY1JDhW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y56eLBWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY1wEBW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//ObjetGerable/gestions"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y56eLRWYEeWV5_2gWqHPSw" key="_o292cFUWEeSyt_5RCl16VA">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y56eMRWYEeWV5_2gWqHPSw" value="_Y56eLhWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY1wERW6EeWV5_2gWqHPSw" key="_o292cFUWEeSyt_5RCl16VA">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY1wFRW6EeWV5_2gWqHPSw" value="_WY1wEhW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y57FMBWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY1wHBW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//ObjetGerable/proprietes"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y57FMRWYEeWV5_2gWqHPSw" key="_GTKfoN3YEeS5tN-iaIY7-w">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y57FNRWYEeWV5_2gWqHPSw" value="_Y57FMhWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY1wHRW6EeWV5_2gWqHPSw" key="_GTKfoN3YEeS5tN-iaIY7-w">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY1wIRW6EeWV5_2gWqHPSw" value="_WY1wHhW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y57FPBWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY1wKBW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//ObjetGerable/gardes"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y57FPRWYEeWV5_2gWqHPSw" key="_3A-wAFUUEeSyt_5RCl16VA">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y57FQRWYEeWV5_2gWqHPSw" value="_Y57FPhWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY1wKRW6EeWV5_2gWqHPSw" key="_3A-wAFUUEeSyt_5RCl16VA">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY1wLRW6EeWV5_2gWqHPSw" value="_WY1wKhW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y586YBWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY2-MBW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//StationPompage/pompes"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y586YRWYEeWV5_2gWqHPSw" key="_KIknUHVTEeSFwdJ1zkiD8w">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y586ZRWYEeWV5_2gWqHPSw" value="_Y586YhWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY3lQBW6EeWV5_2gWqHPSw" key="_KIknUHVTEeSFwdJ1zkiD8w">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY3lRBW6EeWV5_2gWqHPSw" value="_WY3lQRW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y59hcBWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY4MUBW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//Desordre/observations"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y59hcRWYEeWV5_2gWqHPSw" key="_FGNs4H64EeS_Q4eVxCk5uA">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y5-IgBWYEeWV5_2gWqHPSw" value="_Y59hchWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY4MURW6EeWV5_2gWqHPSw" key="_FGNs4H64EeS_Q4eVxCk5uA">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY4MVRW6EeWV5_2gWqHPSw" value="_WY4MUhW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y5_9sBWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY6BgBW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//Observation/photos"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y5_9sRWYEeWV5_2gWqHPSw" key="_w0RL8AoHEeW2PsRqbEhF5g">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y5_9tRWYEeWV5_2gWqHPSw" value="_Y5_9shWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY6BgRW6EeWV5_2gWqHPSw" key="_w0RL8AoHEeW2PsRqbEhF5g">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY6BhRW6EeWV5_2gWqHPSw" value="_WY6BghW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6AkwBWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY6okBW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//EvenementHydraulique/meteos"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6AkwRWYEeWV5_2gWqHPSw" key="_dJqjcHvGEeSMvKjasgWS-Q">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6AkxRWYEeWV5_2gWqHPSw" value="_Y6AkwhWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY6okRW6EeWV5_2gWqHPSw" key="_dJqjcHvGEeSMvKjasgWS-Q">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY6olRW6EeWV5_2gWqHPSw" value="_WY6okhW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6BL0BWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY7PoBW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//MonteeEaux/mesures"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6BL0RWYEeWV5_2gWqHPSw" key="_Qrc3wHowEeSCY8mEeQ0t9g">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6BL1RWYEeWV5_2gWqHPSw" value="_Y6BL0hWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY7PoRW6EeWV5_2gWqHPSw" key="_Qrc3wHowEeSCY8mEeQ0t9g">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY7PpRW6EeWV5_2gWqHPSw" value="_WY7PohW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6By4BWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY7PrBW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//LigneEau/mesuresXYZ"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6By4RWYEeWV5_2gWqHPSw" key="_NZG9QHowEeSCY8mEeQ0t9g">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6By5RWYEeWV5_2gWqHPSw" value="_Y6By4hWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY72sBW6EeWV5_2gWqHPSw" key="_NZG9QHowEeSCY8mEeQ0t9g">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY72tBW6EeWV5_2gWqHPSw" value="_WY72sRW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6By7BWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY72uxW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//LigneEau/mesuresDZ"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6By7RWYEeWV5_2gWqHPSw" key="_CIAaAAhaEeWDuecB0niLQw">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6By8RWYEeWV5_2gWqHPSw" value="_Y6By7hWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY72vBW6EeWV5_2gWqHPSw" key="_CIAaAAhaEeWDuecB0niLQw">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY72wBW6EeWV5_2gWqHPSw" value="_WY72vRW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6DBABWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY9E0BW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//Marche/maitreOeuvre"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6DBARWYEeWV5_2gWqHPSw" key="_mSxh8H7EEeS_Q4eVxCk5uA">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6DBBRWYEeWV5_2gWqHPSw" value="_Y6DBAhWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY9E0RW6EeWV5_2gWqHPSw" key="_mSxh8H7EEeS_Q4eVxCk5uA">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY9E1RW6EeWV5_2gWqHPSw" value="_WY9E0hW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6EPIBWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY9r4BW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//GardeTroncon/contactId"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6EPIRWYEeWV5_2gWqHPSw" key="_V_Xk_N03EeS5tN-iaIY7-w">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6EPJRWYEeWV5_2gWqHPSw" value="_Y6EPIhWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY9r4RW6EeWV5_2gWqHPSw" key="_V_Xk_N03EeS5tN-iaIY7-w">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY9r5RW6EeWV5_2gWqHPSw" value="_WY9r4hW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6E2MBWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY-S8BW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//ProprieteTroncon/organismeId"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6E2MRWYEeWV5_2gWqHPSw" key="_7q480N08EeS5tN-iaIY7-w">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6E2NRWYEeWV5_2gWqHPSw" value="_Y6E2MhWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY-S8RW6EeWV5_2gWqHPSw" key="_7q480N08EeS5tN-iaIY7-w">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY-S9RW6EeWV5_2gWqHPSw" value="_WY-S8hW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6FdQBWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY-6ABW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//GardeObjet/contactId"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6FdQRWYEeWV5_2gWqHPSw" key="_5D1_oFUUEeSyt_5RCl16VA">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6FdRRWYEeWV5_2gWqHPSw" value="_Y6FdQhWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY-6ARW6EeWV5_2gWqHPSw" key="_5D1_oFUUEeSyt_5RCl16VA">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY-6BRW6EeWV5_2gWqHPSw" value="_WY-6AhW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6GEUBWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY-6DBW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//GestionObjet/organismeId"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6GEURWYEeWV5_2gWqHPSw" key="_lCVuQFUWEeSyt_5RCl16VA">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6GEVRWYEeWV5_2gWqHPSw" value="_Y6GEUhWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY-6DRW6EeWV5_2gWqHPSw" key="_lCVuQFUWEeSyt_5RCl16VA">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY-6ERW6EeWV5_2gWqHPSw" value="_WY-6DhW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
             </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6GEXBWYEeWV5_2gWqHPSw">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fusibles"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6GEXRWYEeWV5_2gWqHPSw" key="_PgY_cBWXEeWV5_2gWqHPSw">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6GrYxWYEeWV5_2gWqHPSw" value="_Y6GrYBWYEeWV5_2gWqHPSw">
-                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
-                </value>
-              </value>
-            </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6GrahWYEeWV5_2gWqHPSw">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/seuils"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6GraxWYEeWV5_2gWqHPSw" key="_PgZmjBWXEeWV5_2gWqHPSw">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6GrbxWYEeWV5_2gWqHPSw" value="_Y6GrbBWYEeWV5_2gWqHPSw">
-                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
-                </value>
-              </value>
-            </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6HScBWYEeWV5_2gWqHPSw">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//ProfilTravers/parametresHydrauliques"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6HScRWYEeWV5_2gWqHPSw" key="_XWA7kHDKEeS-n5RTdhPTFw">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6HSdRWYEeWV5_2gWqHPSw" value="_Y6HSchWYEeWV5_2gWqHPSw">
-                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
-                </value>
-              </value>
-            </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6H5gBWYEeWV5_2gWqHPSw">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//LeveProfilTravers/pointsLeveXYZ"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6IgkBWYEeWV5_2gWqHPSw" key="_kNC_kHCiEeS-n5RTdhPTFw">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6IglBWYEeWV5_2gWqHPSw" value="_Y6IgkRWYEeWV5_2gWqHPSw">
-                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
-                </value>
-              </value>
-            </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6IgmxWYEeWV5_2gWqHPSw">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//LeveProfilTravers/pointsLeveDZ"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6IgnBWYEeWV5_2gWqHPSw" key="_zDMqAN4HEeS5tN-iaIY7-w">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6IgoBWYEeWV5_2gWqHPSw" value="_Y6IgnRWYEeWV5_2gWqHPSw">
-                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
-                </value>
-              </value>
-            </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6JusBWYEeWV5_2gWqHPSw">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//ProfilLong/pointsLeveXYZ"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6JusRWYEeWV5_2gWqHPSw" key="_DO3AUN4IEeS5tN-iaIY7-w">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6JutRWYEeWV5_2gWqHPSw" value="_Y6JushWYEeWV5_2gWqHPSw">
-                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
-                </value>
-              </value>
-            </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6KVwBWYEeWV5_2gWqHPSw">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//ProfilLong/pointsLeveDZ"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6KVwRWYEeWV5_2gWqHPSw" key="_JlL5YHSCEeSFwdJ1zkiD8w">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6KVxRWYEeWV5_2gWqHPSw" value="_Y6KVwhWYEeWV5_2gWqHPSw">
-                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
-                </value>
-              </value>
-            </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6K80BWYEeWV5_2gWqHPSw">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//ProfilLong/parametresHydrauliques"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6K80RWYEeWV5_2gWqHPSw" key="_Ih06wHSJEeSFwdJ1zkiD8w">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6K81RWYEeWV5_2gWqHPSw" value="_Y6K80hWYEeWV5_2gWqHPSw">
-                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
-                </value>
-              </value>
-            </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6Lj4BWYEeWV5_2gWqHPSw">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//MaitreOeuvreMarche/organismeId"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6Lj4RWYEeWV5_2gWqHPSw" key="_pk4y8H7EEeS_Q4eVxCk5uA">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6Lj5RWYEeWV5_2gWqHPSw" value="_Y6Lj4hWYEeWV5_2gWqHPSw">
-                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
-                </value>
-              </value>
-            </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6MK8BWYEeWV5_2gWqHPSw">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//PositionProfilTravers/photos"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6MK8RWYEeWV5_2gWqHPSw" key="_pY5BcNnhEeSLgYBcUGk4VA">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6MyABWYEeWV5_2gWqHPSw" value="_Y6MK8hWYEeWV5_2gWqHPSw">
-                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
-                </value>
-              </value>
-            </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6RqgBWYEeWV5_2gWqHPSw">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//GestionTroncon/organismeId"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6SRkBWYEeWV5_2gWqHPSw" key="_LgsY4N0yEeS5tN-iaIY7-w">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6SRlBWYEeWV5_2gWqHPSw" value="_Y6SRkRWYEeWV5_2gWqHPSw">
-                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
-                </value>
-              </value>
-            </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6SRmxWYEeWV5_2gWqHPSw">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//SyndicTroncon/syndicatId"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6SRnBWYEeWV5_2gWqHPSw" key="_nkW28N09EeS5tN-iaIY7-w">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6SRoBWYEeWV5_2gWqHPSw" value="_Y6SRnRWYEeWV5_2gWqHPSw">
-                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
-                </value>
-              </value>
-            </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_Y6S4oBWYEeWV5_2gWqHPSw">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//LevePositionProfilTravers/leveId"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_Y6S4oRWYEeWV5_2gWqHPSw" key="_z0awwN31EeS5tN-iaIY7-w">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_Y6S4pRWYEeWV5_2gWqHPSw" value="_Y6S4ohWYEeWV5_2gWqHPSw">
-                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
-                </value>
-              </value>
-            </value>
-            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_85-zEBWYEeWV5_2gWqHPSw">
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WY_hEBW6EeWV5_2gWqHPSw">
               <key xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fosses"/>
-              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_85-zERWYEeWV5_2gWqHPSw" key="_85-MABWYEeWV5_2gWqHPSw">
-                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_85-zFRWYEeWV5_2gWqHPSw" value="_85-zEhWYEeWV5_2gWqHPSw">
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WY_hERW6EeWV5_2gWqHPSw" key="_85-MABWYEeWV5_2gWqHPSw">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WY_hFRW6EeWV5_2gWqHPSw" value="_WY_hEhW6EeWV5_2gWqHPSw">
+                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
+                </value>
+              </value>
+            </value>
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WZAIJRW6EeWV5_2gWqHPSw">
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fusibles"/>
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WZAIJhW6EeWV5_2gWqHPSw" key="_PgY_cBWXEeWV5_2gWqHPSw">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WZAIKhW6EeWV5_2gWqHPSw" value="_WZAIJxW6EeWV5_2gWqHPSw">
+                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
+                </value>
+              </value>
+            </value>
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WZAvMBW6EeWV5_2gWqHPSw">
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/seuils"/>
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WZAvMRW6EeWV5_2gWqHPSw" key="_PgZmjBWXEeWV5_2gWqHPSw">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WZAvNRW6EeWV5_2gWqHPSw" value="_WZAvMhW6EeWV5_2gWqHPSw">
+                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
+                </value>
+              </value>
+            </value>
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WZAvPBW6EeWV5_2gWqHPSw">
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//ProfilTravers/parametresHydrauliques"/>
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WZAvPRW6EeWV5_2gWqHPSw" key="_XWA7kHDKEeS-n5RTdhPTFw">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WZAvQRW6EeWV5_2gWqHPSw" value="_WZAvPhW6EeWV5_2gWqHPSw">
+                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
+                </value>
+              </value>
+            </value>
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WZB9UBW6EeWV5_2gWqHPSw">
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//LeveProfilTravers/pointsLeveXYZ"/>
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WZB9URW6EeWV5_2gWqHPSw" key="_kNC_kHCiEeS-n5RTdhPTFw">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WZB9VRW6EeWV5_2gWqHPSw" value="_WZB9UhW6EeWV5_2gWqHPSw">
+                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
+                </value>
+              </value>
+            </value>
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WZB9XBW6EeWV5_2gWqHPSw">
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//LeveProfilTravers/pointsLeveDZ"/>
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WZB9XRW6EeWV5_2gWqHPSw" key="_zDMqAN4HEeS5tN-iaIY7-w">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WZCkYBW6EeWV5_2gWqHPSw" value="_WZB9XhW6EeWV5_2gWqHPSw">
+                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
+                </value>
+              </value>
+            </value>
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WZDLcBW6EeWV5_2gWqHPSw">
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//ProfilLong/pointsLeveXYZ"/>
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WZDLcRW6EeWV5_2gWqHPSw" key="_DO3AUN4IEeS5tN-iaIY7-w">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WZDLdRW6EeWV5_2gWqHPSw" value="_WZDLchW6EeWV5_2gWqHPSw">
+                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
+                </value>
+              </value>
+            </value>
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WZDygBW6EeWV5_2gWqHPSw">
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//ProfilLong/pointsLeveDZ"/>
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WZDygRW6EeWV5_2gWqHPSw" key="_JlL5YHSCEeSFwdJ1zkiD8w">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WZDyhRW6EeWV5_2gWqHPSw" value="_WZDyghW6EeWV5_2gWqHPSw">
+                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
+                </value>
+              </value>
+            </value>
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WZDyjBW6EeWV5_2gWqHPSw">
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//ProfilLong/parametresHydrauliques"/>
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WZDyjRW6EeWV5_2gWqHPSw" key="_Ih06wHSJEeSFwdJ1zkiD8w">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WZDykRW6EeWV5_2gWqHPSw" value="_WZDyjhW6EeWV5_2gWqHPSw">
+                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
+                </value>
+              </value>
+            </value>
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WZEZkBW6EeWV5_2gWqHPSw">
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//MaitreOeuvreMarche/organismeId"/>
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WZEZkRW6EeWV5_2gWqHPSw" key="_pk4y8H7EEeS_Q4eVxCk5uA">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WZEZlRW6EeWV5_2gWqHPSw" value="_WZEZkhW6EeWV5_2gWqHPSw">
+                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
+                </value>
+              </value>
+            </value>
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WZFAoBW6EeWV5_2gWqHPSw">
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//PositionProfilTravers/photos"/>
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WZFAoRW6EeWV5_2gWqHPSw" key="_pY5BcNnhEeSLgYBcUGk4VA">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WZFApRW6EeWV5_2gWqHPSw" value="_WZFAohW6EeWV5_2gWqHPSw">
+                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
+                </value>
+              </value>
+            </value>
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WZFnsBW6EeWV5_2gWqHPSw">
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//GestionTroncon/organismeId"/>
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WZFnsRW6EeWV5_2gWqHPSw" key="_LgsY4N0yEeS5tN-iaIY7-w">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WZFntRW6EeWV5_2gWqHPSw" value="_WZFnshW6EeWV5_2gWqHPSw">
+                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
+                </value>
+              </value>
+            </value>
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WZGOwBW6EeWV5_2gWqHPSw">
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//SyndicTroncon/syndicatId"/>
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WZGOwRW6EeWV5_2gWqHPSw" key="_nkW28N09EeS5tN-iaIY7-w">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WZGOxRW6EeWV5_2gWqHPSw" value="_WZGOwhW6EeWV5_2gWqHPSw">
+                  <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
+                </value>
+              </value>
+            </value>
+            <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_WZG10BW6EeWV5_2gWqHPSw">
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//LevePositionProfilTravers/leveId"/>
+              <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_WZG10RW6EeWV5_2gWqHPSw" key="_z0awwN31EeS5tN-iaIY7-w">
+                <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_WZG11RW6EeWV5_2gWqHPSw" value="_WZG10hW6EeWV5_2gWqHPSw">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
                 </value>
               </value>
@@ -8782,14 +8782,14 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_5KL9YFUCEeSyt_5RCl16VA" name="[0..*] contactOrganisme" sourceNode="_j2vxoEfgEeSoXJiONqf-1A" targetNode="_mUWf0FUCEeSyt_5RCl16VA">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//Organisme/contactOrganisme"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Organisme/contactOrganisme"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y553FhWYEeWV5_2gWqHPSw" description="_Y553EhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY1JBhW6EeWV5_2gWqHPSw" description="_WY1JAhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_zKS30MZeEeSYqtQW89EFmA" red="25" green="25" blue="35"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y553GBWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y553GRWYEeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY1JCBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY1JCRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y553GhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y553GxWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY1JChW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY1JCxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -8813,14 +8813,14 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_3A-wAFUUEeSyt_5RCl16VA" name="[0..*] gardes" sourceNode="__oqHQAO6EeWAFpz-FySxiw" targetNode="_wB8hUFUUEeSyt_5RCl16VA">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//ObjetGerable/gardes"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//ObjetGerable/gardes"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y57FQhWYEeWV5_2gWqHPSw" description="_Y57FPhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY1wLhW6EeWV5_2gWqHPSw" description="_WY1wKhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_NGxtEOHsEeSSsJWLqdyq6Q"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y57FRBWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y57FRRWYEeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY1wMBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY1wMRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y57FRhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y57FRxWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY1wMhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY1wMxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -8828,14 +8828,14 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_5D1_oFUUEeSyt_5RCl16VA" name="[1..1] contactId" sourceNode="_wB8hUFUUEeSyt_5RCl16VA" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//GardeObjet/contactId"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//GardeObjet/contactId"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6FdRhWYEeWV5_2gWqHPSw" description="_Y6FdQhWYEeWV5_2gWqHPSw" routingStyle="manhattan">
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY-6BhW6EeWV5_2gWqHPSw" description="_WY-6AhW6EeWV5_2gWqHPSw" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_QilngMZfEeSYqtQW89EFmA"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6FdSBWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6FdSRWYEeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY-6CBW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY-6CRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6FdShWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6FdSxWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY-6ChW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY-6CxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -8859,14 +8859,14 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_lCVuQFUWEeSyt_5RCl16VA" name="[1..1] organismeId" sourceNode="_lBRXQFUWEeSyt_5RCl16VA" targetNode="_j2vxoEfgEeSoXJiONqf-1A">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//GestionObjet/organismeId"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//GestionObjet/organismeId"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6GEVhWYEeWV5_2gWqHPSw" description="_Y6GEUhWYEeWV5_2gWqHPSw" routingStyle="manhattan">
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY-6EhW6EeWV5_2gWqHPSw" description="_WY-6DhW6EeWV5_2gWqHPSw" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_9janwMZeEeSYqtQW89EFmA"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6GEWBWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6GEWRWYEeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY-6FBW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY-6FRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6GEWhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6GEWxWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY-6FhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY-6FxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -8874,14 +8874,14 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_o292cFUWEeSyt_5RCl16VA" name="[0..*] gestions" sourceNode="__oqHQAO6EeWAFpz-FySxiw" targetNode="_lBRXQFUWEeSyt_5RCl16VA">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//ObjetGerable/gestions"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//ObjetGerable/gestions"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y56eMhWYEeWV5_2gWqHPSw" description="_Y56eLhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY1wFhW6EeWV5_2gWqHPSw" description="_WY1wEhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_MAFx0OHsEeSSsJWLqdyq6Q"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y56eNBWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y56eNRWYEeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY1wGBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY1wGRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y56eNhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y56eNxWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY1wGhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY1wGxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -9539,13 +9539,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_Jc8c0GM-EeSFhsNlhvvJ5w" name="[0..*] systemeReperageBornes" sourceNode="_e0PzAEfeEeSoXJiONqf-1A" targetNode="_PBF_UFQ_EeSV8-H6esGTsg">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//SystemeReperage/systemeReperageBornes"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//SystemeReperage/systemeReperageBornes"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y55QABWYEeWV5_2gWqHPSw" description="_Y54o8hWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y55QARWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y55QAhWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y55QAxWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WYz65hW6EeWV5_2gWqHPSw" description="_WYz64hW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WYz65xW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WYz66BW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WYz66RW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y55QBBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y55QBRWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WYz66hW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WYz66xW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -9739,14 +9739,14 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_kNC_kHCiEeS-n5RTdhPTFw" name="[0..*] pointsLeveXYZ" sourceNode="_dsIoQF6DEeSu4tBL7n5h2g" targetNode="_GGV6gOT9EeS27Ph2jXIweA">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//LeveProfilTravers/pointsLeveXYZ"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//LeveProfilTravers/pointsLeveXYZ"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6IglRWYEeWV5_2gWqHPSw" description="_Y6IgkRWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WZB9VhW6EeWV5_2gWqHPSw" description="_WZB9UhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_C91ScOKBEeSZrbGiFKaeGA" green="128"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6IglxWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6IgmBWYEeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WZB9WBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZB9WRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6IgmRWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6IgmhWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WZB9WhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZB9WxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -9754,13 +9754,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_XWA7kHDKEeS-n5RTdhPTFw" name="[0..*] parametresHydrauliques" sourceNode="_XLb7YF6DEeSu4tBL7n5h2g" targetNode="_aIgL0F63EeSu4tBL7n5h2g">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//ProfilTravers/parametresHydrauliques"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//ProfilTravers/parametresHydrauliques"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6HSdhWYEeWV5_2gWqHPSw" description="_Y6HSchWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6HSdxWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6HSeBWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6HSeRWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WZAvQhW6EeWV5_2gWqHPSw" description="_WZAvPhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WZAvQxW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WZAvRBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZAvRRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6HSehWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6HSexWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WZAvRhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZAvRxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -9768,14 +9768,14 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_JlL5YHSCEeSFwdJ1zkiD8w" name="[0..*] pointsLeveDZ" sourceNode="_uNwtEF67EeSu4tBL7n5h2g" targetNode="_kz_wEOT8EeS27Ph2jXIweA">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//ProfilLong/pointsLeveDZ"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//ProfilLong/pointsLeveDZ"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6KVxhWYEeWV5_2gWqHPSw" description="_Y6KVwhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WZDyhhW6EeWV5_2gWqHPSw" description="_WZDyghW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_LYa5IOKBEeSZrbGiFKaeGA" green="128"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6KVyBWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6KVyRWYEeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WZDyiBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZDyiRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6KVyhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6KVyxWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WZDyihW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZDyixW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -9783,13 +9783,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_Ih06wHSJEeSFwdJ1zkiD8w" name="[0..*] parametresHydrauliques" sourceNode="_uNwtEF67EeSu4tBL7n5h2g" targetNode="_I8xaAF9DEeSu4tBL7n5h2g">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//ProfilLong/parametresHydrauliques"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//ProfilLong/parametresHydrauliques"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6K81hWYEeWV5_2gWqHPSw" description="_Y6K80hWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6K81xWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6K82BWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6K82RWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WZDykhW6EeWV5_2gWqHPSw" description="_WZDyjhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WZDykxW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WZDylBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZDylRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6K82hWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6K82xWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WZDylhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZDylxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -9797,13 +9797,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_KIknUHVTEeSFwdJ1zkiD8w" name="[0..*] pompes" sourceNode="_8CMkkEiGEeSShKVOxlfrCQ" targetNode="_TCtS0EiHEeSShKVOxlfrCQ">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//StationPompage/pompes"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//StationPompage/pompes"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y586ZhWYEeWV5_2gWqHPSw" description="_Y586YhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y586ZxWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y586aBWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y586aRWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY3lRRW6EeWV5_2gWqHPSw" description="_WY3lQRW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WY3lRhW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY3lRxW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY3lSBW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y586ahWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y586axWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY3lSRW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY3lShW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -9811,14 +9811,14 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_NZG9QHowEeSCY8mEeQ0t9g" name="[0..*] mesuresXYZ" sourceNode="_RwJssEixEeSShKVOxlfrCQ" targetNode="_4ePf4AhYEeWDuecB0niLQw">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//LigneEau/mesuresXYZ"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//LigneEau/mesuresXYZ"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6By5hWYEeWV5_2gWqHPSw" description="_Y6By4hWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY72tRW6EeWV5_2gWqHPSw" description="_WY72sRW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_aGKcQAhaEeWDuecB0niLQw" green="128"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6By6BWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6By6RWYEeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY72txW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY72uBW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6By6hWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6By6xWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY72uRW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY72uhW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -9826,13 +9826,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_Qrc3wHowEeSCY8mEeQ0t9g" name="[0..*] mesures" sourceNode="_BRrIEEixEeSShKVOxlfrCQ" targetNode="_xtbhoEixEeSShKVOxlfrCQ">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//MonteeEaux/mesures"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//MonteeEaux/mesures"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6BL1hWYEeWV5_2gWqHPSw" description="_Y6BL0hWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6BL1xWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6BL2BWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6BL2RWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY7PphW6EeWV5_2gWqHPSw" description="_WY7PohW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WY7PpxW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY7PqBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY7PqRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6BL2hWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6BL2xWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY7PqhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY7PqxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -10012,13 +10012,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_dJqjcHvGEeSMvKjasgWS-Q" name="[0..*] meteos" sourceNode="_FTOHYEiwEeSShKVOxlfrCQ" targetNode="_dwHUEEiwEeSShKVOxlfrCQ">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//EvenementHydraulique/meteos"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//EvenementHydraulique/meteos"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6AkxhWYEeWV5_2gWqHPSw" description="_Y6AkwhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6AkxxWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6AkyBWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6AkyRWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY6olhW6EeWV5_2gWqHPSw" description="_WY6okhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WY6olxW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY6omBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY6omRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6AkyhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6AkyxWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY6omhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY6omxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -10026,13 +10026,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_FGNs4H64EeS_Q4eVxCk5uA" name="[0..*] observations" sourceNode="_7fxRUEikEeSShKVOxlfrCQ" targetNode="_PDVXkEilEeSShKVOxlfrCQ">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//Desordre/observations"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Desordre/observations"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y5-IgRWYEeWV5_2gWqHPSw" description="_Y59hchWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y5-IghWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y5-IgxWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y5-IhBWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY4MVhW6EeWV5_2gWqHPSw" description="_WY4MUhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WY4MVxW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY4MWBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY4MWRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y5-IhRWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y5-IhhWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY4MWhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY4MWxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -10118,14 +10118,14 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_mSxh8H7EEeS_Q4eVxCk5uA" name="[0..*] maitreOeuvre" sourceNode="_nJ0C0Ei6EeSShKVOxlfrCQ" targetNode="_f58-sH7EEeS_Q4eVxCk5uA">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//Marche/maitreOeuvre"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Marche/maitreOeuvre"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6DoEBWYEeWV5_2gWqHPSw" description="_Y6DBAhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY9E1hW6EeWV5_2gWqHPSw" description="_WY9E0hW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_CtdOQMZgEeSYqtQW89EFmA"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6DoEhWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6DoExWYEeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY9E2BW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY9E2RW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6DoFBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6DoFRWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY9E2hW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY9E2xW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -10133,14 +10133,14 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_pk4y8H7EEeS_Q4eVxCk5uA" name="[1..1] organismeId" sourceNode="_f58-sH7EEeS_Q4eVxCk5uA" targetNode="_j2vxoEfgEeSoXJiONqf-1A">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//MaitreOeuvreMarche/organismeId"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//MaitreOeuvreMarche/organismeId"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6Lj5hWYEeWV5_2gWqHPSw" description="_Y6Lj4hWYEeWV5_2gWqHPSw" routingStyle="manhattan">
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WZEZlhW6EeWV5_2gWqHPSw" description="_WZEZkhW6EeWV5_2gWqHPSw" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_vIku0MZeEeSYqtQW89EFmA"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6Lj6BWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6Lj6RWYEeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WZEZmBW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZEZmRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6Lj6hWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6Lj6xWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WZEZmhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZEZmxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -10148,13 +10148,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_Owc1IH-KEeSOeabJ-GPliw" name="[0..*] photos" sourceNode="_LV6tYAoCEeW2PsRqbEhF5g" targetNode="_NDoboEffEeSoXJiONqf-1A">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//ObjetPhotographiable/photos"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//ObjetPhotographiable/photos"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y56eJhWYEeWV5_2gWqHPSw" description="_Y56eIhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y56eJxWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y56eKBWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y56eKRWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY1JEhW6EeWV5_2gWqHPSw" description="_WY1JDhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WY1JExW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY1JFBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY1JFRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y56eKhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y56eKxWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY1JFhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY1JFxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -11224,13 +11224,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_pY5BcNnhEeSLgYBcUGk4VA" name="[0..*] photos" sourceNode="_fw6QANngEeSLgYBcUGk4VA" targetNode="_NDoboEffEeSoXJiONqf-1A">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//PositionProfilTravers/photos"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//PositionProfilTravers/photos"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6MyARWYEeWV5_2gWqHPSw" description="_Y6MK8hWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6MyAhWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6MyAxWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6MyBBWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WZFAphW6EeWV5_2gWqHPSw" description="_WZFAohW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WZFApxW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WZFAqBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZFAqRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6MyBRWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6MyBhWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WZFAqhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZFAqxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -11491,13 +11491,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_LgsY4N0yEeS5tN-iaIY7-w" name="[1..1] organismeId" sourceNode="_Lc-WgN0yEeS5tN-iaIY7-w" targetNode="_j2vxoEfgEeSoXJiONqf-1A">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//GestionTroncon/organismeId"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//GestionTroncon/organismeId"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6SRlRWYEeWV5_2gWqHPSw" description="_Y6SRkRWYEeWV5_2gWqHPSw" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6SRlhWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6SRlxWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6SRmBWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WZFnthW6EeWV5_2gWqHPSw" description="_WZFnshW6EeWV5_2gWqHPSw" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WZFntxW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WZFnuBW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZFnuRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6SRmRWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6SRmhWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WZFnuhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZFnuxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -11505,13 +11505,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_kaot8N0yEeS5tN-iaIY7-w" name="[0..*] gestions" sourceNode="_DBuuUEfeEeSoXJiONqf-1A" targetNode="_Lc-WgN0yEeS5tN-iaIY7-w">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//TronconDigue/gestions"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//TronconDigue/gestions"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y53a1hWYEeWV5_2gWqHPSw" description="_Y53a0hWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y53a1xWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y53a2BWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y53a2RWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WYysxhW6EeWV5_2gWqHPSw" description="_WYyswhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WYysxxW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WYysyBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WYysyRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y53a2hWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y53a2xWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WYysyhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WYysyxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -11567,13 +11567,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_V_Xk_N03EeS5tN-iaIY7-w" name="[1..1] contactId" sourceNode="_Y6Q2gN08EeS5tN-iaIY7-w" targetNode="_Qsz24EfhEeSoXJiONqf-1A">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//GardeTroncon/contactId"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//GardeTroncon/contactId"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6EPJhWYEeWV5_2gWqHPSw" description="_Y6EPIhWYEeWV5_2gWqHPSw" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6EPJxWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6EPKBWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6EPKRWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY9r5hW6EeWV5_2gWqHPSw" description="_WY9r4hW6EeWV5_2gWqHPSw" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WY9r5xW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY9r6BW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY9r6RW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6EPKhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6EPKxWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY9r6hW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY9r6xW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -11713,13 +11713,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_7q480N08EeS5tN-iaIY7-w" name="[1..1] organismeId" sourceNode="_wVZ3oFRKEeSV8-H6esGTsg" targetNode="_j2vxoEfgEeSoXJiONqf-1A">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//ProprieteTroncon/organismeId"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//ProprieteTroncon/organismeId"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6E2NhWYEeWV5_2gWqHPSw" description="_Y6E2MhWYEeWV5_2gWqHPSw" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6E2NxWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6E2OBWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6E2ORWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY-S9hW6EeWV5_2gWqHPSw" description="_WY-S8hW6EeWV5_2gWqHPSw" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WY-S9xW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY-S-BW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY-S-RW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6E2OhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6E2OxWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY-S-hW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY-S-xW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -11758,13 +11758,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_nkW28N09EeS5tN-iaIY7-w" name="[1..1] syndicatId" sourceNode="_feHvoN09EeS5tN-iaIY7-w" targetNode="_AgpAQN08EeS5tN-iaIY7-w">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//SyndicTroncon/syndicatId"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//SyndicTroncon/syndicatId"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6SRoRWYEeWV5_2gWqHPSw" description="_Y6SRnRWYEeWV5_2gWqHPSw" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6SRohWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6SRoxWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6SRpBWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WZGOxhW6EeWV5_2gWqHPSw" description="_WZGOwhW6EeWV5_2gWqHPSw" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WZGOxxW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WZGOyBW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZGOyRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6SRpRWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6SRphWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WZGOyhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZGOyxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -11901,13 +11901,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_GTKfoN3YEeS5tN-iaIY7-w" name="[0..*] proprietes" sourceNode="__oqHQAO6EeWAFpz-FySxiw" targetNode="__HJaUN3WEeS5tN-iaIY7-w">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//ObjetGerable/proprietes"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//ObjetGerable/proprietes"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y57FNhWYEeWV5_2gWqHPSw" description="_Y57FMhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y57FNxWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y57FOBWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y57FORWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY1wIhW6EeWV5_2gWqHPSw" description="_WY1wHhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WY1wIxW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY1wJBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY1wJRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y57FOhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y57FOxWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY1wJhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY1wJxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -12086,13 +12086,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_z0awwN31EeS5tN-iaIY7-w" name="[1..1] leveId" sourceNode="_EohSAN30EeS5tN-iaIY7-w" targetNode="_dsIoQF6DEeSu4tBL7n5h2g">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//LevePositionProfilTravers/leveId"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//LevePositionProfilTravers/leveId"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6S4phWYEeWV5_2gWqHPSw" description="_Y6S4ohWYEeWV5_2gWqHPSw" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6S4pxWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6S4qBWYEeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6S4qRWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WZG11hW6EeWV5_2gWqHPSw" description="_WZG10hW6EeWV5_2gWqHPSw" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WZG11xW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WZG12BW6EeWV5_2gWqHPSw" labelFormat="bold" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZG12RW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6S4qhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6S4qxWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WZG12hW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZG12xW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -12193,14 +12193,14 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_zDMqAN4HEeS5tN-iaIY7-w" name="[0..*] pointsLeveDZ" sourceNode="_dsIoQF6DEeSu4tBL7n5h2g" targetNode="_vlZdIOT8EeS27Ph2jXIweA">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//LeveProfilTravers/pointsLeveDZ"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//LeveProfilTravers/pointsLeveDZ"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6IgoRWYEeWV5_2gWqHPSw" description="_Y6IgnRWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WZCkYRW6EeWV5_2gWqHPSw" description="_WZB9XhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_ES0IYOKBEeSZrbGiFKaeGA" green="128"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6IgoxWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6IgpBWYEeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WZCkYxW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZCkZBW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6IgpRWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6IgphWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WZCkZRW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZCkZhW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -12208,14 +12208,14 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_DO3AUN4IEeS5tN-iaIY7-w" name="[0..*] pointsLeveXYZ" sourceNode="_uNwtEF67EeSu4tBL7n5h2g" targetNode="_PpUFkOT9EeS27Ph2jXIweA">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//ProfilLong/pointsLeveXYZ"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//ProfilLong/pointsLeveXYZ"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6JuthWYEeWV5_2gWqHPSw" description="_Y6JushWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WZDLdhW6EeWV5_2gWqHPSw" description="_WZDLchW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_N2W7MOKBEeSZrbGiFKaeGA" green="128"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6JuuBWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6JuuRWYEeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WZDLeBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZDLeRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6JuuhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6JuuxWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WZDLehW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZDLexW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -13063,14 +13063,14 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_CIAaAAhaEeWDuecB0niLQw" name="[0..*] mesuresDZ" sourceNode="_RwJssEixEeSShKVOxlfrCQ" targetNode="_SVH-UAhZEeWDuecB0niLQw">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//LigneEau/mesuresDZ"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//LigneEau/mesuresDZ"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6By8hWYEeWV5_2gWqHPSw" description="_Y6By7hWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY72wRW6EeWV5_2gWqHPSw" description="_WY72vRW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
           <customFeatures>strokeColor</customFeatures>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_ZA_j8AhaEeWDuecB0niLQw" green="128"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6By9BWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6By9RWYEeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY72wxW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY72xBW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6By9hWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6By9xWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY72xRW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY72xhW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -13207,13 +13207,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_w0RL8AoHEeW2PsRqbEhF5g" name="[0..*] photos" sourceNode="_PDVXkEilEeSShKVOxlfrCQ" targetNode="_NDoboEffEeSoXJiONqf-1A">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//Observation/photos"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Observation/photos"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y5_9thWYEeWV5_2gWqHPSw" description="_Y5_9shWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y5_9txWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y5_9uBWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y5_9uRWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY6BhhW6EeWV5_2gWqHPSw" description="_WY6BghW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WY6BhxW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WY6BiBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY6BiRW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y5_9uhWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y5_9uxWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WY6BihW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WY6BixW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -13373,13 +13373,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_PgY_cBWXEeWV5_2gWqHPSw" name="[0..*] fusibles" sourceNode="_HX4owFrCEeS5fNILrts1cg" targetNode="_cTQDYBWWEeWV5_2gWqHPSw">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fusibles"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fusibles"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6GrZBWYEeWV5_2gWqHPSw" description="_Y6GrYBWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6GrZRWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6GrZhWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6GrZxWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WZAIKxW6EeWV5_2gWqHPSw" description="_WZAIJxW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WZAILBW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WZAILRW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZAILhW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6GraBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6GraRWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WZAILxW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZAIMBW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -13387,13 +13387,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_PgZmjBWXEeWV5_2gWqHPSw" name="[0..*] seuils" sourceNode="_HX4owFrCEeS5fNILrts1cg" targetNode="_anoPEBWWEeWV5_2gWqHPSw">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/seuils"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/seuils"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_Y6GrcBWYEeWV5_2gWqHPSw" description="_Y6GrbBWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6GrcRWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_Y6GrchWYEeWV5_2gWqHPSw" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6GrcxWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WZAvNhW6EeWV5_2gWqHPSw" description="_WZAvMhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WZAvNxW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WZAvOBW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZAvORW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_Y6GrdBWYEeWV5_2gWqHPSw" labelSize="6" showIcon="false">
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Y6GrdRWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WZAvOhW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZAvOxW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
@@ -13471,15 +13471,13 @@
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_85-MABWYEeWV5_2gWqHPSw" name="[0..*] fosses" sourceNode="_HX4owFrCEeS5fNILrts1cg" targetNode="_84Y3oBWYEeWV5_2gWqHPSw">
         <target xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fosses"/>
         <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fosses"/>
-        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_85_aIBWYEeWV5_2gWqHPSw" description="_85-zEhWYEeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
-          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_85_aIRWYEeWV5_2gWqHPSw"/>
-          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_85_aIhWYEeWV5_2gWqHPSw" showIcon="false">
-            <customFeatures>labelSize</customFeatures>
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_85_aIxWYEeWV5_2gWqHPSw"/>
+        <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_WY_hFhW6EeWV5_2gWqHPSw" description="_WY_hEhW6EeWV5_2gWqHPSw" sourceArrow="FillDiamond" routingStyle="manhattan">
+          <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_WZAIIBW6EeWV5_2gWqHPSw"/>
+          <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_WZAIIRW6EeWV5_2gWqHPSw" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZAIIhW6EeWV5_2gWqHPSw"/>
           </centerLabelStyle>
-          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_85_aJBWYEeWV5_2gWqHPSw" showIcon="false">
-            <customFeatures>labelSize</customFeatures>
-            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_85_aJRWYEeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
+          <endLabelStyle xmi:type="diagram:EndLabelStyle" xmi:id="_WZAIIxW6EeWV5_2gWqHPSw" labelSize="6" showIcon="false">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_WZAIJBW6EeWV5_2gWqHPSw" red="39" green="76" blue="114"/>
           </endLabelStyle>
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>

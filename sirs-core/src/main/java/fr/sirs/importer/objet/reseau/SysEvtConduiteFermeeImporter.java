@@ -68,7 +68,7 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter,
-                typePositionImporter, null);
+                typePositionImporter, null, null);
         this.typeEcoulementImporter = typeEcoulementImporter;
         this.typeImplantationImporter = typeImplantationImporter;
         this.typeConduiteFermeeImporter = typeConduiteFermeeImporter;

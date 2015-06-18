@@ -55,7 +55,7 @@ class SysEvtOuvrageParticulierEchelleLimnimetriqueImporter extends GenericReseau
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter,
-                typePositionImporter, null);
+                typePositionImporter, null, null);
     }
 
     private enum Columns {

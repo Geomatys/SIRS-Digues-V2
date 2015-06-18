@@ -59,7 +59,7 @@ class SysEvtStationDePompageImporter extends GenericReseauImporter<StationPompag
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter,
-                typePositionImporter, null);
+                typePositionImporter, null, null);
         this.pompeImporter = pompeImporter;
     }
 
