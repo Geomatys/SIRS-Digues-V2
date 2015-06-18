@@ -52,40 +52,22 @@ public class ReferenceChecker extends Task<Void> {
     private final Map<Class<ReferenceType>, Map<ReferenceType, ReferenceType>> incoherentReferences = new HashMap<>();
     
     private final Map<Class, List<ReferenceType>> serverInstancesNotLocal = new HashMap<>();
-
-    public Map<Class, List<ReferenceType>> getServerInstancesNotLocal() {
-        return serverInstancesNotLocal;
-    }
+    public Map<Class, List<ReferenceType>> getServerInstancesNotLocal() { return serverInstancesNotLocal;}
 
     private final Map<Class<ReferenceType>, List<ReferenceType>> localInstancesNotOnTheServer = new HashMap<>();
-
-    public Map<Class<ReferenceType>, List<ReferenceType>> getLocalInstancesNotOnTheServer() {
-        return localInstancesNotOnTheServer;
-    }
+    public Map<Class<ReferenceType>, List<ReferenceType>> getLocalInstancesNotOnTheServer() { return localInstancesNotOnTheServer;}
 
     private List<Class<ReferenceType>> serverClassReferences;
-
-    public List<Class<ReferenceType>> getServerClassReferences() {
-        return serverClassReferences;
-    }
+    public List<Class<ReferenceType>> getServerClassReferences() {return serverClassReferences;}
 
     private List<String> serverClassNameReferencesNotLocal;
-
-    public List<String> getServerClassNameReferencesNotLocal() {
-        return serverClassNameReferencesNotLocal;
-    }
+    public List<String> getServerClassNameReferencesNotLocal() {return serverClassNameReferencesNotLocal;}
 
     private List<Class<? extends ReferenceType>> localClassReferences;
-
-    public List<Class<? extends ReferenceType>> getLocalClassReferences() {
-        return localClassReferences;
-    }
+    public List<Class<? extends ReferenceType>> getLocalClassReferences() {return localClassReferences;}
 
     private List<String> localClassNameReferencesNotOnServer;
-
-    public List<String> getLocalClassNameReferencesNotOnServer() {
-        return localClassNameReferencesNotOnServer;
-    }
+    public List<String> getLocalClassNameReferencesNotOnServer() {return localClassNameReferencesNotOnServer;}
 
     private void checkAllReferences() throws IOException {
         updateMessage("Vérification des références.");
@@ -499,7 +481,6 @@ public class ReferenceChecker extends Task<Void> {
                 serverClassNameReferencesNotLocal.add(className);
             }
         }
-
         return classes;
     }
 
