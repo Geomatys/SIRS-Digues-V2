@@ -4,7 +4,6 @@ import com.healthmarketscience.jackcess.DatabaseBuilder;
 
 import fr.sirs.AbstractRestartableStage;
 import fr.sirs.Loader;
-import fr.sirs.Plugins;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.core.component.DatabaseRegistry;

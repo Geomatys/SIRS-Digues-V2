@@ -262,7 +262,9 @@ public class DatabaseRegistry {
      * @return A connector to queried database.
      * @throws java.io.IOException If an error occurs while connecting to couchDb database.
      */
-    public ConfigurableApplicationContext connectToSirsDatabase(String dbName, final boolean createIfNotExists, final boolean initIndex, final boolean initChangeListener) throws IOException {
+    public ConfigurableApplicationContext connectToSirsDatabase(String dbName, 
+            final boolean createIfNotExists, final boolean initIndex, 
+            final boolean initChangeListener) throws IOException {
         final String dbContext = getContextPath(dbName);
         try {
             CouchDbConnector connector = couchDbInstance.createConnector(dbContext, createIfNotExists);
@@ -273,9 +275,7 @@ public class DatabaseRegistry {
 
             final ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext(
                     new String[]{SirsCore.SPRING_CONTEXT}, parentContext);
-
-            appContext.getBean(SirsDBInfoRepository.class).get().ifPresent(info -> SirsCore.LOGGER.info(info.toString()));
-
+            
             if (initIndex) {
                 ElasticSearchEngine elasticEngine = new ElasticSearchEngine(
                         couchDbUrl.getHost(), (couchDbUrl.getPort() < 0) ? 5984 : couchDbUrl.getPort(), dbContext, username, userPass);

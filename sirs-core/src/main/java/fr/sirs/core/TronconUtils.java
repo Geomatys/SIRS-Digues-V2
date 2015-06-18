@@ -739,7 +739,7 @@ public class TronconUtils {
      * @param borneRepo Database  connection to read {@link BorneDigue} objects referenced in target {@link SystemeReperage}.
      * @return Value of the computed PR, or {@link Float.NaN} if we cannot compute any.
      */
-    public static float computePR(final SegmentInfo[] refLinear, final SystemeReperage targetSR, final Point toGetPRFor, final BorneDigueRepository borneRepo) {
+    public static float computePR(final SegmentInfo[] refLinear, final SystemeReperage targetSR, final Point toGetPRFor, final AbstractSIRSRepository<BorneDigue> borneRepo) {
         ArgumentChecks.ensureNonNull("Reference linear", refLinear);
         ArgumentChecks.ensureNonNull("Target SR", targetSR);
         ArgumentChecks.ensureNonNull("Point to compute PR for", toGetPRFor);

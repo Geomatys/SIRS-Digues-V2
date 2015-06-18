@@ -1,6 +1,7 @@
 package fr.sirs.core;
 
 import static fr.sirs.core.SirsCore.COMPONENT_PACKAGE;
+import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DatabaseRegistry;
@@ -96,18 +97,29 @@ public class SessionCore extends SessionGen implements ApplicationContextAware {
             this.applicationContext = applicationContext;
     }
     
+
+    /**
+     * Find a repository for update operations on {@link Element} of given type.
+     * @param <T>
+     * @param elementType The class of the type we want a {@link AbstractSIRSRepository} for. (Ex : RefMateriau.class, TronconDigue.class, etc.)
+     * @return A valid repository for input type. Never null.
+     */
     public <T extends Element> AbstractSIRSRepository<T> getRepositoryForClass(Class<T> elementType) {
-        System.out.println(elementType);
         return applicationContext.getBeansOfType(AbstractSIRSRepository.class).get(COMPONENT_PACKAGE+"."+elementType.getSimpleName()+"Repository");
     }
     
+    /**
+     * Find a repository for update operations on {@link Element} of given type.
+     * @param type The name of the type we want a {@link AbstractSIRSRepository} for. (Ex : RefMateriau, TronconDigue, etc.)
+     * @return A valid repository for input type. Never null.. 
+     */
     public AbstractSIRSRepository getRepositoryForType(String type) {
         Class c;
         try {
             c = Class.forName(type);
         } catch (ClassNotFoundException ex1) {
             try {
-                c = Class.forName(SirsCore.MODEL_PACKAGE+"."+type);
+                c = Class.forName(MODEL_PACKAGE+"."+type);
             } catch (ClassNotFoundException ex2) {
                 throw new IllegalArgumentException("No repository can be found for argument "+type);
             }

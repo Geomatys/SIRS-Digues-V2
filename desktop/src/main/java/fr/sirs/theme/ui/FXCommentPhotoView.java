@@ -129,7 +129,7 @@ public class FXCommentPhotoView extends SplitPane {
                 final Path imagePath = SIRS.getDocumentAbsolutePath(selected.getChemin());
                 // TODO : How to manage image loading error ? No exception is thrown here...
                 uiPhotoView.setImage(new Image(imagePath.toUri().toURL().toExternalForm()));
-                uiPhotoLibelle.textProperty().bind(selected.commentaireProperty());
+                uiPhotoLibelle.setText("");
                 // Do not bind directly date as string because it can return ugly "null" text.
                 uiPhotoDate.textProperty().bind(
                         Bindings.createStringBinding(() -> {
