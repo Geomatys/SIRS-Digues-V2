@@ -22,6 +22,7 @@ import fr.sirs.core.model.Utilisateur;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
 import fr.sirs.util.SimpleButtonColumn;
+import fr.sirs.util.property.SirsPreferences;
 
 import java.io.File;
 import java.io.IOException;
@@ -214,6 +215,7 @@ public class FXLauncherPane extends BorderPane {
         uiLocalBaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         uiLocalBaseTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
+        uiMajServerURL.setText(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.UPDATE_PLUGINS_URL));
         uiInstallPluginBtn.setDisable(true);
         uiDeletePluginBtn.setDisable(true);
 

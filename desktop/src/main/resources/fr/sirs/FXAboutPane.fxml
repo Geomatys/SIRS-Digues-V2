@@ -7,7 +7,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="fond" stylesheets="@splashscreen.css" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="fond" stylesheets="@splashscreen.css" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <left>
       <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
          <image>
@@ -26,19 +26,25 @@
       </Label>
    </top>
    <padding>
-      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
    </padding>
    <center>
-      <VBox spacing="10.0" BorderPane.alignment="CENTER">
+      <VBox spacing="5.0" BorderPane.alignment="CENTER">
          <children>
             <Label text="Application de gestion des digues" />
-            <HBox>
+            <HBox alignment="CENTER_LEFT">
                <children>
                   <Label text="Version : " />
                   <Label fx:id="uiVersionLabel" />
+                  <StackPane>
+                     <children>
+                        <Hyperlink fx:id="uiMajLink" text="Mettre à jour" />
+                        <ProgressIndicator fx:id="uiMajProgress" prefHeight="20.0" prefWidth="20.0" />
+                     </children>
+                  </StackPane>
                </children>
             </HBox>
-            <Hyperlink fx:id="uiHyperLink" text="Site communautaire" />
+            <Hyperlink fx:id="uiCommunityLink" text="Site communautaire" />
          </children>
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

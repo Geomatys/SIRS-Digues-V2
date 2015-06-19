@@ -1,17 +1,17 @@
 package fr.sirs;
 
 import fr.sirs.core.SirsCore;
-import java.awt.Desktop;
-import java.net.URI;
+import java.net.URL;
 import java.util.logging.Level;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.web.WebView;
-import javafx.stage.Stage;
 
 /**
  *
@@ -22,32 +22,43 @@ public class FXAboutPane extends BorderPane {
     private static final String FRANCE_DIGUES_URL = "http://sirs-digues.info";
     
     @FXML
-    private Hyperlink uiHyperLink;
+    private Hyperlink uiCommunityLink;
 
     @FXML
     private Label uiVersionLabel;
     
+    
+    @FXML
+    private Hyperlink uiMajLink;
+        
+    @FXML
+    private ProgressIndicator uiMajProgress;
+    
     public FXAboutPane() {
         SIRS.loadFXML(this);
         uiVersionLabel.setText(SIRS.getVersion());
-        uiHyperLink.setUnderline(true);
-        uiHyperLink.setOnAction((ActionEvent event) -> {
-            if (Desktop.isDesktopSupported()) {
-                new Thread(() -> {
-                    try {
-                        Desktop.getDesktop().browse(new URI(FRANCE_DIGUES_URL));
-                    } catch (Exception ex) {
-                        SIRS.LOGGER.log(Level.WARNING, null, ex);
-                    }
-                }).start();
-            } else {
-                final WebView webView = new WebView();
-                final Stage infoStage = new Stage();
-                infoStage.getIcons().add(SirsCore.ICON);
-                infoStage.setTitle("Site communautaire");
-                infoStage.setScene(new Scene(webView));
-                infoStage.show();
-                webView.getEngine().load(FRANCE_DIGUES_URL);
+        uiCommunityLink.setUnderline(true);
+        uiCommunityLink.setOnAction((ActionEvent event) -> {
+            try {
+                SIRS.browseURL(new URL(FRANCE_DIGUES_URL), "Site communautaire");
+            } catch (Exception ex) {
+                SIRS.LOGGER.log(Level.WARNING, null, ex);
+            }
+        });
+        
+        // Update check process
+        uiMajLink.setVisible(false);
+        final Task<SirsCore.UpdateInfo> checkUpdate = SirsCore.checkUpdate();
+        uiMajProgress.visibleProperty().bind(checkUpdate.runningProperty());
+        checkUpdate.setOnSucceeded(event -> {
+            Object value = event.getSource().getValue();
+            if (value instanceof SirsCore.UpdateInfo) {
+                final SirsCore.UpdateInfo info = (SirsCore.UpdateInfo) value;
+                Platform.runLater(() -> {
+                    uiMajLink.setTooltip(new Tooltip("vers " + info.distantVersion));
+                    uiMajLink.setVisible(true);
+                    uiMajLink.setOnAction(ae -> SIRS.browseURL(info.updateURL, "Mise à jour"));
+                });
             }
         });
     }

@@ -1,7 +1,10 @@
 package fr.sirs.core;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.util.property.Internal;
+import fr.sirs.util.property.SirsPreferences;
+import java.awt.Desktop;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -10,15 +13,26 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
+import javafx.scene.web.WebView;
+import javafx.stage.Stage;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
@@ -238,5 +252,120 @@ public class SirsCore {
                 }
         }
         return properties;
+    }
+    
+    /**
+     * Utility method which will check for application updates. The check is 
+     * done in an asynchronous task, to avoid freeze of the application while 
+     * searching for updates. If an update has been found, result of the task 
+     * will be information about upgrade, including update package download URL.
+     * 
+     * @return The task which has been submitted for update check.
+     */
+    public static Task<UpdateInfo> checkUpdate() {
+        return TaskManager.INSTANCE.submit("Vérification des mises à jour", () -> {
+            String localVersion = getVersion();
+            if (localVersion == null || localVersion.isEmpty()) 
+                throw new IllegalStateException("La version locale de l'application est illisible !");
+            final String updateAddr = SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.UPDATE_CORE_URL);
+            try {
+                final URL updateURL = new URL(updateAddr);
+                Map config = new ObjectMapper().readValue(updateURL, Map.class);
+                final Object distantVersion = config.get("version");
+                if (distantVersion instanceof String && localVersion.compareTo((String) distantVersion) <= 0) {
+                    final Object packageUrl = config.get("url");
+                    if (packageUrl instanceof String) {
+                        return new UpdateInfo(localVersion, (String) distantVersion, new URL((String) packageUrl));
+                    }
+                }
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "Cannot access update service : " + updateAddr, e);
+            }
+            return null;
+        });
+    }
+    
+    /**
+     * Try to open a system browser to visit given address. If system browser cannot
+     * open input URL, we'll try with a web view.
+     * @param toBrowse The address of the page to display. If null, the method does nothing.
+     */
+    public static void browseURL(final URL toBrowse) {
+        browseURL(toBrowse, null);
+    }
+    
+    /**
+     * Try to open a system browser to visit given address. If system browser cannot
+     * open input URL, we'll try with a web view. A new stage will be opened for 
+     * the web view, and input title will be set on the stage.
+     * 
+     * @param toBrowse The address of the page to display. If null, the method does nothing.
+     * @param title A title set to displayed web view. If null, no title will be set.
+     */
+    public static void browseURL(final URL toBrowse, final String title) {
+        browseURL(toBrowse, title, false);
+    }
+    
+
+    /**
+     * Try to open a system browser to visit given address. If system browser cannot
+     * open input URL, we'll try with a web view. A new stage will be opened for 
+     * the web view, and input title will be set on the stage.
+     * 
+     * @param toBrowse The address of the page to display. If null, the method does nothing.
+     * @param title A title set to displayed web view. If null, no title will be set.
+     * @param showAndWait If true, opened browser will lock application until its opened. If false, 
+     * browser is launched asynchronously.
+     */
+    public static void browseURL(final URL toBrowse, final String title, final boolean showAndWait) {
+        if (toBrowse == null) 
+            return;
+        if (Desktop.isDesktopSupported()) {
+            final Thread t = new Thread(() -> {
+                try {
+                    Desktop.getDesktop().browse(toBrowse.toURI());
+                } catch (Exception ex) {
+                    LOGGER.log(Level.WARNING, "Cannot browse following URL with system browser : "+toBrowse, ex);
+                }
+            });
+            t.start();
+            if (showAndWait)
+                try {
+                    t.join();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        } else {
+            final WebView webView = new WebView();
+            final Stage infoStage = new Stage();
+            infoStage.getIcons().add(SirsCore.ICON);
+            if (title != null) 
+                infoStage.setTitle(title);
+            infoStage.setScene(new Scene(webView));
+            webView.getEngine().load(toBrowse.toExternalForm());
+            if (showAndWait)
+                infoStage.showAndWait();
+            else
+                infoStage.show();
+        }
+    }
+    
+    /**
+     * Simple structure to store information about an update.
+     * TODO : add changelog
+     */
+    public static final class UpdateInfo {
+        /** Version of currently installed application. */
+        public final String localVersion;
+        /** Version of found update. */
+        public final String distantVersion;
+        /** Download URL for update package. */
+        public final URL updateURL;
+
+        public UpdateInfo(String localVersion, String distantVersion, URL updateURL) {
+            this.localVersion = localVersion;
+            this.distantVersion = distantVersion;
+            this.updateURL = updateURL;
+        }
     }
 }
