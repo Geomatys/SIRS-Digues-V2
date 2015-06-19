@@ -110,8 +110,6 @@ fr.sirs.core.model.ReseauTelecomEnergie
 fr.sirs.core.model.Seuil
 fr.sirs.core.model.SommetRisberme
 fr.sirs.core.model.StationPompage
-fr.sirs.core.model.Syndicat
-fr.sirs.core.model.SyndicTroncon
 fr.sirs.core.model.SystemeEndiguement
 fr.sirs.core.model.SystemeReperageBorne
 fr.sirs.core.model.SystemeReperage

@@ -29,6 +29,7 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.BorneDigue;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
@@ -41,6 +42,7 @@ import fr.sirs.core.model.PrZPointImporter;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.map.ExportTask;
 import fr.sirs.theme.ColumnOrder;
 import fr.sirs.util.SirsStringConverter;
@@ -1138,9 +1140,9 @@ public class PojoTable extends BorderPane {
             else{
                 final double result = (double) TronconUtils.computePR(
                         posInfo.getTronconSegments(false), 
-                        Injector.getSession().getSystemeReperageRepository().get(posInfo.getTroncon().getSystemeRepDefautId()), 
+                        Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(posInfo.getTroncon().getSystemeRepDefautId()), 
                         new GeometryFactory().createPoint(new Coordinate(point.getX(),point.getY())), 
-                        Injector.getSession().getBorneDigueRepository());
+                        Injector.getSession().getRepositoryForClass(BorneDigue.class));
                 return result;
             }
         }
@@ -1167,9 +1169,9 @@ public class PojoTable extends BorderPane {
             
             final double result = TronconUtils.switchSRForPR(posInfo.getTronconSegments(false), 
                     point.getD(),
-                    Injector.getSession().getSystemeReperageRepository().get(pointImporter.getSystemeRepDzId()),
-                    Injector.getSession().getSystemeReperageRepository().get(posInfo.getTroncon().getSystemeRepDefautId()),
-                    Injector.getSession().getBorneDigueRepository());
+                    Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(pointImporter.getSystemeRepDzId()),
+                    Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(posInfo.getTroncon().getSystemeRepDefautId()),
+                    Injector.getSession().getRepositoryForClass(BorneDigue.class));
             return result;
         }
     }
@@ -1389,17 +1391,12 @@ public class PojoTable extends BorderPane {
             final String prefix = bundle.getString(BUNDLE_KEY_CLASS_ABREGE)+" : ";
             final ComboBox<Preview> comboBox;
             if(tronconSourceProperty.get()==null){
-                comboBox = new ComboBox<Preview>(FXCollections.observableArrayList(Injector.getSession().getPreviews().getByClass(pojoClass)));
+                comboBox = new ComboBox<>(FXCollections.observableArrayList(Injector.getSession().getPreviews().getByClass(pojoClass)));
             }
             else{
                 
-                comboBox = new ComboBox<Preview>(FXCollections.observableArrayList(Injector.getSession().getPreviews().getByClass(pojoClass)).filtered(new Predicate<Preview>() {
-
-                    @Override
-                    public boolean test(Preview t) {
-                        return tronconSourceProperty.get().equals(t.getDocId());
-                    }
-                }));
+                comboBox = new ComboBox<>(FXCollections.observableArrayList(Injector.getSession().getPreviews().getByClass(pojoClass))
+                        .filtered((Preview t) -> { return tronconSourceProperty.get().equals(t.getDocId());}));
             }
             comboBox.setConverter(new StringConverter<Preview>() {
 
@@ -1415,22 +1412,14 @@ public class PojoTable extends BorderPane {
             });
             
             final Button cancel = new Button("Annuler");
-            cancel.setOnAction(new EventHandler<ActionEvent>() {
-
-                @Override
-                public void handle(ActionEvent event) {
+            cancel.setOnAction((ActionEvent event) -> {
                     retrievedElement.set(null);
                     hide();
-                }
             });
             final Button add = new Button("Ajouter");
-            add.setOnAction(new EventHandler<ActionEvent>() {
-
-                @Override
-                public void handle(ActionEvent event) {
+            add.setOnAction((ActionEvent event) -> {
                     retrievedElement.set(addExistingPojo(comboBox.valueProperty().get()));
                     hide();
-                }
             });
             final HBox hBox = new HBox(cancel, add);
             hBox.setAlignment(Pos.CENTER);
@@ -1446,17 +1435,11 @@ public class PojoTable extends BorderPane {
             return retrievedElement;
         }
         
-        protected Element addExistingPojo(final Preview summary) {
+        protected Element addExistingPojo(final Preview preview) {
             Object result = null;
             if (repo != null) {
-                result = repo.get(summary.getDocId());
-            } 
-//            else {
-//                final Set<String> id = new HashSet<>();
-//                id.add(summary.getElementId());
-//                result = SIRS.getStructures(id, pojoClass).get(0);
-//            }
-
+                result = repo.get(preview.getDocId());
+            }
 
             if (result!=null && result instanceof Element) {
                 uiTable.getItems().add((Element) result);

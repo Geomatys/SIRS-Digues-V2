@@ -3,11 +3,15 @@ package fr.sirs;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.PositionDocumentRepository;
+import fr.sirs.core.component.PositionProfilTraversRepository;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.core.model.PositionDocument;
+import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Preview;
@@ -278,9 +282,9 @@ public final class SIRS extends SirsCore {
             final Preview summary = Injector.getSession().getPreviews().get(documentId);
             final Class clazz = Class.forName(summary.getElementClass(), true, Thread.currentThread().getContextClassLoader());
             if(clazz==ProfilTravers.class){
-                return FXCollections.observableList(Injector.getSession().getPositionProfilTraversRepository().getByDocumentId(documentId));
+                return FXCollections.observableList(((PositionProfilTraversRepository)Injector.getSession().getRepositoryForClass(PositionProfilTravers.class)).getByDocumentId(documentId));
             } else {
-                return FXCollections.observableList(Injector.getSession().getPositionDocumentRepository().getByDocumentId(documentId));
+                return FXCollections.observableList(((PositionDocumentRepository)Injector.getSession().getRepositoryForClass(PositionDocument.class)).getByDocumentId(documentId));
             }
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(SIRS.class.getName()).log(Level.SEVERE, null, ex);

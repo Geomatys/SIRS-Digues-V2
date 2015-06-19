@@ -39,7 +39,6 @@ import fr.sirs.importer.objet.ObjetManager;
 import fr.sirs.importer.system.TypeDonneesSousGroupeImporter;
 import fr.sirs.importer.troncon.GardienTronconGestionImporter;
 import fr.sirs.importer.troncon.ProprietaireTronconGestionImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueSyndicatImporter;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -109,7 +108,6 @@ public class DbImporter {
     private ObjetManager objetManager;
     private GardienTronconGestionImporter tronconGestionDigueGardienImporter;
     private ProprietaireTronconGestionImporter tronconGestionDigueProprietaireImporter;
-    private TronconGestionDigueSyndicatImporter tronconGestionDigueSyndicatImporter;
     private PositionDocumentImporter documentImporter;
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
@@ -278,7 +276,7 @@ public class DbImporter {
 //     SYNCHRO_JOURNAL,
 //     SYNCHRO_ORGANISME_BD,
 //     SYNCHRO_SUIVI_BD,
-     SYNDICAT,
+//     SYNDICAT,
 //     SYS_DONNEES_LOCALISEES_EN_PR,
      SYS_EVT_AUTRE_OUVRAGE_HYDRAULIQUE,
 //     SYS_EVT_BRISE_LAME, // Dans le module "ouvrages à la mer" (2015)
@@ -369,7 +367,7 @@ public class DbImporter {
      TRONCON_GESTION_DIGUE_COMMUNE,
      TRONCON_GESTION_DIGUE_GESTIONNAIRE,
 //     TRONCON_GESTION_DIGUE_SITUATION_FONCIERE, // Plus dans le modèle
-     TRONCON_GESTION_DIGUE_SYNDICAT,
+//     TRONCON_GESTION_DIGUE_SYNDICAT,
 //     TYPE_COMPOSITION, // Pas dans le nouveau modèle.
      TYPE_CONDUITE_FERMEE,
      TYPE_CONVENTION,
@@ -523,9 +521,6 @@ public class DbImporter {
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, intervenantImporter, 
                 organismeImporter);
-        tronconGestionDigueSyndicatImporter = new TronconGestionDigueSyndicatImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter,
-                systemeReperageImporter, borneDigueImporter);
         documentImporter = new PositionDocumentImporter(accessDatabase, 
                 couchDbConnector, tronconGestionDigueImporter, borneDigueImporter, 
                 intervenantImporter, organismeImporter, systemeReperageImporter, 
@@ -658,7 +653,6 @@ public class DbImporter {
         objetManager.link();
         tronconGestionDigueGardienImporter.compute();
         tronconGestionDigueProprietaireImporter.compute();
-        tronconGestionDigueSyndicatImporter.compute();
         
         for(final GenericEntityLinker linker : linkers) linker.link();
         tronconGestionDigueImporter.update();

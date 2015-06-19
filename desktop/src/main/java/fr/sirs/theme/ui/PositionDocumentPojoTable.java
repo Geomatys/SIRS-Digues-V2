@@ -1,7 +1,6 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
-import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.TronconDigue;
 import java.lang.reflect.InvocationTargetException;
@@ -24,8 +23,7 @@ public class PositionDocumentPojoTable<T extends AbstractPositionDocument> exten
     @Override
     protected T createPojo() {
         final T position = (T) super.createPojo();
-        final TronconDigueRepository tronconDigueRepository = Injector.getSession().getTronconDigueRepository();
-        final TronconDigue premierTroncon = tronconDigueRepository.getAll().get(0);
+        final TronconDigue premierTroncon = Injector.getSession().getRepositoryForClass(TronconDigue.class).getOne();
         position.setForeignParentId(premierTroncon.getId());
         try {
             ((Property<String>) propertyMethodToListen.invoke(position)).setValue(propertyReference);

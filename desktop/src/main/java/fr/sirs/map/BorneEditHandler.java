@@ -144,7 +144,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                 if(ids.size()==1){
                     //borne edition mode
                     final String borneId = lst.get(0).getBorneId();
-                    borne = session.getBorneDigueRepository().get(borneId);
+                    borne = session.getRepositoryForClass(BorneDigue.class).get(borneId);
                     updateGeometry();
                 }else{
                     borne = null;
@@ -159,7 +159,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
             TronconDigue troncon = editPane.tronconProperty().get();
             if (troncon != null) {
                 //on recupere la derniere version, la maj des sr entraine la maj des troncons
-                troncon = session.getTronconDigueRepository().get(troncon.getDocumentId());
+                troncon = session.getRepositoryForClass(TronconDigue.class).get(troncon.getDocumentId());
                 //on recalcule les geometries des positionables du troncon.
                 TronconUtils.updatePositionableGeometry(troncon, session);
             }
@@ -291,7 +291,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                     if(feature !=null){
                         Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
                         if(bean instanceof TronconDigue){
-                            bean = session.getTronconDigueRepository().get(((TronconDigue)bean).getDocumentId());
+                            bean = session.getRepositoryForClass(TronconDigue.class).get(((TronconDigue)bean).getDocumentId());
                             editPane.tronconProperty().set((TronconDigue)bean);
                         }
                     }
@@ -366,7 +366,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
             mouseDragged(me);
             if(borne!=null && editGeometry.selectedNode[0]>=0){
                 borne.setGeometry((Point) editGeometry.geometry);
-                session.getBorneDigueRepository().update(borne);
+                session.getRepositoryForClass(BorneDigue.class).update(borne);
                 editPane.selectSRB(null);
                 //les event vont induire le repaint de la carte
                 editPane.sortBorneTable();

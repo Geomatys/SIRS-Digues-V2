@@ -1501,25 +1501,10 @@
       <eAnnotations source="foreignParent"/>
     </eStructuralFeatures>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Syndicat">
-    <eAnnotations source="couchDBDocument">
-      <details key="document" value="true "/>
-    </eAnnotations>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="GardeTroncon" eSuperTypes="#//PeriodeLocaliseeTroncon">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="contactId" lowerBound="1"
         eType="#//Contact"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SyndicTroncon" eSuperTypes="#//PeriodeLocaliseeTroncon">
-    <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="syndicatId" lowerBound="1"
-        eType="#//Syndicat"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PeriodeObjet" abstract="true">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>

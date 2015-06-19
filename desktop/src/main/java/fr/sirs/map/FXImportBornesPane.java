@@ -6,6 +6,7 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.CRS_WGS84;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
@@ -302,7 +303,7 @@ public class FXImportBornesPane extends BorderPane {
             @Override
             protected Object call() throws Exception {
                 final TronconDigue troncon;
-                TronconDigueRepository tdRepo = Injector.getSession().getTronconDigueRepository();
+                final AbstractSIRSRepository<TronconDigue> tdRepo = Injector.getSession().getRepositoryForClass(TronconDigue.class);
                 if (selectedTd instanceof TronconDigue) {
                     troncon = (TronconDigue) selectedTd;
                 } else if (selectedTd instanceof Preview) {
@@ -319,7 +320,7 @@ Injector.getSession().getProjection(),
 
                 boolean mustUpdateTroncon = false;
                 try (final FeatureIterator it = selection.iterator()) {
-                    final BorneDigueRepository borneRepo = Injector.getSession().getBorneDigueRepository();
+                    final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
                     while (it.hasNext()) {
                         Feature current = it.next();
                         // We can cast here because we checked property type at loading. 

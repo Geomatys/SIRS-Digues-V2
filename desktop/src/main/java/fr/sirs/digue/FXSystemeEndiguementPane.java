@@ -5,7 +5,7 @@ import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.component.DigueRepository;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
@@ -142,7 +142,7 @@ public class FXSystemeEndiguementPane extends BorderPane {
         final Preview tech = uiTechnique.getValue();
         se.setGestionnaireTechniqueId( tech==null ? null : tech.getElementId());
         se.setDateMaj(LocalDateTime.now());
-        session.getSystemeEndiguementRepository().update(se);
+        session.getRepositoryForClass(SystemeEndiguement.class).update(se);
     }
     
     @FXML
@@ -166,7 +166,7 @@ public class FXSystemeEndiguementPane extends BorderPane {
             final SystemeEndiguement sd = endiguementProp.get();
             if(sd==null) return FXCollections.emptyObservableList();
             
-            final DigueRepository digueRepository = session.getDigueRepository();
+            final AbstractSIRSRepository<Digue> digueRepository = session.getRepositoryForClass(Digue.class);
             final List<String> digueIds = sd.getDigueIds();
             final ObservableList<Element> digues = FXCollections.observableArrayList();
             for(String id : digueIds){
@@ -182,10 +182,9 @@ public class FXSystemeEndiguementPane extends BorderPane {
         }
 
         @Override
-        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
-            final DigueRepository digueRepository = session.getDigueRepository();            
+        protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {  
             final Element digue = event.getRowValue();
-            digueRepository.update((Digue)digue);
+            session.getRepositoryForClass(Digue.class).update((Digue)digue);
         }
 
         @Override

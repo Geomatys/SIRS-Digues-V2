@@ -36,6 +36,7 @@ import org.opengis.util.FactoryException;
 
 import static fr.sirs.core.LinearReferencingUtilities.*;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.PositionProfilTraversRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Desordre;
@@ -368,7 +369,7 @@ public class TronconUtils {
      */
     public static List<Photo> getPhotoList(final String linearId){
         final List<Photo> photos = new ArrayList<>();
-        final List<PositionProfilTravers> positions = InjectorCore.getBean(SessionCore.class).getPositionProfilTraversRepository().getByLinearId(linearId);
+        final List<PositionProfilTravers> positions = ((PositionProfilTraversRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(PositionProfilTravers.class)).getByLinearId(linearId);
         final List<Objet> objets = getObjetList(linearId);
         for(final PositionProfilTravers position : positions){
             final List<Photo> p = position.getPhotos();
@@ -435,7 +436,7 @@ public class TronconUtils {
      */
     public static TronconDigue mergeTroncon(TronconDigue mergeResult, TronconDigue mergeParam, SessionGen session) {
         
-        final SystemeReperageRepository srRepo = session.getSystemeReperageRepository();
+        final SystemeReperageRepository srRepo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
         
         // on ajoute les bornes. Pas de copie / modification ici, car les bornes 
         // sont indépendantes des tronçons.
@@ -557,8 +558,8 @@ public class TronconUtils {
      */
     public static void updateSRElementaire(TronconDigue troncon, SessionCore session){
                 
-        final SystemeReperageRepository srRepo = session.getSystemeReperageRepository();
-        final BorneDigueRepository bdRepo = session.getBorneDigueRepository();
+        final SystemeReperageRepository srRepo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
+        final AbstractSIRSRepository<BorneDigue> bdRepo = session.getRepositoryForClass(BorneDigue.class);
         
         final List<SystemeReperage> srs = srRepo.getByLinearId(troncon.getId());
         
@@ -640,14 +641,15 @@ public class TronconUtils {
      * la géometrie ou que les SR du troncon aient changés.
      * 
      * @param troncon 
+     * @param session 
      */
     public static void updatePositionableGeometry(TronconDigue troncon, SessionGen session){
         for(Objet obj : getObjetList(troncon)){
             final LineString structGeom = buildGeometry(
-                    troncon.getGeometry(), obj, session.getBorneDigueRepository());
+                    troncon.getGeometry(), obj, session.getRepositoryForClass(BorneDigue.class));
             obj.setGeometry(structGeom);
         }     
-        session.getTronconDigueRepository().update(troncon);
+        session.getRepositoryForClass(TronconDigue.class).update(troncon);
     }
     
     
@@ -667,7 +669,7 @@ public class TronconUtils {
             final double initialPR, 
             final SystemeReperage initialSR, 
             final SystemeReperage targetSR, 
-            final BorneDigueRepository borneRepo){
+            final AbstractSIRSRepository<BorneDigue> borneRepo){
         ArgumentChecks.ensureNonNull("Reference linear", refLinear);
         ArgumentChecks.ensureNonNull("Initial SR", initialSR);
         ArgumentChecks.ensureNonNull("Target SR", targetSR);
@@ -882,16 +884,16 @@ public class TronconUtils {
                 // Maybe we have an incomplete version of the document, so we try by querying repository.
                 if (troncon == null) {
                     try {
-                        troncon = session.getTronconDigueRepository().get(pos.getDocumentId());
+                        troncon = session.getRepositoryForClass(TronconDigue.class).get(pos.getDocumentId());
                     } catch (Exception e) {
                         troncon = null;
                     }
                 }
                 // Last chance, we must try to get it from SR
                 if (troncon == null && pos.getSystemeRepId() != null) {
-                    SystemeReperage sr = session.getSystemeReperageRepository().get(pos.getSystemeRepId());
+                    SystemeReperage sr = session.getRepositoryForClass(SystemeReperage.class).get(pos.getSystemeRepId());
                     if (sr.getLinearId() != null) {
-                        troncon = session.getTronconDigueRepository().get(sr.getLinearId());
+                        troncon = session.getRepositoryForClass(TronconDigue.class).get(sr.getLinearId());
                     }
                 }
             }
@@ -940,7 +942,7 @@ public class TronconUtils {
             if (point == null) {
                 if (pos.getBorneDebutId() != null) {
                     //calcule a partir des bornes
-                    final Point bornePoint = session.getBorneDigueRepository().get(pos.getBorneDebutId()).getGeometry();
+                    final Point bornePoint = session.getRepositoryForClass(BorneDigue.class).get(pos.getBorneDebutId()).getGeometry();
                     double dist = pos.getBorne_debut_distance();
                     if (pos.getBorne_debut_aval()) {
                         dist *= -1;
@@ -951,7 +953,7 @@ public class TronconUtils {
                     point = pos.getPositionFin();
 
                 } else if (pos.getBorneFinId() != null) {
-                    final Point bornePoint = session.getBorneDigueRepository().get(pos.getBorneFinId()).getGeometry();
+                    final Point bornePoint = session.getRepositoryForClass(BorneDigue.class).get(pos.getBorneFinId()).getGeometry();
                     double dist = pos.getBorne_fin_distance();
                     if (pos.getBorne_fin_aval()) {
                         dist *= -1;
@@ -997,7 +999,7 @@ public class TronconUtils {
             if (point == null) {
                 if (pos.getBorneFinId() != null) {
                     //calcule a partir des bornes
-                    final Point bornePoint = session.getBorneDigueRepository().get(pos.getBorneFinId()).getGeometry();
+                    final Point bornePoint = session.getRepositoryForClass(BorneDigue.class).get(pos.getBorneFinId()).getGeometry();
                     double dist = pos.getBorne_fin_distance();
                     if (pos.getBorne_fin_aval()) {
                         dist *= -1;
@@ -1008,7 +1010,7 @@ public class TronconUtils {
                     point = pos.getPositionDebut();
                     
                 } else if (pos.getBorneDebutId() != null) {
-                    final Point bornePoint = session.getBorneDigueRepository().get(pos.getBorneDebutId()).getGeometry();
+                    final Point bornePoint = session.getRepositoryForClass(BorneDigue.class).get(pos.getBorneDebutId()).getGeometry();
                     double dist = pos.getBorne_debut_distance();
                     if (pos.getBorne_debut_aval()) {
                         dist *= -1;
@@ -1048,7 +1050,7 @@ public class TronconUtils {
                 //On utilise le SR du troncon
                 srid = getTroncon().getSystemeRepDefautId();
                 if(srid==null) return new PosSR();
-                final SystemeReperage sr = session.getSystemeReperageRepository().get(srid);
+                final SystemeReperage sr = session.getRepositoryForClass(SystemeReperage.class).get(srid);
                 if(sr==null) return new PosSR();
                 return getForSR(sr);
             }else{
@@ -1074,7 +1076,7 @@ public class TronconUtils {
             final List<Point> references = new ArrayList<>();
             for(SystemeReperageBorne srb : sr.systemeReperageBornes){
                 final String bid = srb.getBorneId();
-                final BorneDigue bd = session.getBorneDigueRepository().get(bid);
+                final BorneDigue bd = session.getRepositoryForClass(BorneDigue.class).get(bid);
                 if(bd!=null){ 
                     bornes.add(bd);
                     references.add(bd.getGeometry());

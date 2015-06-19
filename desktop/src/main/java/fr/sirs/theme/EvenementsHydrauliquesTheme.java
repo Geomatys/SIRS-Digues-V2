@@ -1,6 +1,7 @@
 package fr.sirs.theme;
 
 import fr.sirs.Injector;
+import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.theme.ui.PojoTable;
 import javafx.scene.Parent;
 
@@ -16,7 +17,7 @@ public class EvenementsHydrauliquesTheme extends Theme {
 
     @Override
     public Parent createPane() {
-        return new PojoTable(Injector.getSession().getEvenementHydrauliqueRepository(), null);
+        return new PojoTable(Injector.getSession().getRepositoryForClass(EvenementHydraulique.class), null);
     }
     
 }

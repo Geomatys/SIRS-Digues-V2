@@ -92,7 +92,7 @@ public class FXTronconMerge extends VBox{
             final Session session = Injector.getSession();
 
             final TronconDigue merge = troncons.get(0).copy();
-            final TronconDigueRepository tronconRepo = session.getTronconDigueRepository();
+            final AbstractSIRSRepository<TronconDigue> tronconRepo = session.getRepositoryForClass(TronconDigue.class);
             tronconRepo.add(merge);
             try {
                 final StringBuilder sb = new StringBuilder(troncons.get(0).getLibelle());
@@ -137,7 +137,7 @@ public class FXTronconMerge extends VBox{
                         }
                     }
                 }
-                session.getTronconDigueRepository().update(current);
+                session.getRepositoryForClass(TronconDigue.class).update(current);
                 it.remove();
             }
             

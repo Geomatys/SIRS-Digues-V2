@@ -93,11 +93,11 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         
         final Organisme organisme;
         if (newValue == null) {
-            organisme = Injector.getSession().getOrganismeRepository().create();
-            uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDateTime.now()); Injector.getSession().getOrganismeRepository().add(organisme);});
+            organisme = Injector.getSession().getRepositoryForClass(Organisme.class).create();
+            uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDateTime.now()); Injector.getSession().getRepositoryForClass(Organisme.class).add(organisme);});
         } else {
             organisme = newValue;
-            uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDateTime.now()); Injector.getSession().getOrganismeRepository().update(organisme);});
+            uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDateTime.now()); Injector.getSession().getRepositoryForClass(Organisme.class).update(organisme);});
         }
         
         date_maj.valueProperty().bind(organisme.dateMajProperty());

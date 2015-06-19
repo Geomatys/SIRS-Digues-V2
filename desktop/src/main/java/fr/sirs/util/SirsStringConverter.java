@@ -9,6 +9,7 @@ import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.AvecLibelle;
+import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.PositionDocument;
@@ -48,7 +49,7 @@ public class SirsStringConverter extends StringConverter {
         if(item instanceof SystemeReperageBorne){
             final SystemeReperageBorne srb = (SystemeReperageBorne) item;
             final Session session = Injector.getBean(Session.class);
-            item = session.getBorneDigueRepository().get(srb.getBorneId());
+            item = session.getRepositoryForClass(BorneDigue.class).get(srb.getBorneId());
         }
 
         StringBuilder text = new StringBuilder();

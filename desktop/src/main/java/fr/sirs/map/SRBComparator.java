@@ -5,7 +5,7 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.core.LinearReferencingUtilities;
-import fr.sirs.core.component.BorneDigueRepository;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperageBorne;
 import java.util.Comparator;
@@ -18,12 +18,12 @@ public class SRBComparator implements Comparator<SystemeReperageBorne>{
 
     private final LineString linear;
     private final LinearReferencingUtilities.SegmentInfo[] segments;
-    private final BorneDigueRepository repo;
+    private final AbstractSIRSRepository<BorneDigue> repo;
 
     public SRBComparator(LineString line) {
         this.linear = line;
         this.segments = LinearReferencingUtilities.buildSegments(linear);
-        this.repo = Injector.getSession().getBorneDigueRepository();
+        this.repo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
     }
     
     @Override

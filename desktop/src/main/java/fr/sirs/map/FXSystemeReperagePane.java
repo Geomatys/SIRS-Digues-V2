@@ -7,7 +7,8 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
-import fr.sirs.core.component.BorneDigueRepository;
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.SystemeReperage;
@@ -197,7 +198,7 @@ public class FXSystemeReperagePane extends BorderPane {
     public void save() {
         final SystemeReperage sr = systemeReperageProperty().get();
         if(sr!=null){
-            session.getSystemeReperageRepository().update(sr, tronconProperty().get());
+            ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).update(sr, tronconProperty().get());
         }
     }
     
@@ -210,7 +211,6 @@ public class FXSystemeReperagePane extends BorderPane {
         final SystemeReperage csr = systemeReperageProperty().get();
         if(csr==null || troncon==null) return;
         
-        final BorneDigueRepository repo = session.getBorneDigueRepository();
         
         //liste de toutes les bornes
         final SortedSet<BorneDigue> bornes = new TreeSet<>(new Comparator<BorneDigue>() {
@@ -219,6 +219,8 @@ public class FXSystemeReperagePane extends BorderPane {
                 return o1.getLibelle().compareToIgnoreCase(o2.getLibelle());
             }
         });
+        
+        final AbstractSIRSRepository<BorneDigue> repo = session.getRepositoryForClass(BorneDigue.class);
         for(String bid : troncon.getBorneIds()){
             bornes.add(repo.get(bid));
         }
@@ -263,7 +265,7 @@ public class FXSystemeReperagePane extends BorderPane {
         
         final LineString linear = LinearReferencingUtilities.asLineString(troncon.getGeometry());
         final LinearReferencingUtilities.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(linear);
-        final BorneDigueRepository repo = session.getBorneDigueRepository();
+        final AbstractSIRSRepository<BorneDigue> repo = session.getRepositoryForClass(BorneDigue.class);
         
         //calcule des distances réels par rapport au début du troncon
         for(int i=0;i<lst.length;i++){
@@ -296,7 +298,7 @@ public class FXSystemeReperagePane extends BorderPane {
         
         final LineString linear = LinearReferencingUtilities.asLineString(troncon.getGeometry());
         final LinearReferencingUtilities.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(linear);
-        final BorneDigueRepository repo = session.getBorneDigueRepository();
+        final AbstractSIRSRepository<BorneDigue> repo = session.getRepositoryForClass(BorneDigue.class);
         
         final ObservableList<SystemeReperageBorne> lst = uiBorneTable.getSelectionModel().getSelectedItems();
         
@@ -331,10 +333,10 @@ public class FXSystemeReperagePane extends BorderPane {
         
         
         final String srName = opt.get();
-        final SystemeReperage sr = session.getSystemeReperageRepository().create();
+        final SystemeReperage sr = session.getRepositoryForClass(SystemeReperage.class).create();
         sr.setLibelle(srName);
         sr.setLinearId(troncon.getDocumentId());
-        session.getSystemeReperageRepository().add(sr, troncon);
+        ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).add(sr, troncon);
         
         //maj de la liste des SR
         updateSrList(null, null, null);
@@ -356,10 +358,10 @@ public class FXSystemeReperagePane extends BorderPane {
         
         //creation de la borne
         final String borneLbl = opt.get();
-        final BorneDigue borne = session.getBorneDigueRepository().create();
+        final BorneDigue borne = session.getRepositoryForClass(BorneDigue.class).create();
         borne.setLibelle(borneLbl);
         borne.setGeometry(geom);
-        session.getBorneDigueRepository().add(borne);
+        session.getRepositoryForClass(BorneDigue.class).add(borne);
         
         createBorne(borne);
     }
@@ -382,7 +384,7 @@ public class FXSystemeReperagePane extends BorderPane {
         
         //sauvegarde du SR
         sr.systemeReperageBornes.add(srb);
-        session.getSystemeReperageRepository().update(sr, tronconProperty().get());
+        ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).update(sr, tronconProperty().get());
         updateBorneTable(null, null, null);
         
     }
@@ -402,7 +404,7 @@ public class FXSystemeReperagePane extends BorderPane {
             uiSrComboBox.setItems(FXCollections.emptyObservableList());
         } else {
             mode.set(Mode.NONE);
-            final List<SystemeReperage> srs = session.getSystemeReperageRepository().getByLinear(troncon);
+            final List<SystemeReperage> srs = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).getByLinear(troncon);
             uiSrComboBox.setItems(FXCollections.observableArrayList(srs));
             
             final String defaultSRID = troncon.getSystemeRepDefautId();

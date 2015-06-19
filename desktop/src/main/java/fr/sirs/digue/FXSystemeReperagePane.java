@@ -80,13 +80,13 @@ public class FXSystemeReperagePane extends BorderPane {
         
         sr.setCommentaire(uiComment.getHtmlText());
         final Session session = Injector.getBean(Session.class);
-        final SystemeReperageRepository repo = session.getSystemeReperageRepository();
+        final SystemeReperageRepository repo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
         
         final String tcId = sr.getLinearId();
         if (tcId == null || tcId.isEmpty()) {
             throw new IllegalArgumentException("Aucun tronçon n'est associé au SR. Sauvegarde impossible.");
         }
-        final TronconDigue troncon = session.getTronconDigueRepository().get(tcId);
+        final TronconDigue troncon = session.getRepositoryForClass(TronconDigue.class).get(tcId);
         repo.update(sr, troncon);
     }
     

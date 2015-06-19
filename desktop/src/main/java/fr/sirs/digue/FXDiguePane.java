@@ -4,6 +4,7 @@ import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
+import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
@@ -68,7 +69,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
     
     private void save() {
         preSave();
-        session.getDigueRepository().update(this.elementProperty.get());
+        session.getRepositoryForClass(Digue.class).update(this.elementProperty.get());
     }
 
     /**
@@ -103,7 +104,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
             uiMode.authorIDProperty().bind(newValue.authorProperty());
             
             table.setTableItems(()->FXCollections.observableArrayList(
-                    session.getTronconDigueRepository().getByDigue(newValue)));
+                    ((TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class)).getByDigue(newValue)));
         }
     }
 
