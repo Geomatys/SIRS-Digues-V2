@@ -33,14 +33,8 @@ public class ListeningPojoTable<T> extends PojoTable {
 
     private Supplier<ObservableList<Element>> producer;
     private ObservableList<T> observableListToListen;
-    private final ListChangeListener<T> listener = new ListChangeListener<T>() {
-
-            @Override
-            public void onChanged(ListChangeListener.Change<? extends T> c) {
-                if(producer!=null){
-                    setTableItems(producer);
-                }
-            }
+    private final ListChangeListener<T> listener = (ListChangeListener.Change<? extends T> c) -> {
+                if(producer!=null) setTableItems(producer);
         }; 
     
     public ListeningPojoTable(Class pojoClass, String title) {

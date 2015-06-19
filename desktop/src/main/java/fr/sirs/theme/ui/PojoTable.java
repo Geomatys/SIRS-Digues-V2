@@ -383,9 +383,6 @@ public class PojoTable extends BorderPane {
             final Element p;
             if(createNewProperty.get()){
                 p = createPojo();
-                if(this.repo!=null){
-                    this.repo.add(p);
-                }
                 if (p != null && openEditorOnNewProperty.get()) {
                     editPojo(p);
                 }
@@ -407,7 +404,7 @@ public class PojoTable extends BorderPane {
                 alert.setResizable(true);
                 final Optional<ButtonType> res = alert.showAndWait();
                 if (res.isPresent() && ButtonType.YES.equals(res.get())) {
-                        deletePojos(elements);
+                    deletePojos(elements);
                 }
             } else {
                 final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée sélectionnée. Pas de suppression possible.");
@@ -989,6 +986,7 @@ public class PojoTable extends BorderPane {
         
         if (repo != null) {
             result = repo.create();
+            repo.add(result);
         } 
         else if (pojoClass != null) {
             try {
@@ -1442,7 +1440,13 @@ public class PojoTable extends BorderPane {
             }
 
             if (result!=null && result instanceof Element) {
-                uiTable.getItems().add((Element) result);
+                if(uiTable.getItems().contains((Element) result)){
+                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le lien que vous souhaitez ajouter est déjà présent dans la table.");
+                    alert.setResizable(true);
+                    alert.showAndWait();
+                } else {
+                    uiTable.getItems().add((Element) result);
+                }
             } else {
                 final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
                 alert.setResizable(true);

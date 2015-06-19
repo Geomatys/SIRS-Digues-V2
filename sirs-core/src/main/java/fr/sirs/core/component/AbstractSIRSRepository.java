@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
+import org.ektorp.BulkDeleteDocument;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentOperationResult;
@@ -82,7 +83,6 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * as parameters.
      * 
      * @param ids
-     * @param clazz
      * @return 
      */
     public List<T> get(final String... ids) {
@@ -135,6 +135,17 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
             cachedBulkList.add(entity);
         } 
         return db.executeBulk(cachedBulkList);
+    }
+    
+    
+    public List<DocumentOperationResult> executeBulkDelete(final List<T> bulkList){
+        
+        final List<BulkDeleteDocument> toDelete = new ArrayList<>();
+        for(final T toBeDeleted : bulkList){
+            toDelete.add(BulkDeleteDocument.of(toBeDeleted));
+            if(cache.containsKey(toBeDeleted.getId())) cache.remove(toBeDeleted.getId());
+        }
+        return db.executeBulk(toDelete);
     }
 
     @Override
