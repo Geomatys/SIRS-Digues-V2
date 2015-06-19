@@ -293,6 +293,7 @@ public class FXLauncherPane extends BorderPane {
     }
 
     private void restartApplicationNeeded() {
+        errorLabel.setVisible(false);
         uiRestartLbl.setVisible(true);
         uiRestartAppBtn.setVisible(true);
         uiLocalTab.setDisable(true);
