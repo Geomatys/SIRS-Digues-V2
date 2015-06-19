@@ -5,8 +5,9 @@ import fr.sirs.theme.ui.ObligationsCalendarView;
 import fr.sirs.ui.calendar.CalendarView;
 import fr.sirs.Injector;
 import fr.sirs.core.component.ObligationReglementaireRepository;
+import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
-import fr.sirs.theme.ui.ObligationsPojoTable;
+import fr.sirs.theme.ui.PojoTable;
 import javafx.scene.Parent;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -51,8 +52,7 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
     private Tab buildListTab() {
         final Tab listTab = new Tab("Liste");
         listTab.setClosable(false);
-        final ObligationReglementaireRepository orr = new ObligationReglementaireRepository(Injector.getSession().getConnector());
-        final ObligationsPojoTable obligationsPojoTable = new ObligationsPojoTable(orr);
+        final PojoTable obligationsPojoTable = new PojoTable(Injector.getSession().getRepositoryForClass(ObligationReglementaire.class), "Liste des obligations réglementaires");
         listTab.setContent(obligationsPojoTable);
         return listTab;
     }

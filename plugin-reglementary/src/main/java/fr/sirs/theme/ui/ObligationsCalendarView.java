@@ -1,6 +1,7 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Preview;
@@ -39,7 +40,7 @@ public final class ObligationsCalendarView extends CalendarView {
     public ObservableList<CalendarEvent> getCalendarEvents() {
         final ObservableList<CalendarEvent> calEvents = FXCollections.observableArrayList();
 
-        final ObligationReglementaireRepository orr = new ObligationReglementaireRepository(Injector.getSession().getConnector());
+        final AbstractSIRSRepository<ObligationReglementaire> orr = Injector.getSession().getRepositoryForClass(ObligationReglementaire.class);
         final List<ObligationReglementaire> obligations = orr.getAll();
         for (final ObligationReglementaire obligation : obligations) {
             final LocalDateTime eventDate = obligation.getDateRealisation() != null ? obligation.getDateRealisation() :
