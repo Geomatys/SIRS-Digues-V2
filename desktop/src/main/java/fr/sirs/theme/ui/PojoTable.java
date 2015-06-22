@@ -219,6 +219,10 @@ public class PojoTable extends BorderPane {
     protected final StringProperty currentSearch = new SimpleStringProperty("");
     protected final BorderPane topPane;
     
+    // Colonnes de suppression et d'ouverture d'éditeur.
+    protected final DeleteColumn deleteColumn = new DeleteColumn();
+    protected final EditColumn editCol = new EditColumn(this::editPojo);
+    
     /** The element to set as parent for any created element using {@linkplain #createPojo() }. */
     protected final ObjectProperty<Element> parentElementProperty = new SimpleObjectProperty<>();
     /** The element to set as owner for any created element using {@linkplain #createPojo() }. 
@@ -282,10 +286,6 @@ public class PojoTable extends BorderPane {
             session.prepareToPrint(uiTable.getSelectionModel().getSelectedItems());
         });
                 
-        // Colonnes de suppression et d'ouverture d'éditeur.
-        final DeleteColumn deleteColumn = new DeleteColumn();
-        final EditColumn editCol = new EditColumn(this::editPojo);
-                
         /* We cannot bind visible properties of those columns, because TableView 
          * will set their value when user will request to hide them.
          */
@@ -299,7 +299,7 @@ public class PojoTable extends BorderPane {
         });
         
         uiTable.getColumns().add(deleteColumn);
-        uiTable.getColumns().add((TableColumn)editCol);
+        uiTable.getColumns().add((TableColumn) editCol);
         
         try {
             //contruction des colonnes editable

@@ -13,7 +13,7 @@ import org.ektorp.CouchDbConnector;
  */
 public abstract class AbstractPositionableRepository<T extends Positionable> extends AbstractSIRSRepository<T> {
 
-    public static final String BY_LINEAR_ID = "byLinarId";
+    public static final String BY_LINEAR_ID = "byLinearId";
     
     public AbstractPositionableRepository(Class<T> type, CouchDbConnector db) {
         super(type, db);

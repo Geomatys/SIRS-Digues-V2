@@ -49,35 +49,29 @@ public class DigueRepositoryTest extends CouchDBTestCase {
     public void testStoreDigueAndTroncons() {
         System.out.println("DigueRepositoryTest.testStoreDigueAndTroncons()");
         
-        TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
+        final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
       
-        Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
-
+        final Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
         digue.setLibelle("une digue");
-
         digue.setDateMaj(LocalDateTime.now());
 
         digueRepository.add(digue);
 
         for (int i = 0; i < 1; i++) {
-            TronconDigue troncon = ElementCreator.createAnonymValidElement(TronconDigue.class);
-            troncon.setCommentaire("Traoncon1");
+            final TronconDigue troncon = ElementCreator.createAnonymValidElement(TronconDigue.class);
+            troncon.setCommentaire("Troncon1");
             troncon.setDigueId(digue.getId());
             troncon.setGeometry(createPoint());
             troncon.setDateMaj(LocalDateTime.now());
+            tronconRepository.add(troncon);
 
-            List<Objet> stuctures = new ArrayList<Objet>();
-            Fondation e = ElementCreator.createAnonymValidElement(Fondation.class);
-            // e.setDocument(troncon);
-            stuctures.add(e);
-            Crete crete = ElementCreator.createAnonymValidElement(Crete.class);
+            final Fondation fondation = ElementCreator.createAnonymValidElement(Fondation.class);
+            fondation.setLinearId(troncon.getId());
+            
+            final Crete crete = ElementCreator.createAnonymValidElement(Crete.class);
             crete.setBorneDebutId("8");
             crete.setCommentaire("Belle crete");
-            stuctures.add(crete);
-            
-//            troncon.setStructures(stuctures);
-
-            tronconRepository.add(troncon);
+            crete.setLinearId(troncon.getId());
         }
     }
 
@@ -88,7 +82,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
               System.out.println(digue);
           }
 
-          TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
+          final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
           for(TronconDigue troncon: tronconRepository.getAll()) {
               for(Objet str: TronconUtils.getObjetList(troncon)) {
                   System.out.println(str.getParent() + " " + str.getDocumentId());
@@ -100,13 +94,12 @@ public class DigueRepositoryTest extends CouchDBTestCase {
     @Test
     public void failDelete() {
 
-        DigueRepository digueRepository = new DigueRepository(connector);
         Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
         digue.setLibelle("toDelete");
         digueRepository.add(digue);
 
         {
-            Digue digue2 = digueRepository.get(digue.getId());
+            final Digue digue2 = digueRepository.get(digue.getId());
             digue2.setLibelle("StillToDelete");
             digueRepository.update(digue2);
         }
@@ -119,7 +112,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
     @Ignore
     @Test
     public void testInstances(){
-        DigueRepository digueRepository = new DigueRepository(connector);
+        
         Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
         digue.setLibelle("coucou");
         digueRepository.add(digue);

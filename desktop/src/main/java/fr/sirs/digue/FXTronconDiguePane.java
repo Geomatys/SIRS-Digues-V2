@@ -108,9 +108,11 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         uiComment.disableProperty().bind(editBind.not());
         uiTypeTroncon.disableProperty().bind(editBind.not());
         
-        srController.editableProperty().bind(editSR);
-        uiSRAdd.disableProperty().bind(editSR.not());
-        uiSRDelete.disableProperty().bind(editSR.not());
+        srController.editableProperty().set(false);
+        uiSRAdd.disableProperty().set(true);
+        uiSRAdd.setVisible(false);
+        uiSRDelete.disableProperty().set(true);
+        uiSRDelete.setVisible(false);
         
         uiGestionsTable.editableProperty().bind(editBind);
         uiProprietesTable.editableProperty().bind(editBind);

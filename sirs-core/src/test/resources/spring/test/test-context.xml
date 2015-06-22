@@ -10,6 +10,5 @@
 
   <import resource="classpath:/fr/sirs/spring/couchdb-context.xml" />
   <couchdb:database name="sirs-test" url="http://geouser:geopw@localhost:5984" />
-  <!--bean class="fr.sirs.core.component.DigueRepository" /-->
 
 </beans>
