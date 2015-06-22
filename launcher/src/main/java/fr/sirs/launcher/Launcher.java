@@ -3,20 +3,28 @@ package fr.sirs.launcher;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsCore.UpdateInfo;
+import static fr.sirs.core.SirsCore.browseURL;
 import fr.sirs.core.plugins.PluginLoader;
 import java.io.IOException;
+import java.util.Optional;
 
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.Background;
@@ -58,7 +66,7 @@ public class Launcher extends Application {
 
         ProgressIndicator progressIndicator = new ProgressIndicator();
         progressIndicator.setBackground(Background.EMPTY);
-        final Label splashLabel = new Label("Initialisation de la base EPSG");
+        final Label splashLabel = new Label();
         final VBox vbox = new VBox(progressIndicator, splashLabel);
         vbox.setSpacing(10);
         vbox.setAlignment(Pos.CENTER);
@@ -88,21 +96,13 @@ public class Launcher extends Application {
          * Initialize / create EPSG db. A loader is displayed while the task is 
          * running, preventing application launch.
          */
-        final Task<Boolean> epsgIniter = new Task<Boolean>() {
-            @Override
-            protected Boolean call() throws Exception {
-                SirsCore.initEpsgDB();
-                final ClassLoader scl = ClassLoader.getSystemClassLoader();
-                if (scl instanceof PluginLoader) {
-                    Platform.runLater(()-> splashLabel.setText("Chargement des plugins"));
-                    ((PluginLoader)scl).loadPlugins();
-                }
-                return true;
-            }
-        };
-        epsgIniter.setOnSucceeded((WorkerStateEvent event) -> {
-            splashLabel.setText("Lancement de l'application");
-            
+        final Task<Boolean> initer = new Initer();
+        splashLabel.textProperty().bind(initer.messageProperty());
+        splashLabel.textProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+            splashStage.sizeToScene();
+        });
+        
+        initer.setOnSucceeded((WorkerStateEvent event) -> {
             FXLauncherPane launcherPane;
             try {
                 launcherPane = new FXLauncherPane();
@@ -115,16 +115,15 @@ public class Launcher extends Application {
             }
         });
 
-        epsgIniter.setOnFailed((WorkerStateEvent event) -> {
+        initer.setOnFailed((WorkerStateEvent event) -> {
             GeotkFX.newExceptionDialog("Impossible de se connecter à la base EPSG.", event.getSource().getException()).showAndWait();
             System.exit(1);
         });
 
-        epsgIniter.setOnCancelled((WorkerStateEvent event) -> {
+        initer.setOnCancelled((WorkerStateEvent event) -> {
             System.exit(0);
         });
-        new Thread(epsgIniter).start();
-
+        new Thread(initer).start();
     }
 
     @Override
@@ -132,5 +131,66 @@ public class Launcher extends Application {
         SirsCore.getTaskManager().close();
     }
     
+    /**
+     * Check if there's any update available on SIRS server. If any, user is asked for download.
+     */
+    private static boolean checkUpdate() throws InterruptedException, ExecutionException {
+        UpdateInfo info = SirsCore.checkUpdate().get();
+        if (info != null) {
+            // Now that we found that an update is available, we can redirect user on package URL.
+            final Task<Boolean> askForUpdate = new Task<Boolean>() {
+
+                @Override
+                protected Boolean call() throws Exception {
+                    final Alert alert = new Alert(
+                            Alert.AlertType.INFORMATION,
+                            "Une mise à jour de l'application est disponible (" + info.localVersion + " vers " + info.distantVersion + "). Voulez-vous l'installer ?",
+                            ButtonType.NO, ButtonType.YES);
+                    alert.setWidth(400);
+                    alert.setHeight(300);
+                    alert.setResizable(true);
+                    final Optional<ButtonType> choice = alert.showAndWait();
+                    if (ButtonType.YES.equals(choice.orElse(ButtonType.NO))) {
+                        browseURL(info.updateURL, "Mise à jour", true);
+                        // Once downloaded, we stop the system to allow user to install its new package.
+                        return true;
+                    }
+                    return false;
+                }
+            };
+            Platform.runLater(() -> askForUpdate.run());
+            // Shutdown program to allow user installing software update without any conflict.
+            if (Boolean.TRUE.equals(askForUpdate.get())) {
+                return true;
+            }
+        }
+        return false;
+    }
     
+    /**
+     * Task which takes care of components initialisation, as EPSG database and plugins.
+     */
+    private static final class Initer extends Task<Boolean> {
+
+        @Override
+        protected Boolean call() throws Exception {
+            updateMessage("Vérification de mises à jour");
+            boolean updateRequired = checkUpdate();
+            if (updateRequired) {
+                cancel();
+                return false;
+            }
+            
+            updateMessage("Initialisation de la base EPSG");
+            SirsCore.initEpsgDB();
+
+            final ClassLoader scl = ClassLoader.getSystemClassLoader();
+            if (scl instanceof PluginLoader) {
+                updateMessage("Chargement des plugins");
+                ((PluginLoader) scl).loadPlugins();
+            }
+            updateMessage("Lancement de l'application");
+            return true;
+        }
+    }
 }

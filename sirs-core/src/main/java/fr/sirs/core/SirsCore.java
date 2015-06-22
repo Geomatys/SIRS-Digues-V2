@@ -314,27 +314,20 @@ public class SirsCore {
      * 
      * @param toBrowse The address of the page to display. If null, the method does nothing.
      * @param title A title set to displayed web view. If null, no title will be set.
-     * @param showAndWait If true, opened browser will lock application until its opened. If false, 
-     * browser is launched asynchronously.
+     * @param showAndWait If true, and a webview is opened, application stays locked while its opened. If false, 
+     * webview will be launched in a non-modal window.
      */
     public static void browseURL(final URL toBrowse, final String title, final boolean showAndWait) {
         if (toBrowse == null) 
             return;
         if (Desktop.isDesktopSupported()) {
-            final Thread t = new Thread(() -> {
+            new Thread(() -> {
                 try {
                     Desktop.getDesktop().browse(toBrowse.toURI());
                 } catch (Exception ex) {
                     LOGGER.log(Level.WARNING, "Cannot browse following URL with system browser : "+toBrowse, ex);
                 }
-            });
-            t.start();
-            if (showAndWait)
-                try {
-                    t.join();
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            }
+            }).start();
         } else {
             final WebView webView = new WebView();
             final Stage infoStage = new Stage();
