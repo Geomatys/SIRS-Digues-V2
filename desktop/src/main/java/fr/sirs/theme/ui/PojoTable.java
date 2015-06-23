@@ -584,6 +584,11 @@ public class PojoTable extends BorderPane {
             uiFilterPane.setContent(filterContent);
             uiFilterPane.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
             
+            uiFilterPane.setExpanded(false);
+            applyFilterBtn.managedProperty().bind(uiFilterPane.expandedProperty());
+            resetFilterBtn.managedProperty().bind(uiFilterPane.expandedProperty());
+            uiFilterBuilder.managedProperty().bind(uiFilterPane.expandedProperty());
+            
             titleAndFilterBox.getChildren().add(uiFilterPane);
             resetFilterBtn.setOnAction(event -> {
                 final ObservableList<Node> vBoxChildren = filterContent.getChildren();
