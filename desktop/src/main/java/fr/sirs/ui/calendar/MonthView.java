@@ -15,6 +15,8 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.text.TextAlignment;
+
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
@@ -200,10 +202,8 @@ final class MonthView extends DatePane {
         }
 
         // Prepare buttons style
-        final ColumnConstraints colSmallCstr = new ColumnConstraints(Region.USE_PREF_SIZE, Region.USE_COMPUTED_SIZE, Region.USE_PREF_SIZE,
-                Priority.NEVER, HPos.RIGHT, true);
-        final ColumnConstraints colLargeTxtEventCstr = new ColumnConstraints(Region.USE_PREF_SIZE, Region.USE_COMPUTED_SIZE, Double.MAX_VALUE,
-                Priority.ALWAYS, HPos.LEFT, true);
+        final ColumnConstraints colLargeTxtEventCstr = new ColumnConstraints(130);
+        final ColumnConstraints colSmallCstr = new ColumnConstraints(20);
 
         final ObservableList<CalendarEvent> events = calendarView.getCalendarEvents();
 
@@ -221,10 +221,12 @@ final class MonthView extends DatePane {
                 gridBtn.setMaxWidth(Region.USE_PREF_SIZE);
                 gridBtn.setMaxHeight(Region.USE_PREF_SIZE);
                 gridBtn.getStyleClass().add(CSS_CALENDAR_DAY);
-
-                gridBtn.add(new Label(Integer.toString(calendar.get(Calendar.DAY_OF_MONTH))), 1, 0);
+                gridBtn.getColumnConstraints().clear();
                 gridBtn.getColumnConstraints().add(colLargeTxtEventCstr);
                 gridBtn.getColumnConstraints().add(colSmallCstr);
+
+                gridBtn.getChildren().clear();
+                gridBtn.add(new Label(Integer.toString(calendar.get(Calendar.DAY_OF_MONTH))), 1, 0);
 
                 boolean disabled = calendarView.getDisabledWeekdays().contains(calendar.get(Calendar.DAY_OF_WEEK));
 
@@ -269,6 +271,7 @@ final class MonthView extends DatePane {
                         }
                         control.setTextOverrun(OverrunStyle.ELLIPSIS);
                         control.setText(calendarEvent.getTitle());
+                        control.setTextAlignment(TextAlignment.LEFT);
                         control.setTooltip(new Tooltip(calendarEvent.getTitle()));
                         control.setOnMouseClicked(event -> calendarView.showCalendarPopupForEvent(calendarEvent, control));
                         control.setBackground(Background.EMPTY);
