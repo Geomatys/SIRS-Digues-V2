@@ -14,7 +14,9 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.stage.Modality;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 
@@ -83,13 +85,13 @@ public final class ObligationsCalendarView extends CalendarView {
     @Override
     public void showCalendarPopupForEvent(final CalendarEvent calendarEvent, final Node parent) {
         final ObligationsCalendarPopupEvent popup = new ObligationsCalendarPopupEvent(calendarEvent);
-        popup.setAutoHide(true);
+        popup.initModality(Modality.NONE);
         final Point2D popupPos = parent.localToScreen(0, 20);
         if (popupPos != null) {
             popup.sizeToScene();
-            popup.show(parent, popupPos.getX() ,popupPos.getY());
-        } else {
-            popup.show(parent, 200, 200);
+            popup.setX(popupPos.getX());
+            popup.setY(popupPos.getY());
         }
+        popup.show();
     }
 }
