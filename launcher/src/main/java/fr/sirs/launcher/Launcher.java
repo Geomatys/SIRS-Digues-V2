@@ -135,7 +135,13 @@ public class Launcher extends Application {
      * Check if there's any update available on SIRS server. If any, user is asked for download.
      */
     private static boolean checkUpdate() throws InterruptedException, ExecutionException {
-        UpdateInfo info = SirsCore.checkUpdate().get();
+        final UpdateInfo info;
+        try {
+            info = SirsCore.checkUpdate().get();
+        } catch (Exception ex) {
+            SirsCore.LOGGER.log(Level.WARNING, "Impossible de charger le numéro de version de l'application.", ex);
+            return false;
+        }
         if (info != null) {
             // Now that we found that an update is available, we can redirect user on package URL.
             final Task<Boolean> askForUpdate = new Task<Boolean>() {
