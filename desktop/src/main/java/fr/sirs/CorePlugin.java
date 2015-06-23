@@ -63,6 +63,7 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -132,7 +133,7 @@ public class CorePlugin extends Plugin {
      */
     public static final String NAME = "core";
     
-    public static final Class[] VALID_CLASSES = new Class[]{
+    private static final Class[] VALID_CLASSES = new Class[]{
         byte.class,
         short.class,
         int.class,
@@ -148,18 +149,15 @@ public class CorePlugin extends Plugin {
         Float.class,
         Double.class,
         String.class,
-        LocalDateTime.class
+        LocalDateTime.class,
+        LocalDate.class
     };
     
-    public static final Predicate<PropertyDescriptor> MAPPROPERTY_PREDICATE = new Predicate<PropertyDescriptor>(){
-
-        @Override
-        public boolean test(PropertyDescriptor t) {
-            final Class c = t.getReadMethod().getReturnType();
-            return ArraysExt.contains(VALID_CLASSES, c) || Geometry.class.isAssignableFrom(c);
-        }
-        
-    };
+    public static final org.geotoolkit.data.bean.Predicate<PropertyDescriptor> MAPPROPERTY_PREDICATE = 
+            (PropertyDescriptor t) -> {
+                final Class c = t.getReadMethod().getReturnType();
+                return ArraysExt.contains(VALID_CLASSES, c) || Geometry.class.isAssignableFrom(c);
+            };
     
     private final HashMap<Class, BeanFeatureSupplier> suppliers = new HashMap<>();
     

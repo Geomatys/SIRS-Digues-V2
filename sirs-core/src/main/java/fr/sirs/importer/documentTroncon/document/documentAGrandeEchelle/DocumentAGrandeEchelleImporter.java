@@ -122,7 +122,7 @@ public class DocumentAGrandeEchelleImporter extends GenericDocumentRelatedImport
                 documentGrandeEchelle.setTypeDocumentGrandeEchelleId(types.get(row.getInt(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.toString())).getId());
     
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    documentGrandeEchelle.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                    documentGrandeEchelle.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                 }
                 
                 // Faute de mieux, on référence le document à grande échelle avec l'id du document.

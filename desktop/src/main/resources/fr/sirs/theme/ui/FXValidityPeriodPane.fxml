@@ -33,16 +33,14 @@
                         <Insets left="10.0" />
                      </padding>
                   </Label>
-                  <FXDateField fx:id="uiDateDebut">
-                  </FXDateField>
+                  <FXLocalDateField fx:id="uiDateDebut" />
                   <Separator maxWidth="1.7976931348623157E308" orientation="VERTICAL" visible="false" HBox.hgrow="ALWAYS" />
                   <Label text="Fin :">
                      <padding>
                         <Insets left="10.0" />
                      </padding>
                   </Label>
-                  <FXDateField fx:id="uiDateFin">
-                  </FXDateField>
+                  <FXLocalDateField fx:id="uiDateFin" />
                </children>
                <padding>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

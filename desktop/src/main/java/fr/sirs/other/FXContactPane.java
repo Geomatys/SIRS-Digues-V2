@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -29,7 +28,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.util.Callback;
-import org.geotoolkit.gui.javafx.util.FXDateField;
+import org.geotoolkit.gui.javafx.util.FXLocalDateTimeField;
 
 /**
  *
@@ -39,7 +38,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
     
     @FXML private FXEditMode uiMode;
     @FXML private TextField uiPseudoId;
-    @FXML private FXDateField date_maj;
+    @FXML private FXLocalDateTimeField date_maj;
     
     @FXML private TextField uiNom;
     @FXML private TextField uiPrenom;

@@ -69,11 +69,11 @@ public class MeteoImporter extends GenericImporter {
             final Meteo meteo = createAnonymValidElement(Meteo.class);
             
             if (row.getDate(Columns.DATE_DEBUT_METEO.toString()) != null) {
-                meteo.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_METEO.toString()), dateTimeFormatter));
+                meteo.setDate_debut(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DEBUT_METEO.toString()), dateTimeFormatter));
             }
             
             if (row.getDate(Columns.DATE_FIN_METEO.toString()) != null) {
-                meteo.setData_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_METEO.toString()), dateTimeFormatter));
+                meteo.setData_fin(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_FIN_METEO.toString()), dateTimeFormatter));
             }
             
             if(row.getDouble(Columns.VITESSE_VENT.toString())!=null){
@@ -89,7 +89,7 @@ public class MeteoImporter extends GenericImporter {
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                meteo.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                meteo.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             // La météo n'ayant pas d'ID, on affecte l'ID de l'événement hydraulique comme pseudo id.

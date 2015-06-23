@@ -102,15 +102,15 @@ public class ElementReseauProprietaireImporter extends GenericEntityLinker {
         final ProprieteObjet propriete = createAnonymValidElement(ProprieteObjet.class);
 
         if (row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()) != null) {
-            propriete.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()), dateTimeFormatter));
+            propriete.setDate_debut(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()), dateTimeFormatter));
         }
 
         if (row.getDate(Columns.DATE_FIN_PROPRIO.toString()) != null) {
-            propriete.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_PROPRIO.toString()), dateTimeFormatter));
+            propriete.setDate_fin(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN_PROPRIO.toString()), dateTimeFormatter));
         }
 
         if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-            propriete.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+            propriete.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
         }
         // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du proprio.
         propriete.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERV_PROPRIO.toString())));
@@ -124,15 +124,15 @@ public class ElementReseauProprietaireImporter extends GenericEntityLinker {
         final ProprieteObjet propriete = createAnonymValidElement(ProprieteObjet.class);
 
         if (row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()) != null) {
-            propriete.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()), dateTimeFormatter));
+            propriete.setDate_debut(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DEBUT_PROPRIO.toString()), dateTimeFormatter));
         }
 
         if (row.getDate(Columns.DATE_FIN_PROPRIO.toString()) != null) {
-            propriete.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_PROPRIO.toString()), dateTimeFormatter));
+            propriete.setDate_fin(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN_PROPRIO.toString()), dateTimeFormatter));
         }
 
         if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-            propriete.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+            propriete.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
         }
         // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du proprio.
         propriete.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_PROPRIO.toString())));

@@ -59,7 +59,7 @@ class TypeRevetementImporter extends GenericTypeReferenceImporter<RefRevetement>
             typeRevetement.setLibelle(row.getString(Columns.LIBELLE_TYPE_REVETEMENT.toString()));
             typeRevetement.setAbrege(row.getString(Columns.ABREGE_TYPE_REVETEMENT.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeRevetement.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeRevetement.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeRevetement.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_REVETEMENT.toString()))));
             

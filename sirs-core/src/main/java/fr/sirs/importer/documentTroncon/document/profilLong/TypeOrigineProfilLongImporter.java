@@ -59,7 +59,7 @@ class TypeOrigineProfilLongImporter extends GenericTypeReferenceImporter<RefOrig
             typeOrigineProfilLong.setLibelle(row.getString(Columns.LIBELLE_TYPE_ORIGINE_PROFIL_EN_LONG.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeOrigineProfilLong.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeOrigineProfilLong.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeOrigineProfilLong.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_LONG.toString())));
             

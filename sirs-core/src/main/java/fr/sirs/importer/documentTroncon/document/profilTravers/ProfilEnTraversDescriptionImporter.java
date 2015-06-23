@@ -139,7 +139,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
             final LeveProfilTravers leve = createAnonymValidElement(LeveProfilTravers.class);
             
             if (row.getDate(Columns.DATE_LEVE.toString()) != null) {
-                leve.setDateLevee(DbImporter.parse(row.getDate(Columns.DATE_LEVE.toString()), dateTimeFormatter));
+                leve.setDateLevee(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_LEVE.toString()), dateTimeFormatter));
             }
             
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_CREATEUR.toString()));
@@ -168,7 +168,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
             leve.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                leve.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                leve.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             if(pointsByLeveXYZ.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){

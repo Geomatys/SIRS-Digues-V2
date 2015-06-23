@@ -28,7 +28,7 @@ public class StructBeanSupplier extends BeanFeatureSupplier implements DocumentL
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
 
     public StructBeanSupplier(Class clazz, final Supplier<Iterable> callable) {
-        super(clazz, "id", hasField(clazz,"geometry")?"geometry":null, (PropertyDescriptor t) -> CorePlugin.MAPPROPERTY_PREDICATE.test(t), null, Injector.getSession().getProjection(), callable::get);
+        super(clazz, "id", hasField(clazz,"geometry")?"geometry":null, CorePlugin.MAPPROPERTY_PREDICATE, null, Injector.getSession().getProjection(), callable::get);
         Injector.getDocumentChangeEmiter().addListener(this);
     }
 

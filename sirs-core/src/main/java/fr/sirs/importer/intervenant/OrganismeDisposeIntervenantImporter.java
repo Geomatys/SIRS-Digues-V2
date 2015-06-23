@@ -77,15 +77,15 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
             contactOrganisme.setContactId(organismes.get(row.getInt(Columns.ID_INTERVENANT.toString())).getId());
             
             if (row.getDate(Columns.DATE_DEBUT_INTERV_ORG.toString()) != null) {
-                contactOrganisme.setDateDebutIntervenant(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_INTERV_ORG.toString()), dateTimeFormatter));
+                contactOrganisme.setDateDebutIntervenant(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DEBUT_INTERV_ORG.toString()), dateTimeFormatter));
             }
             
             if (row.getDate(Columns.DATE_FIN_INTERV_ORG.toString()) != null) {
-                contactOrganisme.setDateFinIntervenant(DbImporter.parse(row.getDate(Columns.DATE_FIN_INTERV_ORG.toString()), dateTimeFormatter));
+                contactOrganisme.setDateFinIntervenant(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_FIN_INTERV_ORG.toString()), dateTimeFormatter));
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                contactOrganisme.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                contactOrganisme.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             // Table de jointure, donc pas d'ID propre. On choisit arbitrairement l'ID de l'intervenant comme pseudo-id.

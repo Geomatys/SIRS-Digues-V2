@@ -19,7 +19,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import org.geotoolkit.gui.javafx.util.FXDateField;
+import org.geotoolkit.gui.javafx.util.FXLocalDateTimeField;
 
 /**
  *
@@ -30,7 +30,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
     
     @FXML private FXEditMode uiMode;
     @FXML private TextField uiPseudoId;
-    @FXML private FXDateField date_maj;
+    @FXML private FXLocalDateTimeField date_maj;
 
     @FXML private GridPane uiDescriptionGrid;
     @FXML private GridPane uiAdresseGrid;
@@ -112,24 +112,24 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         uiCommuneTextField.textProperty().bindBidirectional(organisme.communeProperty());
         
         if (organisme.getDate_debut() != null) {
-            uiDebutDatePicker.valueProperty().set(organisme.getDate_debut().toLocalDate());
+            uiDebutDatePicker.valueProperty().set(organisme.getDate_debut());
         }
         uiDebutDatePicker.valueProperty().addListener((ObservableValue<? extends LocalDate> observableDate, LocalDate oldDate, LocalDate newDate) -> {
             if (newDate == null) {
                 organisme.date_debutProperty().set(null);
             } else {
-                organisme.date_debutProperty().set(LocalDateTime.of(newDate, LocalTime.MIN));
+                organisme.date_debutProperty().set(newDate);
             }
         });
         
         if (organisme.getDate_fin() != null) {
-            uiFinDatePicker.valueProperty().set(organisme.getDate_fin().toLocalDate());
+            uiFinDatePicker.valueProperty().set(organisme.getDate_fin());
         }
         uiFinDatePicker.valueProperty().addListener((ObservableValue<? extends LocalDate> observableDate, LocalDate oldDate, LocalDate newDate) -> {
             if (newDate == null) {
                 organisme.date_finProperty().set(null);
             } else {
-                organisme.date_finProperty().set(LocalDateTime.of(newDate, LocalTime.MIN));
+                organisme.date_finProperty().set(newDate);
             }
         });
         

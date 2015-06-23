@@ -45,7 +45,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
-import org.geotoolkit.gui.javafx.util.FXDateField;
+import org.geotoolkit.gui.javafx.util.FXLocalDateField;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -66,8 +66,8 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     
     // Onglet "Description"
     @FXML private HTMLEditor uiComment;
-    @FXML private FXDateField uiDateStart;
-    @FXML private FXDateField uiDateEnd;
+    @FXML private FXLocalDateField uiDateStart;
+    @FXML private FXLocalDateField uiDateEnd;
     
     // Onglet "SR"
     @FXML private ListView<SystemeReperage> uiSRList;

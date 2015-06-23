@@ -21,14 +21,13 @@ import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.ektorp.CouchDbConnector;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -115,22 +114,17 @@ public class RepositoriesTest {
                     + "posuere cubilia Curae; Aliquam nibh. Mauris ac mauris "
                     + "sed pede pellentesque fermentum. Maecenas adipiscing "
                     + "ante non diam sodales hendrerit.</body></html>");
-            tron.setDate_debut(LocalDateTime.now());
-            tron.setDate_fin(LocalDateTime.now());
+            tron.setDate_debut(LocalDate.now());
+            tron.setDate_fin(LocalDate.now());
             tron.setDateMaj(LocalDateTime.now());
             
             tron.setGeometry(createPoint());
+            tronconRepository.add(tron);
             
             Fondation ecluse = ElementCreator.createAnonymValidElement(Fondation.class);
             ecluse.setCommentaire("Fondation");
-            
-            List<Objet> stuctures = new ArrayList<>();
-            stuctures.add(ecluse);
-//            tron.setStructures(stuctures);
-            tronconRepository.add(tron);
+            ecluse.setLinearId(tron.getId());
         }
-        
-        
     }
 
     private Point createPoint(double i, double j) {

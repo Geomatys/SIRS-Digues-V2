@@ -80,13 +80,13 @@ class TronconGestionDigueGestionnaireImporter extends GenericImporter {
             final GestionTroncon gestion = createAnonymValidElement(GestionTroncon.class);
 
             if (row.getDate(Columns.DATE_DEBUT_GESTION.toString()) != null) {
-                gestion.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_GESTION.toString()), dateTimeFormatter));
+                gestion.setDate_debut(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DEBUT_GESTION.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_FIN_GESTION.toString()) != null) {
-                gestion.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_GESTION.toString()), dateTimeFormatter));
+                gestion.setDate_fin(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN_GESTION.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                gestion.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                gestion.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
 
             // Set the references.

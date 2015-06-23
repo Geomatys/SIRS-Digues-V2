@@ -158,11 +158,11 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         }
         
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-            prestation.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter, prestation));
+            prestation.setDate_debut(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter, prestation));
         }
         
         if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-            prestation.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter, prestation));
+            prestation.setDate_fin(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter, prestation));
         }
         
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {

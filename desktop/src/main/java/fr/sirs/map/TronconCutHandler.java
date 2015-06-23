@@ -16,11 +16,10 @@ import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Positionable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -183,7 +182,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                     alert.setResizable(true);
                     alert.showAndWait();
                     try {
-                        Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(LocalDateTime.now(), map);
+                        Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(LocalDate.now(), map);
                     } catch (Exception ex) {
                         SirsCore.LOGGER.log(Level.WARNING, "Map temporal range cannot be updated.", ex);
                     }
@@ -430,10 +429,10 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
 
                 } else if (FXTronconCut.SegmentType.ARCHIVER.equals(type)) {
                     //on marque comme terminé le troncon et ses structures
-                    cut.date_finProperty().set(LocalDateTime.now());
+                    cut.date_finProperty().set(LocalDate.now());
                     for (Objet obj : TronconUtils.getObjetList(cut)) {
                         obj.dateMajProperty().set(LocalDateTime.now());
-                        obj.date_finProperty().set(LocalDateTime.now());
+                        obj.date_finProperty().set(LocalDate.now());
                     }
                     //on le sauvegarde
                     session.getRepositoryForClass(TronconDigue.class).update(cut);
@@ -447,13 +446,13 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
 
             //on archive l'ancien troncon
             updateMessage("Finalisation du découpage pour "+toCut.getLibelle());
-            toCut.setDate_fin(LocalDateTime.now());
+            toCut.setDate_fin(LocalDate.now());
             
             session.getRepositoryForClass(TronconDigue.class).update(toCut);
 
             for (Positionable obj : TronconUtils.getPositionableList(toCut)) {
                 if (obj instanceof AvecBornesTemporelles) {
-                    ((AvecBornesTemporelles) obj).date_finProperty().set(LocalDateTime.now());
+                    ((AvecBornesTemporelles) obj).date_finProperty().set(LocalDate.now());
                     try {
                         AbstractSIRSRepository repo = session.getRepositoryForClass(obj.getClass());
                         repo.update(obj);

@@ -175,11 +175,11 @@ class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydrauliqueCie
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-            reseauEau.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter));
+            reseauEau.setDate_debut(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter));
         }
 
         if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-            reseauEau.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter));
+            reseauEau.setDate_fin(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter));
         }
 
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {

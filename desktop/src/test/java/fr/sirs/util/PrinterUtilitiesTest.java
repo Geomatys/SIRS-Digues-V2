@@ -1,6 +1,5 @@
 package fr.sirs.util;
 
-import static fr.sirs.util.PrinterUtilities.print;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
@@ -8,11 +7,8 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.TronconDigue;
 
-import java.io.File;
 import java.lang.reflect.Method;
-import java.time.LocalDateTime;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.time.LocalDate;
 
 import org.ektorp.CouchDbConnector;
 import org.junit.After;
@@ -98,8 +94,8 @@ public class PrinterUtilitiesTest {
         final BorneDigue borneDigue = ElementCreator.createAnonymValidElement(BorneDigue.class);
         //borneDigue.setIdBorne(1);
         borneDigue.setCommentaire("Cette borne n'est pas une borne fictive.");
-        borneDigue.setDate_debut(LocalDateTime.now());
-        borneDigue.setDate_fin(LocalDateTime.now());
+        borneDigue.setDate_debut(LocalDate.now());
+        borneDigue.setDate_fin(LocalDate.now());
         borneDigue.setFictive(false);
         //borneDigue.setIdTronconGestion(2);
         borneDigue.setLibelle("Borne principale");

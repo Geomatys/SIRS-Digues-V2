@@ -125,7 +125,7 @@ public class ProfilEnLongImporter extends GenericImporter {
             profil.setLibelle(row.getString(Columns.NOM.toString()));
             
             if (row.getDate(Columns.DATE_LEVE.toString()) != null) {
-                profil.setDateLevee(DbImporter.parse(row.getDate(Columns.DATE_LEVE.toString()), dateTimeFormatter));
+                profil.setDateLevee(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_LEVE.toString()), dateTimeFormatter));
             }
             
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_CREATEUR.toString()));
@@ -138,7 +138,7 @@ public class ProfilEnLongImporter extends GenericImporter {
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                profil.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                profil.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             profil.setReferencePapier(row.getString(Columns.REFERENCE_PAPIER.toString()));

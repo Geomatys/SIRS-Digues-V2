@@ -19,10 +19,9 @@ import fr.sirs.map.style.FXStyleAggregatedPane;
 import java.awt.Color;
 import java.awt.RenderingHints;
 import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.logging.Level;
@@ -83,7 +82,6 @@ import org.geotoolkit.gui.javafx.util.FXUtilities;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import org.opengis.filter.Id;
 import org.opengis.geometry.Envelope;
 import org.opengis.util.GenericName;
@@ -178,7 +176,7 @@ public class FXMapPane extends BorderPane {
             if(mapsplit.getItems().contains(paneMap2)){
                 mapsplit.getItems().remove(paneMap2);
                 splitButton.setTooltip(new Tooltip("Afficher la deuxième carte"));
-            }else{
+            } else{
                 mapsplit.setDividerPositions(0.5);
                 mapsplit.getItems().add(paneMap2);
                 splitButton.setTooltip(new Tooltip("Cacher la deuxième carte"));
@@ -241,7 +239,7 @@ public class FXMapPane extends BorderPane {
                     uiMap1.getContainer().setContext(context);
                     uiMap1.getCanvas().setObjectiveCRS(Injector.getSession().getProjection());
                     uiMap1.getCanvas().setVisibleArea(context.getAreaOfInterest());
-                    setTemporalRange(LocalDateTime.now(), null);
+                    setTemporalRange(LocalDate.now(), null);
                     return null;
                 }
             };
@@ -262,7 +260,7 @@ public class FXMapPane extends BorderPane {
      * @param map La carte à mettre à jour. Nulle pour mettre à jour les deux cartes 
      * par défaut.
      */
-    public void setTemporalRange(final LocalDateTime ldt, FXMap map) {
+    public void setTemporalRange(final LocalDate ldt, FXMap map) {
         final Task t = new Task() {
             @Override
             protected Object call() throws Exception {
@@ -414,15 +412,17 @@ public class FXMapPane extends BorderPane {
             // Envelope temporelle
             final LocalDateTime selectionTime;
             if (toFocusOn instanceof AvecBornesTemporelles) {
+                
+                final AvecBornesTemporelles abtToFocusOn = (AvecBornesTemporelles) toFocusOn;
                 long minTime = Long.MIN_VALUE;
                 long maxTime = Long.MAX_VALUE;
                 
-                LocalDateTime tmpTime = ((AvecBornesTemporelles) toFocusOn).getDate_debut();
+                LocalDateTime tmpTime = abtToFocusOn.getDate_debut()==null ? null : abtToFocusOn.getDate_debut().atTime(LocalTime.MIDNIGHT);
                 if (tmpTime != null) {
                     minTime = Timestamp.valueOf(tmpTime).getTime();
                 }
                 
-                tmpTime = ((AvecBornesTemporelles) toFocusOn).getDate_fin();
+                tmpTime = abtToFocusOn.getDate_fin()==null ? null : abtToFocusOn.getDate_fin().atTime(LocalTime.MIDNIGHT);
                 if (tmpTime != null) {
                     maxTime = Timestamp.valueOf(tmpTime).getTime();
                 }
@@ -457,7 +457,7 @@ public class FXMapPane extends BorderPane {
             final TaskManager.MockTask displayUpdate = new TaskManager.MockTask(() -> {
                     uiMap1.getCanvas().setVisibleArea(selectionEnvelope);
                     if (selectionTime != null) {
-                        setTemporalRange(selectionTime, uiMap1);
+                        setTemporalRange(selectionTime.toLocalDate(), uiMap1);
                     }
                     return null;
             });

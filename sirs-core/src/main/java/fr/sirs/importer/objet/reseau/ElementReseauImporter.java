@@ -403,7 +403,7 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
                     }
                     
                     if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                        objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                        objet.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                     }
                 }
             

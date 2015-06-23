@@ -3,15 +3,11 @@ package fr.sirs.importer;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
-import fr.sirs.core.InjectorCore;
-import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.DatabaseRegistry;
-import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
@@ -41,6 +37,7 @@ import fr.sirs.importer.troncon.GardienTronconGestionImporter;
 import fr.sirs.importer.troncon.ProprietaireTronconGestionImporter;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -51,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.ektorp.BulkDeleteDocument;
 import org.geotoolkit.factory.Hints;
 import org.geotoolkit.lang.Setup;
 import org.ektorp.CouchDbConnector;
@@ -71,7 +67,7 @@ public class DbImporter {
         return (NULL_STRING_VALUE.equals(string) || string==null) ? "" : string;
     }    
     
-    public static LocalDateTime parse(final Date date, final DateTimeFormatter dateTimeFormatter){
+    public static LocalDateTime parseLocalDateTime(final Date date, final DateTimeFormatter dateTimeFormatter){
         try{
             return LocalDateTime.parse(date.toString(), dateTimeFormatter);
         }
@@ -81,9 +77,29 @@ public class DbImporter {
         return null;
     }
     
-    public static LocalDateTime parse(final Date date, final DateTimeFormatter dateTimeFormatter, final Element element){
+    public static LocalDateTime parseLocalDateTime(final Date date, final DateTimeFormatter dateTimeFormatter, final Element element){
         try{
             return LocalDateTime.parse(date.toString(), dateTimeFormatter);
+        }
+        catch(DateTimeParseException ex){
+            SirsCore.LOGGER.log(Level.SEVERE, "Date error for element "+element.getClass().getSimpleName()+" "+element.getDesignation(), ex);
+        }
+        return null;
+    }
+    
+    public static LocalDate parseLocalDate(final Date date, final DateTimeFormatter dateTimeFormatter){
+        try{
+            return LocalDate.parse(date.toString(), dateTimeFormatter);
+        }
+        catch(DateTimeParseException ex){
+            SirsCore.LOGGER.log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+    
+    public static LocalDate parseLocalDate(final Date date, final DateTimeFormatter dateTimeFormatter, final Element element){
+        try{
+            return LocalDate.parse(date.toString(), dateTimeFormatter);
         }
         catch(DateTimeParseException ex){
             SirsCore.LOGGER.log(Level.SEVERE, "Date error for element "+element.getClass().getSimpleName()+" "+element.getDesignation(), ex);

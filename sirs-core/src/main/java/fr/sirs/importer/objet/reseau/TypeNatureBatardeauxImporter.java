@@ -59,7 +59,7 @@ class TypeNatureBatardeauxImporter extends GenericTypeReferenceImporter<RefNatur
             nature.setLibelle(row.getString(Columns.LIBELLE_TYPE_NATURE_BATARDEAUX.toString()));
             nature.setAbrege(row.getString(Columns.ABREGE_TYPE_NATURE_BATARDEAUX.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                nature.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                nature.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             nature.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_NATURE_BATARDEAUX.toString()))));
             

@@ -58,7 +58,7 @@ public class TypeRefHeauImporter extends GenericTypeReferenceImporter<RefReferen
             refHauteur.setId(refHauteur.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_REF_HEAU.toString())));
             refHauteur.setLibelle(row.getString(Columns.LIBELLE_TYPE_REF_HEAU.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                refHauteur.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                refHauteur.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             refHauteur.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_REF_HEAU.toString()))));
             

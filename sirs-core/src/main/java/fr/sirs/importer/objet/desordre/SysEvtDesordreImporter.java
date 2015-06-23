@@ -187,11 +187,11 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-            desordre.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter, desordre));
+            desordre.setDate_debut(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter, desordre));
         }
         
         if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-            desordre.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter, desordre));
+            desordre.setDate_fin(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter, desordre));
         }
 
         if (row.getString(Columns.DESCRIPTION_DESORDRE.toString()) != null) {

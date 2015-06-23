@@ -59,7 +59,7 @@ class TypeProfilFrancBordImporter extends GenericTypeReferenceImporter<RefProfil
             typeProfil.setLibelle(row.getString(Columns.LIBELLE_TYPE_PROFIL_FB.toString()));
             typeProfil.setAbrege(row.getString(Columns.ABREGE_TYPE_PROFIL_FB.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeProfil.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeProfil.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeProfil.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_PROFIL_FB.toString())));
             

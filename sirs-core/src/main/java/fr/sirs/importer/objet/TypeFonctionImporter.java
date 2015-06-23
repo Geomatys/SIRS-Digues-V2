@@ -57,7 +57,7 @@ public class TypeFonctionImporter extends GenericTypeReferenceImporter<RefFoncti
             typeFonction.setId(typeFonction.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_FONCTION.toString())));
             typeFonction.setLibelle(row.getString(Columns.LIBELLE_TYPE_FONCTION.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeFonction.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeFonction.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeFonction.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_FONCTION.toString()))));
             

@@ -58,7 +58,7 @@ class TypeFonctionMoImporter extends GenericTypeReferenceImporter<RefFonctionMai
             typeFonctionMo.setLibelle(row.getString(Columns.LIBELLE_FONCTION_MO.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeFonctionMo.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeFonctionMo.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             typeFonctionMo.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_FONCTION_MO.toString()))));

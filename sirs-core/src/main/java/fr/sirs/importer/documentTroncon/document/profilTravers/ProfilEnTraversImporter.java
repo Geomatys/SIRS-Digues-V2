@@ -82,7 +82,7 @@ public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<Prof
             profil.setLibelle(row.getString(Columns.NOM.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                profil.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                profil.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             profil.setDesignation(String.valueOf(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString())));
             

@@ -80,11 +80,11 @@ public class MarcheImporter extends GenericDocumentRelatedImporter<Marche> {
         marche.setMaitreOuvrageId(organismes.get(row.getInt(Columns.ID_MAITRE_OUVRAGE.toString())).getId());
 
         if (row.getDate(Columns.DATE_DEBUT_MARCHE.toString()) != null) {
-            marche.setDate_debut(DbImporter.parse(row.getDate(Columns.DATE_DEBUT_MARCHE.toString()), dateTimeFormatter));
+            marche.setDate_debut(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DEBUT_MARCHE.toString()), dateTimeFormatter));
         }
 
         if (row.getDate(Columns.DATE_FIN_MARCHE.toString()) != null) {
-            marche.setDate_fin(DbImporter.parse(row.getDate(Columns.DATE_FIN_MARCHE.toString()), dateTimeFormatter));
+            marche.setDate_fin(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN_MARCHE.toString()), dateTimeFormatter));
         }
 
         if (row.getDouble(Columns.MONTANT_MARCHE.toString()) != null) {
@@ -96,7 +96,7 @@ public class MarcheImporter extends GenericDocumentRelatedImporter<Marche> {
         }
 
         if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-            marche.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+            marche.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
         }
         
         marche.setDesignation(String.valueOf(row.getInt(Columns.ID_MARCHE.toString())));

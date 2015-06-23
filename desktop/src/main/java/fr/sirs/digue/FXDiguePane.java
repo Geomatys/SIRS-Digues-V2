@@ -20,7 +20,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
 import javafx.scene.web.HTMLEditor;
 import jidefx.scene.control.field.LocalDateTimeField;
-import org.geotoolkit.gui.javafx.util.FXDateField;
+import org.geotoolkit.gui.javafx.util.FXLocalDateTimeField;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -33,7 +33,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
 
     @FXML private TextField libelle;
     @FXML private TextField uiDesignation;
-    @FXML private FXDateField date_maj;
+    @FXML private FXLocalDateTimeField date_maj;
     @FXML private HTMLEditor uiComment;
     
     @FXML private FXEditMode uiMode;

@@ -23,8 +23,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Date;
@@ -49,7 +49,7 @@ import org.controlsfx.control.StatusBar;
 import org.geotoolkit.display.canvas.AbstractCanvas2D;
 import org.geotoolkit.display2d.canvas.painter.SolidColorPainter;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
-import org.geotoolkit.gui.javafx.util.FXDateField;
+import org.geotoolkit.gui.javafx.util.FXLocalDateField;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.internal.Loggers;
@@ -109,7 +109,7 @@ public class FXCoordinateBar extends GridPane {
     private final ComboBox scaleCombo = new ComboBox();
     private final ColorPicker colorPicker = new ColorPicker(Color.WHITE);
     private final FXCRSButton crsButton = new FXCRSButton();
-    private final FXDateField dateField = new FXDateField();
+    private final FXLocalDateField dateField = new FXLocalDateField();
     
     public FXCoordinateBar(FXMap map) {
         this.map = map;
@@ -135,8 +135,8 @@ public class FXCoordinateBar extends GridPane {
                     if(newValue==null){
                         map.getCanvas().setTemporalRange(null,null);
                     }else{
-                        final LocalDateTime date = dateField.valueProperty().get();
-                        final Instant time = date.toInstant(ZoneOffset.UTC);
+                        final LocalDate date = dateField.valueProperty().get();
+                        final Instant time = date.atTime(LocalTime.MIDNIGHT).toInstant(ZoneOffset.UTC);
                         map.getCanvas().setTemporalRange(Date.from(time),Date.from(time));
                     }
                 } catch (TransformException ex) {
@@ -211,7 +211,7 @@ public class FXCoordinateBar extends GridPane {
      * TODO change this, we should be able to control multiple crs axis at the same time.
      * @return temporal axis crs viewer
      */
-    public FXDateField getDateField() {
+    public FXLocalDateField getDateField() {
         return dateField;
     }
     

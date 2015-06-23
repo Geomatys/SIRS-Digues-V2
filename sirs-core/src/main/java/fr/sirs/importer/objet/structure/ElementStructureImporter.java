@@ -238,7 +238,7 @@ public class ElementStructureImporter extends GenericStructureImporter<ObjetStru
 
             if (objet != null) {
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    objet.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                    objet.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                 }
 
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.

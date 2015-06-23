@@ -1,6 +1,6 @@
 package fr.sirs.core.model;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import javafx.beans.property.ObjectProperty;
 
 /**
@@ -11,15 +11,15 @@ import javafx.beans.property.ObjectProperty;
  */
 public interface AvecBornesTemporelles {
              
-    public ObjectProperty<LocalDateTime> date_debutProperty();
+    public ObjectProperty<LocalDate> date_debutProperty();
 
-    public LocalDateTime getDate_debut();
+    public LocalDate getDate_debut();
 
-    public void setDate_debut(LocalDateTime date_debut);
+    public void setDate_debut(LocalDate date_debut);
 
-    public ObjectProperty<LocalDateTime> date_finProperty();
+    public ObjectProperty<LocalDate> date_finProperty();
 
-    public LocalDateTime getDate_fin();
+    public LocalDate getDate_fin();
 
-    public void setDate_fin(LocalDateTime date_fin);
+    public void setDate_fin(LocalDate date_fin);
 }

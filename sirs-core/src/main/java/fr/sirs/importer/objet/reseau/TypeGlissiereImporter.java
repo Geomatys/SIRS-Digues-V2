@@ -59,7 +59,7 @@ class TypeGlissiereImporter extends GenericTypeReferenceImporter<RefTypeGlissier
             typeGlissiere.setLibelle(row.getString(Columns.LIBELLE_TYPE_GLISSIERE.toString()));
             typeGlissiere.setAbrege(row.getString(Columns.ABREGE_TYPE_GLISSIERE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeGlissiere.setDateMaj(DbImporter.parse(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeGlissiere.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeGlissiere.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_GLISSIERE.toString()))));
             
