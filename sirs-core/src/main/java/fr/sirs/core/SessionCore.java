@@ -29,8 +29,11 @@ import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.index.ElementHit;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import javafx.beans.property.BooleanProperty;
@@ -47,7 +50,6 @@ import org.opengis.util.FactoryException;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * La session contient toutes les données chargées dans l'instance courante de 
@@ -106,6 +108,41 @@ public class SessionCore extends SessionGen implements ApplicationContextAware {
      */
     public <T extends Element> AbstractSIRSRepository<T> getRepositoryForClass(Class<T> elementType) {
         return applicationContext.getBeansOfType(AbstractSIRSRepository.class).get(COMPONENT_PACKAGE+"."+elementType.getSimpleName()+"Repository");
+    }
+    
+    public Collection<AbstractSIRSRepository> getModelRepositories(){
+        return applicationContext.getBeansOfType(AbstractSIRSRepository.class).values();
+    }
+    
+    private final Map<Class<? extends Element>, Collection<AbstractSIRSRepository<Element>>> REPOS_FOR_ABSTRACT_CLASS = new HashMap<>();
+    
+    /**
+     * Return a collection of candidate repositories for an abstract class or an interface.
+     * @param elementType
+     * @return 
+     */
+    public Collection<AbstractSIRSRepository<Element>> getRepositoriesForClass(Class<? extends Element> elementType){
+        
+        if(!elementType.isInterface() 
+                && !Modifier.isAbstract(elementType.getModifiers())) 
+            throw new IllegalArgumentException("The class given as an arguement has to be either abstract or either an interface.");
+        
+        
+        if(REPOS_FOR_ABSTRACT_CLASS.get(elementType)==null){
+            final Collection<AbstractSIRSRepository<Element>> col = new ArrayList<>();
+
+            for(final Class element : ELEMENTS){
+                if(elementType.isAssignableFrom(element)) 
+                    col.add(getRepositoryForClass(element));
+            }
+
+            for(final Class element : REFERENCES){
+                if(elementType.isAssignableFrom(element)) 
+                    col.add(getRepositoryForClass(element));
+            }
+            REPOS_FOR_ABSTRACT_CLASS.put(elementType, col);
+        }
+        return REPOS_FOR_ABSTRACT_CLASS.get(elementType);
     }
     
     /**
@@ -225,10 +262,6 @@ public class SessionCore extends SessionGen implements ApplicationContextAware {
 
     public SQLQueryRepository getSqlQueryRepository() {
         return sqlQueryRepository;
-    }
-    
-    public Collection<AbstractSIRSRepository> getModelRepositories(){
-        return repositories.values();
     }
     
     public <T extends Positionable> List<T> getByTronconId(final String tronconId, final Class<T> clazz){
