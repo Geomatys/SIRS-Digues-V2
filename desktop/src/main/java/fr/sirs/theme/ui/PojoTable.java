@@ -1321,8 +1321,10 @@ public class PojoTable extends BorderPane {
             setCellValueFactory((TableColumn.CellDataFeatures<Element, Element> param) -> new SimpleObjectProperty<>(param.getValue()));
             setCellFactory((TableColumn<Element, Element> param) -> {
                 final boolean realDelete = createNewProperty.get();
-                return new ButtonTableCell<>(
-                        false, realDelete? new ImageView(GeotkFX.ICON_DELETE) : new ImageView(GeotkFX.ICON_UNLINK), (Element t) -> true, (Element t) -> {
+                return new ButtonTableCell<>(false, 
+                        realDelete ? new ImageView(GeotkFX.ICON_DELETE) : new ImageView(GeotkFX.ICON_UNLINK), 
+                        (Element t) -> true, 
+                        (Element t) -> {
                             final Alert confirm;
                             if (realDelete) {
                                 confirm = new Alert(Alert.AlertType.WARNING, "Vous allez supprimer DEFINITIVEMENT l'entrée de la base de données. Êtes-vous sûr ?", ButtonType.NO, ButtonType.YES);
@@ -1361,6 +1363,7 @@ public class PojoTable extends BorderPane {
 
             setCellFactory(new Callback<TableColumn, TableCell>() {
 
+                @Override
                 public TableCell call(TableColumn param) {
                     return new ButtonTableCell(
                             false, new ImageView(SIRS.ICON_EDIT_BLACK),
