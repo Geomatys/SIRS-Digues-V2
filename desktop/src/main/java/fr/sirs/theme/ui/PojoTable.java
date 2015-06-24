@@ -158,7 +158,7 @@ import org.opengis.filter.Filter;
  */
 public class PojoTable extends BorderPane {
     
-    private static final String BUTTON_STYLE = "buttonbar-button";
+    protected static final String BUTTON_STYLE = "buttonbar-button";
     
     private static final String[] COLUMNS_TO_IGNORE = new String[] {
         AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD, 

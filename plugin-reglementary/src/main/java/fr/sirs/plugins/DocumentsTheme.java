@@ -2,6 +2,7 @@ package fr.sirs.plugins;
 
 import fr.sirs.SIRS;
 import fr.sirs.theme.ui.ObligationsCalendarView;
+import fr.sirs.theme.ui.ObligationsPojoTable;
 import fr.sirs.ui.calendar.CalendarView;
 import fr.sirs.Injector;
 import fr.sirs.core.component.ObligationReglementaireRepository;
@@ -37,7 +38,7 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
         final BorderPane borderPane = new BorderPane();
         final TabPane tabPane = new TabPane();
 
-        final Tab listTab = buildListTab();
+        final Tab listTab = buildListTab(tabPane);
         final Tab calendarTab = buildCalendarTab();
         tabPane.getTabs().add(listTab);
         tabPane.getTabs().add(calendarTab);
@@ -48,11 +49,13 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
 
     /**
      * Génère l'onglet présentant la liste des obligations réglementaires.
+     *
+     * @param tabPane
      */
-    private Tab buildListTab() {
+    private Tab buildListTab(final TabPane tabPane) {
         final Tab listTab = new Tab("Liste");
         listTab.setClosable(false);
-        final PojoTable obligationsPojoTable = new PojoTable(Injector.getSession().getRepositoryForClass(ObligationReglementaire.class), "Liste des obligations réglementaires");
+        final PojoTable obligationsPojoTable = new ObligationsPojoTable(Injector.getSession().getRepositoryForClass(ObligationReglementaire.class), tabPane);
         listTab.setContent(obligationsPojoTable);
         return listTab;
     }
