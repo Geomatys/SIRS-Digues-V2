@@ -1,0 +1,16 @@
+.calendar-event-popup-title{
+    -fx-font-weight: bold;
+}
+
+.calendar-event-popup-button{
+    -fx-background-color: none;
+}
+.calendar-event-popup-button:hover{
+    -fx-background-color:rgb(139,179,212);
+}
+.calendar-event-popup-button:selected{
+    -fx-background-color: rgb(74,123,165);
+}
+.calendar-event-popup-button:armed{
+    -fx-background-color: rgb(74,123,165);
+}

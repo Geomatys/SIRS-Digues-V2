@@ -203,7 +203,7 @@ final class MonthView extends DatePane {
 
         // Prepare buttons style
         final ColumnConstraints colLargeTxtEventCstr = new ColumnConstraints(130);
-        final ColumnConstraints colSmallCstr = new ColumnConstraints(20);
+        final ColumnConstraints colSmallCstr = new ColumnConstraints(USE_PREF_SIZE, 20, USE_PREF_SIZE, Priority.NEVER, HPos.RIGHT, true);
 
         final ObservableList<CalendarEvent> events = calendarView.getCalendarEvents();
 

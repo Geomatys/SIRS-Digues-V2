@@ -59,7 +59,8 @@ public final class ObligationsCalendarPopupEvent extends Stage {
         buttonAlert.getStyleClass().add(CSS_CALENDAR_EVENT_POPUP_BUTTON);
         mainBox.getChildren().add(buttonAlert);
 
-        final Scene scene = new Scene(mainBox, 200, 100);
+        final Scene scene = new Scene(mainBox, 250, 100);
+        scene.getStylesheets().add("/fr/sirs/theme/ui/popup-calendar.css");
         setScene(scene);
     }
 }
