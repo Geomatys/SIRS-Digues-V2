@@ -137,7 +137,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
     public void displayElement(final Element obj) {
         AbstractFXElementPane ctrl = SIRS.generateEditionPane(obj);
         uiRight.setCenter(ctrl);
-        session.prepareToPrint(obj);
+        session.getPrintManager().prepareToPrint(obj);
     }
 
     private void deleteSelection(ActionEvent event) {

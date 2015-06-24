@@ -25,6 +25,8 @@ import jidefx.scene.control.field.LocalDateTimeField;
  * TODO improve control to support all Date type objects.
  * 
  * @author Johann Sorel (Geomatys)
+ * 
+ * @description Refactor of FXDateField
  */
 public class FXLocalDateTimeField extends DecorationPane{
     

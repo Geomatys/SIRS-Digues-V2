@@ -282,21 +282,24 @@ public class PojoTable extends BorderPane {
             }
         });
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        uiTable.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
-            session.prepareToPrint(uiTable.getSelectionModel().getSelectedItems());
-        });
+        uiTable.getSelectionModel().selectedItemProperty().addListener(
+                (ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
+                    session.getPrintManager().prepareToPrint(uiTable.getSelectionModel().getSelectedItems());
+                });
                 
         /* We cannot bind visible properties of those columns, because TableView 
          * will set their value when user will request to hide them.
          */
-        editableProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-            deleteColumn.setVisible(newValue);
-            //editCol.setVisible(newValue && detaillableProperty.get());
-        });
+        editableProperty.addListener((
+                ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                    deleteColumn.setVisible(newValue);
+                    //editCol.setVisible(newValue && detaillableProperty.get());
+                });
         cellEditableProperty.bind(editableProperty);
-        detaillableProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-            editCol.setVisible(newValue && detaillableProperty.get());
-        });
+        detaillableProperty.addListener(
+                (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                    editCol.setVisible(newValue && detaillableProperty.get());
+                });
         
         uiTable.getColumns().add(deleteColumn);
         uiTable.getColumns().add((TableColumn) editCol);

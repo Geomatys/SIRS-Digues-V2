@@ -99,9 +99,10 @@ public class PrinterUtilities {
      * src/main/resources/fr/sirs/jrxml/metaTemplate.jrxml
      * and produce a specific template : ClassName.jrxml".</p>
      * 
-     * <p>Then, this specific template is used to print an object of the model.</p>
-     * @param <T>
-     * @param elements Pojos to print.
+     * <p>This specific template is used to print objects of the model.</p>
+     * 
+     * @param elements Pojos to print. The list must contain at least one element. 
+     * If it contains more than one, they must be all of the same class.
      * @param avoidFields Names of the fields to avoid printing.
      * @param previewLabelRepository
      * @param stringConverter
@@ -109,16 +110,16 @@ public class PrinterUtilities {
      * @throws Exception 
      */
     public static File print(final List<String> avoidFields, 
-            final Previews previewLabelRepository, final StringConverter stringConverter, final Element... elements) throws Exception {
+            final Previews previewLabelRepository, final StringConverter stringConverter, final List<? extends Element> elements) throws Exception {
         
         // Creates the Jasper Reports specific template from the generic template.
-        final File templateFile = File.createTempFile(elements[0].getClass().getSimpleName(), JRXML_EXTENSION);
+        final File templateFile = File.createTempFile(elements.get(0).getClass().getSimpleName(), JRXML_EXTENSION);
         templateFile.deleteOnExit();
         
         final JRDomWriterElementSheet templateWriter = new JRDomWriterElementSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_ELEMENT));
         templateWriter.setFieldsInterline(2);
         templateWriter.setOutput(templateFile);
-        templateWriter.write(elements[0].getClass(), avoidFields);
+        templateWriter.write(elements.get(0).getClass(), avoidFields);
         
         final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
                 
@@ -136,11 +137,10 @@ public class PrinterUtilities {
                     finalPrint.addPage(page);
                 }
             }
-//            prints.add(print);
         }
         
         // Generate the report -------------------------------------------------
-        final File fout = File.createTempFile(elements[0].getClass().getSimpleName(), PDF_EXTENSION);
+        final File fout = File.createTempFile(elements.get(0).getClass().getSimpleName(), PDF_EXTENSION);
         try (final FileOutputStream outStream = new FileOutputStream(fout)) {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
             JasperReportService.generate(finalPrint, output);
@@ -148,9 +148,48 @@ public class PrinterUtilities {
         return fout;
     }
     
-//    public static File print(final Element objectToPrint, final List<String> avoidFields) throws Exception {
-//        return print(objectToPrint, avoidFields, null, null);
-//    }
+    /*
+    
+    Pour l'impression de plusieurs documents, plusieurs solutions (http://stackoverflow.com/questions/24115885/combining-two-jasper-reports)
+    
+    
+    solution 1
+    
+    List<JasperPrint> jasperPrints = new ArrayList<JasperPrint>();
+// Your code to get Jasperreport objects
+JasperReport jasperReportReport1 = JasperCompileManager.compileReport(jasperDesignReport1);
+jasperPrints.add(jasperReportReport1);
+JasperReport jasperReportReport2 = JasperCompileManager.compileReport(jasperDesignReport2);
+jasperPrints.add(jasperReportReport2);
+JasperReport jasperReportReport3 = JasperCompileManager.compileReport(jasperDesignReport3);
+jasperPrints.add(jasperReportReport3);
+
+JRPdfExporter exporter = new JRPdfExporter();
+//Create new FileOutputStream or you can use Http Servlet Response.getOutputStream() to get Servlet output stream
+// Or if you want bytes create ByteArrayOutputStream
+ByteArrayOutputStream out = new ByteArrayOutputStream();
+exporter.setParameter(JRExporterParameter.JASPER_PRINT_LIST, jasperPrints);
+exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
+exporter.exportReport();
+byte[] bytes = out.toByteArray();
+    
+    
+    solution 2 (adoptée pour le moment) :
+    
+    JasperPrint jp1 = JasperFillManager.fillReport(url.openStream(), parameters,
+                    new JRBeanCollectionDataSource(inspBean));
+JasperPrint jp2 = JasperFillManager.fillReport(url.openStream(), parameters,
+                    new JRBeanCollectionDataSource(inspBean));
+
+List pages = jp2 .getPages();
+        for (int j = 0; j < pages.size(); j++) {
+        JRPrintPage object = (JRPrintPage)pages.get(j);
+        jp1.addPage(object);
+
+}
+JasperViewer.viewReport(jp1,false);
+    
+    */
     
     ////////////////////////////////////////////////////////////////////////////
     // METHODES UTILITAIRES

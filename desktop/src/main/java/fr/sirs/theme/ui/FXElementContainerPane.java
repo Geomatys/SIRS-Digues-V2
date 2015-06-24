@@ -158,7 +158,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
             //validation
             uiMode.validProperty().bind(newValue.validProperty());
             uiMode.authorIDProperty().bind(newValue.authorProperty());
-            Injector.getSession().prepareToPrint(newValue);
+            Injector.getSession().getPrintManager().prepareToPrint(newValue);
             
             uiPseudoId.textProperty().bindBidirectional(newValue.designationProperty());
             

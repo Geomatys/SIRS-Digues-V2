@@ -52,11 +52,8 @@ import org.apache.sis.util.iso.SimpleInternationalString;
 import org.ektorp.CouchDbConnector;
 import org.geotoolkit.coverage.CoverageReference;
 import org.geotoolkit.coverage.CoverageStore;
-import org.geotoolkit.data.FeatureCollection;
-import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.display2d.ext.DefaultBackgroundTemplate;
 import org.geotoolkit.display2d.ext.legend.DefaultLegendTemplate;
-import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.Name;
 import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.osmtms.OSMTileMapClient;
@@ -140,6 +137,7 @@ public class Session extends SessionCore {
             referenceUrl = SirsPreferences.PROPERTIES.REFERENCE_URL.getDefaultValue();
         }
         referenceChecker = new ReferenceChecker(referenceUrl);
+        printManager = new PrintManager();
     }
     
     void setFrame(FXMainFrame frame) {
@@ -227,32 +225,8 @@ public class Session extends SessionCore {
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES IMPRESSIONS PDF
     ////////////////////////////////////////////////////////////////////////////
-    private List<Element> elementsToPrint = null;
-    private FeatureCollection featuresToPrint = null;
-    
-    public List<? extends Element> getElementsToPrint(){return elementsToPrint;}
-    public FeatureCollection getFeaturesToPrint(){return featuresToPrint;}
-
-    public void prepareToPrint(final Element object){
-        featuresToPrint = null;
-        elementsToPrint = new ArrayList<>();
-        elementsToPrint.add(object);
-    }
-
-    public void prepareToPrint(final List<Element> objects){
-        featuresToPrint = null;
-        elementsToPrint = objects;
-    }
-    
-    public void prepareToPrint(final Feature feature){
-        elementsToPrint = null;
-        featuresToPrint = FeatureStoreUtilities.collection(feature);
-    }
-    
-    public void prepareToPrint(final FeatureCollection featureCollection){
-        elementsToPrint = null;
-        featuresToPrint = featureCollection;
-    }
+    private final PrintManager printManager;
+    public final PrintManager getPrintManager(){return printManager;}
     
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES PANNEAUX
@@ -379,7 +353,7 @@ public class Session extends SessionCore {
             diguesTab.getDiguesController().displayElement(element);
             diguesTab.setOnSelectionChanged((Event event) -> {
                 if (diguesTab.isSelected()) {
-                    prepareToPrint(element);
+                    printManager.prepareToPrint(element);
                 }
             });
             return diguesTab;
@@ -415,7 +389,7 @@ public class Session extends SessionCore {
                         tab.setTextAbrege(generateElementTitle(element));
                         tab.setOnSelectionChanged((Event event) -> {
                             if (tab.isSelected()) {
-                                prepareToPrint(element);
+                                printManager.prepareToPrint(element);
                             }
                         });
                         

@@ -609,12 +609,13 @@ public class FXSearchPane extends BorderPane {
         @Override
         public boolean init(Object candidate){
             final  boolean result = super.init(candidate);
-            table.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Feature> observable, Feature oldValue, Feature newValue) -> {
-                final List<Feature> ftrs = table.getSelectionModel().getSelectedItems();
-                if(ftrs!=null && !ftrs.isEmpty()){
-                    Injector.getSession().prepareToPrint(FeatureStoreUtilities.collection(ftrs.get(0).getType(), ftrs));
-                }
-            });
+            table.getSelectionModel().selectedItemProperty().addListener(
+                    (ObservableValue<? extends Feature> observable, Feature oldValue, Feature newValue) -> {
+                        final List<Feature> ftrs = table.getSelectionModel().getSelectedItems();
+                        if(ftrs!=null && !ftrs.isEmpty()){
+                            Injector.getSession().getPrintManager().prepareToPrint(FeatureStoreUtilities.collection(ftrs.get(0).getType(), ftrs));
+                        }
+                    });
             return result;
         }
     }

@@ -167,7 +167,7 @@ public class SessionCore extends SessionGen implements ApplicationContextAware {
     private final CouchDbConnector connector;
     
     ////////////////////////////////////////////////////////////////////////////
-    // NON-GENERATED REPOSITORIES
+    // SPECIFIC REPOSITORIES
     ////////////////////////////////////////////////////////////////////////////
     private final ReferenceUsageRepository referenceUsageRepository;
     private final Previews previews;
@@ -187,34 +187,33 @@ public class SessionCore extends SessionGen implements ApplicationContextAware {
         elementCreator = new ElementCreator(this);
         
         // Listen on user change
-        utilisateurProperty.addListener(this::userChanged);
-    }
+        utilisateurProperty.addListener(
+                (ObservableValue<? extends Utilisateur> observable, Utilisateur oldValue, Utilisateur newValue) -> {
+                    if (newValue == null || newValue.getRole() == null) {
+                        role.set(Role.GUEST);
+                    } else {
+                        role.set(newValue.getRole());
+                    }
 
-    private void userChanged(ObservableValue<? extends Utilisateur> observable, Utilisateur oldValue, Utilisateur newValue) {
-        if (newValue == null || newValue.getRole() == null) {
-            role.set(Role.GUEST);
-        } else {
-            role.set(newValue.getRole());
-        }
-        
-        // reset rights to most restricted, then unlock authorization regarding user role.
-        needValidationProperty.set(true);
-        geometryEditionProperty.set(false);
-        nonGeometryEditionProperty.set(false);
-        switch (role.get()) {
-            case USER:
-                nonGeometryEditionProperty.set(true);
-                needValidationProperty.set(false);
-                break;
-            case ADMIN:
-                nonGeometryEditionProperty.set(true);
-                geometryEditionProperty.set(true);
-                needValidationProperty.set(false);
-                break;
-            case EXTERN:
-                nonGeometryEditionProperty.set(true);
-                geometryEditionProperty.set(true);
-        }
+                    // reset rights to most restricted, then unlock authorization regarding user role.
+                    needValidationProperty.set(true);
+                    geometryEditionProperty.set(false);
+                    nonGeometryEditionProperty.set(false);
+                    switch (role.get()) {
+                        case USER:
+                            nonGeometryEditionProperty.set(true);
+                            needValidationProperty.set(false);
+                            break;
+                        case ADMIN:
+                            nonGeometryEditionProperty.set(true);
+                            geometryEditionProperty.set(true);
+                            needValidationProperty.set(false);
+                            break;
+                        case EXTERN:
+                            nonGeometryEditionProperty.set(true);
+                            geometryEditionProperty.set(true);
+                    }
+                });
     }
     
     public CouchDbConnector getConnector() {

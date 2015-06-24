@@ -1,20 +1,6 @@
 package fr.sirs;
 
-import static fr.sirs.SIRS.BORNE_IDS_REFERENCE;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
-import static fr.sirs.SIRS.COUCH_DB_DOCUMENT_FIELD;
-import static fr.sirs.SIRS.DOCUMENT_ID_FIELD;
-import static fr.sirs.SIRS.FOREIGN_PARENT_ID_FIELD;
-import static fr.sirs.SIRS.GEOMETRY_FIELD;
-import static fr.sirs.SIRS.ID_FIELD;
-import static fr.sirs.SIRS.LATITUDE_MAX_FIELD;
-import static fr.sirs.SIRS.LATITUDE_MIN_FIELD;
-import static fr.sirs.SIRS.LONGITUDE_MAX_FIELD;
-import static fr.sirs.SIRS.LONGITUDE_MIN_FIELD;
-import static fr.sirs.SIRS.PARENT_FIELD;
-import static fr.sirs.SIRS.POSITION_DEBUT_FIELD;
-import static fr.sirs.SIRS.POSITION_FIN_FIELD;
-import static fr.sirs.SIRS.REVISION_FIELD;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
@@ -26,28 +12,20 @@ import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Tooltip;
 import javafx.scene.text.TextAlignment;
 import org.geotoolkit.gui.javafx.util.TaskManager;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Role;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.query.FXSearchPane;
 import fr.sirs.util.FXPreferenceEditor;
-import fr.sirs.util.PrinterUtilities;
-import fr.sirs.util.SirsStringConverter;
 import org.geotoolkit.gui.javafx.util.ProgressMonitor;
-import java.awt.Desktop;
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.beans.binding.Bindings;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -392,54 +370,21 @@ public class FXMainFrame extends BorderPane {
         final Thread t = new Thread() {
             @Override
             public void run() {
-                if(session.getElementsToPrint()!=null){
-                    printElements();
-                } else if(session.getFeaturesToPrint()!=null){
-                    printFeatures();
+                if(session.getPrintManager().getElementsToPrint()!=null){
+                    session.getPrintManager().printElements();
+                } else if(session.getPrintManager().getFeaturesToPrint()!=null){
+                    session.getPrintManager().printFeatures();
                 }
             }
         };
         t.start();
     }
     
-    private void printFeatures(){
-        try {
-            final File fileToPrint = PrinterUtilities.print(null, session.getFeaturesToPrint());
-            Desktop.getDesktop().open(fileToPrint);
-        } catch (Exception ex) {
-            Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    private void printElements(){
-        final List avoidFields = new ArrayList<>();
-        final File fileToPrint;
-        avoidFields.add(GEOMETRY_FIELD);
-        avoidFields.add(DOCUMENT_ID_FIELD);
-        avoidFields.add(ID_FIELD);
-        avoidFields.add(LONGITUDE_MIN_FIELD);
-        avoidFields.add(LONGITUDE_MAX_FIELD);
-        avoidFields.add(LATITUDE_MIN_FIELD);
-        avoidFields.add(LATITUDE_MAX_FIELD);
-        avoidFields.add(FOREIGN_PARENT_ID_FIELD);
-        avoidFields.add(REVISION_FIELD);
-        avoidFields.add(POSITION_DEBUT_FIELD);
-        avoidFields.add(POSITION_FIN_FIELD);
-        avoidFields.add(PARENT_FIELD);
-        avoidFields.add(COUCH_DB_DOCUMENT_FIELD);
-        
-        for(final Element element : session.getElementsToPrint()){
-            if(element instanceof TronconDigue){
-                if(!avoidFields.contains(BORNE_IDS_REFERENCE)) avoidFields.add(BORNE_IDS_REFERENCE);
-            }
-        }
-
-        try {
-            fileToPrint = PrinterUtilities.print(avoidFields, session.getPreviews(), new SirsStringConverter(), session.getElementsToPrint().toArray(new Element[session.getElementsToPrint().size()]));
-            Desktop.getDesktop().open(fileToPrint);
-        } catch (Exception e) {
-            Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, e);
-        }
+    @FXML private void disorderPrint(){
+        System.out.println("IMPRESSION DES FICHES DE DÉSORDRES !");
+        final Stage disorderPrintStage = new Stage();
+        disorderPrintStage.setScene(new Scene(new FXDisorderPrintFrame()));
+        disorderPrintStage.show();
     }
     
     @FXML
