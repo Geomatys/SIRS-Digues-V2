@@ -13,6 +13,7 @@ import java.util.Map;
 import javafx.util.StringConverter;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JREmptyDataSource;
+import net.sf.jasperreports.engine.JRPrintPage;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -54,7 +55,7 @@ public class PrinterUtilities {
         falseGetter.add("getDocumentId");
     }
     
-    static public File print(final FeatureCollection featureCollection, List<String> avoidFields) throws Exception {
+    static public File print(List<String> avoidFields, final FeatureCollection featureCollection) throws Exception {
         
         if(avoidFields==null) avoidFields=new ArrayList<>();
         
@@ -99,44 +100,57 @@ public class PrinterUtilities {
      * and produce a specific template : ClassName.jrxml".</p>
      * 
      * <p>Then, this specific template is used to print an object of the model.</p>
-     * @param element Pojo to print.
+     * @param <T>
+     * @param elements Pojos to print.
      * @param avoidFields Names of the fields to avoid printing.
      * @param previewLabelRepository
      * @param stringConverter
      * @return 
      * @throws Exception 
      */
-    static public File print(final Element element, final List<String> avoidFields, 
-            final Previews previewLabelRepository, final StringConverter stringConverter) throws Exception {
+    public static File print(final List<String> avoidFields, 
+            final Previews previewLabelRepository, final StringConverter stringConverter, final Element... elements) throws Exception {
         
         // Creates the Jasper Reports specific template from the generic template.
-        final File templateFile = File.createTempFile(element.getClass().getSimpleName(), JRXML_EXTENSION);
+        final File templateFile = File.createTempFile(elements[0].getClass().getSimpleName(), JRXML_EXTENSION);
         templateFile.deleteOnExit();
         
         final JRDomWriterElementSheet templateWriter = new JRDomWriterElementSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_ELEMENT));
         templateWriter.setFieldsInterline(2);
         templateWriter.setOutput(templateFile);
-        templateWriter.write(element.getClass(), avoidFields);
+        templateWriter.write(elements[0].getClass(), avoidFields);
         
         final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
-        final Map<String, Object> parameters = new HashMap<>();
-        parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
-        final JRDataSource source = new ObjectDataSource(Collections.singletonList(element), previewLabelRepository, stringConverter);
-        
-        final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
+                
+//        final List<JasperPrint> prints = new ArrayList<>();
+        JasperPrint finalPrint = null;
+        for(final Element element : elements){
+            final JRDataSource source = new ObjectDataSource(Collections.singletonList(element), previewLabelRepository, stringConverter);
+
+            final Map<String, Object> parameters = new HashMap<>();
+            parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
+            final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
+            if(finalPrint==null) finalPrint=print;
+            else{
+                for(final JRPrintPage page : print.getPages()){
+                    finalPrint.addPage(page);
+                }
+            }
+//            prints.add(print);
+        }
         
         // Generate the report -------------------------------------------------
-        final File fout = File.createTempFile(element.getClass().getSimpleName(), PDF_EXTENSION);
+        final File fout = File.createTempFile(elements[0].getClass().getSimpleName(), PDF_EXTENSION);
         try (final FileOutputStream outStream = new FileOutputStream(fout)) {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
-            JasperReportService.generate(print, output);
+            JasperReportService.generate(finalPrint, output);
         }
         return fout;
     }
     
-    static public File print(final Element objectToPrint, final List<String> avoidFields) throws Exception {
-        return print(objectToPrint, avoidFields, null, null);
-    }
+//    public static File print(final Element objectToPrint, final List<String> avoidFields) throws Exception {
+//        return print(objectToPrint, avoidFields, null, null);
+//    }
     
     ////////////////////////////////////////////////////////////////////////////
     // METHODES UTILITAIRES

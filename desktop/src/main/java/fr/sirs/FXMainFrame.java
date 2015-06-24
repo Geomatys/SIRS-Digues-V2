@@ -404,7 +404,7 @@ public class FXMainFrame extends BorderPane {
     
     private void printFeatures(){
         try {
-            final File fileToPrint = PrinterUtilities.print(session.getFeaturesToPrint(), null);
+            final File fileToPrint = PrinterUtilities.print(null, session.getFeaturesToPrint());
             Desktop.getDesktop().open(fileToPrint);
         } catch (Exception ex) {
             Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, ex);
@@ -412,37 +412,33 @@ public class FXMainFrame extends BorderPane {
     }
     
     private void printElements(){
+        final List avoidFields = new ArrayList<>();
+        final File fileToPrint;
+        avoidFields.add(GEOMETRY_FIELD);
+        avoidFields.add(DOCUMENT_ID_FIELD);
+        avoidFields.add(ID_FIELD);
+        avoidFields.add(LONGITUDE_MIN_FIELD);
+        avoidFields.add(LONGITUDE_MAX_FIELD);
+        avoidFields.add(LATITUDE_MIN_FIELD);
+        avoidFields.add(LATITUDE_MAX_FIELD);
+        avoidFields.add(FOREIGN_PARENT_ID_FIELD);
+        avoidFields.add(REVISION_FIELD);
+        avoidFields.add(POSITION_DEBUT_FIELD);
+        avoidFields.add(POSITION_FIN_FIELD);
+        avoidFields.add(PARENT_FIELD);
+        avoidFields.add(COUCH_DB_DOCUMENT_FIELD);
+        
         for(final Element element : session.getElementsToPrint()){
-                    
-            final File fileToPrint;
-            final List avoidFields = new ArrayList<>();
-            avoidFields.add(GEOMETRY_FIELD);
-            avoidFields.add(DOCUMENT_ID_FIELD);
-            avoidFields.add(ID_FIELD);
-            avoidFields.add(LONGITUDE_MIN_FIELD);
-            avoidFields.add(LONGITUDE_MAX_FIELD);
-            avoidFields.add(LATITUDE_MIN_FIELD);
-            avoidFields.add(LATITUDE_MAX_FIELD);
-            avoidFields.add(FOREIGN_PARENT_ID_FIELD);
-            avoidFields.add(REVISION_FIELD);
-            avoidFields.add(POSITION_DEBUT_FIELD);
-            avoidFields.add(POSITION_FIN_FIELD);
-            avoidFields.add(PARENT_FIELD);
-
             if(element instanceof TronconDigue){
-                avoidFields.add(BORNE_IDS_REFERENCE);
+                if(!avoidFields.contains(BORNE_IDS_REFERENCE)) avoidFields.add(BORNE_IDS_REFERENCE);
             }
+        }
 
-            if(element instanceof Element){
-                avoidFields.add(COUCH_DB_DOCUMENT_FIELD);
-            }
-
-            try {
-                fileToPrint = PrinterUtilities.print(element, avoidFields, session.getPreviews(), new SirsStringConverter());
-                Desktop.getDesktop().open(fileToPrint);
-            } catch (Exception e) {
-                Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, e);
-            }
+        try {
+            fileToPrint = PrinterUtilities.print(avoidFields, session.getPreviews(), new SirsStringConverter(), session.getElementsToPrint().toArray(new Element[session.getElementsToPrint().size()]));
+            Desktop.getDesktop().open(fileToPrint);
+        } catch (Exception e) {
+            Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, e);
         }
     }
     

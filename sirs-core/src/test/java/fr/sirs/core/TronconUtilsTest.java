@@ -3,8 +3,6 @@ package fr.sirs.core;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import fr.sirs.core.component.BorneDigueRepository;
-import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Crete;
@@ -39,7 +37,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
     
     @BeforeClass
     public static void prepareData() {
-        final SessionGen session = new SessionGen(connector);
+        final SessionCore session = new SessionCore(connector);
         //creation du troncon
         troncon = ElementCreator.createAnonymValidElement(TronconDigue.class);
         troncon.setLibelle("TC");
@@ -93,7 +91,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
     
     @Test
     public void dataIntegrityTest() {
-        final SessionGen session = new SessionGen(connector);
+        final SessionCore session = new SessionCore(connector);
                 
         //le troncon doit etre a jour avec la liste des bornes
         troncon = session.getRepositoryForClass(TronconDigue.class).get(troncon.getDocumentId());
@@ -115,7 +113,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
     @Test
     @DependsOnMethod("dataIntegrityTest")
     public void cutTest() {
-        final SessionGen session = new SessionGen(connector);
+        final SessionCore session = new SessionCore(connector);
         //premiere decoupe -----------------------------------------------------
         final TronconDigue cut0 = TronconUtils.cutTroncon(troncon, 
                 GF.createLineString(new Coordinate[]{new Coordinate(0, 0),new Coordinate(50, 0)}),
@@ -229,7 +227,7 @@ public class TronconUtilsTest extends CouchDBTestCase {
     @Test
     @DependsOnMethod("dataIntegrityTest")
     public void computePRTest() {
-        final SessionGen session = new SessionGen(connector);
+        final SessionCore session = new SessionCore(connector);
         TronconUtils.computePRs(crete, session);
         
         /*

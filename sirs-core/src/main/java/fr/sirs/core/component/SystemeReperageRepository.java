@@ -43,14 +43,13 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     
     @Override
     public SystemeReperage create(){
-        final SessionGen session = InjectorCore.getBean(SessionGen.class);
+        final SessionCore session = InjectorCore.getBean(SessionCore.class);
         if(session!=null && session instanceof SessionCore){
             final ElementCreator elementCreator = ((SessionCore) session).getElementCreator();
             return elementCreator.createElement(SystemeReperage.class);
         } else {
             throw new SirsCoreRuntimeExecption("Pas de session courante");
         }
-//        return new SystemeReperage();
     }
     
     public List<SystemeReperage> getByLinear(final TronconDigue linear) {

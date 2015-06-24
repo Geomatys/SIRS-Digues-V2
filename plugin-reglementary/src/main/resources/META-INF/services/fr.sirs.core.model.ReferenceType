@@ -1,3 +1,4 @@
 fr.sirs.core.model.RefTypeObligationReglementaire
 fr.sirs.core.model.RefFrequenceObligationReglementaire
 fr.sirs.core.model.RefPeriodeRappelObligationReglementaire
+fr.sirs.core.model.RefEtapeObligationReglementaire

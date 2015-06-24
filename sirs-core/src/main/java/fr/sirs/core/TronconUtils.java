@@ -7,7 +7,6 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import fr.sirs.core.component.BorneDigueRepository;
-import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
@@ -72,7 +71,7 @@ public class TronconUtils {
      * @param session
      * @return nouveau troncon découpé
      */
-    public static TronconDigue cutTroncon(TronconDigue troncon, LineString cutLinear, String newName, SessionGen session) {
+    public static TronconDigue cutTroncon(TronconDigue troncon, LineString cutLinear, String newName, SessionCore session) {
         ArgumentChecks.ensureNonNull("Troncon to cut", troncon);
         ArgumentChecks.ensureNonNull("Line string to extract", cutLinear);
         ArgumentChecks.ensureNonNull("Database session", session);
@@ -434,7 +433,7 @@ public class TronconUtils {
      * @param session La session applicative permettant de mettre à jour les SRs.
      * @return le premier tronçon (mergeResult).
      */
-    public static TronconDigue mergeTroncon(TronconDigue mergeResult, TronconDigue mergeParam, SessionGen session) {
+    public static TronconDigue mergeTroncon(TronconDigue mergeResult, TronconDigue mergeParam, SessionCore session) {
         
         final SystemeReperageRepository srRepo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
         
@@ -643,7 +642,7 @@ public class TronconUtils {
      * @param troncon 
      * @param session 
      */
-    public static void updatePositionableGeometry(TronconDigue troncon, SessionGen session){
+    public static void updatePositionableGeometry(TronconDigue troncon, SessionCore session){
         for(Objet obj : getObjetList(troncon)){
             final LineString structGeom = buildGeometry(
                     troncon.getGeometry(), obj, session.getRepositoryForClass(BorneDigue.class));
@@ -817,7 +816,7 @@ public class TronconUtils {
      * @param targetPos The Positionable object to compute PR for.
      * @param session Connection to database, to retrieve SR and bornes.
      */
-    public static void computePRs(final Positionable targetPos, final SessionGen session) {
+    public static void computePRs(final Positionable targetPos, final SessionCore session) {
         ArgumentChecks.ensureNonNull("Input position to compute PR for.", targetPos);
         ArgumentChecks.ensureNonNull("Database connection.", session);
         
@@ -846,22 +845,22 @@ public class TronconUtils {
     public static final class PosInfo {
 
         private final Positionable pos;
-        private final SessionGen session;
+        private final SessionCore session;
         private TronconDigue troncon;
         private Geometry linear;
         private SegmentInfo[] linearSegments;
         
-        public PosInfo(Positionable pos, SessionGen session) {
+        public PosInfo(Positionable pos, SessionCore session) {
             this(pos,null,session);
         }
         
-        public PosInfo(Positionable pos, TronconDigue troncon, SessionGen session) {
+        public PosInfo(Positionable pos, TronconDigue troncon, SessionCore session) {
             this.pos = pos;
             this.troncon = troncon;
             this.session = session;
         }
 
-        public PosInfo(Positionable pos, TronconDigue troncon, SegmentInfo[] linear, SessionGen session) {
+        public PosInfo(Positionable pos, TronconDigue troncon, SegmentInfo[] linear, SessionCore session) {
             this.pos = pos;
             this.troncon = troncon;
             this.linearSegments = linear;

@@ -260,7 +260,7 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
         
         private void recomputePositionable(final Positionable current, final LinearReferencing.SegmentInfo[] linear){
             try{
-                final SessionGen session = InjectorCore.getBean(SessionGen.class);
+                final SessionCore session = InjectorCore.getBean(SessionCore.class);
                 final SystemeReperage sr = session.getRepositoryForClass(SystemeReperage.class).get(troncon.getSystemeRepDefautId());
 
                 final TronconUtils.PosInfo position = new TronconUtils.PosInfo(current, troncon, linear, session);
