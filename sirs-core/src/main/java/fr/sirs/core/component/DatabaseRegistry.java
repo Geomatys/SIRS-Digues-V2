@@ -61,9 +61,22 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public class DatabaseRegistry {
 
+    // Httpd related configurations
     private static final String HTTPD_SECTION = "httpd";
     private static final String SOCKET_OPTION = "socket_options";
     private static final String NO_DELAY_KEY = "nodelay";
+    private static final String BIND_ADDRESS_OPTION = "bind_address";
+    private static final String ENABLE_CORS_OPTION = "enable_cors";
+    
+    // Cors configuration
+    private static final String CORS_SECTION = "cors";
+    private static final String CREDENTIALS_OPTIONS = "credentials";
+    private static final String METHODS_OPTIONS = "methods";
+    private static final String ORIGINS_OPTIONS = "origins";
+    
+    // Authentication options
+    private static final String AUTH_SECTION = "couch_httpd_auth";
+    private static final String REQUIRE_USER_OPTION = "require_valid_user";
     
     private static final Pattern BASIC_AUTH = Pattern.compile("([^\\:/@]+)(?:\\:([^\\:/@]+))?@");
     private static final Pattern LOCAL_URL = Pattern.compile("(?i)^([A-Za-z]+://)?(localhost|127\\.0\\.0\\.1)(:\\d+)?");
@@ -85,10 +98,10 @@ public class DatabaseRegistry {
     public final URL couchDbUrl;
     
     /**
-     * Login for connexion on CouchDb service.
+     * Login for connection on CouchDb service.
      */
     private String username;
-    /** Password for cconnexion on CouchDb service. */
+    /** Password for connection on CouchDb service. */
     private String userPass;
     
     private CouchDbInstance couchDbInstance;
@@ -151,6 +164,9 @@ public class DatabaseRegistry {
         connect();
         
         if (isLocal) {
+            setAuthenticationRequired();
+            setOpenWorld();
+            setCorsUseless();
             ensureNoDelay();
         }
     }
@@ -741,7 +757,71 @@ public class DatabaseRegistry {
 
             // Do not make application fail because of an optimisation.
         } catch (Exception e) {
-            SirsCore.LOGGER.log(Level.WARNING, "Cannot checck 'no delay' configuration", e);
+            SirsCore.LOGGER.log(Level.WARNING, "Cannot check 'no delay' configuration", e);
+        }
+    }
+    
+    private void setAuthenticationRequired() {
+        String authValue;
+        try {
+            authValue = couchDbInstance.getConfiguration(AUTH_SECTION, REQUIRE_USER_OPTION);
+        } catch (DbAccessException e) {
+            authValue = null;
+        }
+        if (!"true".equals(authValue)) {
+            couchDbInstance.setConfiguration(AUTH_SECTION, REQUIRE_USER_OPTION, "true");
+        }
+    }
+    
+    /**
+     * Allow current couchdb service to be requested by any host.
+     */
+    private void setOpenWorld() {
+        String bindAdress;
+        try {
+            bindAdress = couchDbInstance.getConfiguration(HTTPD_SECTION, BIND_ADDRESS_OPTION);
+        } catch (DbAccessException e) {
+            bindAdress = null;
+        }
+        if (bindAdress == null || LOCAL_URL.matcher(bindAdress).matches()) {
+            couchDbInstance.setConfiguration(HTTPD_SECTION, BIND_ADDRESS_OPTION, "0.0.0.0");
+        }
+        
+        String corsValue;
+        try {
+            corsValue = couchDbInstance.getConfiguration(HTTPD_SECTION, ENABLE_CORS_OPTION);
+        } catch (DbAccessException e) {
+            corsValue = null;
+        }
+        if (!"true".equals(corsValue)) {
+            couchDbInstance.setConfiguration(HTTPD_SECTION, ENABLE_CORS_OPTION, "true");
+        }
+    }
+    
+    /**
+     * Make Cors filter accept all types of requests from any host.
+     */
+    private void setCorsUseless() {
+        String credentials;
+        try {
+            credentials = couchDbInstance.getConfiguration(CORS_SECTION, CREDENTIALS_OPTIONS);
+        } catch (DbAccessException e) {
+            credentials = null;
+        }
+        if (!"true".equals(credentials)) {
+            couchDbInstance.setConfiguration(CORS_SECTION, CREDENTIALS_OPTIONS, "true");
+        }
+        
+        try {
+            couchDbInstance.getConfiguration(CORS_SECTION, ORIGINS_OPTIONS);
+        } catch (Exception e) {
+            couchDbInstance.setConfiguration(CORS_SECTION, ORIGINS_OPTIONS, "*");
+        }
+        
+        try {
+            couchDbInstance.getConfiguration(CORS_SECTION, METHODS_OPTIONS);
+        } catch (Exception e) {
+            couchDbInstance.setConfiguration(CORS_SECTION, METHODS_OPTIONS, "GET, POST, PUT, DELETE");
         }
     }
 }
