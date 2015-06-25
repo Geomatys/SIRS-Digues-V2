@@ -8,6 +8,8 @@ import static fr.sirs.core.SirsCore.browseURL;
 import fr.sirs.core.plugins.PluginLoader;
 import fr.sirs.util.SystemProxySelector;
 import java.io.IOException;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.net.ProxySelector;
 import java.util.Optional;
 
@@ -35,6 +37,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.geotoolkit.internal.GeotkFX;
+import org.geotoolkit.security.ByThreadAuthenticator;
 
 /**
  * @author Johann Sorel (Geomatys)
@@ -183,6 +186,20 @@ public class Launcher extends Application {
         protected Boolean call() throws Exception {
             updateMessage("Analyse des configurations réseau");
             ProxySelector.setDefault(new SystemProxySelector());
+            Authenticator.setDefault(new Authenticator() {
+
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    if (RequestorType.PROXY.equals(getRequestorType())) {
+                        // TODO : prompt for login
+                        return new PasswordAuthentication("login", "password".toCharArray());
+                    } else {
+                        // Check CouchDB authentication and others
+                        return new PasswordAuthentication("toto", "toto".toCharArray());
+                    }
+                }
+                
+            });
             
             updateMessage("Vérification de mises à jour");
             boolean updateRequired = checkUpdate();
