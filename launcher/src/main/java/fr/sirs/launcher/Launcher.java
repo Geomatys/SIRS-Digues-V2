@@ -6,7 +6,9 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCore.UpdateInfo;
 import static fr.sirs.core.SirsCore.browseURL;
 import fr.sirs.core.plugins.PluginLoader;
+import fr.sirs.util.SystemProxySelector;
 import java.io.IOException;
+import java.net.ProxySelector;
 import java.util.Optional;
 
 import java.util.UUID;
@@ -179,6 +181,9 @@ public class Launcher extends Application {
 
         @Override
         protected Boolean call() throws Exception {
+            updateMessage("Analyse des configurations réseau");
+            ProxySelector.setDefault(new SystemProxySelector());
+            
             updateMessage("Vérification de mises à jour");
             boolean updateRequired = checkUpdate();
             if (updateRequired) {

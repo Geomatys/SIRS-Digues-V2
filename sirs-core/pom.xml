@@ -196,6 +196,13 @@
       <version>${jai-io.version}</version>
     </dependency>
     
+    <!-- Proxy analysis / configuration -->
+    <dependency>
+        <groupId>de.rosstauscher.proxy_vole</groupId>
+        <artifactId>proxy_vole</artifactId>
+        <version>1.0.1-SNAPSHOT</version>
+    </dependency>
+  
     <dependency>
         <groupId>org.apache.sis.core</groupId>
         <artifactId>sis-utility</artifactId>
