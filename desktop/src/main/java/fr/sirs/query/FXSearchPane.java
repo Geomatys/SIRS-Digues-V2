@@ -570,6 +570,7 @@ public class FXSearchPane extends BorderPane {
             table.setLoadAll(true);
             table.init(layer);
             setCenter(table);
+            Injector.getSession().getPrintManager().prepareToPrint(FeatureStoreUtilities.collection(layer.getCollection().getFeatureType(), layer.getCollection()));
         }
     }
     

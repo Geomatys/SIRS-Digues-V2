@@ -52,8 +52,6 @@ import java.util.MissingResourceException;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -69,7 +67,6 @@ import org.geotoolkit.feature.type.PropertyDescriptor;
 import org.geotoolkit.report.FeatureCollectionDataSource;
 import org.opengis.feature.PropertyType;
 import org.w3c.dom.CDATASection;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
@@ -77,14 +74,12 @@ import org.xml.sax.SAXException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class JRDomWriterQueryResultSheet {
+public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
     
     private final Map<String, ResourceBundle> bundles = new HashMap<>();
-    private String bundlePrefix = SIRS.MODEL_PACKAGE+".";
+    private final String bundlePrefix = SIRS.MODEL_PACKAGE+".";
     
     // Template elements.
-    private final Document document;
-    private final Element root;
     private final Element subDataset;
     private final Element title;
     private final Element pageHeader;
@@ -116,8 +111,7 @@ public class JRDomWriterQueryResultSheet {
     
     
     private JRDomWriterQueryResultSheet(){
-        document = null;
-        root = null; 
+        super();
         subDataset = null;
         title = null; 
         pageHeader = null;
@@ -132,15 +126,8 @@ public class JRDomWriterQueryResultSheet {
     }
     
     public JRDomWriterQueryResultSheet(final InputStream stream) throws ParserConfigurationException, SAXException, IOException {
+        super(stream);
         
-        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        final DocumentBuilder constructeur = factory.newDocumentBuilder();
-        factory.setNamespaceAware(true);
-        
-        document = constructeur.parse(stream);
-        stream.close();
-        
-        root = document.getDocumentElement();
         subDataset = (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(0);
         title = (Element) root.getElementsByTagName(TAG_TITLE).item(0);
         pageHeader = (Element) root.getElementsByTagName(TAG_PAGE_HEADER).item(0);

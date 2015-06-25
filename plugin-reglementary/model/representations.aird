@@ -89,11 +89,14 @@
               <children xmi:type="notation:Node" xmi:id="_tBkIEhNXEeWTNvankef_KQ" type="3010" element="_tBczVRNXEeWTNvankef_KQ">
                 <layoutConstraint xmi:type="notation:Location" xmi:id="_tBkIExNXEeWTNvankef_KQ"/>
               </children>
+              <children xmi:type="notation:Node" xmi:id="_Yr6PYBsfEeWUhvH6pnqkew" type="3010" element="_Yq3GgBsfEeWUhvH6pnqkew">
+                <layoutConstraint xmi:type="notation:Location" xmi:id="_Yr6PYRsfEeWUhvH6pnqkew"/>
+              </children>
               <styles xmi:type="notation:SortingStyle" xmi:id="_tBjhAhNXEeWTNvankef_KQ"/>
               <styles xmi:type="notation:FilteringStyle" xmi:id="_tBjhAxNXEeWTNvankef_KQ"/>
             </children>
             <styles xmi:type="notation:ShapeStyle" xmi:id="_tBi58RNXEeWTNvankef_KQ" fontName="Ubuntu" fontHeight="8"/>
-            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_tBi58hNXEeWTNvankef_KQ" x="390" y="380" width="246" height="58"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_tBi58hNXEeWTNvankef_KQ" x="390" y="380" width="246" height="68"/>
           </children>
           <children xmi:type="notation:Node" xmi:id="_8P2SABTJEeWTNvankef_KQ" type="2003" element="_8Pj-IBTJEeWTNvankef_KQ">
             <children xmi:type="notation:Node" xmi:id="_8P25EBTJEeWTNvankef_KQ" type="5007"/>
@@ -393,28 +396,39 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_tBM7sBNXEeWTNvankef_KQ" name="RefPeriodeRappelObligationReglementaire" tooltipText="" incomingEdges="_vQJhYBTJEeWTNvankef_KQ" width="12" height="10">
-        <target xmi:type="ecore:EClass" href="reglementary.ecore#//RefPeriodeRappelObligationReglementaire"/>
-        <semanticElements xmi:type="ecore:EClass" href="reglementary.ecore#//RefPeriodeRappelObligationReglementaire"/>
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_tBM7sBNXEeWTNvankef_KQ" name="RefEcheanceRappelObligationReglementaire" tooltipText="" incomingEdges="_vQJhYBTJEeWTNvankef_KQ" width="12" height="10">
+        <target xmi:type="ecore:EClass" href="reglementary.ecore#//RefEcheanceRappelObligationReglementaire"/>
+        <semanticElements xmi:type="ecore:EClass" href="reglementary.ecore#//RefEcheanceRappelObligationReglementaire"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
         <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
         <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
-        <ownedStyle xmi:type="diagram:FlatContainerStyle" xmi:id="_JBBNgBmjEeWAU-POrFs2dw" backgroundStyle="Liquid">
-          <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_JBBNgRmjEeWAU-POrFs2dw"/>
+        <ownedStyle xmi:type="diagram:FlatContainerStyle" xmi:id="_a432MBsfEeWUhvH6pnqkew" backgroundStyle="Liquid">
+          <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_a432MRsfEeWUhvH6pnqkew"/>
           <description xmi:type="style:FlatContainerStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@style"/>
-          <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_JBBNghmjEeWAU-POrFs2dw"/>
-          <backgroundColor xmi:type="viewpoint:RGBValues" xmi:id="_JBBNgxmjEeWAU-POrFs2dw" red="255" green="255" blue="255"/>
-          <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_JBBNhBmjEeWAU-POrFs2dw" red="255" green="252" blue="216"/>
+          <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_a432MhsfEeWUhvH6pnqkew"/>
+          <backgroundColor xmi:type="viewpoint:RGBValues" xmi:id="_a432MxsfEeWUhvH6pnqkew" red="255" green="255" blue="255"/>
+          <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_a432NBsfEeWUhvH6pnqkew" red="255" green="252" blue="216"/>
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_tBczVRNXEeWTNvankef_KQ" name="abrege : EString" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="reglementary.ecore#//RefPeriodeRappelObligationReglementaire/abrege"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="reglementary.ecore#//RefPeriodeRappelObligationReglementaire/abrege"/>
+          <target xmi:type="ecore:EAttribute" href="reglementary.ecore#//RefEcheanceRappelObligationReglementaire/abrege"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="reglementary.ecore#//RefEcheanceRappelObligationReglementaire/abrege"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_tBdaYBNXEeWTNvankef_KQ" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_tBdaYRNXEeWTNvankef_KQ"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
             <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_tBdaYhNXEeWTNvankef_KQ"/>
             <color xmi:type="viewpoint:RGBValues" xmi:id="_tBdaYxNXEeWTNvankef_KQ"/>
+          </ownedStyle>
+          <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
+        </ownedElements>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Yq3GgBsfEeWUhvH6pnqkew" name="nbMois : EInt = 0" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@5d2ac39f{platform:/resource/plugin-reglementary/model/reglementary.ecore#//RefPeriodeRappelObligationReglementaire/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+          <target xmi:type="ecore:EAttribute" href="reglementary.ecore#//RefEcheanceRappelObligationReglementaire/nbMois"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="reglementary.ecore#//RefEcheanceRappelObligationReglementaire/nbMois"/>
+          <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_a5BAIBsfEeWUhvH6pnqkew" labelAlignment="LEFT">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_a5BAIRsfEeWUhvH6pnqkew"/>
+            <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
+            <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_a5BAIhsfEeWUhvH6pnqkew"/>
+            <color xmi:type="viewpoint:RGBValues" xmi:id="_a5BAIxsfEeWUhvH6pnqkew"/>
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>

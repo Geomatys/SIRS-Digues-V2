@@ -1,15 +1,22 @@
 package fr.sirs.util;
 
+import fr.sirs.core.component.DatabaseRegistry;
+import fr.sirs.core.component.DesordreRepository;
 import fr.sirs.core.component.Previews;
+import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.util.StringConverter;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JREmptyDataSource;
@@ -19,11 +26,13 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import org.ektorp.CouchDbConnector;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.display2d.service.OutputDef;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.report.FeatureCollectionDataSource;
 import org.geotoolkit.report.JasperReportService;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * <p>This class provides utilities for two purposes:</p>
@@ -40,12 +49,7 @@ public class PrinterUtilities {
     private static final String JRXML_EXTENSION = ".jrxml";
     private static final String PDF_EXTENSION = ".pdf";
     
-    ////////////////////////////////////////////////////////////////////////////
-    // FICHES DE RESULTATS DE REQUETES
-    ////////////////////////////////////////////////////////////////////////////
-    private static final String META_TEMPLATE_QUERY = "/fr/sirs/jrxml/metaTemplateQuery.jrxml";
     private static final List<String> falseGetter = new ArrayList<>();
-    
     static{
         falseGetter.add("getClass");
         falseGetter.add("isNew");
@@ -55,7 +59,89 @@ public class PrinterUtilities {
         falseGetter.add("getDocumentId");
     }
     
-    static public File print(List<String> avoidFields, final FeatureCollection featureCollection) throws Exception {
+    ////////////////////////////////////////////////////////////////////////////
+    // FICHES DE DESORDRES
+    ////////////////////////////////////////////////////////////////////////////
+    private static final String META_TEMPLATE_DESORDRE = "/fr/sirs/jrxml/metaTemplateDesordre.jrxml";
+    
+    public static File print(List<String> avoidFields, final Previews previewLabelRepository, final StringConverter stringConverter, final Desordre desordre) throws Exception {
+        
+        // Creates the Jasper Reports specific template from the generic template.
+//        final File templateFile = File.createTempFile(elements.get(0).getClass().getSimpleName(), JRXML_EXTENSION);
+//        templateFile.deleteOnExit();
+        final File templateFile = new File("/home/samuel/Bureau/desordreObservation.jrxml");
+        
+//        final JRDomWriterElementSheet templateWriter = new JRDomWriterElementSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_ELEMENT));
+//        templateWriter.setFieldsInterline(2);
+//        templateWriter.setOutput(templateFile);
+//        templateWriter.write(elements.get(0).getClass(), avoidFields);
+        
+        final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
+                
+        JasperPrint finalPrint = null;
+//        for(final Element element : elements){
+            final JRDataSource source = new ObjectDataSource(Collections.singletonList(desordre), previewLabelRepository, stringConverter);
+
+            final Map<String, Object> parameters = new HashMap<>();
+            parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
+//            parameters.put("TABLE_DATA_SOURCE", new FeatureCollectionDataSource());
+            
+            final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
+            if(finalPrint==null) finalPrint=print;
+            else{
+                for(final JRPrintPage page : print.getPages()){
+                    finalPrint.addPage(page);
+                }
+            }
+//        }
+        
+        // Generate the report -------------------------------------------------
+        final File fout = File.createTempFile("DESORDRE_OBSERVATION", PDF_EXTENSION);
+        try (final FileOutputStream outStream = new FileOutputStream(fout)) {
+            final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
+            JasperReportService.generate(finalPrint, output);
+        }
+        return fout;
+//        return null;
+    }
+    
+    public static void main(String[] args) throws IOException {
+        
+//        StdHttpClient.Builder builder = new StdHttpClient.Builder().host("127.0.0.1").port(5984);
+//
+//        builder.username("geouser");
+//        builder.password("geopw");
+//
+//        HttpClient httpClient = builder.build();
+//        CouchDbInstance dbInstance = new StdCouchDbInstance(httpClient);
+//        CouchDbConnector db = new StdCouchDbConnector("rhone22juin", dbInstance);
+//
+//        Previews previews = new Previews(db);
+//        Desordre desordre = new DesordreRepository(db).getOne();
+        
+        DatabaseRegistry registry = new DatabaseRegistry();
+        ConfigurableApplicationContext cac = registry.connectToSirsDatabase("rhone22juin", false, false, false);
+        CouchDbConnector db = cac.getBean(CouchDbConnector.class);
+        
+        Previews previews = new Previews(db);
+        Desordre desordre = new DesordreRepository(db).getOne();
+        
+        try {
+            File pdfFile = PrinterUtilities.print(null, previews, new SirsStringConverter(), desordre);
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(pdfFile);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(PrinterUtilities.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // FICHES DE RESULTATS DE REQUETES
+    ////////////////////////////////////////////////////////////////////////////
+    private static final String META_TEMPLATE_QUERY = "/fr/sirs/jrxml/metaTemplateQuery.jrxml";
+    
+    public static File print(List<String> avoidFields, final FeatureCollection featureCollection) throws Exception {
         
         if(avoidFields==null) avoidFields=new ArrayList<>();
         
@@ -123,7 +209,6 @@ public class PrinterUtilities {
         
         final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
                 
-//        final List<JasperPrint> prints = new ArrayList<>();
         JasperPrint finalPrint = null;
         for(final Element element : elements){
             final JRDataSource source = new ObjectDataSource(Collections.singletonList(element), previewLabelRepository, stringConverter);
@@ -221,6 +306,11 @@ JasperViewer.viewReport(jp1,false);
             return method.getName().startsWith("set")
                 && method.getParameterTypes().length == 1
                 && void.class.equals(method.getReturnType());
+    }
+    
+    public static String getFieldNameFromSetter(final Method setter){
+        return setter.getName().substring(3, 4).toLowerCase()
+                            + setter.getName().substring(4);
     }
     
     ////////////////////////////////////////////////////////////////////////////

@@ -71,7 +71,7 @@ import org.xml.sax.SAXException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class JRDomWriterElementSheet extends AbstractJDomWriter {
+public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     
     // Template elements.
     private final Element title;
@@ -105,7 +105,7 @@ public class JRDomWriterElementSheet extends AbstractJDomWriter {
     private static final String TRUE_REPLACEMENT = "Oui";
     private static final String FALSE_REPLACEMENT = "Non";
     
-    private JRDomWriterElementSheet(){
+    private JRDomWriterDesordreSheet(){
         super();
         this.title = null; 
         this.pageHeader = null;
@@ -118,7 +118,7 @@ public class JRDomWriterElementSheet extends AbstractJDomWriter {
         this.fields_interline = 8;
     }
     
-    public JRDomWriterElementSheet(final InputStream stream) throws ParserConfigurationException, SAXException, IOException {
+    public JRDomWriterDesordreSheet(final InputStream stream) throws ParserConfigurationException, SAXException, IOException {
         super(stream);
         title = (Element) root.getElementsByTagName(TAG_TITLE).item(0);
         pageHeader = (Element) root.getElementsByTagName(TAG_PAGE_HEADER).item(0);

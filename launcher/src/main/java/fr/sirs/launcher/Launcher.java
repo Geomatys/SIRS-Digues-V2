@@ -17,7 +17,6 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;

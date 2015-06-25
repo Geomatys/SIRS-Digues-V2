@@ -28,4 +28,11 @@
         </tabs>
       </TabPane>
    </center>
+   <bottom>
+      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button mnemonicParsing="false" onAction="#print" text="%print" />
+         </children>
+      </HBox>
+   </bottom>
 </fx:root>

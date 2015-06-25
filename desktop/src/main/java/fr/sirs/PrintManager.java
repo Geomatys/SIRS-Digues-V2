@@ -14,6 +14,7 @@ import static fr.sirs.SIRS.PARENT_FIELD;
 import static fr.sirs.SIRS.POSITION_DEBUT_FIELD;
 import static fr.sirs.SIRS.POSITION_FIN_FIELD;
 import static fr.sirs.SIRS.REVISION_FIELD;
+import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.PrinterUtilities;
@@ -64,7 +65,7 @@ public class PrintManager {
     public final void printFeatures(){
         try {
             final File fileToPrint = PrinterUtilities.print(null, featuresToPrint);
-            Desktop.getDesktop().open(fileToPrint);
+            if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception ex) {
             Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -95,10 +96,15 @@ public class PrintManager {
 
         try {
             fileToPrint = PrinterUtilities.print(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), elementsToPrint);
-            Desktop.getDesktop().open(fileToPrint);
+            if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception e) {
             Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, e);
         }
+    }
+    
+    public final void printDesordre(final Desordre desordre) throws Exception{
+        PrinterUtilities.print(null, Injector.getSession().getPreviews(), new SirsStringConverter(), desordre);
+        
     }
     
 }

@@ -12,7 +12,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="systemeEndiguementId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//SystemeEndiguement"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeId" eType="#//RefTypeObligationReglementaire"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="periodeId" eType="#//RefPeriodeRappelObligationReglementaire"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="periodeId" eType="#//RefEcheanceRappelObligationReglementaire"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="annee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="etapeId" eType="#//RefEtapeObligationReglementaire"/>
   </eClassifiers>
@@ -33,10 +33,11 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="frequenceId" eType="#//RefFrequenceObligationReglementaire"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="obligationId" eType="#//ObligationReglementaire"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefPeriodeRappelObligationReglementaire"
+  <eClassifiers xsi:type="ecore:EClass" name="RefEcheanceRappelObligationReglementaire"
       eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nbMois" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefEtapeObligationReglementaire" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
