@@ -2,6 +2,8 @@
 package fr.sirs.util;
 
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
+import fr.sirs.core.model.Desordre;
+import fr.sirs.core.model.Observation;
 import static fr.sirs.util.JRUtils.ATT_BACKCOLOR;
 import static fr.sirs.util.JRUtils.ATT_CLASS;
 import static fr.sirs.util.JRUtils.ATT_FONT_NAME;
@@ -38,6 +40,7 @@ import static fr.sirs.util.JRUtils.TAG_PAGE_FOOTER;
 import static fr.sirs.util.JRUtils.TAG_PAGE_HEADER;
 import static fr.sirs.util.JRUtils.TAG_REPORT_ELEMENT;
 import static fr.sirs.util.JRUtils.TAG_STATIC_TEXT;
+import static fr.sirs.util.JRUtils.TAG_SUB_DATASET;
 import static fr.sirs.util.JRUtils.TAG_TEXT;
 import static fr.sirs.util.JRUtils.TAG_TEXT_ELEMENT;
 import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD;
@@ -50,6 +53,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -74,6 +78,7 @@ import org.xml.sax.SAXException;
 public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     
     // Template elements.
+    private final Element subDataset;
     private final Element title;
     private final Element pageHeader;
     private final Element columnHeader;
@@ -107,6 +112,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     
     private JRDomWriterDesordreSheet(){
         super();
+        subDataset = null;
         this.title = null; 
         this.pageHeader = null;
         this.columnHeader = null;
@@ -120,6 +126,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     
     public JRDomWriterDesordreSheet(final InputStream stream) throws ParserConfigurationException, SAXException, IOException {
         super(stream);
+        subDataset = (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(0);
         title = (Element) root.getElementsByTagName(TAG_TITLE).item(0);
         pageHeader = (Element) root.getElementsByTagName(TAG_PAGE_HEADER).item(0);
         columnHeader = (Element) root.getElementsByTagName(TAG_COLUMN_HEADER).item(0);
@@ -149,21 +156,21 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     
     /**
      * <p>This method writes a Jasper Reports template mapping the parameter class.</p>
-     * @param classToMap
+     * @param desordre
      * @param avoidFields field names to avoid.
      * @throws TransformerException
      * @throws IOException
      */
-    public void write(final Class classToMap, final List<String> avoidFields) throws TransformerException, IOException, Exception {
+    public void write(final Desordre desordre, final List<String> avoidFields) throws TransformerException, IOException, Exception {
         
         // Remove elements before inserting fields.-----------------------------
-        this.root.removeChild(this.title);
-        this.root.removeChild(this.pageHeader);
-        this.root.removeChild(this.columnHeader);
-        this.root.removeChild(this.detail);
+        root.removeChild(this.title);
+        root.removeChild(this.pageHeader);
+        root.removeChild(this.columnHeader);
+        root.removeChild(this.detail);
         
         // Modifies the template, based on the given class.---------------------
-        this.writeObject(classToMap, avoidFields);
+        writeObject(desordre, avoidFields);
         
         // Serializes the document.---------------------------------------------
         //DomUtilities.write(this.document, this.output);
@@ -182,28 +189,77 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
      * @param avoidFields field names to avoid.
      * @throws Exception 
      */
-    private void writeObject(final Class classToMap, List<String> avoidFields) {
+    private void writeObject(final Desordre desordre, List<String> avoidFields) {
+        
+        
+        
+        if(avoidFields==null) avoidFields=new ArrayList<>();
+        writeSubDataset(Observation.class, avoidFields);
+        
         
         // Sets the initial fields used by the template.------------------------
-        final Method[] methods = classToMap.getMethods();
+        final Method[] methods = desordre.getClass().getMethods();
         for (final Method method : methods){
             if(PrinterUtilities.isSetter(method)){
                 final String fieldName = getFieldNameFromSetter(method);
                 if (avoidFields==null || !avoidFields.contains(fieldName)) {
-                    this.writeField(method);
+                    writeField(method);
                 }
             }
         }
         
         // Modifies the title block.--------------------------------------------
-        writeTitle(classToMap);
+        writeTitle(desordre.getClass());
         
         // Writes the headers.--------------------------------------------------
         writePageHeader();
         writeColumnHeader();
         
         // Builds the body of the Jasper Reports template.----------------------
-        writeDetail(classToMap, avoidFields);
+        writeDetail(desordre.getClass(), avoidFields);
+    }
+    
+    
+    
+    private void writeSubDataset(final Class<? extends fr.sirs.core.model.Element> elementClass, final List<String> avoidFields){
+        
+        
+        final Method[] methods = elementClass.getMethods();
+        for (final Method method : methods){
+            if(PrinterUtilities.isSetter(method)){
+                final String fieldName = getFieldNameFromSetter(method);
+                if (avoidFields==null || !avoidFields.contains(fieldName)) {
+                    writeSubDatasetField(method);
+                }
+            }
+        }
+        
+    }
+        
+    /**
+     * <p>This method writes the fiels user by the Jasper Reports template.</p>
+     * @param propertyType must be a setter method starting by "set"
+     */
+    private void writeSubDatasetField(final Method method) {
+        
+        // Builds the name of the field.----------------------------------------
+        final String fieldName = method.getName().substring(3, 4).toLowerCase() 
+                        + method.getName().substring(4);
+        
+        // Creates the field element.-------------------------------------------
+        final Element field = document.createElement(TAG_FIELD);
+        field.setAttribute(ATT_NAME, fieldName);
+        
+        final Optional<String> canonicalName = getCanonicalName(method.getParameterTypes()[0]);
+        if(canonicalName.isPresent()) field.setAttribute(ATT_CLASS, canonicalName.get());
+        
+        final Element fieldDescription = document.createElement(TAG_FIELD_DESCRIPTION);
+        final CDATASection description = document.createCDATASection("Mettre ici une description du champ.");
+        
+        // Builds the DOM tree.-------------------------------------------------
+        fieldDescription.appendChild(description);
+        field.appendChild(fieldDescription);
+        subDataset.appendChild(field);
     }
         
     /**
@@ -229,7 +285,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         // Builds the DOM tree.-------------------------------------------------
         fieldDescription.appendChild(description);
         field.appendChild(fieldDescription);
-        this.root.appendChild(field);
+        root.appendChild(field);
     }
     
     /**
@@ -254,8 +310,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         else{
             className = classToMap.getSimpleName();
         }
-        ((CDATASection) text.getChildNodes().item(0)).setData(
-                "Fiche synoptique de " + className);
+        ((CDATASection) text.getChildNodes().item(0)).setData("Fiche détaillée de " + className);
         
         // Builds the DOM tree.-------------------------------------------------
         this.root.appendChild(this.title);
@@ -305,12 +360,12 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
             }
         }
         
-        // Sizes the detail element givent the field number.--------------------
-        ((Element) this.detail.getElementsByTagName(TAG_BAND).item(0))
+        // Sizes the detail element given to the field number.--------------------
+        ((Element) detail.getElementsByTagName(TAG_BAND).item(0))
                 .setAttribute(ATT_HEIGHT, String.valueOf((FIELDS_HEIGHT+fields_interline)*i));
         
         // Builds the DOM tree.-------------------------------------------------
-        this.root.appendChild(this.detail);
+        root.appendChild(detail);
     }
     
     /**

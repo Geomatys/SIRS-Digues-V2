@@ -176,14 +176,12 @@ public class ReferenceChecker extends Task<Void> {
                         final Object localId = getId.invoke(localReferenceInstance);
                         for (final ReferenceType serverReferenceInstance : currentServerInstances) {
                             try {
-                                SIRS.LOGGER.log(Level.INFO, localReferenceInstance.toString() +"  =?  "+serverReferenceInstance.toString());
                                 final Object serverId = getId.invoke(serverReferenceInstance);
                                 if (localId instanceof String
                                         && localId.equals(serverId)) {
                                     presentOnServer = true;
                                     currentServerInstances.remove(serverReferenceInstance);
                                     if (!sameReferences(localReferenceInstance, serverReferenceInstance)) {
-                                        SIRS.LOGGER.log(Level.INFO, "incoherent references detected !");
                                         registerIncoherentReferences(localReferenceInstance, serverReferenceInstance);
                                     }
                                     break;

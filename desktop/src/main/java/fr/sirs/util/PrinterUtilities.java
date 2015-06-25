@@ -67,14 +67,14 @@ public class PrinterUtilities {
     public static File print(List<String> avoidFields, final Previews previewLabelRepository, final StringConverter stringConverter, final Desordre desordre) throws Exception {
         
         // Creates the Jasper Reports specific template from the generic template.
-//        final File templateFile = File.createTempFile(elements.get(0).getClass().getSimpleName(), JRXML_EXTENSION);
-//        templateFile.deleteOnExit();
-        final File templateFile = new File("/home/samuel/Bureau/desordreObservation.jrxml");
+        final File templateFile = File.createTempFile(desordre.getClass().getName(), JRXML_EXTENSION);
+        templateFile.deleteOnExit();
+//        final File templateFile = new File("/home/samuel/Bureau/desordreObservation.jrxml");
         
-//        final JRDomWriterElementSheet templateWriter = new JRDomWriterElementSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_ELEMENT));
-//        templateWriter.setFieldsInterline(2);
-//        templateWriter.setOutput(templateFile);
-//        templateWriter.write(elements.get(0).getClass(), avoidFields);
+        final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE));
+        templateWriter.setFieldsInterline(2);
+        templateWriter.setOutput(templateFile);
+        templateWriter.write(desordre, avoidFields);
         
         final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
                 
@@ -84,6 +84,7 @@ public class PrinterUtilities {
 
             final Map<String, Object> parameters = new HashMap<>();
             parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
+            for(int i = 0; i<10; i++) desordre.observations.add(desordre.observations.get(0));
             parameters.put("OBSERVATIONS_TABLE_DATA_SOURCE", new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
             parameters.put("OBSERVATIONS_2_TABLE_DATA_SOURCE", new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
             

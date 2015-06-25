@@ -73,7 +73,6 @@ public class PrintManager {
     
     public final void printElements(){
         final List avoidFields = new ArrayList<>();
-        final File fileToPrint;
         avoidFields.add(GEOMETRY_FIELD);
         avoidFields.add(DOCUMENT_ID_FIELD);
         avoidFields.add(ID_FIELD);
@@ -95,16 +94,38 @@ public class PrintManager {
         }
 
         try {
-            fileToPrint = PrinterUtilities.print(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), elementsToPrint);
+            final File fileToPrint = PrinterUtilities.print(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), elementsToPrint);
             if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception e) {
             Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, e);
         }
     }
     
-    public final void printDesordre(final Desordre desordre) throws Exception{
-        PrinterUtilities.print(null, Injector.getSession().getPreviews(), new SirsStringConverter(), desordre);
+    public final void printDesordre(final Desordre desordre) {
         
+        
+            final List avoidFields = new ArrayList<>();
+            avoidFields.add(GEOMETRY_FIELD);
+            avoidFields.add(DOCUMENT_ID_FIELD);
+            avoidFields.add(ID_FIELD);
+            avoidFields.add(LONGITUDE_MIN_FIELD);
+            avoidFields.add(LONGITUDE_MAX_FIELD);
+            avoidFields.add(LATITUDE_MIN_FIELD);
+            avoidFields.add(LATITUDE_MAX_FIELD);
+            avoidFields.add(FOREIGN_PARENT_ID_FIELD);
+            avoidFields.add(REVISION_FIELD);
+            avoidFields.add(POSITION_DEBUT_FIELD);
+            avoidFields.add(POSITION_FIN_FIELD);
+            avoidFields.add(PARENT_FIELD);
+            avoidFields.add(COUCH_DB_DOCUMENT_FIELD);
+            
+            
+        try {
+            final File fileToPrint = PrinterUtilities.print(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), desordre);
+            if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
+        } catch (Exception ex) {
+            Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
 }

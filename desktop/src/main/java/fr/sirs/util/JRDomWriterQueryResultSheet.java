@@ -337,7 +337,7 @@ public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
         
         for(final PropertyType propertyType : featureType.getProperties(true)){
             if (!avoidFields.contains(propertyType.getName().toString())) {
-                writeField(propertyType);
+                writeSubDatasetField(propertyType);
             }
         }
     }
@@ -346,7 +346,7 @@ public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
      * <p>This method writes the fiels user by the Jasper Reports template.</p>
      * @param propertyType must be a setter method starting by "set"
      */
-    private void writeField(final PropertyType propertyType) {
+    private void writeSubDatasetField(final PropertyType propertyType) {
         
         // Builds the name of the field.----------------------------------------
         final String fieldName = propertyType.getName().toString();
