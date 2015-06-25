@@ -7,6 +7,7 @@ import fr.sirs.core.model.RappelObligationReglementaire;
 import fr.sirs.util.FXFreeTab;
 import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 
@@ -26,6 +27,7 @@ public final class ObligationsPojoTable extends PojoTable {
 
         final Button uiPlanificationBtn = new Button(null, new ImageView(SIRS.ICON_CLOCK_WHITE));
         uiPlanificationBtn.getStyleClass().add(BUTTON_STYLE);
+        uiPlanificationBtn.setTooltip(new Tooltip("Planification automatique"));
         searchEditionToolbar.getChildren().add(2, uiPlanificationBtn);
 
         uiPlanificationBtn.setOnMouseClicked(event -> showPlanificationTable(tabPane));
