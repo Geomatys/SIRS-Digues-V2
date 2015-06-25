@@ -1,5 +1,6 @@
 package fr.sirs.theme.ui;
 
+import fr.sirs.core.model.Identifiable;
 import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.gui.javafx.util.FXStringCell;
 import org.geotoolkit.gui.javafx.util.FXLocalDateTimeCell;
@@ -509,24 +510,20 @@ public class PojoTable extends BorderPane {
         uiImport.visibleProperty().bind(importPointProperty);
         uiImport.managedProperty().bind(importPointProperty);
         uiImport.setTooltip(new Tooltip("Importer des points"));
-        uiImport.setOnAction(new EventHandler<ActionEvent>() {
+        uiImport.setOnAction(event -> {
+            final FXAbstractImportPointLeve importCoord;
+            if(PointXYZ.class.isAssignableFrom(pojoClass)) importCoord = new FXImportXYZ(PojoTable.this);
+            else importCoord = new FXImportDZ(PojoTable.this);
 
-            @Override
-            public void handle(ActionEvent event) {
-                final FXAbstractImportPointLeve importCoord;
-                if(PointXYZ.class.isAssignableFrom(pojoClass)) importCoord = new FXImportXYZ(PojoTable.this);
-                else importCoord = new FXImportDZ(PojoTable.this);
-                
-                final Dialog dialog = new Dialog();
-                final DialogPane pane = new DialogPane();
-                pane.getButtonTypes().add(ButtonType.CLOSE);
-                pane.setContent(importCoord);
-                dialog.setDialogPane(pane);
-                dialog.setResizable(true);
-                dialog.setTitle("Import de points");
-                dialog.setOnCloseRequest((Event event1) -> {dialog.hide();});
-                dialog.show();
-            }
+            final Dialog dialog = new Dialog();
+            final DialogPane pane = new DialogPane();
+            pane.getButtonTypes().add(ButtonType.CLOSE);
+            pane.setContent(importCoord);
+            dialog.setDialogPane(pane);
+            dialog.setResizable(true);
+            dialog.setTitle("Import de points");
+            dialog.setOnCloseRequest(event1 -> dialog.hide());
+            dialog.show();
         });
 
         uiExport.getStyleClass().add(BUTTON_STYLE);
@@ -823,7 +820,7 @@ public class PojoTable extends BorderPane {
             tableUpdater.cancel();
         }
         
-        tableUpdater = new TaskManager.MockTask("Recherche...", () -> {
+        tableUpdater = new TaskManager.MockTask("Recherche...", (Runnable)() -> {
 
             allValues = producer.get();
             if (allValues == null || allValues.isEmpty()) {
@@ -994,7 +991,7 @@ public class PojoTable extends BorderPane {
         
         if (repo != null) {
             result = repo.create();
-            repo.add(result);
+            repo.add((Identifiable)result);
         } 
         else if (pojoClass != null) {
             try {
@@ -1259,7 +1256,7 @@ public class PojoTable extends BorderPane {
                 setEditable(false);
                 setCellFactory((TableColumn<Element, Object> param) -> new SirsTableCell());            
                 try {
-                    final Method propertyAccessor = pojoClass.getMethod(desc.getName()+"Property");
+                    final Method propertyAccessor = ref.ref().getMethod(desc.getName()+"Property");
                     setCellValueFactory((CellDataFeatures<Element, Object> param) -> {
                         try {
                             return (ObservableValue) propertyAccessor.invoke(param.getValue());
