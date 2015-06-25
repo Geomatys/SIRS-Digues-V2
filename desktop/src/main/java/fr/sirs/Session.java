@@ -6,6 +6,7 @@ import fr.sirs.core.component.UtilisateurRepository;
 
 import java.util.List;
 
+import fr.sirs.ui.AlertManager;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
@@ -24,6 +25,7 @@ import fr.sirs.other.FXReferencePane;
 import fr.sirs.other.FXValidationPane;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.ui.AlertItem;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.SirsPreferences;
@@ -431,5 +433,21 @@ public class Session extends SessionCore {
     
     public DefaultLegendTemplate getLegendTemplate() {
         return legendTemplate;
+    }
+
+    /**
+     * Ajoute les alertes fournies à la pile d'alertes à afficher.
+     *
+     * @param alerts Liste des alertes à afficher.
+     */
+    public void addAlerts(final List<AlertItem> alerts) {
+        if (alerts == null || alerts.isEmpty()) {
+            return;
+        }
+
+        final AlertManager manager = AlertManager.getInstance();
+        for (final AlertItem alert : alerts) {
+            manager.getAlerts().add(alert);
+        }
     }
 }

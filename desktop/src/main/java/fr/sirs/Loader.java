@@ -238,6 +238,8 @@ public class Loader extends Application {
 
         mainStage.show();
         frame.getMapTab().show();
+
+        frame.showAlertsPopup();
     }
 
     private final class LoadingTask extends Task {

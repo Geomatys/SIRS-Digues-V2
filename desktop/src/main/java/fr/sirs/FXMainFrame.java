@@ -4,13 +4,20 @@ import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
+import fr.sirs.ui.AlertItem;
+import fr.sirs.ui.AlertManager;
+import javafx.collections.ObservableList;
+import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Popup;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Role;
 import fr.sirs.digue.DiguesTab;
@@ -51,12 +58,14 @@ import org.geotoolkit.font.IconBuilder;
 public class FXMainFrame extends BorderPane {
 
     public static final Image ICON_ALL  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TABLE,16,FontAwesomeIcons.DEFAULT_COLOR),null);
+    public static final Image ICON_ALERT  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_BELL,16,FontAwesomeIcons.DEFAULT_COLOR),null);
     private final Session session = Injector.getBean(Session.class);
     private final ResourceBundle bundle = ResourceBundle.getBundle(FXMainFrame.class.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
     
     @FXML private MenuButton uiThemesLocalized;
     @FXML private MenuButton uiThemesUnlocalized;
     @FXML private MenuButton uiPlugins;
+    @FXML private Button uiAlertsBtn;
     @FXML private ImageView uiPluginsImg;
     @FXML private ToolBar uiToolBarPlugins;
     @FXML private TabPane uiTabs;
@@ -72,6 +81,9 @@ public class FXMainFrame extends BorderPane {
     private static final String BUNDLE_KEY_REFERENCES = "references";
     private static final String BUNDLE_KEY_DESIGNATIONS = "designations";
     private static final String BUNDLE_KEY_SEARCH = "search";
+
+    private static final String CSS_POPUP_ALERTS = "popup-alerts";
+    private static final String CSS_POPUP_RAPPEL_TITLE = "popup-alerts-rappel-title";
     
     /** 
      * A cache to get back tab as long as their displayed in application, 
@@ -140,8 +152,33 @@ public class FXMainFrame extends BorderPane {
             }
             return false;
         }, session.utilisateurProperty()));
-                    
-        SIRS.LOGGER.log(Level.FINE, org.apache.sis.setup.About.configuration().toString());     
+
+        final ObservableList<AlertItem> alerts = AlertManager.getInstance().getAlerts();
+        uiAlertsBtn.setOnMouseClicked(event -> showAlertsPopup());
+        uiAlertsBtn.setGraphic(new ImageView(ICON_ALERT));
+        uiAlertsBtn.setText(alerts.size() +" alerte(s)");
+
+        SIRS.LOGGER.log(Level.FINE, org.apache.sis.setup.About.configuration().toString());
+    }
+
+    public void showAlertsPopup() {
+        final ObservableList<AlertItem> alerts = AlertManager.getInstance().getAlerts();
+        final Popup popup = new Popup();
+        final VBox vbox = new VBox();
+        vbox.getStylesheets().add(SIRS.CSS_PATH);
+        vbox.getStyleClass().add(CSS_POPUP_ALERTS);
+        for (final AlertItem alert : alerts) {
+            final Label label = new Label(alert.getTitle());
+            label.getStyleClass().add(CSS_POPUP_RAPPEL_TITLE);
+            vbox.getChildren().add(label);
+            vbox.getChildren().add(new Label("Echéance "+ alert.getDate().toString()));
+        }
+
+        popup.getContent().add(vbox);
+        popup.setAutoHide(true);
+
+        final Bounds bounds = uiAlertsBtn.getBoundsInLocal();
+        popup.show(uiAlertsBtn, bounds.getMinX(), bounds.getMinY() - popup.getHeight() - 30);
     }
     
     public TabPane getUiTabs() {
@@ -168,7 +205,7 @@ public class FXMainFrame extends BorderPane {
         }
         uiTabs.getSelectionModel().select(tab);
     }
-    
+
     private enum Choice{REFERENCE, MODEL};
     private MenuItem toMenuItem(final Class clazz, final Choice typeOfSummary){
         final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());

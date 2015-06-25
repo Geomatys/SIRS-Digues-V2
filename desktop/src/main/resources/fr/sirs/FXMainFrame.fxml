@@ -6,7 +6,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="768.0" prefWidth="1024.0" stylesheets="@theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="768.0" prefWidth="1024.0" stylesheets="@theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.45" xmlns:fx="http://javafx.com/fxml/1">
     <top>
       <BorderPane>
          <top>
@@ -124,4 +124,15 @@
             </center>
         </BorderPane>
     </center>
+   <bottom>
+      <BorderPane BorderPane.alignment="CENTER">
+         <center>
+            <HBox alignment="CENTER_RIGHT" styleClass="bottom-bar" BorderPane.alignment="CENTER">
+               <children>
+                  <Button fx:id="uiAlertsBtn" mnemonicParsing="false" styleClass="buttonbar-button" text="alertes" />
+               </children>
+            </HBox>
+         </center>
+      </BorderPane>
+   </bottom>
 </fx:root>

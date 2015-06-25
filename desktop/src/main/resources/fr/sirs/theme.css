@@ -241,3 +241,11 @@
     -fx-border-color: white;
     -fx-border-radius: 5;
 }
+
+.popup-alerts {
+    -fx-background-color: #FF9966;
+}
+
+.popup-alerts-rappel-title {
+    -fx-font-weight: bold;
+}
