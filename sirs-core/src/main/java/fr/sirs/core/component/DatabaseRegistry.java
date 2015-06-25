@@ -761,6 +761,9 @@ public class DatabaseRegistry {
         }
     }
     
+    /**
+     * Configure CouchDB to force client authentication. Not avoidable.
+     */
     private void setAuthenticationRequired() {
         String authValue;
         try {
@@ -774,7 +777,11 @@ public class DatabaseRegistry {
     }
     
     /**
-     * Allow current couchdb service to be requested by any host.
+     * Allow current couchdb service to be requested by any host. The "bind_adress"
+     * property, which lists allowed hosts, will be overrided only if it's null or 
+     * if it contains a single local address (default couchdb configuration). It 
+     * means you still can restrain accesses to localhost by setting it as follow :
+     * "localhost, 127.0.0.1".
      */
     private void setOpenWorld() {
         String bindAdress;
@@ -800,6 +807,11 @@ public class DatabaseRegistry {
     
     /**
      * Make Cors filter accept all types of requests from any host.
+     * Cors accepted origins will be overrided only if its not already present in
+     * couchdb configuration (default configuration).
+     * 
+     * Cors accepted methods will be overrided only if its not already present in
+     * couchdb configuration (default configuration).
      */
     private void setCorsUseless() {
         String credentials;
