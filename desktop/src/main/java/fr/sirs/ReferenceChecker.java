@@ -39,6 +39,13 @@ import static fr.sirs.SIRS.REFERENCE_GET_ID;
  * @author Samuel Andrés (Geomatys)
  */
 public class ReferenceChecker extends Task<Void> {
+    
+    
+    private static final String BOOLEAN_PRIMITIVE_NAME = "boolean";
+    private static final String FLOAT_PRIMITIVE_NAME = "float";
+    private static final String DOUBLE_PRIMITIVE_NAME = "double";
+    private static final String INTEGER_PRIMITIVE_NAME = "int";
+    private static final String LONG_PRIMITIVE_NAME = "long";
 
     private String referencesDirectoryPath;
     
@@ -169,12 +176,14 @@ public class ReferenceChecker extends Task<Void> {
                         final Object localId = getId.invoke(localReferenceInstance);
                         for (final ReferenceType serverReferenceInstance : currentServerInstances) {
                             try {
+                                SIRS.LOGGER.log(Level.INFO, localReferenceInstance.toString() +"  =?  "+serverReferenceInstance.toString());
                                 final Object serverId = getId.invoke(serverReferenceInstance);
                                 if (localId instanceof String
                                         && localId.equals(serverId)) {
                                     presentOnServer = true;
                                     currentServerInstances.remove(serverReferenceInstance);
                                     if (!sameReferences(localReferenceInstance, serverReferenceInstance)) {
+                                        SIRS.LOGGER.log(Level.INFO, "incoherent references detected !");
                                         registerIncoherentReferences(localReferenceInstance, serverReferenceInstance);
                                     }
                                     break;
@@ -290,6 +299,14 @@ public class ReferenceChecker extends Task<Void> {
                         } else {
                             setter.invoke(referenceInstance, record.get(header));
                         }
+                    } else if(Integer.class.equals(type) || INTEGER_PRIMITIVE_NAME.equals(type.getName())){
+                        setter.invoke(referenceInstance, Integer.parseInt(record.get(header)));
+                    } else if(Long.class.equals(type) || LONG_PRIMITIVE_NAME.equals(type.getName())){
+                        setter.invoke(referenceInstance, Long.parseLong(record.get(header)));
+                    } else if(Float.class.equals(type) || FLOAT_PRIMITIVE_NAME.equals(type.getName())){
+                        setter.invoke(referenceInstance, Float.parseFloat(record.get(header)));
+                    } else if(Double.class.equals(type) || DOUBLE_PRIMITIVE_NAME.equals(type.getName())){
+                        setter.invoke(referenceInstance, Double.parseDouble(record.get(header)));
                     } else if (LocalDateTime.class.equals(type)) {
                         try {
                             setter.invoke(referenceInstance, LocalDateTime.of(LocalDate.parse(record.get(header), DateTimeFormatter.ISO_DATE), LocalTime.MIN));
@@ -310,7 +327,6 @@ public class ReferenceChecker extends Task<Void> {
 
             return referenceInstance;
         }
-        
 
         private List<ReferenceType> readReferenceFile(final File file) throws FileNotFoundException, IOException {
             

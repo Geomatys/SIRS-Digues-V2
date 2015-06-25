@@ -84,7 +84,8 @@ public class PrinterUtilities {
 
             final Map<String, Object> parameters = new HashMap<>();
             parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
-//            parameters.put("TABLE_DATA_SOURCE", new FeatureCollectionDataSource());
+            parameters.put("OBSERVATIONS_TABLE_DATA_SOURCE", new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
+            parameters.put("OBSERVATIONS_2_TABLE_DATA_SOURCE", new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
             
             final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
             if(finalPrint==null) finalPrint=print;

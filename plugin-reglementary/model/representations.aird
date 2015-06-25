@@ -145,7 +145,7 @@
           </edges>
           <edges xmi:type="notation:Edge" xmi:id="_vQanIBTJEeWTNvankef_KQ" type="4001" element="_vQJhYBTJEeWTNvankef_KQ" source="_wqqsMA62EeWRg56UJ5LWnQ" target="_tBi58BNXEeWTNvankef_KQ">
             <children xmi:type="notation:Node" xmi:id="_vQbOMBTJEeWTNvankef_KQ" type="6001">
-              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_vQbOMRTJEeWTNvankef_KQ" y="-10"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_vQbOMRTJEeWTNvankef_KQ" x="-14" y="-23"/>
             </children>
             <children xmi:type="notation:Node" xmi:id="_vQbOMhTJEeWTNvankef_KQ" type="6002">
               <layoutConstraint xmi:type="notation:Bounds" xmi:id="_vQbOMxTJEeWTNvankef_KQ" y="10"/>
@@ -421,7 +421,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Yq3GgBsfEeWUhvH6pnqkew" name="nbMois : EInt = 0" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@5d2ac39f{platform:/resource/plugin-reglementary/model/reglementary.ecore#//RefPeriodeRappelObligationReglementaire/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Yq3GgBsfEeWUhvH6pnqkew" name="nbMois : EInt = 0" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="reglementary.ecore#//RefEcheanceRappelObligationReglementaire/nbMois"/>
           <semanticElements xmi:type="ecore:EAttribute" href="reglementary.ecore#//RefEcheanceRappelObligationReglementaire/nbMois"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_a5BAIBsfEeWUhvH6pnqkew" labelAlignment="LEFT">
