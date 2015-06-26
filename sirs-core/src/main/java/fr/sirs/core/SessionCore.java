@@ -153,10 +153,10 @@ public class SessionCore extends SessionGen implements ApplicationContextAware {
     public AbstractSIRSRepository getRepositoryForType(String type) {
         Class c;
         try {
-            c = Class.forName(type);
+            c = Class.forName(type, true, Thread.currentThread().getContextClassLoader());
         } catch (ClassNotFoundException ex1) {
             try {
-                c = Class.forName(MODEL_PACKAGE+"."+type);
+                c = Class.forName(MODEL_PACKAGE+"."+type, true, Thread.currentThread().getContextClassLoader());
             } catch (ClassNotFoundException ex2) {
                 throw new IllegalArgumentException("No repository can be found for argument "+type);
             }
