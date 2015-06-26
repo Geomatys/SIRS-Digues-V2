@@ -74,7 +74,7 @@ public class JournalArticleImporter extends GenericDocumentRelatedImporter<Artic
             articleJournal.setLibelle(cleanNullString(row.getString(Columns.INTITULE_ARTICLE.toString())));
             
             if (row.getDate(Columns.DATE_ARTICLE.toString()) != null) {
-                articleJournal.setDateArticle(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_ARTICLE.toString()), dateTimeFormatter));
+                articleJournal.setDateArticle(DbImporter.parseLocalDate(row.getDate(Columns.DATE_ARTICLE.toString()), dateTimeFormatter));
             }
             
             articleJournal.setReferencePapier(cleanNullString(row.getString(Columns.REFERENCE_PAPIER.toString())));

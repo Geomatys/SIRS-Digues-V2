@@ -17,6 +17,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -217,6 +218,7 @@ public class SirsCore {
         float.class,
         double.class,
         LocalDateTime.class,
+        LocalDate.class,
         Point.class
     };
 
