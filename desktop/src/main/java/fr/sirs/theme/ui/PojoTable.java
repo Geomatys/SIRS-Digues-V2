@@ -56,6 +56,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.lang.reflect.Method;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,7 +88,6 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -144,6 +144,7 @@ import org.geotoolkit.feature.FeatureTypeBuilder;
 import org.geotoolkit.gui.javafx.filter.FXFilterBuilder;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXEnumTableCell;
+import org.geotoolkit.gui.javafx.util.FXLocalDateCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
@@ -1297,6 +1298,8 @@ public class PojoTable extends BorderPane {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXNumberCell(Double.class));
                 } else if (LocalDateTime.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateTimeCell());
+                } else if (LocalDate.class.isAssignableFrom(type)) {
+                    setCellFactory((TableColumn<Element, Object> param) -> new FXLocalDateCell());
                 } else if (Point.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXPointCell());
                 } else {
