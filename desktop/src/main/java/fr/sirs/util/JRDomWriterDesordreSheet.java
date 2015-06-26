@@ -10,12 +10,15 @@ import static fr.sirs.util.JRUtils.ATT_FONT_NAME;
 import static fr.sirs.util.JRUtils.ATT_HEIGHT;
 import static fr.sirs.util.JRUtils.ATT_IS_BOLD;
 import static fr.sirs.util.JRUtils.ATT_IS_STRETCH_WITH_OVERFLOW;
+import static fr.sirs.util.JRUtils.ATT_KEY;
 import static fr.sirs.util.JRUtils.ATT_LINE_COLOR;
 import static fr.sirs.util.JRUtils.ATT_LINE_WIDTH;
 import static fr.sirs.util.JRUtils.ATT_MARKUP;
 import static fr.sirs.util.JRUtils.ATT_MODE;
 import static fr.sirs.util.JRUtils.ATT_NAME;
 import static fr.sirs.util.JRUtils.ATT_POSITION_TYPE;
+import static fr.sirs.util.JRUtils.ATT_STYLE;
+import static fr.sirs.util.JRUtils.ATT_SUB_DATASET;
 import static fr.sirs.util.JRUtils.ATT_TEXT_ALIGNMENT;
 import static fr.sirs.util.JRUtils.ATT_VERTICAL_ALIGNMENT;
 import static fr.sirs.util.JRUtils.ATT_WIDTH;
@@ -28,9 +31,14 @@ import fr.sirs.util.JRUtils.PositionType;
 import static fr.sirs.util.JRUtils.TAG_BAND;
 import static fr.sirs.util.JRUtils.TAG_BOTTOM_PEN;
 import static fr.sirs.util.JRUtils.TAG_BOX;
+import static fr.sirs.util.JRUtils.TAG_COLUMN;
 import static fr.sirs.util.JRUtils.TAG_COLUMN_FOOTER;
 import static fr.sirs.util.JRUtils.TAG_COLUMN_HEADER;
+import static fr.sirs.util.JRUtils.TAG_COMPONENT_ELEMENT;
+import static fr.sirs.util.JRUtils.TAG_DATASET_RUN;
+import static fr.sirs.util.JRUtils.TAG_DATA_SOURCE_EXPRESSION;
 import static fr.sirs.util.JRUtils.TAG_DETAIL;
+import static fr.sirs.util.JRUtils.TAG_DETAIL_CELL;
 import static fr.sirs.util.JRUtils.TAG_FIELD;
 import static fr.sirs.util.JRUtils.TAG_FIELD_DESCRIPTION;
 import static fr.sirs.util.JRUtils.TAG_FONT;
@@ -41,12 +49,17 @@ import static fr.sirs.util.JRUtils.TAG_PAGE_HEADER;
 import static fr.sirs.util.JRUtils.TAG_REPORT_ELEMENT;
 import static fr.sirs.util.JRUtils.TAG_STATIC_TEXT;
 import static fr.sirs.util.JRUtils.TAG_SUB_DATASET;
+import static fr.sirs.util.JRUtils.TAG_TABLE;
+import static fr.sirs.util.JRUtils.TAG_TABLE_FOOTER;
+import static fr.sirs.util.JRUtils.TAG_TABLE_HEADER;
 import static fr.sirs.util.JRUtils.TAG_TEXT;
 import static fr.sirs.util.JRUtils.TAG_TEXT_ELEMENT;
 import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD;
 import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD_EXPRESSION;
 import static fr.sirs.util.JRUtils.TAG_TITLE;
 import fr.sirs.util.JRUtils.TextAlignment;
+import static fr.sirs.util.JRUtils.URI_JRXML;
+import static fr.sirs.util.JRUtils.URI_JRXML_COMPONENTS;
 import static fr.sirs.util.JRUtils.getCanonicalName;
 import static fr.sirs.util.PrinterUtilities.getFieldNameFromSetter;
 import java.io.File;
@@ -109,6 +122,8 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     private static final String NULL_REPLACEMENT = "Non renseigné";
     private static final String TRUE_REPLACEMENT = "Oui";
     private static final String FALSE_REPLACEMENT = "Non";
+    
+    private static final String OBSERVATIONS_TABLE_DATA_SOURCE = "OBSERVATIONS_TABLE_DATA_SOURCE";
     
     private JRDomWriterDesordreSheet(){
         super();
@@ -334,9 +349,12 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName(), Locale.getDefault(),
                 Thread.currentThread().getContextClassLoader());
         
+        /*----------------------------------------------------------------------
+        ATTRIBUTS DU DESORDRE
+        ----------------------------------------------------------------------*/
         // Loops over the method looking for setters (based on the field names).
         final Method[] methods = classToMap.getMethods();
-        int i = 0;
+        int order = 0;
         for (final Method method : methods){
             if(PrinterUtilities.isSetter(method)){
                 
@@ -354,18 +372,146 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
                 
                 // Writes the field.--------------------------------------------
                 if(avoidFields==null || !avoidFields.contains(fieldName)){
-                    writeDetailField(fieldName, fieldClass, i, markup, resourceBundle);
-                    i++;
+                    writeDetailField(fieldName, fieldClass, order, markup, resourceBundle);
+                    order++;
                 }
             }
         }
         
+        /*----------------------------------------------------------------------
+        TABLE DES OBSERVATIONS
+        ----------------------------------------------------------------------*/
+        final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
+        
+        final Element componentElement = document.createElement(TAG_COMPONENT_ELEMENT);
+        final Element componentElementReportElement = document.createElement(TAG_REPORT_ELEMENT);
+        componentElementReportElement.setAttribute(ATT_KEY, "table");
+        componentElementReportElement.setAttribute(ATT_STYLE, "table");
+        componentElementReportElement.setAttribute(ATT_X, String.valueOf(0));
+        componentElementReportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+fields_interline)*order));
+//        componentElementReportElement.setAttribute(ATT_Y, String.valueOf(0));
+        componentElementReportElement.setAttribute(ATT_WIDTH, String.valueOf(802));
+        componentElementReportElement.setAttribute(ATT_HEIGHT, String.valueOf(64));
+        componentElementReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
+//        componentElementReportElement.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, String.valueOf(true));
+        
+        // Set the table element
+        final Element table = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE);
+        
+        final Element datasetRun = document.createElementNS(URI_JRXML, TAG_DATASET_RUN);
+        datasetRun.setAttribute(ATT_SUB_DATASET, "Query Dataset");
+        final Element datasourceExpression = document.createElementNS(URI_JRXML, TAG_DATA_SOURCE_EXPRESSION);
+        
+        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $P{"+OBSERVATIONS_TABLE_DATA_SOURCE+"})");//.cloneDataSource()
+        
+        datasourceExpression.appendChild(datasourceExpressionField);
+        datasetRun.appendChild(datasourceExpression);
+        
+        table.appendChild(datasetRun);
+        final int columnWidth = (PAGE_WIDTH - 40);///Observation.class.getMethods().length;
+        for(final Method method : Observation.class.getMethods()){
+            
+            if(PrinterUtilities.isSetter(method)){
+                
+                // Retrives the field name from the setter name.----------------
+                final String fieldName = getFieldNameFromSetter(method);
+                final Class fieldClass = method.getParameterTypes()[0];
+                if(("id".equals(fieldName) || "designation".equals(fieldName)) 
+                        && (avoidFields==null || !avoidFields.contains(fieldName)))
+                    writeColumn(method, table, columnWidth);
+            }
+        }
+        
+        componentElement.appendChild(componentElementReportElement);
+        componentElement.appendChild(table);
+        
+        band.appendChild(componentElement);
+        
+        
+        
+        
         // Sizes the detail element given to the field number.--------------------
-        ((Element) detail.getElementsByTagName(TAG_BAND).item(0))
-                .setAttribute(ATT_HEIGHT, String.valueOf((FIELDS_HEIGHT+fields_interline)*i));
+        band.setAttribute(ATT_HEIGHT, String.valueOf((FIELDS_HEIGHT+fields_interline)*order+64));
         
         // Builds the DOM tree.-------------------------------------------------
         root.appendChild(detail);
+    }
+    
+    
+    
+    private void writeColumn(final Method setter, final Element table, final int columnWidth){
+        
+        
+        final Element column = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN);
+        column.setAttribute(ATT_WIDTH, String.valueOf(columnWidth));
+        
+        // Table header and footer
+        final Element tableHeader = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE_HEADER);
+        tableHeader.setAttribute(ATT_STYLE, "table_TH");
+        tableHeader.setAttribute(ATT_HEIGHT, String.valueOf(5));
+        
+        final Element tableFooter = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE_FOOTER);
+        tableFooter.setAttribute(ATT_STYLE, "table_TH");
+        tableFooter.setAttribute(ATT_HEIGHT, String.valueOf(5));
+        
+        // Column header
+        final Element jrColumnHeader = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN_HEADER);
+        jrColumnHeader.setAttribute(ATT_STYLE, "table_CH");
+        jrColumnHeader.setAttribute(ATT_HEIGHT, String.valueOf(40));
+        
+            final Element staticText = document.createElementNS(URI_JRXML, TAG_STATIC_TEXT);
+            
+                final Element staticTextReportElement = document.createElementNS(URI_JRXML, TAG_REPORT_ELEMENT);
+                staticTextReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL/2));
+                staticTextReportElement.setAttribute(ATT_Y, String.valueOf(0));
+                staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-INDENT_LABEL));
+                staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(40));
+        //        staticTextReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
+                staticText.appendChild(staticTextReportElement);
+
+                final Element text = document.createElementNS(URI_JRXML, TAG_TEXT);
+                final CDATASection labelField = document.createCDATASection(getFieldNameFromSetter(setter));
+                text.appendChild(labelField);
+
+            staticText.appendChild(text);
+        jrColumnHeader.appendChild(staticText);
+        
+        // Column footer
+        final Element jrColumnFooter = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN_FOOTER);
+        jrColumnFooter.setAttribute(ATT_STYLE, "table_CH");
+        jrColumnFooter.setAttribute(ATT_HEIGHT, String.valueOf(5));
+        
+        
+        // Detail cell
+        final Element detailCell = document.createElementNS(URI_JRXML_COMPONENTS, TAG_DETAIL_CELL);
+        detailCell.setAttribute(ATT_STYLE, "table_TD");
+        detailCell.setAttribute(ATT_HEIGHT, String.valueOf(40));
+        
+            final Element textField = document.createElementNS(URI_JRXML, TAG_TEXT_FIELD);
+            textField.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, "true");
+
+            final Element textFieldReportElement = document.createElement(TAG_REPORT_ELEMENT);
+            textFieldReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL/2));
+            textFieldReportElement.setAttribute(ATT_Y, String.valueOf(0));
+            textFieldReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-INDENT_LABEL));
+            textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(40));
+    //        textFieldReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
+            textField.appendChild(textFieldReportElement);
+
+            final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);
+            final CDATASection valueField = document.createCDATASection("$F{"+getFieldNameFromSetter(setter)+"}");
+            textFieldExpression.appendChild(valueField);
+
+            textField.appendChild(textFieldExpression);
+        detailCell.appendChild(textField);
+        
+        column.appendChild(tableHeader);
+        column.appendChild(tableFooter);
+        column.appendChild(jrColumnHeader);
+        column.appendChild(jrColumnFooter);
+        column.appendChild(detailCell);
+        
+        table.appendChild(column);
     }
     
     /**

@@ -109,6 +109,7 @@ public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
     private static final int TOP_MARGIN = 20;
     private static final int BOTTOM_MARGIN = 20;
     
+    private static final String TABLE_DATA_SOURCE = "TABLE_DATA_SOURCE";
     
     private JRDomWriterQueryResultSheet(){
         super();
@@ -241,7 +242,7 @@ public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
         datasetRun.setAttribute(ATT_SUB_DATASET, "Query Dataset");
         final Element datasourceExpression = document.createElementNS(URI_JRXML, TAG_DATA_SOURCE_EXPRESSION);
         
-        final CDATASection datasourceExpressionField = document.createCDATASection("(("+FeatureCollectionDataSource.class.getCanonicalName()+") $P{TABLE_DATA_SOURCE})");//.cloneDataSource()
+        final CDATASection datasourceExpressionField = document.createCDATASection("(("+FeatureCollectionDataSource.class.getCanonicalName()+") $P{"+TABLE_DATA_SOURCE+"})");//.cloneDataSource()
         
         datasourceExpression.appendChild(datasourceExpressionField);
         datasetRun.appendChild(datasourceExpression);
