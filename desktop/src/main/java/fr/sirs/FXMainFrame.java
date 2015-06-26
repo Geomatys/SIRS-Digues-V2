@@ -35,6 +35,8 @@ import fr.sirs.query.FXSearchPane;
 import fr.sirs.util.FXPreferenceEditor;
 import org.geotoolkit.gui.javafx.util.ProgressMonitor;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -177,11 +179,17 @@ public class FXMainFrame extends BorderPane {
         final VBox vbox = new VBox();
         vbox.getStylesheets().add(SIRS.CSS_PATH);
         vbox.getStyleClass().add(CSS_POPUP_ALERTS);
+        boolean firstItem = true;
+        final DateTimeFormatter dfFormat = DateTimeFormatter.ofPattern("d MMMM uuuu");
         for (final AlertItem alert : alerts) {
+            if (!firstItem) {
+                vbox.getChildren().add(new Label());
+            }
             final Label label = new Label(alert.getTitle());
             label.getStyleClass().add(CSS_POPUP_RAPPEL_TITLE);
             vbox.getChildren().add(label);
-            vbox.getChildren().add(new Label("Echéance "+ alert.getDate().toString()));
+            vbox.getChildren().add(new Label("Echéance " + alert.getDate().format(dfFormat)));
+            firstItem = false;
         }
 
         alertPopup.getContent().setAll(vbox);

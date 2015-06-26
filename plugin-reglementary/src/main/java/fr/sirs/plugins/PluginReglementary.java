@@ -4,9 +4,11 @@ import fr.sirs.Injector;
 import fr.sirs.Plugin;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ObligationReglementaire;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RappelObligationReglementaire;
 import fr.sirs.core.model.RefEcheanceRappelObligationReglementaire;
 import fr.sirs.core.model.RefFrequenceObligationReglementaire;
+import fr.sirs.core.model.RefTypeObligationReglementaire;
 import fr.sirs.ui.AlertItem;
 import javafx.scene.image.Image;
 
@@ -61,14 +63,21 @@ public class PluginReglementary extends Plugin {
                     Injector.getSession().getRepositoryForClass(RefEcheanceRappelObligationReglementaire.class);
             final AbstractSIRSRepository<RefFrequenceObligationReglementaire> repoFrequenceRappel =
                     Injector.getSession().getRepositoryForClass(RefFrequenceObligationReglementaire.class);
+            final AbstractSIRSRepository<RefTypeObligationReglementaire> repoTypeObl =
+                    Injector.getSession().getRepositoryForClass(RefTypeObligationReglementaire.class);
             final LocalDateTime now = LocalDateTime.now();
 
             for (final RappelObligationReglementaire rappel : rappels) {
                 final ObligationReglementaire obl = repoObl.get(rappel.getObligationId());
                 final RefEcheanceRappelObligationReglementaire period = repoEcheanceRappel.get(obl.getEcheanceId());
 
+                final StringBuilder sb = new StringBuilder();
+                sb.append(repoTypeObl.get(obl.getTypeId()).getAbrege()).append(" - ");
+                final Preview previewSE = Injector.getSession().getPreviews().get(obl.getSystemeEndiguementId());
+                sb.append(previewSE.getLibelle()).append(" - ").append(obl.getAnnee());
+
                 if (obl.getDateEcheance().minusMonths(period.getNbMois()).compareTo(now) <= 0 && obl.getDateEcheance().compareTo(now) >= 0) {
-                    alerts.add(new AlertItem(obl.getLibelle(), obl.getDateEcheance()));
+                    alerts.add(new AlertItem(sb.toString(), obl.getDateEcheance()));
                     continue;
                 }
 
@@ -79,7 +88,7 @@ public class PluginReglementary extends Plugin {
                 }
 
                 if (obl.getDateEcheance().minusMonths(period.getNbMois()).compareTo(now) < 0) {
-                    alerts.add(new AlertItem(obl.getLibelle(), obl.getDateEcheance()));
+                    alerts.add(new AlertItem(sb.toString(), obl.getDateEcheance()));
                 }
             }
 
