@@ -62,7 +62,7 @@ public class PluginReglementary extends Plugin {
 
             for (final RappelObligationReglementaire rappel : rappels) {
                 final ObligationReglementaire obl = repoObl.get(rappel.getObligationId());
-                final RefEcheanceRappelObligationReglementaire period = repoEcheanceRappel.get(obl.getPeriodeId());
+                final RefEcheanceRappelObligationReglementaire period = repoEcheanceRappel.get(obl.getEcheanceId());
 
                 if (obl.getDateEcheance().minusMonths(period.getNbMois()).compareTo(now) < 0) {
                     alerts.add(new AlertItem(obl.getLibelle(), obl.getDateEcheance()));

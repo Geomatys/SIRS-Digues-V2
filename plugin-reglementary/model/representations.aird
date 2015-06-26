@@ -59,11 +59,14 @@
               <children xmi:type="notation:Node" xmi:id="_diqKEhNXEeWTNvankef_KQ" type="3010" element="_dikDdBNXEeWTNvankef_KQ">
                 <layoutConstraint xmi:type="notation:Location" xmi:id="_diqKExNXEeWTNvankef_KQ"/>
               </children>
+              <children xmi:type="notation:Node" xmi:id="_NuBeEBvmEeWUhvH6pnqkew" type="3010" element="_Nt6JUBvmEeWUhvH6pnqkew">
+                <layoutConstraint xmi:type="notation:Location" xmi:id="_NuBeERvmEeWUhvH6pnqkew"/>
+              </children>
               <styles xmi:type="notation:SortingStyle" xmi:id="_dipjAhNXEeWTNvankef_KQ"/>
               <styles xmi:type="notation:FilteringStyle" xmi:id="_dipjAxNXEeWTNvankef_KQ"/>
             </children>
             <styles xmi:type="notation:ShapeStyle" xmi:id="_dio78RNXEeWTNvankef_KQ" fontName="Ubuntu" fontHeight="8"/>
-            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_dio78hNXEeWTNvankef_KQ" x="400" y="235" width="227" height="58"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_dio78hNXEeWTNvankef_KQ" x="400" y="235" width="227" height="68"/>
           </children>
           <children xmi:type="notation:Node" xmi:id="_k5B6sBNXEeWTNvankef_KQ" type="2003" element="_k4o5IBNXEeWTNvankef_KQ">
             <children xmi:type="notation:Node" xmi:id="_k5B6sxNXEeWTNvankef_KQ" type="5007"/>
@@ -139,7 +142,7 @@
             </children>
             <styles xmi:type="notation:ConnectorStyle" xmi:id="_ITBuIRNYEeWTNvankef_KQ" routing="Rectilinear" jumpLinkStatus="Above"/>
             <styles xmi:type="notation:FontStyle" xmi:id="_ITBuIhNYEeWTNvankef_KQ" fontColor="7490599" fontName="Ubuntu" fontHeight="8"/>
-            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_ITBuIxNYEeWTNvankef_KQ" points="[-94, 49, 229, 18]$[-274, 49, 49, 18]"/>
+            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_ITBuIxNYEeWTNvankef_KQ" points="[-94, 39, 229, 7]$[-274, 39, 49, 7]"/>
             <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_ITCVMhNYEeWTNvankef_KQ" id="(0.48223350253807107,0.08227848101265822)"/>
             <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_ITCVMxNYEeWTNvankef_KQ" id="(0.7841409691629956,0.13043478260869565)"/>
           </edges>
@@ -350,6 +353,17 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Nt6JUBvmEeWUhvH6pnqkew" name="nbMois : EInt = 0" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="reglementary.ecore#//RefFrequenceObligationReglementaire/nbMois"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="reglementary.ecore#//RefFrequenceObligationReglementaire/nbMois"/>
+          <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_Nt6JURvmEeWUhvH6pnqkew" labelAlignment="LEFT">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Nt6JUhvmEeWUhvH6pnqkew"/>
+            <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
+            <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_Nt6JUxvmEeWUhvH6pnqkew"/>
+            <color xmi:type="viewpoint:RGBValues" xmi:id="_Nt6JVBvmEeWUhvH6pnqkew"/>
+          </ownedStyle>
+          <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
+        </ownedElements>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_k4o5IBNXEeWTNvankef_KQ" name="RappelObligationReglementaire" tooltipText="" outgoingEdges="_ISrv4BNYEeWTNvankef_KQ _XY9wIBp3EeWAU-POrFs2dw" width="12" height="10">
         <target xmi:type="ecore:EClass" href="reglementary.ecore#//RappelObligationReglementaire"/>
@@ -467,9 +481,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_vQJhYBTJEeWTNvankef_KQ" name="[0..1] periodeId" sourceNode="_wp_90A62EeWRg56UJ5LWnQ" targetNode="_tBM7sBNXEeWTNvankef_KQ">
-        <target xmi:type="ecore:EReference" href="reglementary.ecore#//ObligationReglementaire/periodeId"/>
-        <semanticElements xmi:type="ecore:EReference" href="reglementary.ecore#//ObligationReglementaire/periodeId"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_vQJhYBTJEeWTNvankef_KQ" name="[0..1] echeanceId" sourceNode="_wp_90A62EeWRg56UJ5LWnQ" targetNode="_tBM7sBNXEeWTNvankef_KQ">
+        <target xmi:type="ecore:EReference" href="reglementary.ecore#//ObligationReglementaire/echeanceId"/>
+        <semanticElements xmi:type="ecore:EReference" href="reglementary.ecore#//ObligationReglementaire/echeanceId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_vQKIcBTJEeWTNvankef_KQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_vQKIcRTJEeWTNvankef_KQ"/>
