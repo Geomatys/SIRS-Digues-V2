@@ -123,7 +123,6 @@ public class PhotoLocaliseeEnPrImporter extends PhotoImporter {
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, TronconDigue> troncons = tronconGestionDigueImporter.getTronconsDigues();
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
-        final Map<Integer, AbstractPositionDocument> docTroncons = documentImporter.getPositions();
         
         final Map<Integer, RefOrientationPhoto> orientations = orientationImporter.getTypeReferences();
         final Map<Integer, RefCote> cotes = typeCoteImporter.getTypeReferences();
@@ -142,10 +141,6 @@ public class PhotoLocaliseeEnPrImporter extends PhotoImporter {
             
             if (row.getInt(Columns.ID_INTERV_PHOTOGRAPH.toString()) != null) {
                 photo.setPhotographeId(intervenants.get(row.getInt(Columns.ID_INTERV_PHOTOGRAPH.toString())).getId());
-            }
-            
-            if (row.getInt(Columns.ID_DOC.toString()) != null) {
-                photo.setDocumentRelated(docTroncons.get(row.getInt(Columns.ID_DOC.toString())).getId());
             }
             
             photo.setLibelle(cleanNullString(row.getString(Columns.REF_PHOTO.toString())));
