@@ -109,7 +109,7 @@ public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
     private static final int TOP_MARGIN = 20;
     private static final int BOTTOM_MARGIN = 20;
     
-    private static final String TABLE_DATA_SOURCE = "TABLE_DATA_SOURCE";
+    public static final String TABLE_DATA_SOURCE = "TABLE_DATA_SOURCE";
     
     private JRDomWriterQueryResultSheet(){
         super();

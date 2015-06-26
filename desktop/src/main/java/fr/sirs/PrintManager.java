@@ -119,10 +119,10 @@ public class PrintManager {
             avoidFields.add(PARENT_FIELD);
             avoidFields.add(COUCH_DB_DOCUMENT_FIELD);
             
-            
-        try {
-            final File fileToPrint = PrinterUtilities.print(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), desordre);
-            if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
+        try{  
+            final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll().subList(0, 10);
+            final File fileToPrint = PrinterUtilities.printDisorders(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), desordres);
+//            if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception ex) {
             Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, ex);
         }

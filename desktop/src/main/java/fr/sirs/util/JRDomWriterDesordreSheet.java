@@ -123,7 +123,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     private static final String TRUE_REPLACEMENT = "Oui";
     private static final String FALSE_REPLACEMENT = "Non";
     
-    private static final String OBSERVATIONS_TABLE_DATA_SOURCE = "OBSERVATIONS_TABLE_DATA_SOURCE";
+    public static final String OBSERVATIONS_TABLE_DATA_SOURCE = "OBSERVATIONS_TABLE_DATA_SOURCE";
     
     private JRDomWriterDesordreSheet(){
         super();

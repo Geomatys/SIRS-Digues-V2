@@ -96,23 +96,31 @@ public final class SIRS extends SirsCore {
     public static final String CSS_PATH = "/fr/sirs/theme.css";
     public static final String CSS_PATH_CALENDAR = "/fr/sirs/calendar.css";
     
+    //--------------------------------------------------------------------------
     // Champs spéciaux des classes utilisés dans le code
+    //--------------------------------------------------------------------------
+    
+    // Champs de contrôle des dates
     public static final String DATE_DEBUT_FIELD = "date_debut";
     public static final String DATE_FIN_FIELD = "date_fin";
     public static final String DATE_MAJ_FIELD = "dateMaj";
     
+    public static final String COMMENTAIRE_FIELD = "commentaire";
     public static final String GEOMETRY_FIELD = "geometry";
+    
+    public static final String DESIGNATION_FIELD = "designation";
+    public static final String VALID_FIELD = "valid";
+    public static final String AUTHOR_FIELD = "author";
+    
     public static final String DOCUMENT_ID_FIELD = "documentId";
     public static final String ID_FIELD = "id";
     public static final String REVISION_FIELD = "revision";
     public static final String PARENT_FIELD = "parent";
     public static final String COUCH_DB_DOCUMENT_FIELD = "couchDBDocument";
+    
     public static final String LINEAR_ID_FIELD = "linearId";
-    public static final String VALID_FIELD = "valid";
-    public static final String AUTHOR_FIELD = "author";
     public static final String FOREIGN_PARENT_ID_FIELD = "foreignParentId";
-    public static final String COMMENTAIRE_FIELD = "commentaire";
-    public static final String DESIGNATION_FIELD = "designation";
+    
     public static final String PR_DEBUT_FIELD = "prDebut";
     public static final String PR_FIN_FIELD = "prFin";
     public static final String POSITION_DEBUT_FIELD = "positionDebut";
@@ -124,6 +132,30 @@ public final class SIRS extends SirsCore {
     
     public static final String SIRSDOCUMENT_REFERENCE = "sirsdocument";
     public static final String BORNE_IDS_REFERENCE = "borneIds";
+    
+    //--------------------------------------------------------------------------
+    // Champs particuliers aux désordres
+    //--------------------------------------------------------------------------
+    public static class DesordreFields {
+        // Observations des désordres
+        public static final String OBSERVATIONS_REFERENCE = "observations";
+        
+        // Photos des observations
+        public static final String PHOTOS_OBSERVATION_REFERENCE = "photos";
+
+        // Réseaux et ouvrages
+        public static final String ECHELLE_LIMINIMETRIQUE_REFERENCE = "echelleLimnimetriqueIds";
+        public static final String OUVRAGE_PARTICULIER_REFERENCE = "ouvrageParticulierIds";
+        public static final String RESEAU_TELECOM_ENERGIE_REFERENCE = "reseauTelecomEnergieIds";
+        public static final String OUVRAGE_TELECOM_ENERGIE_REFERENCE = "ouvrageTelecomEnergieIds";
+        public static final String OUVRAGE_HYDRAULIQUE_REFERENCE = "ouvrageHydrauliqueAssocieIds";
+        public static final String RESEAU_HYDRAULIQUE_FERME_REFERENCE = "reseauHydrauliqueFermeIds";
+        public static final String RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE = "reseauHydrauliqueCielOuvertIds";
+
+        // Voiries
+        public static final String OUVRAGE_VOIRIE_REFERENCE = "ouvrageVoirieIds";
+        public static final String VOIE_DIGUE_REFERENCE = "voieDigueIds";
+    }
     
     // Champs spéciaux des ResourceBundles
     public static final String BUNDLE_KEY_CLASS = "class";

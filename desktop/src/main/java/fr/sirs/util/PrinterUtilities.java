@@ -64,78 +64,50 @@ public class PrinterUtilities {
     ////////////////////////////////////////////////////////////////////////////
     private static final String META_TEMPLATE_DESORDRE = "/fr/sirs/jrxml/metaTemplateDesordre.jrxml";
     
-    public static File print(List<String> avoidFields, final Previews previewLabelRepository, final StringConverter stringConverter, final Desordre desordre) throws Exception {
+    public static File printDisorders(List<String> avoidFields, final Previews previewLabelRepository, final StringConverter stringConverter, final List<Desordre> desordres) throws Exception {
         
-        // Creates the Jasper Reports specific template from the generic template.
-        final File templateFile = File.createTempFile(desordre.getClass().getName(), JRXML_EXTENSION);
-        templateFile.deleteOnExit();
-//        final File templateFile = new File("/home/samuel/Bureau/desordreObservation.jrxml");
-        
-        final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE));
-        templateWriter.setFieldsInterline(2);
-        templateWriter.setOutput(templateFile);
-        templateWriter.write(desordre, avoidFields);
-        
-        final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
+        JasperPrint firstPrint = null;
+        final List<JasperPrint> followingPrints = new ArrayList<>();
+        for(final Desordre desordre : desordres){
+            
+            // Creates the Jasper Reports specific template from the generic template.
+            final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
+            templateFile.deleteOnExit();
+    //        final File templateFile = new File("/home/samuel/Bureau/desordreObservation.jrxml");
+
+            final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE));
+            templateWriter.setFieldsInterline(2);
+            templateWriter.setOutput(templateFile);
+            templateWriter.write(desordre, avoidFields);
+
+            final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
                 
-        JasperPrint finalPrint = null;
-//        for(final Element element : elements){
             final JRDataSource source = new ObjectDataSource(Collections.singletonList(desordre), previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
             parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
-            for(int i = 0; i<10; i++) desordre.observations.add(desordre.observations.get(0));
-            parameters.put("OBSERVATIONS_TABLE_DATA_SOURCE", new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
+//            for(int i = 0; i<10; i++) desordre.observations.add(desordre.observations.get(0));
+            parameters.put(JRDomWriterDesordreSheet.OBSERVATIONS_TABLE_DATA_SOURCE, new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
             parameters.put("OBSERVATIONS_2_TABLE_DATA_SOURCE", new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
             
             final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
-            if(finalPrint==null) finalPrint=print;
-            else{
-                for(final JRPrintPage page : print.getPages()){
-                    finalPrint.addPage(page);
-                }
+            if(firstPrint==null) firstPrint=print;
+            else followingPrints.add(print);
+        }
+        
+        for(final JasperPrint print : followingPrints){
+            for(final JRPrintPage page : print.getPages()){
+                firstPrint.addPage(page);
             }
-//        }
+        }
         
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile("DESORDRE_OBSERVATION", PDF_EXTENSION);
         try (final FileOutputStream outStream = new FileOutputStream(fout)) {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
-            JasperReportService.generate(finalPrint, output);
+            JasperReportService.generate(firstPrint, output);
         }
         return fout;
-//        return null;
-    }
-    
-    public static void main(String[] args) throws IOException {
-        
-//        StdHttpClient.Builder builder = new StdHttpClient.Builder().host("127.0.0.1").port(5984);
-//
-//        builder.username("geouser");
-//        builder.password("geopw");
-//
-//        HttpClient httpClient = builder.build();
-//        CouchDbInstance dbInstance = new StdCouchDbInstance(httpClient);
-//        CouchDbConnector db = new StdCouchDbConnector("rhone22juin", dbInstance);
-//
-//        Previews previews = new Previews(db);
-//        Desordre desordre = new DesordreRepository(db).getOne();
-        
-        DatabaseRegistry registry = new DatabaseRegistry();
-        ConfigurableApplicationContext cac = registry.connectToSirsDatabase("rhone22juin", false, false, false);
-        CouchDbConnector db = cac.getBean(CouchDbConnector.class);
-        
-        Previews previews = new Previews(db);
-        Desordre desordre = new DesordreRepository(db).getOne();
-        
-        try {
-            File pdfFile = PrinterUtilities.print(null, previews, new SirsStringConverter(), desordre);
-            if (Desktop.isDesktopSupported()) {
-                Desktop.getDesktop().open(pdfFile);
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(PrinterUtilities.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
     
     ////////////////////////////////////////////////////////////////////////////
@@ -167,7 +139,7 @@ public class PrinterUtilities {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
             final Map<String, Object> parameters = new HashMap<>();
             parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
-            parameters.put("TABLE_DATA_SOURCE", new FeatureCollectionDataSource(featureCollection));
+            parameters.put(JRDomWriterQueryResultSheet.TABLE_DATA_SOURCE, new FeatureCollectionDataSource(featureCollection));
 
             final JasperPrint print = JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());
             JasperReportService.generate(print, output);
