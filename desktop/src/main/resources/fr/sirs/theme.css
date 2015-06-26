@@ -242,6 +242,11 @@
     -fx-border-radius: 5;
 }
 
+.bottom-bar{
+    -fx-background-color: lightgray;
+    -fx-border-color: #AAAAAA;
+    -fx-border-width: 1px 0 0 0;
+}
 .popup-alerts {
     -fx-padding: 10px;
     -fx-background-color: #FF9966;
