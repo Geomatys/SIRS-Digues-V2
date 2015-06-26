@@ -236,6 +236,7 @@ public class Loader extends Application {
             System.exit(0);
         });
 
+        mainStage.sizeToScene();
         mainStage.show();
         frame.getMapTab().show();
 

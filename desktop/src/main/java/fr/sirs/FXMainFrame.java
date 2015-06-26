@@ -6,8 +6,14 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import fr.sirs.ui.AlertItem;
 import fr.sirs.ui.AlertManager;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
@@ -17,6 +23,7 @@ import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
+import javafx.scene.transform.Transform;
 import javafx.stage.Popup;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Role;
@@ -74,7 +81,10 @@ public class FXMainFrame extends BorderPane {
     private FXMapTab mapTab;
     private DiguesTab diguesTab;
     private Tab searchTab;
-    
+
+
+    private final Popup alertPopup = new Popup();
+
     private static final String BUNDLE_KEY_ADMINISTATION = "administration";
     private static final String BUNDLE_KEY_USERS = "users";
     private static final String BUNDLE_KEY_VALIDATION = "validation";
@@ -156,6 +166,7 @@ public class FXMainFrame extends BorderPane {
         final ObservableList<AlertItem> alerts = AlertManager.getInstance().getAlerts();
         uiAlertsBtn.setOnMouseClicked(event -> showAlertsPopup());
         uiAlertsBtn.setGraphic(new ImageView(ICON_ALERT));
+        alerts.addListener((ListChangeListener<AlertItem>) c -> uiAlertsBtn.setText(alerts.size() +" alerte(s)"));
         uiAlertsBtn.setText(alerts.size() +" alerte(s)");
 
         SIRS.LOGGER.log(Level.FINE, org.apache.sis.setup.About.configuration().toString());
@@ -163,7 +174,6 @@ public class FXMainFrame extends BorderPane {
 
     public void showAlertsPopup() {
         final ObservableList<AlertItem> alerts = AlertManager.getInstance().getAlerts();
-        final Popup popup = new Popup();
         final VBox vbox = new VBox();
         vbox.getStylesheets().add(SIRS.CSS_PATH);
         vbox.getStyleClass().add(CSS_POPUP_ALERTS);
@@ -174,11 +184,21 @@ public class FXMainFrame extends BorderPane {
             vbox.getChildren().add(new Label("Echéance "+ alert.getDate().toString()));
         }
 
-        popup.getContent().add(vbox);
-        popup.setAutoHide(true);
+        alertPopup.getContent().setAll(vbox);
+        alertPopup.setAutoHide(true);
+        alertPopup.setConsumeAutoHidingEvents(false);
 
-        final Bounds bounds = uiAlertsBtn.getBoundsInLocal();
-        popup.show(uiAlertsBtn, bounds.getMinX(), bounds.getMinY() - popup.getHeight() - 30);
+        uiAlertsBtn.localToSceneTransformProperty().addListener((observable, oldValue, newValue) -> {
+            if (alertPopup.isShowing()) {
+                final Point2D popupPos = uiAlertsBtn.localToScreen(uiAlertsBtn.getWidth(), 0);
+                alertPopup.show(uiAlertsBtn, popupPos.getX() - alertPopup.getWidth() - 5, popupPos.getY() - alertPopup.getHeight());
+            }
+        });
+
+        if (!alerts.isEmpty()) {
+            final Point2D popupPos = uiAlertsBtn.localToScreen(uiAlertsBtn.getWidth(), 0);
+            alertPopup.show(uiAlertsBtn, popupPos.getX() - alertPopup.getWidth() - 5, popupPos.getY() - alertPopup.getHeight());
+        }
     }
     
     public TabPane getUiTabs() {

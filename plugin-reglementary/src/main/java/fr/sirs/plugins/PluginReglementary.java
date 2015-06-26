@@ -6,6 +6,7 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.RappelObligationReglementaire;
 import fr.sirs.core.model.RefEcheanceRappelObligationReglementaire;
+import fr.sirs.core.model.RefFrequenceObligationReglementaire;
 import fr.sirs.ui.AlertItem;
 import javafx.scene.image.Image;
 
@@ -24,7 +25,7 @@ public class PluginReglementary extends Plugin {
 
     public PluginReglementary() {
         name = NAME;
-        loadingMessage.set("Chargement du module réglementaire");
+        loadingMessage.set("module réglementaire");
         themes.add(new DocumentsTheme());
         themes.add(new StatesGeneratorTheme());
     }
@@ -58,11 +59,24 @@ public class PluginReglementary extends Plugin {
                     Injector.getSession().getRepositoryForClass(ObligationReglementaire.class);
             final AbstractSIRSRepository<RefEcheanceRappelObligationReglementaire> repoEcheanceRappel =
                     Injector.getSession().getRepositoryForClass(RefEcheanceRappelObligationReglementaire.class);
+            final AbstractSIRSRepository<RefFrequenceObligationReglementaire> repoFrequenceRappel =
+                    Injector.getSession().getRepositoryForClass(RefFrequenceObligationReglementaire.class);
             final LocalDateTime now = LocalDateTime.now();
 
             for (final RappelObligationReglementaire rappel : rappels) {
                 final ObligationReglementaire obl = repoObl.get(rappel.getObligationId());
                 final RefEcheanceRappelObligationReglementaire period = repoEcheanceRappel.get(obl.getEcheanceId());
+
+                if (obl.getDateEcheance().minusMonths(period.getNbMois()).compareTo(now) <= 0 && obl.getDateEcheance().compareTo(now) >= 0) {
+                    alerts.add(new AlertItem(obl.getLibelle(), obl.getDateEcheance()));
+                    continue;
+                }
+
+                LocalDateTime newEcheanceDate = LocalDateTime.from(obl.getDateEcheance());
+                final RefFrequenceObligationReglementaire frequenceRappel = repoFrequenceRappel.get(rappel.getFrequenceId());
+                while (newEcheanceDate.compareTo(now) <= 0) {
+                    newEcheanceDate = newEcheanceDate.plusMonths(frequenceRappel.getNbMois());
+                }
 
                 if (obl.getDateEcheance().minusMonths(period.getNbMois()).compareTo(now) < 0) {
                     alerts.add(new AlertItem(obl.getLibelle(), obl.getDateEcheance()));
