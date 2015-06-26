@@ -32,12 +32,16 @@ import org.ektorp.http.RestTemplate;
 import org.geotoolkit.util.FileUtilities;
 
 import static fr.sirs.util.property.SirsPreferences.PROPERTIES.*;
+import java.net.Proxy;
+import java.net.ProxySelector;
+import java.net.URISyntaxException;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
@@ -164,10 +168,14 @@ public class DatabaseRegistry {
         connect();
         
         if (isLocal) {
-            setAuthenticationRequired();
-            setOpenWorld();
-            setCorsUseless();
-            ensureNoDelay();
+            try {
+                setAuthenticationRequired();
+                setOpenWorld();
+                setCorsUseless();
+                ensureNoDelay();
+            } catch (DbAccessException e) {
+                SirsCore.LOGGER.log(Level.WARNING, "CouchDB configuration cannot be overriden !", e);
+            }
         }
     }
 
@@ -205,11 +213,29 @@ public class DatabaseRegistry {
      * @throws IllegalArgumentExeption If login information is null.
      */
     private void connect() throws IOException {
+        final Proxy proxy;
+        try {
+            List<Proxy> select = ProxySelector.getDefault().select(couchDbUrl.toURI());
+            if (select != null && !select.isEmpty()) {
+                proxy = select.get(0);
+            } else {
+                proxy = Proxy.NO_PROXY;
+            }
+        } catch (URISyntaxException ex) {
+            throw new IOException(ex);
+        }
         StdHttpClient.Builder builder = new StdHttpClient.Builder()
                 .url(couchDbUrl)
                 .connectionTimeout(CONNECTION_TIMEOUT)
                 .socketTimeout(SOCKET_TIMEOUT)
                 .relaxedSSLSettings(true);
+        if (!Proxy.NO_PROXY.equals(proxy)) {
+            final String[] proxyPart = proxy.address().toString().split(":");
+            if (proxyPart.length == 2) {
+                builder.proxy(proxyPart[0]);
+                builder.proxy(proxyPart[1]);
+            }
+        }
         final boolean userGiven = (username != null && !username.isEmpty());
         if (userGiven) {
             builder.username(username);
@@ -701,7 +727,7 @@ public class DatabaseRegistry {
                 final Alert question = new Alert(Alert.AlertType.NONE, "Veuillez rentrer des identifiants de connexion à CouchDb : ", ButtonType.CANCEL, ButtonType.OK);
                 question.getDialogPane().setContent(gPane);
                 question.setResizable(true);
-                question.setHeaderText("Veuillez rentrer des identifiants de connexion à CouchDb pour l'adresse suivante :\n"
+                question.setHeaderText("Veuillez rentrer des identifiants de connexion à CouchDB pour l'adresse suivante :\n"
                         + (isLocal? "Service local" : couchDbUrl.toExternalForm()));
 
                 Optional<ButtonType> result = question.showAndWait();

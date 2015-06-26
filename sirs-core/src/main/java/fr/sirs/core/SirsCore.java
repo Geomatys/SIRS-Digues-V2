@@ -9,7 +9,6 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 
-import javafx.scene.image.Image;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,6 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javax.measure.unit.SI;

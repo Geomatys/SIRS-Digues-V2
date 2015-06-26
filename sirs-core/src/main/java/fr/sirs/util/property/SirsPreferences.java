@@ -26,8 +26,8 @@ public class SirsPreferences extends Properties {
         REFERENCE_URL("Adresse des références", "Url à laquelle se trouvent les différents fichiers centralisés des références de l'application.", "http://sirs-digues.info/wp-content/tablesReferences/"),
         UPDATE_CORE_URL("Mise à jour de l'application", "Url à laquelle se trouve le service de mise à jour de l'application.", "http://sirs-digues.info/wp-content/updates/core.json"),
         UPDATE_PLUGINS_URL("Mise à jour des plugins", "Url à laquelle se trouve le service de mise à jour des plugins.", "http://sirs-digues.info/wp-content/updates/plugins.json"),
-        DEFAULT_LOCAL_USER("Administrateur CouchDB local", "Login de l'administrateur pour la base couchDB locale.", "geouser"),
-        DEFAULT_LOCAL_PASS("Mot de passe de l'administrateur CouchDB", "Le mot de passe de l'utilisateur CouchDB spécifié ici.", "geopw"),
+        DEFAULT_LOCAL_USER("Administrateur CouchDB local", "Login de l'administrateur pour la base couchDB locale.", null),
+        DEFAULT_LOCAL_PASS("Mot de passe de l'administrateur CouchDB", "Le mot de passe de l'utilisateur CouchDB spécifié ici.", null),
         COUCHDB_LOCAL_ADDR("Addresse de la base CouchDB locale", "Addresse d'accès à la base CouchDB locale, pour les réplications sur le poste.", "http://127.0.0.1:5984/");
         public final String title;
         public final String description;
