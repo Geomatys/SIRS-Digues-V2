@@ -41,7 +41,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
-import org.geotoolkit.gui.javafx.util.FXLocalDateTimeField;
+import org.geotoolkit.gui.javafx.util.FXDateField;
 import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
 
 /**
@@ -55,7 +55,7 @@ public class FXSystemeEndiguementPane extends BorderPane {
     @FXML private FXEditMode uiEditMode;
     @FXML private TextField uiLibelle;
     @FXML private Tab uiTabDigues;
-    @FXML private FXLocalDateTimeField uiMaj;
+    @FXML private FXDateField uiMaj;
     @FXML private TextField uiClassement;
     @FXML private FXNumberSpinner uiProtection;
     @FXML private FXNumberSpinner uiPopulation;

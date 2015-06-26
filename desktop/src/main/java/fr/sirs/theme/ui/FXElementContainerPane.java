@@ -23,7 +23,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import org.geotoolkit.gui.javafx.util.FXLocalDateTimeField;
+import org.geotoolkit.gui.javafx.util.FXDateField;
 import org.geotoolkit.internal.GeotkFX;
 
 /**
@@ -39,7 +39,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
     @FXML private Label uiHeaderLabel;
     @FXML private Label uiDateMajLabel;
     @FXML private TextField uiPseudoId;
-    @FXML private FXLocalDateTimeField date_maj;
+    @FXML private FXDateField date_maj;
     @FXML private FXEditMode uiMode;
     @FXML private Button uiShowOnMapButton;
 

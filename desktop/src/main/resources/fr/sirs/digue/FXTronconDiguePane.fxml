@@ -90,8 +90,8 @@
                                                       </GridPane.margin>
                                                   </Label>
                                                   <Label text="Fin" GridPane.columnIndex="3" />
-                                    <FXDateField fx:id="uiDateStart" GridPane.columnIndex="2" />
-                                    <FXDateField fx:id="uiDateEnd" GridPane.columnIndex="4" />
+                                                <DatePicker fx:id="uiDateStart" GridPane.columnIndex="2" />
+                                                <DatePicker fx:id="uiDateEnd" GridPane.columnIndex="4" />
                                               </children>
                                               <columnConstraints>
                                                   <ColumnConstraints hgrow="NEVER" />

@@ -28,7 +28,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.util.Callback;
-import org.geotoolkit.gui.javafx.util.FXLocalDateTimeField;
+import org.geotoolkit.gui.javafx.util.FXDateField;
 
 /**
  *
@@ -38,7 +38,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
     
     @FXML private FXEditMode uiMode;
     @FXML private TextField uiPseudoId;
-    @FXML private FXLocalDateTimeField date_maj;
+    @FXML private FXDateField date_maj;
     
     @FXML private TextField uiNom;
     @FXML private TextField uiPrenom;

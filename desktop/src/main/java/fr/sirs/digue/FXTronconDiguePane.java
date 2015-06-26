@@ -35,6 +35,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -45,7 +46,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
-import org.geotoolkit.gui.javafx.util.FXLocalDateField;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -66,8 +66,8 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     
     // Onglet "Description"
     @FXML private HTMLEditor uiComment;
-    @FXML private FXLocalDateField uiDateStart;
-    @FXML private FXLocalDateField uiDateEnd;
+    @FXML private DatePicker uiDateStart;
+    @FXML private DatePicker uiDateEnd;
     
     // Onglet "SR"
     @FXML private ListView<SystemeReperage> uiSRList;

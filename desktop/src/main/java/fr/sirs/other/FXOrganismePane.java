@@ -9,7 +9,6 @@ import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.PojoTable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -19,7 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import org.geotoolkit.gui.javafx.util.FXLocalDateTimeField;
+import org.geotoolkit.gui.javafx.util.FXDateField;
 
 /**
  *
@@ -30,7 +29,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
     
     @FXML private FXEditMode uiMode;
     @FXML private TextField uiPseudoId;
-    @FXML private FXLocalDateTimeField date_maj;
+    @FXML private FXDateField date_maj;
 
     @FXML private GridPane uiDescriptionGrid;
     @FXML private GridPane uiAdresseGrid;

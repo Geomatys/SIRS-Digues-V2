@@ -7,8 +7,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.DatePicker;
 import javafx.scene.layout.BorderPane;
-import org.geotoolkit.gui.javafx.util.FXLocalDateField;
 
 /**
  * A simple editor for edition of temporal bornes of an object.
@@ -16,8 +16,8 @@ import org.geotoolkit.gui.javafx.util.FXLocalDateField;
  */
 public class FXValidityPeriodPane extends BorderPane {
     
-    @FXML private FXLocalDateField uiDateDebut;
-    @FXML private FXLocalDateField uiDateFin;
+    @FXML private DatePicker uiDateDebut;
+    @FXML private DatePicker uiDateFin;
     
     private final SimpleObjectProperty<AvecBornesTemporelles> target = new SimpleObjectProperty<>();
     

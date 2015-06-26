@@ -36,6 +36,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
@@ -49,7 +50,6 @@ import org.controlsfx.control.StatusBar;
 import org.geotoolkit.display.canvas.AbstractCanvas2D;
 import org.geotoolkit.display2d.canvas.painter.SolidColorPainter;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
-import org.geotoolkit.gui.javafx.util.FXLocalDateField;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.internal.Loggers;
@@ -109,7 +109,7 @@ public class FXCoordinateBar extends GridPane {
     private final ComboBox scaleCombo = new ComboBox();
     private final ColorPicker colorPicker = new ColorPicker(Color.WHITE);
     private final FXCRSButton crsButton = new FXCRSButton();
-    private final FXLocalDateField dateField = new FXLocalDateField();
+    private final DatePicker dateField = new DatePicker();
     
     public FXCoordinateBar(FXMap map) {
         this.map = map;
@@ -211,7 +211,7 @@ public class FXCoordinateBar extends GridPane {
      * TODO change this, we should be able to control multiple crs axis at the same time.
      * @return temporal axis crs viewer
      */
-    public FXLocalDateField getDateField() {
+    public DatePicker getDateField() {
         return dateField;
     }
     
