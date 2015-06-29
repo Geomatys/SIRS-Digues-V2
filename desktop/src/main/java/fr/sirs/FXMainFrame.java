@@ -161,8 +161,10 @@ public class FXMainFrame extends BorderPane {
         final ObservableList<AlertItem> alerts = AlertManager.getInstance().getAlerts();
         uiAlertsBtn.setOnMouseClicked(event -> showAlertsPopup());
         uiAlertsBtn.setGraphic(new ImageView(ICON_ALERT));
-        alerts.addListener((ListChangeListener<AlertItem>) c -> uiAlertsBtn.setText(alerts.size() +" alerte(s)"));
-        uiAlertsBtn.setText(alerts.size() +" alerte(s)");
+        alerts.addListener((ListChangeListener<AlertItem>) c -> uiAlertsBtn.setText(alerts.size() + " alerte(s)"));
+        uiAlertsBtn.setText(alerts.size() + " alerte(s)");
+        uiAlertsBtn.managedProperty().bind(uiAlertsBtn.visibleProperty());
+        uiAlertsBtn.setVisible(AlertManager.getInstance().isAlertsEnabled());
 
         SIRS.LOGGER.log(Level.FINE, org.apache.sis.setup.About.configuration().toString());
     }

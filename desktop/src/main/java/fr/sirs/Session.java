@@ -436,16 +436,17 @@ public class Session extends SessionCore {
     }
 
     /**
-     * Ajoute les alertes fournies à la pile d'alertes à afficher.
+     * Ajoute les alertes fournies à la pile d'alertes à afficher, et actives l'affichage du panneau.
      *
      * @param alerts Liste des alertes à afficher.
      */
     public void addAlerts(final List<AlertItem> alerts) {
+        final AlertManager manager = AlertManager.getInstance();
+        manager.setAlertsEnabled(true);
         if (alerts == null || alerts.isEmpty()) {
             return;
         }
 
-        final AlertManager manager = AlertManager.getInstance();
         for (final AlertItem alert : alerts) {
             manager.getAlerts().add(alert);
         }

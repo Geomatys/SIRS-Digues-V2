@@ -91,8 +91,8 @@ public class PluginReglementary extends Plugin {
                     alerts.add(new AlertItem(sb.toString(), obl.getDateEcheance()));
                 }
             }
-
-            Injector.getSession().addAlerts(alerts);
         }
+
+        Injector.getSession().addAlerts(alerts);
     }
 }
