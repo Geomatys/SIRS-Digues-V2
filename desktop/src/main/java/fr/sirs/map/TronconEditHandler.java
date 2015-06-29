@@ -116,7 +116,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
             
             if (newValue != null && !TronconUtils.getPositionableList(newValue).isEmpty()) {
                 final Alert alert = new Alert(Alert.AlertType.WARNING,
-                        "Attention, ce tronçon contient des structures. Toute modification du tracé risque de changer leur position.", ButtonType.CANCEL, ButtonType.OK);
+                        "Attention, ce tronçon contient des données. Toute modification du tracé risque de changer leur position.", ButtonType.CANCEL, ButtonType.OK);
                 alert.setResizable(true);
                 final Optional<ButtonType> result = alert.showAndWait();
                 if (result.isPresent() && ButtonType.OK.equals(result.get())) {

@@ -4,6 +4,7 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.PojoTable;
 import java.io.File;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
@@ -32,11 +33,12 @@ public class FXDisorderPrintFrame extends BorderPane {
     
     @FXML 
     private void print(){
+        
+        final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll().subList(0, 10);
+        
         new Thread(() -> {
-            final Desordre desordre = Injector.getSession().getRepositoryForClass(Desordre.class).getOne();
-
             try {
-                Injector.getSession().getPrintManager().printDesordre(desordre);
+                Injector.getSession().getPrintManager().printDesordres(desordres);
             } catch (Exception ex) {
                 Logger.getLogger(FXDisorderPrintFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -46,7 +48,7 @@ public class FXDisorderPrintFrame extends BorderPane {
     private class TronconChoicePojoTable extends PojoTable {
 
         public TronconChoicePojoTable() {
-            super(TronconDigue.class, "Troncons");
+            super(TronconDigue.class, "Tronçons");
             uiTable.getColumns().remove(editCol);
             editableProperty.set(false);
         }

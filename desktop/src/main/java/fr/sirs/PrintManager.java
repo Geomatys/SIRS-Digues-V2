@@ -115,7 +115,7 @@ public class PrintManager {
         }
     }
     
-    public final void printDesordre(final Desordre desordre) {
+    public final void printDesordres(final List<Desordre> desordres) {
         
         
             final List avoidFields = new ArrayList<>();
@@ -151,7 +151,7 @@ public class PrintManager {
             avoidFields.add(PHOTOS_OBSERVATION_REFERENCE);
             
         try{  
-            final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll().subList(0, 10);
+//            final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll().subList(0, 10);
             final File fileToPrint = PrinterUtilities.printDisorders(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), desordres);
 //            if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception ex) {
