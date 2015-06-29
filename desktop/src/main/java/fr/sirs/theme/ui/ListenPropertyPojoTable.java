@@ -106,7 +106,7 @@ public class ListenPropertyPojoTable<T> extends PojoTable {
                 if (Worker.State.SUCCEEDED.equals(newValue)) {
                     Platform.runLater(() -> {
                         uiTable.setItems(filteredValues);
-                        for(final Element element : uiTable.getItems()){
+                        for(final Element element : filteredValues){
                             addListener(element);
                         }
                         uiSearch.setGraphic(searchNone);

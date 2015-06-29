@@ -85,6 +85,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
@@ -166,7 +167,6 @@ public class PojoTable extends BorderPane {
         AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD, 
         LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD, 
         DATE_MAJ_FIELD, COMMENTAIRE_FIELD};
-    private static final String[] COLUMNS_TO_PRIORIZE = new String[] {DESIGNATION_FIELD, PR_DEBUT_FIELD, PR_FIN_FIELD};
     
     protected final Class pojoClass;
     protected final AbstractSIRSRepository repo;
@@ -825,9 +825,11 @@ public class PojoTable extends BorderPane {
         tableUpdater = new TaskManager.MockTask("Recherche...", (Runnable)() -> {
 
             allValues = producer.get();
-            if (allValues == null || allValues.isEmpty()) {
+            if(allValues==null){
+                allValues = FXCollections.observableArrayList();
+            }
+            if (allValues.isEmpty()) {
                 Platform.runLater(() -> {
-                    uiTable.setItems(allValues);
                     uiSearch.setGraphic(searchNone);
                 });
             }
@@ -866,13 +868,12 @@ public class PojoTable extends BorderPane {
                 
                 final Predicate<Element> filterPredicate;
                 if (firstFilter == null) {
-                    filterPredicate = element -> result.contains(element.getId());
+                    filterPredicate = element -> element==null || result.contains(element.getId());
                 } else if (str == null || str.isEmpty()) {
-                    filterPredicate = element -> firstFilter.evaluate(element);
+                    filterPredicate = element -> element==null || firstFilter.evaluate(element);
                 } else {
-                    filterPredicate = element -> result.contains(element.getId()) && firstFilter.evaluate(element);
+                    filterPredicate = element -> element==null || result.contains(element.getId()) && firstFilter.evaluate(element);
                 }
-                
                 filteredValues = allValues.filtered(filterPredicate);
             }
         });
@@ -884,9 +885,7 @@ public class PojoTable extends BorderPane {
                     Platform.runLater(() -> {
                         //we set the list to null, otherwise if we have 2 lists of size 0, equal method is true and we won't have any event.
                         if(filteredValues.isEmpty()){
-                            final ObservableList l = FXCollections.observableArrayList();
-                            l.add(null);
-                            uiTable.setItems(l);
+                            addEmptyRow();
                         }else{
                             uiTable.setItems(filteredValues);
                         }
@@ -1031,8 +1030,9 @@ public class PojoTable extends BorderPane {
             else if(ownerElementProperty.get() != null){
                 ownerElementProperty.get().addChild(newlyCreated);
             }
-            
-            uiTable.getItems().add(newlyCreated);
+
+            removeEmptyRow();
+            filteredValues.add(newlyCreated);
         } else {
             final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
             alert.setResizable(true);
@@ -1040,7 +1040,17 @@ public class PojoTable extends BorderPane {
         }
         return (Element) result;
     }
-        
+
+    private void addEmptyRow(){
+        final ObservableList lst = FXCollections.observableArrayList();
+        lst.add(null);
+        uiTable.setItems(lst);
+    }
+
+    private void removeEmptyRow(){
+        uiTable.setItems(filteredValues);
+    }
+
     public static void editElement(Object pojo) {
         try {
             Injector.getSession().showEditionTab(pojo);
@@ -1468,7 +1478,8 @@ public class PojoTable extends BorderPane {
                     alert.setResizable(true);
                     alert.showAndWait();
                 } else {
-                    uiTable.getItems().add((Element) result);
+                    removeEmptyRow();
+                    filteredValues.add((Element) result);
                 }
             } else {
                 final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
