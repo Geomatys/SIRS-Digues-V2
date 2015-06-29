@@ -941,6 +941,11 @@ public class PojoTable extends BorderPane {
                 items.remove(pojo);
             }
         }
+
+        if(items.isEmpty()){
+            addEmptyRow();
+        }
+
     }
     
     // Default deletor
@@ -1041,13 +1046,13 @@ public class PojoTable extends BorderPane {
         return (Element) result;
     }
 
-    private void addEmptyRow(){
+    protected void addEmptyRow(){
         final ObservableList lst = FXCollections.observableArrayList();
         lst.add(null);
         uiTable.setItems(lst);
     }
 
-    private void removeEmptyRow(){
+    protected void removeEmptyRow(){
         uiTable.setItems(filteredValues);
     }
 
