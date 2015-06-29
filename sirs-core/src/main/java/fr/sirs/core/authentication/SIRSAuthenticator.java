@@ -12,6 +12,7 @@ import java.net.InetAddress;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
@@ -38,23 +39,38 @@ public class SIRSAuthenticator extends Authenticator {
      * Keep reference of checked entries, because if login information is wrong, 
      * we'll know it and will prompt user.
      */
-    private final WeakHashMap<URL, Entry> checkedEntries = new WeakHashMap<>();
+    private final HashMap<String, Entry> checkedEntries = new HashMap<>();
     
     @Override
     protected synchronized PasswordAuthentication getPasswordAuthentication() {
-        AuthenticationWallet.Entry entry = wallet == null? null : wallet.get(getRequestingURL());
+        // First, we retrieve target service information and check its integrity.
+        String host = getRequestingHost();
+        int port = getRequestingPort();
+        final URL url = getRequestingURL();
+        if (host == null || host.isEmpty()) {
+            if (url == null)
+                throw new IllegalStateException("Neither host nor valid URL has been provided for authentication check");
+            else 
+                host = url.getHost();
+        }
+        
+        if (port < 0 && url != null) {
+            port = (url.getPort() < 0)? url.getDefaultPort() : url.getPort();
+        }
+        
+        AuthenticationWallet.Entry entry = wallet == null? null : wallet.get(host, port);
         // We've got login from wallet, and it has not been rejected yet.
-        if (entry != null && checkedEntries.get(entry.serviceAddress) == null) {
+        if (entry != null && checkedEntries.get(entry.host) == null) {
             return new PasswordAuthentication(entry.login, entry.password.toCharArray());
         
         // New or invalid entry case.
         } else {
-            Map.Entry<String, String> askForLogin = askForLogin(null, null);
+            Map.Entry<String, String> askForLogin = askForLogin(entry == null? null : entry.login, entry == null? null : entry.password);
             if (askForLogin == null || askForLogin.getKey() == null) {
                 return null;
             } else {
-                entry = new AuthenticationWallet.Entry(getRequestingURL(), askForLogin.getKey(), askForLogin.getValue());
-                checkedEntries.put(entry.serviceAddress, entry);
+                entry = new AuthenticationWallet.Entry(host, port, askForLogin.getKey(), askForLogin.getValue());
+                checkedEntries.put(AuthenticationWallet.toServiceId(host, port), entry);
                 if (wallet != null) {
                     wallet.put(entry);
                 }

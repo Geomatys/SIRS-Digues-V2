@@ -17,7 +17,6 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
@@ -34,7 +33,7 @@ public class AuthenticationWallet {
     
     private final Path walletPath = SirsCore.CONFIGURATION_PATH.resolve("authWallet.json");
         
-    private final ObservableMap<URL, Entry> wallet = FXCollections.observableMap(new HashMap<URL, Entry>());
+    private final ObservableMap<String, Entry> wallet = FXCollections.observableMap(new HashMap<String, Entry>());
     private final ReentrantReadWriteLock walletLock = new ReentrantReadWriteLock();
     
     private AuthenticationWallet() throws IOException {
@@ -49,7 +48,7 @@ public class AuthenticationWallet {
                     Iterator<JsonNode> iterator = root.iterator();
                     while(iterator.hasNext()) {
                         Entry entry = reader.readValue(iterator.next());
-                        wallet.put(entry.serviceAddress, entry);
+                        wallet.put(toServiceId(entry), entry);
                     }
                 }
             }
@@ -61,7 +60,7 @@ public class AuthenticationWallet {
          * When cached wallet is modified, we update wallet on file system. We can
          * use only a read lock here, because file is only read at initialization.
          */
-        wallet.addListener((MapChangeListener.Change<? extends URL, ? extends Entry> change) -> {
+        wallet.addListener((MapChangeListener.Change<? extends String, ? extends Entry> change) -> {
             walletLock.readLock().lock();
             try (final OutputStream walletStream = Files.newOutputStream(walletPath, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
                 new ObjectMapper().writeValue(walletStream, wallet.values());
@@ -76,7 +75,16 @@ public class AuthenticationWallet {
     public Entry get(final URL service) {
         walletLock.readLock().lock();
         try {
-            return wallet.get(service);
+            return wallet.get(toServiceId(service));
+        } finally {
+            walletLock.readLock().unlock();
+        }
+    }
+    
+    public Entry get(final String host, final int port) {
+        walletLock.readLock().lock();
+        try {
+            return wallet.get(toServiceId(host, port));
         } finally {
             walletLock.readLock().unlock();
         }
@@ -87,14 +95,14 @@ public class AuthenticationWallet {
         walletLock.readLock().lock();
         final Entry existing;
         try {
-            existing = wallet.get(authenticationInfo.serviceAddress);
+            existing = wallet.get(toServiceId(authenticationInfo));
         } finally {
             walletLock.readLock().unlock();
         }
         if (existing == null || !existing.equals(authenticationInfo)) {
             walletLock.writeLock().lock();
             try {
-                wallet.put(authenticationInfo.serviceAddress, authenticationInfo);
+                wallet.put(authenticationInfo.host, authenticationInfo);
             } finally {
                 walletLock.writeLock().unlock();
             }
@@ -104,16 +112,16 @@ public class AuthenticationWallet {
     public void remove(final Entry entry) {
         walletLock.writeLock().lock();
         try {
-            wallet.remove(entry.serviceAddress, entry);
+            wallet.remove(entry.host, entry);
         } finally {
             walletLock.writeLock().unlock();
         }
     }
     
-    public void removeForAddress(final InetAddress service) {
+    public void removeForAddress(final URL service) {
         walletLock.writeLock().lock();
         try {
-            wallet.remove(service);
+            wallet.remove(toServiceId(service));
         } finally {
             walletLock.writeLock().unlock();
         }
@@ -139,22 +147,48 @@ public class AuthenticationWallet {
         return INSTANCE;
     }
     
+    public static String toServiceId(final URL url) {
+        int port = url.getPort();
+        if (url.getPort() < 0)
+            port = url.getDefaultPort(); // If even default port is -1, we let it as is, no need to return a wrong entry.
+        return url.getHost()+":"+port;
+    }
+    
+    public static String toServiceId(final String host, final int port) {
+        return host+":"+port;
+    }
+    
+    public static String toServiceId(final Entry entry) {
+        return entry.host+":"+entry.port;
+    }
+    
     public static class Entry {
-        public URL serviceAddress;
+        public String host;
+        public int port;
         public String login;
         public String password;
         
         public Entry(){};
         
+        public Entry(final String host, final int port, final String login, final String password) {
+            this.host = host;
+            this.port = port;
+            this.login = login;
+            this.password = password;
+        }
+        
         public Entry(final URL service, final String login, final String password) {
-            serviceAddress = service;
+            host = service.getHost();
+            port = service.getPort();
+            if (port < 0)
+                port = service.getDefaultPort(); // If even default port is -1, we let it as is, no need to return a wrong entry.
             this.login = login;
             this.password = password;
         }
 
         @Override
         public int hashCode() {
-            return 7 * Objects.hashCode(this.serviceAddress) + Objects.hashCode(this.login);
+            return 31 * (31 * Objects.hashCode(this.host) + port) + Objects.hashCode(this.login);
         }
 
         @Override
@@ -164,7 +198,9 @@ public class AuthenticationWallet {
             if (getClass() != obj.getClass())
                 return false;
             final Entry other = (Entry) obj;
-            if (!Objects.equals(this.serviceAddress, other.serviceAddress))
+            if (!Objects.equals(this.host, other.host))
+                return false;
+            if (this.port != other.port) 
                 return false;
             if (!Objects.equals(this.login, other.login))
                 return false;

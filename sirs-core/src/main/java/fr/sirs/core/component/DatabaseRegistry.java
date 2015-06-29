@@ -23,6 +23,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
 import fr.sirs.core.SirsDBInfo;
+import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.util.property.SirsPreferences;
 import java.util.regex.Matcher;
@@ -32,16 +33,13 @@ import org.ektorp.http.RestTemplate;
 import org.geotoolkit.util.FileUtilities;
 
 import static fr.sirs.util.property.SirsPreferences.PROPERTIES.*;
-import java.net.Proxy;
 import java.net.ProxySelector;
-import java.net.URISyntaxException;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
@@ -50,6 +48,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.ReplicationStatus;
 import org.ektorp.ReplicationTask;
@@ -213,29 +214,22 @@ public class DatabaseRegistry {
      * @throws IllegalArgumentExeption If login information is null.
      */
     private void connect() throws IOException {
-        final Proxy proxy;
-        try {
-            List<Proxy> select = ProxySelector.getDefault().select(couchDbUrl.toURI());
-            if (select != null && !select.isEmpty()) {
-                proxy = select.get(0);
-            } else {
-                proxy = Proxy.NO_PROXY;
-            }
-        } catch (URISyntaxException ex) {
-            throw new IOException(ex);
+        /*
+         * First, we will open a connection with a java.net url to initialize authentication.
+         */
+        couchDbUrl.openConnection().connect();
+        AuthenticationWallet.Entry authEntry = AuthenticationWallet.getDefault().get(couchDbUrl);
+        if (authEntry != null) {
+            username = authEntry.login;
+            userPass = authEntry.password;
         }
-        StdHttpClient.Builder builder = new StdHttpClient.Builder()
+        
+        final StdHttpClient.Builder builder = new SirsClientBuilder()
                 .url(couchDbUrl)
                 .connectionTimeout(CONNECTION_TIMEOUT)
                 .socketTimeout(SOCKET_TIMEOUT)
                 .relaxedSSLSettings(true);
-        if (!Proxy.NO_PROXY.equals(proxy)) {
-            final String[] proxyPart = proxy.address().toString().split(":");
-            if (proxyPart.length == 2) {
-                builder.proxy(proxyPart[0]);
-                builder.proxy(proxyPart[1]);
-            }
-        }
+        
         final boolean userGiven = (username != null && !username.isEmpty());
         if (userGiven) {
             builder.username(username);
@@ -243,6 +237,7 @@ public class DatabaseRegistry {
                 builder.password(userPass);
             }
         }
+                
         couchDbInstance = new StdCouchDbInstance(builder.build());
         try {
             couchDbInstance.getAllDatabases();
@@ -860,6 +855,23 @@ public class DatabaseRegistry {
             couchDbInstance.getConfiguration(CORS_SECTION, METHODS_OPTIONS);
         } catch (Exception e) {
             couchDbInstance.setConfiguration(CORS_SECTION, METHODS_OPTIONS, "GET, POST, PUT, DELETE");
+        }
+    }
+    
+    
+    private static class SirsClientBuilder extends StdHttpClient.Builder {
+
+        @Override
+        public HttpClient configureClient() {
+            // TODO : build our own non-deprecated http client. See https://hc.apache.org/httpcomponents-client-ga/tutorial/html/connmgmt.html
+            HttpClient client = super.configureClient();
+            if (client instanceof DefaultHttpClient) {
+                final DefaultHttpClient tmpClient = (DefaultHttpClient) client;
+                tmpClient.setRoutePlanner(new SystemDefaultRoutePlanner(ProxySelector.getDefault()));
+            } else {
+                throw new IllegalArgumentException("Cannot configure http connection parameters.");
+            }
+            return client;
         }
     }
 }
