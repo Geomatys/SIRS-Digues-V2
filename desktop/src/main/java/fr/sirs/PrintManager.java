@@ -3,6 +3,16 @@ package fr.sirs;
 import static fr.sirs.SIRS.BORNE_IDS_REFERENCE;
 import static fr.sirs.SIRS.COUCH_DB_DOCUMENT_FIELD;
 import static fr.sirs.SIRS.DOCUMENT_ID_FIELD;
+import static fr.sirs.SIRS.DesordreFields.ECHELLE_LIMINIMETRIQUE_REFERENCE;
+import static fr.sirs.SIRS.DesordreFields.OBSERVATIONS_REFERENCE;
+import static fr.sirs.SIRS.DesordreFields.OUVRAGE_HYDRAULIQUE_REFERENCE;
+import static fr.sirs.SIRS.DesordreFields.OUVRAGE_PARTICULIER_REFERENCE;
+import static fr.sirs.SIRS.DesordreFields.OUVRAGE_TELECOM_ENERGIE_REFERENCE;
+import static fr.sirs.SIRS.DesordreFields.OUVRAGE_VOIRIE_REFERENCE;
+import static fr.sirs.SIRS.DesordreFields.RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE;
+import static fr.sirs.SIRS.DesordreFields.RESEAU_HYDRAULIQUE_FERME_REFERENCE;
+import static fr.sirs.SIRS.DesordreFields.RESEAU_TELECOM_ENERGIE_REFERENCE;
+import static fr.sirs.SIRS.DesordreFields.VOIE_DIGUE_REFERENCE;
 import static fr.sirs.SIRS.FOREIGN_PARENT_ID_FIELD;
 import static fr.sirs.SIRS.GEOMETRY_FIELD;
 import static fr.sirs.SIRS.ID_FIELD;
@@ -118,6 +128,17 @@ public class PrintManager {
             avoidFields.add(POSITION_FIN_FIELD);
             avoidFields.add(PARENT_FIELD);
             avoidFields.add(COUCH_DB_DOCUMENT_FIELD);
+            avoidFields.add(OBSERVATIONS_REFERENCE);
+            
+            avoidFields.add(ECHELLE_LIMINIMETRIQUE_REFERENCE);
+            avoidFields.add(OUVRAGE_PARTICULIER_REFERENCE);
+            avoidFields.add(RESEAU_TELECOM_ENERGIE_REFERENCE);
+            avoidFields.add(OUVRAGE_TELECOM_ENERGIE_REFERENCE);
+            avoidFields.add(OUVRAGE_HYDRAULIQUE_REFERENCE);
+            avoidFields.add(RESEAU_HYDRAULIQUE_FERME_REFERENCE);
+            avoidFields.add(RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE);
+            avoidFields.add(OUVRAGE_VOIRIE_REFERENCE);
+            avoidFields.add(VOIE_DIGUE_REFERENCE);
             
         try{  
             final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll().subList(0, 10);

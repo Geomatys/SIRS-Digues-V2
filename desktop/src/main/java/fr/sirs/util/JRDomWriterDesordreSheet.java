@@ -238,7 +238,6 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     
     private void writeSubDataset(final Class<? extends fr.sirs.core.model.Element> elementClass, final List<String> avoidFields){
         
-        
         final Method[] methods = elementClass.getMethods();
         for (final Method method : methods){
             if(PrinterUtilities.isSetter(method)){
@@ -248,7 +247,6 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
                 }
             }
         }
-        
     }
         
     /**
@@ -408,16 +406,29 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         datasetRun.appendChild(datasourceExpression);
         
         table.appendChild(datasetRun);
-        final int columnWidth = (PAGE_WIDTH - 40);///Observation.class.getMethods().length;
+        
+        int nbColumns=1;
+        // Premier parcours pour calculer le nombre de colonnes
         for(final Method method : Observation.class.getMethods()){
             
             if(PrinterUtilities.isSetter(method)){
                 
                 // Retrives the field name from the setter name.----------------
                 final String fieldName = getFieldNameFromSetter(method);
-                final Class fieldClass = method.getParameterTypes()[0];
-                if(("id".equals(fieldName) || "designation".equals(fieldName)) 
-                        && (avoidFields==null || !avoidFields.contains(fieldName)))
+                if(avoidFields==null || !avoidFields.contains(fieldName))
+                    nbColumns++;
+            }
+        }
+        
+        final int columnWidth = (PAGE_WIDTH - 40)/nbColumns;
+        for(final Method method : Observation.class.getMethods()){
+            
+            if(PrinterUtilities.isSetter(method)){
+                
+                // Retrives the field name from the setter name.----------------
+                final String fieldName = getFieldNameFromSetter(method);
+//                final Class fieldClass = method.getParameterTypes()[0];
+                if(avoidFields==null || !avoidFields.contains(fieldName))
                     writeColumn(method, table, columnWidth);
             }
         }

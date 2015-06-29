@@ -50,8 +50,24 @@ public class ForeignParentPojoTable<T extends AvecForeignParent> extends PojoTab
     
     @Override
     protected T createPojo() {
-        final T created = (T) super.createPojo();
-        created.setForeignParentId(getForeignParentId());
+        T created = null;
+        if (repo != null) {
+            created = (T) repo.create();
+        } 
+        else if (pojoClass != null) {
+            try {
+                created = (T) session.getElementCreator().createElement(pojoClass);
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if(created!=null){
+            created.setForeignParentId(getForeignParentId());
+            repo.add(created);
+            uiTable.getItems().add(created);
+        }
         return created;
     }
 }

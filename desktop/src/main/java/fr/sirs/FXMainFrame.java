@@ -438,8 +438,8 @@ public class FXMainFrame extends BorderPane {
         t.start();
     }
     
-    @FXML private void disorderPrint(){
-        System.out.println("IMPRESSION DES FICHES DE DÉSORDRES !");
+    @FXML 
+    private void disorderPrint(){
         final Stage disorderPrintStage = new Stage();
         disorderPrintStage.setScene(new Scene(new FXDisorderPrintFrame()));
         disorderPrintStage.show();

@@ -1,22 +1,16 @@
 package fr.sirs.util;
 
-import fr.sirs.core.component.DatabaseRegistry;
-import fr.sirs.core.component.DesordreRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
-import java.awt.Desktop;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.util.StringConverter;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JREmptyDataSource;
@@ -26,13 +20,11 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
-import org.ektorp.CouchDbConnector;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.display2d.service.OutputDef;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.report.FeatureCollectionDataSource;
 import org.geotoolkit.report.JasperReportService;
-import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * <p>This class provides utilities for two purposes:</p>
