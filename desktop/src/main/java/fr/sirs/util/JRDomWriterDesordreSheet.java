@@ -407,7 +407,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         
         table.appendChild(datasetRun);
         
-        int nbColumns=1;
+        int nbColumns=0;
         // Premier parcours pour calculer le nombre de colonnes
         for(final Method method : Observation.class.getMethods()){
             
@@ -420,7 +420,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
             }
         }
         
-        final int columnWidth = (PAGE_WIDTH - 40)/nbColumns;
+        final int columnWidth = (PAGE_WIDTH - (LEFT_MARGIN+LEFT_MARGIN))/nbColumns;
         for(final Method method : Observation.class.getMethods()){
             
             if(PrinterUtilities.isSetter(method)){
@@ -481,7 +481,8 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
                 staticText.appendChild(staticTextReportElement);
 
                 final Element text = document.createElementNS(URI_JRXML, TAG_TEXT);
-                final CDATASection labelField = document.createCDATASection(getFieldNameFromSetter(setter));
+                final ResourceBundle rb = ResourceBundle.getBundle(Observation.class.getName());
+                final CDATASection labelField = document.createCDATASection(rb.getString(getFieldNameFromSetter(setter)));
                 text.appendChild(labelField);
 
             staticText.appendChild(text);

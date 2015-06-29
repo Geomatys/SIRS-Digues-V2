@@ -196,7 +196,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
                 @Override
                 public ObservableValue<String> call(TableColumn.CellDataFeatures<Element, String> param) {
                     final ContactOrganisme co = (ContactOrganisme) param.getValue();
-                    if(co.getParent()!=null) return new SimpleStringProperty(co.getParent().getId());
+                    if(co!=null && co.getParent()!=null) return new SimpleStringProperty(co.getParent().getId());
                     return null;
                 }
             });

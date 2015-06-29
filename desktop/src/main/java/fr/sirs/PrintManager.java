@@ -1,7 +1,9 @@
 package fr.sirs;
 
+import static fr.sirs.SIRS.AUTHOR_FIELD;
 import static fr.sirs.SIRS.BORNE_IDS_REFERENCE;
 import static fr.sirs.SIRS.COUCH_DB_DOCUMENT_FIELD;
+import static fr.sirs.SIRS.DATE_MAJ_FIELD;
 import static fr.sirs.SIRS.DOCUMENT_ID_FIELD;
 import static fr.sirs.SIRS.DesordreFields.ECHELLE_LIMINIMETRIQUE_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.OBSERVATIONS_REFERENCE;
@@ -9,6 +11,7 @@ import static fr.sirs.SIRS.DesordreFields.OUVRAGE_HYDRAULIQUE_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.OUVRAGE_PARTICULIER_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.OUVRAGE_TELECOM_ENERGIE_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.OUVRAGE_VOIRIE_REFERENCE;
+import static fr.sirs.SIRS.DesordreFields.PHOTOS_OBSERVATION_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.RESEAU_HYDRAULIQUE_FERME_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.RESEAU_TELECOM_ENERGIE_REFERENCE;
@@ -24,6 +27,7 @@ import static fr.sirs.SIRS.PARENT_FIELD;
 import static fr.sirs.SIRS.POSITION_DEBUT_FIELD;
 import static fr.sirs.SIRS.POSITION_FIN_FIELD;
 import static fr.sirs.SIRS.REVISION_FIELD;
+import static fr.sirs.SIRS.VALID_FIELD;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
@@ -139,6 +143,12 @@ public class PrintManager {
             avoidFields.add(RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE);
             avoidFields.add(OUVRAGE_VOIRIE_REFERENCE);
             avoidFields.add(VOIE_DIGUE_REFERENCE);
+            
+            avoidFields.add(VALID_FIELD);
+            avoidFields.add(AUTHOR_FIELD);
+            avoidFields.add(DATE_MAJ_FIELD);
+            
+            avoidFields.add(PHOTOS_OBSERVATION_REFERENCE);
             
         try{  
             final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll().subList(0, 10);
