@@ -33,6 +33,7 @@ import org.ektorp.http.RestTemplate;
 import org.geotoolkit.util.FileUtilities;
 
 import static fr.sirs.util.property.SirsPreferences.PROPERTIES.*;
+import java.io.InputStream;
 import java.net.ProxySelector;
 import java.util.AbstractMap;
 import java.util.HashMap;
@@ -50,6 +51,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.ReplicationStatus;
@@ -66,6 +68,9 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public class DatabaseRegistry {
 
+    /** Administrator list section */
+    private static final String ADMIN_SECTION = "admins";
+    
     // Httpd related configurations
     private static final String HTTPD_SECTION = "httpd";
     private static final String SOCKET_OPTION = "socket_options";
@@ -159,15 +164,35 @@ public class DatabaseRegistry {
                     userPass = split[1];
                 }
             }
+            
+            AuthenticationWallet.Entry entry = AuthenticationWallet.getDefault().get(couchDbUrl);
+            if (entry != null && entry.login != null) {
+                username = entry.login;
+                userPass = entry.password;
+            }
+            
+            // TODO : remove login info from preferences.
             // In case authority is not embedded in url. If we're on local connection, login should be written in preferences.
-            if (username == null || username.isEmpty() && isLocal) {
+            if ((username == null || username.isEmpty()) && isLocal) {
                 username = SirsPreferences.INSTANCE.getPropertySafe(DEFAULT_LOCAL_USER);
                 userPass = SirsPreferences.INSTANCE.getPropertySafe(DEFAULT_LOCAL_PASS);
+                AuthenticationWallet.getDefault().put(new AuthenticationWallet.Entry(couchDbUrl, username, userPass));
+            }
+        }
+        
+        // Create default user if it does not exists.
+        if (username != null && username.equals(SirsPreferences.INSTANCE.getPropertySafe(DEFAULT_LOCAL_USER))) {
+            try {
+                createUserIfNotExists(couchDbUrl, username, userPass);
+            } catch (Exception e) {
+                // normal behavior if authentication is required.
+                SirsCore.LOGGER.log(Level.FINE, "User check / creation failed.", e);
             }
         }
         
         connect();
         
+        // last thing to do : we configure CouchDB wire related parameters.
         if (isLocal) {
             try {
                 setAuthenticationRequired();
@@ -217,53 +242,35 @@ public class DatabaseRegistry {
         /*
          * First, we will open a connection with a java.net url to initialize authentication.
          */
-        couchDbUrl.openConnection().connect();
-        AuthenticationWallet.Entry authEntry = AuthenticationWallet.getDefault().get(couchDbUrl);
-        if (authEntry != null) {
-            username = authEntry.login;
-            userPass = authEntry.password;
+        try (final InputStream stream = couchDbUrl.openStream()) {
+            AuthenticationWallet.Entry authEntry = AuthenticationWallet.getDefault().get(couchDbUrl);
+            if (authEntry != null) {
+                username = authEntry.login;
+                userPass = authEntry.password;
+            }
         }
         
+        // Configure http client
         final StdHttpClient.Builder builder = new SirsClientBuilder()
                 .url(couchDbUrl)
                 .connectionTimeout(CONNECTION_TIMEOUT)
                 .socketTimeout(SOCKET_TIMEOUT)
                 .relaxedSSLSettings(true);
         
-        final boolean userGiven = (username != null && !username.isEmpty());
-        if (userGiven) {
-            builder.username(username);
-            if (userPass != null && !userPass.isEmpty()) {
-                builder.password(userPass);
-            }
-        }
-                
         couchDbInstance = new StdCouchDbInstance(builder.build());
         try {
             couchDbInstance.getAllDatabases();
         } catch (DbAccessException e) {
-            try {
-                if (userGiven) {
-                    createUser(couchDbUrl, username, userPass);
-                }
-                couchDbInstance.getAllDatabases();
-            } catch (DbAccessException | IllegalArgumentException ex) {
-                final Map.Entry<String, String> newLogin = askForLogin(username, userPass);
-                if (newLogin != null) {
-                    username = newLogin.getKey();
-                    userPass = newLogin.getValue();
-                    
-                    // Refresh connection.
-                    connect();
-                    if (isLocal) {
-                        final HashMap<SirsPreferences.PROPERTIES, String> login = new HashMap<>();
-                        login.put(DEFAULT_LOCAL_USER, newLogin.getKey());
-                        login.put(DEFAULT_LOCAL_PASS, newLogin.getValue());
-                        SirsPreferences.INSTANCE.store(login);
-                    }
-                } else {
-                    throw ex;
-                }
+            /*
+             * If we've got an access exception, login query and reconnection
+             * will be handled automatically by the following method.
+             */
+            handleAccessException(e);
+            if (isLocal) {
+                final HashMap<SirsPreferences.PROPERTIES, String> login = new HashMap<>();
+                login.put(DEFAULT_LOCAL_USER, username);
+                login.put(DEFAULT_LOCAL_PASS, userPass);
+                SirsPreferences.INSTANCE.store(login);
             }
         }
     }
@@ -348,45 +355,50 @@ public class DatabaseRegistry {
             dropDatabase(dbName);
         }
     }
-    
-//    /**
-//     * Creates a CouchDb user using login and password given in input URL.
-//     * 
-//     * @param urlWithBasicAuth URL to target database, embedding login as : 
-//     * http://$USER:$PASSWORD@$HOST:$PORT
-//     * @throws IOException If an error occurs while querying CouchDb
-//     */
-//    private static void createUser(final String urlWithBasicAuth) throws IOException {
-//        Matcher matcher = BASIC_AUTH.matcher(urlWithBasicAuth);
-//        if (!matcher.find()) {
-//            throw new IllegalArgumentException("Input URL does not contain valid basic authentication login : "+urlWithBasicAuth);
-//        }
-//        final String username = matcher.group(1);
-//        final String password = matcher.group(2);
-//        createUser(new URL(matcher.replaceFirst("")), username, password);
-//    }
-    
+        
     /**
-     * Try to create an user in the given database
+     * Try to create an user in the given database if he does not already exists.
+     * 
+     * Note: We use a direct HTTP call, without any credential. We cannot use provided
+     * login information, because if it describes a inexisting user, couchdb will 
+     * fail on authentication requests.
+     * 
+     * Note 2 : Although we test user existence, its password is not checked (because hash). 
+     * 
      * @param couchDbUrl URL to the CouchDB database on which to create user.
-     * @param username The login of the user to create.
-     * @param password The password of the user to create.
+     * @param username The login of the user to check/create.
+     * @param password The password to use if we have to create user.
      * @throws IOException If we have a problem while building PUT documents.
      */
-    private static void createUser(final URL couchDbUrl, final String username, final String password) throws IOException {
+    private static void createUserIfNotExists(final URL couchDbUrl, final String username, final String password) throws IOException {
         RestTemplate template = new RestTemplate(new StdHttpClient.Builder().url(couchDbUrl).build());
         String userContent = FileUtilities.getStringFromStream(DatabaseRegistry.class.getResourceAsStream("/fr/sirs/launcher/user-put.json"));
-        
-        // try to send user as database admin. If it's a fail, we will try to add him as simple user.
+
+        final String adminConfig = "/_config/admins/" + username;
         try {
-            template.put("/_config/admins/"+username, password == null? "" : "\""+password+"\"");
-        } catch (DbAccessException e) {
-            SirsCore.LOGGER.log(Level.WARNING, "Cannot create an admin.", e);
-            template.put("/_users/org.couchdb.user:" + username,
-                    userContent.replaceAll("\\$ID", username)
-                    .replaceAll("\\$PASSWORD", password == null ? "" : password));
+            template.getUncached(adminConfig);
+        } catch (Exception e) {
+            SirsCore.LOGGER.log(Level.FINE, "No administrator can be found for login " + username, e);
+            final String userConfig = "/_users/org.couchdb.user:" + username;
+            try {
+                template.getUncached(userConfig);
+            } catch (Exception e2) {
+                SirsCore.LOGGER.log(Level.FINE, "No user can be found for login " + username, e);
+                SirsCore.LOGGER.fine("Attempt to create administrator " + username);
+
+                // try to send user as database admin. If it's a fail, we will try to add him as simple user.
+                try {
+                    template.put(adminConfig, password == null ? "" : "\"" + password + "\"");
+                } catch (DbAccessException e3) {
+                    SirsCore.LOGGER.log(Level.FINE, "Cannot create administrator " + username, e);
+                    SirsCore.LOGGER.fine("Attempt to create simple user " + username);
+                    template.put(userConfig,
+                            userContent.replaceAll("\\$ID", username)
+                            .replaceAll("\\$PASSWORD", password == null ? "" : password));
+                }
+            }
         }
-    }    
+    }
     
     /**
      * Analyze input exception to determine if it's due to bad login. If true, we 
@@ -480,6 +492,21 @@ public class DatabaseRegistry {
                     } else {
                         return;
                     }
+                }
+            }
+            
+            // Force authentication on distant database
+            URL distantURL = toURL(distant);
+            if (distantURL.getUserInfo() == null) {
+                AuthenticationWallet.Entry entry = AuthenticationWallet.getDefault().get(distantURL);
+                if (entry != null && entry.login != null && !entry.login.isEmpty()) {
+                    final String userInfo;
+                    if (entry.password == null || entry.password.isEmpty()) {
+                        userInfo = entry.login + "@";
+                    } else {
+                        userInfo = entry.login+":"+entry.password+"@";
+                    }
+                    distant = distantURL.toExternalForm().replaceFirst("(^\\w+://)", "$1"+userInfo);
                 }
             }
             
@@ -868,6 +895,7 @@ public class DatabaseRegistry {
             if (client instanceof DefaultHttpClient) {
                 final DefaultHttpClient tmpClient = (DefaultHttpClient) client;
                 tmpClient.setRoutePlanner(new SystemDefaultRoutePlanner(ProxySelector.getDefault()));
+                tmpClient.setCredentialsProvider(new SystemDefaultCredentialsProvider());
             } else {
                 throw new IllegalArgumentException("Cannot configure http connection parameters.");
             }

@@ -8,14 +8,12 @@ package fr.sirs.core.authentication;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.authentication.AuthenticationWallet.Entry;
 import java.net.Authenticator;
-import java.net.InetAddress;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import javafx.application.Platform;
@@ -26,9 +24,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import sun.net.www.protocol.http.AuthCacheImpl;
+import sun.net.www.protocol.http.AuthCacheValue;
 
 /**
  * An authenticator which will prompt a JavaFX dialog to query password from user.
+ * 
  * @author Alexis Manin (Geomatys)
  */
 public class SIRSAuthenticator extends Authenticator {
@@ -38,6 +39,11 @@ public class SIRSAuthenticator extends Authenticator {
     /**
      * Keep reference of checked entries, because if login information is wrong, 
      * we'll know it and will prompt user.
+     */
+    private final HashMap<String, Entry> entriesToCheck = new HashMap<>();
+    
+    /**
+     * Contain entries which we were able to verify they're correct. 
      */
     private final HashMap<String, Entry> checkedEntries = new HashMap<>();
     
@@ -58,23 +64,34 @@ public class SIRSAuthenticator extends Authenticator {
             port = (url.getPort() < 0)? url.getDefaultPort() : url.getPort();
         }
         
+        String serviceId = AuthenticationWallet.toServiceId(host, port);
         AuthenticationWallet.Entry entry = wallet == null? null : wallet.get(host, port);
+        
+        /*
+         * HACK : Apache HttpClient (used by Ektorp) will call this method on
+         * each query, which means we cannot determine if it is performing a 
+         * fail&retry. As java.net methods give us the query URL, we can adopt 
+         * different behavior for thee two components.
+         */
+        final boolean fromApache = (getRequestingURL() == null);
+        
         // We've got login from wallet, and it has not been rejected yet.
-        if (entry != null && checkedEntries.get(entry.host) == null) {
-            return new PasswordAuthentication(entry.login, entry.password.toCharArray());
+        if (entry != null && (fromApache || entriesToCheck.get(serviceId) == null)) {if (fromApache)SirsCore.LOGGER.log(Level.FINE, "CREDENTIAL QUERY !");
+            if (!fromApache) entriesToCheck.put(serviceId, entry);
+            return new PasswordAuthentication(entry.login, (entry.password == null)? null : entry.password.toCharArray());
         
         // New or invalid entry case.
         } else {
-            Map.Entry<String, String> askForLogin = askForLogin(entry == null? null : entry.login, entry == null? null : entry.password);
-            if (askForLogin == null || askForLogin.getKey() == null) {
+            Map.Entry<String, String> login = askForLogin(entry == null? null : entry.login, entry == null? null : entry.password);
+            if (login == null || login.getKey() == null) {
                 return null;
             } else {
-                entry = new AuthenticationWallet.Entry(host, port, askForLogin.getKey(), askForLogin.getValue());
-                checkedEntries.put(AuthenticationWallet.toServiceId(host, port), entry);
+                entry = new AuthenticationWallet.Entry(host, port, login.getKey(), login.getValue());
+                entriesToCheck.put(serviceId, entry);
                 if (wallet != null) {
                     wallet.put(entry);
                 }
-                return new PasswordAuthentication(askForLogin.getKey(), askForLogin.getValue().toCharArray());
+                return new PasswordAuthentication(login.getKey(), login.getValue() == null? new char[0] : login.getValue().toCharArray());
             }
         }
     }
@@ -143,5 +160,5 @@ public class SIRSAuthenticator extends Authenticator {
             SirsCore.LOGGER.log(Level.WARNING, "Authentication prompt failed for service : "+ getRequestingSite().toString(), ex);
             return null;
         }
-    }    
+    }
 }

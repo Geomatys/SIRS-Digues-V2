@@ -1,5 +1,6 @@
 package fr.sirs.core.authentication;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -67,7 +68,7 @@ public class AuthenticationWallet {
             } catch (IOException e) {
                 SirsCore.LOGGER.log(Level.WARNING, "Password wallet cannot be updated !", e);
             } finally {
-                walletLock.readLock().lock();
+                walletLock.readLock().unlock();
             }
         });
     }
@@ -92,20 +93,15 @@ public class AuthenticationWallet {
     
     public void put(final Entry authenticationInfo) {
         // Check if it doesn't exist already, to avoid useless update.
-        walletLock.readLock().lock();
-        final Entry existing;
+        walletLock.writeLock().lock();
         try {
-            existing = wallet.get(toServiceId(authenticationInfo));
-        } finally {
-            walletLock.readLock().unlock();
-        }
-        if (existing == null || !existing.equals(authenticationInfo)) {
-            walletLock.writeLock().lock();
-            try {
-                wallet.put(authenticationInfo.host, authenticationInfo);
-            } finally {
-                walletLock.writeLock().unlock();
+            final String serviceId = toServiceId(authenticationInfo);
+            final Entry existing = wallet.get(serviceId);
+            if (existing == null || !existing.equals(authenticationInfo)) {
+                wallet.put(serviceId, authenticationInfo);
             }
+        } finally {
+            walletLock.writeLock().unlock();
         }
     }
     
@@ -162,6 +158,8 @@ public class AuthenticationWallet {
         return entry.host+":"+entry.port;
     }
     
+    
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Entry {
         public String host;
         public int port;

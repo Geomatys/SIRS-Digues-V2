@@ -10,9 +10,7 @@ import fr.sirs.core.authentication.SIRSAuthenticator;
 import fr.sirs.util.SystemProxySelector;
 import java.io.IOException;
 import java.net.Authenticator;
-import java.net.PasswordAuthentication;
 import java.net.ProxySelector;
-import java.util.Map;
 import java.util.Optional;
 
 import java.util.UUID;
@@ -39,7 +37,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.geotoolkit.internal.GeotkFX;
-import org.geotoolkit.security.ByThreadAuthenticator;
 
 /**
  * @author Johann Sorel (Geomatys)
@@ -115,7 +112,7 @@ public class Launcher extends Application {
                 primaryStage.setScene(new Scene(launcherPane));
                 splashStage.close();
                 primaryStage.show();
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 GeotkFX.newExceptionDialog("impossible de se connecter au serveur CouchDb local.", ex).showAndWait();
                 System.exit(1);
             }
