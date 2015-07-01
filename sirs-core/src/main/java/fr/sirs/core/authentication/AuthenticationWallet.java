@@ -4,15 +4,18 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fr.sirs.core.SirsCore;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Objects;
@@ -38,18 +41,20 @@ public class AuthenticationWallet {
     private final ReentrantReadWriteLock walletLock = new ReentrantReadWriteLock();
     
     private AuthenticationWallet() throws IOException {
-        Path walletPath = SirsCore.CONFIGURATION_PATH.resolve("authWallet.json");
         if (Files.isRegularFile(walletPath)) {
-            // TODO check if file is empty, because jackson explode on empty files.
-            try (final InputStream walletStream = Files.newInputStream(walletPath, StandardOpenOption.READ)) {
-                final ObjectMapper mapper = new ObjectMapper();
-                ObjectReader reader = mapper.reader(Entry.class);
-                JsonNode root = mapper.readTree(walletStream);
-                if (root.isArray()) {
-                    Iterator<JsonNode> iterator = root.iterator();
-                    while(iterator.hasNext()) {
-                        Entry entry = reader.readValue(iterator.next());
-                        wallet.put(toServiceId(entry), entry);
+            // check if file is empty, because jackson explode on empty files.
+            BasicFileAttributes pathAttr = Files.getFileAttributeView(walletPath, BasicFileAttributeView.class).readAttributes();
+            if (pathAttr.size() > 0) {
+                try (final InputStream walletStream = Files.newInputStream(walletPath, StandardOpenOption.READ)) {
+                    final ObjectMapper mapper = new ObjectMapper();
+                    ObjectReader reader = mapper.reader(Entry.class);
+                    JsonNode root = mapper.readTree(walletStream);
+                    if (root.isArray()) {
+                        Iterator<JsonNode> iterator = root.iterator();
+                        while (iterator.hasNext()) {
+                            Entry entry = reader.readValue(iterator.next());
+                            wallet.put(toServiceId(entry), entry);
+                        }
                     }
                 }
             }
@@ -164,6 +169,9 @@ public class AuthenticationWallet {
         public String host;
         public int port;
         public String login;
+        
+        //@JsonSerialize(using=PasswordSerialize.class)
+        //@JsonDeserialize(using=PasswordDeserializer.class)
         public String password;
         
         public Entry(){};
@@ -206,7 +214,5 @@ public class AuthenticationWallet {
                 return false;
             return true;
         }
-        
-        
     }
 }
