@@ -1,9 +1,10 @@
-package fr.sirs.theme.ui;
+package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.RappelObligationReglementaire;
+import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;

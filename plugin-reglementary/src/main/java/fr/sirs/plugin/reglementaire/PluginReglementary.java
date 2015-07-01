@@ -1,4 +1,4 @@
-package fr.sirs.plugins;
+package fr.sirs.plugin.reglementaire;
 
 import fr.sirs.Injector;
 import fr.sirs.Plugin;

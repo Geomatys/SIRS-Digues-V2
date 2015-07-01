@@ -1,4 +1,4 @@
-package fr.sirs.theme.ui;
+package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.ui.calendar.CalendarEvent;
 import javafx.embed.swing.SwingFXUtils;
@@ -60,7 +60,7 @@ public final class ObligationsCalendarPopupEvent extends Stage {
         mainBox.getChildren().add(buttonAlert);
 
         final Scene scene = new Scene(mainBox, 250, 100);
-        scene.getStylesheets().add("/fr/sirs/theme/ui/popup-calendar.css");
+        scene.getStylesheets().add("/fr/sirs/plugin/reglementaire/ui/popup-calendar.css");
         setScene(scene);
     }
 }

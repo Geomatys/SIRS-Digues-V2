@@ -1,8 +1,8 @@
-package fr.sirs.plugins;
+package fr.sirs.plugin.reglementaire;
 
 import fr.sirs.SIRS;
-import fr.sirs.theme.ui.ObligationsCalendarView;
-import fr.sirs.theme.ui.ObligationsPojoTable;
+import fr.sirs.plugin.reglementaire.ui.ObligationsCalendarView;
+import fr.sirs.plugin.reglementaire.ui.ObligationsPojoTable;
 import fr.sirs.ui.calendar.CalendarView;
 import fr.sirs.Injector;
 import fr.sirs.core.component.ObligationReglementaireRepository;

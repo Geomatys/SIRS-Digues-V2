@@ -1,4 +1,4 @@
-package fr.sirs.theme.ui;
+package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
@@ -6,7 +6,7 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
-import fr.sirs.plugins.DocumentsTheme;
+import fr.sirs.plugin.reglementaire.DocumentsTheme;
 import fr.sirs.ui.calendar.CalendarEvent;
 import fr.sirs.ui.calendar.CalendarView;
 import javafx.collections.FXCollections;
