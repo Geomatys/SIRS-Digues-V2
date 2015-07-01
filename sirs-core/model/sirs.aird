@@ -146,7 +146,7 @@
               <styles xmi:type="notation:FilteringStyle" xmi:id="_D25bw0feEeSoXJiONqf-1A"/>
             </children>
             <styles xmi:type="notation:ShapeStyle" xmi:id="_D240sUfeEeSoXJiONqf-1A" fontName="Lucida Grande" fontHeight="8"/>
-            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_D240skfeEeSoXJiONqf-1A" x="720" y="-880" width="212" height="302"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_D240skfeEeSoXJiONqf-1A" x="710" y="-880" width="222" height="302"/>
           </children>
           <children xmi:type="notation:Node" xmi:id="_e0tGAEfeEeSoXJiONqf-1A" type="2003" element="_e0PzAEfeEeSoXJiONqf-1A">
             <children xmi:type="notation:Node" xmi:id="_e0ttEEfeEeSoXJiONqf-1A" type="5007"/>
@@ -5590,7 +5590,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Un7hQEfkEeSoXJiONqf-1A" name="borne_debut_distance : EFloat = 0.0" tooltipText="">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Un7hQEfkEeSoXJiONqf-1A" name="borne_debut_distance : EDouble = 0.0" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Positionable/borne_debut_distance"/>
           <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Positionable/borne_debut_distance"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_YHYqsEfkEeSoXJiONqf-1A" labelAlignment="LEFT">
@@ -5634,7 +5634,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_aCyndUfkEeSoXJiONqf-1A" name="borne_fin_distance : EFloat = 0.0" tooltipText="">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_aCyndUfkEeSoXJiONqf-1A" name="borne_fin_distance : EDouble = 0.0" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Positionable/borne_fin_distance"/>
           <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Positionable/borne_fin_distance"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_aCyndkfkEeSoXJiONqf-1A" labelAlignment="LEFT">

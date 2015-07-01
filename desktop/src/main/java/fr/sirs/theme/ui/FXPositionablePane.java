@@ -15,7 +15,6 @@ import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
-import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.BorneDigue;
@@ -41,6 +40,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -60,6 +60,8 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -73,7 +75,6 @@ import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
-import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.LinearReferencing;
@@ -115,18 +116,18 @@ public class FXPositionablePane extends BorderPane {
     @FXML private ComboBox<BorneDigue> uiBorneEnd;
     @FXML private CheckBox uiAmontStart;
     @FXML private CheckBox uiAmontEnd;
-    @FXML private FXNumberSpinner uiDistanceStart;
-    @FXML private FXNumberSpinner uiDistanceEnd;
+    @FXML private Spinner<Double> uiDistanceStart;
+    @FXML private Spinner<Double> uiDistanceEnd;
     @FXML private ImageView uiImageStartValid;
     @FXML private ImageView uiImageEndValid;
     
     // Coordinate mode
     @FXML private GridPane uiCoordPane;
     @FXML private ComboBox<CoordinateReferenceSystem> uiCRSs;
-    @FXML private FXNumberSpinner uiLongitudeStart;
-    @FXML private FXNumberSpinner uiLongitudeEnd;
-    @FXML private FXNumberSpinner uiLatitudeStart;
-    @FXML private FXNumberSpinner uiLatitudeEnd;
+    @FXML private Spinner<Double> uiLongitudeStart;
+    @FXML private Spinner<Double> uiLongitudeEnd;
+    @FXML private Spinner<Double> uiLatitudeStart;
+    @FXML private Spinner<Double> uiLatitudeEnd;
     
     /** A flag to notify when a component update is running, used to lock graphic components */
     private final IntegerProperty computingRunning = new SimpleIntegerProperty(0);
@@ -188,6 +189,20 @@ public class FXPositionablePane extends BorderPane {
         uiDistanceStart.disableProperty().bind(disabledBinding);
         uiDistanceEnd.disableProperty().bind(disabledBinding);
         
+        uiDistanceStart.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
+        uiDistanceEnd.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
+        uiLongitudeStart.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
+        uiLatitudeStart.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
+        uiLongitudeEnd.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
+        uiLatitudeEnd.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
+        uiDistanceStart.setEditable(true);
+        uiDistanceEnd.setEditable(true);
+        uiLongitudeStart.setEditable(true);
+        uiLatitudeStart.setEditable(true);
+        uiLongitudeEnd.setEditable(true);
+        uiLatitudeEnd.setEditable(true);
+        
+        
         uiLongitudeStart.disableProperty().bind(disabledBinding);
         uiLatitudeStart.disableProperty().bind(disabledBinding);
         uiLongitudeEnd.disableProperty().bind(disabledBinding);
@@ -214,24 +229,36 @@ public class FXPositionablePane extends BorderPane {
         // compute back linear referencing when geographic point is changed
         
         //compute back geographic points when linear referencing changes.
-        final LinearChangeListener geoStartUpdater = new LinearChangeListener(uiBorneStart, uiLongitudeStart.valueProperty(), uiLatitudeStart.valueProperty(), prDebut, uiDistanceStart.valueProperty(), uiAmontStart.selectedProperty());
+        final LinearChangeListener geoStartUpdater = new LinearChangeListener(
+                uiBorneStart, uiLongitudeStart.getValueFactory().valueProperty(), 
+                uiLatitudeStart.getValueFactory().valueProperty(), prDebut, 
+                uiDistanceStart.getValueFactory().valueProperty(), uiAmontStart.selectedProperty());
         uiBorneStart.valueProperty().addListener(geoStartUpdater);
         uiBorneStart.focusedProperty().addListener(geoStartUpdater);
         uiAmontStart.selectedProperty().addListener(geoStartUpdater);
         uiDistanceStart.valueProperty().addListener(geoStartUpdater);
         
-        final LinearChangeListener geoEndUpdater = new LinearChangeListener(uiBorneEnd, uiLongitudeEnd.valueProperty(), uiLatitudeEnd.valueProperty(), prFin, uiDistanceEnd.valueProperty(), uiAmontEnd.selectedProperty());
+        final LinearChangeListener geoEndUpdater = new LinearChangeListener(
+                uiBorneEnd, uiLongitudeEnd.getValueFactory().valueProperty(), 
+                uiLatitudeEnd.getValueFactory().valueProperty(), prFin, 
+                uiDistanceEnd.getValueFactory().valueProperty(), uiAmontEnd.selectedProperty());
         uiBorneEnd.valueProperty().addListener(geoEndUpdater);
         uiBorneEnd.focusedProperty().addListener(geoEndUpdater);
         uiAmontEnd.selectedProperty().addListener(geoEndUpdater);
         uiDistanceEnd.valueProperty().addListener(geoEndUpdater);
         
         // Compute back linear referencing when geographic changes
-        final GeographicChangeListener linearStartUpdater = new GeographicChangeListener(uiBorneStart.valueProperty(), uiDistanceStart.valueProperty(), uiAmontStart.selectedProperty(), uiLongitudeStart.valueProperty(), uiLatitudeStart.valueProperty(), prDebut);
+        final GeographicChangeListener linearStartUpdater = new GeographicChangeListener(
+                uiBorneStart.valueProperty(), uiDistanceStart.getValueFactory().valueProperty(), 
+                uiAmontStart.selectedProperty(), uiLongitudeStart.getValueFactory().valueProperty(), 
+                uiLatitudeStart.getValueFactory().valueProperty(), prDebut);
         uiLongitudeStart.valueProperty().addListener(linearStartUpdater);
         uiLatitudeStart.valueProperty().addListener(linearStartUpdater);
         
-        final GeographicChangeListener linearEndUpdater = new GeographicChangeListener(uiBorneEnd.valueProperty(), uiDistanceEnd.valueProperty(), uiAmontEnd.selectedProperty(), uiLongitudeEnd.valueProperty(), uiLatitudeEnd.valueProperty(), prFin);
+        final GeographicChangeListener linearEndUpdater = new GeographicChangeListener(
+                uiBorneEnd.valueProperty(), uiDistanceEnd.getValueFactory().valueProperty(), 
+                uiAmontEnd.selectedProperty(), uiLongitudeEnd.getValueFactory().valueProperty(), 
+                uiLatitudeEnd.getValueFactory().valueProperty(), prFin);
         uiLongitudeEnd.valueProperty().addListener(linearEndUpdater);
         uiLatitudeEnd.valueProperty().addListener(linearEndUpdater);
         
@@ -289,8 +316,14 @@ public class FXPositionablePane extends BorderPane {
         page.append("<html><body>");
 
         //calcul de la position geographique
-        Point startPoint = getOrCreatePoint(uiLongitudeStart.valueProperty(), uiLatitudeStart.valueProperty(), uiDistanceStart.valueProperty(), uiBorneStart.valueProperty(), uiAmontStart.selectedProperty());
-        Point endPoint = getOrCreatePoint(uiLongitudeEnd.valueProperty(), uiLatitudeEnd.valueProperty(), uiDistanceEnd.valueProperty(), uiBorneEnd.valueProperty(), uiAmontEnd.selectedProperty());
+        Point startPoint = getOrCreatePoint(uiLongitudeStart.getValueFactory().valueProperty(), 
+                uiLatitudeStart.getValueFactory().valueProperty(), 
+                uiDistanceStart.getValueFactory().valueProperty(), 
+                uiBorneStart.valueProperty(), uiAmontStart.selectedProperty());
+        Point endPoint = getOrCreatePoint(uiLongitudeEnd.getValueFactory().valueProperty(), 
+                uiLatitudeEnd.getValueFactory().valueProperty(), 
+                uiDistanceEnd.getValueFactory().valueProperty(), 
+                uiBorneEnd.valueProperty(), uiAmontEnd.selectedProperty());
         if (startPoint == null && endPoint == null) {
             page.append("<h2>No sufficient position information</h2>");
         } else {
@@ -474,7 +507,7 @@ public class FXPositionablePane extends BorderPane {
      * 
      * @return The point computed from starting borne. If we cannot, we return null.
      */
-    private Point computeGeoFromLinear(final ObjectProperty<Number> distanceProperty, 
+    private Point computeGeoFromLinear(final ObjectProperty<Double> distanceProperty, 
             final ObjectProperty<BorneDigue> borneProperty, 
             final BooleanProperty amontSelectedProperty) {
         final Number distance = distanceProperty.get();
@@ -502,9 +535,9 @@ public class FXPositionablePane extends BorderPane {
      * @return Geographic / projected start point defined, or null. Returned point 
      * CRS is always {@link #baseCrs}.
      */
-    private Point getOrCreatePoint(final ObjectProperty<Number> longitudeProperty, 
-            final ObjectProperty<Number> latitudeProperty, 
-            final ObjectProperty<Number> distanceProperty, 
+    private Point getOrCreatePoint(final ObjectProperty<Double> longitudeProperty, 
+            final ObjectProperty<Double> latitudeProperty, 
+            final ObjectProperty<Double> distanceProperty, 
             final ObjectProperty<BorneDigue> borneProperty, 
             final BooleanProperty amontSelectedProperty) {
         
@@ -638,8 +671,8 @@ public class FXPositionablePane extends BorderPane {
         // On a un point de début valide
         if (uiLongitudeStart.valueProperty().get() != null && uiLatitudeStart.valueProperty().get() != null) {
             ptStart = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
-                    fxNumberValue(uiLongitudeStart.valueProperty()),
-                    fxNumberValue(uiLatitudeStart.valueProperty())
+                    fxNumberValue(uiLongitudeStart.getValueFactory().valueProperty()),
+                    fxNumberValue(uiLatitudeStart.getValueFactory().valueProperty())
             ));
         } else {
             ptStart = null;
@@ -648,8 +681,8 @@ public class FXPositionablePane extends BorderPane {
         // On a un point de fin valide
         if (uiLongitudeEnd.valueProperty().get() != null && uiLatitudeEnd.valueProperty().get() != null) {
             ptEnd = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
-                    fxNumberValue(uiLongitudeEnd.valueProperty()),
-                    fxNumberValue(uiLatitudeEnd.valueProperty())
+                    fxNumberValue(uiLongitudeEnd.getValueFactory().valueProperty()),
+                    fxNumberValue(uiLatitudeEnd.getValueFactory().valueProperty())
             ));
         } else {
             ptEnd = null;
@@ -664,15 +697,15 @@ public class FXPositionablePane extends BorderPane {
                     if (ptStart != null) {
                         final Point tmpStart = (Point) JTS.transform(ptStart, conversion);
                         Platform.runLater(() -> {
-                            uiLongitudeStart.valueProperty().set(tmpStart.getX());
-                            uiLatitudeStart.valueProperty().set(tmpStart.getY());
+                            uiLongitudeStart.getValueFactory().valueProperty().set(tmpStart.getX());
+                            uiLatitudeStart.getValueFactory().valueProperty().set(tmpStart.getY());
                         });
                     }
                     if (ptEnd != null) {
                         final Point tmpEnd = (Point) JTS.transform(ptEnd, conversion);
                         Platform.runLater(() -> {
-                            uiLongitudeEnd.valueProperty().set(tmpEnd.getX());
-                            uiLatitudeEnd.valueProperty().set(tmpEnd.getY());
+                            uiLongitudeEnd.getValueFactory().valueProperty().set(tmpEnd.getX());
+                            uiLatitudeEnd.getValueFactory().valueProperty().set(tmpEnd.getY());
                         });
                     }
                 } catch (Exception ex) {
@@ -728,9 +761,9 @@ public class FXPositionablePane extends BorderPane {
 
         private final ComboBox<BorneDigue> uiBorne;
         private final Borne borne;
-        private final ObjectProperty<Number> longitudeProperty;
-        private final ObjectProperty<Number> latitudeProperty;
-        private final ObjectProperty<Number> distanceProperty;
+        private final ObjectProperty<Double> longitudeProperty;
+        private final ObjectProperty<Double> latitudeProperty;
+        private final ObjectProperty<Double> distanceProperty;
         private final BooleanProperty amontSelectedProperty;
         private final FloatProperty prProperty;
         
@@ -738,16 +771,16 @@ public class FXPositionablePane extends BorderPane {
             ArgumentChecks.ensureNonNull("Borne", borne);
             if(borne==Borne.END){
                 uiBorne = uiBorneEnd;
-                longitudeProperty = uiLongitudeEnd.valueProperty();
-                latitudeProperty = uiLatitudeEnd.valueProperty();
-                distanceProperty = uiDistanceEnd.valueProperty();
+                longitudeProperty = uiLongitudeEnd.getValueFactory().valueProperty();
+                latitudeProperty = uiLatitudeEnd.getValueFactory().valueProperty();
+                distanceProperty = uiDistanceEnd.getValueFactory().valueProperty();
                 amontSelectedProperty = uiAmontEnd.selectedProperty();
                 prProperty = prFin;
             } else {
                 uiBorne = uiBorneStart;
-                longitudeProperty = uiLongitudeStart.valueProperty();
-                latitudeProperty = uiLatitudeStart.valueProperty();
-                distanceProperty = uiDistanceStart.valueProperty();
+                longitudeProperty = uiLongitudeStart.getValueFactory().valueProperty();
+                latitudeProperty = uiLatitudeStart.getValueFactory().valueProperty();
+                distanceProperty = uiDistanceStart.getValueFactory().valueProperty();
                 amontSelectedProperty = uiAmontStart.selectedProperty();
                 prProperty = prDebut;
             }
@@ -832,8 +865,8 @@ public class FXPositionablePane extends BorderPane {
         if (oldValue != null) {
             uiAmontStart.selectedProperty().unbindBidirectional(oldValue.borne_debut_avalProperty());
             uiAmontEnd.selectedProperty().unbindBidirectional(oldValue.borne_fin_avalProperty());
-            uiDistanceStart.valueProperty().unbindBidirectional(oldValue.borne_debut_distanceProperty());
-            uiDistanceEnd.valueProperty().unbindBidirectional(oldValue.borne_fin_distanceProperty());
+            uiDistanceStart.getValueFactory().valueProperty().unbindBidirectional((Property) oldValue.borne_debut_distanceProperty());
+            uiDistanceEnd.getValueFactory().valueProperty().unbindBidirectional((Property) oldValue.borne_fin_distanceProperty());
         }
         troncon = null;
         
@@ -851,8 +884,8 @@ public class FXPositionablePane extends BorderPane {
                         //Bindings
                         uiAmontStart.selectedProperty().bindBidirectional(newValue.borne_debut_avalProperty());
                         uiAmontEnd.selectedProperty().bindBidirectional(newValue.borne_fin_avalProperty());
-                        uiDistanceStart.valueProperty().bindBidirectional(newValue.borne_debut_distanceProperty());
-                        uiDistanceEnd.valueProperty().bindBidirectional(newValue.borne_fin_distanceProperty());
+                        uiDistanceStart.getValueFactory().valueProperty().bindBidirectional((Property) newValue.borne_debut_distanceProperty());
+                        uiDistanceEnd.getValueFactory().valueProperty().bindBidirectional((Property) newValue.borne_fin_distanceProperty());
                         
                         prDebut.set(newValue.getPrDebut());
                         prFin.set(newValue.getPrFin());
@@ -873,12 +906,12 @@ public class FXPositionablePane extends BorderPane {
                                 final Point startPos = newValue.getPositionDebut();
                                 final Point endPos = newValue.getPositionFin();
                                 if(startPos != null){
-                                    uiLongitudeStart.valueProperty().set(startPos.getX());
-                                    uiLatitudeStart.valueProperty().set(startPos.getY());
+                                    uiLongitudeStart.getValueFactory().valueProperty().set(startPos.getX());
+                                    uiLatitudeStart.getValueFactory().valueProperty().set(startPos.getY());
                                 }
                                 if(endPos != null){
-                                    uiLongitudeEnd.valueProperty().set(endPos.getX());
-                                    uiLatitudeEnd.valueProperty().set(endPos.getY());
+                                    uiLongitudeEnd.getValueFactory().valueProperty().set(endPos.getX());
+                                    uiLatitudeEnd.getValueFactory().valueProperty().set(endPos.getY());
                                 }
                             }
                         };                        
@@ -916,8 +949,14 @@ public class FXPositionablePane extends BorderPane {
         }
         
         //on sauvegarde la position geo
-        pos.setPositionDebut(getOrCreatePoint(uiLongitudeStart.valueProperty(), uiLatitudeStart.valueProperty(), uiDistanceStart.valueProperty(), uiBorneStart.valueProperty(), uiAmontStart.selectedProperty()));
-        pos.setPositionFin(getOrCreatePoint(uiLongitudeEnd.valueProperty(), uiLatitudeEnd.valueProperty(), uiDistanceEnd.valueProperty(), uiBorneEnd.valueProperty(), uiAmontEnd.selectedProperty()));
+        pos.setPositionDebut(getOrCreatePoint(uiLongitudeStart.getValueFactory().valueProperty(), 
+                uiLatitudeStart.getValueFactory().valueProperty(), 
+                uiDistanceStart.getValueFactory().valueProperty(), 
+                uiBorneStart.valueProperty(), uiAmontStart.selectedProperty()));
+        pos.setPositionFin(getOrCreatePoint(uiLongitudeEnd.getValueFactory().valueProperty(), 
+                uiLatitudeEnd.getValueFactory().valueProperty(), 
+                uiDistanceEnd.getValueFactory().valueProperty(), 
+                uiBorneEnd.valueProperty(), uiAmontEnd.selectedProperty()));
         
         //sauvegarde de la position par borne
         final SystemeReperage selectedSR = uiSRs.getSelectionModel().selectedItemProperty().get();
@@ -936,7 +975,7 @@ public class FXPositionablePane extends BorderPane {
         pos.prFinProperty().setValue(prFin.get());
         
         //maj de la geometrie du positionable
-        final LineString structGeom = LinearReferencingUtilities.buildGeometry(getTroncon().getGeometry(), pos, (BorneDigueRepository) Injector.getSession().getRepositoryForClass(BorneDigue.class));
+        final LineString structGeom = LinearReferencingUtilities.buildGeometry(getTroncon().getGeometry(), pos, Injector.getSession().getRepositoryForClass(BorneDigue.class));
         pos.setGeometry(structGeom);        
     }
 
@@ -946,17 +985,17 @@ public class FXPositionablePane extends BorderPane {
     private class LinearChangeListener implements ChangeListener {
 
         private final ComboBox<BorneDigue> uiBorne;
-        private final ObjectProperty<Number> longitudeProperty;
-        private final ObjectProperty<Number> latitudeProperty;
+        private final ObjectProperty<Double> longitudeProperty;
+        private final ObjectProperty<Double> latitudeProperty;
         private final FloatProperty prProperty;
-        private final ObjectProperty<Number> distanceProperty;
+        private final ObjectProperty<Double> distanceProperty;
         private final BooleanProperty amontSelectedProperty;
         
         public LinearChangeListener(final ComboBox<BorneDigue> uiBorne, 
-                final ObjectProperty<Number> longitudeProperty,
-                final ObjectProperty<Number> latitudeProperty, 
+                final ObjectProperty<Double> longitudeProperty,
+                final ObjectProperty<Double> latitudeProperty, 
                 final FloatProperty prProperty, 
-                final ObjectProperty<Number> distanceProperty,
+                final ObjectProperty<Double> distanceProperty,
                 final BooleanProperty amontSelectedProperty) {
             this.uiBorne = uiBorne;
             this.longitudeProperty = longitudeProperty;
@@ -1008,17 +1047,17 @@ public class FXPositionablePane extends BorderPane {
     private class GeographicChangeListener implements ChangeListener {
         
         private final ObjectProperty<BorneDigue> borneProperty;
-        private final ObjectProperty<Number> distanceProperty;
+        private final ObjectProperty<Double> distanceProperty;
         private final BooleanProperty amontSelectedProperty;
-        private final ObjectProperty<Number> longitudeProperty;
-        private final ObjectProperty<Number> latitudeProperty;
+        private final ObjectProperty<Double> longitudeProperty;
+        private final ObjectProperty<Double> latitudeProperty;
         private final FloatProperty prProperty;
         
         GeographicChangeListener(final ObjectProperty<BorneDigue> borneProperty,
-                final ObjectProperty<Number> distanceProperty,
+                final ObjectProperty<Double> distanceProperty,
                 final BooleanProperty amontSelectedProperty,
-                final ObjectProperty<Number> longitudeProperty,
-                final ObjectProperty<Number> latitudeProperty,
+                final ObjectProperty<Double> longitudeProperty,
+                final ObjectProperty<Double> latitudeProperty,
                 final FloatProperty prProperty){
             this.borneProperty = borneProperty;
             this.distanceProperty = distanceProperty;
@@ -1055,12 +1094,12 @@ public class FXPositionablePane extends BorderPane {
     private class DistanceChangeListener implements ChangeListener {
         
         private final ObjectProperty<BorneDigue> borneProperty;
-        private final FXNumberSpinner uiDistance;
+        private final Spinner<Double> uiDistance;
         private final BooleanProperty amontSelectedProperty;
         private final ObjectProperty<Image> imageProperty;
         
         DistanceChangeListener(final ObjectProperty<BorneDigue> borneProperty, 
-                final FXNumberSpinner uiDistance, 
+                final Spinner<Double> uiDistance, 
                 final BooleanProperty amontSelectedProperty, 
                 final ObjectProperty<Image> imageProperty){
             this.borneProperty = borneProperty;
@@ -1088,26 +1127,26 @@ public class FXPositionablePane extends BorderPane {
                 // Les cas suivants doivent alerter l'utilisateur :
 
                 // cas amont pour le début : distance saisie supérieure à la distance de la borne de départ depuis le début du troncon
-                if((amontSelectedProperty.get() && uiDistance.valueProperty().get().doubleValue() > startBorneProj.distanceAlongLinear)
+                if((amontSelectedProperty.get() && uiDistance.getValueFactory().valueProperty().get() > startBorneProj.distanceAlongLinear)
                         // cas aval pour le début : distance saisie supérieure à la longueur du tronçon - la distance de la borne de depart depuis le début du tronçon
-                        || (!amontSelectedProperty.get() && uiDistance.valueProperty().get().doubleValue() > (tronconLength-startBorneProj.distanceAlongLinear))){
-                    uiDistance.getSpinner().setStyle("-fx-text-fill: #cc0000");
-                    uiDistance.getSpinner().setTooltip(new Tooltip("La distance saisie est en-dehors du tronçon."));
+                        || (!amontSelectedProperty.get() && uiDistance.valueProperty().get() > (tronconLength-startBorneProj.distanceAlongLinear))){
+                    uiDistance.setStyle("-fx-text-fill: #cc0000");
+                    uiDistance.setTooltip(new Tooltip("La distance saisie est en-dehors du tronçon."));
                     imageProperty.set(ICON_EXCLAMATION_TRIANGLE);
                 }
 
                 // Dans les autres cas, on restaure le texte en noir.
                 else {
-                    uiDistance.getSpinner().setStyle("-fx-text-fill: #000000");
-                    uiDistance.getSpinner().setTooltip(null);
+                    uiDistance.setStyle("-fx-text-fill: #000000");
+                    uiDistance.setTooltip(null);
                     imageProperty.set(ICON_CHECK_CIRCLE);
                 }
             }
         }
     }
     
-    private double fxNumberValue(ObjectProperty<Number> spinnerNumber){
+    private double fxNumberValue(ObjectProperty<Double> spinnerNumber){
         if(spinnerNumber.get()==null) return 0;
-        return spinnerNumber.get().doubleValue();
+        return spinnerNumber.get();
     }
 }

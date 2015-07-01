@@ -70,7 +70,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
             if(structure.getBorne_debut_aval()) distanceDebut *= -1.0;
             if(structure.getBorne_fin_aval()) distanceFin *= -1.0;
             
-            //calculate de la distance des bornes. Il peut y avoir qu'une seule borne définie dans le cas d'un ponctuel.
+            //calcul de la distance des bornes. Il peut y avoir qu'une seule borne définie dans le cas d'un ponctuel.
             final Point tronconStart = GO2Utilities.JTS_FACTORY.createPoint(troncon.getCoordinates()[0]);
             if (borneDebut != null) {
                 final Point borneDebutGeom = borneDebut.getGeometry();

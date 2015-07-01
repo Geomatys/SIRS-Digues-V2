@@ -91,13 +91,13 @@
                               <Label text="Système de coordonnées" />
                               <Label text="X (longitude)" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                               <Label text="Y (latitude)" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                              <FXNumberSpinner fx:id="uiLongitudeStart" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                              <FXNumberSpinner fx:id="uiLatitudeStart" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                              <Spinner fx:id="uiLongitudeStart" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <Spinner fx:id="uiLatitudeStart" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                               <ComboBox fx:id="uiCRSs" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2" />
                               <Label text="Début" GridPane.rowIndex="2" />
                               <Label text="Fin" GridPane.rowIndex="3" />
-                              <FXNumberSpinner fx:id="uiLongitudeEnd" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                              <FXNumberSpinner fx:id="uiLatitudeEnd" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                              <Spinner fx:id="uiLongitudeEnd" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <Spinner fx:id="uiLatitudeEnd" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                            </children>
                            <padding>
                               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -126,12 +126,12 @@
                               <Label text="Début " GridPane.rowIndex="2" />
                               <ComboBox fx:id="uiBorneStart" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                               <CheckBox fx:id="uiAmontStart" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
-                              <FXNumberSpinner fx:id="uiDistanceStart" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
+                              <Spinner fx:id="uiDistanceStart" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
                               <ImageView fx:id="uiImageStartValid" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="4" GridPane.hgrow="NEVER" GridPane.rowIndex="2" />
                               <Label text="Fin" GridPane.rowIndex="3" />
                               <ComboBox fx:id="uiBorneEnd" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                               <CheckBox fx:id="uiAmontEnd" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-                              <FXNumberSpinner fx:id="uiDistanceEnd" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
+                              <Spinner fx:id="uiDistanceEnd" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
                               <ImageView fx:id="uiImageEndValid" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="4" GridPane.hgrow="NEVER" GridPane.rowIndex="3" />
                            </children>
                            <padding>

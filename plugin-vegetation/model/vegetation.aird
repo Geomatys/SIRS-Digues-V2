@@ -98,7 +98,7 @@
       <ownedAnnotationEntries xmi:type="description:AnnotationEntry" xmi:id="_TydnkB5pEeWA0duXPY-0yg" source="DANNOTATION_CUSTOMIZATION_KEY">
         <data xmi:type="diagram:ComputedStyleDescriptionRegistry" xmi:id="_TydnkR5pEeWA0duXPY-0yg"/>
       </ownedAnnotationEntries>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_TydAgB5pEeWA0duXPY-0yg" name="Parcelle" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@3a9b3b48{platform:/resource/plugin-vegetation/model/vegetation.ecore#//Parcelle/designation}' must be set&#xA;ERROR : The typed element must have a type&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@89f0629{platform:/resource/plugin-vegetation/model/vegetation.ecore#//Parcelle/author}' must be set&#xA;ERROR : The typed element must have a type&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@11b448c5{platform:/resource/plugin-vegetation/model/vegetation.ecore#//Parcelle/valid}' must be set&#xA;ERROR : The typed element must have a type" incomingEdges="_boAAcB5pEeWA0duXPY-0yg" width="12" height="10">
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_TydAgB5pEeWA0duXPY-0yg" name="Parcelle" tooltipText="" incomingEdges="_boAAcB5pEeWA0duXPY-0yg" width="12" height="10">
         <target xmi:type="ecore:EClass" href="vegetation.ecore#//Parcelle"/>
         <semanticElements xmi:type="ecore:EClass" href="vegetation.ecore#//Parcelle"/>
         <ownedStyle xmi:type="diagram:FlatContainerStyle" xmi:id="_YK3LMB5pEeWA0duXPY-0yg" backgroundStyle="Liquid">
@@ -109,7 +109,7 @@
           <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_YK3LNB5pEeWA0duXPY-0yg" red="255" green="252" blue="216"/>
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Tyn_oB5pEeWA0duXPY-0yg" name="designation : EString" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@3a9b3b48{platform:/resource/plugin-vegetation/model/vegetation.ecore#//Parcelle/designation}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Tyn_oB5pEeWA0duXPY-0yg" name="designation : EString" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="vegetation.ecore#//Parcelle/designation"/>
           <semanticElements xmi:type="ecore:EAttribute" href="vegetation.ecore#//Parcelle/designation"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_VxrtUB5pEeWA0duXPY-0yg" labelAlignment="LEFT">
@@ -120,7 +120,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_TyomuB5pEeWA0duXPY-0yg" name="author : EString" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@89f0629{platform:/resource/plugin-vegetation/model/vegetation.ecore#//Parcelle/author}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_TyomuB5pEeWA0duXPY-0yg" name="author : EString" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="vegetation.ecore#//Parcelle/author"/>
           <semanticElements xmi:type="ecore:EAttribute" href="vegetation.ecore#//Parcelle/author"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_XSTLgB5pEeWA0duXPY-0yg" labelAlignment="LEFT">
@@ -131,7 +131,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_TypNxB5pEeWA0duXPY-0yg" name="valid : EBoolean = false" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@11b448c5{platform:/resource/plugin-vegetation/model/vegetation.ecore#//Parcelle/valid}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_TypNxB5pEeWA0duXPY-0yg" name="valid : EBoolean = false" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="vegetation.ecore#//Parcelle/valid"/>
           <semanticElements xmi:type="ecore:EAttribute" href="vegetation.ecore#//Parcelle/valid"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_YK3yQB5pEeWA0duXPY-0yg" labelAlignment="LEFT">

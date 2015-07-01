@@ -1,9 +1,9 @@
 package fr.sirs.core.component;
 
-import fr.sirs.core.Repository;
 import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Identifiable;
+import fr.sirs.core.model.ReferenceType;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -124,7 +124,29 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     public List<DocumentOperationResult> executeBulk(final List<T> bulkList){
         final List<T> cachedBulkList = new ArrayList<>();
         for(T entity : bulkList){
-            if (entity instanceof AvecDateMaj) {
+            if (entity instanceof AvecDateMaj && !(entity instanceof ReferenceType)) {
+                ((AvecDateMaj) entity).setDateMaj(LocalDateTime.now());
+            }
+            // Put the updated entity into cache in case the old entity is different.
+            if (entity != cache.get(entity.getId())) {
+                entity = onLoad(entity);
+                cache.put(entity.getId(), entity);
+            }
+            cachedBulkList.add(entity);
+        } 
+        return db.executeBulk(cachedBulkList);
+    }
+    
+    /**
+     * Execute bulk for add/update operation on several documents.
+     * 
+     * @param bulkList
+     * @return 
+     */
+    public List<DocumentOperationResult> executeBulk(final T... bulkList){
+        final List<T> cachedBulkList = new ArrayList<>();
+        for(T entity : bulkList){
+            if (entity instanceof AvecDateMaj && !(entity instanceof ReferenceType)) {
                 ((AvecDateMaj) entity).setDateMaj(LocalDateTime.now());
             }
             // Put the updated entity into cache in case the old entity is different.
@@ -152,7 +174,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     public void add(T entity) {
         ArgumentChecks.ensureNonNull("Document à ajouter", entity);
         checkIntegrity(entity);
-        if (entity instanceof AvecDateMaj) {
+        if (entity instanceof AvecDateMaj && !(entity instanceof ReferenceType)) {
             ((AvecDateMaj)entity).setDateMaj(LocalDateTime.now());
         }
         super.add(entity);
@@ -163,7 +185,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     public void update(T entity) {
         ArgumentChecks.ensureNonNull("Document à mettre à jour", entity);
         checkIntegrity(entity);
-        if (entity instanceof AvecDateMaj) {
+        if (entity instanceof AvecDateMaj && !(entity instanceof ReferenceType)) {
             ((AvecDateMaj) entity).setDateMaj(LocalDateTime.now());
         }
         super.update(entity);

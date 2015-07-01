@@ -44,9 +44,8 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     @Override
     public SystemeReperage create(){
         final SessionCore session = InjectorCore.getBean(SessionCore.class);
-        if(session!=null && session instanceof SessionCore){
-            final ElementCreator elementCreator = ((SessionCore) session).getElementCreator();
-            return elementCreator.createElement(SystemeReperage.class);
+        if(session!=null){
+            return session.getElementCreator().createElement(SystemeReperage.class);
         } else {
             throw new SirsCoreRuntimeExecption("Pas de session courante");
         }

@@ -85,8 +85,8 @@ public class TronconUtils {
         final double endDistance = index.project(cutLinear.getEndPoint().getCoordinate());
 
         final SystemeReperageRepository srRepo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
-        final BorneDigueRepository bdRepo = (BorneDigueRepository) session.getRepositoryForClass(BorneDigue.class);
-        final TronconDigueRepository tdRepo = (TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class);
+        final AbstractSIRSRepository<BorneDigue> bdRepo = session.getRepositoryForClass(BorneDigue.class);
+        final AbstractSIRSRepository<TronconDigue> tdRepo = session.getRepositoryForClass(TronconDigue.class);
 
         final TronconDigue tronconCp = troncon.copy();
         tronconCp.setGeometry(cutLinear);
@@ -98,10 +98,22 @@ public class TronconUtils {
         // garde un index des ids de borne conservés, cela accélerera le tri sur
         // les SR.
         final SegmentInfo[] sourceTronconSegments = buildSegments(asLineString(troncon.geometryProperty().get()));
-        final ListIterator<String> borneIt = tronconCp.getBorneIds().listIterator();
+        //  REMPLACEMENT DE CETTE SECTION PAR LA SECTION SUIVANTE DE RÉCUPÉRATION DES BORNES EN MASSE.
+//        final ListIterator<String> borneIt = tronconCp.getBorneIds().listIterator();
+//        final HashSet<String> keptBornes = new HashSet<>();
+//        while (borneIt.hasNext()) {
+//            final BorneDigue borne = bdRepo.get(borneIt.next());
+//            final ProjectedPoint proj = projectReference(sourceTronconSegments, borne.getGeometry());
+//            if (proj.distanceAlongLinear < startDistance || proj.distanceAlongLinear > endDistance) {
+//                borneIt.remove();
+//            } else {
+//                keptBornes.add(borne.getId());
+//            }
+//        }
+        final ListIterator<BorneDigue> borneIt = bdRepo.get(tronconCp.getBorneIds()).listIterator();
         final HashSet<String> keptBornes = new HashSet<>();
         while (borneIt.hasNext()) {
-            final BorneDigue borne = bdRepo.get(borneIt.next());
+            final BorneDigue borne = borneIt.next();
             final ProjectedPoint proj = projectReference(sourceTronconSegments, borne.getGeometry());
             if (proj.distanceAlongLinear < startDistance || proj.distanceAlongLinear > endDistance) {
                 borneIt.remove();
@@ -129,6 +141,11 @@ public class TronconUtils {
                 newSRs.put(sr.getId(), srCp);
             }
         }
+        
+        // On sauvegarde les modifications
+        tdRepo.add(tronconCp);
+        // Mise à jour particulière pour le SR élémentaire qui doit avoir une borne de début et de fin.
+        updateSRElementaire(tronconCp, session);
                 
         /* On parcourt la liste des objets positionnés sur le tronçon originel.
          * Pour tout objet contenu dans le morceau découpé (tronçon de sortie)
@@ -242,7 +259,7 @@ public class TronconUtils {
         }
         
         // On sauvegarde les modifications
-        tdRepo.add(tronconCp);
+        tdRepo.update(tronconCp);
         
         // On essaye de trouver un SR par défaut pour notre nouveau tronçon.   
         final SystemeReperage newDefaultSR = newSRs.remove(troncon.getSystemeRepDefautId());
@@ -268,13 +285,27 @@ public class TronconUtils {
             }
             
             // Et on termine par la sérialisation des objets positionés sur le nouveau tronçon.
+            final Map<Class, List<Positionable>> toSave = new HashMap<>();
             for (final Positionable pos : newPositions) {
                 if (pos instanceof AvecForeignParent) {
                     ((AvecForeignParent)pos).setForeignParentId(tronconCp.getId());
                 }
+                if(toSave.get(pos.getClass())==null) toSave.put(pos.getClass(), new ArrayList<>());
+                toSave.get(pos.getClass()).add(pos);
+                // Remplacement par des enregistrements de masse.
+//                try {
+//                    AbstractSIRSRepository repo = session.getRepositoryForClass(pos.getClass());
+//                    repo.add(pos);
+//                } catch (Exception e) {
+//                    SirsCore.LOGGER.log(Level.WARNING, "Position object cannot be copied to new troncon.", e);
+//                }
+            }
+            
+            // Enregistrements de masse.
+            for(final Class c : toSave.keySet()){
                 try {
-                    AbstractSIRSRepository repo = session.getRepositoryForClass(pos.getClass());
-                    repo.add(pos);
+                    AbstractSIRSRepository repo = session.getRepositoryForClass(c);
+                    repo.executeBulk(toSave.get(c));
                 } catch (Exception e) {
                     SirsCore.LOGGER.log(Level.WARNING, "Position object cannot be copied to new troncon.", e);
                 }
@@ -594,7 +625,6 @@ public class TronconUtils {
             //creation de la borne de début
             bdStart = bdRepo.create();
             bdStart.setLibelle("Début du tronçon");
-            bdStart.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(new Coordinate()));
             bdRepo.add(bdStart);
             
             srbStart = session.getElementCreator().createElement(SystemeReperageBorne.class);
@@ -605,10 +635,9 @@ public class TronconUtils {
         }
         
         if(srbEnd==null){
-            //creation de la borne de début
-            bdEnd = session.getElementCreator().createElement(BorneDigue.class);
+            //creation de la borne de fin
+            bdEnd = bdRepo.create();
             bdEnd.setLibelle("Fin du tronçon");
-            bdEnd.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(new Coordinate()));
             bdRepo.add(bdEnd);
             
             srbEnd = session.getElementCreator().createElement(SystemeReperageBorne.class);
@@ -626,8 +655,7 @@ public class TronconUtils {
         bdStart.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(coords[0]));
         bdEnd.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(coords[coords.length-1]));
 
-        bdRepo.update(bdStart);
-        bdRepo.update(bdEnd);
+        bdRepo.executeBulk(bdStart, bdEnd);
         
         srbStart.setValeurPR(0);
         srbEnd.setValeurPR((float)length);
