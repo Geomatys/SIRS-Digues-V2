@@ -39,8 +39,9 @@ public class AuthenticationWallet {
         
     private final ObservableMap<String, Entry> wallet = FXCollections.observableMap(new HashMap<String, Entry>());
     private final ReentrantReadWriteLock walletLock = new ReentrantReadWriteLock();
-    
+        
     private AuthenticationWallet() throws IOException {
+        
         if (Files.isRegularFile(walletPath)) {
             // check if file is empty, because jackson explode on empty files.
             BasicFileAttributes pathAttr = Files.getFileAttributeView(walletPath, BasicFileAttributeView.class).readAttributes();
@@ -127,6 +128,7 @@ public class AuthenticationWallet {
             walletLock.writeLock().unlock();
         }
     }
+    
     /**
      *
      * @return Default registered password container, or null if an error occurred while initializing it.
@@ -170,8 +172,8 @@ public class AuthenticationWallet {
         public int port;
         public String login;
         
-        //@JsonSerialize(using=PasswordSerialize.class)
-        //@JsonDeserialize(using=PasswordDeserializer.class)
+        @JsonSerialize(using=PasswordSerializer.class)
+        @JsonDeserialize(using=PasswordDeserializer.class)
         public String password;
         
         public Entry(){};
