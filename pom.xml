@@ -225,6 +225,16 @@
 
   </build>
 
+  <profiles>
+     <profile>
+        <id>all</id>
+        <modules>
+           <module>plugin-reglementary</module>
+           <module>plugin-vegetation</module>
+        </modules>
+     </profile>
+  </profiles>
+
   <modules>
     <module>sirs-core</module>
     <module>desktop</module>
