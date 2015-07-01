@@ -1,7 +1,7 @@
 package fr.sirs;
 
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
-import fr.sirs.core.SirsCore;
+
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import fr.sirs.ui.AlertItem;
@@ -450,7 +450,7 @@ public class FXMainFrame extends BorderPane {
     @FXML
     public void openAppInfo() {
         final Stage infoStage = new Stage();
-        infoStage.getIcons().add(SirsCore.ICON);
+        infoStage.getIcons().add(SIRS.ICON);
         infoStage.setTitle("À propos");
         infoStage.initStyle(StageStyle.UTILITY);
         infoStage.setScene(new Scene(new FXAboutPane()));

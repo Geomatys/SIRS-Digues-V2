@@ -1,9 +1,8 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
-import fr.sirs.core.SirsCore;
+import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
@@ -15,7 +14,6 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import org.geotoolkit.font.FontAwesomeIcons;
@@ -96,7 +94,7 @@ public final class ObligationsCalendarView extends CalendarView {
                 popup.hide();
             }
         });
-        popup.getIcons().add(SirsCore.ICON);
+        popup.getIcons().add(SIRS.ICON);
         final Point2D popupPos = parent.localToScreen(20, 40);
         if (popupPos != null) {
             popup.sizeToScene();

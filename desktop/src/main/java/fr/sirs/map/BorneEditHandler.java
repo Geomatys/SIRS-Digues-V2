@@ -5,8 +5,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
@@ -91,7 +91,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
     public BorneEditHandler(final FXMap map) {
         super(map);
         session = Injector.getSession();
-        dialog.getIcons().add(SirsCore.ICON);
+        dialog.getIcons().add(SIRS.ICON);
         
         editPane = new FXSystemeReperagePane(map);
         

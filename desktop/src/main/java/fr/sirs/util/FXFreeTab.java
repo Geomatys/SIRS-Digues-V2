@@ -1,7 +1,7 @@
 
 package fr.sirs.util;
 
-import fr.sirs.core.SirsCore;
+import fr.sirs.SIRS;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -41,7 +41,7 @@ public class FXFreeTab extends Tab implements FXTextAbregeable{
                 tabs.getTabs().remove(FXFreeTab.this);
                 
                 final Stage stage = new Stage();
-                stage.getIcons().add(SirsCore.ICON);
+                stage.getIcons().add(SIRS.ICON);
                 stage.setTitle(getText());
                 final TabPane newPane = new TabPane();
                 newPane.getTabs().add(FXFreeTab.this);

@@ -5,7 +5,7 @@ import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.SirsCore;
+
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Element;
@@ -289,7 +289,7 @@ public class FXSearchPane extends BorderPane {
             }
         });
 
-        stage.getIcons().add(SirsCore.ICON);
+        stage.getIcons().add(SIRS.ICON);
         stage.setScene(new Scene(webView));
         stage.setTitle("Modèle");
         stage.setWidth(800);

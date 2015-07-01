@@ -213,7 +213,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
     
     private void installDialog() {
         dialog = new Stage();
-        dialog.getIcons().add(SirsCore.ICON);
+        dialog.getIcons().add(SIRS.ICON);
         dialog.setTitle("Découpage de tronçon");
         dialog.setResizable(true);
         dialog.initModality(Modality.NONE);

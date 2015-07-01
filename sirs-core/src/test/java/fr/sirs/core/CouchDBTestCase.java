@@ -27,8 +27,10 @@ public abstract class CouchDBTestCase {
         sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
         
         Optional<SirsDBInfo> init = sirsDBInfoRepository.get();
-        if (!init.isPresent())
-            sirsDBInfoRepository.setRemoteDatabase("EPSG:2154");
+        if (!init.isPresent()) {
+            sirsDBInfoRepository.setRemoteDatabase("sirs-test");
+            sirsDBInfoRepository.setSRID("EPSG:2154");
+        }
     }
 
     public void test() {

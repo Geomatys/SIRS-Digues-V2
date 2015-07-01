@@ -62,13 +62,13 @@ public class Loader extends Application {
         // Initialize splash screen
         splashStage = new Stage(StageStyle.TRANSPARENT);
         splashStage.setTitle("SIRS-Digues V2");
-        splashStage.getIcons().add(SirsCore.ICON);
+        splashStage.getIcons().add(SIRS.ICON);
         splashStage.initStyle(StageStyle.TRANSPARENT);
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        if(primaryStage!=null) primaryStage.getIcons().add(SirsCore.ICON);
+        if(primaryStage!=null) primaryStage.getIcons().add(SIRS.ICON);
         // perform initialization and plugin loading tasks
         final Task initTask = new LoadingTask();
         showLoadingStage(initTask);
@@ -204,7 +204,7 @@ public class Loader extends Application {
         Scene mainScene = new Scene(frame);
         
         final Stage mainStage = new Stage();
-        mainStage.getIcons().add(SirsCore.ICON);
+        mainStage.getIcons().add(SIRS.ICON);
         mainStage.titleProperty().bind(Bindings.createStringBinding(() -> {
             StringBuilder builder = new StringBuilder("SIRS-Digues 2");
             final String version = SIRS.getVersion();

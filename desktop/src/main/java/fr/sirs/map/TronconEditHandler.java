@@ -9,7 +9,6 @@ import fr.sirs.CorePlugin;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
@@ -240,7 +239,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
         final TextField nameField = new TextField();
         
         final Stage dialog = new Stage();
-        dialog.getIcons().add(SirsCore.ICON);
+        dialog.getIcons().add(SIRS.ICON);
         dialog.setTitle("Nouveau tronçon");
         dialog.setResizable(true);
         dialog.initModality(Modality.WINDOW_MODAL);

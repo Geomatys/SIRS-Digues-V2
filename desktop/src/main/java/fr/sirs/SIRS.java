@@ -62,6 +62,8 @@ public final class SIRS extends SirsCore {
     
     public static final CoordinateReferenceSystem CRS_WGS84 = CommonCRS.WGS84.normalizedGeographic();
     
+    public static final Image ICON = new Image(SirsCore.class.getResource("/fr/sirs/icon.png").toString());
+    
     public static final Image ICON_ADD_WHITE    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.WHITE),null);
     public static final Image ICON_ADD_BLACK    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.BLACK),null);
     public static final Image ICON_CLOCK_WHITE  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CLOCK_O,22,Color.WHITE),null);
@@ -132,7 +134,7 @@ public final class SIRS extends SirsCore {
     
     public static final String SIRSDOCUMENT_REFERENCE = "sirsdocument";
     public static final String BORNE_IDS_REFERENCE = "borneIds";
-    
+
     //--------------------------------------------------------------------------
     // Champs particuliers aux désordres
     //--------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 package fr.sirs.map;
 
 import fr.sirs.SIRS;
-import fr.sirs.core.SirsCore;
+
 import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
@@ -87,7 +87,7 @@ public class FXDataImportPane extends BorderPane {
     public FXDataImportPane() {
         super();
         SIRS.loadFXML(this);
-        dialog.getIcons().add(SirsCore.ICON);
+        dialog.getIcons().add(SIRS.ICON);
         
         uiFactoryList.setCellFactory(value -> new FXStoreChooser.FactoryCell());
         

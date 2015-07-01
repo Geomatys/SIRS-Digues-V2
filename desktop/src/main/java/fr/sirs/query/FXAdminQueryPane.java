@@ -2,7 +2,6 @@ package fr.sirs.query;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.SirsCore;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.model.Role;
@@ -254,7 +253,7 @@ public class FXAdminQueryPane extends BorderPane {
      */
     public static void showAndWait() {
         final Stage dialog = new Stage();
-        dialog.getIcons().add(SirsCore.ICON);
+        dialog.getIcons().add(SIRS.ICON);
         dialog.setTitle("Administration des requêtes");
         dialog.setResizable(true);
         dialog.initModality(Modality.APPLICATION_MODAL);

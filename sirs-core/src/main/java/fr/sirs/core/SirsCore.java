@@ -8,6 +8,8 @@ import java.awt.Desktop;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+
+import javafx.scene.image.Image;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,7 +28,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javax.measure.unit.SI;
@@ -61,8 +62,7 @@ public class SirsCore {
     public static final String COMPONENT_PACKAGE="fr.sirs.core.component";
     
     public static final String SPRING_CONTEXT = "classpath:/fr/sirs/spring/application-context.xml";
-    public static final Image ICON = new Image(SirsCore.class.getResource("/fr/sirs/icon.png").toString());
-    
+
     public static final Path CONFIGURATION_PATH;    
     static {
         Path tmpPath = Paths.get(System.getProperty("user.home"), "."+NAME);
@@ -328,7 +328,7 @@ public class SirsCore {
         } else {
             final WebView webView = new WebView();
             final Stage infoStage = new Stage();
-            infoStage.getIcons().add(SirsCore.ICON);
+            infoStage.getIcons().add(new Image(SirsCore.class.getResource("/fr/sirs/icon.png").toString()));
             if (title != null) 
                 infoStage.setTitle(title);
             infoStage.setScene(new Scene(webView));
