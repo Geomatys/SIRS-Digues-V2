@@ -286,25 +286,25 @@ public class TronconUtils {
                     o.setSystemeRepId(srid);
                 }
             }
+        }
             
-            // Et on termine par la sérialisation des objets positionés sur le nouveau tronçon.
-            final Map<Class, List<Positionable>> toSave = new HashMap<>();
-            for (final Positionable pos : newPositions) {
-                if (pos instanceof AvecForeignParent) {
-                    ((AvecForeignParent)pos).setForeignParentId(tronconCp.getId());
-                }
-                if(toSave.get(pos.getClass())==null) toSave.put(pos.getClass(), new ArrayList<>());
-                toSave.get(pos.getClass()).add(pos);
+        // Et on termine par la sérialisation des objets positionés sur le nouveau tronçon.
+        final Map<Class, List<Positionable>> toSave = new HashMap<>();
+        for (final Positionable pos : newPositions) {
+            if (pos instanceof AvecForeignParent) {
+                ((AvecForeignParent)pos).setForeignParentId(tronconCp.getId());
             }
-            
-            // Enregistrements de masse.
-            for(final Class c : toSave.keySet()){
-                try {
-                    AbstractSIRSRepository repo = session.getRepositoryForClass(c);
-                    repo.executeBulk(toSave.get(c));
-                } catch (Exception e) {
-                    SirsCore.LOGGER.log(Level.WARNING, "Position object cannot be copied to new troncon.", e);
-                }
+            if(toSave.get(pos.getClass())==null) toSave.put(pos.getClass(), new ArrayList<>());
+            toSave.get(pos.getClass()).add(pos);
+        }
+
+        // Enregistrements de masse.
+        for(final Class c : toSave.keySet()){
+            try {
+                AbstractSIRSRepository repo = session.getRepositoryForClass(c);
+                repo.executeBulk(toSave.get(c));
+            } catch (Exception e) {
+                SirsCore.LOGGER.log(Level.WARNING, "Position object cannot be copied to new troncon.", e);
             }
         }
         return tronconCp;

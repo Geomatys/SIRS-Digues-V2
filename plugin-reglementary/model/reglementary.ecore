@@ -66,7 +66,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//SectionType"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="requeteId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="templateId" eType="#//TemplateObligationReglementaire"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="photoChoice" eType="#//PhotoChoice"/>
@@ -75,5 +75,9 @@
     <eLiterals name="NONE"/>
     <eLiterals name="LAST"/>
     <eLiterals name="ALL"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="SectionType">
+    <eLiterals name="TABLE"/>
+    <eLiterals name="FORM"/>
   </eClassifiers>
 </ecore:EPackage>

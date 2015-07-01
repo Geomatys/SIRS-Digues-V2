@@ -12,13 +12,20 @@ import fr.sirs.Injector;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.SystemeReperageRepository;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefRive;
+import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.util.SirsStringConverter;
 import java.beans.PropertyChangeEvent;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import javafx.application.Platform;
@@ -34,9 +41,12 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import static javafx.scene.control.ButtonType.NO;
+import static javafx.scene.control.ButtonType.YES;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -227,7 +237,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
         final Session session = Injector.getBean(Session.class);
         final List<Preview> digues = session.getPreviews().getByClass(Digue.class);
         final ComboBox<Preview> diguesChoice = new ComboBox<>(FXCollections.observableList(digues));
-        final ComboBox<RefRive> rives = new ComboBox<RefRive>(
+        final ComboBox<RefRive> rives = new ComboBox<>(
                 FXCollections.observableList(session.getRepositoryForClass(RefRive.class).getAll()));
         
         final SirsStringConverter strConverter = new SirsStringConverter();
@@ -486,10 +496,38 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
                     if (!popup.getItems().isEmpty()) {
                         popup.getItems().add(new SeparatorMenuItem());
                     }
+                    
                     final MenuItem deleteItem = new MenuItem("Supprimer tronçon", new ImageView(GeotkFX.ICON_DELETE));
                     deleteItem.setOnAction((ActionEvent event) -> {
-                        session.getRepositoryForClass(TronconDigue.class).remove(tronconProperty.get());
-                        tronconProperty.set(null);
+                        final Alert alert = new Alert(CONFIRMATION, "Voulez-vous vraiment supprimer le tronçon ainsi que les systèmes de repérage et tous les positionnables qui le réfèrent ?", YES, NO);
+                        final Optional<ButtonType> result = alert.showAndWait();
+                        if(result.isPresent() && result.get()==YES){
+                            final SystemeReperageRepository srRepo = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class));
+                            final List<SystemeReperage> srs = srRepo.getByLinear(tronconProperty.get());
+                            srRepo.executeBulkDelete(srs);
+                            
+                            final Map<Class, List<Positionable>> positionablesByClass = new HashMap<>();
+                            
+                            
+                            final List<Positionable> positionableList = TronconUtils.getPositionableList(tronconProperty.get());
+                            for(final Positionable positionable : positionableList){
+                                final Class positionableClass = positionable.getClass();
+                                if(positionablesByClass.get(positionableClass)==null)
+                                    positionablesByClass.put(positionableClass, new ArrayList<>());
+                                positionablesByClass.get(positionableClass).add(positionable);
+                            }
+                            
+                            for(final Class positionableClass : positionablesByClass.keySet()){
+                                if(positionablesByClass.get(positionableClass)!=null){
+                                    final AbstractSIRSRepository repo = session.getRepositoryForClass(positionableClass);
+                                    repo.executeBulkDelete(positionablesByClass.get(positionableClass));
+                                }
+                            }
+                            
+                            
+                            session.getRepositoryForClass(TronconDigue.class).remove(tronconProperty.get());
+                            tronconProperty.set(null);
+                        }
                     });
                     popup.getItems().add(deleteItem);
 

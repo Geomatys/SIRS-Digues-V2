@@ -91,8 +91,7 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     public TronconDigue create() {
         final SessionCore session = InjectorCore.getBean(SessionCore.class);
         if(session!=null){
-            final ElementCreator elementCreator = session.getElementCreator();
-            return elementCreator.createElement(TronconDigue.class);
+            return session.getElementCreator().createElement(TronconDigue.class);
         } else {
             throw new SirsCoreRuntimeExecption("Pas de session courante");
         }
