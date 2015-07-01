@@ -931,12 +931,25 @@ public class FXLauncherPane extends BorderPane {
         }
     }
     
+    /**
+     * Rewrite text to replace or remove all unsupported characters in database name.
+     * Multiple steps : 
+     * - Replace all letters with accent by their equivalent without accent
+     * - Replace all spacing characters with an underscore
+     * - Remove all other non-standard characters
+     * - convert to lower case.
+     */
     private static class DatabaseNameFormatter implements ChangeListener<String> {
         @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 if (newValue == null) return;
                 final String nfdText = Normalizer.normalize(newValue, Normalizer.Form.NFD);
-                ((WritableValue) observable).setValue(nfdText.replaceAll("\\p{InCombiningDiacriticalMarks}+", "").replaceAll("\\s+", "_"));
+                ((WritableValue) observable).setValue(nfdText
+                        .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                        .replaceAll("\\s+", "_")
+                        .replaceAll("[^\\w\\d_-]", "")
+                        .toLowerCase()
+                );
             }
     }
 
