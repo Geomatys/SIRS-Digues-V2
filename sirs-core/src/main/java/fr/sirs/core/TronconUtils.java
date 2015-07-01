@@ -88,28 +88,26 @@ public class TronconUtils {
         final AbstractSIRSRepository<BorneDigue> bdRepo = session.getRepositoryForClass(BorneDigue.class);
         final AbstractSIRSRepository<TronconDigue> tdRepo = session.getRepositoryForClass(TronconDigue.class);
 
+        //======================================================================
+        // MODIFICATIONS DE BASE SUR LE TRONÇON
+        //======================================================================
         final TronconDigue tronconCp = troncon.copy();
         tronconCp.setGeometry(cutLinear);
         tronconCp.setLibelle(newName);
         // On enlève toute réference vers un SR appartenant au tronçon copié
         tronconCp.setSystemeRepDefautId(null);
+        
+        // On sauvegarde les modifications
+        tdRepo.add(tronconCp);
 
-        //on évince toutes les bornes qui ne sont pas sur le nouveau tronçon. On 
-        // garde un index des ids de borne conservés, cela accélerera le tri sur
-        // les SR.
+        //======================================================================
+        // RÉFÉRENCES DE BORNES À CONSERVER
+        //======================================================================
+        /* On évince toutes les bornes qui ne sont pas sur le nouveau tronçon. On 
+         * garde un index des ids de borne conservés, cela accélerera le tri sur
+         * les SR.
+         */
         final SegmentInfo[] sourceTronconSegments = buildSegments(asLineString(troncon.geometryProperty().get()));
-        //  REMPLACEMENT DE CETTE SECTION PAR LA SECTION SUIVANTE DE RÉCUPÉRATION DES BORNES EN MASSE.
-//        final ListIterator<String> borneIt = tronconCp.getBorneIds().listIterator();
-//        final HashSet<String> keptBornes = new HashSet<>();
-//        while (borneIt.hasNext()) {
-//            final BorneDigue borne = bdRepo.get(borneIt.next());
-//            final ProjectedPoint proj = projectReference(sourceTronconSegments, borne.getGeometry());
-//            if (proj.distanceAlongLinear < startDistance || proj.distanceAlongLinear > endDistance) {
-//                borneIt.remove();
-//            } else {
-//                keptBornes.add(borne.getId());
-//            }
-//        }
         final ListIterator<BorneDigue> borneIt = bdRepo.get(tronconCp.getBorneIds()).listIterator();
         final HashSet<String> keptBornes = new HashSet<>();
         while (borneIt.hasNext()) {
@@ -122,6 +120,9 @@ public class TronconUtils {
             }
         }
 
+        //======================================================================
+        // COPIE DES SRs / RETRAIT DES BORNES HS / AFFECTATION D'UN SR PAR DEFAUT / MISE À JOUR DU SR ÉLÉMENTAIRE
+        //======================================================================
         /* On copie les SR du tronçon original. Pour chaque, on regarde si il contient
          * des bornes référencées sur le nouveau tronçon. Si c'est le cas, on le 
          * garde pour enregistrement à la fin de l'opération. On garde aussi une
@@ -142,11 +143,23 @@ public class TronconUtils {
             }
         }
         
-        // On sauvegarde les modifications
-        tdRepo.add(tronconCp);
+        // On essaye de trouver un SR par défaut pour notre nouveau tronçon et on enregistre les SR. 
+        final SystemeReperage newDefaultSR = newSRs.remove(troncon.getSystemeRepDefautId());
+        if (newDefaultSR != null) {
+            newDefaultSR.setLinearId(tronconCp.getDocumentId());
+            srRepo.add(newDefaultSR, tronconCp, true);
+        }
+        for (final SystemeReperage newSR : newSRs.values()) {
+            newSR.setLinearId(tronconCp.getDocumentId());
+            srRepo.add(newSR, tronconCp, false);
+        }
+        
         // Mise à jour particulière pour le SR élémentaire qui doit avoir une borne de début et de fin.
         updateSRElementaire(tronconCp, session);
                 
+        //======================================================================
+        // DÉCOUPAGE DES POSITIONABLES POSITIONÉS SUR LE MORCEAU DE TRONÇON
+        //======================================================================
         /* On parcourt la liste des objets positionnés sur le tronçon originel.
          * Pour tout objet contenu dans le morceau découpé (tronçon de sortie)
          * on met simplement à jour ses positions linéaires pour rester cohérent
@@ -158,19 +171,20 @@ public class TronconUtils {
         final ListIterator<Positionable> posIt = getPositionableList(troncon).listIterator();
         final List<Positionable> newPositions = new ArrayList<>();
         SegmentInfo[] cutTronconSegments = null;
+        
         while (posIt.hasNext()) {
-            final Positionable tmpPosition = posIt.next();
+            final Positionable originalPositionable = posIt.next();
 
             //on vérifie que cet objet intersecte le segment
-            Geometry rawObjGeom = tmpPosition.getGeometry();
+            Geometry rawObjGeom = originalPositionable.getGeometry();
             
             if (rawObjGeom == null) {
                 //on la calcule
-                rawObjGeom = buildGeometry(troncon.getGeometry(), tmpPosition, bdRepo);
+                rawObjGeom = buildGeometry(troncon.getGeometry(), originalPositionable, bdRepo);
                 if (rawObjGeom == null) {
-                    throw new IllegalStateException("Impossible de déterminer la géométrie de l'objet suivant :\n" + tmpPosition);
+                    throw new IllegalStateException("Impossible de déterminer la géométrie de l'objet suivant :\n" + originalPositionable);
                 }
-                tmpPosition.setGeometry(rawObjGeom);
+                originalPositionable.setGeometry(rawObjGeom);
             }
 
             /*
@@ -202,23 +216,23 @@ public class TronconUtils {
                 continue;
             } 
             
-            final Positionable position = tmpPosition.copy();
+            final Positionable position = originalPositionable.copy();
             newPositions.add(position);
             
             // Mise à jour des infos géographiques
             if (!cutLinear.contains(interpObjGeom)) {
-                rawObjGeom = cutLinear.intersection(interpObjGeom);
-                position.setGeometry(rawObjGeom);
+                interpObjGeom = cutLinear.intersection(interpObjGeom);
+                position.setGeometry(interpObjGeom);
             }
 
-            if (rawObjGeom instanceof Point) {
-                position.setPositionDebut((Point) rawObjGeom);
-                position.setPositionFin((Point) rawObjGeom);
+            if (interpObjGeom instanceof Point) {
+                position.setPositionDebut((Point) interpObjGeom);
+                position.setPositionFin((Point) interpObjGeom);
             } else {
-                final LineString structureLine = asLineString(rawObjGeom);
+                final LineString structureLine = asLineString(interpObjGeom);
                 position.setPositionDebut(structureLine.getStartPoint());
                 position.setPositionFin(structureLine.getEndPoint());
-                position.setGeometry(rawObjGeom);
+                position.setGeometry(interpObjGeom);
             }
 
             // Mise à jour du réferencement linéaire
@@ -259,18 +273,7 @@ public class TronconUtils {
         }
         
         // On sauvegarde les modifications
-        tdRepo.update(tronconCp);
-        
-        // On essaye de trouver un SR par défaut pour notre nouveau tronçon.   
-        final SystemeReperage newDefaultSR = newSRs.remove(troncon.getSystemeRepDefautId());
-        if (newDefaultSR != null) {
-            newDefaultSR.setLinearId(tronconCp.getDocumentId());
-            srRepo.add(newDefaultSR, tronconCp, true);
-        }
-        for (final SystemeReperage newSR : newSRs.values()) {
-            newSR.setLinearId(tronconCp.getDocumentId());
-            srRepo.add(newSR, tronconCp, false);
-        }
+//        tdRepo.update(tronconCp);
         
         // Maintenant que notre tronçon et nos SR sont enregistrés, on peut relier 
         // les objets du tronçon à leur SR.
@@ -292,13 +295,6 @@ public class TronconUtils {
                 }
                 if(toSave.get(pos.getClass())==null) toSave.put(pos.getClass(), new ArrayList<>());
                 toSave.get(pos.getClass()).add(pos);
-                // Remplacement par des enregistrements de masse.
-//                try {
-//                    AbstractSIRSRepository repo = session.getRepositoryForClass(pos.getClass());
-//                    repo.add(pos);
-//                } catch (Exception e) {
-//                    SirsCore.LOGGER.log(Level.WARNING, "Position object cannot be copied to new troncon.", e);
-//                }
             }
             
             // Enregistrements de masse.

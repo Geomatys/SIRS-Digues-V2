@@ -7,6 +7,7 @@ import fr.sirs.core.model.ReferenceType;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.sis.util.ArgumentChecks;
@@ -121,20 +122,34 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * @param bulkList
      * @return 
      */
-    public List<DocumentOperationResult> executeBulk(final List<T> bulkList){
+    public List<DocumentOperationResult> executeBulk(final Collection<T> bulkList){
         final List<T> cachedBulkList = new ArrayList<>();
+        final List<T> entitiesWithoutIDs = new ArrayList<>();
         for(T entity : bulkList){
             if (entity instanceof AvecDateMaj && !(entity instanceof ReferenceType)) {
                 ((AvecDateMaj) entity).setDateMaj(LocalDateTime.now());
             }
             // Put the updated entity into cache in case the old entity is different.
-            if (entity != cache.get(entity.getId())) {
-                entity = onLoad(entity);
-                cache.put(entity.getId(), entity);
+            // Si on n'a pas d'ID, c'est que l'entité est nouvelle et on ne peut pas la trouver dans le cache (NPE). Il faut donc la garder en réserve pour l'ajouter au cache après qu'un ID lui aura été attribué.
+            if(entity.getId()==null){
+                entitiesWithoutIDs.add(entity);
+            }
+            else {
+                if (entity != cache.get(entity.getId())) {
+                    entity = onLoad(entity);
+                    cache.put(entity.getId(), entity);
+                }
             }
             cachedBulkList.add(entity);
         } 
-        return db.executeBulk(cachedBulkList);
+        final List<DocumentOperationResult> result = db.executeBulk(cachedBulkList);
+        
+        // Avant de renvoyer le résultat, il faut ajouter au cache les entités qui n'avaient pas d'ID et qui en ont maintenant un après leur premier enregistrement.
+        for (T e : entitiesWithoutIDs){
+            e = onLoad(e);
+            cache.put(e.getId(), e);
+        }
+        return result;
     }
     
     /**
@@ -144,19 +159,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * @return 
      */
     public List<DocumentOperationResult> executeBulk(final T... bulkList){
-        final List<T> cachedBulkList = new ArrayList<>();
-        for(T entity : bulkList){
-            if (entity instanceof AvecDateMaj && !(entity instanceof ReferenceType)) {
-                ((AvecDateMaj) entity).setDateMaj(LocalDateTime.now());
-            }
-            // Put the updated entity into cache in case the old entity is different.
-            if (entity != cache.get(entity.getId())) {
-                entity = onLoad(entity);
-                cache.put(entity.getId(), entity);
-            }
-            cachedBulkList.add(entity);
-        } 
-        return db.executeBulk(cachedBulkList);
+        return executeBulk(Arrays.asList(bulkList));
     }
     
     
