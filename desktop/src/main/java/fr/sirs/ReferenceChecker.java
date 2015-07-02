@@ -33,6 +33,8 @@ import javafx.concurrent.Task;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import static fr.sirs.SIRS.REFERENCE_GET_ID;
+import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Level.WARNING;
 
 /**
  *
@@ -343,6 +345,7 @@ public class ReferenceChecker extends Task<Void> {
         private void update(){
             final List<ReferenceType> updated = new ArrayList<>();
             if(fileReferences!=null){
+                final AbstractSIRSRepository repository = Injector.getSession().getRepositoryForClass(referenceClass);
                 for(final ReferenceType fileReference : fileReferences){
                     ReferenceType localInstance = null;
                     for(final ReferenceType localReference : localReferences){
@@ -353,33 +356,30 @@ public class ReferenceChecker extends Task<Void> {
                     }
 
                     if(localInstance==null){
-                        final AbstractSIRSRepository repository = Injector.getSession().getRepositoryForClass(referenceClass);
-                        repository.add(fileReference);
-                        updated.add(fileReference);
+                        updated.add(fileReference); // On mémorise la référence à ajouter
                     }
                     else{
                         if(!localInstance.toString().equals(fileReference.toString())){
-                            final AbstractSIRSRepository repository = Injector.getSession().getRepositoryForClass(referenceClass);
                             try {
                                 final Method getRevision = referenceClass.getMethod("getRevision");
                                 final Method setRevision = referenceClass.getMethod("setRevision", String.class);
                                 final String revision = (String) getRevision.invoke(localInstance);
                                 setRevision.invoke(fileReference, revision);
-                                repository.update(fileReference);
-                                updated.add(fileReference);// On mémorise la référence mise à jour
+                                updated.add(fileReference);// On mémorise la référence à mettre à jour
                             } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                                SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
+                                SIRS.LOGGER.log(WARNING, ex.getMessage());
                             }
                         }
                     }
                 }
+                repository.executeBulk(updated);
             }
             
             // On élimine les instances de références mises à jour des map correspondantes du ReferenceChecker (on se base sur l'identifiant).
             if(serverInstancesNotLocal.get(referenceClass)!=null){
                 serverInstancesNotLocal.get(referenceClass).removeAll(updated);
             } else {
-                SIRS.LOGGER.log(Level.WARNING, referenceClass.getCanonicalName() + " n'a pas été correctement récupérée du serveur.");
+                SIRS.LOGGER.log(WARNING, referenceClass.getCanonicalName() + " n'a pas été correctement récupérée du serveur.");
             }
             final Map<ReferenceType, ReferenceType> incoherentInstances = incoherentReferences.get(referenceClass);
             if(incoherentInstances!=null){
@@ -397,17 +397,15 @@ public class ReferenceChecker extends Task<Void> {
 
         private void registerIncoherentReferences(final ReferenceType localReferenceInstance, final ReferenceType serverReferenceInstance) {
 
-            if (referenceClass == null || localReferenceInstance == null || serverReferenceInstance == null) {
+            if (referenceClass == null 
+                    || localReferenceInstance == null 
+                    || serverReferenceInstance == null) 
                 return;
-            }
 
-            if (incoherentReferences.get(referenceClass) == null) {
+            if (incoherentReferences.get(referenceClass) == null) 
                 incoherentReferences.put(referenceClass, new HashMap<>());
-            }
 
-            final Map<ReferenceType, ReferenceType> classMap = incoherentReferences.get(referenceClass);
-
-            classMap.put(localReferenceInstance, serverReferenceInstance);
+            incoherentReferences.get(referenceClass).put(localReferenceInstance, serverReferenceInstance);
         }
 
     }
@@ -422,16 +420,9 @@ public class ReferenceChecker extends Task<Void> {
     private static boolean sameReferences(final ReferenceType localReferenceInstance, 
             final ReferenceType serverReferenceInstance) {
         // equals ne vérifie pas l'identité de contenu, mais l'égalité des identifiants !!!!
-        if (localReferenceInstance.equals(serverReferenceInstance)) {
-            // La méthode equals ne se basant que sur les ID, on vérifie en plus l'égalité des contenus avec "toString"
-            if (!localReferenceInstance.toString().equals(serverReferenceInstance.toString())) {
-                return false;
-            } else {
-                return true;
-            }
-        } else {
-            return false;
-        }
+        // La méthode equals ne se basant que sur les ID, on vérifie en plus l'égalité des contenus avec "toString"
+        return localReferenceInstance.equals(serverReferenceInstance)
+                && localReferenceInstance.toString().equals(serverReferenceInstance.toString());
     }
     
     /**
@@ -536,13 +527,11 @@ public class ReferenceChecker extends Task<Void> {
             while (true) {
                 final String line = bufferedReader.readLine();
 
-                if (line == null) {
-                    break;
-                }
+                if (line == null) break;
 
                 result.add(line.replaceAll("\\s", ""));
-
             }
+            bufferedReader.close();
         }
         return result;
     }
