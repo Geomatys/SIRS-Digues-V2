@@ -230,7 +230,10 @@ public class PojoTable extends BorderPane {
     /** The element to set as owner for any created element using {@linkplain #createPojo() }. 
      On the contrary to the parent, the owner purpose is not to contain the created pojo, but to reference it.*/
     protected final ObjectProperty<Element> ownerElementProperty = new SimpleObjectProperty<>();
-    
+
+    //Partie basse pour les commentaires et photos
+    private final FXCommentPhotoView commentPhotoView = new FXCommentPhotoView();
+
     /** Task object designed for asynchronous update of the elements contained in the table. */
     protected Task tableUpdater;
 
@@ -268,7 +271,14 @@ public class PojoTable extends BorderPane {
         searchRunning.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         searchRunning.setPrefSize(22, 22);
         searchRunning.setStyle("-fx-progress-color: white;");
-        
+
+        uiFicheMode.managedProperty().bind(uiFicheMode.visibleProperty());
+        uiSearch.managedProperty().bind(uiSearch.visibleProperty());
+        uiAdd.managedProperty().bind(uiAdd.visibleProperty());
+        uiDelete.managedProperty().bind(uiDelete.visibleProperty());
+        uiImport.managedProperty().bind(uiImport.visibleProperty());
+        uiExport.managedProperty().bind(uiExport.visibleProperty());
+
         uiTable.setRowFactory((TableView<Element> param) ->  new TableRow<Element>() {
 
             @Override
@@ -430,15 +440,24 @@ public class PojoTable extends BorderPane {
             setTableItems(()-> FXCollections.observableList(repo.getAll()));
         }
         
-        final FXCommentPhotoView commentPhotoView = new FXCommentPhotoView();
         commentPhotoView.valueProperty().bind(uiTable.getSelectionModel().selectedItemProperty());
-                
-        final SplitPane sPane = new SplitPane();
-        sPane.setOrientation(Orientation.VERTICAL);
-        sPane.getItems().addAll(uiTable, commentPhotoView);
-        sPane.setDividerPositions(0.9);
-        setCenter(sPane);
-        
+
+        commentPhotoView.visibleProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                //on enleve le diviseur quand il n'y a pas la partie commentaire
+                if(newValue){
+                    final SplitPane sPane = new SplitPane();
+                    sPane.setOrientation(Orientation.VERTICAL);
+                    sPane.getItems().addAll(uiTable, commentPhotoView);
+                    sPane.setDividerPositions(0.9);
+                    setCenter(sPane);
+                }else{
+                    setCenter(uiTable);
+                }
+            }
+        });
+
         //
         // NAVIGATION FICHE PAR FICHE
         //
@@ -585,7 +604,8 @@ public class PojoTable extends BorderPane {
             uiFilterPane.setText("Filtrer");
             uiFilterPane.setContent(filterContent);
             uiFilterPane.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
-            
+            uiFilterPane.managedProperty().bind(uiFilterPane.visibleProperty());
+
             uiFilterPane.setExpanded(false);
             applyFilterBtn.managedProperty().bind(uiFilterPane.expandedProperty());
             resetFilterBtn.managedProperty().bind(uiFilterPane.expandedProperty());
@@ -701,6 +721,21 @@ public class PojoTable extends BorderPane {
     }
     public BooleanProperty importPointProperty() {
         return importPointProperty;
+    }
+    public BooleanProperty commentAndPhotoProperty() {
+        return commentPhotoView.visibleProperty();
+    }
+    public BooleanProperty exportVisibleProperty() {
+        return uiExport.visibleProperty();
+    }
+    public BooleanProperty searchVisibleProperty() {
+        return uiSearch.visibleProperty();
+    }
+    public BooleanProperty ficheModeVisibleProperty() {
+        return uiFicheMode.visibleProperty();
+    }
+    public BooleanProperty filterVisibleProperty() {
+        return uiFilterPane.visibleProperty();
     }
     
     public void setFilterBuilder(final FXFilterBuilder newFilterBuilder) {

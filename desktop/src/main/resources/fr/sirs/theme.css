@@ -43,6 +43,13 @@
     -fx-background-insets: 0 0 0 0, 0, 1, 2;
 }
 
+.btn-single {
+    -fx-background-color:rgb(74,123,165);
+    -fx-background-radius:  10 10 10 10;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
 .item-contact{
     -fx-background-color: rgb(220,220,220);
 }

@@ -4,8 +4,10 @@ package fr.sirs.theme;
 import fr.sirs.core.SirsCore;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +23,14 @@ public final class ColumnOrder {
 
     private static final Properties config = new Properties();
     static {
-        try (InputStream stream = ColumnOrder.class.getResourceAsStream("/fr/sirs/theme/ui/columnOrder.properties")){
-            config.load(stream);
+        try{
+            final Enumeration<URL> rsr = ClassLoader.getSystemClassLoader().getResources("fr/sirs/theme/ui/columnOrder.properties");
+            while(rsr.hasMoreElements()){
+                final URL url = rsr.nextElement();
+                try (InputStream stream = url.openStream()) {
+                    config.load(stream);
+                }
+            }
         } catch (IOException ex) {
             SirsCore.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }

@@ -35,6 +35,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -217,8 +218,12 @@ public final class SIRS extends SirsCore {
         
         // If possible, initialize traduction bundle.
         if (modelClass != null) {
-            loader.setResources(ResourceBundle.getBundle(modelClass.getName(), Locale.getDefault(),
-                    Thread.currentThread().getContextClassLoader()));
+            try{
+                loader.setResources(ResourceBundle.getBundle(modelClass.getName(), Locale.FRENCH,
+                        Thread.currentThread().getContextClassLoader()));
+            }catch(MissingResourceException ex){
+                LOGGER.log(Level.INFO, "Missin bundle for : {0}", modelClass.getName());
+            }
         }
         
         try {
