@@ -1,9 +1,11 @@
 package fr.sirs;
 
 import fr.sirs.core.model.Desordre;
+import fr.sirs.core.model.Element;
+import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.PojoTable;
-import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,18 +25,35 @@ public class FXDisorderPrintFrame extends BorderPane {
     @FXML Tab uiDisorderTypeChoice;
     @FXML Tab uiOptionChoice;
     
+    final TronconChoicePojoTable tronconsTable = new TronconChoicePojoTable();
+    final DisorderTypeChoicePojoTable disordreTypesTable = new DisorderTypeChoicePojoTable();
+    
     public FXDisorderPrintFrame(){
         SIRS.loadFXML(this, FXDisorderPrintFrame.class);
-        final PojoTable tronconsTable = new TronconChoicePojoTable();
         tronconsTable.setTableItems(()-> (ObservableList) FXCollections.observableList(Injector.getSession().getRepositoryForClass(TronconDigue.class).getAll()));
         uiTronconChoice.setContent(tronconsTable);
+        disordreTypesTable.setTableItems(()-> (ObservableList) FXCollections.observableList(Injector.getSession().getRepositoryForClass(RefTypeDesordre.class).getAll()));
+        uiDisorderTypeChoice.setContent(disordreTypesTable);
     }
     
     
     @FXML 
     private void print(){
         
-        final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll().subList(0, 10);
+        final List<String> tronconIds = new ArrayList<>();
+        for(final Element element : tronconsTable.getSelectedItems()){
+            tronconIds.add(element.getId());
+        }
+        final List<String> typeDesordresIds = new ArrayList<>();
+        for(final Element element : disordreTypesTable.getSelectedItems()){
+            typeDesordresIds.add(element.getId());
+        }
+        final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll();
+        desordres.removeIf(
+                (Desordre desordre) -> 
+                        !tronconIds.contains(desordre.getForeignParentId())
+                        || !typeDesordresIds.contains(desordre.getTypeDesordreId())
+        );
         
         new Thread(() -> {
             try {
@@ -46,9 +65,26 @@ public class FXDisorderPrintFrame extends BorderPane {
     }
     
     private class TronconChoicePojoTable extends PojoTable {
+        
+        ObservableList<Element> getSelectedItems(){
+            return uiTable.getSelectionModel().getSelectedItems();
+        }
 
         public TronconChoicePojoTable() {
             super(TronconDigue.class, "Tronçons");
+            uiTable.getColumns().remove(editCol);
+            editableProperty.set(false);
+        }
+    }
+    
+    private class DisorderTypeChoicePojoTable extends PojoTable {
+        
+        ObservableList<Element> getSelectedItems(){
+            return uiTable.getSelectionModel().getSelectedItems();
+        }
+
+        public DisorderTypeChoicePojoTable() {
+            super(RefTypeDesordre.class, "Types de désordres");
             uiTable.getColumns().remove(editCol);
             editableProperty.set(false);
         }
