@@ -39,7 +39,7 @@
                      </padding>
                   </FXDateField>
                   <Label text="Désignation : " textFill="WHITE" GridPane.rowIndex="1" />
-                  <TextField fx:id="uiPseudoId" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                  <TextField fx:id="uiDesignation" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1">
                      <GridPane.margin>
                         <Insets left="10.0" />
                      </GridPane.margin></TextField>
@@ -92,8 +92,8 @@
                                     </Label>
                                     <Label text="Téléphone" GridPane.rowIndex="3" />
                                     <TextField fx:id="uiTelephone" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                    <TextField fx:id="uiFax" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                                    <Label text="Fax" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="3">
+                                    <TextField fx:id="uiFax" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+                                    <Label text="Fax" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="4">
                                        <GridPane.margin>
                                           <Insets />
                                        </GridPane.margin>
@@ -104,6 +104,8 @@
                                           <Insets />
                                        </GridPane.margin>
                                     </Label>
+                                    <Label text="Portable" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                    <TextField fx:id="uiMobile" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                                  </children>
                                  <columnConstraints>
                                     <ColumnConstraints hgrow="NEVER" />
@@ -134,7 +136,7 @@
                                     <TextField fx:id="uiAdresse" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
                                     <Label text="Adresse" GridPane.rowIndex="1" />
                                     <Label text="Code postal" GridPane.rowIndex="2" />
-                                    <TextField fx:id="uiCodePostale" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <TextField fx:id="uiCodePostal" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                     <TextField fx:id="uiCommune" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                                     <Label text="Commune" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="2">
                                        <GridPane.margin>

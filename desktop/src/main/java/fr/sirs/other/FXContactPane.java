@@ -37,7 +37,7 @@ import org.geotoolkit.gui.javafx.util.FXDateField;
 public class FXContactPane extends AbstractFXElementPane<Contact> {
     
     @FXML private FXEditMode uiMode;
-    @FXML private TextField uiPseudoId;
+    @FXML private TextField uiDesignation;
     @FXML private FXDateField date_maj;
     
     @FXML private TextField uiNom;
@@ -45,11 +45,12 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
     @FXML private TextField uiService;
     @FXML private TextField uiFonction;
     @FXML private TextField uiTelephone;
+    @FXML private TextField uiMobile;
     @FXML private TextField uiFax;
     @FXML private TextField uiEmail;
     
     @FXML private TextField uiAdresse;
-    @FXML private TextField uiCodePostale;
+    @FXML private TextField uiCodePostal;
     @FXML private TextField uiCommune;
     
     @FXML private Tab uiOrganismeTab;
@@ -83,12 +84,13 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         uiService.disableProperty().bind(disableFieldsProperty());
         uiFonction.disableProperty().bind(disableFieldsProperty());
         uiTelephone.disableProperty().bind(disableFieldsProperty());
+        uiMobile.disableProperty().bind(disableFieldsProperty());
         uiFax.disableProperty().bind(disableFieldsProperty());
         uiEmail.disableProperty().bind(disableFieldsProperty());
         uiAdresse.disableProperty().bind(disableFieldsProperty());
-        uiCodePostale.disableProperty().bind(disableFieldsProperty());
+        uiCodePostal.disableProperty().bind(disableFieldsProperty());
         uiCommune.disableProperty().bind(disableFieldsProperty());
-        uiPseudoId.disableProperty().bind(disableFieldsProperty());
+        uiDesignation.disableProperty().bind(disableFieldsProperty());
         
         organismeTable = new ContactOrganismeTable();
         uiOrganismeTab.setContent(organismeTable);
@@ -137,12 +139,13 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
             uiService.textProperty().unbindBidirectional(oldValue.serviceProperty());
             uiFonction.textProperty().unbindBidirectional(oldValue.fonctionProperty());
             uiTelephone.textProperty().unbindBidirectional(oldValue.telephoneProperty());
+            uiMobile.textProperty().unbindBidirectional(oldValue.mobileProperty());
             uiFax.textProperty().unbindBidirectional(oldValue.faxProperty());
             uiEmail.textProperty().unbindBidirectional(oldValue.emailProperty());
             uiAdresse.textProperty().unbindBidirectional(oldValue.adresseProperty());
-            uiCodePostale.textProperty().unbindBidirectional(oldValue.codePostalProperty());
-            uiCommune.textProperty().unbindBidirectional(oldValue.paysProperty());
-            uiPseudoId.textProperty().unbindBidirectional(oldValue.designationProperty());
+            uiCodePostal.textProperty().unbindBidirectional(oldValue.codePostalProperty());
+            uiCommune.textProperty().unbindBidirectional(oldValue.communeProperty());
+            uiDesignation.textProperty().unbindBidirectional(oldValue.designationProperty());
         }
         
         if (newValue == null) return;
@@ -152,17 +155,18 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         orgsOfContact.clear();
         modifiedOrgs.clear();
                 
-        uiPseudoId.textProperty().bindBidirectional(newValue.designationProperty());
+        uiDesignation.textProperty().bindBidirectional(newValue.designationProperty());
         uiNom.textProperty().bindBidirectional(newValue.nomProperty());
         uiPrenom.textProperty().bindBidirectional(newValue.prenomProperty());
         uiService.textProperty().bindBidirectional(newValue.serviceProperty());
         uiFonction.textProperty().bindBidirectional(newValue.fonctionProperty());
         uiTelephone.textProperty().bindBidirectional(newValue.telephoneProperty());
+        uiTelephone.textProperty().bindBidirectional(newValue.mobileProperty());
         uiFax.textProperty().bindBidirectional(newValue.faxProperty());
         uiEmail.textProperty().bindBidirectional(newValue.emailProperty());
         uiAdresse.textProperty().bindBidirectional(newValue.adresseProperty());
-        uiCodePostale.textProperty().bindBidirectional(newValue.codePostalProperty());
-        uiCommune.textProperty().bindBidirectional(newValue.paysProperty());
+        uiCodePostal.textProperty().bindBidirectional(newValue.codePostalProperty());
+        uiCommune.textProperty().bindBidirectional(newValue.communeProperty());
                
         // Retrieve all organisms current newValue is / was part of.
         if (newValue.getId() != null) {
