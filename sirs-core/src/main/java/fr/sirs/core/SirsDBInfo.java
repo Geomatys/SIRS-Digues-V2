@@ -1,5 +1,9 @@
 package fr.sirs.core;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.support.CouchDbDocument;
 
 @SuppressWarnings("serial")
@@ -12,6 +16,12 @@ public class SirsDBInfo extends CouchDbDocument {
     private String epsgCode;
     
     private String remoteDatabase;
+    
+    /**
+     * No remove method allowed, because even if an application remove a plugin, 
+     * database should still contains related data.
+     */
+    private Map<String, ModuleDescription> moduleDescriptions;
 
     public String getVersion() {
         return version;
@@ -43,5 +53,31 @@ public class SirsDBInfo extends CouchDbDocument {
 
     public void setRemoteDatabase(String remoteDatabase) {
         this.remoteDatabase = remoteDatabase;
+    }
+    
+    public Map<String, ModuleDescription> getModuleDescriptions() {
+        return moduleDescriptions;
+    }
+
+    public void setModuleDescriptions(Map<String, ModuleDescription> moduleDescriptions) {
+        this.moduleDescriptions = moduleDescriptions;
+    }
+    
+    public void addModuleDescriptions(final Collection<ModuleDescription> modules) {
+        ArgumentChecks.ensureNonNull("module descriptions to add", modules);
+        if (moduleDescriptions == null) {
+            moduleDescriptions = new HashMap<>(modules.size());
+        }
+        for (final ModuleDescription module : modules) {
+            moduleDescriptions.put(module.getName(), module);
+        }
+    }
+        
+    public void addModuleDescriptions(final Map<String, ModuleDescription> modules) {
+        ArgumentChecks.ensureNonNull("module descriptions to add", modules);
+        if (moduleDescriptions == null) {
+            moduleDescriptions = new HashMap<>(modules.size());
+        }
+        moduleDescriptions.putAll(modules);
     }
 }

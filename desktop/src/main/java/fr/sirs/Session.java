@@ -1,7 +1,10 @@
 package fr.sirs;
 
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
+import fr.sirs.core.ModuleDescription;
 import fr.sirs.core.SessionCore;
+import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.UtilisateurRepository;
 
 import java.util.List;
@@ -35,12 +38,16 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -54,6 +61,7 @@ import org.apache.sis.util.iso.SimpleInternationalString;
 import org.ektorp.CouchDbConnector;
 import org.geotoolkit.display2d.ext.DefaultBackgroundTemplate;
 import org.geotoolkit.display2d.ext.legend.DefaultLegendTemplate;
+import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.osmtms.OSMTileMapClient;
 import org.geotoolkit.storage.coverage.CoverageReference;
@@ -164,18 +172,35 @@ public class Session extends SessionCore {
                 //sirs layers
                 sirsGroup.setName("Description des ouvrages");
                 mapContext.items().add(0,sirsGroup);
-
-                for(Plugin plugin : Plugins.getPlugins()){
+                
+                final Plugin[] plugins = Plugins.getPlugins();
+                final HashMap<String, ModuleDescription> moduleDescriptions = new HashMap<>(plugins.length);
+                for(Plugin plugin : plugins){
+                    final ModuleDescription d = new ModuleDescription();
+                    d.setName(plugin.name);
+                    d.setTitle(plugin.getTitle().toString());
+                    d.setVersion(plugin.getConfiguration().getVersionMajor()+"."+plugin.getConfiguration().getVersionMinor());
+                    
                     List<MapItem> mapItems = plugin.getMapItems();
                     for (final MapItem item : mapItems) {
                         setPluginProvider(item, plugin);
+                        ModuleDescription.getLayerDescription(item).ifPresent(desc -> d.layers.add(desc));
                     }
                     sirsGroup.items().addAll(mapItems);
+                    moduleDescriptions.put(d.getName(), d);
                 }
                 mapContext.setAreaOfInterest(mapContext.getBounds(true));
-
+                SirsDBInfoRepository infoRepo = getApplicationContext().getBean(SirsDBInfoRepository.class);
+                infoRepo.updateModuleDescriptions(moduleDescriptions);
+                
             } catch (Exception ex) {
-                ex.printStackTrace();
+                SirsCore.LOGGER.log(Level.WARNING, "Cannot retrieve sirs layers.", ex);
+                final Runnable r = () -> GeotkFX.newExceptionDialog("Impossible de construire la liste des couches cartographiques", ex).show();
+                if (Platform.isFxApplicationThread()) {
+                    r.run();
+                } else {
+                    Platform.runLater(r);
+                }
             }
             
             try{
@@ -195,7 +220,13 @@ public class Session extends SessionCore {
                     backgroundGroup.items().add(cml);
                 }
             } catch(Exception ex){
-                ex.printStackTrace();
+                SirsCore.LOGGER.log(Level.WARNING, "Cannot retrieve background layers.", ex);
+                final Runnable r = () -> GeotkFX.newExceptionDialog("Impossible de construire le fond de plan OpenStreetMap", ex).show();
+                if (Platform.isFxApplicationThread()) {
+                    r.run();
+                } else {
+                    Platform.runLater(r);
+                }                
             }
             
         }
