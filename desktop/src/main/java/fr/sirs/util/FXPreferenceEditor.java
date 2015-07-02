@@ -57,7 +57,6 @@ public class FXPreferenceEditor extends Stage {
 
     static {
         EDITOR_OVERRIDES.put(DOCUMENT_ROOT, new FXDirectoryTextField());
-        EDITOR_OVERRIDES.put(DEFAULT_LOCAL_PASS, new PasswordField());
     }
 
     final BorderPane root = new BorderPane();

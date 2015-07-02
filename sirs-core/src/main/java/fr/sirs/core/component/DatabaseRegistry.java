@@ -36,7 +36,6 @@ import static fr.sirs.util.property.SirsPreferences.PROPERTIES.*;
 import java.io.InputStream;
 import java.net.ProxySelector;
 import java.util.AbstractMap;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -170,18 +169,10 @@ public class DatabaseRegistry {
                 username = entry.login;
                 userPass = entry.password;
             }
-            
-            // TODO : remove login info from preferences.
-            // In case authority is not embedded in url. If we're on local connection, login should be written in preferences.
-            if ((username == null || username.isEmpty()) && isLocal) {
-                username = SirsPreferences.INSTANCE.getPropertySafe(DEFAULT_LOCAL_USER);
-                userPass = SirsPreferences.INSTANCE.getPropertySafe(DEFAULT_LOCAL_PASS);
-                AuthenticationWallet.getDefault().put(new AuthenticationWallet.Entry(couchDbUrl, username, userPass));
-            }
         }
         
         // Create default user if it does not exists.
-        if (username != null && username.equals(SirsPreferences.INSTANCE.getPropertySafe(DEFAULT_LOCAL_USER))) {
+        if (username != null && isLocal) {
             try {
                 createUserIfNotExists(couchDbUrl, username, userPass);
             } catch (Exception e) {
@@ -239,14 +230,17 @@ public class DatabaseRegistry {
      * @throws IllegalArgumentExeption If login information is null.
      */
     private void connect() throws IOException {
+        final AuthenticationWallet wallet = AuthenticationWallet.getDefault();
         /*
          * First, we will open a connection with a java.net url to initialize authentication.
          */
         try (final InputStream stream = couchDbUrl.openStream()) {
-            AuthenticationWallet.Entry authEntry = AuthenticationWallet.getDefault().get(couchDbUrl);
-            if (authEntry != null) {
-                username = authEntry.login;
-                userPass = authEntry.password;
+            if (wallet != null) {
+                AuthenticationWallet.Entry authEntry = wallet.get(couchDbUrl);
+                if (authEntry != null) {
+                    username = authEntry.login;
+                    userPass = authEntry.password;
+                }
             }
         }
         
@@ -266,12 +260,6 @@ public class DatabaseRegistry {
              * will be handled automatically by the following method.
              */
             handleAccessException(e);
-            if (isLocal) {
-                final HashMap<SirsPreferences.PROPERTIES, String> login = new HashMap<>();
-                login.put(DEFAULT_LOCAL_USER, username);
-                login.put(DEFAULT_LOCAL_PASS, userPass);
-                SirsPreferences.INSTANCE.store(login);
-            }
         }
     }
     
@@ -433,8 +421,23 @@ public class DatabaseRegistry {
             username = newLogin.getKey();
             userPass = newLogin.getValue();
 
-            // Refresh connection.
-            connect();
+            /* Refresh connection. We set new password in authentication wallet 
+             * to test connection. If connection fails, we reset password to its
+             * previous state.
+             */
+            final AuthenticationWallet wallet = AuthenticationWallet.getDefault();
+            if (wallet != null) {
+                AuthenticationWallet.Entry removed = wallet.put(new AuthenticationWallet.Entry(couchDbUrl, username, userPass));
+                try {
+                    connect();
+                } catch (Exception e) {
+                    wallet.put(removed);
+                    origin.addSuppressed(e);
+                    throw origin;
+                }
+            } else {
+                connect();
+            }
         } else {
             throw origin;
         }
@@ -749,7 +752,7 @@ public class DatabaseRegistry {
                 final Alert question = new Alert(Alert.AlertType.NONE, "Veuillez rentrer des identifiants de connexion à CouchDb : ", ButtonType.CANCEL, ButtonType.OK);
                 question.getDialogPane().setContent(gPane);
                 question.setResizable(true);
-                question.setHeaderText("Veuillez rentrer des identifiants de connexion à CouchDB pour l'adresse suivante :\n"
+                question.setHeaderText("Vos droits sont insuffisants pour cette opération. Veuillez rentrer des identifiants de connexion à CouchDB pour l'adresse suivante :\n"
                         + (isLocal? "Service local" : couchDbUrl.toExternalForm()));
 
                 Optional<ButtonType> result = question.showAndWait();

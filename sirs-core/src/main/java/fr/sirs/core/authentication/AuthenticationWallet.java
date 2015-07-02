@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -42,25 +43,44 @@ public class AuthenticationWallet {
         
     private AuthenticationWallet() throws IOException {
         
+        boolean isEmpty = true;
+        boolean createNewFile = true;
         if (Files.isRegularFile(walletPath)) {
             // check if file is empty, because jackson explode on empty files.
             BasicFileAttributes pathAttr = Files.getFileAttributeView(walletPath, BasicFileAttributeView.class).readAttributes();
             if (pathAttr.size() > 0) {
-                try (final InputStream walletStream = Files.newInputStream(walletPath, StandardOpenOption.READ)) {
-                    final ObjectMapper mapper = new ObjectMapper();
-                    ObjectReader reader = mapper.reader(Entry.class);
-                    JsonNode root = mapper.readTree(walletStream);
-                    if (root.isArray()) {
-                        Iterator<JsonNode> iterator = root.iterator();
-                        while (iterator.hasNext()) {
-                            Entry entry = reader.readValue(iterator.next());
-                            wallet.put(toServiceId(entry), entry);
-                        }
+                createNewFile = false;
+                isEmpty = false;
+            }
+        }
+        
+        if (createNewFile) {
+            try (final InputStream resourceAsStream = AuthenticationWallet.class.getResourceAsStream("/fr/sirs/core/authentication/defaultWallet.json")) {
+                Files.copy(resourceAsStream, walletPath, StandardCopyOption.REPLACE_EXISTING);
+                isEmpty = false;
+            } catch (IOException e) {
+                isEmpty = true; // File is corrupted. Mark it as empty.
+                SirsCore.LOGGER.log(Level.WARNING, "");
+                if (!Files.isRegularFile(walletPath))
+                    Files.createFile(walletPath);
+            }
+        }
+        
+        // Read existing entries from configuration file.
+        if (!isEmpty) {
+            // Does not erase existing file if an error occurs, to allow password backup manually.
+            try (final InputStream walletStream = Files.newInputStream(walletPath, StandardOpenOption.READ)) {
+                final ObjectMapper mapper = new ObjectMapper();
+                ObjectReader reader = mapper.reader(Entry.class);
+                JsonNode root = mapper.readTree(walletStream);
+                if (root.isArray()) {
+                    Iterator<JsonNode> iterator = root.iterator();
+                    while (iterator.hasNext()) {
+                        Entry entry = reader.readValue(iterator.next());
+                        wallet.put(toServiceId(entry), entry);
                     }
                 }
             }
-        } else {
-            Files.createFile(walletPath);
         }
         
         /*
@@ -97,14 +117,18 @@ public class AuthenticationWallet {
         }
     }
     
-    public void put(final Entry authenticationInfo) {
+    public Entry put(final Entry authenticationInfo) {
         // Check if it doesn't exist already, to avoid useless update.
         walletLock.writeLock().lock();
         try {
+            if (authenticationInfo == null) 
+                return put(authenticationInfo);
             final String serviceId = toServiceId(authenticationInfo);
             final Entry existing = wallet.get(serviceId);
             if (existing == null || !existing.equals(authenticationInfo)) {
-                wallet.put(serviceId, authenticationInfo);
+                return wallet.put(serviceId, authenticationInfo);
+            } else {
+                return existing;
             }
         } finally {
             walletLock.writeLock().unlock();
