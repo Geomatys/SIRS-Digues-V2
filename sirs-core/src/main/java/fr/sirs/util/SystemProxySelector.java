@@ -65,9 +65,6 @@ public class SystemProxySelector extends ProxySelector {
                     }
                     return builder.toString();
                 });
-                for (final Proxy p : proxies) {
-                    System.out.println("    PROXY "+ p);
-                }
                 return proxies;
             }
         }

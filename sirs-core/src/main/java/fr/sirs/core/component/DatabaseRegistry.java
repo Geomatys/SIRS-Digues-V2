@@ -35,19 +35,10 @@ import org.geotoolkit.util.FileUtilities;
 import static fr.sirs.util.property.SirsPreferences.PROPERTIES.*;
 import java.io.InputStream;
 import java.net.ProxySelector;
-import java.util.AbstractMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
@@ -56,6 +47,7 @@ import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.ReplicationStatus;
 import org.ektorp.ReplicationTask;
 import org.ektorp.http.HttpResponse;
+import org.ektorp.http.PreemptiveAuthRequestInterceptor;
 import org.ektorp.impl.StdReplicationTask;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -252,15 +244,7 @@ public class DatabaseRegistry {
                 .relaxedSSLSettings(true);
         
         couchDbInstance = new StdCouchDbInstance(builder.build());
-        try {
-            couchDbInstance.getAllDatabases();
-        } catch (DbAccessException e) {
-            /*
-             * If we've got an access exception, login query and reconnection
-             * will be handled automatically by the following method.
-             */
-            handleAccessException(e);
-        }
+        couchDbInstance.getAllDatabases();
     }
     
     /**
@@ -295,38 +279,31 @@ public class DatabaseRegistry {
      * @throws java.io.IOException If an error occurs while connecting to couchDb database.
      */
     public ConfigurableApplicationContext connectToSirsDatabase(String dbName, 
-            final boolean createIfNotExists, final boolean initIndex, 
+            final boolean createIfNotExists, final boolean initIndex,
             final boolean initChangeListener) throws IOException {
         final String dbContext = getContextPath(dbName);
-        try {
-            CouchDbConnector connector = couchDbInstance.createConnector(dbContext, createIfNotExists);
-            // Initializing application context will load application repositories, which will publish their views on the new database.
-            final ClassPathXmlApplicationContext parentContext = new ClassPathXmlApplicationContext();
-            parentContext.refresh();
-            parentContext.getBeanFactory().registerSingleton(CouchDbConnector.class.getSimpleName(), connector);
+        CouchDbConnector connector = couchDbInstance.createConnector(dbContext, createIfNotExists);
+        // Initializing application context will load application repositories, which will publish their views on the new database.
+        final ClassPathXmlApplicationContext parentContext = new ClassPathXmlApplicationContext();
+        parentContext.refresh();
+        parentContext.getBeanFactory().registerSingleton(CouchDbConnector.class.getSimpleName(), connector);
 
-            final ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext(
-                    new String[]{SirsCore.SPRING_CONTEXT}, parentContext);
-            
-            if (initIndex) {
-                ElasticSearchEngine elasticEngine = new ElasticSearchEngine(
-                        couchDbUrl.getHost(), (couchDbUrl.getPort() < 0) ? 5984 : couchDbUrl.getPort(), dbContext, username, userPass);
-                appContext.getBeanFactory().registerSingleton(ElasticSearchEngine.class.getSimpleName(), elasticEngine);
-            }
+        final ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext(
+                new String[]{SirsCore.SPRING_CONTEXT}, parentContext);
 
-            if (initChangeListener) {
-                DocumentChangeEmiter changeEmmiter = new DocumentChangeEmiter(connector);
-                appContext.getBeanFactory().registerSingleton(DocumentChangeEmiter.class.getSimpleName(), changeEmmiter);
-                changeEmmiter.start();
-            }
-
-            return appContext;
-
-            // If an exception occurs, we check if its due to an authorization problem. If true, we ask for new login and retry.
-        } catch (RuntimeException e) {
-            handleAccessException(e);
-            return connectToSirsDatabase(dbContext, createIfNotExists, initIndex, initChangeListener);
+        if (initIndex) {
+            ElasticSearchEngine elasticEngine = new ElasticSearchEngine(
+                    couchDbUrl.getHost(), (couchDbUrl.getPort() < 0) ? 5984 : couchDbUrl.getPort(), dbContext, username, userPass);
+            appContext.getBeanFactory().registerSingleton(ElasticSearchEngine.class.getSimpleName(), elasticEngine);
         }
+
+        if (initChangeListener) {
+            DocumentChangeEmiter changeEmmiter = new DocumentChangeEmiter(connector);
+            appContext.getBeanFactory().registerSingleton(DocumentChangeEmiter.class.getSimpleName(), changeEmmiter);
+            changeEmmiter.start();
+        }
+
+        return appContext;
     }
 
     /**
@@ -335,13 +312,8 @@ public class DatabaseRegistry {
      * @throws IOException If an error happened while connecting to CouchDb service.
      */
     public void dropDatabase(String dbName) throws IOException {
-        try {
-            cancelAllSynchronizations(dbName);
-            couchDbInstance.deleteDatabase(dbName);
-        } catch (RuntimeException e) {
-            handleAccessException(e);
-            dropDatabase(dbName);
-        }
+        cancelAllSynchronizations(dbName);
+        couchDbInstance.deleteDatabase(dbName);
     }
         
     /**
@@ -386,63 +358,7 @@ public class DatabaseRegistry {
                 }
             }
         }
-    }
-    
-    /**
-     * Analyze input exception to determine if it's due to bad login. If true, we 
-     * ask for a login to user. If none provided, a DbAccessException is thrown.
-     * @throws IOException If an error happens when trying to connect to database
-     * with newly provided login.
-     * @throws  DbAccessException If user does not give any login.
-     * @throws T original exception, if it's not an authentication exception, or user cannot give valid login.
-     */
-    private <T extends Exception> void handleAccessException(final T origin) throws T, IOException {
-            Throwable tmpEx = origin;
-            boolean accessException = false;
-            while (!accessException && tmpEx != null) {
-                if (tmpEx instanceof DbAccessException) {
-                    accessException = true;
-                } else {
-                    tmpEx = tmpEx.getCause();
-                }
-            }
-            if (accessException) {
-                if (!AUTH_ERROR_CODE.matcher(tmpEx.getMessage()).find()) {
-                    accessException = false;
-                }
-            }
-            
-            if (!accessException) {
-                throw origin;
-            }
-            
-        final Map.Entry<String, String> newLogin = askForLogin(username, userPass);
-        if (newLogin != null) {
-            username = newLogin.getKey();
-            userPass = newLogin.getValue();
-
-            /* Refresh connection. We set new password in authentication wallet 
-             * to test connection. If connection fails, we reset password to its
-             * previous state.
-             */
-            final AuthenticationWallet wallet = AuthenticationWallet.getDefault();
-            if (wallet != null) {
-                AuthenticationWallet.Entry removed = wallet.put(new AuthenticationWallet.Entry(couchDbUrl, username, userPass));
-                try {
-                    connect();
-                } catch (Exception e) {
-                    wallet.put(removed);
-                    origin.addSuppressed(e);
-                    throw origin;
-                }
-            } else {
-                connect();
-            }
-        } else {
-            throw origin;
-        }
-    }
-    
+    }    
     
     
     ////////////////////////////////////////////////////////////////////////////
@@ -469,69 +385,63 @@ public class DatabaseRegistry {
         final String srid = distantInfo.get().getEpsgCode();
 
         String localPath = getContextPath(local);
-            
-        try {
-            CouchDbConnector localConnector = couchDbInstance.createConnector(localPath, true); 
-            Optional<SirsDBInfo> info = getInfo(localConnector);
-            if (info.isPresent()) {
-                SirsDBInfo localInfo = info.get();
-                
-                // TODO : check that SRID of local and distant database are one and the same.
-                if (localInfo.getEpsgCode() != null && !localInfo.getEpsgCode().equals(srid)) {
-                    throw new IllegalArgumentException("Impossible de synchroniser les bases de données car elles n'utilisent pas le même système de projection :\n"
-                            + "Base distante : " + srid + "\n"
-                            + "Base locale : " + localInfo.getEpsgCode());
-                }
-                
-                if (localInfo.getRemoteDatabase() != null && !localInfo.getRemoteDatabase().equals(distant)) {
-                    final Alert alert = new Alert(
-                            Alert.AlertType.WARNING, 
-                            "Vous êtes sur le point de changer le point de synchronisation de la base de données.", 
-                            ButtonType.CANCEL, ButtonType.OK);
-                    final Optional<ButtonType> showAndWait = alert.showAndWait();
-                    
-                    if (showAndWait.isPresent() && showAndWait.get().equals(ButtonType.OK)) {
-                        cancelAllSynchronizations(localPath);
-                    } else {
-                        return;
-                    }
+        CouchDbConnector localConnector = couchDbInstance.createConnector(localPath, true);
+        Optional<SirsDBInfo> info = getInfo(localConnector);
+        if (info.isPresent()) {
+            SirsDBInfo localInfo = info.get();
+
+            // TODO : check that SRID of local and distant database are one and the same.
+            if (localInfo.getEpsgCode() != null && !localInfo.getEpsgCode().equals(srid)) {
+                throw new IllegalArgumentException("Impossible de synchroniser les bases de données car elles n'utilisent pas le même système de projection :\n"
+                        + "Base distante : " + srid + "\n"
+                        + "Base locale : " + localInfo.getEpsgCode());
+            }
+
+            if (localInfo.getRemoteDatabase() != null && !localInfo.getRemoteDatabase().equals(distant)) {
+                final Alert alert = new Alert(
+                        Alert.AlertType.WARNING,
+                        "Vous êtes sur le point de changer le point de synchronisation de la base de données.",
+                        ButtonType.CANCEL, ButtonType.OK);
+                final Optional<ButtonType> showAndWait = alert.showAndWait();
+
+                if (showAndWait.isPresent() && showAndWait.get().equals(ButtonType.OK)) {
+                    cancelAllSynchronizations(localPath);
+                } else {
+                    return;
                 }
             }
-            
-            // Force authentication on distant database
-            URL distantURL = toURL(distant);
-            if (distantURL.getUserInfo() == null) {
-                AuthenticationWallet.Entry entry = AuthenticationWallet.getDefault().get(distantURL);
-                if (entry != null && entry.login != null && !entry.login.isEmpty()) {
-                    final String userInfo;
-                    if (entry.password == null || entry.password.isEmpty()) {
-                        userInfo = entry.login + "@";
-                    } else {
-                        userInfo = entry.login+":"+entry.password+"@";
-                    }
-                    distant = distantURL.toExternalForm().replaceFirst("(^\\w+://)", "$1"+userInfo);
-                }
-            }
-            
-            // Copy source data in our database.
-            ReplicationCommand cmd = new ReplicationCommand.Builder()
-                    .continuous(continuous).source(distant).target(localPath)
-                    .createTarget(true).build();
-
-            // Send back local data to source database.
-            ReplicationCommand cmdRev = new ReplicationCommand.Builder()
-                    .continuous(continuous).source(localPath).target(distant)
-                    .createTarget(true).build();
-
-            couchDbInstance.replicate(cmd);
-            couchDbInstance.replicate(cmdRev);
-            
-            new SirsDBInfoRepository(localConnector).set(srid, distant);
-            
-        } catch (RuntimeException e) {
-            handleAccessException(e);
-            synchronizeSirsDatabases(distant, localPath, continuous);
         }
+
+        // Force authentication on distant database. We can rely on wallet information
+        // because a connection should have been opened already to retrieve SIRS information.
+        URL distantURL = toURL(distant);
+        if (distantURL.getUserInfo() == null) {
+            AuthenticationWallet.Entry entry = AuthenticationWallet.getDefault().get(distantURL);
+            if (entry != null && entry.login != null && !entry.login.isEmpty()) {
+                final String userInfo;
+                if (entry.password == null || entry.password.isEmpty()) {
+                    userInfo = entry.login + "@";
+                } else {
+                    userInfo = entry.login + ":" + entry.password + "@";
+                }
+                distant = distantURL.toExternalForm().replaceFirst("(^\\w+://)", "$1" + userInfo);
+            }
+        }
+
+        // Copy source data in our database.
+        ReplicationCommand cmd = new ReplicationCommand.Builder()
+                .continuous(continuous).source(distant).target(localPath)
+                .createTarget(true).build();
+
+        // Send back local data to source database.
+        ReplicationCommand cmdRev = new ReplicationCommand.Builder()
+                .continuous(continuous).source(localPath).target(distant)
+                .createTarget(true).build();
+
+        couchDbInstance.replicate(cmd);
+        couchDbInstance.replicate(cmdRev);
+
+        new SirsDBInfoRepository(localConnector).set(srid, distant);
     }
     
     /**
@@ -540,6 +450,7 @@ public class DatabaseRegistry {
      * 
      * @param dbName Target database name or path for synchronizations.
      * @return List of source database names or path for continuous copies on input database.
+     * @throws java.io.IOException If we cannot get list of active synchronisation from CouchDB.
      */
     public Stream<ReplicationTask> getSynchronizationTasks(final String dbName) throws IOException {
         ArgumentChecks.ensureNonEmpty("Input database name", dbName);
@@ -555,16 +466,12 @@ public class DatabaseRegistry {
      * @param dbToPasteInto Database to paste content into. Only its name if it's in current service, complete URL otherwise.
      * @return A status of started replication task.
      */
-    public ReplicationStatus copyDatabase(final String dbToCopy, final String dbToPasteInto) throws IOException {
+    public ReplicationStatus copyDatabase(final String dbToCopy, final String dbToPasteInto) {
         ReplicationCommand cmd = new ReplicationCommand.Builder()
                 .continuous(false).source(dbToCopy).target(dbToPasteInto)
                 .createTarget(true).build();
-        try {
-            return couchDbInstance.replicate(cmd);
-        } catch (DbAccessException e) {
-            handleAccessException(e);
-            return copyDatabase(dbToCopy, dbToPasteInto);
-        }
+        
+        return couchDbInstance.replicate(cmd);
     }
     
     /**
@@ -595,22 +502,22 @@ public class DatabaseRegistry {
 
     ArrayList<ReplicationTask> getReplicationTasks() throws IOException {
         HttpResponse httpResponse = couchDbInstance.getConnection().get("/_active_tasks");
-        
+
         final ArrayList<ReplicationTask> result = new ArrayList();
-        
-            final ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            JsonNode tasks = mapper.readTree(httpResponse.getContent());
-            if (tasks.isArray()) {
-                Iterator<JsonNode> elements = tasks.elements();
-                while (elements.hasNext()) {
-                    final JsonNode next = elements.next();
-                    if (next.has("type") && "replication".equals(next.get("type").asText())) {
-                        result.add(mapper.treeToValue(next, StdReplicationTask.class));
-                    }
+
+        final ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JsonNode tasks = mapper.readTree(httpResponse.getContent());
+        if (tasks.isArray()) {
+            Iterator<JsonNode> elements = tasks.elements();
+            while (elements.hasNext()) {
+                final JsonNode next = elements.next();
+                if (next.has("type") && "replication".equals(next.get("type").asText())) {
+                    result.add(mapper.treeToValue(next, StdReplicationTask.class));
                 }
             }
-            
+        }
+
         return result;
     }
 
@@ -722,59 +629,6 @@ public class DatabaseRegistry {
             return Optional.of(connector.get(SirsDBInfo.class, INFO_DOCUMENT_ID));
         }
         return Optional.empty();
-    }
-
-    /**
-     * Display a dialog to ask user a login and password to allow connection to CouchDB service.
-     * @return An entry whose key is login and value is password typed by user. Null if user cancelled dialog.
-     */
-    private Map.Entry<String, String> askForLogin(final String defaultUser, final String defaultPass) {
-        final Task<Map.Entry<String, String>> askLogin = new Task() {
-
-            @Override
-            protected Object call() throws Exception {
-                final TextField userInput = new TextField(defaultUser);
-                final PasswordField passInput = new PasswordField();
-                passInput.setText(defaultPass);
-
-                final GridPane gPane = new GridPane();
-//                gPane.setMaxWidth(Double.MAX_VALUE);
-//                gPane.setPrefWidth(400);
-//                gPane.getColumnConstraints().addAll(
-//                        new ColumnConstraints(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE, Region.USE_PREF_SIZE, Priority.NEVER, HPos.LEFT, true),
-//                        new ColumnConstraints(0, Region.USE_PREF_SIZE, Double.MAX_VALUE, Priority.ALWAYS, HPos.LEFT, true)
-//                );
-                gPane.add(new Label("Login : "), 0, 0);
-                gPane.add(userInput, 1, 0);
-                gPane.add(new Label("Mot de passe : "), 0, 1);
-                gPane.add(passInput, 1, 1);
-
-                final Alert question = new Alert(Alert.AlertType.NONE, "Veuillez rentrer des identifiants de connexion à CouchDb : ", ButtonType.CANCEL, ButtonType.OK);
-                question.getDialogPane().setContent(gPane);
-                question.setResizable(true);
-                question.setHeaderText("Vos droits sont insuffisants pour cette opération. Veuillez rentrer des identifiants de connexion à CouchDB pour l'adresse suivante :\n"
-                        + (isLocal? "Service local" : couchDbUrl.toExternalForm()));
-
-                Optional<ButtonType> result = question.showAndWait();
-                if (result.isPresent() && result.get().equals(ButtonType.OK)) {
-                    return new AbstractMap.SimpleEntry<>(userInput.getText(), passInput.getText());
-                } else {
-                    return null;
-                }
-            }
-        };
-
-        if (Platform.isFxApplicationThread()) {
-            askLogin.run();
-        } else {
-            Platform.runLater(askLogin);
-        }
-
-        try {
-            return askLogin.get();
-        } catch (InterruptedException | ExecutionException ex) {
-            return null;
-        }
     }
 
     private void ensureNoDelay() {
@@ -899,10 +753,11 @@ public class DatabaseRegistry {
                 final DefaultHttpClient tmpClient = (DefaultHttpClient) client;
                 tmpClient.setRoutePlanner(new SystemDefaultRoutePlanner(ProxySelector.getDefault()));
                 tmpClient.setCredentialsProvider(new SystemDefaultCredentialsProvider());
+                tmpClient.addRequestInterceptor(new PreemptiveAuthRequestInterceptor(), 0);
             } else {
                 throw new IllegalArgumentException("Cannot configure http connection parameters.");
             }
             return client;
-        }
+        }        
     }
 }

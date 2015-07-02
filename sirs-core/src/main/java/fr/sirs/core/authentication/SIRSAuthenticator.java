@@ -24,8 +24,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import sun.net.www.protocol.http.AuthCacheImpl;
-import sun.net.www.protocol.http.AuthCacheValue;
 
 /**
  * An authenticator which will prompt a JavaFX dialog to query password from user.
@@ -74,6 +72,8 @@ public class SIRSAuthenticator extends Authenticator {
          * different behavior for thee two components.
          */
         final boolean fromApache = (getRequestingURL() == null);
+        
+        SirsCore.LOGGER.log(Level.FINE, "CREDENTIAL QUERY FROM "+ (fromApache? "APACHE" : "JAVA.NET"));
         
         // We've got login from wallet, and it has not been rejected yet.
         if (entry != null && (fromApache || entriesToCheck.get(serviceId) == null)) {
