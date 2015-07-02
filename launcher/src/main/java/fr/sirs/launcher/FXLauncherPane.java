@@ -823,7 +823,7 @@ public class FXLauncherPane extends BorderPane {
                                             alerte.show();
                                         }
                                         updateLocalDbList();
-                                    } catch (IOException ex) {
+                                    } catch (Exception ex) {
                                         SirsCore.LOGGER.log(Level.WARNING, "Database copy from " + sourceDb + " to " + destDbName + " failed", ex);
                                         GeotkFX.newExceptionDialog("Impossible de copier les bases de données.", ex).show();
                                     }
