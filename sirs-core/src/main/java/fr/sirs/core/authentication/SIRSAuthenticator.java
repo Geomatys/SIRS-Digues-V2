@@ -76,9 +76,9 @@ public class SIRSAuthenticator extends Authenticator {
         final boolean fromApache = (getRequestingURL() == null);
         
         // We've got login from wallet, and it has not been rejected yet.
-        if (entry != null && (fromApache || entriesToCheck.get(serviceId) == null)) {if (fromApache)SirsCore.LOGGER.log(Level.FINE, "CREDENTIAL QUERY !");
+        if (entry != null && (fromApache || entriesToCheck.get(serviceId) == null)) {
             if (!fromApache) entriesToCheck.put(serviceId, entry);
-            return new PasswordAuthentication(entry.login, (entry.password == null)? null : entry.password.toCharArray());
+            return new PasswordAuthentication(entry.login, (entry.password == null)? new char[0] : entry.password.toCharArray());
         
         // New or invalid entry case.
         } else {
