@@ -63,7 +63,7 @@ import org.springframework.context.ApplicationContextAware;
  * 
  * @author Johann Sorel
  */
-public class SessionCore extends SessionGen implements ApplicationContextAware {
+public class SessionCore implements ApplicationContextAware {
     
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES DROITS
@@ -178,7 +178,6 @@ public class SessionCore extends SessionGen implements ApplicationContextAware {
     
     @Autowired
     public SessionCore(CouchDbConnector couchDbConnector) {
-        super(couchDbConnector);
         this.connector = couchDbConnector;
         
         referenceUsageRepository = new ReferenceUsageRepository(connector);
