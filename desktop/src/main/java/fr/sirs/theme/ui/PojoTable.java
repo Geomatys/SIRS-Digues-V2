@@ -246,7 +246,7 @@ public class PojoTable extends BorderPane {
         this(repo.getModelClass(), title, repo);
     }
     
-    private PojoTable(final Class pojoClass, final String title, final AbstractSIRSRepository repo) {
+    private PojoTable(final Class pojoClass, final String title, AbstractSIRSRepository repo) {
         if (pojoClass == null && repo == null) {
             throw new IllegalArgumentException("Pojo class to expose and Repository parameter are both null. At least one of them must be valid.");
         }
@@ -265,6 +265,7 @@ public class PojoTable extends BorderPane {
                 SIRS.LOGGER.log(Level.FINE, e.getMessage());
                 tmpRepo = null;
             }
+            repo = tmpRepo;
             this.repo = tmpRepo;
         } else {
             this.repo = repo;
@@ -437,8 +438,8 @@ public class PojoTable extends BorderPane {
         uiTable.setPlaceholder(new Label(""));
         uiTable.setTableMenuButtonVisible(true);
         // Load all elements only if the user gave us the repository.
-        if (repo != null) {
-            setTableItems(()-> FXCollections.observableList(repo.getAll()));
+        if (this.repo != null) {
+            setTableItems(()-> FXCollections.observableList(this.repo.getAll()));
         }
         
         commentPhotoView.valueProperty().bind(uiTable.getSelectionModel().selectedItemProperty());

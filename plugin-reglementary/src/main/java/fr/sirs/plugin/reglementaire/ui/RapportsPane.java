@@ -3,19 +3,41 @@ package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.Session;
+import fr.sirs.core.component.ObligationReglementaireRepository;
+import fr.sirs.core.component.Previews;
+import fr.sirs.core.component.SystemeEndiguementRepository;
+import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.ObligationReglementaire;
+import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.RefTypeObligationReglementaire;
+import fr.sirs.core.model.SystemeEndiguement;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.util.SirsStringConverter;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.ResourceBundle;
+import java.util.Set;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 
 /**
  * 
@@ -24,15 +46,17 @@ import javafx.scene.layout.BorderPane;
  */
 public class RapportsPane extends BorderPane implements Initializable {
 
-    @FXML private ListView<Digue> uiTroncons;
-    @FXML private ChoiceBox<?> uiPrDebut;
+    @FXML private ComboBox<Preview> uiSystemEndiguement;
+    @FXML private ListView<TronconDigue> uiTroncons;
+    private Spinner<Double> uiPrDebut;
     @FXML private DatePicker uiPeriodeFin;
-    @FXML private ChoiceBox<?> uiPrFin;
-    @FXML private ChoiceBox<?> uiSystemEndiguement;
+    private Spinner<Double> uiPrFin;
     @FXML private DatePicker uiPeriodeDebut;
     @FXML private CheckBox uiCrerEntreeCalendrier;
     @FXML private TextField uiTitre;
     @FXML private BorderPane uiTablePane;
+    @FXML private GridPane uiGrid;
+    @FXML private ComboBox<Preview> uiType;
 
     private PojoTable uiTable;
 
@@ -43,13 +67,98 @@ public class RapportsPane extends BorderPane implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        uiTable = new RapportsTable();
+        final Session session = Injector.getSession();
+        final Previews previewRepository = session.getPreviews();
 
+        uiTable = new RapportsTable();
         uiTablePane.setCenter(uiTable);
+        uiPrDebut = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE,0.0));
+        uiPrFin = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE,0.0));
+        uiGrid.add(uiPrDebut, 1, 3);
+        uiGrid.add(uiPrFin, 3, 3);
+
+        final LocalDate date = LocalDate.now();
+        uiPeriodeDebut.valueProperty().set(date);
+        uiPeriodeFin.valueProperty().set(date);
+
+        uiSystemEndiguement.setEditable(false);
+        uiSystemEndiguement.valueProperty().addListener(this::systemeEndiguementChange);
+        uiTroncons.getSelectionModel().getSelectedItems().addListener(this::tronconSelectionChange);
+
+        uiSystemEndiguement.setConverter(new SirsStringConverter());
+        uiSystemEndiguement.setItems(FXCollections.observableArrayList(
+            previewRepository.getByClass(SystemeEndiguement.class)));
+        if(uiSystemEndiguement.getItems()!=null){
+            uiSystemEndiguement.getSelectionModel().select(0);
+        }
+
+        SIRS.initCombo(uiType, FXCollections.observableArrayList(
+            previewRepository.getByClass(RefTypeObligationReglementaire.class)), null);
+        if(uiType.getItems()!=null){
+            uiType.getSelectionModel().select(0);
+        }
+        uiType.setEditable(false);
+
+    }
+
+    private void systemeEndiguementChange(ObservableValue<? extends Preview> observable,
+                Preview oldValue, Preview newValue) {
+        if(newValue==null){
+            uiTroncons.setItems(FXCollections.emptyObservableList());
+        }else{
+            final Session session = Injector.getSession();
+            final TronconDigueRepository tronconRepo = (TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class);
+            final Set<Digue> digues = new HashSet<>(session.getRepositoryForClass(Digue.class).getAll());
+
+            final Set<TronconDigue> troncons = new HashSet<>();
+            for(Digue digue : digues){
+                if(newValue.getElementId().equals(digue.getSystemeEndiguementId())){
+                    troncons.addAll(tronconRepo.getByDigue(digue));
+                }
+            }
+            uiTroncons.setItems(FXCollections.observableArrayList(troncons));
+        }
+    }
+
+    private void tronconSelectionChange(ListChangeListener.Change<? extends TronconDigue> c){
+        final Session session = Injector.getSession();
+
+        final ObservableList<TronconDigue> selectedItems = uiTroncons.getSelectionModel().getSelectedItems();
+        if(selectedItems.size()==1){
+            uiPrDebut.setDisable(false);
+            uiPrFin.setDisable(false);
+        }else{
+            uiPrDebut.setDisable(true);
+            uiPrFin.setDisable(true);
+        }
     }
 
     @FXML
-    void generateReport(ActionEvent event) {
+    private void generateReport(ActionEvent event) {
+        final Session session = Injector.getSession();
+
+        final LocalDate dateDebut = uiPeriodeDebut.getValue();
+        final LocalDate dateFin = uiPeriodeFin.getValue();
+        final Preview type = uiType.valueProperty().get();
+        final Preview sysEndi = uiSystemEndiguement.valueProperty().get();
+        final String titre = uiTitre.getText();
+//        final ObservableList<Digue> selectedItems = uiTroncons.getSelectionModel().getSelectedItems();
+//        if(selectedItems.size()!=1){
+//
+//        }
+
+        if(uiCrerEntreeCalendrier.isSelected()){
+            //on crée une obligation à la date d'aujourdhui
+            final ObligationReglementaireRepository rep = (ObligationReglementaireRepository)session.getRepositoryForClass(ObligationReglementaire.class);
+            final ObligationReglementaire obligation = rep.create();
+            final LocalDateTime date = LocalDateTime.now();
+            obligation.setAnnee(date.getYear());
+            obligation.setDateRealisation(date);
+            obligation.setLibelle(titre);
+            if(sysEndi!=null) obligation.setSystemeEndiguementId(sysEndi.getElementId());
+            if(type!=null) obligation.setTypeId(type.getElementId());
+            rep.add(obligation);
+        }
 
     }
 
