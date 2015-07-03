@@ -442,25 +442,12 @@ public class PojoTable extends BorderPane {
         }
         
         commentPhotoView.valueProperty().bind(uiTable.getSelectionModel().selectedItemProperty());
-
-        Consumer<Boolean> switchCommentPhotoView = (Boolean newValue) -> {
-            if(newValue){
-                final SplitPane sPane = new SplitPane();
-                sPane.setOrientation(Orientation.VERTICAL);
-                sPane.getItems().addAll(uiTable, commentPhotoView);
-                sPane.setDividerPositions(0.9);
-                setCenter(sPane);
-            }else{
-                setCenter(uiTable);
-            }
-        };
         commentPhotoView.visibleProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                switchCommentPhotoView.accept(newValue);
+                updateView();
             }
         });
-        switchCommentPhotoView.accept(Boolean.TRUE);
 
         //
         // NAVIGATION FICHE PAR FICHE
@@ -497,39 +484,15 @@ public class PojoTable extends BorderPane {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 if (newValue) {
-                    // If there's no selection, initialize on first element.
-                    if (uiTable.getSelectionModel().getSelectedIndex() < 0) {
-                        uiTable.getSelectionModel().select(0);
-                    }
-                    
-                    // Prepare editor and bind its content to selection model. 
-                    if (elementPane == null) {
-                        elementPane = SIRS.generateEditionPane(uiTable.getSelectionModel().getSelectedItem());
-                    }
-                    elementPane.elementProperty().bind(uiTable.getSelectionModel().selectedItemProperty());
-                    
-                    uiFicheMode.setTooltip(new Tooltip("Passer en mode de tableau synoptique."));
-                    
-                    uiCurrent.setText("" + (uiTable.getSelectionModel().getSelectedIndex()+1) + " / " + uiTable.getItems().size());
                     uiTable.getSelectionModel().selectedIndexProperty().addListener(selectedIndexListener);
-                    setCenter((Node) elementPane);
-                    
                 } else {
-                    // Deconnect editor.
-                    if (elementPane != null) {
-                        elementPane.elementProperty().unbind();
-                    }
-                    
-                    // Update display
                     uiTable.getSelectionModel().selectedIndexProperty().removeListener(selectedIndexListener);
-                    setCenter(uiTable);
-                    
-                    uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
                 }
+                updateView();
             }
         });
         uiFicheMode.disableProperty().bind(fichableProperty.not());
-        
+
         uiImport.getStyleClass().add(BUTTON_STYLE);
         uiImport.disableProperty().bind(editableProperty.not());
         uiImport.visibleProperty().bind(importPointProperty);
@@ -639,8 +602,47 @@ public class PojoTable extends BorderPane {
         titleAndFilterBox.setFillWidth(true);
         topPane = new BorderPane(null, titleAndFilterBox, searchEditionToolbar, null, navigationToolbar);
         setTop(topPane);
+        
+        updateView();
     }
-    
+
+    private void updateView(){
+
+        if(uiFicheMode.isSelected()){
+            // If there's no selection, initialize on first element.
+            if (uiTable.getSelectionModel().getSelectedIndex() < 0) {
+                uiTable.getSelectionModel().select(0);
+            }
+
+            // Prepare editor and bind its content to selection model.
+            if (elementPane == null) {
+                elementPane = SIRS.generateEditionPane(uiTable.getSelectionModel().getSelectedItem());
+            }
+            elementPane.elementProperty().bind(uiTable.getSelectionModel().selectedItemProperty());
+
+            uiFicheMode.setTooltip(new Tooltip("Passer en mode de tableau synoptique."));
+
+            uiCurrent.setText("" + (uiTable.getSelectionModel().getSelectedIndex()+1) + " / " + uiTable.getItems().size());
+            setCenter((Node) elementPane);
+        }else{
+            // Deconnect editor.
+            if (elementPane != null) {
+                elementPane.elementProperty().unbind();
+            }
+            uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
+            
+            if(commentPhotoView.isVisible()){
+                final SplitPane sPane = new SplitPane();
+                sPane.setOrientation(Orientation.VERTICAL);
+                sPane.getItems().addAll(uiTable, commentPhotoView);
+                sPane.setDividerPositions(0.9);
+                setCenter(sPane);
+            }else{
+                setCenter(uiTable);
+            }
+        }
+    }
+
     /**
      * Définit l'élément en paramètre comme parent de tout élément créé via cette table.
      * 
