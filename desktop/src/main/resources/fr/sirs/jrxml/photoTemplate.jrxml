@@ -42,7 +42,7 @@
 			</textField>
 			<image>
 				<reportElement x="22" y="0" width="100" height="40" uuid="072d6ffa-5b23-4566-a9ef-ea6ac8c4c115"/>
-				<imageExpression><![CDATA[fr.sirs.util.FXFileTextField.streamFromText($F{chemin})]]></imageExpression>
+				<imageExpression><![CDATA[fr.sirs.util.PrinterUtilities.streamFromText($F{chemin})]]></imageExpression>
 			</image>
 		</band>
 	</detail>

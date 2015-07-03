@@ -91,29 +91,4 @@ public class FXFileTextField extends AbstractPathTextField {
         }
     }
     
-    /**
-     * Utility method used to build complete path into jasper templates from 
-     * local path only.
-     * 
-     * @param inputText
-     * @return
-     * @throws Exception 
-     */
-    public static InputStream streamFromText(String inputText) throws Exception {
-        final String rootPath = SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT);
-        final URI resultURI;
-        if (rootPath == null) {
-            resultURI = inputText.matches("[A-Za-z]+://.+")? new URI(inputText) : Paths.get(inputText).toUri();
-        } else {
-            resultURI = SIRS.getDocumentAbsolutePath(inputText == null? "" : inputText).toUri();
-        }
-        
-        try {
-            return new FileInputStream(new File(resultURI));
-        } catch(Exception e){
-            SIRS.LOGGER.log(Level.INFO, "No image found at URI "+resultURI);
-            return FXFileTextField.class.getResourceAsStream("/fr/sirs/images/imgNotFound.png");
-        } 
-    }
-    
 }

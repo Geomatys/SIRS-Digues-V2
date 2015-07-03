@@ -1,19 +1,26 @@
 package fr.sirs.util;
 
+import fr.sirs.SIRS;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.Photo;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTOS_SUBREPORT;
+import fr.sirs.util.property.SirsPreferences;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import javafx.util.StringConverter;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JREmptyDataSource;
@@ -55,9 +62,10 @@ public class PrinterUtilities {
     }
     
     ////////////////////////////////////////////////////////////////////////////
-    // FICHES DE DESORDRES
+    // FICHES DÉTAILLÉES DE DESORDRES
     ////////////////////////////////////////////////////////////////////////////
     private static final String META_TEMPLATE_DESORDRE = "/fr/sirs/jrxml/metaTemplateDesordre.jrxml";
+    private static final String TEMPLATE_PHOTOS = "/fr/sirs/jrxml/photoTemplate.jrxml";
     
     public static File printDisorders(List<String> avoidFields, final Previews previewLabelRepository, final StringConverter stringConverter, final List<Desordre> desordres) throws Exception {
         
@@ -68,7 +76,6 @@ public class PrinterUtilities {
             // Creates the Jasper Reports specific template from the generic template.
             final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
             templateFile.deleteOnExit();
-    //        final File templateFile = new File("/home/samuel/Bureau/desordreObservation.jrxml");
 
             final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE));
             templateWriter.setFieldsInterline(2);
@@ -82,7 +89,6 @@ public class PrinterUtilities {
             final Map<String, Object> parameters = new HashMap<>();
             parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
             
-//            for(int i = 0; i<10; i++) desordre.observations.add(desordre.observations.get(0));
             parameters.put(JRDomWriterDesordreSheet.OBSERVATION_TABLE_DATA_SOURCE, new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
             final List<Photo> photos = new ArrayList<>();
             for(final Observation observation : desordre.observations){
@@ -92,7 +98,7 @@ public class PrinterUtilities {
             }
             parameters.put(JRDomWriterDesordreSheet.PHOTO_TABLE_DATA_SOURCE, new ObjectDataSource<>(photos, previewLabelRepository, stringConverter));
             
-            final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplate.jrxml"));
+            final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS));
             parameters.put(PHOTOS_SUBREPORT, photosReport);
             
             final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
@@ -102,7 +108,7 @@ public class PrinterUtilities {
         
         for(final JasperPrint print : followingPrints){
             for(final JRPrintPage page : print.getPages()){
-                firstPrint.addPage(page);
+                if(firstPrint!=null) firstPrint.addPage(page);
             }
         }
         
@@ -290,6 +296,31 @@ JasperViewer.viewReport(jp1,false);
     public static String getFieldNameFromSetter(final Method setter){
         return setter.getName().substring(3, 4).toLowerCase()
                             + setter.getName().substring(4);
+    }
+    
+    /**
+     * Utility method used to build complete path into jasper templates from 
+     * local path only.
+     * 
+     * @param inputText
+     * @return
+     * @throws Exception 
+     */
+    public static InputStream streamFromText(String inputText) throws Exception {
+        final String rootPath = SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT);
+        final URI resultURI;
+        if (rootPath == null) {
+            resultURI = inputText.matches("[A-Za-z]+://.+")? new URI(inputText) : Paths.get(inputText).toUri();
+        } else {
+            resultURI = SIRS.getDocumentAbsolutePath(inputText == null? "" : inputText).toUri();
+        }
+        
+        try {
+            return new FileInputStream(new File(resultURI));
+        } catch(Exception e){
+            SIRS.LOGGER.log(Level.INFO, "No image found at URI "+resultURI);
+            return FXFileTextField.class.getResourceAsStream("/fr/sirs/images/imgNotFound.png");
+        } 
     }
     
     ////////////////////////////////////////////////////////////////////////////

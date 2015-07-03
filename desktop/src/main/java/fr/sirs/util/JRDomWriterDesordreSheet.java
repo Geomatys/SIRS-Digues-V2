@@ -385,23 +385,15 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         /*----------------------------------------------------------------------
         TABLE DES OBSERVATIONS
         ----------------------------------------------------------------------*/
-        writeObservationTable(avoidFields, order);
+        writeTable(Observation.class, avoidFields, order, OBSERVATION_TABLE_DATA_SOURCE);
         
         
         /*----------------------------------------------------------------------
         TABLE DES PHOTOS
         ----------------------------------------------------------------------*/
-//        writePhotoTable(avoidFields, order);
-        
-//			<subreport>
-//				<reportElement x="0" y="267" width="555" height="83" uuid="b87ab09e-7621-4164-b9f6-132acc901c7a"/>
-//				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JREmptyDataSource()]]></dataSourceExpression>
-//				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "photoTemplate.jasper"]]></subreportExpression>
-//			</subreport>
         includePhotoSubreport(order);
         
-        // Sizes the detail element given to the field number.--------------------
-        
+        // Sizes the detail element given to the field number.------------------
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         band.setAttribute(ATT_HEIGHT, String.valueOf((FIELDS_HEIGHT+fields_interline)*order
                 + 64 //Taille du tableau des observations
@@ -455,7 +447,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         band.appendChild(subReport);
     }
     
-    private int writeObservationTable(List<String> avoidFields, int order){
+    private int writeTable(final Class clazz, final List<String> avoidFields, int order, final String datasourceParameter){
         
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         
@@ -487,7 +479,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         
         int nbColumns=0;
         // Premier parcours pour calculer le nombre de colonnes
-        for(final Method method : Observation.class.getMethods()){
+        for(final Method method : clazz.getMethods()){
             
             if(PrinterUtilities.isSetter(method)){
                 
@@ -499,7 +491,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         }
         
         final int columnWidth = (PAGE_WIDTH - (LEFT_MARGIN+LEFT_MARGIN))/nbColumns;
-        for(final Method method : Observation.class.getMethods()){
+        for(final Method method : clazz.getMethods()){
             
             if(PrinterUtilities.isSetter(method)){
                 
