@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
@@ -32,7 +33,7 @@ public class PluginLoader extends URLClassLoader {
     
     public void loadPlugins() throws IOException, IllegalStateException {
         if (Files.isDirectory(SirsCore.PLUGINS_PATH)) {
-            Files.walk(SirsCore.PLUGINS_PATH).filter(PluginLoader::isJar).map(PluginLoader::toURL).forEach(this::addURL);
+            Files.walk(SirsCore.PLUGINS_PATH, FileVisitOption.FOLLOW_LINKS).filter(PluginLoader::isJar).map(PluginLoader::toURL).forEach(this::addURL);
         }
     }
     
