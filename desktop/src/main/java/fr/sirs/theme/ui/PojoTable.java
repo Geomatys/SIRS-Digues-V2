@@ -69,6 +69,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -442,21 +443,24 @@ public class PojoTable extends BorderPane {
         
         commentPhotoView.valueProperty().bind(uiTable.getSelectionModel().selectedItemProperty());
 
+        Consumer<Boolean> switchCommentPhotoView = (Boolean newValue) -> {
+            if(newValue){
+                final SplitPane sPane = new SplitPane();
+                sPane.setOrientation(Orientation.VERTICAL);
+                sPane.getItems().addAll(uiTable, commentPhotoView);
+                sPane.setDividerPositions(0.9);
+                setCenter(sPane);
+            }else{
+                setCenter(uiTable);
+            }
+        };
         commentPhotoView.visibleProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                //on enleve le diviseur quand il n'y a pas la partie commentaire
-                if(newValue){
-                    final SplitPane sPane = new SplitPane();
-                    sPane.setOrientation(Orientation.VERTICAL);
-                    sPane.getItems().addAll(uiTable, commentPhotoView);
-                    sPane.setDividerPositions(0.9);
-                    setCenter(sPane);
-                }else{
-                    setCenter(uiTable);
-                }
+                switchCommentPhotoView.accept(newValue);
             }
         });
+        switchCommentPhotoView.accept(Boolean.TRUE);
 
         //
         // NAVIGATION FICHE PAR FICHE
