@@ -3,6 +3,9 @@ package fr.sirs.util;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Observation;
+import fr.sirs.core.model.Photo;
+import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTOS_SUBREPORT;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.Method;
@@ -78,9 +81,19 @@ public class PrinterUtilities {
 
             final Map<String, Object> parameters = new HashMap<>();
             parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
+            
 //            for(int i = 0; i<10; i++) desordre.observations.add(desordre.observations.get(0));
-            parameters.put(JRDomWriterDesordreSheet.OBSERVATIONS_TABLE_DATA_SOURCE, new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
-            parameters.put("OBSERVATIONS_2_TABLE_DATA_SOURCE", new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
+            parameters.put(JRDomWriterDesordreSheet.OBSERVATION_TABLE_DATA_SOURCE, new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
+            final List<Photo> photos = new ArrayList<>();
+            for(final Observation observation : desordre.observations){
+                if(observation.photos!=null && !observation.photos.isEmpty()){
+                    photos.addAll(observation.photos);
+                }
+            }
+            parameters.put(JRDomWriterDesordreSheet.PHOTO_TABLE_DATA_SOURCE, new ObjectDataSource<>(photos, previewLabelRepository, stringConverter));
+            
+            final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplate.jrxml"));
+            parameters.put(PHOTOS_SUBREPORT, photosReport);
             
             final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
             if(firstPrint==null) firstPrint=print;

@@ -9,6 +9,8 @@ import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
 import fr.sirs.util.property.SirsPreferences;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -87,6 +89,31 @@ public class FXFileTextField extends AbstractPathTextField {
             SIRS.LOGGER.log(Level.FINEST, "Unable to build URI from "+getText());
             return null;
         }
+    }
+    
+    /**
+     * Utility method used to build complete path into jasper templates from 
+     * local path only.
+     * 
+     * @param inputText
+     * @return
+     * @throws Exception 
+     */
+    public static InputStream streamFromText(String inputText) throws Exception {
+        final String rootPath = SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT);
+        final URI resultURI;
+        if (rootPath == null) {
+            resultURI = inputText.matches("[A-Za-z]+://.+")? new URI(inputText) : Paths.get(inputText).toUri();
+        } else {
+            resultURI = SIRS.getDocumentAbsolutePath(inputText == null? "" : inputText).toUri();
+        }
+        
+        try {
+            return new FileInputStream(new File(resultURI));
+        } catch(Exception e){
+            SIRS.LOGGER.log(Level.INFO, "No image found at URI "+resultURI);
+            return FXFileTextField.class.getResourceAsStream("/fr/sirs/images/imgNotFound.png");
+        } 
     }
     
 }

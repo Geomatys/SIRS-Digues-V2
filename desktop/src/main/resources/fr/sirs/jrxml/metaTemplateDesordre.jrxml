@@ -27,10 +27,12 @@
 			<style backcolor="#FFFFEF"/>
 		</conditionalStyle>
 	</style>
-	<subDataset name="Query Dataset">
+	<subDataset name="Observations Dataset">
 	</subDataset>
 	<parameter name="logo" class="java.lang.Object"/>
-	<parameter name="OBSERVATIONS_TABLE_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
+	<parameter name="OBSERVATION_TABLE_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
+	<parameter name="PHOTO_TABLE_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
+	<parameter name="PHOTOS_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport" />
 
 
 	<title>

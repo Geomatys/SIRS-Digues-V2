@@ -50,6 +50,8 @@ public class JRUtils {
     public static final String TAG_STATIC_TEXT = "staticText";
     public static final String TAG_STYLE = "style";
     public static final String TAG_SUB_DATASET = "subDataset";
+    public static final String TAG_SUBREPORT = "subreport";
+    public static final String TAG_SUBREPORT_EXPRESSION = "subreportExpression";
     public static final String TAG_TABLE = "table";
     public static final String TAG_TABLE_HEADER = "tableHeader";
     public static final String TAG_TABLE_FOOTER = "tableFooter";

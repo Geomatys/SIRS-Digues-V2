@@ -48,6 +48,8 @@ import static fr.sirs.util.JRUtils.TAG_PAGE_FOOTER;
 import static fr.sirs.util.JRUtils.TAG_PAGE_HEADER;
 import static fr.sirs.util.JRUtils.TAG_REPORT_ELEMENT;
 import static fr.sirs.util.JRUtils.TAG_STATIC_TEXT;
+import static fr.sirs.util.JRUtils.TAG_SUBREPORT;
+import static fr.sirs.util.JRUtils.TAG_SUBREPORT_EXPRESSION;
 import static fr.sirs.util.JRUtils.TAG_SUB_DATASET;
 import static fr.sirs.util.JRUtils.TAG_TABLE;
 import static fr.sirs.util.JRUtils.TAG_TABLE_FOOTER;
@@ -123,7 +125,11 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     private static final String TRUE_REPLACEMENT = "Oui";
     private static final String FALSE_REPLACEMENT = "Non";
     
-    public static final String OBSERVATIONS_TABLE_DATA_SOURCE = "OBSERVATIONS_TABLE_DATA_SOURCE";
+    public static final String OBSERVATIONS_DATASET = "Observations Dataset";
+    public static final String OBSERVATION_TABLE_DATA_SOURCE = "OBSERVATION_TABLE_DATA_SOURCE";
+    public static final String PHOTOS_DATASET = "Photos Dataset";
+    public static final String PHOTO_TABLE_DATA_SOURCE = "PHOTO_TABLE_DATA_SOURCE";
+    public static final String PHOTOS_SUBREPORT = "PHOTOS_SUBREPORT";
     
     private JRDomWriterDesordreSheet(){
         super();
@@ -379,6 +385,78 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         /*----------------------------------------------------------------------
         TABLE DES OBSERVATIONS
         ----------------------------------------------------------------------*/
+        writeObservationTable(avoidFields, order);
+        
+        
+        /*----------------------------------------------------------------------
+        TABLE DES PHOTOS
+        ----------------------------------------------------------------------*/
+//        writePhotoTable(avoidFields, order);
+        
+//			<subreport>
+//				<reportElement x="0" y="267" width="555" height="83" uuid="b87ab09e-7621-4164-b9f6-132acc901c7a"/>
+//				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JREmptyDataSource()]]></dataSourceExpression>
+//				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "photoTemplate.jasper"]]></subreportExpression>
+//			</subreport>
+        includePhotoSubreport(order);
+        
+        // Sizes the detail element given to the field number.--------------------
+        
+        final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
+        band.setAttribute(ATT_HEIGHT, String.valueOf((FIELDS_HEIGHT+fields_interline)*order
+                + 64 //Taille du tableau des observations
+                + 64 //Taille du tableau des photos
+        ));
+        
+        // Builds the DOM tree.-------------------------------------------------
+        root.appendChild(detail);
+    }
+    
+    private void includePhotoSubreport(int order){
+        
+        final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
+        
+        final Element subReport = document.createElement(TAG_SUBREPORT);
+        final Element reportElement = document.createElement(TAG_REPORT_ELEMENT);
+//        reportElement.setAttribute(ATT_KEY, "table");
+//        reportElement.setAttribute(ATT_STYLE, "table");
+        reportElement.setAttribute(ATT_X, String.valueOf(0));
+        reportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+fields_interline)*order+64/*obs table height*/));
+//        componentElementReportElement.setAttribute(ATT_Y, String.valueOf(0));
+        reportElement.setAttribute(ATT_WIDTH, String.valueOf(802));
+        reportElement.setAttribute(ATT_HEIGHT, String.valueOf(64));
+        reportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
+//        componentElementReportElement.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, String.valueOf(true));
+        subReport.appendChild(reportElement);
+        
+        // Set the table element
+//        final Element table = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE);
+        
+//        final Element datasetRun = document.createElementNS(URI_JRXML, TAG_DATASET_RUN);
+//        datasetRun.setAttribute(ATT_SUB_DATASET, OBSERVATIONS_DATASET);
+        final Element datasourceExpression = document.createElementNS(URI_JRXML, TAG_DATA_SOURCE_EXPRESSION);
+        
+//        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $P{"+OBSERVATION_TABLE_DATA_SOURCE+"})");//.cloneDataSource()
+        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $P{"+PHOTO_TABLE_DATA_SOURCE+"})");//.cloneDataSource()
+        
+        datasourceExpression.appendChild(datasourceExpressionField);
+        subReport.appendChild(datasourceExpression);
+        
+        
+        final Element subreportExpression = document.createElementNS(URI_JRXML, TAG_SUBREPORT_EXPRESSION);
+        
+//        final CDATASection subreportExpressionField = document.createCDATASection("net.sf.jasperreports.engine.JasperCompileManager.compileReport($P{SUBREPORT_DIR} + \"photoTemplate.jrxml\")");//.cloneDataSource()
+//        final CDATASection subreportExpressionField = document.createCDATASection("net.sf.jasperreports.engine.JasperCompileManager.compileReport(\"photoTemplate.jrxml\")");//.cloneDataSource()
+        final CDATASection subreportExpressionField = document.createCDATASection("$P{"+PHOTOS_SUBREPORT+"}");
+        
+        subreportExpression.appendChild(subreportExpressionField);
+        subReport.appendChild(subreportExpression);
+        
+        band.appendChild(subReport);
+    }
+    
+    private int writeObservationTable(List<String> avoidFields, int order){
+        
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         
         final Element componentElement = document.createElement(TAG_COMPONENT_ELEMENT);
@@ -397,10 +475,10 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         final Element table = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE);
         
         final Element datasetRun = document.createElementNS(URI_JRXML, TAG_DATASET_RUN);
-        datasetRun.setAttribute(ATT_SUB_DATASET, "Query Dataset");
+        datasetRun.setAttribute(ATT_SUB_DATASET, OBSERVATIONS_DATASET);
         final Element datasourceExpression = document.createElementNS(URI_JRXML, TAG_DATA_SOURCE_EXPRESSION);
         
-        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $P{"+OBSERVATIONS_TABLE_DATA_SOURCE+"})");//.cloneDataSource()
+        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $P{"+OBSERVATION_TABLE_DATA_SOURCE+"})");//.cloneDataSource()
         
         datasourceExpression.appendChild(datasourceExpressionField);
         datasetRun.appendChild(datasourceExpression);
@@ -437,22 +515,11 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         componentElement.appendChild(table);
         
         band.appendChild(componentElement);
-        
-        
-        
-        
-        // Sizes the detail element given to the field number.--------------------
-        band.setAttribute(ATT_HEIGHT, String.valueOf((FIELDS_HEIGHT+fields_interline)*order+64));
-        
-        // Builds the DOM tree.-------------------------------------------------
-        root.appendChild(detail);
+        return order;
     }
     
-    
-    
     private void writeColumn(final Method setter, final Element table, final int columnWidth){
-        
-        
+       
         final Element column = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN);
         column.setAttribute(ATT_WIDTH, String.valueOf(columnWidth));
         
@@ -469,23 +536,23 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         final Element jrColumnHeader = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN_HEADER);
         jrColumnHeader.setAttribute(ATT_STYLE, "table_CH");
         jrColumnHeader.setAttribute(ATT_HEIGHT, String.valueOf(40));
-        
-            final Element staticText = document.createElementNS(URI_JRXML, TAG_STATIC_TEXT);
+
+        final Element staticText = document.createElementNS(URI_JRXML, TAG_STATIC_TEXT);
             
-                final Element staticTextReportElement = document.createElementNS(URI_JRXML, TAG_REPORT_ELEMENT);
-                staticTextReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL/2));
-                staticTextReportElement.setAttribute(ATT_Y, String.valueOf(0));
-                staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-INDENT_LABEL));
-                staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(40));
-        //        staticTextReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
-                staticText.appendChild(staticTextReportElement);
+        final Element staticTextReportElement = document.createElementNS(URI_JRXML, TAG_REPORT_ELEMENT);
+        staticTextReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL/2));
+        staticTextReportElement.setAttribute(ATT_Y, String.valueOf(0));
+        staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-INDENT_LABEL));
+        staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(40));
+//        staticTextReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
+        staticText.appendChild(staticTextReportElement);
 
-                final Element text = document.createElementNS(URI_JRXML, TAG_TEXT);
-                final ResourceBundle rb = ResourceBundle.getBundle(Observation.class.getName());
-                final CDATASection labelField = document.createCDATASection(rb.getString(getFieldNameFromSetter(setter)));
-                text.appendChild(labelField);
+        final Element text = document.createElementNS(URI_JRXML, TAG_TEXT);
+        final ResourceBundle rb = ResourceBundle.getBundle(Observation.class.getName());
+        final CDATASection labelField = document.createCDATASection(rb.getString(getFieldNameFromSetter(setter)));
+        text.appendChild(labelField);
 
-            staticText.appendChild(text);
+        staticText.appendChild(text);
         jrColumnHeader.appendChild(staticText);
         
         // Column footer
