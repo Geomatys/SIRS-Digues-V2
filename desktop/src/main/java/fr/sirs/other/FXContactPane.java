@@ -205,7 +205,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
                 }
             });
             organismeColumn.setCellFactory((TableColumn<Element, String> param) -> new SirsTableCell<>());
-            uiTable.getColumns().add(organismeColumn);
+            getColumns().add(organismeColumn);
             
             setTableItems(() -> orgsOfContact);          
         }

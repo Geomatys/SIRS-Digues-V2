@@ -7,9 +7,9 @@ import fr.sirs.core.model.RapportModeleObligationReglementaire;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
@@ -36,16 +36,26 @@ public class RapportPane extends GridPane implements Initializable {
         
         SIRS.loadFXML(this, RapportPane.class);
         Injector.injectDependencies(this);
+
+        uiTitre.setText(rapport.getLibelle());
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         uiTable = new RapportSectionTable();
+        uiTable.setTableItems(()-> (ObservableList) rapport.getSection());
         uiTablePane.setCenter(uiTable);
+    }
+
+    public RapportModeleObligationReglementaire getReport(){
+        rapport.setLibelle(uiTitre.getText());
+
+        return rapport;
     }
 
     public static RapportModeleObligationReglementaire showCreateDialog(){
         final RapportPane rpane = new RapportPane(new RapportModeleObligationReglementaire());
+        rpane.rapport.setValid(true);
 
         final Dialog dialog = new Dialog();
         final DialogPane pane = new DialogPane();
@@ -57,13 +67,14 @@ public class RapportPane extends GridPane implements Initializable {
 
         final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.APPLY.equals(opt.get())){
-            return rpane.rapport;
+            return rpane.getReport();
         }
         return null;
     }
 
-    public static RapportPane showEditDialog(RapportModeleObligationReglementaire rapport){
+    public static RapportModeleObligationReglementaire showEditDialog(RapportModeleObligationReglementaire rapport){
         final RapportPane rpane = new RapportPane(rapport);
+        rpane.rapport.setValid(true);
 
         final Dialog dialog = new Dialog();
         final DialogPane pane = new DialogPane();
@@ -75,7 +86,7 @@ public class RapportPane extends GridPane implements Initializable {
 
         final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.APPLY.equals(opt.get())){
-            return rpane;
+            return rpane.getReport();
         }
         return null;
     }

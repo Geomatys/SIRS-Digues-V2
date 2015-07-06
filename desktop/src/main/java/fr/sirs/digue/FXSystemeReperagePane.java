@@ -94,7 +94,7 @@ public class FXSystemeReperagePane extends BorderPane {
 
         public BorneTable() {
             super(SystemeReperageBorne.class, "Liste des bornes");
-            uiTable.getColumns().remove((TableColumn) editCol);
+            getColumns().remove((TableColumn) editCol);
             fichableProperty.set(false);
         }
 

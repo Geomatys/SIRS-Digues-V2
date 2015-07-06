@@ -4,11 +4,13 @@ package fr.sirs.plugin.reglementaire.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
@@ -32,12 +34,15 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.util.Callback;
 
 /**
  * 
@@ -83,7 +88,21 @@ public class RapportsPane extends BorderPane implements Initializable {
 
         uiSystemEndiguement.setEditable(false);
         uiSystemEndiguement.valueProperty().addListener(this::systemeEndiguementChange);
+        uiTroncons.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         uiTroncons.getSelectionModel().getSelectedItems().addListener(this::tronconSelectionChange);
+        final SirsStringConverter converter = new SirsStringConverter();
+        uiTroncons.setCellFactory(new Callback<ListView<TronconDigue>, ListCell<TronconDigue>>() {
+            @Override
+            public ListCell<TronconDigue> call(ListView<TronconDigue> param) {
+                return new ListCell(){
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setText(converter.toString(item));
+                    }
+                };
+            }
+        });
 
         uiSystemEndiguement.setConverter(new SirsStringConverter());
         uiSystemEndiguement.setItems(FXCollections.observableArrayList(
@@ -107,14 +126,14 @@ public class RapportsPane extends BorderPane implements Initializable {
             uiTroncons.setItems(FXCollections.emptyObservableList());
         }else{
             final Session session = Injector.getSession();
+            final SystemeEndiguementRepository sdRepo = (SystemeEndiguementRepository) session.getRepositoryForClass(SystemeEndiguement.class);
+            final DigueRepository digueRepo = (DigueRepository) session.getRepositoryForClass(Digue.class);
             final TronconDigueRepository tronconRepo = (TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class);
-            final Set<Digue> digues = new HashSet<>(session.getRepositoryForClass(Digue.class).getAll());
+            final SystemeEndiguement sd = sdRepo.get(newValue.getElementId());
 
             final Set<TronconDigue> troncons = new HashSet<>();
-            for(Digue digue : digues){
-                if(newValue.getElementId().equals(digue.getSystemeEndiguementId())){
-                    troncons.addAll(tronconRepo.getByDigue(digue));
-                }
+            for(Digue digue : digueRepo.get(sd.getDigueIds())){
+                troncons.addAll(tronconRepo.getByDigue(digue));
             }
             uiTroncons.setItems(FXCollections.observableArrayList(troncons));
         }

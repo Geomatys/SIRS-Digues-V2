@@ -14,7 +14,7 @@ public class RapportsTable extends PojoTable {
     public RapportsTable() {
         super(RapportModeleObligationReglementaire.class, "Modèles de document préenregistrées");
         editableProperty().set(true);
-        detaillableProperty().set(false);
+        detaillableProperty().set(true);
         fichableProperty().set(false);
         importPointProperty().set(false);
         commentAndPhotoProperty().set(false);
@@ -22,6 +22,7 @@ public class RapportsTable extends PojoTable {
         exportVisibleProperty().set(false);
         ficheModeVisibleProperty().set(false);
         filterVisibleProperty().set(false);
+        openEditorOnNewProperty().set(false);
     }
 
     @Override
@@ -29,9 +30,18 @@ public class RapportsTable extends PojoTable {
         final RapportModeleObligationReglementaire rapport = RapportPane.showCreateDialog();
         if(rapport!=null){
             repo.add(rapport);
-            filteredValues.add(rapport);
+            getAllValues().add(rapport);
         }
         return rapport;
+    }
+
+    @Override
+    protected void editPojo(Object pojo) {
+        final RapportModeleObligationReglementaire rapport = RapportPane.showEditDialog((RapportModeleObligationReglementaire) pojo);
+        if(rapport!=null){
+            repo.update(rapport);
+            
+        }
     }
 
 }

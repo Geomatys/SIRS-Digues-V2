@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -66,12 +65,12 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
             serverInstanceNotLocal = referenceChecker.getServerInstancesNotLocal().get(pojoClass);
             localInstancesNotOnTheServer = referenceChecker.getLocalInstancesNotOnTheServer().get(pojoClass);
             
-            uiTable.getColumns().replaceAll((TableColumn<Element, ?> t) -> {
+            getColumns().replaceAll((TableColumn<Element, ?> t) -> {
                     if(t instanceof DeleteColumn) return new StateColumn();
                     else return t;
                 });
             
-            uiTable.setRowFactory((TableView<Element> param) -> {
+            getTable().setRowFactory((TableView<Element> param) -> {
                     return new ReferenceTableRow();
                 });
             
@@ -88,15 +87,6 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
             
             setTableItems(() -> {return allItems;});
         }
-    
-        @Override
-        public void setTableItems(Supplier<ObservableList<Element>> producer) {
-
-            editableProperty().set(true);
-            uiTable.setItems(producer.get());
-            editableProperty().set(false);
-        }
-
 
         private class ReferenceTableRow extends TableRow<Element>{
 

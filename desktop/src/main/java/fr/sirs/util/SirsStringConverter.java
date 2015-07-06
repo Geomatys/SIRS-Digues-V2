@@ -102,7 +102,11 @@ public class SirsStringConverter extends StringConverter {
                 text.append(" : ").append(libelle.getLibelle());
             }
         }
-        
+
+        if(item!=null && item.getClass().isEnum()){
+            text.append(((Enum)item).name());
+        }
+
         final String result = text.toString();
         if (result != null && !result.isEmpty()) {
             fromString.put(result, item);

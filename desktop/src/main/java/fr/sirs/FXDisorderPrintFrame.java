@@ -66,26 +66,18 @@ public class FXDisorderPrintFrame extends BorderPane {
     
     private class TronconChoicePojoTable extends PojoTable {
         
-        ObservableList<Element> getSelectedItems(){
-            return uiTable.getSelectionModel().getSelectedItems();
-        }
-
         public TronconChoicePojoTable() {
             super(TronconDigue.class, "Tronçons");
-            uiTable.getColumns().remove(editCol);
+            getColumns().remove(editCol);
             editableProperty.set(false);
         }
     }
     
     private class DisorderTypeChoicePojoTable extends PojoTable {
         
-        ObservableList<Element> getSelectedItems(){
-            return uiTable.getSelectionModel().getSelectedItems();
-        }
-
         public DisorderTypeChoicePojoTable() {
             super(RefTypeDesordre.class, "Types de désordres");
-            uiTable.getColumns().remove(editCol);
+            getColumns().remove(editCol);
             editableProperty.set(false);
         }
     }

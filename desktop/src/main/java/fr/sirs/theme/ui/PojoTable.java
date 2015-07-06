@@ -17,14 +17,11 @@ import static fr.sirs.SIRS.AUTHOR_FIELD;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS_ABREGE;
 import static fr.sirs.SIRS.COMMENTAIRE_FIELD;
 import static fr.sirs.SIRS.DATE_MAJ_FIELD;
-import static fr.sirs.SIRS.DESIGNATION_FIELD;
 import static fr.sirs.SIRS.FOREIGN_PARENT_ID_FIELD;
 import static fr.sirs.SIRS.LATITUDE_MAX_FIELD;
 import static fr.sirs.SIRS.LATITUDE_MIN_FIELD;
 import static fr.sirs.SIRS.LONGITUDE_MAX_FIELD;
 import static fr.sirs.SIRS.LONGITUDE_MIN_FIELD;
-import static fr.sirs.SIRS.PR_DEBUT_FIELD;
-import static fr.sirs.SIRS.PR_FIN_FIELD;
 import static fr.sirs.SIRS.VALID_FIELD;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
@@ -41,7 +38,6 @@ import fr.sirs.core.model.PointXYZ;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PrZPointImporter;
 import fr.sirs.core.model.ProfilLong;
-import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.map.ExportTask;
@@ -69,7 +65,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -85,8 +80,8 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
@@ -172,7 +167,7 @@ public class PojoTable extends BorderPane {
     protected final Class pojoClass;
     protected final AbstractSIRSRepository repo;
     protected final Session session = Injector.getBean(Session.class);
-    protected final TableView<Element> uiTable = new FXTableView<>();
+    private final TableView<Element> uiTable = new FXTableView<>();
     private final LabelMapper labelMapper;
     
     // Editabilité du tableau (possibilité d'ajout et de suppression des éléments
@@ -216,8 +211,11 @@ public class PojoTable extends BorderPane {
     protected final HBox navigationToolbar = new HBox(uiPrevious, uiCurrent, uiNext);    
     
     protected final ProgressIndicator searchRunning = new ProgressIndicator();
-    protected ObservableList<Element> allValues;
-    protected ObservableList<Element> filteredValues;
+    private ObservableList<Element> allValues;
+    private ObservableList<Element> filteredValues;
+    //Cette liste est uniquement pour de la visualisation, elle peut contenir un enregistrement en plus
+    //afin d'afficher la barre de scroll horizontale.
+    private ObservableList<Element> decoratedValues;
     
     protected final StringProperty currentSearch = new SimpleStringProperty("");
     protected final BorderPane topPane;
@@ -607,6 +605,18 @@ public class PojoTable extends BorderPane {
         updateView();
     }
 
+    protected final ObservableList<TableColumn<Element, ?>> getColumns(){
+        return uiTable.getColumns();
+    }
+    
+    public final ObservableList<Element> getSelectedItems(){
+        return uiTable.getSelectionModel().getSelectedItems();
+    }
+
+    protected final TableView<Element> getTable() {
+        return uiTable;
+    }
+
     private void updateView(){
 
         if(uiFicheMode.isSelected()){
@@ -703,7 +713,9 @@ public class PojoTable extends BorderPane {
         return ownerElementProperty;
     }
     
-    protected ObservableList<Element> getAllValues(){return allValues;}
+    protected ObservableList<Element> getAllValues(){
+        return allValues;
+    }
 
     public BooleanProperty editableProperty(){
         return editableProperty;
@@ -895,7 +907,7 @@ public class PojoTable extends BorderPane {
             // Apply "Plain text" filter 
             final String str = currentSearch.get();
             if ((str == null || str.isEmpty()) && firstFilter == null) {
-                filteredValues = allValues;
+                filteredValues = allValues.filtered((Element t) -> true);
             } else {
                 final Set<String> result = new HashSet<>();
                 SearchResponse search = Injector.getElasticSearchEngine().search(QueryBuilders.queryString(str));
@@ -918,19 +930,34 @@ public class PojoTable extends BorderPane {
                 }
                 filteredValues = allValues.filtered(filterPredicate);
             }
+
+            //list contenant zero ou un element null en fonction du contenue de la liste filtrée
+            //NOTE : bug javafx ici, la premiere ligne n'est plus editable a cause de ca
+            // probleme avec la selection/focus qui cause trop d'événement
+//            final ObservableList<Element> emptyRecord = FXCollections.observableArrayList();
+//            filteredValues.addListener(new ListChangeListener<Element>() {
+//                @Override
+//                public void onChanged(ListChangeListener.Change<? extends Element> c) {
+//                    if(filteredValues.isEmpty()){
+//                        if(emptyRecord.isEmpty()) emptyRecord.add(null);
+//                    }else{
+//                        emptyRecord.clear();
+//                    }
+//                }
+//            });
+//            if(filteredValues.isEmpty()) emptyRecord.add(null);
+//            decoratedValues = SIRS.view(filteredValues,emptyRecord);
+
+            decoratedValues = filteredValues;
         });
-        
+
+
         tableUpdater.stateProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
                 if (Worker.State.SUCCEEDED.equals(newValue)) {
                     Platform.runLater(() -> {
-                        //we set the list to null, otherwise if we have 2 lists of size 0, equal method is true and we won't have any event.
-                        if(filteredValues.isEmpty()){
-                            addEmptyRow();
-                        }else{
-                            uiTable.setItems(filteredValues);
-                        }
+                        uiTable.setItems(decoratedValues);
                         uiSearch.setGraphic(searchNone);
                     });
                 } else if (Worker.State.FAILED.equals(newValue) || Worker.State.CANCELLED.equals(newValue)) {
@@ -973,7 +1000,7 @@ public class PojoTable extends BorderPane {
      * @param pojos The {@link Element}s to delete.
      */
     protected void deletePojos(Element... pojos) {
-        ObservableList<Element> items = uiTable.getItems();
+        final ObservableList<Element> items = getAllValues();
         for (Element pojo : pojos) {
             // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
             // l'élément et que celui-ci soit invalide, sinon, on court-circuite
@@ -982,10 +1009,6 @@ public class PojoTable extends BorderPane {
                 deletor.accept(pojo);
                 items.remove(pojo);
             }
-        }
-
-        if(items.isEmpty()){
-            addEmptyRow();
         }
 
     }
@@ -1078,24 +1101,13 @@ public class PojoTable extends BorderPane {
                 ownerElementProperty.get().addChild(newlyCreated);
             }
 
-            removeEmptyRow();
-            filteredValues.add(newlyCreated);
+            allValues.add(newlyCreated);
         } else {
             final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
             alert.setResizable(true);
             alert.showAndWait();
         }
         return (Element) result;
-    }
-
-    protected void addEmptyRow(){
-        final ObservableList lst = FXCollections.observableArrayList();
-        lst.add(null);
-        uiTable.setItems(lst);
-    }
-
-    protected void removeEmptyRow(){
-        uiTable.setItems(filteredValues);
     }
 
     public static void editElement(Object pojo) {
@@ -1140,17 +1152,17 @@ public class PojoTable extends BorderPane {
 //
 ////////////////////////////////////////////////////////////////////////////////
     
-    private class EnumColumn extends TableColumn<Element, Role>{
+    private class EnumColumn extends TableColumn<Element, Object>{
         private EnumColumn(PropertyDescriptor desc){
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
             setEditable(false);
             setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
-            setCellFactory(new Callback<TableColumn<Element, Role>, TableCell<Element, Role>>() {
+            setCellFactory(new Callback<TableColumn<Element, Object>, TableCell<Element, Object>>() {
 
                 @Override
-                public TableCell<Element, Role> call(TableColumn<Element, Role> param) {
-                    final TableCell<Element, Role> cell = new FXEnumTableCell<>(Role.class, new SirsStringConverter());
-                    cell.setEditable(false);
+                public TableCell<Element, Object> call(TableColumn<Element, Object> param) {
+                    final TableCell<Element, Object> cell = new FXEnumTableCell(desc.getReadMethod().getReturnType(), new SirsStringConverter());
+                    editableProperty().bind(cellEditableProperty);
                     return cell;
                 }
 
@@ -1520,13 +1532,12 @@ public class PojoTable extends BorderPane {
             }
 
             if (result!=null && result instanceof Element) {
-                if(uiTable.getItems().contains((Element) result)){
+                if(getAllValues().contains((Element) result)){
                     final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le lien que vous souhaitez ajouter est déjà présent dans la table.");
                     alert.setResizable(true);
                     alert.showAndWait();
                 } else {
-                    removeEmptyRow();
-                    filteredValues.add((Element) result);
+                    getAllValues().add((Element) result);
                 }
             } else {
                 final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");

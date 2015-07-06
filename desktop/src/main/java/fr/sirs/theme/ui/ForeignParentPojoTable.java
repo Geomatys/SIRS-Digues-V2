@@ -66,8 +66,7 @@ public class ForeignParentPojoTable<T extends AvecForeignParent> extends PojoTab
         if(created!=null){
             created.setForeignParentId(getForeignParentId());
             repo.add(created);
-            removeEmptyRow();
-            uiTable.getItems().add(created);
+            getAllValues().add(created);
         }
         return created;
     }
