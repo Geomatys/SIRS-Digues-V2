@@ -211,7 +211,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
                             row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.WARNING, null, ex);
             }
 
             try {
@@ -222,10 +222,10 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
                             row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.WARNING, null, ex);
             }
         } catch (FactoryException ex) {
-            Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.WARNING, null, ex);
         }
 
         if (observations.get(row.getInt(Columns.ID_DESORDRE.toString())) != null) {

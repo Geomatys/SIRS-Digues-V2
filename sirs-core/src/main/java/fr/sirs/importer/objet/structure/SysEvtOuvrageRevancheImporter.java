@@ -215,7 +215,7 @@ class SysEvtOuvrageRevancheImporter extends GenericStructureImporter<OuvrageReva
                             row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtOuvrageRevancheImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtOuvrageRevancheImporter.class.getName()).log(Level.WARNING, null, ex);
             }
 
             try {
@@ -226,10 +226,10 @@ class SysEvtOuvrageRevancheImporter extends GenericStructureImporter<OuvrageReva
                             row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtOuvrageRevancheImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtOuvrageRevancheImporter.class.getName()).log(Level.WARNING, null, ex);
             }
         } catch (FactoryException ex) {
-            Logger.getLogger(SysEvtOuvrageRevancheImporter.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SysEvtOuvrageRevancheImporter.class.getName()).log(Level.WARNING, null, ex);
         }
 
         if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {

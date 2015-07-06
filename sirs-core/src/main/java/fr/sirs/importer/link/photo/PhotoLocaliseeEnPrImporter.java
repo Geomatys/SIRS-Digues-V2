@@ -183,7 +183,7 @@ public class PhotoLocaliseeEnPrImporter extends PhotoImporter {
                                 row.getDouble(Columns.Y_PHOTO.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(PhotoLocaliseeEnPrImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PhotoLocaliseeEnPrImporter.class.getName()).log(Level.WARNING, null, ex);
                 }
 
                 try {
@@ -195,10 +195,10 @@ public class PhotoLocaliseeEnPrImporter extends PhotoImporter {
                                 row.getDouble(Columns.Y_PHOTO.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(PhotoLocaliseeEnPrImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PhotoLocaliseeEnPrImporter.class.getName()).log(Level.WARNING, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(PhotoLocaliseeEnPrImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(PhotoLocaliseeEnPrImporter.class.getName()).log(Level.WARNING, null, ex);
             }
             
             if (row.getDouble(Columns.ID_BORNEREF.toString()) != null) {

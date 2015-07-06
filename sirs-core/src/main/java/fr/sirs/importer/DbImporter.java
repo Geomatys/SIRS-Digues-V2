@@ -72,7 +72,7 @@ public class DbImporter {
             return LocalDateTime.parse(date.toString(), dateTimeFormatter);
         }
         catch(DateTimeParseException ex){
-            SirsCore.LOGGER.log(Level.SEVERE, null, ex);
+            SirsCore.LOGGER.log(Level.FINE, null, ex);
         }
         return null;
     }
@@ -82,7 +82,7 @@ public class DbImporter {
             return LocalDateTime.parse(date.toString(), dateTimeFormatter);
         }
         catch(DateTimeParseException ex){
-            SirsCore.LOGGER.log(Level.SEVERE, "Date error for element "+element.getClass().getSimpleName()+" "+element.getDesignation(), ex);
+            SirsCore.LOGGER.log(Level.FINE, "Date error for element "+element.getClass().getSimpleName()+" "+element.getDesignation(), ex);
         }
         return null;
     }
@@ -92,7 +92,7 @@ public class DbImporter {
             return LocalDate.parse(date.toString(), dateTimeFormatter);
         }
         catch(DateTimeParseException ex){
-            SirsCore.LOGGER.log(Level.SEVERE, null, ex);
+            SirsCore.LOGGER.log(Level.FINE, null, ex);
         }
         return null;
     }
@@ -102,7 +102,7 @@ public class DbImporter {
             return LocalDate.parse(date.toString(), dateTimeFormatter);
         }
         catch(DateTimeParseException ex){
-            SirsCore.LOGGER.log(Level.SEVERE, "Date error for element "+element.getClass().getSimpleName()+" "+element.getDesignation(), ex);
+            SirsCore.LOGGER.log(Level.FINE, "Date error for element "+element.getClass().getSimpleName()+" "+element.getDesignation(), ex);
         }
         return null;
     }
@@ -717,7 +717,7 @@ public class DbImporter {
             SirsCore.LOGGER.log(Level.FINE, "fin de l'importation !");
 
         } catch (IOException ex) {
-            Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DbImporter.class.getName()).log(Level.INFO, null, ex);
         }
     }
 }

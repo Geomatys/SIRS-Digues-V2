@@ -269,7 +269,7 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
                             row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.WARNING, null, ex);
             }
 
             try {
@@ -280,10 +280,10 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
                             row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.WARNING, null, ex);
             }
         } catch (FactoryException ex) {
-            Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.WARNING, null, ex);
         }
 
         piedDigue.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));

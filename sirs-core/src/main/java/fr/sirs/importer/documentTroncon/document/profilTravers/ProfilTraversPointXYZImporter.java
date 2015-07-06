@@ -97,10 +97,10 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
                         levePoint.setY(point.getY());
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(this.getClass().getName()).log(Level.WARNING, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(this.getClass().getName()).log(Level.WARNING, null, ex);
             }
 
             if (row.getDouble(Columns.Z.toString()) != null) {

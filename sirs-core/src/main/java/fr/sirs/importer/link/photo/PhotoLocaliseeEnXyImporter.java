@@ -145,7 +145,7 @@ public class PhotoLocaliseeEnXyImporter extends PhotoImporter {
                                 row.getDouble(Columns.Y_PHOTO.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(PhotoLocaliseeEnXyImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PhotoLocaliseeEnXyImporter.class.getName()).log(Level.WARNING, null, ex);
                 }
 
                 try {
@@ -157,10 +157,10 @@ public class PhotoLocaliseeEnXyImporter extends PhotoImporter {
                                 row.getDouble(Columns.Y_PHOTO.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(PhotoLocaliseeEnXyImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(PhotoLocaliseeEnXyImporter.class.getName()).log(Level.WARNING, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(PhotoLocaliseeEnXyImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(PhotoLocaliseeEnXyImporter.class.getName()).log(Level.WARNING, null, ex);
             }
             
             photo.setDesignation(String.valueOf(row.getInt(Columns.ID_PHOTO.toString())));

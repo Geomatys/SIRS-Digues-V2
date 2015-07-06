@@ -257,7 +257,7 @@ class SysEvtCreteImporter extends GenericStructureImporter<Crete> {
                             row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtCreteImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtCreteImporter.class.getName()).log(Level.WARNING, null, ex);
             }
 
             try {
@@ -268,10 +268,10 @@ class SysEvtCreteImporter extends GenericStructureImporter<Crete> {
                             row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtCreteImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtCreteImporter.class.getName()).log(Level.WARNING, null, ex);
             }
         } catch (FactoryException ex) {
-            Logger.getLogger(SysEvtCreteImporter.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SysEvtCreteImporter.class.getName()).log(Level.WARNING, null, ex);
         }
 
         crete.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));

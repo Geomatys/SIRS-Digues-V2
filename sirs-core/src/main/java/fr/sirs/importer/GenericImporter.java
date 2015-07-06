@@ -75,7 +75,7 @@ public abstract class GenericImporter {
             }
             
         } catch (IOException ex) {
-            Logger.getLogger(GenericImporter.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(GenericImporter.class.getName()).log(Level.FINE, null, ex);
         }
         SirsCore.LOGGER.log(Level.FINE, "*************************************************\n");
     }

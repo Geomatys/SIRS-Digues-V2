@@ -243,7 +243,7 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
                             row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtVoieSurDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtVoieSurDigueImporter.class.getName()).log(Level.WARNING, null, ex);
             }
 
             try {
@@ -254,10 +254,10 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
                             row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtVoieSurDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtVoieSurDigueImporter.class.getName()).log(Level.WARNING, null, ex);
             }
         } catch (FactoryException ex) {
-            Logger.getLogger(SysEvtVoieSurDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SysEvtVoieSurDigueImporter.class.getName()).log(Level.WARNING, null, ex);
         }
 
         if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {

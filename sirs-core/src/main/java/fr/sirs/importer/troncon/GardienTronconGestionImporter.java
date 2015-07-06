@@ -162,7 +162,7 @@ public class GardienTronconGestionImporter extends GenericPeriodeLocaliseeImport
                                 row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(ProprietaireTronconGestionImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ProprietaireTronconGestionImporter.class.getName()).log(Level.WARNING, null, ex);
                 }
 
                 try {
@@ -173,10 +173,10 @@ public class GardienTronconGestionImporter extends GenericPeriodeLocaliseeImport
                                 row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                     }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(ProprietaireTronconGestionImporter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ProprietaireTronconGestionImporter.class.getName()).log(Level.WARNING, null, ex);
                 }
             } catch (FactoryException ex) {
-                Logger.getLogger(ProprietaireTronconGestionImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ProprietaireTronconGestionImporter.class.getName()).log(Level.WARNING, null, ex);
             }
             
             garde.setGeometry(buildGeometry(troncon.getGeometry(), garde, tronconGestionDigueImporter.getBorneDigueRepository()));

@@ -455,7 +455,7 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
         } else if (typeStructure == VoieDigue.class) {
             return sysEvtVoieSurDigueImporter.importRow(row);
         } else {
-            SirsCore.LOGGER.log(Level.SEVERE, typeStructure + " : Type de réseau incohérent.");
+            SirsCore.LOGGER.log(Level.FINE, typeStructure + " : Type de réseau incohérent.");
             return null;
         }
     }

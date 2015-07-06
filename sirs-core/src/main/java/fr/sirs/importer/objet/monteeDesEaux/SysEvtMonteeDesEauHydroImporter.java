@@ -137,7 +137,7 @@ class SysEvtMonteeDesEauHydroImporter extends GenericMonteeDesEauxImporter {
                                             row.getDouble(Columns.Y.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtMonteeDesEauHydroImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtMonteeDesEauHydroImporter.class.getName()).log(Level.WARNING, null, ex);
             }
 
             try {
@@ -150,10 +150,10 @@ class SysEvtMonteeDesEauHydroImporter extends GenericMonteeDesEauxImporter {
                                             row.getDouble(Columns.Y.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtMonteeDesEauHydroImporter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SysEvtMonteeDesEauHydroImporter.class.getName()).log(Level.WARNING, null, ex);
             }
         } catch (FactoryException ex) {
-            Logger.getLogger(SysEvtMonteeDesEauHydroImporter.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SysEvtMonteeDesEauHydroImporter.class.getName()).log(Level.WARNING, null, ex);
         }
 
         if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {

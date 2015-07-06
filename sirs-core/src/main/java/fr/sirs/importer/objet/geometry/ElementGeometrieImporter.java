@@ -133,7 +133,7 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<ObjetPhot
         if(typeStructure==LargeurFrancBord.class){
             return largeurFrancBordImporter.importRow(row);
         } else{
-            SirsCore.LOGGER.log(Level.SEVERE, typeStructure+" : Type de géométrie incohérent.");
+            SirsCore.LOGGER.log(Level.FINE, typeStructure+" : Type de géométrie incohérent.");
             return null;
         }
     }
