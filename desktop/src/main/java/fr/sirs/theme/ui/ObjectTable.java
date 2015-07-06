@@ -14,7 +14,7 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.index.ElementHit;
 import fr.sirs.map.ExportTask;
 import static fr.sirs.theme.ui.PojoTable.editElement;
-import fr.sirs.util.SirsTableCell;
+import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.property.Reference;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -95,7 +95,7 @@ public class ObjectTable extends BorderPane {
     private final Button uiPrevious = new Button("",new ImageView(SIRS.ICON_CARET_LEFT));
     private final Button uiNext = new Button("",new ImageView(SIRS.ICON_CARET_RIGHT));
     private final Button uiCurrent = new Button();
-    protected final HBox navigationToolbar = new HBox(uiPrevious, uiCurrent, uiNext);    
+    protected final HBox navigationToolbar = new HBox(uiPrevious, uiCurrent, uiNext);
 
     protected final Class pojoClass;
     protected final BorderPane topPane;
@@ -122,7 +122,7 @@ public class ObjectTable extends BorderPane {
         uiTable.setPlaceholder(new Label(""));
         uiTable.setTableMenuButtonVisible(true);
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        
+
         final EditColumn editCol = new EditColumn(this::editPojo);
         uiTable.getColumns().add(editCol);
         try {
@@ -333,7 +333,7 @@ public class ObjectTable extends BorderPane {
             if (ref != null) {
                 //reference vers un autre objet
                 setEditable(false);
-                setCellFactory((TableColumn<Object, Object> param) -> new SirsTableCell());
+                setCellFactory((TableColumn<Object, Object> param) -> new ReferenceTableCell(ref.ref()));
                 try {
                     final Method propertyAccessor = pojoClass.getMethod(desc.getName()+"Property");
                     setCellValueFactory((TableColumn.CellDataFeatures<Object, Object> param) -> {
@@ -388,6 +388,6 @@ public class ObjectTable extends BorderPane {
             });
         }
     }
-    
+
 
 }

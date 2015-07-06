@@ -371,14 +371,20 @@ public class SessionCore implements ApplicationContextAware {
     /**
      * Analyse input object to find a matching {@link Element} registered in database.
      * @param toGetElementFor The object which represents the Element to retrieve.
-     * Can be a {@link Preview}, {@link Preview}, or {@link  ElementHit}
+     * Can be a {@link Preview}, {@link  ElementHit}, or a {@link String} (in which 
+     * case it must represent a valid element ID).
      * @return An optional which contains the found value, if any.
      */
-    public Optional<? extends Element> getElement(final Object toGetElementFor) {
+    public Optional<? extends Element> getElement(Object toGetElementFor) {
         if (toGetElementFor instanceof Element) {
             return getCompleteElement((Element)toGetElementFor);
-        } 
-        else if (toGetElementFor instanceof Preview) {
+        }
+        
+        if (toGetElementFor instanceof String) {
+            toGetElementFor = previews.get((String)toGetElementFor);
+        }
+        
+        if (toGetElementFor instanceof Preview) {
             final Preview summary = (Preview) toGetElementFor;
             final AbstractSIRSRepository repository = getRepositoryForType(summary.getDocClass());
             final Identifiable tmp = repository.get(summary.getDocId());
@@ -388,8 +394,7 @@ public class SessionCore implements ApplicationContextAware {
                 } else {
                     return Optional.of((Element)tmp);
                 }
-            }
-            
+            }            
         } else if (toGetElementFor instanceof ElementHit) {
             final ElementHit hit = (ElementHit) toGetElementFor;
             final AbstractSIRSRepository repository = getRepositoryForType(hit.getElementClassName());
@@ -397,8 +402,7 @@ public class SessionCore implements ApplicationContextAware {
             if (tmp instanceof Element) {
                 return Optional.of((Element)tmp);
             }
-        }
-        
+        }        
         return Optional.empty();
     }
     

@@ -16,8 +16,9 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.FXPreviewToElementTableColumn;
-import fr.sirs.util.SirsTableCell;
+import fr.sirs.util.ReferenceTableCell;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -26,7 +27,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -155,7 +155,7 @@ public class FXValidationPane extends BorderPane {
         authorColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                 return new SimpleObjectProperty(param.getValue().getAuthor());
             });
-        authorColumn.setCellFactory((TableColumn<Preview, String> param) -> new SirsTableCell());
+        authorColumn.setCellFactory((TableColumn<Preview, String> param) -> new ReferenceTableCell(Utilisateur.class));
         table.getColumns().add(authorColumn);
 
         table.getColumns().add(new ValidColumn());

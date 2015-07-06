@@ -12,7 +12,7 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.PojoTable;
-import fr.sirs.util.SirsTableCell;
+import fr.sirs.util.ReferenceTableCell;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,11 +35,11 @@ import org.geotoolkit.gui.javafx.util.FXDateField;
  * @author Johann Sorel (Geomatys)
  */
 public class FXContactPane extends AbstractFXElementPane<Contact> {
-    
+
     @FXML private FXEditMode uiMode;
     @FXML private TextField uiDesignation;
     @FXML private FXDateField date_maj;
-    
+
     @FXML private TextField uiNom;
     @FXML private TextField uiPrenom;
     @FXML private TextField uiService;
@@ -48,24 +48,24 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
     @FXML private TextField uiMobile;
     @FXML private TextField uiFax;
     @FXML private TextField uiEmail;
-    
+
     @FXML private TextField uiAdresse;
     @FXML private TextField uiCodePostal;
     @FXML private TextField uiCommune;
-    
+
     @FXML private Tab uiOrganismeTab;
-    
+
     private final PojoTable organismeTable;
-    
+
     private final AbstractSIRSRepository<Contact> contactRepository;
     private final AbstractSIRSRepository<Organisme> orgRepository;
-    
+
     final ObservableList<Element> orgsOfContact = FXCollections.observableArrayList();
-    
+
     final HashSet<Organisme> modifiedOrgs = new HashSet<>();
-        
+
     final Session session = Injector.getSession();
-    
+
     /**
      *
      * @param contact
@@ -73,10 +73,10 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
     public FXContactPane(Contact contact) {
         SIRS.loadFXML(this);
         date_maj.setDisable(true);
-        
+
         this.contactRepository = session.getRepositoryForClass(Contact.class);
         this.orgRepository = session.getRepositoryForClass(Organisme.class);
-        
+
         uiMode.requireEditionForElement(contact);
         disableFieldsProperty().bind(uiMode.editionState().not());
         uiNom.disableProperty().bind(disableFieldsProperty());
@@ -91,18 +91,18 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         uiCodePostal.disableProperty().bind(disableFieldsProperty());
         uiCommune.disableProperty().bind(disableFieldsProperty());
         uiDesignation.disableProperty().bind(disableFieldsProperty());
-        
+
         organismeTable = new ContactOrganismeTable();
         uiOrganismeTab.setContent(organismeTable);
         // /!\ If you remove "and" condition, you must add null check in below ContactOrganismeTable.
         organismeTable.editableProperty().bind(disableFieldsProperty().not().and(elementProperty.isNotNull()));
-        
+
         uiMode.setSaveAction(this::save);
-        
+
         orgsOfContact.addListener(new ListChangeListener() {
             @Override
             public void onChanged(ListChangeListener.Change c) {
-                // We check only removed elements, because new ones do not 
+                // We check only removed elements, because new ones do not
                 // have an attached organism.
                 while (c.next()) {
                     final Iterator<ContactOrganisme> it = c.getRemoved().iterator();
@@ -115,11 +115,11 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
                 }
             }
         });
-        
+
         elementProperty.addListener(this::initFields);
         setElement(contact);
     }
-    
+
     private void save(){
         if (elementProperty.get() != null) {
             contactRepository.update(elementProperty.get());
@@ -129,10 +129,10 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         }
         modifiedOrgs.clear();
     }
-    
+
     private void initFields(ObservableValue<? extends Contact> observable, Contact oldValue, Contact newValue) {
         date_maj.valueProperty().unbind();
-        
+
         if (oldValue != null) {
             uiNom.textProperty().unbindBidirectional(oldValue.nomProperty());
             uiPrenom.textProperty().unbindBidirectional(oldValue.prenomProperty());
@@ -147,14 +147,14 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
             uiCommune.textProperty().unbindBidirectional(oldValue.communeProperty());
             uiDesignation.textProperty().unbindBidirectional(oldValue.designationProperty());
         }
-        
+
         if (newValue == null) return;
-        
+
         date_maj.valueProperty().bind(newValue.dateMajProperty());
-        
+
         orgsOfContact.clear();
         modifiedOrgs.clear();
-                
+
         uiDesignation.textProperty().bindBidirectional(newValue.designationProperty());
         uiNom.textProperty().bindBidirectional(newValue.nomProperty());
         uiPrenom.textProperty().bindBidirectional(newValue.prenomProperty());
@@ -167,7 +167,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         uiAdresse.textProperty().bindBidirectional(newValue.adresseProperty());
         uiCodePostal.textProperty().bindBidirectional(newValue.codePostalProperty());
         uiCommune.textProperty().bindBidirectional(newValue.communeProperty());
-               
+
         // Retrieve all organisms current newValue is / was part of.
         if (newValue.getId() != null) {
             for (final Organisme org : orgRepository.getAll()) {
@@ -182,7 +182,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
     public void preSave() {
         // nothing to do, all is done by JavaFX bindings.
     }
- 
+
     /**
      * Table listant les rattachement du contact courant aux organismes connus.
      * Aucune opération de sauvegarde n'est effectuée ici, elles seront appliquées
@@ -193,7 +193,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         public ContactOrganismeTable() {
             super(ContactOrganisme.class, "Liste des organismes");
             editableProperty().bind(uiFicheMode.selectedProperty());
-            
+
             final TableColumn<Element, String> organismeColumn = new TableColumn<>("Organisme");
             organismeColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, String>, ObservableValue<String>>() {
 
@@ -204,10 +204,10 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
                     return null;
                 }
             });
-            organismeColumn.setCellFactory((TableColumn<Element, String> param) -> new SirsTableCell<>());
+            organismeColumn.setCellFactory((TableColumn<Element, String> param) -> new ReferenceTableCell<>(Organisme.class));
             getColumns().add(organismeColumn);
-            
-            setTableItems(() -> orgsOfContact);          
+
+            setTableItems(() -> orgsOfContact);
         }
 
         @Override
@@ -220,7 +220,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
             });
             super.editPojo(pojo);
         }
-        
+
         @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
             if (event.getRowValue() instanceof ContactOrganisme) {
@@ -230,12 +230,12 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
                 }
             }
         }
-        
+
         @Override
         protected void deletePojos(Element... pojos) {
             final List<Organisme> modifiedOrganisms = new ArrayList<>();
             for(final Element pojo : pojos){
-                // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de 
+                // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de
                 // l'élément et que celui-ci soit invalide, sinon, on court-circuite
                 // la suppression.
                 if(authoriseElementDeletion(pojo)) {
@@ -245,7 +245,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
                     orgsOfContact.remove(pojo);
                 }
             }
-            
+
             session.getRepositoryForClass(Organisme.class).executeBulk(modifiedOrganisms);
         }
 
@@ -264,5 +264,5 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
             return co;
         }
     }
-    
+
 }

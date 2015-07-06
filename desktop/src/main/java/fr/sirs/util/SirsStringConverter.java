@@ -36,8 +36,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
  */
 public class SirsStringConverter extends StringConverter {
 
-    private final WeakHashMap<String, Object> fromString = new WeakHashMap<>();
     private static final WeakHashMap<String, LabelMapper> LABEL_MAPPERS = new WeakHashMap<>();
+    
+    private final WeakHashMap<String, Object> FROM_STRING = new WeakHashMap<>();
     
     /**
      * Find a simple name for input object.
@@ -109,7 +110,7 @@ public class SirsStringConverter extends StringConverter {
 
         final String result = text.toString();
         if (result != null && !result.isEmpty()) {
-            fromString.put(result, item);
+            FROM_STRING.put(result, item);
         }
         return result;
     }
@@ -158,7 +159,7 @@ public class SirsStringConverter extends StringConverter {
     
     @Override
     public Object fromString(String string) {
-        return fromString.get(string);
+        return FROM_STRING.get(string);
     }
     
     /**
