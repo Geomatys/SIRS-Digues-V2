@@ -7,6 +7,7 @@ import static fr.sirs.util.JRUtils.ATT_HEIGHT;
 import static fr.sirs.util.JRUtils.ATT_IS_STRETCH_WITH_OVERFLOW;
 import static fr.sirs.util.JRUtils.ATT_KEY;
 import static fr.sirs.util.JRUtils.ATT_NAME;
+import static fr.sirs.util.JRUtils.ATT_SIZE;
 import static fr.sirs.util.JRUtils.ATT_STYLE;
 import static fr.sirs.util.JRUtils.ATT_SUB_DATASET;
 import static fr.sirs.util.JRUtils.ATT_WIDTH;
@@ -23,6 +24,7 @@ import static fr.sirs.util.JRUtils.TAG_DETAIL;
 import static fr.sirs.util.JRUtils.TAG_DETAIL_CELL;
 import static fr.sirs.util.JRUtils.TAG_FIELD;
 import static fr.sirs.util.JRUtils.TAG_FIELD_DESCRIPTION;
+import static fr.sirs.util.JRUtils.TAG_FONT;
 import static fr.sirs.util.JRUtils.TAG_LAST_PAGE_FOOTER;
 import static fr.sirs.util.JRUtils.TAG_PAGE_FOOTER;
 import static fr.sirs.util.JRUtils.TAG_PAGE_HEADER;
@@ -33,6 +35,7 @@ import static fr.sirs.util.JRUtils.TAG_TABLE;
 import static fr.sirs.util.JRUtils.TAG_TABLE_FOOTER;
 import static fr.sirs.util.JRUtils.TAG_TABLE_HEADER;
 import static fr.sirs.util.JRUtils.TAG_TEXT;
+import static fr.sirs.util.JRUtils.TAG_TEXT_ELEMENT;
 import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD;
 import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD_EXPRESSION;
 import static fr.sirs.util.JRUtils.TAG_TITLE;
@@ -249,7 +252,7 @@ public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
         
         table.appendChild(datasetRun);
         for(final PropertyDescriptor propertyDescriptor : featureType.getDescriptors()){
-            writeColumn(propertyDescriptor, table);
+            writeColumn(propertyDescriptor, table, 7);
         }
         
         componentElement.appendChild(componentElementReportElement);
@@ -260,7 +263,7 @@ public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
         root.appendChild(detail);
     }
     
-    private void writeColumn(final PropertyDescriptor propertyDescriptor, final Element table){
+    private void writeColumn(final PropertyDescriptor propertyDescriptor, final Element table, final int fontSize){
         
         final Element column = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN);
         column.setAttribute(ATT_WIDTH, String.valueOf(columnWidth));
@@ -277,23 +280,29 @@ public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
         // Column header
         final Element jrColumnHeader = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN_HEADER);
         jrColumnHeader.setAttribute(ATT_STYLE, "table_CH");
-        jrColumnHeader.setAttribute(ATT_HEIGHT, String.valueOf(40));
+        jrColumnHeader.setAttribute(ATT_HEIGHT, String.valueOf(20));
         
-            final Element staticText = document.createElementNS(URI_JRXML, TAG_STATIC_TEXT);
-            
-                final Element staticTextReportElement = document.createElementNS(URI_JRXML, TAG_REPORT_ELEMENT);
-                staticTextReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL/2));
-                staticTextReportElement.setAttribute(ATT_Y, String.valueOf(0));
-                staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-INDENT_LABEL));
-                staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(40));
-        //        staticTextReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
-                staticText.appendChild(staticTextReportElement);
+        final Element staticText = document.createElementNS(URI_JRXML, TAG_STATIC_TEXT);
 
-                final Element text = document.createElementNS(URI_JRXML, TAG_TEXT);
-                final CDATASection labelField = document.createCDATASection(generateFinalColumnName(propertyDescriptor));
-                text.appendChild(labelField);
+        final Element staticTextReportElement = document.createElementNS(URI_JRXML, TAG_REPORT_ELEMENT);
+        staticTextReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL/2));
+        staticTextReportElement.setAttribute(ATT_Y, String.valueOf(0));
+        staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-INDENT_LABEL));
+        staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(20));
+//        staticTextReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
+        staticText.appendChild(staticTextReportElement);
+        
+        final Element textElement = document.createElement(TAG_TEXT_ELEMENT);
+        final Element font = document.createElement(TAG_FONT);
+        font.setAttribute(ATT_SIZE, String.valueOf(fontSize));
+        textElement.appendChild(font);
+        staticText.appendChild(textElement);
 
-            staticText.appendChild(text);
+        final Element text = document.createElementNS(URI_JRXML, TAG_TEXT);
+        final CDATASection labelField = document.createCDATASection(generateFinalColumnName(propertyDescriptor));
+        text.appendChild(labelField);
+
+        staticText.appendChild(text);
         jrColumnHeader.appendChild(staticText);
         
         // Column footer
@@ -307,22 +316,28 @@ public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
         detailCell.setAttribute(ATT_STYLE, "table_TD");
         detailCell.setAttribute(ATT_HEIGHT, String.valueOf(40));
         
-            final Element textField = document.createElementNS(URI_JRXML, TAG_TEXT_FIELD);
-            textField.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, "true");
+        final Element textField = document.createElementNS(URI_JRXML, TAG_TEXT_FIELD);
+        textField.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, "true");
 
-            final Element textFieldReportElement = document.createElement(TAG_REPORT_ELEMENT);
-            textFieldReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL/2));
-            textFieldReportElement.setAttribute(ATT_Y, String.valueOf(0));
-            textFieldReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-INDENT_LABEL));
-            textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(40));
-    //        textFieldReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
-            textField.appendChild(textFieldReportElement);
+        final Element textFieldReportElement = document.createElement(TAG_REPORT_ELEMENT);
+        textFieldReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL/2));
+        textFieldReportElement.setAttribute(ATT_Y, String.valueOf(0));
+        textFieldReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-INDENT_LABEL));
+        textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(40));
+//        textFieldReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
+        textField.appendChild(textFieldReportElement);
+        
+        final Element detailTextElement = document.createElement(TAG_TEXT_ELEMENT);
+        final Element detailFont = document.createElement(TAG_FONT);
+        detailFont.setAttribute(ATT_SIZE, String.valueOf(fontSize));
+        detailTextElement.appendChild(detailFont);
+        textField.appendChild(detailTextElement);
 
-            final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);
-            final CDATASection valueField = document.createCDATASection("$F{"+propertyDescriptor.getType().getName().toString()+"}");
-            textFieldExpression.appendChild(valueField);
+        final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);
+        final CDATASection valueField = document.createCDATASection("$F{"+propertyDescriptor.getType().getName().toString()+"}");
+        textFieldExpression.appendChild(valueField);
 
-            textField.appendChild(textFieldExpression);
+        textField.appendChild(textFieldExpression);
         detailCell.appendChild(textField);
         
         column.appendChild(tableHeader);
@@ -406,7 +421,7 @@ public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
             labelInfo = null;
         }
 
-        final String labelName = prop.getName().toString();
+        final String labelName = prop.getName().toString().replace("http://geotoolkit.org:", "");
         String columnName = labelName;
         String tableName = null;
 

@@ -160,6 +160,12 @@ public final class SIRS extends SirsCore {
         // Voiries
         public static final String OUVRAGE_VOIRIE_REFERENCE = "ouvrageVoirieIds";
         public static final String VOIE_DIGUE_REFERENCE = "voieDigueIds";
+        
+        // Prestations
+        public static final String PRESTATION_REFERENCE = "prestationIds";
+        
+        
+        public static final String ARTICLE_REFERENCE = "articleIds";
     }
     
     // Champs spéciaux des ResourceBundles

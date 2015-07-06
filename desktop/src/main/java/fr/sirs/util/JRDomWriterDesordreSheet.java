@@ -4,33 +4,28 @@ package fr.sirs.util;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Observation;
+import fr.sirs.core.model.Photo;
+import fr.sirs.core.model.Prestation;
 import static fr.sirs.util.JRUtils.ATT_BACKCOLOR;
 import static fr.sirs.util.JRUtils.ATT_CLASS;
-import static fr.sirs.util.JRUtils.ATT_FONT_NAME;
 import static fr.sirs.util.JRUtils.ATT_HEIGHT;
 import static fr.sirs.util.JRUtils.ATT_IS_BOLD;
+import static fr.sirs.util.JRUtils.ATT_IS_ITALIC;
 import static fr.sirs.util.JRUtils.ATT_IS_STRETCH_WITH_OVERFLOW;
+import static fr.sirs.util.JRUtils.ATT_IS_UNDERLINE;
 import static fr.sirs.util.JRUtils.ATT_KEY;
-import static fr.sirs.util.JRUtils.ATT_LINE_COLOR;
-import static fr.sirs.util.JRUtils.ATT_LINE_WIDTH;
-import static fr.sirs.util.JRUtils.ATT_MARKUP;
 import static fr.sirs.util.JRUtils.ATT_MODE;
 import static fr.sirs.util.JRUtils.ATT_NAME;
 import static fr.sirs.util.JRUtils.ATT_POSITION_TYPE;
+import static fr.sirs.util.JRUtils.ATT_SIZE;
 import static fr.sirs.util.JRUtils.ATT_STYLE;
 import static fr.sirs.util.JRUtils.ATT_SUB_DATASET;
-import static fr.sirs.util.JRUtils.ATT_TEXT_ALIGNMENT;
-import static fr.sirs.util.JRUtils.ATT_VERTICAL_ALIGNMENT;
 import static fr.sirs.util.JRUtils.ATT_WIDTH;
 import static fr.sirs.util.JRUtils.ATT_X;
 import static fr.sirs.util.JRUtils.ATT_Y;
-import static fr.sirs.util.JRUtils.BOOLEAN_PRIMITIVE_NAME;
 import fr.sirs.util.JRUtils.Markup;
-import fr.sirs.util.JRUtils.Mode;
 import fr.sirs.util.JRUtils.PositionType;
 import static fr.sirs.util.JRUtils.TAG_BAND;
-import static fr.sirs.util.JRUtils.TAG_BOTTOM_PEN;
-import static fr.sirs.util.JRUtils.TAG_BOX;
 import static fr.sirs.util.JRUtils.TAG_COLUMN;
 import static fr.sirs.util.JRUtils.TAG_COLUMN_FOOTER;
 import static fr.sirs.util.JRUtils.TAG_COLUMN_HEADER;
@@ -59,7 +54,6 @@ import static fr.sirs.util.JRUtils.TAG_TEXT_ELEMENT;
 import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD;
 import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD_EXPRESSION;
 import static fr.sirs.util.JRUtils.TAG_TITLE;
-import fr.sirs.util.JRUtils.TextAlignment;
 import static fr.sirs.util.JRUtils.URI_JRXML;
 import static fr.sirs.util.JRUtils.URI_JRXML_COMPONENTS;
 import static fr.sirs.util.JRUtils.getCanonicalName;
@@ -93,7 +87,6 @@ import org.xml.sax.SAXException;
 public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     
     // Template elements.
-    private final Element subDataset;
     private final Element title;
     private final Element pageHeader;
     private final Element columnHeader;
@@ -109,7 +102,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     // Static template parameters.
     private static final String FIELDS_VERTICAL_ALIGNMENT = "Middle";
     private static final String FIELDS_FONT_NAME = "Serif";
-    private static final int FIELDS_HEIGHT = 16;
+//    private static final int FIELDS_HEIGHT = 12;
     //private static final String DATE_PATTERN = "dd/MM/yyyy à hh:mm:ss";
     private static final int INDENT_LABEL = 10;
     private static final int LABEL_WIDTH = 140;
@@ -127,13 +120,17 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     
     public static final String OBSERVATIONS_DATASET = "Observations Dataset";
     public static final String OBSERVATION_TABLE_DATA_SOURCE = "OBSERVATION_TABLE_DATA_SOURCE";
-    public static final String PHOTOS_DATASET = "Photos Dataset";
+    public static final String PRESTATIONS_DATASET = "Prestations Dataset";
+    public static final String PRESTATION_TABLE_DATA_SOURCE = "PRESTATION_TABLE_DATA_SOURCE";
     public static final String PHOTO_TABLE_DATA_SOURCE = "PHOTO_TABLE_DATA_SOURCE";
     public static final String PHOTOS_SUBREPORT = "PHOTOS_SUBREPORT";
     
+    private final List<String> avoidDesordreFields;
+    private final List<String> avoidPrestationFields;
+    
+    
     private JRDomWriterDesordreSheet(){
         super();
-        subDataset = null;
         this.title = null; 
         this.pageHeader = null;
         this.columnHeader = null;
@@ -143,11 +140,12 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         this.lastPageFooter = null;
         
         this.fields_interline = 8;
+        avoidDesordreFields = null;
+        avoidPrestationFields = null;
     }
     
-    public JRDomWriterDesordreSheet(final InputStream stream) throws ParserConfigurationException, SAXException, IOException {
+    public JRDomWriterDesordreSheet(final InputStream stream, final List<String> avoidDesordreFields, final List<String> avoidPrestationFields) throws ParserConfigurationException, SAXException, IOException {
         super(stream);
-        subDataset = (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(0);
         title = (Element) root.getElementsByTagName(TAG_TITLE).item(0);
         pageHeader = (Element) root.getElementsByTagName(TAG_PAGE_HEADER).item(0);
         columnHeader = (Element) root.getElementsByTagName(TAG_COLUMN_HEADER).item(0);
@@ -157,6 +155,8 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         lastPageFooter = (Element) root.getElementsByTagName(TAG_LAST_PAGE_FOOTER).item(0);
         
         fields_interline = 8;
+        this.avoidDesordreFields = avoidDesordreFields;
+        this.avoidPrestationFields = avoidPrestationFields;
     }
     
     /**
@@ -178,11 +178,10 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     /**
      * <p>This method writes a Jasper Reports template mapping the parameter class.</p>
      * @param desordre
-     * @param avoidFields field names to avoid.
      * @throws TransformerException
      * @throws IOException
      */
-    public void write(final Desordre desordre, final List<String> avoidFields) throws TransformerException, IOException, Exception {
+    public void write(final Desordre desordre) throws TransformerException, IOException, Exception {
         
         // Remove elements before inserting fields.-----------------------------
         root.removeChild(this.title);
@@ -191,7 +190,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         root.removeChild(this.detail);
         
         // Modifies the template, based on the given class.---------------------
-        writeObject(desordre, avoidFields);
+        writeObject(desordre);
         
         // Serializes the document.---------------------------------------------
         //DomUtilities.write(this.document, this.output);
@@ -210,12 +209,10 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
      * @param avoidFields field names to avoid.
      * @throws Exception 
      */
-    private void writeObject(final Desordre desordre, List<String> avoidFields) {
+    private void writeObject(final Desordre desordre) {
         
-        
-        
-        if(avoidFields==null) avoidFields=new ArrayList<>();
-        writeSubDataset(Observation.class, avoidFields);
+        writeSubDataset(Observation.class, avoidDesordreFields, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(0));
+        writeSubDataset(Prestation.class, avoidPrestationFields, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(1));
         
         
         // Sets the initial fields used by the template.------------------------
@@ -223,7 +220,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         for (final Method method : methods){
             if(PrinterUtilities.isSetter(method)){
                 final String fieldName = getFieldNameFromSetter(method);
-                if (avoidFields==null || !avoidFields.contains(fieldName)) {
+                if (avoidDesordreFields==null || !avoidDesordreFields.contains(fieldName)) {
                     writeField(method);
                 }
             }
@@ -237,19 +234,19 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         writeColumnHeader();
         
         // Builds the body of the Jasper Reports template.----------------------
-        writeDetail(desordre.getClass(), avoidFields);
+        writeDetail(desordre);
     }
     
     
     
-    private void writeSubDataset(final Class<? extends fr.sirs.core.model.Element> elementClass, final List<String> avoidFields){
+    private void writeSubDataset(final Class<? extends fr.sirs.core.model.Element> elementClass, final List<String> avoidFields, final Element subDataset){
         
         final Method[] methods = elementClass.getMethods();
         for (final Method method : methods){
             if(PrinterUtilities.isSetter(method)){
                 final String fieldName = getFieldNameFromSetter(method);
                 if (avoidFields==null || !avoidFields.contains(fieldName)) {
-                    writeSubDatasetField(method);
+                    writeSubDatasetField(method, subDataset);
                 }
             }
         }
@@ -259,7 +256,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
      * <p>This method writes the fiels user by the Jasper Reports template.</p>
      * @param propertyType must be a setter method starting by "set"
      */
-    private void writeSubDatasetField(final Method method) {
+    private void writeSubDatasetField(final Method method, final Element subDataset) {
         
         // Builds the name of the field.----------------------------------------
         final String fieldName = method.getName().substring(3, 4).toLowerCase() 
@@ -343,12 +340,15 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         this.root.appendChild(this.columnHeader);
     }
     
+    private int currentY = 0;
     /**
      * <p>This method writes the content of the detail element.</p>
      * @param classToMap
      * @throws Exception 
      */
-    private void writeDetail(final Class classToMap, List<String> avoidFields) {
+    private void writeDetail(final Desordre desordre) {
+        
+        final Class classToMap = desordre.getClass();
         
         final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName(), Locale.getDefault(),
                 Thread.currentThread().getContextClassLoader());
@@ -358,7 +358,6 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         ----------------------------------------------------------------------*/
         // Loops over the method looking for setters (based on the field names).
         final Method[] methods = classToMap.getMethods();
-        int order = 0;
         for (final Method method : methods){
             if(PrinterUtilities.isSetter(method)){
                 
@@ -375,36 +374,102 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
                 }
                 
                 // Writes the field.--------------------------------------------
-                if(avoidFields==null || !avoidFields.contains(fieldName)){
-                    writeDetailField(fieldName, fieldClass, order, markup, resourceBundle);
-                    order++;
-                }
+                // On n'écrit plus les champs dynamiquement : ceux-ci figurent en dur dans le template
+//                if(avoidDesordreFields==null || !avoidDesordreFields.contains(fieldName)){
+//                    writeDetailField(fieldName, fieldClass, markup, resourceBundle);
+//                    // Increment Y between each field
+//                    currentY+=(FIELDS_HEIGHT+fields_interline);
+//                }
             }
         }
         
-        /*----------------------------------------------------------------------
-        TABLE DES OBSERVATIONS
-        ----------------------------------------------------------------------*/
-        writeTable(Observation.class, avoidFields, order, OBSERVATION_TABLE_DATA_SOURCE);
-        
+        final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
+        currentY = Integer.valueOf(band.getAttribute(ATT_HEIGHT));
         
         /*----------------------------------------------------------------------
-        TABLE DES PHOTOS
+        TABLEAU DES OBSERVATIONS
         ----------------------------------------------------------------------*/
-        includePhotoSubreport(order);
+        if(desordre.getObservations()!=null && !desordre.getObservations().isEmpty()){
+            currentY+=2;
+            writeSectionTitle("Observations", 15, 2, 10, 9);
+            currentY+=2;
+            writeTable(Observation.class, avoidDesordreFields, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATIONS_DATASET, 30);
+            currentY+=2;
+        }
+        
+        /*----------------------------------------------------------------------
+        TABLEAU DES PRESTATIONS
+        ----------------------------------------------------------------------*/
+        if(desordre.getPrestationIds()!=null && !desordre.getPrestationIds().isEmpty()){
+            currentY+=2;
+            writeSectionTitle("Prestations", 15, 2, 10, 9);
+            currentY+=2;
+            writeTable(Prestation.class, avoidPrestationFields, PRESTATION_TABLE_DATA_SOURCE, PRESTATIONS_DATASET, 30);
+            currentY+=2;
+        }
+        
+        /*----------------------------------------------------------------------
+        SOUS-RAPPORTS DES PHOTOS
+        ----------------------------------------------------------------------*/
+        final List<Photo> photos = new ArrayList<>();
+        for(final Observation observation : desordre.getObservations()){
+            final List<Photo> obsPhotos = observation.getPhotos();
+            if(obsPhotos!=null && !obsPhotos.isEmpty()){
+                photos.addAll(obsPhotos);
+            }
+        }
+        if(!photos.isEmpty()){
+            currentY+=2;
+            includePhotoSubreport(64);
+        }
         
         // Sizes the detail element given to the field number.------------------
-        final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
-        band.setAttribute(ATT_HEIGHT, String.valueOf((FIELDS_HEIGHT+fields_interline)*order
-                + 64 //Taille du tableau des observations
-                + 64 //Taille du tableau des photos
-        ));
+        band.setAttribute(ATT_HEIGHT, String.valueOf(currentY));
         
         // Builds the DOM tree.-------------------------------------------------
         root.appendChild(detail);
     }
     
-    private void includePhotoSubreport(int order){
+    private void writeSectionTitle(final String sectionTitle, final int height, final int margin, final int indent, final int textSize){
+        final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
+        final Element frame = document.createElement(TAG_FRAME);
+        final Element frameReportElement = document.createElement(TAG_REPORT_ELEMENT);
+        frameReportElement.setAttribute(ATT_BACKCOLOR, "#CB5C5C");
+        frameReportElement.setAttribute(ATT_HEIGHT, String.valueOf(height));
+        frameReportElement.setAttribute(ATT_MODE, JRUtils.Mode.OPAQUE.toString());
+        frameReportElement.setAttribute(ATT_POSITION_TYPE, JRUtils.PositionType.FLOAT.toString());
+        frameReportElement.setAttribute(ATT_WIDTH, String.valueOf(PAGE_WIDTH-LEFT_MARGIN-RIGHT_MARGIN));
+        frameReportElement.setAttribute(ATT_X, String.valueOf(0));
+        frameReportElement.setAttribute(ATT_Y, String.valueOf(currentY));
+        frame.appendChild(frameReportElement);
+        
+        final Element staticText = document.createElement(TAG_STATIC_TEXT);
+        final Element staticTextReportElement = document.createElement(TAG_REPORT_ELEMENT);
+        staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(height-2*margin));
+        staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(PAGE_WIDTH-LEFT_MARGIN-RIGHT_MARGIN-indent));
+        staticTextReportElement.setAttribute(ATT_X, String.valueOf(indent));
+        staticTextReportElement.setAttribute(ATT_Y, String.valueOf(margin));
+        staticText.appendChild(staticTextReportElement);
+        
+        final Element textElement = document.createElement(TAG_TEXT_ELEMENT);
+        final Element font = document.createElement(TAG_FONT);
+        font.setAttribute(ATT_IS_BOLD, String.valueOf(true));
+        font.setAttribute(ATT_IS_ITALIC, String.valueOf(true));
+        font.setAttribute(ATT_IS_UNDERLINE, String.valueOf(true));
+        font.setAttribute(ATT_SIZE, String.valueOf(textSize));
+        textElement.appendChild(font);
+        staticText.appendChild(textElement);
+        
+        final Element text = document.createElement(TAG_TEXT);
+        final CDATASection textField = document.createCDATASection(sectionTitle);
+        text.appendChild(textField);
+        staticText.appendChild(text);
+        frame.appendChild(staticText);
+        band.appendChild(frame);
+        currentY+=height;
+    }
+    
+    private void includePhotoSubreport(final int height){
         
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         
@@ -413,41 +478,32 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
 //        reportElement.setAttribute(ATT_KEY, "table");
 //        reportElement.setAttribute(ATT_STYLE, "table");
         reportElement.setAttribute(ATT_X, String.valueOf(0));
-        reportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+fields_interline)*order+64/*obs table height*/));
+        reportElement.setAttribute(ATT_Y, String.valueOf(currentY));
 //        componentElementReportElement.setAttribute(ATT_Y, String.valueOf(0));
         reportElement.setAttribute(ATT_WIDTH, String.valueOf(802));
-        reportElement.setAttribute(ATT_HEIGHT, String.valueOf(64));
+        reportElement.setAttribute(ATT_HEIGHT, String.valueOf(height));
         reportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
 //        componentElementReportElement.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, String.valueOf(true));
         subReport.appendChild(reportElement);
         
-        // Set the table element
-//        final Element table = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE);
-        
-//        final Element datasetRun = document.createElementNS(URI_JRXML, TAG_DATASET_RUN);
-//        datasetRun.setAttribute(ATT_SUB_DATASET, OBSERVATIONS_DATASET);
         final Element datasourceExpression = document.createElementNS(URI_JRXML, TAG_DATA_SOURCE_EXPRESSION);
         
-//        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $P{"+OBSERVATION_TABLE_DATA_SOURCE+"})");//.cloneDataSource()
-        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $P{"+PHOTO_TABLE_DATA_SOURCE+"})");//.cloneDataSource()
+        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $P{"+PHOTO_TABLE_DATA_SOURCE+"})");
         
         datasourceExpression.appendChild(datasourceExpressionField);
         subReport.appendChild(datasourceExpression);
         
-        
         final Element subreportExpression = document.createElementNS(URI_JRXML, TAG_SUBREPORT_EXPRESSION);
-        
-//        final CDATASection subreportExpressionField = document.createCDATASection("net.sf.jasperreports.engine.JasperCompileManager.compileReport($P{SUBREPORT_DIR} + \"photoTemplate.jrxml\")");//.cloneDataSource()
-//        final CDATASection subreportExpressionField = document.createCDATASection("net.sf.jasperreports.engine.JasperCompileManager.compileReport(\"photoTemplate.jrxml\")");//.cloneDataSource()
         final CDATASection subreportExpressionField = document.createCDATASection("$P{"+PHOTOS_SUBREPORT+"}");
         
         subreportExpression.appendChild(subreportExpressionField);
         subReport.appendChild(subreportExpression);
         
         band.appendChild(subReport);
+        currentY+=height;
     }
     
-    private int writeTable(final Class clazz, final List<String> avoidFields, int order, final String datasourceParameter){
+    private void writeTable(final Class clazz, final List<String> avoidFields, final String datasourceParameter, final String datasetName, final int height){
         
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         
@@ -456,10 +512,10 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         componentElementReportElement.setAttribute(ATT_KEY, "table");
         componentElementReportElement.setAttribute(ATT_STYLE, "table");
         componentElementReportElement.setAttribute(ATT_X, String.valueOf(0));
-        componentElementReportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+fields_interline)*order));
+        componentElementReportElement.setAttribute(ATT_Y, String.valueOf(currentY));
 //        componentElementReportElement.setAttribute(ATT_Y, String.valueOf(0));
         componentElementReportElement.setAttribute(ATT_WIDTH, String.valueOf(802));
-        componentElementReportElement.setAttribute(ATT_HEIGHT, String.valueOf(64));
+        componentElementReportElement.setAttribute(ATT_HEIGHT, String.valueOf(height));
         componentElementReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
 //        componentElementReportElement.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, String.valueOf(true));
         
@@ -467,10 +523,10 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         final Element table = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE);
         
         final Element datasetRun = document.createElementNS(URI_JRXML, TAG_DATASET_RUN);
-        datasetRun.setAttribute(ATT_SUB_DATASET, OBSERVATIONS_DATASET);
+        datasetRun.setAttribute(ATT_SUB_DATASET, datasetName);
         final Element datasourceExpression = document.createElementNS(URI_JRXML, TAG_DATA_SOURCE_EXPRESSION);
         
-        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $P{"+OBSERVATION_TABLE_DATA_SOURCE+"})");//.cloneDataSource()
+        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $P{"+datasourceParameter+"})");//.cloneDataSource()
         
         datasourceExpression.appendChild(datasourceExpressionField);
         datasetRun.appendChild(datasourceExpression);
@@ -499,7 +555,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
                 final String fieldName = getFieldNameFromSetter(method);
 //                final Class fieldClass = method.getParameterTypes()[0];
                 if(avoidFields==null || !avoidFields.contains(fieldName))
-                    writeColumn(method, table, columnWidth);
+                    writeColumn(clazz, method, table, columnWidth, 7, 1, 20, 10);
             }
         }
         
@@ -507,10 +563,10 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         componentElement.appendChild(table);
         
         band.appendChild(componentElement);
-        return order;
+        currentY+=height;
     }
     
-    private void writeColumn(final Method setter, final Element table, final int columnWidth){
+    private void writeColumn(final Class clazz, final Method setter, final Element table, final int columnWidth, final int fontSize, final int padding, final int headerHeight, final int detailCellHeight){
        
         final Element column = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN);
         column.setAttribute(ATT_WIDTH, String.valueOf(columnWidth));
@@ -518,29 +574,35 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         // Table header and footer
         final Element tableHeader = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE_HEADER);
         tableHeader.setAttribute(ATT_STYLE, "table_TH");
-        tableHeader.setAttribute(ATT_HEIGHT, String.valueOf(5));
+        tableHeader.setAttribute(ATT_HEIGHT, String.valueOf(0));
         
         final Element tableFooter = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE_FOOTER);
         tableFooter.setAttribute(ATT_STYLE, "table_TH");
-        tableFooter.setAttribute(ATT_HEIGHT, String.valueOf(5));
+        tableFooter.setAttribute(ATT_HEIGHT, String.valueOf(0));
         
         // Column header
         final Element jrColumnHeader = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN_HEADER);
         jrColumnHeader.setAttribute(ATT_STYLE, "table_CH");
-        jrColumnHeader.setAttribute(ATT_HEIGHT, String.valueOf(40));
+        jrColumnHeader.setAttribute(ATT_HEIGHT, String.valueOf(headerHeight));
 
         final Element staticText = document.createElementNS(URI_JRXML, TAG_STATIC_TEXT);
             
         final Element staticTextReportElement = document.createElementNS(URI_JRXML, TAG_REPORT_ELEMENT);
-        staticTextReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL/2));
-        staticTextReportElement.setAttribute(ATT_Y, String.valueOf(0));
-        staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-INDENT_LABEL));
-        staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(40));
+        staticTextReportElement.setAttribute(ATT_X, String.valueOf(padding));
+        staticTextReportElement.setAttribute(ATT_Y, String.valueOf(padding));
+        staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-2*padding));
+        staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(headerHeight-2*padding));
 //        staticTextReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
         staticText.appendChild(staticTextReportElement);
+        
+        final Element textElement = document.createElement(TAG_TEXT_ELEMENT);
+        final Element font = document.createElement(TAG_FONT);
+        font.setAttribute(ATT_SIZE, String.valueOf(fontSize));
+        textElement.appendChild(font);
+        staticText.appendChild(textElement);
 
         final Element text = document.createElementNS(URI_JRXML, TAG_TEXT);
-        final ResourceBundle rb = ResourceBundle.getBundle(Observation.class.getName());
+        final ResourceBundle rb = ResourceBundle.getBundle(clazz.getName());
         final CDATASection labelField = document.createCDATASection(rb.getString(getFieldNameFromSetter(setter)));
         text.appendChild(labelField);
 
@@ -550,30 +612,36 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         // Column footer
         final Element jrColumnFooter = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN_FOOTER);
         jrColumnFooter.setAttribute(ATT_STYLE, "table_CH");
-        jrColumnFooter.setAttribute(ATT_HEIGHT, String.valueOf(5));
+        jrColumnFooter.setAttribute(ATT_HEIGHT, String.valueOf(0));
         
         
         // Detail cell
         final Element detailCell = document.createElementNS(URI_JRXML_COMPONENTS, TAG_DETAIL_CELL);
         detailCell.setAttribute(ATT_STYLE, "table_TD");
-        detailCell.setAttribute(ATT_HEIGHT, String.valueOf(40));
+        detailCell.setAttribute(ATT_HEIGHT, String.valueOf(detailCellHeight));
         
-            final Element textField = document.createElementNS(URI_JRXML, TAG_TEXT_FIELD);
-            textField.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, "true");
+        final Element textField = document.createElementNS(URI_JRXML, TAG_TEXT_FIELD);
+        textField.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, String.valueOf(true));
 
-            final Element textFieldReportElement = document.createElement(TAG_REPORT_ELEMENT);
-            textFieldReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL/2));
-            textFieldReportElement.setAttribute(ATT_Y, String.valueOf(0));
-            textFieldReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-INDENT_LABEL));
-            textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(40));
-    //        textFieldReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
-            textField.appendChild(textFieldReportElement);
+        final Element textFieldReportElement = document.createElement(TAG_REPORT_ELEMENT);
+        textFieldReportElement.setAttribute(ATT_X, String.valueOf(padding));
+        textFieldReportElement.setAttribute(ATT_Y, String.valueOf(padding));
+        textFieldReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-2*padding));
+        textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(detailCellHeight-2*padding));
+//        textFieldReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
+        textField.appendChild(textFieldReportElement);
+        
+        final Element detailTextElement = document.createElement(TAG_TEXT_ELEMENT);
+        final Element detailFont = document.createElement(TAG_FONT);
+        detailFont.setAttribute(ATT_SIZE, String.valueOf(fontSize));
+        detailTextElement.appendChild(detailFont);
+        textField.appendChild(detailTextElement);
 
-            final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);
-            final CDATASection valueField = document.createCDATASection("$F{"+getFieldNameFromSetter(setter)+"}");
-            textFieldExpression.appendChild(valueField);
+        final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);
+        final CDATASection valueField = document.createCDATASection("$F{"+getFieldNameFromSetter(setter)+"}");
+        textFieldExpression.appendChild(valueField);
 
-            textField.appendChild(textFieldExpression);
+        textField.appendChild(textFieldExpression);
         detailCell.appendChild(textField);
         
         column.appendChild(tableHeader);
@@ -585,156 +653,4 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         table.appendChild(column);
     }
     
-    /**
-     * <p>This method writes the variable of a given field.</p>
-     * @param field
-     * @param order
-     * @param heightMultiplicator 
-     */
-    private void writeDetailField(final String field, final Class fieldClass, final int order, final Markup style, final ResourceBundle resourceBundle){
-        
-        // Looks for the band element.------------------------------------------
-        final Element band = (Element) this.detail.getElementsByTagName(TAG_BAND).item(0);
-        
-        
-        /*
-        Sets the frame, that will contain the field label and the corresponding field value.
-        
-        ------------------------------------------------------------------------
-        |                                                                      |   
-        |                               FRAME                                  |  
-        |                                                                      | 
-        ------------------------------------------------------------------------
-        */
-        final Element frame = document.createElement(TAG_FRAME);
-        
-        final Element frameReportElement = document.createElement(TAG_REPORT_ELEMENT);
-        frameReportElement.setAttribute(ATT_X, String.valueOf(0));
-        frameReportElement.setAttribute(ATT_Y, String.valueOf((FIELDS_HEIGHT+fields_interline)*order));
-        frameReportElement.setAttribute(ATT_WIDTH, String.valueOf(COLUMN_WIDTH));
-        frameReportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT));
-        frameReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
-        frameReportElement.setAttribute(ATT_MODE, Mode.OPAQUE.toString());
-        if(order%2==0)
-            frameReportElement.setAttribute(ATT_BACKCOLOR, "#F0F0F0");
-        else
-            frameReportElement.setAttribute(ATT_BACKCOLOR, "#F5F5F5");
-        
-        final Element box = document.createElement(TAG_BOX);
-        
-        final Element bottomPen = document.createElement(TAG_BOTTOM_PEN);
-        bottomPen.setAttribute(ATT_LINE_WIDTH, "0.25");
-        bottomPen.setAttribute(ATT_LINE_COLOR, "#CCCCCC");
-        
-        // Builds the DOM tree.-------------------------------------------------
-        box.appendChild(bottomPen);
-        frame.appendChild(frameReportElement);
-        frame.appendChild(box);
-        
-        
-        /*
-        Sets the label, that will contain the field label.
-        
-        ------------------------------------------------------------------------
-        |    --------------------  FRAME                                       |   
-        |    |       LABEL      |                                              |  
-        |    --------------------                                              | 
-        ------------------------------------------------------------------------
-        */
-        
-        // Sets the field's label.----------------------------------------------
-        final Element staticText = this.document.createElement(TAG_STATIC_TEXT);
-        
-        final Element staticTextReportElement = this.document.createElement(TAG_REPORT_ELEMENT);
-        staticTextReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL));
-        staticTextReportElement.setAttribute(ATT_Y, String.valueOf(0));
-        staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(LABEL_WIDTH));
-        staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT));
-        staticTextReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
-        
-        final Element staticTextTextElement = this.document.createElement(TAG_TEXT_ELEMENT);
-        staticTextTextElement.setAttribute(ATT_VERTICAL_ALIGNMENT, FIELDS_VERTICAL_ALIGNMENT);
-        staticTextTextElement.setAttribute(ATT_TEXT_ALIGNMENT, TextAlignment.LEFT.toString());
-        
-        final Element staticTextFont = this.document.createElement(TAG_FONT);
-        staticTextFont.setAttribute(ATT_IS_BOLD, "true");
-        staticTextFont.setAttribute(ATT_FONT_NAME, FIELDS_FONT_NAME);
-        
-        final Element text = this.document.createElement(TAG_TEXT);
-        
-        final CDATASection labelField;
-        if(resourceBundle!=null && resourceBundle.containsKey(field)){
-            labelField = this.document.createCDATASection(resourceBundle.getString(field));
-        } else{
-            labelField = this.document.createCDATASection(field);
-        }
-        
-        // Builds the DOM tree.-------------------------------------------------
-        text.appendChild(labelField);
-        staticText.appendChild(staticTextReportElement);
-        staticTextTextElement.appendChild(staticTextFont);
-        staticText.appendChild(staticTextTextElement);
-        staticText.appendChild(text);
-        frame.appendChild(staticText);
-        
-        
-        
-        /*
-        Sets the field, that will contain the field value.
-        
-        ------------------------------------------------------------------------
-        |    --------------------  FRAME  -------------------------------------|   
-        |    |       LABEL      |         |               FIELD               ||  
-        |    --------------------         -------------------------------------| 
-        ------------------------------------------------------------------------
-        */
-        // Sets the field.------------------------------------------------------
-        final Element textField = this.document.createElement(TAG_TEXT_FIELD);
-        //if (c==Instant.class)
-        //    textField.setAttribute(TAG_PATTERN, DATE_PATTERN);
-        textField.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, "true");
-//        if(fieldClass!=LocalDateTime.class)
-//            textField.setAttribute(ATT_IS_BLANK_WHEN_NULL, "true");
-        
-        final Element textFieldReportElement = document.createElement(TAG_REPORT_ELEMENT);
-        textFieldReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL+LABEL_WIDTH));
-        textFieldReportElement.setAttribute(ATT_Y, String.valueOf(0));
-        textFieldReportElement.setAttribute(ATT_WIDTH, String.valueOf(COLUMN_WIDTH-(INDENT_LABEL+LABEL_WIDTH)));
-        textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(FIELDS_HEIGHT));
-        textFieldReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
-        
-        final Element textFieldTextElement = document.createElement(TAG_TEXT_ELEMENT);
-        textFieldTextElement.setAttribute(ATT_VERTICAL_ALIGNMENT, FIELDS_VERTICAL_ALIGNMENT);
-        textFieldTextElement.setAttribute(ATT_TEXT_ALIGNMENT, TextAlignment.JUSTIFIED.toString());
-        if(style!=null && style!=Markup.NONE) 
-            textFieldTextElement.setAttribute(ATT_MARKUP, style.toString());
-        
-        final Element textFieldFont = document.createElement(TAG_FONT);
-        textFieldFont.setAttribute(ATT_FONT_NAME, FIELDS_FONT_NAME);
-        
-        final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);
-        
-        // The content of the field is specific in case of Calendar field.------
-        final CDATASection valueField;
-        //if (c==Instant.class) 
-        //    valueField = this.document.createCDATASection("$F{"+field+"}");
-        //else $F{permit_quantity}.equals(null) ? $F{fst_insp_qpqlml_quantity} : $F{permit_quantity}
-        
-        if(fieldClass==Boolean.class || (fieldClass!=null && BOOLEAN_PRIMITIVE_NAME.equals(fieldClass.getName()))){
-            valueField = document.createCDATASection("$F{"+field+"}==null ? \""+NULL_REPLACEMENT+"\" : ($F{"+field+"} ? \""+TRUE_REPLACEMENT+"\" : \""+FALSE_REPLACEMENT+"\")");
-        }
-        else{
-            valueField = document.createCDATASection("$F{"+field+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+field+"}");
-        }
-        
-        // Builds the DOM tree.-------------------------------------------------
-        textFieldExpression.appendChild(valueField);
-        textField.appendChild(textFieldReportElement);
-        textFieldTextElement.appendChild(textFieldFont);
-        textField.appendChild(textFieldTextElement);
-        textField.appendChild(textFieldExpression);
-        frame.appendChild(textField);
-        
-        band.appendChild(frame);
-    }
 }

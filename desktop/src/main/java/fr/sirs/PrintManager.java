@@ -12,6 +12,7 @@ import static fr.sirs.SIRS.DesordreFields.OUVRAGE_PARTICULIER_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.OUVRAGE_TELECOM_ENERGIE_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.OUVRAGE_VOIRIE_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.PHOTOS_OBSERVATION_REFERENCE;
+import static fr.sirs.SIRS.DesordreFields.PRESTATION_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.RESEAU_HYDRAULIQUE_FERME_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.RESEAU_TELECOM_ENERGIE_REFERENCE;
@@ -118,41 +119,63 @@ public class PrintManager {
     public final void printDesordres(final List<Desordre> desordres) {
         
         
-            final List avoidFields = new ArrayList<>();
-            avoidFields.add(GEOMETRY_FIELD);
-            avoidFields.add(DOCUMENT_ID_FIELD);
-            avoidFields.add(ID_FIELD);
-            avoidFields.add(LONGITUDE_MIN_FIELD);
-            avoidFields.add(LONGITUDE_MAX_FIELD);
-            avoidFields.add(LATITUDE_MIN_FIELD);
-            avoidFields.add(LATITUDE_MAX_FIELD);
-            avoidFields.add(FOREIGN_PARENT_ID_FIELD);
-            avoidFields.add(REVISION_FIELD);
-            avoidFields.add(POSITION_DEBUT_FIELD);
-            avoidFields.add(POSITION_FIN_FIELD);
-            avoidFields.add(PARENT_FIELD);
-            avoidFields.add(COUCH_DB_DOCUMENT_FIELD);
-            avoidFields.add(OBSERVATIONS_REFERENCE);
+            final List avoidDesordreFields = new ArrayList<>();
+            avoidDesordreFields.add(GEOMETRY_FIELD);
+            avoidDesordreFields.add(DOCUMENT_ID_FIELD);
+            avoidDesordreFields.add(ID_FIELD);
+            avoidDesordreFields.add(LONGITUDE_MIN_FIELD);
+            avoidDesordreFields.add(LONGITUDE_MAX_FIELD);
+            avoidDesordreFields.add(LATITUDE_MIN_FIELD);
+            avoidDesordreFields.add(LATITUDE_MAX_FIELD);
+            avoidDesordreFields.add(FOREIGN_PARENT_ID_FIELD);
+            avoidDesordreFields.add(REVISION_FIELD);
+            avoidDesordreFields.add(POSITION_DEBUT_FIELD);
+            avoidDesordreFields.add(POSITION_FIN_FIELD);
+            avoidDesordreFields.add(PARENT_FIELD);
+            avoidDesordreFields.add(COUCH_DB_DOCUMENT_FIELD);
+            avoidDesordreFields.add(OBSERVATIONS_REFERENCE);
             
-            avoidFields.add(ECHELLE_LIMINIMETRIQUE_REFERENCE);
-            avoidFields.add(OUVRAGE_PARTICULIER_REFERENCE);
-            avoidFields.add(RESEAU_TELECOM_ENERGIE_REFERENCE);
-            avoidFields.add(OUVRAGE_TELECOM_ENERGIE_REFERENCE);
-            avoidFields.add(OUVRAGE_HYDRAULIQUE_REFERENCE);
-            avoidFields.add(RESEAU_HYDRAULIQUE_FERME_REFERENCE);
-            avoidFields.add(RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE);
-            avoidFields.add(OUVRAGE_VOIRIE_REFERENCE);
-            avoidFields.add(VOIE_DIGUE_REFERENCE);
+            avoidDesordreFields.add(ECHELLE_LIMINIMETRIQUE_REFERENCE);
+            avoidDesordreFields.add(OUVRAGE_PARTICULIER_REFERENCE);
+            avoidDesordreFields.add(RESEAU_TELECOM_ENERGIE_REFERENCE);
+            avoidDesordreFields.add(OUVRAGE_TELECOM_ENERGIE_REFERENCE);
+            avoidDesordreFields.add(OUVRAGE_HYDRAULIQUE_REFERENCE);
+            avoidDesordreFields.add(RESEAU_HYDRAULIQUE_FERME_REFERENCE);
+            avoidDesordreFields.add(RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE);
+            avoidDesordreFields.add(OUVRAGE_VOIRIE_REFERENCE);
+            avoidDesordreFields.add(VOIE_DIGUE_REFERENCE);
+            avoidDesordreFields.add(PRESTATION_REFERENCE);
             
-            avoidFields.add(VALID_FIELD);
-            avoidFields.add(AUTHOR_FIELD);
-            avoidFields.add(DATE_MAJ_FIELD);
+            avoidDesordreFields.add(VALID_FIELD);
+            avoidDesordreFields.add(AUTHOR_FIELD);
+            avoidDesordreFields.add(DATE_MAJ_FIELD);
             
-            avoidFields.add(PHOTOS_OBSERVATION_REFERENCE);
+            avoidDesordreFields.add(PHOTOS_OBSERVATION_REFERENCE);
+            
+            final List<String> avoidPrestationFields = new ArrayList<>(avoidDesordreFields);
+            avoidPrestationFields.add("photos");
+            avoidPrestationFields.add("borne_fin_distance");
+            avoidPrestationFields.add("desordreIds");
+            avoidPrestationFields.add("borneFinId");
+            avoidPrestationFields.add("coutGlobal");
+            avoidPrestationFields.add("coteId");
+            avoidPrestationFields.add("borneDebutId");
+            avoidPrestationFields.add("prFin");
+            avoidPrestationFields.add("prDebut");
+            avoidPrestationFields.add("sourceId");
+            avoidPrestationFields.add("borne_debut_distance");
+            avoidPrestationFields.add("rapportEtudeIds");
+            avoidPrestationFields.add("systemeRepId");
+            avoidPrestationFields.add("linearId");
+            avoidPrestationFields.add("positionId");
+            avoidPrestationFields.add("documentGrandeEchelleIds");
+            avoidPrestationFields.add("borne_fin_aval");
+            avoidPrestationFields.add("borne_debut_aval");
+            avoidPrestationFields.add("evenementHydrauliqueIds");
             
         try{  
 //            final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll().subList(0, 10);
-            final File fileToPrint = PrinterUtilities.printDisorders(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), desordres);
+            final File fileToPrint = PrinterUtilities.printDisorders(avoidDesordreFields, avoidPrestationFields, Injector.getSession().getPreviews(), new SirsStringConverter(), desordres);
 //            if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception ex) {
             Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, ex);

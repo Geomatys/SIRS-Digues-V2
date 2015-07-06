@@ -1,12 +1,17 @@
 package fr.sirs.util;
 
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.Photo;
+import fr.sirs.core.model.Prestation;
+import static fr.sirs.util.JRDomWriterDesordreSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTOS_SUBREPORT;
+import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTO_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterDesordreSheet.PRESTATION_TABLE_DATA_SOURCE;
 import fr.sirs.util.property.SirsPreferences;
 import java.io.File;
 import java.io.FileInputStream;
@@ -67,7 +72,7 @@ public class PrinterUtilities {
     private static final String META_TEMPLATE_DESORDRE = "/fr/sirs/jrxml/metaTemplateDesordre.jrxml";
     private static final String TEMPLATE_PHOTOS = "/fr/sirs/jrxml/photoTemplate.jrxml";
     
-    public static File printDisorders(List<String> avoidFields, final Previews previewLabelRepository, final StringConverter stringConverter, final List<Desordre> desordres) throws Exception {
+    public static File printDisorders(List<String> avoidDesordreFields, List<String> avoidPrestationFields, final Previews previewLabelRepository, final StringConverter stringConverter, final List<Desordre> desordres) throws Exception {
         
         JasperPrint firstPrint = null;
         final List<JasperPrint> followingPrints = new ArrayList<>();
@@ -77,10 +82,10 @@ public class PrinterUtilities {
             final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
             templateFile.deleteOnExit();
 
-            final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE));
+            final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE), avoidDesordreFields, avoidPrestationFields);
             templateWriter.setFieldsInterline(2);
             templateWriter.setOutput(templateFile);
-            templateWriter.write(desordre, avoidFields);
+            templateWriter.write(desordre);
 
             final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
                 
@@ -89,14 +94,17 @@ public class PrinterUtilities {
             final Map<String, Object> parameters = new HashMap<>();
             parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
             
-            parameters.put(JRDomWriterDesordreSheet.OBSERVATION_TABLE_DATA_SOURCE, new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
+            parameters.put(OBSERVATION_TABLE_DATA_SOURCE, new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
+            
+            parameters.put(PRESTATION_TABLE_DATA_SOURCE, new ObjectDataSource<>(Injector.getSession().getRepositoryForClass(Prestation.class).get(desordre.getPrestationIds()), previewLabelRepository, stringConverter));
+            
             final List<Photo> photos = new ArrayList<>();
             for(final Observation observation : desordre.observations){
                 if(observation.photos!=null && !observation.photos.isEmpty()){
                     photos.addAll(observation.photos);
                 }
             }
-            parameters.put(JRDomWriterDesordreSheet.PHOTO_TABLE_DATA_SOURCE, new ObjectDataSource<>(photos, previewLabelRepository, stringConverter));
+            parameters.put(PHOTO_TABLE_DATA_SOURCE, new ObjectDataSource<>(photos, previewLabelRepository, stringConverter));
             
             final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS));
             parameters.put(PHOTOS_SUBREPORT, photosReport);

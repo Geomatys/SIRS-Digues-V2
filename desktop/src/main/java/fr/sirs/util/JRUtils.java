@@ -95,6 +95,9 @@ public class JRUtils {
     public static final String ATT_HEIGHT = "height";
     public static final String ATT_IS_BLANK_WHEN_NULL = "isBlankWhenNull";
     public static final String ATT_IS_BOLD = "isBold";
+    public static final String ATT_IS_ITALIC = "isItalic";
+    public static final String ATT_IS_UNDERLINE = "isUnderline";
+    public static final String ATT_SIZE = "size";
     public static final String ATT_IS_STRETCH_WITH_OVERFLOW = "isStretchWithOverflow";
     public static final String ATT_KEY = "key";
     public enum PositionType {

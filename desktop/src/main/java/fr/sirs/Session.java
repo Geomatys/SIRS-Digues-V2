@@ -137,7 +137,6 @@ public class Session extends SessionCore {
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
         super(couchDbConnector);
-        
         sirsGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
         final String referenceUrl;
         if(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.REFERENCE_URL)!=null){

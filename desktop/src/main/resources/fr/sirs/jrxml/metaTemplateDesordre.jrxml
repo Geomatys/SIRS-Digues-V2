@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="jasper_report_template" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="10e7ad18-cce4-4b7d-832d-94e5135fe8c0">
-	<property name="ireport.zoom" value="1.0000000000000004"/>
+	<property name="ireport.zoom" value="1.6105100000000014"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<style name="table">
@@ -27,26 +27,25 @@
 			<style backcolor="#FFFFEF"/>
 		</conditionalStyle>
 	</style>
-	<subDataset name="Observations Dataset">
-	</subDataset>
+	<subDataset name="Observations Dataset" uuid="f87f5cd0-3234-40c4-9ea3-250724f36d5e"/>
+	<subDataset name="Prestations Dataset" uuid="df00eaba-db68-4b08-8235-09c8aa0b6e8c"/>
 	<parameter name="logo" class="java.lang.Object"/>
 	<parameter name="OBSERVATION_TABLE_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
+	<parameter name="PRESTATION_TABLE_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
 	<parameter name="PHOTO_TABLE_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
-	<parameter name="PHOTOS_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport" />
-
-
+	<parameter name="PHOTOS_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport"/>
 	<title>
 		<band height="60">
 			<staticText>
-				<reportElement x="153" y="17" width="371" height="22" />
+				<reportElement x="153" y="17" width="371" height="22" uuid="6d934ba3-7489-43ba-81be-6056b992d8d4"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Serif" size="14" isBold="true" isUnderline="true"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<image>
-				<reportElement x="0" y="0" width="135" height="59" />
-				<imageExpression class="java.io.InputStream"><![CDATA[$P{logo}]]></imageExpression>
+				<reportElement x="0" y="0" width="135" height="59" uuid="bd3c6ab1-f29e-4734-bab3-a0956e74e525"/>
+				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
 			</image>
 		</band>
 	</title>
@@ -57,6 +56,435 @@
 		<band height="2" splitType="Stretch"/>
 	</columnHeader>
 	<detail>
-		<band height="2" splitType="Stretch"/>
+		<band height="304" splitType="Stretch">
+			<frame>
+				<reportElement mode="Opaque" x="0" y="0" width="555" height="15" backcolor="#CB5C5C" uuid="e9515967-8551-4baf-9ece-675713572d85"/>
+				<staticText>
+					<reportElement x="10" y="2" width="545" height="11" uuid="f2e8836c-b61f-4ad0-aac7-590cd453e6e5"/>
+					<textElement>
+						<font size="9" isBold="true" isItalic="true" isUnderline="true"/>
+					</textElement>
+					<text><![CDATA[Description générale]]></text>
+				</staticText>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="18" width="555" height="12" backcolor="#F5F5F5" uuid="b0a96719-0ed1-44d4-8762-38ac9bcc34fa"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="0" width="140" height="12" uuid="459226d2-85bf-4a43-ada4-b175ccaa4983"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Désignation]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="150" y="0" width="405" height="12" uuid="10400906-6fe6-4ab8-add5-fef0d9e5a411"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{designation}==null ? "Non renseigné" : $F{designation}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="32" width="555" height="12" backcolor="#F0F0F0" uuid="02d9c324-3ac0-42d0-aa9e-0b401f14863d"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="150" y="0" width="100" height="12" uuid="9caf9b0d-875c-40bd-bd75-4cd689980517"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Date de début]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="250" y="0" width="100" height="12" uuid="03d7cc2a-93c3-44da-8bda-a6e22c997ff2"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{date_debut}==null ? "Non renseigné" : $F{date_debut}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement positionType="Float" x="350" y="0" width="100" height="12" uuid="b1da5310-7da5-4a2a-8d9d-3689b5ad86ea"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Date de fin]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="450" y="0" width="100" height="12" uuid="8d9d6fc2-d4e8-497e-a20e-f70310e0b6ba"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{date_fin}==null ? "Non renseigné" : $F{date_fin}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="46" width="555" height="12" backcolor="#F5F5F5" uuid="e423bc72-aff4-4491-b057-3140660fd441"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="0" width="140" height="12" uuid="2abd0d0e-c148-4174-a7d5-d37e5f896512"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Source]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="150" y="0" width="405" height="12" uuid="baf87d65-4632-4d22-8377-982bdf6008d1"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{sourceId}==null ? "Non renseigné" : $F{sourceId}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="60" width="555" height="12" backcolor="#F0F0F0" uuid="c22aaddd-a331-4518-82ac-464fd37a289c"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="0" width="140" height="12" uuid="05f85007-63da-4cf2-a91d-370c6f08e7cf"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Type de désordre]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="150" y="0" width="405" height="12" uuid="6d4e5282-40d5-422c-9283-86b8e423382e"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{typeDesordreId}==null ? "Non renseigné" : $F{typeDesordreId}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="74" width="555" height="12" backcolor="#F5F5F5" uuid="db36f05c-78e1-4707-beb5-92a401a23d9a"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="0" width="140" height="12" uuid="d7da9cd0-dc97-4465-ac0f-45871b6a9d3a"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Commentaire]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="150" y="0" width="405" height="12" uuid="f3bfaffb-0ba0-4cbd-a94e-4cebad331bfd"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle" markup="html">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{commentaire}==null ? "Non renseigné" : $F{commentaire}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="90" width="555" height="15" backcolor="#CB5C5C" uuid="62e862ef-7bf7-4e55-82f0-e1ecb659c0f1"/>
+				<staticText>
+					<reportElement x="10" y="2" width="545" height="11" uuid="cd0f4df6-f9f6-40c0-884e-053ad25fcb32"/>
+					<textElement>
+						<font size="9" isBold="true" isItalic="true" isUnderline="true"/>
+					</textElement>
+					<text><![CDATA[Localisation]]></text>
+				</staticText>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="108" width="555" height="12" backcolor="#F0F0F0" uuid="9a5c9dcb-362d-4582-b623-e2dc4851a4d3"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="0" width="140" height="12" uuid="47354525-ae0e-4bfa-99b0-a8a5ff298881"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Linéaire]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="150" y="0" width="405" height="12" uuid="8ef77866-e00c-46a6-812d-288968bce4d6"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{linearId}==null ? "Non renseigné" : $F{linearId}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="122" width="555" height="12" backcolor="#F5F5F5" uuid="cb3f6e9a-e5eb-4fdf-89c9-f8d4caf5bebf"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="0" width="140" height="12" uuid="902a6a79-d700-4b9d-8629-de83910b379d"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Système de repérage]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="150" y="0" width="405" height="12" uuid="5a5856b2-3396-49af-8403-09282329adf5"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{systemeRepId}==null ? "Non renseigné" : $F{systemeRepId}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="136" width="555" height="12" backcolor="#F0F0F0" uuid="eb6e93f0-e640-48be-b20b-2ea7290d6109"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="150" y="0" width="100" height="12" uuid="df6998e9-1d13-4ad0-badc-cb7a2026a600"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[PR de début]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="250" y="0" width="100" height="12" uuid="3eace7af-afbf-4fc1-91cf-ae44a3124289"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{prDebut}==null ? "Non renseigné" : $F{prDebut}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement positionType="Float" x="350" y="0" width="100" height="12" uuid="0e1215e7-a658-48e4-b0ce-2c4d045c6c73"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[PR de fin]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="450" y="0" width="100" height="12" uuid="8640e006-c476-4a24-adcf-386c72421d9f"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{prFin}==null ? "Non renseigné" : $F{prFin}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="150" width="555" height="12" backcolor="#F5F5F5" uuid="67b2fbed-89e0-4d70-b400-57e0de20b423"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="164" width="555" height="12" backcolor="#F0F0F0" uuid="76fe1118-6c07-4f81-aa6c-d365abebad59"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="150" y="0" width="100" height="12" uuid="0696493d-99fc-413a-a5f6-2e67e21ff935"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Borne début]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="250" y="0" width="100" height="12" uuid="85f7f084-05ec-4e25-ae2e-c76f46689324"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{borneDebutId}==null ? "Non renseigné" : $F{borneDebutId}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement positionType="Float" x="350" y="0" width="100" height="12" uuid="d1bc4e45-b009-45da-974f-911164385de5"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Borne fin]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="450" y="0" width="100" height="12" uuid="53aa79d6-951f-4974-b8ee-a4f0a9f6678e"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{borneFinId}==null ? "Non renseigné" : $F{borneFinId}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="178" width="555" height="12" backcolor="#F5F5F5" uuid="16dc0ccd-34fe-4a85-9575-c3b789d6b2fa"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="150" y="0" width="100" height="12" uuid="c3cde09a-c83f-4b1f-9aaf-23f6efbee1d4"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Borne début en aval]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="250" y="0" width="100" height="12" uuid="b7fd2eea-1058-4ea7-9d62-66bb7058e328"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{borne_debut_aval}==null ? "Non renseigné" : ($F{borne_debut_aval} ? "Oui" : "Non")]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement positionType="Float" x="350" y="0" width="100" height="12" uuid="8881536a-e80b-4e7d-8629-a3f737a51a4a"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Borne (fin) en aval]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="450" y="0" width="100" height="12" uuid="f36f745d-620a-43af-8536-03eeb78cc14b"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{borne_fin_aval}==null ? "Non renseigné" : ($F{borne_fin_aval} ? "Oui" : "Non")]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="192" width="555" height="12" backcolor="#F0F0F0" uuid="cb205cc8-4443-44de-8e90-4da41022d5f6"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="150" y="0" width="100" height="12" uuid="e9de5183-203c-441f-81e4-1742aa3720bc"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Dist. borne début]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="350" y="0" width="100" height="12" uuid="f8be7dd2-a528-4b41-8e67-028a689d1059"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Dist. borne fin]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="450" y="0" width="100" height="12" uuid="3c66c3a1-0077-4434-b690-0ed0104abd7f"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{borne_fin_distance}==null ? "Non renseigné" : $F{borne_fin_distance}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="250" y="0" width="100" height="12" uuid="f15736be-6875-44cd-97d6-5dfc2f5270f0"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{borne_debut_distance}==null ? "Non renseigné" : $F{borne_debut_distance}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="206" width="555" height="12" backcolor="#F5F5F5" uuid="0e1acf57-eccd-4210-8f1d-62cff5a475f1"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="220" width="555" height="12" backcolor="#F0F0F0" uuid="877d62ac-6a24-48a4-b0d8-5ed6eba68aca"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="150" y="0" width="100" height="12" uuid="f9df8c90-3cab-4c1d-a240-4aac3b97d602"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[X début]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="350" y="0" width="100" height="12" uuid="4d154de6-156c-4ad5-bacb-e4203e816aab"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[X fin]]></text>
+				</staticText>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="234" width="555" height="12" backcolor="#F5F5F5" uuid="0392c098-6c5f-41fa-84fb-8c7ca3b39015"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="150" y="0" width="100" height="12" uuid="ee33b827-aa7c-4eee-90e7-91bb559c6b36"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Y début]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="350" y="0" width="100" height="12" uuid="be178574-126c-4f05-b0f2-c4f561aa3265"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Y fin]]></text>
+				</staticText>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="248" width="555" height="12" backcolor="#F0F0F0" uuid="e5494272-c6af-4adb-9ef7-19ae5ed5f438"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="262" width="555" height="12" backcolor="#F5F5F5" uuid="0e5f620d-ae56-4464-a0d2-b9d3ac85412b"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="0" width="140" height="12" uuid="a9c8b115-9926-4cb9-bf49-5fd53252f997"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Côté]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="150" y="0" width="405" height="12" uuid="edb278aa-9d56-40fb-a2d1-a6e647a3235a"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{coteId}==null ? "Non renseigné" : $F{coteId}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="276" width="555" height="12" backcolor="#F0F0F0" uuid="b62e28af-bde4-445f-b2cb-a299be69d7db"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="0" width="140" height="12" uuid="07f91b3c-882f-4f9d-bc50-1c7e23969d43"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Position]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="150" y="0" width="405" height="12" uuid="d9b019ce-21cd-4632-a9dc-bfead597cc51"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{positionId}==null ? "Non renseigné" : $F{positionId}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="290" width="555" height="12" backcolor="#F5F5F5" uuid="7a34ecd5-c519-438d-824d-952682f4633d"/>
+				<box>
+					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</box>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="150" y="0" width="405" height="12" uuid="9e9b1c98-529b-4848-8fd3-ed5fe498cbaa"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{lieuDit}==null ? "Non renseigné" : $F{lieuDit}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="0" width="140" height="12" uuid="17c35dba-be53-4ddc-893d-fdbf44195ea8"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Lieu-dit]]></text>
+				</staticText>
+			</frame>
+		</band>
 	</detail>
 </jasperReport>
