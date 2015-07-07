@@ -1,5 +1,7 @@
 package fr.sirs.ui.calendar;
 
+import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Identifiable;
 import javafx.scene.image.Image;
 import java.time.LocalDateTime;
 
@@ -9,20 +11,26 @@ import java.time.LocalDateTime;
  * @author Cédric Briançon (Geomatys)
  */
 public class CalendarEvent {
+    private final Element parent;
     private final LocalDateTime date;
     private final String title;
     private final String type;
     private final Image image;
 
-    public CalendarEvent(final LocalDateTime date, final String title, final String type) {
-        this(date, title, type, null);
+    public CalendarEvent(final Element parent, final LocalDateTime date, final String title, final String type) {
+        this(parent, date, title, type, null);
     }
 
-    public CalendarEvent(final LocalDateTime date, final String title, final String type, final Image image) {
+    public CalendarEvent(final Element parent, final LocalDateTime date, final String title, final String type, final Image image) {
+        this.parent = parent;
         this.date = date;
         this.title = title;
         this.type = type;
         this.image = image;
+    }
+
+    public Element getParent() {
+        return parent;
     }
 
     public LocalDateTime getDate() {

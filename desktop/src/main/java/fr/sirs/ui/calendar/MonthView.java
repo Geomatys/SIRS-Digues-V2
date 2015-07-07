@@ -1,6 +1,7 @@
 package fr.sirs.ui.calendar;
 
 import javafx.beans.Observable;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
@@ -86,6 +87,9 @@ final class MonthView extends DatePane {
         calendarView.calendarDate.addListener(observable -> {
             updateContent();
         });
+
+        final ObservableList<CalendarEvent> events = calendarView.getCalendarEvents();
+        events.addListener((ListChangeListener<CalendarEvent>) c -> updateDays());
     }
 
     /**
@@ -205,8 +209,6 @@ final class MonthView extends DatePane {
         final ColumnConstraints colLargeTxtEventCstr = new ColumnConstraints(130);
         final ColumnConstraints colSmallCstr = new ColumnConstraints(USE_PREF_SIZE, 20, USE_PREF_SIZE, Priority.NEVER, HPos.RIGHT, true);
 
-        final ObservableList<CalendarEvent> events = calendarView.getCalendarEvents();
-
         // Ignore the week day row and the week number column
         for (int i = numberOfDaysPerWeek + (calendarView.getShowWeeks() ? 1 : 0); i < getChildren().size(); i++) {
             //final Date currentDate = calendar.getTime();
@@ -258,7 +260,8 @@ final class MonthView extends DatePane {
                     gridBtn.getStyleClass().add(CSS_CALENDAR_SELECTED);
                 }
 
-                final List<CalendarEvent> eventsForDate = calendarView.getCalendarEventsForCalendarDate(calendar, events);
+                final ObservableList<CalendarEvent> eventsForDate = calendarView.getCalendarEventsForCalendarDate(calendar);
+                eventsForDate.addListener((ListChangeListener<CalendarEvent>) c -> updateDays());
                 if (!eventsForDate.isEmpty()) {
                     gridBtn.getStyleClass().add(CSS_CALENDAR_DAY_HAS_EVENTS);
                     for (int j=0; j<eventsForDate.size(); j++) {

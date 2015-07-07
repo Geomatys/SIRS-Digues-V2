@@ -2,14 +2,16 @@ package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
 import fr.sirs.plugin.reglementaire.DocumentsTheme;
 import fr.sirs.ui.calendar.CalendarEvent;
 import fr.sirs.ui.calendar.CalendarView;
-import javafx.collections.FXCollections;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Point2D;
@@ -20,7 +22,6 @@ import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * @author Cédric Briançon (Geomatys)
@@ -30,49 +31,95 @@ public final class ObligationsCalendarView extends CalendarView {
             FontAwesomeIcons.DEFAULT_COLOR), null);
     private static final Image ICON_WORK = new Image(DocumentsTheme.class.getResourceAsStream("images/roadworks.png"));
 
-    public ObligationsCalendarView() {
-        super();
-    }
+    private final ObjectProperty<ObservableList<ObligationReglementaire>> obligationsProperty;
 
-    /**
-     * Retourne la liste des évènements de calendriers typés Obligations.
-     */
-    @Override
-    public ObservableList<CalendarEvent> getCalendarEvents() {
-        final ObservableList<CalendarEvent> calEvents = FXCollections.observableArrayList();
+    private final ChangeListener propChangeListener = (observable, oldValue, newValue) -> update();
 
-        final AbstractSIRSRepository<ObligationReglementaire> orr = Injector.getSession().getRepositoryForClass(ObligationReglementaire.class);
-        final List<ObligationReglementaire> obligations = orr.getAll();
-        for (final ObligationReglementaire obligation : obligations) {
-            final LocalDateTime eventDate = obligation.getDateRealisation() != null ? obligation.getDateRealisation() :
-                    obligation.getDateEcheance();
-            if (eventDate != null) {
-                final StringBuilder sb = new StringBuilder();
-                Image image = ICON_DOC;
-                if (obligation.getTypeId() != null) {
-                    final RefTypeObligationReglementaire oblType =
-                            Injector.getSession().getRepositoryForClass(RefTypeObligationReglementaire.class).get(obligation.getTypeId());
-                    if (oblType != null) {
-                        final String oblTypeAbreg = oblType.getAbrege();
-                        sb.append(oblTypeAbreg);
-                        if ("TRA".equalsIgnoreCase(oblTypeAbreg)) {
-                            image = ICON_WORK;
-                        }
-                    }
-                }
-                if (obligation.getSystemeEndiguementId() != null) {
-                    final Preview previewSE = Injector.getSession().getPreviews().get(obligation.getSystemeEndiguementId());
-                    if (previewSE != null) {
-                        if (!sb.toString().isEmpty()) {
-                            sb.append(" - ");
-                        }
-                        sb.append(previewSE.getLibelle());
-                    }
-                }
-                calEvents.add(new CalendarEvent(eventDate, sb.toString(), obligation.getTypeId(), image));
+    private final ListChangeListener<ObligationReglementaire> listChangeListener = c -> {
+        update();
+        while(c.next()) {
+            for (final ObligationReglementaire obl : c.getAddedSubList()) {
+                attachPropertyListener(obl);
+            }
+
+            for (final ObligationReglementaire obl : c.getRemoved()) {
+                removePropertyListener(obl);
             }
         }
-        return calEvents;
+    };
+
+    public ObligationsCalendarView(final ObjectProperty<ObservableList<ObligationReglementaire>> obligationsProperty) {
+        super();
+        this.obligationsProperty = obligationsProperty;
+        obligationsProperty.addListener(new ChangeListener<ObservableList<ObligationReglementaire>>() {
+            @Override
+            public void changed(ObservableValue<? extends ObservableList<ObligationReglementaire>> observable, ObservableList<ObligationReglementaire> oldList, ObservableList<ObligationReglementaire> newList) {
+                update();
+                if (newList != null) {
+                    for (final ObligationReglementaire obl : newList) {
+                        attachPropertyListener(obl);
+                    }
+                    newList.addListener(listChangeListener);
+                }
+                if (oldList != null) {
+                    for (final ObligationReglementaire obl : oldList) {
+                        removePropertyListener(obl);
+                    }
+                    oldList.removeListener(listChangeListener);
+                }
+            }
+        });
+    }
+
+    private void attachPropertyListener(final ObligationReglementaire obligation) {
+        obligation.dateEcheanceProperty().addListener(propChangeListener);
+        obligation.dateRealisationProperty().addListener(propChangeListener);
+        obligation.typeIdProperty().addListener(propChangeListener);
+        obligation.systemeEndiguementIdProperty().addListener(propChangeListener);
+    }
+
+    private void removePropertyListener(final ObligationReglementaire obligation) {
+        obligation.dateEcheanceProperty().removeListener(propChangeListener);
+        obligation.dateRealisationProperty().removeListener(propChangeListener);
+        obligation.typeIdProperty().removeListener(propChangeListener);
+        obligation.systemeEndiguementIdProperty().removeListener(propChangeListener);
+    }
+
+    private void update() {
+        getCalendarEvents().clear();
+
+        final ObservableList<ObligationReglementaire> obligations = obligationsProperty.get();
+        if (obligations != null && !obligations.isEmpty()) {
+            for (final ObligationReglementaire obligation : obligations) {
+                final LocalDateTime eventDate = obligation.getDateRealisation() != null ? obligation.getDateRealisation() :
+                        obligation.getDateEcheance();
+                if (eventDate != null) {
+                    final StringBuilder sb = new StringBuilder();
+                    Image image = ICON_DOC;
+                    if (obligation.getTypeId() != null) {
+                        final RefTypeObligationReglementaire oblType =
+                                Injector.getSession().getRepositoryForClass(RefTypeObligationReglementaire.class).get(obligation.getTypeId());
+                        if (oblType != null) {
+                            final String oblTypeAbreg = oblType.getAbrege();
+                            sb.append(oblTypeAbreg);
+                            if ("TRA".equalsIgnoreCase(oblTypeAbreg)) {
+                                image = ICON_WORK;
+                            }
+                        }
+                    }
+                    if (obligation.getSystemeEndiguementId() != null) {
+                        final Preview previewSE = Injector.getSession().getPreviews().get(obligation.getSystemeEndiguementId());
+                        if (previewSE != null) {
+                            if (!sb.toString().isEmpty()) {
+                                sb.append(" - ");
+                            }
+                            sb.append(previewSE.getLibelle());
+                        }
+                    }
+                    getCalendarEvents().add(new CalendarEvent(obligation, eventDate, sb.toString(), obligation.getTypeId(), image));
+                }
+            }
+        }
     }
 
     /**
@@ -83,7 +130,7 @@ public final class ObligationsCalendarView extends CalendarView {
      */
     @Override
     public void showCalendarPopupForEvent(final CalendarEvent calendarEvent, final Node parent) {
-        final ObligationsCalendarPopupEvent popup = new ObligationsCalendarPopupEvent(calendarEvent);
+        final ObligationsCalendarPopupEvent popup = new ObligationsCalendarPopupEvent(calendarEvent, obligationsProperty.get());
         popup.initModality(Modality.NONE);
         popup.setIconified(false);
         popup.setMaximized(false);

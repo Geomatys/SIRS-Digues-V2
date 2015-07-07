@@ -26,6 +26,8 @@ public class CalendarView extends VBox {
     private static final String CSS_CALENDAR = "calendar";
     private static final String CSS_CALENDAR_TODAY_BUTTON = "calendar-today-button";
 
+    private final ObservableList<CalendarEvent> calEvents = FXCollections.observableArrayList();
+
     /**
      * Initializes a calendar with the default locale.
      */
@@ -270,21 +272,18 @@ public class CalendarView extends VBox {
      * @return By default an empty list.
      */
     public ObservableList<CalendarEvent> getCalendarEvents() {
-        return FXCollections.observableArrayList();
+        return calEvents;
     }
 
     /**
      * Get all calendar events defined for the choosen date.
      *
-     * @see #getCalendarEvents()
      * @param calendar Calendar date.
-     * @param events All available events.
      * @return Events list for this date.
      */
-    public final ObservableList<CalendarEvent> getCalendarEventsForCalendarDate(final Calendar calendar,
-                                                                                final ObservableList<CalendarEvent> events) {
+    public final ObservableList<CalendarEvent> getCalendarEventsForCalendarDate(final Calendar calendar) {
         final ObservableList<CalendarEvent> finalEvents = FXCollections.observableArrayList();
-        for (final CalendarEvent event : events) {
+        for (final CalendarEvent event : calEvents) {
             final LocalDateTime d = event.getDate();
             if (d != null && d.getDayOfMonth() == calendar.get(Calendar.DAY_OF_MONTH) && d.getMonthValue() == calendar.get(Calendar.MONTH)+1 &&
                     d.getYear() == calendar.get(Calendar.YEAR)) {

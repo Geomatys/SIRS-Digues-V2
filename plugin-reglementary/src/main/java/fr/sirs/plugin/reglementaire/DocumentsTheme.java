@@ -9,6 +9,8 @@ import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import fr.sirs.theme.ui.PojoTable;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Parent;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -38,39 +40,24 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
         final BorderPane borderPane = new BorderPane();
         final TabPane tabPane = new TabPane();
 
-        final Tab listTab = buildListTab(tabPane);
-        final Tab calendarTab = buildCalendarTab();
+        final Tab listTab = new Tab("Liste");
+        listTab.setClosable(false);
+        final PojoTable obligationsPojoTable = new ObligationsPojoTable(Injector.getSession()
+                .getRepositoryForClass(ObligationReglementaire.class), tabPane);
+        listTab.setContent(obligationsPojoTable);
+
+        final Tab calendarTab = new Tab("Calendrier");
+        calendarTab.setClosable(false);
+        final CalendarView calendarView = new ObligationsCalendarView(obligationsPojoTable.getUiTable().itemsProperty());
+        calendarView.getStylesheets().add(SIRS.CSS_PATH_CALENDAR);
+        calendarView.setShowTodayButton(false);
+        calendarView.getCalendar().setTime(new Date());
+        calendarTab.setContent(calendarView);
+
         tabPane.getTabs().add(listTab);
         tabPane.getTabs().add(calendarTab);
 
         borderPane.setCenter(tabPane);
         return borderPane;
-    }
-
-    /**
-     * Génère l'onglet présentant la liste des obligations réglementaires.
-     *
-     * @param tabPane
-     */
-    private Tab buildListTab(final TabPane tabPane) {
-        final Tab listTab = new Tab("Liste");
-        listTab.setClosable(false);
-        final PojoTable obligationsPojoTable = new ObligationsPojoTable(Injector.getSession().getRepositoryForClass(ObligationReglementaire.class), tabPane);
-        listTab.setContent(obligationsPojoTable);
-        return listTab;
-    }
-
-    /**
-     * Génère l'onglet présentant le calendrier.
-     */
-    private Tab buildCalendarTab() {
-        final Tab calendarTab = new Tab("Calendrier");
-        calendarTab.setClosable(false);
-        final CalendarView calendarView = new ObligationsCalendarView();
-        calendarView.getStylesheets().add(SIRS.CSS_PATH_CALENDAR);
-        calendarView.setShowTodayButton(false);
-        calendarView.getCalendar().setTime(new Date());
-        calendarTab.setContent(calendarView);
-        return calendarTab;
     }
 }
