@@ -11,10 +11,13 @@ import fr.sirs.core.model.RefFrequenceObligationReglementaire;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
 import fr.sirs.ui.AlertItem;
 import javafx.scene.image.Image;
+import org.apache.sis.util.logging.Logging;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Plugin correspondant au module réglementaire, permettant de gérer des documents de suivis.
@@ -24,6 +27,7 @@ import java.util.List;
 public class PluginReglementary extends Plugin {
     private static final String NAME = "plugin-reglementary";
     private static final String TITLE = "Module réglementaire";
+    private static final Logger LOGGER = Logging.getLogger(PluginReglementary.class);
 
     public PluginReglementary() {
         name = NAME;
@@ -68,7 +72,14 @@ public class PluginReglementary extends Plugin {
             final LocalDateTime now = LocalDateTime.now();
 
             for (final RappelObligationReglementaire rappel : rappels) {
-                final ObligationReglementaire obl = repoObl.get(rappel.getObligationId());
+                final ObligationReglementaire obl;
+                try {
+                    obl = repoObl.get(rappel.getObligationId());
+                } catch (RuntimeException ex) {
+                    // Pourrait survenir si une obligation a été supprimée mais pas son rappel
+                    LOGGER.log(Level.INFO, ex.getLocalizedMessage(), ex);
+                    continue;
+                }
                 final RefEcheanceRappelObligationReglementaire period = repoEcheanceRappel.get(obl.getEcheanceId());
 
                 final StringBuilder sb = new StringBuilder();

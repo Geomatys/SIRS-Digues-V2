@@ -42,7 +42,7 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
 
         final Tab listTab = new Tab("Liste");
         listTab.setClosable(false);
-        final PojoTable obligationsPojoTable = new ObligationsPojoTable(Injector.getSession()
+        final ObligationsPojoTable obligationsPojoTable = new ObligationsPojoTable(Injector.getSession()
                 .getRepositoryForClass(ObligationReglementaire.class), tabPane);
         listTab.setContent(obligationsPojoTable);
 

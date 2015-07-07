@@ -3,9 +3,13 @@ package fr.sirs.plugin.reglementaire.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.Element;
+import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.RappelObligationReglementaire;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.Tooltip;
@@ -48,5 +52,10 @@ public final class ObligationsPojoTable extends PojoTable {
         planTab.setContent(mainPane);
         tabPane.getTabs().add(planTab);
         tabPane.getSelectionModel().select(planTab);
+    }
+
+    @Override
+    public ObservableList<Element> getAllValues() {
+        return super.getAllValues();
     }
 }

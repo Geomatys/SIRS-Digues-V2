@@ -3,9 +3,13 @@ package fr.sirs.plugin.reglementaire.ui;
 import fr.sirs.Injector;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.RappelObligationReglementaireRepository;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ObligationReglementaire;
+import fr.sirs.core.model.RappelObligationReglementaire;
 import fr.sirs.ui.calendar.CalendarEvent;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -18,6 +22,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
+
+import java.util.List;
 
 
 /**
@@ -36,11 +42,16 @@ public final class ObligationsCalendarPopupEvent extends Stage {
     private static final Image ICON_ALERT = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_BELL, 16,
             FontAwesomeIcons.DEFAULT_COLOR), null);
 
+    /**
+     * Prépare une popup pour afficher les choix possibles au clic sur un évènement du calendrier.
+     *
+     * @param calendarEvent Evènement du calendrier concerné
+     * @param obligations Liste des obligations.
+     */
     public ObligationsCalendarPopupEvent(final CalendarEvent calendarEvent, final ObservableList<ObligationReglementaire> obligations) {
         super();
 
         setTitle(calendarEvent.getTitle());
-
         // Main box containing the whole popup
         final VBox mainBox = new VBox();
         mainBox.getStyleClass().add(CSS_CALENDAR_EVENT_POPUP);
@@ -51,16 +62,27 @@ public final class ObligationsCalendarPopupEvent extends Stage {
         buttonDelete.setMaxWidth(Region.USE_PREF_SIZE);
         buttonDelete.getStyleClass().add(CSS_CALENDAR_EVENT_POPUP_BUTTON);
         buttonDelete.setOnMouseClicked(event -> {
-            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression de l'alerte ?",
+            final Alert alertDelConfirm = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression de l'alerte ?",
                     ButtonType.NO, ButtonType.YES);
-            alert.setResizable(true);
+            alertDelConfirm.setResizable(true);
 
-            final ButtonType res = alert.showAndWait().get();
+            final ButtonType res = alertDelConfirm.showAndWait().get();
             if(ButtonType.YES != res) return;
 
-            final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(calendarEvent.getParent().getClass());
-            repo.remove(calendarEvent.getParent());
-            obligations.remove(calendarEvent.getParent());
+            final Element parent = calendarEvent.getParent();
+            if (!(parent instanceof ObligationReglementaire)) {
+                // Ne devrait pas survenir mais vérification tout de même.
+                return;
+            }
+            final ObligationReglementaire obligation = (ObligationReglementaire)parent;
+            final AbstractSIRSRepository<ObligationReglementaire> repoObl = Injector.getSession()
+                    .getRepositoryForClass(ObligationReglementaire.class);
+            repoObl.remove(obligation);
+            if (obligations instanceof FilteredList) {
+                ((FilteredList)obligations).getSource().remove(obligation);
+            } else {
+                obligations.remove(obligation);
+            }
         });
         mainBox.getChildren().add(buttonDelete);
 

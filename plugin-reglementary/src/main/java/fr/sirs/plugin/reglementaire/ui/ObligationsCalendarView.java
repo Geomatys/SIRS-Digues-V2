@@ -2,6 +2,7 @@ package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
@@ -24,6 +25,8 @@ import org.geotoolkit.font.IconBuilder;
 import java.time.LocalDateTime;
 
 /**
+ * Vue calendrier présentant les évènements construits à partir des obligations réglementaires.
+ *
  * @author Cédric Briançon (Geomatys)
  */
 public final class ObligationsCalendarView extends CalendarView {
@@ -31,10 +34,21 @@ public final class ObligationsCalendarView extends CalendarView {
             FontAwesomeIcons.DEFAULT_COLOR), null);
     private static final Image ICON_WORK = new Image(DocumentsTheme.class.getResourceAsStream("images/roadworks.png"));
 
+    /**
+     * Propriété pointant sur la liste des obligations réglementaires filtrées pour le calendrier.
+     */
     private final ObjectProperty<ObservableList<ObligationReglementaire>> obligationsProperty;
 
+    /**
+     * En cas de changements sur une propriété d'un objet, mets à jour la vue du calendrier.
+     */
     private final ChangeListener propChangeListener = (observable, oldValue, newValue) -> update();
 
+    /**
+     * Ecouteur sur les changements de la liste des obligations. En cas d'ajout ou de retrait dans cette liste,
+     * ajoute ou retire des écouteurs sur les futures changements de ces obligations, de manière à pouvoir mettre
+     * à jour les vues les présentant.
+     */
     private final ListChangeListener<ObligationReglementaire> listChangeListener = c -> {
         update();
         while(c.next()) {
@@ -48,6 +62,11 @@ public final class ObligationsCalendarView extends CalendarView {
         }
     };
 
+    /**
+     * Vue calendrier pour les obligations réglementaires, permettant d'afficher les évènements.
+     *
+     * @param obligationsProperty propriété pointant sur la liste des obligations réglementaires filtrées pour le calendrier.
+     */
     public ObligationsCalendarView(final ObjectProperty<ObservableList<ObligationReglementaire>> obligationsProperty) {
         super();
         this.obligationsProperty = obligationsProperty;
@@ -71,6 +90,11 @@ public final class ObligationsCalendarView extends CalendarView {
         });
     }
 
+    /**
+     * Attache un écouteur de changements sur l'obligation reglémentaire.
+     *
+     * @param obligation L'obligation réglementaire.
+     */
     private void attachPropertyListener(final ObligationReglementaire obligation) {
         obligation.dateEcheanceProperty().addListener(propChangeListener);
         obligation.dateRealisationProperty().addListener(propChangeListener);
@@ -78,6 +102,11 @@ public final class ObligationsCalendarView extends CalendarView {
         obligation.systemeEndiguementIdProperty().addListener(propChangeListener);
     }
 
+    /**
+     * Retire un écouteur de changements sur l'obligation reglémentaire.
+     *
+     * @param obligation L'obligation réglementaire.
+     */
     private void removePropertyListener(final ObligationReglementaire obligation) {
         obligation.dateEcheanceProperty().removeListener(propChangeListener);
         obligation.dateRealisationProperty().removeListener(propChangeListener);
@@ -85,6 +114,9 @@ public final class ObligationsCalendarView extends CalendarView {
         obligation.systemeEndiguementIdProperty().removeListener(propChangeListener);
     }
 
+    /**
+     * Met à jour les évènements sur le calendrier.
+     */
     private void update() {
         getCalendarEvents().clear();
 

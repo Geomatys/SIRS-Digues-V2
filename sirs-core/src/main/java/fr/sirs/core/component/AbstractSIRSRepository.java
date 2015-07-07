@@ -62,6 +62,8 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     public T get(String id) {
         try {
             return cache.getOrCreate(id, () -> onLoad(super.get(id)));
+        } catch (RuntimeException re) {
+            throw re;
         } catch (Exception ex) {
             // should never happen...
             throw new RuntimeException(ex);

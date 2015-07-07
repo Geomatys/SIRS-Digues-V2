@@ -26,6 +26,9 @@ public class CalendarView extends VBox {
     private static final String CSS_CALENDAR = "calendar";
     private static final String CSS_CALENDAR_TODAY_BUTTON = "calendar-today-button";
 
+    /**
+     * Calendar events to display on the calendar view.
+     */
     private final ObservableList<CalendarEvent> calEvents = FXCollections.observableArrayList();
 
     /**
@@ -266,12 +269,11 @@ public class CalendarView extends VBox {
     }
 
     /**
-     * Return an empty list for calendar events. Subclasses should override this method and return
-     * the wished list of events.
+     * List of calendar events.
      *
-     * @return By default an empty list.
+     * @return Calendar events list, never {@code null}.
      */
-    public ObservableList<CalendarEvent> getCalendarEvents() {
+    public final ObservableList<CalendarEvent> getCalendarEvents() {
         return calEvents;
     }
 
