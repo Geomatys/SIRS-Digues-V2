@@ -7,9 +7,9 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="15.0" styleClass="blue-dark" type="VBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="15.0" styleClass="blue-dark" type="VBox" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <HBox alignment="CENTER" VBox.vgrow="NEVER">
+      <HBox fx:id="uiValidationBox" alignment="CENTER" VBox.vgrow="NEVER">
          <children>
             <ImageView fx:id="uiImageValid" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" />
             <Label fx:id="uiLabelValid">

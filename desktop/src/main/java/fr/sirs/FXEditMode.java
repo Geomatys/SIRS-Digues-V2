@@ -6,8 +6,6 @@ import static fr.sirs.SIRS.CSS_PATH;
 import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import static fr.sirs.SIRS.ICON_EXCLAMATION_CIRCLE;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Role;
-import fr.sirs.core.model.Utilisateur;
 import java.io.IOException;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -24,6 +22,7 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import org.apache.sis.util.ArgumentChecks;
@@ -33,25 +32,25 @@ import org.apache.sis.util.ArgumentChecks;
  * @author Johann Sorel (Geomatys)
  */
 public class FXEditMode extends VBox {
-    
+
     private static final String VALID_TEXT = "Validé";
     private static final String INVALID_TEXT = "Invalidé";
-    
-    
-    @FXML private ImageView uiImageValid;
-    @FXML private Label uiLabelValid;
-    @FXML private ToggleButton uiEdit;
-    @FXML private Button uiSave;
-    @FXML private ToggleButton uiConsult;
-    
+
+    @FXML protected HBox uiValidationBox;
+    @FXML protected ImageView uiImageValid;
+    @FXML protected Label uiLabelValid;
+    @FXML protected ToggleButton uiEdit;
+    @FXML protected Button uiSave;
+    @FXML protected ToggleButton uiConsult;
+
     private final Session session = Injector.getBean(Session.class);
     private final StringProperty authorIDProperty;
     private final BooleanProperty validProperty;
 
     private Runnable saveAction;
-    
+
     public FXEditMode() {
-        final Class cdtClass = getClass();
+        final Class cdtClass = FXEditMode.class;
         final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
         final FXMLLoader loader = new FXMLLoader(cdtClass.getResource(fxmlpath));
         loader.setController(this);
@@ -65,18 +64,22 @@ public class FXEditMode extends VBox {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
         getStylesheets().add(CSS_PATH);
-        
+
         uiEdit.disableProperty().bind(session.nonGeometryEditionProperty().not());
         final BooleanBinding editBind = uiEdit.selectedProperty().not();
         uiSave.disableProperty().bind(editBind);
-        
+
         final ToggleGroup group = new ToggleGroup();
         uiConsult.setToggleGroup(group);
         uiEdit.setToggleGroup(group);
         group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
-                if(newValue==null) group.selectToggle(oldValue);
+            // We check that user has enough rights
+            if (!session.nonGeometryEditionProperty().get())
+                group.selectToggle(uiConsult);
+            else if (newValue==null)
+                group.selectToggle(oldValue);
             });
-        
+
         authorIDProperty = new SimpleStringProperty();
         validProperty = new SimpleBooleanProperty();
         validProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
@@ -84,7 +87,7 @@ public class FXEditMode extends VBox {
             });
         validProperty.set(true);
     }
-    
+
     private void resetValidUIs(final boolean valid){
         if(valid){
             uiImageValid.setImage(ICON_CHECK_CIRCLE);
@@ -97,16 +100,16 @@ public class FXEditMode extends VBox {
             uiLabelValid.setTextFill(Color.valueOf(COLOR_INVALID_ICON));
         }
     }
-    
+
     public StringProperty authorIDProperty(){return authorIDProperty;}
     public BooleanProperty validProperty(){return validProperty;}
-    
+
     private void requireEdition(){
         if(!uiEdit.isDisabled()){
             uiEdit.setSelected(true);
         }
     }
-    
+
     public void requireEditionForElement(final Element element){
         ArgumentChecks.ensureNonNull("element", element);
         if(element.getDesignation()==null || "".equals(element.getDesignation())){
@@ -121,7 +124,7 @@ public class FXEditMode extends VBox {
     public BooleanProperty editionState(){
         return uiEdit.selectedProperty();
     }
-    
+
     @FXML
     public void save(ActionEvent event) {
         if(saveAction!=null) saveAction.run();

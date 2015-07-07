@@ -105,6 +105,7 @@ public abstract class AbstractTheme extends Theme {
                 themeClass, extractor, deletor);
     }
 
+    @Override
     public abstract Parent createPane();
 
     protected abstract void initThemeManager(final ThemeManager... managers);
