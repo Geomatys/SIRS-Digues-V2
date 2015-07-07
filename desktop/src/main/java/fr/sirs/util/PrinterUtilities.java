@@ -72,7 +72,12 @@ public class PrinterUtilities {
     private static final String META_TEMPLATE_DESORDRE = "/fr/sirs/jrxml/metaTemplateDesordre.jrxml";
     private static final String TEMPLATE_PHOTOS = "/fr/sirs/jrxml/photoTemplate.jrxml";
     
-    public static File printDisorders(List<String> avoidDesordreFields, List<String> avoidPrestationFields, final Previews previewLabelRepository, final StringConverter stringConverter, final List<Desordre> desordres) throws Exception {
+    public static File printDisorders(final List<String> avoidDesordreFields, 
+            final List<String> avoidObservationFields, 
+            final List<String> avoidPrestationFields, 
+            final Previews previewLabelRepository, 
+            final StringConverter stringConverter, 
+            final List<Desordre> desordres) throws Exception {
         
         JasperPrint firstPrint = null;
         final List<JasperPrint> followingPrints = new ArrayList<>();
@@ -82,7 +87,9 @@ public class PrinterUtilities {
             final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
             templateFile.deleteOnExit();
 
-            final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE), avoidDesordreFields, avoidPrestationFields);
+            final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(
+                    PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE), 
+                    avoidDesordreFields, avoidObservationFields, avoidPrestationFields);
             templateWriter.setFieldsInterline(2);
             templateWriter.setOutput(templateFile);
             templateWriter.write(desordre);
@@ -90,7 +97,7 @@ public class PrinterUtilities {
             final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
                 
             final JRDataSource source = new ObjectDataSource(Collections.singletonList(desordre), previewLabelRepository, stringConverter);
-
+            
             final Map<String, Object> parameters = new HashMap<>();
             parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
             

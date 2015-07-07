@@ -18,6 +18,11 @@ public class AbstractJDomWriter {
     protected final Document document;
     protected final Element root; 
     
+    
+    protected static final String NULL_REPLACEMENT = "Non renseigné";
+    protected static final String TRUE_REPLACEMENT = "Oui";
+    protected static final String FALSE_REPLACEMENT = "Non";
+    
     public AbstractJDomWriter(){
         document=null;
         root=null;

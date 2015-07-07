@@ -14,6 +14,7 @@ import static fr.sirs.util.JRUtils.ATT_IS_ITALIC;
 import static fr.sirs.util.JRUtils.ATT_IS_STRETCH_WITH_OVERFLOW;
 import static fr.sirs.util.JRUtils.ATT_IS_UNDERLINE;
 import static fr.sirs.util.JRUtils.ATT_KEY;
+import static fr.sirs.util.JRUtils.ATT_MARKUP;
 import static fr.sirs.util.JRUtils.ATT_MODE;
 import static fr.sirs.util.JRUtils.ATT_NAME;
 import static fr.sirs.util.JRUtils.ATT_POSITION_TYPE;
@@ -23,6 +24,7 @@ import static fr.sirs.util.JRUtils.ATT_SUB_DATASET;
 import static fr.sirs.util.JRUtils.ATT_WIDTH;
 import static fr.sirs.util.JRUtils.ATT_X;
 import static fr.sirs.util.JRUtils.ATT_Y;
+import static fr.sirs.util.JRUtils.BOOLEAN_PRIMITIVE_NAME;
 import fr.sirs.util.JRUtils.Markup;
 import fr.sirs.util.JRUtils.PositionType;
 import static fr.sirs.util.JRUtils.TAG_BAND;
@@ -126,6 +128,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     public static final String PHOTOS_SUBREPORT = "PHOTOS_SUBREPORT";
     
     private final List<String> avoidDesordreFields;
+    private final List<String> avoidObservationFields;
     private final List<String> avoidPrestationFields;
     
     
@@ -141,10 +144,14 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         
         this.fields_interline = 8;
         avoidDesordreFields = null;
+        avoidObservationFields = null;
         avoidPrestationFields = null;
     }
     
-    public JRDomWriterDesordreSheet(final InputStream stream, final List<String> avoidDesordreFields, final List<String> avoidPrestationFields) throws ParserConfigurationException, SAXException, IOException {
+    public JRDomWriterDesordreSheet(final InputStream stream, 
+            final List<String> avoidDesordreFields,
+            final List<String> avoidObservationFields,
+            final List<String> avoidPrestationFields) throws ParserConfigurationException, SAXException, IOException {
         super(stream);
         title = (Element) root.getElementsByTagName(TAG_TITLE).item(0);
         pageHeader = (Element) root.getElementsByTagName(TAG_PAGE_HEADER).item(0);
@@ -156,6 +163,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         
         fields_interline = 8;
         this.avoidDesordreFields = avoidDesordreFields;
+        this.avoidObservationFields = avoidObservationFields;
         this.avoidPrestationFields = avoidPrestationFields;
     }
     
@@ -393,7 +401,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
             currentY+=2;
             writeSectionTitle("Observations", 15, 2, 10, 9);
             currentY+=2;
-            writeTable(Observation.class, avoidDesordreFields, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATIONS_DATASET, 30);
+            writeTable(Observation.class, avoidObservationFields, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATIONS_DATASET, 30);
             currentY+=2;
         }
         
@@ -568,6 +576,9 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     
     private void writeColumn(final Class clazz, final Method setter, final Element table, final int columnWidth, final int fontSize, final int padding, final int headerHeight, final int detailCellHeight){
        
+        final String fieldName = getFieldNameFromSetter(setter);
+        final Class fieldClass = setter.getParameterTypes()[0];
+        
         final Element column = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN);
         column.setAttribute(ATT_WIDTH, String.valueOf(columnWidth));
         
@@ -603,7 +614,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
 
         final Element text = document.createElementNS(URI_JRXML, TAG_TEXT);
         final ResourceBundle rb = ResourceBundle.getBundle(clazz.getName());
-        final CDATASection labelField = document.createCDATASection(rb.getString(getFieldNameFromSetter(setter)));
+        final CDATASection labelField = document.createCDATASection(rb.getString(fieldName));
         text.appendChild(labelField);
 
         staticText.appendChild(text);
@@ -635,10 +646,23 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         final Element detailFont = document.createElement(TAG_FONT);
         detailFont.setAttribute(ATT_SIZE, String.valueOf(fontSize));
         detailTextElement.appendChild(detailFont);
+        final Markup markup;
+        if (fieldName.contains("escript") || fieldName.contains("omment")){
+            markup = Markup.HTML;
+        } else {
+            markup = Markup.NONE;
+        }
+        detailTextElement.setAttribute(ATT_MARKUP, markup.toString());
         textField.appendChild(detailTextElement);
 
         final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);
-        final CDATASection valueField = document.createCDATASection("$F{"+getFieldNameFromSetter(setter)+"}");
+        final CDATASection valueField;
+        if(fieldClass==Boolean.class || (fieldClass!=null && BOOLEAN_PRIMITIVE_NAME.equals(fieldClass.getName()))){
+            valueField = document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : ($F{"+fieldName+"} ? \""+TRUE_REPLACEMENT+"\" : \""+FALSE_REPLACEMENT+"\")");
+        }
+        else{
+            valueField = document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+fieldName+"}");
+        }
         textFieldExpression.appendChild(valueField);
 
         textField.appendChild(textFieldExpression);

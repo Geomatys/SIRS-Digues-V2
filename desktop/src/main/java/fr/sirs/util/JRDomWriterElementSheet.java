@@ -101,9 +101,6 @@ public class JRDomWriterElementSheet extends AbstractJDomWriter {
     private static final int TOP_MARGIN = 20;
     private static final int BOTTOM_MARGIN = 20;
     
-    private static final String NULL_REPLACEMENT = "Non renseigné";
-    private static final String TRUE_REPLACEMENT = "Oui";
-    private static final String FALSE_REPLACEMENT = "Non";
     
     private JRDomWriterElementSheet(){
         super();
@@ -319,7 +316,7 @@ public class JRDomWriterElementSheet extends AbstractJDomWriter {
      * @param order
      * @param heightMultiplicator 
      */
-    private void writeDetailField(final String field, final Class fieldClass, final int order, final Markup style, final ResourceBundle resourceBundle){
+    private void writeDetailField(final String field, final Class fieldClass, final int order, final Markup markup, final ResourceBundle resourceBundle){
         
         // Looks for the band element.------------------------------------------
         final Element band = (Element) this.detail.getElementsByTagName(TAG_BAND).item(0);
@@ -434,8 +431,8 @@ public class JRDomWriterElementSheet extends AbstractJDomWriter {
         final Element textFieldTextElement = document.createElement(TAG_TEXT_ELEMENT);
         textFieldTextElement.setAttribute(ATT_VERTICAL_ALIGNMENT, FIELDS_VERTICAL_ALIGNMENT);
         textFieldTextElement.setAttribute(ATT_TEXT_ALIGNMENT, TextAlignment.JUSTIFIED.toString());
-        if(style!=null && style!=Markup.NONE) 
-            textFieldTextElement.setAttribute(ATT_MARKUP, style.toString());
+        if(markup!=null && markup!=Markup.NONE) 
+            textFieldTextElement.setAttribute(ATT_MARKUP, markup.toString());
         
         final Element textFieldFont = document.createElement(TAG_FONT);
         textFieldFont.setAttribute(ATT_FONT_NAME, FIELDS_FONT_NAME);

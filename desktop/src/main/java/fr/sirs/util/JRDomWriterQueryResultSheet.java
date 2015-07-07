@@ -6,6 +6,7 @@ import static fr.sirs.util.JRUtils.ATT_CLASS;
 import static fr.sirs.util.JRUtils.ATT_HEIGHT;
 import static fr.sirs.util.JRUtils.ATT_IS_STRETCH_WITH_OVERFLOW;
 import static fr.sirs.util.JRUtils.ATT_KEY;
+import static fr.sirs.util.JRUtils.ATT_MARKUP;
 import static fr.sirs.util.JRUtils.ATT_NAME;
 import static fr.sirs.util.JRUtils.ATT_SIZE;
 import static fr.sirs.util.JRUtils.ATT_STYLE;
@@ -13,6 +14,7 @@ import static fr.sirs.util.JRUtils.ATT_SUB_DATASET;
 import static fr.sirs.util.JRUtils.ATT_WIDTH;
 import static fr.sirs.util.JRUtils.ATT_X;
 import static fr.sirs.util.JRUtils.ATT_Y;
+import fr.sirs.util.JRUtils.Markup;
 import static fr.sirs.util.JRUtils.TAG_BAND;
 import static fr.sirs.util.JRUtils.TAG_COLUMN;
 import static fr.sirs.util.JRUtils.TAG_COLUMN_FOOTER;
@@ -317,7 +319,7 @@ public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
         detailCell.setAttribute(ATT_HEIGHT, String.valueOf(40));
         
         final Element textField = document.createElementNS(URI_JRXML, TAG_TEXT_FIELD);
-        textField.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, "true");
+        textField.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, String.valueOf(true));
 
         final Element textFieldReportElement = document.createElement(TAG_REPORT_ELEMENT);
         textFieldReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL/2));
@@ -331,10 +333,18 @@ public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
         final Element detailFont = document.createElement(TAG_FONT);
         detailFont.setAttribute(ATT_SIZE, String.valueOf(fontSize));
         detailTextElement.appendChild(detailFont);
+        final String fieldName = propertyDescriptor.getType().getName().toString();
+        final Markup markup;
+        if (fieldName.contains("escript") || fieldName.contains("omment")){
+            markup = Markup.HTML;
+        } else {
+            markup = Markup.NONE;
+        }
+        detailTextElement.setAttribute(ATT_MARKUP, markup.toString());
         textField.appendChild(detailTextElement);
 
         final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);
-        final CDATASection valueField = document.createCDATASection("$F{"+propertyDescriptor.getType().getName().toString()+"}");
+        final CDATASection valueField = document.createCDATASection("$F{"+fieldName+"}");
         textFieldExpression.appendChild(valueField);
 
         textField.appendChild(textFieldExpression);

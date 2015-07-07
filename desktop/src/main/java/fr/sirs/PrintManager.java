@@ -129,8 +129,6 @@ public class PrintManager {
             avoidDesordreFields.add(LATITUDE_MAX_FIELD);
             avoidDesordreFields.add(FOREIGN_PARENT_ID_FIELD);
             avoidDesordreFields.add(REVISION_FIELD);
-            avoidDesordreFields.add(POSITION_DEBUT_FIELD);
-            avoidDesordreFields.add(POSITION_FIN_FIELD);
             avoidDesordreFields.add(PARENT_FIELD);
             avoidDesordreFields.add(COUCH_DB_DOCUMENT_FIELD);
             avoidDesordreFields.add(OBSERVATIONS_REFERENCE);
@@ -150,7 +148,21 @@ public class PrintManager {
             avoidDesordreFields.add(AUTHOR_FIELD);
             avoidDesordreFields.add(DATE_MAJ_FIELD);
             
-            avoidDesordreFields.add(PHOTOS_OBSERVATION_REFERENCE);
+            
+            final List avoidObservationFields = new ArrayList<>();
+            avoidObservationFields.add(DOCUMENT_ID_FIELD);
+            avoidObservationFields.add(ID_FIELD);
+            avoidObservationFields.add(FOREIGN_PARENT_ID_FIELD);
+            avoidObservationFields.add(REVISION_FIELD);
+            avoidObservationFields.add(PARENT_FIELD);
+            avoidObservationFields.add(COUCH_DB_DOCUMENT_FIELD);
+            
+            
+            avoidObservationFields.add(VALID_FIELD);
+            avoidObservationFields.add(AUTHOR_FIELD);
+            avoidObservationFields.add(DATE_MAJ_FIELD);
+            
+            avoidObservationFields.add(PHOTOS_OBSERVATION_REFERENCE);
             
             final List<String> avoidPrestationFields = new ArrayList<>(avoidDesordreFields);
             avoidPrestationFields.add("photos");
@@ -160,6 +172,8 @@ public class PrintManager {
             avoidPrestationFields.add("coutGlobal");
             avoidPrestationFields.add("coteId");
             avoidPrestationFields.add("borneDebutId");
+            avoidPrestationFields.add(POSITION_DEBUT_FIELD);
+            avoidPrestationFields.add(POSITION_FIN_FIELD);
             avoidPrestationFields.add("prFin");
             avoidPrestationFields.add("prDebut");
             avoidPrestationFields.add("sourceId");
@@ -168,6 +182,7 @@ public class PrintManager {
             avoidPrestationFields.add("systemeRepId");
             avoidPrestationFields.add("linearId");
             avoidPrestationFields.add("positionId");
+            avoidPrestationFields.add("positionId");
             avoidPrestationFields.add("documentGrandeEchelleIds");
             avoidPrestationFields.add("borne_fin_aval");
             avoidPrestationFields.add("borne_debut_aval");
@@ -175,7 +190,13 @@ public class PrintManager {
             
         try{  
 //            final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll().subList(0, 10);
-            final File fileToPrint = PrinterUtilities.printDisorders(avoidDesordreFields, avoidPrestationFields, Injector.getSession().getPreviews(), new SirsStringConverter(), desordres);
+            final File fileToPrint = PrinterUtilities.printDisorders(
+                    avoidDesordreFields, 
+                    avoidObservationFields, 
+                    avoidPrestationFields, 
+                    Injector.getSession().getPreviews(), 
+                    new SirsStringConverter(), 
+                    desordres);
 //            if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception ex) {
             Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, ex);
