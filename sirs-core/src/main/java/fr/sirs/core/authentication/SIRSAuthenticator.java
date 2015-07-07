@@ -27,23 +27,18 @@ import javafx.scene.layout.GridPane;
 
 /**
  * An authenticator which will prompt a JavaFX dialog to query password from user.
- * 
+ *
  * @author Alexis Manin (Geomatys)
  */
 public class SIRSAuthenticator extends Authenticator {
 
     private final AuthenticationWallet wallet = AuthenticationWallet.getDefault();
-    
+
     /**
-     * Keep reference of checked entries, because if login information is wrong, 
+     * Keep reference of checked entries, because if login information is wrong,
      * we'll know it and will prompt user.
      */
     private final HashMap<String, Entry> entriesToCheck = new HashMap<>();
-    
-    /**
-     * Contain entries which we were able to verify they're correct. 
-     */
-    private final HashMap<String, Entry> checkedEntries = new HashMap<>();
     
     @Override
     protected synchronized PasswordAuthentication getPasswordAuthentication() {
@@ -54,32 +49,32 @@ public class SIRSAuthenticator extends Authenticator {
         if (host == null || host.isEmpty()) {
             if (url == null)
                 throw new IllegalStateException("Neither host nor valid URL has been provided for authentication check");
-            else 
+            else
                 host = url.getHost();
         }
-        
+
         if (port < 0 && url != null) {
             port = (url.getPort() < 0)? url.getDefaultPort() : url.getPort();
         }
-        
+
         String serviceId = AuthenticationWallet.toServiceId(host, port);
         AuthenticationWallet.Entry entry = wallet == null? null : wallet.get(host, port);
-        
+
         /*
          * HACK : Apache HttpClient (used by Ektorp) will call this method on
-         * each query, which means we cannot determine if it is performing a 
-         * fail&retry. As java.net methods give us the query URL, we can adopt 
+         * each query, which means we cannot determine if it is performing a
+         * fail&retry. As java.net methods give us the query URL, we can adopt
          * different behavior for thee two components.
          */
         final boolean fromApache = (getRequestingURL() == null);
-        
+
         SirsCore.LOGGER.log(Level.FINE, "CREDENTIAL QUERY FROM "+ (fromApache? "APACHE" : "JAVA.NET"));
-        
+
         // We've got login from wallet, and it has not been rejected yet.
         if (entry != null && (fromApache || entriesToCheck.get(serviceId) == null)) {
             if (!fromApache) entriesToCheck.put(serviceId, entry);
             return new PasswordAuthentication(entry.login, (entry.password == null)? new char[0] : entry.password.toCharArray());
-        
+
         // New or invalid entry case.
         } else {
             Map.Entry<String, String> login = askForLogin(entry == null? null : entry.login, entry == null? null : entry.password);
@@ -95,7 +90,7 @@ public class SIRSAuthenticator extends Authenticator {
             }
         }
     }
-            
+
     /**
      * Display a dialog to ask user a login and password to allow connection to queried service.
      * @param defaultUser Default login to show in login input. Can be null.
@@ -132,7 +127,7 @@ public class SIRSAuthenticator extends Authenticator {
                 } else {
                     headerText.append(getRequestingSite());
                 }
-                
+
                 final Alert question = new Alert(Alert.AlertType.CONFIRMATION, null, ButtonType.CANCEL, ButtonType.OK);
                 question.getDialogPane().setContent(gPane);
                 question.setResizable(true);
