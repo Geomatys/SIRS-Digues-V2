@@ -69,6 +69,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
@@ -126,6 +127,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
 import jidefx.scene.control.field.NumberField;
 import org.apache.sis.feature.AbstractIdentifiedType;
@@ -1368,8 +1370,6 @@ public class PojoTable extends BorderPane {
             setEditable(isEditable);
             if (isEditable) {
                 editableProperty().bind(cellEditableProperty);
-                // When starting to edit, we clear notification panel.
-                setOnEditStart(event -> showNotification(Collections.EMPTY_LIST));
                 setOnEditCommit((CellEditEvent<Element, Object> event) -> {
                     /*
                      * We try to update data. If it's a failure, we store exception
@@ -1435,6 +1435,11 @@ public class PojoTable extends BorderPane {
         } else {
             notifier.getChildren().setAll(toShow);
         }
+        // transition allows to see a difference when two identic message are queried in line.
+        final FadeTransition transition = new FadeTransition(new Duration(1000), notifier);
+        transition.setFromValue(0);
+        transition.setToValue(1);
+        transition.play();
     }
 
     /**
