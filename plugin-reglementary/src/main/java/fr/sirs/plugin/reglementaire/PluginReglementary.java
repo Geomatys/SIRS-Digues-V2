@@ -13,7 +13,7 @@ import fr.sirs.ui.AlertItem;
 import javafx.scene.image.Image;
 import org.apache.sis.util.logging.Logging;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -69,7 +69,7 @@ public class PluginReglementary extends Plugin {
                     Injector.getSession().getRepositoryForClass(RefFrequenceObligationReglementaire.class);
             final AbstractSIRSRepository<RefTypeObligationReglementaire> repoTypeObl =
                     Injector.getSession().getRepositoryForClass(RefTypeObligationReglementaire.class);
-            final LocalDateTime now = LocalDateTime.now();
+            final LocalDate now = LocalDate.now();
 
             for (final RappelObligationReglementaire rappel : rappels) {
                 final ObligationReglementaire obl;
@@ -92,7 +92,7 @@ public class PluginReglementary extends Plugin {
                     continue;
                 }
 
-                LocalDateTime newEcheanceDate = LocalDateTime.from(obl.getDateEcheance());
+                LocalDate newEcheanceDate = LocalDate.from(obl.getDateEcheance());
                 final RefFrequenceObligationReglementaire frequenceRappel = repoFrequenceRappel.get(rappel.getFrequenceId());
                 while (newEcheanceDate.compareTo(now) <= 0) {
                     newEcheanceDate = newEcheanceDate.plusMonths(frequenceRappel.getNbMois());

@@ -10,7 +10,7 @@ import javafx.scene.control.Control;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -286,7 +286,7 @@ public class CalendarView extends VBox {
     public final ObservableList<CalendarEvent> getCalendarEventsForCalendarDate(final Calendar calendar) {
         final ObservableList<CalendarEvent> finalEvents = FXCollections.observableArrayList();
         for (final CalendarEvent event : calEvents) {
-            final LocalDateTime d = event.getDate();
+            final LocalDate d = event.getDate();
             if (d != null && d.getDayOfMonth() == calendar.get(Calendar.DAY_OF_MONTH) && d.getMonthValue() == calendar.get(Calendar.MONTH)+1 &&
                     d.getYear() == calendar.get(Calendar.YEAR)) {
                 finalEvents.add(event);

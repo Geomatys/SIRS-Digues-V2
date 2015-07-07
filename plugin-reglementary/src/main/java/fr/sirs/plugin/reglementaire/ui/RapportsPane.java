@@ -20,7 +20,6 @@ import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SirsStringConverter;
 import java.net.URL;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -170,7 +169,7 @@ public class RapportsPane extends BorderPane implements Initializable {
             //on crée une obligation à la date d'aujourdhui
             final ObligationReglementaireRepository rep = (ObligationReglementaireRepository)session.getRepositoryForClass(ObligationReglementaire.class);
             final ObligationReglementaire obligation = rep.create();
-            final LocalDateTime date = LocalDateTime.now();
+            final LocalDate date = LocalDate.now();
             obligation.setAnnee(date.getYear());
             obligation.setDateRealisation(date);
             obligation.setLibelle(titre);

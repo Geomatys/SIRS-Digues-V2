@@ -2,7 +2,6 @@ package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
@@ -22,7 +21,7 @@ import javafx.stage.Modality;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
  * Vue calendrier présentant les évènements construits à partir des obligations réglementaires.
@@ -123,7 +122,7 @@ public final class ObligationsCalendarView extends CalendarView {
         final ObservableList<ObligationReglementaire> obligations = obligationsProperty.get();
         if (obligations != null && !obligations.isEmpty()) {
             for (final ObligationReglementaire obligation : obligations) {
-                final LocalDateTime eventDate = obligation.getDateRealisation() != null ? obligation.getDateRealisation() :
+                final LocalDate eventDate = obligation.getDateRealisation() != null ? obligation.getDateRealisation() :
                         obligation.getDateEcheance();
                 if (eventDate != null) {
                     final StringBuilder sb = new StringBuilder();
@@ -162,24 +161,24 @@ public final class ObligationsCalendarView extends CalendarView {
      */
     @Override
     public void showCalendarPopupForEvent(final CalendarEvent calendarEvent, final Node parent) {
-        final ObligationsCalendarPopupEvent popup = new ObligationsCalendarPopupEvent(calendarEvent, obligationsProperty.get());
-        popup.initModality(Modality.NONE);
-        popup.setIconified(false);
-        popup.setMaximized(false);
-        popup.setResizable(false);
-        popup.focusedProperty().addListener((obs,old,newVal) -> {
-            if (popup.isShowing() && !newVal) {
+        final ObligationsCalendarEventStage stage = new ObligationsCalendarEventStage(calendarEvent, obligationsProperty.get());
+        stage.initModality(Modality.NONE);
+        stage.setIconified(false);
+        stage.setMaximized(false);
+        stage.setResizable(false);
+        stage.focusedProperty().addListener((obs,old,newVal) -> {
+            if (stage.isShowing() && !newVal) {
                 // Close the popup if the focus is lost
-                popup.hide();
+                stage.hide();
             }
         });
-        popup.getIcons().add(SIRS.ICON);
+        stage.getIcons().add(SIRS.ICON);
         final Point2D popupPos = parent.localToScreen(20, 40);
         if (popupPos != null) {
-            popup.sizeToScene();
-            popup.setX(popupPos.getX());
-            popup.setY(popupPos.getY());
+            stage.sizeToScene();
+            stage.setX(popupPos.getX());
+            stage.setY(popupPos.getY());
         }
-        popup.show();
+        stage.show();
     }
 }

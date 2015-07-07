@@ -1,12 +1,9 @@
 package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
-import fr.sirs.core.InjectorCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.component.RappelObligationReglementaireRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ObligationReglementaire;
-import fr.sirs.core.model.RappelObligationReglementaire;
 import fr.sirs.ui.calendar.CalendarEvent;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -15,15 +12,16 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
-
-import java.util.List;
 
 
 /**
@@ -31,7 +29,7 @@ import java.util.List;
  *
  * @author Cédric Briançon (Geomatys)
  */
-public final class ObligationsCalendarPopupEvent extends Stage {
+public final class ObligationsCalendarEventStage extends Stage {
     private static final String CSS_CALENDAR_EVENT_POPUP = "calendar-event-popup";
     private static final String CSS_CALENDAR_EVENT_POPUP_BUTTON = "calendar-event-popup-button";
 
@@ -48,7 +46,7 @@ public final class ObligationsCalendarPopupEvent extends Stage {
      * @param calendarEvent Evènement du calendrier concerné
      * @param obligations Liste des obligations.
      */
-    public ObligationsCalendarPopupEvent(final CalendarEvent calendarEvent, final ObservableList<ObligationReglementaire> obligations) {
+    public ObligationsCalendarEventStage(final CalendarEvent calendarEvent, final ObservableList<ObligationReglementaire> obligations) {
         super();
 
         setTitle(calendarEvent.getTitle());
@@ -91,6 +89,10 @@ public final class ObligationsCalendarPopupEvent extends Stage {
         buttonReport.setGraphic(new ImageView(ICON_REPORT));
         buttonReport.setMaxWidth(Region.USE_PREF_SIZE);
         buttonReport.getStyleClass().add(CSS_CALENDAR_EVENT_POPUP_BUTTON);
+        buttonReport.setOnMouseClicked(event -> {
+            hide();
+            switchToDateStage(calendarEvent);
+        });
         mainBox.getChildren().add(buttonReport);
 
         final Button buttonAlert = new Button();
@@ -103,5 +105,23 @@ public final class ObligationsCalendarPopupEvent extends Stage {
         final Scene scene = new Scene(mainBox, 250, 100);
         scene.getStylesheets().add("/fr/sirs/plugin/reglementaire/ui/popup-calendar.css");
         setScene(scene);
+    }
+
+    private void switchToDateStage(final CalendarEvent event) {
+        final VBox vbox = new VBox();
+        final HBox hbox = new HBox();
+        final Label lbl = new Label("Nouvelle date : ");
+        hbox.getChildren().add(lbl);
+        final DatePicker dp = new DatePicker();
+        hbox.getChildren().add(dp);
+
+        vbox.getChildren().add(hbox);
+        final Button okButton = new Button("OK");
+        okButton.setOnMouseClicked(e -> {
+            final ObligationReglementaire obligation = (ObligationReglementaire)event.getParent();
+            dp.valueProperty().bindBidirectional(obligation.dateRealisationProperty());
+        });
+        vbox.getChildren().add(okButton);
+        getScene().setRoot(vbox);
     }
 }

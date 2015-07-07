@@ -1,15 +1,16 @@
 package fr.sirs.ui;
 
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 
 /**
  * @author Cédric Briançon (Geomatys)
  */
 public class AlertItem {
     private final String title;
-    private final LocalDateTime date;
+    private final LocalDate date;
 
-    public AlertItem(String title, LocalDateTime date) {
+    public AlertItem(String title, LocalDate date) {
         this.title = title;
         this.date = date;
     }
@@ -18,7 +19,7 @@ public class AlertItem {
         return title;
     }
 
-    public LocalDateTime getDate() {
+    public LocalDate getDate() {
         return date;
     }
 }

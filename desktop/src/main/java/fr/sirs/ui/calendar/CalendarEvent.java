@@ -3,7 +3,7 @@ package fr.sirs.ui.calendar;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Identifiable;
 import javafx.scene.image.Image;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
  * Event on the calendar to display.
@@ -12,16 +12,16 @@ import java.time.LocalDateTime;
  */
 public class CalendarEvent {
     private final Element parent;
-    private final LocalDateTime date;
+    private final LocalDate date;
     private final String title;
     private final String type;
     private final Image image;
 
-    public CalendarEvent(final Element parent, final LocalDateTime date, final String title, final String type) {
+    public CalendarEvent(final Element parent, final LocalDate date, final String title, final String type) {
         this(parent, date, title, type, null);
     }
 
-    public CalendarEvent(final Element parent, final LocalDateTime date, final String title, final String type, final Image image) {
+    public CalendarEvent(final Element parent, final LocalDate date, final String title, final String type, final Image image) {
         this.parent = parent;
         this.date = date;
         this.title = title;
@@ -33,7 +33,7 @@ public class CalendarEvent {
         return parent;
     }
 
-    public LocalDateTime getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
