@@ -444,9 +444,8 @@ public class FXMainFrame extends BorderPane {
     @FXML 
     private void disorderPrint(){
         final Stage disorderPrintStage = new Stage();
-//        new Thread(() -> {
-//        session.getPrintManager().printDesordres(session.getRepositoryForClass(Desordre.class).getAll().subList(0, 10));
-//        }).start();
+        disorderPrintStage.setTitle("Fiches détaillées de désordres");
+        disorderPrintStage.getIcons().add(SIRS.ICON);
         disorderPrintStage.setScene(new Scene(new FXDisorderPrintFrame()));
         disorderPrintStage.show();
     }
