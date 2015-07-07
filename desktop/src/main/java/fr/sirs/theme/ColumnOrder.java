@@ -38,36 +38,46 @@ public final class ColumnOrder {
 
     private ColumnOrder(){}
 
+    public static Comparator<String> createComparator(String className){
+        return new ColumnComparator(className);
+    }
+
     public static List<String> sort(String className, List<String> properties){
+        final Comparator<String> cmp = createComparator(className);
+        Collections.sort(properties, cmp);
+        return properties;
+    }
 
-        final String order = config.getProperty(className);
-        if(order!=null){
-            final String[] parts = order.split(",");
-            final Map<String,Integer> map = new HashMap<>();
-            for(int i=0;i<parts.length;i++){
-                map.put(parts[i], i);
-            }
+    private static final class ColumnComparator implements Comparator<String>{
 
-            final Comparator<String> comp = new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    final Integer i1 = map.get(o1);
-                    final Integer i2 = map.get(o2);
-                    if(i1!=null && i2!=null){
-                        return Integer.compare(i1, i2);
-                    }else if(i1!=null){
-                        return -1;
-                    }else if(i2!=null){
-                        return +1;
-                    }else{
-                        return o1.compareTo(o2);
-                    }
+        final Map<String,Integer> map = new HashMap<>();
+
+        public ColumnComparator(String className) {
+            final String order = config.getProperty(className);
+            if(order!=null){
+                final String[] parts = order.split(",");
+                final Map<String,Integer> map = new HashMap<>();
+                for(int i=0;i<parts.length;i++){
+                    map.put(parts[i], i);
                 }
-            };
-            Collections.sort(properties, comp);
+            }
         }
 
-        return properties;
+        @Override
+        public int compare(String o1, String o2) {
+            final Integer i1 = map.get(o1);
+            final Integer i2 = map.get(o2);
+            if(i1!=null && i2!=null){
+                return Integer.compare(i1, i2);
+            }else if(i1!=null){
+                return -1;
+            }else if(i2!=null){
+                return +1;
+            }else{
+                return o1.compareTo(o2);
+            }
+        }
+
     }
 
 }
