@@ -67,7 +67,11 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//SectionType"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="requeteId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="requeteId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
+      <eAnnotations source="Reference">
+        <details key="ref" value="fr.sirs.core.model.SQLQuery"/>
+      </eAnnotations>
+    </eStructuralFeatures>
     <eStructuralFeatures xsi:type="ecore:EReference" name="templateId" eType="#//TemplateObligationReglementaire"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="photoChoice" eType="#//PhotoChoice"/>
   </eClassifiers>
