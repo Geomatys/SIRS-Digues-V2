@@ -56,6 +56,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -97,6 +98,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
@@ -116,6 +118,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -169,21 +172,24 @@ public class PojoTable extends BorderPane {
     private final TableView<Element> uiTable = new FXTableView<>();
     private final LabelMapper labelMapper;
 
-    // Editabilité du tableau (possibilité d'ajout et de suppression des éléments
+    /**
+     * Editabilité du tableau (possibilité d'ajout et de suppression des éléments
+     * via la barre d'action sur la droite, plus édition des cellules)
+     */
     protected final BooleanProperty editableProperty = new SimpleBooleanProperty(true);
-    // Editabilité des cellules tableau (possibilité d'ajout et de suppression des éléments
+    /** Editabilité des cellules tableau */
     protected final BooleanProperty cellEditableProperty = new SimpleBooleanProperty();
-    // Parcours fiche par fiche
+    /** Parcours fiche par fiche */
     protected final BooleanProperty fichableProperty = new SimpleBooleanProperty(true);
-    // Accès à la fiche détaillée d'un élément particulier
+    /** Accès à la fiche détaillée d'un élément particulier */
     protected final BooleanProperty detaillableProperty = new SimpleBooleanProperty(true);
-    // Possibilité de faire une recherche sur le contenu de la table
+    /** Possibilité de faire une recherche sur le contenu de la table */
     protected final BooleanProperty searchableProperty = new SimpleBooleanProperty(true);
-    // Ouvrir l'editeur sur creation d'un nouvel objet
+    /** Ouvrir l'editeur sur creation d'un nouvel objet */
     protected final BooleanProperty openEditorOnNewProperty = new SimpleBooleanProperty(true);
-    // Créer un nouvel objet à l'ajout
+    /** Créer un nouvel objet à l'ajout */
     protected final BooleanProperty createNewProperty = new SimpleBooleanProperty(true);
-    /* Importer des points. Default : false */
+    /** Importer des points. Default : false */
     protected final BooleanProperty importPointProperty = new SimpleBooleanProperty(false);
 
     /** Composant de filtrage. Propose de filtrer la liste d'objets actuels en éditant des contraintes sur leur propriété. */
@@ -195,7 +201,7 @@ public class PojoTable extends BorderPane {
     // Barre de droite : manipulation du tableau et passage en mode parcours de fiche
     protected final ToggleButton uiFicheMode = new ToggleButton(null, new ImageView(SIRS.ICON_FILE_WHITE));
     protected final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH_WHITE);
-    protected final Button uiSearch = new Button(null, searchNone);;
+    protected final Button uiSearch = new Button(null, searchNone);
     protected final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
     protected final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH_WHITE));
     protected final Button uiImport = new Button(null, new ImageView(SIRS.ICON_IMPORT_WHITE));
@@ -234,6 +240,8 @@ public class PojoTable extends BorderPane {
 
     /** Task object designed for asynchronous update of the elements contained in the table. */
     protected Task tableUpdater;
+
+    protected final StackPane notifier = new StackPane();
 
     public PojoTable(final Class pojoClass, final String title) {
         this(pojoClass, title, null);
@@ -597,7 +605,7 @@ public class PojoTable extends BorderPane {
         }
 
         titleAndFilterBox.setFillWidth(true);
-        topPane = new BorderPane(null, titleAndFilterBox, searchEditionToolbar, null, navigationToolbar);
+        topPane = new BorderPane(notifier, titleAndFilterBox, searchEditionToolbar, null, navigationToolbar);
         setTop(topPane);
 
         updateView();
@@ -833,7 +841,6 @@ public class PojoTable extends BorderPane {
         });
         final Point2D sc = uiSearch.localToScreen(0, 0);
         popup.show(uiSearch, sc.getX(), sc.getY());
-
     }
 
     protected void goTo(ActionEvent event){
@@ -1047,7 +1054,7 @@ public class PojoTable extends BorderPane {
      * @param event The table event refering to the edition action.
      */
     protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event){
-        if(repo!=null){
+        if (repo != null) {
             final Element obj = event.getRowValue();
             if(obj == null) return;
             repo.update(obj);
@@ -1165,14 +1172,10 @@ public class PojoTable extends BorderPane {
                 }
 
             });
-            addEventHandler(TableColumn.editCommitEvent(), new EventHandler<CellEditEvent<Element, Object>>() {
-
-                @Override
-                public void handle(CellEditEvent<Element, Object> event) {
-                    final Object rowElement = event.getRowValue();
-                    new PropertyReference<>(rowElement.getClass(), desc.getName()).set(rowElement, event.getNewValue());
-                    elementEdited(event);
-                }
+            addEventHandler(TableColumn.editCommitEvent(), (CellEditEvent<Element, Object> event) -> {
+                final Object rowElement = event.getRowValue();
+                new PropertyReference<>(rowElement.getClass(), desc.getName()).set(rowElement, event.getNewValue());
+                elementEdited(event);
             });
         }
     }
@@ -1314,20 +1317,9 @@ public class PojoTable extends BorderPane {
         public PropertyColumn(final PropertyDescriptor desc) {
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
 
-            final Reference ref = desc.getReadMethod().getAnnotation(Reference.class);
-
-            addEventHandler(TableColumn.editCommitEvent(), new EventHandler<CellEditEvent<Element, Object>>() {
-
-                @Override
-                public void handle(CellEditEvent<Element, Object> event) {
-                    final Object rowElement = event.getRowValue();
-                    new PropertyReference<>(rowElement.getClass(), desc.getName()).set(rowElement, event.getNewValue());
-                    elementEdited(event);
-                }
-            });
-
             //choix de l'editeur en fonction du type de données
             boolean isEditable = true;
+            final Reference ref = desc.getReadMethod().getAnnotation(Reference.class);
             if (ref != null) {
                 //reference vers un autre objet
                 setCellFactory((TableColumn<Element, Object> param) -> new ReferenceTableCell(ref.ref()));
@@ -1376,7 +1368,72 @@ public class PojoTable extends BorderPane {
             setEditable(isEditable);
             if (isEditable) {
                 editableProperty().bind(cellEditableProperty);
+                // When starting to edit, we clear notification panel.
+                setOnEditStart(event -> showNotification(Collections.EMPTY_LIST));
+                setOnEditCommit((CellEditEvent<Element, Object> event) -> {
+                    /*
+                     * We try to update data. If it's a failure, we store exception
+                     * to give more information to user. In all cases, a notification
+                     * is requested to inform user if its modification has succeded
+                     * or not.
+                     */
+                    Exception tmpError = null;
+                    final Object rowElement = event.getRowValue();
+                    if (rowElement == null) return;
+                    final PropertyReference<Object> propertyReference = new PropertyReference<>(rowElement.getClass(), desc.getName());
+                    Object oldValue = propertyReference.get(rowElement);
+                    try {
+                        propertyReference.set(rowElement, event.getNewValue());
+                        elementEdited(event);
+                    } catch (Exception e) {
+                        SIRS.LOGGER.log(Level.WARNING, "Cannot update field.", e);
+                        tmpError = e;
+                        // rollback value in case of error.
+                        propertyReference.set(rowElement, oldValue);
+                    }
+                    final Exception error = tmpError;
+                    final String message = (error == null)?
+                            "Le champs "+getText()+" a été modifié avec succès"
+                            : "Erreur pendant la mise à jour du champs "+getText();
+                    final ImageView graphic = new ImageView(error == null ? SIRS.ICON_CHECK_CIRCLE : SIRS.ICON_EXCLAMATION_TRIANGLE);
+                    final Label messageLabel = new Label(message, graphic);
+                    if (error == null) {
+                        showNotification(messageLabel);
+                    } else {
+                        final Hyperlink errorLink = new Hyperlink("Voir l'erreur");
+                        errorLink.setOnMouseClicked(linkEvent -> GeotkFX.newExceptionDialog(message, error).show());
+                        final HBox container = new HBox(5, messageLabel, errorLink);
+                        container.setAlignment(Pos.CENTER);
+                        container.setPadding(Insets.EMPTY);
+                        showNotification(container);
+                    }
+                });
             }
+        }
+    }
+
+    /**
+     * Display input node into the notification popup. All previous content will
+     * be removed from popup.
+     * @param toShow The node to show in notification popup.
+     */
+    public void showNotification(final Node toShow) {
+        if (toShow == null)
+            showNotification(Collections.EMPTY_LIST);
+        else
+            showNotification(Collections.singletonList(toShow));
+    }
+
+    /**
+     * Display input nodes into a popup stack pane. All previous content will
+     * be removed from popup.
+     * @param toShow nodes to display in notification popup.
+     */
+    public void showNotification(final List<Node> toShow) {
+        if (toShow == null || toShow.isEmpty()) {
+            notifier.getChildren().clear();
+        } else {
+            notifier.getChildren().setAll(toShow);
         }
     }
 
