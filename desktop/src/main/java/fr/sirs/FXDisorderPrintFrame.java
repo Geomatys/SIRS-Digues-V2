@@ -5,6 +5,8 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.PojoTable;
+import java.awt.Desktop;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -61,7 +63,7 @@ public class FXDisorderPrintFrame extends BorderPane {
             } catch (Exception ex) {
                 Logger.getLogger(FXDisorderPrintFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }).run();
+        }).start();
     }
     
     private class TronconChoicePojoTable extends PojoTable {

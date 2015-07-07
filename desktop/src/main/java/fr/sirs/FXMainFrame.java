@@ -3,6 +3,7 @@ package fr.sirs;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.Desordre;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import fr.sirs.ui.AlertItem;
 import fr.sirs.ui.AlertManager;
@@ -443,6 +444,9 @@ public class FXMainFrame extends BorderPane {
     @FXML 
     private void disorderPrint(){
         final Stage disorderPrintStage = new Stage();
+//        new Thread(() -> {
+//        session.getPrintManager().printDesordres(session.getRepositoryForClass(Desordre.class).getAll().subList(0, 10));
+//        }).start();
         disorderPrintStage.setScene(new Scene(new FXDisorderPrintFrame()));
         disorderPrintStage.show();
     }

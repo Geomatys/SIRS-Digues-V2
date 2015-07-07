@@ -82,7 +82,7 @@ public class PrintManager {
             final File fileToPrint = PrinterUtilities.print(null, featuresToPrint);
             if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception ex) {
-            Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -112,7 +112,7 @@ public class PrintManager {
             final File fileToPrint = PrinterUtilities.print(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), elementsToPrint);
             if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception e) {
-            Logger.getLogger(FXMainFrame.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, e);
         }
     }
     
@@ -189,7 +189,6 @@ public class PrintManager {
             avoidPrestationFields.add("evenementHydrauliqueIds");
             
         try{  
-//            final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll().subList(0, 10);
             final File fileToPrint = PrinterUtilities.printDisorders(
                     avoidDesordreFields, 
                     avoidObservationFields, 
@@ -197,7 +196,7 @@ public class PrintManager {
                     Injector.getSession().getPreviews(), 
                     new SirsStringConverter(), 
                     desordres);
-//            if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
+            if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception ex) {
             Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, ex);
         }
