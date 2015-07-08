@@ -175,13 +175,15 @@ public final class ObligationsCalendarView extends CalendarView {
                         if (rappels != null && !rappels.isEmpty()) {
                             for (final RappelObligationReglementaire rappel : rappels) {
                                 LocalDate candidDate = LocalDate.from(firstDateRappel);
-                                final RefFrequenceObligationReglementaire freq = rforr.get(rappel.getFrequenceId());
-                                // Génère des alertes pour les rappels sur les 10 ans à venir
-                                while (candidDate.getYear() - firstDateRappel.getYear() < 10) {
-                                    if (candidDate.getYear() != firstDateRappel.getYear()) {
-                                        getCalendarEvents().add(new CalendarEvent(rappel, candidDate, sb.toString(), ICON_ALERT));
+                                if (rappel.getFrequenceId() != null) {
+                                    final RefFrequenceObligationReglementaire freq = rforr.get(rappel.getFrequenceId());
+                                    // Génère des alertes pour les rappels sur les 10 ans à venir
+                                    while (candidDate.getYear() - firstDateRappel.getYear() < 10) {
+                                        if (candidDate.getYear() != firstDateRappel.getYear()) {
+                                            getCalendarEvents().add(new CalendarEvent(rappel, candidDate, sb.toString(), ICON_ALERT));
+                                        }
+                                        candidDate = candidDate.plusMonths(freq.getNbMois());
                                     }
-                                    candidDate = candidDate.plusMonths(freq.getNbMois());
                                 }
                             }
                         }

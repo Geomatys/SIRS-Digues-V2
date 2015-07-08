@@ -14,7 +14,7 @@ import javafx.scene.control.TableColumn;
 public class RapportsTable extends PojoTable {
 
     public RapportsTable() {
-        super(Injector.getSession().getRepositoryForClass(RapportModeleObligationReglementaire.class), "Modèles de document préenregistrées");
+        super(Injector.getSession().getRepositoryForClass(RapportModeleObligationReglementaire.class), "Modèles de document préenregistrés");
         editableProperty().set(true);
         detaillableProperty().set(true);
         fichableProperty().set(false);
