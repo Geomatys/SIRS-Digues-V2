@@ -285,7 +285,7 @@ public class RapportsPane extends BorderPane implements Initializable {
                             Platform.runLater(()->uiProgressLabel.setText("Génération de la section : "+section.getLibelle()));
                             if(SectionType.TABLE.equals(section.getType())){
                                 files.addAll(generateTable(section, elements, folder, inc));
-                            }else if(SectionType.FORM.equals(section.getType())){
+                            }else if(SectionType.FICHE.equals(section.getType())){
 
                             }
 
@@ -307,7 +307,7 @@ public class RapportsPane extends BorderPane implements Initializable {
                         //on crée une obligation à la date d'aujourdhui
                         final ObligationReglementaireRepository rep = (ObligationReglementaireRepository)session.getRepositoryForClass(ObligationReglementaire.class);
                         final ObligationReglementaire obligation = rep.create();
-                        final LocalDateTime date = LocalDateTime.now();
+                        final LocalDate date = LocalDate.now();
                         obligation.setAnnee(date.getYear());
                         obligation.setDateRealisation(date);
                         obligation.setLibelle(titre);

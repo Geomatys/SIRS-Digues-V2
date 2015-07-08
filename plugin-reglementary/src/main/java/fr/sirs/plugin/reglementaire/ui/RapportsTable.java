@@ -1,6 +1,7 @@
 
 package fr.sirs.plugin.reglementaire.ui;
 
+import fr.sirs.Injector;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.RapportModeleObligationReglementaire;
 import fr.sirs.theme.ui.PojoTable;
@@ -12,7 +13,7 @@ import fr.sirs.theme.ui.PojoTable;
 public class RapportsTable extends PojoTable {
 
     public RapportsTable() {
-        super(RapportModeleObligationReglementaire.class, "Modèles de document préenregistrées");
+        super(Injector.getSession().getRepositoryForClass(RapportModeleObligationReglementaire.class), "Modèles de document préenregistrées");
         editableProperty().set(true);
         detaillableProperty().set(true);
         fichableProperty().set(false);

@@ -28,18 +28,18 @@ public class RapportSectionTable extends PojoTable {
         openEditorOnNewProperty().set(false);
 
 
-        for(TableColumn col : getColumns()){
-            if(col instanceof PropertyColumn && ((PropertyColumn)col).getReference()!=null){
-                col.setEditable(true);
-            }
-        }
+//        for(TableColumn col : getColumns()){
+//            if(col instanceof PropertyColumn && ((PropertyColumn)col).getReference()!=null){
+//                col.setEditable(true);
+//            }
+//        }
     }
 
     @Override
     protected Element createPojo() {
         final RapportSectionObligationReglementaire section = (RapportSectionObligationReglementaire) super.createPojo();
-        section.setPhotoChoice(PhotoChoice.NONE);
-        section.setType(SectionType.FORM);
+        section.setPhotoChoice(PhotoChoice.AUCNE);
+        section.setType(SectionType.FICHE);
         return section;
     }
 
