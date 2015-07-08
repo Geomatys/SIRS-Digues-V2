@@ -1,13 +1,16 @@
 package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
-import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.SIRS;
 import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.component.RappelObligationReglementaireRepository;
+import fr.sirs.core.component.RefEcheanceRappelObligationReglementaireRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.RappelObligationReglementaire;
+import fr.sirs.core.model.RefEcheanceRappelObligationReglementaire;
 import fr.sirs.ui.calendar.CalendarEvent;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.embed.swing.SwingFXUtils;
@@ -16,6 +19,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -68,7 +72,7 @@ public final class ObligationsCalendarEventStage extends Stage {
         buttonDelete.setMaxWidth(Double.MAX_VALUE);
         buttonDelete.setAlignment(Pos.CENTER_LEFT);
         buttonDelete.getStyleClass().add(CSS_CALENDAR_EVENT_POPUP_BUTTON);
-        buttonDelete.setOnMouseClicked(event -> delete(calendarEvent, obligations));
+        buttonDelete.setOnAction(event -> delete(calendarEvent, obligations));
         mainBox.getChildren().add(buttonDelete);
 
         final Button buttonReport = new Button();
@@ -77,7 +81,13 @@ public final class ObligationsCalendarEventStage extends Stage {
         buttonReport.setGraphic(new ImageView(ICON_REPORT));
         buttonReport.setMaxWidth(Double.MAX_VALUE);
         buttonReport.getStyleClass().add(CSS_CALENDAR_EVENT_POPUP_BUTTON);
-        buttonReport.setOnMouseClicked(event -> switchToDateStage(calendarEvent));
+        buttonReport.setOnAction(event -> {
+            if (!calendarEvent.isAlert()) {
+                switchToDateStage(calendarEvent);
+            } else {
+                switchToEcheanceListStage(calendarEvent);
+            }
+        });
         mainBox.getChildren().add(buttonReport);
 
         if (!calendarEvent.isAlert()) {
@@ -87,6 +97,7 @@ public final class ObligationsCalendarEventStage extends Stage {
             buttonAlert.setGraphic(new ImageView(ICON_ALERT));
             buttonAlert.setMaxWidth(Double.MAX_VALUE);
             buttonAlert.getStyleClass().add(CSS_CALENDAR_EVENT_POPUP_BUTTON);
+            buttonAlert.setOnAction(event -> switchToEcheanceListStage(calendarEvent));
             mainBox.getChildren().add(buttonAlert);
         }
 
@@ -175,7 +186,7 @@ public final class ObligationsCalendarEventStage extends Stage {
         okButton.setPrefWidth(80);
         okButton.setMaxWidth(Region.USE_PREF_SIZE);
         okButton.setTextAlignment(TextAlignment.CENTER);
-        okButton.setOnMouseClicked(e -> {
+        okButton.setOnAction(e -> {
             Injector.getBean(ObligationReglementaireRepository.class).update(obligation);
             hide();
         });
@@ -186,4 +197,63 @@ public final class ObligationsCalendarEventStage extends Stage {
         newScene.getStylesheets().add("/fr/sirs/plugin/reglementaire/ui/popup-calendar.css");
         setScene(newScene);
     }
+
+    /**
+     * Modifie la popup actuellement affichée pour montrer une liste déroulante des choix possibles de
+     * rappels d'échéance pour l'obligation pointée par l'évènement.
+     *
+     * @param event L'évènement du calendrier concerné.
+     */
+    private void switchToEcheanceListStage(final CalendarEvent event) {
+        final VBox vbox = new VBox();
+        vbox.getStyleClass().add(CSS_CALENDAR_EVENT_POPUP);
+        vbox.setSpacing(15);
+
+        final HBox hbox = new HBox();
+        hbox.setMaxWidth(Double.MAX_VALUE);
+        hbox.setMaxHeight(30);
+        final Label lbl = new Label("Echéance : ");
+        lbl.setAlignment(Pos.CENTER_LEFT);
+        lbl.setMaxHeight(Double.MAX_VALUE);
+        hbox.getChildren().add(lbl);
+
+        // Récupération de l'obligation
+        final ObligationReglementaire obligation;
+        if (event.getParent() instanceof ObligationReglementaire) {
+            obligation = (ObligationReglementaire) event.getParent();
+        } else if (event.getParent() instanceof RappelObligationReglementaire) {
+            final RappelObligationReglementaire rappel = (RappelObligationReglementaire)event.getParent();
+            final ObligationReglementaireRepository orr = Injector.getBean(ObligationReglementaireRepository.class);
+            obligation = orr.get(rappel.getObligationId());
+        } else {
+            return;
+        }
+
+        // Génération de la liste déroulante des échéances possibles, avec l'ancienne valeur sélectionnée
+        final RefEcheanceRappelObligationReglementaireRepository reorr = Injector.getBean(RefEcheanceRappelObligationReglementaireRepository.class);
+        final ComboBox<RefEcheanceRappelObligationReglementaire> comboEcheanceBox = new ComboBox<>();
+        SIRS.initCombo(comboEcheanceBox, FXCollections.observableArrayList(reorr.getAll()),
+                obligation.getEcheanceId() == null ? null : reorr.get(obligation.getEcheanceId()));
+        hbox.getChildren().add(comboEcheanceBox);
+        vbox.getChildren().add(hbox);
+
+        final BorderPane borderPane = new BorderPane();
+        borderPane.setMaxWidth(Double.MAX_VALUE);
+        final Button okButton = new Button("Valider");
+        okButton.setPrefWidth(80);
+        okButton.setMaxWidth(Region.USE_PREF_SIZE);
+        okButton.setTextAlignment(TextAlignment.CENTER);
+        okButton.setOnAction(e -> {
+            obligation.setEcheanceId(comboEcheanceBox.getValue().getId());
+            Injector.getBean(ObligationReglementaireRepository.class).update(obligation);
+            hide();
+        });
+        borderPane.setCenter(okButton);
+        vbox.getChildren().add(borderPane);
+
+        final Scene newScene = new Scene(vbox, 350, 100);
+        newScene.getStylesheets().add("/fr/sirs/plugin/reglementaire/ui/popup-calendar.css");
+        setScene(newScene);
+    }
+
 }
