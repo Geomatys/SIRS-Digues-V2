@@ -19,7 +19,7 @@
         <rowConstraints>
           <RowConstraints maxHeight="1.7976931348623157E308" minHeight="250.0" prefHeight="250.0" vgrow="ALWAYS" />
           <RowConstraints vgrow="NEVER" />
-            <RowConstraints vgrow="NEVER" />
+            <RowConstraints valignment="CENTER" vgrow="NEVER" />
         </rowConstraints>
          <children>
             <Label text="Propriétés du document" GridPane.rowIndex="1">
@@ -27,7 +27,6 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <Button fx:id="uiGenerate" mnemonicParsing="false" onAction="#generateReport" styleClass="btn-single" text="Générer et télécharger le document" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <GridPane fx:id="uiGrid" hgap="10.0" styleClass="gray-light" vgap="10.0" GridPane.rowIndex="2">
               <columnConstraints>
                 <ColumnConstraints hgrow="NEVER" />
@@ -68,6 +67,13 @@
                </padding>
             </GridPane>
             <BorderPane fx:id="uiTablePane" GridPane.columnSpan="3" />
+            <VBox alignment="CENTER" maxHeight="150.0" spacing="20.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.rowIndex="2" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+               <children>
+                  <Button fx:id="uiGenerate" mnemonicParsing="false" onAction="#generateReport" styleClass="btn-single" text="Générer et télécharger le document" textAlignment="CENTER" wrapText="true" />
+                  <ProgressIndicator fx:id="uiProgress" visible="false" />
+                  <Label fx:id="uiProgressLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" />
+               </children>
+            </VBox>
          </children>
       </GridPane>
    </center>

@@ -1314,7 +1314,10 @@ public class PojoTable extends BorderPane {
         }
     }
 
-    public class PropertyColumn extends TableColumn<Element, Object>{
+    public final class PropertyColumn extends TableColumn<Element, Object>{
+
+        private final ObservableList refList;
+        private final Reference ref;
 
         public PropertyColumn(final PropertyDescriptor desc) {
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
@@ -1323,6 +1326,9 @@ public class PojoTable extends BorderPane {
             boolean isEditable = true;
             final Reference ref = desc.getReadMethod().getAnnotation(Reference.class);
             if (ref != null) {
+                this.ref = ref;
+                this.refList = FXCollections.observableArrayList(session.getPreviews().getByClass(ref.ref()));
+
                 //reference vers un autre objet
                 setCellFactory((TableColumn<Element, Object> param) -> new ReferenceTableCell(ref.ref()));
                 try {
@@ -1344,6 +1350,9 @@ public class PojoTable extends BorderPane {
                 }
 
             } else {
+                this.ref = null;
+                this.refList = FXCollections.emptyObservableList();
+
                 setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
                 final Class type = desc.getReadMethod().getReturnType();
                 if (Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)) {
@@ -1410,6 +1419,15 @@ public class PojoTable extends BorderPane {
                 });
             }
         }
+        
+        public Reference getReference() {
+            return ref;
+        }
+
+        public ObservableList<Preview> getReferencesList(){
+            return refList;
+        }
+
     }
 
     /**
@@ -1440,7 +1458,7 @@ public class PojoTable extends BorderPane {
         transition.setFromValue(0);
         transition.setToValue(1);
         transition.play();
-    }
+        }
 
     /**
      * A column allowing to delete the {@link Element} of a row. Two modes possible :

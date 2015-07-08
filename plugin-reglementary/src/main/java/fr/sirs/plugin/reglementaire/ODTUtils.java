@@ -26,6 +26,7 @@ import org.odftoolkit.odfdom.dom.element.text.TextPElement;
 import org.odftoolkit.odfdom.incubator.doc.draw.OdfDrawFrame;
 import org.odftoolkit.odfdom.incubator.doc.draw.OdfDrawImage;
 import org.odftoolkit.odfdom.incubator.doc.text.OdfTextParagraph;
+import org.odftoolkit.simple.Document;
 import org.odftoolkit.simple.TextDocument;
 import org.odftoolkit.simple.style.MasterPage;
 import org.odftoolkit.simple.style.StyleTypeDefinitions;
@@ -152,22 +153,7 @@ public final class ODTUtils extends Static{
      */
     public static void insertImageFullPage(final TextDocument doc, final URI imageUri) throws Exception {
         final BufferedImage img = ImageIO.read(imageUri.toURL());
-        final MasterPage pdfpageStyle;
-        if(img.getWidth()>img.getHeight()){
-            pdfpageStyle = MasterPage.getOrCreateMasterPage(doc, "pdfPageLandScape");
-            pdfpageStyle.setPrintOrientation(StyleTypeDefinitions.PrintOrientation.LANDSCAPE);
-            pdfpageStyle.setPageHeight(210);
-            pdfpageStyle.setPageWidth(297);
-            pdfpageStyle.setMargins(0, 0, 0, 0);
-            pdfpageStyle.setFootnoteMaxHeight(0);
-        }else{
-            pdfpageStyle = MasterPage.getOrCreateMasterPage(doc, "pdfPagePortrait");
-            pdfpageStyle.setPrintOrientation(StyleTypeDefinitions.PrintOrientation.PORTRAIT);
-            pdfpageStyle.setPageWidth(210);
-            pdfpageStyle.setPageHeight(297);
-            pdfpageStyle.setMargins(0, 0, 0, 0);
-            pdfpageStyle.setFootnoteMaxHeight(0);
-        }
+        final MasterPage pdfpageStyle = createMasterPage(doc, img.getWidth()>img.getHeight(), 0);
         doc.addPageBreak(null, pdfpageStyle);
 
         final OdfContentDom contentDom = doc.getContentDom();
@@ -201,5 +187,33 @@ public final class ODTUtils extends Static{
         image.newImage(imageUri);
     }
 
+    /**
+     * Create a page configuration.
+     * 
+     * @param doc
+     * @param landscape
+     * @param margin ine millimeter
+     * @return
+     * @throws Exception
+     */
+    public static MasterPage createMasterPage(Document doc, boolean landscape, int margin) throws Exception{
+        final MasterPage masterPage;
+        if(landscape){
+            masterPage = MasterPage.getOrCreateMasterPage(doc, "pageLandScape");
+            masterPage.setPrintOrientation(StyleTypeDefinitions.PrintOrientation.LANDSCAPE);
+            masterPage.setPageHeight(210);
+            masterPage.setPageWidth(297);
+            masterPage.setMargins(margin, margin, margin, margin);
+            masterPage.setFootnoteMaxHeight(0);
+        }else{
+            masterPage = MasterPage.getOrCreateMasterPage(doc, "pagePortrait");
+            masterPage.setPrintOrientation(StyleTypeDefinitions.PrintOrientation.PORTRAIT);
+            masterPage.setPageWidth(210);
+            masterPage.setPageHeight(297);
+            masterPage.setMargins(margin, margin, margin, margin);
+            masterPage.setFootnoteMaxHeight(0);
+        }
+        return masterPage;
+    }
 
 }

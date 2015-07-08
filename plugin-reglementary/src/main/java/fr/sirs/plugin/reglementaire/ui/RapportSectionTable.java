@@ -6,6 +6,7 @@ import fr.sirs.core.model.PhotoChoice;
 import fr.sirs.core.model.RapportSectionObligationReglementaire;
 import fr.sirs.core.model.SectionType;
 import fr.sirs.theme.ui.PojoTable;
+import javafx.scene.control.TableColumn;
 
 /**
  *
@@ -25,6 +26,13 @@ public class RapportSectionTable extends PojoTable {
         ficheModeVisibleProperty().set(false);
         filterVisibleProperty().set(false);
         openEditorOnNewProperty().set(false);
+
+
+        for(TableColumn col : getColumns()){
+            if(col instanceof PropertyColumn && ((PropertyColumn)col).getReference()!=null){
+                col.setEditable(true);
+            }
+        }
     }
 
     @Override

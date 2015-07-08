@@ -7,5 +7,5 @@ package fr.sirs.core.model;
  */
 public enum SectionType {
     TABLE,
-    FORM
+    FICHE
 }

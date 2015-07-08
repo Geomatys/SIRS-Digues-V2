@@ -19,6 +19,7 @@ import static fr.sirs.core.model.Role.ADMIN;
 import static fr.sirs.core.model.Role.EXTERN;
 import static fr.sirs.core.model.Role.GUEST;
 import static fr.sirs.core.model.Role.USER;
+import fr.sirs.core.model.SQLQuery;
 import fr.sirs.index.ElementHit;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
@@ -59,6 +60,8 @@ public class SirsStringConverter extends StringConverter {
             text.append(getDesignation((Element)item));
         }  else if (item instanceof Preview) {
             text.append(getDesignation((Preview) item));
+        }  else if (item instanceof SQLQuery) {
+            text.append(((SQLQuery)item).getName());
         }
         
         // Search for a name or label associated to input object
