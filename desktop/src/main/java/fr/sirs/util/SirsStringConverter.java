@@ -61,7 +61,7 @@ public class SirsStringConverter extends StringConverter {
         }  else if (item instanceof Preview) {
             text.append(getDesignation((Preview) item));
         }  else if (item instanceof SQLQuery) {
-            text.append(((SQLQuery)item).getName());
+            text.append(((SQLQuery)item).getLibelle());
         }
         
         // Search for a name or label associated to input object

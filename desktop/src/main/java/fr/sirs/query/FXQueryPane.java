@@ -39,16 +39,16 @@ public class FXQueryPane extends GridPane {
         
         final SQLQuery oldValue = sqlQueryProperty.get();
         if (oldValue != null) {
-            uiLibelle.textProperty().unbindBidirectional(oldValue.name);
-            uiDesc.textProperty().unbindBidirectional(oldValue.description);
-            uiSql.textProperty().unbindBidirectional(oldValue.sql);
+            uiLibelle.textProperty().unbindBidirectional(oldValue.libelleProperty());
+            uiDesc.textProperty().unbindBidirectional(oldValue.descriptionProperty());
+            uiSql.textProperty().unbindBidirectional(oldValue.sqlProperty());
         }
         
         sqlQueryProperty.set(newValue);
         if (newValue != null) {
-            uiLibelle.textProperty().bindBidirectional(newValue.name);
-            uiDesc.textProperty().bindBidirectional(newValue.description);
-            uiSql.textProperty().bindBidirectional(newValue.sql);
+            uiLibelle.textProperty().bindBidirectional(newValue.libelleProperty());
+            uiDesc.textProperty().bindBidirectional(newValue.descriptionProperty());
+            uiSql.textProperty().bindBidirectional(newValue.sqlProperty());
         }
     }
 }

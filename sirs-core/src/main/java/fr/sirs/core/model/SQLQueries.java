@@ -22,6 +22,8 @@ import org.apache.sis.util.ArgumentChecks;
  * @author Johann Sorel
  */
 public class SQLQueries {
+    
+    private static final char SEPARATOR = '§';
 
     /**
      * Open a file containing SQL queries, and put them in memory.
@@ -45,10 +47,26 @@ public class SQLQueries {
 
         final List<SQLQuery> queries = new ArrayList<>();
         for (Entry entry : props.entrySet()) {
-            queries.add(new SQLQuery((String) entry.getKey(), (String) entry.getValue()));
+            final SQLQuery query = new SQLQuery();
+            query.setLibelle((String) entry.getKey());
+            
+            final String value = (String) entry.getValue();
+            final int index = value.indexOf(SEPARATOR);
+            if(index<=0){
+                query.setSql(value);
+                query.setDescription("");
+            }else{
+                query.setSql(value.substring(0, index));
+                query.setDescription(value.substring(index+1));
+            }
+            queries.add(query);
         }
 
         return queries;
+    }
+    
+    private static String getValueString(final SQLQuery query){
+        return query.getSql()+SEPARATOR+query.getDescription();
     }
 
     /**
@@ -92,7 +110,7 @@ public class SQLQueries {
         }
         final Properties props = new Properties();
         for (SQLQuery query : queries) {
-            props.put(query.name.get(), query.getValueString());
+            props.put(query.getLibelle(), getValueString(query));
         }
         try (OutputStream out = Files.newOutputStream(outputFile)) {
             props.store(out, "");
@@ -113,7 +131,7 @@ public class SQLQueries {
         protected void updateItem(SQLQuery item, boolean empty) {
             super.updateItem(item, empty);
             if (!empty && item != null) {
-                this.textProperty().bind(item.name);
+                this.textProperty().bind(item.libelleProperty());
             } else {
                 this.textProperty().unbind();
                 this.setText(null);

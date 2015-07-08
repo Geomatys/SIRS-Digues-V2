@@ -332,7 +332,7 @@ public class FXSearchPane extends BorderPane {
         final DialogPane pane = new DialogPane();
         pane.getButtonTypes().addAll(ButtonType.OK,ButtonType.CANCEL);        
         final SQLQuery query = new SQLQuery();
-        query.sql.set(uiSQLText.getText());
+        query.sqlProperty().set(uiSQLText.getText());
         pane.setContent(new FXQueryPane(query));
         
         dialog.setDialogPane(pane);
@@ -343,7 +343,7 @@ public class FXSearchPane extends BorderPane {
             try{
                 final List<SQLQuery> queries = SQLQueries.getLocalQueries();
                 queries.add(query);
-                sqlLibelle = query.getName();
+                sqlLibelle = query.getLibelle();
                 SQLQueries.saveQueriesLocally(queries);
             }catch(IOException ex){
                 SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
@@ -384,8 +384,8 @@ public class FXSearchPane extends BorderPane {
                 //sauvegarde s'il y a eu des changements
                 final SQLQuery selected = table.getSelection();
                 if (selected != null) {
-                    sqlLibelle = selected.getName();
-                    uiSQLText.setText(selected.sql.get());
+                    sqlLibelle = selected.getLibelle();
+                    uiSQLText.setText(selected.getSql());
                 }
             }
         }

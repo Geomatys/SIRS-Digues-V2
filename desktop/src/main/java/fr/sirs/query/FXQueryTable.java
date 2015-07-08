@@ -59,7 +59,7 @@ public class FXQueryTable extends BorderPane{
         nameCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<SQLQuery, String>, ObservableValue<String>>() {
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<SQLQuery, String> param) {
-                return param.getValue().name;
+                return param.getValue().libelleProperty();
             }
         });
         
