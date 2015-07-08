@@ -56,7 +56,9 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
     @Override
     public void terminateEdit() {
         Object newValue = editor.getValue();
-        if (newValue instanceof Preview) {
+        if (newValue == null) {
+            commitEdit(null);
+        } if (newValue instanceof Preview) {
             commitEdit(((Preview)newValue).getElementId());
         } else if (newValue instanceof Identifiable) {
             commitEdit(((Identifiable)newValue).getId());
