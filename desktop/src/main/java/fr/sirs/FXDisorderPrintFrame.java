@@ -10,10 +10,14 @@ import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.PojoTable;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.ObjectProperty;
@@ -22,12 +26,17 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
+import org.apache.sis.measure.NumberRange;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.referencing.LinearReferencing;
@@ -42,6 +51,15 @@ public class FXDisorderPrintFrame extends BorderPane {
     @FXML Tab uiDisorderTypeChoice;
     @FXML Tab uiOptionChoice;
     
+    @FXML CheckBox uiOptionPhoto;
+    @FXML CheckBox uiOptionReseauOuvrage;
+    @FXML CheckBox uiOptionVoirie;
+    
+    @FXML DatePicker uiOptionDebut;
+    @FXML DatePicker uiOptionFin;
+    
+    @FXML CheckBox uiOptionArchive;
+    
     private final Map<String, ObjectProperty<Number>[]> prsByTronconId = new HashMap<>();
     private final TronconChoicePojoTable tronconsTable = new TronconChoicePojoTable();
     private final DisorderTypeChoicePojoTable disordreTypesTable = new DisorderTypeChoicePojoTable();
@@ -52,6 +70,10 @@ public class FXDisorderPrintFrame extends BorderPane {
         uiTronconChoice.setContent(tronconsTable);
         disordreTypesTable.setTableItems(()-> (ObservableList) FXCollections.observableList(Injector.getSession().getRepositoryForClass(RefTypeDesordre.class).getAll()));
         uiDisorderTypeChoice.setContent(disordreTypesTable);
+    }
+    
+    @FXML private void cancel(){
+        
     }
     
     
@@ -70,12 +92,29 @@ public class FXDisorderPrintFrame extends BorderPane {
             for(final Element element : disordreTypesTable.getSelectedItems()){
                 typeDesordresIds.add(element.getId());
             }
+            
+            long minTimeSelected = Long.MIN_VALUE;
+            long maxTimeSelected = Long.MAX_VALUE;
+            LocalDateTime tmpTimeSelected = uiOptionDebut.getValue()==null ? null : uiOptionDebut.getValue().atTime(LocalTime.MIDNIGHT);
+            if (tmpTimeSelected !=null) minTimeSelected = Timestamp.valueOf(tmpTimeSelected).getTime();
+
+            tmpTimeSelected = uiOptionFin.getValue()==null ? null : uiOptionFin.getValue().atTime(LocalTime.MIDNIGHT);
+            if (tmpTimeSelected !=null) maxTimeSelected = Timestamp.valueOf(tmpTimeSelected).getTime();
+
+            final NumberRange<Long> selectedRange = NumberRange.create(minTimeSelected, true, maxTimeSelected, true);
                         
             // On retire les désordres de la liste dans les cas suivants :
             desordres.removeIf(
                     (Desordre desordre) -> {
                         
-                        if(desordre.getForeignParentId()!=null){
+                        final boolean conditionRetrait;
+                        
+                        final boolean conditionSurTronconEtType;
+                        /*
+                        CONDITIONS DE RETRAIT PORTANT SUR LES TRONÇONS 
+                        SÉLECTIONNÉS, LES PR LIMITES ET LES TYPES DE DÉSORDRES.
+                        */
+                        if(!tronconIds.isEmpty() && desordre.getForeignParentId()!=null){
                             final String linearId = desordre.getForeignParentId();
                             
                             /*
@@ -124,15 +163,44 @@ public class FXDisorderPrintFrame extends BorderPane {
                             } 
                             else prOutOfRange=false;
 
-                            return linearSelected // Si le tronçon ne figure pas parmi les tronçons sélectionnés.
-                                    || typeSelected // Si le type du désordre
-                                    || prOutOfRange;
+                            conditionSurTronconEtType = linearSelected // Si le tronçon ne figure pas parmi les tronçons sélectionnés.
+                                    || typeSelected // Si le type du désordre n'est pas parmi les types sélectionnés
+                                    || prOutOfRange; // Si le désordre est en dehors des PR indiqués pour le tronçon
                         } 
-                        else return false;
+                        else conditionSurTronconEtType = false;
+                        
+                        
+                        final boolean conditionOptions;
+                        /*
+                        CONDITION PORTANT SUR LES OPTIONS
+                        */
+                        // 1- Si on a décidé de ne pas générer de fiche pour les désordres archivés.
+                        final boolean archiveCondition = (uiOptionArchive.isSelected() && desordre.getDate_fin()!=null);
+                        
+                        // 2- Si le désordre n'a pas eu lieu durant la période retenue
+                        final boolean periodeCondition;
+
+                        long minTime = Long.MIN_VALUE;
+                        long maxTime = Long.MAX_VALUE;
+                        LocalDateTime tmpTime = desordre.getDate_debut()==null ? null : desordre.getDate_debut().atTime(LocalTime.MIDNIGHT);
+                        if (tmpTime != null) minTime = Timestamp.valueOf(tmpTime).getTime();
+                        
+                        tmpTime = desordre.getDate_fin()==null ? null : desordre.getDate_fin().atTime(LocalTime.MIDNIGHT);
+                        if (tmpTime != null) maxTime = Timestamp.valueOf(tmpTime).getTime();
+
+                        final NumberRange<Long> desordreRange = NumberRange.create(minTime, true, maxTime, true);
+                        periodeCondition = !selectedRange.intersects(desordreRange);
+                        
+                        conditionOptions = archiveCondition || periodeCondition;
+                        
+                        return conditionSurTronconEtType || conditionOptions;
+                        
                     });
             
             try {
-                Injector.getSession().getPrintManager().printDesordres(desordres);
+                if(!desordres.isEmpty()){
+                    Injector.getSession().getPrintManager().printDesordres(desordres);
+                }
             } catch (Exception ex) {
                 Logger.getLogger(FXDisorderPrintFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
