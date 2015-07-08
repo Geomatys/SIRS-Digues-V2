@@ -1,3 +1,7 @@
+.calendar-event-popup{
+    -fx-padding: 10px;
+}
+
 .calendar-event-popup-title{
     -fx-font-weight: bold;
 }
