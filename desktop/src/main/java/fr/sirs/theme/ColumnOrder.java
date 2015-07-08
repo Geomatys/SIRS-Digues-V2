@@ -56,7 +56,6 @@ public final class ColumnOrder {
             final String order = config.getProperty(className);
             if(order!=null){
                 final String[] parts = order.split(",");
-                final Map<String,Integer> map = new HashMap<>();
                 for(int i=0;i<parts.length;i++){
                     map.put(parts[i], i);
                 }

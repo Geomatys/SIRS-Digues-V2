@@ -2,19 +2,18 @@
 package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.RapportModeleObligationReglementaire;
+import fr.sirs.core.model.TemplateObligationReglementaire;
 import fr.sirs.theme.ui.PojoTable;
 import javafx.scene.control.TableColumn;
 
 /**
  *
- * @author Johann Sorel (Geomatys)
+ * @author Johann Sorel
  */
-public class RapportsTable extends PojoTable {
+public class TemplatesTable extends PojoTable {
 
-    public RapportsTable() {
-        super(Injector.getSession().getRepositoryForClass(RapportModeleObligationReglementaire.class), "Modèles de document préenregistrées");
+    public TemplatesTable() {
+        super(Injector.getSession().getRepositoryForClass(TemplateObligationReglementaire.class), "Modèles de mise en forme");
         editableProperty().set(true);
         detaillableProperty().set(true);
         fichableProperty().set(false);
@@ -25,7 +24,7 @@ public class RapportsTable extends PojoTable {
         ficheModeVisibleProperty().set(false);
         filterVisibleProperty().set(false);
         openEditorOnNewProperty().set(false);
-        
+
         for(TableColumn col : getColumns()){
             if("Désignation".equalsIgnoreCase(col.getText())){
                 col.setVisible(false);
@@ -34,21 +33,21 @@ public class RapportsTable extends PojoTable {
     }
 
     @Override
-    protected Element createPojo() {
-        final RapportModeleObligationReglementaire rapport = RapportPane.showCreateDialog();
-        if(rapport!=null){
-            repo.add(rapport);
-            getAllValues().add(rapport);
+    protected TemplateObligationReglementaire createPojo() {
+        final TemplateObligationReglementaire ele = TemplatePane.showCreateDialog();
+        if(ele!=null){
+            repo.add(ele);
+            getAllValues().add(ele);
         }
-        return rapport;
+        return ele;
     }
 
     @Override
     protected void editPojo(Object pojo) {
-        final RapportModeleObligationReglementaire rapport = RapportPane.showEditDialog((RapportModeleObligationReglementaire) pojo);
+        final TemplateObligationReglementaire rapport = TemplatePane.showEditDialog((TemplateObligationReglementaire) pojo);
         if(rapport!=null){
             repo.update(rapport);
-            
+
         }
     }
 

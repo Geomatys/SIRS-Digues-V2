@@ -82,47 +82,58 @@ public final class ODTUtils extends Static{
      * - images
      * - odt
      * - pdf
+     *
+     * Supporte aussi les objets de type :
+     * - File
+     * - TextDocument
      * 
      * @param outputFile fichier ODT de sortie
-     * @param files 
+     * @param candidates
      */
-    public static void concatenateFiles(File outputFile, File ... files) throws Exception {
+    public static void concatenateFiles(File outputFile, Object ... candidates) throws Exception {
         final TextDocument doc = TextDocument.newTextDocument();
 
-        for(File file : files){
-            final String fileName = file.getName().toLowerCase();
-            if(fileName.endsWith(".odt")){
-                //append content at the end
-                final TextDocument childDoc = TextDocument.loadDocument(file);
-                final Paragraph paragraph = doc.addParagraph("");
-                doc.insertContentFromDocumentAfter(childDoc, paragraph, true);
+        for(Object candidate : candidates){
+            if(candidate instanceof File){
+                final File file = (File) candidate;
+                final String fileName = file.getName().toLowerCase();
+                if(fileName.endsWith(".odt")){
+                    //append content at the end
+                    final TextDocument childDoc = TextDocument.loadDocument(file);
+                    final Paragraph paragraph = doc.addParagraph("");
+                    doc.insertContentFromDocumentAfter(childDoc, paragraph, true);
 
-            }else if(fileName.endsWith(".pdf")){
-                //transform it to image
-                try (PDDocument document = PDDocument.loadNonSeq(file, null)) {
-                    final List<PDPage> pages = document.getDocumentCatalog().getAllPages();
-                    for(int i=0,n=pages.size();i<n;i++) {
-                        final PDPage page = pages.get(i);
-                        final BufferedImage bim = page.convertToImage(BufferedImage.TYPE_INT_RGB, 300);
-                        final File imgFile = File.createTempFile("pdf_"+page+"_", ".png");
-                        imgFile.deleteOnExit();
-                        try(final FileOutputStream imgStream = new FileOutputStream(imgFile)){
-                            ImageIOUtil.writeImage(bim, "png", imgStream, 300);
-                            insertImageFullPage(doc, imgFile.toURI());
-                        }finally{
-                            file.delete();
+                }else if(fileName.endsWith(".pdf")){
+                    //transform it to image
+                    try (PDDocument document = PDDocument.loadNonSeq(file, null)) {
+                        final List<PDPage> pages = document.getDocumentCatalog().getAllPages();
+                        for(int i=0,n=pages.size();i<n;i++) {
+                            final PDPage page = pages.get(i);
+                            final BufferedImage bim = page.convertToImage(BufferedImage.TYPE_INT_RGB, 300);
+                            final File imgFile = File.createTempFile("pdf_"+page+"_", ".png");
+                            imgFile.deleteOnExit();
+                            try(final FileOutputStream imgStream = new FileOutputStream(imgFile)){
+                                ImageIOUtil.writeImage(bim, "png", imgStream, 300);
+                                insertImageFullPage(doc, imgFile.toURI());
+                            }finally{
+                                file.delete();
+                            }
                         }
                     }
-                }
 
-            }else{
-                //try image
-                try{
-                    final BufferedImage img = ImageIO.read(file);
-                    insertImage(doc, file.toURI());
-                }catch(IOException ex){
-                    throw new IOException("Unvalid file "+file+". Only PDF, ODT and images are supported.");
+                }else{
+                    //try image
+                    try{
+                        final BufferedImage img = ImageIO.read(file);
+                        insertImage(doc, file.toURI());
+                    }catch(IOException ex){
+                        throw new IOException("Unvalid file "+candidate+". Only PDF, ODT and images are supported.");
+                    }
                 }
+            }else if(candidate instanceof TextDocument){
+                final TextDocument textDoc = (TextDocument) candidate;
+                final Paragraph paragraph = doc.addParagraph("");
+                doc.insertContentFromDocumentAfter(textDoc, paragraph, true);
             }
         }
 

@@ -44,6 +44,8 @@ import java.io.File;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -246,14 +248,15 @@ public class RapportsPane extends BorderPane implements Initializable {
                 try{
                     final Session session = Injector.getSession();
 
-                    final LocalDate dateDebut = uiPeriodeDebut.getValue();
-                    final LocalDate dateFin = uiPeriodeFin.getValue();
+                    final long dateDebut = uiPeriodeDebut.getValue().atTime(0,0,0).toInstant(ZoneOffset.UTC).toEpochMilli();
+                    final long dateFin = uiPeriodeFin.getValue().atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
+                    final NumberRange dateRange = NumberRange.create(dateDebut, true, dateFin, true);
                     final Preview type = uiType.valueProperty().get();
                     final Preview sysEndi = uiSystemEndiguement.valueProperty().get();
                     final String titre = uiTitre.getText();
                     final Double prDebut = uiPrFin.getValue();
                     final Double prFin = uiPrFin.getValue();
-                    final NumberRange range = NumberRange.create(prDebut, true, prFin, true);
+                    final NumberRange prRange = NumberRange.create(prDebut, true, prFin, true);
 
                     // on liste tous les elements a générer
                     Platform.runLater(()->uiProgressLabel.setText("Recherche des objets du rapport..."));
@@ -261,39 +264,60 @@ public class RapportsPane extends BorderPane implements Initializable {
                     final Map<String,Objet> elements = new LinkedHashMap<>();
                     for(TronconDigue troncon : troncons){
                         if(troncon==null) continue;
-                        if(prDebut == 0.0 && prFin == 0.0){
-                            for(Objet obj : TronconUtils.getObjetList(troncon.getDocumentId())){
-                                elements.put(obj.getDocumentId(), obj);
-                            }
-                        }else{
+
+                        final List<Objet> objetList = TronconUtils.getObjetList(troncon.getDocumentId());
+
+                        for(Objet obj : objetList){
                             //on verifie la position
-                            for(Objet obj : TronconUtils.getObjetList(troncon.getDocumentId())){
-                                if(range.intersectsAny(NumberRange.create(obj.getPrDebut(), true, obj.getPrFin(), true))){
-                                    elements.put(obj.getDocumentId(), obj);
+                            if(!(prDebut == 0.0 && prFin == 0.0)){
+                                if(!prRange.intersectsAny(NumberRange.create(obj.getPrDebut(), true, obj.getPrFin(), true))){
+                                    continue;
                                 }
                             }
+                            //on vérifie la date
+                            final LocalDate objDateDebut = obj.getDate_debut();
+                            final LocalDate objDateFin = obj.getDate_fin();
+                            final long debut = objDateDebut==null ? 0 : objDateDebut.atTime(0,0,0).toInstant(ZoneOffset.UTC).toEpochMilli();
+                            final long fin = objDateFin==null ? Long.MAX_VALUE : objDateFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
+                            final NumberRange objDateRange = NumberRange.create(debut, true, fin, true);
+                            if(!dateRange.intersectsAny(objDateRange)){
+                                continue;
+                            }
+
+                            elements.put(obj.getDocumentId(), obj);
                         }
+                    }
+
+                    final List parts = new ArrayList();
+                    // on crée un document qui contient le titre
+                    try{
+                        final TextDocument headerDoc = TextDocument.newTextDocument();
+                        final Paragraph paragraph = headerDoc.addParagraph(titre);
+                        paragraph.setFont(new Font("Serial", StyleTypeDefinitions.FontStyle.BOLD, 20));
+                        parts.add(headerDoc);
+                    }catch(Exception ex){
+                        SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                        GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du rapport.", ex).show();
+                        return;
                     }
 
                     // on crée un rapport pour chaque section
                     final File folder = new File(file.getParentFile(),"temp_"+file.getName().split("\\.")[0]);
                     folder.mkdirs();
-                    final List<File> files = new ArrayList<>();
                     final AtomicInteger inc = new AtomicInteger();
                     try{
                         for(RapportSectionObligationReglementaire section : report.section){
                             Platform.runLater(()->uiProgressLabel.setText("Génération de la section : "+section.getLibelle()));
                             if(SectionType.TABLE.equals(section.getType())){
-                                files.addAll(generateTable(section, elements, folder, inc));
+                                parts.addAll(generateTable(section, elements, folder, inc));
                             }else if(SectionType.FICHE.equals(section.getType())){
 
                             }
-
                         }
 
                         // on aggrege le tout
                         Platform.runLater(()->uiProgressLabel.setText("Aggrégation des sections"));
-                        ODTUtils.concatenateFiles(file, files.toArray(new File[0]));
+                        ODTUtils.concatenateFiles(file, parts.toArray(new File[0]));
                     }catch(Exception ex){
                         SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                         GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du rapport.", ex).show();
@@ -333,7 +357,7 @@ public class RapportsPane extends BorderPane implements Initializable {
 
     }
 
-    private List<File> generateTable(RapportSectionObligationReglementaire section,
+    private List<TextDocument> generateTable(RapportSectionObligationReglementaire section,
             Map<String,Objet> elements, File tempFolder, AtomicInteger inc) throws Exception{
         final TextDocument doc = TextDocument.newTextDocument();
 
@@ -440,7 +464,14 @@ public class RapportsPane extends BorderPane implements Initializable {
         }
 
         doc.save(docFile);
-        return Collections.singletonList(docFile);
+        return Collections.singletonList(doc);
+    }
+
+
+    private List<TextDocument> generateFiches(RapportSectionObligationReglementaire section,
+            Map<String,Objet> elements, File tempFolder, AtomicInteger inc) throws Exception{
+        
+        return Collections.emptyList();
     }
 
     private static interface Printer{

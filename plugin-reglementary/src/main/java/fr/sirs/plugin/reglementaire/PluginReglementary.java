@@ -34,6 +34,7 @@ public class PluginReglementary extends Plugin {
         loadingMessage.set("module réglementaire");
         themes.add(new DocumentsTheme());
         themes.add(new StatesGeneratorTheme());
+        themes.add(new TemplatesTheme());
     }
 
     /**

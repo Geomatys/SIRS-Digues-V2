@@ -27,12 +27,11 @@ public class RapportSectionTable extends PojoTable {
         filterVisibleProperty().set(false);
         openEditorOnNewProperty().set(false);
 
-
-//        for(TableColumn col : getColumns()){
-//            if(col instanceof PropertyColumn && ((PropertyColumn)col).getReference()!=null){
-//                col.setEditable(true);
-//            }
-//        }
+        for(TableColumn col : getColumns()){
+            if("Désignation".equalsIgnoreCase(col.getText())){
+                col.setVisible(false);
+            }
+        }
     }
 
     @Override
