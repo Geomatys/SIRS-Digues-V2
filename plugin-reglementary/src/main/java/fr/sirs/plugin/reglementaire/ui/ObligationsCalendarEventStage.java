@@ -3,8 +3,10 @@ package fr.sirs.plugin.reglementaire.ui;
 import fr.sirs.Injector;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.ObligationReglementaireRepository;
+import fr.sirs.core.component.RappelObligationReglementaireRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ObligationReglementaire;
+import fr.sirs.core.model.RappelObligationReglementaire;
 import fr.sirs.ui.calendar.CalendarEvent;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -26,6 +28,8 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
+
+import java.util.List;
 
 
 /**
@@ -64,29 +68,7 @@ public final class ObligationsCalendarEventStage extends Stage {
         buttonDelete.setMaxWidth(Double.MAX_VALUE);
         buttonDelete.setAlignment(Pos.CENTER_LEFT);
         buttonDelete.getStyleClass().add(CSS_CALENDAR_EVENT_POPUP_BUTTON);
-        buttonDelete.setOnMouseClicked(event -> {
-            final Alert alertDelConfirm = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression de l'alerte ?",
-                    ButtonType.NO, ButtonType.YES);
-            alertDelConfirm.setResizable(true);
-
-            final ButtonType res = alertDelConfirm.showAndWait().get();
-            if(ButtonType.YES != res) return;
-
-            final Element parent = calendarEvent.getParent();
-            if (!(parent instanceof ObligationReglementaire)) {
-                // Ne devrait pas survenir mais vérification tout de même.
-                return;
-            }
-            final ObligationReglementaire obligation = (ObligationReglementaire)parent;
-            final AbstractSIRSRepository<ObligationReglementaire> repoObl = Injector.getSession()
-                    .getRepositoryForClass(ObligationReglementaire.class);
-            repoObl.remove(obligation);
-            if (obligations instanceof FilteredList) {
-                ((FilteredList)obligations).getSource().remove(obligation);
-            } else {
-                obligations.remove(obligation);
-            }
-        });
+        buttonDelete.setOnMouseClicked(event -> delete(calendarEvent, obligations));
         mainBox.getChildren().add(buttonDelete);
 
         final Button buttonReport = new Button();
@@ -109,6 +91,56 @@ public final class ObligationsCalendarEventStage extends Stage {
         final Scene scene = new Scene(mainBox, 250, 100);
         scene.getStylesheets().add("/fr/sirs/plugin/reglementaire/ui/popup-calendar.css");
         setScene(scene);
+    }
+
+    /**
+     * Supprime un évènement du calendrier ou une alerte de rappel.
+     *
+     * @param calendarEvent Evènement du calendrier concerné.
+     * @param obligations Liste des obligations.
+     */
+    private void delete(final CalendarEvent calendarEvent, final ObservableList<ObligationReglementaire> obligations) {
+        final Alert alertDelConfirm = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression de l'alerte ?",
+                ButtonType.NO, ButtonType.YES);
+        alertDelConfirm.setResizable(true);
+
+        final ButtonType res = alertDelConfirm.showAndWait().get();
+        if(ButtonType.YES != res) return;
+
+        final ObligationReglementaireRepository orr = Injector.getBean(ObligationReglementaireRepository.class);
+        final RappelObligationReglementaireRepository rorr = Injector.getBean(RappelObligationReglementaireRepository.class);
+
+        final Element parent = calendarEvent.getParent();
+        if (parent instanceof ObligationReglementaire) {
+            final ObligationReglementaire obligation = (ObligationReglementaire) parent;
+            if (!calendarEvent.isAlert()) {
+                // Une obligation a été fournie et ce n'est pas une alerte de rappel, donc on peut supprimer directement l'obligation.
+                orr.remove(obligation);
+                if (obligations instanceof FilteredList) {
+                    ((FilteredList) obligations).getSource().remove(obligation);
+                } else {
+                    obligations.remove(obligation);
+                }
+            } else {
+                // Une obligation a été fournie et c'est une alerte de rappel, donc on doit supprimer les rappels sur cette obligation
+                // et mettre à jour la date de rappel de l'échéance car ce n'est plus valide.
+                final List<RappelObligationReglementaire> rappels = rorr.getByObligation(obligation);
+                for (RappelObligationReglementaire rappel : rappels) {
+                    rorr.remove(rappel);
+                }
+                obligation.setEcheanceId(null);
+                orr.update(obligation);
+            }
+        } else if (parent instanceof RappelObligationReglementaire) {
+            // Suppression du rappel fourni et suppression de la date de rappel de l'échéance
+            final RappelObligationReglementaire rappel = (RappelObligationReglementaire) parent;
+            if (rappel.getObligationId() != null) {
+                final ObligationReglementaire obligation = orr.get(rappel.getObligationId());
+                rorr.remove(rappel);
+                obligation.setEcheanceId(null);
+                orr.update(obligation);
+            }
+        }
     }
 
     /**

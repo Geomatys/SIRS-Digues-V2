@@ -108,6 +108,7 @@ public final class ObligationsCalendarView extends CalendarView {
         obligation.dateRealisationProperty().addListener(propChangeListener);
         obligation.typeIdProperty().addListener(propChangeListener);
         obligation.systemeEndiguementIdProperty().addListener(propChangeListener);
+        obligation.echeanceIdProperty().addListener(propChangeListener);
     }
 
     /**
@@ -120,6 +121,7 @@ public final class ObligationsCalendarView extends CalendarView {
         obligation.dateRealisationProperty().removeListener(propChangeListener);
         obligation.typeIdProperty().removeListener(propChangeListener);
         obligation.systemeEndiguementIdProperty().removeListener(propChangeListener);
+        obligation.echeanceIdProperty().removeListener(propChangeListener);
     }
 
     /**
@@ -168,7 +170,7 @@ public final class ObligationsCalendarView extends CalendarView {
                         final RefEcheanceRappelObligationReglementaire period = rerorr.get(obligation.getEcheanceId());
                         firstDateRappel = firstDateRappel.minusMonths(period.getNbMois());
                         sb.append(" - ").append(period.getLibelle());
-                        getCalendarEvents().add(new CalendarEvent(obligation, firstDateRappel, sb.toString(), ICON_ALERT));
+                        getCalendarEvents().add(new CalendarEvent(obligation, true, firstDateRappel, sb.toString(), ICON_ALERT));
 
                         // Gestion des alertes pour les rappels de cette obligation
                         final List<RappelObligationReglementaire> rappels = rorr.getByObligation(obligation);
@@ -180,7 +182,7 @@ public final class ObligationsCalendarView extends CalendarView {
                                     // Génère des alertes pour les rappels sur les 10 ans à venir
                                     while (candidDate.getYear() - firstDateRappel.getYear() < 10) {
                                         if (candidDate.getYear() != firstDateRappel.getYear()) {
-                                            getCalendarEvents().add(new CalendarEvent(rappel, candidDate, sb.toString(), ICON_ALERT));
+                                            getCalendarEvents().add(new CalendarEvent(rappel, true, candidDate, sb.toString(), ICON_ALERT));
                                         }
                                         candidDate = candidDate.plusMonths(freq.getNbMois());
                                     }
