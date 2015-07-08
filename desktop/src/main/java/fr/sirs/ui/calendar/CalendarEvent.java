@@ -1,7 +1,6 @@
 package fr.sirs.ui.calendar;
 
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Identifiable;
 import javafx.scene.image.Image;
 import java.time.LocalDate;
 
@@ -11,21 +10,38 @@ import java.time.LocalDate;
  * @author Cédric Briançon (Geomatys)
  */
 public class CalendarEvent {
+    /**
+     * Parent element responsible for this event.
+     */
     private final Element parent;
+
+    /**
+     * Event date.
+     */
     private final LocalDate date;
+
+    /**
+     * Event title.
+     */
     private final String title;
-    private final String type;
+
+    /**
+     * Event image, might be {@code null}.
+     */
     private final Image image;
 
-    public CalendarEvent(final Element parent, final LocalDate date, final String title, final String type) {
-        this(parent, date, title, type, null);
-    }
-
-    public CalendarEvent(final Element parent, final LocalDate date, final String title, final String type, final Image image) {
+    /**
+     * Generates the calendar event.
+     *
+     * @param parent The source element responsible for this event.
+     * @param date The specific date of this event.
+     * @param title Title to display for this event.
+     * @param image Icon to display for this event, might be {@code null}.
+     */
+    public CalendarEvent(final Element parent, final LocalDate date, final String title, final Image image) {
         this.parent = parent;
         this.date = date;
         this.title = title;
-        this.type = type;
         this.image = image;
     }
 
@@ -41,10 +57,6 @@ public class CalendarEvent {
         return title;
     }
 
-    public String getType() {
-        return type;
-    }
-
     public Image getImage() {
         return image;
     }
@@ -57,7 +69,6 @@ public class CalendarEvent {
         CalendarEvent that = (CalendarEvent) o;
 
         if (!title.equals(that.title)) return false;
-        if (!type.equals(that.type)) return false;
 
         return true;
     }
@@ -65,7 +76,7 @@ public class CalendarEvent {
     @Override
     public int hashCode() {
         int result = title.hashCode();
-        result = 31 * result + type.hashCode();
+        result = 31 * result + date.hashCode();
         return result;
     }
 
@@ -74,7 +85,6 @@ public class CalendarEvent {
         return "CalendarEvent{" +
                 "date=" + date +
                 ", title='" + title + '\'' +
-                ", type='" + type + '\'' +
                 '}';
     }
 }

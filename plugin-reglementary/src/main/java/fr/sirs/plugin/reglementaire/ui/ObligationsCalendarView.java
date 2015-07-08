@@ -2,8 +2,14 @@ package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.component.RappelObligationReglementaireRepository;
+import fr.sirs.core.component.RefEcheanceRappelObligationReglementaireRepository;
+import fr.sirs.core.component.RefFrequenceObligationReglementaireRepository;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.RappelObligationReglementaire;
+import fr.sirs.core.model.RefEcheanceRappelObligationReglementaire;
+import fr.sirs.core.model.RefFrequenceObligationReglementaire;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
 import fr.sirs.plugin.reglementaire.DocumentsTheme;
 import fr.sirs.ui.calendar.CalendarEvent;
@@ -22,6 +28,7 @@ import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Vue calendrier présentant les évènements construits à partir des obligations réglementaires.
@@ -30,6 +37,8 @@ import java.time.LocalDate;
  */
 public final class ObligationsCalendarView extends CalendarView {
     private static final Image ICON_DOC = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_FILE, 16,
+            FontAwesomeIcons.DEFAULT_COLOR), null);
+    private static final Image ICON_ALERT = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_BELL, 16,
             FontAwesomeIcons.DEFAULT_COLOR), null);
     private static final Image ICON_WORK = new Image(DocumentsTheme.class.getResourceAsStream("images/roadworks.png"));
 
@@ -121,6 +130,10 @@ public final class ObligationsCalendarView extends CalendarView {
 
         final ObservableList<ObligationReglementaire> obligations = obligationsProperty.get();
         if (obligations != null && !obligations.isEmpty()) {
+            final RappelObligationReglementaireRepository rorr = Injector.getBean(RappelObligationReglementaireRepository.class);
+            final RefEcheanceRappelObligationReglementaireRepository rerorr = Injector.getBean(RefEcheanceRappelObligationReglementaireRepository.class);
+            final RefFrequenceObligationReglementaireRepository rforr = Injector.getBean(RefFrequenceObligationReglementaireRepository.class);
+
             for (final ObligationReglementaire obligation : obligations) {
                 final LocalDate eventDate = obligation.getDateRealisation() != null ? obligation.getDateRealisation() :
                         obligation.getDateEcheance();
@@ -147,7 +160,32 @@ public final class ObligationsCalendarView extends CalendarView {
                             sb.append(previewSE.getLibelle());
                         }
                     }
-                    getCalendarEvents().add(new CalendarEvent(obligation, eventDate, sb.toString(), obligation.getTypeId(), image));
+                    getCalendarEvents().add(new CalendarEvent(obligation, eventDate, sb.toString(), image));
+
+                    // Si l'obligation a une date de rappel d'échéance de configurée, on ajoute une alerte à cette date
+                    if (obligation.getEcheanceId() != null) {
+                        LocalDate firstDateRappel = LocalDate.from(eventDate);
+                        final RefEcheanceRappelObligationReglementaire period = rerorr.get(obligation.getEcheanceId());
+                        firstDateRappel = firstDateRappel.minusMonths(period.getNbMois());
+                        sb.append(" - ").append(period.getLibelle());
+                        getCalendarEvents().add(new CalendarEvent(obligation, firstDateRappel, sb.toString(), ICON_ALERT));
+
+                        // Gestion des alertes pour les rappels de cette obligation
+                        final List<RappelObligationReglementaire> rappels = rorr.getByObligation(obligation);
+                        if (rappels != null && !rappels.isEmpty()) {
+                            for (final RappelObligationReglementaire rappel : rappels) {
+                                LocalDate candidDate = LocalDate.from(firstDateRappel);
+                                final RefFrequenceObligationReglementaire freq = rforr.get(rappel.getFrequenceId());
+                                // Génère des alertes pour les rappels sur les 10 ans à venir
+                                while (candidDate.getYear() - firstDateRappel.getYear() < 10) {
+                                    if (candidDate.getYear() != firstDateRappel.getYear()) {
+                                        getCalendarEvents().add(new CalendarEvent(rappel, candidDate, sb.toString(), ICON_ALERT));
+                                    }
+                                    candidDate = candidDate.plusMonths(freq.getNbMois());
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
