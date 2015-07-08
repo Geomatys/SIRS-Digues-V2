@@ -80,13 +80,15 @@ public final class ObligationsCalendarEventStage extends Stage {
         buttonReport.setOnMouseClicked(event -> switchToDateStage(calendarEvent));
         mainBox.getChildren().add(buttonReport);
 
-        final Button buttonAlert = new Button();
-        buttonAlert.setText("Gérer l'alerte");
-        buttonAlert.setAlignment(Pos.CENTER_LEFT);
-        buttonAlert.setGraphic(new ImageView(ICON_ALERT));
-        buttonAlert.setMaxWidth(Double.MAX_VALUE);
-        buttonAlert.getStyleClass().add(CSS_CALENDAR_EVENT_POPUP_BUTTON);
-        mainBox.getChildren().add(buttonAlert);
+        if (!calendarEvent.isAlert()) {
+            final Button buttonAlert = new Button();
+            buttonAlert.setText("Gérer l'alerte");
+            buttonAlert.setAlignment(Pos.CENTER_LEFT);
+            buttonAlert.setGraphic(new ImageView(ICON_ALERT));
+            buttonAlert.setMaxWidth(Double.MAX_VALUE);
+            buttonAlert.getStyleClass().add(CSS_CALENDAR_EVENT_POPUP_BUTTON);
+            mainBox.getChildren().add(buttonAlert);
+        }
 
         final Scene scene = new Scene(mainBox, 250, 100);
         scene.getStylesheets().add("/fr/sirs/plugin/reglementaire/ui/popup-calendar.css");

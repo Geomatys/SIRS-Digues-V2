@@ -181,7 +181,7 @@ public final class ObligationsCalendarView extends CalendarView {
                                     final RefFrequenceObligationReglementaire freq = rforr.get(rappel.getFrequenceId());
                                     // Génère des alertes pour les rappels sur les 10 ans à venir
                                     while (candidDate.getYear() - firstDateRappel.getYear() < 10) {
-                                        if (candidDate.getYear() != firstDateRappel.getYear()) {
+                                        if (candidDate.compareTo(firstDateRappel) != 0) {
                                             getCalendarEvents().add(new CalendarEvent(rappel, true, candidDate, sb.toString(), ICON_ALERT));
                                         }
                                         candidDate = candidDate.plusMonths(freq.getNbMois());
