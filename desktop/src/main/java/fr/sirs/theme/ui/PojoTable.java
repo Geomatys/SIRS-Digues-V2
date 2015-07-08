@@ -885,7 +885,14 @@ public class PojoTable extends BorderPane {
 
         tableUpdater = new TaskManager.MockTask("Recherche...", (Runnable)() -> {
 
-            allValues = producer.get();
+            try{
+                allValues = producer.get();
+            }catch(Throwable ex){
+                allValues = FXCollections.observableArrayList();
+                filteredValues = allValues.filtered((Element t) -> true);
+                decoratedValues = filteredValues;
+                throw ex;
+            }
             if(allValues==null){
                 allValues = FXCollections.observableArrayList();
             }
@@ -968,6 +975,10 @@ public class PojoTable extends BorderPane {
                         uiSearch.setGraphic(searchNone);
                     });
                 } else if (Worker.State.FAILED.equals(newValue) || Worker.State.CANCELLED.equals(newValue)) {
+                    final Throwable ex = tableUpdater.getException();
+                    if(ex!=null){
+                        SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                    }
                     Platform.runLater(() -> {
                         uiSearch.setGraphic(searchNone);
                     });

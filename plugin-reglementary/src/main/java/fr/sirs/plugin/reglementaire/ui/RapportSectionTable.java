@@ -37,7 +37,7 @@ public class RapportSectionTable extends PojoTable {
     @Override
     protected Element createPojo() {
         final RapportSectionObligationReglementaire section = (RapportSectionObligationReglementaire) super.createPojo();
-        section.setPhotoChoice(PhotoChoice.AUCNE);
+        section.setPhotoChoice(PhotoChoice.AUCUNE);
         section.setType(SectionType.FICHE);
         return section;
     }

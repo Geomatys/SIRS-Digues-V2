@@ -14,17 +14,23 @@ import static fr.sirs.SIRS.LONGITUDE_MIN_FIELD;
 import static fr.sirs.SIRS.VALID_FIELD;
 import fr.sirs.Session;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.component.Previews;
+import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
+import fr.sirs.core.component.TemplateObligationReglementaireRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetPhotographiable;
 import fr.sirs.core.model.ObligationReglementaire;
+import fr.sirs.core.model.Photo;
+import fr.sirs.core.model.PhotoChoice;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RapportModeleObligationReglementaire;
@@ -33,21 +39,28 @@ import fr.sirs.core.model.RefTypeObligationReglementaire;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.SectionType;
 import fr.sirs.core.model.SystemeEndiguement;
+import fr.sirs.core.model.TemplateObligationReglementaire;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugin.reglementaire.ODTUtils;
 import fr.sirs.theme.ColumnOrder;
 import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
+import freemarker.template.TemplateModel;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.net.URL;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -88,7 +101,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
+import net.sf.jooreports.templates.DocumentTemplate;
+import net.sf.jooreports.templates.DocumentTemplateFactory;
 import org.apache.sis.measure.NumberRange;
+import org.apache.sis.storage.DataStoreException;
 import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureIterator;
@@ -136,6 +152,7 @@ public class RapportsPane extends BorderPane implements Initializable {
 
     private PojoTable uiTable;
     private final BooleanProperty running = new SimpleBooleanProperty(false);
+    private Session session;
 
     public RapportsPane() {
         SIRS.loadFXML(this, RapportsPane.class);
@@ -144,7 +161,7 @@ public class RapportsPane extends BorderPane implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        final Session session = Injector.getSession();
+        session = Injector.getSession();
         final Previews previewRepository = session.getPreviews();
 
         uiTable = new RapportsTable();
@@ -202,7 +219,6 @@ public class RapportsPane extends BorderPane implements Initializable {
         if(newValue==null){
             uiTroncons.setItems(FXCollections.emptyObservableList());
         }else{
-            final Session session = Injector.getSession();
             final SystemeEndiguementRepository sdRepo = (SystemeEndiguementRepository) session.getRepositoryForClass(SystemeEndiguement.class);
             final DigueRepository digueRepo = (DigueRepository) session.getRepositoryForClass(Digue.class);
             final TronconDigueRepository tronconRepo = (TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class);
@@ -246,8 +262,6 @@ public class RapportsPane extends BorderPane implements Initializable {
             public void run() {
 
                 try{
-                    final Session session = Injector.getSession();
-
                     final long dateDebut = uiPeriodeDebut.getValue().atTime(0,0,0).toInstant(ZoneOffset.UTC).toEpochMilli();
                     final long dateFin = uiPeriodeFin.getValue().atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
                     final NumberRange dateRange = NumberRange.create(dateDebut, true, dateFin, true);
@@ -311,16 +325,16 @@ public class RapportsPane extends BorderPane implements Initializable {
                             if(SectionType.TABLE.equals(section.getType())){
                                 parts.addAll(generateTable(section, elements, folder, inc));
                             }else if(SectionType.FICHE.equals(section.getType())){
-
+                                parts.addAll(generateFiches(section, elements, folder, inc));
                             }
                         }
 
                         // on aggrege le tout
                         Platform.runLater(()->uiProgressLabel.setText("Aggrégation des sections"));
-                        ODTUtils.concatenateFiles(file, parts.toArray(new File[0]));
+                        ODTUtils.concatenateFiles(file, parts.toArray());
                     }catch(Exception ex){
                         SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-                        GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du rapport.", ex).show();
+                        Platform.runLater(()->GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du rapport.", ex).show());
                         return;
                     }finally{
                         FileUtilities.deleteDirectory(folder);
@@ -366,32 +380,9 @@ public class RapportsPane extends BorderPane implements Initializable {
 //        final MasterPage masterPage = ODTUtils.createMasterPage(doc, false, 5);
 //        doc.addPageBreak(para, masterPage);
 
-        final File docFile = new File(tempFolder, inc.incrementAndGet()+".odt");
 
-        final String titre = section.getLibelle();
-        final String requeteId = section.getRequeteId();
-
-        //creation de la requete
-        final Session session = Injector.getSession();
-        final SQLQuery sqlQuery = session.getSqlQueryRepository().get(requeteId);
-        final Query fsquery = org.geotoolkit.data.query.QueryBuilder.language(
-                JDBCFeatureStore.CUSTOM_SQL, sqlQuery.getSql(), NamesExt.create("requete"));
-
-        //recupération de la base H2
-        final FeatureStore h2Store = (H2FeatureStore) H2Helper.getStore(session.getConnector());
-        final FeatureCollection col = h2Store.createSession(false).getFeatureCollection(fsquery);
-        final String firstProperty = col.getFeatureType().getDescriptors().iterator().next().getName().tip().toString();
-
-        //on filtre les elements
-        final List<Element> validElements = new ArrayList<>();
-        try (FeatureIterator iterator = col.iterator()) {
-            while(iterator.hasNext()){
-                final Feature feature = iterator.next();
-                final Object val = feature.getPropertyValue(firstProperty);
-                final Objet ele = elements.get(val);
-                if(ele!=null) validElements.add(ele);
-            }
-        }
+        //on recupere les elements qui correspondent a la requete
+        final List<Element> validElements = listValidElements(section, elements);
         if(validElements.isEmpty()){
             return Collections.EMPTY_LIST;
         }
@@ -428,8 +419,8 @@ public class RapportsPane extends BorderPane implements Initializable {
             SIRS.LOGGER.log(Level.WARNING, "property columns cannot be created.", ex);
         }
 
-
         //titre
+        final String titre = section.getLibelle();
         final Paragraph paragraph = doc.addParagraph(titre);
         paragraph.setFont(new Font("Serial", StyleTypeDefinitions.FontStyle.BOLD, 16));
 
@@ -463,15 +454,115 @@ public class RapportsPane extends BorderPane implements Initializable {
             }
         }
 
-        doc.save(docFile);
         return Collections.singletonList(doc);
     }
 
 
-    private List<TextDocument> generateFiches(RapportSectionObligationReglementaire section,
+    private List generateFiches(RapportSectionObligationReglementaire section,
             Map<String,Objet> elements, File tempFolder, AtomicInteger inc) throws Exception{
-        
-        return Collections.emptyList();
+
+        final PhotoChoice photoChoice = section.getPhotoChoice();
+
+        final List parts = new ArrayList();
+
+        //titre
+        final TextDocument doc = TextDocument.newTextDocument();
+        final String titre = section.getLibelle();
+        final Paragraph paragraph = doc.addParagraph(titre);
+        paragraph.setFont(new Font("Serial", StyleTypeDefinitions.FontStyle.BOLD, 16));
+        parts.add(doc);
+
+        //on recupere le template
+        final String templateId = section.getTemplateId();
+        if(templateId==null || templateId.isEmpty()){
+            throw new Exception("Template manque pour la section : "+section.getLibelle());
+        }
+        final TemplateObligationReglementaireRepository repo = (TemplateObligationReglementaireRepository)session.getRepositoryForClass(TemplateObligationReglementaire.class);
+        final TemplateObligationReglementaire template = repo.get(templateId);
+        if(template==null){
+            throw new Exception("Template manquant pour l'identifiant : "+templateId);
+        }
+        final DocumentTemplateFactory documentTemplateFactory = new DocumentTemplateFactory();
+        final DocumentTemplate templateDoc = documentTemplateFactory.getTemplate(new ByteArrayInputStream(template.getOdt()));
+
+
+        //on recupere les elements qui correspondent a la requete
+        final List<Element> validElements = listValidElements(section, elements);
+        if(validElements.isEmpty()){
+            return Collections.EMPTY_LIST;
+        }
+
+        //on genere une fiche pour chaque objet
+        for(Element ele : validElements){
+            final File f = new File(tempFolder, section.getLibelle()+"_"+inc.incrementAndGet()+".odt");
+            ODTUtils.generateReport(templateDoc, ele, f);
+
+            parts.add(f);
+
+            if(ele instanceof ObjetPhotographiable){
+                final ObjetPhotographiable photographiable = (ObjetPhotographiable) ele;
+                final List<Photo> photos = photographiable.getPhotos();
+                if(!photos.isEmpty()){
+                    if(PhotoChoice.DERNIERE.equals(photoChoice)){
+                        Photo last = null;
+                        for(Photo p : photos){
+                            final String str = p.getChemin();
+                            if(str!=null && !str.isEmpty()){
+                                if(last==null || last.getDate()==null || (p.getDate()!=null && last.getDate().isBefore(p.getDate()))){
+                                    last = p;
+                                }
+                            }
+                        }
+                        if(last!=null){
+                            parts.add(new File(PrinterUtilities.imageUriFromText(last.getChemin())));
+                        }
+                    }else if(PhotoChoice.TOUTE.equals(photoChoice)){
+                        for(Photo p : photos){
+                            final String str = p.getChemin();
+                            if(str!=null && !str.isEmpty()){
+                                parts.add(new File(PrinterUtilities.imageUriFromText(str)));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return parts;
+    }
+
+    private List<Element> listValidElements(RapportSectionObligationReglementaire section, Map<String,Objet> elements) throws SQLException, DataStoreException{
+        final List<Element> validElements = new ArrayList<>();
+        final String requeteId = section.getRequeteId();
+
+        if(requeteId==null || requeteId.isEmpty()){
+            //pas de filtre
+            validElements.addAll(elements.values());
+            return validElements;
+        }
+
+        //creation de la requete
+        final SQLQueryRepository queryRepo = (SQLQueryRepository)Injector.getSession().getRepositoryForClass(SQLQuery.class);
+        final SQLQuery sqlQuery = queryRepo.get(requeteId);
+        final Query fsquery = org.geotoolkit.data.query.QueryBuilder.language(
+                JDBCFeatureStore.CUSTOM_SQL, sqlQuery.getSql(), NamesExt.create("requete"));
+
+        //recupération de la base H2
+        final FeatureStore h2Store = (H2FeatureStore) H2Helper.getStore(session.getConnector());
+        final FeatureCollection col = h2Store.createSession(false).getFeatureCollection(fsquery);
+        final String firstProperty = col.getFeatureType().getDescriptors().iterator().next().getName().tip().toString();
+
+        //on filtre les elements
+        try (FeatureIterator iterator = col.iterator()) {
+            while(iterator.hasNext()){
+                final Feature feature = iterator.next();
+                final Object val = feature.getPropertyValue(firstProperty);
+                final Objet ele = elements.get(val);
+                if(ele!=null) validElements.add(ele);
+            }
+        }
+
+        return validElements;
     }
 
     private static interface Printer{

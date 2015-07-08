@@ -11,9 +11,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fr.sirs.core.component.SessionGen;
 import fr.sirs.core.component.ReferenceUsageRepository;
-import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AvecForeignParent;

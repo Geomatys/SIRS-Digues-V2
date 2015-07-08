@@ -13,7 +13,7 @@ import javafx.scene.layout.BorderPane;
  */
 public final class TemplatesTheme extends AbstractPluginsButtonTheme {
     private static final Image BUTTON_IMAGE = new Image(
-            TemplatesTheme.class.getResourceAsStream("images/gen_etats.png"));
+            TemplatesTheme.class.getResourceAsStream("images/template.png"));
 
     public TemplatesTheme() {
         super("Documents de mise en forme", "Documents de mise en forme", BUTTON_IMAGE);

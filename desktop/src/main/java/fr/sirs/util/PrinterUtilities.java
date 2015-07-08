@@ -322,6 +322,16 @@ JasperViewer.viewReport(jp1,false);
      * @throws Exception 
      */
     public static InputStream streamFromText(String inputText) throws Exception {
+        final URI resultURI = imageUriFromText(inputText);
+        try {
+            return new FileInputStream(new File(resultURI));
+        } catch(Exception e){
+            SIRS.LOGGER.log(Level.INFO, "No image found at URI "+resultURI);
+            return FXFileTextField.class.getResourceAsStream("/fr/sirs/images/imgNotFound.png");
+        } 
+    }
+
+    public static URI imageUriFromText(String inputText) throws Exception {
         final String rootPath = SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT);
         final URI resultURI;
         if (rootPath == null) {
@@ -329,13 +339,8 @@ JasperViewer.viewReport(jp1,false);
         } else {
             resultURI = SIRS.getDocumentAbsolutePath(inputText == null? "" : inputText).toUri();
         }
-        
-        try {
-            return new FileInputStream(new File(resultURI));
-        } catch(Exception e){
-            SIRS.LOGGER.log(Level.INFO, "No image found at URI "+resultURI);
-            return FXFileTextField.class.getResourceAsStream("/fr/sirs/images/imgNotFound.png");
-        } 
+
+        return resultURI;
     }
     
     ////////////////////////////////////////////////////////////////////////////

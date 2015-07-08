@@ -4,6 +4,7 @@ package fr.sirs.plugin.reglementaire.ui;
 import fr.sirs.Injector;
 import fr.sirs.core.model.TemplateObligationReglementaire;
 import fr.sirs.theme.ui.PojoTable;
+import javafx.collections.FXCollections;
 import javafx.scene.control.TableColumn;
 
 /**
@@ -14,6 +15,7 @@ public class TemplatesTable extends PojoTable {
 
     public TemplatesTable() {
         super(Injector.getSession().getRepositoryForClass(TemplateObligationReglementaire.class), "Modèles de mise en forme");
+        setTableItems(() -> FXCollections.observableList(repo.getAll()));
         editableProperty().set(true);
         detaillableProperty().set(true);
         fichableProperty().set(false);

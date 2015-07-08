@@ -5,6 +5,7 @@ import fr.sirs.Injector;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.RapportModeleObligationReglementaire;
 import fr.sirs.theme.ui.PojoTable;
+import javafx.collections.FXCollections;
 import javafx.scene.control.TableColumn;
 
 /**
@@ -15,6 +16,7 @@ public class RapportsTable extends PojoTable {
 
     public RapportsTable() {
         super(Injector.getSession().getRepositoryForClass(RapportModeleObligationReglementaire.class), "Modèles de document préenregistrés");
+        setTableItems(() -> FXCollections.observableList(repo.getAll()));
         editableProperty().set(true);
         detaillableProperty().set(true);
         fichableProperty().set(false);

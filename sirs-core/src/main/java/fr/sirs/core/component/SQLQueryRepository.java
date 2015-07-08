@@ -16,10 +16,10 @@ import org.springframework.stereotype.Component;
  * 
  * @author Alexis Manin (Geomatys)
  */
-@Component
+@Component("fr.sirs.core.component.SQLQueryRepository")
 @Views({
         @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.SQLQuery') {emit(doc._id, doc._id)}}"),
-        @View(name = "byName", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.SQLQuery') {emit(doc.name, doc._id)}}") })
+        @View(name = "byLibelle", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.SQLQuery') {emit(doc.libelle, doc._id)}}") })
 public class SQLQueryRepository  extends AbstractSIRSRepository<SQLQuery>{
 
     @Autowired
@@ -38,7 +38,7 @@ public class SQLQueryRepository  extends AbstractSIRSRepository<SQLQuery>{
         return new SQLQuery();
     }
 
-    public List<SQLQuery> getByName(final String name) {
-        return this.queryView("byName", name);
+    public List<SQLQuery> getByLibelle(final String name) {
+        return this.queryView("byLibelle", name);
     }
 }
