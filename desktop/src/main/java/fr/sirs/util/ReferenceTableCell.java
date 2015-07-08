@@ -60,9 +60,16 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
             commitEdit(((Preview)newValue).getElementId());
         } else if (newValue instanceof Identifiable) {
             commitEdit(((Identifiable)newValue).getId());
+        } else {
+            cancelEdit();
         }
     }
 
+    @Override
+    public void cancelEdit() {
+        super.cancelEdit();
+        updateItem(getItem(), false);
+    }
 
     @Override
     public void startEdit() {
