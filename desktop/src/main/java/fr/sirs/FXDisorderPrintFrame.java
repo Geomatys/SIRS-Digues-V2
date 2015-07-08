@@ -18,7 +18,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -26,6 +25,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -60,6 +60,8 @@ public class FXDisorderPrintFrame extends BorderPane {
         Injector.getSession().getTaskManager().submit("Génération de fiches détaillées de désordres",
         new Thread(() -> {
             
+            final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll();
+            
             final List<String> tronconIds = new ArrayList<>();
             for(final Element element : tronconsTable.getSelectedItems()){
                 tronconIds.add(element.getId());
@@ -68,31 +70,66 @@ public class FXDisorderPrintFrame extends BorderPane {
             for(final Element element : disordreTypesTable.getSelectedItems()){
                 typeDesordresIds.add(element.getId());
             }
-            final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll();
-            
-            // On retire les désordred de la liste dans les cas suivants :
+                        
+            // On retire les désordres de la liste dans les cas suivants :
             desordres.removeIf(
                     (Desordre desordre) -> {
                         
-                        System.out.println(desordre);
-                        System.out.println(desordre.getForeignParentId());
-                        System.out.println(prsByTronconId.keySet().size());
-                        System.out.println(prsByTronconId.get(desordre.getForeignParentId()));
-                        System.out.println(prsByTronconId.get(desordre.getForeignParentId())[0]);
-                        System.out.println(prsByTronconId.get(desordre.getForeignParentId())[1]);
-                        System.out.println(prsByTronconId.get(desordre.getForeignParentId())[0].get());
-                        System.out.println(prsByTronconId.get(desordre.getForeignParentId())[1].get());
-                        
-                            final boolean remove = !tronconIds.contains(desordre.getForeignParentId()) // Si le tronçon ne figure pas parmi les tronçons sélectionnés.
-                            || !typeDesordresIds.contains(desordre.getTypeDesordreId()) // Si le type de figure pas parmi les types de désordres sélectionnés.
-                            || (desordre.getPrFin() < prsByTronconId.get(desordre.getForeignParentId())[0].get().floatValue()) // Si le désordre s'achève avant le début de la zone du tronçon que l'on souhaite.
-                            || (desordre.getPrDebut() > prsByTronconId.get(desordre.getForeignParentId())[1].get().floatValue()); // Si le désordre débute après la fin de la zone du tronçon que l'on souhaite.
-                    
+                        if(desordre.getForeignParentId()!=null){
+                            final String linearId = desordre.getForeignParentId();
                             
-                        if(!remove)System.out.println(desordre);
-                            return remove;
-                    } 
-            );
+                            /*
+                            Sous-condition de retrait 1 : si le désordre est 
+                            associé à un tronçon qui n'est pas sélectionné dans 
+                            la liste.
+                            */
+                            final boolean linearSelected = !tronconIds.contains(linearId);
+                            
+                            /*
+                            Sous-condition de retrait 2 : si le désordre est 
+                            d'un type qui n'est pas sélectionné dans la liste. 
+                            */
+                            final boolean typeSelected;
+                                    // Si on n'a sélectionné aucun désordre, on laisse passer a priori quel que soit le type de désordre.
+                                    if (typeDesordresIds.isEmpty()) typeSelected = false;
+                                    // Si la liste de sélection des types de désordres n'est pas vide on vérifie de type de désordre
+                                    else typeSelected = (desordre.getTypeDesordreId()==null 
+                                            || !typeDesordresIds.contains(desordre.getTypeDesordreId()));
+                                    
+                            /* 
+                            Sous-condition de retrait 3 : si le désordre a des PRs de 
+                            début et de fin et si le tronçon a des PRs de début et 
+                            de fin (i.e. s'il a un SR par défaut qui a permi de les 
+                            calculer), alors on vérifie :
+                            */
+                            final boolean prOutOfRange;
+                            if(desordre.getPrDebut()!=Float.NaN 
+                                    && desordre.getPrFin()!=Float.NaN
+                                    && prsByTronconId.get(linearId)!=null
+                                    && prsByTronconId.get(linearId)!=null
+                                    && prsByTronconId.get(linearId)[0]!=null
+                                    && prsByTronconId.get(linearId)[1]!=null
+                                    && prsByTronconId.get(linearId)[0].get()!=null
+                                    && prsByTronconId.get(linearId)[1].get()!=null){
+                                final float prInf, prSup;
+                                if(desordre.getPrDebut() < desordre.getPrFin()) {
+                                    prInf=desordre.getPrDebut();
+                                    prSup=desordre.getPrFin();
+                                } else {
+                                    prInf=desordre.getPrFin();
+                                    prSup=desordre.getPrDebut();
+                                }
+                                prOutOfRange = (prInf < prsByTronconId.get(linearId)[0].get().floatValue()) // Si le désordre s'achève avant le début de la zone du tronçon que l'on souhaite.
+                                || (prSup > prsByTronconId.get(linearId)[1].get().floatValue()); // Si le désordre débute après la fin de la zone du tronçon que l'on souhaite.
+                            } 
+                            else prOutOfRange=false;
+
+                            return linearSelected // Si le tronçon ne figure pas parmi les tronçons sélectionnés.
+                                    || typeSelected // Si le type du désordre
+                                    || prOutOfRange;
+                        } 
+                        else return false;
+                    });
             
             try {
                 Injector.getSession().getPrintManager().printDesordres(desordres);
@@ -109,11 +146,18 @@ public class FXDisorderPrintFrame extends BorderPane {
             super(TronconDigue.class, "Tronçons");
             getColumns().remove(editCol);
             editableProperty.set(false);
-            getColumns().add(new SelectPRColumn("PR début", true));
-            getColumns().add(new SelectPRColumn("PR fin", false));
-//            TableView table = getTable();
-//            ObservableList selectedIndices = table.getSelectionModel().getSelectedIndices();
-//            table.getColumns().get(0).
+            TableView table = getTable();
+            table.editableProperty().unbind();
+            table.setEditable(true);
+            for(final Object o : table.getColumns()){
+                if(o instanceof TableColumn){
+                    final TableColumn c = (TableColumn)o;
+                    c.editableProperty().unbind();
+                    c.setEditable(false);
+                }
+            }
+            getColumns().add(new SelectPRColumn("PR début", ExtremiteTroncon.DEBUT));
+            getColumns().add(new SelectPRColumn("PR fin", ExtremiteTroncon.FIN));
         }
     }
     
@@ -126,27 +170,23 @@ public class FXDisorderPrintFrame extends BorderPane {
         }
     }
     
+    private enum ExtremiteTroncon {DEBUT, FIN}
+    
     private class SelectPRColumn extends TableColumn {
         
         
-        
-        
-        public SelectPRColumn(final String text, final boolean begin){
+        public SelectPRColumn(final String text, final ExtremiteTroncon extremite){
             super(text);
             
-//            prProperty.addListener(new ChangeListener<Number>() {
-//
-//                @Override
-//                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-//                    System.out.println("nouvelle valeur de pr : "+newValue);
-//                }
-//            });
+            setEditable(true);
             
             setCellFactory(new Callback<TableColumn<TronconDigue, Number>, TableCell<TronconDigue, Number>>() {
 
                 @Override
                 public TableCell<TronconDigue, Number> call(TableColumn<TronconDigue, Number> param) {
-                    return new FXNumberCell(Float.class);
+                    TableCell<TronconDigue, Number> tableCell = new FXNumberCell(Float.class);
+                    tableCell.setEditable(true);
+                    return tableCell;
                 }
             });
             setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TronconDigue, Number>, ObservableValue<Number>>() {
@@ -157,8 +197,10 @@ public class FXDisorderPrintFrame extends BorderPane {
                     
                     if(param!=null && param.getValue()!=null){
                         final TronconDigue troncon = param.getValue();
-                        if(troncon.getSystemeRepDefautId()!=null && troncon.getGeometry()!=null){
-                            final int index = begin ? 0 : 1;
+                        if(troncon.getSystemeRepDefautId()!=null 
+                                && troncon.getGeometry()!=null 
+                                && troncon.getId()!=null){
+                            final int index = extremite==ExtremiteTroncon.FIN ? 1:0; // Si on est à la fin du tronçon le pr se trouve à l'index 1 du tableau, sinon, par défaut on se place au début et on met l'index à 0
                             final ObjectProperty<Number> prProperty;
                             if(prsByTronconId.get(troncon.getId())==null) prsByTronconId.put(troncon.getId(), new ObjectProperty[2]);
                             if(prsByTronconId.get(troncon.getId())[index]==null){
@@ -167,10 +209,15 @@ public class FXDisorderPrintFrame extends BorderPane {
                                 final LinearReferencing.SegmentInfo[] tronconSegments = LinearReferencingUtilities.buildSegments(LinearReferencing.asLineString(troncon.getGeometry()));
 
                                 final Point point;
-                                if(begin) point = GO2Utilities.JTS_FACTORY.createPoint(tronconSegments[0].getPoint(0, 0));
-                                else{
-                                    final LinearReferencing.SegmentInfo lastSegment = tronconSegments[tronconSegments.length-1];
-                                    point = GO2Utilities.JTS_FACTORY.createPoint(lastSegment.getPoint(lastSegment.length, 0));
+                                switch(extremite){
+                                    case FIN: 
+                                        final LinearReferencing.SegmentInfo lastSegment = tronconSegments[tronconSegments.length-1];
+                                        point = GO2Utilities.JTS_FACTORY.createPoint(lastSegment.getPoint(lastSegment.length, 0));
+                                        break;
+                                    case DEBUT:
+                                    default:
+                                        point = GO2Utilities.JTS_FACTORY.createPoint(tronconSegments[0].getPoint(0, 0));
+                                        break;
                                 }
                                 prProperty.set(TronconUtils.computePR(tronconSegments, sr, point, Injector.getSession().getRepositoryForClass(BorneDigue.class)));
                                 prsByTronconId.get(troncon.getId())[index] = prProperty;
@@ -185,42 +232,4 @@ public class FXDisorderPrintFrame extends BorderPane {
             });
         }
     }
-    
-    
-    
-//    
-//    public static class SelectColumn extends TableColumn {
-//        
-//        
-//        private ObservableList selected;
-//
-//        public SelectColumn() {
-//            super("Sélection");
-//            setSortable(false);
-//            setResizable(false);
-//            setPrefWidth(24);
-//            setMinWidth(24);
-//            setMaxWidth(24);
-//            setGraphic(new ImageView(SIRS.ICON_EDIT_BLACK));
-//
-//            setCellValueFactory(new Callback<TableColumn.CellDataFeatures, ObservableValue>() {
-//
-//                @Override
-//                public ObservableValue call(TableColumn.CellDataFeatures param) {
-//                    return new SimpleObjectProperty<>(param.getValue());
-//                }
-//            });
-//
-//            setCellFactory(new Callback<TableColumn, TableCell>() {
-//
-//                @Override
-//                public TableCell call(TableColumn param) {
-//                    return new FXBooleanCell();
-//                }
-//            });
-//        }
-//    }
-    
-    
-    
 }
