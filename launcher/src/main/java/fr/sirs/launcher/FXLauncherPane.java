@@ -16,11 +16,13 @@ import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
+import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
+import fr.sirs.util.FXAuthenticationWalletEditor;
 import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.property.SirsPreferences;
 
@@ -118,6 +120,8 @@ public class FXLauncherPane extends BorderPane {
     private Tab uiCreateTab;
     @FXML
     private Tab uiImportTab;
+    @FXML
+    private Tab uiWalletTab;
 
     // onglet base locales
     @FXML
@@ -125,7 +129,7 @@ public class FXLauncherPane extends BorderPane {
     @FXML
     private Button uiConnectButton;
 
-    // onglet base distantes    
+    // onglet base distantes
     @FXML
     private TextField uiDistantName;
     @FXML
@@ -192,7 +196,7 @@ public class FXLauncherPane extends BorderPane {
     private PluginList distant = new PluginList();
 
     private final DatabaseRegistry localRegistry;
-    
+
     private final DatabaseNameFormatter dbNameFormat = new DatabaseNameFormatter();
 
     public FXLauncherPane() throws IOException {
@@ -292,6 +296,12 @@ public class FXLauncherPane extends BorderPane {
             LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
 
+        AuthenticationWallet wallet = AuthenticationWallet.getDefault();
+        if (wallet == null ) {
+            uiTabPane.getTabs().remove(uiWalletTab);
+        } else {
+            uiWalletTab.setContent(new FXAuthenticationWalletEditor(wallet));
+        }
     }
 
     private void restartApplicationNeeded() {
@@ -763,7 +773,7 @@ public class FXLauncherPane extends BorderPane {
                             final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
                                     ButtonType.NO, ButtonType.YES);
                             alert.setResizable(true);
-                            
+
                             if (ButtonType.YES == alert.showAndWait().get()) {
                                 try {
                                     deleteDatabase(toDelete);
@@ -902,7 +912,7 @@ public class FXLauncherPane extends BorderPane {
                             break;
                         }
                     }
-                    
+
                     // Disposition transitoire destinée à permettre l'effacement des bases pour une personne dont le mot de passe a précédemment été enregistré en binaire.
                     // Seulement en cas d'échec de l'indentification en hexadécimal
                     final String binaryEncryptedPassword = binaryMD5(password.getText());
@@ -930,10 +940,10 @@ public class FXLauncherPane extends BorderPane {
             }
         }
     }
-    
+
     /**
      * Rewrite text to replace or remove all unsupported characters in database name.
-     * Multiple steps : 
+     * Multiple steps :
      * - Replace all letters with accent by their equivalent without accent
      * - Replace all spacing characters with an underscore
      * - Remove all other non-standard characters

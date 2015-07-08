@@ -10,6 +10,7 @@ import fr.sirs.core.SirsCore;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,13 +20,16 @@ import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
+import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.internal.GeotkFX;
 
 /**
@@ -33,16 +37,16 @@ import org.geotoolkit.internal.GeotkFX;
  * @author Alexis Manin (Geomatys)
  */
 public class AuthenticationWallet {
-    
+
     private static AuthenticationWallet INSTANCE;
-    
+
     private final Path walletPath = SirsCore.CONFIGURATION_PATH.resolve("authWallet.json");
-        
+
     private final ObservableMap<String, Entry> wallet = FXCollections.observableMap(new HashMap<String, Entry>());
     private final ReentrantReadWriteLock walletLock = new ReentrantReadWriteLock();
-        
+
     private AuthenticationWallet() throws IOException {
-        
+
         boolean isEmpty = true;
         boolean createNewFile = true;
         if (Files.isRegularFile(walletPath)) {
@@ -53,7 +57,7 @@ public class AuthenticationWallet {
                 isEmpty = false;
             }
         }
-        
+
         if (createNewFile) {
             try (final InputStream resourceAsStream = AuthenticationWallet.class.getResourceAsStream("/fr/sirs/core/authentication/defaultWallet.json")) {
                 Files.copy(resourceAsStream, walletPath, StandardCopyOption.REPLACE_EXISTING);
@@ -65,7 +69,7 @@ public class AuthenticationWallet {
                     Files.createFile(walletPath);
             }
         }
-        
+
         // Read existing entries from configuration file.
         if (!isEmpty) {
             // Does not erase existing file if an error occurs, to allow password backup manually.
@@ -82,7 +86,7 @@ public class AuthenticationWallet {
                 }
             }
         }
-        
+
         /*
          * When cached wallet is modified, we update wallet on file system. We can
          * use only a read lock here, because file is only read at initialization.
@@ -98,7 +102,7 @@ public class AuthenticationWallet {
             }
         });
     }
-    
+
     public Entry get(final URL service) {
         walletLock.readLock().lock();
         try {
@@ -107,7 +111,7 @@ public class AuthenticationWallet {
             walletLock.readLock().unlock();
         }
     }
-    
+
     public Entry get(final String host, final int port) {
         walletLock.readLock().lock();
         try {
@@ -116,12 +120,12 @@ public class AuthenticationWallet {
             walletLock.readLock().unlock();
         }
     }
-    
+
     public Entry put(final Entry authenticationInfo) {
         // Check if it doesn't exist already, to avoid useless update.
         walletLock.writeLock().lock();
         try {
-            if (authenticationInfo == null) 
+            if (authenticationInfo == null)
                 return put(authenticationInfo);
             final String serviceId = toServiceId(authenticationInfo);
             final Entry existing = wallet.get(serviceId);
@@ -134,25 +138,45 @@ public class AuthenticationWallet {
             walletLock.writeLock().unlock();
         }
     }
-    
-    public void remove(final Entry entry) {
+
+    /**
+     * Return a view of wallet entries. The view is backed by the wallet, so every
+     * change on the wallet will be applied on returned list.
+     *
+     * IMPORTANT : To protect wallet from inconsiderate changes on the list, returned
+     * list is unmodifiable.
+     *
+     * @return A mirror of wallet values.
+     */
+    public ObservableList<Entry> values() {
+        walletLock.readLock().lock();
+        try {
+            final ObservableList follower = FXCollections.observableArrayList(wallet.values());
+            wallet.addListener(new FollowListener(wallet, follower));
+            return FXCollections.unmodifiableObservableList(follower);
+        } finally {
+            walletLock.readLock().unlock();
+        }
+    }
+
+    public boolean remove(final Entry entry) {
         walletLock.writeLock().lock();
         try {
-            wallet.remove(entry.host, entry);
+            return wallet.remove(toServiceId(entry), entry);
         } finally {
             walletLock.writeLock().unlock();
         }
     }
-    
-    public void removeForAddress(final URL service) {
+
+    public Entry removeForAddress(final URL service) {
         walletLock.writeLock().lock();
         try {
-            wallet.remove(toServiceId(service));
+            return wallet.remove(toServiceId(service));
         } finally {
             walletLock.writeLock().unlock();
         }
     }
-    
+
     /**
      *
      * @return Default registered password container, or null if an error occurred while initializing it.
@@ -173,42 +197,42 @@ public class AuthenticationWallet {
         }
         return INSTANCE;
     }
-    
+
     public static String toServiceId(final URL url) {
         int port = url.getPort();
         if (url.getPort() < 0)
             port = url.getDefaultPort(); // If even default port is -1, we let it as is, no need to return a wrong entry.
         return url.getHost()+":"+port;
     }
-    
+
     public static String toServiceId(final String host, final int port) {
         return host+":"+port;
     }
-    
+
     public static String toServiceId(final Entry entry) {
         return entry.host+":"+entry.port;
     }
-    
-    
+
+
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    public static class Entry {
+    public static class Entry implements Cloneable {
         public String host;
         public int port;
         public String login;
-        
+
         @JsonSerialize(using=PasswordSerializer.class)
         @JsonDeserialize(using=PasswordDeserializer.class)
         public String password;
-        
+
         public Entry(){};
-        
+
         public Entry(final String host, final int port, final String login, final String password) {
             this.host = host;
             this.port = port;
             this.login = login;
             this.password = password;
         }
-        
+
         public Entry(final URL service, final String login, final String password) {
             host = service.getHost();
             port = service.getPort();
@@ -216,6 +240,18 @@ public class AuthenticationWallet {
                 port = service.getDefaultPort(); // If even default port is -1, we let it as is, no need to return a wrong entry.
             this.login = login;
             this.password = password;
+        }
+
+        public Entry(final Entry toClone) {
+            host = toClone.host;
+            port = toClone.port;
+            login = toClone.login;
+            password = toClone.password;
+        }
+
+        @Override
+        public Entry clone() {
+            return new Entry(this);
         }
 
         @Override
@@ -232,13 +268,47 @@ public class AuthenticationWallet {
             final Entry other = (Entry) obj;
             if (!Objects.equals(this.host, other.host))
                 return false;
-            if (this.port != other.port) 
+            if (this.port != other.port)
                 return false;
             if (!Objects.equals(this.login, other.login))
                 return false;
-            if (!Objects.equals(this.password, other.password))
-                return false;
-            return true;
+            return Objects.equals(this.password, other.password);
+        }
+    }
+
+    /**
+     * A listener which report all additions/suppressions which happen in a map
+     * to the given list.
+     * The listener does not register itself automatically, but it will unregister
+     * when target list will be garbage collected.
+     */
+    private static class FollowListener implements MapChangeListener<String, Entry> {
+
+        private final WeakReference<ObservableMap> source;
+        private final WeakReference<List> follower;
+
+        public FollowListener(final ObservableMap<String, Entry> toFollow, final List follower) {
+            ArgumentChecks.ensureNonNull("Map to listen on", toFollow);
+            this.source = new WeakReference<>(toFollow);
+            this.follower = new WeakReference<>(follower);
+        }
+
+        @Override
+        public void onChanged(Change<? extends String, ? extends Entry> change) {
+            final List tmpFollower = follower.get();
+            // follower has been detroyed, no need to listen anymore
+            if (tmpFollower == null) {
+                ObservableMap tmpSource = source.get();
+                if (tmpSource != null) {
+                    tmpSource.removeListener(this);
+                }
+            } else {
+                if (change.wasAdded()) {
+                    tmpFollower.add(change.getValueAdded());
+                } else if (change.wasRemoved()) {
+                    tmpFollower.remove(change.getValueRemoved());
+                }
+            }
         }
     }
 }

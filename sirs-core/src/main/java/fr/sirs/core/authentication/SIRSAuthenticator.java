@@ -39,7 +39,7 @@ public class SIRSAuthenticator extends Authenticator {
      * we'll know it and will prompt user.
      */
     private final HashMap<String, Entry> entriesToCheck = new HashMap<>();
-    
+
     @Override
     protected synchronized PasswordAuthentication getPasswordAuthentication() {
         // First, we retrieve target service information and check its integrity.
@@ -126,6 +126,9 @@ public class SIRSAuthenticator extends Authenticator {
                     headerText.append("Service local");
                 } else {
                     headerText.append(getRequestingSite());
+                }
+                if (getRequestingPort() >= 0) {
+                    headerText.append(", port ").append(getRequestingPort());
                 }
 
                 final Alert question = new Alert(Alert.AlertType.CONFIRMATION, null, ButtonType.CANCEL, ButtonType.OK);
