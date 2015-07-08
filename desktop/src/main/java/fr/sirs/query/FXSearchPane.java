@@ -7,6 +7,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
+import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
@@ -356,7 +357,8 @@ public class FXSearchPane extends BorderPane {
         final List<SQLQuery> queries;
         try {
             queries = SQLQueries.getLocalQueries();
-            queries.addAll(Injector.getSession().getSqlQueryRepository().getAll());
+            final SQLQueryRepository repo = (SQLQueryRepository)Injector.getSession().getRepositoryForClass(SQLQuery.class);
+            queries.addAll(repo.getAll());
         } catch (IOException ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             GeotkFX.newExceptionDialog("Une erreur s'est produite pendant la création de la liste des requêtes.", ex).show();

@@ -171,7 +171,6 @@ public class SessionCore implements ApplicationContextAware {
     ////////////////////////////////////////////////////////////////////////////
     private final ReferenceUsageRepository referenceUsageRepository;
     private final Previews previews;
-    private final SQLQueryRepository sqlQueryRepository;
     
     private CoordinateReferenceSystem projection;
     private int srid;
@@ -182,7 +181,6 @@ public class SessionCore implements ApplicationContextAware {
         
         referenceUsageRepository = new ReferenceUsageRepository(connector);
         previews = new Previews(connector);
-        sqlQueryRepository = new SQLQueryRepository(connector);
         elementCreator = new ElementCreator(this);
         
         // Listen on user change
@@ -256,10 +254,6 @@ public class SessionCore implements ApplicationContextAware {
     
     public Previews getPreviews() {
         return previews;
-    }
-
-    public SQLQueryRepository getSqlQueryRepository() {
-        return sqlQueryRepository;
     }
     
     public <T extends Positionable> List<T> getByTronconId(final String tronconId, final Class<T> clazz){

@@ -109,9 +109,10 @@ public class FXAdminQueryPane extends BorderPane {
         // Fill query lists
         ObservableList<SQLQuery> localQueries = FXCollections.observableArrayList(SQLQueries.getLocalQueries());
         uiLocalList.setItems(localQueries);
-        
+
+        final SQLQueryRepository repo = (SQLQueryRepository)Injector.getSession().getRepositoryForClass(SQLQuery.class);
         ObservableList<SQLQuery> dbQueries = FXCollections.observableArrayList(
-                Injector.getSession().getSqlQueryRepository().getAll());
+                repo.getAll());
         uiDBList.setItems(dbQueries);
         
         // Listen on database list to know which elements we must update.
@@ -192,7 +193,7 @@ public class FXAdminQueryPane extends BorderPane {
 
                 updateMessage("Mise à jour des requêtes dans la base de données.");
                 // Update database. For each element updated, we can remove it from notification lists.
-                SQLQueryRepository queryRepo = Injector.getSession().getSqlQueryRepository();
+                final SQLQueryRepository queryRepo = (SQLQueryRepository)Injector.getSession().getRepositoryForClass(SQLQuery.class);
                 Iterator<SQLQuery> addIt = toAddInDB.iterator();
                 while (addIt.hasNext()) {
                     queryRepo.add(addIt.next());
