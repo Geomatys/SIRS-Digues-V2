@@ -30,9 +30,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
@@ -51,6 +48,9 @@ import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
  * it's impossible to make embedded buttons either fireable or capable of retrieving
  * the right item.
  *
+ * TODO : Move style rules in a CSS file
+ * TODO : Do not reload all list on display update.
+ * 
  * @author Alexis Manin (Geomatys)
  */
 public class FXAuthenticationWalletEditor extends BorderPane {
@@ -138,25 +138,23 @@ public class FXAuthenticationWalletEditor extends BorderPane {
         header.add(hostSearch, 1, 1);
         header.add(new Label("port :"), 2, 1);
         header.add(portSearch, 3, 1);
+        header.setPadding(new Insets(5));
+        header.setHgap(5);
+        header.setVgap(5);
 
         setTop(header);
 
         // init entry list
         content.setFillWidth(true);
         content.setMaxHeight(USE_PREF_SIZE);
-        content.setBorder(new Border(new BorderStroke(Color.GREY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))));
-
-        final ArrayList<EntryCell> cells = new ArrayList<>();
-        for (int i = 0 ; i < entries.size() ; i++) {
-            final EntryCell cell = new EntryCell(entries.get(i));
-            cell.setBorder(Border.EMPTY);
-            cell.setBackground(LIST_BACKGROUNDS[i%LIST_BACKGROUNDS.length]);
-            cells.add(cell);
-        }
-        content.getChildren().setAll(cells);
+        updateDisplay();
 
         setPadding(new Insets(5));
-        setCenter(new ScrollPane(content));
+
+        final ScrollPane sPane = new ScrollPane(content);
+        sPane.setFitToWidth(true);
+        sPane.setBorder(Border.EMPTY);
+        setCenter(sPane);
         updateDisplay();
     }
 
@@ -177,6 +175,7 @@ public class FXAuthenticationWalletEditor extends BorderPane {
 
         EntryCell(final Entry source) {
             this.source = source;
+            setPadding(new Insets(5));
             getColumnConstraints().addAll(
                     // Label column
                     new ColumnConstraints(USE_PREF_SIZE, USE_COMPUTED_SIZE, USE_PREF_SIZE, Priority.NEVER, HPos.LEFT, true),

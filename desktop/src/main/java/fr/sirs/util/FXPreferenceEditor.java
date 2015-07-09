@@ -40,7 +40,6 @@ import java.lang.reflect.Method;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.Property;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.PasswordField;
 import org.apache.sis.util.ArgumentChecks;
 
 /**
@@ -98,7 +97,7 @@ public class FXPreferenceEditor extends Stage {
         final GridPane propertyPane = new GridPane();
         propertyPane.setAlignment(Pos.CENTER);
         propertyPane.setMaxSize(Double.MAX_VALUE, USE_COMPUTED_SIZE);
-        
+
         // label column, we always want it to fit content size.
         propertyPane.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
         // Propery editor. We make it fit available space.
@@ -153,16 +152,12 @@ public class FXPreferenceEditor extends Stage {
             }
             row++;
         }
-        
+
         final ScrollPane scroll = new ScrollPane(propertyPane);
         scroll.setFitToWidth(true);
         root.setCenter(scroll);
     }
 
-//    private void initializeTop() {
-//        final Label titleLabel = new Label("Préférences");
-//        root.setTop(titleLabel);
-//    }
     private synchronized void save() {
         try {
             SirsPreferences.INSTANCE.store(editedProperties);
@@ -192,7 +187,7 @@ public class FXPreferenceEditor extends Stage {
         } else if (inputNode instanceof CheckBox) {
             return ((CheckBox)inputNode).selectedProperty();
         }
-        
+
         // Fallback case. We'll try to get node default property.
         final Class<? extends Node> nodeClass = inputNode.getClass();
         DefaultProperty annotation = nodeClass.getAnnotation(DefaultProperty.class);
