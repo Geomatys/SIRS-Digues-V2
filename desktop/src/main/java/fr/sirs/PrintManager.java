@@ -116,8 +116,7 @@ public class PrintManager {
         }
     }
     
-    public final void printDesordres(final List<Desordre> desordres) {
-        
+    public final void printDesordres(final List<Desordre> desordres, final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie) {
         
             final List avoidDesordreFields = new ArrayList<>();
             avoidDesordreFields.add(GEOMETRY_FIELD);
@@ -148,54 +147,42 @@ public class PrintManager {
             avoidDesordreFields.add(AUTHOR_FIELD);
             avoidDesordreFields.add(DATE_MAJ_FIELD);
             
+            final List<String> observationFields = new ArrayList<>();
+            observationFields.add("designation");
+            observationFields.add("urgenceId");
+            observationFields.add("observateurId");
+            observationFields.add("nombreDesordres");
+            observationFields.add("date");
+            observationFields.add("evolution");
+            observationFields.add("suite");
             
-            final List avoidObservationFields = new ArrayList<>();
-            avoidObservationFields.add(DOCUMENT_ID_FIELD);
-            avoidObservationFields.add(ID_FIELD);
-            avoidObservationFields.add(FOREIGN_PARENT_ID_FIELD);
-            avoidObservationFields.add(REVISION_FIELD);
-            avoidObservationFields.add(PARENT_FIELD);
-            avoidObservationFields.add(COUCH_DB_DOCUMENT_FIELD);
+            final List<String> prestationFields = new ArrayList<>();
+            prestationFields.add("designation");
+            prestationFields.add("libelle");
+            prestationFields.add("typePrestationId");
+            prestationFields.add("coutMetre");
+            prestationFields.add("marcheId");
+            prestationFields.add("realisationInterne");
+            prestationFields.add("date_debut");
+            prestationFields.add("date_fin");
+            prestationFields.add("commentaire");
             
-            
-            avoidObservationFields.add(VALID_FIELD);
-            avoidObservationFields.add(AUTHOR_FIELD);
-            avoidObservationFields.add(DATE_MAJ_FIELD);
-            
-            avoidObservationFields.add(PHOTOS_OBSERVATION_REFERENCE);
-            
-            final List<String> avoidPrestationFields = new ArrayList<>(avoidDesordreFields);
-            avoidPrestationFields.add("photos");
-            avoidPrestationFields.add("borne_fin_distance");
-            avoidPrestationFields.add("desordreIds");
-            avoidPrestationFields.add("borneFinId");
-            avoidPrestationFields.add("coutGlobal");
-            avoidPrestationFields.add("coteId");
-            avoidPrestationFields.add("borneDebutId");
-            avoidPrestationFields.add(POSITION_DEBUT_FIELD);
-            avoidPrestationFields.add(POSITION_FIN_FIELD);
-            avoidPrestationFields.add("prFin");
-            avoidPrestationFields.add("prDebut");
-            avoidPrestationFields.add("sourceId");
-            avoidPrestationFields.add("borne_debut_distance");
-            avoidPrestationFields.add("rapportEtudeIds");
-            avoidPrestationFields.add("systemeRepId");
-            avoidPrestationFields.add("linearId");
-            avoidPrestationFields.add("positionId");
-            avoidPrestationFields.add("positionId");
-            avoidPrestationFields.add("documentGrandeEchelleIds");
-            avoidPrestationFields.add("borne_fin_aval");
-            avoidPrestationFields.add("borne_debut_aval");
-            avoidPrestationFields.add("evenementHydrauliqueIds");
+            final List<String> reseauFields = new ArrayList<>();
+            reseauFields.add("designation");
+            reseauFields.add("libelle");
+            reseauFields.add("date_debut");
+            reseauFields.add("date_fin");
+            reseauFields.add("commentaire");
             
         try{  
             final File fileToPrint = PrinterUtilities.printDisorders(
                     avoidDesordreFields, 
-                    avoidObservationFields, 
-                    avoidPrestationFields, 
+                    observationFields, 
+                    prestationFields, 
+                    reseauFields,
                     Injector.getSession().getPreviews(), 
                     new SirsStringConverter(), 
-                    desordres);
+                    desordres, printPhoto, printReseauOuvrage, printVoirie);
             if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception ex) {
             Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, ex);

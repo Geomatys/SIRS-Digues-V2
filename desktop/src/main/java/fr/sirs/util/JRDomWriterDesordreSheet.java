@@ -3,6 +3,7 @@ package fr.sirs.util;
 
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.core.model.Desordre;
+import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.Prestation;
@@ -64,11 +65,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -78,6 +85,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.aspectj.asm.IProgramElement;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -116,21 +124,27 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     private static final int TOP_MARGIN = 20;
     private static final int BOTTOM_MARGIN = 20;
     
-    private static final String NULL_REPLACEMENT = "Non renseigné";
-    private static final String TRUE_REPLACEMENT = "Oui";
-    private static final String FALSE_REPLACEMENT = "Non";
-    
-    public static final String OBSERVATIONS_DATASET = "Observations Dataset";
+    public static final String OBSERVATION_DATASET = "Observation Dataset";
     public static final String OBSERVATION_TABLE_DATA_SOURCE = "OBSERVATION_TABLE_DATA_SOURCE";
-    public static final String PRESTATIONS_DATASET = "Prestations Dataset";
+    public static final String PRESTATION_DATASET = "Prestation Dataset";
     public static final String PRESTATION_TABLE_DATA_SOURCE = "PRESTATION_TABLE_DATA_SOURCE";
-    public static final String PHOTO_TABLE_DATA_SOURCE = "PHOTO_TABLE_DATA_SOURCE";
-    public static final String PHOTOS_SUBREPORT = "PHOTOS_SUBREPORT";
+    
+    public static final String RESEAU_OUVRAGE_DATASET = "ReseauOuvrage Dataset";
+    public static final String RESEAU_OUVRAGE_TABLE_DATA_SOURCE = "RESEAU_OUVRAGE_TABLE_DATA_SOURCE";
+    public static final String VOIRIE_DATASET = "Voirie Dataset";
+    public static final String VOIRIE_TABLE_DATA_SOURCE = "VOIRIE_TABLE_DATA_SOURCE";
+    
+    public static final String PHOTO_DATA_SOURCE = "PHOTO_DATA_SOURCE";
+    public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
     
     private final List<String> avoidDesordreFields;
-    private final List<String> avoidObservationFields;
-    private final List<String> avoidPrestationFields;
+    private final List<String> observationFields;
+    private final List<String> prestationFields;
+    private final List<String> reseauFields;
     
+    private final boolean printPhoto;
+    private final boolean printReseauOuvrage;
+    private final boolean printVoirie;
     
     private JRDomWriterDesordreSheet(){
         super();
@@ -144,27 +158,37 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         
         this.fields_interline = 8;
         avoidDesordreFields = null;
-        avoidObservationFields = null;
-        avoidPrestationFields = null;
+        observationFields = null;
+        prestationFields = null;
+        reseauFields = null;
+        printPhoto = printReseauOuvrage = printVoirie = true;
     }
     
     public JRDomWriterDesordreSheet(final InputStream stream, 
             final List<String> avoidDesordreFields,
-            final List<String> avoidObservationFields,
-            final List<String> avoidPrestationFields) throws ParserConfigurationException, SAXException, IOException {
+            final List<String> observationFields,
+            final List<String> prestationFields,
+            final List<String> reseauFields,
+            final boolean printPhoto, 
+            final boolean printReseauOuvrage, 
+            final boolean printVoirie) throws ParserConfigurationException, SAXException, IOException {
         super(stream);
         title = (Element) root.getElementsByTagName(TAG_TITLE).item(0);
         pageHeader = (Element) root.getElementsByTagName(TAG_PAGE_HEADER).item(0);
         columnHeader = (Element) root.getElementsByTagName(TAG_COLUMN_HEADER).item(0);
-        detail = (Element) this.root.getElementsByTagName(TAG_DETAIL).item(0);
+        detail = (Element) root.getElementsByTagName(TAG_DETAIL).item(0);
         columnFooter = (Element) root.getElementsByTagName(TAG_COLUMN_FOOTER).item(0);
         pageFooter = (Element) root.getElementsByTagName(TAG_PAGE_FOOTER).item(0);
         lastPageFooter = (Element) root.getElementsByTagName(TAG_LAST_PAGE_FOOTER).item(0);
         
         fields_interline = 8;
         this.avoidDesordreFields = avoidDesordreFields;
-        this.avoidObservationFields = avoidObservationFields;
-        this.avoidPrestationFields = avoidPrestationFields;
+        this.observationFields = observationFields;
+        this.prestationFields = prestationFields;
+        this.reseauFields = reseauFields;
+        this.printPhoto = printPhoto;
+        this.printReseauOuvrage = printReseauOuvrage;
+        this.printVoirie = printVoirie;
     }
     
     /**
@@ -219,8 +243,10 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
      */
     private void writeObject(final Desordre desordre) {
         
-        writeSubDataset(Observation.class, avoidDesordreFields, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(0));
-        writeSubDataset(Prestation.class, avoidPrestationFields, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(1));
+        writeSubDataset(Observation.class, observationFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(0));
+        writeSubDataset(Prestation.class, prestationFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(1));
+        writeSubDataset(ObjetReseau.class, reseauFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(2));
+        writeSubDataset(ObjetReseau.class, reseauFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(3));
         
         
         // Sets the initial fields used by the template.------------------------
@@ -246,14 +272,25 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
     }
     
     
-    
-    private void writeSubDataset(final Class<? extends fr.sirs.core.model.Element> elementClass, final List<String> avoidFields, final Element subDataset){
+    /**
+     * 
+     * @param elementClass The class to explore fields.
+     * @param fields The field list
+     * @param print If true, print the field list, if false print all the fields but the ones contained into given field list
+     * @param subDataset 
+     */
+    private void writeSubDataset(final Class<? extends fr.sirs.core.model.Element> elementClass, 
+            final List<String> fields, final boolean print, final Element subDataset) {
+        
+        final Predicate<String> printPredicate = print 
+                ? (String fieldName) -> fields==null || fields.contains(fieldName) 
+                : (String fieldName) -> fields==null || !fields.contains(fieldName);
         
         final Method[] methods = elementClass.getMethods();
         for (final Method method : methods){
             if(PrinterUtilities.isSetter(method)){
                 final String fieldName = getFieldNameFromSetter(method);
-                if (avoidFields==null || !avoidFields.contains(fieldName)) {
+                if (printPredicate.test(fieldName)) {
                     writeSubDatasetField(method, subDataset);
                 }
             }
@@ -361,36 +398,6 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName(), Locale.getDefault(),
                 Thread.currentThread().getContextClassLoader());
         
-        /*----------------------------------------------------------------------
-        ATTRIBUTS DU DESORDRE
-        ----------------------------------------------------------------------*/
-        // Loops over the method looking for setters (based on the field names).
-        final Method[] methods = classToMap.getMethods();
-        for (final Method method : methods){
-            if(PrinterUtilities.isSetter(method)){
-                
-                // Retrives the field name from the setter name.----------------
-                final String fieldName = getFieldNameFromSetter(method);
-                final Class fieldClass = method.getParameterTypes()[0];
-                
-                // Provides a multiplied height for comment and description fields.
-                final Markup markup;
-                if (fieldName.contains("escript") || fieldName.contains("omment")){
-                    markup = Markup.HTML;
-                } else {
-                    markup = Markup.NONE;
-                }
-                
-                // Writes the field.--------------------------------------------
-                // On n'écrit plus les champs dynamiquement : ceux-ci figurent en dur dans le template
-//                if(avoidDesordreFields==null || !avoidDesordreFields.contains(fieldName)){
-//                    writeDetailField(fieldName, fieldClass, markup, resourceBundle);
-//                    // Increment Y between each field
-//                    currentY+=(FIELDS_HEIGHT+fields_interline);
-//                }
-            }
-        }
-        
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         currentY = Integer.valueOf(band.getAttribute(ATT_HEIGHT));
         
@@ -401,7 +408,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
             currentY+=2;
             writeSectionTitle("Observations", 15, 2, 10, 9);
             currentY+=2;
-            writeTable(Observation.class, avoidObservationFields, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATIONS_DATASET, 30);
+            writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 30);
             currentY+=2;
         }
         
@@ -412,23 +419,58 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
             currentY+=2;
             writeSectionTitle("Prestations", 15, 2, 10, 9);
             currentY+=2;
-            writeTable(Prestation.class, avoidPrestationFields, PRESTATION_TABLE_DATA_SOURCE, PRESTATIONS_DATASET, 30);
+            writeTable(Prestation.class, prestationFields, true, PRESTATION_TABLE_DATA_SOURCE, PRESTATION_DATASET, 30);
             currentY+=2;
         }
         
         /*----------------------------------------------------------------------
         SOUS-RAPPORTS DES PHOTOS
         ----------------------------------------------------------------------*/
-        final List<Photo> photos = new ArrayList<>();
-        for(final Observation observation : desordre.getObservations()){
-            final List<Photo> obsPhotos = observation.getPhotos();
-            if(obsPhotos!=null && !obsPhotos.isEmpty()){
-                photos.addAll(obsPhotos);
+        if(printPhoto){
+            
+            // On sait que les photos qui seront fournies par le datasource seront les photos des observations du désordre courant
+            final List<Photo> photos = new ArrayList<>();
+            for(final Observation observation : desordre.getObservations()){
+                final List<Photo> obsPhotos = observation.getPhotos();
+                if(obsPhotos!=null && !obsPhotos.isEmpty()){
+                    photos.addAll(obsPhotos);
+                }
+            }
+            if(!photos.isEmpty()){
+                currentY+=2;
+                includePhotoSubreport(64);
             }
         }
-        if(!photos.isEmpty()){
+        
+        /*----------------------------------------------------------------------
+        TABLEAU DES OUVRAGES ET RÉSEAUX
+        ----------------------------------------------------------------------*/
+        final int nbReseauOuvrage = desordre.getEchelleLimnimetriqueIds().size()
+                + desordre.getOuvrageParticulierIds().size()
+                + desordre.getReseauTelecomEnergieIds().size()
+                + desordre.getOuvrageTelecomEnergieIds().size()
+                + desordre.getOuvrageHydrauliqueAssocieIds().size()
+                + desordre.getReseauHydrauliqueCielOuvertIds().size()
+                + desordre.getReseauHydrauliqueFermeIds().size();
+        if(printReseauOuvrage && nbReseauOuvrage>0){
             currentY+=2;
-            includePhotoSubreport(64);
+            writeSectionTitle("Réseaux et ouvrages", 15, 2, 10, 9);
+            currentY+=2;
+            writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET, 30);
+            currentY+=2;
+        }
+        
+        /*----------------------------------------------------------------------
+        TABLEAU DES VOIRIES
+        ----------------------------------------------------------------------*/
+        final int nbVoirie = desordre.getOuvrageVoirieIds().size()
+                + desordre.getVoieDigueIds().size();
+        if(printReseauOuvrage && nbVoirie>0){
+            currentY+=2;
+            writeSectionTitle("Voiries", 15, 2, 10, 9);
+            currentY+=2;
+            writeTable(ObjetReseau.class, reseauFields, true, VOIRIE_TABLE_DATA_SOURCE, VOIRIE_DATASET, 30);
+            currentY+=2;
         }
         
         // Sizes the detail element given to the field number.------------------
@@ -496,7 +538,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         
         final Element datasourceExpression = document.createElementNS(URI_JRXML, TAG_DATA_SOURCE_EXPRESSION);
         
-        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $P{"+PHOTO_TABLE_DATA_SOURCE+"})");
+        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $P{"+PHOTO_DATA_SOURCE+"})");
         
         datasourceExpression.appendChild(datasourceExpressionField);
         subReport.appendChild(datasourceExpression);
@@ -511,7 +553,21 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         currentY+=height;
     }
     
-    private void writeTable(final Class clazz, final List<String> avoidFields, final String datasourceParameter, final String datasetName, final int height){
+    /**
+     * 
+     * @param clazz
+     * @param fields
+     * @param print
+     * @param datasourceParameter
+     * @param datasetName
+     * @param height 
+     */
+    private void writeTable(final Class clazz, final List<String> fields, 
+            final boolean print, final String datasourceParameter, final String datasetName, final int height){
+        
+        final Predicate<String> printPredicate = print
+                ? (String fieldName) -> fields==null || fields.contains(fieldName)
+                : (String fieldName) -> fields==null || !fields.contains(fieldName);
         
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         
@@ -542,28 +598,123 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         table.appendChild(datasetRun);
         
         int nbColumns=0;
-        // Premier parcours pour calculer le nombre de colonnes
-        for(final Method method : clazz.getMethods()){
-            
-            if(PrinterUtilities.isSetter(method)){
-                
-                // Retrives the field name from the setter name.----------------
-                final String fieldName = getFieldNameFromSetter(method);
-                if(avoidFields==null || !avoidFields.contains(fieldName))
-                    nbColumns++;
+        // Si la liste des champs contient les champs à imprimer et non pas à éviter alors le nombre de champs est directement donnée par la taille de la liste.
+        if(print) {
+            nbColumns=fields.size();
+        }
+        // Sinon il faut faire un premier parcours pour calculer le nombre de colonnes
+        else {
+            for(final Method method : clazz.getMethods()){
+                if(PrinterUtilities.isSetter(method)){
+                    // Retrives the field name from the setter name.----------------
+                    final String fieldName = getFieldNameFromSetter(method);
+                    if(printPredicate.test(fieldName))
+                        nbColumns++;
+                }
             }
         }
         
+        // If class is abstract, add one column to print class name
+//        if(Modifier.isAbstract(clazz.getModifiers())){
+//            nbColumns++;
+//        }
+        
+        // Calcul de la largeur d'une colonne en fonction du nombre  
         final int columnWidth = (PAGE_WIDTH - (LEFT_MARGIN+LEFT_MARGIN))/nbColumns;
-        for(final Method method : clazz.getMethods()){
+        
+        
+        
+        
+        
+        final Function<Method, Supplier<CDATASection>> getFromMethodSupplier = (Method setter) -> {
             
-            if(PrinterUtilities.isSetter(method)){
-                
-                // Retrives the field name from the setter name.----------------
-                final String fieldName = getFieldNameFromSetter(method);
-//                final Class fieldClass = method.getParameterTypes()[0];
-                if(avoidFields==null || !avoidFields.contains(fieldName))
-                    writeColumn(clazz, method, table, columnWidth, 7, 1, 20, 10);
+            final String fieldName = getFieldNameFromSetter(setter);
+            final Class fieldClass = setter.getParameterTypes()[0];
+            
+            Supplier<CDATASection> fromMethodSupplier = () -> {
+
+                final CDATASection valueField;
+                if(fieldClass==Boolean.class || (fieldClass!=null && BOOLEAN_PRIMITIVE_NAME.equals(fieldClass.getName()))){
+                    valueField = document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : ($F{"+fieldName+"} ? \""+TRUE_REPLACEMENT+"\" : \""+FALSE_REPLACEMENT+"\")");
+                }
+                else{
+                    valueField = document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+fieldName+"}");
+                }
+                return valueField;
+            };
+            
+            return fromMethodSupplier;
+        };
+        
+        final Function<String, Markup> markupFromFieldName = (String fieldName) -> {
+            
+            final Markup markup;
+            if (fieldName.contains("escript") || fieldName.contains("omment")){
+                markup = Markup.HTML;
+            } else {
+                markup = Markup.NONE;
+            }
+            return markup;
+        };
+        
+        
+        
+//        final Function<Class, Supplier<CDATASection>> getFromClassSupplier = (Class clazz) -> {
+//            
+//            final String fieldName = getFieldNameFromSetter(setter);
+//            final Class fieldClass = setter.getParameterTypes()[0];
+//            
+//            Supplier<CDATASection> fromMethodSupplier = () -> {
+//
+//                final CDATASection valueField;
+//                if(fieldClass==Boolean.class || (fieldClass!=null && BOOLEAN_PRIMITIVE_NAME.equals(fieldClass.getName()))){
+//                    valueField = document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : ($F{"+fieldName+"} ? \""+TRUE_REPLACEMENT+"\" : \""+FALSE_REPLACEMENT+"\")");
+//                }
+//                else{
+//                    valueField = document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+fieldName+"}");
+//                }
+//                return valueField;
+//            };
+//            
+//            return fromMethodSupplier;
+//        };
+        
+        
+        
+        
+        
+//        if(Modifier.isAbstract(clazz.getModifiers())){
+//            writeColumn("Type", settersByFieldName.get(fieldName), table, columnWidth, 7, 1, 20, 10);
+//        }
+        
+        // Si la liste des champs contient les champs à imprimer et non pas à éviter on se base sur l'ordre de la liste pour générer l'ordre des colonnes.
+        final ResourceBundle rb = ResourceBundle.getBundle(clazz.getName());
+        
+        
+        
+        
+        if(print){
+            // Indexation des initialiseurs par les noms de champs.
+            final Map<String, Method> settersByFieldName = new HashMap<>();
+            for(final Method method : clazz.getMethods()){
+                if(PrinterUtilities.isSetter(method)){
+                    settersByFieldName.put(getFieldNameFromSetter(method), method);
+                }
+            }
+            for(final String fieldName : fields){
+                writeColumn(rb.getString(fieldName), getFromMethodSupplier.apply(settersByFieldName.get(fieldName)), markupFromFieldName.apply(fieldName), table, columnWidth, 7, 1, 20, 10);
+            }
+        } 
+        // Sinon on n'a pas d'ordre particulier sur lequel se baser et on parcours donc en premier les méthodes pour trouver les noms des champs à imprimer.
+        else{
+            for(final Method method : clazz.getMethods()){
+                if(PrinterUtilities.isSetter(method)){
+                    // Retrives the field name from the setter name.----------------
+                    final String fieldName = getFieldNameFromSetter(method);
+                    if(printPredicate.test(fieldName)){
+                        writeColumn(rb.getString(fieldName), getFromMethodSupplier.apply(method), markupFromFieldName.apply(fieldName), table, columnWidth, 7, 1, 20, 10);
+                    }
+                }
             }
         }
         
@@ -574,10 +725,11 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         currentY+=height;
     }
     
-    private void writeColumn(final Class clazz, final Method setter, final Element table, final int columnWidth, final int fontSize, final int padding, final int headerHeight, final int detailCellHeight){
+    private void writeColumn(final String header, final Supplier<CDATASection> cellSupplier,
+            final Markup markup, final Element table, final int columnWidth, 
+            final int fontSize, final int padding, 
+            final int headerHeight, final int detailCellHeight){
        
-        final String fieldName = getFieldNameFromSetter(setter);
-        final Class fieldClass = setter.getParameterTypes()[0];
         
         final Element column = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN);
         column.setAttribute(ATT_WIDTH, String.valueOf(columnWidth));
@@ -603,7 +755,6 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         staticTextReportElement.setAttribute(ATT_Y, String.valueOf(padding));
         staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-2*padding));
         staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(headerHeight-2*padding));
-//        staticTextReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
         staticText.appendChild(staticTextReportElement);
         
         final Element textElement = document.createElement(TAG_TEXT_ELEMENT);
@@ -613,8 +764,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         staticText.appendChild(textElement);
 
         final Element text = document.createElementNS(URI_JRXML, TAG_TEXT);
-        final ResourceBundle rb = ResourceBundle.getBundle(clazz.getName());
-        final CDATASection labelField = document.createCDATASection(rb.getString(fieldName));
+        final CDATASection labelField = document.createCDATASection(header);
         text.appendChild(labelField);
 
         staticText.appendChild(text);
@@ -639,31 +789,19 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         textFieldReportElement.setAttribute(ATT_Y, String.valueOf(padding));
         textFieldReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-2*padding));
         textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(detailCellHeight-2*padding));
-//        textFieldReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
         textField.appendChild(textFieldReportElement);
         
         final Element detailTextElement = document.createElement(TAG_TEXT_ELEMENT);
         final Element detailFont = document.createElement(TAG_FONT);
         detailFont.setAttribute(ATT_SIZE, String.valueOf(fontSize));
         detailTextElement.appendChild(detailFont);
-        final Markup markup;
-        if (fieldName.contains("escript") || fieldName.contains("omment")){
-            markup = Markup.HTML;
-        } else {
-            markup = Markup.NONE;
-        }
-        detailTextElement.setAttribute(ATT_MARKUP, markup.toString());
+        detailTextElement.setAttribute(ATT_MARKUP, (markup==null ? Markup.NONE : markup).toString());
         textField.appendChild(detailTextElement);
 
         final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);
-        final CDATASection valueField;
-        if(fieldClass==Boolean.class || (fieldClass!=null && BOOLEAN_PRIMITIVE_NAME.equals(fieldClass.getName()))){
-            valueField = document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : ($F{"+fieldName+"} ? \""+TRUE_REPLACEMENT+"\" : \""+FALSE_REPLACEMENT+"\")");
-        }
-        else{
-            valueField = document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+fieldName+"}");
-        }
-        textFieldExpression.appendChild(valueField);
+        
+        
+        textFieldExpression.appendChild(cellSupplier.get());
 
         textField.appendChild(textFieldExpression);
         detailCell.appendChild(textField);
@@ -676,5 +814,6 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         
         table.appendChild(column);
     }
+    
     
 }

@@ -199,7 +199,7 @@ public class FXDisorderPrintFrame extends BorderPane {
             
             try {
                 if(!desordres.isEmpty()){
-                    Injector.getSession().getPrintManager().printDesordres(desordres);
+                    Injector.getSession().getPrintManager().printDesordres(desordres, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionVoirie.isSelected());
                 }
             } catch (Exception ex) {
                 Logger.getLogger(FXDisorderPrintFrame.class.getName()).log(Level.SEVERE, null, ex);

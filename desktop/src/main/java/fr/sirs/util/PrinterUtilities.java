@@ -2,16 +2,29 @@ package fr.sirs.util;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
+import fr.sirs.core.model.EchelleLimnimetrique;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Observation;
+import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
+import fr.sirs.core.model.OuvrageParticulier;
+import fr.sirs.core.model.OuvrageTelecomEnergie;
+import fr.sirs.core.model.OuvrageVoirie;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.Prestation;
+import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
+import fr.sirs.core.model.ReseauHydrauliqueFerme;
+import fr.sirs.core.model.ReseauTelecomEnergie;
+import fr.sirs.core.model.VoieDigue;
 import static fr.sirs.util.JRDomWriterDesordreSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTOS_SUBREPORT;
-import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTO_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTO_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PRESTATION_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterDesordreSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterDesordreSheet.VOIRIE_TABLE_DATA_SOURCE;
 import fr.sirs.util.property.SirsPreferences;
 import java.io.File;
 import java.io.FileInputStream;
@@ -75,9 +88,11 @@ public class PrinterUtilities {
     public static File printDisorders(final List<String> avoidDesordreFields, 
             final List<String> avoidObservationFields, 
             final List<String> avoidPrestationFields, 
+            final List<String> reseauFields,
             final Previews previewLabelRepository, 
             final StringConverter stringConverter, 
-            final List<Desordre> desordres) throws Exception {
+            final List<Desordre> desordres, 
+            final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie) throws Exception {
         
         JasperPrint firstPrint = null;
         final List<JasperPrint> followingPrints = new ArrayList<>();
@@ -89,7 +104,8 @@ public class PrinterUtilities {
 
             final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(
                     PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE), 
-                    avoidDesordreFields, avoidObservationFields, avoidPrestationFields);
+                    avoidDesordreFields, avoidObservationFields, avoidPrestationFields, 
+                    reseauFields, printPhoto, printReseauOuvrage, printVoirie);
             templateWriter.setFieldsInterline(2);
             templateWriter.setOutput(templateFile);
             templateWriter.write(desordre);
@@ -111,7 +127,45 @@ public class PrinterUtilities {
                     photos.addAll(observation.photos);
                 }
             }
-            parameters.put(PHOTO_TABLE_DATA_SOURCE, new ObjectDataSource<>(photos, previewLabelRepository, stringConverter));
+            
+            if(printPhoto) {
+                parameters.put(PHOTO_DATA_SOURCE, new ObjectDataSource<>(photos, previewLabelRepository, stringConverter));
+            }
+            
+            if(printReseauOuvrage) {
+                final List<ObjetReseau> reseauOuvrageList = new ArrayList<>();
+                final List<List<? extends ObjetReseau>> retrievedLists = new ArrayList();
+                retrievedLists.add(Injector.getSession().getRepositoryForClass(EchelleLimnimetrique.class).get(desordre.getEchelleLimnimetriqueIds()));
+                retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageParticulier.class).get(desordre.getOuvrageParticulierIds()));
+                retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauTelecomEnergie.class).get(desordre.getReseauTelecomEnergieIds()));
+                retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageTelecomEnergie.class).get(desordre.getOuvrageTelecomEnergieIds()));
+                retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageHydrauliqueAssocie.class).get(desordre.getOuvrageHydrauliqueAssocieIds()));
+                retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueCielOuvert.class).get(desordre.getReseauHydrauliqueCielOuvertIds()));
+                retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).get(desordre.getReseauHydrauliqueFermeIds()));
+                
+                for(final List candidate : retrievedLists){
+                    if(candidate!=null && !candidate.isEmpty()){
+                        reseauOuvrageList.addAll(candidate);
+                    }
+                }
+                
+                parameters.put(RESEAU_OUVRAGE_TABLE_DATA_SOURCE, new ObjectDataSource<>(reseauOuvrageList, previewLabelRepository, stringConverter));
+            }
+            
+            if(printVoirie) {
+                final List<ObjetReseau> voirieList = new ArrayList<>();
+                final List<List<? extends ObjetReseau>> retrievedLists = new ArrayList();
+                retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageVoirie.class).get(desordre.getOuvrageVoirieIds()));
+                retrievedLists.add(Injector.getSession().getRepositoryForClass(VoieDigue.class).get(desordre.getVoieDigueIds()));
+                
+                for(final List candidate : retrievedLists){
+                    if(candidate!=null && !candidate.isEmpty()){
+                        voirieList.addAll(candidate);
+                    }
+                }
+                
+                parameters.put(VOIRIE_TABLE_DATA_SOURCE, new ObjectDataSource<>(voirieList, previewLabelRepository, stringConverter));
+            }
             
             final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS));
             parameters.put(PHOTOS_SUBREPORT, photosReport);
