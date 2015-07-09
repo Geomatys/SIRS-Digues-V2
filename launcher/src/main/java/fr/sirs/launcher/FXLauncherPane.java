@@ -81,7 +81,6 @@ import javafx.stage.Window;
 import javafx.util.Callback;
 
 import org.apache.sis.util.logging.Logging;
-import org.ektorp.CouchDbConnector;
 import org.ektorp.ReplicationStatus;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
 import org.geotoolkit.internal.GeotkFX;
@@ -515,10 +514,9 @@ public class FXLauncherPane extends BorderPane {
             try (ConfigurableApplicationContext appCtx = localRegistry.connectToSirsDatabase(dbName, true, false, false)) {
                 final File mainDbFile = new File(uiImportDBData.getText());
                 final File cartoDbFile = new File(uiImportDBCarto.getText());
-                final CouchDbConnector couchDbConnector = appCtx.getBean(CouchDbConnector.class);
                 SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
                 sirsDBInfoRepository.setSRID(epsgCode);
-                DbImporter importer = new DbImporter(couchDbConnector);
+                DbImporter importer = new DbImporter(appCtx);
                 importer.setDatabase(DatabaseBuilder.open(mainDbFile),
                         DatabaseBuilder.open(cartoDbFile), uiImportCRS.crsProperty().get());
                 importer.importation();

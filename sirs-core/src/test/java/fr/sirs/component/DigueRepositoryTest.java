@@ -6,10 +6,8 @@
 package fr.sirs.component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -28,29 +26,26 @@ import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 
 import org.junit.Ignore;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
 public class DigueRepositoryTest extends CouchDBTestCase {
-    
+
+    @Autowired
     DigueRepository digueRepository;
-    
-    @Before
-    public void setUp() {
-    	 digueRepository = new DigueRepository(connector);
-    }
-    
+
+    @Autowired
+    TronconDigueRepository tronconRepository;
+
     /**
      * Test of getAll method, of class DigueRepository.
      */
     @Test
     public void testStoreDigueAndTroncons() {
         System.out.println("DigueRepositoryTest.testStoreDigueAndTroncons()");
-        
-        final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
-      
         final Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
         digue.setLibelle("une digue");
         digue.setDateMaj(LocalDateTime.now());
@@ -67,7 +62,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
 
             final Fondation fondation = ElementCreator.createAnonymValidElement(Fondation.class);
             fondation.setLinearId(troncon.getId());
-            
+
             final Crete crete = ElementCreator.createAnonymValidElement(Crete.class);
             crete.setBorneDebutId("8");
             crete.setCommentaire("Belle crete");
@@ -82,18 +77,16 @@ public class DigueRepositoryTest extends CouchDBTestCase {
               System.out.println(digue);
           }
 
-          final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
           for(TronconDigue troncon: tronconRepository.getAll()) {
               for(Objet str: TronconUtils.getObjetList(troncon)) {
                   System.out.println(str.getParent() + " " + str.getDocumentId());
               }
           }
-          
+
     }
-    
+
     @Test
     public void failDelete() {
-
         Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
         digue.setLibelle("toDelete");
         digueRepository.add(digue);
@@ -108,35 +101,34 @@ public class DigueRepositoryTest extends CouchDBTestCase {
         digueRepository.remove(digue);
 
     }
-    
+
     @Ignore
     @Test
     public void testInstances(){
-        
         Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
         digue.setLibelle("coucou");
         digueRepository.add(digue);
-        
+
         System.out.println(digue.getLibelle());
         System.out.println(digue.getId());
-        
+
         Digue digue1 = digueRepository.get(digue.getId());
         Digue digue2 = digueRepository.get(digue.getId());
-        
+
         System.out.println(digue.hashCode());
         System.out.println(digue1.hashCode());
         System.out.println(digue2.hashCode());
-        
-        
+
+
         assert(digue==digue1);
-        
+
         assert(digue==digue2);
     }
-    
+
     @Ignore
     @Test
     public void uuid() {
-    	
+
     }
 
     private Point createPoint(double i, double j) {

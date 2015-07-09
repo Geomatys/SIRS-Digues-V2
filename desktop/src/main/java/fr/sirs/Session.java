@@ -47,7 +47,6 @@ import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -70,42 +69,42 @@ import org.geotoolkit.style.DefaultDescription;
 import org.opengis.util.GenericName;
 
 /**
- * La session contient toutes les données chargées dans l'instance courante de 
+ * La session contient toutes les données chargées dans l'instance courante de
  * l'application.
- * 
- * Notamment, elle doit réferencer l'ensemble des thèmes ouvert, ainsi que les 
+ *
+ * Notamment, elle doit réferencer l'ensemble des thèmes ouvert, ainsi que les
  * onglets associés. De même pour les {@link Element}s et leurs éditeurs.
- * 
+ *
  * La session fournit également un point d'accès centralisé à tous les documents
  * de la base CouchDB.
- * 
+ *
  * @author Johann Sorel
  */
 @Component
 public class Session extends SessionCore {
-    
+
     public static String FLAG_SIRSLAYER = "SirsLayer";
-    
+
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES REFERENCES
     ////////////////////////////////////////////////////////////////////////////
     private final ReferenceChecker referenceChecker;
     public ReferenceChecker getReferenceChecker(){return referenceChecker;}
-    
+
     ////////////////////////////////////////////////////////////////////////////
     private MapContext mapContext;
     private final MapItem sirsGroup = MapBuilder.createItem();
     private final MapItem backgroundGroup = MapBuilder.createItem();
 
     private FXMainFrame frame = null;
-    
+
     private final Cache<Element, FXFreeTab> openEditors = new Cache<>(12, 0, false);
     private final Cache<Theme, FXFreeTab> openThemes = new Cache<>(12, 0, false);
     private final Cache<Class<? extends ReferenceType>, FXFreeTab> openReferencePanes = new Cache<>(12, 0, false);
     private final Cache<Class<? extends Element>, FXFreeTab> openDesignationPanes = new Cache<>(12, 0, false);
     public enum AdminTab{VALIDATION, USERS}
     private final Cache<AdminTab, FXFreeTab> openAdminTabs = new Cache<>(2, 0, false);
-    
+
     //generate a template for the legend
     final DefaultLegendTemplate legendTemplate = new DefaultLegendTemplate(
             new DefaultBackgroundTemplate( //legend background
@@ -122,7 +121,7 @@ public class Session extends SessionCore {
             new Font("Serial", Font.BOLD, 12), //Font used for layer names
             true // display only visible layers
     );
-    
+
     /**
      * Clear session cache.
      */
@@ -133,7 +132,7 @@ public class Session extends SessionCore {
         openDesignationPanes.clear();
         openAdminTabs.clear();
     }
-    
+
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
         super(couchDbConnector);
@@ -148,7 +147,7 @@ public class Session extends SessionCore {
         referenceChecker = new ReferenceChecker(referenceUrl);
         printManager = new PrintManager();
     }
-    
+
     void setFrame(FXMainFrame frame) {
         this.frame = frame;
     }
@@ -171,7 +170,7 @@ public class Session extends SessionCore {
                 //sirs layers
                 sirsGroup.setName("Description des ouvrages");
                 mapContext.items().add(0,sirsGroup);
-                
+
                 final Plugin[] plugins = Plugins.getPlugins();
                 final HashMap<String, ModuleDescription> moduleDescriptions = new HashMap<>(plugins.length);
                 for(Plugin plugin : plugins){
@@ -179,7 +178,7 @@ public class Session extends SessionCore {
                     d.setName(plugin.name);
                     d.setTitle(plugin.getTitle().toString());
                     d.setVersion(plugin.getConfiguration().getVersionMajor()+"."+plugin.getConfiguration().getVersionMinor());
-                    
+
                     List<MapItem> mapItems = plugin.getMapItems();
                     for (final MapItem item : mapItems) {
                         setPluginProvider(item, plugin);
@@ -191,7 +190,7 @@ public class Session extends SessionCore {
                 mapContext.setAreaOfInterest(mapContext.getBounds(true));
                 SirsDBInfoRepository infoRepo = getApplicationContext().getBean(SirsDBInfoRepository.class);
                 infoRepo.updateModuleDescriptions(moduleDescriptions);
-                
+
             } catch (Exception ex) {
                 SirsCore.LOGGER.log(Level.WARNING, "Cannot retrieve sirs layers.", ex);
                 final Runnable r = () -> GeotkFX.newExceptionDialog("Impossible de construire la liste des couches cartographiques", ex).show();
@@ -201,7 +200,7 @@ public class Session extends SessionCore {
                     Platform.runLater(r);
                 }
             }
-            
+
             try{
                 //Fond de plan
                 backgroundGroup.setName("Fond de plan");
@@ -225,9 +224,9 @@ public class Session extends SessionCore {
                     r.run();
                 } else {
                     Platform.runLater(r);
-                }                
+                }
             }
-            
+
         }
         return mapContext;
     }
@@ -237,13 +236,13 @@ public class Session extends SessionCore {
      * @param mapItem The map item to mark. Cannot be null
      * @param provider The plugin which provided the item. Cannot be null.
      */
-    private static void setPluginProvider(final MapItem mapItem, final Plugin provider) {        
+    private static void setPluginProvider(final MapItem mapItem, final Plugin provider) {
         mapItem.getUserProperties().put(Plugin.PLUGIN_FLAG, provider.name);
         for (final MapItem child : mapItem.items()) {
             setPluginProvider(child, provider);
         }
     }
-    
+
     public synchronized MapItem getSirsLayerGroup() {
         getMapContext();
         return sirsGroup;
@@ -253,32 +252,32 @@ public class Session extends SessionCore {
         getMapContext();
         return backgroundGroup;
     }
-    
+
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES IMPRESSIONS PDF
     ////////////////////////////////////////////////////////////////////////////
     private final PrintManager printManager;
     public final PrintManager getPrintManager(){return printManager;}
-    
+
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES PANNEAUX
     ////////////////////////////////////////////////////////////////////////////
-    
+
     public void showEditionTab(final Object object) {
         final Optional<? extends Element> element = getElement(object);
         if (element.isPresent()){
             if(element.get() instanceof ReferenceType) {
                 final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Les références ne sont pas éditables.", ButtonType.CLOSE);
                 alert.setResizable(true);
-                alert.showAndWait();                       
+                alert.showAndWait();
             } else {
                 getFrame().addTab(getOrCreateElementTab(element.get()));
             }
         }
     }
-    
+
     public FXFreeTab getOrCreateAdminTab(final AdminTab adminTab, final String title){
-        
+
         try {
             switch(adminTab){
                 case USERS:
@@ -295,13 +294,13 @@ public class Session extends SessionCore {
                                         if(utilisateur.equals(session.getUtilisateur())){
                                             final Alert alert = new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer votre propre compte.", ButtonType.CLOSE);
                                             alert.setResizable(true);
-                                            alert.showAndWait();                       
-                                        } 
+                                            alert.showAndWait();
+                                        }
                                         // On interdit également la suppression de l'invité par défaut !
                                         else if (UtilisateurRepository.GUEST_USER.equals(utilisateur)){
                                             final Alert alert = new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer le compte de l'invité par défaut.", ButtonType.CLOSE);
                                             alert.setResizable(true);
-                                            alert.showAndWait();                       
+                                            alert.showAndWait();
                                         }
                                         else{
                                             pojoList.add(pojo);
@@ -322,14 +321,14 @@ public class Session extends SessionCore {
                         tab.setContent(new FXValidationPane());
                         return tab;
                     });
-                default: 
+                default:
                     throw new UnsupportedOperationException("Unsupported administration pane.");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-    
+
     public FXFreeTab getOrCreateThemeTab(final Theme theme) {
         try {
             return openThemes.getOrCreate(theme, new Callable<FXFreeTab>() {
@@ -346,7 +345,7 @@ public class Session extends SessionCore {
             throw new RuntimeException(e);
         }
     }
-    
+
     public FXFreeTab getOrCreateDesignationTab(final Class<? extends Element> clazz){
         try {
             return openDesignationPanes.getOrCreate(clazz, new Callable<FXFreeTab>() {
@@ -362,7 +361,7 @@ public class Session extends SessionCore {
             throw new RuntimeException(e);
         }
     }
-    
+
     public FXFreeTab getOrCreateReferenceTypeTab(final Class<? extends ReferenceType> clazz){
         try {
             return openReferencePanes.getOrCreate(clazz, new Callable<FXFreeTab>() {
@@ -378,10 +377,10 @@ public class Session extends SessionCore {
             throw new RuntimeException(e);
         }
     }
-    
+
     public FXFreeTab getOrCreateElementTab(final Element element) {
         if (element instanceof TronconDigue) {
-            final DiguesTab diguesTab = Injector.getSession().getFrame().getDiguesTab();
+            final DiguesTab diguesTab = getFrame().getDiguesTab();
             diguesTab.getDiguesController().displayElement(element);
             diguesTab.setOnSelectionChanged((Event event) -> {
                 if (diguesTab.isSelected()) {
@@ -424,7 +423,7 @@ public class Session extends SessionCore {
                                 printManager.prepareToPrint(element);
                             }
                         });
-                        
+
                         // Remove from cache when tab is closed.
                         tab.setOnClosed(event -> openEditors.remove(element));
                         return tab;
@@ -435,15 +434,15 @@ public class Session extends SessionCore {
             }
         }
     }
-    
+
     public String generateElementTitle(final Element element) {
         String title="";
-        
+
         final String libelle = new SirsStringConverter().toString(element);
         if (libelle != null && !libelle.isEmpty()) {
             title += libelle;
         }
-        
+
         final Element parent = element.getParent();
         if (parent instanceof AvecLibelle) {
             final String parentLibelle = ((AvecLibelle)parent).getLibelle();
@@ -453,14 +452,14 @@ public class Session extends SessionCore {
         }
         return title;
     }
-    
+
     public void focusOnMap(Element target) {
         if (target == null || frame == null || frame.getMapTab() == null || frame.getMapTab().getMap() == null) {
             return;
         }
         frame.getMapTab().getMap().focusOnElement(target);
     }
-    
+
     public DefaultLegendTemplate getLegendTemplate() {
         return legendTemplate;
     }

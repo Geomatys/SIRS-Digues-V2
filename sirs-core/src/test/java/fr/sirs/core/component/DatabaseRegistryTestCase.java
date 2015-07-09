@@ -5,14 +5,13 @@ import org.junit.Test;
 import fr.sirs.core.CouchDBTestCase;
 import java.io.IOException;
 import org.apache.sis.test.DependsOnMethod;
-import org.junit.Ignore;
 
 //@Ignore
 public class DatabaseRegistryTestCase extends CouchDBTestCase {
 
-    private static String REPLICATION_SOURCE = "http://geouser:geopw@127.0.0.1:5984/sirs-test/";
-    private static String REPLICATION_DEST = "http://geouser:geopw@127.0.0.1:5984/sirs-test-dup/";
-    
+    private static final String REPLICATION_SOURCE = "http://geouser:geopw@127.0.0.1:5984/sirs-test/";
+    private static final String REPLICATION_DEST = "http://geouser:geopw@127.0.0.1:5984/sirs-test-dup/";
+
     @Test
     public void databaseList() throws IOException {
         final DatabaseRegistry registry = new DatabaseRegistry("http://geouser:geopw@127.0.0.1:5984/");
@@ -43,6 +42,7 @@ public class DatabaseRegistryTestCase extends CouchDBTestCase {
                 t -> System.out.println(t));
     }
 
+    @DependsOnMethod("getReplicationTasks")
     @Test
     public void getReplicationTasksByTarget() throws IOException {
         new DatabaseRegistry().getReplicationTasksBySourceOrTarget(REPLICATION_DEST).forEach(

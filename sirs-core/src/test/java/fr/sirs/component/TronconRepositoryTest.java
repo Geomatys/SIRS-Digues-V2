@@ -6,7 +6,6 @@
 package fr.sirs.component;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,21 +13,12 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.sirs.core.CouchDBTestCase;
-import fr.sirs.core.DocHelper;
 import fr.sirs.core.JacksonIterator;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Fondation;
-import fr.sirs.core.model.PiedDigue;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 
-import org.ektorp.CouchDbConnector;
-import org.ektorp.StreamingViewResult;
-import org.ektorp.ViewResult.Row;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.core.TronconUtils;
 
@@ -39,7 +29,7 @@ import fr.sirs.core.TronconUtils;
 public class TronconRepositoryTest extends CouchDBTestCase {
 
     @Autowired
-    private CouchDbConnector couchDbConnector;
+    private TronconDigueRepository tronconRepository;
 
     /**
      * Test of getAll method, of class TronconDigueRepository.
@@ -47,8 +37,6 @@ public class TronconRepositoryTest extends CouchDBTestCase {
     @Test
     public void testGetAll() {
         System.out.println("getAll");
-        final TronconDigueRepository tronconRepository = new TronconDigueRepository(
-                couchDbConnector);
         for (TronconDigue troncon : tronconRepository.getAll()) {
             System.out.println(troncon);
             for (Objet struct : TronconUtils.getObjetList(troncon)) {
@@ -59,7 +47,7 @@ public class TronconRepositoryTest extends CouchDBTestCase {
             System.out.println(copy.getCommentaire());
             tronconRepository.add(copy);
         }
-        
+
     }
 
     /**
@@ -68,8 +56,6 @@ public class TronconRepositoryTest extends CouchDBTestCase {
     @Test
     public void testGetAllAsStream() {
         System.out.println("getAllAsStream");
-        final TronconDigueRepository tronconRepository = new TronconDigueRepository(
-                couchDbConnector);
         try (JacksonIterator<TronconDigue> allAsStream = tronconRepository
                 .getAllIterator()) {
             while (allAsStream.hasNext()) {
@@ -86,16 +72,14 @@ public class TronconRepositoryTest extends CouchDBTestCase {
             e.printStackTrace();
         }
     }
-    
-    
+
+
     /**
      * Test of getAll method, of class TronconDigueRepository.
      */
     @Test
     public void testGetAllLightAsStream() {
         System.out.println("getAllAsStream");
-        final TronconDigueRepository tronconRepository = new TronconDigueRepository(
-                couchDbConnector);
         try (JacksonIterator<TronconDigue> allAsStream = tronconRepository
                 .getAllLightIterator()) {
             while (allAsStream.hasNext()) {

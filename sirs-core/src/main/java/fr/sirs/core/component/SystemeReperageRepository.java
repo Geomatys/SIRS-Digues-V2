@@ -6,7 +6,6 @@ import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
 import static fr.sirs.core.component.SystemeReperageRepository.BY_LINEAR_ID;
-import fr.sirs.core.model.ElementCreator;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,20 +26,23 @@ import org.ektorp.support.Views;
 })
 @Component("fr.sirs.core.component.SystemeReperageRepository")
 public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeReperage>{
-    
+
     public static final String BY_LINEAR_ID = "byLinarId";
 
     @Autowired
-    public SystemeReperageRepository ( CouchDbConnector db) {
+    protected TronconDigueRepository tronconDigueRepo;
+
+    @Autowired
+    private SystemeReperageRepository ( CouchDbConnector db) {
        super(SystemeReperage.class, db);
        initStandardDesignDocument();
    }
-    
+
     @Override
     public Class<SystemeReperage> getModelClass() {
         return SystemeReperage.class;
     }
-    
+
     @Override
     public SystemeReperage create(){
         final SessionCore session = InjectorCore.getBean(SessionCore.class);
@@ -50,26 +52,26 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
             throw new SirsCoreRuntimeExecption("Pas de session courante");
         }
     }
-    
+
     public List<SystemeReperage> getByLinear(final TronconDigue linear) {
         return this.queryView(BY_LINEAR_ID, linear.getId());
     }
-    
+
     public List<SystemeReperage> getByLinearId(final String linearId) {
         return this.queryView(BY_LINEAR_ID, linearId);
     }
-    
+
     public void update(SystemeReperage entity, TronconDigue troncon) {
         ArgumentChecks.ensureNonNull("SR to update", entity);
         ArgumentChecks.ensureNonNull("Troncon bound to updated SR", troncon);
         super.update(entity);
         constraintBorneInTronconListBorne(entity, troncon, false);
     }
-    
+
     public void add(SystemeReperage entity, TronconDigue troncon) {
         add(entity, troncon, false);
     }
-    
+
     public void add(SystemeReperage entity, TronconDigue troncon, final boolean forceDefaultSR) {
         ArgumentChecks.ensureNonNull("SR to add", entity);
         ArgumentChecks.ensureNonNull("Troncon bound to added SR", troncon);
@@ -94,40 +96,39 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     public void add(SystemeReperage entity) {
         throw new UnsupportedOperationException("Operation interdite : le SR doit être mis à jour en même temps que le tronçon associé.");
     }
-   
+
     public void remove(SystemeReperage source, TronconDigue troncon) {
         ArgumentChecks.ensureNonNull("SR to delete", source);
         ArgumentChecks.ensureNonNull("Troncon bound to deleted SR", troncon);
         if (source.getId().equals(troncon.getSystemeRepDefautId())) {
             troncon.setSystemeRepDefautId(null);
-            new TronconDigueRepository(db).update(troncon);
+            tronconDigueRepo.update(troncon);
         }
         super.remove(source);
     }
-    
+
     /**
      * Cette contrainte s'assure que les bornes du systeme de reperage sont
      * dans la liste des bornes du troncon.
-     * 
-     * @param entity 
+     *
+     * @param entity
      */
     private void constraintBorneInTronconListBorne(SystemeReperage entity, TronconDigue troncon, final boolean forceDefaultSR) {
         final String tcId = entity.getLinearId();
         if(tcId==null) return;
         if(entity.getSystemeReperageBornes().isEmpty()) return;
-        
-        final TronconDigueRepository tcRepo = new TronconDigueRepository(db);
+
         if(troncon==null){
             try{
-                troncon = tcRepo.get(tcId);
+                troncon = tronconDigueRepo.get(tcId);
             }catch(DocumentNotFoundException ex){
                 //le troncon n'existe pas
                 return;
             }
         }
-        
+
         final List<String> borneIds = troncon.getBorneIds();
-        
+
         boolean needSave = false;
         for(SystemeReperageBorne srb : entity.getSystemeReperageBornes()){
             final String bid = srb.getBorneId();
@@ -136,16 +137,16 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
                 needSave = true;
             }
         }
-        
+
         if (troncon.getSystemeRepDefautId() == null || troncon.getSystemeRepDefautId().isEmpty() || forceDefaultSR) {
             troncon.setSystemeRepDefautId(entity.getId());
             needSave = true;
         }
-        
+
         if(needSave){
-            tcRepo.update(troncon);
+            tronconDigueRepo.update(troncon);
         }
     }
-    
+
 }
 

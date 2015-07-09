@@ -1,7 +1,5 @@
 package fr.sirs.core;
 
-import static fr.sirs.core.SirsCore.COMPONENT_PACKAGE;
-import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DatabaseRegistry;
@@ -27,11 +25,11 @@ import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.index.ElementHit;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import javafx.beans.property.BooleanProperty;
@@ -39,6 +37,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import org.apache.sis.util.collection.Cache;
 
 import org.ektorp.CouchDbConnector;
 import org.geotoolkit.referencing.CRS;
@@ -50,45 +49,48 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 /**
- * La session contient toutes les données chargées dans l'instance courante de 
+ * La session contient toutes les données chargées dans l'instance courante de
  * l'application.
- * 
- * Notamment, elle doit réferencer l'ensemble des thèmes ouvert, ainsi que les 
+ *
+ * Notamment, elle doit réferencer l'ensemble des thèmes ouvert, ainsi que les
  * onglets associés. De même pour les {@link Element}s et leurs éditeurs.
- * 
+ *
  * La session fournit également un point d'accès centralisé à tous les documents
  * de la base CouchDB.
- * 
+ *
  * @author Johann Sorel
  */
 public class SessionCore implements ApplicationContextAware {
-    
+
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DES DROITS
     ////////////////////////////////////////////////////////////////////////////
     private final ObjectProperty<Utilisateur> utilisateurProperty = new SimpleObjectProperty<>(null);
     public ObjectProperty<Utilisateur> utilisateurProperty() {return utilisateurProperty;}
-    
+
     public Utilisateur getUtilisateur() {return utilisateurProperty.get();}
     public void setUtilisateur(final Utilisateur utilisateur) {
         utilisateurProperty.set(utilisateur);
     }
-    
+
     private final BooleanProperty geometryEditionProperty = new SimpleBooleanProperty(false);
     public BooleanProperty geometryEditionProperty() {return geometryEditionProperty;}
     private final BooleanProperty nonGeometryEditionProperty = new SimpleBooleanProperty(false);
     public BooleanProperty nonGeometryEditionProperty() {return nonGeometryEditionProperty;}
     private final BooleanProperty needValidationProperty = new SimpleBooleanProperty(true);
     public BooleanProperty needValidationProperty() {return needValidationProperty;}
-    
+
     private final ObjectProperty<Role> role = new SimpleObjectProperty();
     public Role getRole(){return role.get();}
-    
+
     private final ElementCreator elementCreator;
-    
+
     public ElementCreator getElementCreator(){return elementCreator;}
+
+
     ////////////////////////////////////////////////////////////////////////////
-    
+    // GESTION DU CONTEXTE SPRING
+    ////////////////////////////////////////////////////////////////////////////
     private ApplicationContext applicationContext;
     public ApplicationContext getApplicationContext(){return applicationContext;}
 
@@ -96,91 +98,98 @@ public class SessionCore implements ApplicationContextAware {
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
             this.applicationContext = applicationContext;
     }
-    
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    // GESTION DES REPOSITORIES COUCHDB
+    ////////////////////////////////////////////////////////////////////////////
+    /**
+     * A map of all available repositories in current context. Value is a
+     * specific repository, and key is the canonical name of the model class on
+     * which the repository works.
+     */
+    private final HashMap<String, AbstractSIRSRepository> repositories = new HashMap<>();
+
+    private final Cache<Class<? extends Element>, Collection<AbstractSIRSRepository>> matchingRepositoriesCache = new Cache<>(12, 12, false);
+
+    /**
+     * Retrieve all registries initialized by spring, then add them to current session.
+     *
+     * @param registered
+     */
+    @Autowired
+    public void initRepositories(List<AbstractSIRSRepository> registered) {
+        for (final AbstractSIRSRepository repo : registered) {
+            repositories.put(repo.getModelClass().getCanonicalName(), repo);
+        }
+    }
 
     /**
      * Find a repository for update operations on {@link Element} of given type.
      * @param <T>
      * @param elementType The class of the type we want a {@link AbstractSIRSRepository} for. (Ex : RefMateriau.class, TronconDigue.class, etc.)
-     * @return A valid repository for input type. Never null.
+     * @return A valid repository for input type, or null if we cannot find any repository for given type.
      */
     public <T extends Element> AbstractSIRSRepository<T> getRepositoryForClass(Class<T> elementType) {
-        return applicationContext.getBeansOfType(AbstractSIRSRepository.class).get(COMPONENT_PACKAGE+"."+elementType.getSimpleName()+"Repository");
+        if (elementType == null) return null;
+        return getRepositoryForType(elementType.getCanonicalName());
     }
-    
+
     public Collection<AbstractSIRSRepository> getModelRepositories(){
-        return applicationContext.getBeansOfType(AbstractSIRSRepository.class).values();
+        return repositories.values();
     }
-    
-    private final Map<Class<? extends Element>, Collection<AbstractSIRSRepository<Element>>> REPOS_FOR_ABSTRACT_CLASS = new HashMap<>();
-    
+
     /**
      * Return a collection of candidate repositories for an abstract class or an interface.
      * @param elementType
-     * @return 
+     * @return All repositories which work on given element types or its sub-classes. Can be empty, but never null.
      */
-    public Collection<AbstractSIRSRepository<Element>> getRepositoriesForClass(Class<? extends Element> elementType){
-        
-        if(!elementType.isInterface() 
-                && !Modifier.isAbstract(elementType.getModifiers())) 
-            throw new IllegalArgumentException("The class given as an arguement has to be either abstract or either an interface.");
-        
-        
-        if(REPOS_FOR_ABSTRACT_CLASS.get(elementType)==null){
-            final Collection<AbstractSIRSRepository<Element>> col = new ArrayList<>();
-
-            for(final Class element : ELEMENTS){
-                if(elementType.isAssignableFrom(element)) 
-                    col.add(getRepositoryForClass(element));
-            }
-
-            for(final Class element : REFERENCES){
-                if(elementType.isAssignableFrom(element)) 
-                    col.add(getRepositoryForClass(element));
-            }
-            REPOS_FOR_ABSTRACT_CLASS.put(elementType, col);
+    public Collection<AbstractSIRSRepository> getRepositoriesForClass(Class<? extends Element> elementType) {
+        if (elementType == null)
+            return Collections.EMPTY_SET;
+        try {
+            return matchingRepositoriesCache.getOrCreate(elementType, () -> {
+                final HashSet<AbstractSIRSRepository> result = new HashSet<>();
+                for (final AbstractSIRSRepository repo : repositories.values()) {
+                    if (elementType.isAssignableFrom(repo.getModelClass())) {
+                        result.add(repo);
+                    }
+                }
+                return result;
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return REPOS_FOR_ABSTRACT_CLASS.get(elementType);
     }
-    
+
     /**
      * Find a repository for update operations on {@link Element} of given type.
      * @param type The name of the type we want a {@link AbstractSIRSRepository} for. (Ex : RefMateriau, TronconDigue, etc.)
-     * @return A valid repository for input type. Never null.. 
+     * @return A valid repository for input type. Never null..
      */
     public AbstractSIRSRepository getRepositoryForType(String type) {
-        Class c;
-        try {
-            c = Class.forName(type, true, Thread.currentThread().getContextClassLoader());
-        } catch (ClassNotFoundException ex1) {
-            try {
-                c = Class.forName(MODEL_PACKAGE+"."+type, true, Thread.currentThread().getContextClassLoader());
-            } catch (ClassNotFoundException ex2) {
-                throw new IllegalArgumentException("No repository can be found for argument "+type);
-            }
-        }
-        return getRepositoryForClass(c);
+        return repositories.get(type);
     }
 
-    private final CouchDbConnector connector;
-    
+
     ////////////////////////////////////////////////////////////////////////////
     // SPECIFIC REPOSITORIES
     ////////////////////////////////////////////////////////////////////////////
     private final ReferenceUsageRepository referenceUsageRepository;
     private final Previews previews;
-    
+
+    private final CouchDbConnector connector;
     private CoordinateReferenceSystem projection;
     private int srid;
-    
+
     @Autowired
     public SessionCore(CouchDbConnector couchDbConnector) {
         this.connector = couchDbConnector;
-        
+
         referenceUsageRepository = new ReferenceUsageRepository(connector);
         previews = new Previews(connector);
         elementCreator = new ElementCreator(this);
-        
+
         // Listen on user change
         utilisateurProperty.addListener(
                 (ObservableValue<? extends Utilisateur> observable, Utilisateur oldValue, Utilisateur newValue) -> {
@@ -210,18 +219,18 @@ public class SessionCore implements ApplicationContextAware {
                     }
                 });
     }
-    
+
     public CouchDbConnector getConnector() {
         return connector;
     }
-    
+
     public int getSrid() {
         if (projection == null) {
             getProjection();
         }
         return srid;
     }
-    
+
     public CoordinateReferenceSystem getProjection() {
         if (projection == null) {
             try {
@@ -236,24 +245,24 @@ public class SessionCore implements ApplicationContextAware {
         }
         return projection;
     }
-           
+
     /**
-     * 
-     * @return the application task manager, designed to start users tasks in a 
+     *
+     * @return the application task manager, designed to start users tasks in a
      * separate thread pool.
      */
     public TaskManager getTaskManager() {
         return SirsCore.getTaskManager();
-    }  
-    
+    }
+
     public ReferenceUsageRepository getReferenceUsageRepository(){
         return referenceUsageRepository;
     }
-    
+
     public Previews getPreviews() {
         return previews;
     }
-    
+
     public <T extends Positionable> List<T> getByTronconId(final String tronconId, final Class<T> clazz){
         final List<T> objets = new ArrayList<>();
         for(final Element element : ServiceLoader.load(Element.class)){
@@ -267,17 +276,17 @@ public class SessionCore implements ApplicationContextAware {
         }
         return objets;
     }
-    
+
     public List<ProprieteTroncon> getProprietesByTronconId(final String tronconId){
         final AbstractPositionableRepository<ProprieteTroncon> repo = (AbstractPositionableRepository<ProprieteTroncon>) getRepositoryForClass(ProprieteTroncon.class);
         return repo.getByLinearId(tronconId);
     }
-    
+
     public List<GardeTroncon> getGardesByTronconId(final String tronconId){
         final AbstractPositionableRepository<GardeTroncon> repo = (AbstractPositionableRepository<GardeTroncon>) getRepositoryForClass(GardeTroncon.class);
         return repo.getByLinearId(tronconId);
     }
-    
+
     public List<Objet> getObjetsByTronconId(final String tronconId){
         final List<Objet> objets = new ArrayList<>();
         for(final Element element : ServiceLoader.load(Element.class)){
@@ -291,7 +300,7 @@ public class SessionCore implements ApplicationContextAware {
         }
         return objets;
     }
-    
+
     public List<AbstractPositionDocument> getPositionDocumentsByTronconId(final String tronconId){
         final List<AbstractPositionDocument> positions = new ArrayList<>();
         for(final Element element : ServiceLoader.load(Element.class)){
@@ -305,7 +314,7 @@ public class SessionCore implements ApplicationContextAware {
         }
         return positions;
     }
-        
+
     // REFERENCES
     private static final List<Class<? extends ReferenceType>> REFERENCES = new ArrayList<>();
     private static final List<Class<? extends Element>> ELEMENTS = new ArrayList<>();
@@ -315,29 +324,29 @@ public class SessionCore implements ApplicationContextAware {
     private static void initElements(){
         ServiceLoader.load(Element.class).forEach((Element t) -> ELEMENTS.add(t.getClass()));
     }
-    
+
     static{
         initReferences();
         initElements();
     }
-    
+
     public static List<Class<? extends ReferenceType>> getReferences(){return REFERENCES;}
     public static List<Class<? extends Element>> getElements(){return ELEMENTS;}
-    
+
     /**
      * Take an element in input, and return the same, but with its {@link Element#parentProperty() }
      * and {@link Element#getCouchDBDocument() } set.
-     * 
+     *
      * @param e The element we want to get parent for.
-     * @return The same element, completed with its parent, Or a null value if we 
+     * @return The same element, completed with its parent, Or a null value if we
      * cannot get full version of the element.
      */
     public Optional<? extends Element> getCompleteElement(Element e) {
         if (e != null) {
             if (e.getCouchDBDocument() != null) {
-                // For objects like {@link tronconDigue}, we force reload, because 
-                //they're root objects. It means checking their document do not 
-                //ensure they're complete. 
+                // For objects like {@link tronconDigue}, we force reload, because
+                //they're root objects. It means checking their document do not
+                //ensure they're complete.
                 if (e.getCouchDBDocument() == e) {
                     return Optional.of((Element)getRepositoryForClass(e.getClass()).get(e.getId()));
                 } else {
@@ -359,11 +368,11 @@ public class SessionCore implements ApplicationContextAware {
         }
         return Optional.empty();
     }
-    
+
     /**
      * Analyse input object to find a matching {@link Element} registered in database.
      * @param toGetElementFor The object which represents the Element to retrieve.
-     * Can be a {@link Preview}, {@link  ElementHit}, or a {@link String} (in which 
+     * Can be a {@link Preview}, {@link  ElementHit}, or a {@link String} (in which
      * case it must represent a valid element ID).
      * @return An optional which contains the found value, if any.
      */
@@ -371,11 +380,11 @@ public class SessionCore implements ApplicationContextAware {
         if (toGetElementFor instanceof Element) {
             return getCompleteElement((Element)toGetElementFor);
         }
-        
+
         if (toGetElementFor instanceof String) {
             toGetElementFor = previews.get((String)toGetElementFor);
         }
-        
+
         if (toGetElementFor instanceof Preview) {
             final Preview summary = (Preview) toGetElementFor;
             final AbstractSIRSRepository repository = getRepositoryForType(summary.getDocClass());
@@ -386,7 +395,7 @@ public class SessionCore implements ApplicationContextAware {
                 } else {
                     return Optional.of((Element)tmp);
                 }
-            }            
+            }
         } else if (toGetElementFor instanceof ElementHit) {
             final ElementHit hit = (ElementHit) toGetElementFor;
             final AbstractSIRSRepository repository = getRepositoryForType(hit.getElementClassName());
@@ -394,10 +403,10 @@ public class SessionCore implements ApplicationContextAware {
             if (tmp instanceof Element) {
                 return Optional.of((Element)tmp);
             }
-        }        
+        }
         return Optional.empty();
     }
-    
+
     public String getElementType(final Object o) {
         if (o instanceof Element) {
             return o.getClass().getCanonicalName();

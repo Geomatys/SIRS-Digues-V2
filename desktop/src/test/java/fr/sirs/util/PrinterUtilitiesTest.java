@@ -10,7 +10,6 @@ import fr.sirs.core.model.TronconDigue;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 
-import org.ektorp.CouchDbConnector;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -22,7 +21,6 @@ import static org.junit.Assert.*;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -35,24 +33,26 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class PrinterUtilitiesTest {
 
     @Autowired
-    @Qualifier("sirsCouchDB")
-    private CouchDbConnector connector;
-    
+    DigueRepository digueRepository;
+
+    @Autowired
+    TronconDigueRepository tronconRepository;
+
     public PrinterUtilitiesTest() {
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() {
     }
-    
+
     @After
     public void tearDown() {
     }
@@ -65,11 +65,10 @@ public class PrinterUtilitiesTest {
     @Ignore
     public void testPrintDigue() throws Exception {
         System.out.println("Test print Digue.");
-        final DigueRepository digueRepository = new DigueRepository(connector);
         final Digue digue = digueRepository.getAll().get(0);
-//        print(digue, null);    
+//        print(digue, null);
     }
-    
+
     /**
      * Test of print method for TronconGestionDigue, of class PrinterUtilities.
      * @throws java.lang.Exception
@@ -78,16 +77,15 @@ public class PrinterUtilitiesTest {
     @Ignore
     public void testPrintTronconGestionDigue() throws Exception {
         System.out.println("Test print TronconGestionDigue.");
-        final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
         final TronconDigue tronconGestionDigue = tronconRepository.getAll().get(0);
-//        print(tronconGestionDigue, null); 
+//        print(tronconGestionDigue, null);
     }
-    
+
     /**
      * Test of print method for BorneDigue, of class PrinterUtilities.
      * @throws java.lang.Exception
      */
-    @Test 
+    @Test
     @Ignore
     public void testPrintBorneDigue() throws Exception {
         System.out.println("Test print BorneDigue.");
@@ -104,8 +102,8 @@ public class PrinterUtilitiesTest {
         //borneDigue.setZPoint(1.5);
         //borneDigue.setXPointOrigine(1.6);
         //borneDigue.setYPointOrigine(1.7);
-         
-//        print(borneDigue, null); 
+
+//        print(borneDigue, null);
     }
 
     /**

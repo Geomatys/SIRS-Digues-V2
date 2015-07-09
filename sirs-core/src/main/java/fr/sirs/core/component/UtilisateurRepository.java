@@ -24,23 +24,23 @@ import org.ektorp.support.Views;
 public class UtilisateurRepository extends AbstractSIRSRepository<Utilisateur>{
 
     public static final String BY_LOGIN = "byLogin";
-    
+
     public static final Utilisateur GUEST_USER = ElementCreator.createAnonymValidElement(Utilisateur.class);
     static {
         GUEST_USER.setRole(Role.GUEST);
     }
-    
+
     @Autowired
-    public UtilisateurRepository ( CouchDbConnector db) {
+    private UtilisateurRepository ( CouchDbConnector db) {
        super(Utilisateur.class, db);
        initStandardDesignDocument();
    }
-    
+
     @Override
     public Class<Utilisateur> getModelClass() {
         return Utilisateur.class;
     }
-    
+
     @Override
     public Utilisateur create(){
         final SessionCore session = InjectorCore.getBean(SessionCore.class);
@@ -53,10 +53,10 @@ public class UtilisateurRepository extends AbstractSIRSRepository<Utilisateur>{
     }
 
     public List<Utilisateur> getByLogin(final String login) {
-        if (login == null || login.isEmpty()) 
+        if (login == null || login.isEmpty())
             return Collections.singletonList(GUEST_USER);
         return this.queryView(BY_LOGIN, login);
     }
-   
+
 }
 

@@ -1,13 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package fr.sirs.util;
+package fr.sirs.component;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import fr.sirs.core.CouchDBTestCase;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +20,6 @@ import fr.sirs.core.model.TronconDigue;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import org.ektorp.CouchDbConnector;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,31 +32,31 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:/spring/test-context.xml")
-public class RepositoriesTest {
+public class RepositoriesTest extends CouchDBTestCase {
 
     @Autowired
-    private CouchDbConnector connector;
+    DigueRepository digueRepository;
+
+    @Autowired
+    TronconDigueRepository tronconRepository;
 
     public void test() {
         System.out.println(connector.getAllDocIds());
     }
-    
+
     public void removeDigues() {
-        final DigueRepository digueRepository = new DigueRepository(connector);
         List<Digue> digues = digueRepository.getAll();
         for(Digue digue : digues) digueRepository.remove(digue);
     }
-    
+
     public void removeTronconsDigue() {
-        final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
         final List<TronconDigue> troncons = tronconRepository.getAll();
         troncons.stream().forEach((troncon) -> {
             tronconRepository.remove(troncon);
         });
     }
-    
+
     public void insertDigues() {
-        final DigueRepository digueRepository = new DigueRepository(connector);
         final int nbDigues = 10;
         for (int i = 0; i < nbDigues; i++) {
             final Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
@@ -91,8 +86,6 @@ public class RepositoriesTest {
     }
 
     public void insertTronconsDigue() {
-        
-        final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
         final int nbTroncons = 30;
         for (int i = 0; i < nbTroncons; i++) {
             final TronconDigue tron = ElementCreator.createAnonymValidElement(TronconDigue.class);
@@ -117,10 +110,10 @@ public class RepositoriesTest {
             tron.setDate_debut(LocalDate.now());
             tron.setDate_fin(LocalDate.now());
             tron.setDateMaj(LocalDateTime.now());
-            
+
             tron.setGeometry(createPoint());
             tronconRepository.add(tron);
-            
+
             Fondation ecluse = ElementCreator.createAnonymValidElement(Fondation.class);
             ecluse.setCommentaire("Fondation");
             ecluse.setLinearId(tron.getId());
@@ -136,17 +129,15 @@ public class RepositoriesTest {
     private Point createPoint() {
         //random coord in france in 2154
         return createPoint(
-                Math.random()*900000 - 100000, 
+                Math.random()*900000 - 100000,
                 Math.random()*1000000 + 6100000);
     }
-    
+
     public void linkTronconsToDigues(){
-        final DigueRepository digueRepository = new DigueRepository(connector);
-        final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
         final List<Digue> digues = digueRepository.getAll();
         final List<TronconDigue> troncons = tronconRepository.getAll();
         final int nbDigues = digues.size();
-        
+
         int i=0;
         for(final TronconDigue troncon : troncons){
             final Digue digue = digues.get(i);
@@ -157,7 +148,7 @@ public class RepositoriesTest {
             tronconRepository.update(troncon);
         }
     }
-    
+
     @Test
     @Ignore
     public void testBase(){
@@ -175,8 +166,6 @@ public class RepositoriesTest {
     @Ignore
     public void testGetAll() {
         System.out.println("getAll");
-        final DigueRepository digueRepository = new DigueRepository(connector);
-        final TronconDigueRepository tronconRepository = new TronconDigueRepository(connector);
         final List<Digue> expResult = new ArrayList<>();
         final List<Digue> result = digueRepository.getAll();
         for (Digue digue : result) {

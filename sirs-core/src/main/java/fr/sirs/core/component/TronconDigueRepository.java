@@ -14,7 +14,6 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -25,30 +24,30 @@ import org.springframework.stereotype.Component;
 
 /**
  * Outil gérant les échanges avec la bdd CouchDB pour tous les objets tronçons.
- * 
- * Note : Le cache qui permet de garder une instance unique en mémoire pour un 
- * tronçon donné est extrêmement important pour les opérations de sauvegarde. 
- * 
+ *
+ * Note : Le cache qui permet de garder une instance unique en mémoire pour un
+ * tronçon donné est extrêmement important pour les opérations de sauvegarde.
+ *
  * Ex : On a un tronçon A, qui contient une crête tata et un talus de digue toto.
- * 
- * On ouvre l'éditeur de toto. Le tronçon A est donc chargé en mémoire. 
- * Dans le même temps on ouvre le panneau d'édition pour tata. On doit donc aussi 
+ *
+ * On ouvre l'éditeur de toto. Le tronçon A est donc chargé en mémoire.
+ * Dans le même temps on ouvre le panneau d'édition pour tata. On doit donc aussi
  * charger le tronçon A en mémoire.
- * 
- * Maintenant, que se passe -'il sans cache ? On a deux copies du tronçon A en  
+ *
+ * Maintenant, que se passe -'il sans cache ? On a deux copies du tronçon A en
  * mémoire pour une même révision (disons 0).
- * 
- * Si on sauvegarde toto, tronçon A passe en révision 1 dans la bdd, mais pour 
- * UNE SEULE des 2 copies en mémoire. En conséquence de quoi, lorsqu'on veut 
+ *
+ * Si on sauvegarde toto, tronçon A passe en révision 1 dans la bdd, mais pour
+ * UNE SEULE des 2 copies en mémoire. En conséquence de quoi, lorsqu'on veut
  * sauvegarder tata, on a un problème : on demande à la base de faire une mise à
  * jour de la révision 1 en utilisant un objet de la révision 0.
- * 
- * Résultat : ERREUR ! 
- * 
+ *
+ * Résultat : ERREUR !
+ *
  * Avec le cache, les deux éditeurs pointent sur la même copie en mémoire. Lorsqu'un
  * éditeur met à jour le tronçon, la révision de la copie est indentée, le deuxième
  * éditeur a donc un tronçon avec un numéro de révision correct.
- * 
+ *
  * @author Samuel Andrés (Geomatys)
  * @author Alexis Manin (Geomatys)
  */
@@ -59,13 +58,13 @@ import org.springframework.stereotype.Component;
         @View(name = TronconDigueRepository.BY_DIGUE_ID, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}") })
 @Component("fr.sirs.core.component.TronconDigueRepository")
 public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue> {
-    
+
     public static final String STREAM = "stream";
     public static final String STREAM_LIGHT = "streamLight";
     public static final String BY_DIGUE_ID = "byDigueId";
-    
+
     @Autowired
-    public TronconDigueRepository(CouchDbConnector db) {
+    private TronconDigueRepository(CouchDbConnector db) {
         super(TronconDigue.class, db);
         initStandardDesignDocument();
     }
@@ -99,10 +98,10 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
 
     /**
      * Return a light version of the tronçon, without sub-structures.
-     * 
+     *
      * Note : As the objects returned here are incomplete, they're not cached.
-     * 
-     * @return 
+     *
+     * @return
      */
     public List<TronconDigue> getAllLight() {
         final JacksonIterator<TronconDigue> ite = JacksonIterator.create(TronconDigue.class, db.queryForStreamingView(createQuery(STREAM_LIGHT)));
@@ -117,19 +116,19 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         return JacksonIterator.create(TronconDigue.class,
                 db.queryForStreamingView(createQuery(STREAM)));
     }
-    
+
     public JacksonIterator<TronconDigue> getAllLightIterator() {
         return JacksonIterator.create(TronconDigue.class,
                 db.queryForStreamingView(createQuery(STREAM_LIGHT)));
     }
-    
+
     /**
      * Cette contrainte s'assure de supprimer les SR et bornes associées au troncon
      * en cas de suppression.
      */
     private void constraintDeleteBoundEntities(TronconDigue entity) {
         //on supprime tous les SR associés
-        final SystemeReperageRepository srrepo = new SystemeReperageRepository(db);
+        final SystemeReperageRepository srrepo = InjectorCore.getBean(SystemeReperageRepository.class);
         final List<SystemeReperage> srs = srrepo.getByLinearId(entity.getId());
         for(SystemeReperage sr : srs) {
             srrepo.remove(sr, entity);

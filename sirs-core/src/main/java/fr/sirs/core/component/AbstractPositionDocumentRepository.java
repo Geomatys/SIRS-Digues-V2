@@ -14,8 +14,8 @@ import org.ektorp.CouchDbConnector;
 public abstract class AbstractPositionDocumentRepository<T extends AbstractPositionDocumentAssociable> extends AbstractPositionableRepository<T> {
 
     public static final String BY_DOCUMENT_ID = "byDocumentId";
-    
-    public AbstractPositionDocumentRepository(Class<T> type, CouchDbConnector db) {
+
+    protected AbstractPositionDocumentRepository(Class<T> type, CouchDbConnector db) {
         super(type, db);
     }
 
