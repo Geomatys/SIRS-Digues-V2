@@ -5210,7 +5210,7 @@
               </value>
             </value>
             <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_q6brhiCUEeWNTNjiAQl0YQ">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fosses"/>
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fosse"/>
               <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_q6brhyCUEeWNTNjiAQl0YQ" key="_85-MABWYEeWV5_2gWqHPSw">
                 <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_q6briyCUEeWNTNjiAQl0YQ" value="_q6briCCUEeWNTNjiAQl0YQ">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
@@ -5218,7 +5218,7 @@
               </value>
             </value>
             <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_q6cSliCUEeWNTNjiAQl0YQ">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fusibles"/>
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fusible"/>
               <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_q6cSlyCUEeWNTNjiAQl0YQ" key="_PgY_cBWXEeWV5_2gWqHPSw">
                 <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_q6cSmyCUEeWNTNjiAQl0YQ" value="_q6cSmCCUEeWNTNjiAQl0YQ">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
@@ -5226,7 +5226,7 @@
               </value>
             </value>
             <value xmi:type="diagram:ModelElement2ViewVariable" xmi:id="_q6c5piCUEeWNTNjiAQl0YQ">
-              <key xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/seuils"/>
+              <key xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/seuil"/>
               <value xmi:type="diagram:ViewVariable2ContainerVariable" xmi:id="_q6c5pyCUEeWNTNjiAQl0YQ" key="_PgZmjBWXEeWV5_2gWqHPSw">
                 <value xmi:type="diagram:ContainerVariable2StyleDescription" xmi:id="_q6c5qyCUEeWNTNjiAQl0YQ" value="_q6c5qCCUEeWNTNjiAQl0YQ">
                   <key xmi:type="ecore:EPackage" href="sirs.ecore#/"/>
@@ -13225,9 +13225,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_PgY_cBWXEeWV5_2gWqHPSw" name="[0..*] fusibles" sourceNode="_HX4owFrCEeS5fNILrts1cg" targetNode="_cTQDYBWWEeWV5_2gWqHPSw">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fusibles"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fusibles"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_PgY_cBWXEeWV5_2gWqHPSw" name="[0..1] fusible" sourceNode="_HX4owFrCEeS5fNILrts1cg" targetNode="_cTQDYBWWEeWV5_2gWqHPSw">
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fusible"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fusible"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_q6c5oCCUEeWNTNjiAQl0YQ" description="_q6cSmCCUEeWNTNjiAQl0YQ" sourceArrow="FillDiamond" routingStyle="manhattan">
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_q6c5oSCUEeWNTNjiAQl0YQ"/>
           <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_q6c5oiCUEeWNTNjiAQl0YQ" showIcon="false">
@@ -13239,9 +13239,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_PgZmjBWXEeWV5_2gWqHPSw" name="[0..*] seuils" sourceNode="_HX4owFrCEeS5fNILrts1cg" targetNode="_anoPEBWWEeWV5_2gWqHPSw">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/seuils"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/seuils"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_PgZmjBWXEeWV5_2gWqHPSw" name="[0..1] seuil" sourceNode="_HX4owFrCEeS5fNILrts1cg" targetNode="_anoPEBWWEeWV5_2gWqHPSw">
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/seuil"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/seuil"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_q6c5rCCUEeWNTNjiAQl0YQ" description="_q6c5qCCUEeWNTNjiAQl0YQ" sourceArrow="FillDiamond" routingStyle="manhattan">
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_q6c5rSCUEeWNTNjiAQl0YQ"/>
           <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_q6c5riCUEeWNTNjiAQl0YQ" showIcon="false">
@@ -13323,9 +13323,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_85-MABWYEeWV5_2gWqHPSw" name="[0..*] fosses" sourceNode="_HX4owFrCEeS5fNILrts1cg" targetNode="_84Y3oBWYEeWV5_2gWqHPSw">
-        <target xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fosses"/>
-        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fosses"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_85-MABWYEeWV5_2gWqHPSw" name="[0..1] fosse" sourceNode="_HX4owFrCEeS5fNILrts1cg" targetNode="_84Y3oBWYEeWV5_2gWqHPSw">
+        <target xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fosse"/>
+        <semanticElements xmi:type="ecore:EReference" href="sirs.ecore#//Deversoir/fosse"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_q6cSkCCUEeWNTNjiAQl0YQ" description="_q6briCCUEeWNTNjiAQl0YQ" sourceArrow="FillDiamond" routingStyle="manhattan">
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_q6cSkSCUEeWNTNjiAQl0YQ"/>
           <centerLabelStyle xmi:type="diagram:CenterLabelStyle" xmi:id="_q6cSkiCUEeWNTNjiAQl0YQ" showIcon="false">
@@ -13412,7 +13412,7 @@
           <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_Ktc4ZCVPEeWwdbdq1jZqgw" red="255" green="252" blue="216"/>
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_8rgAkCVOEeWwdbdq1jZqgw" name="libelle : EString" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@580eb90b{platform:/resource/sirs-core/model/sirs.ecore#//SQLQuery/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_8rgAkCVOEeWwdbdq1jZqgw" name="libelle : EString" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="sirs.ecore#//SQLQuery/libelle"/>
           <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//SQLQuery/libelle"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="__rSLcCVOEeWwdbdq1jZqgw" labelAlignment="LEFT">
@@ -13423,7 +13423,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_AJJMICVPEeWwdbdq1jZqgw" name="sql : EString" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@490e8abd{platform:/resource/sirs-core/model/sirs.ecore#//SQLQuery/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_AJJMICVPEeWwdbdq1jZqgw" name="sql : EString" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="sirs.ecore#//SQLQuery/sql"/>
           <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//SQLQuery/sql"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_CnCK4CVPEeWwdbdq1jZqgw" labelAlignment="LEFT">
@@ -13434,7 +13434,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Dfy-4CVPEeWwdbdq1jZqgw" name="description : EString" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@701b18bd{platform:/resource/sirs-core/model/sirs.ecore#//SQLQuery/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Dfy-4CVPEeWwdbdq1jZqgw" name="description : EString" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="sirs.ecore#//SQLQuery/description"/>
           <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//SQLQuery/description"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_KuI04CVPEeWwdbdq1jZqgw" labelAlignment="LEFT">
