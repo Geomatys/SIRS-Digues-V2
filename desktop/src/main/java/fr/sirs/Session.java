@@ -44,6 +44,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -104,7 +105,9 @@ public class Session extends SessionCore {
     private final Cache<Class<? extends Element>, FXFreeTab> openDesignationPanes = new Cache<>(12, 0, false);
     public enum AdminTab{VALIDATION, USERS}
     private final Cache<AdminTab, FXFreeTab> openAdminTabs = new Cache<>(2, 0, false);
-
+    public enum PrintTab{DESORDRE}
+    private final Cache<PrintTab, FXFreeTab> openPrintTabs = new Cache<>(2, 0, false);
+    
     //generate a template for the legend
     final DefaultLegendTemplate legendTemplate = new DefaultLegendTemplate(
             new DefaultBackgroundTemplate( //legend background
@@ -275,7 +278,20 @@ public class Session extends SessionCore {
             }
         }
     }
-
+    
+    public FXFreeTab getOrCreatePrintTab(final PrintTab printTab, final String title){
+        
+        try {
+            return openPrintTabs.getOrCreate(PrintTab.DESORDRE, () -> {
+                final FXFreeTab tab = new FXFreeTab(title);
+                tab.setContent(new FXDisorderPrintPane());
+                return tab;
+            });
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+    
     public FXFreeTab getOrCreateAdminTab(final AdminTab adminTab, final String title){
 
         try {

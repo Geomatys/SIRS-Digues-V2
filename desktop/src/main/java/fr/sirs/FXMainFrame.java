@@ -443,11 +443,7 @@ public class FXMainFrame extends BorderPane {
     
     @FXML 
     private void disorderPrint(){
-        final Stage disorderPrintStage = new Stage();
-        disorderPrintStage.setTitle("Fiches détaillées de désordres");
-        disorderPrintStage.getIcons().add(SIRS.ICON);
-        disorderPrintStage.setScene(new Scene(new FXDisorderPrintFrame()));
-        disorderPrintStage.show();
+        addTab(session.getOrCreatePrintTab(Session.PrintTab.DESORDRE, "Fiches détaillées de désordres"));
     }
     
     @FXML

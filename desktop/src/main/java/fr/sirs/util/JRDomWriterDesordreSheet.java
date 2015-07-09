@@ -2,6 +2,7 @@
 package fr.sirs.util;
 
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Observation;
@@ -76,6 +77,8 @@ import java.util.ResourceBundle;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -295,23 +298,32 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
                 }
             }
         }
+        
+        // Écriture d'un champ supplémentaire pour la classe de l'objet.
+        writeSubDatasetField("class", Class.class, subDataset);
     }
         
     /**
      * <p>This method writes the fiels user by the Jasper Reports template.</p>
      * @param propertyType must be a setter method starting by "set"
      */
-    private void writeSubDatasetField(final Method method, final Element subDataset) {
+    private void writeSubDatasetField(final Method setter, final Element subDataset) {
         
         // Builds the name of the field.----------------------------------------
-        final String fieldName = method.getName().substring(3, 4).toLowerCase() 
-                        + method.getName().substring(4);
+        final String fieldName = setter.getName().substring(3, 4).toLowerCase() 
+                        + setter.getName().substring(4);
+        writeSubDatasetField(fieldName, setter.getParameterTypes()[0], subDataset);
+    }
+    
+    
+    private void writeSubDatasetField(final String fieldName, final Class fieldClass, final Element subDataset) {
+        
         
         // Creates the field element.-------------------------------------------
         final Element field = document.createElement(TAG_FIELD);
         field.setAttribute(ATT_NAME, fieldName);
         
-        final Optional<String> canonicalName = getCanonicalName(method.getParameterTypes()[0]);
+        final Optional<String> canonicalName = getCanonicalName(fieldClass);
         if(canonicalName.isPresent()) field.setAttribute(ATT_CLASS, canonicalName.get());
         
         final Element fieldDescription = document.createElement(TAG_FIELD_DESCRIPTION);
@@ -597,6 +609,9 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         
         table.appendChild(datasetRun);
         
+        ////////////////////////////////////////////////////////////////////////
+        // COMPUTE NUMBER OF COLUMNS AND COLUMN WIDTH
+        ////////////////////////////////////////////////////////////////////////
         int nbColumns=0;
         // Si la liste des champs contient les champs à imprimer et non pas à éviter alors le nombre de champs est directement donnée par la taille de la liste.
         if(print) {
@@ -615,17 +630,17 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         }
         
         // If class is abstract, add one column to print class name
-//        if(Modifier.isAbstract(clazz.getModifiers())){
-//            nbColumns++;
-//        }
+        if(Modifier.isAbstract(clazz.getModifiers())){
+            nbColumns++;
+        }
         
         // Calcul de la largeur d'une colonne en fonction du nombre  
         final int columnWidth = (PAGE_WIDTH - (LEFT_MARGIN+LEFT_MARGIN))/nbColumns;
         
         
-        
-        
-        
+        ////////////////////////////////////////////////////////////////////////
+        // FUNCTIONAL PARAMETERS TO FILL COLUMNS
+        ////////////////////////////////////////////////////////////////////////
         final Function<Method, Supplier<CDATASection>> getFromMethodSupplier = (Method setter) -> {
             
             final String fieldName = getFieldNameFromSetter(setter);
@@ -646,53 +661,20 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
             return fromMethodSupplier;
         };
         
-        final Function<String, Markup> markupFromFieldName = (String fieldName) -> {
-            
-            final Markup markup;
-            if (fieldName.contains("escript") || fieldName.contains("omment")){
-                markup = Markup.HTML;
-            } else {
-                markup = Markup.NONE;
-            }
-            return markup;
-        };
+        final Function<String, Markup> markupFromFieldName = (String fieldName) -> 
+                (fieldName.contains("escript") || fieldName.contains("omment")) ? Markup.HTML : Markup.NONE;
         
+        if(Modifier.isAbstract(clazz.getModifiers())){
+            writeColumn("Type", 
+                    () -> document.createCDATASection("$F{class}==null ? \""+NULL_REPLACEMENT+"\" : java.util.ResourceBundle.getBundle($F{class}.getName()).getString(\"class\")"), 
+                    markupFromFieldName.apply("class"), table, columnWidth, 7, 1, 20, 10);
+        }
         
-        
-//        final Function<Class, Supplier<CDATASection>> getFromClassSupplier = (Class clazz) -> {
-//            
-//            final String fieldName = getFieldNameFromSetter(setter);
-//            final Class fieldClass = setter.getParameterTypes()[0];
-//            
-//            Supplier<CDATASection> fromMethodSupplier = () -> {
-//
-//                final CDATASection valueField;
-//                if(fieldClass==Boolean.class || (fieldClass!=null && BOOLEAN_PRIMITIVE_NAME.equals(fieldClass.getName()))){
-//                    valueField = document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : ($F{"+fieldName+"} ? \""+TRUE_REPLACEMENT+"\" : \""+FALSE_REPLACEMENT+"\")");
-//                }
-//                else{
-//                    valueField = document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+fieldName+"}");
-//                }
-//                return valueField;
-//            };
-//            
-//            return fromMethodSupplier;
-//        };
-        
-        
-        
-        
-        
-//        if(Modifier.isAbstract(clazz.getModifiers())){
-//            writeColumn("Type", settersByFieldName.get(fieldName), table, columnWidth, 7, 1, 20, 10);
-//        }
-        
-        // Si la liste des champs contient les champs à imprimer et non pas à éviter on se base sur l'ordre de la liste pour générer l'ordre des colonnes.
+        ////////////////////////////////////////////////////////////////////////
+        // BUILD COLUMNS
+        ////////////////////////////////////////////////////////////////////////
         final ResourceBundle rb = ResourceBundle.getBundle(clazz.getName());
-        
-        
-        
-        
+        // Si la liste des champs contient les champs à imprimer et non pas à éviter on se base sur l'ordre de la liste pour générer l'ordre des colonnes.
         if(print){
             // Indexation des initialiseurs par les noms de champs.
             final Map<String, Method> settersByFieldName = new HashMap<>();

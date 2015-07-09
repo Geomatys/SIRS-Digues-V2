@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.ObjectProperty;
@@ -26,8 +25,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Tab;
@@ -45,7 +42,7 @@ import org.geotoolkit.referencing.LinearReferencing;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXDisorderPrintFrame extends BorderPane {
+public class FXDisorderPrintPane extends BorderPane {
     
     @FXML Tab uiTronconChoice;
     @FXML Tab uiDisorderTypeChoice;
@@ -64,8 +61,8 @@ public class FXDisorderPrintFrame extends BorderPane {
     private final TronconChoicePojoTable tronconsTable = new TronconChoicePojoTable();
     private final DisorderTypeChoicePojoTable disordreTypesTable = new DisorderTypeChoicePojoTable();
     
-    public FXDisorderPrintFrame(){
-        SIRS.loadFXML(this, FXDisorderPrintFrame.class);
+    public FXDisorderPrintPane(){
+        SIRS.loadFXML(this, FXDisorderPrintPane.class);
         tronconsTable.setTableItems(()-> (ObservableList) FXCollections.observableList(Injector.getSession().getRepositoryForClass(TronconDigue.class).getAll()));
         uiTronconChoice.setContent(tronconsTable);
         disordreTypesTable.setTableItems(()-> (ObservableList) FXCollections.observableList(Injector.getSession().getRepositoryForClass(RefTypeDesordre.class).getAll()));
@@ -202,7 +199,7 @@ public class FXDisorderPrintFrame extends BorderPane {
                     Injector.getSession().getPrintManager().printDesordres(desordres, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionVoirie.isSelected());
                 }
             } catch (Exception ex) {
-                Logger.getLogger(FXDisorderPrintFrame.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(FXDisorderPrintPane.class.getName()).log(Level.SEVERE, null, ex);
             }
         }));
     }
