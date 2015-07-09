@@ -12,6 +12,12 @@
     <description>Plugin de vegetation.</description>
     <!--url>http://www.myorganization.org</url-->
 
+    <parent>
+        <groupId>fr.sirs</groupId>
+        <artifactId>sirs</artifactId>
+        <version>0.x-SNAPSHOT</version>
+    </parent>
+
     <dependencies>
         <dependency>
             <groupId>fr.sirs</groupId>
