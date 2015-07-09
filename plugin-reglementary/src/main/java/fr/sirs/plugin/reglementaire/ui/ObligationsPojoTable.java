@@ -8,13 +8,17 @@ import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.RappelObligationReglementaire;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
+import fr.sirs.util.SimpleFXEditMode;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 
 /**
  * Table présentant les obligations réglementaires.
@@ -45,11 +49,16 @@ public final class ObligationsPojoTable extends PojoTable {
      */
     private void showPlanificationTable(final TabPane tabPane) {
         final FXFreeTab planTab = new FXFreeTab("Panification");
-        final BorderPane mainPane = new BorderPane();
+        // Gestion du bouton consultation / édition pour la pojo table
+        final Separator separator = new Separator();
+        separator.setVisible(false);
+        final SimpleFXEditMode editMode = new SimpleFXEditMode();
+        final HBox topPane = new HBox(separator, editMode);
+        HBox.setHgrow(separator, Priority.ALWAYS);
         final PojoTable pojoTable = new PojoTable(Injector.getSession().getRepositoryForClass(RappelObligationReglementaire.class),
                 "Planification(s) programmée(s)");
-        mainPane.setCenter(pojoTable);
-        planTab.setContent(mainPane);
+        pojoTable.editableProperty().bind(editMode.editionState());
+        planTab.setContent(new BorderPane(pojoTable, topPane, null, null, null));
         tabPane.getTabs().add(planTab);
         tabPane.getSelectionModel().select(planTab);
     }
