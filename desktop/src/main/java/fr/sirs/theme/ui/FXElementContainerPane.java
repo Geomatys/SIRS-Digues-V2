@@ -137,7 +137,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
             specificThemePane = null;
         } else {
             try {
-                uiHeaderLabel.setText("Informations sur un(e) "+new LabelMapper(newValue.getClass()).mapClassName());
+                uiHeaderLabel.setText("Informations sur un(e) "+LabelMapper.get(newValue.getClass()).mapClassName());
             } catch (Exception e) {
                 SIRS.LOGGER.log(Level.WARNING, "Header label cannot be updated.", e);
                 uiHeaderLabel.setText("Informations sur un ouvrage");

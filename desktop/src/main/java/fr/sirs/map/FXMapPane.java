@@ -305,7 +305,7 @@ public class FXMapPane extends BorderPane {
             final Previews previews = Injector.getSession().getPreviews();
             if(element instanceof AbstractPositionDocumentAssociable){
                 if(element instanceof PositionProfilTravers){
-                    return getMapLayerForElement(new LabelMapper(PositionProfilTravers.class).mapClassName());
+                    return getMapLayerForElement(LabelMapper.get(PositionProfilTravers.class).mapClassName());
                 } else {
                     final String documentId = ((AbstractPositionDocumentAssociable)element).getSirsdocument(); // IL est nécessaire qu'un document soit associé pour déterminer le type de la couche.
                     final Preview previewLabel = previews.get(documentId);
@@ -316,16 +316,16 @@ public class FXMapPane extends BorderPane {
                         SIRS.LOGGER.log(Level.WARNING, null, ex);
                     }
 
-                    final LabelMapper mapper = new LabelMapper(documentClass);
+                    final LabelMapper mapper = LabelMapper.get(documentClass);
                     return getMapLayerForElement(mapper.mapClassName());
                 }
             }
             else{// Les profils en long ne sont associés à aucun document
-                final LabelMapper mapper = new LabelMapper(element.getClass());
+                final LabelMapper mapper = LabelMapper.get(element.getClass());
                 return getMapLayerForElement(mapper.mapClassName());
             }
         } else {
-            final LabelMapper mapper = new LabelMapper(element.getClass());
+            final LabelMapper mapper = LabelMapper.get(element.getClass());
             return getMapLayerForElement(mapper.mapClassName());
         }
     }

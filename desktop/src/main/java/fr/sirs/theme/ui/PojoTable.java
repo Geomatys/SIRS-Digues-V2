@@ -263,7 +263,7 @@ public class PojoTable extends BorderPane {
             this.pojoClass = pojoClass;
         }
         getStylesheets().add(SIRS.CSS_PATH);
-        this.labelMapper = new LabelMapper(this.pojoClass);
+        this.labelMapper = LabelMapper.get(this.pojoClass);
         if (repo == null) {
             AbstractSIRSRepository tmpRepo;
             try {

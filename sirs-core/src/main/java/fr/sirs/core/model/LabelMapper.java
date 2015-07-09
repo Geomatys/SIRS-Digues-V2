@@ -1,6 +1,8 @@
 package fr.sirs.core.model;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import org.apache.sis.util.ArgumentChecks;
@@ -10,15 +12,25 @@ import org.apache.sis.util.ArgumentChecks;
  * @author Samuel Andrés (Geomatys)
  */
 public class LabelMapper {
-    
-    private Class modelClass;
-    private ResourceBundle bundle;
-    
-    public LabelMapper(final Class modelClass) {
-        setModelClass(modelClass);
+
+    /**
+     * Cache.
+     */
+    private static final Map<Class,LabelMapper> MAPPERS = new HashMap<>();
+
+    private final Class modelClass;
+    private final ResourceBundle bundle;
+
+    public static synchronized LabelMapper get(Class clazz){
+        LabelMapper mapper = MAPPERS.get(clazz);
+        if(mapper==null){
+            mapper = new LabelMapper(clazz);
+            MAPPERS.put(clazz, mapper);
+        }
+        return mapper;
     }
-    
-    public final void setModelClass(final Class modelClass) {
+
+    private LabelMapper(final Class modelClass) {
         ArgumentChecks.ensureNonNull("Input model class", modelClass);
         this.modelClass = modelClass;
         bundle = ResourceBundle.getBundle(modelClass.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
@@ -35,8 +47,7 @@ public class LabelMapper {
     }
     
     public static String mapPropertyName(final Class modelClass, final String property) {
-        final LabelMapper labelMapper = new LabelMapper(modelClass);
-        return labelMapper.mapPropertyName(property);
+        return get(modelClass).mapPropertyName(property);
     }
 
     public String mapClassName() {

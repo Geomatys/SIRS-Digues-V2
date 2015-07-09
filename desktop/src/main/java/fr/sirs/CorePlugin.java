@@ -237,7 +237,7 @@ public class CorePlugin extends Plugin {
         try{
             final Map<String,String> nameMap = new HashMap<>();
             for(Class elementClass : suppliers.keySet()) {
-                final LabelMapper mapper = new LabelMapper(elementClass);
+                final LabelMapper mapper = LabelMapper.get(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
             final Map<Class<? extends AbstractPositionDocument>, List<Class>> mapDesTypesDeDocs = new HashMap<>();
@@ -249,19 +249,19 @@ public class CorePlugin extends Plugin {
             positionDocumentList.add(DocumentGrandeEchelle.class);
             
             for(final Class elementClass : positionDocumentList){
-                final LabelMapper mapper = new LabelMapper(elementClass);
+                final LabelMapper mapper = LabelMapper.get(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
             final List<Class> positionProfilTraversList = new ArrayList<>();
             positionProfilTraversList.add(ProfilTravers.class);
             for(final Class elementClass : positionProfilTraversList){
-                final LabelMapper mapper = new LabelMapper(elementClass);
+                final LabelMapper mapper = LabelMapper.get(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
             final List<Class> profilLongList = new ArrayList<>();
             profilLongList.add(ProfilLong.class);
             for(final Class elementClass : profilLongList){
-                final LabelMapper mapper = new LabelMapper(elementClass);
+                final LabelMapper mapper = LabelMapper.get(elementClass);
                 nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
             }
             mapDesTypesDeDocs.put(PositionDocument.class, positionDocumentList);

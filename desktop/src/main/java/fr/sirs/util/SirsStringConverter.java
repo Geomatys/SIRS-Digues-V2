@@ -36,8 +36,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
  * @author Johann Sorel
  */
 public class SirsStringConverter extends StringConverter {
-
-    private static final WeakHashMap<String, LabelMapper> LABEL_MAPPERS = new WeakHashMap<>();
     
     private final WeakHashMap<String, Object> FROM_STRING = new WeakHashMap<>();
     
@@ -93,7 +91,7 @@ public class SirsStringConverter extends StringConverter {
             else if(item==EXTERN) text.append("Externe");
         } else if (item instanceof Class) {
             if(Element.class.isAssignableFrom((Class) item)){
-                return getLabelMapperForClass((Class) item).mapClassName();
+                return LabelMapper.get((Class) item).mapClassName();
             }
         }
         
@@ -132,7 +130,7 @@ public class SirsStringConverter extends StringConverter {
     }
     
     public static String getDesignation(final Element source) {
-        final LabelMapper labelMapper = getLabelMapperForClass(source.getClass());
+        final LabelMapper labelMapper =  LabelMapper.get(source.getClass());
         String prefixedDesignation = (labelMapper == null) ? "" : labelMapper.mapPropertyName(BUNDLE_KEY_CLASS_ABREGE);
         if(source.getDesignation()!=null){
             if(!"".equals(prefixedDesignation)){
@@ -146,7 +144,7 @@ public class SirsStringConverter extends StringConverter {
                 final Preview preview = Injector.getSession().getPreviews().get(((PositionDocument)source).getSirsdocument());
                 if(preview!=null && preview.getElementClass()!=null){
                     try {
-                        final LabelMapper documentLabelMapper = getLabelMapperForClass(Class.forName(preview.getElementClass(), true, Thread.currentThread().getContextClassLoader()));
+                        final LabelMapper documentLabelMapper =  LabelMapper.get(Class.forName(preview.getElementClass(), true, Thread.currentThread().getContextClassLoader()));
                         if(documentLabelMapper!=null){
                             prefixedDesignation+=" ["+documentLabelMapper.mapClassName()+"] ";
                         }
@@ -164,18 +162,7 @@ public class SirsStringConverter extends StringConverter {
     public Object fromString(String string) {
         return FROM_STRING.get(string);
     }
-    
-    /**
-     * 
-     * @param clazz
-     * @return the label mapper for the given class.
-     */
-    private static LabelMapper getLabelMapperForClass(final Class clazz){
-        if(LABEL_MAPPERS.get(clazz.getName())==null)
-            LABEL_MAPPERS.put(clazz.getName(), new LabelMapper(clazz));
-        return LABEL_MAPPERS.get(clazz.getName());
-    }
-    
+        
     /**
      * 
      * @param className
@@ -184,7 +171,7 @@ public class SirsStringConverter extends StringConverter {
      */
     private static LabelMapper getLabelMapperForClass(final String className){
         try {
-            return getLabelMapperForClass(Class.forName(className,  true, Thread.currentThread().getContextClassLoader()));
+            return  LabelMapper.get(Class.forName(className,  true, Thread.currentThread().getContextClassLoader()));
         } catch (ClassNotFoundException ex) {
             SIRS.LOGGER.log(Level.WARNING, null, ex);
         }

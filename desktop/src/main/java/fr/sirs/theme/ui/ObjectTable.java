@@ -105,7 +105,7 @@ public class ObjectTable extends BorderPane {
     public ObjectTable(final Class pojoClass, final String title) {
         this.pojoClass = pojoClass;
         getStylesheets().add(SIRS.CSS_PATH);
-        this.labelMapper = new LabelMapper(this.pojoClass);
+        this.labelMapper = LabelMapper.get(this.pojoClass);
 
         final Label uiTitle = new Label(title);
         uiTitle.getStyleClass().add("pojotable-header");

@@ -73,6 +73,8 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -266,7 +268,7 @@ public class RapportsPane extends BorderPane implements Initializable {
                     final Double prDebut = uiPrFin.getValue();
                     final Double prFin = uiPrFin.getValue();
                     final NumberRange prRange = NumberRange.create(prDebut, true, prFin, true);
-
+                    
                     // on liste tous les elements a générer
                     Platform.runLater(()->uiProgressLabel.setText("Recherche des objets du rapport..."));
                     final ObservableList<TronconDigue> troncons = uiTroncons.getSelectionModel().getSelectedItems();
@@ -326,7 +328,13 @@ public class RapportsPane extends BorderPane implements Initializable {
 
                         // on aggrege le tout
                         Platform.runLater(()->uiProgressLabel.setText("Aggrégation des sections"));
-                        ODTUtils.concatenateFiles(file, parts.toArray());
+                        final TextDocument aggDoc = TextDocument.newTextDocument();
+                        for(int i=0,n=parts.size();i<n;i++){
+                            final int I = i;
+                            Platform.runLater(()->uiProgressLabel.setText("Aggrégation des sections "+I+"/"+n));
+                            ODTUtils.concatenateFile(aggDoc, parts.get(i));
+                        }
+                        aggDoc.save(file);
                     }catch(Exception ex){
                         SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                         Platform.runLater(()->GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du rapport.", ex).show());
@@ -384,7 +392,7 @@ public class RapportsPane extends BorderPane implements Initializable {
 
         //liste des champs
         final Class pojoClass = validElements.get(0).getClass();
-        final LabelMapper labelMapper = new LabelMapper(pojoClass);
+        final LabelMapper labelMapper = LabelMapper.get(pojoClass);
         final Map<String,Printer> cols = new TreeMap<>(ColumnOrder.createComparator(pojoClass.getSimpleName()));
 
         try {
@@ -468,17 +476,22 @@ public class RapportsPane extends BorderPane implements Initializable {
         parts.add(doc);
 
         //on recupere le template
+        final boolean isDefaultTemplate;
+        final DocumentTemplate templateDoc;
         final String templateId = section.getTemplateId();
         if(templateId==null || templateId.isEmpty()){
-            throw new Exception("Template manque pour la section : "+section.getLibelle());
+            isDefaultTemplate = true;
+            templateDoc = ODTUtils.getDefaultTemplate();
+        }else{
+            isDefaultTemplate = false;
+            final TemplateObligationReglementaireRepository repo = (TemplateObligationReglementaireRepository)session.getRepositoryForClass(TemplateObligationReglementaire.class);
+            final TemplateObligationReglementaire template = repo.get(templateId);
+            if(template==null){
+                throw new Exception("Template manquant pour l'identifiant : "+templateId);
+            }
+            final DocumentTemplateFactory documentTemplateFactory = new DocumentTemplateFactory();
+            templateDoc = documentTemplateFactory.getTemplate(new ByteArrayInputStream(template.getOdt()));
         }
-        final TemplateObligationReglementaireRepository repo = (TemplateObligationReglementaireRepository)session.getRepositoryForClass(TemplateObligationReglementaire.class);
-        final TemplateObligationReglementaire template = repo.get(templateId);
-        if(template==null){
-            throw new Exception("Template manquant pour l'identifiant : "+templateId);
-        }
-        final DocumentTemplateFactory documentTemplateFactory = new DocumentTemplateFactory();
-        final DocumentTemplate templateDoc = documentTemplateFactory.getTemplate(new ByteArrayInputStream(template.getOdt()));
 
 
         //on recupere les elements qui correspondent a la requete
@@ -490,7 +503,11 @@ public class RapportsPane extends BorderPane implements Initializable {
         //on genere une fiche pour chaque objet
         for(Element ele : validElements){
             final File f = new File(tempFolder, section.getLibelle()+"_"+inc.incrementAndGet()+".odt");
-            ODTUtils.generateReport(templateDoc, ele, f);
+            if(isDefaultTemplate){
+                ODTUtils.generateReport(templateDoc, ODTUtils.toTemplateMap(ele), f);
+            }else{
+                ODTUtils.generateReport(templateDoc, ele, f);
+            }
 
             parts.add(f);
 
