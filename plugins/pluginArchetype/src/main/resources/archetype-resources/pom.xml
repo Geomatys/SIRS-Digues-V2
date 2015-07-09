@@ -12,6 +12,12 @@
     <description>A template showing plugin structure for SIRS2 application.</description>
     <!--url>http://www.myorganization.org</url-->
 
+    <parent>
+        <groupId>fr.sirs</groupId>
+        <artifactId>sirs</artifactId>
+        <version>${sirs-version}</version>
+    </parent>
+
     <dependencies>
         <dependency>
             <groupId>fr.sirs</groupId>
