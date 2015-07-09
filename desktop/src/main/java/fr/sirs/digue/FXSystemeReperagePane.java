@@ -27,61 +27,62 @@ import org.geotoolkit.gui.javafx.util.FXDateField;
  * @author Johann Sorel (Geomatys)
  */
 public class FXSystemeReperagePane extends BorderPane {
-    
+
     @FXML private TextField uiNom;
     @FXML private HTMLEditor uiComment;
     @FXML private FXDateField uiDate;
-    
-    private final ObjectProperty<SystemeReperage> srProperty = new SimpleObjectProperty<>();    
+
+    private final ObjectProperty<SystemeReperage> srProperty = new SimpleObjectProperty<>();
     private final BorneTable borneTable = new BorneTable();
     private final BooleanProperty editableProperty = new SimpleBooleanProperty(true);
-    
+
     public FXSystemeReperagePane(){
         SIRS.loadFXML(this);
-                
+
         setCenter(borneTable);
-        
+
         srProperty.addListener(this::updateFields);
-        
+
         this.visibleProperty().bind(srProperty.isNotNull());
-        
+
         uiNom.editableProperty().bind(editableProperty);
         uiComment.disableProperty().bind(editableProperty.not());
         uiDate.setDisable(true);
-        borneTable.editableProperty().bind(editableProperty);
+        // Client query...
+        borneTable.editableProperty().set(false);
     }
 
     public BooleanProperty editableProperty(){
         return editableProperty;
     }
-    
+
     public ObjectProperty<SystemeReperage> getSystemeReperageProperty() {
         return srProperty;
     }
-    
+
     private void updateFields(ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) {
         if (oldValue != null) {
             uiNom.textProperty().unbindBidirectional(oldValue.libelleProperty());
             uiDate.valueProperty().unbindBidirectional(oldValue.dateMajProperty());
             borneTable.getUiTable().setItems(FXCollections.emptyObservableList());
         }
-        
-        if(newValue==null) return;        
+
+        if(newValue==null) return;
         uiNom.textProperty().bindBidirectional(newValue.libelleProperty());
         uiDate.valueProperty().bindBidirectional(newValue.dateMajProperty());
         uiComment.setHtmlText(newValue.getCommentaire());
-                
+
         borneTable.getUiTable().setItems(newValue.systemeReperageBornes);
     }
-    
+
     public void save(){
         final SystemeReperage sr = srProperty.get();
         if(sr==null) return;
-        
+
         sr.setCommentaire(uiComment.getHtmlText());
         final Session session = Injector.getBean(Session.class);
         final SystemeReperageRepository repo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
-        
+
         final String tcId = sr.getLinearId();
         if (tcId == null || tcId.isEmpty()) {
             throw new IllegalArgumentException("Aucun tronçon n'est associé au SR. Sauvegarde impossible.");
@@ -89,7 +90,7 @@ public class FXSystemeReperagePane extends BorderPane {
         final TronconDigue troncon = session.getRepositoryForClass(TronconDigue.class).get(tcId);
         repo.update(sr, troncon);
     }
-    
+
     private class BorneTable extends PojoTable {
 
         public BorneTable() {
@@ -101,7 +102,7 @@ public class FXSystemeReperagePane extends BorderPane {
         @Override
         protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
             //on ne sauvegarde pas, le formulaire conteneur s'en charge
-        }        
+        }
     }
-    
+
 }

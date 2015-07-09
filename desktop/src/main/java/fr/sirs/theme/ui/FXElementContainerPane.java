@@ -13,7 +13,6 @@ import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.map.FXMapTab;
 import java.lang.reflect.Constructor;
-import java.time.LocalDateTime;
 import java.util.logging.Level;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -32,10 +31,10 @@ import org.geotoolkit.internal.GeotkFX;
  * @param <T>
  */
 public class FXElementContainerPane<T extends Element> extends AbstractFXElementPane<T> {
-    
+
     private final Session session = Injector.getSession();
     protected FXElementPane specificThemePane;
-    
+
     @FXML private Label uiHeaderLabel;
     @FXML private Label uiDateMajLabel;
     @FXML private TextField uiPseudoId;
@@ -44,32 +43,30 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
     @FXML private Button uiShowOnMapButton;
 
     private Element couchDbDocument;
-    
+
     public FXElementContainerPane(final T element) {
         SIRS.loadFXML(this);
         date_maj.setDisable(true);
-        
+
         uiMode.setSaveAction(this::save);
         uiMode.requireEditionForElement(element);
         disableFieldsProperty().bind(uiMode.editionState().not());
-        
+
         uiPseudoId.disableProperty().bind(disableFieldsProperty());
-        
+
         elementProperty.addListener(this::initPane);
-        
+
         setElement((T) element);
     }
-    
+
     public void setShowOnMapButton(final boolean isShown){
         uiShowOnMapButton.setVisible(isShown);
     }
-    
+
     @FXML
     void save() {
         try {
             preSave();
-
-            LocalDateTime now = LocalDateTime.now();
 
             Element elementDocument = elementProperty.get().getCouchDBDocument();
             if (elementDocument == null) {
@@ -83,28 +80,17 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
             if (couchDbDocument == null) {
                 couchDbDocument = elementDocument;
             } else if (!couchDbDocument.equals(elementDocument)) {
-                if (couchDbDocument instanceof AvecDateMaj) {
-                    ((AvecDateMaj)couchDbDocument).dateMajProperty().set(now);
-                }
                 repo.update(couchDbDocument);
                 couchDbDocument = elementDocument;
             }
 
-            if (couchDbDocument instanceof AvecDateMaj) {
-                ((AvecDateMaj)couchDbDocument).dateMajProperty().set(now);
-            }
-
-            if (elementProperty.get() instanceof AvecDateMaj) {
-                ((AvecDateMaj)elementProperty.get()).dateMajProperty().set(now);
-            }
-            
             repo.update(couchDbDocument);
         } catch (Exception e) {
             GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
             SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
     }
-    
+
     @FXML
     private void showOnMap() {
         final Element object = elementProperty.get();
@@ -119,18 +105,18 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
             alert.show();
         }
     }
-    
+
     protected void initPane(ObservableValue<? extends Element> observable, Element oldValue, Element newValue) {
         // unbind all mono-directional
         date_maj.valueProperty().unbind();
         uiMode.validProperty().unbind();
         uiMode.authorIDProperty().unbind();
-        
+
         if (oldValue != null) {
             //unbind all bidirectionnal
             uiPseudoId.textProperty().unbindBidirectional(oldValue.designationProperty());
         }
-        
+
         if (newValue == null) {
             uiHeaderLabel.setText("Aucune information disponible");
             setCenter(new Label("Pas d'éditeur disponible."));
@@ -144,7 +130,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
             }
             // Keep parent reference, so we can now if it has been switched at save.
             couchDbDocument = newValue.getCouchDBDocument();
-            
+
             // maj
             if (newValue instanceof AvecDateMaj) {
                 date_maj.valueProperty().bind(((AvecDateMaj) newValue).dateMajProperty());
@@ -154,14 +140,14 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
                 date_maj.setVisible(false);
                 uiDateMajLabel.setVisible(false);
             }
-            
+
             //validation
             uiMode.validProperty().bind(newValue.validProperty());
             uiMode.authorIDProperty().bind(newValue.authorProperty());
             Injector.getSession().getPrintManager().prepareToPrint(newValue);
-            
+
             uiPseudoId.textProperty().bindBidirectional(newValue.designationProperty());
-            
+
             // If we previously edited same type of element, we recycle edition panel.
             if (specificThemePane != null && oldValue != null && oldValue.getClass().equals(newValue.getClass())) {
                 specificThemePane.setElement(newValue);
@@ -182,7 +168,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
                 }
             }
         }
-        
+
         uiShowOnMapButton.setVisible(newValue instanceof Positionable);
     }
 
