@@ -164,8 +164,8 @@ public class PojoTable extends BorderPane {
     protected static final String BUTTON_STYLE = "buttonbar-button";
 
     public static final String[] COLUMNS_TO_IGNORE = new String[] {
-        AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD, 
-        LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD, 
+        AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD,
+        LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD,
         DATE_MAJ_FIELD, COMMENTAIRE_FIELD};
 
     protected final Class pojoClass;
@@ -1430,7 +1430,7 @@ public class PojoTable extends BorderPane {
                 });
             }
         }
-        
+
         public Reference getReference() {
             return ref;
         }
@@ -1504,8 +1504,10 @@ public class PojoTable extends BorderPane {
                             final Optional<ButtonType> res = confirm.showAndWait();
                             if (res.isPresent() && ButtonType.YES.equals(res.get())) {
                                 deletePojos(t);
+                                return null;
+                            } else {
+                                return t;
                             }
-                            return null;
                         });
             });
         }
