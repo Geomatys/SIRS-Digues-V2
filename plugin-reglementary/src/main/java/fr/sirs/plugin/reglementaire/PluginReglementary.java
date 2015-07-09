@@ -3,6 +3,8 @@ package fr.sirs.plugin.reglementaire;
 import fr.sirs.Injector;
 import fr.sirs.Plugin;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.ObligationReglementaireRepository;
+import fr.sirs.core.component.RappelObligationReglementaireRepository;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RappelObligationReglementaire;
@@ -73,70 +75,70 @@ public class PluginReglementary extends Plugin {
     private void showAlerts() {
         final List<AlertItem> alerts = new ArrayList<>();
 
-        final List<RappelObligationReglementaire> rappels = Injector.getSession().getRepositoryForClass(RappelObligationReglementaire.class).getAll();
-        if (rappels != null && !rappels.isEmpty()) {
-            // Des rappels existent, il faut les analyser pour savoir si une alerte doit être affichée ou non.
-            final AbstractSIRSRepository<ObligationReglementaire> repoObl =
-                    Injector.getSession().getRepositoryForClass(ObligationReglementaire.class);
-            final AbstractSIRSRepository<RefEcheanceRappelObligationReglementaire> repoEcheanceRappel =
-                    Injector.getSession().getRepositoryForClass(RefEcheanceRappelObligationReglementaire.class);
-            final AbstractSIRSRepository<RefFrequenceObligationReglementaire> repoFrequenceRappel =
-                    Injector.getSession().getRepositoryForClass(RefFrequenceObligationReglementaire.class);
-            final AbstractSIRSRepository<RefTypeObligationReglementaire> repoTypeObl =
-                    Injector.getSession().getRepositoryForClass(RefTypeObligationReglementaire.class);
-            final LocalDate now = LocalDate.now();
+        final ObligationReglementaireRepository orr = Injector.getBean(ObligationReglementaireRepository.class);
+        final List<ObligationReglementaire> obligations = orr.getAll();
+        if (obligations.isEmpty()) {
+            Injector.getSession().addAlerts(alerts);
+            return;
+        }
 
+        final RappelObligationReglementaireRepository rorr = Injector.getBean(RappelObligationReglementaireRepository.class);
+        final AbstractSIRSRepository<RefEcheanceRappelObligationReglementaire> repoEcheanceRappel =
+                Injector.getSession().getRepositoryForClass(RefEcheanceRappelObligationReglementaire.class);
+        final AbstractSIRSRepository<RefFrequenceObligationReglementaire> repoFrequenceRappel =
+                Injector.getSession().getRepositoryForClass(RefFrequenceObligationReglementaire.class);
+        final AbstractSIRSRepository<RefTypeObligationReglementaire> repoTypeObl =
+                Injector.getSession().getRepositoryForClass(RefTypeObligationReglementaire.class);
+        final LocalDate now = LocalDate.now();
+
+        for (final ObligationReglementaire obligation : obligations) {
+            if (obligation.getEcheanceId() == null) {
+                continue;
+            }
+
+            final RefEcheanceRappelObligationReglementaire echeance = repoEcheanceRappel.get(obligation.getEcheanceId());
+            // Construction du texte à afficher sur le calendrier
+            final StringBuilder sb = new StringBuilder();
+            if (obligation.getTypeId() != null) {
+                sb.append(repoTypeObl.get(obligation.getTypeId()).getAbrege()).append(" - ");
+            }
+            if (obligation.getSystemeEndiguementId() != null) {
+                final Preview previewSE = Injector.getSession().getPreviews().get(obligation.getSystemeEndiguementId());
+                sb.append(previewSE.getLibelle()).append(" - ");
+            }
+            sb.append(obligation.getAnnee());
+
+            final LocalDate oblDate = obligation.getDateRealisation() != null ? obligation.getDateRealisation() :
+                    obligation.getDateEcheance();
+            if (oblDate == null) {
+                continue;
+            }
+
+            // Compare la date actuelle avec la date d'échéance de l'obligation et le temps avant la date d'échéance
+            // pour afficher l'alerte. Exemple : une obligation au 1er juillet avec un rappel 3 mois avant,
+            // l'alerte sera affichée si la date du lancement de l'application est comprise dans cette période.
+            if (oblDate.minusMonths(echeance.getNbMois()).compareTo(now) <= 0 && oblDate.compareTo(now) >= 0) {
+                alerts.add(new AlertItem(sb.toString(), oblDate));
+                continue;
+            }
+
+            // On doit maintenant vérifier la fréquence de répétition du rappel
+            final List<RappelObligationReglementaire> rappels = rorr.getByObligation(obligation);
+            if (rappels.isEmpty()) {
+                continue;
+            }
             for (final RappelObligationReglementaire rappel : rappels) {
-                final ObligationReglementaire obligation;
-                try {
-                    obligation = repoObl.get(rappel.getObligationId());
-                } catch (RuntimeException ex) {
-                    // Pourrait survenir si une obligation a été supprimée mais pas son rappel
-                    LOGGER.log(Level.INFO, ex.getLocalizedMessage(), ex);
-                    continue;
-                }
-
-                if (obligation.getEcheanceId() != null) {
-                    final RefEcheanceRappelObligationReglementaire period = repoEcheanceRappel.get(obligation.getEcheanceId());
-
-                    // Construction du texte à afficher sur le calendrier
-                    final StringBuilder sb = new StringBuilder();
-                    if (obligation.getTypeId() != null) {
-                        sb.append(repoTypeObl.get(obligation.getTypeId()).getAbrege()).append(" - ");
-                    }
-                    if (obligation.getSystemeEndiguementId() != null) {
-                        final Preview previewSE = Injector.getSession().getPreviews().get(obligation.getSystemeEndiguementId());
-                        sb.append(previewSE.getLibelle()).append(" - ");
-                    }
-                    sb.append(obligation.getAnnee());
-
-                    final LocalDate oblDate = obligation.getDateRealisation() != null ? obligation.getDateRealisation() :
-                            obligation.getDateEcheance();
-                    if (oblDate == null) {
-                        continue;
+                if (rappel.getFrequenceId() != null) {
+                    LocalDate newOblDate = LocalDate.from(oblDate);
+                    final RefFrequenceObligationReglementaire frequenceRappel = repoFrequenceRappel.get(rappel.getFrequenceId());
+                    while (newOblDate.compareTo(now) <= 0) {
+                        newOblDate = newOblDate.plusMonths(frequenceRappel.getNbMois());
                     }
 
-                    // Compare la date actuelle avec la date d'échéance de l'obligation et le temps avant la date d'échéance
-                    // pour afficher l'alerte. Exemple : une obligation au 1er juillet avec un rappel 3 mois avant,
-                    // l'alerte sera affichée si la date du lancement de l'application est comprise dans cette période.
-                    if (oblDate.minusMonths(period.getNbMois()).compareTo(now) <= 0 && oblDate.compareTo(now) >= 0) {
+                    // On a dépassé la date actuelle, on peut donc vérifier combien de mois avant la date de fin l'alerte doit
+                    // être affichée.
+                    if (newOblDate.minusMonths(echeance.getNbMois()).compareTo(now) < 0) {
                         alerts.add(new AlertItem(sb.toString(), oblDate));
-                        continue;
-                    }
-
-                    // On doit maintenant vérifier la fréquence de répétition du rappel
-                    if (rappel.getFrequenceId() != null) {
-                        LocalDate newOblDate = LocalDate.from(oblDate);
-                        final RefFrequenceObligationReglementaire frequenceRappel = repoFrequenceRappel.get(rappel.getFrequenceId());
-                        while (newOblDate.compareTo(now) <= 0) {
-                            newOblDate = newOblDate.plusMonths(frequenceRappel.getNbMois());
-                        }
-
-                        // On a dépassé la date actuelle, on peut donc vérifier combien de mois avant la date de fin l'alerte doit
-                        // être affichée.
-                        if (newOblDate.minusMonths(period.getNbMois()).compareTo(now) < 0) {
-                            alerts.add(new AlertItem(sb.toString(), oblDate));
-                        }
                     }
                 }
             }
