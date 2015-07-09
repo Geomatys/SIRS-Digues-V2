@@ -4,11 +4,13 @@ package fr.sirs.plugin.reglementaire;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.List;
 import javax.imageio.ImageIO;
 import net.sf.jooreports.templates.DocumentTemplate;
@@ -38,6 +40,8 @@ import org.odftoolkit.simple.text.Paragraph;
  * @author Johann Sorel (Geomatys)
  */
 public final class ODTUtils extends Static{
+
+    private static final int IMAGE_WIDTH = 140;
 
     /**
      * Remplissage d'un modèle de rapport pour un objet donné.
@@ -94,8 +98,13 @@ public final class ODTUtils extends Static{
         final TextDocument doc = TextDocument.newTextDocument();
 
         for(Object candidate : candidates){
-            if(candidate instanceof File){
-                final File file = (File) candidate;
+            if(candidate instanceof File || candidate instanceof Path){
+                final File file;
+                if(candidate instanceof Path){
+                    file = ((Path)candidate).toFile();
+                }else{
+                    file = (File) candidate;
+                }
                 final String fileName = file.getName().toLowerCase();
                 if(fileName.endsWith(".odt")){
                     //append content at the end
@@ -125,7 +134,7 @@ public final class ODTUtils extends Static{
                     //try image
                     try{
                         final BufferedImage img = ImageIO.read(file);
-                        insertImage(doc, file.toURI());
+                        insertImage(doc, file.toURI(), img);
                     }catch(IOException ex){
                         throw new IOException("Unvalid file "+candidate+". Only PDF, ODT and images are supported.");
                     }
@@ -147,13 +156,44 @@ public final class ODTUtils extends Static{
      * @param imageUri
      */
     public static void insertImage(final TextDocument doc, final URI imageUri) throws Exception {
+        insertImage(doc, imageUri, null);
+    }
+
+    private static void insertImage(final TextDocument doc, final URI imageUri, BufferedImage image) throws Exception {
         final OdfContentDom contentDom = doc.getContentDom();
+        final TextPElement lastPara = doc.newParagraph("");
         final OdfDrawFrame drawFrame = contentDom.newOdfElement(OdfDrawFrame.class);
-        final TextPElement lastPara = doc.newParagraph();
         lastPara.appendChild(drawFrame);
+        final OdfDrawImage drawImage = (OdfDrawImage) drawFrame.newDrawImageElement();
+        drawImage.newImage(imageUri);
+
+        //style none
+        final OdfStyleBase sb = drawFrame.getOrCreateUnqiueAutomaticStyle();
+        sb.setAttributeNS("urn:oasis:names:tc:opendocument:xmlns:style:1.0","style:parent-style-name", "Graphics");
+        sb.setProperty(StyleGraphicPropertiesElement.Wrap, "none");
+        sb.setProperty(StyleGraphicPropertiesElement.HorizontalPos, "center");
+        sb.setProperty(StyleGraphicPropertiesElement.HorizontalRel, "paragraph");
+        sb.setProperty(StyleGraphicPropertiesElement.Mirror, "none");
+        sb.setProperty(StyleGraphicPropertiesElement.Clip, "rect(0mm, 0mm, 0mm, 0mm)");
+        sb.setProperty(StyleGraphicPropertiesElement.VerticalPos, "top");
+        sb.setProperty(StyleGraphicPropertiesElement.VerticalRel, "baseline");
+        sb.setProperty(StyleGraphicPropertiesElement.Luminance, "0%");
+        sb.setProperty(StyleGraphicPropertiesElement.Contrast, "0%");
+        sb.setProperty(StyleGraphicPropertiesElement.Red, "0%");
+        sb.setProperty(StyleGraphicPropertiesElement.Green, "0%");
+        sb.setProperty(StyleGraphicPropertiesElement.Blue, "0%");
+        sb.setProperty(StyleGraphicPropertiesElement.Gamma, "100%");
+        sb.setProperty(StyleGraphicPropertiesElement.ColorInversion, "false");
+        sb.setProperty(StyleGraphicPropertiesElement.ImageOpacity, "100%");
+        sb.setProperty(StyleGraphicPropertiesElement.ColorMode, "standard");
+
+
         drawFrame.setTextAnchorTypeAttribute(TextAnchorTypeAttribute.Value.PARAGRAPH.toString());
-        final OdfDrawImage image = (OdfDrawImage) drawFrame.newDrawImageElement();
-        image.newImage(imageUri);
+        drawFrame.setSvgWidthAttribute(IMAGE_WIDTH+"mm");
+        //Calculate relative height
+        drawFrame.setSvgHeightAttribute((int)(((float)image.getHeight() / (float)image.getWidth()) * IMAGE_WIDTH)+"mm");
+
+
     }
 
     /**

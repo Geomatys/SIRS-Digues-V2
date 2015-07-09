@@ -14,7 +14,6 @@ import static fr.sirs.SIRS.LONGITUDE_MIN_FIELD;
 import static fr.sirs.SIRS.VALID_FIELD;
 import fr.sirs.Session;
 import fr.sirs.core.TronconUtils;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.component.Previews;
@@ -44,23 +43,20 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugin.reglementaire.ODTUtils;
 import fr.sirs.theme.ColumnOrder;
 import fr.sirs.theme.ui.PojoTable;
-import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
-import freemarker.template.TemplateModel;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Period;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,7 +69,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -509,18 +504,24 @@ public class RapportsPane extends BorderPane implements Initializable {
                             final String str = p.getChemin();
                             if(str!=null && !str.isEmpty()){
                                 if(last==null || last.getDate()==null || (p.getDate()!=null && last.getDate().isBefore(p.getDate()))){
-                                    last = p;
+                                    final Path path = SIRS.getDocumentAbsolutePath(p.getChemin());
+                                    if(Files.exists(path, LinkOption.NOFOLLOW_LINKS)){
+                                        last = p;
+                                    }
                                 }
                             }
                         }
                         if(last!=null){
-                            parts.add(new File(PrinterUtilities.imageUriFromText(last.getChemin())));
+                            parts.add(SIRS.getDocumentAbsolutePath(last.getChemin()));
                         }
                     }else if(PhotoChoice.TOUTE.equals(photoChoice)){
                         for(Photo p : photos){
                             final String str = p.getChemin();
                             if(str!=null && !str.isEmpty()){
-                                parts.add(new File(PrinterUtilities.imageUriFromText(str)));
+                                final Path path = SIRS.getDocumentAbsolutePath(p.getChemin());
+                                if(Files.exists(path, LinkOption.NOFOLLOW_LINKS)){
+                                    parts.add(SIRS.getDocumentAbsolutePath(str));
+                                }
                             }
                         }
                     }
