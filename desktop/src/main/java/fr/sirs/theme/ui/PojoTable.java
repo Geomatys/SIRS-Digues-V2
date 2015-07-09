@@ -83,6 +83,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
@@ -222,7 +223,7 @@ public class PojoTable extends BorderPane {
     private ObservableList<Element> filteredValues;
     //Cette liste est uniquement pour de la visualisation, elle peut contenir un enregistrement en plus
     //afin d'afficher la barre de scroll horizontale.
-    private ObservableList<Element> decoratedValues;
+    private SortedList<Element> decoratedValues;
 
     protected final StringProperty currentSearch = new SimpleStringProperty("");
     protected final BorderPane topPane;
@@ -890,7 +891,8 @@ public class PojoTable extends BorderPane {
             }catch(Throwable ex){
                 allValues = FXCollections.observableArrayList();
                 filteredValues = allValues.filtered((Element t) -> true);
-                decoratedValues = filteredValues;
+                decoratedValues = new SortedList<>(filteredValues);
+                decoratedValues.comparatorProperty().bind(uiTable.comparatorProperty());
                 throw ex;
             }
             if(allValues==null){
@@ -962,7 +964,8 @@ public class PojoTable extends BorderPane {
 //            if(filteredValues.isEmpty()) emptyRecord.add(null);
 //            decoratedValues = SIRS.view(filteredValues,emptyRecord);
 
-            decoratedValues = filteredValues;
+            decoratedValues = new SortedList<>(filteredValues);
+            decoratedValues.comparatorProperty().bind(uiTable.comparatorProperty());
         });
 
 
