@@ -1,0 +1,91 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>fr.sirs.plugins</groupId>
+    <!-- Name of the plugin, used for packaging and description -->
+    <artifactId>plugin-document</artifactId>
+    <!-- Version must be composed of two integers (major and minor version) separated by a dot. -->
+    <version>1.0</version>
+    <packaging>jar</packaging>
+    
+    <name>plugin-document</name>
+    <description>Plugin dossier d'ouvrages</description>
+    <!--url>http://www.myorganization.org</url-->
+
+    <parent>
+        <groupId>fr.sirs</groupId>
+        <artifactId>sirs</artifactId>
+        <version>0.x-SNAPSHOT</version>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>fr.sirs</groupId>
+            <artifactId>desktop</artifactId>
+            <!-- SIRS application version is defined at archetype generation goal -->
+            <version>0.x-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>groovy-maven-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>fr.sirs</groupId>
+                        <artifactId>desktop</artifactId>
+            <!-- SIRS application version is defined at archetype generation goal -->
+                        <version>0.x-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <source>${project.basedir}/src/main/script/makeDescriptor.groovy</source>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <descriptor>src/main/resources/assembly/plugin-package.xml</descriptor>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Force jar packager to properly set META-INF version as maven project. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>                   
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            
+        </plugins>
+    </build>
+
+</project>
