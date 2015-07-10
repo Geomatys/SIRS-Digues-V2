@@ -22,16 +22,22 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Separator;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Modality;
@@ -61,7 +67,7 @@ import org.opengis.filter.identity.Identifier;
 public class BorneEditHandler extends FXAbstractNavigationHandler {
 
     private static final int CROSS_SIZE = 5;
-    
+
     private final MouseListen mouseInputListener = new MouseListen();
     private final FXGeometryLayer geomlayer= new FXGeometryLayer(){
         @Override
@@ -75,7 +81,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
     };
     private final double zoomFactor = 2;
     private final Session session;
-    
+
     //edition variables
     private FeatureMapLayer tronconLayer = null;
     private FeatureMapLayer borneLayer = null;
@@ -83,18 +89,28 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
     private EditionHelper helperTroncon;
     private EditionHelper helperBorne;
     private final EditionHelper.EditionGeometry editGeometry = new EditionHelper.EditionGeometry();
-    
+
     private final Stage dialog = new Stage();
     private final FXSystemeReperagePane editPane;
-        
-    
+
+
     public BorneEditHandler(final FXMap map) {
         super(map);
         session = Injector.getSession();
         dialog.getIcons().add(SIRS.ICON);
-        
+
         editPane = new FXSystemeReperagePane(map);
-        
+        // Prepare footer to set an "exit" button
+        final Button exitButton = new Button("Fermer");
+        exitButton.setCancelButton(true);
+        exitButton.setOnAction(event -> dialog.hide());
+        final Separator sep = new Separator();
+        sep.setVisible(false);
+        final HBox footer = new HBox(sep, exitButton);
+        footer.setPadding(new Insets(0, 10, 10, 0));
+        HBox.setHgrow(sep, Priority.ALWAYS);
+        final BorderPane bp = new BorderPane(editPane, null, null, footer, null);
+
         dialog.setResizable(true);
         dialog.setOnCloseRequest(new EventHandler() {
             @Override
@@ -104,20 +120,20 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         });
         dialog.initModality(Modality.NONE);
         dialog.initOwner(map.getScene().getWindow());
-        dialog.setScene(new Scene(editPane));
-        
+        dialog.setScene(new Scene(bp));
+
         //on ecoute la selection du troncon et des bornes pour les mettre en surbrillant
         editPane.tronconProperty().addListener(new ChangeListener<TronconDigue>() {
             @Override
             public void changed(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
                 if(tronconLayer==null) return;
-                
+
                 borne = null;
                 updateGeometry();
                 if(borneLayer!=null){
                     borneLayer.setSelectionFilter(null);
                 }
-                    
+
                 if(newValue==null){
                     tronconLayer.setSelectionFilter(null);
                 }else{
@@ -126,21 +142,21 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                 }
             }
         });
-        
+
         editPane.borneProperties().addListener(new ListChangeListener<SystemeReperageBorne>() {
             @Override
             public void onChanged(ListChangeListener.Change<? extends SystemeReperageBorne> c) {
                 if(borneLayer==null) return;
-                
+
                 final ObservableList<SystemeReperageBorne> lst = editPane.borneProperties();
                 final Set<Identifier> ids = new HashSet<>();
                 for(SystemeReperageBorne borne : lst){
                     ids.add(new DefaultFeatureId(borne.getBorneId()));
                 }
-                
+
                 final Id filter = GO2Utilities.FILTER_FACTORY.id(ids);
                 borneLayer.setSelectionFilter(filter);
-                                
+
                 if(ids.size()==1){
                     //borne edition mode
                     final String borneId = lst.get(0).getBorneId();
@@ -150,22 +166,22 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                     borne = null;
                     updateGeometry();
                 }
-                
+
             }
         });
-        
+
         //fin de l'edition
         dialog.setOnHiding((WindowEvent event) -> {
             TronconDigue troncon = editPane.tronconProperty().get();
             if (troncon != null) {
-                //on recupere la derniere version, la maj des sr entraine la maj des troncons
+                //on recupère la derniere version, la maj des sr entraine la maj des troncons
                 troncon = session.getRepositoryForClass(TronconDigue.class).get(troncon.getDocumentId());
                 //on recalcule les geometries des positionables du troncon.
                 TronconUtils.updatePositionableGeometry(troncon, session);
             }
             editPane.reset();
         });
-        
+
         editPane.tronconProperty().addListener(new ChangeListener<TronconDigue>() {
             @Override
             public void changed(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) {
@@ -188,13 +204,13 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         component.addEventHandler(ScrollEvent.ANY, mouseInputListener);
         map.setCursor(Cursor.CROSSHAIR);
         map.addDecoration(0,geomlayer);
-        
+
         //recuperation du layer de troncon
         tronconLayer = null;
-        
+
         //on passe en mode sélection de troncon
         editPane.reset();
-        
+
         final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
         final MapContext context = cc.getContext();
         for(MapLayer layer : context.layers()){
@@ -207,13 +223,13 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                 layer.setSelectable(true);
             }
         }
-        
+
         helperTroncon = new EditionHelper(map, tronconLayer);
         helperTroncon.setMousePointerSize(6);
-        
+
         helperBorne = new EditionHelper(map, borneLayer);
         helperBorne.setMousePointerSize(6);
-        
+
     }
 
     /**
@@ -221,12 +237,12 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
      */
     @Override
     public boolean uninstall(final FXMap component) {
-        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.", 
+        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.",
                         ButtonType.YES,ButtonType.NO);
         alert.setResizable(true);
-        if(editPane.tronconProperty().get()==null || 
+        if(editPane.tronconProperty().get()==null ||
                 ButtonType.YES.equals(alert.showAndWait().get())){
-        
+
             super.uninstall(component);
             component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
             component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
@@ -244,24 +260,24 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
             dialog.close();
             return true;
         }
-        
+
         return false;
     }
-    
+
     private void updateGeometry(){
         if(borne==null){
             editGeometry.reset();
         }else{
             editGeometry.geometry = borne.getGeometry();
         }
-        
+
         if(editGeometry.geometry==null){
             geomlayer.getGeometries().clear();
         }else{
             geomlayer.getGeometries().setAll(editGeometry.geometry);
         }
     }
-    
+
     private class MouseListen extends FXPanMouseListen {
 
         private final ContextMenu popup = new ContextMenu();
@@ -272,18 +288,18 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
             super(BorneEditHandler.this);
             popup.setAutoHide(true);
         }
-        
+
         @Override
         public void mouseClicked(final MouseEvent e) {
             if(tronconLayer==null) return;
-            
+
             startX = getMouseX(e);
             startY = getMouseY(e);
             mousebutton = e.getButton();
-                        
-            
+
+
             final FXSystemeReperagePane.Mode mode = editPane.modeProperty().get();
-            
+
             if(FXSystemeReperagePane.Mode.PICK_TRONCON.equals(mode)){
                 if(mousebutton == MouseButton.PRIMARY){
                     //selection d'un troncon
@@ -299,8 +315,8 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
             }else if(FXSystemeReperagePane.Mode.EDIT_BORNE.equals(mode)){
                 final TronconDigue troncon = editPane.tronconProperty().get();
                 final SystemeReperage sr = editPane.systemeReperageProperty().get();
-                
-                if(borne==null || editGeometry.selectedNode[0] < 0){                    
+
+                if(borne==null || editGeometry.selectedNode[0] < 0){
                     //selection d'une borne
                     final Feature feature = helperBorne.grabFeature(e.getX(), e.getY(), false);
                     if(feature !=null){
@@ -308,9 +324,9 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                         if(bean instanceof BorneDigue){
                             final BorneDigue candidate = (BorneDigue) bean;
                             final String candidateId = candidate.getDocumentId();
-                            
+
                             //on vérifie que la borne fait bien partie du SR sélectionné
-                            final List<SystemeReperageBorne> srbs = sr.getSystemeReperageBornes();   
+                            final List<SystemeReperageBorne> srbs = sr.getSystemeReperageBornes();
                             for(SystemeReperageBorne srb : srbs){
                                 if(srb.getBorneId().equals(candidateId)){
                                     editPane.selectSRB(srb);
@@ -320,16 +336,16 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                         }
                     }
                 }
-                
+
             }else if(FXSystemeReperagePane.Mode.CREATE_BORNE.equals(mode)){
-                
+
                 final Coordinate coord = helperBorne.toCoord(startX,startY);
                 final Point point = GO2Utilities.JTS_FACTORY.createPoint(coord);
                 JTS.setCRS(point, session.getProjection());
                 //les event vont induire le repaint de la carte
                 editPane.createBorne(point);
             }
-            
+
         }
 
         @Override
@@ -337,7 +353,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
             super.mousePressed(e);
             startX = getMouseX(e);
             startY = getMouseY(e);
-            
+
             if(editGeometry.geometry!=null){
                 helperBorne.grabGeometryNode(startX, startY, editGeometry);
             }
@@ -347,11 +363,11 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
         public void mouseDragged(MouseEvent me) {
             //do not use getX/getY to calculate difference
             //JavaFX Bug : https://javafx-jira.kenai.com/browse/RT-34608
-            
+
             //calcul du deplacement
             startX = getMouseX(me);
             startY = getMouseY(me);
-            
+
             if(borne!=null && editGeometry.selectedNode[0]>=0){
                 //deplacement d'une borne
                 editGeometry.moveSelectedNode(helperBorne.toCoord(startX,startY));
@@ -370,7 +386,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
                 editPane.selectSRB(null);
                 //les event vont induire le repaint de la carte
                 editPane.sortBorneTable();
-                
+
                 final TronconDigue troncon = editPane.tronconProperty().get();
                 if(troncon!=null){
                     //on recalcule les geometries des positionables du troncon.
@@ -381,5 +397,5 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
             }
         }
     }
-        
+
 }
