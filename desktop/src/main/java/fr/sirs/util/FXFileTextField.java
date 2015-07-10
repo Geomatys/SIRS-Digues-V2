@@ -9,8 +9,6 @@ import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
 import fr.sirs.util.property.SirsPreferences;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
