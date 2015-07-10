@@ -248,9 +248,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             SIRS.initCombo(ui_digueId, FXCollections.observableArrayList(
                     previewRepository.getByClass(Digue.class)),
                     newElement.getDigueId() == null ? null : previewRepository.get(newElement.getDigueId()));
-            SIRS.initCombo(ui_positionId, FXCollections.observableArrayList(
-                    previewRepository.getByClass(RefPosition.class)),
-                    newElement.getPositionId() == null ? null : previewRepository.get(newElement.getPositionId()));
             SIRS.initCombo(ui_typeRiveId, FXCollections.observableArrayList(
                     previewRepository.getByClass(RefRive.class)),
                     newElement.getTypeRiveId() == null ? null : previewRepository.get(newElement.getTypeRiveId()));
@@ -289,14 +286,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             element.setDigueId(((Element)cbValue).getId());
         } else if (cbValue == null) {
             element.setDigueId(null);
-        }
-        cbValue = ui_positionId.getValue();
-        if (cbValue instanceof Preview) {
-            element.setPositionId(((Preview)cbValue).getElementId());
-        } else if (cbValue instanceof Element) {
-            element.setPositionId(((Element)cbValue).getId());
-        } else if (cbValue == null) {
-            element.setPositionId(null);
         }
         cbValue = ui_typeRiveId.getValue();
         if (cbValue instanceof Preview) {
