@@ -23,20 +23,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Element;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
  * This component forward all document events to its listener.
- * 
+ *
  * @author olivier.nouguier@geomatys.com
  */
 public class DocumentChangeEmiter {
 
     /** A pattern to identify new elements. They must have a revision number equal to 1 */
     private static final Pattern FIRST_REVISION = Pattern.compile("^1\\D.*");
-    
+
+    // TODO : Transform to Observable list ?
     private final List<DocumentListener> listeners = new ArrayList<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final CouchDbConnector connector;
@@ -46,7 +48,7 @@ public class DocumentChangeEmiter {
      */
     public volatile long bulkTime = 1;
     public volatile TimeUnit bulkUnit = TimeUnit.SECONDS;
-    
+
     public DocumentChangeEmiter(CouchDbConnector connector) {
         this.connector = connector;
     }
@@ -68,6 +70,7 @@ public class DocumentChangeEmiter {
             };
         };
 
+        thread.setDaemon(true);
         thread.start();
 
         return thread;
@@ -90,7 +93,7 @@ public class DocumentChangeEmiter {
 
     }
 
- 
+
     private static Optional<Class<?>> asClass(String clazz) {
         try {
             return Optional.of(Class.forName(clazz, true, Thread.currentThread().getContextClassLoader()));
@@ -175,17 +178,24 @@ public class DocumentChangeEmiter {
 
     }
 
+    /**
+     * @return a view of all listeners currently active. Never null, but can be empty.
+     */
+    public List<DocumentListener> getListenersUnmodifiable() {
+        return Collections.unmodifiableList(listeners);
+    }
+
     private void handlerChanges(ChangesFeed feed) throws InterruptedException {
 
         final Thread currentThread = Thread.currentThread();
         final HashMap<Class, List<Element>> addedElements = new HashMap<>();
         final HashMap<Class, List<Element>> changedElements = new HashMap<>();
         final HashMap<Class, List<Element>> removedElements = new HashMap<>();
-        
+
         while (!currentThread.isInterrupted()) {
             final DocumentChange change = feed.next(bulkTime, bulkUnit);
             if (change == null) break;
-            
+
             if (change.isDeleted()) {
                 retrieveDeletedElement(change.getId()).ifPresent((Element e)-> putElement(e, removedElements));
             } else if (FIRST_REVISION.matcher(change.getRevision()).find()) {
@@ -194,7 +204,7 @@ public class DocumentChangeEmiter {
                 getElement(change.getId(), Optional.empty()).ifPresent((Element e)-> putElement(e, changedElements));
             }
         }
-        
+
         for (DocumentListener listener : listeners) {
             if (!addedElements.isEmpty()) {
                 listener.documentCreated(addedElements);
@@ -216,7 +226,7 @@ public class DocumentChangeEmiter {
         }
         registry.add(e);
     }
-    
+
     private void log(Exception e) {
         SirsCore.LOGGER.log(Level.WARNING, e.getMessage(), e);
     }

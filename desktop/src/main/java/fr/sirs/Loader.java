@@ -52,10 +52,10 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @author Johann Sorel (Geomatys)
  */
 public class Loader extends Application {
-    
+
     private final Stage splashStage;
     private final String databaseName;
-    
+
     public Loader(String databaseName) {
         ArgumentChecks.ensureNonEmpty("Database name", databaseName);
         this.databaseName = databaseName;
@@ -74,11 +74,11 @@ public class Loader extends Application {
         showLoadingStage(initTask);
         new Thread(initTask).start();
     }
-    
+
     public void showSplashStage() {
         splashStage.show();
     }
-    
+
     /**
      * Display splash screen.
      *
@@ -115,7 +115,7 @@ public class Loader extends Application {
                 }
             }
         });
-        
+
         controller.uiPassword.setOnAction((ActionEvent e)-> controller.uiConnexion.fire());
         controller.uiConnexion.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -127,18 +127,18 @@ public class Loader extends Application {
 
                     controller.uiLogInfo.setText("Recherche…");
                     final List<Utilisateur> candidateUsers = utilisateurRepository.getByLogin(controller.uiLogin.getText());
-                        
+
                     if (candidateUsers.isEmpty()) {
                         controller.uiLogInfo.setText("Identifiants erronés.");
                         controller.uiPassword.setText("");
                         return;
                     }
-                    
+
                     // Database passwords are encrypted, so we encrypt input password to compare both.
                         final String passwordText = controller.uiPassword.getText();
                         final String encryptedPassword;
                         if (passwordText == null || passwordText.isEmpty()) {
-                            encryptedPassword = null;                            
+                            encryptedPassword = null;
                         } else {
                             encryptedPassword = hexaMD5(passwordText);
                         }
@@ -193,7 +193,7 @@ public class Loader extends Application {
         });
 
     }
-    
+
     /**
      * Display the main frame.
      */
@@ -202,7 +202,7 @@ public class Loader extends Application {
         final FXMainFrame frame = new FXMainFrame();
         session.setFrame(frame);
         Scene mainScene = new Scene(frame);
-        
+
         final Stage mainStage = new Stage();
         mainStage.getIcons().add(SIRS.ICON);
         mainStage.titleProperty().bind(Bindings.createStringBinding(() -> {
@@ -296,7 +296,7 @@ public class Loader extends Application {
                 // LOAD SIRS DATABASE //////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement et création des index ...");
-                final ConfigurableApplicationContext context = 
+                final ConfigurableApplicationContext context =
                         new DatabaseRegistry().connectToSirsDatabase(databaseName, true, true, true);
 
                 // LOAD PLUGINS ////////////////////////////////////////////////
@@ -306,19 +306,19 @@ public class Loader extends Application {
                             + plugin.getLoadingMessage().getValue());
                     plugin.load();
                 }
-                
+
                 // MAP INITIALISATION //////////////////////////////////////////
                 //Affiche le contexte carto et le déplace à la date du jour
                 updateProgress(inc++, total);
                 updateMessage("Initialisation de la carte");
                 Injector.getSession().getMapContext().getAreaOfInterest();
-                
+
                 // COUCHDB TO SQL //////////////////////////////////////////////
                 updateMessage("Export vers la base RDBMS");
                 H2Helper.init();
 
                 updateProgress(inc++, total);
-                
+
                 // OVER
                 updateProgress(total, total);
                 updateMessage("Chargement terminé.");
@@ -331,5 +331,5 @@ public class Loader extends Application {
             }
             return null;
         }
-    }    
+    }
 }

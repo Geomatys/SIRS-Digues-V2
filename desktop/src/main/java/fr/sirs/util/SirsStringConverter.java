@@ -31,14 +31,14 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * Try to return a simple and readable name for any element given as argument.
- * 
+ *
  * @author Alexis Manin
  * @author Johann Sorel
  */
 public class SirsStringConverter extends StringConverter {
-    
+
     private final WeakHashMap<String, Object> FROM_STRING = new WeakHashMap<>();
-    
+
     /**
      * Find a simple name for input object.
      * @param item The object to find a name for.
@@ -61,7 +61,7 @@ public class SirsStringConverter extends StringConverter {
         }  else if (item instanceof SQLQuery) {
             text.append(((SQLQuery)item).getLibelle());
         }
-        
+
         // Search for a name or label associated to input object
         if (item instanceof Contact) {
             final Contact c = (Contact) item;
@@ -93,20 +93,18 @@ public class SirsStringConverter extends StringConverter {
             if(Element.class.isAssignableFrom((Class) item)){
                 return LabelMapper.get((Class) item).mapClassName();
             }
+        } else if(item!=null && item.getClass().isEnum()){
+            text.append(((Enum)item).name());
         }
-        
+
         // Whatever object we've got, if we can append a libelle, we do.
         if (item instanceof AvecLibelle) {
             final AvecLibelle libelle = (AvecLibelle) item;
-            if (text.length() > 0 
-                    && libelle.getLibelle() != null 
+            if (text.length() > 0
+                    && libelle.getLibelle() != null
                     && !libelle.getLibelle().isEmpty()) {
                 text.append(" : ").append(libelle.getLibelle());
             }
-        }
-
-        if(item!=null && item.getClass().isEnum()){
-            text.append(((Enum)item).name());
         }
 
         final String result = text.toString();
@@ -128,7 +126,7 @@ public class SirsStringConverter extends StringConverter {
         }
         return prefixedDesignation;
     }
-    
+
     public static String getDesignation(final Element source) {
         final LabelMapper labelMapper =  LabelMapper.get(source.getClass());
         String prefixedDesignation = (labelMapper == null) ? "" : labelMapper.mapPropertyName(BUNDLE_KEY_CLASS_ABREGE);
@@ -138,7 +136,7 @@ public class SirsStringConverter extends StringConverter {
             }
             prefixedDesignation+=source.getDesignation();
         }
-        
+
         if(source instanceof PositionDocument){
             if(((PositionDocument)source).getSirsdocument()!=null){
                 final Preview preview = Injector.getSession().getPreviews().get(((PositionDocument)source).getSirsdocument());
@@ -154,17 +152,17 @@ public class SirsStringConverter extends StringConverter {
                 }
             }
         }
-        
+
         return prefixedDesignation;
     }
-    
+
     @Override
     public Object fromString(String string) {
         return FROM_STRING.get(string);
     }
-        
+
     /**
-     * 
+     *
      * @param className
      * @return the labelMapper for the given class name, or null if there is no
      * class for the given name.
@@ -177,5 +175,5 @@ public class SirsStringConverter extends StringConverter {
         }
         return null;
     }
-    
+
 }
