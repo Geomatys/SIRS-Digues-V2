@@ -21,6 +21,18 @@ public class ElementCreator {
         this(null);
     }
     
+    /**
+     * Create a new element of type T. 
+     * 
+     * If possible, this method sets the correct validity and author dependant 
+     * on user's privileges of the session.
+     * 
+     * Do not add the element to the database.
+     * 
+     * @param <T>
+     * @param clazz
+     * @return 
+     */
     public <T extends Element> T createElement(final Class<T> clazz){
         try {
             final Constructor<T> constructor = clazz.getConstructor();

@@ -14,7 +14,7 @@ import javafx.scene.layout.BorderPane;
  */
 public abstract class AbstractFXElementPane<T extends Element> extends BorderPane implements FXElementPane<T> {
 
-    protected final SimpleObjectProperty<T> elementProperty = new SimpleObjectProperty<>();
+    protected final ObjectProperty<T> elementProperty = new SimpleObjectProperty<>();
     private final BooleanProperty editableProperty = new SimpleBooleanProperty();
     
     @Override

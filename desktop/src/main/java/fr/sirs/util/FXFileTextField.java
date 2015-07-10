@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -28,7 +29,7 @@ public class FXFileTextField extends AbstractPathTextField {
 
     private final SimpleStringProperty rootPath = new SimpleStringProperty();
     
-    public final SimpleBooleanProperty disableFieldsProperty = new SimpleBooleanProperty();
+    public final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty();
     
     public FXFileTextField() {
         rootPath.addListener(this::updateRoot);

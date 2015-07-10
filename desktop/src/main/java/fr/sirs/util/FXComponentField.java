@@ -1,31 +1,27 @@
 package fr.sirs.util;
 
 import fr.sirs.Injector;
-import fr.sirs.SIRS;
-import fr.sirs.core.SirsCore;
-import fr.sirs.util.property.SirsPreferences;
+import fr.sirs.core.model.Element;
 import java.awt.Color;
-import java.io.File;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.logging.Level;
+import java.util.Optional;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.stage.FileChooser;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
-import static org.geotoolkit.gui.javafx.util.AbstractPathTextField.ICON_FORWARD;
 
 /**
  *
@@ -33,7 +29,7 @@ import static org.geotoolkit.gui.javafx.util.AbstractPathTextField.ICON_FORWARD;
  * @param <P> Container element type (parent)
  * @param <C> Contained element type (child)
  */
-public class FXComponentField<P, C> extends HBox {
+public class FXComponentField<P extends Element, C extends Element> extends HBox {
     
     private static final Image ICON_FORWARD = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXTERNAL_LINK, 16, Color.DARK_GRAY), null);
     protected final Button openPathButton = new Button("", new ImageView(ICON_FORWARD));
@@ -41,79 +37,81 @@ public class FXComponentField<P, C> extends HBox {
     protected final Button addButton = new Button(null, new ImageView(ICON_ADD));
     private static final Image ICON_REMOVE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TRASH_O, 16, Color.DARK_GRAY),null);
     protected final Button removeButton = new Button(null, new ImageView(ICON_REMOVE));
-
-    private final SimpleStringProperty rootPath = new SimpleStringProperty();
     
-    public final SimpleBooleanProperty disableFieldsProperty = new SimpleBooleanProperty();
-    public final ObjectProperty<C> property;
+    protected final Label label = new Label();
     
-    public FXComponentField(final ObjectProperty<C> property) {
-        this.property = property;
+    private final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty(false);
+    
+    private final ChangeListener<C> changeListener;
+    
+    private Class<C> childClass;
+    private ObjectProperty<C> property;
+    private P parent;
+    
+    
+    public FXComponentField() {
         
-        removeButton.setOnAction((ActionEvent event) -> FXComponentField.this.property.set(null));
-        addButton.setOnAction((ActionEvent event) -> {
-//            Injector.getSession().getElementCreator().createElement(null)
+        setSpacing(10);
+        
+        removeButton.setOnAction((ActionEvent event) -> {
+            final Alert alert = new Alert(Alert.AlertType.NONE, "L'élément sera définitivement supprimé.", ButtonType.OK, ButtonType.CANCEL);
+            alert.setResizable(true);
+            final Optional<ButtonType> answer = alert.showAndWait();
+            if(answer.isPresent() && answer.get()==ButtonType.OK){
+                FXComponentField.this.property.set(null);
+            }
         });
+        
+        openPathButton.setOnAction((ActionEvent event) -> {
+            Injector.getSession().showEditionTab(property.get());
+        });
+        
+        addButton.setOnAction((ActionEvent event) -> {
+            final Alert alert = new Alert(Alert.AlertType.NONE, "Vous allez créer un élément.", ButtonType.OK);
+            alert.setResizable(true);
+            final Optional<ButtonType> answer = alert.showAndWait();
+            if(answer.isPresent() && answer.get()==ButtonType.OK){
+                final C childElement = Injector.getSession().getElementCreator().createElement(childClass);
+                childElement.getId(); // Il faut attribuer un ID à l'élément en invoquant la méthode getId() de manière à ce que son panneau soit correctement indexé.
+                property.set(childElement);
+                childElement.setParent(parent);
+                Injector.getSession().showEditionTab(property.get());
+            }
+        });
+        
+        label.setPrefWidth(USE_COMPUTED_SIZE);
+        label.setPrefHeight(getHeight());
+        label.setAlignment(Pos.CENTER_LEFT);
         
         getChildren().add(addButton);
         getChildren().add(openPathButton);
         getChildren().add(removeButton);
-//        rootPath.addListener(this::updateRoot);
-//        rootPath.set(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT));
-//        
-//        inputText.disableProperty().bind(disableFieldsProperty);
-//        choosePathButton.disableProperty().bind(disableFieldsProperty);
+        getChildren().add(label);
+        
+        
+        changeListener = new WeakChangeListener<>(new ChangeListener<C>() {
+            @Override
+            public void changed(ObservableValue<? extends C> observable, C oldValue, C newValue) {
+                label.textProperty().unbind();
+                if(newValue!=null){
+                    label.textProperty().bind(newValue.designationProperty());
+                }
+            }
+        });
     }
     
-    private void updateRoot(final ObservableValue<? extends String> obs, final String oldValue, final String newValue) {
-//        if (newValue == null || newValue.isEmpty()) {
-//            completor.root = null;
-//        } else {
-//            completor.root = Paths.get(newValue);
-//        }
+    public void initChildClass(final Class<C> childClass){
+        this.childClass = childClass;
     }
     
-//    @Override
-//    protected String chooseInputContent() {
-//        final FileChooser chooser = new FileChooser();
-//        try {
-//            URI uriForText = getURIForText(getText());
-//            final Path basePath = Paths.get(uriForText);
-//            if (Files.isDirectory(basePath)) {
-//                chooser.setInitialDirectory(basePath.toFile());
-//            } else if (Files.isDirectory(basePath.getParent())) {
-//                chooser.setInitialDirectory(basePath.getParent().toFile());
-//            }
-//        } catch (Exception e) {
-//            // Well, we'll try without it...
-//            SirsCore.LOGGER.log(Level.FINE, "Input path cannot be decoded.", e);
-//        }
-//        File returned = chooser.showOpenDialog(null);
-//        if (returned == null) {
-//            return null;
-//        } else {
-//            return (completor.root != null)? 
-//                    completor.root.relativize(returned.toPath()).toString() : returned.getAbsolutePath();
-//        }
-//    }
-//
-//    @Override
-//    protected URI getURIForText(String inputText) throws Exception {
-//        rootPath.set(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT));
-//        if (rootPath.get() == null) {
-//            return inputText.matches("[A-Za-z]+://.+")? new URI(inputText) : Paths.get(inputText).toUri();
-//        } else {
-//            return SIRS.getDocumentAbsolutePath(inputText == null? "" : inputText).toUri();
-//        }
-//    }
-//    
-//    public URI getURI() {
-//        try{
-//            return getURIForText(getText());
-//        } catch(Exception e){
-//            SIRS.LOGGER.log(Level.FINEST, "Unable to build URI from "+getText());
-//            return null;
-//        }
-//    }
+    public void setParent(final P parent, final ObjectProperty<C> property){
+        this.parent = parent;
+        this.property = property;
+        this.property.addListener(changeListener);
+        removeButton.disableProperty().bind(property.isNull().or(disableFieldsProperty));
+        addButton.disableProperty().bind(property.isNull());
+        addButton.disableProperty().bind(property.isNotNull().or(disableFieldsProperty));
+        label.textProperty().bind(property.get().designationProperty());
+    }
     
 }
