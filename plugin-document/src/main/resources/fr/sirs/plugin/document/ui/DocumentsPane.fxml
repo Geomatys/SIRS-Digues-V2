@@ -27,7 +27,7 @@
    <children>
       <TreeTableView fx:id="tree1" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2" GridPane.rowSpan="10">
         <columns>
-          <TreeTableColumn prefWidth="203.0" text="Nom" />
+          <TreeTableColumn maxWidth="1.7976931348623157E308" prefWidth="300.0" text="Nom" />
           <TreeTableColumn minWidth="0.0" prefWidth="71.0" text="Date de modification" />
             <TreeTableColumn prefWidth="75.0" text="Taille" />
             <TreeTableColumn prefWidth="146.0" text="N° inventaire" />
