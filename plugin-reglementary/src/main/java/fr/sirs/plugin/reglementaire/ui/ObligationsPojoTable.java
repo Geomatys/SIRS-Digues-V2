@@ -4,18 +4,12 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.RappelObligationReglementaire;
-import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SimpleFXEditMode;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TabPane;
@@ -25,8 +19,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.util.Callback;
-import org.geotoolkit.gui.javafx.util.FXStringCell;
+import org.geotoolkit.gui.javafx.util.FXTableCell;
 
 /**
  * Table présentant les obligations réglementaires.
@@ -43,7 +36,7 @@ public final class ObligationsPojoTable extends PojoTable {
     public ObligationsPojoTable(final AbstractSIRSRepository obligationRepository, final TabPane tabPane) {
         super(obligationRepository, "Liste des obligations réglementaires");
 
-        getUiTable().getColumns().add(5, new ClassTableColumn());
+        getUiTable().getColumns().add(5, new SEClassTableColumn());
 
         final Button uiPlanificationBtn = new Button(null, new ImageView(SIRS.ICON_CLOCK_WHITE));
         uiPlanificationBtn.getStyleClass().add(BUTTON_STYLE);
@@ -74,25 +67,44 @@ public final class ObligationsPojoTable extends PojoTable {
         tabPane.getSelectionModel().select(planTab);
     }
 
+
     /**
-     * Colonne représentant la classe du système d'endiguement
+     * Colonne représentant la classe du système d'endiguement.
      */
-    private class ClassTableColumn extends TableColumn<ObligationReglementaire, String> {
-        public ClassTableColumn() {
+    private class SEClassTableColumn extends TableColumn<ObligationReglementaire, String> {
+        public SEClassTableColumn() {
             super("Classe");
 
-            setCellValueFactory(param -> {
-                final ObligationReglementaire obligation = param.getValue();
-                if (obligation.getSystemeEndiguementId() != null) {
-                    final SystemeEndiguement se = Injector.getBean(SystemeEndiguementRepository.class).get(obligation.getSystemeEndiguementId());
-                    return new SimpleStringProperty(se.getClassement());
-                }
-                return new SimpleStringProperty();
-            });
-
-            setCellFactory(param -> new FXStringCell());
+            setCellValueFactory(param -> param.getValue().systemeEndiguementIdProperty());
+            setCellFactory(param -> new SEClassCell());
 
             setEditable(false);
+        }
+    }
+
+    /**
+     * Cellule représentant la classe du système d'endiguement.
+     */
+    private class SEClassCell extends FXTableCell<ObligationReglementaire, String> {
+        public SEClassCell() {
+            super();
+            setAlignment(Pos.CENTER);
+        }
+
+        /**
+         * Garde la correspondance entre la classe du système d'endiguement affichée dans la cellule et la propriété
+         * correspondante dans le système d'endiguement.
+         *
+         * @param item La propriété id du système d'endiguement
+         * @param empty Vrai si la cellule est vide
+         */
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (!empty && item != null) {
+                textProperty().bind(Injector.getBean(SystemeEndiguementRepository.class).get(item).classementProperty());
+            }
         }
     }
 }
