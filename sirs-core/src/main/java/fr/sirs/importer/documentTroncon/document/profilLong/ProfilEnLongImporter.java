@@ -125,7 +125,7 @@ public class ProfilEnLongImporter extends GenericImporter {
             profil.setLibelle(row.getString(Columns.NOM.toString()));
             
             if (row.getDate(Columns.DATE_LEVE.toString()) != null) {
-                profil.setDateLevee(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_LEVE.toString()), dateTimeFormatter));
+                profil.setDateLeve(DbImporter.parseLocalDate(row.getDate(Columns.DATE_LEVE.toString()), dateTimeFormatter));
             }
             
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_CREATEUR.toString()));

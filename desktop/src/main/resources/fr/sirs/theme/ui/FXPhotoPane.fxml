@@ -58,7 +58,7 @@
                           <children>
                                <!-- EDate -->                 
                                <Label text="%date" GridPane.rowIndex="0" />
-                               <FXDateField fx:id="ui_date" GridPane.columnIndex="1" GridPane.rowIndex="0"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                               <DatePicker fx:id="ui_date" GridPane.columnIndex="1" GridPane.rowIndex="0"  maxHeight="-Infinity" maxWidth="-Infinity"/>
                                <!-- EString -->                 
                                <Label text="%chemin" GridPane.rowIndex="1" />
                                <FXFileTextField fx:id="ui_chemin" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>

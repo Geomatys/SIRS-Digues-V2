@@ -128,7 +128,7 @@ public class PhotoLocaliseeEnXyImporter extends PhotoImporter {
             }
             
             if (row.getDate(Columns.DATE_PHOTO.toString()) != null) {
-                photo.setDate(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_PHOTO.toString()), dateTimeFormatter));
+                photo.setDate(DbImporter.parseLocalDate(row.getDate(Columns.DATE_PHOTO.toString()), dateTimeFormatter));
             }
             
             GeometryFactory geometryFactory = new GeometryFactory();

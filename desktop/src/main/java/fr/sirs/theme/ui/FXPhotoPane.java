@@ -48,7 +48,7 @@ public class FXPhotoPane extends AbstractFXElementPane<Photo> {
     @FXML FXPositionablePane uiPositionable;
 
     // Propriétés de Photo
-    @FXML FXDateField ui_date;
+    @FXML DatePicker ui_date;
     @FXML FXFileTextField ui_chemin;
     @FXML TextField ui_libelle;
     @FXML HTMLEditor ui_commentaire;

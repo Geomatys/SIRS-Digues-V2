@@ -69,11 +69,11 @@ public class MeteoImporter extends GenericImporter {
             final Meteo meteo = createAnonymValidElement(Meteo.class);
             
             if (row.getDate(Columns.DATE_DEBUT_METEO.toString()) != null) {
-                meteo.setDate_debut(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DEBUT_METEO.toString()), dateTimeFormatter));
+                meteo.setDateDebut(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DEBUT_METEO.toString()), dateTimeFormatter));
             }
             
             if (row.getDate(Columns.DATE_FIN_METEO.toString()) != null) {
-                meteo.setData_fin(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_FIN_METEO.toString()), dateTimeFormatter));
+                meteo.setDateFin(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN_METEO.toString()), dateTimeFormatter));
             }
             
             if(row.getDouble(Columns.VITESSE_VENT.toString())!=null){

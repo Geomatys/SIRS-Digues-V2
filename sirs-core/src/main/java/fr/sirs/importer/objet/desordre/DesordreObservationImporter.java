@@ -79,7 +79,7 @@ public class DesordreObservationImporter extends GenericImporter {
             }
             
             if (row.getDate(Columns.DATE_OBSERVATION_DESORDRE.toString()) != null) {
-                observation.setDate(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_OBSERVATION_DESORDRE.toString()), dateTimeFormatter));
+                observation.setDate(DbImporter.parseLocalDate(row.getDate(Columns.DATE_OBSERVATION_DESORDRE.toString()), dateTimeFormatter));
             }
             
             if (row.getString(Columns.SUITE_A_APPORTER.toString()) != null) {

@@ -13,7 +13,7 @@ import fr.sirs.core.model.Organisme;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.ReferenceTableCell;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -259,7 +259,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
             final Organisme org = session.getRepositoryForClass(Organisme.class).getOne();
             co.setDocumentId(org.getId());
             org.addChild(co);
-            co.setDateDebutIntervenant(LocalDateTime.now());
+            co.setDateDebutIntervenant(LocalDate.now());
             orgsOfContact.add(co);
             return co;
         }

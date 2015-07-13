@@ -7802,9 +7802,9 @@
           <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_qrovVEiwEeSShKVOxlfrCQ" red="255" green="252" blue="216"/>
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_gGU9gEiwEeSShKVOxlfrCQ" name="date_debut : EDate" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Meteo/date_debut"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Meteo/date_debut"/>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_gGU9gEiwEeSShKVOxlfrCQ" name="dateDebut : EDate" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Meteo/dateDebut"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Meteo/dateDebut"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_h68VwEiwEeSShKVOxlfrCQ" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_h68VwUiwEeSShKVOxlfrCQ"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -7813,9 +7813,9 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_iTbuQEiwEeSShKVOxlfrCQ" name="data_fin : EDate" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Meteo/data_fin"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Meteo/data_fin"/>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_iTbuQEiwEeSShKVOxlfrCQ" name="dateFin : EDate" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//Meteo/dateFin"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//Meteo/dateFin"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_iTbuQUiwEeSShKVOxlfrCQ" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_iTbuQkiwEeSShKVOxlfrCQ"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -8970,9 +8970,9 @@
           <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_WJPEsOHvEeSSsJWLqdyq6Q" red="227" green="164" blue="156"/>
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_k7wQoF6DEeSu4tBL7n5h2g" name="dateLevee : EDate" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//LeveProfilTravers/dateLevee"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//LeveProfilTravers/dateLevee"/>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_k7wQoF6DEeSu4tBL7n5h2g" name="dateLeve : EDate" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//LeveProfilTravers/dateLeve"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//LeveProfilTravers/dateLeve"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_nTwCwF6DEeSu4tBL7n5h2g" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_nTwCwV6DEeSu4tBL7n5h2g"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -9235,9 +9235,9 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_uO7KtV67EeSu4tBL7n5h2g" name="dateLevee : EDate" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//ProfilLong/dateLevee"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//ProfilLong/dateLevee"/>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_uO7KtV67EeSu4tBL7n5h2g" name="dateLeve : EDate" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="sirs.ecore#//ProfilLong/dateLeve"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="sirs.ecore#//ProfilLong/dateLeve"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_uO7Ktl67EeSu4tBL7n5h2g" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_uO7Kt167EeSu4tBL7n5h2g"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>

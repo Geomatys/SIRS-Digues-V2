@@ -263,20 +263,6 @@ public class SessionCore implements ApplicationContextAware {
         return previews;
     }
 
-    public <T extends Positionable> List<T> getByTronconId(final String tronconId, final Class<T> clazz){
-        final List<T> objets = new ArrayList<>();
-        for(final Element element : ServiceLoader.load(Element.class)){
-            if(clazz.isAssignableFrom(element.getClass()) && element instanceof AvecForeignParent){
-                final AbstractPositionableRepository<T> repo = (AbstractPositionableRepository<T>) getRepositoryForClass(element.getClass());
-                final List elementList = repo.getByLinearId(tronconId);
-                for(final Object objet : elementList){
-                    objets.add((T) objet);
-                }
-            }
-        }
-        return objets;
-    }
-
     public List<ProprieteTroncon> getProprietesByTronconId(final String tronconId){
         final AbstractPositionableRepository<ProprieteTroncon> repo = (AbstractPositionableRepository<ProprieteTroncon>) getRepositoryForClass(ProprieteTroncon.class);
         return repo.getByLinearId(tronconId);

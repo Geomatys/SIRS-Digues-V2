@@ -139,7 +139,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
             final LeveProfilTravers leve = createAnonymValidElement(LeveProfilTravers.class);
             
             if (row.getDate(Columns.DATE_LEVE.toString()) != null) {
-                leve.setDateLevee(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_LEVE.toString()), dateTimeFormatter));
+                leve.setDateLeve(DbImporter.parseLocalDate(row.getDate(Columns.DATE_LEVE.toString()), dateTimeFormatter));
             }
             
             final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORG_CREATEUR.toString()));
