@@ -2,7 +2,6 @@ package fr.sirs.util;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.EchelleLimnimetrique;

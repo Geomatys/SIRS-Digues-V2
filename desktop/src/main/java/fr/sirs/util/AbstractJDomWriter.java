@@ -1,7 +1,9 @@
 package fr.sirs.util;
 
+import fr.sirs.SIRS;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -31,8 +33,9 @@ public class AbstractJDomWriter {
     public AbstractJDomWriter(final InputStream stream) throws ParserConfigurationException, SAXException, IOException{
         
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setCoalescing(false);
+        factory.setNamespaceAware(true); 
         final DocumentBuilder constructeur = factory.newDocumentBuilder();
-        factory.setNamespaceAware(true);
         
         document = constructeur.parse(stream);
         stream.close();

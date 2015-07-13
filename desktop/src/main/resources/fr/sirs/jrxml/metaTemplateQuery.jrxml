@@ -39,7 +39,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Serif" size="14" isBold="true" isUnderline="true"/>
 				</textElement>
-				<text><![CDATA[]]></text>
+				<text><![CDATA[Titre]]></text>
 			</staticText>
 			<image>
 				<reportElement x="0" y="0" width="135" height="59"/>

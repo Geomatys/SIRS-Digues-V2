@@ -251,8 +251,7 @@ public class JRDomWriterElementSheet extends AbstractJDomWriter {
         else{
             className = classToMap.getSimpleName();
         }
-        ((CDATASection) text.getChildNodes().item(0)).setData(
-                "Fiche synoptique de " + className);
+        ((CDATASection) text.getChildNodes().item(0)).setData("Fiche synoptique de " + className);
         
         // Builds the DOM tree.-------------------------------------------------
         this.root.appendChild(this.title);
