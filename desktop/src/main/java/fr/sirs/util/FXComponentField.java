@@ -1,12 +1,18 @@
 package fr.sirs.util;
 
+import com.healthmarketscience.jackcess.impl.complex.UnsupportedColumnInfoImpl;
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Element;
 import java.awt.Color;
 import java.util.Optional;
+import java.util.ResourceBundle;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
@@ -17,6 +23,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -49,12 +56,14 @@ public class FXComponentField<P extends Element, C extends Element> extends HBox
     private P parent;
     
     
+    private ResourceBundle bundle;
+    
     public FXComponentField() {
         
         setSpacing(10);
         
         removeButton.setOnAction((ActionEvent event) -> {
-            final Alert alert = new Alert(Alert.AlertType.NONE, "L'élément sera définitivement supprimé.", ButtonType.OK, ButtonType.CANCEL);
+            final Alert alert = new Alert(Alert.AlertType.NONE, "Le/La "+bundle.getString(SIRS.BUNDLE_KEY_CLASS)+" sera définitivement supprimé(e).", ButtonType.OK, ButtonType.CANCEL);
             alert.setResizable(true);
             final Optional<ButtonType> answer = alert.showAndWait();
             if(answer.isPresent() && answer.get()==ButtonType.OK){
@@ -67,7 +76,7 @@ public class FXComponentField<P extends Element, C extends Element> extends HBox
         });
         
         addButton.setOnAction((ActionEvent event) -> {
-            final Alert alert = new Alert(Alert.AlertType.NONE, "Vous allez créer un élément.", ButtonType.OK);
+            final Alert alert = new Alert(Alert.AlertType.NONE, "Vous allez créer un(e) "+bundle.getString(SIRS.BUNDLE_KEY_CLASS)+".", ButtonType.OK, ButtonType.CANCEL);
             alert.setResizable(true);
             final Optional<ButtonType> answer = alert.showAndWait();
             if(answer.isPresent() && answer.get()==ButtonType.OK){
@@ -94,14 +103,44 @@ public class FXComponentField<P extends Element, C extends Element> extends HBox
             public void changed(ObservableValue<? extends C> observable, C oldValue, C newValue) {
                 label.textProperty().unbind();
                 if(newValue!=null){
-                    label.textProperty().bind(newValue.designationProperty());
+                    label.textProperty().bind(new LabelBinding(newValue.designationProperty()));
+                } else {
+                    label.setText("");
                 }
             }
         });
     }
+
+    final private class LabelBinding extends StringBinding {
+
+        final StringProperty designationProperty;
+        public LabelBinding(final StringProperty designationProperty){
+            super();
+            bind(designationProperty);
+            this.designationProperty = designationProperty;
+        }
+
+        @Override
+        protected String computeValue() {
+            return computeLabel(designationProperty);
+        }
+    }
+    
+    private String computeLabel(final StringProperty designationProp) {
+        if(designationProp!=null 
+                && designationProp.get()!=null 
+                && !"".equals(designationProp.get()))
+            return "Désignation : " + bundle.getString(SIRS.BUNDLE_KEY_CLASS_ABREGE)+ " - " + designationProp.get();
+        else
+            return "";
+    }
     
     public void initChildClass(final Class<C> childClass){
         this.childClass = childClass;
+        bundle = ResourceBundle.getBundle(childClass.getName());
+        openPathButton.setTooltip(new Tooltip("Accéder au/à la "+bundle.getString(SIRS.BUNDLE_KEY_CLASS)));
+        removeButton.setTooltip(new Tooltip("Supprimer le/la "+bundle.getString(SIRS.BUNDLE_KEY_CLASS)));
+        addButton.setTooltip(new Tooltip("Créer un(e) "+bundle.getString(SIRS.BUNDLE_KEY_CLASS)));
     }
     
     public void setParent(final P parent, final ObjectProperty<C> property){
@@ -109,9 +148,9 @@ public class FXComponentField<P extends Element, C extends Element> extends HBox
         this.property = property;
         this.property.addListener(changeListener);
         removeButton.disableProperty().bind(property.isNull().or(disableFieldsProperty));
-        addButton.disableProperty().bind(property.isNull());
+        openPathButton.disableProperty().bind(property.isNull());
         addButton.disableProperty().bind(property.isNotNull().or(disableFieldsProperty));
-        label.textProperty().bind(property.get().designationProperty());
+        if(property.get()!=null) label.textProperty().bind(new LabelBinding(property.get().designationProperty()));
     }
     
 }
