@@ -1,6 +1,10 @@
 
 package fr.sirs.plugin.document;
 
+import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.SystemeEndiguement;
+import fr.sirs.core.model.TronconDigue;
+import fr.sirs.plugin.document.ui.DocumentsPane;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -94,6 +98,42 @@ public class PropertiesFileUtilities {
         }
     }
     
+    public static void setIsSe(final File f, boolean value) {
+        final Properties prop   = getSirsProperties(f);
+        prop.put(f.getName() + "_se", Boolean.toString(value));
+        
+        try {
+            final File sirsPropFile = getSirsPropertiesFile(f);
+            prop.store(new FileWriter(sirsPropFile), "");
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
+        }
+    }
+    
+    public static void setIsTr(final File f, boolean value) {
+        final Properties prop   = getSirsProperties(f);
+        prop.put(f.getName() + "_tr", Boolean.toString(value));
+        
+        try {
+            final File sirsPropFile = getSirsPropertiesFile(f);
+            prop.store(new FileWriter(sirsPropFile), "");
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
+        }
+    }
+    
+    public static void setIsDg(final File f, boolean value) {
+        final Properties prop   = getSirsProperties(f);
+        prop.put(f.getName() + "_dg", Boolean.toString(value));
+        
+        try {
+            final File sirsPropFile = getSirsPropertiesFile(f);
+            prop.store(new FileWriter(sirsPropFile), "");
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
+        }
+    }
+    
     public static void removeDOIntegrated(final File f) {
         final Properties prop   = getSirsProperties(f);
         prop.remove(f.getName() + "_do_integrated");
@@ -161,5 +201,56 @@ public class PropertiesFileUtilities {
         } else {
             return f.length();
         }
+    }
+    
+    public static File getOrCreateSE(final File rootDirectory, SystemeEndiguement sd){
+        String name = sd.getLibelle();
+        if (name == null) {
+            name = "null";
+        }
+        final File sdDir = new File(rootDirectory, name);
+        if (!sdDir.exists()) {
+            sdDir.mkdir();
+        }
+        setIsSe(sdDir, true);
+        final File docDir = new File(sdDir, DocumentsPane.DOCUMENT_FOLDER); 
+        if (!docDir.exists()) {
+            docDir.mkdir();
+        }
+        return sdDir;
+    }
+    
+    public static File getOrCreateDG(final File rootDirectory, Digue digue){
+        String name = digue.getLibelle();
+        if (name == null) {
+            name = "null";
+        }
+        final File digueDir = new File(rootDirectory, name);
+        if (!digueDir.exists()) {
+            digueDir.mkdir();
+        }
+        setIsDg(digueDir, true);
+        final File docDir = new File(digueDir, DocumentsPane.DOCUMENT_FOLDER); 
+        if (!docDir.exists()) {
+            docDir.mkdir();
+        }
+        return digueDir;
+    }
+    
+    public static File getOrCreateTR(final File rootDirectory, TronconDigue tr){
+        String name = tr.getLibelle();
+        if (name == null) {
+            name = "null";
+        }
+        final File trDir = new File(rootDirectory, name);
+        if (!trDir.exists()) {
+            trDir.mkdir();
+        }
+        setIsTr(trDir, true);
+        final File docDir = new File(trDir, DocumentsPane.DOCUMENT_FOLDER); 
+        if (!docDir.exists()) {
+            docDir.mkdir();
+        }
+        return trDir;
     }
 }

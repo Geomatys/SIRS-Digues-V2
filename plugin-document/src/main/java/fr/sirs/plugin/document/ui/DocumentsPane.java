@@ -82,6 +82,9 @@ public class DocumentsPane extends GridPane {
     
     private static final DateFormat DATE_FORMATTER = new SimpleDateFormat("dd/MM/yyyy");
     
+    public static final String UNCLASSIFIED = "Non classés";
+    public static final String DOCUMENT_FOLDER = "Dossier d'ouvrage";
+    
     private static final Logger LOGGER = Logging.getLogger(DocumentsPane.class);
     
     private String rootPath = "/home/guilhem/Bureau/sym_doc_test";
@@ -166,6 +169,7 @@ public class DocumentsPane extends GridPane {
             }
         });
         
+        tree1.setShowRoot(false);
         updateRoot();
     }
     
@@ -300,34 +304,20 @@ public class DocumentsPane extends GridPane {
         final Set<TronconDigue> tronconsFound = new HashSet<>();
         
         for (SystemeEndiguement sd : sds) {
-            final File sdDir = new File(rootDirectory, sd.getLibelle());
-            if (!sdDir.exists()) {
-                sdDir.mkdir();
-            }
+            final File sdDir = getOrCreateSE(rootDirectory, sd);
             
             final List<String> digueIds = sd.getDigueIds();
             for (Digue digue : digues) {
                 if (!digueIds.contains(digue.getDocumentId())) continue;
                 diguesFound.add(digue);
                 
-                String name = digue.getLibelle();
-                if (name == null) {
-                    name = "null";
-                }
-                final File digueDir = new File(sdDir, name);
-                if (!digueDir.exists()) {
-                    digueDir.mkdir();
-                }
+                final File digueDir = getOrCreateDG(sdDir, digue);
 
                 for (final TronconDigue td : troncons) {
                     if (td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
                     tronconsFound.add(td);
 
-                    final File trDir = new File(digueDir, td.getLibelle());
-                    if (!trDir.exists()) {
-                        trDir.mkdir();
-                    }
-
+                    final File trDir = getOrCreateTR(digueDir, td);
                 }
             }
         }
@@ -335,37 +325,24 @@ public class DocumentsPane extends GridPane {
         
         //on place toute les digues et troncons non trouvé dans un group a part
         digues.removeAll(diguesFound);
-        final File unclassifiedDir = new File(rootDirectory, "Non classés"); 
+        final File unclassifiedDir = new File(rootDirectory, UNCLASSIFIED); 
         if (!unclassifiedDir.exists()) {
             unclassifiedDir.mkdir();
         }
         
         for (final Digue digue : digues) {
-            String name = digue.getLibelle();
-            if (name == null) {
-                name = "null";
-            }
-            final File digueDir = new File(unclassifiedDir, name);
-            if (!digueDir.exists()) {
-                digueDir.mkdir();
-            }
+            final File digueDir = getOrCreateDG(unclassifiedDir, digue);
             for (final TronconDigue td : troncons) {
                 if (td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
                 tronconsFound.add(td);
 
-                final File trDir = new File(digueDir, td.getLibelle());
-                if (!trDir.exists()) {
-                    trDir.mkdir();
-                }
+                final File trDir = getOrCreateTR(digueDir, td);
             }
         }
         
         troncons.removeAll(tronconsFound);
         for(final TronconDigue td : troncons){
-            final File trDir = new File(unclassifiedDir, td.getLibelle());
-            if (!trDir.exists()) {
-                trDir.mkdir();
-            }
+            final File trDir = getOrCreateTR(unclassifiedDir, td);
         }
         
         TreeItem root = new FileTreeItem(rootDirectory);
