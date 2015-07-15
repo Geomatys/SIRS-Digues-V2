@@ -13,7 +13,6 @@ import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.GestionTroncon;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProprieteTroncon;
-import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.RefTypeTroncon;
 import fr.sirs.core.model.SystemeReperage;
@@ -67,7 +66,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     @FXML TextField ui_libelle;
     @FXML HTMLEditor ui_commentaire;
     @FXML ComboBox ui_digueId;
-    @FXML ComboBox ui_positionId;
     @FXML ComboBox ui_typeRiveId;
     @FXML ComboBox ui_typeTronconId;
     @FXML ComboBox ui_systemeRepDefautId;
@@ -108,7 +106,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         ui_libelle.disableProperty().bind(disableFieldsProperty());
         ui_commentaire.disableProperty().bind(disableFieldsProperty());
         ui_digueId.disableProperty().bind(disableFieldsProperty());
-        ui_positionId.disableProperty().bind(disableFieldsProperty());
         ui_typeRiveId.disableProperty().bind(disableFieldsProperty());
         ui_typeTronconId.disableProperty().bind(disableFieldsProperty());
         ui_systemeRepDefautId.disableProperty().bind(disableFieldsProperty());
