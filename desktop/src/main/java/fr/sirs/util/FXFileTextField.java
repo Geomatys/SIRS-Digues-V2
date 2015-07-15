@@ -28,17 +28,17 @@ import org.geotoolkit.gui.javafx.util.AbstractPathTextField;
 public class FXFileTextField extends AbstractPathTextField {
 
     private final SimpleStringProperty rootPath = new SimpleStringProperty();
-    
+
     public final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty();
-    
+
     public FXFileTextField() {
         rootPath.addListener(this::updateRoot);
         rootPath.set(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT));
-        
+
         inputText.disableProperty().bind(disableFieldsProperty);
         choosePathButton.disableProperty().bind(disableFieldsProperty);
     }
-    
+
     private void updateRoot(final ObservableValue<? extends String> obs, final String oldValue, final String newValue) {
         if (newValue == null || newValue.isEmpty()) {
             completor.root = null;
@@ -46,7 +46,7 @@ public class FXFileTextField extends AbstractPathTextField {
             completor.root = Paths.get(newValue);
         }
     }
-    
+
     @Override
     protected String chooseInputContent() {
         final FileChooser chooser = new FileChooser();
@@ -66,7 +66,7 @@ public class FXFileTextField extends AbstractPathTextField {
         if (returned == null) {
             return null;
         } else {
-            return (completor.root != null)? 
+            return (completor.root != null)?
                     completor.root.relativize(returned.toPath()).toString() : returned.getAbsolutePath();
         }
     }
@@ -76,11 +76,13 @@ public class FXFileTextField extends AbstractPathTextField {
         rootPath.set(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT));
         if (rootPath.get() == null) {
             return inputText.matches("[A-Za-z]+://.+")? new URI(inputText) : Paths.get(inputText).toUri();
+        } else if (inputText == null || inputText.isEmpty()) {
+            return Paths.get(rootPath.get()).toUri();
         } else {
             return SIRS.getDocumentAbsolutePath(inputText == null? "" : inputText).toUri();
         }
     }
-    
+
     public URI getURI() {
         try{
             return getURIForText(getText());
@@ -89,5 +91,5 @@ public class FXFileTextField extends AbstractPathTextField {
             return null;
         }
     }
-    
+
 }

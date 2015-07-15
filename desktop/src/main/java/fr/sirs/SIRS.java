@@ -1,5 +1,6 @@
 package fr.sirs;
 
+import com.sun.javafx.PlatformUtil;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
@@ -58,15 +59,15 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * Constants used for project.
- * 
+ *
  * @author Johann Sorel
  */
 public final class SIRS extends SirsCore {
-    
+
     public static final CoordinateReferenceSystem CRS_WGS84 = CommonCRS.WGS84.normalizedGeographic();
-    
+
     public static final Image ICON = new Image(SirsCore.class.getResource("/fr/sirs/icon.png").toString());
-    
+
     public static final Image ICON_ADD_WHITE    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.WHITE),null);
     public static final Image ICON_ADD_BLACK    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.BLACK),null);
     public static final Image ICON_CLOCK_WHITE  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CLOCK_O,22,Color.WHITE),null);
@@ -88,44 +89,44 @@ public final class SIRS extends SirsCore {
     public static final Image ICON_IMPORT_WHITE  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_DOWNLOAD,22,Color.WHITE),null);
     public static final Image ICON_EXPORT_WHITE  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_SAVE_ALIAS,22,Color.WHITE),null);
     public static final Image ICON_VIEWOTHER_WHITE  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_BARS,22,Color.WHITE),null);
-    
+
     public static final String COLOR_INVALID_ICON = "#aa0000";
     public static final Image ICON_EXCLAMATION_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_CIRCLE, 16, Color.decode(COLOR_INVALID_ICON)),null);
     public static final String COLOR_VALID_ICON = "#00aa00";
     public static final Image ICON_CHECK_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CHECK_CIRCLE, 16, Color.decode(COLOR_VALID_ICON)),null);
     public static final String COLOR_WARNING_ICON = "#EEB422";
     public static final Image ICON_EXCLAMATION_TRIANGLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_TRIANGLE, 16, Color.decode(COLOR_WARNING_ICON)),null);
-    
+
     public static final Image ICON_LINK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXTERNAL_LINK, 16, Color.BLACK),null);
-    
+
     public static final String CSS_PATH = "/fr/sirs/theme.css";
     public static final String CSS_PATH_CALENDAR = "/fr/sirs/calendar.css";
-    
+
     //--------------------------------------------------------------------------
     // Champs spéciaux des classes utilisés dans le code
     //--------------------------------------------------------------------------
-    
+
     // Champs de contrôle des dates
     public static final String DATE_DEBUT_FIELD = "date_debut";
     public static final String DATE_FIN_FIELD = "date_fin";
     public static final String DATE_MAJ_FIELD = "dateMaj";
-    
+
     public static final String COMMENTAIRE_FIELD = "commentaire";
     public static final String GEOMETRY_FIELD = "geometry";
-    
+
     public static final String DESIGNATION_FIELD = "designation";
     public static final String VALID_FIELD = "valid";
     public static final String AUTHOR_FIELD = "author";
-    
+
     public static final String DOCUMENT_ID_FIELD = "documentId";
     public static final String ID_FIELD = "id";
     public static final String REVISION_FIELD = "revision";
     public static final String PARENT_FIELD = "parent";
     public static final String COUCH_DB_DOCUMENT_FIELD = "couchDBDocument";
-    
+
     public static final String LINEAR_ID_FIELD = "linearId";
     public static final String FOREIGN_PARENT_ID_FIELD = "foreignParentId";
-    
+
     public static final String PR_DEBUT_FIELD = "prDebut";
     public static final String PR_FIN_FIELD = "prFin";
     public static final String POSITION_DEBUT_FIELD = "positionDebut";
@@ -134,7 +135,7 @@ public final class SIRS extends SirsCore {
     public static final String LONGITUDE_MAX_FIELD = "longitudeMax";
     public static final String LATITUDE_MIN_FIELD = "latitudeMin";
     public static final String LATITUDE_MAX_FIELD = "latitudeMax";
-    
+
     public static final String SIRSDOCUMENT_REFERENCE = "sirsdocument";
     public static final String BORNE_IDS_REFERENCE = "borneIds";
 
@@ -144,7 +145,7 @@ public final class SIRS extends SirsCore {
     public static class DesordreFields {
         // Observations des désordres
         public static final String OBSERVATIONS_REFERENCE = "observations";
-        
+
         // Photos des observations
         public static final String PHOTOS_OBSERVATION_REFERENCE = "photos";
 
@@ -160,18 +161,18 @@ public final class SIRS extends SirsCore {
         // Voiries
         public static final String OUVRAGE_VOIRIE_REFERENCE = "ouvrageVoirieIds";
         public static final String VOIE_DIGUE_REFERENCE = "voieDigueIds";
-        
+
         // Prestations
         public static final String PRESTATION_REFERENCE = "prestationIds";
-        
-        
+
+
         public static final String ARTICLE_REFERENCE = "articleIds";
     }
-    
+
     // Champs spéciaux des ResourceBundles
     public static final String BUNDLE_KEY_CLASS = "class";
     public static final String BUNDLE_KEY_CLASS_ABREGE = "classAbrege";
-    
+
     // Bundle des previews
     public static final String PREVIEW_BUNDLE_KEY_DOC_ID = "docId";
     public static final String PREVIEW_BUNDLE_KEY_DOC_CLASS = "docClass";
@@ -180,9 +181,9 @@ public final class SIRS extends SirsCore {
     public static final String PREVIEW_BUNDLE_KEY_LIBELLE = "libelle";
     public static final String PREVIEW_BUNDLE_KEY_DESIGNATION = "designation";
     public static final String PREVIEW_BUNDLE_KEY_AUTHOR = "author";
-    
+
     public static final String PASSWORD_ENCRYPT_ALGO="MD5";
-    
+
     // Méthodes utilisées pour les références
     public static final String REFERENCE_GET_ID = "getId";
     public static final String REFERENCE_SET_DESIGNATION = "setDesignation";
@@ -196,15 +197,15 @@ public final class SIRS extends SirsCore {
     }
 
     public static Loader LOADER;
-        
+
     private SIRS(){};
-    
+
     public static void loadFXML(Parent candidate) {
         loadFXML(candidate, null);
     }
-    
+
     /**
-     * Load FXML document matching input controller. If a model class is given, 
+     * Load FXML document matching input controller. If a model class is given,
      * we'll try to load a bundle for text internationalization.
      * @param candidate The controller object to get FXMl for.
      * @param modelClass A class which will be used for bundle loading.
@@ -223,7 +224,7 @@ public final class SIRS extends SirsCore {
         //in special environement like osgi or other, we must use the proper class loaders
         //not necessarly the one who loaded the FXMLLoader class
         loader.setClassLoader(cdtClass.getClassLoader());
-        
+
         // If possible, initialize traduction bundle.
         if (modelClass != null) {
             try{
@@ -233,27 +234,27 @@ public final class SIRS extends SirsCore {
                 LOGGER.log(Level.INFO, "Missin bundle for : {0}", modelClass.getName());
             }
         }
-        
+
         try {
             loader.load();
         } catch (IOException ex) {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
-        
+
         candidate.getStylesheets().add(CSS_PATH);
     }
-    
+
     /**
-     * 
+     *
      * @param relativeReference Un chemin relatif dénotant une référence dans un {@link Element}
      * @return Un chemin absolu vers la réference passée en paramètre.
      * @throws IllegalStateException Si la propriété {@link SirsPreferences.PROPERTIES#DOCUMENT_ROOT} est inexistante ou ne dénote pas un chemin valide.
-     * Dans ce cas, il est FORTEMENT conseillé d'attraper l'exception, et de proposer à l'utilisateur de vérifier la valeur de cette propriété dans les 
+     * Dans ce cas, il est FORTEMENT conseillé d'attraper l'exception, et de proposer à l'utilisateur de vérifier la valeur de cette propriété dans les
      * préférences de l'application.
      * @throws InvalidPathException Si il est impossible de construire un chemin valide avec le paramètre d'entrée.
-     * 
-     * Note : les deux exceptions ci-dessus ne sont pas lancées dans le cas où le 
-     * chemin créé dénote un fichier inexistant. Elles sont invoquées uniquement 
+     *
+     * Note : les deux exceptions ci-dessus ne sont pas lancées dans le cas où le
+     * chemin créé dénote un fichier inexistant. Elles sont invoquées uniquement
      * si les chemins sont incorrects syntaxiquement.
      */
     public static Path getDocumentAbsolutePath(final String relativeReference) throws IllegalStateException, InvalidPathException {
@@ -268,20 +269,24 @@ public final class SIRS extends SirsCore {
                     + "depuis les préférences de l'application (Fichier > Preferences).", e);
         }
 
-        /* HACK : change all separators, because when we use 2 different system 
+        /* HACK : change all separators, because when we use 2 different system
          * separator in the same time, it produces invalid paths. We also check
          * if path starts with file separator, because unix consider it as system
          * root, and will not resolve image path as relative if we keep it.
          */
-        return docRoot.resolve(relativeReference.replaceFirst("^(/+|\\\\+)", "").replaceAll("/+|\\\\+", File.separator));
+        if (PlatformUtil.isWindows()) {
+            return docRoot.resolve(relativeReference.replaceAll("/+", "\\\\"));
+        } else {
+            return docRoot.resolve(relativeReference.replaceFirst("^/+", "").replaceAll("(\\\\[^\\s])+", File.separator));
+        }
     }
-    
+
     /**
      * Reconstruit une liste d'éléments depuis la liste en entrée et le {@link Repository} donné.
      * Si la liste en paramètre est nulle ou vide, une liste vide est renvoyée.
      * Si elle contient des éléments, elle est renvoyée telle quel.
      * Si c'est une liste d'ID, on construit une liste des élements correspondants.
-     * 
+     *
      * @param sourceList La liste depuis laquelle on doit reconstruire la liste des éléments.
      * @param repo Le repository servant à retrouver les éléments depuis leur ID.
      * @return Une liste d'éléments. Peut être vide, mais jamais nulle.
@@ -289,7 +294,7 @@ public final class SIRS extends SirsCore {
     public static ObservableList<Element> toElementList(final List sourceList, final AbstractSIRSRepository repo) {
         if (sourceList == null) {
             return FXCollections.observableArrayList();
-            
+
         } else if (!sourceList.isEmpty() && sourceList.get(0) instanceof Element) {
             if (sourceList instanceof ModifiableObservableListBase) {
                 return (ObservableList) sourceList;
@@ -305,10 +310,10 @@ public final class SIRS extends SirsCore {
 //                      .includeDocs(true)
 //                      .keys(sourceList);
 //            return FXCollections.observableArrayList(Injector.getSession().getConnector().queryView(q, repo.getModelClass()));
-            
-            // Version de récupération "cache" : fes documents sont récupérés un par un à moins qu'ils ne soient dans le cache du repository 
+
+            // Version de récupération "cache" : fes documents sont récupérés un par un à moins qu'ils ne soient dans le cache du repository
             // Restauration de cette version, car la duplication "Bulk" ne passe pas par le repository et duplique donc les instances déjà dans son cache.
-            final ObservableList resultList = FXCollections.observableArrayList(); 
+            final ObservableList resultList = FXCollections.observableArrayList();
             final Iterator<String> it = sourceList.iterator();
             while (it.hasNext()) {
                 resultList.add(repo.get(it.next()));
@@ -316,13 +321,13 @@ public final class SIRS extends SirsCore {
             return resultList;
         }
     }
-    
+
     /**
-     * Return the AbstractPositionDocumentAssociable linked to one document 
+     * Return the AbstractPositionDocumentAssociable linked to one document
      * specified by the given id.
-     * 
+     *
      * @param documentId
-     * @return 
+     * @return
      */
     public static ObservableList<? extends AbstractPositionDocumentAssociable> getPositionDocumentByDocumentId(final String documentId){
         try {
@@ -339,11 +344,11 @@ public final class SIRS extends SirsCore {
         }
         return null;
     }
-    
+
     /**
      * Tente de trouver un éditeur d'élément compatible avec l'objet passé en paramètre.
      * @param pojo
-     * @return Un éditeur pour l'objet d'entrée, ou null si aucun ne peut être 
+     * @return Un éditeur pour l'objet d'entrée, ou null si aucun ne peut être
      * trouvé. L'éditeur aura déjà été initialisé avec l'objet en paramètre.
      */
     public static AbstractFXElementPane generateEditionPane(final Element pojo) {
@@ -361,7 +366,7 @@ public final class SIRS extends SirsCore {
         }
         return content;
     }
-    
+
     /**
      * initialize ComboBox items using input list. We also activate completion.
      * @param comboBox The combo box to set value on.
@@ -375,7 +380,7 @@ public final class SIRS extends SirsCore {
         comboBox.getSelectionModel().select(current);
         ComboBoxCompletion.autocomplete(comboBox);
     }
-    
+
     public static String hexaMD5(final String toEncrypt){
         StringBuilder sb = new StringBuilder();
         try {
@@ -388,7 +393,7 @@ public final class SIRS extends SirsCore {
         }
         return sb.toString();
     }
-    
+
     public static String binaryMD5(final String toEncrypt){
         try {
             return new String(MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO).digest(toEncrypt.getBytes()));
