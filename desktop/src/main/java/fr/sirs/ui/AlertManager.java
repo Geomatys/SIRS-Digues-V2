@@ -3,6 +3,8 @@ package fr.sirs.ui;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.util.List;
+
 
 /**
  * Gestionnaire d'alertes de l'application. Elles seront affichées dans une barre en bas de l'application.
@@ -39,5 +41,15 @@ public class AlertManager {
 
     public void setAlertsEnabled(boolean alertsEnabled) {
         this.alertsEnabled = alertsEnabled;
+    }
+
+    /**
+     * Ajoute les alertes fournies à la pile d'alertes à afficher, et actives l'affichage du panneau.
+     *
+     * @param alerts Liste des alertes à afficher.
+     */
+    public void addAlerts(final List<AlertItem> alerts) {
+        manager.setAlertsEnabled(true);
+        manager.getAlerts().addAll(alerts);
     }
 }

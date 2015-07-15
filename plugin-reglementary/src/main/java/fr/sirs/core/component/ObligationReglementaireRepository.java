@@ -5,6 +5,7 @@ import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 
 import fr.sirs.core.model.RappelObligationReglementaire;
+import fr.sirs.plugin.reglementaire.PluginReglementary;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,20 @@ public class ObligationReglementaireRepository extends
     }
 
     /**
-     * A la suppression d'une obligation réglementaire, supprimes les rappels sur cette obligation également.
+     * Mets à jour l'obligation réglementaire et répercute le changement sur l'affichage des alertes.
+     *
+     * @param entity L'obligation réglementaire à mettre à jour.
+     */
+    @Override
+    public void update(ObligationReglementaire entity) {
+        super.update(entity);
+
+        PluginReglementary.showAlerts();
+    }
+
+    /**
+     * A la suppression d'une obligation réglementaire, supprimes les rappels sur cette obligation également
+     * et répercute le changement sur l'affichage des alertes
      *
      * @param entity L'obligation réglementaire à supprimer.
      */
@@ -55,5 +69,7 @@ public class ObligationReglementaireRepository extends
                 rorr.remove(rappel);
             }
         }
+
+        PluginReglementary.showAlerts();
     }
 }

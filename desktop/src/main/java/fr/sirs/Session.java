@@ -9,7 +9,6 @@ import fr.sirs.core.component.UtilisateurRepository;
 
 import java.util.List;
 
-import fr.sirs.ui.AlertManager;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
@@ -28,7 +27,6 @@ import fr.sirs.other.FXReferencePane;
 import fr.sirs.other.FXValidationPane;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.ui.PojoTable;
-import fr.sirs.ui.AlertItem;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.SirsPreferences;
@@ -44,7 +42,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -478,22 +475,5 @@ public class Session extends SessionCore {
 
     public DefaultLegendTemplate getLegendTemplate() {
         return legendTemplate;
-    }
-
-    /**
-     * Ajoute les alertes fournies à la pile d'alertes à afficher, et actives l'affichage du panneau.
-     *
-     * @param alerts Liste des alertes à afficher.
-     */
-    public void addAlerts(final List<AlertItem> alerts) {
-        final AlertManager manager = AlertManager.getInstance();
-        manager.setAlertsEnabled(true);
-        if (alerts == null || alerts.isEmpty()) {
-            return;
-        }
-
-        for (final AlertItem alert : alerts) {
-            manager.getAlerts().add(alert);
-        }
     }
 }

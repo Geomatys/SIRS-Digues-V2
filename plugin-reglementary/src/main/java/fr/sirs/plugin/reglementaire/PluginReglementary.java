@@ -12,6 +12,7 @@ import fr.sirs.core.model.RefEcheanceRappelObligationReglementaire;
 import fr.sirs.core.model.RefFrequenceObligationReglementaire;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
 import fr.sirs.ui.AlertItem;
+import fr.sirs.ui.AlertManager;
 import javafx.scene.image.Image;
 import org.apache.sis.util.logging.Logging;
 
@@ -72,13 +73,14 @@ public class PluginReglementary extends Plugin {
      * Récupère les alertes à afficher pour l'utilisateur, selon les dates fournies dans les obligations réglementaires
      * et la fréquence de rappel.
      */
-    private void showAlerts() {
+    public static void showAlerts() {
+        AlertManager.getInstance().getAlerts().clear();
         final List<AlertItem> alerts = new ArrayList<>();
 
         final ObligationReglementaireRepository orr = Injector.getBean(ObligationReglementaireRepository.class);
         final List<ObligationReglementaire> obligations = orr.getAll();
         if (obligations.isEmpty()) {
-            Injector.getSession().addAlerts(alerts);
+            AlertManager.getInstance().addAlerts(alerts);
             return;
         }
 
@@ -144,6 +146,6 @@ public class PluginReglementary extends Plugin {
             }
         }
 
-        Injector.getSession().addAlerts(alerts);
+        AlertManager.getInstance().addAlerts(alerts);
     }
 }
