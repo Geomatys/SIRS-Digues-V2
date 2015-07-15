@@ -13,6 +13,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,9 +21,13 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn.CellDataFeatures;
@@ -155,6 +160,22 @@ public class DocumentsPane extends GridPane {
         TreeItem root = new FileTreeItem(new File("/home/guilhem/Bureau/sym_doc_test"));
         tree1.setRoot(root);
         
+    }
+    
+    @FXML
+    public void showImportDialog(ActionEvent event) {
+        final Dialog dialog = new Dialog();
+        final DialogPane pane = new DialogPane();
+        pane.setContent(new ImportPane());
+        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Import de document");
+
+        final Optional opt = dialog.showAndWait();
+        if(opt.isPresent() && ButtonType.APPLY.equals(opt.get())){
+            //upload file
+        }
     }
     
     public static String getInventoryNumber(final File f) {
