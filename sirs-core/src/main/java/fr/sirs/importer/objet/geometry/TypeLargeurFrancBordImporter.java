@@ -59,7 +59,7 @@ class TypeLargeurFrancBordImporter extends GenericTypeReferenceImporter<RefLarge
             typeLargeur.setLibelle(row.getString(Columns.LIBELLE_TYPE_LARGEUR_FB.toString()));
             typeLargeur.setAbrege(row.getString(Columns.ABREGE_TYPE_LARGEUR_FB.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeLargeur.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeLargeur.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeLargeur.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_LARGEUR_FB.toString())));
             

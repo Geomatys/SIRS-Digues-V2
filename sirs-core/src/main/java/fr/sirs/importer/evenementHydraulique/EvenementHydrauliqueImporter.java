@@ -112,7 +112,7 @@ implements DocumentsUpdatable {
                 evenement.setDateFin(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_FIN.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                evenement.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                evenement.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             if(row.getInt(Columns.ID_TYPE_EVENEMENT_HYDRAU.toString())!=null){

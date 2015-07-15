@@ -84,7 +84,7 @@ public class JournalArticleImporter extends GenericDocumentRelatedImporter<Artic
             articleJournal.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                articleJournal.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                articleJournal.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             articleJournal.setDesignation(String.valueOf(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString())));

@@ -114,7 +114,7 @@ public class GardienTronconGestionImporter extends GenericPeriodeLocaliseeImport
                 garde.setDate_fin(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                garde.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                garde.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
 
             if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {

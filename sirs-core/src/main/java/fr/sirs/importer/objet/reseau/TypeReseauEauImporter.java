@@ -59,7 +59,7 @@ class TypeReseauEauImporter extends GenericTypeReferenceImporter<RefReseauHydroC
             typeReseau.setLibelle(row.getString(Columns.LIBELLE_TYPE_RESEAU_EAU.toString()));
             typeReseau.setAbrege(row.getString(Columns.ABREGE_TYPE_RESEAU_EAU.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeReseau.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeReseau.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeReseau.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_RESEAU_EAU.toString()))));
             

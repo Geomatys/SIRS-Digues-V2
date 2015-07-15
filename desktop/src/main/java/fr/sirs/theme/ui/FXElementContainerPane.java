@@ -20,9 +20,9 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import org.geotoolkit.gui.javafx.util.FXDateField;
 import org.geotoolkit.internal.GeotkFX;
 
 /**
@@ -38,7 +38,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
     @FXML private Label uiHeaderLabel;
     @FXML private Label uiDateMajLabel;
     @FXML private TextField uiPseudoId;
-    @FXML private FXDateField date_maj;
+    @FXML private DatePicker date_maj;
     @FXML private FXEditMode uiMode;
     @FXML private Button uiShowOnMapButton;
 

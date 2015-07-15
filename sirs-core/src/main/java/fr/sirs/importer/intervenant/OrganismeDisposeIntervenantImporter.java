@@ -85,7 +85,7 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                contactOrganisme.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                contactOrganisme.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             // Table de jointure, donc pas d'ID propre. On choisit arbitrairement l'ID de l'intervenant comme pseudo-id.

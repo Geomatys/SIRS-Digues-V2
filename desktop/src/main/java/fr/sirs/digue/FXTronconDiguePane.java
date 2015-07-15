@@ -33,6 +33,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -43,7 +44,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
-import org.geotoolkit.gui.javafx.util.FXDateField;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -59,7 +59,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     @FXML private FXEditMode uiMode;
     //@FXML private TextField uiName;
     @FXML private TextField uiPseudoId;
-    @FXML private FXDateField date_maj;
+    @FXML private DatePicker date_maj;
 
     // Onglet "Information"
     @FXML FXValidityPeriodPane uiValidityPeriod;
@@ -93,6 +93,8 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         previewRepository = Injector.getBean(Session.class).getPreviews();
         elementProperty().addListener(this::initFields);
 
+        date_maj.setDisable(true);
+        
         uiMode.requireEditionForElement(troncon);
         uiMode.setSaveAction(this::save);
         disableFieldsProperty().bind(uiMode.editionState().not());

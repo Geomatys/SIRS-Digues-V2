@@ -128,7 +128,7 @@ public class ProprietaireTronconGestionImporter extends GenericPeriodeLocaliseeI
                 propriete.setDate_fin(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                propriete.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                propriete.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             if(row.getInt(Columns.ID_TYPE_PROPRIETAIRE.toString())!=null){

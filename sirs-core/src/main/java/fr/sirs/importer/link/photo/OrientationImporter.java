@@ -61,7 +61,7 @@ public class OrientationImporter extends GenericTypeReferenceImporter<RefOrienta
             orientation.setAbrege(row.getString(Columns.ABREGE_TYPE_ORIENTATION.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                orientation.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                orientation.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             orientation.setDesignation(String.valueOf(row.getInt(Columns.ID_ORIENTATION.toString())));
             

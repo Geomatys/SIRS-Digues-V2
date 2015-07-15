@@ -1,6 +1,6 @@
 package fr.sirs.core.model;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import javafx.beans.property.ObjectProperty;
 
 /**
@@ -9,9 +9,9 @@ import javafx.beans.property.ObjectProperty;
  */
 public interface AvecDateMaj {
  
-    ObjectProperty<LocalDateTime> dateMajProperty();
+    ObjectProperty<LocalDate> dateMajProperty();
     
-    LocalDateTime getDateMaj();
+    LocalDate getDateMaj();
     
-    void setDateMaj(LocalDateTime dateMaj);
+    void setDateMaj(LocalDate dateMaj);
 }

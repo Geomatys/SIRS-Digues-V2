@@ -97,7 +97,7 @@ class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
             profilTraversEvenementHydraulique.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                profilTraversEvenementHydraulique.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                profilTraversEvenementHydraulique.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             // Table de jointure : on prend l'id de l'événement hydraulique comme pseudo id en l'absence d'identifiant véritable

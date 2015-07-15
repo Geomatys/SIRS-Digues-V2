@@ -99,7 +99,7 @@ public class IntervenantImporter extends GenericImporter {
             intervenant.setFonction(row.getString(Columns.FONCTION_INTERV.toString()));
 
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                intervenant.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                intervenant.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
 
             intervenant.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERVENANT.toString())));

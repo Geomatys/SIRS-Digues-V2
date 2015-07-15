@@ -138,7 +138,7 @@ public class ProfilEnLongImporter extends GenericImporter {
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                profil.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                profil.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             profil.setReferencePapier(row.getString(Columns.REFERENCE_PAPIER.toString()));

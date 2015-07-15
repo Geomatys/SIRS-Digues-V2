@@ -9,6 +9,7 @@ import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.AbstractFXElementPane;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -16,11 +17,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
 import javafx.scene.web.HTMLEditor;
 import jidefx.scene.control.field.LocalDateTimeField;
-import org.geotoolkit.gui.javafx.util.FXDateField;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -33,7 +34,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
 
     @FXML private TextField libelle;
     @FXML private TextField uiDesignation;
-    @FXML private FXDateField date_maj;
+    @FXML private DatePicker date_maj;
     @FXML private HTMLEditor uiComment;
     
     @FXML private FXEditMode uiMode;
@@ -54,7 +55,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
         uiComment.disableProperty().bind(disableFieldsProperty());
         table.editableProperty().bind(disableFieldsProperty().not());
         
-        this.date_maj.setDisable(true);
+        date_maj.setDisable(true);
         
         table.parentElementProperty().bind(elementProperty);
         elementProperty.addListener(this::initFields);
@@ -112,7 +113,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
     public void preSave() {
         final Digue digue = elementProperty.get();
         if (digue != null) {
-            digue.setDateMaj(LocalDateTime.now());
+            digue.setDateMaj(LocalDate.now());
             digue.commentaireProperty().set(uiComment.getHtmlText());
         }
     }

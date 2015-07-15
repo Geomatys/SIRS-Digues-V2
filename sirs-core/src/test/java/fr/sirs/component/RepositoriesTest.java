@@ -18,7 +18,6 @@ import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
@@ -80,7 +79,7 @@ public class RepositoriesTest extends CouchDBTestCase {
                     + "posuere cubilia Curae; Aliquam nibh. Mauris ac mauris "
                     + "sed pede pellentesque fermentum. Maecenas adipiscing "
                     + "ante non diam sodales hendrerit.</body></html>");
-            digue.setDateMaj(LocalDateTime.now());
+            digue.setDateMaj(LocalDate.now());
             digueRepository.add(digue);
         }
     }
@@ -109,7 +108,7 @@ public class RepositoriesTest extends CouchDBTestCase {
                     + "ante non diam sodales hendrerit.</body></html>");
             tron.setDate_debut(LocalDate.now());
             tron.setDate_fin(LocalDate.now());
-            tron.setDateMaj(LocalDateTime.now());
+            tron.setDateMaj(LocalDate.now());
 
             tron.setGeometry(createPoint());
             tronconRepository.add(tron);

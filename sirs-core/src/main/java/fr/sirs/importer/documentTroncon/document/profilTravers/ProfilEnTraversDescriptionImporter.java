@@ -168,7 +168,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
             leve.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                leve.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                leve.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             if(pointsByLeveXYZ.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()))!=null){

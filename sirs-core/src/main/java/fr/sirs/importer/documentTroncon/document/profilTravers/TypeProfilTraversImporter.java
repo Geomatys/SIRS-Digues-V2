@@ -59,7 +59,7 @@ class TypeProfilTraversImporter extends GenericTypeReferenceImporter<RefTypeProf
             typeProfilTravers.setLibelle(row.getString(Columns.LIBELLE_TYPE_PROFIL_EN_TRAVERS.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeProfilTravers.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeProfilTravers.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeProfilTravers.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_PROFIL_EN_TRAVERS.toString())));
             

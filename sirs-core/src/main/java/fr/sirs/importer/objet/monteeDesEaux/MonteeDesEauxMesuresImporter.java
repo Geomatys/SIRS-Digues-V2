@@ -124,7 +124,7 @@ class MonteeDesEauxMesuresImporter extends GenericImporter {
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                mesure.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                mesure.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             mesure.setCommentaire(cleanNullString(row.getString(Columns.COMMENTAIRE.toString())));

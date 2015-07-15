@@ -102,7 +102,7 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
             final MonteeEaux objet = importRow(row);
 
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                objet.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                objet.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             if (row.getInt(Columns.ID_ECHELLE_LIMNI.toString()) != null) {

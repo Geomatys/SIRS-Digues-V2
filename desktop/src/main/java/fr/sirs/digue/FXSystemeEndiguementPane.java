@@ -14,7 +14,7 @@ import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SirsStringConverter;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +27,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.ListCell;
@@ -41,7 +42,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
-import org.geotoolkit.gui.javafx.util.FXDateField;
 import org.geotoolkit.gui.javafx.util.FXNumberSpinner;
 
 /**
@@ -55,7 +55,7 @@ public class FXSystemeEndiguementPane extends BorderPane {
     @FXML private FXEditMode uiEditMode;
     @FXML private TextField uiLibelle;
     @FXML private Tab uiTabDigues;
-    @FXML private FXDateField uiMaj;
+    @FXML private DatePicker uiMaj;
     @FXML private TextField uiClassement;
     @FXML private FXNumberSpinner uiProtection;
     @FXML private FXNumberSpinner uiPopulation;
@@ -72,7 +72,7 @@ public class FXSystemeEndiguementPane extends BorderPane {
         endiguementProp.addListener(this::changed);
         uiEditMode.setSaveAction(this::save);
         
-        uiMaj.disableProperty().set(true);
+        uiMaj.setDisable(true);
         final BooleanBinding binding = uiEditMode.editionState().not();
         uiLibelle.disableProperty().bind(binding);
         uiClassement.disableProperty().bind(binding);
@@ -138,7 +138,7 @@ public class FXSystemeEndiguementPane extends BorderPane {
         se.setGestionnaireDecretId( decret==null ? null : decret.getElementId());
         final Preview tech = uiTechnique.getValue();
         se.setGestionnaireTechniqueId( tech==null ? null : tech.getElementId());
-        se.setDateMaj(LocalDateTime.now());
+        se.setDateMaj(LocalDate.now());
         session.getRepositoryForClass(SystemeEndiguement.class).update(se);
     }
     

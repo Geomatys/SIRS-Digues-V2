@@ -59,7 +59,7 @@ class TypeUsageVoieImporter extends GenericTypeReferenceImporter<RefUsageVoie> {
             typeUtilisation.setLibelle(row.getString(Columns.LIBELLE_TYPE_USAGE_VOIE.toString()));
             typeUtilisation.setAbrege(row.getString(Columns.ABREGE_TYPE_USAGE_VOIE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeUtilisation.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeUtilisation.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeUtilisation.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_USAGE_VOIE.toString()))));
             

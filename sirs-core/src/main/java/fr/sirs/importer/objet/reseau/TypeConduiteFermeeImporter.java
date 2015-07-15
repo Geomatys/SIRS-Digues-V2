@@ -59,7 +59,7 @@ class TypeConduiteFermeeImporter extends GenericTypeReferenceImporter<RefConduit
             typeConduite.setLibelle(row.getString(Columns.LIBELLE_TYPE_CONDUITE_FERMEE.toString()));
             typeConduite.setAbrege(row.getString(Columns.ABREGE_TYPE_CONDUITE_FERMEE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeConduite.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeConduite.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             typeConduite.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_CONDUITE_FERMEE.toString()))));

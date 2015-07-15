@@ -16,11 +16,11 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
-import org.geotoolkit.gui.javafx.util.FXDateField;
 
 /**
  *
@@ -30,7 +30,7 @@ public class FXSystemeReperagePane extends BorderPane {
 
     @FXML private TextField uiNom;
     @FXML private HTMLEditor uiComment;
-    @FXML private FXDateField uiDate;
+    @FXML private DatePicker uiDate;
 
     private final ObjectProperty<SystemeReperage> srProperty = new SimpleObjectProperty<>();
     private final BorneTable borneTable = new BorneTable();

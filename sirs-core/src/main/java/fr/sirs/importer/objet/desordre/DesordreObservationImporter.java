@@ -95,7 +95,7 @@ public class DesordreObservationImporter extends GenericImporter {
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                observation.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                observation.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
         
             observation.setDesignation(String.valueOf(row.getInt(Columns.ID_OBSERVATION.toString())));

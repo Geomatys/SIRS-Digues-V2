@@ -96,7 +96,7 @@ public class MarcheImporter extends GenericDocumentRelatedImporter<Marche> {
         }
 
         if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-            marche.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+            marche.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
         }
         
         marche.setDesignation(String.valueOf(row.getInt(Columns.ID_MARCHE.toString())));

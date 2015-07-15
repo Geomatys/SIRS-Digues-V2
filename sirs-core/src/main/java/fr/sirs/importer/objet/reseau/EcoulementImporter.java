@@ -59,7 +59,7 @@ class EcoulementImporter extends GenericTypeReferenceImporter<RefEcoulement> {
             typeEcoulement.setLibelle(row.getString(Columns.LIBELLE_ECOULEMENT.toString()));
             typeEcoulement.setAbrege(row.getString(Columns.ABREGE_ECOULEMENT.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeEcoulement.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeEcoulement.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeEcoulement.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_ECOULEMENT.toString()))));
             

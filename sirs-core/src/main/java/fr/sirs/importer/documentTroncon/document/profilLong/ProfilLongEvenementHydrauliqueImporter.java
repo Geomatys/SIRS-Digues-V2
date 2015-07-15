@@ -96,7 +96,7 @@ class ProfilLongEvenementHydrauliqueImporter extends GenericImporter {
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                profilLongEvenementHydraulique.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                profilLongEvenementHydraulique.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             // Pas d'id car table de jointure : arbitrairement, on met l'id de l'événement hydrau

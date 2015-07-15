@@ -63,7 +63,7 @@ class TypeEvenementHydrauliqueImporter extends GenericTypeReferenceImporter<RefE
             typeEvenement.setLibelle(row.getString(Columns.LIBELLE_TYPE_EVENEMENT_HYDRAU.toString()));
             typeEvenement.setAbrege(row.getString(Columns.ABREGE_TYPE_EVENEMENT_HYDRAU.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeEvenement.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeEvenement.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeEvenement.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_EVENEMENT_HYDRAU.toString())));
             

@@ -59,7 +59,7 @@ class TypePositionProfilLongImporter extends GenericTypeReferenceImporter<RefPos
             typePositionProfilLong.setLibelle(row.getString(Columns.LIBELLE_TYPE_POSITION_PROFIL_EN_LONG.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typePositionProfilLong.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typePositionProfilLong.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typePositionProfilLong.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_POSITION_PROFIL_EN_LONG.toString())));
             

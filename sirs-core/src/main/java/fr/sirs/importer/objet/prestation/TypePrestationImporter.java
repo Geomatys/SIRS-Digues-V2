@@ -57,7 +57,7 @@ public class TypePrestationImporter extends GenericTypeReferenceImporter<RefPres
             typePrestation.setId(typePrestation.getClass().getSimpleName()+":"+row.getInt(String.valueOf(Columns.ID_TYPE_PRESTATION.toString())));
             typePrestation.setLibelle(row.getString(Columns.LIBELLE_TYPE_PRESTATION.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typePrestation.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typePrestation.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typePrestation.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_PRESTATION.toString())));
             

@@ -8,7 +8,6 @@ import fr.sirs.core.model.Organisme;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.PojoTable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -18,7 +17,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import org.geotoolkit.gui.javafx.util.FXDateField;
 
 /**
  *
@@ -29,7 +27,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
     
     @FXML private FXEditMode uiMode;
     @FXML private TextField uiPseudoId;
-    @FXML private FXDateField date_maj;
+    @FXML private DatePicker date_maj;
 
     @FXML private GridPane uiDescriptionGrid;
     @FXML private GridPane uiAdresseGrid;
@@ -93,10 +91,10 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         final Organisme organisme;
         if (newValue == null) {
             organisme = Injector.getSession().getRepositoryForClass(Organisme.class).create();
-            uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDateTime.now()); Injector.getSession().getRepositoryForClass(Organisme.class).add(organisme);});
+            uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDate.now()); Injector.getSession().getRepositoryForClass(Organisme.class).add(organisme);});
         } else {
             organisme = newValue;
-            uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDateTime.now()); Injector.getSession().getRepositoryForClass(Organisme.class).update(organisme);});
+            uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDate.now()); Injector.getSession().getRepositoryForClass(Organisme.class).update(organisme);});
         }
         
         date_maj.valueProperty().bind(organisme.dateMajProperty());

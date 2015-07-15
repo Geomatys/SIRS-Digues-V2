@@ -85,7 +85,7 @@ public class ElementReseauGardienImporter extends GenericEntityLinker {
                 }
 
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    contactStructure.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                    contactStructure.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                 }
                 
                 // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gardien.

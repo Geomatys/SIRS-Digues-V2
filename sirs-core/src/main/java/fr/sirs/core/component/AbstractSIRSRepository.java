@@ -4,6 +4,7 @@ import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.ReferenceType;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -129,7 +130,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         final List<T> entitiesWithoutIDs = new ArrayList<>();
         for(T entity : bulkList){
             if (entity instanceof AvecDateMaj && !(entity instanceof ReferenceType)) {
-                ((AvecDateMaj) entity).setDateMaj(LocalDateTime.now());
+                ((AvecDateMaj) entity).setDateMaj(LocalDate.now());
             }
             // Put the updated entity into cache in case the old entity is different.
             // Si on n'a pas d'ID, c'est que l'entité est nouvelle et on ne peut pas la trouver dans le cache (NPE). Il faut donc la garder en réserve pour l'ajouter au cache après qu'un ID lui aura été attribué.
@@ -180,7 +181,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         ArgumentChecks.ensureNonNull("Document à ajouter", entity);
         checkIntegrity(entity);
         if (entity instanceof AvecDateMaj && !(entity instanceof ReferenceType)) {
-            ((AvecDateMaj)entity).setDateMaj(LocalDateTime.now());
+            ((AvecDateMaj)entity).setDateMaj(LocalDate.now());
         }
         super.add(entity);
         cache.put(entity.getId(), onLoad(entity));
@@ -191,7 +192,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         ArgumentChecks.ensureNonNull("Document à mettre à jour", entity);
         checkIntegrity(entity);
         if (entity instanceof AvecDateMaj && !(entity instanceof ReferenceType)) {
-            ((AvecDateMaj) entity).setDateMaj(LocalDateTime.now());
+            ((AvecDateMaj) entity).setDateMaj(LocalDate.now());
         }
         super.update(entity);
         // Put the updated entity into cache in case the old entity is different.

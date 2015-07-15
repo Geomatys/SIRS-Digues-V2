@@ -59,7 +59,7 @@ class ImplantationImporter extends GenericTypeReferenceImporter<RefImplantation>
             typeImplantation.setLibelle(row.getString(Columns.LIBELLE_IMPLANTATION.toString()));
             typeImplantation.setAbrege(row.getString(Columns.ABREGE_TYPE_IMPLANTATION.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeImplantation.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeImplantation.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeImplantation.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_IMPLANTATION.toString()))));
             

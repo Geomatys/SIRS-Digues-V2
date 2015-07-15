@@ -59,7 +59,7 @@ class TypeOuvrageTelecomNrjImporter extends GenericTypeReferenceImporter<RefOuvr
             typeOuvrage.setLibelle(row.getString(Columns.LIBELLE_TYPE_OUVRAGE_TELECOM_NRJ.toString()));
             typeOuvrage.setAbrege(row.getString(Columns.ABREGE_TYPE_OUVRAGE_TELECOM_NRJ.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeOuvrage.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeOuvrage.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeOuvrage.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_TELECOM_NRJ.toString()))));
             

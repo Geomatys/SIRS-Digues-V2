@@ -58,7 +58,7 @@ class TypeConventionImporter extends GenericTypeReferenceImporter<RefConvention>
             typeConvention.setLibelle(row.getString(Columns.LIBELLE_TYPE_CONVENTION.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeConvention.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeConvention.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeConvention.setDesignation(String.valueOf(row.getInt(Columns.ID_TYPE_CONVENTION.toString())));
             

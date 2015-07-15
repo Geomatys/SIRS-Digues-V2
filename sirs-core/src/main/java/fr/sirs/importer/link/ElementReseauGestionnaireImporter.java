@@ -85,7 +85,7 @@ public class ElementReseauGestionnaireImporter extends GenericEntityLinker {
                 }
 
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    gestion.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                    gestion.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                 }
                 
                 // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du gestionnaire.

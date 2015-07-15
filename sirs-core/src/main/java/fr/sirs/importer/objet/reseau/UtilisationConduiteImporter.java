@@ -60,7 +60,7 @@ class UtilisationConduiteImporter extends GenericTypeReferenceImporter<RefUtilis
             typeUtilisation.setLibelle(row.getString(Columns.LIBELLE_UTILISATION_CONDUITE.toString()));
             typeUtilisation.setAbrege(row.getString(Columns.ABREGE_UTILISATION_CONDUITE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeUtilisation.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeUtilisation.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeUtilisation.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_UTILISATION_CONDUITE.toString()))));
             

@@ -148,7 +148,7 @@ implements DocumentsUpdatable {
             tronconDigue.setCommentaire(row.getString(Columns.COMMENTAIRE_TRONCON.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                tronconDigue.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                tronconDigue.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             if (row.getDate(Columns.DATE_DEBUT_VAL_TRONCON.toString()) != null) {

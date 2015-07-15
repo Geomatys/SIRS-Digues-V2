@@ -153,12 +153,12 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                          <Label fx:id="uiDateMajLabel" prefHeight="25.0" prefWidth="80.0" text="Mise à jour :" textFill="WHITE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                  <FXDateField fx:id="date_maj" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                   <Label fx:id="uiDateMajLabel" prefHeight="25.0" prefWidth="80.0" text="Mise à jour :" textFill="WHITE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  <DatePicker fx:id="date_maj" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="4" GridPane.rowIndex="1">
                      <padding>
                         <Insets left="10.0" />
                      </padding>
-                  </FXDateField>
+                  </DatePicker>
                   <Label text="Désignation : " textFill="WHITE" GridPane.rowIndex="1" />
                   <TextField fx:id="uiPseudoId" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1">
                      <GridPane.margin>

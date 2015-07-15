@@ -17,7 +17,6 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Positionable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -431,7 +430,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                     //on marque comme terminé le troncon et ses structures
                     cut.date_finProperty().set(LocalDate.now());
                     for (Objet obj : TronconUtils.getObjetList(cut)) {
-                        obj.dateMajProperty().set(LocalDateTime.now());
+                        obj.dateMajProperty().set(LocalDate.now());
                         obj.date_finProperty().set(LocalDate.now());
                     }
                     //on le sauvegarde

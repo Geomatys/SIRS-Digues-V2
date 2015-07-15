@@ -86,7 +86,7 @@ class TronconGestionDigueGestionnaireImporter extends GenericImporter {
                 gestion.setDate_fin(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN_GESTION.toString()), dateTimeFormatter));
             }
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                gestion.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                gestion.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
 
             // Set the references.

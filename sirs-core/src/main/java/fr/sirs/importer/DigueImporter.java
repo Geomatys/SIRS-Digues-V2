@@ -69,7 +69,7 @@ public class DigueImporter extends GenericImporter {
             digue.setLibelle(row.getString(Columns.LIBELLE_DIGUE.toString()));
             digue.setCommentaire(row.getString(Columns.COMMENTAIRE_DIGUE.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                digue.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                digue.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             digue.setDesignation(String.valueOf(row.getInt(Columns.ID_DIGUE.toString())));
             

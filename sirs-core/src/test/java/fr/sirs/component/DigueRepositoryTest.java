@@ -5,7 +5,6 @@
  */
 package fr.sirs.component;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.Test;
@@ -24,6 +23,7 @@ import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Fondation;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
+import java.time.LocalDate;
 
 import org.junit.Ignore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
         System.out.println("DigueRepositoryTest.testStoreDigueAndTroncons()");
         final Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
         digue.setLibelle("une digue");
-        digue.setDateMaj(LocalDateTime.now());
+        digue.setDateMaj(LocalDate.now());
 
         digueRepository.add(digue);
 
@@ -57,7 +57,7 @@ public class DigueRepositoryTest extends CouchDBTestCase {
             troncon.setCommentaire("Troncon1");
             troncon.setDigueId(digue.getId());
             troncon.setGeometry(createPoint());
-            troncon.setDateMaj(LocalDateTime.now());
+            troncon.setDateMaj(LocalDate.now());
             tronconRepository.add(troncon);
 
             final Fondation fondation = ElementCreator.createAnonymValidElement(Fondation.class);

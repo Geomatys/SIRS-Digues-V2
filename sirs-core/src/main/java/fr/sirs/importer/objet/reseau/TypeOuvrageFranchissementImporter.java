@@ -59,7 +59,7 @@ class TypeOuvrageFranchissementImporter extends GenericTypeReferenceImporter<Ref
             typeOuvrage.setLibelle(row.getString(Columns.LIBELLE_TYPE_OUVRAGE_FRANCHISSEMENT.toString()));
             typeOuvrage.setAbrege(row.getString(Columns.ABREGE_TYPE_OUVRAGE_FRANCHISSEMENT.toString()));
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                typeOuvrage.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                typeOuvrage.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             typeOuvrage.setDesignation(String.valueOf(row.getInt(String.valueOf(Columns.ID_TYPE_OUVRAGE_FRANCHISSEMENT.toString()))));
             

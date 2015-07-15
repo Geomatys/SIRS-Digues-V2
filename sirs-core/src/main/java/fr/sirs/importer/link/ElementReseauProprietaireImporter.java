@@ -110,7 +110,7 @@ public class ElementReseauProprietaireImporter extends GenericEntityLinker {
         }
 
         if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-            propriete.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+            propriete.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
         }
         // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du proprio.
         propriete.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERV_PROPRIO.toString())));
@@ -132,7 +132,7 @@ public class ElementReseauProprietaireImporter extends GenericEntityLinker {
         }
 
         if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-            propriete.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+            propriete.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
         }
         // Jointure, donc pas d'id propre : on choisit arbitrairement l'id du proprio.
         propriete.setDesignation(String.valueOf(row.getInt(Columns.ID_ORG_PROPRIO.toString())));

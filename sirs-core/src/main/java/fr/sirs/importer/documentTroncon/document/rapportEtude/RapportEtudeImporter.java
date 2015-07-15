@@ -86,7 +86,7 @@ public class RapportEtudeImporter extends GenericDocumentRelatedImporter<Rapport
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                rapport.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                rapport.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             rapport.setDesignation(String.valueOf(row.getInt(Columns.ID_RAPPORT_ETUDE.toString())));
             

@@ -102,7 +102,7 @@ public class ConventionImporter extends GenericDocumentRelatedImporter<Conventio
             convention.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                convention.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                convention.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
             }
             
             final List<String> organismesSignatairesIds = orgSignataires.get(row.getInt(Columns.ID_CONVENTION.toString()));

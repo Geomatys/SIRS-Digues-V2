@@ -110,7 +110,7 @@ public class LigneEauImporter extends GenericLigneEauImporter {
             
             if(objet!=null){
                 if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    objet.setDateMaj(DbImporter.parseLocalDateTime(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
+                    objet.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                 }
             
                 if(row.getInt(Columns.ID_SYSTEME_REP_PRZ.toString())!=null){

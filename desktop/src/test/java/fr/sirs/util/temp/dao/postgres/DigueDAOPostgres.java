@@ -9,7 +9,7 @@ import fr.sirs.util.temp.dao.DigueDAO;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.ElementCreator;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -53,7 +53,7 @@ public class DigueDAOPostgres extends DAOPostgres implements DigueDAO {
                 digue.setLibelle(this.resultSet.getString("libelle_digue"));
                 digue.setCommentaire(this.resultSet.getString("commentaire_digue"));
                 if (this.resultSet.getString("date_derniere_maj")!=null)
-                    digue.setDateMaj(LocalDateTime.parse(this.resultSet.getString("date_derniere_maj")));
+                    digue.setDateMaj(LocalDate.parse(this.resultSet.getString("date_derniere_maj")));
                 digues.add(digue);
             }
         } finally {

@@ -24,11 +24,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.util.Callback;
-import org.geotoolkit.gui.javafx.util.FXDateField;
 
 /**
  *
@@ -38,7 +38,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
 
     @FXML private FXEditMode uiMode;
     @FXML private TextField uiDesignation;
-    @FXML private FXDateField date_maj;
+    @FXML private DatePicker date_maj;
 
     @FXML private TextField uiNom;
     @FXML private TextField uiPrenom;
