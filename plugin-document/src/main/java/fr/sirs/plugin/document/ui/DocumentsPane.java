@@ -156,10 +156,7 @@ public class DocumentsPane extends GridPane {
             }
         });
         
-        
-        TreeItem root = new FileTreeItem(new File(rootPath));
-        tree1.setRoot(root);
-        
+        updateRoot();
     }
     
     @FXML
@@ -184,8 +181,7 @@ public class DocumentsPane extends GridPane {
                 setClassPlace(newFile, ipane.classPlaceField.getText());
                 
                 // refresh tree
-                TreeItem root = new FileTreeItem(new File(rootPath));
-                tree1.setRoot(root);
+                updateRoot();
             }
         }
     }
@@ -198,6 +194,7 @@ public class DocumentsPane extends GridPane {
         dialog.setDialogPane(pane);
         dialog.setResizable(true);
         dialog.setTitle("Detruire document");
+        dialog.setContentText("Detruire le fichier/dossier dans le système de fichier?");
 
         final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
@@ -212,9 +209,35 @@ public class DocumentsPane extends GridPane {
             removeInventoryNumber(f);
             
             // refresh tree
-            TreeItem root = new FileTreeItem(new File(rootPath));
-            tree1.setRoot(root);
+            updateRoot();
         }
+    }
+    
+    @FXML
+    public void setMainFolder(ActionEvent event) {
+        final Dialog dialog    = new Dialog();
+        final DialogPane pane  = new DialogPane();
+        final MainFolderPane ipane = new MainFolderPane();
+        pane.setContent(ipane);
+        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Emplacement du dossier");
+
+        final Optional opt = dialog.showAndWait();
+        if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
+            File f = new File(ipane.rootFolderField.getText());
+            if (f.isDirectory()) {
+                rootPath = f.getPath();
+                // refresh tree
+                updateRoot();
+            }
+        }
+    }
+    
+    private void updateRoot() {
+        TreeItem root = new FileTreeItem(new File(rootPath));
+        tree1.setRoot(root);
     }
     
     private static class DOIntegatedCell extends TreeTableCell {

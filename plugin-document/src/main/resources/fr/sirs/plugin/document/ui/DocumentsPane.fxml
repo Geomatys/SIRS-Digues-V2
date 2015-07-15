@@ -41,7 +41,7 @@
       <Button fx:id="addDocButton" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="5" />
       <Button fx:id="importDocButton" mnemonicParsing="false" onAction="#showImportDialog" GridPane.columnIndex="1" GridPane.rowIndex="6" />
       <Button fx:id="deleteDocButton" mnemonicParsing="false" onAction="#showRemoveDialog" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-      <Button fx:id="setFolderButton" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+      <Button fx:id="setFolderButton" mnemonicParsing="false" onAction="#setMainFolder" GridPane.columnIndex="1" GridPane.rowIndex="9" />
       <Button fx:id="listButton" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="10" />
    </children>
    <padding>
