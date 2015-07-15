@@ -246,6 +246,7 @@
         <modules>
            <module>plugin-reglementary</module>
            <module>plugin-vegetation</module>
+           <module>plugin-document</module>
         </modules>
      </profile>
   </profiles>

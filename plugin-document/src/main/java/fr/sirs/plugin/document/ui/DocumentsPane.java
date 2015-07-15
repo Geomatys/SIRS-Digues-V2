@@ -37,6 +37,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
 import org.apache.sis.util.logging.Logging;
+import org.geotoolkit.util.FileUtilities;
 
 /**
  *
@@ -54,7 +55,7 @@ public class DocumentsPane extends GridPane {
     private Button setFolderButton;
 
     @FXML
-    private TreeTableView<FileTreeItem> tree1;
+    private TreeTableView<File> tree1;
 
     @FXML
     private Button addDocButton;
@@ -75,6 +76,8 @@ public class DocumentsPane extends GridPane {
     private static final DateFormat DATE_FORMATTER = new SimpleDateFormat("dd/MM/yyyy");
     
     private static final Logger LOGGER = Logging.getLogger(DocumentsPane.class);
+    
+    private String rootPath = "/home/guilhem/Bureau/sym_doc_test";
     
     public DocumentsPane() {
         SIRS.loadFXML(this, DocumentsPane.class);
@@ -157,24 +160,36 @@ public class DocumentsPane extends GridPane {
         });
         
         
-        TreeItem root = new FileTreeItem(new File("/home/guilhem/Bureau/sym_doc_test"));
+        TreeItem root = new FileTreeItem(new File(rootPath));
         tree1.setRoot(root);
         
     }
     
     @FXML
-    public void showImportDialog(ActionEvent event) {
-        final Dialog dialog = new Dialog();
-        final DialogPane pane = new DialogPane();
-        pane.setContent(new ImportPane());
+    public void showImportDialog(ActionEvent event) throws IOException {
+        final Dialog dialog    = new Dialog();
+        final DialogPane pane  = new DialogPane();
+        final ImportPane ipane = new ImportPane();
+        pane.setContent(ipane);
         pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
         dialog.setDialogPane(pane);
         dialog.setResizable(true);
         dialog.setTitle("Import de document");
 
         final Optional opt = dialog.showAndWait();
-        if(opt.isPresent() && ButtonType.APPLY.equals(opt.get())){
-            //upload file
+        if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
+            File f = new File(ipane.fileField.getText());
+            final File directory = tree1.getSelectionModel().getSelectedItem().getValue();
+            if (directory.isDirectory()) {
+                final File newFile = new File(directory, f.getName());
+                FileUtilities.copy(f, newFile);
+                setInventoryNumber(newFile, ipane.inventoryNumField.getText());
+                setClassPlace(newFile, ipane.classPlaceField.getText());
+                
+                // refresh tree
+                TreeItem root = new FileTreeItem(new File(rootPath));
+                tree1.setRoot(root);
+            }
         }
     }
     
@@ -183,9 +198,33 @@ public class DocumentsPane extends GridPane {
         return prop.getProperty(f.getName() + "_inventory_number", "");
     }
     
+    public static void setInventoryNumber(final File f, String value) {
+        final Properties prop   = getSirsProperties(f);
+        prop.put(f.getName() + "_inventory_number", value);
+        
+        try {
+            final File sirsPropFile = getSirsPropertiesFile(f);
+            prop.store(new FileWriter(sirsPropFile), "");
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
+        }
+    }
+    
     public static String getClassPlace(final File f) {
         final Properties prop = getSirsProperties(f);
         return prop.getProperty(f.getName() + "_class_place", "");
+    }
+    
+    public static void setClassPlace(final File f, String value) {
+        final Properties prop   = getSirsProperties(f);
+        prop.put(f.getName() + "_class_place", value);
+        
+        try {
+            final File sirsPropFile = getSirsPropertiesFile(f);
+            prop.store(new FileWriter(sirsPropFile), "");
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
+        }
     }
     
     public static Boolean getDOIntegrated(final File f) {
