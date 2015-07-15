@@ -199,6 +199,8 @@ public class PojoTable extends BorderPane {
     /** Composant de filtrage. Propose de filtrer la liste d'objets actuels en éditant des contraintes sur leur propriété. */
     protected FXFilterBuilder uiFilterBuilder;
     protected final TitledPane uiFilterPane = new TitledPane();
+    private final Button resetFilterBtn = new Button("Réinitialiser");
+    private final Button applyFilterBtn = new Button("Filtrer");
 
     // Icônes de la barre d'action
 
@@ -566,8 +568,6 @@ public class PojoTable extends BorderPane {
         try {
             initFilterBuilder();
 
-            final Button resetFilterBtn = new Button("Réinitialiser");
-            final Button applyFilterBtn = new Button("Filtrer");
             resetFilterBtn.getStyleClass().addAll("label-header", "buttonbar-button", "white-rounded");
             applyFilterBtn.getStyleClass().addAll("label-header", "buttonbar-button", "white-rounded");
             final Separator separator = new Separator(Orientation.VERTICAL);
@@ -588,21 +588,7 @@ public class PojoTable extends BorderPane {
             uiFilterBuilder.managedProperty().bind(uiFilterPane.expandedProperty());
 
             titleAndFilterBox.getChildren().add(uiFilterPane);
-            resetFilterBtn.setOnAction(event -> {
-                final ObservableList<Node> vBoxChildren = filterContent.getChildren();
-                final int indexOfBuilder = vBoxChildren.indexOf(uiFilterBuilder);
-                if (vBoxChildren.size() > indexOfBuilder) {
-                    vBoxChildren.remove(indexOfBuilder);
-                    uiFilterBuilder = null;
-                    try {
-                        initFilterBuilder();
-                        vBoxChildren.add(indexOfBuilder, uiFilterBuilder);
-                    } catch (Exception e) {
-                        GeotkFX.newExceptionDialog("Une erreur inattendue est survenue.", e).show();
-                    }
-                    applyFilterBtn.fire();
-                }
-            });
+            resetFilterBtn.setOnAction(event -> resetFilter(filterContent));
             applyFilterBtn.setOnAction(event -> setTableItems(() -> allValues));
         } catch (Exception e) {
             SIRS.LOGGER.log(Level.WARNING, "Filter panel cannot be initialized !", e);
@@ -876,6 +862,46 @@ public class PojoTable extends BorderPane {
     }
 
     /**
+     * Reset the filter pane at its initial state.
+     *
+     * @param filterContent
+     */
+    public void resetFilter(final VBox filterContent) {
+        final ObservableList<Node> vBoxChildren = filterContent.getChildren();
+        final int indexOfBuilder = vBoxChildren.indexOf(uiFilterBuilder);
+        if (vBoxChildren.size() > indexOfBuilder) {
+            vBoxChildren.remove(indexOfBuilder);
+            uiFilterBuilder = null;
+            try {
+                initFilterBuilder();
+                vBoxChildren.add(indexOfBuilder, uiFilterBuilder);
+            } catch (Exception e) {
+                GeotkFX.newExceptionDialog("Une erreur inattendue est survenue.", e).show();
+            }
+            applyFilterBtn.fire();
+        }
+    }
+
+    /**
+     * Get the filter which will be applied on the pojo table values. Subclasses can override this method
+     * to extend the filter used.
+     *
+     * @return The filter to use, or {@code null} if none.
+     */
+    public Filter getFilter() {
+        // Apply filter on properties
+        Filter tmpFilter = null;
+        if (uiFilterBuilder != null) {
+            try {
+                tmpFilter = uiFilterBuilder.getFilter();
+            } catch (Exception e) {
+                SIRS.LOGGER.log(Level.FINE, "No filter can be built for pojo table on "+pojoClass, e);
+            }
+        }
+        return tmpFilter;
+    }
+
+    /**
      * Start an asynchronous task which will update table content with the elements
      * provided by input supplier.
      * @param producer Data provider.
@@ -906,15 +932,7 @@ public class PojoTable extends BorderPane {
             }
 
             // Apply filter on properties
-            Filter tmpFilter = null;
-            if (uiFilterBuilder != null) {
-                try {
-                    tmpFilter = uiFilterBuilder.getFilter();
-                } catch (Exception e) {
-                    SIRS.LOGGER.log(Level.FINE, "No ffilter can be built for pojotable on "+pojoClass, e);
-                }
-            }
-            final Filter firstFilter = tmpFilter;
+            final Filter firstFilter = getFilter();
 
             final Thread currentThread = Thread.currentThread();
             if (currentThread.isInterrupted()) {

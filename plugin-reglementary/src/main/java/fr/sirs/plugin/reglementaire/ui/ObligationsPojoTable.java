@@ -11,6 +11,7 @@ import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SimpleFXEditMode;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
@@ -19,7 +20,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import org.geotoolkit.filter.DefaultPropertyIsNull;
+import org.geotoolkit.filter.DefaultPropertyName;
+import org.geotoolkit.filter.binarylogic.DefaultAnd;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
+import org.opengis.filter.Filter;
 
 /**
  * Table présentant les obligations réglementaires.
@@ -27,6 +33,13 @@ import org.geotoolkit.gui.javafx.util.FXTableCell;
  * @author Cédric Briançon (Geomatys)
  */
 public final class ObligationsPojoTable extends PojoTable {
+    /**
+     * Nom de la colonne à ajouter pour la table.
+     */
+    private static final String CLASS_PROP_NAME = "Classe";
+
+    private final CheckBox uiHideRealizedCheckBox = new CheckBox("Masquer les étapes réalisées");
+
     /**
      * Création de la table présentant les obligations réglementaires.
      *
@@ -41,9 +54,35 @@ public final class ObligationsPojoTable extends PojoTable {
         final Button uiPlanificationBtn = new Button(null, new ImageView(SIRS.ICON_CLOCK_WHITE));
         uiPlanificationBtn.getStyleClass().add(BUTTON_STYLE);
         uiPlanificationBtn.setTooltip(new Tooltip("Planification automatique"));
+        uiPlanificationBtn.setOnMouseClicked(event -> showPlanificationTable(tabPane));
         searchEditionToolbar.getChildren().add(2, uiPlanificationBtn);
 
-        uiPlanificationBtn.setOnMouseClicked(event -> showPlanificationTable(tabPane));
+        if (uiFilterPane.getContent() instanceof VBox) {
+            final VBox vbox = (VBox) uiFilterPane.getContent();
+            vbox.getChildren().add(vbox.getChildren().size() - 1, uiHideRealizedCheckBox);
+        }
+    }
+
+    @Override
+    public Filter getFilter() {
+        if (uiHideRealizedCheckBox == null || !uiHideRealizedCheckBox.isSelected()) {
+            return super.getFilter();
+        }
+
+        final Filter filterNotRealized = new DefaultPropertyIsNull(new DefaultPropertyName("dateRealisation"));
+        final Filter filter = super.getFilter();
+        if (filter == null) {
+            return filterNotRealized;
+        }
+
+        return new DefaultAnd(filterNotRealized, filter);
+    }
+
+    @Override
+    public void resetFilter(final VBox filterContent) {
+        super.resetFilter(filterContent);
+
+        uiHideRealizedCheckBox.setSelected(false);
     }
 
     /**
@@ -73,7 +112,7 @@ public final class ObligationsPojoTable extends PojoTable {
      */
     private class SEClassTableColumn extends TableColumn<ObligationReglementaire, String> {
         public SEClassTableColumn() {
-            super("Classe");
+            super(CLASS_PROP_NAME);
 
             setCellValueFactory(param -> param.getValue().systemeEndiguementIdProperty());
             setCellFactory(param -> new SEClassCell());
@@ -104,6 +143,9 @@ public final class ObligationsPojoTable extends PojoTable {
 
             if (!empty && item != null) {
                 textProperty().bind(Injector.getBean(SystemeEndiguementRepository.class).get(item).classementProperty());
+            } else {
+                textProperty().unbind();
+                setText(null);
             }
         }
     }
