@@ -37,7 +37,7 @@
         </columns>
       </TreeTableView>
       <Label text="Liste des dossiers et fichiers" GridPane.rowIndex="1" />
-      <Button fx:id="addFolderButton" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+      <Button fx:id="addFolderButton" mnemonicParsing="false" onAction="#showAddFolderDialog" GridPane.columnIndex="1" GridPane.rowIndex="4" />
       <Button fx:id="addDocButton" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="5" />
       <Button fx:id="importDocButton" mnemonicParsing="false" onAction="#showImportDialog" GridPane.columnIndex="1" GridPane.rowIndex="6" />
       <Button fx:id="deleteDocButton" mnemonicParsing="false" onAction="#showRemoveDialog" GridPane.columnIndex="1" GridPane.rowIndex="7" />

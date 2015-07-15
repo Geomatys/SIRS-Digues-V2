@@ -33,8 +33,17 @@ import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
 import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.util.FileUtilities;
-
+import fr.sirs.core.component.SystemeEndiguementRepository;
+import fr.sirs.core.component.DigueRepository;
+import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.SystemeEndiguement;
+import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.TronconDigue;
+        
 import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -62,7 +71,8 @@ public class DocumentsPane extends GridPane {
 
     @FXML
     private Button listButton;
-
+    
+    
     private static final Image ADDF_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/add_folder.png"));
     private static final Image ADDD_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/add_doc.png"));
     private static final Image IMP_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/import.png"));
@@ -173,8 +183,8 @@ public class DocumentsPane extends GridPane {
         final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
             File f = new File(ipane.fileField.getText());
-            final File directory = tree1.getSelectionModel().getSelectedItem().getValue();
-            if (directory.isDirectory()) {
+            final File directory = getSelectedFile();
+            if (directory != null && directory.isDirectory()) {
                 final File newFile = new File(directory, f.getName());
                 FileUtilities.copy(f, newFile);
                 setInventoryNumber(newFile, ipane.inventoryNumField.getText());
@@ -198,18 +208,20 @@ public class DocumentsPane extends GridPane {
 
         final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
-            final File f = tree1.getSelectionModel().getSelectedItem().getValue();
-            if (f.isDirectory()) {
-                FileUtilities.deleteDirectory(f);
-            } else {
-                f.delete();
+            final File f = getSelectedFile();
+            if (f != null) {
+                if (f.isDirectory()) {
+                    FileUtilities.deleteDirectory(f);
+                } else {
+                    f.delete();
+                }
+                removeClassPlace(f);
+                removeDOIntegrated(f);
+                removeInventoryNumber(f);
+
+                // refresh tree
+                updateRoot();
             }
-            removeClassPlace(f);
-            removeDOIntegrated(f);
-            removeInventoryNumber(f);
-            
-            // refresh tree
-            updateRoot();
         }
     }
     
@@ -235,8 +247,128 @@ public class DocumentsPane extends GridPane {
         }
     }
     
+    @FXML
+    public void showAddFolderDialog(ActionEvent event) {
+        final Dialog dialog    = new Dialog();
+        final DialogPane pane  = new DialogPane();
+        final NewFolderPane ipane = new NewFolderPane();
+        pane.setContent(ipane);
+        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Création de dossier");
+
+        final Optional opt = dialog.showAndWait();
+        if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
+            String folderName = ipane.folderNameField.getText();
+            switch (ipane.locCombo.getValue()) {
+                case NewFolderPane.IN_CURRENT_FOLDER: 
+                    final File directory = getSelectedFile();
+                    if (directory != null && directory.isDirectory()) {
+                        final File newDir = new File(directory, folderName);
+                        newDir.mkdir();
+                        updateRoot();
+                    }
+                    break;
+                case NewFolderPane.IN_ALL_FOLDER:break;     
+                case NewFolderPane.IN_SE_FOLDER:break;
+                case NewFolderPane.IN_TR_FOLDER:break;
+            }
+        }
+    }
+    
+    private File getSelectedFile() {
+        TreeItem<File> item = tree1.getSelectionModel().getSelectedItem();
+        if (item != null) {
+            return item.getValue();
+        }
+        return null;
+    }
+    
     private void updateRoot() {
-        TreeItem root = new FileTreeItem(new File(rootPath));
+        final File rootDirectory = new File(rootPath);
+                
+        final SystemeEndiguementRepository SErepo = Injector.getBean(SystemeEndiguementRepository.class);
+        final DigueRepository Drepo = Injector.getBean(DigueRepository.class);
+        final TronconDigueRepository TRrepo = Injector.getBean(TronconDigueRepository.class);
+        
+        //on recupere tous les elements
+        final List<SystemeEndiguement> sds    = SErepo.getAll();
+        final Set<Digue> digues               = new HashSet<>(Drepo.getAll());
+        final Set<TronconDigue> troncons      = new HashSet<>(TRrepo.getAllLight());
+        final Set<Digue> diguesFound          = new HashSet<>();
+        final Set<TronconDigue> tronconsFound = new HashSet<>();
+        
+        for (SystemeEndiguement sd : sds) {
+            final File sdDir = new File(rootDirectory, sd.getLibelle());
+            if (!sdDir.exists()) {
+                sdDir.mkdir();
+            }
+            
+            final List<String> digueIds = sd.getDigueIds();
+            for (Digue digue : digues) {
+                if (!digueIds.contains(digue.getDocumentId())) continue;
+                diguesFound.add(digue);
+                
+                String name = digue.getLibelle();
+                if (name == null) {
+                    name = "null";
+                }
+                final File digueDir = new File(sdDir, name);
+                if (!digueDir.exists()) {
+                    digueDir.mkdir();
+                }
+
+                for (final TronconDigue td : troncons) {
+                    if (td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
+                    tronconsFound.add(td);
+
+                    final File trDir = new File(digueDir, td.getLibelle());
+                    if (!trDir.exists()) {
+                        trDir.mkdir();
+                    }
+
+                }
+            }
+        }
+        
+        
+        //on place toute les digues et troncons non trouvé dans un group a part
+        digues.removeAll(diguesFound);
+        final File unclassifiedDir = new File(rootDirectory, "Non classés"); 
+        if (!unclassifiedDir.exists()) {
+            unclassifiedDir.mkdir();
+        }
+        
+        for (final Digue digue : digues) {
+            String name = digue.getLibelle();
+            if (name == null) {
+                name = "null";
+            }
+            final File digueDir = new File(unclassifiedDir, name);
+            if (!digueDir.exists()) {
+                digueDir.mkdir();
+            }
+            for (final TronconDigue td : troncons) {
+                if (td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
+                tronconsFound.add(td);
+
+                final File trDir = new File(digueDir, td.getLibelle());
+                if (!trDir.exists()) {
+                    trDir.mkdir();
+                }
+            }
+        }
+        
+        troncons.removeAll(tronconsFound);
+        for(final TronconDigue td : troncons){
+            final File trDir = new File(unclassifiedDir, td.getLibelle());
+            if (!trDir.exists()) {
+                trDir.mkdir();
+            }
+        }
+        
+        TreeItem root = new FileTreeItem(rootDirectory);
         tree1.setRoot(root);
     }
     
