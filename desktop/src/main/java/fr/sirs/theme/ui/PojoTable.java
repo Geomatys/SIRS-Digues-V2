@@ -42,6 +42,7 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.map.ExportTask;
 import fr.sirs.theme.ColumnOrder;
+import fr.sirs.util.FXReferenceEqualsOperator;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.property.Internal;
@@ -808,7 +809,7 @@ public class PojoTable extends BorderPane {
                     if (annot != null) {
                         final FeatureTypeBuilder builder = new FeatureTypeBuilder();
                         builder.setName(desc.getName());
-                        builder.add("class", annot.ref());
+                        builder.add(FXReferenceEqualsOperator.CLASS_ATTRIBUTE, annot.ref());
                         props.add(new DefaultAssociationRole(
                                 identification, builder.buildFeatureType(), 0, 1));
                     } else {

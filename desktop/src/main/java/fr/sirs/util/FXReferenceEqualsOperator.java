@@ -16,6 +16,7 @@ import org.geotoolkit.gui.javafx.filter.FXFilterOperator;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 import org.opengis.feature.AttributeType;
 import org.opengis.feature.FeatureAssociationRole;
+import org.opengis.feature.PropertyNotFoundException;
 import org.opengis.feature.PropertyType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
@@ -23,18 +24,27 @@ import org.opengis.filter.expression.Expression;
 /**
  * A special filter case to allow equality test on SIRS links between objects.
  * In application, we expect that links between elements are represented by a
- * {@link FeatureAssociationRole}, whose inner feature type contains a 'class' 
- * property. The class property is expected to be an attribute type whose value 
+ * {@link FeatureAssociationRole}, whose inner feature type contains a 'class'
+ * property. The class property is expected to be an attribute type whose value
  * class is the class of the element bound by its id.
  * @author Alexis Manin (Geomatys)
  */
 public class FXReferenceEqualsOperator implements FXFilterOperator {
 
+    public static final String CLASS_ATTRIBUTE = "class";
     private static final SirsStringConverter CHOICE_CONVERTER = new SirsStringConverter();
-    
+
     @Override
     public boolean canHandle(PropertyType target) {
-        return (target instanceof FeatureAssociationRole);
+        if (target instanceof FeatureAssociationRole) {
+            final FeatureAssociationRole role = (FeatureAssociationRole) target;
+            try {
+                return role.getValueType().getProperty(CLASS_ATTRIBUTE) != null;
+            } catch (PropertyNotFoundException e) {
+                return false;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -49,7 +59,7 @@ public class FXReferenceEqualsOperator implements FXFilterOperator {
                 Injector.getSession().getPreviews().getByClass(refClass));
         if (choices.isEmpty())
             return Optional.empty();
-        
+
         final ComboBox cBox = new ComboBox(choices);
         cBox.setConverter(CHOICE_CONVERTER);
         cBox.setEditable(true);
@@ -68,7 +78,7 @@ public class FXReferenceEqualsOperator implements FXFilterOperator {
         } else {
             choices = null;
         }
-        
+
         if (choices != null && !choices.isEmpty() && refClass.isInstance(choices.get(0))) {
             return true;
         } else {
@@ -82,9 +92,9 @@ public class FXReferenceEqualsOperator implements FXFilterOperator {
         if (filterEditor instanceof ComboBoxBase) {
             choice = ((ComboBoxBase)filterEditor).valueProperty().get();
         }
-        
+
         if (choice instanceof Preview) {
-            return GO2Utilities.FILTER_FACTORY.equals(toApplyOn, 
+            return GO2Utilities.FILTER_FACTORY.equals(toApplyOn,
                     GO2Utilities.FILTER_FACTORY.literal(((Preview)choice).getElementId()));
         } else {
             throw new IllegalArgumentException("L'éditeur des paramètres du filtre est invalide.");
@@ -93,13 +103,13 @@ public class FXReferenceEqualsOperator implements FXFilterOperator {
 
     private static Class getReferenceClass(PropertyType propertyType) {
         if (propertyType instanceof FeatureAssociationRole) {
-            PropertyType property = ((FeatureAssociationRole)propertyType).getValueType().getProperty("class");
+            PropertyType property = ((FeatureAssociationRole)propertyType).getValueType().getProperty(CLASS_ATTRIBUTE);
             if (property instanceof AttributeType) {
                 return ((AttributeType)property).getValueClass();
             }
         }
-        
+
         throw new IllegalArgumentException("Le filtre courant ne peut gérer que des attributs associatifs !");
     }
-    
+
 }
