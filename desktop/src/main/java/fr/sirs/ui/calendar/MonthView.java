@@ -206,7 +206,7 @@ final class MonthView extends DatePane {
         }
 
         // Prepare buttons style
-        final ColumnConstraints colLargeTxtEventCstr = new ColumnConstraints(130);
+        final ColumnConstraints colLargeTxtEventCstr = new ColumnConstraints(0, USE_COMPUTED_SIZE, Double.MAX_VALUE, Priority.ALWAYS, HPos.LEFT, true);
         final ColumnConstraints colSmallCstr = new ColumnConstraints(USE_PREF_SIZE, 20, USE_PREF_SIZE, Priority.NEVER, HPos.RIGHT, true);
 
         // Ignore the week day row and the week number column
@@ -218,6 +218,7 @@ final class MonthView extends DatePane {
             } else {
                 final GridPane gridBtn = (GridPane) getChildren().get(i);
                 //control.setTooltip(new Tooltip(dateFormat.format(currentDate)));
+                gridBtn.setMinSize(0, 0);
                 gridBtn.setPrefWidth(150);
                 gridBtn.setPrefHeight(100);
                 gridBtn.setMaxWidth(Region.USE_PREF_SIZE);
@@ -279,8 +280,7 @@ final class MonthView extends DatePane {
                         control.setOnMouseClicked(event -> calendarView.showCalendarPopupForEvent(calendarEvent, control));
                         control.setBackground(Background.EMPTY);
                         control.setBorder(Border.EMPTY);
-                        control.setMaxWidth(130);
-                        gridBtn.add(control, 0, j+1);
+                        gridBtn.add(control, 0, j+1, GridPane.REMAINING, 1);
                     }
                 } else {
                     gridBtn.getStyleClass().remove(CSS_CALENDAR_DAY_HAS_EVENTS);
