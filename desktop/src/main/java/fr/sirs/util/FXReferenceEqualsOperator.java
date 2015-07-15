@@ -16,7 +16,6 @@ import org.geotoolkit.gui.javafx.filter.FXFilterOperator;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 import org.opengis.feature.AttributeType;
 import org.opengis.feature.FeatureAssociationRole;
-import org.opengis.feature.PropertyNotFoundException;
 import org.opengis.feature.PropertyType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
@@ -40,7 +39,7 @@ public class FXReferenceEqualsOperator implements FXFilterOperator {
             final FeatureAssociationRole role = (FeatureAssociationRole) target;
             try {
                 return role.getValueType().getProperty(CLASS_ATTRIBUTE) != null;
-            } catch (PropertyNotFoundException e) {
+            } catch (IllegalArgumentException e) {
                 return false;
             }
         }

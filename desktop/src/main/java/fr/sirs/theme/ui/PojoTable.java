@@ -39,12 +39,14 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PrZPointImporter;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.map.ExportTask;
 import fr.sirs.theme.ColumnOrder;
 import fr.sirs.util.FXReferenceEqualsOperator;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.ReferenceTableCell;
+import fr.sirs.util.SEClassementEqualsOperator;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.Reference;
 import java.beans.BeanInfo;
@@ -764,6 +766,11 @@ public class PojoTable extends BorderPane {
                 @Override
                 protected String getTitle(PropertyType candidate) {
                     if (candidate == null || candidate.getName() == null || candidate.getName().head() == null) return "";
+
+                    if (new SEClassementEqualsOperator().canHandle(candidate)) {
+                        return "classe";
+                    }
+
                     String pName = candidate.getName().head().toString();
                     if (labelMapper != null) {
                         final String pTitle = labelMapper.mapPropertyName(pName);
@@ -798,6 +805,14 @@ public class PojoTable extends BorderPane {
                         builder.add(FXReferenceEqualsOperator.CLASS_ATTRIBUTE, annot.ref());
                         props.add(new DefaultAssociationRole(
                                 identification, builder.buildFeatureType(), 0, 1));
+                        if (SystemeEndiguement.class.equals(annot.ref())) {
+                            builder.reset();
+                            builder.setName("classement");
+                            builder.add(SEClassementEqualsOperator.CLASSEMENT_ATTRIBUTE, String.class);
+                            final HashMap tmpIdent = new HashMap(1);
+                            tmpIdent.put(AbstractIdentifiedType.NAME_KEY, "classement");
+                            props.add(new DefaultAssociationRole(identification, builder.buildFeatureType(), 0, 1));
+                        }
                     } else {
                         props.add(new DefaultAttributeType(
                                 identification, desc.getPropertyType(), 0, 1, null, null));
