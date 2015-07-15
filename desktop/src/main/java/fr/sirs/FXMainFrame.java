@@ -425,6 +425,11 @@ public class FXMainFrame extends BorderPane {
         SIRS.LOADER.showSplashStage();
     }
     
+    @FXML 
+    private void checkReferences(){
+        Injector.getSession().getTaskManager().submit(Injector.getSession().getReferenceChecker());
+    }
+    
     @FXML
     private void print() throws Exception {
 

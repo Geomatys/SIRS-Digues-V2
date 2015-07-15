@@ -183,15 +183,12 @@ public class Loader extends Application {
                             }
                         });
                         fadeSplash.play();
-
-                        session.getTaskManager().submit(session.getReferenceChecker());
                     }
                 } finally {
                     controller.uiConnexion.setDisable(false);
                 }
             }
         });
-
     }
 
     /**
@@ -251,7 +248,7 @@ public class Loader extends Application {
                 updateMessage("Recherche des plugins");
                 int inc = 0;
                 final Plugin[] plugins = Plugins.getPlugins();
-                final int total = 8 + plugins.length;
+                final int total = 9 + plugins.length;
 
                 // EPSG DATABASE ///////////////////////////////////////////////
                 updateProgress(inc++, total);
@@ -314,10 +311,14 @@ public class Loader extends Application {
                 Injector.getSession().getMapContext().getAreaOfInterest();
 
                 // COUCHDB TO SQL //////////////////////////////////////////////
+                updateProgress(inc++, total);
                 updateMessage("Export vers la base RDBMS");
                 H2Helper.init();
-
+                
+                // VÉRIFICATION DES RÉFÉRENCES
                 updateProgress(inc++, total);
+                updateMessage("Synchronisation des listes de références");
+                Injector.getSession().getReferenceChecker().call();
 
                 // OVER
                 updateProgress(total, total);

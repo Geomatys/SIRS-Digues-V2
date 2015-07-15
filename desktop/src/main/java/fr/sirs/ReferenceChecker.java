@@ -33,7 +33,6 @@ import javafx.concurrent.Task;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import static fr.sirs.SIRS.REFERENCE_GET_ID;
-import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Level.WARNING;
 
 /**
@@ -318,6 +317,12 @@ public class ReferenceChecker extends Task<Void> {
                             }
                             SIRS.LOGGER.log(Level.FINE, ex.getMessage());
                         }
+                    } else if (LocalDate.class.equals(type)) {
+                        try {
+                            setter.invoke(referenceInstance, LocalDate.parse(record.get(header), DateTimeFormatter.ISO_DATE));
+                        } catch (DateTimeParseException ex) {
+                            SIRS.LOGGER.log(Level.FINE, ex.getMessage());
+                        }
                     }
 
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
@@ -372,7 +377,7 @@ public class ReferenceChecker extends Task<Void> {
                         }
                     }
                 }
-                repository.executeBulk(updated);
+                if(!updated.isEmpty()) repository.executeBulk(updated);
             }
             
             // On élimine les instances de références mises à jour des map correspondantes du ReferenceChecker (on se base sur l'identifiant).
@@ -381,6 +386,8 @@ public class ReferenceChecker extends Task<Void> {
             } else {
                 SIRS.LOGGER.log(WARNING, referenceClass.getCanonicalName() + " n'a pas été correctement récupérée du serveur.");
             }
+            
+            // On retire les références mises à jour de la liste des instances incohérentes.
             final Map<ReferenceType, ReferenceType> incoherentInstances = incoherentReferences.get(referenceClass);
             if(incoherentInstances!=null){
                 for(final ReferenceType updatedInstance : updated){

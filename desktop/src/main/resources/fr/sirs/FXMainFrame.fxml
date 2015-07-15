@@ -6,7 +6,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="768.0" prefWidth="1024.0" stylesheets="@theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.45" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="768.0" prefWidth="1024.0" stylesheets="@theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <top>
       <BorderPane>
          <top>
@@ -20,6 +20,7 @@
                                       <items>
                                           <MenuItem fx:id="uiPref" mnemonicParsing="false" onAction="#openPref" text="%preferences" />
                                     <MenuItem mnemonicParsing="false" onAction="#clearCache" text="%clearCache" />
+                                    <MenuItem mnemonicParsing="false" onAction="#checkReferences" text="%checkReferences" />
                                     <MenuItem fx:id="uiCompte" mnemonicParsing="false" onAction="#openCompte" text="%count" />
                                     <MenuItem mnemonicParsing="false" onAction="#changeUser" text="%changeUser" />
                                     <MenuItem fx:id="uiDeconnect" mnemonicParsing="false" onAction="#deconnect" text="%changeDB" />
