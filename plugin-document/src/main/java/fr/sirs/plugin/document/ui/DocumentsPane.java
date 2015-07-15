@@ -6,16 +6,11 @@ import fr.sirs.SIRS;
 import fr.sirs.plugin.document.DocumentManagementTheme;
 import fr.sirs.plugin.document.FileTreeItem;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
-import java.util.Properties;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -38,6 +33,8 @@ import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
 import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.util.FileUtilities;
+
+import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
 
 /**
  *
@@ -193,111 +190,30 @@ public class DocumentsPane extends GridPane {
         }
     }
     
-    public static String getInventoryNumber(final File f) {
-        final Properties prop = getSirsProperties(f);
-        return prop.getProperty(f.getName() + "_inventory_number", "");
-    }
-    
-    public static void setInventoryNumber(final File f, String value) {
-        final Properties prop   = getSirsProperties(f);
-        prop.put(f.getName() + "_inventory_number", value);
-        
-        try {
-            final File sirsPropFile = getSirsPropertiesFile(f);
-            prop.store(new FileWriter(sirsPropFile), "");
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
-        }
-    }
-    
-    public static String getClassPlace(final File f) {
-        final Properties prop = getSirsProperties(f);
-        return prop.getProperty(f.getName() + "_class_place", "");
-    }
-    
-    public static void setClassPlace(final File f, String value) {
-        final Properties prop   = getSirsProperties(f);
-        prop.put(f.getName() + "_class_place", value);
-        
-        try {
-            final File sirsPropFile = getSirsPropertiesFile(f);
-            prop.store(new FileWriter(sirsPropFile), "");
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
-        }
-    }
-    
-    public static Boolean getDOIntegrated(final File f) {
-        final Properties prop = getSirsProperties(f);
-        return Boolean.parseBoolean(prop.getProperty(f.getName() + "_do_integrated", "false"));
-    }
-    
-    public static void setDOIntegrated(final File f, boolean value) {
-        final Properties prop   = getSirsProperties(f);
-        prop.put(f.getName() + "_do_integrated", Boolean.toString(value));
-        
-        try {
-            final File sirsPropFile = getSirsPropertiesFile(f);
-            prop.store(new FileWriter(sirsPropFile), "");
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
-        }
-    }
-    
-    public static File getSirsPropertiesFile(final File f) throws IOException {
-        final File parent = f.getParentFile();
-        if (parent != null) {
-            final File sirsPropFile = new File(parent, "sirs.properties");
-            if (!sirsPropFile.exists()) {
-                sirsPropFile.createNewFile();
-            }
-            return sirsPropFile;
-        }
-        return null;
-    }
-    
-    public static Properties getSirsProperties(final File f) {
-        final Properties prop = new Properties();
-        try {
-            final File sirsPropFile = getSirsPropertiesFile(f);
-            if (sirsPropFile != null) {
-                prop.load(new FileReader(sirsPropFile));
-            } 
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while loading/creating sirs properties file.", ex);
-        }
-        return prop;
-    }
-    
-    public static String getStringSizeFile(final File f) {
-        final long size        = getFileSize(f);
-        final DecimalFormat df = new DecimalFormat("0.0");
-        final float sizeKb     = 1024.0f;
-        final float sizeMo     = sizeKb * sizeKb;
-        final float sizeGo     = sizeMo * sizeKb;
-        final float sizeTerra  = sizeGo * sizeKb;
+    @FXML
+    public void showRemoveDialog(ActionEvent event) {
+        final Dialog dialog    = new Dialog();
+        final DialogPane pane  = new DialogPane();
+        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Detruire document");
 
-        if (size < sizeKb) {
-            return df.format(size)          + " o";
-        } else if (size < sizeMo) {
-            return df.format(size / sizeKb) + " Ko";
-        } else if (size < sizeGo) {
-            return df.format(size / sizeMo) + " Mo";
-        } else if (size < sizeTerra) {
-            return df.format(size / sizeGo) + " Go";
-        }
-        return "";
-    }
-    
-    public static long getFileSize(final File f) {
-        if (f.isDirectory()) {
-            long result = 0;
-            for (File child : f.listFiles()) {
-                result += getFileSize(child);
+        final Optional opt = dialog.showAndWait();
+        if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
+            final File f = tree1.getSelectionModel().getSelectedItem().getValue();
+            if (f.isDirectory()) {
+                FileUtilities.deleteDirectory(f);
+            } else {
+                f.delete();
             }
-            return result;
-        } else {
-            return f.length();
+            removeClassPlace(f);
+            removeDOIntegrated(f);
+            removeInventoryNumber(f);
+            
+            // refresh tree
+            TreeItem root = new FileTreeItem(new File(rootPath));
+            tree1.setRoot(root);
         }
     }
     
@@ -320,7 +236,6 @@ public class DocumentsPane extends GridPane {
             });
         }
         
-        
         @Override
         public void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
@@ -332,8 +247,5 @@ public class DocumentsPane extends GridPane {
                 box.setSelected(getDOIntegrated(f));
             }
         }
-        
-        
-        
     }
 }
