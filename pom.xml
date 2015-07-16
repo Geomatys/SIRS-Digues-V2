@@ -247,6 +247,8 @@
            <module>plugin-reglementary</module>
            <module>plugin-vegetation</module>
            <module>plugin-document</module>
+           <module>plugin-aot-cot</module>
+           <module>plugin-berge</module>
         </modules>
      </profile>
   </profiles>
