@@ -98,6 +98,11 @@ public class PropertiesFileUtilities {
         }
     }
     
+    public static Boolean getIsSe(final File f) {
+        final Properties prop = getSirsProperties(f);
+        return Boolean.parseBoolean(prop.getProperty(f.getName() + "_se", "false"));
+    }
+    
     public static void setIsSe(final File f, boolean value) {
         final Properties prop   = getSirsProperties(f);
         prop.put(f.getName() + "_se", Boolean.toString(value));
@@ -110,6 +115,11 @@ public class PropertiesFileUtilities {
         }
     }
     
+    public static Boolean getIsTr(final File f) {
+        final Properties prop = getSirsProperties(f);
+        return Boolean.parseBoolean(prop.getProperty(f.getName() + "_tr", "false"));
+    }
+    
     public static void setIsTr(final File f, boolean value) {
         final Properties prop   = getSirsProperties(f);
         prop.put(f.getName() + "_tr", Boolean.toString(value));
@@ -120,6 +130,11 @@ public class PropertiesFileUtilities {
         } catch (IOException ex) {
             LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
         }
+    }
+    
+    public static Boolean getIsDg(final File f) {
+        final Properties prop = getSirsProperties(f);
+        return Boolean.parseBoolean(prop.getProperty(f.getName() + "_dg", "false"));
     }
     
     public static void setIsDg(final File f, boolean value) {

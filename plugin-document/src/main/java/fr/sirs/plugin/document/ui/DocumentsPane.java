@@ -264,7 +264,8 @@ public class DocumentsPane extends GridPane {
 
         final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
-            String folderName = ipane.folderNameField.getText();
+            String folderName  = ipane.folderNameField.getText();
+            final File rootDir = new File(rootPath);
             switch (ipane.locCombo.getValue()) {
                 case NewFolderPane.IN_CURRENT_FOLDER: 
                     final File directory = getSelectedFile();
@@ -274,9 +275,15 @@ public class DocumentsPane extends GridPane {
                         updateRoot();
                     }
                     break;
-                case NewFolderPane.IN_ALL_FOLDER:break;     
-                case NewFolderPane.IN_SE_FOLDER:break;
-                case NewFolderPane.IN_TR_FOLDER:break;
+                case NewFolderPane.IN_ALL_FOLDER:
+                    addToAllFolder(rootDir, folderName);
+                    break;     
+                case NewFolderPane.IN_SE_FOLDER:
+                    addToSeFolder(rootDir, folderName);
+                    break;
+                case NewFolderPane.IN_TR_FOLDER:
+                    addToTrFolder(rootDir, folderName);
+                    break;
             }
         }
     }
@@ -347,6 +354,59 @@ public class DocumentsPane extends GridPane {
         
         TreeItem root = new FileTreeItem(rootDirectory);
         tree1.setRoot(root);
+    }
+    
+    private void addToAllFolder(final File rootDir, final String folderName) {
+        for (File f : rootDir.listFiles()) {
+            if (f.isDirectory()) {
+                if (f.getName().equals(DOCUMENT_FOLDER)) {
+                    final File newDir = new File(f, folderName);
+                    if (!newDir.exists()) {
+                        newDir.mkdir();
+                    }
+                } else {
+                    addToAllFolder(f, folderName);
+                }
+            }
+        }
+    }
+    
+    private void addToTrFolder(final File rootDir, final String folderName) {
+        for (File f : rootDir.listFiles()) {
+            if (f.isDirectory()) {
+                if (getIsTr(f)) {
+                    final File docDir = new File(f, DOCUMENT_FOLDER);
+                    if (!docDir.exists()) {
+                        docDir.mkdir();
+                    }
+                    final File newDir = new File(docDir, folderName);
+                    if (!newDir.exists()) {
+                        newDir.mkdir();
+                    }
+                } else {
+                    addToTrFolder(f, folderName);
+                }
+            }
+        }
+    }
+    
+    private void addToSeFolder(final File rootDir, final String folderName) {
+        for (File f : rootDir.listFiles()) {
+            if (f.isDirectory()) {
+                if (getIsSe(f)) {
+                    final File docDir = new File(f, DOCUMENT_FOLDER);
+                    if (!docDir.exists()) {
+                        docDir.mkdir();
+                    }
+                    final File newDir = new File(docDir, folderName);
+                    if (!newDir.exists()) {
+                        newDir.mkdir();
+                    }
+                } else {
+                    addToSeFolder(f, folderName);
+                }
+            }
+        }
     }
     
     private static class DOIntegatedCell extends TreeTableCell {
