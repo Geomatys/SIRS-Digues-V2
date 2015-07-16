@@ -319,7 +319,7 @@ public class DocumentsPane extends GridPane {
         if (existingKey == null) {
             return true;
         } else if (!existingKey.equals(key)) {
-            return showBadVersionDialog();
+            return showBadVersionDialog(existingKey, key);
         }
         return true;
     }
@@ -335,9 +335,11 @@ public class DocumentsPane extends GridPane {
         dialog.showAndWait();
     }
     
-    private boolean showBadVersionDialog() {
+    private boolean showBadVersionDialog(final String existingKey, final String dbKey) {
         final Dialog dialog    = new Alert(Alert.AlertType.ERROR);
         final DialogPane pane  = new DialogPane();
+        final DatabaseVersionPane ipane = new DatabaseVersionPane(existingKey, dbKey);
+        pane.setContent(ipane);
         pane.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
         dialog.setDialogPane(pane);
         dialog.setResizable(true);
@@ -493,7 +495,7 @@ public class DocumentsPane extends GridPane {
         final Optional<SirsDBInfo> info = DBrepo.get();
         if (info.isPresent()) {
             final SirsDBInfo dbInfo = info.get();
-            return dbInfo.getUuid() + "-" + dbInfo.getEpsgCode() + "-" + dbInfo.getVersion()  + "-" + dbInfo.getRemoteDatabase();
+            return dbInfo.getUuid() + "|" + dbInfo.getEpsgCode() + "|" + dbInfo.getVersion()  + "|" + dbInfo.getRemoteDatabase();
         }
         return null;
     }

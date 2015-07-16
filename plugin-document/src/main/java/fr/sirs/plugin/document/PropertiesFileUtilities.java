@@ -108,9 +108,10 @@ public class PropertiesFileUtilities {
         return Boolean.parseBoolean(prop.getProperty(f.getName() + "_se", "false"));
     }
     
-    public static void setIsSe(final File f, boolean value) {
+    public static void setIsSe(final File f, boolean value, final String libelle) {
         final Properties prop   = getSirsProperties(f);
         prop.put(f.getName() + "_se", Boolean.toString(value));
+        prop.put(f.getName() + "_libelle", libelle);
         
         try {
             final File sirsPropFile = getSirsPropertiesFile(f);
@@ -125,9 +126,10 @@ public class PropertiesFileUtilities {
         return Boolean.parseBoolean(prop.getProperty(f.getName() + "_tr", "false"));
     }
     
-    public static void setIsTr(final File f, boolean value) {
+    public static void setIsTr(final File f, boolean value, final String libelle) {
         final Properties prop   = getSirsProperties(f);
         prop.put(f.getName() + "_tr", Boolean.toString(value));
+        prop.put(f.getName() + "_libelle", libelle);
         
         try {
             final File sirsPropFile = getSirsPropertiesFile(f);
@@ -142,9 +144,10 @@ public class PropertiesFileUtilities {
         return Boolean.parseBoolean(prop.getProperty(f.getName() + "_dg", "false"));
     }
     
-    public static void setIsDg(final File f, boolean value) {
+    public static void setIsDg(final File f, boolean value, final String libelle) {
         final Properties prop   = getSirsProperties(f);
         prop.put(f.getName() + "_dg", Boolean.toString(value));
+        prop.put(f.getName() + "_libelle", libelle);
         
         try {
             final File sirsPropFile = getSirsPropertiesFile(f);
@@ -245,7 +248,7 @@ public class PropertiesFileUtilities {
         if (!sdDir.exists()) {
             sdDir.mkdir();
         }
-        setIsSe(sdDir, true);
+        setIsSe(sdDir, true, sd.getId());
         final File docDir = new File(sdDir, DocumentsPane.DOCUMENT_FOLDER); 
         if (!docDir.exists()) {
             docDir.mkdir();
@@ -262,7 +265,7 @@ public class PropertiesFileUtilities {
         if (!digueDir.exists()) {
             digueDir.mkdir();
         }
-        setIsDg(digueDir, true);
+        setIsDg(digueDir, true, digue.getId());
         final File docDir = new File(digueDir, DocumentsPane.DOCUMENT_FOLDER); 
         if (!docDir.exists()) {
             docDir.mkdir();
@@ -279,7 +282,7 @@ public class PropertiesFileUtilities {
         if (!trDir.exists()) {
             trDir.mkdir();
         }
-        setIsTr(trDir, true);
+        setIsTr(trDir, true, tr.getId());
         final File docDir = new File(trDir, DocumentsPane.DOCUMENT_FOLDER); 
         if (!docDir.exists()) {
             docDir.mkdir();
