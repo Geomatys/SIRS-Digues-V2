@@ -3,9 +3,12 @@
 package fr.sirs.core.component;
 
 import fr.sirs.core.InjectorCore;
+import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
+import fr.sirs.core.TronconUtils;
 import static fr.sirs.core.component.SystemeReperageRepository.BY_LINEAR_ID;
+import fr.sirs.core.model.Positionable;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +17,12 @@ import org.springframework.stereotype.Component;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import java.util.Iterator;
 import java.util.List;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.support.Views;
+import org.geotoolkit.referencing.LinearReferencing;
 
 
 @Views({
@@ -66,6 +71,7 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
         ArgumentChecks.ensureNonNull("Troncon bound to updated SR", troncon);
         super.update(entity);
         constraintBorneInTronconListBorne(entity, troncon, false);
+        updatePositionsForSR(troncon, entity, entity);
     }
 
     public void add(SystemeReperage entity, TronconDigue troncon) {
@@ -97,13 +103,39 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
         throw new UnsupportedOperationException("Operation interdite : le SR doit être mis à jour en même temps que le tronçon associé.");
     }
 
+    /**
+     * Remove this SR from database, and update all items whose linear position
+     * is defined in this SR. All updated items will lose their linear information.
+     *
+     * @param source SR to delete.
+     * @param troncon Troncon which contains the SR to remove.
+     */
     public void remove(SystemeReperage source, TronconDigue troncon) {
+        remove(source, troncon, null);
+    }
+
+    /**
+     * Remove this SR from database, and update all items whose linear position
+     * is defined in this SR. All updated items will lose their linear information
+     * if alternative SR is null. Otherwise, their position is computed on it.
+     *
+     * @param source SR to delete.
+     * @param troncon Troncon which contains the SR to remove.
+     * @param alternative the new SR to affect to items bound to the old SR.
+     */
+    public void remove(SystemeReperage source, TronconDigue troncon, SystemeReperage alternative) {
         ArgumentChecks.ensureNonNull("SR to delete", source);
         ArgumentChecks.ensureNonNull("Troncon bound to deleted SR", troncon);
+        if (alternative == source)
+            alternative = null;
         if (source.getId().equals(troncon.getSystemeRepDefautId())) {
-            troncon.setSystemeRepDefautId(null);
+            troncon.setSystemeRepDefautId(alternative == null ? null : alternative.getId());
             tronconDigueRepo.update(troncon);
         }
+
+        updatePositionsForSR(troncon, source, alternative);
+
+        // We can finally delete our sr safely.
         super.remove(source);
     }
 
@@ -146,6 +178,73 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
         if(needSave){
             tronconDigueRepo.update(troncon);
         }
+    }
+
+    /**
+     * Update all {@link Positionable} object from given {@link TronconDigue}
+     * whose linear position is defined on first given {@link SystemeReperage}.
+     * Second SR will be used to compute new linear position.
+     *
+     * Note : If second SR is null, linear information will be deleted. Also,
+     * if no geographic position exists in such a case, we compute it to avoid
+     * loss of position info.
+     *
+     * @param troncon Troncon on which the two given SRs are defined.
+     * @param oldSR The original SR to get rid of. Cannot be null.
+     * @param newSR The new SR to use to compute linear referencing. If null,
+     * linear information will be kept empty.
+     */
+    private void updatePositionsForSR(final TronconDigue troncon, final SystemeReperage oldSR, final SystemeReperage newSR) {
+
+        // We must update position of objects whose position was relative to the SR
+        final SessionCore session = InjectorCore.getBean(SessionCore.class);
+        LinearReferencing.SegmentInfo[] tronconSegments = LinearReferencingUtilities.buildSegments(LinearReferencingUtilities.asLineString(troncon.getGeometry()));
+        List<Positionable> positionableList = TronconUtils.getPositionableList(troncon);
+        Iterator<Positionable> iterator = positionableList.iterator();
+        while (iterator.hasNext()) {
+            final Positionable p = iterator.next();
+            if (oldSR.getId().equals(p.getSystemeRepId())) {
+                if (newSR != null) {
+                    // We must update linear information.
+                    final TronconUtils.PosInfo pInfo = new TronconUtils.PosInfo(p, troncon, tronconSegments, session);
+                    TronconUtils.PosSR forSR = pInfo.getForSR(newSR);
+                    p.setSystemeRepId(newSR.getId());
+                    p.setBorneDebutId(forSR.borneStartId);
+                    p.setBorneFinId(forSR.borneEndId);
+                    p.setBorne_debut_distance(forSR.distanceStartBorne);
+                    p.setBorne_fin_distance(forSR.distanceEndBorne);
+                    p.setBorne_debut_aval(forSR.startAval);
+                    p.setBorne_fin_aval(forSR.endAval);
+                } else {
+                    /*
+                     * We must remove linear information. First, if no geographic
+                     * position is defined. We compute it now, to avoid losing
+                     * position information. Once done, we reset linear referencement
+                     * attributes.
+                     */
+                    if (p.getPositionDebut() == null && p.getPositionFin() == null) {
+                        final TronconUtils.PosInfo pInfo = new TronconUtils.PosInfo(p, troncon, tronconSegments, session);
+                        p.setPositionDebut(pInfo.getGeoPointStart());
+                        p.setPositionFin(pInfo.getGeoPointEnd());
+                    }
+
+                    // reset linear referencement.
+                    p.setSystemeRepId(null);
+                    p.setBorneDebutId(null);
+                    p.setBorneFinId(null);
+                    p.setBorne_debut_distance(Double.NaN);
+                    p.setBorne_fin_distance(Double.NaN);
+                    p.setBorne_debut_aval(false);
+                    p.setBorne_fin_aval(false);
+                }
+
+            } else {
+                iterator.remove();
+            }
+        }
+
+        // TODO : analyse operation list and raise error if needed.
+        session.executeBulk((List)positionableList);
     }
 
 }

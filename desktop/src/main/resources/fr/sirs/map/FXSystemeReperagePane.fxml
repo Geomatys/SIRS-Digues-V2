@@ -6,7 +6,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxWidth="800.0" minHeight="480.0" minWidth="380.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxWidth="800.0" minHeight="480.0" minWidth="380.0" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <GridPane hgap="10.0" vgap="10.0" BorderPane.alignment="CENTER">
         <columnConstraints>
@@ -33,7 +33,7 @@
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </padding>
                <children>
-                  <Label text="Bornes" />
+                  <Label text="Bornes dans le système de repérage" />
                   <ScrollPane fitToHeight="true" fitToWidth="true" GridPane.columnSpan="2" GridPane.rowIndex="1">
                      <content>
                         <FXTableView fx:id="uiBorneTable" editable="true">
@@ -54,6 +54,7 @@
               <columnConstraints>
                 <ColumnConstraints hgrow="ALWAYS" />
                 <ColumnConstraints hgrow="NEVER" />
+                  <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
               </columnConstraints>
               <rowConstraints>
                 <RowConstraints vgrow="NEVER" />
@@ -68,8 +69,9 @@
                   <Label text="Système de repèrage :" GridPane.rowIndex="2" />
                   <ChoiceBox fx:id="uiSrComboBox" maxWidth="1.7976931348623157E308" GridPane.rowIndex="3" />
                   <ToggleButton fx:id="uiPickTroncon" maxWidth="1.7976931348623157E308" mnemonicParsing="false" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <TextField fx:id="uiTronconLabel" editable="false" maxWidth="1.7976931348623157E308" promptText="Sélectionner un tronçon" GridPane.rowIndex="1" />
+                  <TextField fx:id="uiTronconLabel" editable="false" maxWidth="1.7976931348623157E308" promptText="Sélectionner un tronçon" GridPane.columnSpan="2147483647" GridPane.rowIndex="1" />
                   <CheckBox fx:id="uiDefaultSRCheckBox" mnemonicParsing="false" text="Définir comme SR par défaut" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
+                  <Button fx:id="uiDeleteSR" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                </children>
                <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

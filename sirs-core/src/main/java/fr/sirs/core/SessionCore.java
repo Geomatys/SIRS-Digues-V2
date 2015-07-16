@@ -12,14 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import fr.sirs.core.component.ReferenceUsageRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPositionDocument;
-import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
@@ -30,6 +28,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import javafx.beans.property.BooleanProperty;
@@ -40,6 +40,7 @@ import javafx.beans.value.ObservableValue;
 import org.apache.sis.util.collection.Cache;
 
 import org.ektorp.CouchDbConnector;
+import org.ektorp.DocumentOperationResult;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.IdentifiedObjects;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -403,5 +404,48 @@ public class SessionCore implements ApplicationContextAware {
         } else {
             return null;
         }
+    }
+
+        /**
+     * Update or add given elements to database. If one of the given elements is
+     * a fragment, we'll try to get back complete element before updating.
+     * @param target Collection of objects to update.
+     * @return A list of failed operations. Can be empty, but never null.
+     */
+    public List<DocumentOperationResult> executeBulk(Collection<Element> target) {
+        if (target == null || target.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
+
+        // Sort input documents by type to delegate bulk to repositories (to avoid cache problems)
+        final HashMap<Class, HashSet<Element>> toUpdate = new HashMap<>();
+        final ArrayList<DocumentOperationResult> result = new ArrayList<>();
+        Iterator<Element> iterator = target.iterator();
+        while (iterator.hasNext()) {
+            Element e = iterator.next();
+            if (e.getDocumentId() != null && !e.getDocumentId().equals(e.getId())) {
+                // input object was only part of a couchdb document, so we try to retrieve complete element.
+                Optional<? extends Element> completeElement = getCompleteElement(e);
+                if (completeElement.isPresent()) {
+                    e = completeElement.get();
+                } else {
+                    result.add(DocumentOperationResult.newInstance(e.getDocumentId(), "Cannot update document.", "Impossible to retrieve complete document to update from fragment."));
+                }
+            }
+
+            HashSet<Element> tmpList = toUpdate.get(e.getClass());
+            if (tmpList == null) {
+                tmpList = new HashSet<>();
+                toUpdate.put(e.getClass(), tmpList);
+            }
+            tmpList.add(e);
+        }
+
+        // Finally, we call bulk executor of each concerned repository.
+        for (final Map.Entry<Class, HashSet<Element>> entry : toUpdate.entrySet()) {
+            result.addAll(getRepositoryForClass(entry.getKey()).executeBulk(entry.getValue()));
+        }
+
+        return result;
     }
 }

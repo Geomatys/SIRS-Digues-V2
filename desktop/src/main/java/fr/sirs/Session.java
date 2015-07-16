@@ -104,7 +104,7 @@ public class Session extends SessionCore {
     private final Cache<AdminTab, FXFreeTab> openAdminTabs = new Cache<>(2, 0, false);
     public enum PrintTab{DESORDRE}
     private final Cache<PrintTab, FXFreeTab> openPrintTabs = new Cache<>(2, 0, false);
-    
+
     //generate a template for the legend
     final DefaultLegendTemplate legendTemplate = new DefaultLegendTemplate(
             new DefaultBackgroundTemplate( //legend background
@@ -275,9 +275,9 @@ public class Session extends SessionCore {
             }
         }
     }
-    
+
     public FXFreeTab getOrCreatePrintTab(final PrintTab printTab, final String title){
-        
+
         try {
             return openPrintTabs.getOrCreate(PrintTab.DESORDRE, () -> {
                 final FXFreeTab tab = new FXFreeTab(title);
@@ -288,7 +288,7 @@ public class Session extends SessionCore {
             throw new RuntimeException(ex);
         }
     }
-    
+
     public FXFreeTab getOrCreateAdminTab(final AdminTab adminTab, final String title){
 
         try {

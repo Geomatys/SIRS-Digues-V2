@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.InjectorCore;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
@@ -39,6 +40,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.ListView;
@@ -77,6 +79,7 @@ public class FXSystemeReperagePane extends BorderPane {
     @FXML private ChoiceBox<SystemeReperage> uiSrComboBox;
     @FXML private CheckBox uiDefaultSRCheckBox;
     @FXML private Button uiAddSr;
+    @FXML private Button uiDeleteSR;
     @FXML private FXTableView<SystemeReperageBorne> uiBorneTable;
     @FXML private Button uiAddBorne;
     @FXML private ToggleButton uiCreateBorne;
@@ -94,6 +97,7 @@ public class FXSystemeReperagePane extends BorderPane {
 
         uiPickTroncon.setGraphic(new ImageView(SIRS.ICON_CROSSHAIR_BLACK));
         uiAddSr.setGraphic(new ImageView(SIRS.ICON_ADD_BLACK));
+        uiDeleteSR.setGraphic(new ImageView(GeotkFX.ICON_DELETE));
         uiProject.setDisable(true);
 
         //on active le choix du sr si un troncon est sélectionné
@@ -128,6 +132,7 @@ public class FXSystemeReperagePane extends BorderPane {
         uiAddBorne.setOnAction(this::startAddBorne);
         uiCreateBorne.setOnAction(this::startCreateBorne);
         uiAddSr.setOnAction(this::createSystemeReperage);
+        uiDeleteSR.setOnAction(this::deleteSystemeReperage);
         uiProject.setOnAction(this::projectPoints);
 
         //liste des SR sur changement de troncon
@@ -343,7 +348,74 @@ public class FXSystemeReperagePane extends BorderPane {
 
         //selection du SR
         uiSrComboBox.getSelectionModel().clearAndSelect(uiSrComboBox.getItems().indexOf(sr));
+    }
 
+    /**
+     * Delete the {@link SystemeReperage} selected in {@link #ui
+     * @param evt
+     */
+    private void deleteSystemeReperage(ActionEvent evt) {
+        final TronconDigue troncon = tronconProperty().get();
+        if(troncon==null) return;
+
+        SystemeReperage toDelete = uiSrComboBox.getValue();
+        if (toDelete == null || toDelete.getId() == null) {
+            return;
+        }
+
+        // We cannot delete default SR, because all PRs on the troncon are based on it.
+        if (toDelete.getId().equals(troncon.getSystemeRepDefautId())) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Impossible de supprimer le système de repérage par défaut.\n "
+                    + "Avant de pouvoir supprimer le système courant, vous devez en sélectionner un autre comme système par défaut du tronçon.", ButtonType.OK);
+            // Forced to do that because of linux bug.
+            alert.setResizable(true);
+            alert.setWidth(400);
+            alert.setHeight(300);
+            alert.showAndWait();
+
+        } else {
+            /*
+             Before deleting SR, we propose user to choose another SR to update
+             position of objects defined on SR to delete.
+             */
+            final SystemeReperage alternative;
+            if (uiSrComboBox.getItems().size() > 1) {
+
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Les positions linéaires des structures définies sur ce système de repérage seront invalidées.\n"
+                        + "Voulez-vous définir un SR pour mettre à jour la position linéaire des objets affectés ?"
+                        + toDelete.getLibelle() + " ?", ButtonType.NO, ButtonType.YES);
+                // Forced to do that because of linux bug.
+                alert.setResizable(true);
+                alert.setWidth(400);
+                alert.setHeight(300);
+                ButtonType response = alert.showAndWait().orElse(ButtonType.NO);
+                if (ButtonType.YES.equals(response)) {
+                    ObservableList<SystemeReperage> otherSRs = FXCollections.observableArrayList(uiSrComboBox.getItems());
+                    otherSRs.remove(toDelete);
+                    final ComboBox<SystemeReperage> chooser = new ComboBox();
+                    SIRS.initCombo(chooser, otherSRs, otherSRs.get(0));
+                    alert = new Alert(Alert.AlertType.NONE, null, ButtonType.CANCEL, ButtonType.YES);
+                    alert.getDialogPane().setContent(chooser);
+                    // Forced to do that because of linux bug.
+                    alert.setResizable(true);
+                    alert.setWidth(400);
+                    alert.setHeight(300);
+                    response = alert.showAndWait().orElse(ButtonType.CANCEL);
+                    if (ButtonType.YES.equals(response)) {
+                        alternative = chooser.getValue();
+                    } else {
+                        return;
+                    }
+                } else {
+                    alternative = null;
+                }
+            } else {
+                alternative = null;
+            }
+
+            InjectorCore.getBean(SystemeReperageRepository.class).remove(toDelete, troncon, alternative);
+            uiSrComboBox.getItems().remove(toDelete);
+        }
     }
 
     public void createBorne(Point geom){
@@ -459,13 +531,13 @@ public class FXSystemeReperagePane extends BorderPane {
     public class DeleteColumn extends SimpleButtonColumn<SystemeReperageBorne, SystemeReperageBorne> {
 
         public DeleteColumn() {
-            super(GeotkFX.ICON_DELETE,
+            super(GeotkFX.ICON_UNLINK,
                     (TableColumn.CellDataFeatures<SystemeReperageBorne, SystemeReperageBorne> param) -> new SimpleObjectProperty<>(param.getValue()),
                     (SystemeReperageBorne t) -> true,
                     new Function<SystemeReperageBorne, SystemeReperageBorne>() {
 
                         public SystemeReperageBorne apply(SystemeReperageBorne t) {
-                            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
+                            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression (seule l'association entre la borne et le système de repérage est brisée) ?",
                                     ButtonType.NO, ButtonType.YES);
                             alert.setResizable(true);
                             final ButtonType res = alert.showAndWait().get();
@@ -477,7 +549,7 @@ public class FXSystemeReperagePane extends BorderPane {
                             return null;
                         }
                     },
-                    "Supprimer le système de repérage"
+                    "Enlever du système de repérage"
             );
         }
     }
