@@ -46,8 +46,12 @@ public class FileTreeItem extends TreeItem<File> {
             if (o1 == null && o2 == null) {
                 return 0;
             } else if (o1 != null && o2 != null) {
-                if (o1.getName().equals(DocumentsPane.UNCLASSIFIED)) {
+                if (o1.getName().equals(DocumentsPane.SAVE_FOLDER)) {
                     return 1;
+                } else if (o1.getName().equals(DocumentsPane.UNCLASSIFIED)) {
+                    return 1;
+                } else if (o2.getName().equals(DocumentsPane.SAVE_FOLDER)) {
+                    return -1;
                 } else if (o2.getName().equals(DocumentsPane.UNCLASSIFIED)) {
                     return -1;
                 } else if (o1.getName().equals(DocumentsPane.DOCUMENT_FOLDER)) {

@@ -3,6 +3,7 @@ package fr.sirs.plugin.document.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.SirsDBInfo;
 import fr.sirs.plugin.document.DocumentManagementTheme;
 import fr.sirs.plugin.document.FileTreeItem;
 import java.io.File;
@@ -36,6 +37,7 @@ import org.geotoolkit.util.FileUtilities;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
@@ -44,6 +46,8 @@ import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.prefs.Preferences;
+import javafx.scene.control.Alert;
 
 /**
  *
@@ -83,11 +87,13 @@ public class DocumentsPane extends GridPane {
     private static final DateFormat DATE_FORMATTER = new SimpleDateFormat("dd/MM/yyyy");
     
     public static final String UNCLASSIFIED = "Non classés";
+    public static final String SAVE_FOLDER  = "Sauvegarde";
     public static final String DOCUMENT_FOLDER = "Dossier d'ouvrage";
+    public static final String ROOT_FOLDER = "symadrem.root.foler";
     
     private static final Logger LOGGER = Logging.getLogger(DocumentsPane.class);
     
-    private String rootPath = "/home/guilhem/Bureau/sym_doc_test";
+    private String rootPath;
     
     public DocumentsPane() {
         SIRS.loadFXML(this, DocumentsPane.class);
@@ -168,9 +174,22 @@ public class DocumentsPane extends GridPane {
                 return new DOIntegatedCell();
             }
         });
-        
         tree1.setShowRoot(false);
-        updateRoot();
+        
+        final Preferences prefs = Preferences.userRoot().node(getClass().getName());
+        rootPath = prefs.get(ROOT_FOLDER, null);
+        
+        if (rootPath != null && verifyDatabaseVersion(new File(rootPath))) {
+            updateRoot();
+            setDatabaseIdentifier(new File(rootPath), getDatabaseIdentifier());
+           
+        } else {
+            importDocButton.disableProperty().set(true);
+            deleteDocButton.disableProperty().set(true);
+            addDocButton.disableProperty().set(true);
+            addFolderButton.disableProperty().set(true);
+            listButton .disableProperty().set(true);
+        }
     }
     
     @FXML
@@ -225,6 +244,8 @@ public class DocumentsPane extends GridPane {
 
                 // refresh tree
                 updateRoot();
+            } else {
+                showErrorDialog("Vous devez selectionner un dossier.");
             }
         }
     }
@@ -243,10 +264,19 @@ public class DocumentsPane extends GridPane {
         final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
             File f = new File(ipane.rootFolderField.getText());
-            if (f.isDirectory()) {
+            if (f.isDirectory() && verifyDatabaseVersion(f)) {
                 rootPath = f.getPath();
+                
+                final Preferences prefs = Preferences.userRoot().node(getClass().getName());
+                prefs.put(ROOT_FOLDER, rootPath);
+                importDocButton.disableProperty().set(false);
+                deleteDocButton.disableProperty().set(false);
+                addDocButton.disableProperty().set(false);
+                addFolderButton.disableProperty().set(false);
+                listButton .disableProperty().set(false);
                 // refresh tree
                 updateRoot();
+                setDatabaseIdentifier(new File(rootPath), getDatabaseIdentifier());
             }
         }
     }
@@ -268,12 +298,7 @@ public class DocumentsPane extends GridPane {
             final File rootDir = new File(rootPath);
             switch (ipane.locCombo.getValue()) {
                 case NewFolderPane.IN_CURRENT_FOLDER: 
-                    final File directory = getSelectedFile();
-                    if (directory != null && directory.isDirectory()) {
-                        final File newDir = new File(directory, folderName);
-                        newDir.mkdir();
-                        updateRoot();
-                    }
+                    addToSelectedFolder(folderName);
                     break;
                 case NewFolderPane.IN_ALL_FOLDER:
                     addToAllFolder(rootDir, folderName);
@@ -286,6 +311,40 @@ public class DocumentsPane extends GridPane {
                     break;
             }
         }
+    }
+    
+    private boolean verifyDatabaseVersion(final File rootDirectory) {
+        final String key         = getDatabaseIdentifier();
+        final String existingKey = getExistingDatabaseIdentifier(rootDirectory);
+        if (existingKey == null) {
+            return true;
+        } else if (!existingKey.equals(key)) {
+            return showBadVersionDialog();
+        }
+        return true;
+    }
+    
+    private void showErrorDialog(final String errorMsg) {
+        final Dialog dialog    = new Alert(Alert.AlertType.ERROR);
+        final DialogPane pane  = new DialogPane();
+        pane.getButtonTypes().addAll(ButtonType.OK);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Erreur");
+        dialog.setContentText(errorMsg);
+        dialog.showAndWait();
+    }
+    
+    private boolean showBadVersionDialog() {
+        final Dialog dialog    = new Alert(Alert.AlertType.ERROR);
+        final DialogPane pane  = new DialogPane();
+        pane.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Version de la base differente");
+        dialog.setContentText("Le système de fichier que vous tenter d'ouvrir correspond a une autre base de données.\n Voulez vous l'ouvrir quand même?");
+        final Optional opt = dialog.showAndWait();
+        return opt.isPresent() && ButtonType.YES.equals(opt.get());
     }
     
     private File getSelectedFile() {
@@ -332,10 +391,7 @@ public class DocumentsPane extends GridPane {
         
         //on place toute les digues et troncons non trouvé dans un group a part
         digues.removeAll(diguesFound);
-        final File unclassifiedDir = new File(rootDirectory, UNCLASSIFIED); 
-        if (!unclassifiedDir.exists()) {
-            unclassifiedDir.mkdir();
-        }
+        final File unclassifiedDir = getOrCreateUnclassif(rootDirectory);
         
         for (final Digue digue : digues) {
             final File digueDir = getOrCreateDG(unclassifiedDir, digue);
@@ -352,8 +408,31 @@ public class DocumentsPane extends GridPane {
             final File trDir = getOrCreateTR(unclassifiedDir, td);
         }
         
+        //objet detruit
+        final File saveDir = new File(rootDirectory, SAVE_FOLDER);
+        if (!saveDir.exists()) {
+            saveDir.mkdir();
+        }
+        
         TreeItem root = new FileTreeItem(rootDirectory);
         tree1.setRoot(root);
+    }
+    
+    private void addToSelectedFolder(final String folderName) {
+        File directory = getSelectedFile();
+        if (directory != null && directory.isDirectory()) {
+            if (getIsModelFolder(directory)) {
+                directory = new File(directory, DOCUMENT_FOLDER);
+                if (!directory.exists()) {
+                    directory.mkdir();
+                }
+            }
+            final File newDir = new File(directory, folderName);
+            newDir.mkdir();
+            updateRoot();
+        } else {
+            showErrorDialog("Vous devez selectionner un dossier.");
+        }
     }
     
     private void addToAllFolder(final File rootDir, final String folderName) {
@@ -407,6 +486,16 @@ public class DocumentsPane extends GridPane {
                 }
             }
         }
+    }
+    
+    private String getDatabaseIdentifier() {
+        final SirsDBInfoRepository DBrepo = Injector.getBean(SirsDBInfoRepository.class);
+        final Optional<SirsDBInfo> info = DBrepo.get();
+        if (info.isPresent()) {
+            final SirsDBInfo dbInfo = info.get();
+            return dbInfo.getUuid() + "-" + dbInfo.getEpsgCode() + "-" + dbInfo.getVersion()  + "-" + dbInfo.getRemoteDatabase();
+        }
+        return null;
     }
     
     private static class DOIntegatedCell extends TreeTableCell {

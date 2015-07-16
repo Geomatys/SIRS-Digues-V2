@@ -5,6 +5,7 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugin.document.ui.DocumentsPane;
+import static fr.sirs.plugin.document.ui.DocumentsPane.UNCLASSIFIED;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -98,6 +99,10 @@ public class PropertiesFileUtilities {
         }
     }
     
+    public static Boolean getIsModelFolder(final File f) {
+        return getIsSe(f) || getIsDg(f) || getIsTr(f);
+    }
+    
     public static Boolean getIsSe(final File f) {
         final Properties prop = getSirsProperties(f);
         return Boolean.parseBoolean(prop.getProperty(f.getName() + "_se", "false"));
@@ -162,9 +167,18 @@ public class PropertiesFileUtilities {
     }
     
     public static File getSirsPropertiesFile(final File f) throws IOException {
-        final File parent = f.getParentFile();
-        if (parent != null) {
-            final File sirsPropFile = new File(parent, "sirs.properties");
+        return getSirsPropertiesFile(f, true);
+    }
+    
+    public static File getSirsPropertiesFile(final File f, final boolean parent) throws IOException {
+        final File parentFile;
+        if (parent) {
+            parentFile = f.getParentFile();
+        } else {
+            parentFile = f;
+        }
+        if (parentFile != null) {
+            final File sirsPropFile = new File(parentFile, "sirs.properties");
             if (!sirsPropFile.exists()) {
                 sirsPropFile.createNewFile();
             }
@@ -174,9 +188,13 @@ public class PropertiesFileUtilities {
     }
     
     public static Properties getSirsProperties(final File f) {
+        return getSirsProperties(f, true);
+    }
+    
+    public static Properties getSirsProperties(final File f, final boolean parent) {
         final Properties prop = new Properties();
         try {
-            final File sirsPropFile = getSirsPropertiesFile(f);
+            final File sirsPropFile = getSirsPropertiesFile(f, parent);
             if (sirsPropFile != null) {
                 prop.load(new FileReader(sirsPropFile));
             } 
@@ -268,4 +286,35 @@ public class PropertiesFileUtilities {
         }
         return trDir;
     }
+    
+    public static File getOrCreateUnclassif(final File rootDirectory){
+        final File unclassifiedDir = new File(rootDirectory, UNCLASSIFIED); 
+        if (!unclassifiedDir.exists()) {
+            unclassifiedDir.mkdir();
+        }
+        
+        final File docDir = new File(unclassifiedDir, DocumentsPane.DOCUMENT_FOLDER); 
+        if (!docDir.exists()) {
+            docDir.mkdir();
+        }
+        return unclassifiedDir;
+    }
+    
+    public static String getExistingDatabaseIdentifier(final File rootDirectory) {
+        Properties prop = getSirsProperties(rootDirectory, false);
+        return (String) prop.get("database_identifier");
+    }
+    
+    public static void setDatabaseIdentifier(final File rootDirectory, final String key) {
+        Properties prop = getSirsProperties(rootDirectory, false);
+        prop.put("database_identifier", key);
+        
+        try {
+            final File sirsPropFile = getSirsPropertiesFile(rootDirectory, false);
+            prop.store(new FileWriter(sirsPropFile), "");
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
+        }
+    }
+    
 }
