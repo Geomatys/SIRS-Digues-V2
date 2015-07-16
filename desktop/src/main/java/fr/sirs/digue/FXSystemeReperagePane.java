@@ -97,6 +97,9 @@ public class FXSystemeReperagePane extends BorderPane {
             super(SystemeReperageBorne.class, "Liste des bornes");
             getColumns().remove((TableColumn) editCol);
             fichableProperty.set(false);
+            uiAdd.setVisible(false);
+            uiDelete.setVisible(false);
+            uiFicheMode.setVisible(false);
         }
 
         @Override
