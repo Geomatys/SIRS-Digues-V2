@@ -318,7 +318,7 @@ public class Loader extends Application {
                 // VÉRIFICATION DES RÉFÉRENCES
                 updateProgress(inc++, total);
                 updateMessage("Synchronisation des listes de références");
-                Injector.getSession().getReferenceChecker().call();
+                Injector.getSession().getTaskManager().submit(Injector.getSession().getReferenceChecker());
 
                 // OVER
                 updateProgress(total, total);
