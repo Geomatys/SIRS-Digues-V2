@@ -38,6 +38,7 @@ import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
@@ -612,13 +613,16 @@ public class FXSearchPane extends BorderPane {
         @Override
         public boolean init(Object candidate){
             final  boolean result = super.init(candidate);
-            table.getSelectionModel().selectedItemProperty().addListener(
-                    (ObservableValue<? extends Feature> observable, Feature oldValue, Feature newValue) -> {
-                        final List<Feature> ftrs = table.getSelectionModel().getSelectedItems();
-                        if(ftrs!=null && !ftrs.isEmpty()){
-                            Injector.getSession().getPrintManager().prepareToPrint(FeatureStoreUtilities.collection(ftrs.get(0).getType(), ftrs));
-                        }
-                    });
+            table.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<Feature>() {
+
+                @Override
+                public void onChanged(ListChangeListener.Change<? extends Feature> c) {
+                    final List<Feature> ftrs = table.getSelectionModel().getSelectedItems();
+                    if(ftrs!=null && !ftrs.isEmpty()){
+                        Injector.getSession().getPrintManager().prepareToPrint(FeatureStoreUtilities.collection(ftrs.get(0).getType(), ftrs));
+                    }
+                }
+            });
             return result;
         }
     }
