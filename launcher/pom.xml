@@ -47,8 +47,20 @@
                     <mainClass>fr.sirs.launcher.Launcher</mainClass>
                     <needMenu>true</needMenu>
                     <jvmArgs>
-                        <jvmArg>-Xmx1G</jvmArg>
+                        <!-- Memory management. Application cannot run with less 
+                        than 256MB heap, so we forbid its use when this requirement
+                        cannot be fulfilled. Another important point is that multiple 
+                        end users work on Win7-32bits system, so they need memory saving.
+                        As application performance is not affected when running with 
+                        512MB, we define it as maximal heap amount. -->
+                        <jvmArg>-XXexitOnOutOfMemory</jvmArg>
+                        <jvmArg>-Xms256m</jvmArg>
+                        <jvmArg>-Xmx512m</jvmArg>
+                        <!-- We delegate proxy detection to Java (Note : Use of Proxy-vole 
+                        library should make this parameter obsolete, but we keep it active, 
+                        in case proxy-vole is not sufficient). -->
                         <jvmArg>-Djava.net.useSystemProxies=true</jvmArg>
+                        <!-- We define a custom system class loader which will scan and load available modules. -->
                         <jvmArg>-Djava.system.class.loader=fr.sirs.core.plugins.PluginLoader</jvmArg>
                     </jvmArgs>
                 </configuration>
