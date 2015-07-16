@@ -30,6 +30,7 @@ extends GenericImporter
 implements DocumentsUpdatable {
 
     private Map<Integer, EvenementHydraulique> evenements = null;
+    private Map<String, EvenementHydraulique> evenementsByCouchDBId = null;
     private final TypeEvenementHydrauliqueImporter typeEvenementHydrauliqueImporter;
     private final TypeFrequenceEvenementHydrauliqueImporter typeFrequenceEvenementHydrauliqueImporter;
     private final MeteoImporter meteoImporter;
@@ -81,6 +82,7 @@ implements DocumentsUpdatable {
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
         evenements = new HashMap<>();
+        evenementsByCouchDBId = new HashMap<>();
         
         final Map<Integer, RefEvenementHydraulique> types = typeEvenementHydrauliqueImporter.getTypeReferences();
         final Map<Integer, RefFrequenceEvenementHydraulique> frequences = typeFrequenceEvenementHydrauliqueImporter.getTypeReferences();
@@ -132,11 +134,23 @@ implements DocumentsUpdatable {
             evenements.put(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()), evenement);
         }
         couchDbConnector.executeBulk(evenements.values());
+        
+        // Indexation par couchDBId
+        for(final EvenementHydraulique evenement : evenements.values()){
+            if(evenement.getId()!=null){
+                evenementsByCouchDBId.put(evenement.getId(), evenement);
+            }
+        }
     }
     
-    public Map<Integer, EvenementHydraulique> getEvenementHydraulique() throws IOException, AccessDbImporterException{
+    public Map<Integer, EvenementHydraulique> getEvenements() throws IOException, AccessDbImporterException{
         if(evenements==null) compute();
         return evenements;
+    }
+    
+    public Map<String, EvenementHydraulique> getEvenementsByCouchDBId() throws IOException, AccessDbImporterException{
+        if(evenementsByCouchDBId==null) compute();
+        return evenementsByCouchDBId;
     }
     
 }

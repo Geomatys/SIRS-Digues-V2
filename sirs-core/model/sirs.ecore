@@ -302,7 +302,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
         eType="#//Prestation" eOpposite="#//Prestation/desordreIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydrauliqueIds"
-        upperBound="-1" eType="#//EvenementHydraulique" eOpposite="#//EvenementHydraulique/desordreIds"/>
+        upperBound="-1" eType="#//EvenementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueFermeIds"
         upperBound="-1" eType="#//ReseauHydrauliqueFerme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageHydrauliqueAssocieIds"
@@ -375,7 +375,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
         eType="#//Desordre" eOpposite="#//Desordre/prestationIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydrauliqueIds"
-        upperBound="-1" eType="#//EvenementHydraulique" eOpposite="#//EvenementHydraulique/prestationIds"/>
+        upperBound="-1" eType="#//EvenementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="intervenantsIds" upperBound="-1"
         eType="#//Contact"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="rapportEtudeIds" upperBound="-1"
@@ -700,8 +700,6 @@
         eType="#//RefOuvrageParticulier"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObjetMesure" abstract="true" eSuperTypes="#//ObjetPhotographiable">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydrauliqueId"
-        eType="#//EvenementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="articleIds" upperBound="-1"
         eType="#//ArticleJournal"/>
   </eClassifiers>
@@ -714,6 +712,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="referenceHauteurId" eType="#//RefReferenceHauteur"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observateurId" eType="#//Contact"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydrauliqueId"
+        eType="#//EvenementHydraulique" eOpposite="#//EvenementHydraulique/laisseCrueIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EvenementHydraulique">
     <eAnnotations source="couchDBDocument">
@@ -739,15 +739,17 @@
         eType="#//RefFrequenceEvenementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeEvenementHydrauliqueId"
         eType="#//RefEvenementHydraulique"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
-        eType="#//Desordre" eOpposite="#//Desordre/evenementHydrauliqueIds"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="prestationIds" upperBound="-1"
-        eType="#//Prestation" eOpposite="#//Prestation/evenementHydrauliqueIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="meteos" upperBound="-1"
         eType="#//Meteo" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="laisseCrueIds" upperBound="-1"
+        eType="#//LaisseCrue" eOpposite="#//LaisseCrue/evenementHydrauliqueId"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ligneEauIds" upperBound="-1"
+        eType="#//LigneEau" eOpposite="#//LigneEau/evenementHydrauliqueId"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="monteeEauxIds" upperBound="-1"
+        eType="#//MonteeEaux" eOpposite="#//MonteeEaux/evenementHydrauliqueId"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Meteo">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateDebut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
@@ -773,6 +775,8 @@
         eType="#//EchelleLimnimetrique"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="mesures" upperBound="-1"
         eType="#//MesureMonteeEaux" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydrauliqueId"
+        eType="#//EvenementHydraulique" eOpposite="#//EvenementHydraulique/monteeEauxIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MesureMonteeEaux">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
@@ -806,6 +810,8 @@
       <eAnnotations source="importPoint"/>
     </eStructuralFeatures>
     <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepDzId" eType="#//SystemeReperage"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydrauliqueId"
+        eType="#//EvenementHydraulique" eOpposite="#//EvenementHydraulique/ligneEauIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Convention" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference">
     <eAnnotations source="couchDBDocument">

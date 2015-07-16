@@ -4,6 +4,7 @@ package fr.sirs.importer.objet.laisseCrue;
 import fr.sirs.importer.objet.TypeRefHeauImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
@@ -125,5 +126,25 @@ public class LaisseCrueImporter extends GenericLaisseCrueImporter {
             }
         }
         couchDbConnector.executeBulk(objets.values());
+        
+        ////////////////////////////////////////////////////////////////////////
+        // Mise à jour des événements hydrauliques
+        ////////////////////////////////////////////////////////////////////////
+        final List<EvenementHydraulique> evenementsToUpdate = new ArrayList<>();
+        for(final LaisseCrue laisse : objets.values()){
+            final String evenementId = laisse.getEvenementHydrauliqueId();
+            if(evenementId!=null){
+                final EvenementHydraulique evenement = evenementHydrauliqueImporter.getEvenementsByCouchDBId().get(evenementId);
+                if(evenement!=null){
+                    evenement.getLaisseCrueIds().add(laisse.getId());
+                    evenementsToUpdate.add(evenement);
+                }
+                // Si on n'a pas d'evenement correspondant on annule l'id de l'evenement de la mesure pour retrouver une intégrité des données.
+                else {
+                    laisse.setEvenementHydrauliqueId(null);
+                }
+            }
+        }
+        couchDbConnector.executeBulk(evenementsToUpdate);
     }
 }

@@ -124,7 +124,7 @@ class SysEvtLaisseCrueImporter extends GenericLaisseCrueImporter {
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
         
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
-        final Map<Integer, EvenementHydraulique> evenementsHydrau = evenementHydrauliqueImporter.getEvenementHydraulique();
+        final Map<Integer, EvenementHydraulique> evenementsHydrau = evenementHydrauliqueImporter.getEvenements();
         
         final Map<Integer, RefReferenceHauteur> referenceHauteur = typeRefHeauImporter.getTypeReferences();
         

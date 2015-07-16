@@ -3,7 +3,9 @@ package fr.sirs.importer.objet.ligneEau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.LigneEau;
+import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
@@ -130,5 +132,25 @@ public class LigneEauImporter extends GenericLigneEauImporter {
             }
         }
         couchDbConnector.executeBulk(objets.values());
+        
+        ////////////////////////////////////////////////////////////////////////
+        // Mise à jour des événements hydrauliques
+        ////////////////////////////////////////////////////////////////////////
+        final List<EvenementHydraulique> evenementsToUpdate = new ArrayList<>();
+        for(final LigneEau ligne : objets.values()){
+            final String evenementId = ligne.getEvenementHydrauliqueId();
+            if(evenementId!=null){
+                final EvenementHydraulique evenement = evenementHydrauliqueImporter.getEvenementsByCouchDBId().get(evenementId);
+                if(evenement!=null){
+                    evenement.getLigneEauIds().add(ligne.getId());
+                    evenementsToUpdate.add(evenement);
+                }
+                // Si on n'a pas d'evenement correspondant on annule l'id de l'evenement de la mesure pour retrouver une intégrité des données.
+                else {
+                    ligne.setEvenementHydrauliqueId(null);
+                }
+            }
+        }
+        couchDbConnector.executeBulk(evenementsToUpdate);
     }
 }

@@ -57,7 +57,7 @@ public class PrestationEvenementHydrauImporter extends GenericEntityLinker {
     protected void compute() throws IOException, AccessDbImporterException {
         
         final Map<Integer, Prestation> prestations = prestationImporter.getById();
-        final Map<Integer, EvenementHydraulique> evenements = evenementHydrauliqueImporter.getEvenementHydraulique();
+        final Map<Integer, EvenementHydraulique> evenements = evenementHydrauliqueImporter.getEvenements();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while (it.hasNext()) {
@@ -68,7 +68,6 @@ public class PrestationEvenementHydrauImporter extends GenericEntityLinker {
             
             if(prestation!=null && evenement!=null){
                 prestation.getEvenementHydrauliqueIds().add(evenement.getId());
-                evenement.getPrestationIds().add(prestation.getId());
             }
         }
     }

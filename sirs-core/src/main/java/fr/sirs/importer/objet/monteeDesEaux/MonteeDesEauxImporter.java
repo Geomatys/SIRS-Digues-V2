@@ -3,6 +3,7 @@ package fr.sirs.importer.objet.monteeDesEaux;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.EchelleLimnimetrique;
+import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.importer.AccessDbImporterException;
@@ -122,9 +123,28 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
                 objetsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
             }
             listByTronconId.add(objet);
-//            }
         }
         couchDbConnector.executeBulk(objets.values());
+        
+        ////////////////////////////////////////////////////////////////////////
+        // Mise à jour des événements hydrauliques
+        ////////////////////////////////////////////////////////////////////////
+        final List<EvenementHydraulique> evenementsToUpdate = new ArrayList<>();
+        for(final MonteeEaux montee : objets.values()){
+            final String evenementId = montee.getEvenementHydrauliqueId();
+            if(evenementId!=null){
+                final EvenementHydraulique evenement = evenementHydrauliqueImporter.getEvenementsByCouchDBId().get(evenementId);
+                if(evenement!=null){
+                    evenement.getMonteeEauxIds().add(montee.getId());
+                    evenementsToUpdate.add(evenement);
+                }
+                // Si on n'a pas d'evenement correspondant on annule l'id de l'evenement de la mesure pour retrouver une intégrité des données.
+                else {
+                    montee.setEvenementHydrauliqueId(null);
+                }
+            }
+        }
+        couchDbConnector.executeBulk(evenementsToUpdate);
     }
 
     @Override

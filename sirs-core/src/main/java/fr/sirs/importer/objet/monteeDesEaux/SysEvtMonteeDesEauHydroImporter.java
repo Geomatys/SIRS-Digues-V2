@@ -102,7 +102,7 @@ class SysEvtMonteeDesEauHydroImporter extends GenericMonteeDesEauxImporter {
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
 
-        final Map<Integer, EvenementHydraulique> evenementsHydrau = evenementHydrauliqueImporter.getEvenementHydraulique();
+        final Map<Integer, EvenementHydraulique> evenementsHydrau = evenementHydrauliqueImporter.getEvenements();
 
         final Map<Integer, List<MesureMonteeEaux>> mesures = monteeDesEauxMesuresImporter.getMesuresByMonteeDesEaux();
 

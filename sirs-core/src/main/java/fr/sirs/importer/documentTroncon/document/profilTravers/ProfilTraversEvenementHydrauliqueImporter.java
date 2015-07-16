@@ -71,7 +71,7 @@ class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         evenementHydrauByLeveId = new HashMap<>();
         
-        final Map<Integer, EvenementHydraulique> evenementHydrauliques = evenementHydrauliqueImporter.getEvenementHydraulique();
+        final Map<Integer, EvenementHydraulique> evenementHydrauliques = evenementHydrauliqueImporter.getEvenements();
         
         final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
         while(it.hasNext()){
