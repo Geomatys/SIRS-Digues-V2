@@ -17,6 +17,7 @@ public class PluginDocument extends Plugin {
         name = NAME;
         loadingMessage.set("module document d'ouvrages");
         themes.add(new DocumentManagementTheme());
+        themes.add(new DynamicDocumentTheme());
     }
 
     @Override
