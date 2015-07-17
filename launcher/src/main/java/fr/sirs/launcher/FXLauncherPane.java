@@ -311,6 +311,7 @@ public class FXLauncherPane extends BorderPane {
         uiDistantTab.setDisable(true);
         uiCreateTab.setDisable(true);
         uiImportTab.setDisable(true);
+        uiWalletTab.setDisable(true);
     }
 
     /**
