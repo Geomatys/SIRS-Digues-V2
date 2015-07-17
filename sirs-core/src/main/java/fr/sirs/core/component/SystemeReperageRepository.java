@@ -5,6 +5,7 @@ package fr.sirs.core.component;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SessionCore;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.TronconUtils;
 import static fr.sirs.core.component.SystemeReperageRepository.BY_LINEAR_ID;
@@ -19,8 +20,10 @@ import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.DocumentNotFoundException;
+import org.ektorp.DocumentOperationResult;
 import org.ektorp.support.Views;
 import org.geotoolkit.referencing.LinearReferencing;
 
@@ -244,7 +247,19 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
         }
 
         // TODO : analyse operation list and raise error if needed.
-        session.executeBulk((List)positionableList);
+        List<DocumentOperationResult> response = session.executeBulk((List)positionableList);
+        for (final DocumentOperationResult result : response) {
+            SirsCore.LOGGER.log(Level.WARNING, () -> {
+                final StringBuilder errorMsg = new StringBuilder("Position update failed");
+                errorMsg.append('\n')
+                        .append("Doc: ").append(result.getId())
+                        .append('\n')
+                        .append("Error: ").append(result.getError())
+                        .append('\n')
+                        .append("Reason: ").append(result.getReason());
+                return errorMsg.toString();
+            });
+        }
     }
 
 }

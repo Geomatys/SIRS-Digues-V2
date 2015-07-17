@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.logging.Level;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -46,6 +47,7 @@ import org.geotoolkit.referencing.IdentifiedObjects;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -406,7 +408,7 @@ public class SessionCore implements ApplicationContextAware {
         }
     }
 
-        /**
+    /**
      * Update or add given elements to database. If one of the given elements is
      * a fragment, we'll try to get back complete element before updating.
      * @param target Collection of objects to update.
@@ -427,9 +429,9 @@ public class SessionCore implements ApplicationContextAware {
                 // input object was only part of a couchdb document, so we try to retrieve complete element.
                 Optional<? extends Element> completeElement = getCompleteElement(e);
                 if (completeElement.isPresent()) {
-                    e = completeElement.get();
+                    e = completeElement.get().getCouchDBDocument();
                 } else {
-                    result.add(DocumentOperationResult.newInstance(e.getDocumentId(), "Cannot update document.", "Impossible to retrieve complete document to update from fragment."));
+                    result.add(DocumentOperationResult.newInstance(e.getDocumentId(), "Cannot update document (client side error).", "Impossible to retrieve complete document to update from fragment."));
                 }
             }
 
@@ -443,7 +445,31 @@ public class SessionCore implements ApplicationContextAware {
 
         // Finally, we call bulk executor of each concerned repository.
         for (final Map.Entry<Class, HashSet<Element>> entry : toUpdate.entrySet()) {
-            result.addAll(getRepositoryForClass(entry.getKey()).executeBulk(entry.getValue()));
+            final HashSet<Element> docs = entry.getValue();
+            final Class docClass = entry.getKey();
+            if (!docs.isEmpty()) {
+                try {
+                    final AbstractSIRSRepository repo = getRepositoryForClass(docClass);
+                    if (repo == null) {
+                        SirsCore.LOGGER.log(Level.WARNING, "No repository found for " + docClass);
+                        for (final Element inError : docs) {
+                            result.add(DocumentOperationResult.newInstance(inError.getDocumentId(), "Cannot update document (client side error).", "Cannot find any repository for class " + docClass.getCanonicalName()));
+                        }
+                    } else {
+                        result.addAll(repo.executeBulk(docs));
+                    }
+                } catch (NoSuchBeanDefinitionException e) {
+                    SirsCore.LOGGER.log(Level.WARNING, "No repository found for " + docClass, e);
+                    for (final Element inError : docs) {
+                        result.add(DocumentOperationResult.newInstance(inError.getDocumentId(), "Cannot update document (client side error).", "Cannot find any repository for class " + docClass.getCanonicalName()));
+                    }
+                } catch (Exception e) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Unexpected error on bulk execution.", e);
+                    for (final Element inError : docs) {
+                        result.add(DocumentOperationResult.newInstance(inError.getDocumentId(), "Unexpected error on position update", e.getMessage()));
+                    }
+                }
+            }
         }
 
         return result;
