@@ -220,9 +220,9 @@ public class RapportsPane extends BorderPane implements Initializable {
             final DigueRepository digueRepo = (DigueRepository) session.getRepositoryForClass(Digue.class);
             final TronconDigueRepository tronconRepo = (TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class);
             final SystemeEndiguement sd = sdRepo.get(newValue.getElementId());
-
             final Set<TronconDigue> troncons = new HashSet<>();
-            for(Digue digue : digueRepo.get(sd.getDigueIds())){
+            final List<Digue> digues = digueRepo.getBySystemeEndiguement(sd);
+            for(Digue digue : digues){
                 troncons.addAll(tronconRepo.getByDigue(digue));
             }
             uiTroncons.setItems(FXCollections.observableArrayList(troncons));

@@ -395,10 +395,9 @@ public class DocumentsPane extends GridPane {
             seFiles.remove(seDir);
             
             final Set<File> digueFiles = listDigue(seDir);
-            
-            final List<String> digueIds = se.getDigueIds();
+            final List<Digue> diguesForSE = Drepo.getBySystemeEndiguement(se);
             for (Digue digue : digues) {
-                if (!digueIds.contains(digue.getDocumentId())) continue;
+                if (!diguesForSE.contains(digue)) continue;
                 diguesFound.add(digue);
                 
                 final File digueDir = getOrCreateDG(seDir, digue);
@@ -406,8 +405,9 @@ public class DocumentsPane extends GridPane {
                 
                 final Set<File> trFiles = listTroncon(digueDir);
 
+                final List<TronconDigue> tronconForDigue = TRrepo.getByDigue(digue);
                 for (final TronconDigue td : troncons) {
-                    if (td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
+                    if (!tronconForDigue.contains(td)) continue;
                     tronconsFound.add(td);
 
                     final File trDir = getOrCreateTR(digueDir, td);
