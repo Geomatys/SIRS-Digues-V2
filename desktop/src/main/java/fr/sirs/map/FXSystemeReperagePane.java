@@ -388,7 +388,8 @@ public class FXSystemeReperagePane extends BorderPane {
                 alert.setResizable(true);
                 alert.setWidth(400);
                 alert.setHeight(300);
-                ButtonType response = alert.showAndWait().orElse(ButtonType.NO);
+                ButtonType response = alert.showAndWait().orElse(null);
+                // User choose to use an alternative SR.
                 if (ButtonType.YES.equals(response)) {
                     ObservableList<SystemeReperage> otherSRs = FXCollections.observableArrayList(uiSrComboBox.getItems());
                     otherSRs.remove(toDelete);
@@ -404,10 +405,14 @@ public class FXSystemeReperagePane extends BorderPane {
                     if (ButtonType.YES.equals(response)) {
                         alternative = chooser.getValue();
                     } else {
+                        // User cancelled dialog.
                         return;
                     }
-                } else {
+                } else if (ButtonType.NO.equals(response)) {
                     alternative = null;
+                } else {
+                    // User cancelled dialog.
+                    return;
                 }
             } else {
                 alternative = null;
@@ -415,6 +420,9 @@ public class FXSystemeReperagePane extends BorderPane {
 
             InjectorCore.getBean(SystemeReperageRepository.class).remove(toDelete, troncon, alternative);
             uiSrComboBox.getItems().remove(toDelete);
+            if (alternative != null) {
+                uiSrComboBox.getSelectionModel().select(alternative);
+            }
         }
     }
 
@@ -458,7 +466,6 @@ public class FXSystemeReperagePane extends BorderPane {
         sr.systemeReperageBornes.add(srb);
         ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).update(sr, tronconProperty().get());
         updateBorneTable(null, null, null);
-
     }
 
     public void sortBorneTable(){
@@ -544,6 +551,7 @@ public class FXSystemeReperagePane extends BorderPane {
                             if (ButtonType.YES == res) {
                                 final SystemeReperage sr = systemeReperageProperty().get();
                                 sr.getSystemeReperageBornes().remove(t);
+                                InjectorCore.getBean(SystemeReperageRepository.class).update(sr, tronconProp.get());
                                 updateBorneTable(null, null, null);
                             }
                             return null;
