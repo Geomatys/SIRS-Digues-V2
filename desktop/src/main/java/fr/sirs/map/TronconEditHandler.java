@@ -84,6 +84,7 @@ import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.util.collection.CollectionChangeEvent;
+import org.opengis.filter.Filter;
 import org.opengis.filter.Id;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
@@ -143,6 +144,8 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
             if (newValue != null) {
                 selectionFilter = GO2Utilities.FILTER_FACTORY.id(
                         Collections.singleton(new DefaultFeatureId(newValue.getId())));
+            } else {
+                selectionFilter = null;
             }
             if (Platform.isFxApplicationThread()) {
                 tronconLayer.setSelectionFilter(selectionFilter);
