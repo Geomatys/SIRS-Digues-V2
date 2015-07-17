@@ -367,7 +367,6 @@ public class DocumentsPane extends GridPane {
     private void updateRoot() {
         final File rootDirectory = new File(rootPath);
         
-        //objet detruit
         final File saveDir = new File(rootDirectory, SAVE_FOLDER);
         if (!saveDir.exists()) {
             saveDir.mkdir();
@@ -386,7 +385,8 @@ public class DocumentsPane extends GridPane {
         final Set<Digue> diguesFound          = new HashSet<>();
         final Set<TronconDigue> tronconsFound = new HashSet<>();
         final Set<File> seFiles               = listSE(rootDirectory);
-        
+        final Set<File> digueMoved            = new HashSet<>();
+        final Set<File> tronMoved             = new HashSet<>();
         
         for (SystemeEndiguement se : ses) {
             final File seDir = getOrCreateSE(rootDirectory, se);
@@ -412,25 +412,23 @@ public class DocumentsPane extends GridPane {
                     trFiles.remove(trDir);
                 }
                 
-                // on place les tronçon disparus dans backup
-                backupDirectories(saveDir, trFiles);
+                // on place les tronçon disparus dans les fichiers deplacé
+                tronMoved.addAll(trFiles);
             }
             
-            // on place les digues disparues dans backup
-            backupDirectories(saveDir, digueFiles);
+            // on place les digues disparues dans les fichiers deplacé
+            digueMoved.addAll(digueFiles);
         }
-        
-        // on place les systèmes d'endiguement disparus dans backup
-        backupDirectories(saveDir, seFiles);
-        
-        
-        
-        //on place toute les digues et troncons non trouvé dans un group a part
         digues.removeAll(diguesFound);
         
+        // on recupere les repertoire des digues / tronçons dans les se detruits
+        for (File seFile : seFiles) {
+            digueMoved.addAll(listDigue(seFile));
+            tronMoved.addAll(listTroncon(seFile));
+        }
         
         /*
-         * digue / tronçon non classé
+         * on place toute les digues et troncons non trouvé dans un group a part
          */      
         final Set<File> digueFiles = listDigue(unclassifiedDir);
         
@@ -448,12 +446,12 @@ public class DocumentsPane extends GridPane {
                 trFiles.remove(trDir);
             }
             
-            // on place les tronçon disparus dans backup
-            backupDirectories(saveDir, trFiles);
+            // on place les tronçon disparus dans les fichiers deplacé
+            tronMoved.addAll(trFiles);
         }
         
-        // on place les digues disparues dans backup
-        backupDirectories(saveDir, digueFiles);
+        // on place les digues disparues dans les fichiers deplacé
+        digueMoved.addAll(digueFiles);
         
         
         troncons.removeAll(tronconsFound);
@@ -465,9 +463,37 @@ public class DocumentsPane extends GridPane {
             trFiles.remove(trDir);
         }
         
-        // on place les tronçon disparus dans backup
-        backupDirectories(saveDir, trFiles);
+        // on place les tronçon disparus dans les fichiers deplacé
+        tronMoved.addAll(trFiles);
         
+        // on restore les fichier deplacé dans leur nouvel emplacement
+        final Set<File> tronMovedFound = new HashSet<>();
+        for (File movedFile : tronMoved) {
+            final File newFile = findFile(rootDirectory, movedFile);
+            if (newFile != null) {
+                backupDirectory(newFile.getParentFile(), movedFile);
+                tronMovedFound.add(movedFile);
+            }
+        }
+        tronMoved.removeAll(tronMovedFound);
+        
+        final Set<File> digueMovedFound = new HashSet<>();
+        for (File movedFile : digueMoved) {
+            final File newFile = findFile(rootDirectory, movedFile);
+            if (newFile != null) {
+                backupDirectory(newFile.getParentFile(), movedFile);
+                digueMovedFound.add(movedFile);
+            }
+        }
+        digueMoved.removeAll(digueMovedFound);
+        
+        
+        // on place les fichiers deplacé non relocaliser dans le backup
+        backupDirectories(saveDir, tronMoved);
+        backupDirectories(saveDir, digueMoved);
+        
+        // on place les systèmes d'endiguement disparus dans backup
+        backupDirectories(saveDir, seFiles);
         
         TreeItem root = new FileTreeItem(rootDirectory);
         tree1.setRoot(root);

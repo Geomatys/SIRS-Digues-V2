@@ -6,6 +6,7 @@ import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugin.document.ui.DocumentsPane;
 import static fr.sirs.plugin.document.ui.DocumentsPane.UNCLASSIFIED;
+import static fr.sirs.plugin.document.ui.DocumentsPane.DOCUMENT_FOLDER;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -332,16 +333,24 @@ public class PropertiesFileUtilities {
         storeSirsProperties(prop, f);
         
         
-        final File newFile = new File(saveDir, f.getName());
+        final File newDir = new File(saveDir, f.getName());
         try {
-            FileUtilities.copy(f, newFile);
+            // we copy only the "dossier d'ouvrage" directory
+            if (!newDir.exists()) {
+                newDir.mkdir();
+            }
+            
+            final File doFile    = new File(f, DOCUMENT_FOLDER);
+            final File newDoFile = new File(newDir, DOCUMENT_FOLDER);
+            
+            FileUtilities.copy(doFile, newDoFile);
             FileUtilities.deleteDirectory(f);
             
             // save new properties
-            final Properties newProp = getSirsProperties(newFile);
+            final Properties newProp = getSirsProperties(newDir);
             newProp.putAll(extracted);
             
-            storeSirsProperties(newProp, newFile);
+            storeSirsProperties(newProp, newDir);
             
         } catch (IOException ex) {
             LOGGER.log(Level.WARNING, "Error while moving destroyed obj to backup folder", ex);
@@ -366,14 +375,14 @@ public class PropertiesFileUtilities {
         }
     }
     
-    public static Set<File> listDigue(final File SEDirectory) {
+    public static Set<File> listDigue(final File rootDirectory) {
         Set<File> digueList = new HashSet<>();
-        listDigue(SEDirectory, digueList);
+        listDigue(rootDirectory, digueList);
         return digueList;
     }
     
-    private static void listDigue(final File SEDirectory, Set<File> digueList) {
-        for (File f : SEDirectory.listFiles()) {
+    private static void listDigue(final File rootDirectory, Set<File> digueList) {
+        for (File f : rootDirectory.listFiles()) {
             if (f.isDirectory()) {
                 if (getIsDg(f)) {
                     digueList.add(f);
@@ -404,5 +413,19 @@ public class PropertiesFileUtilities {
                 }
             }
         }
+    }
+    
+    public static File findFile(final File rootDirectory, File file) {
+        for (File f : rootDirectory.listFiles()) {
+            if (f.getName().equals(file.getName()) && !f.getPath().equals(file.getPath())) {
+                return f;
+            } else if (f.isDirectory()) {
+                File child = findFile(f, file);
+                if (child != null) {
+                    return child;
+                }
+            }
+        }
+        return null;
     }
 }
