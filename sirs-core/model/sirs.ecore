@@ -28,8 +28,6 @@
       <eAnnotations source="localDate"/>
     </eStructuralFeatures>
     <eStructuralFeatures xsi:type="ecore:EReference" name="gestionnaireDecretId" eType="#//Organisme"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="digueIds" upperBound="-1"
-        eType="#//Digue" eOpposite="#//Digue/systemeEndiguementId"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="populationProtegee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="classement" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="zoneProtegee" eType="ecore:EDataType jts.ecore#//Geometry"/>
@@ -50,8 +48,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
       <eAnnotations source="localDate"/>
     </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="systemeEndiguementId" eType="#//SystemeEndiguement"
-        eOpposite="#//SystemeEndiguement/digueIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="systemeEndiguementId" eType="#//SystemeEndiguement"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>

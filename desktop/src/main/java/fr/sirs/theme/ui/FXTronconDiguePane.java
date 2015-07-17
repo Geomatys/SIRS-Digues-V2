@@ -1,4 +1,4 @@
-package fr.sirs.digue;
+package fr.sirs.theme.ui;
 
 import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
@@ -17,10 +17,7 @@ import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.RefTypeTroncon;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.theme.ui.AbstractFXElementPane;
-import fr.sirs.theme.ui.FXValidityPeriodPane;
-import fr.sirs.theme.ui.ForeignParentPojoTable;
-import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.digue.FXSystemeReperagePane;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;

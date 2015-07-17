@@ -13,6 +13,7 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.ui.AbstractFXElementPane;
@@ -263,9 +264,9 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                     treeRootItem.getChildren().add(sdItem);
                     sdItem.setExpanded(extendeds.contains(sd));
 
-                    final List<String> digueIds = sd.getDigueIds();
+                    final List<Digue> digueIds = ((DigueRepository) session.getRepositoryForClass(Digue.class)).getBySystemeEndiguement(sd);
                     for(Digue digue : digues){
-                        if(!digueIds.contains(digue.getDocumentId())) continue;
+                        if(!digueIds.contains(digue)) continue;
                         diguesFound.add(digue);
                         final TreeItem digueItem = toNode(digue, troncons, tronconsFound, filter);
                         digueItem.setExpanded(extendeds.contains(digue));
@@ -388,7 +389,6 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                 
                 if(parent!=null){
                     final SystemeEndiguement se = (SystemeEndiguement) parent.getValue();
-                    se.getDigueIds().add(digue.getDocumentId());
                     digue.setSystemeEndiguementId(se.getId());
                     session.getRepositoryForClass(SystemeEndiguement.class).update(se);
                 }

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import fr.sirs.theme.ui.*?>
+<?import fr.sirs.util.FXFileTextField?>
+<?import fr.sirs.util.FXComponentField?>
+<?import org.geotoolkit.gui.javafx.util.*?>
+<?import jidefx.scene.control.field.*?>
+<?import jfxtras.scene.control.*?>
+<?import javafx.scene.web.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+
+
+<fx:root fx:id="uiBorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+  <center>
+    <TabPane fx:id="tabs" TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <tabs>
+
+<!-- ATTRIBUTE TAB-->
+        <Tab text="Informations">
+          <ScrollPane>
+            <content>
+          <VBox fx:id="centerContent" spacing="30.0" BorderPane.alignment="CENTER">
+            <children>
+
+
+<!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
+
+
+            <!-- SystemeEndiguement -->
+            <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="NEVER" />
+                <ColumnConstraints hgrow="ALWAYS" />
+              </columnConstraints>
+              <!--rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints-->
+              <children>
+                   <!-- EString -->                 
+                   <Label text="%libelle" GridPane.rowIndex="0" />
+                   <TextField fx:id="ui_libelle" GridPane.columnIndex="1" GridPane.rowIndex="0"  />
+                   <!-- EInt -->                 
+                   <Label text="%populationProtegee" GridPane.rowIndex="1" />
+                   <Spinner fx:id="ui_populationProtegee" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- EString -->                 
+                   <Label text="%classement" GridPane.rowIndex="2" />
+                   <TextField fx:id="ui_classement" GridPane.columnIndex="1" GridPane.rowIndex="2"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- EFloat -->                 
+                   <Label text="%niveauProtection" GridPane.rowIndex="3" />
+                   <Spinner fx:id="ui_niveauProtection" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <Label text="%gestionnaireDecretId" GridPane.rowIndex="4" />
+                   <ComboBox fx:id="ui_gestionnaireDecretId" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                   <Button fx:id="ui_gestionnaireDecretId_link" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                   <Label text="%gestionnaireTechniqueId" GridPane.rowIndex="5" />
+                   <ComboBox fx:id="ui_gestionnaireTechniqueId" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                   <Button fx:id="ui_gestionnaireTechniqueId_link" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+
+              </children>
+              <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+              </padding>
+            </GridPane>
+            <HTMLEditor fx:id="ui_commentaire" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contentediTable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" maxHeight="-Infinity"  prefHeight="200.0" styleClass="gray-light" />
+
+            </children>
+            <padding>
+              <Insets bottom="10.0" left="50.0" right="50.0" top="30.0" />
+            </padding>
+          </VBox>
+            </content>
+          </ScrollPane>
+        </Tab>
+
+<!-- REFERENCE TABS -->
+
+      </tabs>
+    </TabPane>
+  </center>
+
+</fx:root>
+

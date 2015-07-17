@@ -18,9 +18,7 @@
     <top>
         <BorderPane styleClass="blue-light" BorderPane.alignment="CENTER" VBox.vgrow="NEVER">
             <center>
-                
-                
-                            <GridPane hgap="10.0" vgap="10.0" BorderPane.alignment="CENTER">
+            <GridPane hgap="10.0" vgap="10.0" BorderPane.alignment="CENTER">
               <columnConstraints>
                 <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
                   <ColumnConstraints hgrow="NEVER" />
