@@ -9,6 +9,7 @@ import fr.sirs.Session;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperageBorne;
@@ -17,7 +18,6 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.ReferenceTableCell;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -35,6 +35,8 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -45,6 +47,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
@@ -54,6 +57,10 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXNumberCell;
@@ -211,29 +218,38 @@ public class FXSystemeReperagePane extends BorderPane {
         mode.set(Mode.PICK_TRONCON);
     }
 
-    private void startAddBorne(ActionEvent evt){
+    /*
+     * BORNE UTILITIES
+     */
+
+    /**
+     *
+     * @return A list view of all bornes bound to currently selected troncon, or
+     * null if no troncon is selected.
+     */
+    private ListView<BorneDigue> buildBorneList() {
         final TronconDigue troncon = tronconProperty().get();
-        final SystemeReperage csr = systemeReperageProperty().get();
-        if(csr==null || troncon==null) return;
+        if (troncon == null) return null;
 
-
-        //liste de toutes les bornes
-        final SortedSet<BorneDigue> bornes = new TreeSet<>(new Comparator<BorneDigue>() {
-            @Override
-            public int compare(BorneDigue o1, BorneDigue o2) {
-                return o1.getLibelle().compareToIgnoreCase(o2.getLibelle());
-            }
-        });
+        final SortedSet<BorneDigue> bornes = new TreeSet<>((BorneDigue o1, BorneDigue o2) -> o1.getLibelle().compareToIgnoreCase(o2.getLibelle()));
 
         final AbstractSIRSRepository<BorneDigue> repo = session.getRepositoryForClass(BorneDigue.class);
-        for(String bid : troncon.getBorneIds()){
-            bornes.add(repo.get(bid));
-        }
+        bornes.addAll(repo.get(troncon.getBorneIds()));
 
         final ListView<BorneDigue> bornesView = new ListView<>();
         bornesView.setItems(FXCollections.observableArrayList(bornes));
         bornesView.setCellFactory(TextFieldListCell.forListView(new SirsStringConverter()));
         bornesView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        return bornesView;
+    }
+
+    private void startAddBorne(ActionEvent evt){
+        final TronconDigue troncon = tronconProperty().get();
+        final SystemeReperage csr = systemeReperageProperty().get();
+        if(csr==null || troncon==null) return;
+
+        final ListView<BorneDigue> bornesView = buildBorneList();
 
         final Dialog dialog = new Dialog();
         final DialogPane pane = new DialogPane();
@@ -350,6 +366,91 @@ public class FXSystemeReperagePane extends BorderPane {
         uiSrComboBox.getSelectionModel().clearAndSelect(uiSrComboBox.getItems().indexOf(sr));
     }
 
+    public void createBorne(Point geom){
+        final TextInputDialog dialog = new TextInputDialog("");
+        dialog.getEditor().setPromptText("borne ...");
+        dialog.setTitle("Nouvelle borne");
+        dialog.setGraphic(null);
+        dialog.setHeaderText("Libellé de la nouvelle borne");
+
+        final Optional<String> opt = dialog.showAndWait();
+        if(!opt.isPresent() || opt.get().isEmpty()) return;
+
+        //creation de la borne
+        final String borneLbl = opt.get();
+        final BorneDigue borne = session.getRepositoryForClass(BorneDigue.class).create();
+        borne.setLibelle(borneLbl);
+        borne.setGeometry(geom);
+        session.getRepositoryForClass(BorneDigue.class).add(borne);
+
+        createBorne(borne);
+    }
+
+    public void createBorne(BorneDigue borne){
+        final SystemeReperage sr = systemeReperageProperty().get();
+
+        //on vérifie que la borne n'est pas deja dans la liste
+        for(SystemeReperageBorne srb : sr.getSystemeReperageBornes()){
+            if(borne.getDocumentId().equals(srb.borneIdProperty().get())){
+                //la borne fait deja partie de ce SR
+                return;
+            }
+        }
+
+        //reference dans le SR
+        final SystemeReperageBorne srb = Injector.getSession().getElementCreator().createElement(SystemeReperageBorne.class);
+        srb.borneIdProperty().set(borne.getDocumentId());
+        srb.valeurPRProperty().set(0);
+
+        //sauvegarde du SR
+        sr.systemeReperageBornes.add(srb);
+        ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).update(sr, tronconProperty().get());
+        updateBorneTable(null, null, null);
+    }
+
+    /**
+     * Open a {@link ListView} to allow user to select one or more {@link BorneDigue}
+     * to delete.
+     *
+     * Note : Once suppression is confirmed, we're forced to check all {@link SystemeReperage}
+     * defined on the currently edited {@link TronconDigue}, and update them if
+     * they use chosen bornes.
+     * @param e Event fired when deletion button has been fired.
+     */
+    @FXML
+    private void deleteBornes(ActionEvent e) {
+        final ListView<BorneDigue> borneList = buildBorneList();
+        if (borneList == null) return;
+
+        final Stage stage = new Stage();
+        stage.setTitle("Sélectionnez les bornes à supprimer");
+        stage.initModality(Modality.WINDOW_MODAL);
+        stage.initOwner(this.getScene().getWindow());
+
+        final Separator blankSpace = new Separator();
+        blankSpace.setVisible(false);
+
+        final Button cancelButton = new Button("Annuler");
+        cancelButton.setCancelButton(true);
+        cancelButton.setOnAction(event -> stage.hide());
+        final Button deleteButton = new Button("Supprimer");
+        deleteButton.disableProperty().bind(borneList.getSelectionModel().selectedItemProperty().isNull());
+        deleteButton.setOnAction(event -> {
+            final ObservableList<BorneDigue> selectedItems = borneList.getSelectionModel().getSelectedItems();
+            InjectorCore.getBean(BorneDigueRepository.class).remove(selectedItems.toArray(new BorneDigue[0]));
+            borneList.getItems().removeAll(selectedItems);
+        });
+        final HBox buttonBar = new HBox(10, blankSpace, cancelButton, deleteButton);
+        buttonBar.setPadding(new Insets(5));
+
+        stage.setScene(new Scene(new VBox(borneList, buttonBar)));
+        stage.show();
+    }
+
+    /*
+     * SR UTILITIES
+     */
+
     /**
      * Delete the {@link SystemeReperage} selected in {@link #ui
      * @param evt
@@ -426,57 +527,6 @@ public class FXSystemeReperagePane extends BorderPane {
         }
     }
 
-    public void createBorne(Point geom){
-        final TextInputDialog dialog = new TextInputDialog("");
-        dialog.getEditor().setPromptText("borne ...");
-        dialog.setTitle("Nouvelle borne");
-        dialog.setGraphic(null);
-        dialog.setHeaderText("Libellé de la nouvelle borne");
-
-        final Optional<String> opt = dialog.showAndWait();
-        if(!opt.isPresent() || opt.get().isEmpty()) return;
-
-        //creation de la borne
-        final String borneLbl = opt.get();
-        final BorneDigue borne = session.getRepositoryForClass(BorneDigue.class).create();
-        borne.setLibelle(borneLbl);
-        borne.setGeometry(geom);
-        session.getRepositoryForClass(BorneDigue.class).add(borne);
-
-        createBorne(borne);
-    }
-
-    public void createBorne(BorneDigue borne){
-        final SystemeReperage sr = systemeReperageProperty().get();
-
-        //on vérifie que la borne n'est pas deja dans la liste
-        for(SystemeReperageBorne srb : sr.getSystemeReperageBornes()){
-            if(borne.getDocumentId().equals(srb.borneIdProperty().get())){
-                //la borne fait deja partie de ce SR
-                return;
-            }
-        }
-
-        //reference dans le SR
-        final SystemeReperageBorne srb = Injector.getSession().getElementCreator().createElement(SystemeReperageBorne.class);
-        srb.borneIdProperty().set(borne.getDocumentId());
-        srb.valeurPRProperty().set(0);
-
-        //sauvegarde du SR
-        sr.systemeReperageBornes.add(srb);
-        ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).update(sr, tronconProperty().get());
-        updateBorneTable(null, null, null);
-    }
-
-    public void sortBorneTable(){
-        final TronconDigue troncon = tronconProp.get();
-        if(troncon==null) return;
-
-        final List lst = uiBorneTable.getItems();
-        final LineString linear = LinearReferencingUtilities.asLineString(troncon.getGeometry());
-        lst.sort(new SRBComparator(linear));
-    }
-
     private void updateSrList(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue){
         final TronconDigue troncon = tronconProperty().get();
         if(troncon==null){
@@ -516,6 +566,19 @@ public class FXSystemeReperagePane extends BorderPane {
         if (Boolean.TRUE.equals(newValue) && tronconProp.get() != null) {
             tronconProp.get().setSystemeRepDefautId(uiSrComboBox.getSelectionModel().getSelectedItem().getId());
         }
+    }
+
+    /*
+     * TABLE UTILITIES
+     */
+
+    public void sortBorneTable(){
+        final TronconDigue troncon = tronconProp.get();
+        if(troncon==null) return;
+
+        final List lst = uiBorneTable.getItems();
+        final LineString linear = LinearReferencingUtilities.asLineString(troncon.getGeometry());
+        lst.sort(new SRBComparator(linear));
     }
 
     private void updateBorneTable(ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue){
