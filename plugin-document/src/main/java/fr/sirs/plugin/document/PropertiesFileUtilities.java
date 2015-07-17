@@ -11,10 +11,17 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.sis.util.logging.Logging;
+import org.geotoolkit.util.FileUtilities;
 
 /**
  *
@@ -33,24 +40,14 @@ public class PropertiesFileUtilities {
         final Properties prop   = getSirsProperties(f);
         prop.put(f.getName() + "_inventory_number", value);
         
-        try {
-            final File sirsPropFile = getSirsPropertiesFile(f);
-            prop.store(new FileWriter(sirsPropFile), "");
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
-        }
+        storeSirsProperties(prop, f);
     }
     
     public static void removeInventoryNumber(final File f) {
         final Properties prop   = getSirsProperties(f);
         prop.remove(f.getName() + "_inventory_number");
         
-        try {
-            final File sirsPropFile = getSirsPropertiesFile(f);
-            prop.store(new FileWriter(sirsPropFile), "");
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
-        }
+        storeSirsProperties(prop, f);
     }
     
     public static String getClassPlace(final File f) {
@@ -62,24 +59,14 @@ public class PropertiesFileUtilities {
         final Properties prop   = getSirsProperties(f);
         prop.put(f.getName() + "_class_place", value);
         
-        try {
-            final File sirsPropFile = getSirsPropertiesFile(f);
-            prop.store(new FileWriter(sirsPropFile), "");
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
-        }
+        storeSirsProperties(prop, f);
     }
     
     public static void removeClassPlace(final File f) {
         final Properties prop   = getSirsProperties(f);
         prop.remove(f.getName() + "_class_place");
         
-        try {
-            final File sirsPropFile = getSirsPropertiesFile(f);
-            prop.store(new FileWriter(sirsPropFile), "");
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
-        }
+        storeSirsProperties(prop, f);
     }
     
     public static Boolean getDOIntegrated(final File f) {
@@ -91,16 +78,16 @@ public class PropertiesFileUtilities {
         final Properties prop   = getSirsProperties(f);
         prop.put(f.getName() + "_do_integrated", Boolean.toString(value));
         
-        try {
-            final File sirsPropFile = getSirsPropertiesFile(f);
-            prop.store(new FileWriter(sirsPropFile), "");
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
-        }
+        storeSirsProperties(prop, f);
     }
     
     public static Boolean getIsModelFolder(final File f) {
         return getIsSe(f) || getIsDg(f) || getIsTr(f);
+    }
+    
+    public static String getLibelle(final File f) {
+        final Properties prop = getSirsProperties(f);
+        return prop.getProperty(f.getName() + "_libelle", "null");
     }
     
     public static Boolean getIsSe(final File f) {
@@ -113,12 +100,7 @@ public class PropertiesFileUtilities {
         prop.put(f.getName() + "_se", Boolean.toString(value));
         prop.put(f.getName() + "_libelle", libelle);
         
-        try {
-            final File sirsPropFile = getSirsPropertiesFile(f);
-            prop.store(new FileWriter(sirsPropFile), "");
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
-        }
+       storeSirsProperties(prop, f);
     }
     
     public static Boolean getIsTr(final File f) {
@@ -131,12 +113,7 @@ public class PropertiesFileUtilities {
         prop.put(f.getName() + "_tr", Boolean.toString(value));
         prop.put(f.getName() + "_libelle", libelle);
         
-        try {
-            final File sirsPropFile = getSirsPropertiesFile(f);
-            prop.store(new FileWriter(sirsPropFile), "");
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
-        }
+        storeSirsProperties(prop, f);
     }
     
     public static Boolean getIsDg(final File f) {
@@ -149,20 +126,37 @@ public class PropertiesFileUtilities {
         prop.put(f.getName() + "_dg", Boolean.toString(value));
         prop.put(f.getName() + "_libelle", libelle);
         
-        try {
-            final File sirsPropFile = getSirsPropertiesFile(f);
-            prop.store(new FileWriter(sirsPropFile), "");
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
-        }
+        storeSirsProperties(prop, f);
     }
     
     public static void removeDOIntegrated(final File f) {
         final Properties prop   = getSirsProperties(f);
         prop.remove(f.getName() + "_do_integrated");
         
+        storeSirsProperties(prop, f);
+    }
+    
+    public static void removeProperties(final File f) {
+        final Properties prop   = getSirsProperties(f);
+        
+        Set<Entry<Object,Object>> properties = new HashSet<>(prop.entrySet());
+        for (Entry<Object,Object> entry : properties) {
+            if (((String)entry.getKey()).startsWith(f.getName())) {
+                prop.remove(entry.getKey());
+            }
+        }
+        
+        //save cleaned properties file
+        storeSirsProperties(prop, f);
+    }
+    
+    public static void storeSirsProperties(final Properties prop, final File f) {
+        storeSirsProperties(prop, f, true);
+    }
+    
+    public static void storeSirsProperties(final Properties prop, final File f, boolean parent) {
         try {
-            final File sirsPropFile = getSirsPropertiesFile(f);
+            final File sirsPropFile = getSirsPropertiesFile(f, parent);
             prop.store(new FileWriter(sirsPropFile), "");
         } catch (IOException ex) {
             LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
@@ -240,15 +234,15 @@ public class PropertiesFileUtilities {
     }
     
     public static File getOrCreateSE(final File rootDirectory, SystemeEndiguement sd){
+        final File sdDir = new File(rootDirectory, sd.getId());
+        if (!sdDir.exists()) {
+            sdDir.mkdir();
+        }
         String name = sd.getLibelle();
         if (name == null) {
             name = "null";
         }
-        final File sdDir = new File(rootDirectory, name);
-        if (!sdDir.exists()) {
-            sdDir.mkdir();
-        }
-        setIsSe(sdDir, true, sd.getId());
+        setIsSe(sdDir, true, name);
         final File docDir = new File(sdDir, DocumentsPane.DOCUMENT_FOLDER); 
         if (!docDir.exists()) {
             docDir.mkdir();
@@ -257,15 +251,15 @@ public class PropertiesFileUtilities {
     }
     
     public static File getOrCreateDG(final File rootDirectory, Digue digue){
+        final File digueDir = new File(rootDirectory, digue.getId());
+        if (!digueDir.exists()) {
+            digueDir.mkdir();
+        }
         String name = digue.getLibelle();
         if (name == null) {
             name = "null";
         }
-        final File digueDir = new File(rootDirectory, name);
-        if (!digueDir.exists()) {
-            digueDir.mkdir();
-        }
-        setIsDg(digueDir, true, digue.getId());
+        setIsDg(digueDir, true, name);
         final File docDir = new File(digueDir, DocumentsPane.DOCUMENT_FOLDER); 
         if (!docDir.exists()) {
             docDir.mkdir();
@@ -274,15 +268,15 @@ public class PropertiesFileUtilities {
     }
     
     public static File getOrCreateTR(final File rootDirectory, TronconDigue tr){
+        final File trDir = new File(rootDirectory, tr.getId());
+        if (!trDir.exists()) {
+            trDir.mkdir();
+        }
         String name = tr.getLibelle();
         if (name == null) {
             name = "null";
         }
-        final File trDir = new File(rootDirectory, name);
-        if (!trDir.exists()) {
-            trDir.mkdir();
-        }
-        setIsTr(trDir, true, tr.getId());
+        setIsTr(trDir, true, name);
         final File docDir = new File(trDir, DocumentsPane.DOCUMENT_FOLDER); 
         if (!docDir.exists()) {
             docDir.mkdir();
@@ -312,12 +306,103 @@ public class PropertiesFileUtilities {
         Properties prop = getSirsProperties(rootDirectory, false);
         prop.put("database_identifier", key);
         
-        try {
-            final File sirsPropFile = getSirsPropertiesFile(rootDirectory, false);
-            prop.store(new FileWriter(sirsPropFile), "");
-        } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
+        storeSirsProperties(prop, rootDirectory, false);
+    }
+ 
+    public static void backupDirectories(final File saveDir, final Collection<File> files) {
+        for (File f : files) {
+            backupDirectory(saveDir, f);
         }
     }
     
+    public static void backupDirectory(final File saveDir, final File f) {
+        
+        // extract properties
+        final Map<Object, Object> extracted  = new HashMap<>();
+        final Properties prop                = getSirsProperties(f);
+        Set<Entry<Object,Object>> properties = new HashSet<>(prop.entrySet());
+        for (Entry<Object,Object> entry : properties) {
+            if (((String)entry.getKey()).startsWith(f.getName())) {
+                extracted.put(entry.getKey(), entry.getValue());
+                prop.remove(entry.getKey());
+            }
+        }
+        
+        //save cleaned properties file
+        storeSirsProperties(prop, f);
+        
+        
+        final File newFile = new File(saveDir, f.getName());
+        try {
+            FileUtilities.copy(f, newFile);
+            FileUtilities.deleteDirectory(f);
+            
+            // save new properties
+            final Properties newProp = getSirsProperties(newFile);
+            newProp.putAll(extracted);
+            
+            storeSirsProperties(newProp, newFile);
+            
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, "Error while moving destroyed obj to backup folder", ex);
+        }
+    }
+    
+    public  static Set<File> listSE(final File rootDirectory) {
+        Set<File> seList = new HashSet<>();
+        listSE(rootDirectory, seList);
+        return seList;
+    }
+    
+    private static void listSE(final File rootDirectory, Set<File> seList) {
+        for (File f : rootDirectory.listFiles()) {
+            if (f.isDirectory()) {
+                if (getIsSe(f)) {
+                    seList.add(f);
+                } else {
+                    listSE(f, seList);
+                }
+            }
+        }
+    }
+    
+    public static Set<File> listDigue(final File SEDirectory) {
+        Set<File> digueList = new HashSet<>();
+        listDigue(SEDirectory, digueList);
+        return digueList;
+    }
+    
+    private static void listDigue(final File SEDirectory, Set<File> digueList) {
+        for (File f : SEDirectory.listFiles()) {
+            if (f.isDirectory()) {
+                if (getIsDg(f)) {
+                    digueList.add(f);
+                } else {
+                    listDigue(f, digueList);
+                }
+            }
+        }
+    }
+    
+    public static Set<File> listTroncon(final File digueDirectory) {
+        return listTroncon(digueDirectory, true);
+    }
+    
+    public static Set<File> listTroncon(final File digueDirectory, boolean deep) {
+        Set<File> trList = new HashSet<>();
+        listTroncon(digueDirectory, trList, deep);
+        return trList;
+    }
+    
+    private static void listTroncon(final File digueDirectory, Set<File> trList, boolean deep) {
+        for (File f : digueDirectory.listFiles()) {
+            if (f.isDirectory()) {
+                if (getIsTr(f)) {
+                    trList.add(f);
+                } else if (deep){
+                    listTroncon(f, trList, deep);
+                }
+            }
+        }
+    }
 }

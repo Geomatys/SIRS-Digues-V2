@@ -112,7 +112,13 @@ public class DocumentsPane extends GridPane {
             @Override
             public ObservableValue call(Object param) {
                 final File f = (File) ((CellDataFeatures)param).getValue().getValue();
-                return new SimpleStringProperty(f.getName());
+                final String name;
+                if (getIsModelFolder(f)) {
+                    name = getLibelle(f);
+                } else {
+                    name = f.getName();
+                }
+                return new SimpleStringProperty(name);
             }
         });
         
@@ -238,9 +244,7 @@ public class DocumentsPane extends GridPane {
                 } else {
                     f.delete();
                 }
-                removeClassPlace(f);
-                removeDOIntegrated(f);
-                removeInventoryNumber(f);
+                removeProperties(f);
 
                 // refresh tree
                 updateRoot();
@@ -302,12 +306,15 @@ public class DocumentsPane extends GridPane {
                     break;
                 case NewFolderPane.IN_ALL_FOLDER:
                     addToAllFolder(rootDir, folderName);
+                    updateRoot();
                     break;     
                 case NewFolderPane.IN_SE_FOLDER:
                     addToSeFolder(rootDir, folderName);
+                    updateRoot();
                     break;
                 case NewFolderPane.IN_TR_FOLDER:
                     addToTrFolder(rootDir, folderName);
+                    updateRoot();
                     break;
             }
         }
@@ -359,62 +366,108 @@ public class DocumentsPane extends GridPane {
     
     private void updateRoot() {
         final File rootDirectory = new File(rootPath);
-                
-        final SystemeEndiguementRepository SErepo = Injector.getBean(SystemeEndiguementRepository.class);
-        final DigueRepository Drepo = Injector.getBean(DigueRepository.class);
-        final TronconDigueRepository TRrepo = Injector.getBean(TronconDigueRepository.class);
-        
-        //on recupere tous les elements
-        final List<SystemeEndiguement> sds    = SErepo.getAll();
-        final Set<Digue> digues               = new HashSet<>(Drepo.getAll());
-        final Set<TronconDigue> troncons      = new HashSet<>(TRrepo.getAllLight());
-        final Set<Digue> diguesFound          = new HashSet<>();
-        final Set<TronconDigue> tronconsFound = new HashSet<>();
-        
-        for (SystemeEndiguement sd : sds) {
-            final File sdDir = getOrCreateSE(rootDirectory, sd);
-            
-            final List<String> digueIds = sd.getDigueIds();
-            for (Digue digue : digues) {
-                if (!digueIds.contains(digue.getDocumentId())) continue;
-                diguesFound.add(digue);
-                
-                final File digueDir = getOrCreateDG(sdDir, digue);
-
-                for (final TronconDigue td : troncons) {
-                    if (td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
-                    tronconsFound.add(td);
-
-                    final File trDir = getOrCreateTR(digueDir, td);
-                }
-            }
-        }
-        
-        
-        //on place toute les digues et troncons non trouvé dans un group a part
-        digues.removeAll(diguesFound);
-        final File unclassifiedDir = getOrCreateUnclassif(rootDirectory);
-        
-        for (final Digue digue : digues) {
-            final File digueDir = getOrCreateDG(unclassifiedDir, digue);
-            for (final TronconDigue td : troncons) {
-                if (td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
-                tronconsFound.add(td);
-
-                final File trDir = getOrCreateTR(digueDir, td);
-            }
-        }
-        
-        troncons.removeAll(tronconsFound);
-        for(final TronconDigue td : troncons){
-            final File trDir = getOrCreateTR(unclassifiedDir, td);
-        }
         
         //objet detruit
         final File saveDir = new File(rootDirectory, SAVE_FOLDER);
         if (!saveDir.exists()) {
             saveDir.mkdir();
         }
+        
+        final File unclassifiedDir = getOrCreateUnclassif(rootDirectory);
+                
+        final SystemeEndiguementRepository SErepo = Injector.getBean(SystemeEndiguementRepository.class);
+        final DigueRepository Drepo = Injector.getBean(DigueRepository.class);
+        final TronconDigueRepository TRrepo = Injector.getBean(TronconDigueRepository.class);
+        
+        //on recupere tous les elements
+        final List<SystemeEndiguement> ses    = SErepo.getAll();
+        final Set<Digue> digues               = new HashSet<>(Drepo.getAll());
+        final Set<TronconDigue> troncons      = new HashSet<>(TRrepo.getAllLight());
+        final Set<Digue> diguesFound          = new HashSet<>();
+        final Set<TronconDigue> tronconsFound = new HashSet<>();
+        final Set<File> seFiles               = listSE(rootDirectory);
+        
+        
+        for (SystemeEndiguement se : ses) {
+            final File seDir = getOrCreateSE(rootDirectory, se);
+            seFiles.remove(seDir);
+            
+            final Set<File> digueFiles = listDigue(seDir);
+            
+            final List<String> digueIds = se.getDigueIds();
+            for (Digue digue : digues) {
+                if (!digueIds.contains(digue.getDocumentId())) continue;
+                diguesFound.add(digue);
+                
+                final File digueDir = getOrCreateDG(seDir, digue);
+                digueFiles.remove(digueDir);
+                
+                final Set<File> trFiles = listTroncon(digueDir);
+
+                for (final TronconDigue td : troncons) {
+                    if (td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
+                    tronconsFound.add(td);
+
+                    final File trDir = getOrCreateTR(digueDir, td);
+                    trFiles.remove(trDir);
+                }
+                
+                // on place les tronçon disparus dans backup
+                backupDirectories(saveDir, trFiles);
+            }
+            
+            // on place les digues disparues dans backup
+            backupDirectories(saveDir, digueFiles);
+        }
+        
+        // on place les systèmes d'endiguement disparus dans backup
+        backupDirectories(saveDir, seFiles);
+        
+        
+        
+        //on place toute les digues et troncons non trouvé dans un group a part
+        digues.removeAll(diguesFound);
+        
+        
+        /*
+         * digue / tronçon non classé
+         */      
+        final Set<File> digueFiles = listDigue(unclassifiedDir);
+        
+        for (final Digue digue : digues) {
+            final File digueDir = getOrCreateDG(unclassifiedDir, digue);
+            digueFiles.remove(digueDir);
+            
+            final Set<File> trFiles = listTroncon(digueDir);
+            
+            for (final TronconDigue td : troncons) {
+                if (td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
+                tronconsFound.add(td);
+
+                final File trDir = getOrCreateTR(digueDir, td);
+                trFiles.remove(trDir);
+            }
+            
+            // on place les tronçon disparus dans backup
+            backupDirectories(saveDir, trFiles);
+        }
+        
+        // on place les digues disparues dans backup
+        backupDirectories(saveDir, digueFiles);
+        
+        
+        troncons.removeAll(tronconsFound);
+        
+        final Set<File> trFiles = listTroncon(unclassifiedDir, false);
+        
+        for(final TronconDigue td : troncons){
+            final File trDir = getOrCreateTR(unclassifiedDir, td);
+            trFiles.remove(trDir);
+        }
+        
+        // on place les tronçon disparus dans backup
+        backupDirectories(saveDir, trFiles);
+        
         
         TreeItem root = new FileTreeItem(rootDirectory);
         tree1.setRoot(root);
