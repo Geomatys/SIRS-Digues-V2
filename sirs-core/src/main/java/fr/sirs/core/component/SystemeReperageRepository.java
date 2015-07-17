@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -93,17 +94,35 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
 
     @Override
     public void update(SystemeReperage entity) {
-        throw new UnsupportedOperationException("Operation interdite : le SR doit être mis à jour en même temps que le tronçon associé.");
+        final TronconDigue srConstaint;
+        try {
+            srConstaint = tronconDigueRepo.get(entity.getLinearId());
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot update following SR, because we cannot check its constraints :"+ entity, e);
+        }
+        update(entity, srConstaint);
     }
 
     @Override
     public void remove(SystemeReperage entity) {
-        throw new UnsupportedOperationException("Operation interdite : le SR doit être mis à jour en même temps que le tronçon associé.");
+        final TronconDigue srConstaint;
+        try {
+            srConstaint = tronconDigueRepo.get(entity.getLinearId());
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot remove following SR, because we cannot check its constraints :"+ entity, e);
+        }
+        remove(entity, srConstaint);
     }
 
     @Override
     public void add(SystemeReperage entity) {
-        throw new UnsupportedOperationException("Operation interdite : le SR doit être mis à jour en même temps que le tronçon associé.");
+        final TronconDigue srConstaint;
+        try {
+            srConstaint = tronconDigueRepo.get(entity.getLinearId());
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot add following SR, because we cannot check its constraints :"+ entity, e);
+        }
+        add(entity, srConstaint);
     }
 
     /**
@@ -141,6 +160,23 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
         // We can finally delete our sr safely.
         super.remove(source);
     }
+
+    @Override
+    public List<DocumentOperationResult> executeBulkDelete(List<SystemeReperage> bulkList) {
+        throw new UnsupportedOperationException("Forbidden due to SR integrity constraints.");
+    }
+
+    @Override
+    public List<DocumentOperationResult> executeBulk(SystemeReperage... bulkList) {
+        throw new UnsupportedOperationException("Forbidden due to SR integrity constraints.");
+    }
+
+    @Override
+    public List<DocumentOperationResult> executeBulk(Collection<SystemeReperage> bulkList) {
+        throw new UnsupportedOperationException("Forbidden due to SR integrity constraints.");
+    }
+
+
 
     /**
      * Cette contrainte s'assure que les bornes du systeme de reperage sont
