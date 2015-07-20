@@ -450,6 +450,11 @@ public class FXMainFrame extends BorderPane {
     private void disorderPrint(){
         addTab(session.getOrCreatePrintTab(Session.PrintTab.DESORDRE, "Fiches détaillées de désordres"));
     }
+
+    @FXML
+    private void templatesPrint(){
+        addTab(session.getOrCreatePrintTab(Session.PrintTab.TEMPLATE, "Modèles de mise en forme"));
+    }
     
     @FXML
     public void openAppInfo() {

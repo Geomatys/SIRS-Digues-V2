@@ -9,6 +9,7 @@ import fr.sirs.core.component.UtilisateurRepository;
 
 import java.util.List;
 
+import fr.sirs.ui.TemplatesTable;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
@@ -102,7 +103,7 @@ public class Session extends SessionCore {
     private final Cache<Class<? extends Element>, FXFreeTab> openDesignationPanes = new Cache<>(12, 0, false);
     public enum AdminTab{VALIDATION, USERS}
     private final Cache<AdminTab, FXFreeTab> openAdminTabs = new Cache<>(2, 0, false);
-    public enum PrintTab{DESORDRE}
+    public enum PrintTab{DESORDRE, TEMPLATE}
     private final Cache<PrintTab, FXFreeTab> openPrintTabs = new Cache<>(2, 0, false);
 
     //generate a template for the legend
@@ -279,11 +280,19 @@ public class Session extends SessionCore {
     public FXFreeTab getOrCreatePrintTab(final PrintTab printTab, final String title){
 
         try {
-            return openPrintTabs.getOrCreate(PrintTab.DESORDRE, () -> {
-                final FXFreeTab tab = new FXFreeTab(title);
-                tab.setContent(new FXDisorderPrintPane());
-                return tab;
-            });
+            if (PrintTab.DESORDRE.equals(printTab)) {
+                return openPrintTabs.getOrCreate(PrintTab.DESORDRE, () -> {
+                    final FXFreeTab tab = new FXFreeTab(title);
+                    tab.setContent(new FXDisorderPrintPane());
+                    return tab;
+                });
+            } else {
+                return openPrintTabs.getOrCreate(PrintTab.TEMPLATE, () -> {
+                    final FXFreeTab tab = new FXFreeTab(title);
+                    tab.setContent(new BorderPane(new TemplatesTable()));
+                    return tab;
+                });
+            }
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

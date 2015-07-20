@@ -1,5 +1,5 @@
 
-package fr.sirs.plugin.reglementaire.ui;
+package fr.sirs.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;

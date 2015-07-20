@@ -19,7 +19,6 @@ import org.apache.sis.util.logging.Logging;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -37,7 +36,6 @@ public class PluginReglementary extends Plugin {
         loadingMessage.set("module réglementaire");
         themes.add(new DocumentsTheme());
         themes.add(new StatesGeneratorTheme());
-        themes.add(new TemplatesTheme());
     }
 
     /**
