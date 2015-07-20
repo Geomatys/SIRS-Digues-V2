@@ -87,10 +87,21 @@ public class DocumentsPane extends GridPane {
     
     private static final DateFormat DATE_FORMATTER = new SimpleDateFormat("dd/MM/yyyy");
     
-    public static final String UNCLASSIFIED = "Non classés";
-    public static final String SAVE_FOLDER  = "Sauvegarde";
-    public static final String DOCUMENT_FOLDER = "Dossier d'ouvrage";
-    public static final String ROOT_FOLDER = "symadrem.root.foler";
+    public static final String UNCLASSIFIED     = "Non classés";
+    public static final String SAVE_FOLDER      = "Sauvegarde";
+    public static final String DOCUMENT_FOLDER  = "Dossier d'ouvrage";
+    public static final String ROOT_FOLDER      = "symadrem.root.foler";
+    
+    // SIRS hidden file properties
+    public static final String INVENTORY_NUMBER = "inventory_number";
+    public static final String CLASS_PLACE      = "class_place";
+    public static final String DO_INTEGRATED    = "do_integrated";
+    public static final String LIBELLE          = "libelle";
+    
+    public static final String SE = "se";
+    public static final String TR = "tr";
+    public static final String DG = "dg";
+    
     
     private static final Logger LOGGER = Logging.getLogger(DocumentsPane.class);
     
@@ -115,7 +126,7 @@ public class DocumentsPane extends GridPane {
                 final File f = (File) ((CellDataFeatures)param).getValue().getValue();
                 final String name;
                 if (getIsModelFolder(f)) {
-                    name = getLibelle(f);
+                    name = getProperty(f, LIBELLE);
                 } else {
                     name = f.getName();
                 }
@@ -156,7 +167,7 @@ public class DocumentsPane extends GridPane {
         tree1.getColumns().get(3).setCellFactory(new Callback() {
             @Override
             public TreeTableCell call(Object param) {
-                return new InventoryCell();
+                return new PropertyCell(INVENTORY_NUMBER);
             }
         });
         
@@ -171,7 +182,7 @@ public class DocumentsPane extends GridPane {
         tree1.getColumns().get(4).setCellFactory(new Callback() {
             @Override
             public TreeTableCell call(Object param) {
-                return new PlaceCell();
+                return new PropertyCell(CLASS_PLACE);
             }
         });
         
@@ -227,8 +238,8 @@ public class DocumentsPane extends GridPane {
             if (directory != null && directory.isDirectory()) {
                 final File newFile = new File(directory, f.getName());
                 FileUtilities.copy(f, newFile);
-                setInventoryNumber(newFile, ipane.inventoryNumField.getText());
-                setClassPlace(newFile, ipane.classPlaceField.getText());
+                setProperty(newFile, INVENTORY_NUMBER, ipane.inventoryNumField.getText());
+                setProperty(newFile, CLASS_PLACE,      ipane.classPlaceField.getText());
                 
                 // refresh tree
                 update();
@@ -320,15 +331,15 @@ public class DocumentsPane extends GridPane {
                     update();
                     break;     
                 case NewFolderPane.IN_SE_FOLDER:
-                    addToSeFolder(rootDir, folderName);
+                    addToModelFolder(rootDir, folderName, SE);
                     update();
                     break;
                 case NewFolderPane.IN_DG_FOLDER:
-                    addToDgFolder(rootDir, folderName);
+                    addToModelFolder(rootDir, folderName, DG);
                     update();
                     break;
                 case NewFolderPane.IN_TR_FOLDER:
-                    addToTrFolder(rootDir, folderName);
+                    addToModelFolder(rootDir, folderName, TR);
                     update();
                     break;
             }
@@ -401,7 +412,7 @@ public class DocumentsPane extends GridPane {
         final Set<TronconDigue> troncons      = new HashSet<>(TRrepo.getAllLight());
         final Set<Digue> diguesFound          = new HashSet<>();
         final Set<TronconDigue> tronconsFound = new HashSet<>();
-        final Set<File> seFiles               = listSE(rootDirectory);
+        final Set<File> seFiles               = listModel(rootDirectory, SE);
         final Set<File> digueMoved            = new HashSet<>();
         final Set<File> tronMoved             = new HashSet<>();
         
@@ -409,7 +420,7 @@ public class DocumentsPane extends GridPane {
             final File seDir = getOrCreateSE(rootDirectory, se);
             seFiles.remove(seDir);
             
-            final Set<File> digueFiles = listDigue(seDir);
+            final Set<File> digueFiles = listModel(seDir, DG);
             final List<Digue> diguesForSE = Drepo.getBySystemeEndiguement(se);
             for (Digue digue : digues) {
                 if (!diguesForSE.contains(digue)) continue;
@@ -418,7 +429,7 @@ public class DocumentsPane extends GridPane {
                 final File digueDir = getOrCreateDG(seDir, digue);
                 digueFiles.remove(digueDir);
                 
-                final Set<File> trFiles = listTroncon(digueDir);
+                final Set<File> trFiles = listModel(digueDir, TR);
 
                 final List<TronconDigue> tronconForDigue = TRrepo.getByDigue(digue);
                 for (final TronconDigue td : troncons) {
@@ -440,20 +451,20 @@ public class DocumentsPane extends GridPane {
         
         // on recupere les repertoire des digues / tronçons dans les SE detruits
         for (File seFile : seFiles) {
-            digueMoved.addAll(listDigue(seFile));
-            tronMoved.addAll(listTroncon(seFile));
+            digueMoved.addAll(listModel(seFile, DG));
+            tronMoved.addAll(listModel(seFile, TR));
         }
         
         /**
          * On place toute les digues et troncons non trouvé dans un group a part.
          */      
-        final Set<File> digueFiles = listDigue(unclassifiedDir);
+        final Set<File> digueFiles = listModel(unclassifiedDir, DG);
         
         for (final Digue digue : digues) {
             final File digueDir = getOrCreateDG(unclassifiedDir, digue);
             digueFiles.remove(digueDir);
             
-            final Set<File> trFiles = listTroncon(digueDir);
+            final Set<File> trFiles = listModel(digueDir, TR);
             
             for (final TronconDigue td : troncons) {
                 if (td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
@@ -472,12 +483,12 @@ public class DocumentsPane extends GridPane {
         
         // on recupere les repertoire tronçons dans les digues detruites
         for (File digueFile : digueFiles) {
-            tronMoved.addAll(listTroncon(digueFile));
+            tronMoved.addAll(listModel(digueFile, TR));
         }
         
         troncons.removeAll(tronconsFound);
         
-        final Set<File> trFiles = listTroncon(unclassifiedDir, false);
+        final Set<File> trFiles = listModel(unclassifiedDir, TR, false);
         
         for(final TronconDigue td : troncons){
             final File trDir = getOrCreateTR(unclassifiedDir, td);
@@ -561,10 +572,10 @@ public class DocumentsPane extends GridPane {
         }
     }
     
-    private void addToTrFolder(final File rootDir, final String folderName) {
+    private void addToModelFolder(final File rootDir, final String folderName, final String model) {
         for (File f : rootDir.listFiles()) {
             if (f.isDirectory()) {
-                if (getIsTr(f)) {
+                if (getIsModelFolder(f, model)) {
                     final File docDir = new File(f, DOCUMENT_FOLDER);
                     if (!docDir.exists()) {
                         docDir.mkdir();
@@ -574,45 +585,7 @@ public class DocumentsPane extends GridPane {
                         newDir.mkdir();
                     }
                 } else {
-                    addToTrFolder(f, folderName);
-                }
-            }
-        }
-    }
-    
-    private void addToSeFolder(final File rootDir, final String folderName) {
-        for (File f : rootDir.listFiles()) {
-            if (f.isDirectory()) {
-                if (getIsSe(f)) {
-                    final File docDir = new File(f, DOCUMENT_FOLDER);
-                    if (!docDir.exists()) {
-                        docDir.mkdir();
-                    }
-                    final File newDir = new File(docDir, folderName);
-                    if (!newDir.exists()) {
-                        newDir.mkdir();
-                    }
-                } else {
-                    addToSeFolder(f, folderName);
-                }
-            }
-        }
-    }
-    
-    private void addToDgFolder(final File rootDir, final String folderName) {
-        for (File f : rootDir.listFiles()) {
-            if (f.isDirectory()) {
-                if (getIsDg(f)) {
-                    final File docDir = new File(f, DOCUMENT_FOLDER);
-                    if (!docDir.exists()) {
-                        docDir.mkdir();
-                    }
-                    final File newDir = new File(docDir, folderName);
-                    if (!newDir.exists()) {
-                        newDir.mkdir();
-                    }
-                } else {
-                    addToDgFolder(f, folderName);
+                    addToModelFolder(f, folderName, model);
                 }
             }
         }
@@ -641,7 +614,7 @@ public class DocumentsPane extends GridPane {
                 public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                     File f = (File) getItem();
                     if (f != null) {
-                        setDOIntegrated(f, newValue);
+                        setBooleanProperty(f, DO_INTEGRATED, newValue);
                     }
                 }
             });
@@ -655,16 +628,19 @@ public class DocumentsPane extends GridPane {
                 box.setVisible(false);
             } else {
                 box.setVisible(true);
-                box.setSelected(getDOIntegrated(f));
+                box.setSelected(getBooleanProperty(f, DO_INTEGRATED));
             }
         }
     }
     
-    private static class PlaceCell extends TreeTableCell {
+    private static class PropertyCell extends TreeTableCell {
 
         private TextField text = new TextField();
 
-        public PlaceCell() {
+        private final String property;
+        
+        public PropertyCell(final String property) {
+            this.property = property;
             setGraphic(text);
             text.disableProperty().bind(editingProperty());
             text.textProperty().addListener(new ChangeListener<String>() {
@@ -673,7 +649,7 @@ public class DocumentsPane extends GridPane {
                 public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                     File f = (File) getItem();
                     if (f != null) {
-                        setClassPlace(f, newValue);
+                        setProperty(f, property, newValue);
                     }
                 }
             });
@@ -687,39 +663,7 @@ public class DocumentsPane extends GridPane {
                 text.setVisible(false);
             } else {
                 text.setVisible(true);
-                text.setText(getClassPlace(f));
-            }
-        }
-    }
-    
-    private static class InventoryCell extends TreeTableCell {
-
-        private TextField text = new TextField();
-
-        public InventoryCell() {
-            setGraphic(text);
-            text.disableProperty().bind(editingProperty());
-            text.textProperty().addListener(new ChangeListener<String>() {
-
-                @Override
-                public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                    File f = (File) getItem();
-                    if (f != null) {
-                        setInventoryNumber(f, newValue);
-                    }
-                }
-            });
-        }
-        
-        @Override
-        public void updateItem(Object item, boolean empty) {
-            super.updateItem(item, empty);
-            File f = (File) item;
-            if (f == null || f.isDirectory()) {
-                text.setVisible(false);
-            } else {
-                text.setVisible(true);
-                text.setText(getInventoryNumber(f));
+                text.setText(getProperty(f, property));
             }
         }
     }

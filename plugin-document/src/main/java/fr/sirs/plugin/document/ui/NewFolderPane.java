@@ -17,7 +17,7 @@ import javafx.scene.layout.GridPane;
 public class NewFolderPane extends GridPane {
     
     public static final String IN_CURRENT_FOLDER = " Dans le dossier sélectionné";
-    public static final String IN_ALL_FOLDER     = " Dans tous les dossiers de SE et tronçons";
+    public static final String IN_ALL_FOLDER     = " Dans tous les dossiers de SE, digues et tronçons";
     public static final String IN_SE_FOLDER      = " Uniquement dans les systèmes d'endiguements";
     public static final String IN_DG_FOLDER      = " Uniquement dans les digues";
     public static final String IN_TR_FOLDER      = " Uniquement dans les tronçons";

@@ -5,8 +5,7 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugin.document.ui.DocumentsPane;
-import static fr.sirs.plugin.document.ui.DocumentsPane.UNCLASSIFIED;
-import static fr.sirs.plugin.document.ui.DocumentsPane.DOCUMENT_FOLDER;
+import static fr.sirs.plugin.document.ui.DocumentsPane.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -25,120 +24,119 @@ import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.util.FileUtilities;
 
 /**
- *
- * @author guilhem
+ * Utility class managing the properties file adding different properties to the filesystem objects.
+ * 
+ * @author Guilhem Legal (Geomatys)
  */
 public class PropertiesFileUtilities {
     
     private static final Logger LOGGER = Logging.getLogger(PropertiesFileUtilities.class);
     
-    public static String getInventoryNumber(final File f) {
-        final Properties prop = getSirsProperties(f);
-        return prop.getProperty(f.getName() + "_inventory_number", "");
+    /**
+     * Extract a property in the sirs.properties file coupled to the specified file.
+     * 
+     * @param f A file, can be a folder correspounding to a SE, DG or TR. Or a simple file.
+     * @param property Name of the property.
+     * @return 
+     */
+    public static String getProperty(final File f, final String property) {
+        final Properties prop = getSirsProperties(f, true);
+        return prop.getProperty(f.getName() + "_" + property, "");
     }
     
-    public static void setInventoryNumber(final File f, String value) {
-        final Properties prop   = getSirsProperties(f);
-        prop.put(f.getName() + "_inventory_number", value);
+    /**
+     * Set a property in the sirs.properties file coupled to the specified file.
+     * 
+     * @param f A file, can be a folder correspounding to a SE, DG or TR. Or a simple file.
+     * @param property Name of the property.
+     * @param value The value to set.
+     */
+    public static void setProperty(final File f, final String property, final String value) {
+        final Properties prop   = getSirsProperties(f, true);
+        prop.put(f.getName() + "_" + property, value);
+        storeSirsProperties(prop, f, true);
+    }
+    
+    /**
+     * Remove a property in the sirs.properties file coupled to the specified file.
+     * @param f A file, can be a folder correspounding to a SE, DG or TR. Or a simple file.
+     * @param property Name of the property.
+     */
+    public static void removeProperty(final File f, final String property) {
+        final Properties prop   = getSirsProperties(f, true);
+        prop.remove(f.getName() + "_" + property);
+        storeSirsProperties(prop, f, true);
+    }
+    
+    /**
+     * Extract a property in the sirs.properties file coupled to the specified file.
+     * 
+     * @param f A file, can be a folder correspounding to a SE, DG or TR. Or a simple file.
+     * @param property Name of the property.
+     * @return 
+     */
+    public static Boolean getBooleanProperty(final File f, final String property) {
+        final Properties prop = getSirsProperties(f, true);
+        return Boolean.parseBoolean(prop.getProperty(f.getName() + "_" + property, "false"));
+    }
+    
+    /**
+     * Set a property in the sirs.properties file coupled to the specified file.
+     * 
+     * @param f A file, can be a folder correspounding to a SE, DG or TR. Or a simple file.
+     * @param property Name of the property.
+     * @param value The value to set.
+     */
+    public static void setBooleanProperty(final File f, final String property, boolean value) {
+        final Properties prop   = getSirsProperties(f, true);
+        prop.put(f.getName() + "_" + property, Boolean.toString(value));
         
-        storeSirsProperties(prop, f);
+        storeSirsProperties(prop, f, true);
     }
     
-    public static void removeInventoryNumber(final File f) {
-        final Properties prop   = getSirsProperties(f);
-        prop.remove(f.getName() + "_inventory_number");
-        
-        storeSirsProperties(prop, f);
-    }
-    
-    public static String getClassPlace(final File f) {
-        final Properties prop = getSirsProperties(f);
-        return prop.getProperty(f.getName() + "_class_place", "");
-    }
-    
-    public static void setClassPlace(final File f, String value) {
-        final Properties prop   = getSirsProperties(f);
-        prop.put(f.getName() + "_class_place", value);
-        
-        storeSirsProperties(prop, f);
-    }
-    
-    public static void removeClassPlace(final File f) {
-        final Properties prop   = getSirsProperties(f);
-        prop.remove(f.getName() + "_class_place");
-        
-        storeSirsProperties(prop, f);
-    }
-    
-    public static Boolean getDOIntegrated(final File f) {
-        final Properties prop = getSirsProperties(f);
-        return Boolean.parseBoolean(prop.getProperty(f.getName() + "_do_integrated", "false"));
-    }
-    
-    public static void setDOIntegrated(final File f, boolean value) {
-        final Properties prop   = getSirsProperties(f);
-        prop.put(f.getName() + "_do_integrated", Boolean.toString(value));
-        
-        storeSirsProperties(prop, f);
-    }
-    
+    /**
+     * Return true if the specified file correspound to a a SE, DG or TR folder.
+     * 
+     * @param f A file.
+     * @return 
+     */
     public static Boolean getIsModelFolder(final File f) {
-        return getIsSe(f) || getIsDg(f) || getIsTr(f);
+        return getIsModelFolder(f, SE) || getIsModelFolder(f, TR) || getIsModelFolder(f, DG);
     }
     
-    public static String getLibelle(final File f) {
-        final Properties prop = getSirsProperties(f);
-        return prop.getProperty(f.getName() + "_libelle", "null");
+    /**
+     * Return true if the specified file correspound to a a specific specified model (SE, DG or TR).
+     * @param f A file.
+     * @param model SE, DG or TR.
+     * @return 
+     */
+    public static Boolean getIsModelFolder(final File f, final String model) {
+        final Properties prop = getSirsProperties(f, true);
+        return Boolean.parseBoolean(prop.getProperty(f.getName() + "_" + model, "false"));
     }
     
-    public static Boolean getIsSe(final File f) {
-        final Properties prop = getSirsProperties(f);
-        return Boolean.parseBoolean(prop.getProperty(f.getName() + "_se", "false"));
-    }
-    
-    public static void setIsSe(final File f, boolean value, final String libelle) {
-        final Properties prop   = getSirsProperties(f);
-        prop.put(f.getName() + "_se", Boolean.toString(value));
-        prop.put(f.getName() + "_libelle", libelle);
+    /**
+     * Set the specific specified model (SE, DG or TR) for a folder.
+     * 
+     * @param f A model folder.
+     * @param model SE, DG or TR.
+     * @param libelle The name that will be displayed in UI.
+     */
+    private static void setIsModelFolder(final File f, final String model, final String libelle) {
+        final Properties prop   = getSirsProperties(f, true);
+        prop.put(f.getName() + "_" + model, true);
+        prop.put(f.getName() + "_" + LIBELLE, libelle);
         
-       storeSirsProperties(prop, f);
+       storeSirsProperties(prop, f, true);
     }
     
-    public static Boolean getIsTr(final File f) {
-        final Properties prop = getSirsProperties(f);
-        return Boolean.parseBoolean(prop.getProperty(f.getName() + "_tr", "false"));
-    }
-    
-    public static void setIsTr(final File f, boolean value, final String libelle) {
-        final Properties prop   = getSirsProperties(f);
-        prop.put(f.getName() + "_tr", Boolean.toString(value));
-        prop.put(f.getName() + "_libelle", libelle);
-        
-        storeSirsProperties(prop, f);
-    }
-    
-    public static Boolean getIsDg(final File f) {
-        final Properties prop = getSirsProperties(f);
-        return Boolean.parseBoolean(prop.getProperty(f.getName() + "_dg", "false"));
-    }
-    
-    public static void setIsDg(final File f, boolean value, final String libelle) {
-        final Properties prop   = getSirsProperties(f);
-        prop.put(f.getName() + "_dg", Boolean.toString(value));
-        prop.put(f.getName() + "_libelle", libelle);
-        
-        storeSirsProperties(prop, f);
-    }
-    
-    public static void removeDOIntegrated(final File f) {
-        final Properties prop   = getSirsProperties(f);
-        prop.remove(f.getName() + "_do_integrated");
-        
-        storeSirsProperties(prop, f);
-    }
-    
+    /**
+     * Remove all properties coupled to the specified file.
+     * 
+     * @param f A file.
+     */
     public static void removeProperties(final File f) {
-        final Properties prop   = getSirsProperties(f);
+        final Properties prop   = getSirsProperties(f, true);
         
         Set<Entry<Object,Object>> properties = new HashSet<>(prop.entrySet());
         for (Entry<Object,Object> entry : properties) {
@@ -146,29 +144,36 @@ public class PropertiesFileUtilities {
                 prop.remove(entry.getKey());
             }
         }
-        
         //save cleaned properties file
-        storeSirsProperties(prop, f);
-    }
-    
-    public static void storeSirsProperties(final Properties prop, final File f) {
         storeSirsProperties(prop, f, true);
     }
     
-    public static void storeSirsProperties(final Properties prop, final File f, boolean parent) {
+    /**
+     * Store the updated properties to the sirs file.
+     * 
+     * @param prop the updated properties. (will replace the previous one in the file).
+     * @param f The file adding properties (not the sirs file).
+     * @param parent {@code true} if the file f is not the root directory.
+     */
+    private static void storeSirsProperties(final Properties prop, final File f, boolean parent) {
         try {
             final File sirsPropFile = getSirsPropertiesFile(f, parent);
             prop.store(new FileWriter(sirsPropFile), "");
         } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while accessing sirs properties file.", ex);
+            LOGGER.log(Level.WARNING, "Error while accessing sirs properties file.", ex);
         }
     }
     
-    public static File getSirsPropertiesFile(final File f) throws IOException {
-        return getSirsPropertiesFile(f, true);
-    }
-    
-    public static File getSirsPropertiesFile(final File f, final boolean parent) throws IOException {
+    /**
+     * Get or create a sirs.properties file next to the specified one (or in the directory if parent is set to false)
+     * 
+     * @param f A file.
+     * @param parent {@code true} if the file f is not the root directory.
+     * 
+     * @return A sirs.properties file.
+     * @throws IOException 
+     */
+    private static File getSirsPropertiesFile(final File f, final boolean parent) throws IOException {
         final File parentFile;
         if (parent) {
             parentFile = f.getParentFile();
@@ -185,11 +190,14 @@ public class PropertiesFileUtilities {
         return null;
     }
     
-    public static Properties getSirsProperties(final File f) {
-        return getSirsProperties(f, true);
-    }
-    
-    public static Properties getSirsProperties(final File f, final boolean parent) {
+    /**
+     * Return the Properties associated with all the files next to the one specified (or in the directory if parent is set to false).
+     * 
+     * @param f A file.
+     * @param parent {@code true} if the file f is not the root directory.
+     * @return 
+     */
+    private static Properties getSirsProperties(final File f, final boolean parent) {
         final Properties prop = new Properties();
         try {
             final File sirsPropFile = getSirsPropertiesFile(f, parent);
@@ -202,6 +210,12 @@ public class PropertiesFileUtilities {
         return prop;
     }
     
+    /**
+     * Return a label for a file size (if it is a directory the all the added size of its children).
+     * 
+     * @param f A file.
+     * @return 
+     */
     public static String getStringSizeFile(final File f) {
         final long size        = getFileSize(f);
         final DecimalFormat df = new DecimalFormat("0.0");
@@ -222,7 +236,12 @@ public class PropertiesFileUtilities {
         return "";
     }
     
-    public static long getFileSize(final File f) {
+    /**
+     * Return the size of a file (if it is a directory the all the added size of its children).
+     * @param f
+     * @return 
+     */
+    private static long getFileSize(final File f) {
         if (f.isDirectory()) {
             long result = 0;
             for (File child : f.listFiles()) {
@@ -243,7 +262,7 @@ public class PropertiesFileUtilities {
         if (name == null) {
             name = "null";
         }
-        setIsSe(sdDir, true, name);
+        setIsModelFolder(sdDir, SE, name);
         final File docDir = new File(sdDir, DocumentsPane.DOCUMENT_FOLDER); 
         if (!docDir.exists()) {
             docDir.mkdir();
@@ -260,7 +279,7 @@ public class PropertiesFileUtilities {
         if (name == null) {
             name = "null";
         }
-        setIsDg(digueDir, true, name);
+        setIsModelFolder(digueDir, DG, name);
         final File docDir = new File(digueDir, DocumentsPane.DOCUMENT_FOLDER); 
         if (!docDir.exists()) {
             docDir.mkdir();
@@ -277,7 +296,7 @@ public class PropertiesFileUtilities {
         if (name == null) {
             name = "null";
         }
-        setIsTr(trDir, true, name);
+        setIsModelFolder(trDir, TR, name);
         final File docDir = new File(trDir, DocumentsPane.DOCUMENT_FOLDER); 
         if (!docDir.exists()) {
             docDir.mkdir();
@@ -299,12 +318,12 @@ public class PropertiesFileUtilities {
     }
     
     public static String getExistingDatabaseIdentifier(final File rootDirectory) {
-        Properties prop = getSirsProperties(rootDirectory, false);
+        final Properties prop = getSirsProperties(rootDirectory, false);
         return (String) prop.get("database_identifier");
     }
     
     public static void setDatabaseIdentifier(final File rootDirectory, final String key) {
-        Properties prop = getSirsProperties(rootDirectory, false);
+        final Properties prop = getSirsProperties(rootDirectory, false);
         prop.put("database_identifier", key);
         
         storeSirsProperties(prop, rootDirectory, false);
@@ -320,7 +339,7 @@ public class PropertiesFileUtilities {
         
         // extract properties
         final Map<Object, Object> extracted  = new HashMap<>();
-        final Properties prop                = getSirsProperties(f);
+        final Properties prop                = getSirsProperties(f, true);
         Set<Entry<Object,Object>> properties = new HashSet<>(prop.entrySet());
         for (Entry<Object,Object> entry : properties) {
             if (((String)entry.getKey()).startsWith(f.getName())) {
@@ -330,7 +349,7 @@ public class PropertiesFileUtilities {
         }
         
         //save cleaned properties file
-        storeSirsProperties(prop, f);
+        storeSirsProperties(prop, f, true);
         
         
         final File newDir = new File(saveDir, f.getName());
@@ -347,69 +366,35 @@ public class PropertiesFileUtilities {
             FileUtilities.deleteDirectory(f);
             
             // save new properties
-            final Properties newProp = getSirsProperties(newDir);
+            final Properties newProp = getSirsProperties(newDir, true);
             newProp.putAll(extracted);
             
-            storeSirsProperties(newProp, newDir);
+            storeSirsProperties(newProp, newDir, true);
             
         } catch (IOException ex) {
             LOGGER.log(Level.WARNING, "Error while moving destroyed obj to backup folder", ex);
         }
     }
     
-    public  static Set<File> listSE(final File rootDirectory) {
-        Set<File> seList = new HashSet<>();
-        listSE(rootDirectory, seList);
-        return seList;
+    public  static Set<File> listModel(final File rootDirectory, final String model) {
+        Set<File> modelList = new HashSet<>();
+        listModel(rootDirectory, modelList, model, true);
+        return modelList;
     }
     
-    private static void listSE(final File rootDirectory, Set<File> seList) {
+    public  static Set<File> listModel(final File rootDirectory, final String model, final boolean deep) {
+        Set<File> modelList = new HashSet<>();
+        listModel(rootDirectory, modelList, model, deep);
+        return modelList;
+    }
+    
+    private static void listModel(final File rootDirectory, Set<File> modelList, String model, final boolean deep) {
         for (File f : rootDirectory.listFiles()) {
             if (f.isDirectory()) {
-                if (getIsSe(f)) {
-                    seList.add(f);
-                } else {
-                    listSE(f, seList);
-                }
-            }
-        }
-    }
-    
-    public static Set<File> listDigue(final File rootDirectory) {
-        Set<File> digueList = new HashSet<>();
-        listDigue(rootDirectory, digueList);
-        return digueList;
-    }
-    
-    private static void listDigue(final File rootDirectory, Set<File> digueList) {
-        for (File f : rootDirectory.listFiles()) {
-            if (f.isDirectory()) {
-                if (getIsDg(f)) {
-                    digueList.add(f);
-                } else {
-                    listDigue(f, digueList);
-                }
-            }
-        }
-    }
-    
-    public static Set<File> listTroncon(final File digueDirectory) {
-        return listTroncon(digueDirectory, true);
-    }
-    
-    public static Set<File> listTroncon(final File digueDirectory, boolean deep) {
-        Set<File> trList = new HashSet<>();
-        listTroncon(digueDirectory, trList, deep);
-        return trList;
-    }
-    
-    private static void listTroncon(final File digueDirectory, Set<File> trList, boolean deep) {
-        for (File f : digueDirectory.listFiles()) {
-            if (f.isDirectory()) {
-                if (getIsTr(f)) {
-                    trList.add(f);
+                if (getIsModelFolder(f, model)) {
+                    modelList.add(f);
                 } else if (deep){
-                    listTroncon(f, trList, deep);
+                    listModel(f, modelList, model, deep);
                 }
             }
         }
