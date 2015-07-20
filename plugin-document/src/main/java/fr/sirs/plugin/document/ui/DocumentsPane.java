@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
 import javafx.scene.control.Alert;
+import javafx.scene.control.TextField;
 
 /**
  *
@@ -145,22 +146,32 @@ public class DocumentsPane extends GridPane {
         });
         
         // Inventory number column
-        tree1.getColumns().get(3).setEditable(false);
         tree1.getColumns().get(3).setCellValueFactory(new Callback() {
             @Override
             public ObservableValue call(Object param) {
                 final File f = (File) ((CellDataFeatures)param).getValue().getValue();
-                return new SimpleStringProperty(getInventoryNumber(f));
+                return new SimpleObjectProperty(f);
+            }
+        });
+        tree1.getColumns().get(3).setCellFactory(new Callback() {
+            @Override
+            public TreeTableCell call(Object param) {
+                return new InventoryCell();
             }
         });
         
         // class place column
-        tree1.getColumns().get(4).setEditable(false);
         tree1.getColumns().get(4).setCellValueFactory(new Callback() {
             @Override
             public ObservableValue call(Object param) {
                 final File f = (File) ((CellDataFeatures)param).getValue().getValue();
-                return new SimpleStringProperty(getClassPlace(f));
+                return new SimpleObjectProperty(f);
+            }
+        });
+        tree1.getColumns().get(4).setCellFactory(new Callback() {
+            @Override
+            public TreeTableCell call(Object param) {
+                return new PlaceCell();
             }
         });
         
@@ -172,14 +183,14 @@ public class DocumentsPane extends GridPane {
                 return new SimpleObjectProperty(f);
             }
         });
-        
-        
         tree1.getColumns().get(5).setCellFactory(new Callback() {
             @Override
             public TreeTableCell call(Object param) {
                 return new DOIntegatedCell();
             }
         });
+        
+        
         tree1.setShowRoot(false);
         
         final Preferences prefs = Preferences.userRoot().node(getClass().getName());
@@ -220,7 +231,7 @@ public class DocumentsPane extends GridPane {
                 setClassPlace(newFile, ipane.classPlaceField.getText());
                 
                 // refresh tree
-                updateRoot();
+                update();
             }
         }
     }
@@ -247,7 +258,7 @@ public class DocumentsPane extends GridPane {
                 removeProperties(f);
 
                 // refresh tree
-                updateRoot();
+                update();
             } else {
                 showErrorDialog("Vous devez selectionner un dossier.");
             }
@@ -306,15 +317,15 @@ public class DocumentsPane extends GridPane {
                     break;
                 case NewFolderPane.IN_ALL_FOLDER:
                     addToAllFolder(rootDir, folderName);
-                    updateRoot();
+                    update();
                     break;     
                 case NewFolderPane.IN_SE_FOLDER:
                     addToSeFolder(rootDir, folderName);
-                    updateRoot();
+                    update();
                     break;
                 case NewFolderPane.IN_TR_FOLDER:
                     addToTrFolder(rootDir, folderName);
-                    updateRoot();
+                    update();
                     break;
             }
         }
@@ -509,6 +520,11 @@ public class DocumentsPane extends GridPane {
         tree1.setRoot(root);
     }
     
+    private void update() {
+        FileTreeItem root = (FileTreeItem) tree1.getRoot();
+        root.update();
+    }
+    
     private void addToSelectedFolder(final String folderName) {
         File directory = getSelectedFile();
         if (directory != null && directory.isDirectory()) {
@@ -520,7 +536,7 @@ public class DocumentsPane extends GridPane {
             }
             final File newDir = new File(directory, folderName);
             newDir.mkdir();
-            updateRoot();
+            update();
         } else {
             showErrorDialog("Vous devez selectionner un dossier.");
         }
@@ -617,6 +633,70 @@ public class DocumentsPane extends GridPane {
             } else {
                 box.setVisible(true);
                 box.setSelected(getDOIntegrated(f));
+            }
+        }
+    }
+    
+    private static class PlaceCell extends TreeTableCell {
+
+        private TextField text = new TextField();
+
+        public PlaceCell() {
+            setGraphic(text);
+            text.disableProperty().bind(editingProperty());
+            text.textProperty().addListener(new ChangeListener<String>() {
+
+                @Override
+                public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                    File f = (File) getItem();
+                    if (f != null) {
+                        setClassPlace(f, newValue);
+                    }
+                }
+            });
+        }
+        
+        @Override
+        public void updateItem(Object item, boolean empty) {
+            super.updateItem(item, empty);
+            File f = (File) item;
+            if (f == null || f.isDirectory()) {
+                text.setVisible(false);
+            } else {
+                text.setVisible(true);
+                text.setText(getClassPlace(f));
+            }
+        }
+    }
+    
+    private static class InventoryCell extends TreeTableCell {
+
+        private TextField text = new TextField();
+
+        public InventoryCell() {
+            setGraphic(text);
+            text.disableProperty().bind(editingProperty());
+            text.textProperty().addListener(new ChangeListener<String>() {
+
+                @Override
+                public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                    File f = (File) getItem();
+                    if (f != null) {
+                        setInventoryNumber(f, newValue);
+                    }
+                }
+            });
+        }
+        
+        @Override
+        public void updateItem(Object item, boolean empty) {
+            super.updateItem(item, empty);
+            File f = (File) item;
+            if (f == null || f.isDirectory()) {
+                text.setVisible(false);
+            } else {
+                text.setVisible(true);
+                text.setText(getInventoryNumber(f));
             }
         }
     }

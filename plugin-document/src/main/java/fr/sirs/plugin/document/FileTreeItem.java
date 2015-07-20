@@ -3,6 +3,7 @@ package fr.sirs.plugin.document;
 
 import fr.sirs.plugin.document.ui.DocumentsPane;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,6 +38,44 @@ public class FileTreeItem extends TreeItem<File> {
         final List<File> result = Arrays.asList(directory.listFiles());
         Collections.sort(result, new FileComparator());
         return result;
+    }
+    
+    public void update() {
+        if (getValue().isDirectory()) {
+            List<FileTreeItem> children = listChildrenItem();
+            for (File f : listFiles(getValue())) {
+                if (!f.getName().equals("sirs.properties")) {
+                    FileTreeItem item = getChildrenItem(f);
+                    if (item == null) {
+                        getChildren().add(new FileTreeItem(f));
+                    } else {
+                        children.remove(item);
+                        item.update();
+                    }
+                }
+            }
+            // remove the destroyed node
+            for (FileTreeItem item : children) {
+                getChildren().remove(item);
+            }
+        }
+    }
+    
+    private FileTreeItem getChildrenItem(final File f) {
+        for (TreeItem item : getChildren()) {
+            FileTreeItem fitem = (FileTreeItem) item;
+            if (fitem.getValue().getPath().equals(f.getPath())) {
+                return fitem;
+            }
+        }
+        return null;
+    }
+    private List<FileTreeItem> listChildrenItem() {
+        final List<FileTreeItem> results = new ArrayList<>();
+        for (TreeItem item : getChildren()) {
+            results.add((FileTreeItem) item);
+        }
+        return results;
     }
     
     private static class FileComparator implements Comparator<File> {
