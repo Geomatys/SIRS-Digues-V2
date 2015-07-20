@@ -11,8 +11,9 @@ import java.util.List;
 import javafx.scene.control.TreeItem;
 
 /**
- *
- * @author guilhem
+ * Tree item used in the tree-table representing the documents.
+ * 
+ * @author Guilhem Legal (Geomatys)
  */
 public class FileTreeItem extends TreeItem<File> {
     
@@ -34,12 +35,21 @@ public class FileTreeItem extends TreeItem<File> {
         return !getValue().isDirectory();
     }
     
+    /**
+     * List the files in the specified directory and order them.
+     * 
+     * @param directory
+     * @return 
+     */
     private List<File> listFiles(File directory) {
         final List<File> result = Arrays.asList(directory.listFiles());
         Collections.sort(result, new FileComparator());
         return result;
     }
     
+    /**
+     * Update the current items. 
+     */
     public void update() {
         if (getValue().isDirectory()) {
             List<FileTreeItem> children = listChildrenItem();
@@ -61,6 +71,12 @@ public class FileTreeItem extends TreeItem<File> {
         }
     }
     
+    /**
+     * Return The Tree item correspounding to the specified file in the current node children.
+     * 
+     * @param f
+     * @return 
+     */
     private FileTreeItem getChildrenItem(final File f) {
         for (TreeItem item : getChildren()) {
             FileTreeItem fitem = (FileTreeItem) item;
@@ -70,6 +86,12 @@ public class FileTreeItem extends TreeItem<File> {
         }
         return null;
     }
+    
+    /**
+     * Return a list of the children items.
+     * 
+     * @return 
+     */
     private List<FileTreeItem> listChildrenItem() {
         final List<FileTreeItem> results = new ArrayList<>();
         for (TreeItem item : getChildren()) {

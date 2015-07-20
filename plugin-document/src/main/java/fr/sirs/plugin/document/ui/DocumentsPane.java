@@ -323,6 +323,10 @@ public class DocumentsPane extends GridPane {
                     addToSeFolder(rootDir, folderName);
                     update();
                     break;
+                case NewFolderPane.IN_DG_FOLDER:
+                    addToDgFolder(rootDir, folderName);
+                    update();
+                    break;
                 case NewFolderPane.IN_TR_FOLDER:
                     addToTrFolder(rootDir, folderName);
                     update();
@@ -590,6 +594,25 @@ public class DocumentsPane extends GridPane {
                     }
                 } else {
                     addToSeFolder(f, folderName);
+                }
+            }
+        }
+    }
+    
+    private void addToDgFolder(final File rootDir, final String folderName) {
+        for (File f : rootDir.listFiles()) {
+            if (f.isDirectory()) {
+                if (getIsDg(f)) {
+                    final File docDir = new File(f, DOCUMENT_FOLDER);
+                    if (!docDir.exists()) {
+                        docDir.mkdir();
+                    }
+                    final File newDir = new File(docDir, folderName);
+                    if (!newDir.exists()) {
+                        newDir.mkdir();
+                    }
+                } else {
+                    addToDgFolder(f, folderName);
                 }
             }
         }
