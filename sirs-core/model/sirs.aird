@@ -2122,7 +2122,7 @@
             </children>
             <styles xmi:type="notation:ConnectorStyle" xmi:id="_FtPPQV68EeSu4tBL7n5h2g" routing="Rectilinear" jumpLinkStatus="Above" lineColor="8905185"/>
             <styles xmi:type="notation:FontStyle" xmi:id="_FtPPQl68EeSu4tBL7n5h2g" fontColor="7490599" fontName="Lucida Grande" fontHeight="8"/>
-            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_FtPPQ168EeSu4tBL7n5h2g" points="[15, 61, -1398, -655]$[386, 61, -1027, -655]$[386, 647, -1027, -69]$[1328, 647, -85, -69]"/>
+            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_FtPPQ168EeSu4tBL7n5h2g" points="[15, 58, -1395, -650]$[385, 58, -1025, -650]$[385, 648, -1025, -60]$[1335, 648, -75, -60]"/>
             <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_FtP2Vl68EeSu4tBL7n5h2g" id="(0.9076923076923077,0.46)"/>
           </edges>
           <edges xmi:type="notation:Edge" xmi:id="_mB8ZYF9DEeSu4tBL7n5h2g" type="4001" element="_mAMs8F9DEeSu4tBL7n5h2g" source="_I-gfYF9DEeSu4tBL7n5h2g" target="_FTxhAEiwEeSShKVOxlfrCQ">
@@ -2549,7 +2549,7 @@
             </children>
             <styles xmi:type="notation:ConnectorStyle" xmi:id="_pl6GoX7EEeS_Q4eVxCk5uA" routing="Rectilinear" jumpLinkStatus="Above" lineColor="8905185"/>
             <styles xmi:type="notation:FontStyle" xmi:id="_pl6Gon7EEeS_Q4eVxCk5uA" fontColor="7490599" fontName="Lucida Grande" fontHeight="8"/>
-            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_pl6Go37EEeS_Q4eVxCk5uA" points="[21, 26, -744, -70]$[765, 26, 0, -70]"/>
+            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_pl6Go37EEeS_Q4eVxCk5uA" points="[21, 22, -744, -64]$[765, 22, 0, -64]"/>
             <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_pl6Gqn7EEeS_Q4eVxCk5uA" id="(0.8583333333333333,0.68)"/>
             <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_pl6Gq37EEeS_Q4eVxCk5uA" id="(0.005780346820809248,0.3445692883895131)"/>
           </edges>
