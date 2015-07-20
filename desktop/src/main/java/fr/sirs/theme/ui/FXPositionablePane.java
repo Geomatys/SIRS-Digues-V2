@@ -35,7 +35,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -57,12 +56,12 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Toggle;
@@ -117,8 +116,10 @@ public class FXPositionablePane extends BorderPane {
     @FXML private ComboBox<SystemeReperage> uiSRs;
     @FXML private ComboBox<BorneDigue> uiBorneStart;
     @FXML private ComboBox<BorneDigue> uiBorneEnd;
-    @FXML private CheckBox uiAmontStart;
-    @FXML private CheckBox uiAmontEnd;
+    @FXML private RadioButton uiAmontStart;
+    @FXML private RadioButton uiAmontEnd;
+    @FXML private RadioButton uiAvalStart;
+    @FXML private RadioButton uiAvalEnd;
     @FXML private Spinner<Double> uiDistanceStart;
     @FXML private Spinner<Double> uiDistanceEnd;
     @FXML private ImageView uiImageStartValid;
@@ -198,8 +199,28 @@ public class FXPositionablePane extends BorderPane {
         uiSRs.disableProperty().bind(disabledBinding);
         uiBorneStart.disableProperty().bind(disabledBinding);
         uiBorneEnd.disableProperty().bind(disabledBinding);
+        
         uiAmontStart.disableProperty().bind(disabledBinding);
+        uiAvalStart.disableProperty().bind(disabledBinding);
+        uiAmontStart.selectedProperty().addListener(new ChangeListener<Boolean>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(uiAvalStart.isSelected()==uiAmontStart.isSelected()) uiAvalStart.setSelected(!uiAmontStart.isSelected());
+            }
+        });
+        uiAmontStart.setSelected(true);
         uiAmontEnd.disableProperty().bind(disabledBinding);
+        uiAvalEnd.disableProperty().bind(disabledBinding);
+        uiAmontEnd.selectedProperty().addListener(new ChangeListener<Boolean>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(uiAvalEnd.isSelected()==uiAmontEnd.isSelected()) uiAvalEnd.setSelected(!uiAmontEnd.isSelected());
+            }
+        });
+        uiAmontEnd.setSelected(true);
+        
         uiDistanceStart.disableProperty().bind(disabledBinding);
         uiDistanceEnd.disableProperty().bind(disabledBinding);
         
