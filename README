@@ -50,4 +50,24 @@ Note : L'URL vers le JSON de mise à jour est editable dans les préférences de
 
 4 - Créer un plugin :
 
-TODO
+Un archétype maven est fourni dans le projet SIRS. Ce squelette contient la structure de base à respecter pour les sources du projet, ainsi que le fichier de configuration de Maven (pom.xml) permettant de compiler le projet et de créer le paquet nécessaire à son intégration dans l’application.
+
+Pour créer un nouveau projet de type plugin : 
+1 - compiler et déployer localement l’archétype de plugin (il n’est nécessaire de l’éxecuter qu’une fois pour une machine donnée).
+ → Ouvrir une console.
+ → Depuis les sources du projet SIRS, aller dans le dossier “plugins/pluginArchetype”.
+ → Compiler le module en lançant la commande : “mvn clean install”.
+ → Lancer la commande “mvn archetype:jar”. Cela va générer le modèle de projet. Il va   maintenant falloir le déployer localement pour pouvoir l’utiliser.
+ → Lancer la commande “mvn archetype:update-local-catalog”. Cela permet de publier l’archétype de plugin localement, et de générer de nouveaux projets à partir de ce dernier.
+
+2 - Créer un nouveau projet de type plugin : 
+ → Ouvrez une console
+ → Placez-vous dans le dossier où vous voulez créer vos sources.
+ → Executez la commande : “mvn archetype:generate -DarchetypeCatalog=local -DarchetypeGroupId=fr.sirs.plugins -DarchetypeArtifactId=sirs-plugin-archetype”.
+Cela permet d’initialiser un nouveau projet construit comme le modèle choisi. Dans la commande, il vous sera demandé de spécifier plusieurs propriétés pour terminer la création de votre projet : 
+
+Les propriétés ‘groupId’, ‘artifactId’,  et ‘version’ sont respectivement le paquet, le nom et la version initiale que vous voulez donner à votre projet maven.
+La propriété ‘package’ est le paquet Java à générer pour votre projet. Par défaut, c’est le même que celui de votre projet maven.
+‘sirs-version’ est la version de l’application SIRS2 compatible avec votre plugin.
+
+Une fois toutes les propriétés spécifiées, maven vous demande confirmation. Confirmez, et la création de votre plugin est terminée.
