@@ -13,15 +13,15 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 import java.net.URL;
@@ -31,6 +31,8 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 /**
+ * Panneau de gestion de création de documents dynamiques.
+ *
  * @author Cédric Briançon (Geomatys)
  */
 public class DynamicDocumentsPane extends BorderPane implements Initializable {
@@ -38,15 +40,32 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
 
     @FXML private ListView<TronconDigue> uiTronconsList;
 
+    @FXML private ListView uiModelsList;
+
+    @FXML private VBox uiRightVBox;
+
+    @FXML private VBox uiParagraphesVbox;
+
+    @FXML private Button uiAddParagrapheBtn;
+
+    @FXML private Button uiSaveModelBtn;
+
     public DynamicDocumentsPane() {
         SIRS.loadFXML(this, DynamicDocumentsPane.class);
         Injector.injectDependencies(this);
     }
 
+    /**
+     * Initialise les différents panneaux de la page.
+     *
+     * @param location
+     * @param resources
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         final Previews previewRepository = Injector.getSession().getPreviews();
 
+        // Gestion de la liste de système d'endiguements et de tronçons associés
         uiSECombo.setEditable(false);
         uiSECombo.valueProperty().addListener(this::systemeEndiguementChange);
         uiTronconsList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -71,8 +90,20 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
             uiSECombo.getSelectionModel().select(0);
         }
 
+        // Gestion de l'affichage de la partie de droite.
+        uiRightVBox.visibleProperty().bind(uiModelsList.getSelectionModel().selectedItemProperty().isNotNull());
+
+        // Partie de droite, après avoir sélectionné un modèle.
+        uiAddParagrapheBtn.setOnAction(event -> addParagraphePane());
     }
 
+    /**
+     * Rafraîchit la liste des tronçons associés au système d'endiguement choisi.
+     *
+     * @param observable système d'endiguement
+     * @param oldValue ancien système
+     * @param newValue nouveau système
+     */
     private void systemeEndiguementChange(ObservableValue<? extends Preview> observable,
                                           Preview oldValue, Preview newValue) {
         if(newValue==null){
@@ -89,5 +120,12 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
             }
             uiTronconsList.setItems(FXCollections.observableArrayList(troncons));
         }
+    }
+
+    /**
+     * Ajoute un paragraphe au modèle de document.
+     */
+    private void addParagraphePane() {
+        uiParagraphesVbox.getChildren().add(new ModelParagraphePane());
     }
 }
