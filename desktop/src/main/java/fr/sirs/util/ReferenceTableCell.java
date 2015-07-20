@@ -102,6 +102,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
 
     @Override
     public void terminateEdit() {
+        setGraphic(null);
         Object newValue = editor.getValue();
         if (newValue == null) {
             commitEdit(null);
@@ -150,6 +151,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
         if (items != null && !items.isEmpty()) {
             SIRS.initCombo(editor, items, selected);
             super.startEdit();
+            textProperty().unbind();
             setText(null);
             setGraphic(editor);
             editor.requestFocus();
