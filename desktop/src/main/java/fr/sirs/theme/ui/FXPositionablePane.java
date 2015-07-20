@@ -33,7 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -49,6 +51,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -141,7 +144,17 @@ public class FXPositionablePane extends BorderPane {
      */
     private TronconDigue troncon;
     private LinearReferencing.SegmentInfo[] tronconSegments;
-
+    
+    private final LinearChangeListener geoStartUpdater;
+    private final LinearChangeListener geoEndUpdater;
+    private final GeographicChangeListener linearStartUpdater;
+    private final GeographicChangeListener linearEndUpdater;
+    private final SRChangeListener sRChangeListenerStart;
+    private final SRChangeListener sRChangeListenerEnd;
+    private final DistanceChangeListener distanceChangeListenerStart;
+    private final DistanceChangeListener distanceChangeListenerEnd;
+    private final ChangeListener<CoordinateReferenceSystem> crsChangeListener;
+    
     public FXPositionablePane() {
         SIRS.loadFXML(this, Positionable.class);
                 
@@ -181,6 +194,7 @@ public class FXPositionablePane extends BorderPane {
         final BooleanBinding disabledBinding = disableFieldsProperty.or(disabledProperty()).or(positionableProperty.isNull());
         uiImport.visibleProperty().bind(disableFieldsProperty.not().and(uiTypeCoord.selectedProperty()));
         
+        
         uiSRs.disableProperty().bind(disabledBinding);
         uiBorneStart.disableProperty().bind(disabledBinding);
         uiBorneEnd.disableProperty().bind(disabledBinding);
@@ -202,7 +216,6 @@ public class FXPositionablePane extends BorderPane {
         uiLongitudeEnd.setEditable(true);
         uiLatitudeEnd.setEditable(true);
         
-        
         uiLongitudeStart.disableProperty().bind(disabledBinding);
         uiLatitudeStart.disableProperty().bind(disabledBinding);
         uiLongitudeEnd.disableProperty().bind(disabledBinding);
@@ -220,55 +233,42 @@ public class FXPositionablePane extends BorderPane {
         /*
          * DATA LISTENERS
          */        
-        uiCRSs.getSelectionModel().selectedItemProperty().addListener(this::updateGeoCoord);        
-//        uiSRs.getSelectionModel().selectedItemProperty().addListener(this::updateBorneList);     
-        uiSRs.getSelectionModel().selectedItemProperty().addListener(new SRChangeListener(Borne.START));     
-        uiSRs.getSelectionModel().selectedItemProperty().addListener(new SRChangeListener(Borne.END));
+        crsChangeListener = this::updateGeoCoord;
+        sRChangeListenerStart = new SRChangeListener(Borne.START);
+        sRChangeListenerEnd = new SRChangeListener(Borne.END);
         positionableProperty.addListener(this::updateField);
         
         // compute back linear referencing when geographic point is changed
         
         //compute back geographic points when linear referencing changes.
-        final LinearChangeListener geoStartUpdater = new LinearChangeListener(
+        geoStartUpdater = new LinearChangeListener(
                 uiBorneStart, uiLongitudeStart.getValueFactory().valueProperty(), 
                 uiLatitudeStart.getValueFactory().valueProperty(), prDebut, 
                 uiDistanceStart.getValueFactory().valueProperty(), uiAmontStart.selectedProperty());
-        uiBorneStart.valueProperty().addListener(geoStartUpdater);
-        uiBorneStart.focusedProperty().addListener(geoStartUpdater);
-        uiAmontStart.selectedProperty().addListener(geoStartUpdater);
-        uiDistanceStart.valueProperty().addListener(geoStartUpdater);
         
-        final LinearChangeListener geoEndUpdater = new LinearChangeListener(
+        geoEndUpdater = new LinearChangeListener(
                 uiBorneEnd, uiLongitudeEnd.getValueFactory().valueProperty(), 
                 uiLatitudeEnd.getValueFactory().valueProperty(), prFin, 
                 uiDistanceEnd.getValueFactory().valueProperty(), uiAmontEnd.selectedProperty());
-        uiBorneEnd.valueProperty().addListener(geoEndUpdater);
-        uiBorneEnd.focusedProperty().addListener(geoEndUpdater);
-        uiAmontEnd.selectedProperty().addListener(geoEndUpdater);
-        uiDistanceEnd.valueProperty().addListener(geoEndUpdater);
         
         // Compute back linear referencing when geographic changes
-        final GeographicChangeListener linearStartUpdater = new GeographicChangeListener(
+        linearStartUpdater = new GeographicChangeListener(
                 uiBorneStart.valueProperty(), uiDistanceStart.getValueFactory().valueProperty(), 
                 uiAmontStart.selectedProperty(), uiLongitudeStart.getValueFactory().valueProperty(), 
                 uiLatitudeStart.getValueFactory().valueProperty(), prDebut);
-        uiLongitudeStart.valueProperty().addListener(linearStartUpdater);
-        uiLatitudeStart.valueProperty().addListener(linearStartUpdater);
         
-        final GeographicChangeListener linearEndUpdater = new GeographicChangeListener(
+        linearEndUpdater = new GeographicChangeListener(
                 uiBorneEnd.valueProperty(), uiDistanceEnd.getValueFactory().valueProperty(), 
                 uiAmontEnd.selectedProperty(), uiLongitudeEnd.getValueFactory().valueProperty(), 
                 uiLatitudeEnd.getValueFactory().valueProperty(), prFin);
-        uiLongitudeEnd.valueProperty().addListener(linearEndUpdater);
-        uiLatitudeEnd.valueProperty().addListener(linearEndUpdater);
         
         // Update PR information
         uiPRDebut.textProperty().bind(prDebut.asString("%.2f"));
         uiPRFin.textProperty().bind(prFin.asString("%.2f"));
         
         // Check if the positionable distances are on the troncon
-        prDebut.addListener(new DistanceChangeListener(uiBorneStart.valueProperty(), uiDistanceStart, uiAmontStart.selectedProperty(), uiImageStartValid.imageProperty()));
-        prFin.addListener(new DistanceChangeListener(uiBorneEnd.valueProperty(), uiDistanceEnd, uiAmontEnd.selectedProperty(), uiImageEndValid.imageProperty()));
+        distanceChangeListenerStart = new DistanceChangeListener(uiBorneStart.valueProperty(), uiDistanceStart, uiAmontStart.selectedProperty(), uiImageStartValid.imageProperty());
+        distanceChangeListenerEnd = new DistanceChangeListener(uiBorneEnd.valueProperty(), uiDistanceEnd, uiAmontEnd.selectedProperty(), uiImageEndValid.imageProperty());
     }
 
     public ObjectProperty<Positionable> positionableProperty() {
@@ -691,28 +691,30 @@ public class FXPositionablePane extends BorderPane {
         // If we've got at least one valid point, we transform it. Otherwise, just return.
         if (ptStart != null || ptEnd != null) {
             final Runnable pointConverter = () -> {
-                try {
-                    final MathTransform conversion = CRS.findMathTransform(oldValue, newValue, true);
+                synchronized (computingRunning) {
+                    try {
+                        final MathTransform conversion = CRS.findMathTransform(oldValue, newValue, true);
 
-                    if (ptStart != null) {
-                        final Point tmpStart = (Point) JTS.transform(ptStart, conversion);
-                        Platform.runLater(() -> {
-                            uiLongitudeStart.getValueFactory().valueProperty().set(tmpStart.getX());
-                            uiLatitudeStart.getValueFactory().valueProperty().set(tmpStart.getY());
-                        });
+                        if (ptStart != null) {
+                            final Point tmpStart = (Point) JTS.transform(ptStart, conversion);
+                            Platform.runLater(() -> {
+                                uiLongitudeStart.getValueFactory().valueProperty().set(tmpStart.getX());
+                                uiLatitudeStart.getValueFactory().valueProperty().set(tmpStart.getY());
+                            });
+                        }
+                        if (ptEnd != null) {
+                            final Point tmpEnd = (Point) JTS.transform(ptEnd, conversion);
+                            Platform.runLater(() -> {
+                                uiLongitudeEnd.getValueFactory().valueProperty().set(tmpEnd.getX());
+                                uiLatitudeEnd.getValueFactory().valueProperty().set(tmpEnd.getY());
+                            });
+                        }
+                    } catch (Exception ex) {
+                        GeotkFX.newExceptionDialog("La conversion des positions a échouée.", ex).show();
+                        throw new RuntimeException("La conversion des positions a échouée.", ex);
+                    } finally {
+                        Platform.runLater(() -> computingRunning.set(computingRunning.get() - 1));
                     }
-                    if (ptEnd != null) {
-                        final Point tmpEnd = (Point) JTS.transform(ptEnd, conversion);
-                        Platform.runLater(() -> {
-                            uiLongitudeEnd.getValueFactory().valueProperty().set(tmpEnd.getX());
-                            uiLatitudeEnd.getValueFactory().valueProperty().set(tmpEnd.getY());
-                        });
-                    }
-                } catch (Exception ex) {
-                    GeotkFX.newExceptionDialog("La conversion des positions a échouée.", ex).show();
-                    throw new RuntimeException("La conversion des positions a échouée.", ex);
-                } finally {
-                    Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
                 }
             };
 
@@ -725,35 +727,47 @@ public class FXPositionablePane extends BorderPane {
     /**
      * Set list of available {@link SystemeReperage} in {@link #uiSRs}.
      */
-    private void updateSRList() {        
+    private Task updateSRList() {        
         final Positionable pos = (Positionable) positionableProperty.get();
-        if(pos==null) return;
-        
+        if (pos == null) {
+            return null;
+        }
+
         final TronconDigue t = getTroncon();
-        
+
         if (t != null) {
-            computingRunning.set(computingRunning.get()+1);
-            TaskManager.INSTANCE.submit("Mise à jour d'une position", () -> {
-                try {
-                    final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
-                    final List<SystemeReperage> srs = srRepo.getByLinear(t);
-                    final SystemeReperage defaultSR;
-                    if (pos.getSystemeRepId() != null) {
-                        defaultSR = srRepo.get(pos.getSystemeRepId());
-                    } else if (t.getSystemeRepDefautId() != null) {
-                        defaultSR = srRepo.get(t.getSystemeRepDefautId());
-                    } else {
-                        defaultSR = null;
+            computingRunning.set(computingRunning.get() + 1);
+            return TaskManager.INSTANCE.submit("Mise à jour d'une position", () -> {
+                // needed to synchronize field update and SR update
+                synchronized (computingRunning) {
+                    try {
+                        final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
+                        final List<SystemeReperage> srs = srRepo.getByLinear(t);
+                        final SystemeReperage defaultSR;
+                        if (pos.getSystemeRepId() != null) {
+                            defaultSR = srRepo.get(pos.getSystemeRepId());
+                        } else if (t.getSystemeRepDefautId() != null) {
+                            defaultSR = srRepo.get(t.getSystemeRepDefautId());
+                        } else {
+                            defaultSR = null;
+                        }
+
+                        // Wait for JavaFX to update our fields.
+                        TaskManager.MockTask mockTask = new TaskManager.MockTask(() -> {
+                            uiSRs.setItems(FXCollections.observableList(srs));
+                            uiSRs.getSelectionModel().select(defaultSR);
+                        });
+                        Platform.runLater(mockTask);
+                        mockTask.get();
+                        return false;
+
+                    } finally {
+                        Platform.runLater(() -> computingRunning.set(computingRunning.get() - 1));
                     }
-                    Platform.runLater(() -> {
-                        uiSRs.setItems(FXCollections.observableList(srs));
-                        uiSRs.getSelectionModel().select(defaultSR);
-                    });
-                } finally {
-                    Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
                 }
             });
         }
+        return null;
     }
     
     private enum Borne {START, END};
@@ -805,50 +819,50 @@ public class FXPositionablePane extends BorderPane {
             
             computingRunning.set(computingRunning.get() + 1);
             TaskManager.INSTANCE.submit("Mise à jour d'une position", () -> {
-                try {
-                    final ArrayList<BorneDigue> bornes = new ArrayList<>();
-                    final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-                    BorneDigue defaultBorne = null;
-                    for (final SystemeReperageBorne srb : newSRValue.systemeReperageBornes) {
-                        final BorneDigue bd = borneRepo.get(srb.getBorneId());
-                        if (bd != null) {
-                            bornes.add(bd);
-                            if ((borne == Borne.START && bd.getId().equals(pos.getBorneDebutId()))
-                                    || borne == Borne.END && bd.getId().equals(pos.getBorneFinId())) {
-                                defaultBorne = bd;
+                synchronized (computingRunning) {
+                    try {
+                        final ArrayList<BorneDigue> bornes = new ArrayList<>();
+                        final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
+                        BorneDigue defaultBorne = null;
+                        for (final SystemeReperageBorne srb : newSRValue.systemeReperageBornes) {
+                            final BorneDigue bd = borneRepo.get(srb.getBorneId());
+                            if (bd != null) {
+                                bornes.add(bd);
+                                if ((borne == Borne.START && bd.getId().equals(pos.getBorneDebutId()))
+                                        || borne == Borne.END && bd.getId().equals(pos.getBorneFinId())) {
+                                    defaultBorne = bd;
+                                }
                             }
                         }
+
+                        // Si on a de quoi recalculer, on privilégie le recalcul de la borne, et pour être certain de la cohérence, de la distance, de la position relative et du PR.
+                        if (point != null) {
+                            final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(newSRValue, point);
+                            final float computedPR = TronconUtils.computePR(getSourceLinear(newSRValue), newSRValue, point, Injector.getSession().getRepositoryForClass(BorneDigue.class));
+                            Platform.runLater(() -> {
+                                // Mise à jour de la liste des bornes
+                                uiBorne.setItems(FXCollections.observableList(bornes));
+
+                                // Mise à jour de la position
+                                amontSelectedProperty.set(computedLinear.getValue() < 0);
+                                distanceProperty.set(StrictMath.abs(computedLinear.getValue()));
+                                uiBorne.getSelectionModel().select(computedLinear.getKey());
+
+                                // Mise à jour de l'affichage du PR
+                                prProperty.set(computedPR);
+                            });
+                        } // Si on n'a pas de quoi recalculer mais que la nouvelle valeur n'est pas nulle, on va chercher la borne enregistrée en base.
+                        else {
+                            final BorneDigue finalCopy = defaultBorne;
+                            Platform.runLater(() -> {
+                                uiBorne.setItems(FXCollections.observableList(bornes));
+                                uiBorne.getSelectionModel().select(finalCopy);
+                            });
+                        }
+
+                    } finally {
+                        Platform.runLater(() -> computingRunning.set(computingRunning.get() - 1));
                     }
-                        
-                    // Si on a de quoi recalculer, on privilégie le recalcul de la borne, et pour être certain de la cohérence, de la distance, de la position relative et du PR.
-                    if (point != null) {
-                        final Entry<BorneDigue, Double> computedLinear = computeLinearFromGeo(newSRValue, point);
-                        final float computedPR = TronconUtils.computePR(getSourceLinear(newSRValue), newSRValue, point, Injector.getSession().getRepositoryForClass(BorneDigue.class));
-                        Platform.runLater(() -> {
-                            // Mise à jour de la liste des bornes
-                            uiBorne.setItems(FXCollections.observableList(bornes));
-
-                            // Mise à jour de la position
-                            amontSelectedProperty.set(computedLinear.getValue() < 0);
-                            distanceProperty.set(StrictMath.abs(computedLinear.getValue()));
-                            uiBorne.getSelectionModel().select(computedLinear.getKey());
-
-                            // Mise à jour de l'affichage du PR
-                            prProperty.set(computedPR);
-                        });
-                    } 
-
-                    // Si on n'a pas de quoi recalculer mais que la nouvelle valeur n'est pas nulle, on va chercher la borne enregistrée en base.
-                    else {
-                        final BorneDigue finalCopy = defaultBorne;
-                        Platform.runLater(() -> {
-                            uiBorne.setItems(FXCollections.observableList(bornes));
-                            uiBorne.getSelectionModel().select(finalCopy);
-                        });
-                    }
-                    
-                } finally {
-                    Platform.runLater(() -> computingRunning.set(computingRunning.get() - 1));
                 }
             });
         }
@@ -867,6 +881,31 @@ public class FXPositionablePane extends BorderPane {
             uiAmontEnd.selectedProperty().unbindBidirectional(oldValue.borne_fin_avalProperty());
             uiDistanceStart.getValueFactory().valueProperty().unbindBidirectional((Property) oldValue.borne_debut_distanceProperty());
             uiDistanceEnd.getValueFactory().valueProperty().unbindBidirectional((Property) oldValue.borne_fin_distanceProperty());
+            
+            // Remove listeners
+            uiCRSs.getSelectionModel().selectedItemProperty().removeListener(crsChangeListener);
+        
+            uiSRs.getSelectionModel().selectedItemProperty().removeListener(sRChangeListenerStart);     
+            uiSRs.getSelectionModel().selectedItemProperty().removeListener(sRChangeListenerEnd);
+        
+            uiBorneStart.valueProperty().removeListener(geoStartUpdater);
+            uiBorneStart.focusedProperty().removeListener(geoStartUpdater);
+            uiAmontStart.selectedProperty().removeListener(geoStartUpdater);
+            uiDistanceStart.getValueFactory().valueProperty().removeListener(geoStartUpdater);
+
+            uiBorneEnd.valueProperty().removeListener(geoEndUpdater);
+            uiBorneEnd.focusedProperty().removeListener(geoEndUpdater);
+            uiAmontEnd.selectedProperty().removeListener(geoEndUpdater);
+            uiDistanceEnd.getValueFactory().valueProperty().removeListener(geoEndUpdater);
+
+            uiLongitudeStart.getValueFactory().valueProperty().removeListener(linearStartUpdater);
+            uiLatitudeStart.getValueFactory().valueProperty().removeListener(linearStartUpdater);
+
+            uiLongitudeEnd.getValueFactory().valueProperty().removeListener(linearEndUpdater);
+            uiLatitudeEnd.getValueFactory().valueProperty().removeListener(linearEndUpdater);
+            
+            prDebut.removeListener(distanceChangeListenerStart);
+            prFin.removeListener(distanceChangeListenerEnd);
         }
         troncon = null;
         
@@ -876,61 +915,100 @@ public class FXPositionablePane extends BorderPane {
         final Runnable updater = () -> {
             try {
                 //creation de la liste des systemes de reperage
-                updateSRList();
-                
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        //Bindings
-                        uiAmontStart.selectedProperty().bindBidirectional(newValue.borne_debut_avalProperty());
-                        uiAmontEnd.selectedProperty().bindBidirectional(newValue.borne_fin_avalProperty());
-                        uiDistanceStart.getValueFactory().valueProperty().bindBidirectional((Property) newValue.borne_debut_distanceProperty());
-                        uiDistanceEnd.getValueFactory().valueProperty().bindBidirectional((Property) newValue.borne_fin_distanceProperty());
-                        
-                        prDebut.set(newValue.getPrDebut());
-                        prFin.set(newValue.getPrFin());
-                        // Mise à jour automatique de la liste des SRs si le parent
-                        // du positionable change.
-                        if (newValue.parentProperty() != null) {
-                            newValue.parentProperty().addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
-                                updateSRList();
-                            });
-                        }
+                updateSRList().get();
 
-                        //on ecoute les changements de geometrie pour mettre a jour les champs
-                        final ChangeListener cl = new ChangeListener() {
-                            @Override
-                            public void changed(ObservableValue observable, Object oldPosition, Object newPosition) {
-                                //selectionner RGF93 par defaut
-                                uiCRSs.getSelectionModel().clearAndSelect(1);
-                                final Point startPos = newValue.getPositionDebut();
-                                final Point endPos = newValue.getPositionFin();
-                                if(startPos != null){
-                                    uiLongitudeStart.getValueFactory().valueProperty().set(startPos.getX());
-                                    uiLatitudeStart.getValueFactory().valueProperty().set(startPos.getY());
-                                }
-                                if(endPos != null){
-                                    uiLongitudeEnd.getValueFactory().valueProperty().set(endPos.getX());
-                                    uiLatitudeEnd.getValueFactory().valueProperty().set(endPos.getY());
-                                }
+                synchronized (computingRunning) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Bindings
+
+                            final BorneDigue borneStart = Injector.getSession().getRepositoryForClass(BorneDigue.class).get(newValue.getBorneDebutId());
+                            uiBorneStart.setItems(FXCollections.singletonObservableList(borneStart));
+                            uiBorneStart.getSelectionModel().select(borneStart);
+                            final BorneDigue borneEnd = Injector.getSession().getRepositoryForClass(BorneDigue.class).get(newValue.getBorneFinId());
+                            uiBorneEnd.setItems(FXCollections.singletonObservableList(borneEnd));
+                            uiBorneEnd.getSelectionModel().select(borneEnd);
+
+                            uiAmontStart.selectedProperty().bindBidirectional(newValue.borne_debut_avalProperty());
+                            uiAmontEnd.selectedProperty().bindBidirectional(newValue.borne_fin_avalProperty());
+                            uiDistanceStart.getValueFactory().valueProperty().bindBidirectional((Property) newValue.borne_debut_distanceProperty());
+                            uiDistanceEnd.getValueFactory().valueProperty().bindBidirectional((Property) newValue.borne_fin_distanceProperty());
+
+                            prDebut.set(newValue.getPrDebut());
+                            prFin.set(newValue.getPrFin());
+                            // Mise à jour automatique de la liste des SRs si le parent
+                            // du positionable change.
+                            if (newValue.parentProperty() != null) {
+                                newValue.parentProperty().addListener((ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
+                                    updateSRList();
+                                });
                             }
-                        };                        
-                        newValue.positionDebutProperty().addListener(cl);
-                        newValue.positionFinProperty().addListener(cl);
-                        cl.changed(null, null, null);
-                        
-                        //on active le panneau qui a le positionnement
-                        final Point startPos = newValue.getPositionDebut();
-                        final Point endPos = newValue.getPositionFin();
-                        if (startPos != null || endPos != null) {
-                            uiTypeCoord.setSelected(true);
-                        } else {
-                            uiTypeBorne.setSelected(true);
+
+                            //on ecoute les changements de geometrie pour mettre a jour les champs
+                            final ChangeListener cl = new ChangeListener() {
+                                @Override
+                                public void changed(ObservableValue observable, Object oldPosition, Object newPosition) {
+                                    //selectionner RGF93 par defaut
+                                    uiCRSs.getSelectionModel().clearAndSelect(1);
+                                    final Point startPos = newValue.getPositionDebut();
+                                    final Point endPos = newValue.getPositionFin();
+                                    if (startPos != null) {
+                                        uiLongitudeStart.getValueFactory().valueProperty().set(startPos.getX());
+                                        uiLatitudeStart.getValueFactory().valueProperty().set(startPos.getY());
+                                    }
+                                    if (endPos != null) {
+                                        uiLongitudeEnd.getValueFactory().valueProperty().set(endPos.getX());
+                                        uiLatitudeEnd.getValueFactory().valueProperty().set(endPos.getY());
+                                    }
+                                }
+                            };
+                            newValue.positionDebutProperty().addListener(cl);
+                            newValue.positionFinProperty().addListener(cl);
+                            cl.changed(null, null, null);
+
+                            //on active le panneau qui a le positionnement
+                            final Point startPos = newValue.getPositionDebut();
+                            final Point endPos = newValue.getPositionFin();
+                            if (startPos != null || endPos != null) {
+                                uiTypeCoord.setSelected(true);
+                            } else {
+                                uiTypeBorne.setSelected(true);
+                            }
+
+                            // Add listeners
+                            uiCRSs.getSelectionModel().selectedItemProperty().addListener(crsChangeListener);
+
+                            uiSRs.getSelectionModel().selectedItemProperty().addListener(sRChangeListenerStart);
+                            uiSRs.getSelectionModel().selectedItemProperty().addListener(sRChangeListenerEnd);
+
+                            uiBorneStart.valueProperty().addListener(geoStartUpdater);
+                            uiBorneStart.focusedProperty().addListener(geoStartUpdater);
+                            uiAmontStart.selectedProperty().addListener(geoStartUpdater);
+                            uiDistanceStart.getValueFactory().valueProperty().addListener(geoStartUpdater);
+
+                            uiBorneEnd.valueProperty().addListener(geoEndUpdater);
+                            uiBorneEnd.focusedProperty().addListener(geoEndUpdater);
+                            uiAmontEnd.selectedProperty().addListener(geoEndUpdater);
+                            uiDistanceEnd.getValueFactory().valueProperty().addListener(geoEndUpdater);
+
+                            uiLongitudeStart.getValueFactory().valueProperty().addListener(linearStartUpdater);
+                            uiLatitudeStart.getValueFactory().valueProperty().addListener(linearStartUpdater);
+
+                            uiLongitudeEnd.getValueFactory().valueProperty().addListener(linearEndUpdater);
+                            uiLatitudeEnd.getValueFactory().valueProperty().addListener(linearEndUpdater);
+
+                            prDebut.addListener(distanceChangeListenerStart);
+                            prFin.addListener(distanceChangeListenerEnd);
                         }
-                    }
-                });
+                    });
+                }
+            } catch (InterruptedException ex) {
+                SIRS.LOGGER.log(Level.WARNING, null, ex);
+            } catch (ExecutionException ex) {
+                throw new RuntimeException(ex);
             } finally {
-                Platform.runLater(() -> computingRunning.set(computingRunning.get()-1));
+                Platform.runLater(() -> computingRunning.set(computingRunning.get() - 1));
             }
         };
         
