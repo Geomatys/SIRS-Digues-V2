@@ -124,7 +124,7 @@ public class PropertiesFileUtilities {
      */
     private static void setIsModelFolder(final File f, final String model, final String libelle) {
         final Properties prop   = getSirsProperties(f, true);
-        prop.put(f.getName() + "_" + model, true);
+        prop.put(f.getName() + "_" + model, "true");
         prop.put(f.getName() + "_" + LIBELLE, libelle);
         
        storeSirsProperties(prop, f, true);

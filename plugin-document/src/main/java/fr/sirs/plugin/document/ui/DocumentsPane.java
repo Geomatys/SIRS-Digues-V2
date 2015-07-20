@@ -47,6 +47,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
+import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 
@@ -84,6 +85,7 @@ public class DocumentsPane extends GridPane {
     private static final Image DEL_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/remove.png"));
     private static final Image SET_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/set.png"));
     private static final Image LIST_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/list.png"));
+    private static final Image PUB_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/publish.png"));
     
     private static final DateFormat DATE_FORMATTER = new SimpleDateFormat("dd/MM/yyyy");
     
@@ -198,6 +200,21 @@ public class DocumentsPane extends GridPane {
             @Override
             public TreeTableCell call(Object param) {
                 return new DOIntegatedCell();
+            }
+        });
+        
+        // publish column
+        tree1.getColumns().get(6).setCellValueFactory(new Callback() {
+            @Override
+            public ObservableValue call(Object param) {
+                final File f = (File) ((CellDataFeatures)param).getValue().getValue();
+                return new SimpleObjectProperty(f);
+            }
+        });
+        tree1.getColumns().get(6).setCellFactory(new Callback() {
+            @Override
+            public TreeTableCell call(Object param) {
+                return new PublicationCell();
             }
         });
         
@@ -664,6 +681,36 @@ public class DocumentsPane extends GridPane {
             } else {
                 text.setVisible(true);
                 text.setText(getProperty(f, property));
+            }
+        }
+    }
+    
+    private static class PublicationCell extends TreeTableCell {
+
+        private final Button button = new Button();
+
+        public PublicationCell() {
+            setGraphic(button);
+            button.setGraphic(new ImageView(PUB_BUTTON_IMAGE));
+            button.disableProperty().bind(editingProperty());
+            button.onActionProperty().addListener(new ChangeListener<EventHandler<ActionEvent>>() {
+
+                @Override
+                public void changed(ObservableValue<? extends EventHandler<ActionEvent>> observable, EventHandler<ActionEvent> oldValue, EventHandler<ActionEvent> newValue) {
+                    System.out.println("EVENT");
+                }
+                    
+            });
+        }
+        
+        @Override
+        public void updateItem(Object item, boolean empty) {
+            super.updateItem(item, empty);
+            File f = (File) item;
+            if (f == null || (f.isDirectory() && !f.getName().equals(DOCUMENT_FOLDER))) {
+                button.setVisible(false);
+            } else {
+                button.setVisible(true);
             }
         }
     }
