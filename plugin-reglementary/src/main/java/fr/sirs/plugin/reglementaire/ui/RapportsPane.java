@@ -14,12 +14,13 @@ import static fr.sirs.SIRS.LONGITUDE_MIN_FIELD;
 import static fr.sirs.SIRS.VALID_FIELD;
 import fr.sirs.Session;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
-import fr.sirs.core.component.TemplateObligationReglementaireRepository;
+import fr.sirs.core.component.TemplateOdtRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Digue;
@@ -29,16 +30,16 @@ import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObjetPhotographiable;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Photo;
-import fr.sirs.core.model.PhotoChoice;
+import fr.sirs.core.model.PhotoChoiceObligationReglementaire;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RapportModeleObligationReglementaire;
 import fr.sirs.core.model.RapportSectionObligationReglementaire;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
 import fr.sirs.core.model.SQLQuery;
-import fr.sirs.core.model.SectionType;
+import fr.sirs.core.model.SectionTypeObligationReglementaire;
 import fr.sirs.core.model.SystemeEndiguement;
-import fr.sirs.core.model.TemplateObligationReglementaire;
+import fr.sirs.core.model.TemplateOdt;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugin.reglementaire.ODTUtils;
 import fr.sirs.theme.ColumnOrder;
@@ -319,9 +320,9 @@ public class RapportsPane extends BorderPane implements Initializable {
                     try{
                         for(RapportSectionObligationReglementaire section : report.section){
                             Platform.runLater(()->uiProgressLabel.setText("Génération de la section : "+section.getLibelle()));
-                            if(SectionType.TABLE.equals(section.getType())){
+                            if(SectionTypeObligationReglementaire.TABLE.equals(section.getType())){
                                 parts.addAll(generateTable(section, elements, folder, inc));
-                            }else if(SectionType.FICHE.equals(section.getType())){
+                            }else if(SectionTypeObligationReglementaire.FICHE.equals(section.getType())){
                                 parts.addAll(generateFiches(section, elements, folder, inc));
                             }
                         }
@@ -464,7 +465,7 @@ public class RapportsPane extends BorderPane implements Initializable {
     private List generateFiches(RapportSectionObligationReglementaire section,
             Map<String,Objet> elements, File tempFolder, AtomicInteger inc) throws Exception{
 
-        final PhotoChoice photoChoice = section.getPhotoChoice();
+        final PhotoChoiceObligationReglementaire photoChoice = section.getPhotoChoice();
 
         final List parts = new ArrayList();
 
@@ -484,8 +485,8 @@ public class RapportsPane extends BorderPane implements Initializable {
             templateDoc = ODTUtils.getDefaultTemplate();
         }else{
             isDefaultTemplate = false;
-            final TemplateObligationReglementaireRepository repo = (TemplateObligationReglementaireRepository)session.getRepositoryForClass(TemplateObligationReglementaire.class);
-            final TemplateObligationReglementaire template = repo.get(templateId);
+            final AbstractSIRSRepository<TemplateOdt> repo = session.getRepositoryForClass(TemplateOdt.class);
+            final TemplateOdt template = repo.get(templateId);
             if(template==null){
                 throw new Exception("Template manquant pour l'identifiant : "+templateId);
             }
@@ -515,7 +516,7 @@ public class RapportsPane extends BorderPane implements Initializable {
                 final ObjetPhotographiable photographiable = (ObjetPhotographiable) ele;
                 final List<Photo> photos = photographiable.getPhotos();
                 if(!photos.isEmpty()){
-                    if(PhotoChoice.DERNIERE.equals(photoChoice)){
+                    if(PhotoChoiceObligationReglementaire.DERNIERE.equals(photoChoice)){
                         Photo last = null;
                         for(Photo p : photos){
                             final String str = p.getChemin();
@@ -531,7 +532,7 @@ public class RapportsPane extends BorderPane implements Initializable {
                         if(last!=null){
                             parts.add(SIRS.getDocumentAbsolutePath(last.getChemin()));
                         }
-                    }else if(PhotoChoice.TOUTE.equals(photoChoice)){
+                    }else if(PhotoChoiceObligationReglementaire.TOUTE.equals(photoChoice)){
                         for(Photo p : photos){
                             final String str = p.getChemin();
                             if(str!=null && !str.isEmpty()){

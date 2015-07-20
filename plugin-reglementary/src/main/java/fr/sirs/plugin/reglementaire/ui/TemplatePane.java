@@ -3,7 +3,7 @@ package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.model.TemplateObligationReglementaire;
+import fr.sirs.core.model.TemplateOdt;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,9 +33,9 @@ public class TemplatePane extends GridPane implements Initializable {
     @FXML private TextField uiTitre;
     @FXML private TextField uiFile;
 
-    private final TemplateObligationReglementaire template;
+    private final TemplateOdt template;
 
-    public TemplatePane(TemplateObligationReglementaire rapport) {
+    public TemplatePane(TemplateOdt rapport) {
         ArgumentChecks.ensureNonNull("rapport", rapport);
         this.template = rapport;
         
@@ -50,7 +50,7 @@ public class TemplatePane extends GridPane implements Initializable {
         uiFile.textProperty().bindBidirectional(template.fichierProperty());
     }
 
-    public TemplateObligationReglementaire getTemplate(){
+    public TemplateOdt getTemplate(){
         return template;
     }
 
@@ -72,8 +72,8 @@ public class TemplatePane extends GridPane implements Initializable {
         }
     }
 
-    public static TemplateObligationReglementaire showCreateDialog(){
-        final TemplatePane rpane = new TemplatePane(new TemplateObligationReglementaire());
+    public static TemplateOdt showCreateDialog(){
+        final TemplatePane rpane = new TemplatePane(new TemplateOdt());
         rpane.template.setValid(true);
 
         final Dialog dialog = new Dialog();
@@ -91,7 +91,7 @@ public class TemplatePane extends GridPane implements Initializable {
         return null;
     }
 
-    public static TemplateObligationReglementaire showEditDialog(TemplateObligationReglementaire rapport){
+    public static TemplateOdt showEditDialog(TemplateOdt rapport){
         final TemplatePane rpane = new TemplatePane(rapport);
         rpane.template.setValid(true);
 

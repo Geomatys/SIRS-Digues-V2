@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="document" nsURI="http://fr.sirs/document">
+  <eClassifiers xsi:type="ecore:EEnum" name="PhotoChoiceDocument">
+    <eLiterals name="LAST"/>
+    <eLiterals name="ALL"/>
+    <eLiterals name="NONE"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="SectionTypeDocument">
+    <eLiterals name="TABLE"/>
+    <eLiterals name="FORM"/>
+    <eLiterals name="DOCUMENT"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RapportSectionDocument">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//SectionTypeDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="requeteId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
+      <eAnnotations source="Reference">
+        <details key="ref" value="fr.sirs.core.model.SQLQuery"/>
+      </eAnnotations>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="photoChoice" eType="#//PhotoChoiceDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="templateId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//TemplateOdt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RapportModeleDocument">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sections" upperBound="-1"
+        eType="#//RapportSectionDocument" containment="true"/>
+  </eClassifiers>
+</ecore:EPackage>

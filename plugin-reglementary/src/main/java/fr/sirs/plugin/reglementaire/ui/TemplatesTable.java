@@ -2,7 +2,7 @@
 package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
-import fr.sirs.core.model.TemplateObligationReglementaire;
+import fr.sirs.core.model.TemplateOdt;
 import fr.sirs.theme.ui.PojoTable;
 import javafx.collections.FXCollections;
 import javafx.scene.control.TableColumn;
@@ -14,7 +14,7 @@ import javafx.scene.control.TableColumn;
 public class TemplatesTable extends PojoTable {
 
     public TemplatesTable() {
-        super(Injector.getSession().getRepositoryForClass(TemplateObligationReglementaire.class), "Modèles de mise en forme");
+        super(Injector.getSession().getRepositoryForClass(TemplateOdt.class), "Modèles de mise en forme");
         setTableItems(() -> FXCollections.observableList(repo.getAll()));
         editableProperty().set(true);
         detaillableProperty().set(true);
@@ -35,8 +35,8 @@ public class TemplatesTable extends PojoTable {
     }
 
     @Override
-    protected TemplateObligationReglementaire createPojo() {
-        final TemplateObligationReglementaire ele = TemplatePane.showCreateDialog();
+    protected TemplateOdt createPojo() {
+        final TemplateOdt ele = TemplatePane.showCreateDialog();
         if(ele!=null){
             repo.add(ele);
             getAllValues().add(ele);
@@ -46,7 +46,7 @@ public class TemplatesTable extends PojoTable {
 
     @Override
     protected void editPojo(Object pojo) {
-        final TemplateObligationReglementaire rapport = TemplatePane.showEditDialog((TemplateObligationReglementaire) pojo);
+        final TemplateOdt rapport = TemplatePane.showEditDialog((TemplateOdt) pojo);
         if(rapport!=null){
             repo.update(rapport);
 
