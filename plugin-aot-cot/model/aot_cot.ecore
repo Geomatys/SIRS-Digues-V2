@@ -1,10 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="aot_cot" nsURI="http://fr.sirs/aot_cot">
-  <eClassifiers xsi:type="ecore:EClass" name="AOT">
-    <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  <eClassifiers xsi:type="ecore:EClass" name="NewConvention" eSuperTypes="../../sirs-core/model/sirs.ecore#//SIRSDefaultDocument ../../sirs-core/model/sirs.ecore#//SIRSDefaultReference">
+    <eAnnotations source="couchDBDocument">
+      <details key="document" value="true"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeConventionId" eType="#//RefNewConvention"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="organismeSignataireIds"
+        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Organisme"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="contactSignataireIds" upperBound="-1"
+        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Contact"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefNewConvention" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument">
+      <details key="document" value="true"/>
+    </eAnnotations>
   </eClassifiers>
 </ecore:EPackage>
