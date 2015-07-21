@@ -4,15 +4,20 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.Previews;
+import fr.sirs.core.component.RapportModeleDocumentRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.RapportModeleDocument;
+import fr.sirs.core.model.RapportSectionDocument;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -20,13 +25,17 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -40,7 +49,7 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
 
     @FXML private ListView<TronconDigue> uiTronconsList;
 
-    @FXML private ListView uiModelsList;
+    @FXML private ListView<RapportModeleDocument> uiModelsList;
 
     @FXML private VBox uiRightVBox;
 
@@ -48,10 +57,10 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
 
     @FXML private Button uiAddParagrapheBtn;
 
-    @FXML private Button uiSaveModelBtn;
+    @FXML private TextField uiModelNameTxtField;
 
     public DynamicDocumentsPane() {
-        SIRS.loadFXML(this, DynamicDocumentsPane.class);
+        SIRS.loadFXML(this);
         Injector.injectDependencies(this);
     }
 
@@ -90,11 +99,75 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
             uiSECombo.getSelectionModel().select(0);
         }
 
-        // Gestion de l'affichage de la partie de droite.
-        uiRightVBox.visibleProperty().bind(uiModelsList.getSelectionModel().selectedItemProperty().isNotNull());
+        final RapportModeleDocumentRepository rmdr = Injector.getBean(RapportModeleDocumentRepository.class);
+        uiModelsList.setCellFactory(new Callback<ListView<RapportModeleDocument>, ListCell<RapportModeleDocument>>() {
+            @Override
+            public ListCell<RapportModeleDocument> call(ListView<RapportModeleDocument> param) {
+                return new ListCell<RapportModeleDocument>() {
+                    @Override
+                    protected void updateItem(RapportModeleDocument item, boolean empty) {
+                        super.updateItem(item, empty);
 
-        // Partie de droite, après avoir sélectionné un modèle.
-        uiAddParagrapheBtn.setOnAction(event -> addParagraphePane());
+                        if (item != null) {
+                            setText(item.getLibelle());
+                        } else {
+                            setText(null);
+                        }
+                    }
+                };
+            }
+        });
+
+        uiModelsList.setItems(FXCollections.observableArrayList(rmdr.getAll()));
+
+        // Gestion de l'affichage de la partie de droite.
+        uiModelsList.getSelectionModel().selectedItemProperty().addListener((observable, oldModel, newModel) -> {
+            if (oldModel != null) {
+                uiModelNameTxtField.textProperty().unbindBidirectional(oldModel.libelleProperty());
+            }
+
+            if (newModel != null) {
+                if (uiParagraphesVbox.getChildren().size() > 1) {
+                    uiParagraphesVbox.getChildren().remove(1, uiParagraphesVbox.getChildren().size());
+                }
+
+                uiModelNameTxtField.textProperty().bindBidirectional(newModel.libelleProperty());
+
+                uiAddParagrapheBtn.setOnAction(event -> addParagraphePane(newModel));
+                final List<RapportSectionDocument> sections = newModel.getSections();
+                for (int i=0, length=sections.size(); i<length; i++) {
+                    final RapportSectionDocument section = sections.get(i);
+                    uiParagraphesVbox.getChildren().add(new ModelParagraphePane(newModel, section, i+1));
+                }
+            }
+        });
+        uiRightVBox.visibleProperty().bind(uiModelsList.getSelectionModel().selectedItemProperty().isNotNull());
+    }
+
+    @FXML
+    private void addModel() {
+        final RapportModeleDocumentRepository rmdr = Injector.getBean(RapportModeleDocumentRepository.class);
+        final RapportModeleDocument model = rmdr.create();
+        model.setLibelle("Nouveau modèle");
+        rmdr.add(model);
+        uiModelsList.getItems().add(model);
+    }
+
+    @FXML
+    private void deleteModel() {
+        final RapportModeleDocument model = uiModelsList.getSelectionModel().getSelectedItem();
+        uiModelsList.getItems().remove(model);
+        Injector.getBean(RapportModeleDocumentRepository.class).remove(model);
+    }
+
+    @FXML
+    private void saveModel() {
+        final RapportModeleDocument model = uiModelsList.getSelectionModel().getSelectedItem();
+        Injector.getBean(RapportModeleDocumentRepository.class).update(model);
+        final ObservableList<RapportModeleDocument> oldModels = uiModelsList.getItems();
+        uiModelsList.setItems(null);
+        uiModelsList.setItems(oldModels);
+        uiModelsList.getSelectionModel().select(model);
     }
 
     /**
@@ -125,7 +198,10 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
     /**
      * Ajoute un paragraphe au modèle de document.
      */
-    private void addParagraphePane() {
-        uiParagraphesVbox.getChildren().add(new ModelParagraphePane());
+    private void addParagraphePane(final RapportModeleDocument model) {
+        final RapportSectionDocument newSection =
+                Injector.getSession().getElementCreator().createElement(RapportSectionDocument.class);
+        model.getSections().add(newSection);
+        uiParagraphesVbox.getChildren().add(new ModelParagraphePane(model, newSection, model.getSections().size()));
     }
 }

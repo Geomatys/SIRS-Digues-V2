@@ -232,7 +232,7 @@ public final class SIRS extends SirsCore {
                 loader.setResources(ResourceBundle.getBundle(modelClass.getName(), Locale.FRENCH,
                         Thread.currentThread().getContextClassLoader()));
             }catch(MissingResourceException ex){
-                LOGGER.log(Level.INFO, "Missin bundle for : {0}", modelClass.getName());
+                LOGGER.log(Level.INFO, "Missing bundle for : {0}", modelClass.getName());
             }
         }
 
