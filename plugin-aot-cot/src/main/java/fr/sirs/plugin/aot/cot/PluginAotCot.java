@@ -18,6 +18,7 @@ public class PluginAotCot extends Plugin {
         loadingMessage.set("module AOT COT");
         themes.add(new CreateAotCotTheme());
         themes.add(new SuiviAotCotTheme());
+        themes.add(new ConsultationAotCotTheme());
         themes.add(new AssociatedDocumentsAotCotTheme());
     }
 
