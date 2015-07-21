@@ -16,8 +16,9 @@ import org.ektorp.CouchDbConnector;
 /**
  *
  * @author Samuel Andrés (Geomatys)
+ * @param <T>
  */
-abstract class GenericPositionDocumentImporter<T extends AbstractPositionDocument> extends GenericImporter {
+public abstract class GenericPositionDocumentImporter<T extends AbstractPositionDocument> extends GenericImporter {
     
     protected Map<Integer, T> positions = null;
     protected Map<Integer, List<T>> positionsByTronconId = null;

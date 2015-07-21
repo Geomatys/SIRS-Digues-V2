@@ -12189,7 +12189,7 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_Q8jSMONUEeS9Pbtwbvq1MA" name="SIRSDefaultReference" tooltipText="" outgoingEdges="_Q-z8AONUEeS9Pbtwbvq1MA" incomingEdges="_9K_tsKYSEeSphvtX4JgPaw _Apa8YKYTEeSphvtX4JgPaw _--XIwKYSEeSphvtX4JgPaw _CUsycKYTEeSphvtX4JgPaw _HkowIKYVEeSphvtX4JgPaw" width="12" height="10">
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_Q8jSMONUEeS9Pbtwbvq1MA" name="SIRSDefaultReference" tooltipText="" outgoingEdges="_Q-z8AONUEeS9Pbtwbvq1MA" incomingEdges="_9K_tsKYSEeSphvtX4JgPaw _--XIwKYSEeSphvtX4JgPaw _Apa8YKYTEeSphvtX4JgPaw _CUsycKYTEeSphvtX4JgPaw _HkowIKYVEeSphvtX4JgPaw" width="12" height="10">
         <target xmi:type="ecore:EClass" href="sirs.ecore#//SIRSDefaultReference"/>
         <semanticElements xmi:type="ecore:EClass" href="sirs.ecore#//SIRSDefaultReference"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
@@ -12712,7 +12712,7 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_sMeGQAO4EeWAFpz-FySxiw" name="ObjetStructure" tooltipText="" outgoingEdges="_Fg0NcAO7EeWAFpz-FySxiw" incomingEdges="_tGLX0EfvEeSoXJiONqf-1A _l60v8EflEeSoXJiONqf-1A _aScDMEh3EeSShKVOxlfrCQ _1jjD8Eh3EeSShKVOxlfrCQ _GDLfIEh4EeSShKVOxlfrCQ _JjmR4Eh4EeSShKVOxlfrCQ _94lcQEh3EeSShKVOxlfrCQ _D7Ki4FrFEeS5fNILrts1cg _rVPxgGvlEeSz0bikHziHTg" width="12" height="10">
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_sMeGQAO4EeWAFpz-FySxiw" name="ObjetStructure" tooltipText="" outgoingEdges="_Fg0NcAO7EeWAFpz-FySxiw" incomingEdges="_l60v8EflEeSoXJiONqf-1A _tGLX0EfvEeSoXJiONqf-1A _aScDMEh3EeSShKVOxlfrCQ _1jjD8Eh3EeSShKVOxlfrCQ _GDLfIEh4EeSShKVOxlfrCQ _94lcQEh3EeSShKVOxlfrCQ _JjmR4Eh4EeSShKVOxlfrCQ _D7Ki4FrFEeS5fNILrts1cg _rVPxgGvlEeSz0bikHziHTg" width="12" height="10">
         <target xmi:type="ecore:EClass" href="sirs.ecore#//ObjetStructure"/>
         <semanticElements xmi:type="ecore:EClass" href="sirs.ecore#//ObjetStructure"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>

@@ -9,7 +9,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
-import fr.sirs.importer.documentTroncon.TypeDocumentImporter;
+import fr.sirs.importer.documentTroncon.CoreTypeDocumentImporter;
 import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,11 +27,11 @@ public class DocumentAGrandeEchelleImporter extends GenericDocumentRelatedImport
 
     private final TypeDocumentAGrandeEchelleImporter typeDocumentAGrandeEchelleImporter;
     
-    private final TypeDocumentImporter typeDocumentImporter;
+    private final CoreTypeDocumentImporter typeDocumentImporter;
     
     public DocumentAGrandeEchelleImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
-            final TypeDocumentImporter typeDocumentImporter) {
+            final CoreTypeDocumentImporter typeDocumentImporter) {
         super(accessDatabase, couchDbConnector);
         this.typeDocumentAGrandeEchelleImporter = new TypeDocumentAGrandeEchelleImporter(
                 accessDatabase, couchDbConnector);

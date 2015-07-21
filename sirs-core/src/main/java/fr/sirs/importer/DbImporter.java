@@ -31,6 +31,7 @@ import fr.sirs.importer.link.photo.OrientationImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnPrImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnXyImporter;
 import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
+import fr.sirs.importer.documentTroncon.CoreTypeDocumentImporter;
 import fr.sirs.importer.objet.ObjetManager;
 import fr.sirs.importer.system.TypeDonneesSousGroupeImporter;
 import fr.sirs.importer.troncon.GardienTronconGestionImporter;
@@ -126,7 +127,8 @@ public class DbImporter {
     private ObjetManager objetManager;
     private GardienTronconGestionImporter tronconGestionDigueGardienImporter;
     private ProprietaireTronconGestionImporter tronconGestionDigueProprietaireImporter;
-    private PositionDocumentImporter documentImporter;
+    private CoreTypeDocumentImporter typeDocumentImporter;
+    private PositionDocumentImporter positionDocumentImporter;
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
     private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
     private TypeCoteImporter typeCoteImporter;
@@ -492,11 +494,14 @@ public class DbImporter {
 //     Selections
     }
 
+    final CouchDbConnector couchDbConnector;
+    
     public DbImporter(final ApplicationContext applicationContext) throws IOException {
         ArgumentChecks.ensureNonNull("Application context", applicationContext);
         context = applicationContext;
         repositories.put(TronconDigue.class, applicationContext.getBean(TronconDigueRepository.class));
         repositories.put(BorneDigue.class, applicationContext.getBean(BorneDigueRepository.class));
+        couchDbConnector = context.getBean(CouchDbConnector.class);
     }
 
     public void setDatabase(final Database accessDatabase,
@@ -504,7 +509,6 @@ public class DbImporter {
         GenericImporter.outputCrs = crs;
         this.accessDatabase=accessDatabase;
         this.accessCartoDatabase=accessCartoDatabase;
-        final CouchDbConnector couchDbConnector = context.getBean(CouchDbConnector.class);
 
         intervenantImporter = new IntervenantImporter(accessDatabase,
                 couchDbConnector);
@@ -541,13 +545,15 @@ public class DbImporter {
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, intervenantImporter,
                 organismeImporter);
-        documentImporter = new PositionDocumentImporter(accessDatabase,
+        typeDocumentImporter = new CoreTypeDocumentImporter(accessDatabase, 
+                couchDbConnector);
+        positionDocumentImporter = new PositionDocumentImporter(accessDatabase,
                 couchDbConnector, tronconGestionDigueImporter, borneDigueImporter,
                 intervenantImporter, organismeImporter, systemeReperageImporter,
-                evenementHydrauliqueImporter);
+                evenementHydrauliqueImporter, typeDocumentImporter);
         objetManager = new ObjetManager(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
-                intervenantImporter, documentImporter.getDocumentManager().getMarcheImporter(), evenementHydrauliqueImporter, typeCoteImporter);
+                intervenantImporter, positionDocumentImporter.getDocumentManager().getMarcheImporter(), evenementHydrauliqueImporter, typeCoteImporter);
 
         orientationImporter = new OrientationImporter(
                 accessDatabase, couchDbConnector);
@@ -566,32 +572,32 @@ public class DbImporter {
         desordreJournalImporter = new DesordreJournalImporter(accessDatabase,
                 couchDbConnector,
                 objetManager.getDesordreImporter(),
-                documentImporter.getDocumentManager().getJournalArticleImporter());
+                positionDocumentImporter.getDocumentManager().getJournalArticleImporter());
         linkers.add(desordreJournalImporter);
-        elementReseauConventionImporter = new ElementReseauConventionImporter(
-                accessDatabase, couchDbConnector,
-                objetManager.getElementReseauImporter(),
-                documentImporter.getDocumentManager().getConventionImporter());
-        linkers.add(elementReseauConventionImporter);
+//        elementReseauConventionImporter = new ElementReseauConventionImporter(
+//                accessDatabase, couchDbConnector,
+//                objetManager.getElementReseauImporter(),
+//                documentImporter.getDocumentManager().getConventionImporter());
+//        linkers.add(elementReseauConventionImporter);
         laisseCrueJournalImporter = new LaisseCrueJournalImporter(
                 accessDatabase, couchDbConnector,
                 objetManager.getLaisseCrueImporter(),
-                documentImporter.getDocumentManager().getJournalArticleImporter());
+                positionDocumentImporter.getDocumentManager().getJournalArticleImporter());
         linkers.add(laisseCrueJournalImporter);
         ligneEauJournalImporter = new LigneEauJournalImporter(accessDatabase,
                 couchDbConnector,
                 objetManager.getLigneEauImporter(),
-                documentImporter.getDocumentManager().getJournalArticleImporter());
+                positionDocumentImporter.getDocumentManager().getJournalArticleImporter());
         linkers.add(ligneEauJournalImporter);
         monteeDesEauxJournalImporter = new MonteeDesEauxJournalImporter(
                 accessDatabase, couchDbConnector,
                 objetManager.getMonteeDesEauxImporter(),
-                documentImporter.getDocumentManager().getJournalArticleImporter());
+                positionDocumentImporter.getDocumentManager().getJournalArticleImporter());
         linkers.add(monteeDesEauxJournalImporter);
         prestationDocumentImporter = new PrestationDocumentImporter(
                 accessDatabase, couchDbConnector,
                 objetManager.getPrestationImporter(),
-                documentImporter);
+                positionDocumentImporter);
         linkers.add(prestationDocumentImporter);
         elementReseauGardienImporter = new ElementReseauGardienImporter(
                 accessDatabase, couchDbConnector,
@@ -614,24 +620,24 @@ public class DbImporter {
                 intervenantImporter);
         linkers.add(prestationIntervenantImporter);
         marcheFinanceurImporter = new MarcheFinanceurImporter(accessDatabase,
-                couchDbConnector, documentImporter.getDocumentManager().getMarcheImporter(),
+                couchDbConnector, positionDocumentImporter.getDocumentManager().getMarcheImporter(),
                 organismeImporter);
         linkers.add(marcheFinanceurImporter);
         marcheMaitreOeuvreImporter = new MarcheMaitreOeuvreImporter(
                 accessDatabase, couchDbConnector,
-                documentImporter.getDocumentManager().getMarcheImporter(), organismeImporter);
+                positionDocumentImporter.getDocumentManager().getMarcheImporter(), organismeImporter);
         linkers.add(marcheMaitreOeuvreImporter);
         typeDonneesSousGroupeImporter = new TypeDonneesSousGroupeImporter(
                 accessDatabase, couchDbConnector);
         photoLocaliseeEnPrImporter = new PhotoLocaliseeEnPrImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 objetManager, systemeReperageImporter, borneDigueImporter,
-                intervenantImporter, documentImporter, orientationImporter,
+                intervenantImporter, positionDocumentImporter, orientationImporter,
                 typeCoteImporter, typeDonneesSousGroupeImporter);
         linkers.add(photoLocaliseeEnPrImporter);
         photoLocaliseeEnXyImporter = new PhotoLocaliseeEnXyImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter,
-                objetManager, intervenantImporter, documentImporter,
+                objetManager, intervenantImporter, positionDocumentImporter,
                 orientationImporter, typeCoteImporter, typeDonneesSousGroupeImporter);
         linkers.add(photoLocaliseeEnXyImporter);
     }
@@ -643,7 +649,39 @@ public class DbImporter {
     public Database getCartoDatabase() {
         return this.accessCartoDatabase;
     }
+    
+    public CouchDbConnector getConnector(){
+        return couchDbConnector;
+    }
+    
+    public OrganismeImporter getOrganismeImporter(){
+        return organismeImporter;
+    }
 
+    public IntervenantImporter getIntervenantImporter(){
+        return intervenantImporter;
+    }
+    
+    public TronconGestionDigueImporter getTronconGestionDigueImporter(){
+        return tronconGestionDigueImporter;
+    }
+    
+    public BorneDigueImporter getBorneDigueImporter(){
+        return borneDigueImporter;
+    }
+    
+    public SystemeReperageImporter getSystemeReperageImporter(){
+        return systemeReperageImporter;
+    }
+    
+    public PositionDocumentImporter getPositionDocumentImporter() {
+        return positionDocumentImporter;
+    }
+
+    public CoreTypeDocumentImporter getTypeDocumentImporter() {
+        return typeDocumentImporter;
+    }
+    
     public void importation() throws IOException, AccessDbImporterException{
 /*
         => troncons
@@ -664,7 +702,7 @@ public class DbImporter {
         systemeReperageImporter.update();
 
         systemeReperageBorneImporter.getByBorneId();
-        documentImporter.getPositions();
+        positionDocumentImporter.getPositions();
         objetManager.compute();
         objetManager.link();
         tronconGestionDigueGardienImporter.compute();
@@ -680,7 +718,7 @@ public class DbImporter {
 //        documentImporter.update();
         evenementHydrauliqueImporter.update();
         objetManager.update();
-        documentImporter.update();
+        positionDocumentImporter.update();
     }
 
     //TODO remove when import finished

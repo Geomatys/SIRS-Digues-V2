@@ -14,7 +14,7 @@ import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.RefTypeDocument;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.documentTroncon.document.TypeDocumentImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,12 +27,10 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeDocumentImporter extends GenericImporter {
+public class CoreTypeDocumentImporter extends TypeDocumentImporter {
 
-    private Map<Integer, Class> classesDocument = null;
-    private Map<Integer, RefTypeDocument> typesDocument = null;
 
-    TypeDocumentImporter(final Database accessDatabase,
+    public CoreTypeDocumentImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
@@ -108,9 +106,9 @@ public class TypeDocumentImporter extends GenericImporter {
                 final Class classe;
                 final DbImporter.TableName table = valueOf(row.getString(Columns.NOM_TABLE_EVT.toString()));
                 switch (table) {
-                    case SYS_EVT_CONVENTION:
-                        classe = Convention.class;
-                        break;
+//                    case SYS_EVT_CONVENTION:
+//                        classe = Convention.class;
+//                        break;
 ////                case SYS_EVT_COUPE_OUVRAGE: // N'existe pas
 //                case SYS_EVT_DOCUMENT_MARCHE:
 //                    classe = .class; break;

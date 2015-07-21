@@ -57,7 +57,7 @@
                <graphic>
                   <ImageView pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../images/menu-carto.png" />
+                        <Image url="@../../images/menu-carto.png" />
                      </image>
                   </ImageView>
                </graphic>

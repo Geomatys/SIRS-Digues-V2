@@ -234,12 +234,12 @@
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
         <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
         <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
-        <ownedStyle xmi:type="diagram:FlatContainerStyle" xmi:id="_OuCAcC7oEeWv4JwE7hUOUQ" backgroundStyle="Liquid">
-          <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_OuCAcS7oEeWv4JwE7hUOUQ"/>
+        <ownedStyle xmi:type="diagram:FlatContainerStyle" xmi:id="_Kqip8C71EeW65sRTEELlrA" backgroundStyle="Liquid">
+          <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Kqip8S71EeW65sRTEELlrA"/>
           <description xmi:type="style:FlatContainerStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@style"/>
-          <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_OuCAci7oEeWv4JwE7hUOUQ"/>
-          <backgroundColor xmi:type="viewpoint:RGBValues" xmi:id="_OuCAcy7oEeWv4JwE7hUOUQ" red="255" green="255" blue="255"/>
-          <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_OuCAdC7oEeWv4JwE7hUOUQ" red="255" green="252" blue="216"/>
+          <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_Kqip8i71EeW65sRTEELlrA"/>
+          <backgroundColor xmi:type="viewpoint:RGBValues" xmi:id="_Kqip8y71EeW65sRTEELlrA" red="255" green="255" blue="255"/>
+          <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_Kqip9C71EeW65sRTEELlrA" red="255" green="252" blue="216"/>
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="__M2KgC7nEeWv4JwE7hUOUQ" name="type : SectionTypeDocument = TABLE" tooltipText="">

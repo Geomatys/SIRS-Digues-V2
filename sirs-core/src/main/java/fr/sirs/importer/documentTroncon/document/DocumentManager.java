@@ -4,8 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
-import fr.sirs.importer.documentTroncon.TypeDocumentImporter;
+import fr.sirs.importer.documentTroncon.CoreTypeDocumentImporter;
 import fr.sirs.importer.documentTroncon.document.convention.ConventionImporter;
 import fr.sirs.importer.documentTroncon.document.documentAGrandeEchelle.DocumentAGrandeEchelleImporter;
 import fr.sirs.importer.documentTroncon.document.journal.JournalArticleImporter;
@@ -25,7 +24,7 @@ import org.ektorp.CouchDbConnector;
  */
 public class DocumentManager {
     
-    private final ConventionImporter conventionImporter;
+//    private final ConventionImporter conventionImporter;
     private final DocumentAGrandeEchelleImporter documentAGrandeEchelleImporter;
     private final JournalArticleImporter journalArticleImporter;
     private final MarcheImporter marcheImporter;
@@ -42,11 +41,11 @@ public class DocumentManager {
             final IntervenantImporter intervenantImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
-            final TypeDocumentImporter typeDocumentImporter){
+            final CoreTypeDocumentImporter typeDocumentImporter){
         
-        conventionImporter = new ConventionImporter(accessDatabase, 
-                couchDbConnector, intervenantImporter, organismeImporter);
-        documentRelatedImporters.add(conventionImporter);
+//        conventionImporter = new ConventionImporter(accessDatabase, 
+//                couchDbConnector, intervenantImporter, organismeImporter);
+//        documentRelatedImporters.add(conventionImporter);
         documentAGrandeEchelleImporter = new DocumentAGrandeEchelleImporter(
                 accessDatabase, couchDbConnector, typeDocumentImporter);
         documentRelatedImporters.add(documentAGrandeEchelleImporter);
@@ -79,9 +78,9 @@ public class DocumentManager {
                 evenementHydrauliqueImporter, typeSystemeReleveProfilImporter);
     }
 
-    public ConventionImporter getConventionImporter() {
-        return conventionImporter;
-    }
+//    public ConventionImporter getConventionImporter() {
+//        return conventionImporter;
+//    }
 
     public DocumentAGrandeEchelleImporter getDocumentAGrandeEchelleImporter() {
         return documentAGrandeEchelleImporter;

@@ -39,9 +39,9 @@ public class PositionDocumentImporter extends GenericPositionDocumentImporter<Ab
     private final DocumentManager documentManager;
     private final List<GenericDocumentRelatedImporter> documentRelatedImporters;
     
-    private final TypeDocumentImporter typeDocumentImporter;
+    private final CoreTypeDocumentImporter typeDocumentImporter;
     
-    private final SysEvtConventionImporter sysEvtConventionImporter;
+//    private final SysEvtConventionImporter sysEvtConventionImporter;
     private final SysEvtProfilEnLongImporter sysEvtProfilLongImporter;
     private final SysEvtProfilEnTraversImporter sysEvtProfilTraversImporter;
     private final SysEvtRapportEtudesImporter sysEvtRapportEtudeImporter;
@@ -56,21 +56,17 @@ public class PositionDocumentImporter extends GenericPositionDocumentImporter<Ab
             final IntervenantImporter intervenantImporter,
             final OrganismeImporter organismeImporter,
             final SystemeReperageImporter systemeReperageImporter,
-            final EvenementHydrauliqueImporter evenementHydrauliqueImporter){
+            final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
+            final CoreTypeDocumentImporter typeDocumentImporter){
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 borneDigueImporter, systemeReperageImporter);
-        this.typeDocumentImporter = new TypeDocumentImporter(accessDatabase, 
-                couchDbConnector);
+        this.typeDocumentImporter = typeDocumentImporter;
         documentManager = new DocumentManager(accessDatabase, couchDbConnector, 
                 organismeImporter, intervenantImporter, systemeReperageImporter,
                 evenementHydrauliqueImporter, typeDocumentImporter);
         
         documentRelatedImporters = documentManager.getDocumentRelatedImporters();
         
-        sysEvtConventionImporter = new SysEvtConventionImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter,
-                borneDigueImporter, systemeReperageImporter, 
-                documentManager.getConventionImporter());
         sysEvtProfilTraversImporter = new SysEvtProfilEnTraversImporter(
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 borneDigueImporter, systemeReperageImporter, 
@@ -94,7 +90,7 @@ public class PositionDocumentImporter extends GenericPositionDocumentImporter<Ab
                 borneDigueImporter, systemeReperageImporter, documentManager.getDocumentAGrandeEchelleImporter());
     }
     
-    public DocumentManager getDocumentManager() {return this.documentManager;}
+    public DocumentManager getDocumentManager() {return documentManager;}
 
 //    @Override
 //    public void update() throws IOException, AccessDbImporterException {
@@ -167,19 +163,21 @@ public class PositionDocumentImporter extends GenericPositionDocumentImporter<Ab
         while(it.hasNext()){
             final Row row = it.next();
             final AbstractPositionDocument position = importRow(row);
-            position.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
             
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            positions.put(row.getInt(Columns.ID_DOC.toString()), position);
+            if(position!=null){
+                position.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
 
-            // Set the list ByTronconId
-            List<AbstractPositionDocument> listByTronconId = positionsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-                positionsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+                positions.put(row.getInt(Columns.ID_DOC.toString()), position);
+
+                // Set the list ByTronconId
+                List<AbstractPositionDocument> listByTronconId = positionsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+                if (listByTronconId == null) {
+                    listByTronconId = new ArrayList<>();
+                    positionsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                }
+                listByTronconId.add(position);
             }
-            listByTronconId.add(position);
-                    
         }
         couchDbConnector.executeBulk(positions.values());
     }
@@ -193,10 +191,11 @@ public class PositionDocumentImporter extends GenericPositionDocumentImporter<Ab
 
         if (classeDocument != null) {
 
-            if (classeDocument.equals(Convention.class)) {
-                return sysEvtConventionImporter.importRow(row);
-            } 
-            else if (classeDocument.equals(DocumentGrandeEchelle.class)){
+//            if (classeDocument.equals(Convention.class)) {
+//                return sysEvtConventionImporter.importRow(row);
+//            } 
+//            else 
+            if (classeDocument.equals(DocumentGrandeEchelle.class)){
                 return sysEvtDocumentAGrandeEchelleImporter.importRow(row);
             }
             else if(classeDocument.equals(ArticleJournal.class)){

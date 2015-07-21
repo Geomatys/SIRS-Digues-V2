@@ -3,7 +3,6 @@ package fr.sirs.importer.documentTroncon.document.convention;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
-import fr.sirs.core.model.RefConvention;
 import fr.sirs.core.model.RefNewConvention;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
