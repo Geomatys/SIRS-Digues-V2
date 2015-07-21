@@ -1,0 +1,47 @@
+/* 
+    Created on : 21 juil. 2015, 09:23:36
+    Author     : Alexis Manin (Geomatys)
+
+.header : a TitledPane which contains filter elements.
+
+.footer : a TitledPane which contains export button and last export parameters.
+
+*/
+
+/*
+ * We set titled panes completely transparents first.
+ */
+.titled-pane, .titled-pane > .title, .content {
+    -fx-border-color: transparent;
+    -fx-border-style: none;
+    -fx-background-color: transparent;
+}
+
+.list-title, .titled-pane > .title {
+    -fx-font: bold 13pt default;
+    -fx-text-fill : darkgray;
+}
+
+.header, .footer {
+    -fx-background-color: rgb(220,220,220);
+    -fx-background-radius : 7;
+    -fx-text-fill : darkgray;
+}
+
+.button {
+    -fx-alignment:CENTER;
+    -fx-graphic-text-gap:0;
+    -fx-border-radius : 4;
+    -fx-border-color : #AAAAAA;
+    -fx-background-radius : 4;
+    -fx-background-color : white;
+}
+
+.button:hover {
+    -fx-background-color : aliceblue;
+}
+
+.button:armed {
+    -fx-border-color : #AAAAAA;
+    -fx-background-color : #DDDDDD;
+}

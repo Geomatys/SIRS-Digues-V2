@@ -30,14 +30,14 @@ public class LabelMapper {
         return mapper;
     }
 
-    private LabelMapper(final Class modelClass) {
+    private LabelMapper(final Class modelClass) throws MissingResourceException {
         ArgumentChecks.ensureNonNull("Input model class", modelClass);
         this.modelClass = modelClass;
         bundle = ResourceBundle.getBundle(modelClass.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
     }
-    
+
     public Class getModelClass() {return this.modelClass;}
-    
+
     public String mapPropertyName(final String property) {
         try {
             return bundle.getString(property);
@@ -45,7 +45,7 @@ public class LabelMapper {
             return property;
         }
     }
-    
+
     public static String mapPropertyName(final Class modelClass, final String property) {
         return get(modelClass).mapPropertyName(property);
     }
