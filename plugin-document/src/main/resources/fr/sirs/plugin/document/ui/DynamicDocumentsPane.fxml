@@ -23,7 +23,7 @@
                      <children>
                         <Label text="Modèles de documents" />
                         <Pane HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" onAction="#deleteModel" text="Supprimer" />
+                        <Button fx:id="uiDeleteBtn" mnemonicParsing="false" onAction="#deleteModel" text="Supprimer" />
                         <Button fx:id="uiNewModelBtn" mnemonicParsing="false" onAction="#addModel" text="Ajouter" />
                      </children>
                   </HBox>

@@ -17,6 +17,7 @@ import fr.sirs.util.SirsStringConverter;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -137,10 +138,11 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
                 final List<RapportSectionDocument> sections = newModel.getSections();
                 for (int i=0, length=sections.size(); i<length; i++) {
                     final RapportSectionDocument section = sections.get(i);
-                    uiParagraphesVbox.getChildren().add(new ModelParagraphePane(newModel, section, i+1));
+                    uiParagraphesVbox.getChildren().add(new ModelParagraphePane(uiParagraphesVbox, newModel, section, i+1));
                 }
             }
         });
+
         uiRightVBox.visibleProperty().bind(uiModelsList.getSelectionModel().selectedItemProperty().isNotNull());
     }
 
@@ -202,6 +204,6 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
         final RapportSectionDocument newSection =
                 Injector.getSession().getElementCreator().createElement(RapportSectionDocument.class);
         model.getSections().add(newSection);
-        uiParagraphesVbox.getChildren().add(new ModelParagraphePane(model, newSection, model.getSections().size()));
+        uiParagraphesVbox.getChildren().add(new ModelParagraphePane(uiParagraphesVbox, model, newSection, model.getSections().size()));
     }
 }
