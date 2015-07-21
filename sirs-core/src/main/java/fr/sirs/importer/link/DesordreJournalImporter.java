@@ -70,5 +70,7 @@ public class DesordreJournalImporter extends GenericEntityLinker {
                 desordre.getArticleIds().add(article.getId());
             }
         }
+        
+        couchDbConnector.executeBulk(desordres.values());
     }
 }

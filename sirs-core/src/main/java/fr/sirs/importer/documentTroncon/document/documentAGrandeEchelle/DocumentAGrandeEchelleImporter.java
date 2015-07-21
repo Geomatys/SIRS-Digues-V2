@@ -10,7 +10,7 @@ import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
 import fr.sirs.importer.documentTroncon.CoreTypeDocumentImporter;
-import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
+import fr.sirs.importer.documentTroncon.document.GenericDocumentImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class DocumentAGrandeEchelleImporter extends GenericDocumentRelatedImporter<DocumentGrandeEchelle> {
+public class DocumentAGrandeEchelleImporter extends GenericDocumentImporter<DocumentGrandeEchelle> {
 
     private final TypeDocumentAGrandeEchelleImporter typeDocumentAGrandeEchelleImporter;
     

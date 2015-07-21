@@ -7,7 +7,7 @@ import fr.sirs.core.model.ArticleJournal;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import static fr.sirs.importer.DbImporter.TableName.JOURNAL_ARTICLE;
 import static fr.sirs.importer.DbImporter.cleanNullString;
-import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
+import fr.sirs.importer.documentTroncon.document.GenericDocumentImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class JournalArticleImporter extends GenericDocumentRelatedImporter<ArticleJournal> {
+public class JournalArticleImporter extends GenericDocumentImporter<ArticleJournal> {
     
     private final JournalImporter journalImporter;
     

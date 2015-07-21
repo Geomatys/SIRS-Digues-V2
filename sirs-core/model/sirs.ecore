@@ -531,8 +531,6 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="conventionIds" upperBound="-1"
-        eType="#//Convention"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EchelleLimnimetrique" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -809,27 +807,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="systemeRepDzId" eType="#//SystemeReperage"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydrauliqueId"
         eType="#//EvenementHydraulique" eOpposite="#//EvenementHydraulique/ligneEauIds"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Convention" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference">
-    <eAnnotations source="couchDBDocument">
-      <details key="document" value="true"/>
-    </eAnnotations>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-      <eAnnotations source="localDate"/>
-    </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-      <eAnnotations source="localDate"/>
-    </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeConventionId" eType="#//RefConvention"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-      <eAnnotations source="localDate"/>
-    </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="organismeSignataireIds"
-        upperBound="-1" eType="#//Organisme"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="contactSignataireIds" upperBound="-1"
-        eType="#//Contact"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Marche" eSuperTypes="#//SIRSDefaultDocument #//SIRSDefaultReference">
     <eAnnotations source="couchDBDocument">
@@ -1253,11 +1230,6 @@
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefConvention" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="couchDBDocument">
-      <details key="document" value="true"/>
-    </eAnnotations>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefConduiteFermee" eSuperTypes="#//ReferenceType">
     <eAnnotations source="couchDBDocument">

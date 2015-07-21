@@ -14,7 +14,6 @@ import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
 import fr.sirs.importer.link.DesordreEvenementHydrauImporter;
 import fr.sirs.importer.link.DesordreJournalImporter;
-import fr.sirs.importer.link.ElementReseauConventionImporter;
 import fr.sirs.importer.link.ElementReseauGardienImporter;
 import fr.sirs.importer.link.ElementReseauGestionnaireImporter;
 import fr.sirs.importer.link.ElementReseauProprietaireImporter;
@@ -33,6 +32,7 @@ import fr.sirs.importer.link.photo.PhotoLocaliseeEnXyImporter;
 import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
 import fr.sirs.importer.documentTroncon.CoreTypeDocumentImporter;
 import fr.sirs.importer.objet.ObjetManager;
+import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.system.TypeDonneesSousGroupeImporter;
 import fr.sirs.importer.troncon.GardienTronconGestionImporter;
 import fr.sirs.importer.troncon.ProprietaireTronconGestionImporter;
@@ -45,8 +45,10 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.sis.util.ArgumentChecks;
@@ -138,7 +140,6 @@ public class DbImporter {
     private DesordreEvenementHydrauImporter desordreEvenementHydrauImporter;
     private PrestationEvenementHydrauImporter prestationEvenementHydrauImporter;
     private DesordreJournalImporter desordreJournalImporter;
-    private ElementReseauConventionImporter elementReseauConventionImporter;
     private LaisseCrueJournalImporter laisseCrueJournalImporter;
     private LigneEauJournalImporter ligneEauJournalImporter;
     private MonteeDesEauxJournalImporter monteeDesEauxJournalImporter;
@@ -574,11 +575,6 @@ public class DbImporter {
                 objetManager.getDesordreImporter(),
                 positionDocumentImporter.getDocumentManager().getJournalArticleImporter());
         linkers.add(desordreJournalImporter);
-//        elementReseauConventionImporter = new ElementReseauConventionImporter(
-//                accessDatabase, couchDbConnector,
-//                objetManager.getElementReseauImporter(),
-//                documentImporter.getDocumentManager().getConventionImporter());
-//        linkers.add(elementReseauConventionImporter);
         laisseCrueJournalImporter = new LaisseCrueJournalImporter(
                 accessDatabase, couchDbConnector,
                 objetManager.getLaisseCrueImporter(),
@@ -682,6 +678,10 @@ public class DbImporter {
         return typeDocumentImporter;
     }
     
+    public ObjetManager getObjetManager(){
+        return objetManager;
+    }
+    
     public void importation() throws IOException, AccessDbImporterException{
 /*
         => troncons
@@ -719,6 +719,13 @@ public class DbImporter {
         evenementHydrauliqueImporter.update();
         objetManager.update();
         positionDocumentImporter.update();
+        
+        
+        // Importation des plugins
+        final Iterator<PluginImporter> pluginImporterIt = ServiceLoader.load(PluginImporter.class).iterator();
+        while(pluginImporterIt.hasNext()){
+            pluginImporterIt.next().importation(this);
+        }
     }
 
     //TODO remove when import finished

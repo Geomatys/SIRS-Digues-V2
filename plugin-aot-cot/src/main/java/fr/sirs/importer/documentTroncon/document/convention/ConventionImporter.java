@@ -4,12 +4,12 @@ import fr.sirs.importer.*;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-
 import fr.sirs.core.model.Convention;
+
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefConvention;
 import static fr.sirs.importer.DbImporter.TableName.CONVENTION;
-import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
+import fr.sirs.importer.documentTroncon.document.GenericDocumentImporter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ConventionImporter extends GenericDocumentRelatedImporter<Convention> {
+public class ConventionImporter extends GenericDocumentImporter<Convention> {
     
     private final TypeConventionImporter typeConventionImporter;
     private final ConventionSignataireIntervenantImporter conventionSignataireIntervenantImporter;

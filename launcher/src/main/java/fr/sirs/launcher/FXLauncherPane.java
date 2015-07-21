@@ -20,7 +20,6 @@ import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Utilisateur;
-import fr.sirs.importer.PluginImporter;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
 import fr.sirs.util.FXAuthenticationWalletEditor;
@@ -38,10 +37,8 @@ import java.nio.file.Paths;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -524,15 +521,6 @@ public class FXLauncherPane extends BorderPane {
                 importer.setDatabase(DatabaseBuilder.open(mainDbFile),
                         DatabaseBuilder.open(cartoDbFile), uiImportCRS.crsProperty().get());
                 importer.importation();
-                
-                // Importation des plugins
-                final Iterator<PluginImporter> pluginImporterIt = ServiceLoader.load(PluginImporter.class).iterator();
-                SIRS.LOGGER.log(Level.INFO, "Importation des plugins : préparation");
-                while(pluginImporterIt.hasNext()){
-                    SIRS.LOGGER.log(Level.INFO, "Importation des plugins"+importer);
-                    pluginImporterIt.next().importation(importer);
-                }
-                SIRS.LOGGER.log(Level.INFO, "Fin de l'importation.");
                 
                 final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
                 createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());

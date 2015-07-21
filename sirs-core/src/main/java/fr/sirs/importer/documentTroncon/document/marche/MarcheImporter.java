@@ -7,7 +7,7 @@ import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.Organisme;
 import static fr.sirs.importer.DbImporter.TableName.MARCHE;
-import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
+import fr.sirs.importer.documentTroncon.document.GenericDocumentImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class MarcheImporter extends GenericDocumentRelatedImporter<Marche> {
+public class MarcheImporter extends GenericDocumentImporter<Marche> {
     
     private final OrganismeImporter organismeImporter;
     

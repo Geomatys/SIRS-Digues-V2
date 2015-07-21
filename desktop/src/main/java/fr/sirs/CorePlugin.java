@@ -10,7 +10,6 @@ import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoir;
@@ -242,7 +241,6 @@ public class CorePlugin extends Plugin {
             }
             final Map<Class<? extends AbstractPositionDocument>, List<Class>> mapDesTypesDeDocs = new HashMap<>();
             final List<Class> positionDocumentList = new ArrayList<>();
-            positionDocumentList.add(Convention.class);
             positionDocumentList.add(ArticleJournal.class);
             positionDocumentList.add(Marche.class);
             positionDocumentList.add(RapportEtude.class);
@@ -588,7 +586,6 @@ public class CorePlugin extends Plugin {
         themes.add(new ContactsTheme());
         themes.add(new EvenementsHydrauliquesTheme());
         themes.add(new DocumentTheme<>("Profil en travers", ProfilTravers.class));
-        themes.add(new DocumentTheme<>("Convention", Convention.class));
         themes.add(new DocumentTheme<>("Article de presse", ArticleJournal.class));
         themes.add(new DocumentTheme<>("Marché", Marche.class));
         themes.add(new DocumentTheme<>("Rapport d'étude", RapportEtude.class));

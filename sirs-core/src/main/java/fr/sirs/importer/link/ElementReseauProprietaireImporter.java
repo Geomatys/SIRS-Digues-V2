@@ -94,6 +94,10 @@ public class ElementReseauProprietaireImporter extends GenericEntityLinker {
                 }
             }
         }
+        
+        couchDbConnector.executeBulk(reseaux.values());
+        couchDbConnector.executeBulk(intervenants.values());
+        couchDbConnector.executeBulk(organismes.values());
     }
     
     

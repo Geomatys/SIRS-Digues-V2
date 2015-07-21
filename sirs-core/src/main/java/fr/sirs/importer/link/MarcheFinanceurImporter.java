@@ -70,5 +70,7 @@ public class MarcheFinanceurImporter extends GenericEntityLinker {
                 marche.getFinanceurIds().add(financeur.getId());
             }
         }
+        
+        couchDbConnector.executeBulk(marches.values());
     }
 }

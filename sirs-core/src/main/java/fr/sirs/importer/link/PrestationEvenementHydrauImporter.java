@@ -70,5 +70,7 @@ public class PrestationEvenementHydrauImporter extends GenericEntityLinker {
                 prestation.getEvenementHydrauliqueIds().add(evenement.getId());
             }
         }
+        
+        couchDbConnector.executeBulk(prestations.values());
     }
 }

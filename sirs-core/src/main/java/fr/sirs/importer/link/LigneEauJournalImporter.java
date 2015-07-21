@@ -70,5 +70,7 @@ public class LigneEauJournalImporter extends GenericEntityLinker {
                 ligneEau.getArticleIds().add(article.getId());
             }
         }
+        
+        couchDbConnector.executeBulk(lignesEau.values());
     }
 }

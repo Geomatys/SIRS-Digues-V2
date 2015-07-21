@@ -20,6 +20,8 @@ import fr.sirs.importer.documentTroncon.document.convention.ConventionImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -36,43 +38,35 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class SysEvtConventionImporter extends GenericPositionDocumentImporter<PositionDocument> {
+class PositionConventionImporter extends GenericPositionDocumentImporter<PositionDocument> {
 
     private final ConventionImporter conventionImporter;
-    
-    SysEvtConventionImporter(final Database accessDatabase, 
-            final CouchDbConnector couchDbConnector, 
+    private final AotCotTypeDocumentImporter typeDocumentImporter;
+
+    PositionConventionImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
-            final BorneDigueImporter borneDigueImporter, 
+            final BorneDigueImporter borneDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final ConventionImporter conventionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 borneDigueImporter, systemeReperageImporter);
         this.conventionImporter = conventionImporter;
+        this.typeDocumentImporter = new AotCotTypeDocumentImporter(accessDatabase, couchDbConnector);
     }
-    
+
     private enum Columns {
+
         ID_DOC,
-//        id_nom_element, // Redondant avec ID_DOC
-//        ID_SOUS_GROUPE_DONNEES, // Redondant avec le type de données
-//        LIBELLE_TYPE_DOCUMENT, // Redondant avec le type d'importateur
-//        DECALAGE_DEFAUT, // Relatif à l'affichage
-//        DECALAGE, // Relatif à l'affichage
-//        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des SR
-//        NOM_BORNE_DEBUT, // Redondant avec l'importation des bornes
-//        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
-//        NOM_PROFIL_EN_TRAVERS, 
-//        LIBELLE_MARCHE,
-//        INTITULE_ARTICLE,
-//        TITRE_RAPPORT_ETUDE,
-//        ID_TYPE_RAPPORT_ETUDE,
-//        TE16_AUTEUR_RAPPORT,
-//        DATE_RAPPORT,
         ID_TRONCON_GESTION,
-//        ID_TYPE_DOCUMENT,
-//        ID_DOSSIER, // Pas dans le nouveau modèle
-//        DATE_DEBUT_VAL, // Pas dans le nouveau modèle
-//        DATE_FIN_VAL, // Pas dans le nouveau modèle
+        ID_TYPE_DOCUMENT,
+        ////        ID_DOSSIER, // Pas dans le nouveau modèle
+        ////        REFERENCE_PAPIER, // Pas dans le nouveau modèle
+        ////        REFERENCE_NUMERIQUE, // Pas dans le nouveau modèle
+        ////        REFERENCE_CALQUE, // Pas dans le nouveau modèle
+        ////        DATE_DOCUMENT,
+        ////        DATE_DEBUT_VAL, // Pas dans le nouveau modèle
+        ////        DATE_FIN_VAL, // Pas dans le nouveau modèle
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
         X_DEBUT,
@@ -87,21 +81,18 @@ class SysEvtConventionImporter extends GenericPositionDocumentImporter<PositionD
         AMONT_AVAL_FIN,
         DIST_BORNEREF_FIN,
         COMMENTAIRE,
-//        REFERENCE_PAPIER, // Pas dans le nouveau modèle
-//        REFERENCE_NUMERIQUE, // Pas dans le nouveau modèle
-//        REFERENCE_CALQUE, // Pas dans le nouveau modèle
-//        DATE_DOCUMENT, // Pas dans le nouveau modèle
-//        NOM, // Pas dans le nouveau modèle
-//        TM_AUTEUR_RAPPORT,
-//        ID_MARCHE,
-//        ID_INTERV_CREATEUR,
-//        ID_ORG_CREATEUR,
-//        ID_ARTICLE_JOURNAL,
-//        ID_PROFIL_EN_TRAVERS,
-//        ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE,
+        ////        NOM,
+        ////        ID_MARCHE,
+        ////        ID_INTERV_CREATEUR,
+        ////        ID_ORG_CREATEUR,
+        //        ID_ARTICLE_JOURNAL,
+        //        ID_PROFIL_EN_TRAVERS,
+        ////        ID_PROFIL_EN_LONG, // Utilisation interdite ! C'est ID_DOC qui est utilisé par les profils en long !
+        ////        ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE,
         ID_CONVENTION,
-//        ID_RAPPORT_ETUDE,
-//        ID_AUTO
+////        DATE_DERNIERE_MAJ,
+////        AUTEUR_RAPPORT,
+//        ID_RAPPORT_ETUDE
     }
 
     @Override
@@ -115,53 +106,46 @@ class SysEvtConventionImporter extends GenericPositionDocumentImporter<PositionD
 
     @Override
     public String getTableName() {
-        return SYS_EVT_CONVENTION.toString();
+        return DOCUMENT.toString();
     }
 
-//    @Override
-//    protected void preCompute() throws IOException {
-//        
-//        positions = new HashMap<>();
-//        positionsByTronconId = new HashMap<>();
-//        
-//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-//        while (it.hasNext()){
-//            final Row row = it.next();
-//            final PositionDocument documentTroncon = createAnonymValidElement(PositionDocument.class);
-//            positions.put(row.getInt(Columns.ID_DOC.toString()), documentTroncon);
-//            
-//            final Integer tronconId = row.getInt(Columns.ID_TRONCON_GESTION.toString());
-//            if(positionsByTronconId.get(tronconId)==null)
-//                positionsByTronconId.put(tronconId, new ArrayList<>());
-//            positionsByTronconId.get(tronconId).add(documentTroncon);
-//        }
-//    }
-//
-//    @Override
-//    protected void compute() throws IOException, AccessDbImporterException {
-//        if(computed) return;
-//        
-//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-//        while (it.hasNext()){
-//            final Row row = it.next();
-//            final PositionDocument docTroncon = importRow(row);
-//
-//            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-//            positions.put(row.getInt(Columns.ID_DOC.toString()), docTroncon);
-//
-//            // Set the list ByTronconId
-//            List<PositionDocument> listByTronconId = positionsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-//            if (listByTronconId == null) {
-//                listByTronconId = new ArrayList<>();
-//                positionsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-//            }
-//            listByTronconId.add(docTroncon);
-//            
-//            
-//        }
-//        computed=true;
-//    }
+    @Override
+    protected void compute() throws IOException, AccessDbImporterException {
 
+        positions = new HashMap<>();
+        positionsByTronconId = new HashMap<>();
+
+        final Map<Integer, Class> classesDocument = typeDocumentImporter.getClasseDocument();
+
+        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        while (it.hasNext()) {
+            final Row row = it.next();
+
+            final Class classeDocument = classesDocument.get(row.getInt(Columns.ID_TYPE_DOCUMENT.toString()));
+
+            if (classeDocument != null && classeDocument.equals(Convention.class)) {
+
+                final PositionDocument position = importRow(row);
+
+                if (position != null) {
+                    position.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
+
+                    // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
+                    positions.put(row.getInt(Columns.ID_DOC.toString()), position);
+
+                    // Set the list ByTronconId
+                    List<PositionDocument> listByTronconId = positionsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+                    if (listByTronconId == null) {
+                        listByTronconId = new ArrayList<>();
+                        positionsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+                    }
+                    listByTronconId.add(position);
+                }
+            }
+        }
+        couchDbConnector.executeBulk(positions.values());
+    }
+    
     @Override
     PositionDocument importRow(Row row) throws IOException, AccessDbImporterException {
 
@@ -172,7 +156,7 @@ class SysEvtConventionImporter extends GenericPositionDocumentImporter<PositionD
 
         final PositionDocument position = createAnonymValidElement(PositionDocument.class);
         position.setLinearId(troncon.getId());
-        
+
         final GeometryFactory geometryFactory = new GeometryFactory();
         final MathTransform lambertToRGF;
         try {
@@ -186,7 +170,7 @@ class SysEvtConventionImporter extends GenericPositionDocumentImporter<PositionD
                             row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtConventionImporter.class.getName()).log(Level.WARNING, null, ex);
+                Logger.getLogger(PositionConventionImporter.class.getName()).log(Level.WARNING, null, ex);
             }
 
             try {
@@ -197,10 +181,10 @@ class SysEvtConventionImporter extends GenericPositionDocumentImporter<PositionD
                             row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
                 }
             } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtConventionImporter.class.getName()).log(Level.WARNING, null, ex);
+                Logger.getLogger(PositionConventionImporter.class.getName()).log(Level.WARNING, null, ex);
             }
         } catch (FactoryException ex) {
-            Logger.getLogger(SysEvtConventionImporter.class.getName()).log(Level.WARNING, null, ex);
+            Logger.getLogger(PositionConventionImporter.class.getName()).log(Level.WARNING, null, ex);
         }
 
         position.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
@@ -240,7 +224,7 @@ class SysEvtConventionImporter extends GenericPositionDocumentImporter<PositionD
         }
         position.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
         position.setGeometry(buildGeometry(troncon.getGeometry(), position, tronconGestionDigueImporter.getBorneDigueRepository()));
-        
+
         return position;
     }
 }

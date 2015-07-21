@@ -94,5 +94,8 @@ public class ElementReseauGestionnaireImporter extends GenericEntityLinker {
                 reseau.getGestions().add(gestion);
             }
         }
+        
+        couchDbConnector.executeBulk(reseaux.values());
+        couchDbConnector.executeBulk(organismes.values());
     }
 }

@@ -94,5 +94,8 @@ public class ElementReseauGardienImporter extends GenericEntityLinker {
                 reseau.getGardes().add(contactStructure);
             }
         }
+        
+        couchDbConnector.executeBulk(reseaux.values());
+        couchDbConnector.executeBulk(intervenants.values());
     }
 }

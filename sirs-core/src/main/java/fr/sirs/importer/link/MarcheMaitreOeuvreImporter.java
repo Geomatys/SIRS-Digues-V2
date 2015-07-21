@@ -73,9 +73,9 @@ public class MarcheMaitreOeuvreImporter extends GenericEntityLinker {
             final Row row = it.next();
             
             final Marche marche = marches.get(row.getInt(Columns.ID_MARCHE.toString()));
-            final Organisme maitreOeuvre = organismes.get(row.getInt(Columns.ID_ORGANISME.toString()));
+            final Organisme organisme = organismes.get(row.getInt(Columns.ID_ORGANISME.toString()));
             
-            if(marche!=null && maitreOeuvre!=null){
+            if(marche!=null && organisme!=null){
                 final MaitreOeuvreMarche maitreOeuvreMarche = createAnonymValidElement(MaitreOeuvreMarche.class);
                 
                 maitreOeuvreMarche.setFonctionMaitreOeuvre(fonctionsMo.get(row.getInt(Columns.ID_FONCTION_MO.toString())).getId());
@@ -84,7 +84,7 @@ public class MarcheMaitreOeuvreImporter extends GenericEntityLinker {
                     maitreOeuvreMarche.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
                 }
             
-                maitreOeuvreMarche.setOrganismeId(maitreOeuvre.getId());
+                maitreOeuvreMarche.setOrganismeId(organisme.getId());
                 
                 // Jointure, donc pas d'ID propre : on affecte l'id de l'organisme comme pseudo-id.
                 maitreOeuvreMarche.setDesignation(String.valueOf(row.getInt(Columns.ID_ORGANISME.toString())));
@@ -92,5 +92,8 @@ public class MarcheMaitreOeuvreImporter extends GenericEntityLinker {
                 marche.getMaitreOeuvre().add(maitreOeuvreMarche);
             }
         }
+        
+        couchDbConnector.executeBulk(marches.values());
+        
     }
 }

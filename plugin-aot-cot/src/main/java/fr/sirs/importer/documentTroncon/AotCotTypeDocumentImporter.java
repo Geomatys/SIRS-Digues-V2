@@ -6,7 +6,7 @@ import java.util.logging.Level;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
-import fr.sirs.core.model.NewConvention;
+import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.RefTypeDocument;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
@@ -103,7 +103,7 @@ public class AotCotTypeDocumentImporter extends TypeDocumentImporter {
                 final DbImporter.TableName table = valueOf(row.getString(Columns.NOM_TABLE_EVT.toString()));
                 switch (table) {
                     case SYS_EVT_CONVENTION:
-                        classe = NewConvention.class;
+                        classe = Convention.class;
                         break;
                     default:
                         classe = null;

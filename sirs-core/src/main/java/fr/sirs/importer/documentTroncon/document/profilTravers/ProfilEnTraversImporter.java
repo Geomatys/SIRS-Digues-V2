@@ -9,7 +9,7 @@ import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
+import fr.sirs.importer.documentTroncon.document.GenericDocumentImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +22,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ProfilEnTraversImporter extends GenericDocumentRelatedImporter<ProfilTravers> {
+public class ProfilEnTraversImporter extends GenericDocumentImporter<ProfilTravers> {
     
     private ProfilEnTraversDescriptionImporter profilTraversDescriptionImporter;
     private ProfilEnTraversTronconImporter profilTraversTronconImporter;

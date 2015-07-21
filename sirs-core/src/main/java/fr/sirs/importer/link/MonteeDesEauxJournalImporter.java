@@ -70,5 +70,7 @@ public class MonteeDesEauxJournalImporter extends GenericEntityLinker {
                 montee.getArticleIds().add(article.getId());
             }
         }
+        
+        couchDbConnector.executeBulk(montees.values());
     }
 }

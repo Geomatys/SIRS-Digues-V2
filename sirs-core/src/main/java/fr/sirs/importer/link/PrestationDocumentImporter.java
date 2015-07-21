@@ -95,6 +95,9 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
                 }
             }
         }
+        
+        couchDbConnector.executeBulk(prestations.values());
+        couchDbConnector.executeBulk(rapportsEtude.values());
     }
     
     private Map<String, RapportEtude> rapportEtudeByCouchDbId() 

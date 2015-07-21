@@ -70,5 +70,7 @@ public class LaisseCrueJournalImporter extends GenericEntityLinker {
                 laisseCrue.getArticleIds().add(article.getId());
             }
         }
+        
+        couchDbConnector.executeBulk(laisseCrues.values());
     }
 }

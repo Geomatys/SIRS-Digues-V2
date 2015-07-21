@@ -70,5 +70,6 @@ public class PrestationIntervenantImporter extends GenericEntityLinker {
                 prestation.getIntervenantsIds().add(intervenant.getId());
             }
         }
+        couchDbConnector.executeBulk(prestations.values());
     }
 }

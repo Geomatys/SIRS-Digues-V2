@@ -8,7 +8,7 @@ import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.RefRapportEtude;
 import static fr.sirs.importer.DbImporter.TableName.RAPPORT_ETUDE;
 import static fr.sirs.importer.DbImporter.cleanNullString;
-import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
+import fr.sirs.importer.documentTroncon.document.GenericDocumentImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class RapportEtudeImporter extends GenericDocumentRelatedImporter<RapportEtude> {
+public class RapportEtudeImporter extends GenericDocumentImporter<RapportEtude> {
     
     private final TypeRapportEtudeImporter typeRapportEtudeImporter;
     

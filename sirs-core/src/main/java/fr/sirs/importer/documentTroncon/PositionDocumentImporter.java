@@ -5,7 +5,6 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.ArticleJournal;
-import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.ProfilLong;
@@ -19,7 +18,7 @@ import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.documentTroncon.document.DocumentManager;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
-import fr.sirs.importer.documentTroncon.document.GenericDocumentRelatedImporter;
+import fr.sirs.importer.documentTroncon.document.GenericDocumentImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ import org.ektorp.CouchDbConnector;
 public class PositionDocumentImporter extends GenericPositionDocumentImporter<AbstractPositionDocument> {
     
     private final DocumentManager documentManager;
-    private final List<GenericDocumentRelatedImporter> documentRelatedImporters;
+    private final List<GenericDocumentImporter> documentRelatedImporters;
     
     private final CoreTypeDocumentImporter typeDocumentImporter;
     
@@ -190,11 +189,7 @@ public class PositionDocumentImporter extends GenericPositionDocumentImporter<Ab
         final Class classeDocument = classesDocument.get(row.getInt(Columns.ID_TYPE_DOCUMENT.toString()));
 
         if (classeDocument != null) {
-
-//            if (classeDocument.equals(Convention.class)) {
-//                return sysEvtConventionImporter.importRow(row);
-//            } 
-//            else 
+            
             if (classeDocument.equals(DocumentGrandeEchelle.class)){
                 return sysEvtDocumentAGrandeEchelleImporter.importRow(row);
             }

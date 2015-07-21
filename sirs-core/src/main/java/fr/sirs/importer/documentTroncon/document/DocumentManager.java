@@ -5,7 +5,6 @@ import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.documentTroncon.CoreTypeDocumentImporter;
-import fr.sirs.importer.documentTroncon.document.convention.ConventionImporter;
 import fr.sirs.importer.documentTroncon.document.documentAGrandeEchelle.DocumentAGrandeEchelleImporter;
 import fr.sirs.importer.documentTroncon.document.journal.JournalArticleImporter;
 import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
@@ -33,7 +32,7 @@ public class DocumentManager {
     
     private final ProfilEnLongImporter profilEnLongImporter;
     
-    private final List<GenericDocumentRelatedImporter> documentRelatedImporters = new ArrayList<>();
+    private final List<GenericDocumentImporter> documentRelatedImporters = new ArrayList<>();
     
     public DocumentManager(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
@@ -102,7 +101,7 @@ public class DocumentManager {
         return rapportEtudeImporter;
     }
 
-    public List<GenericDocumentRelatedImporter> getDocumentRelatedImporters() {
+    public List<GenericDocumentImporter> getDocumentRelatedImporters() {
         return documentRelatedImporters;
     }
     

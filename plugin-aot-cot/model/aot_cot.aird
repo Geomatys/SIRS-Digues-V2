@@ -63,9 +63,9 @@
       <ownedAnnotationEntries xmi:type="description:AnnotationEntry" xmi:id="_elVGwC7cEeWv4JwE7hUOUQ" source="DANNOTATION_CUSTOMIZATION_KEY">
         <data xmi:type="diagram:ComputedStyleDescriptionRegistry" xmi:id="_elVGwS7cEeWv4JwE7hUOUQ"/>
       </ownedAnnotationEntries>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_elT4oC7cEeWv4JwE7hUOUQ" name="NewConvention" tooltipText="" outgoingEdges="_8NJqwC7dEeWv4JwE7hUOUQ" width="12" height="10">
-        <target xmi:type="ecore:EClass" href="aot_cot.ecore#//NewConvention"/>
-        <semanticElements xmi:type="ecore:EClass" href="aot_cot.ecore#//NewConvention"/>
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_elT4oC7cEeWv4JwE7hUOUQ" name="Convention" tooltipText="" outgoingEdges="_8NJqwC7dEeWv4JwE7hUOUQ" width="12" height="10">
+        <target xmi:type="ecore:EClass" href="aot_cot.ecore#//Convention"/>
+        <semanticElements xmi:type="ecore:EClass" href="aot_cot.ecore#//Convention"/>
         <ownedStyle xmi:type="diagram:FlatContainerStyle" xmi:id="_mWPo4C7dEeWv4JwE7hUOUQ" backgroundStyle="Liquid">
           <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_mWPo4S7dEeWv4JwE7hUOUQ"/>
           <description xmi:type="style:FlatContainerStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@style"/>
@@ -75,8 +75,8 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_eliiIC7cEeWv4JwE7hUOUQ" name="date_debut : EDate" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="aot_cot.ecore#//NewConvention/date_debut"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="aot_cot.ecore#//NewConvention/date_debut"/>
+          <target xmi:type="ecore:EAttribute" href="aot_cot.ecore#//Convention/date_debut"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="aot_cot.ecore#//Convention/date_debut"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_jCYg4C7cEeWv4JwE7hUOUQ" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_jCYg4S7cEeWv4JwE7hUOUQ"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -86,8 +86,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_eljwRC7cEeWv4JwE7hUOUQ" name="date_fin : EDate" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="aot_cot.ecore#//NewConvention/date_fin"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="aot_cot.ecore#//NewConvention/date_fin"/>
+          <target xmi:type="ecore:EAttribute" href="aot_cot.ecore#//Convention/date_fin"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="aot_cot.ecore#//Convention/date_fin"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_ko06QC7cEeWv4JwE7hUOUQ" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_ko06QS7cEeWv4JwE7hUOUQ"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -97,8 +97,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_elkXWC7cEeWv4JwE7hUOUQ" name="libelle : EString" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="aot_cot.ecore#//NewConvention/libelle"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="aot_cot.ecore#//NewConvention/libelle"/>
+          <target xmi:type="ecore:EAttribute" href="aot_cot.ecore#//Convention/libelle"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="aot_cot.ecore#//Convention/libelle"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_nbEYYC7cEeWv4JwE7hUOUQ" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_nbEYYS7cEeWv4JwE7hUOUQ"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -108,8 +108,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_elk-Zy7cEeWv4JwE7hUOUQ" name="commentaire : EString" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="aot_cot.ecore#//NewConvention/commentaire"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="aot_cot.ecore#//NewConvention/commentaire"/>
+          <target xmi:type="ecore:EAttribute" href="aot_cot.ecore#//Convention/commentaire"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="aot_cot.ecore#//Convention/commentaire"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_qJFd0C7cEeWv4JwE7hUOUQ" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_qJFd0S7cEeWv4JwE7hUOUQ"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -119,8 +119,8 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
         <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_ellldi7cEeWv4JwE7hUOUQ" name="dateMaj : EDate" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="aot_cot.ecore#//NewConvention/dateMaj"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="aot_cot.ecore#//NewConvention/dateMaj"/>
+          <target xmi:type="ecore:EAttribute" href="aot_cot.ecore#//Convention/dateMaj"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="aot_cot.ecore#//Convention/dateMaj"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_rxdJ0C7cEeWv4JwE7hUOUQ" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_rxdJ0S7cEeWv4JwE7hUOUQ"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -130,9 +130,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_2MXNAC7dEeWv4JwE7hUOUQ" name="RefNewConvention" tooltipText="" incomingEdges="_8NJqwC7dEeWv4JwE7hUOUQ" width="12" height="10">
-        <target xmi:type="ecore:EClass" href="aot_cot.ecore#//RefNewConvention"/>
-        <semanticElements xmi:type="ecore:EClass" href="aot_cot.ecore#//RefNewConvention"/>
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_2MXNAC7dEeWv4JwE7hUOUQ" name="RefConvention" tooltipText="" incomingEdges="_8NJqwC7dEeWv4JwE7hUOUQ" width="12" height="10">
+        <target xmi:type="ecore:EClass" href="aot_cot.ecore#//RefConvention"/>
+        <semanticElements xmi:type="ecore:EClass" href="aot_cot.ecore#//RefConvention"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
         <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
         <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
@@ -146,8 +146,8 @@
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
       </ownedDiagramElements>
       <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_8NJqwC7dEeWv4JwE7hUOUQ" name="[0..1] typeConventionId" sourceNode="_elT4oC7cEeWv4JwE7hUOUQ" targetNode="_2MXNAC7dEeWv4JwE7hUOUQ">
-        <target xmi:type="ecore:EReference" href="aot_cot.ecore#//NewConvention/typeConventionId"/>
-        <semanticElements xmi:type="ecore:EReference" href="aot_cot.ecore#//NewConvention/typeConventionId"/>
+        <target xmi:type="ecore:EReference" href="aot_cot.ecore#//Convention/typeConventionId"/>
+        <semanticElements xmi:type="ecore:EReference" href="aot_cot.ecore#//Convention/typeConventionId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_8NK44C7dEeWv4JwE7hUOUQ" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_8NK44S7dEeWv4JwE7hUOUQ"/>

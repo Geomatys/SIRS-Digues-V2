@@ -2,7 +2,6 @@ fr.sirs.core.model.ArticleJournal
 fr.sirs.core.model.BorneDigue
 fr.sirs.core.model.Contact
 fr.sirs.core.model.ContactOrganisme
-fr.sirs.core.model.Convention
 fr.sirs.core.model.Crete
 fr.sirs.core.model.Desordre
 fr.sirs.core.model.Deversoir
@@ -54,7 +53,6 @@ fr.sirs.core.model.ProfilTravers
 fr.sirs.core.model.PrZProfilLong
 fr.sirs.core.model.RapportEtude
 fr.sirs.core.model.RefConduiteFermee
-fr.sirs.core.model.RefConvention
 fr.sirs.core.model.RefCote
 fr.sirs.core.model.RefDevers
 fr.sirs.core.model.RefDocumentGrandeEchelle

@@ -70,5 +70,7 @@ public class DesordreEvenementHydrauImporter extends GenericEntityLinker {
                 desordre.getEvenementHydrauliqueIds().add(evenement.getId());
             }
         }
+        
+        couchDbConnector.executeBulk(desordres.values());
     }
 }

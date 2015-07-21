@@ -5,7 +5,6 @@ import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.ArticleJournal;
-import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.PositionProfilTravers;
@@ -30,7 +29,6 @@ import javafx.collections.FXCollections;
  */
 public class PositionDocumentTheme extends TronconTheme {
     
-    private static final ThemeManager CONVENTION = generateThemeManager(PositionDocument.class, Convention.class);
     private static final ThemeManager ARTICLE = generateThemeManager(PositionDocument.class, ArticleJournal.class);
     private static final ThemeManager MARCHE = generateThemeManager(PositionDocument.class, Marche.class);
     private static final ThemeManager RAPPORT_ETUDE = generateThemeManager(PositionDocument.class, RapportEtude.class);
@@ -40,7 +38,7 @@ public class PositionDocumentTheme extends TronconTheme {
     private static final ThemeManager PROFIL_TRAVERS = generateThemeManager(PositionProfilTravers.class);
     
     public PositionDocumentTheme() {
-        super("Documents localisés", CONVENTION, ARTICLE, MARCHE, RAPPORT_ETUDE, DOCUMENT_GRANDE_ECHELLE, AUTRE, PROFIL_LONG, PROFIL_TRAVERS);
+        super("Documents localisés", ARTICLE, MARCHE, RAPPORT_ETUDE, DOCUMENT_GRANDE_ECHELLE, AUTRE, PROFIL_LONG, PROFIL_TRAVERS);
     }
     
     private static <T extends Positionable, D extends SIRSDocument> ThemeManager<T> generateThemeManager(final Class<T> themeClass, Class<D> documentClass){
