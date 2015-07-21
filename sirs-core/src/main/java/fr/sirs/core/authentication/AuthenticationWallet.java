@@ -106,7 +106,11 @@ public class AuthenticationWallet {
     public Entry get(final URL service) {
         walletLock.readLock().lock();
         try {
-            return wallet.get(toServiceId(service));
+            Entry found = wallet.get(toServiceId(service));
+            if (found == null) {
+                found = wallet.get(toServiceId("*", service.getPort()));
+            }
+            return found;
         } finally {
             walletLock.readLock().unlock();
         }
@@ -115,7 +119,11 @@ public class AuthenticationWallet {
     public Entry get(final String host, final int port) {
         walletLock.readLock().lock();
         try {
-            return wallet.get(toServiceId(host, port));
+            Entry found = wallet.get(toServiceId(host, port));
+            if (found == null) {
+                found = wallet.get(toServiceId("*", port));
+            }
+            return found;
         } finally {
             walletLock.readLock().unlock();
         }
