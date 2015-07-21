@@ -99,6 +99,7 @@ public class DocumentsPane extends GridPane {
     public static final String CLASS_PLACE      = "class_place";
     public static final String DO_INTEGRATED    = "do_integrated";
     public static final String LIBELLE          = "libelle";
+    public static final String DYNAMIC          = "dynamic";
     
     public static final String SE = "se";
     public static final String TR = "tr";
@@ -693,24 +694,22 @@ public class DocumentsPane extends GridPane {
             setGraphic(button);
             button.setGraphic(new ImageView(PUB_BUTTON_IMAGE));
             button.disableProperty().bind(editingProperty());
-            button.onActionProperty().addListener(new ChangeListener<EventHandler<ActionEvent>>() {
-
-                @Override
-                public void changed(ObservableValue<? extends EventHandler<ActionEvent>> observable, EventHandler<ActionEvent> oldValue, EventHandler<ActionEvent> newValue) {
-                    System.out.println("EVENT");
-                }
-                    
-            });
+            button.setOnAction(this::handle);
+            
+        }
+        
+        public void handle(ActionEvent event) {
+            // TODO publier ouvrage de synthese
         }
         
         @Override
         public void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
-            File f = (File) item;
-            if (f == null || (f.isDirectory() && !f.getName().equals(DOCUMENT_FOLDER))) {
-                button.setVisible(false);
-            } else {
+            final File f = (File) item;
+            if (f != null && (f.getName().equals(DOCUMENT_FOLDER) || getBooleanProperty(f, DYNAMIC))){
                 button.setVisible(true);
+            } else {
+                button.setVisible(false);
             }
         }
     }
