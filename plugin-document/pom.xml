@@ -26,6 +26,18 @@
             <version>0.x-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>net.sf.jodreports</groupId>
+            <artifactId>jodreports</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.odftoolkit</groupId>
+            <artifactId>simple-odf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

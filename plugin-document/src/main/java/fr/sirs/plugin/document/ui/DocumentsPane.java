@@ -78,6 +78,7 @@ public class DocumentsPane extends GridPane {
     @FXML
     private Button listButton;
     
+    protected static final String BUTTON_STYLE = "buttonbar-button";
     
     private static final Image ADDF_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/add_folder.png"));
     private static final Image ADDD_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/add_doc.png"));
@@ -114,12 +115,21 @@ public class DocumentsPane extends GridPane {
         SIRS.loadFXML(this, DocumentsPane.class);
         Injector.injectDependencies(this);
         
+        getStylesheets().add(SIRS.CSS_PATH);
+        
         addFolderButton.setGraphic(new ImageView(ADDF_BUTTON_IMAGE));
         importDocButton.setGraphic(new ImageView(IMP_BUTTON_IMAGE));
         deleteDocButton.setGraphic(new ImageView(DEL_BUTTON_IMAGE));
         setFolderButton.setGraphic(new ImageView(SET_BUTTON_IMAGE));
         addDocButton.setGraphic(new ImageView(ADDD_BUTTON_IMAGE));
         listButton.setGraphic(new ImageView(LIST_BUTTON_IMAGE));
+        
+        addFolderButton.getStyleClass().add(BUTTON_STYLE);
+        importDocButton.getStyleClass().add(BUTTON_STYLE);
+        deleteDocButton.getStyleClass().add(BUTTON_STYLE);
+        setFolderButton.getStyleClass().add(BUTTON_STYLE);
+        addDocButton.getStyleClass().add(BUTTON_STYLE);
+        listButton.getStyleClass().add(BUTTON_STYLE);
         
         // Name column
         tree1.getColumns().get(0).setEditable(false);
@@ -693,6 +703,7 @@ public class DocumentsPane extends GridPane {
         public PublicationCell() {
             setGraphic(button);
             button.setGraphic(new ImageView(PUB_BUTTON_IMAGE));
+            button.getStyleClass().add(BUTTON_STYLE);
             button.disableProperty().bind(editingProperty());
             button.setOnAction(this::handle);
             

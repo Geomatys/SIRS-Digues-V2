@@ -92,7 +92,7 @@ public class FileTreeItem extends TreeItem<File> {
      * 
      * @return 
      */
-    private List<FileTreeItem> listChildrenItem() {
+    public List<FileTreeItem> listChildrenItem() {
         final List<FileTreeItem> results = new ArrayList<>();
         for (TreeItem item : getChildren()) {
             results.add((FileTreeItem) item);
