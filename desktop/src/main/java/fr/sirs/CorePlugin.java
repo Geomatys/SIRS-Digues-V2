@@ -602,22 +602,22 @@ public class CorePlugin extends Plugin {
         return null;
     }
 
-    public MapLayer createLayer(final Class beanClass, final Query query){
-        final BeanFeatureSupplier supplier = suppliers.get(beanClass);
-        final BeanStore store = new BeanStore(supplier);
-        
-        final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(true)
-                .getFeatureCollection(query));
-        layer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-        layer.setSelectable(true);
-        return layer;
-    }
-
-    public MapLayer createLayer(Class beanClass) throws DataStoreException {
-        final BeanFeatureSupplier supplier = suppliers.get(beanClass);
-        final BeanStore store = new BeanStore(supplier);
-        return createLayer(beanClass, QueryBuilder.all(store.getNames().iterator().next()));
-    }
+//    public MapLayer createLayer(final Class beanClass, final Query query){
+//        final BeanFeatureSupplier supplier = suppliers.get(beanClass);
+//        final BeanStore store = new BeanStore(supplier);
+//        
+//        final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(true)
+//                .getFeatureCollection(query));
+//        layer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+//        layer.setSelectable(true);
+//        return layer;
+//    }
+//
+//    public MapLayer createLayer(Class beanClass) throws DataStoreException {
+//        final BeanFeatureSupplier supplier = suppliers.get(beanClass);
+//        final BeanStore store = new BeanStore(supplier);
+//        return createLayer(beanClass, QueryBuilder.all(store.getNames().iterator().next()));
+//    }
     
     private static MutableStyle createTronconStyle() throws CQLException, URISyntaxException{
         final Stroke stroke1 = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,FF.literal(9),
