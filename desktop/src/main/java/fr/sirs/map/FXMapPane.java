@@ -1,6 +1,11 @@
 package fr.sirs.map;
 
 import fr.sirs.CorePlugin;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.ButtonBar;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.geotoolkit.display2d.Canvas2DSynchronizer;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
@@ -78,6 +83,7 @@ import org.geotoolkit.gui.javafx.render2d.FXNavigationBar;
 import org.geotoolkit.gui.javafx.render2d.FXScaleBarDecoration;
 import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
+import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
@@ -148,6 +154,37 @@ public class FXMapPane extends BorderPane {
                 final FXStyleAggregatedPane pane = new FXStyleAggregatedPane();
                 pane.init(candidate);
                 return pane;
+            }
+
+            @Override
+            protected void openEditor(MapLayer candidate) {
+                final Pane panel = createEditor(candidate);
+                panel.setPrefSize(900, 700);
+
+                final Stage dialog = new Stage();
+                dialog.getIcons().add(SIRS.ICON);
+                dialog.setTitle(GeotkFX.getString("org.geotoolkit.gui.javafx.contexttree.MapItemGlyphColumn.dialogTitle") + candidate.getName());
+                dialog.setResizable(true);
+                dialog.initModality(Modality.NONE);
+                dialog.initOwner(null);
+
+                final Button cancelBtn = new Button(GeotkFX.getString("org.geotoolkit.gui.javafx.contexttree.menu.LayerPropertiesItem.close"));
+                cancelBtn.setCancelButton(true);
+
+                final ButtonBar bbar = new ButtonBar();
+                bbar.setPadding(new Insets(5, 5, 5, 5));
+                bbar.getButtons().addAll(cancelBtn);
+
+                final BorderPane dialogContent = new BorderPane();
+                dialogContent.setCenter(panel);
+                dialogContent.setBottom(bbar);
+                dialog.setScene(new Scene(dialogContent));
+
+                cancelBtn.setOnAction((ActionEvent e) -> {
+                    dialog.close();
+                });
+
+                dialog.show();
             }
         });
         uiTree.getTreetable().getColumns().add(new MapItemVisibleColumn());
