@@ -17,6 +17,7 @@
 package org.geotoolkit.gui.javafx.parameter;
 
 import java.awt.Color;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
@@ -53,12 +54,14 @@ import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.parameter.ParameterGroup;
 import org.geotoolkit.parameter.ParametersExt;
+import org.opengis.metadata.Identifier;
 import org.opengis.parameter.GeneralParameterDescriptor;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterDescriptor;
 import org.opengis.parameter.ParameterDescriptorGroup;
 import org.opengis.parameter.ParameterValue;
 import org.opengis.parameter.ParameterValueGroup;
+import org.opengis.util.GenericName;
 import org.opengis.util.InternationalString;
 
 /**
@@ -93,13 +96,13 @@ public class FXParameterGroupPane extends BorderPane {
     private static final String SIMPLE_VIEW_TOOLTIP = GeotkFX.getString("org.geotoolkit.gui.javafx.parameter.simpleViewTooltip");
 
     /**
-     * Flow pane in which we'll add all {@link ParameterValue} editors. 
+     * Flow pane in which we'll add all {@link ParameterValue} editors.
      */
     @FXML
     private TilePane uiInnerValues;
 
     /**
-     * Flow pane in which we'll add all {@link ParameterGroup} editors. 
+     * Flow pane in which we'll add all {@link ParameterGroup} editors.
      */
     @FXML
     private FlowPane uiInnerGroups;
@@ -233,7 +236,17 @@ public class FXParameterGroupPane extends BorderPane {
     }
 
     private String getTitle(final GeneralParameterDescriptor parameter) {
-        return parameter.getName().getCode();
+        Collection<GenericName> alias = parameter.getAlias();
+        if (alias != null && !alias.isEmpty()) {
+            return alias.iterator().next().tip().toInternationalString().toString();
+        } else {
+            Identifier name = parameter.getName();
+            if (name.getDescription() == null) {
+                return name.getCode();
+            } else {
+                return name.getDescription().toString();
+            }
+        }
     }
 
     protected DescriptorPanel getOrCreateDescriptorPanel(final GeneralParameterDescriptor descriptor) {
@@ -289,7 +302,7 @@ public class FXParameterGroupPane extends BorderPane {
             super();
             ArgumentChecks.ensureNonNull("Parameter descriptor", descriptor);
             this.descriptor = descriptor;
-            uiTitle.setText(descriptor.getName().getCode());
+            uiTitle.setText(getTitle(descriptor));
 
             getStyleClass().add(DESCRIPTOR_CONTAINER_CLASS);
             content.getStyleClass().add(DESCRIPTOR_CONTENT_CLASS);
@@ -325,8 +338,8 @@ public class FXParameterGroupPane extends BorderPane {
 
             setContent(content);
             setGraphic(uiToolbar);
-            
-            /* 
+
+            /*
              * CONFIGURE HEADER POSITION
              */
             uiToolbar.setAlignment(Pos.CENTER_LEFT);
