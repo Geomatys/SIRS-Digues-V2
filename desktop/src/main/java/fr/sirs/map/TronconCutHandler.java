@@ -73,31 +73,31 @@ import org.opengis.util.FactoryException;
 
 /**
  * Outil cartographique permettant le découpage de tronçons.
- * 
+ *
  * @author Johann Sorel (Geomatys)
  * @author Alexis Manin (Geomatys)
  */
 public class TronconCutHandler extends FXAbstractNavigationHandler {
-    
+
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
     private final MouseListen mouseInputListener = new MouseListen();
     private final FXMapContainerPane geomlayer= new FXMapContainerPane();
-    
+
     //edition variables
     private FeatureMapLayer tronconLayer = null;
     private EditionHelper helper;
-    
+
     private Stage dialog;
     private final FXTronconCut editPane;
     private final FeatureType featureType;
     private final Session session;
-    
+
     public TronconCutHandler(final FXMap map) {
         super(map);
         session = Injector.getSession();
         geomlayer.setMap2D(map);
         editPane = new FXTronconCut();
-        
+
         //recalcule l'affichage lorsque le tronçon cible change.
         editPane.tronconProperty().addListener(new ChangeListener<TronconDigue>() {
             @Override
@@ -110,17 +110,17 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                 }
             }
         });
-        
+
         //recalcule de l'affichage sur changement d'un segment
         editPane.getSegments().addListener(this::segmentChanged);
-        
+
         final FeatureTypeBuilder ftb = new FeatureTypeBuilder();
         ftb.setName("name");
         ftb.add("geom", LineString.class,session.getProjection());
         ftb.setDefaultGeometry("geom");
         featureType = ftb.buildFeatureType();
     }
-    
+
     /**
      * We check operations to perform. If all segments are marked "CONSERVER",
      * we ask user if he really want to end cut, because there's nothing to do
@@ -191,25 +191,25 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
             editPane.tronconProperty().set(null);
         }
     }
-    
+
     private void segmentChanged(ListChangeListener.Change c){
         geomlayer.getChildren().clear();
-        
+
         final TronconDigue troncon = editPane.tronconProperty().get();
-        if(troncon==null) return;        
-        
+        if(troncon==null) return;
+
         final FXTronconCut.Segment[] segments = editPane.getSegments().toArray(new FXTronconCut.Segment[0]);
         for (FXTronconCut.Segment segment : segments) {
             final Feature feature = FeatureUtilities.defaultFeature(featureType, "id-0");
             feature.getProperty("geom").setValue(segment.geometryProp.get());
-            
+
             final LineSymbolizer ls = SF.lineSymbolizer(SF.stroke(FXUtilities.toSwingColor(segment.colorProp.get()), 4), null);
             final FXFeature fxf = new FXFeature(geomlayer.getContext(), feature);
             fxf.setSymbolizers(ls);
             geomlayer.getChildren().add(fxf);
         }
-    }   
-    
+    }
+
     private void installDialog() {
         dialog = new Stage();
         dialog.getIcons().add(SIRS.ICON);
@@ -217,49 +217,49 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
         dialog.setResizable(true);
         dialog.initModality(Modality.NONE);
         dialog.initOwner(map.getScene().getWindow());
-        
+
         final Button finishBtn = new Button("Terminer");
         final Button cancelBtn = new Button("Annuler");
         cancelBtn.setCancelButton(true);
-        
+
         final ButtonBar babar = new ButtonBar();
         babar.setPadding(new Insets(5, 5, 5, 5));
         babar.getButtons().addAll(cancelBtn, finishBtn);
-        
+
         final BorderPane dialogContent = new BorderPane();
         dialogContent.setCenter(editPane);
         dialogContent.setBottom(babar);
-                
+
         cancelBtn.setOnAction((ActionEvent e) -> {
             editPane.tronconProperty().set(null);
         });
-        
+
         finishBtn.setOnAction((ActionEvent e) -> this.processCut());
         finishBtn.disableProperty().bind(editPane.tronconProperty().isNull());
         dialog.setScene(new Scene(dialogContent));
     }
-    
+
     private void uninstallDialog() {
         if (dialog != null) {
             dialog.close();
             dialog = null;
         }
     }
-    
+
     /**
      * {@inheritDoc }
      */
     @Override
     public void install(final FXMap component) {
         super.install(component);
-        
+
         installDialog();
-        
+
         component.addEventHandler(MouseEvent.ANY, mouseInputListener);
         component.addEventHandler(ScrollEvent.ANY, mouseInputListener);
         map.setCursor(Cursor.CROSSHAIR);
         map.addDecoration(0,geomlayer);
-        
+
         //recuperation du layer de troncon
         tronconLayer = null;
         final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
@@ -271,7 +271,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                 layer.setSelectable(true);
             }
         }
-        
+
         helper = new EditionHelper(map, tronconLayer);
         helper.setMousePointerSize(6);
     }
@@ -296,15 +296,15 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
             component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
             component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
             map.removeDecoration(geomlayer);
-            
+
             uninstallDialog();
-            
+
             return true;
         }
-        
+
         return false;
     }
-        
+
     private class MouseListen extends FXPanMouseListen {
 
         private final ContextMenu popup = new ContextMenu();
@@ -315,18 +315,18 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
             super(TronconCutHandler.this);
             popup.setAutoHide(true);
         }
-        
+
         @Override
-        public void mouseClicked(final MouseEvent e) {            
+        public void mouseClicked(final MouseEvent e) {
             if(tronconLayer==null) return;
-            
+
             startX = getMouseX(e);
             startY = getMouseY(e);
             mousebutton = e.getButton();
-                
+
             final TronconDigue troncon = editPane.tronconProperty().get();
             if (troncon==null || !editPane.isCutMode()) {
-                //actions en l'absence de troncon                
+                //actions en l'absence de troncon
                 if(mousebutton == MouseButton.PRIMARY) {
                     //selection d'un troncon
                     final Feature feature = helper.grabFeature(e.getX(), e.getY(), false);
@@ -350,12 +350,12 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                     final LineString linear = LinearReferencingUtilities.asLineString(troncon.getGeometry());
                     final LinearReferencingUtilities.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(linear);
                     final LinearReferencingUtilities.ProjectedPoint proj = LinearReferencingUtilities.projectReference(segments, pt);
-                
+
                     //si le point de coupe est avant le debut ou apres la fin on ne le fait pas
                     if(proj.distanceAlongLinear<=0 || proj.distanceAlongLinear>=linear.getLength()){
                         return;
                     }
-                    
+
                     final FXTronconCut.CutPoint cutPoint = new FXTronconCut.CutPoint();
                     cutPoint.distance.set(proj.distanceAlongLinear);
                     if (!editPane.getCutpoints().contains(cutPoint)) {
@@ -364,21 +364,21 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                         Collections.sort(cuts);
                         editPane.getCutpoints().setAll(cuts);
                     }
-                    
+
                 } catch(TransformException | FactoryException ex) {
                     SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-                }                
+                }
             }
-            
+
             if (editPane.tronconProperty().get() != null) dialog.show();
         }
     }
-        
+
     /**
      * The task which cut, recompose and update {@link TronconDigue} elements.
-     * Note : Cancel the task is not allowed, because database updates are 
+     * Note : Cancel the task is not allowed, because database updates are
      * performed all along the process.
-     * 
+     *
      * TODO : put all database updates at the end of the process ?
      */
     private static class CutTask extends Task<Boolean> {
@@ -386,14 +386,14 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
         private final ObservableList<FXTronconCut.CutPoint> cutpoints;
         private final ObservableList<FXTronconCut.Segment> segments;
 
-        public CutTask(final TronconDigue toCut, 
+        public CutTask(final TronconDigue toCut,
                 final ObservableList<FXTronconCut.CutPoint> cutpoints,
                 final ObservableList<FXTronconCut.Segment> segments) {
             this.toCut = toCut;
             this.cutpoints = cutpoints;
             this.segments = segments;
         }
-        
+
         @Override
         protected Boolean call() throws Exception {
             updateTitle("Découpage de tronçon");
@@ -401,15 +401,15 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
             if (toCut == null || cutpoints.isEmpty() || segments.isEmpty()) {
                 return false;
             }
-            
+
             updateMessage("Tronçon "+toCut.getLibelle());
-            
+
             final Session session = Injector.getSession();
             TronconDigue aggregate = null;
             for (int i = 0, n = segments.size(); i < n; i++) {
-                
+
                 updateProgress(i, n);
-                
+
                 final FXTronconCut.Segment segment = segments.get(i);
                 final TronconDigue cut = TronconUtils.cutTroncon(toCut, segment.geometryProp.get(), toCut.getLibelle() + "[" + i + "]", session);
 
@@ -431,7 +431,9 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                     cut.date_finProperty().set(LocalDate.now());
                     for (Objet obj : TronconUtils.getObjetList(cut)) {
                         obj.dateMajProperty().set(LocalDate.now());
-                        obj.date_finProperty().set(LocalDate.now());
+                        if (obj.getDate_fin() == null) {
+                            obj.date_finProperty().set(LocalDate.now());
+                        }
                     }
                     //on le sauvegarde
                     session.getRepositoryForClass(TronconDigue.class).update(cut);
@@ -446,7 +448,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
             //on archive l'ancien troncon
             updateMessage("Finalisation du découpage pour "+toCut.getLibelle());
             toCut.setDate_fin(LocalDate.now());
-            
+
             session.getRepositoryForClass(TronconDigue.class).update(toCut);
 
             for (Positionable obj : TronconUtils.getPositionableList(toCut)) {
@@ -464,5 +466,5 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
             return true;
         }
     }
-     
+
 }

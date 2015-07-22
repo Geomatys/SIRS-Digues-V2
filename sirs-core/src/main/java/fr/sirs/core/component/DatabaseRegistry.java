@@ -53,7 +53,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Create a wrapper for connections on a CouchDb service.
- * 
+ *
  * @author Olivier Nouguier (Geomatys)
  * @author Alexis Manin (Geomatys)
  */
@@ -61,61 +61,61 @@ public class DatabaseRegistry {
 
     /** Administrator list section */
     private static final String ADMIN_SECTION = "admins";
-    
+
     // Httpd related configurations
     private static final String HTTPD_SECTION = "httpd";
     private static final String SOCKET_OPTION = "socket_options";
     private static final String NO_DELAY_KEY = "nodelay";
     private static final String BIND_ADDRESS_OPTION = "bind_address";
     private static final String ENABLE_CORS_OPTION = "enable_cors";
-    
+
     // Cors configuration
     private static final String CORS_SECTION = "cors";
     private static final String CREDENTIALS_OPTIONS = "credentials";
     private static final String METHODS_OPTIONS = "methods";
     private static final String ORIGINS_OPTIONS = "origins";
-    
+
     // Authentication options
     private static final String AUTH_SECTION = "couch_httpd_auth";
     private static final String REQUIRE_USER_OPTION = "require_valid_user";
-    
+
     private static final Pattern BASIC_AUTH = Pattern.compile("([^\\:/@]+)(?:\\:([^\\:/@]+))?@");
     private static final Pattern LOCAL_URL = Pattern.compile("(?i)^([A-Za-z]+://)?(localhost|127\\.0\\.0\\.1)(:\\d+)?");
     private static final Pattern URL_START = Pattern.compile("(?i)^[A-Za-z]+://([^@]+@)?");
     private static final Pattern AUTH_ERROR_CODE = Pattern.compile("40(1|3)");
-    
+
     private static final int SOCKET_TIMEOUT = 45000;
     private static final int CONNECTION_TIMEOUT = 5000;
-    
+
     /**
      * A boolean indicating if program runs on the same host than target CouchDb
      * service (true). False if we work with a service on a distant host.
      */
     private final boolean isLocal;
-    
+
     /**
      * URL of the CouchDb service our registry is working with.
      */
     public final URL couchDbUrl;
-    
+
     /**
      * Login for connection on CouchDb service.
      */
     private String username;
     /** Password for connection on CouchDb service. */
     private String userPass;
-    
+
     private CouchDbInstance couchDbInstance;
-    
+
     /**
      * Create a connection on local database, using address and login found in {@link SirsPreferences}.
-     * 
+     *
      * @throws IOException If URL found in configuration is not valid, or a connection problem occurs.
      */
     public DatabaseRegistry() throws IOException {
         this(null);
     }
-    
+
     /**
      * Try to connect to CouchDb service pointed by input URL.
      * @param couchDbURL The URL to CouchDB server.
@@ -149,20 +149,20 @@ public class DatabaseRegistry {
             if (userInfo != null) {
                 String[] split = userInfo.split(":");
                 if (split.length > 0) {
-                    username = split[0]; 
+                    username = split[0];
                 }
                 if (split.length > 1) {
                     userPass = split[1];
                 }
             }
-            
+
             AuthenticationWallet.Entry entry = AuthenticationWallet.getDefault().get(couchDbUrl);
             if (entry != null && entry.login != null) {
                 username = entry.login;
                 userPass = entry.password;
             }
         }
-        
+
         // Create default user if it does not exists.
         if (username != null && isLocal) {
             try {
@@ -172,9 +172,9 @@ public class DatabaseRegistry {
                 SirsCore.LOGGER.log(Level.FINE, "User check / creation failed.", e);
             }
         }
-        
+
         connect();
-        
+
         // last thing to do : we configure CouchDB wire related parameters.
         if (isLocal) {
             try {
@@ -201,18 +201,18 @@ public class DatabaseRegistry {
     public String getUserPass() {
         return userPass;
     }
-    
+
     ////////////////////////////////////////////////////////////////////////////
-    //  
+    //
     // CONNECTION MANAGEMENT
     //
     ////////////////////////////////////////////////////////////////////////////
-    
+
     /**
      * Create a new connection for input parameters. If we cannot connect because
      * provided user does not exists in given database, we will try to create it.
      * If we cannot, we'll ask user for authentication login.
-     * 
+     *
      * @param couchDbUrl The database to connect to.
      * @param user The user login for CouchDb connection.
      * @param password The user password.
@@ -235,25 +235,25 @@ public class DatabaseRegistry {
                 }
             }
         }
-        
+
         // Configure http client
         final StdHttpClient.Builder builder = new SirsClientBuilder()
                 .url(couchDbUrl)
                 .connectionTimeout(CONNECTION_TIMEOUT)
                 .socketTimeout(SOCKET_TIMEOUT)
                 .relaxedSSLSettings(true);
-        
+
         couchDbInstance = new StdCouchDbInstance(builder.build());
         couchDbInstance.getAllDatabases();
     }
-    
+
     /**
      * List SIRS application databases found on current CouchDb server.
      * @return The name of all databases which contain SIRS data.
      */
     public List<String> listSirsDatabases() {
         final List<String> dbList = couchDbInstance.getAllDatabases();
-        
+
         List<String> res = new ArrayList<>();
         for (String db : dbList) {
             if (db.startsWith("_"))
@@ -278,7 +278,7 @@ public class DatabaseRegistry {
      * @return A connector to queried database.
      * @throws java.io.IOException If an error occurs while connecting to couchDb database.
      */
-    public ConfigurableApplicationContext connectToSirsDatabase(String dbName, 
+    public ConfigurableApplicationContext connectToSirsDatabase(String dbName,
             final boolean createIfNotExists, final boolean initIndex,
             final boolean initChangeListener) throws IOException {
         final String dbContext = getContextPath(dbName);
@@ -307,7 +307,7 @@ public class DatabaseRegistry {
     }
 
     /**
-     * Delete the queried database of current CouchDb service. 
+     * Delete the queried database of current CouchDb service.
      * @param dbName Name of the database (must be a name valid on current CouchDb service) to remove.
      * @throws IOException If an error happened while connecting to CouchDb service.
      */
@@ -315,16 +315,16 @@ public class DatabaseRegistry {
         cancelAllSynchronizations(dbName);
         couchDbInstance.deleteDatabase(dbName);
     }
-        
+
     /**
      * Try to create an user in the given database if he does not already exists.
-     * 
+     *
      * Note: We use a direct HTTP call, without any credential. We cannot use provided
-     * login information, because if it describes a inexisting user, couchdb will 
+     * login information, because if it describes a inexisting user, couchdb will
      * fail on authentication requests.
-     * 
-     * Note 2 : Although we test user existence, its password is not checked (because hash). 
-     * 
+     *
+     * Note 2 : Although we test user existence, its password is not checked (because hash).
+     *
      * @param couchDbUrl URL to the CouchDB database on which to create user.
      * @param username The login of the user to check/create.
      * @param password The password to use if we have to create user.
@@ -358,18 +358,18 @@ public class DatabaseRegistry {
                 }
             }
         }
-    }    
-    
-    
+    }
+
+
     ////////////////////////////////////////////////////////////////////////////
-    //  
+    //
     // REPLICATION UTILITIES
     //
     ////////////////////////////////////////////////////////////////////////////
-    
+
     /**
      * Synchronize two databases content.
-     * 
+     *
      * @param distant The source database name if it's in current service, complete URL otherwise.
      * @param local Name of target database. It have to be in current service.
      * @param continuous True if we must keep databases synchronized over time. False for one shot synchronization.
@@ -443,11 +443,11 @@ public class DatabaseRegistry {
 
         new SirsDBInfoRepository(localConnector).set(srid, distant);
     }
-    
+
     /**
-     * Retrieve list of Synchronization tasks the input database is part of. Even 
+     * Retrieve list of Synchronization tasks the input database is part of. Even
      * paused tasks are returned.
-     * 
+     *
      * @param dbName Target database name or path for synchronizations.
      * @return List of source database names or path for continuous copies on input database.
      * @throws java.io.IOException If we cannot get list of active synchronisation from CouchDB.
@@ -457,11 +457,11 @@ public class DatabaseRegistry {
         return getReplicationTasksBySourceOrTarget(dbName)
                 .filter((ReplicationTask task)-> task.isContinuous());
     }
-    
+
     /**
-     * Copy source database content to destination database. If destination database 
+     * Copy source database content to destination database. If destination database
      * does not exists, it will be created. No synchronization over time here.
-     * 
+     *
      * @param dbToCopy Database to copy. Only its name if it's in current service, complete URL otherwise.
      * @param dbToPasteInto Database to paste content into. Only its name if it's in current service, complete URL otherwise.
      * @return A status of started replication task.
@@ -470,10 +470,10 @@ public class DatabaseRegistry {
         ReplicationCommand cmd = new ReplicationCommand.Builder()
                 .continuous(false).source(dbToCopy).target(dbToPasteInto)
                 .createTarget(true).build();
-        
+
         return couchDbInstance.replicate(cmd);
     }
-    
+
     /**
      * Cancel the database copy pointed by given replication status.
      * @param operationStatus Status of the copy to stop.
@@ -483,12 +483,12 @@ public class DatabaseRegistry {
         return couchDbInstance.replicate(new ReplicationCommand.Builder()
                 .id(operationStatus.getId()).cancel(true).build());
     }
-        
+
     /**
      * Cancel all replication tasks implying input database.
      * @param dbName Name of the database to deconnect.
      * @return Number of cancelled replication tasks.
-     * @throws IOException If a connection error happens while retrieving replication tasks. 
+     * @throws IOException If a connection error happens while retrieving replication tasks.
      */
     public int cancelAllSynchronizations(final String dbName) throws IOException {
         final AtomicInteger counter = new AtomicInteger(0);
@@ -525,17 +525,17 @@ public class DatabaseRegistry {
         return getReplicationTasks().stream().filter(
                 t -> (t.getSourceDatabaseName().equals(dst) || t.getTargetDatabaseName().equals(dst)));
     }
-    
-    
-    
+
+
+
     ////////////////////////////////////////////////////////////////////////////
-    //  
+    //
     // MINOR UTILITY METHODS
     //
     ////////////////////////////////////////////////////////////////////////////
-    
+
     /**
-     * Build an {@link  URL} object from given string. Add protocol http prefix 
+     * Build an {@link  URL} object from given string. Add protocol http prefix
      * if no prefix is defined in input string.
      * @param baseURL The string to make URL from.
      * @return An URL representing input path.
@@ -548,7 +548,7 @@ public class DatabaseRegistry {
             return new URL("http://"+baseURL);
         }
     }
-    
+
     private static CouchDbConnector connectToDistant(final String distantService) throws IOException {
         // Connect to distant database.
         final DatabaseRegistry regis = new DatabaseRegistry(distantService);
@@ -567,10 +567,10 @@ public class DatabaseRegistry {
         }
         throw new IllegalArgumentException("Input path does not contain database name.");
     }
-    
+
     public Optional<SirsDBInfo> getInfo(final String dbName) {
         final CouchDbConnector connector;
-        
+
         final Optional<String> localPath = getLocalPath(dbName);
         if (localPath.isPresent()) {
             connector = couchDbInstance.createConnector(dbName, false);
@@ -584,9 +584,9 @@ public class DatabaseRegistry {
         }
         return getInfo(connector);
     }
-    
+
     /**
-     * Test if the given path or name represents a database instance hosted by current 
+     * Test if the given path or name represents a database instance hosted by current
      * service. If its true, we return a path whose all information before context has been truncated.
      * @param dbName Name or URL of the database to test.
      * @return true if given database has been found in current service, false otherwise.
@@ -602,11 +602,11 @@ public class DatabaseRegistry {
         }
         return Optional.empty();
     }
-    
+
     /**
      * If the given string represents an URL pointing on current service, truncate all information before context path.
      * @param dbPath The path to truncate.
-     * @return The context path for input string, or untouched input if it does 
+     * @return The context path for input string, or untouched input if it does
      * not represent a local URL.
      */
     private String getContextPath(final String dbPath) {
@@ -623,7 +623,7 @@ public class DatabaseRegistry {
             }
         }
     }
-    
+
     public static Optional<SirsDBInfo> getInfo(CouchDbConnector connector) {
         if (connector.contains(INFO_DOCUMENT_ID)) {
             return Optional.of(connector.get(SirsDBInfo.class, INFO_DOCUMENT_ID));
@@ -640,7 +640,7 @@ public class DatabaseRegistry {
             } catch (DbAccessException e) {
                 socketConfig = null;
             }
-            
+
             if (socketConfig == null || socketConfig.trim().matches("\\[\\s*\\]")) {
                 socketConfig = "[{" + NO_DELAY_KEY + ", true}]";
             } else {
@@ -665,7 +665,7 @@ public class DatabaseRegistry {
             SirsCore.LOGGER.log(Level.WARNING, "Cannot check 'no delay' configuration", e);
         }
     }
-    
+
     /**
      * Configure CouchDB to force client authentication. Not avoidable.
      */
@@ -680,11 +680,11 @@ public class DatabaseRegistry {
             couchDbInstance.setConfiguration(AUTH_SECTION, REQUIRE_USER_OPTION, "true");
         }
     }
-    
+
     /**
      * Allow current couchdb service to be requested by any host. The "bind_adress"
-     * property, which lists allowed hosts, will be overrided only if it's null or 
-     * if it contains a single local address (default couchdb configuration). It 
+     * property, which lists allowed hosts, will be overrided only if it's null or
+     * if it contains a single local address (default couchdb configuration). It
      * means you still can restrain accesses to localhost by setting it as follow :
      * "localhost, 127.0.0.1".
      */
@@ -698,7 +698,7 @@ public class DatabaseRegistry {
         if (bindAdress == null || LOCAL_URL.matcher(bindAdress).matches()) {
             couchDbInstance.setConfiguration(HTTPD_SECTION, BIND_ADDRESS_OPTION, "0.0.0.0");
         }
-        
+
         String corsValue;
         try {
             corsValue = couchDbInstance.getConfiguration(HTTPD_SECTION, ENABLE_CORS_OPTION);
@@ -709,12 +709,12 @@ public class DatabaseRegistry {
             couchDbInstance.setConfiguration(HTTPD_SECTION, ENABLE_CORS_OPTION, "true");
         }
     }
-    
+
     /**
      * Make Cors filter accept all types of requests from any host.
      * Cors accepted origins will be overrided only if its not already present in
      * couchdb configuration (default configuration).
-     * 
+     *
      * Cors accepted methods will be overrided only if its not already present in
      * couchdb configuration (default configuration).
      */
@@ -728,21 +728,21 @@ public class DatabaseRegistry {
         if (!"true".equals(credentials)) {
             couchDbInstance.setConfiguration(CORS_SECTION, CREDENTIALS_OPTIONS, "true");
         }
-        
+
         try {
             couchDbInstance.getConfiguration(CORS_SECTION, ORIGINS_OPTIONS);
         } catch (Exception e) {
             couchDbInstance.setConfiguration(CORS_SECTION, ORIGINS_OPTIONS, "*");
         }
-        
+
         try {
             couchDbInstance.getConfiguration(CORS_SECTION, METHODS_OPTIONS);
         } catch (Exception e) {
             couchDbInstance.setConfiguration(CORS_SECTION, METHODS_OPTIONS, "GET, POST, PUT, DELETE");
         }
     }
-    
-    
+
+
     private static class SirsClientBuilder extends StdHttpClient.Builder {
 
         @Override
@@ -758,6 +758,6 @@ public class DatabaseRegistry {
                 throw new IllegalArgumentException("Cannot configure http connection parameters.");
             }
             return client;
-        }        
+        }
     }
 }

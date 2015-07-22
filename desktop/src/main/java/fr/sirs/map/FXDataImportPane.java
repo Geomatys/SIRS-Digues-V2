@@ -43,54 +43,54 @@ import org.opengis.parameter.ParameterValueGroup;
 
 /**
  * Panel in charge of external data loading on map.
- * 
+ *
  * @author Alexis Manin (Geomatys)
  */
 public class FXDataImportPane extends BorderPane {
-    
+
     private static final String[] COVERAGE_STORES = new String[]{"coverage-file", "wms", "osmtms"};
-    
+
     private static final String[] FEATURE_STORES = new String[]{"shapefile", "csv", "dwg", "dxf"};
     @FXML
     protected RadioButton uiImageToggle;
-    
+
     @FXML
     protected RadioButton uiVectorToggle;
-    
+
     @FXML
     protected ListView uiFactoryList;
-    
-    @FXML 
+
+    @FXML
     protected Label uiDescriptionLabel;
-    
+
     @FXML
     protected Button uiConnectionBtn;
-    
+
     @FXML
     protected StackPane uiCenterPane;
-    
+
     @FXML
     protected ProgressBar uiProgressBar;
-    
+
     protected final FXParameterGroupPane parameterEditor = new FXParameterGroupPane();
-    
+
     protected final ObservableList<FeatureStoreFactory> featureStores;
 
     protected final ObservableList<CoverageStoreFactory> coverageStores;
-    
+
     public final ObservableList<MapLayer> mapLayers = FXCollections.observableArrayList();
-    
+
     private final FXLayerChooser layerChooser = new FXLayerChooser();
-    
+
     private final Stage dialog = new Stage();
-    
+
     public FXDataImportPane() {
         super();
         SIRS.loadFXML(this);
         dialog.getIcons().add(SIRS.ICON);
-        
+
         uiFactoryList.setCellFactory(value -> new FXStoreChooser.FactoryCell());
-        
+
         coverageStores = FXCollections.observableArrayList();
         for (final String factoryName : COVERAGE_STORES) {
             try {
@@ -99,7 +99,7 @@ public class FXDataImportPane extends BorderPane {
                 SIRS.LOGGER.log(Level.FINE, "No factory available for name : "+factoryName, e);
             }
         }
-        
+
         featureStores = FXCollections.observableArrayList();
         for (final String factoryName : FEATURE_STORES) {
             try {
@@ -108,38 +108,38 @@ public class FXDataImportPane extends BorderPane {
                 SIRS.LOGGER.log(Level.FINE, "No factory available for name : "+factoryName, e);
             }
         }
-        
+
         uiImageToggle.getToggleGroup().selectedToggleProperty().addListener(this::updateFactoryList);
         uiFactoryList.getSelectionModel().selectedItemProperty().addListener(this::updateFactoryForm);
-        
+
         parameterEditor.managedProperty().bind(parameterEditor.visibleProperty());
         parameterEditor.visibleProperty().bind(uiFactoryList.getSelectionModel().selectedItemProperty().isNotNull());
-        
+
         uiCenterPane.getChildren().add(parameterEditor);
         uiProgressBar.visibleProperty().bind(disableProperty());
-        
+
         /*
-         * INIT DIALOG FOR LAYER CHOICE. 
+         * INIT DIALOG FOR LAYER CHOICE.
          */
         dialog.setTitle("Choix des données à importer");
         dialog.setResizable(true);
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.initOwner(null);
-        
+
         final Button finishBtn = new Button("Valider");
         final Button cancelBtn = new Button("Annuler");
         cancelBtn.setCancelButton(true);
-        
+
         final ButtonBar babar = new ButtonBar();
         babar.setPadding(new Insets(5, 5, 5, 5));
         babar.getButtons().addAll(cancelBtn, finishBtn);
-        
+
         final BorderPane dialogContent = new BorderPane();
         dialogContent.setCenter(layerChooser);
         dialogContent.setBottom(babar);
-                
+
         cancelBtn.setOnAction((ActionEvent e) -> dialog.hide());
-        
+
         finishBtn.setOnAction((ActionEvent e) ->  {
             try {
                 mapLayers.addAll(layerChooser.getLayers());
@@ -149,20 +149,20 @@ public class FXDataImportPane extends BorderPane {
             }
             dialog.hide();
         });
-        
+
         finishBtn.disableProperty().bind(layerChooser.layerNames.getSelectionModel().selectedItemProperty().isNull());
         dialog.setScene(new Scene(dialogContent));
     }
-    
+
     public SimpleObjectProperty<ParameterValueGroup> configurationProperty() {
         return parameterEditor.inputGroup;
     }
-    
+
     @FXML
     protected void connect(ActionEvent event) {
         final Object selectedItem = uiFactoryList.getSelectionModel().getSelectedItem();
         final ParameterValueGroup parameters = parameterEditor.inputGroup.get();
-        
+
         setDisable(true);
 
         // Try to connnect on data source with given parameter.
@@ -186,7 +186,7 @@ public class FXDataImportPane extends BorderPane {
             Platform.runLater(getItems);
             return getItems.get();
         });
-        
+
         submit.setOnFailed(e -> {
             Platform.runLater(() -> {
                 setDisable(false);
@@ -195,7 +195,7 @@ public class FXDataImportPane extends BorderPane {
                 }
             });
         });
-        
+
         submit.setOnSucceeded(e -> {
             Platform.runLater(() -> {
                 setDisable(false);
@@ -218,7 +218,7 @@ public class FXDataImportPane extends BorderPane {
             });
         });
     }
-    
+
     protected void updateFactoryList(ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
         if (newValue == uiImageToggle) {
             uiFactoryList.setItems(coverageStores);
@@ -228,7 +228,7 @@ public class FXDataImportPane extends BorderPane {
             uiFactoryList.setItems(null);
         }
     }
-    
+
     protected void updateFactoryForm(ObservableValue observable, Object oldValue, Object newValue) {
         if (newValue instanceof DataStoreFactory) {
             ParameterValueGroup factoryParameters = ((DataStoreFactory)newValue).getParametersDescriptor().createValue();
