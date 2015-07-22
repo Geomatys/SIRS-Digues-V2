@@ -3,6 +3,7 @@ package fr.sirs.core;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DatabaseRegistry;
+import fr.sirs.core.component.PositionProfilTraversRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 
 import java.util.List;
@@ -12,12 +13,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import fr.sirs.core.component.ReferenceUsageRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPositionDocument;
+import fr.sirs.core.model.AvecForeignParent;
+import fr.sirs.core.model.AvecPhotos;
+import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.ObjetPhotographiable;
+import fr.sirs.core.model.Observation;
+import fr.sirs.core.model.Photo;
+import fr.sirs.core.model.PositionProfilTravers;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
@@ -147,7 +156,7 @@ public class SessionCore implements ApplicationContextAware {
      * @param elementType
      * @return All repositories which work on given element types or its sub-classes. Can be empty, but never null.
      */
-    public Collection<AbstractSIRSRepository> getRepositoriesForClass(Class<? extends Element> elementType) {
+    public Collection<AbstractSIRSRepository> getRepositoriesForClass(Class elementType) {
         if (elementType == null)
             return Collections.EMPTY_SET;
         try {
@@ -276,32 +285,88 @@ public class SessionCore implements ApplicationContextAware {
         return repo.getByLinearId(tronconId);
     }
 
-    public List<Objet> getObjetsByTronconId(final String tronconId){
+    public List<Objet> getObjetsByTronconId(final String tronconId) {
         final List<Objet> objets = new ArrayList<>();
-        for(final Element element : ServiceLoader.load(Element.class)){
-            if(element instanceof Objet){
-                final AbstractPositionableRepository repo = (AbstractPositionableRepository) getRepositoryForClass(element.getClass());
-                final List elementList = repo.getByLinearId(tronconId);
-                for(final Object objet : elementList){
-                    objets.add((Objet) objet);
-                }
+        for(final AbstractSIRSRepository<Objet> repo : getRepositoriesForClass(Objet.class)) {
+            if(repo instanceof AbstractPositionableRepository) {
+                objets.addAll(((AbstractPositionableRepository<Objet>)repo).getByLinearId(tronconId));
             }
         }
         return objets;
     }
 
-    public List<AbstractPositionDocument> getPositionDocumentsByTronconId(final String tronconId){
+    public List<AbstractPositionDocument> getPositionDocumentsByTronconId(final String tronconId) {
         final List<AbstractPositionDocument> positions = new ArrayList<>();
-        for(final Element element : ServiceLoader.load(Element.class)){
-            if(element instanceof AbstractPositionDocument){
-                final AbstractPositionableRepository repo = (AbstractPositionableRepository) getRepositoryForClass(element.getClass());
-                final List elementList = repo.getByLinearId(tronconId);
-                for(final Object position : elementList){
-                    positions.add((AbstractPositionDocument) position);
+                for(final AbstractSIRSRepository<AbstractPositionDocument> repo : getRepositoriesForClass(AbstractPositionDocument.class)) {
+            if(repo instanceof AbstractPositionableRepository) {
+                positions.addAll(((AbstractPositionableRepository<AbstractPositionDocument>)repo).getByLinearId(tronconId));
+            }
+        }
+
+        return positions;
+    }
+
+    public List<Photo> getPhotoList(final String linearId) {
+                final List<Photo> photos = new ArrayList<>();
+        final List<PositionProfilTravers> positions = ((PositionProfilTraversRepository) getRepositoryForClass(PositionProfilTravers.class)).getByLinearId(linearId);
+        final List<Objet> objets = getObjetsByTronconId(linearId);
+        for(final PositionProfilTravers position : positions){
+            final List<Photo> p = position.getPhotos();
+            if(p!=null && !p.isEmpty()) photos.addAll(p);
+        }
+        for(final Objet objet : objets){
+            if (objet instanceof ObjetPhotographiable){
+                final List<Photo> p = ((ObjetPhotographiable) objet).getPhotos();
+                if(p!=null && !p.isEmpty()) photos.addAll(p);
+            } else if (objet instanceof Desordre){
+                for (final Observation observation : ((Desordre) objet).getObservations()){
+                    final List<Photo> p = observation.getPhotos();
+                    if(p!=null && !p.isEmpty()) photos.addAll(p);
                 }
             }
         }
-        return positions;
+
+        final Collection<AbstractSIRSRepository> repos = getRepositoriesForClass(AvecPhotos.class);
+        for (final AbstractSIRSRepository repo : repos) {
+            if (repo instanceof AbstractPositionableRepository) {
+                List byLinearId = ((AbstractPositionableRepository)repo).getByLinearId(linearId);
+                for (Object o : byLinearId) {
+                    photos.addAll(((AvecPhotos)o).getPhotos());
+                }
+            } else {
+                for (final Object photoContainer : repo.getAll()) {
+                    for (final Photo photo : ((AvecPhotos)photoContainer).getPhotos()) {
+                        Element parent = photo.getParent();
+                        while (parent != null) {
+                            if (parent instanceof AvecForeignParent && linearId.equalsIgnoreCase(((AvecForeignParent)parent).getForeignParentId())) {
+                                photos.add(photo);
+                                break;
+                            }
+                            parent = parent.getParent();
+                        }
+                    }
+                }
+            }
+        }
+
+        // Special case :
+        for (final Desordre d : ((AbstractPositionableRepository<Desordre>)getRepositoryForClass(Desordre.class)).getByLinearId(linearId)) {
+            for (final Observation o : d.observations) {
+                photos.addAll(o.photos);
+            }
+        }
+
+        return photos;
+    }
+
+    public List<Positionable> getPositionableByLinearId(final String linearId) {
+        final ArrayList<Positionable> positionables = new ArrayList<>();
+        for (final AbstractPositionableRepository repo : applicationContext.getBeansOfType(AbstractPositionableRepository.class).values()) {
+            positionables.addAll(repo.getByLinearId(linearId));
+        }
+        positionables.addAll(getPhotoList(linearId));
+        
+        return positionables;
     }
 
     // REFERENCES
