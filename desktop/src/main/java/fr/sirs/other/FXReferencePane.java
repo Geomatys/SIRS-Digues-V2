@@ -11,12 +11,15 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -45,7 +48,7 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
     public FXReferencePane(final Class<T> type) {
         final ResourceBundle bundle = ResourceBundle.getBundle(type.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
         referenceChecker = session.getReferenceChecker();
-        references = new ReferencePojoTable(type, bundle.getString(BUNDLE_KEY_CLASS));
+        references = new ReferencePojoTable(type, bundle.getString(BUNDLE_KEY_CLASS)+" (type : "+type.getSimpleName()+")");
         references.editableProperty().set(false);
         references.fichableProperty().set(false);
         references.detaillableProperty().set(false);
@@ -73,6 +76,16 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
             getTable().setRowFactory((TableView<Element> param) -> {
                     return new ReferenceTableRow();
                 });
+            
+            TableColumn<Element, String> idCol = new TableColumn<>("Identifiant");
+            idCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, String>, ObservableValue<String>>() {
+
+                @Override
+                public ObservableValue<String> call(TableColumn.CellDataFeatures<Element, String> param) {
+                    return new SimpleStringProperty(param.getValue().getId());
+                }
+            });
+            getColumns().add(1, idCol);
             
             final ObservableList allItems = FXCollections.observableArrayList(repo.getAll());
             if(serverInstanceNotLocal!=null && !serverInstanceNotLocal.isEmpty()){
