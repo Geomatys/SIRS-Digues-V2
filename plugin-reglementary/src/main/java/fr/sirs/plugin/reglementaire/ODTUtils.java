@@ -106,7 +106,8 @@ public final class ODTUtils extends Static{
      * @throws DocumentTemplateException
      */
     public static void generateReport(File templateFile, Object candidate, File outputFile)
-            throws IOException, TemplateModelException, DocumentTemplateException{
+            throws IOException, TemplateModelException, DocumentTemplateException, IllegalAccessException,
+            IntrospectionException, InvocationTargetException {
         final DocumentTemplateFactory documentTemplateFactory = new DocumentTemplateFactory();
         final DocumentTemplate template = documentTemplateFactory.getTemplate(templateFile);
         generateReport(template, candidate, outputFile);
@@ -125,9 +126,28 @@ public final class ODTUtils extends Static{
      * @throws DocumentTemplateException
      */
     public static void generateReport(DocumentTemplate template, Object candidate, File outputFile)
-            throws IOException, TemplateModelException, DocumentTemplateException{
+            throws IOException, TemplateModelException, DocumentTemplateException, IntrospectionException,
+            InvocationTargetException, IllegalAccessException {
         if(!(candidate instanceof Map || candidate instanceof TemplateModel)){
-            candidate = BeansWrapper.getDefaultInstance().wrap(candidate);
+            final Class pojoClass = candidate.getClass();
+            final HashMap<String, PropertyDescriptor> props = SIRS.listSimpleProperties(pojoClass);
+            final SirsStringConverter cvt = new SirsStringConverter();
+            final Previews previews = Injector.getSession().getPreviews();
+
+            final Map<String,Object> properties = new HashMap<>();
+            for(Entry<String,PropertyDescriptor> entry : props.entrySet()){
+                if(entry.getValue().getReadMethod()!=null){
+                    Object val = entry.getValue().getReadMethod().invoke(candidate);
+                    if(val instanceof String){
+                        try{
+                            val = cvt.toString(previews.get((String)val));
+                        }catch(DocumentNotFoundException ex){/**pas important*/}
+                    }
+                    properties.put(entry.getKey(), val == null ? "" : val.toString());
+                }
+            }
+            candidate = properties;
+            //candidate = BeansWrapper.getDefaultInstance().wrap(candidate);
         }
         template.createDocument(candidate, new FileOutputStream(outputFile));
     }
