@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="aot_cot" nsURI="http://fr.sirs/aot_cot">
-  <eClassifiers xsi:type="ecore:EClass" name="Convention" eSuperTypes="../../sirs-core/model/sirs.ecore#//SIRSDefaultDocument ../../sirs-core/model/sirs.ecore#//SIRSDefaultReference">
+  <eClassifiers xsi:type="ecore:EClass" name="Convention" eSuperTypes="../../sirs-core/model/sirs.ecore#//SIRSDefaultReference ../../sirs-core/model/sirs.ecore#//SIRSDocument">
     <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -21,34 +21,46 @@
         upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Organisme"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="contactSignataireIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Contact"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvertureBatardableIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvertureBatardable"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="voieAccesIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//VoieAcces"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="voieDigueIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//VoieDigue"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageVoirieIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageVoirie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageFranchissementIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageFranchissement"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="stationPompageIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//StationPompage"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueCielOuvertIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//ReseauHydrauliqueCielOuvert"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueFermeIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//ReseauHydrauliqueFerme"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageHydrauliqueAssocieIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageHydrauliqueAssocie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauTelecomEnergieIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//ReseauTelecomEnergie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageTelecomEnergieIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageTelecomEnergie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageParticulierIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageParticulier"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="echelleLimnimetriqueIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//EchelleLimnimetrique"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="portees" upperBound="-1"
+        eType="#//PorteeConvention" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="piecesJointes" upperBound="-1"
+        eType="#//ConventionPJ" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefConvention" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument">
+      <details key="document" value="true"/>
+    </eAnnotations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PorteeConvention">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="prDebut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="prFin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="objetReseauId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//ObjetReseau"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ConventionPJ">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="chemin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeConventionPJId" eType="#//RefConventionPJ"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefConventionPJ" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>

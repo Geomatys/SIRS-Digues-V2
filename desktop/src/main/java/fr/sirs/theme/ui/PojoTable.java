@@ -379,7 +379,7 @@ public class PojoTable extends BorderPane {
                 getPropertyColumn(desc).ifPresent(column -> cols.add(column));
             }
 
-            //on tri les colonnes
+            //on trie les colonnes
             final List<String> order = ColumnOrder.sort(this.pojoClass.getSimpleName(),colNames);
             for(String colName : order){
                 final TableColumn column = getColumn(colName, cols);
@@ -711,7 +711,7 @@ public class PojoTable extends BorderPane {
         return ownerElementProperty;
     }
 
-    protected ObservableList<Element> getAllValues(){
+    public ObservableList<Element> getAllValues(){
         return allValues;
     }
 
@@ -1186,7 +1186,7 @@ public class PojoTable extends BorderPane {
     }
 
 
-    protected Optional<TableColumn> getPropertyColumn(final PropertyDescriptor desc) {
+    public Optional<TableColumn> getPropertyColumn(final PropertyDescriptor desc) {
         if (desc != null) {
             final TableColumn col;
             if (desc.getReadMethod().getReturnType().isEnum()) {

@@ -1,24 +1,18 @@
 package fr.sirs.plugin.aot.cot;
 
-import fr.sirs.FXMainFrame;
 import fr.sirs.Injector;
 import fr.sirs.Plugin;
-import fr.sirs.SIRS;
 import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.model.Convention;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.theme.ui.PojoTable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.Tab;
 import javafx.scene.image.Image;
-import javafx.scene.layout.BorderPane;
 
 /**
  * Plugin correspondant au module AOT COT.
@@ -35,11 +29,9 @@ public class PluginAotCot extends Plugin {
     public PluginAotCot() {
         name = NAME;
         loadingMessage.set("module AOT COT");
-        themes.add(new CreateAotCotTheme());
         themes.add(new SuiviAotCotTheme());
         consultationAotCotTheme = new ConsultationAotCotTheme();
         themes.add(consultationAotCotTheme);
-        themes.add(new AssociatedDocumentsAotCotTheme());
     }
 
     @Override

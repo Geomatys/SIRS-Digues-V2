@@ -4,6 +4,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.EchelleLimnimetrique;
+import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.OuvertureBatardable;
 import fr.sirs.core.model.OuvrageFranchissement;
@@ -11,6 +12,7 @@ import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.OuvrageParticulier;
 import fr.sirs.core.model.OuvrageTelecomEnergie;
 import fr.sirs.core.model.OuvrageVoirie;
+import fr.sirs.core.model.PorteeConvention;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauTelecomEnergie;
@@ -79,45 +81,56 @@ public class ElementReseauConventionImporter extends GenericEntityLinker {
             final Convention convention = conventions.get(row.getInt(Columns.ID_CONVENTION.toString()));
             
             if(reseau!=null && convention!=null){
-                if(reseau instanceof OuvertureBatardable){
-                    convention.getOuvertureBatardableIds().add(reseau.getId());
-                }
-                if(reseau instanceof VoieAcces){
-                    convention.getVoieAccesIds().add(reseau.getId());
-                }
-                if(reseau instanceof VoieDigue){
-                    convention.getVoieDigueIds().add(reseau.getId());
-                }
-                if(reseau instanceof OuvrageVoirie){
-                    convention.getOuvrageVoirieIds().add(reseau.getId());
-                }
-                if(reseau instanceof OuvrageFranchissement){
-                    convention.getOuvrageFranchissementIds().add(reseau.getId());
-                }
-                if(reseau instanceof StationPompage){
-                    convention.getStationPompageIds().add(reseau.getId());
-                }
-                if(reseau instanceof ReseauHydrauliqueCielOuvert){
-                    convention.getReseauHydrauliqueCielOuvertIds().add(reseau.getId());
-                }
-                if(reseau instanceof ReseauHydrauliqueFerme){
-                    convention.getReseauHydrauliqueFermeIds().add(reseau.getId());
-                }
-                if(reseau instanceof OuvrageHydrauliqueAssocie){
-                    convention.getOuvrageHydrauliqueAssocieIds().add(reseau.getId());
-                }
-                if(reseau instanceof OuvrageTelecomEnergie){
-                    convention.getOuvrageTelecomEnergieIds().add(reseau.getId());
-                }
-                if(reseau instanceof ReseauTelecomEnergie){
-                    convention.getReseauTelecomEnergieIds().add(reseau.getId());
-                }
-                if(reseau instanceof OuvrageParticulier){
-                    convention.getOuvrageParticulierIds().add(reseau.getId());
-                }
-                if(reseau instanceof EchelleLimnimetrique){
-                    convention.getEchelleLimnimetriqueIds().add(reseau.getId());
-                }
+                // VERSION SI LES CONVENTIONS RÉFÉRENCENT DIRECTEMENT LES OBJETS
+//                if(reseau instanceof OuvertureBatardable){
+//                    convention.getOuvertureBatardableIds().add(reseau.getId());
+//                }
+//                if(reseau instanceof VoieAcces){
+//                    convention.getVoieAccesIds().add(reseau.getId());
+//                }
+//                if(reseau instanceof VoieDigue){
+//                    convention.getVoieDigueIds().add(reseau.getId());
+//                }
+//                if(reseau instanceof OuvrageVoirie){
+//                    convention.getOuvrageVoirieIds().add(reseau.getId());
+//                }
+//                if(reseau instanceof OuvrageFranchissement){
+//                    convention.getOuvrageFranchissementIds().add(reseau.getId());
+//                }
+//                if(reseau instanceof StationPompage){
+//                    convention.getStationPompageIds().add(reseau.getId());
+//                }
+//                if(reseau instanceof ReseauHydrauliqueCielOuvert){
+//                    convention.getReseauHydrauliqueCielOuvertIds().add(reseau.getId());
+//                }
+//                if(reseau instanceof ReseauHydrauliqueFerme){
+//                    convention.getReseauHydrauliqueFermeIds().add(reseau.getId());
+//                }
+//                if(reseau instanceof OuvrageHydrauliqueAssocie){
+//                    convention.getOuvrageHydrauliqueAssocieIds().add(reseau.getId());
+//                }
+//                if(reseau instanceof OuvrageTelecomEnergie){
+//                    convention.getOuvrageTelecomEnergieIds().add(reseau.getId());
+//                }
+//                if(reseau instanceof ReseauTelecomEnergie){
+//                    convention.getReseauTelecomEnergieIds().add(reseau.getId());
+//                }
+//                if(reseau instanceof OuvrageParticulier){
+//                    convention.getOuvrageParticulierIds().add(reseau.getId());
+//                }
+//                if(reseau instanceof EchelleLimnimetrique){
+//                    convention.getEchelleLimnimetriqueIds().add(reseau.getId());
+//                }
+                
+                // VERSION SI LES CONVENTIONS RÉFÉRENCENT INDIRECTEMENT LES OBJETS MAIS EN ÉVITANT UN POSITIONNEMENT SUR LE TRONCON
+                final PorteeConvention portee = ElementCreator.createAnonymValidElement(PorteeConvention.class);
+                portee.setObjetReseauId(reseau.getId());
+                // Par défaut, on initialise la portée à l'aide des pr et des dates de l'objet.
+                portee.setPrDebut(reseau.getPrDebut());
+                portee.setPrFin(reseau.getPrFin());
+                portee.setDate_debut(reseau.getDate_debut());
+                portee.setDate_fin(reseau.getDate_fin());
+                convention.getPortees().add(portee);
             }
         }
         couchDbConnector.executeBulk(conventions.values());

@@ -1,8 +1,11 @@
 package fr.sirs.core.component;
 
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
 import static fr.sirs.core.component.Previews.BY_CLASS;
 import static fr.sirs.core.component.Previews.BY_ID;
 import static fr.sirs.core.component.Previews.VALIDATION;
+import fr.sirs.core.model.Element;
 import java.util.List;
 
 import org.ektorp.CouchDbConnector;
@@ -10,9 +13,12 @@ import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.View;
 
 import fr.sirs.core.model.Preview;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.ServiceLoader;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.Options;
@@ -68,10 +74,25 @@ public class Previews extends CouchDbRepositorySupport<Preview> {
         return db.queryView(viewQuery, Preview.class);
     }
     
+    
+    /**
+     * Retrieve the previews for objects of given canonicalClassNames (only for
+     * concrete classes).
+     * 
+     * @param canonicalClassNames
+     * @return 
+     */
     public List<Preview> getByClass(final String... canonicalClassNames) {
         return Previews.this.getByClass(Arrays.asList(canonicalClassNames));
     }
     
+    /**
+     * Retrieve the previews for objects of given canonicalClassNames (only for
+     * concrete classes).
+     * 
+     * @param canonicalClassNames
+     * @return 
+     */
     public List<Preview> getByClass(final Collection<String> canonicalClassNames) {
         ArgumentChecks.ensureNonNull("Class", canonicalClassNames);
         
@@ -84,10 +105,34 @@ public class Previews extends CouchDbRepositorySupport<Preview> {
         return db.queryView(viewQuery, Preview.class);
     }
     
+    /**
+     * Retrieve the previews for objects of given classes.
+     * 
+     * For a concrete class,retrieve the previews of the objects of this class.
+     * 
+     * For an abstract class or an interface, retrive the previews of the 
+     * objects of all classes extending the abstract class or implementing the
+     * interface.
+     * 
+     * @param classes
+     * @return 
+     */
     public List<Preview> getByClass(final Class... classes) {
         final ArrayList<String> classNames = new ArrayList();
         for (final Class c : classes) {
-            classNames.add(c.getCanonicalName());
+            if(Modifier.isAbstract(c.getModifiers()) || c.isInterface()){
+                final Iterator<Class<? extends Element>> classIt = SessionCore.getElements().iterator();
+                while (classIt.hasNext()){
+                    final Class<? extends Element> slClass = classIt.next();
+                    if(!Modifier.isAbstract(slClass.getModifiers()) 
+                            && !slClass.isInterface()
+                            && c.isAssignableFrom(slClass)){
+                        classNames.add(slClass.getCanonicalName());   
+                    }
+                }
+            } else {
+                classNames.add(c.getCanonicalName());
+            }
         }
         return Previews.this.getByClass(classNames);
     }
