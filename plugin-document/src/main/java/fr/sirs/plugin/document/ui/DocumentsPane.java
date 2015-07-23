@@ -41,13 +41,14 @@ import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.plugin.document.ODTUtils;
         
 import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.prefs.Preferences;
-import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 
@@ -164,8 +165,8 @@ public class DocumentsPane extends GridPane {
         tree1.getColumns().get(2).setCellValueFactory(new Callback() {
             @Override
             public ObservableValue call(Object param) {
-                final File f = (File) ((CellDataFeatures)param).getValue().getValue();
-                return new SimpleStringProperty(getStringSizeFile(f));
+                final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
+                return new SimpleStringProperty(f.getSize());
             }
         });
         
@@ -370,6 +371,28 @@ public class DocumentsPane extends GridPane {
                     addToModelFolder(rootDir, folderName, TR);
                     update();
                     break;
+            }
+        }
+    }
+    
+    @FXML
+    public void exportOdtSummary(ActionEvent event) {
+        final Dialog dialog    = new Dialog();
+        final DialogPane pane  = new DialogPane();
+        final SaveSummaryPane ipane = new SaveSummaryPane();
+        pane.setContent(ipane);
+        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Exporter le sommaire");
+
+        final Optional opt = dialog.showAndWait();
+        if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
+            File f = new File(ipane.newFileFIeld.getText());
+            try {
+                ODTUtils.write(new FileTreeItem(new File(rootPath)), f);
+            } catch (Exception ex) {
+                showErrorDialog(ex.getMessage());
             }
         }
     }

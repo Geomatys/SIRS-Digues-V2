@@ -100,6 +100,43 @@ public class FileTreeItem extends TreeItem<File> {
         return results;
     }
     
+    public List<FileTreeItem> listChildrenItem(boolean directory) {
+        final List<FileTreeItem> results = new ArrayList<>();
+        for (TreeItem item : getChildren()) {
+            final FileTreeItem fitem = (FileTreeItem) item;
+            if (fitem.isDirectory() && directory || 
+                !fitem.isDirectory() && !directory ) {
+                results.add(fitem);
+            }
+        }
+        return results;
+    }
+    
+    public String getLibelle() {
+        final File f = getValue();
+        String name = PropertiesFileUtilities.getProperty(getValue(), DocumentsPane.LIBELLE);
+        if (name.isEmpty()) {
+            name = f.getName();
+        }
+        return name;
+    }
+    
+    public String getSize() {
+        return PropertiesFileUtilities.getStringSizeFile(getValue());
+    }
+    
+    public String getInventoryNumber() {
+        return PropertiesFileUtilities.getProperty(getValue(), DocumentsPane.INVENTORY_NUMBER);
+    }
+    
+    public String getClassPlace() {
+        return PropertiesFileUtilities.getProperty(getValue(), DocumentsPane.CLASS_PLACE);
+    }
+    
+    public boolean isDirectory() {
+        return getValue().isDirectory();
+    }
+            
     private static class FileComparator implements Comparator<File> {
 
         @Override
