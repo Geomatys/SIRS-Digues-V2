@@ -16,7 +16,6 @@ import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.theme.ui.FXDiguePane;
 import fr.sirs.theme.ui.FXTronconDiguePane;
 import fr.sirs.other.FXContactPane;
@@ -71,6 +70,7 @@ public final class SIRS extends SirsCore {
 
     public static final Image ICON_ADD_WHITE    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.WHITE),null);
     public static final Image ICON_ADD_BLACK    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,16,Color.BLACK),null);
+    public static final Image ICON_ARROW_RIGHT_BLACK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_ARROW_RIGHT,16,Color.BLACK),null);
     public static final Image ICON_CLOCK_WHITE  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CLOCK_O,22,Color.WHITE),null);
     public static final Image ICON_SEARCH_WHITE       = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_SEARCH,22,Color.WHITE),null);
     public static final Image ICON_TRASH_WHITE        = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TRASH_O,22,Color.WHITE),null);
@@ -245,6 +245,11 @@ public final class SIRS extends SirsCore {
         candidate.getStylesheets().add(CSS_PATH);
     }
 
+    public static Path getDocumentRootPath() throws InvalidPathException {
+        String rootStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.DOCUMENT_ROOT);
+       return Paths.get(rootStr);
+    }
+
     /**
      *
      * @param relativeReference Un chemin relatif dénotant une référence dans un {@link Element}
@@ -260,10 +265,9 @@ public final class SIRS extends SirsCore {
      */
     public static Path getDocumentAbsolutePath(final String relativeReference) throws IllegalStateException, InvalidPathException {
         ArgumentChecks.ensureNonEmpty("Document relative path", relativeReference);
-        String rootStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.DOCUMENT_ROOT);
         final Path docRoot;
         try {
-            docRoot = Paths.get(rootStr);
+            docRoot = getDocumentRootPath();
         } catch (InvalidPathException e) {
             throw new IllegalStateException("La preference " + SirsPreferences.PROPERTIES.DOCUMENT_ROOT.name()
                     + "ne dénote pas un chemin valide. Vous pouvez vérifier sa valeur "
