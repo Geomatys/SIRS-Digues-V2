@@ -136,6 +136,18 @@ public class FileTreeItem extends TreeItem<File> {
     public boolean isDirectory() {
         return getValue().isDirectory();
     }
+    
+    public boolean isSe() {
+        return PropertiesFileUtilities.getIsModelFolder(getValue(), DocumentsPane.SE);
+    }
+    
+    public boolean isDg() {
+        return PropertiesFileUtilities.getIsModelFolder(getValue(), DocumentsPane.DG);
+    }
+    
+    public boolean isTr() {
+        return PropertiesFileUtilities.getIsModelFolder(getValue(), DocumentsPane.TR);
+    }
             
     private static class FileComparator implements Comparator<File> {
 

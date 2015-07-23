@@ -1,6 +1,7 @@
 
 package fr.sirs.plugin.document;
 
+import fr.sirs.plugin.document.ui.DocumentsPane;
 import java.io.File;
 import java.util.List;
 import org.odftoolkit.odfdom.type.Color;
@@ -16,24 +17,38 @@ import org.odftoolkit.simple.text.Paragraph;
  */
 public class ODTUtils {
     
+    private static String TAB = "        ";
+    
     public static void write(final FileTreeItem item, File file) throws Exception {
         final TextDocument doc = TextDocument.newTextDocument();
         for (FileTreeItem child : item.listChildrenItem()) {
-            write(doc, child, 4, "");
+            if (!child.getLibelle().equals(DocumentsPane.SAVE_FOLDER)) {
+                write(doc, child, "");
+            }
         }
         doc.save(file);
     }
     
-    public static void write(final TextDocument doc, final FileTreeItem item, int level, final String margin) {
+    public static void write(final TextDocument doc, final FileTreeItem item, String margin) {
         final Paragraph paragraph = doc.addParagraph("");
-        paragraph.applyHeading(true, level);
-        paragraph.appendTextContent(margin);
         
-        paragraph.setFont(new Font("Arial", StyleTypeDefinitions.FontStyle.REGULAR, 12, Color.BLACK, StyleTypeDefinitions.TextLinePosition.THROUGHUNDER));
-        
-        paragraph.appendTextContent(item.getLibelle());
-        
-        
+        if (item.isSe()) {
+            paragraph.setFont(new Font("Arial", StyleTypeDefinitions.FontStyle.BOLD, 22, Color.BLACK, StyleTypeDefinitions.TextLinePosition.UNDER));
+            margin = "";
+            paragraph.appendTextContent(margin + item.getLibelle() + "\n");
+            
+        } else if (item.isDg()) {
+            paragraph.setFont(new Font("Arial", StyleTypeDefinitions.FontStyle.BOLD, 18, Color.BLACK, StyleTypeDefinitions.TextLinePosition.UNDER));
+            margin = "";
+            paragraph.appendTextContent(margin + item.getLibelle() + "\n");
+        } else if (item.isTr()) {
+            paragraph.setFont(new Font("Arial", StyleTypeDefinitions.FontStyle.BOLD, 14, Color.BLACK, StyleTypeDefinitions.TextLinePosition.UNDER));
+            margin = "";
+            paragraph.appendTextContent(margin + item.getLibelle() + "\n");
+        } else {
+            paragraph.setFont(new Font("Arial", StyleTypeDefinitions.FontStyle.BOLD, 12, Color.BLACK, StyleTypeDefinitions.TextLinePosition.REGULAR));
+            paragraph.appendTextContent(margin + " - " + item.getLibelle() + "\n");
+        }
                 
         List<FileTreeItem> directories = item.listChildrenItem(true);
         List<FileTreeItem> files       = item.listChildrenItem(false);
@@ -68,10 +83,11 @@ public class ODTUtils {
 
                 i++;
             }
+            doc.addParagraph("");
         }
         
         for (FileTreeItem child : directories) {
-            write(doc, child, level + 1, "\t" + margin);
+            write(doc, child, TAB + margin);
         }
     }
 }
