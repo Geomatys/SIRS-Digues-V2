@@ -23,6 +23,7 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -270,7 +271,12 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
                         // use SirsStringConverter or libelle.
                         Preview preview = getPreview(e.getId());
                         if (preview != null) {
-                            tmpProp.set(preview.getLibelle());
+                            final Runnable fxUpdate = () -> tmpProp.set(preview.getLibelle());
+                            if (Platform.isFxApplicationThread()) {
+                                fxUpdate.run();
+                            } else {
+                                Platform.runLater(fxUpdate);
+                            }
                         } // else... can it really happen ?
                     }
                 }
@@ -284,7 +290,12 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
                 for (final Element e : elements) {
                     final StringProperty tmpProp = CACHED_VALUES.get(e.getId());
                     if (tmpProp != null) {
-                        tmpProp.set(OBJECT_DELETED);
+                        final Runnable fxUpdate = () -> tmpProp.set(OBJECT_DELETED);
+                        if (Platform.isFxApplicationThread()) {
+                            fxUpdate.run();
+                        } else {
+                            Platform.runLater(fxUpdate);
+                        }
                     }
                 }
             }
