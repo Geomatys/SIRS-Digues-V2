@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
+
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -219,10 +221,15 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
             // L'entrée nest pas dans le cache, on va chercher l'info en base.
             if (text == null) {
                 // On essaye de récupérer le preview label, car l'objet en entrée doit être un ID.
-                final Preview tmpPreview = getPreview((String) item);
-                if (tmpPreview != null) {
-                    text = tmpPreview.libelleProperty();
-                    CACHED_VALUES.put(item, text);
+                try {
+                    final Preview tmpPreview = getPreview((String) item);
+                    if (tmpPreview != null) {
+                        text = tmpPreview.libelleProperty();
+                        CACHED_VALUES.put(item, text);
+                    }
+                } catch (DocumentNotFoundException ex) {
+                    // La preview n'a pas pu être trouvée, ce qui indique que l'objet pointé a été supprimé.
+                    text = new SimpleStringProperty(OBJECT_DELETED);
                 }
             }
         }
@@ -238,7 +245,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
         }
     }
 
-    private static Preview getPreview(final String elementId) {
+    private static Preview getPreview(final String elementId) throws DocumentNotFoundException {
         final Session session = Injector.getSession();
         final Previews previews = session.getPreviews();
         return previews.get(elementId);
