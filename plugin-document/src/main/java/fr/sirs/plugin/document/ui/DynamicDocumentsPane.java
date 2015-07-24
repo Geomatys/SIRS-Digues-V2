@@ -14,10 +14,8 @@ import fr.sirs.core.model.RapportSectionDocument;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -32,13 +30,12 @@ import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 
 /**
  * Panneau de gestion de création de documents dynamiques.
@@ -46,6 +43,11 @@ import java.util.Set;
  * @author Cédric Briançon (Geomatys)
  */
 public class DynamicDocumentsPane extends BorderPane implements Initializable {
+    
+    @FXML private CheckBox uiSelectAllTronconBox;
+    
+    @FXML private CheckBox uiOnlySEBox;
+    
     @FXML private ComboBox<Preview> uiSECombo;
 
     @FXML private ListView<TronconDigue> uiTronconsList;
@@ -59,6 +61,8 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
     @FXML private Button uiAddParagrapheBtn;
 
     @FXML private TextField uiModelNameTxtField;
+    
+    @FXML private Label uiTronconLabel;
 
     public DynamicDocumentsPane() {
         SIRS.loadFXML(this);
@@ -144,6 +148,20 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
         });
 
         uiRightVBox.visibleProperty().bind(uiModelsList.getSelectionModel().selectedItemProperty().isNotNull());
+        
+        uiOnlySEBox.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            uiTronconLabel.setVisible(!newValue);
+            uiSelectAllTronconBox.setVisible(!newValue);
+            uiTronconsList.setVisible(!newValue);
+        });
+        
+        uiSelectAllTronconBox.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            if (newValue) {
+                uiTronconsList.getSelectionModel().selectRange(0, uiTronconsList.getItems().size());
+            } else {
+                uiTronconsList.getSelectionModel().clearSelection();
+            }
+        });
     }
 
     @FXML

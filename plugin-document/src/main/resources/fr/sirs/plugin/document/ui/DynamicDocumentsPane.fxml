@@ -5,7 +5,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="600.0" prefWidth="1024.0" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.45" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="600.0" prefWidth="1024.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <GridPane hgap="20.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vgap="10.0" BorderPane.alignment="CENTER">
         <columnConstraints>
@@ -70,7 +70,7 @@
                         <ComboBox fx:id="uiSECombo" maxWidth="1.7976931348623157E308" prefWidth="285.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
                         <CheckBox fx:id="uiOnlySEBox" mnemonicParsing="false" text="Sélectionner uniquement le SE" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <CheckBox fx:id="uiSelectAllTronconBox" mnemonicParsing="false" text="Sélectionner tous les tronçons du SE" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <Label text="Tronçons" GridPane.rowIndex="2" />
+                        <Label fx:id="uiTronconLabel" text="Tronçons" GridPane.rowIndex="2" />
                         <ListView fx:id="uiTronconsList" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                      </children>
                   </GridPane>

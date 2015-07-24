@@ -47,7 +47,6 @@ import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
