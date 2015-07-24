@@ -10,7 +10,10 @@ import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.LevePositionProfilTravers;
+import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.SIRSFileReference;
 import fr.sirs.core.model.SIRSReference;
 import fr.sirs.core.model.TronconDigue;
@@ -22,14 +25,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.function.Predicate;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -55,6 +64,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
@@ -65,8 +75,7 @@ import org.geotoolkit.internal.GeotkFX;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * TODO : detect mobile emplacement.
- * TODO : manage documents already on mobile
+ * TODO : detect mobile emplacement. TODO : manage documents already on mobile
  *
  * @author Alexis Manin (Geomatys)
  */
@@ -117,6 +126,9 @@ public class DocumentExportPane extends StackPane {
     @FXML
     private BorderPane uiCopyPane;
 
+    @FXML
+    private BorderPane uiLoadingPane;
+
     @Autowired
     private Session session;
 
@@ -130,6 +142,9 @@ public class DocumentExportPane extends StackPane {
         super();
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
+
+        // Prevent actions when a copy or a loading is running.
+        //uiConfigPane.disableProperty().bind(uiCopyPane.visibleProperty().or(uiLoadingPane.visibleProperty()));
 
         uiDocumentType.setConverter(new ClassNameConverter());
 
@@ -180,49 +195,148 @@ public class DocumentExportPane extends StackPane {
     }
 
     /**
-     * Build list of available documents in desktop application when a filter change.
+     * Build list of available documents in desktop application when a filter
+     * change.
      */
     private void updateDocumentList() {
-        final Class docClass = uiDocumentType.getValue() == null? SIRSFileReference.class : uiDocumentType.getValue();
-        final LocalDate date = uiDate.getValue();
-        final ObservableList<Preview> selectedTroncons = uiTronconList.getSelectionModel().getSelectedItems();
-        final ObservableList<SIRSFileReference> items = FXCollections.observableArrayList();
-        /*
-         * We will browse each troncon to get back all of its documents of queried
-         * type and at the selected date.
-         */
-        for (final Preview p : selectedTroncons) {
-            List<AbstractPositionDocument> docList = TronconUtils.getPositionDocumentList(p.getElementId());
-            for (final AbstractPositionDocument doc : docList) {
-                if (doc instanceof AbstractPositionDocumentAssociable) {
-                    final String docId = ((AbstractPositionDocumentAssociable)doc).getSirsdocument();
-                    if (docId != null && !docId.isEmpty()) {
-                        session.getElement(docId).ifPresent(e -> {
-                            // Temporal filter
-                            if (docClass.isAssignableFrom(e.getClass())) {
-                                if (date != null && e instanceof AvecBornesTemporelles) {
-                                    AvecBornesTemporelles temp = (AvecBornesTemporelles) e;
-                                    final Long filter = Timestamp.valueOf(date.atStartOfDay()).getTime();
-                                    final Long start = temp.getDate_debut() == null? Long.MIN_VALUE : Timestamp.valueOf(temp.getDate_debut().atStartOfDay()).getTime();
-                                    final Long end = temp.getDate_fin() == null? Long.MIN_VALUE : Timestamp.valueOf(temp.getDate_fin().atStartOfDay()).getTime();
-                                    final NumberRange range = new NumberRange(Long.class, start, true, end, true);
-                                    if (range.contains(filter)) {
-                                        items.add((SIRSFileReference)e);
-                                    }
-                                } else {
-                                    items.add((SIRSFileReference)e);
-                                }
-                            }
-                        });
+        uiLoadingPane.setVisible(true);
+
+        final Task updater = TaskManager.INSTANCE.submit("Recherche de documents", () -> {
+            final Class docClass = uiDocumentType.getValue() == null ? SIRSFileReference.class : uiDocumentType.getValue();
+            final List<TronconDigue> selectedTroncons = session.getRepositoryForClass(TronconDigue.class).get(
+                    uiTronconList.getSelectionModel().getSelectedItems().stream().map(p -> p.getElementId()).collect(Collectors.toList()));
+
+            // Use an hash set to avoid doublons.
+            final HashSet<SIRSFileReference> items = new HashSet();
+
+            // A filter which check that a given document really points on a file reference
+            final Predicate fileFilter = element -> {
+                if (element instanceof SIRSFileReference) {
+                    String chemin = ((SIRSFileReference)element).getChemin();
+                    if (chemin != null && !chemin.isEmpty()) {
+                        return Files.isRegularFile(SIRS.getDocumentAbsolutePath(chemin));
+                    }
+                }
+                return false;
+            };
+
+            // Prepare temporal filter
+            final LocalDate date = uiDate.getValue();
+            final Long dateMilli = date == null ? null : Timestamp.valueOf(date.atStartOfDay()).getTime();
+            final Predicate temporalFilter = dateMilli == null ? null : e -> {
+                if (e instanceof AvecBornesTemporelles) {
+                    AvecBornesTemporelles temp = (AvecBornesTemporelles) e;
+                    final Long start = temp.getDate_debut() == null ? Long.MIN_VALUE : Timestamp.valueOf(temp.getDate_debut().atStartOfDay()).getTime();
+                    final Long end = temp.getDate_fin() == null ? Long.MIN_VALUE : Timestamp.valueOf(temp.getDate_fin().atStartOfDay()).getTime();
+                    final NumberRange range = new NumberRange(Long.class, start, true, end, true);
+                    return range.contains(dateMilli);
+                } else {
+                    return false;
+                }
+            };
+
+            /*
+            * We will browse each troncon to get back all of its documents of queried
+            * type and at the selected date.
+            */
+            for (final TronconDigue troncon : selectedTroncons) {
+                // First, we test if the current troncon is in the wanted time period.
+                if (temporalFilter != null && !temporalFilter.test(troncon)) {
+                    continue;
+                }
+
+                final List<Preview> docPreviews = getDocumentPreviews(troncon);
+
+                // utility container whose key is a type of elements, and value is the id of all elements found for this type.
+                final HashMap<String, HashSet<String>> docs = new HashMap();
+                for (final Preview docPreview : docPreviews) {
+                    // If a document type filter is set, we filter directly on previews to avoid unnecessary queries.
+                    if (SIRSFileReference.class.equals(docClass) || docClass.getCanonicalName().equals(docPreview.getElementClass())) {
+                        HashSet<String> ids = docs.get(docPreview.getElementClass());
+                        if (ids == null) {
+                            ids = new HashSet();
+                            docs.put(docPreview.getElementClass(), ids);
+                        }
+                        ids.add(docPreview.getElementId());
+                    }
+                }
+
+                for (final Map.Entry<String, HashSet<String>> docGroup : docs.entrySet()) {
+                    final AbstractSIRSRepository repo = session.getRepositoryForType(docGroup.getKey());
+                    if (repo == null)
+                        continue;
+                    final List elements = repo.get(docGroup.getValue().toArray(new String[0]));
+                    if (temporalFilter != null) {
+                        items.addAll((Collection) elements.stream().filter(temporalFilter).filter(fileFilter).collect(Collectors.toList()));
+                    } else {
+                        items.addAll((Collection) elements.stream().filter(fileFilter).collect(Collectors.toList()));
                     }
                 }
             }
+
+            TaskManager.MockTask uiUpdate = new TaskManager.MockTask(() -> uiDesktopList.setItems(FXCollections.observableArrayList(items)));
+            Platform.runLater(uiUpdate);
+            uiUpdate.get();
+            return true;
+        });
+
+        updater.runningProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            if (Boolean.FALSE.equals(newValue)) {
+                final Runnable r = () -> uiLoadingPane.setVisible(false);
+                if (Platform.isFxApplicationThread()) {
+                    r.run();
+                } else {
+                    Platform.runLater(r);
+                }
+            }
+        });
+    }
+
+    /**
+     * Analyse all {@link AbstractPositionDocument} placed on input {@link TronconDigue}
+     * to retrieve associated {@link SIRSFileReference}. The aim is to perform a minimum amount
+     * of queries to avoid IO/CPU overhead.
+     *
+     * There's 3 cases here :
+     * - {@link AbstractPositionDocumentAssociable} : document position contains
+     * an id of another document which is the wanted {@link SIRSFileReference}
+     * - {@link AbstractPositionDocument} which are {@link SIRSFileReference} themselves
+     * (Ex: {@link ProfilLong}.
+     * - {@link PositionProfilTravers}, which contains a link to multiple {@link LevePositionProfilTravers},
+     * each of them being associatded to one wanted {@link SIRSFileReference}
+     *
+     * @param troncon The linear we have to find documents for.
+     * @return a preview of each document found.
+     */
+    private List<Preview> getDocumentPreviews(final TronconDigue troncon) {
+        final HashSet<String> docIds = new HashSet<>();
+        // Store ids found for leves, to perform a single query to retrieve all.
+        final HashSet<String> levePositionIds = new HashSet<>();
+        final List<AbstractPositionDocument> docPositions = TronconUtils.getPositionDocumentList(troncon.getId());
+        for (final AbstractPositionDocument docPosition : docPositions) {
+            if (docPosition instanceof SIRSFileReference) {
+                docIds.add(docPosition.getId());
+            } else if (docPosition instanceof AbstractPositionDocumentAssociable) {
+                final String docId = ((AbstractPositionDocumentAssociable)docPosition).getSirsdocument();
+                if (docId != null && !docId.isEmpty()) {
+                    docIds.add(docId);
+                }
+            } else if (docPosition instanceof PositionProfilTravers) {
+                levePositionIds.addAll(((PositionProfilTravers)docPosition).getLevePositionIds());
+            }
         }
-        uiDesktopList.setItems(items);
+
+        if (!levePositionIds.isEmpty()) {
+            AbstractSIRSRepository<LevePositionProfilTravers> repo = session.getRepositoryForClass(LevePositionProfilTravers.class);
+            docIds.addAll(repo.get(levePositionIds.toArray(new String[0])).stream().map(tmpLeve -> tmpLeve.getLeveId()).collect(Collectors.toSet()));
+        }
+
+        return session.getPreviews().get(docIds.toArray(new String[0]));
     }
 
     /**
      * Try to retrieve available space on chosen mobile folder.
+     *
      * @param obs source observable value
      * @param oldValue previous selected folder
      * @param newValue currently selected folder
@@ -243,13 +357,13 @@ public class DocumentExportPane extends StackPane {
 
     /**
      * Refresh UI bindings on copy task.
+     *
      * @param obs
      * @param oldTask
      * @param newTask
      */
     void updateTask(final ObservableValue<? extends Task> obs, final Task oldTask, final Task newTask) {
         if (newTask != null) {
-            uiConfigPane.disableProperty().bind(newTask.runningProperty());
             uiCopyPane.visibleProperty().bind(newTask.runningProperty());
             uiCopyTitle.textProperty().bind(newTask.titleProperty());
             uiCopyMessage.textProperty().bind(newTask.messageProperty());
@@ -261,11 +375,11 @@ public class DocumentExportPane extends StackPane {
     /*
      * UI ACTIONS
      */
-
     @FXML
     void sendToMobileList(ActionEvent event) {
         ObservableList<SIRSFileReference> selectedItems = uiDesktopList.getSelectionModel().getSelectedItems();
-        if (selectedItems.isEmpty()) return;
+        if (selectedItems.isEmpty())
+            return;
 
         uiMobileList.getItems().addAll(selectedItems);
         uiDesktopList.getItems().removeAll(selectedItems);
@@ -274,7 +388,8 @@ public class DocumentExportPane extends StackPane {
     @FXML
     void deleteFromMobile(ActionEvent event) {
         ObservableList<SIRSFileReference> selectedItems = uiMobileList.getSelectionModel().getSelectedItems();
-        if (selectedItems.isEmpty()) return;
+        if (selectedItems.isEmpty())
+            return;
 
         uiMobileList.getItems().removeAll(selectedItems);
     }
@@ -297,15 +412,16 @@ public class DocumentExportPane extends StackPane {
         final ArrayList<Path> toCopy = new ArrayList<>();
         long sizeToCopy = 0;
         try {
-        for (final SIRSFileReference ref : uiMobileList.getItems()) {
-            final String chemin = ref.getChemin();
-            if (chemin == null || chemin.isEmpty()) continue;
-            final Path doc = SIRS.getDocumentAbsolutePath(chemin);
-            if (Files.isRegularFile(doc)) {
-                toCopy.add(doc);
-                Files.getFileAttributeView(doc, BasicFileAttributeView.class).readAttributes().size();
+            for (final SIRSFileReference ref : uiMobileList.getItems()) {
+                final String chemin = ref.getChemin();
+                if (chemin == null || chemin.isEmpty())
+                    continue;
+                final Path doc = SIRS.getDocumentAbsolutePath(chemin);
+                if (Files.isRegularFile(doc)) {
+                    toCopy.add(doc);
+                    sizeToCopy += Files.getFileAttributeView(doc, BasicFileAttributeView.class).readAttributes().size();
+                }
             }
-        }
         } catch (Exception e) {
             SirsCore.LOGGER.log(Level.WARNING, "Impossible to compute file list for copy.", e);
             GeotkFX.newExceptionDialog("Une erreur est survenue pendant l'analyse des fichiers à copier.", e).show();
@@ -318,10 +434,10 @@ public class DocumentExportPane extends StackPane {
             new Alert(Alert.AlertType.ERROR, "Espace insuffisant sur le media de sortie.", ButtonType.OK).show();
         } else {
             final String sourceReadable = toReadableSize(sizeToCopy);
-            final String outputName = "TODO"; // TODO
+            final String outputName = mobileDocumentDir.get().toString();
             final String outputReadable = uiRemainingSpace.getText();
             ButtonType choice = new Alert(Alert.AlertType.CONFIRMATION,
-                    "Vous allez copier "+sourceReadable + "sur "+outputName+ " (Espace restant : "+outputReadable+").\nÊtes-vous sûr ?",
+                    "Vous allez copier " + sourceReadable + " sur " + outputName + " (Espace restant : " + outputReadable + ").\nÊtes-vous sûr ?",
                     ButtonType.NO, ButtonType.YES)
                     .showAndWait().orElse(ButtonType.NO);
 
@@ -355,6 +471,7 @@ public class DocumentExportPane extends StackPane {
      * Cell to display label of input element.
      */
     private static class TextCell extends ListCell {
+
         final SirsStringConverter strConverter = new SirsStringConverter();
 
         @Override
@@ -381,12 +498,13 @@ public class DocumentExportPane extends StackPane {
                 return "";
             else if (SIRSFileReference.class.equals(object))
                 return ALL_DOCS;
-            else try {
-                LabelMapper mapper = LabelMapper.get(object);
-                return mapper.mapClassName();
-            } catch (MissingResourceException e) {
-                return object.getSimpleName();
-            }
+            else
+                try {
+                    LabelMapper mapper = LabelMapper.get(object);
+                    return mapper.mapClassName();
+                } catch (MissingResourceException e) {
+                    return object.getSimpleName();
+                }
         }
 
         @Override
@@ -425,7 +543,7 @@ public class DocumentExportPane extends StackPane {
 
         @Override
         protected Boolean call() throws Exception {
-            updateTitle("Copie vers "+destination.toString());
+            updateTitle("Copie vers " + destination.toString());
 
             boolean replaceAll = false;
             boolean ignoreAll = false;
@@ -439,7 +557,7 @@ public class DocumentExportPane extends StackPane {
                 Path target = destination.resolve(srcRoot.relativize(p));
 
                 updateProgress(0, toCopy.size());
-                updateMessage("Copie de "+p.toString()+" vers "+target.toString());
+                updateMessage("Copie de " + p.toString() + " vers " + target.toString());
 
                 if (!Files.isDirectory(target.getParent())) {
                     Files.createDirectories(target.getParent());
@@ -469,9 +587,33 @@ public class DocumentExportPane extends StackPane {
                             .append("vers")
                             .append('\t').append(target.toString()).append('\n')
                             .append("Le fichier existe déjà. Voulez-vous le remplacer ?");
+
+                    BasicFileAttributes srcAttr = Files.getFileAttributeView(p, BasicFileAttributeView.class).readAttributes();
+                    BasicFileAttributes dstAttr = Files.getFileAttributeView(target, BasicFileAttributeView.class).readAttributes();
+
+                    final Label header = new Label("Impossible de copier un fichier car il existe déjà dans le dossier destination.\nVoulez-vous le remplacer ?");
+                    // source file information
+                    final GridPane srcInfo = new GridPane();
+                    srcInfo.add(new Label(p.toString(), new ImageView(SIRS.ICON_FILE_BLACK)), 0, 0, 2, 1);
+                    srcInfo.add(new Label("Taille du fichier : "), 0, 1);
+                    srcInfo.add(new Label(toReadableSize(srcAttr.size())), 1, 1);
+                    srcInfo.add(new Label("Dernière modification : "), 0, 2);
+                    srcInfo.add(new Label(Timestamp.from(srcAttr.lastModifiedTime().toInstant()).toLocalDateTime().toString()), 1, 2);
+
+                    // destination file information
+                    final GridPane dstInfo = new GridPane();
+                    dstInfo.add(new Label(target.toString(), new ImageView(SIRS.ICON_FILE_BLACK)), 0, 0, 2, 1);
+                    dstInfo.add(new Label("Taille du fichier : "), 0, 1);
+                    dstInfo.add(new Label(toReadableSize(dstAttr.size())), 1, 1);
+                    dstInfo.add(new Label("Dernière modification : "), 0, 2);
+                    dstInfo.add(new Label(Timestamp.from(dstAttr.lastModifiedTime().toInstant()).toLocalDateTime().toString()), 1, 2);
+
                     final CheckBox repeat = new CheckBox("Appliquer ce choix pour les futurs conflits");
+
+                    final BorderPane msgDisplay = new BorderPane(new Label("vers"), header, dstInfo, repeat, srcInfo);
+
                     final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Un conflit a été détecté", ButtonType.CANCEL, ignore, replace);
-                    alert.getDialogPane().setContent(new VBox(10, new Label(strBuilder.toString()), repeat));
+                    alert.getDialogPane().setContent(new VBox(10, msgDisplay, repeat));
 
                     final Task<ButtonType> askUser = new TaskManager.MockTask(() -> alert.showAndWait().orElse(ButtonType.CANCEL));
                     Platform.runLater(askUser);
@@ -492,6 +634,5 @@ public class DocumentExportPane extends StackPane {
             }
             return true;
         }
-
     }
 }

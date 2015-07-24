@@ -5,7 +5,6 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
 <fx:root stylesheets="@DocumentExportPane.css" type="StackPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <BorderPane fx:id="uiConfigPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity">
@@ -122,30 +121,39 @@
             </TitledPane>
          </bottom>
       </BorderPane>
-      <BorderPane fx:id="uiCopyPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" visible="false">
-         <top>
-            <Label fx:id="uiCopyTitle" text="Aucune copie en cours" BorderPane.alignment="CENTER_LEFT">
-               <padding>
-                  <Insets bottom="10.0" right="10.0" top="10.0" />
-               </padding>
-            </Label>
-         </top>
+      <BorderPane visible="false">
          <center>
-            <ProgressBar fx:id="uiCopyProgress" prefWidth="200.0" progress="0.0" BorderPane.alignment="CENTER">
-               <BorderPane.margin>
-                  <Insets right="20.0" />
-               </BorderPane.margin>
-            </ProgressBar>
+            <BorderPane fx:id="uiCopyPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
+               <top>
+                  <Label fx:id="uiCopyTitle" text="Aucune copie en cours" BorderPane.alignment="CENTER_LEFT">
+                     <padding>
+                        <Insets bottom="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </Label>
+               </top>
+               <center>
+                  <ProgressBar fx:id="uiCopyProgress" prefWidth="200.0" progress="0.0" BorderPane.alignment="CENTER">
+                     <BorderPane.margin>
+                        <Insets right="20.0" />
+                     </BorderPane.margin>
+                  </ProgressBar>
+               </center>
+               <bottom>
+                  <Label fx:id="uiCopyMessage" text="En attente" BorderPane.alignment="CENTER_LEFT" />
+               </bottom>
+               <right>
+                  <Button mnemonicParsing="false" onAction="#cancelTask" text="Annuler" BorderPane.alignment="CENTER" />
+               </right>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </BorderPane>
          </center>
-         <bottom>
-            <Label fx:id="uiCopyMessage" text="En attente" BorderPane.alignment="CENTER_LEFT" />
-         </bottom>
-         <right>
-            <Button mnemonicParsing="false" onAction="#cancelTask" text="Annuler" BorderPane.alignment="CENTER" />
-         </right>
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
+      </BorderPane>
+      <BorderPane fx:id="uiLoadingPane" prefHeight="200.0" prefWidth="200.0" visible="false">
+         <center>
+            <ProgressIndicator maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+         </center>
       </BorderPane>
    </children>
 </fx:root>

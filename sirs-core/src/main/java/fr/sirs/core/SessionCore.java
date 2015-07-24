@@ -195,7 +195,7 @@ public class SessionCore implements ApplicationContextAware {
     /**
      * Find a repository for update operations on {@link Element} of given type.
      * @param type The name of the type we want a {@link AbstractSIRSRepository} for. (Ex : RefMateriau, TronconDigue, etc.)
-     * @return A valid repository for input type. Never null..
+     * @return A valid repository for input type. Can be null if input canonical class name is unknown.
      */
     public AbstractSIRSRepository getRepositoryForType(String type) {
         return repositories.get(type);
@@ -383,7 +383,7 @@ public class SessionCore implements ApplicationContextAware {
             positionables.addAll(repo.getByLinearId(linearId));
         }
         positionables.addAll(getPhotoList(linearId));
-        
+
         return positionables;
     }
 
@@ -470,7 +470,7 @@ public class SessionCore implements ApplicationContextAware {
         if (toGetElementFor instanceof Preview) {
             final Preview summary = (Preview) toGetElementFor;
             final AbstractSIRSRepository repository = getRepositoryForType(summary.getDocClass());
-            final Identifiable tmp = repository.get(summary.getDocId());
+            final Identifiable tmp = repository.get(summary.getDocId() == null? summary.getElementId() : summary.getDocId());
             if (tmp instanceof Element) {
                 if (summary.getElementId() != null) {
                     return Optional.of(((Element)tmp).getChildById(summary.getElementId()));
