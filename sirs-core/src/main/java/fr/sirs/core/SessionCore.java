@@ -41,6 +41,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.logging.Level;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -149,6 +150,17 @@ public class SessionCore implements ApplicationContextAware {
 
     public Collection<AbstractSIRSRepository> getModelRepositories(){
         return repositories.values();
+    }
+
+    /**
+     * @return the list of all classes pointed by repositories.
+     */
+    public Collection<Class> getAvailableModels() {
+        final Set<Class> clazz = new HashSet<>();
+        for (final AbstractSIRSRepository repo : repositories.values()) {
+            clazz.add(repo.getModelClass());
+        }
+        return clazz;
     }
 
     /**

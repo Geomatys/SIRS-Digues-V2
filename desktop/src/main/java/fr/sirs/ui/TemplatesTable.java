@@ -14,7 +14,7 @@ import javafx.scene.control.TableColumn;
 public class TemplatesTable extends PojoTable {
 
     public TemplatesTable() {
-        super(Injector.getSession().getRepositoryForClass(TemplateOdt.class), "Modèles de mise en forme");
+        super(Injector.getSession().getRepositoryForClass(TemplateOdt.class), "Modèles disponibles");
         setTableItems(() -> FXCollections.observableList(repo.getAll()));
         editableProperty().set(true);
         detaillableProperty().set(true);

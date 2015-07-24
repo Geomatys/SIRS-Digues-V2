@@ -9,7 +9,10 @@ import fr.sirs.core.component.UtilisateurRepository;
 
 import java.util.List;
 
+import fr.sirs.ui.TemplateGeneratorPane;
 import fr.sirs.ui.TemplatesTable;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
@@ -289,7 +292,17 @@ public class Session extends SessionCore {
             } else {
                 return openPrintTabs.getOrCreate(PrintTab.TEMPLATE, () -> {
                     final FXFreeTab tab = new FXFreeTab(title);
-                    tab.setContent(new BorderPane(new TemplatesTable()));
+                    final HBox hbox = new HBox();
+                    final TemplatesTable table = new TemplatesTable();
+                    HBox.setHgrow(table, Priority.SOMETIMES);
+                    hbox.getChildren().add(table);
+                    final TemplateGeneratorPane genPane = new TemplateGeneratorPane();
+                    HBox.setHgrow(genPane, Priority.SOMETIMES);
+                    hbox.getChildren().add(genPane);
+                    hbox.setMinWidth(400);
+                    hbox.setMaxWidth(Double.MAX_VALUE);
+                    hbox.setFillHeight(true);
+                    tab.setContent(hbox);
                     return tab;
                 });
             }
