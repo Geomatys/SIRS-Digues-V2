@@ -6,30 +6,44 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.LabelMapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
+import org.geotoolkit.font.FontAwesomeIcons;
+import org.geotoolkit.font.IconBuilder;
+import org.odftoolkit.simple.TextDocument;
 
+import java.awt.Color;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.io.IOException;
 import java.text.Collator;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 
 /**
- *
+ * Formulaire de génération de template ODT.
  */
 public class TemplateGeneratorPane extends VBox{
     private static final String FOREIGN_PARENT_ID = "foreignParentId";
+
+    private static final Image ICON_DOWNLOAD =
+            SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_DOWNLOAD, 16, Color.BLACK), null);
 
     /**
      * Liste des classes possibles.
@@ -110,8 +124,46 @@ public class TemplateGeneratorPane extends VBox{
         SIRS.initCombo(uiClassChoice, clazz, null);
         getChildren().add(vboxChoices);
 
+        final Button generateBtn = new Button("Générer");
+        generateBtn.setOnAction(event -> {
+            try {
+                generate();
+            } catch (IOException ex) {
+                SirsCore.LOGGER.log(Level.WARNING, "Erreur à la génération du document", ex);
+            }
+        });
+        generateBtn.setGraphic(new ImageView(ICON_DOWNLOAD));
+        getChildren().add(generateBtn);
+
         setMinWidth(100);
         setMaxWidth(Double.MAX_VALUE);
+    }
+
+    /**
+     * Génère le fichier ODT de template avec les propriétés choisies.
+     *
+     * @throws IOException si une erreur est survenue à l'écriture du fichier ODT.
+     */
+    private void generate() throws IOException {
+        final FileChooser chooser = new FileChooser();
+        final File outputFile = chooser.showSaveDialog(null);
+        if(outputFile==null) return;
+
+        final TextDocument doc;
+        try {
+            doc = TextDocument.newTextDocument();
+
+            final AttributeConverter cvt = new AttributeConverter();
+            final StringBuilder sb = new StringBuilder();
+            for (final String prop : selectedProperties) {
+                sb.append(cvt.toString(prop)).append(" : ${").append(prop).append("}\n");
+            }
+
+            doc.addParagraph(sb.toString());
+            doc.save(outputFile);
+        } catch (Exception ex) {
+            throw new IOException(ex);
+        }
     }
 
     private class AttributeConverter extends StringConverter<String> {
