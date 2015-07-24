@@ -5,7 +5,9 @@ import fr.sirs.SIRS;
 import fr.sirs.core.model.RapportModeleDocument;
 import fr.sirs.core.model.RapportSectionDocument;
 import fr.sirs.core.component.SQLQueryRepository;
+import fr.sirs.core.model.PhotoChoiceDocument;
 import fr.sirs.core.model.SQLQuery;
+import fr.sirs.core.model.SectionTypeDocument;
 import fr.sirs.util.SirsStringConverter;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -23,6 +25,7 @@ import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -114,7 +117,18 @@ public class ModelParagraphePane extends BorderPane {
                 }
             });
             queryBox.setConverter(new SirsStringConverter());
+
+            if (section.getRequeteId() != null) {
+                SQLQuery query = queryRepo.get(section.getRequeteId());
+                queryBox.getSelectionModel().select(query);
+            }
             
+            queryBox.valueProperty().addListener(new ChangeListener<SQLQuery>() {
+                @Override
+                public void changed(ObservableValue<? extends SQLQuery> observable, SQLQuery oldValue, SQLQuery newValue) {
+                    section.setRequeteId(newValue.getId());
+                }
+            });
             
             switch (newValue) {
                 case SELECT_DOC     : 
@@ -132,18 +146,33 @@ public class ModelParagraphePane extends BorderPane {
                         final File file = fileChooser.showOpenDialog(null);
                         if (file != null) {
                             importField.setText(file.getPath());
+                            section.setDocumentPath(file.getPath());
                         }
                     });
                     selectPane.addColumn(1, chooseButton);
+                    if (section.getDocumentPath() != null) {
+                        importField.setText(section.getDocumentPath());
+                    }
+                    
                     
                     gridPane.add(selectPane, 1, 2);
+                    
+                    // update model
+                    this.section.setType(SectionTypeDocument.DOCUMENT);
+                    this.section.setPhotoChoice(null);
+                    this.section.setRequeteId(null);
                     break;
                     
                 case GENERATE_TAB   : 
                     queryBox.setPrefWidth(500);
                     gridPane.add(queryBox, 1, 2);
                     
+                    // update model
+                    this.section.setType(SectionTypeDocument.TABLE);
+                    this.section.setPhotoChoice(null);
+                    this.section.setDocumentPath(null);
                     break;
+                    
                 case GENERATE_SHEET : 
                     final GridPane sheetPane = new GridPane();
                     sheetPane.setId("sheet");
@@ -158,15 +187,33 @@ public class ModelParagraphePane extends BorderPane {
                     photos.add("Dernière photo");
                     photos.add("Toutes les photos");
                     photoBox.setItems(photos);
+                    
+                    if (section.getPhotoChoice() != null) {
+                        photoBox.getSelectionModel().select(PhotoChoiceDocument.toBox(section.getPhotoChoice()));
+                    } else {
+                        photoBox.getSelectionModel().selectFirst();
+                    }
+                    
+                    photoBox.valueProperty().addListener((ObservableValue<? extends String> observable1, String oldValue1, String newValue1) -> {
+                        section.setPhotoChoice(PhotoChoiceDocument.fromBox(newValue1));
+                    });
+                    
                     sheetPane.addColumn(1, photoBox);
                     
                     gridPane.add(sheetPane, 1, 2);
+                    
+                    // update model
+                    this.section.setType(SectionTypeDocument.FICHE);
+                    this.section.setDocumentPath(null);
                     break;
             }
         });
         
-        
-        uiTypeComboBox.getSelectionModel().selectFirst();
+        if (section.getType() != null) {
+            uiTypeComboBox.getSelectionModel().select(SectionTypeDocument.toBox(section.getType()));
+        } else {
+            uiTypeComboBox.getSelectionModel().selectFirst();
+        }
     }
 
     @FXML
