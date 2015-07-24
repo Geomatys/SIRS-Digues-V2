@@ -62,6 +62,8 @@ public class TemplateGeneratorPane extends VBox{
      */
     private final ComboBox<Class> uiClassChoice = new ComboBox<>();
 
+    private final Label progressLabel = new Label();
+
     /**
      * Liste des propriétés sélectionnées pour l'export ODT.
      */
@@ -84,6 +86,7 @@ public class TemplateGeneratorPane extends VBox{
         vboxChoices.getStyleClass().add(CSS_WHITE_WITH_BORDERS);
 
         uiClassChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            progressLabel.setText("");
             if (newValue != null) {
                 // Rafraichissement de la liste des cases à cocher par rapport à la nouvelle classe choisie
                 if (vboxChoices.getChildren().size() > 1 && vboxChoices.getChildren().get(1) instanceof GridPane) {
@@ -114,6 +117,7 @@ public class TemplateGeneratorPane extends VBox{
                     }
                     checkBox.setText(cvt.toString(key));
                     checkBox.setOnAction(event -> {
+                        progressLabel.setText("");
                         if (checkBox.isSelected()) {
                             selectedProperties.add(key);
                         } else if (selectedProperties.contains(key)) {
@@ -154,6 +158,8 @@ public class TemplateGeneratorPane extends VBox{
         generateButtonPane.setRight(generateBtn);
         getChildren().add(generateButtonPane);
 
+        getChildren().add(new BorderPane(progressLabel));
+
         setMinWidth(100);
         setMaxWidth(Double.MAX_VALUE);
     }
@@ -180,7 +186,9 @@ public class TemplateGeneratorPane extends VBox{
 
             doc.addParagraph(sb.toString());
             doc.save(outputFile);
+            progressLabel.setText("Document ODT généré avec succès");
         } catch (Exception ex) {
+            progressLabel.setText("Erreur à la génération du document !");
             throw new IOException(ex);
         }
     }
