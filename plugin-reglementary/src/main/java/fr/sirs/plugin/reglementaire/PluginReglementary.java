@@ -72,7 +72,6 @@ public class PluginReglementary extends Plugin {
      * et la fréquence de rappel.
      */
     public static void showAlerts() {
-        AlertManager.getInstance().getAlerts().clear();
         final List<AlertItem> alerts = new ArrayList<>();
 
         final ObligationReglementaireRepository orr = Injector.getBean(ObligationReglementaireRepository.class);

@@ -27,6 +27,8 @@ import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.query.FXSearchPane;
+import static fr.sirs.ui.AlertItem.AlertItemLevel.HIGHT;
+import static fr.sirs.ui.AlertItem.AlertItemLevel.INFORMATION;
 import fr.sirs.util.FXPreferenceEditor;
 import org.geotoolkit.gui.javafx.util.ProgressMonitor;
 import java.io.IOException;
@@ -90,6 +92,10 @@ public class FXMainFrame extends BorderPane {
 
     private static final String CSS_POPUP_ALERTS = "popup-alerts";
     private static final String CSS_POPUP_RAPPEL_TITLE = "popup-alerts-rappel-title";
+    private static final String CSS_POPUP_ALERT = "popup-alert";
+    private static final String CSS_POPUP_ALERT_NORMAL = "popup-alert-normal";
+    private static final String CSS_POPUP_ALERT_HIGHT = "popup-alert-hight";
+    private static final String CSS_POPUP_ALERT_INFORMATION = "popup-alert-information";
     
     /** 
      * A cache to get back tab as long as their displayed in application, 
@@ -175,17 +181,21 @@ public class FXMainFrame extends BorderPane {
         final VBox vbox = new VBox();
         vbox.getStylesheets().add(SIRS.CSS_PATH);
         vbox.getStyleClass().add(CSS_POPUP_ALERTS);
-        boolean firstItem = true;
+        
         final DateTimeFormatter dfFormat = DateTimeFormatter.ofPattern("d MMMM uuuu");
         for (final AlertItem alert : alerts) {
-            if (!firstItem) {
-                vbox.getChildren().add(new Label());
-            }
             final Label label = new Label(alert.getTitle());
             label.getStyleClass().add(CSS_POPUP_RAPPEL_TITLE);
-            vbox.getChildren().add(label);
-            vbox.getChildren().add(new Label("Echéance " + alert.getDate().format(dfFormat)));
-            firstItem = false;
+            
+            final VBox alertBox = new VBox(label, new Label("Echéance " + alert.getDate().format(dfFormat)));
+            alertBox.getStyleClass().add(CSS_POPUP_ALERT);
+            if(alert.getLevel()==HIGHT)
+                alertBox.getStyleClass().add(CSS_POPUP_ALERT_HIGHT);
+            else if(alert.getLevel()==INFORMATION)
+                alertBox.getStyleClass().add(CSS_POPUP_ALERT_INFORMATION);
+            else
+                alertBox.getStyleClass().add(CSS_POPUP_ALERT_NORMAL);
+            vbox.getChildren().add(alertBox);
         }
 
         alertPopup.getContent().setAll(vbox);

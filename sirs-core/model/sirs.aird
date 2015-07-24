@@ -2649,7 +2649,7 @@
             <styles xmi:type="notation:ConnectorStyle" xmi:id="_u4ETQaYVEeSphvtX4JgPaw" routing="Tree"/>
             <styles xmi:type="notation:FontStyle" xmi:id="_u4ETQqYVEeSphvtX4JgPaw" fontName="Lucida Grande" fontHeight="8"/>
             <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_u4ETQ6YVEeSphvtX4JgPaw" points="[0, -1, 58, 247]$[0, -26, 58, 222]$[-57, -26, 1, 222]$[-57, -205, 1, 43]"/>
-            <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_u4E6VqYVEeSphvtX4JgPaw" id="(0.4316546762589928,0.16)"/>
+            <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_u4E6VqYVEeSphvtX4JgPaw" id="(0.5923566878980892,0.1554054054054054)"/>
             <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_u4E6V6YVEeSphvtX4JgPaw" id="(0.5,0.5)"/>
           </edges>
           <edges xmi:type="notation:Edge" xmi:id="_Z7R9AKYlEeSphvtX4JgPaw" type="4001" element="_Z7A3QKYlEeSphvtX4JgPaw" source="_XNOEEF6DEeSu4tBL7n5h2g" target="_I_l38KYlEeSphvtX4JgPaw">
