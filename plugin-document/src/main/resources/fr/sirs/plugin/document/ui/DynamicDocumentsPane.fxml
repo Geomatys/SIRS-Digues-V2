@@ -76,7 +76,7 @@
                   </GridPane>
                   <HBox alignment="CENTER_RIGHT" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefHeight="32.0" prefWidth="482.0">
                      <children>
-                        <Button fx:id="uiGenerateBtn" mnemonicParsing="false" text="GENERER" />
+                        <Button fx:id="uiGenerateBtn" mnemonicParsing="false" onAction="#generateDocument" text="GENERER" />
                      </children>
                      <padding>
                         <Insets right="10.0" />
