@@ -285,6 +285,8 @@
 
 .popup-alert-information {
     -fx-background-color: #66AA00;
+}
+
 .white-with-borders {
     -fx-background-color: #FFFFFF;
     -fx-border-color: #AAAAAA;
