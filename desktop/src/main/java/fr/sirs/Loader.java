@@ -299,8 +299,7 @@ public class Loader extends Application {
                 // LOAD PLUGINS ////////////////////////////////////////////////
                 for (Plugin plugin : plugins) {
                     updateProgress(inc++, total);
-                    updateMessage("Chargement du plugin "
-                            + plugin.getLoadingMessage().getValue());
+                    updateMessage("Chargement du plugin " + plugin.getLoadingMessage().getValue());
                     plugin.load();
                 }
 

@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import static fr.sirs.SIRS.DATE_DEBUT_FIELD;
 import static fr.sirs.SIRS.DATE_FIN_FIELD;
 import static fr.sirs.SIRS.SIRSDOCUMENT_REFERENCE;
+import static fr.sirs.core.ModuleDescription.getLayerDescription;
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
@@ -228,6 +229,17 @@ public class CorePlugin extends Plugin {
             // Propriétés et gardiennages de troncons
             suppliers.put(ProprieteTroncon.class, getSupplierForClass.apply(ProprieteTroncon.class));
             suppliers.put(GardeTroncon.class, getSupplierForClass.apply(GardeTroncon.class));
+    }
+    
+    @Override
+    public void afterImport() throws Exception {
+        if (suppliers.isEmpty()) {
+            loadDataSuppliers();
+        }
+        
+        // getLayerDescription itère sur les éléments des FeatureCollections des 
+        // couches, ce qui a pour effet de créer les vues.
+        for(final MapItem item : getMapItems()) getLayerDescription(item);
     }
     
     @Override

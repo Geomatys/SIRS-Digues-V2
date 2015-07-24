@@ -4,11 +4,13 @@ import com.healthmarketscience.jackcess.DatabaseBuilder;
 
 import fr.sirs.AbstractRestartableStage;
 import fr.sirs.Loader;
+import fr.sirs.Plugin;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.PluginInfo;
+import fr.sirs.Plugins;
 import fr.sirs.core.model.Role;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.binaryMD5;
@@ -153,24 +155,16 @@ public class FXLauncherPane extends BorderPane {
     private PasswordField uiCreateConfirmPassword;
 
     // onglet base importation
-    @FXML
-    private TextField uiImportName;
-    @FXML
-    private FXCRSButton uiImportCRS;
-    @FXML
-    private TextField uiImportDBData;
-    @FXML
-    private TextField uiImportDBCarto;
-    @FXML
-    private ProgressBar uiProgressImport;
-    @FXML
-    private Button uiImportButton;
-    @FXML
-    private TextField uiImportLogin;
-    @FXML
-    private PasswordField uiImportPassword;
-    @FXML
-    private PasswordField uiImportConfirmPassword;
+    @FXML private TextField uiImportName;
+    @FXML private FXCRSButton uiImportCRS;
+    @FXML private TextField uiImportDBData;
+    @FXML private TextField uiImportDBCarto;
+    @FXML private ProgressBar uiProgressImport;
+    @FXML private Label uiImportInfo;
+    @FXML private Button uiImportButton;
+    @FXML private TextField uiImportLogin;
+    @FXML private PasswordField uiImportPassword;
+    @FXML private PasswordField uiImportConfirmPassword;
 
     // onglet mise à jour
     @FXML
@@ -512,20 +506,31 @@ public class FXLauncherPane extends BorderPane {
 
         uiImportButton.setDisable(true);
         new Thread(() -> {
-            try (ConfigurableApplicationContext appCtx = localRegistry.connectToSirsDatabase(dbName, true, false, false)) {
+            try (ConfigurableApplicationContext appCtx = localRegistry.connectToSirsDatabase(dbName, true, false, true)) {
                 final File mainDbFile = new File(uiImportDBData.getText());
                 final File cartoDbFile = new File(uiImportDBCarto.getText());
                 SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
                 sirsDBInfoRepository.setSRID(epsgCode);
+                
+                final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
+                createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());
+                
                 DbImporter importer = new DbImporter(appCtx);
                 importer.setDatabase(DatabaseBuilder.open(mainDbFile),
                         DatabaseBuilder.open(cartoDbFile), uiImportCRS.crsProperty().get());
                 importer.importation();
                 
-                final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
-                createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());
-
-                //aller au panneau principale
+                // Opérations ultérieures à l'importation à réaliser par les plugins.
+                // Should initialize most of couchdb views
+                for(final Plugin p : Plugins.getPlugins()) {
+                    try{
+                        p.afterImport();
+                    } catch (Exception ex) {
+                        LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                    }
+                }
+                
+                //aller au panneau principal
                 Platform.runLater(() -> {
                     uiTabPane.getSelectionModel().clearAndSelect(0);
                     updateLocalDbList();

@@ -107,6 +107,18 @@ public abstract class Plugin {
     public abstract void load() throws Exception;
     
     /**
+     * Opérations à effecture après importation. Il s'agit par exemple de la
+     * génération des vues.
+     * 
+     * Par défaut, on ne fait rien.
+     * 
+     * @throws Exception 
+     */
+    public void afterImport() throws Exception {
+        return;
+    }
+    
+    /**
      * Cherche une configuration valide pour le plugin courant. Par défaut, la
      * méthode cherche un JSON descriptif dans le dossier des plugins. Si aucun
      * fichier ne peut être utilisé, on essaie de construire un descriptif grâce
