@@ -15,6 +15,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -38,12 +39,23 @@ import java.util.logging.Level;
 
 /**
  * Formulaire de génération de template ODT.
+ *
+ * @author Cédric Briançon (Geomatys)
  */
 public class TemplateGeneratorPane extends VBox{
-    private static final String FOREIGN_PARENT_ID = "foreignParentId";
-
     private static final Image ICON_DOWNLOAD =
             SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_DOWNLOAD, 16, Color.BLACK), null);
+
+    private static final String CSS_WHITE_WITH_BORDERS = "white-with-borders";
+    private static final String CSS_POJOTABLE_HEADER = "pojotable-header";
+
+    /**
+     * Attributs que l'on ne souhaite pas garder dans le formulaire.
+     */
+    private static final String FOREIGN_PARENT_ID = "foreignParentId";
+    private static final String AUTHOR = "author";
+    private static final String VALID = "valid";
+    private static final String DATE_MAJ = "dateMaj";
 
     /**
      * Liste des classes possibles.
@@ -56,16 +68,20 @@ public class TemplateGeneratorPane extends VBox{
     private Set<String> selectedProperties = new HashSet<>();
 
     public TemplateGeneratorPane() {
-        setPadding(new Insets(0, 0, 0, 10));
+        setPadding(new Insets(0, 10, 0, 10));
+        setSpacing(10);
 
         final Label title = new Label("Création d'un template");
-        title.getStyleClass().add("pojotable-header");
+        title.getStyleClass().add(CSS_POJOTABLE_HEADER);
         title.setAlignment(Pos.CENTER);
-        getChildren().add(title);
+        final BorderPane titlePane = new BorderPane(title);
+        titlePane.setMaxWidth(Double.MAX_VALUE);
+        getChildren().add(titlePane);
 
         final VBox vboxChoices = new VBox();
         vboxChoices.setPadding(new Insets(10));
         vboxChoices.getChildren().add(uiClassChoice);
+        vboxChoices.getStyleClass().add(CSS_WHITE_WITH_BORDERS);
 
         uiClassChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -92,7 +108,7 @@ public class TemplateGeneratorPane extends VBox{
                     // Ajout des checkbox pour la nouvelle classe choisie
                     final CheckBox checkBox = new CheckBox();
                     final String key = entry.getKey();
-                    if (FOREIGN_PARENT_ID.equals(key)) {
+                    if (FOREIGN_PARENT_ID.equals(key) || AUTHOR.equals(key) || VALID.equals(key) || DATE_MAJ.equals(key)) {
                         // On ne garde pas cet attribut
                         continue;
                     }
@@ -124,7 +140,7 @@ public class TemplateGeneratorPane extends VBox{
         SIRS.initCombo(uiClassChoice, clazz, null);
         getChildren().add(vboxChoices);
 
-        final Button generateBtn = new Button("Générer");
+        final Button generateBtn = new Button("Générer le template");
         generateBtn.setOnAction(event -> {
             try {
                 generate();
@@ -133,7 +149,10 @@ public class TemplateGeneratorPane extends VBox{
             }
         });
         generateBtn.setGraphic(new ImageView(ICON_DOWNLOAD));
-        getChildren().add(generateBtn);
+        generateBtn.visibleProperty().bind(uiClassChoice.getSelectionModel().selectedItemProperty().isNotNull());
+        final BorderPane generateButtonPane = new BorderPane();
+        generateButtonPane.setRight(generateBtn);
+        getChildren().add(generateButtonPane);
 
         setMinWidth(100);
         setMaxWidth(Double.MAX_VALUE);

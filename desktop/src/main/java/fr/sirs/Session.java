@@ -293,6 +293,7 @@ public class Session extends SessionCore {
                 return openPrintTabs.getOrCreate(PrintTab.TEMPLATE, () -> {
                     final FXFreeTab tab = new FXFreeTab(title);
                     final HBox hbox = new HBox();
+                    hbox.setPadding(new javafx.geometry.Insets(10, 0, 0, 0));
                     final TemplatesTable table = new TemplatesTable();
                     HBox.setHgrow(table, Priority.SOMETIMES);
                     hbox.getChildren().add(table);
