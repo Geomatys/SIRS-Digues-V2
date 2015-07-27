@@ -10,7 +10,6 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Convention;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.PositionConvention;
-import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;

@@ -70,7 +70,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.ActionEvent;
@@ -86,7 +85,6 @@ import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.bean.BeanStore;
-import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
@@ -153,7 +151,7 @@ public class CorePlugin extends Plugin {
         LocalDate.class
     };
     
-    public static final org.geotoolkit.data.bean.Predicate<PropertyDescriptor> MAPPROPERTY_PREDICATE = 
+    public static final org.geotoolkit.data.bean.Predicate<PropertyDescriptor> MAP_PROPERTY_PREDICATE = 
             (PropertyDescriptor t) -> {
                 final Class c = t.getReadMethod().getReturnType();
                 return ArraysExt.contains(VALID_CLASSES, c) || Geometry.class.isAssignableFrom(c);
@@ -167,68 +165,68 @@ public class CorePlugin extends Plugin {
 
     private synchronized void loadDataSuppliers() {
         suppliers.clear();
-            final TronconDigueRepository repository = (TronconDigueRepository) getSession().getRepositoryForClass(TronconDigue.class);
-            
-            final Function<Class<? extends Element>, StructBeanSupplier> getSupplierForClass = (Class<? extends Element> c) ->{
-                return new StructBeanSupplier(c, () -> getSession().getRepositoryForClass(c).getAll());
-            };
-                    
-            //troncons
-            suppliers.put(TronconDigue.class, new StructBeanSupplier(TronconDigue.class,() -> repository::getAllLightIterator));
+        final TronconDigueRepository repository = (TronconDigueRepository) getSession().getRepositoryForClass(TronconDigue.class);
 
-            //bornes
-            suppliers.put(BorneDigue.class, getSupplierForClass.apply(BorneDigue.class));
+        final Function<Class<? extends Element>, StructBeanSupplier> getDefaultSupplierForClass = (Class<? extends Element> c) ->{
+            return new StructBeanSupplier(c, () -> getSession().getRepositoryForClass(c).getAll());
+        };
 
-            //structures
-            suppliers.put(Crete.class, getSupplierForClass.apply(Crete.class));
-            suppliers.put(OuvrageRevanche.class, getSupplierForClass.apply(OuvrageRevanche.class));
-            suppliers.put(TalusDigue.class, getSupplierForClass.apply(TalusDigue.class));
-            suppliers.put(SommetRisberme.class, getSupplierForClass.apply(SommetRisberme.class));
-            suppliers.put(TalusRisberme.class, getSupplierForClass.apply(TalusRisberme.class));
-            suppliers.put(PiedDigue.class, getSupplierForClass.apply(PiedDigue.class));
-            suppliers.put(Fondation.class, getSupplierForClass.apply(Fondation.class));
-            suppliers.put(Epi.class, getSupplierForClass.apply(Epi.class));
-            suppliers.put(Deversoir.class, getSupplierForClass.apply(Deversoir.class));
+        //troncons
+        suppliers.put(TronconDigue.class, new StructBeanSupplier(TronconDigue.class,() -> repository::getAllLightIterator));
 
-            // Franc-bords
-            suppliers.put(LargeurFrancBord.class, getSupplierForClass.apply(LargeurFrancBord.class));
+        //bornes
+        suppliers.put(BorneDigue.class, getDefaultSupplierForClass.apply(BorneDigue.class));
 
-            // Réseaux de voirie
-            suppliers.put(VoieAcces.class, getSupplierForClass.apply(VoieAcces.class));
-            suppliers.put(OuvrageFranchissement.class, getSupplierForClass.apply(OuvrageFranchissement.class));
-            suppliers.put(OuvertureBatardable.class, getSupplierForClass.apply(OuvertureBatardable.class));
-            suppliers.put(VoieDigue.class, getSupplierForClass.apply(VoieDigue.class));
-            suppliers.put(OuvrageVoirie.class, getSupplierForClass.apply(OuvrageVoirie.class));
+        //structures
+        suppliers.put(Crete.class, getDefaultSupplierForClass.apply(Crete.class));
+        suppliers.put(OuvrageRevanche.class, getDefaultSupplierForClass.apply(OuvrageRevanche.class));
+        suppliers.put(TalusDigue.class, getDefaultSupplierForClass.apply(TalusDigue.class));
+        suppliers.put(SommetRisberme.class, getDefaultSupplierForClass.apply(SommetRisberme.class));
+        suppliers.put(TalusRisberme.class, getDefaultSupplierForClass.apply(TalusRisberme.class));
+        suppliers.put(PiedDigue.class, getDefaultSupplierForClass.apply(PiedDigue.class));
+        suppliers.put(Fondation.class, getDefaultSupplierForClass.apply(Fondation.class));
+        suppliers.put(Epi.class, getDefaultSupplierForClass.apply(Epi.class));
+        suppliers.put(Deversoir.class, getDefaultSupplierForClass.apply(Deversoir.class));
 
-            // Réseaux et ouvrages
-            suppliers.put(StationPompage.class, getSupplierForClass.apply(StationPompage.class));
-            suppliers.put(ReseauHydrauliqueFerme.class, getSupplierForClass.apply(ReseauHydrauliqueFerme.class));
-            suppliers.put(OuvrageHydrauliqueAssocie.class, getSupplierForClass.apply(OuvrageHydrauliqueAssocie.class));
-            suppliers.put(ReseauTelecomEnergie.class, getSupplierForClass.apply(ReseauTelecomEnergie.class));
-            suppliers.put(OuvrageTelecomEnergie.class, getSupplierForClass.apply(OuvrageTelecomEnergie.class));
-            suppliers.put(ReseauHydrauliqueCielOuvert.class, getSupplierForClass.apply(ReseauHydrauliqueCielOuvert.class));
-            suppliers.put(OuvrageParticulier.class, getSupplierForClass.apply(OuvrageParticulier.class));
-            suppliers.put(EchelleLimnimetrique.class, getSupplierForClass.apply(EchelleLimnimetrique.class));
+        // Franc-bords
+        suppliers.put(LargeurFrancBord.class, getDefaultSupplierForClass.apply(LargeurFrancBord.class));
 
-            // Désordres
-            suppliers.put(Desordre.class, getSupplierForClass.apply(Desordre.class));
+        // Réseaux de voirie
+        suppliers.put(VoieAcces.class, getDefaultSupplierForClass.apply(VoieAcces.class));
+        suppliers.put(OuvrageFranchissement.class, getDefaultSupplierForClass.apply(OuvrageFranchissement.class));
+        suppliers.put(OuvertureBatardable.class, getDefaultSupplierForClass.apply(OuvertureBatardable.class));
+        suppliers.put(VoieDigue.class, getDefaultSupplierForClass.apply(VoieDigue.class));
+        suppliers.put(OuvrageVoirie.class, getDefaultSupplierForClass.apply(OuvrageVoirie.class));
 
-            // Prestations
-            suppliers.put(Prestation.class, getSupplierForClass.apply(Prestation.class));
+        // Réseaux et ouvrages
+        suppliers.put(StationPompage.class, getDefaultSupplierForClass.apply(StationPompage.class));
+        suppliers.put(ReseauHydrauliqueFerme.class, getDefaultSupplierForClass.apply(ReseauHydrauliqueFerme.class));
+        suppliers.put(OuvrageHydrauliqueAssocie.class, getDefaultSupplierForClass.apply(OuvrageHydrauliqueAssocie.class));
+        suppliers.put(ReseauTelecomEnergie.class, getDefaultSupplierForClass.apply(ReseauTelecomEnergie.class));
+        suppliers.put(OuvrageTelecomEnergie.class, getDefaultSupplierForClass.apply(OuvrageTelecomEnergie.class));
+        suppliers.put(ReseauHydrauliqueCielOuvert.class, getDefaultSupplierForClass.apply(ReseauHydrauliqueCielOuvert.class));
+        suppliers.put(OuvrageParticulier.class, getDefaultSupplierForClass.apply(OuvrageParticulier.class));
+        suppliers.put(EchelleLimnimetrique.class, getDefaultSupplierForClass.apply(EchelleLimnimetrique.class));
 
-            // Mesures d'évènements
-            suppliers.put(LaisseCrue.class, getSupplierForClass.apply(LaisseCrue.class));
-            suppliers.put(MonteeEaux.class, getSupplierForClass.apply(MonteeEaux.class));
-            suppliers.put(LigneEau.class, getSupplierForClass.apply(LigneEau.class));
-            
-            // Documents positionnés
-            suppliers.put(PositionDocument.class, getSupplierForClass.apply(PositionDocument.class));
-            suppliers.put(PositionProfilTravers.class, getSupplierForClass.apply(PositionProfilTravers.class));
-            suppliers.put(ProfilLong.class, getSupplierForClass.apply(ProfilLong.class));
-            
-            // Propriétés et gardiennages de troncons
-            suppliers.put(ProprieteTroncon.class, getSupplierForClass.apply(ProprieteTroncon.class));
-            suppliers.put(GardeTroncon.class, getSupplierForClass.apply(GardeTroncon.class));
+        // Désordres
+        suppliers.put(Desordre.class, getDefaultSupplierForClass.apply(Desordre.class));
+
+        // Prestations
+        suppliers.put(Prestation.class, getDefaultSupplierForClass.apply(Prestation.class));
+
+        // Mesures d'évènements
+        suppliers.put(LaisseCrue.class, getDefaultSupplierForClass.apply(LaisseCrue.class));
+        suppliers.put(MonteeEaux.class, getDefaultSupplierForClass.apply(MonteeEaux.class));
+        suppliers.put(LigneEau.class, getDefaultSupplierForClass.apply(LigneEau.class));
+
+        // Documents positionnés
+        suppliers.put(PositionDocument.class, getDefaultSupplierForClass.apply(PositionDocument.class));
+        suppliers.put(PositionProfilTravers.class, getDefaultSupplierForClass.apply(PositionProfilTravers.class));
+        suppliers.put(ProfilLong.class, getDefaultSupplierForClass.apply(ProfilLong.class));
+
+        // Propriétés et gardiennages de troncons
+        suppliers.put(ProprieteTroncon.class, getDefaultSupplierForClass.apply(ProprieteTroncon.class));
+        suppliers.put(GardeTroncon.class, getDefaultSupplierForClass.apply(GardeTroncon.class));
     }
     
     @Override
@@ -312,7 +310,7 @@ public class CorePlugin extends Plugin {
                     suppliers.get(Fondation.class));
             final MapItem structLayer = MapBuilder.createItem();
             structLayer.setName("Structures");
-            structLayer.items().addAll( buildLayers(structStore, nameMap, colors, createStructureSelectionStyle(),false));
+            structLayer.items().addAll( buildLayers(structStore, nameMap, colors, createDefaultSelectionStyle(),false));
             structLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(structLayer);
             
@@ -321,7 +319,7 @@ public class CorePlugin extends Plugin {
                     suppliers.get(LargeurFrancBord.class));
             final MapItem fbLayer = MapBuilder.createItem();
             fbLayer.setName("Francs-bords");
-            fbLayer.items().addAll( buildLayers(fbStore, nameMap, colors, createStructureSelectionStyle(),false) );
+            fbLayer.items().addAll( buildLayers(fbStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             fbLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(fbLayer);
             
@@ -334,7 +332,7 @@ public class CorePlugin extends Plugin {
                     suppliers.get(OuvrageVoirie.class));
             final MapItem rvLayer = MapBuilder.createItem();
             rvLayer.setName("Réseaux de voirie");
-            rvLayer.items().addAll( buildLayers(rvStore, nameMap, colors, createStructureSelectionStyle(),false) );
+            rvLayer.items().addAll( buildLayers(rvStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             rvLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(rvLayer);
             
@@ -350,7 +348,7 @@ public class CorePlugin extends Plugin {
                     suppliers.get(EchelleLimnimetrique.class));  
             final MapItem roLayer = MapBuilder.createItem();
             roLayer.setName("Réseaux et ouvrages");
-            roLayer.items().addAll( buildLayers(roStore, nameMap, colors, createStructureSelectionStyle(),false) );
+            roLayer.items().addAll( buildLayers(roStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             roLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(roLayer);          
             
@@ -358,7 +356,7 @@ public class CorePlugin extends Plugin {
             final BeanStore desordreStore = new BeanStore(suppliers.get(Desordre.class));
             final MapItem desordresLayer = MapBuilder.createItem();
             desordresLayer.setName("Désordres");
-            desordresLayer.items().addAll( buildLayers(desordreStore, nameMap, colors, createStructureSelectionStyle(),false) );
+            desordresLayer.items().addAll( buildLayers(desordreStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             desordresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(desordresLayer);
             
@@ -366,7 +364,7 @@ public class CorePlugin extends Plugin {
             final BeanStore prestaStore = new BeanStore(suppliers.get(Prestation.class));
             final MapItem prestaLayer = MapBuilder.createItem();
             prestaLayer.setName("Prestations");
-            prestaLayer.items().addAll( buildLayers(prestaStore, nameMap, colors, createStructureSelectionStyle(),false) );
+            prestaLayer.items().addAll( buildLayers(prestaStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             prestaLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(prestaLayer);
                         
@@ -377,7 +375,7 @@ public class CorePlugin extends Plugin {
                     suppliers.get(LigneEau.class));
             final MapItem mesuresLayer = MapBuilder.createItem();
             mesuresLayer.setName("Mesures d'évènements");
-            mesuresLayer.items().addAll( buildLayers(mesuresStore, nameMap, colors, createStructureSelectionStyle(),false) );
+            mesuresLayer.items().addAll( buildLayers(mesuresStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             mesuresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(mesuresLayer);
                         
@@ -388,7 +386,7 @@ public class CorePlugin extends Plugin {
                     suppliers.get(ProfilLong.class));
             final MapItem documentsLayer = MapBuilder.createItem();
             documentsLayer.setName("Documents");
-            documentsLayer.items().addAll(buildLayers(documentsStore, mapDesTypesDeDocs, nameMap, colors, createStructureSelectionStyle(),false) );
+            documentsLayer.items().addAll(buildLayers(documentsStore, mapDesTypesDeDocs, nameMap, colors, createDefaultSelectionStyle(),false) );
             documentsLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(documentsLayer);
             
@@ -398,7 +396,7 @@ public class CorePlugin extends Plugin {
                     suppliers.get(GardeTroncon.class));
             final MapItem periodesLocaliseesLayer = MapBuilder.createItem();
             periodesLocaliseesLayer.setName("Propriétés et gardiennages");
-            periodesLocaliseesLayer.items().addAll(buildLayers(periodesLocaliseesTroncon, nameMap, colors, createStructureSelectionStyle(), false));
+            periodesLocaliseesLayer.items().addAll(buildLayers(periodesLocaliseesTroncon, nameMap, colors, createDefaultSelectionStyle(), false));
             periodesLocaliseesLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             items.add(periodesLocaliseesLayer);
             
@@ -494,7 +492,7 @@ public class CorePlugin extends Plugin {
         for(GenericName name : store.getNames()){
             final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.all(name));
             final int d = (int)((i%colors.length)*1.5);
-            final MutableStyle baseStyle = createStructureStyle(colors[i%colors.length]);
+            final MutableStyle baseStyle = createDefaultStyle(colors[i%colors.length]);
             final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
             final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
             
@@ -542,7 +540,7 @@ public class CorePlugin extends Plugin {
                 for(final Class documentClass : documentClasses.get(positionDocumentClass)){
                     final FeatureCollection col = symSession.getFeatureCollection(QueryBuilder.filtered(name, new DocumentFilter(documentClass)));
                     if(col.getFeatureType()!=null){
-                        final MutableStyle baseStyle = createStructureStyle(colors[i%colors.length]);
+                        final MutableStyle baseStyle = createDefaultStyle(colors[i%colors.length]);
                         final MutableStyle style = (baseStyle==null) ? RandomStyleBuilder.createRandomVectorStyle(col.getFeatureType()) : baseStyle;
                         final FeatureMapLayer fml = MapBuilder.createFeatureLayer(col, style);
 
@@ -567,7 +565,7 @@ public class CorePlugin extends Plugin {
                     }
                 }
             } catch (ClassNotFoundException ex) {
-                Logger.getLogger(CorePlugin.class.getName()).log(Level.SEVERE, null, ex);
+                SIRS.LOGGER.log(Level.WARNING, null, ex);
             }
         }
         return layers;
@@ -613,23 +611,6 @@ public class CorePlugin extends Plugin {
     public Image getImage() {
         return null;
     }
-
-//    public MapLayer createLayer(final Class beanClass, final Query query){
-//        final BeanFeatureSupplier supplier = suppliers.get(beanClass);
-//        final BeanStore store = new BeanStore(supplier);
-//        
-//        final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(true)
-//                .getFeatureCollection(query));
-//        layer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-//        layer.setSelectable(true);
-//        return layer;
-//    }
-//
-//    public MapLayer createLayer(Class beanClass) throws DataStoreException {
-//        final BeanFeatureSupplier supplier = suppliers.get(beanClass);
-//        final BeanStore store = new BeanStore(supplier);
-//        return createLayer(beanClass, QueryBuilder.all(store.getNames().iterator().next()));
-//    }
     
     private static MutableStyle createTronconStyle() throws CQLException, URISyntaxException{
         final Stroke stroke1 = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,FF.literal(9),
@@ -799,7 +780,7 @@ public class CorePlugin extends Plugin {
         return style;
     }
     
-    private static MutableStyle createStructureSelectionStyle(){
+    public static MutableStyle createDefaultSelectionStyle(){
         // Stroke to use for lines and point perimeter
         final Stroke stroke = SF.stroke(SF.literal(Color.GREEN),LITERAL_ONE_FLOAT,FF.literal(7),
                 STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
@@ -842,11 +823,11 @@ public class CorePlugin extends Plugin {
         return style;
     }
     
-    private static MutableStyle createStructureStyle(Color col) {
-        return createStructureStyle(col, null);
+    public static MutableStyle createDefaultStyle(Color col) {
+        return createDefaultStyle(col, null);
     }
     
-    public static MutableStyle createStructureStyle(Color col, final String geometryName) {
+    public static MutableStyle createDefaultStyle(Color col, final String geometryName) {
         final Stroke line1Stroke = SF.stroke(SF.literal(col),LITERAL_ONE_FLOAT,GO2Utilities.FILTER_FACTORY.literal(8),
                 STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",

@@ -601,7 +601,7 @@ public class FXSearchPane extends BorderPane {
             geomType = null;
         }
         
-        return CorePlugin.createStructureStyle(Color.GRAY, (geomType == null)? null : geomType.getName().toString());
+        return CorePlugin.createDefaultStyle(Color.GRAY, (geomType == null)? null : geomType.getName().toString());
     } 
     
     private static class CustomizedFeatureTable extends FXFeatureTable {

@@ -6,7 +6,6 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.PluginImporter;
 import fr.sirs.importer.documentTroncon.document.convention.ConventionImporter;
-import fr.sirs.importer.link.ElementReseauConventionImporter;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,8 +43,12 @@ public class AotCotImporter implements PluginImporter {
             conventionLocImporter.getPositions();
             
             elementReseauConventionImporter = new ElementReseauConventionImporter(
-                    database, connector, coreImporter.getObjetManager().getElementReseauImporter(), conventionImporter);
-            elementReseauConventionImporter.link();
+                    database, connector, 
+                    coreImporter.getTronconGestionDigueImporter(), 
+                    coreImporter.getBorneDigueImporter(), 
+                    coreImporter.getSystemeReperageImporter(), 
+                    coreImporter.getObjetManager().getElementReseauImporter(), conventionImporter);
+            elementReseauConventionImporter.compute();
             
             
         } catch (IOException ex) {
