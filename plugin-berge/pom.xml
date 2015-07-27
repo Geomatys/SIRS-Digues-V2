@@ -101,6 +101,9 @@
                         <goals>
                             <goal>fxmodel2sql</goal>
                         </goals>
+                      <configuration>
+                        <helperName>BergeSqlHelper</helperName>
+                      </configuration>
                     </execution>
                     <execution>
                       <id>fxml</id>

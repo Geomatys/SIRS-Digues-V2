@@ -101,6 +101,9 @@
                         <goals>
                             <goal>fxmodel2sql</goal>
                         </goals>
+                      <configuration>
+                        <helperName>AotCotSqlHelper</helperName>
+                      </configuration>
                     </execution>
                     <execution>
                       <id>fxml</id>

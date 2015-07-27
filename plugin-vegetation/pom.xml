@@ -113,6 +113,9 @@
                         <goals>
                             <goal>fxmodel2sql</goal>
                         </goals>
+                      <configuration>
+                        <helperName>VegetationSqlHelper</helperName>
+                      </configuration>
                     </execution>
                     <execution>
                       <id>fxml</id>

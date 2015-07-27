@@ -30,6 +30,7 @@ import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.sql.CoreSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
 import java.util.Iterator;
 import java.util.Optional;
@@ -148,7 +149,7 @@ public class H2Helper {
             try (Connection conn = createConnection(couchConnector)) {
                 updateMessage("Création des tables.");
                 int srid = InjectorCore.getBean(SessionCore.class).getSrid();
-                SQLHelper.createTables(conn, srid);
+                CoreSqlHelper.getInstance().createTables(conn, srid);
                 conn.setAutoCommit(false);
 
                 updateMessage("Création de la liste des éléments à insérer.");
@@ -180,7 +181,7 @@ public class H2Helper {
 
                         Optional<Element> element = docHelper.toElement(currentRow.getDocAsNode());
                         if (element.isPresent()) {
-                            SQLHelper.insertElement(conn, element.get());
+                            CoreSqlHelper.getInstance().insertElement(conn, element.get());
                             conn.commit();
                             updateProgress(currentProgress++, allDocIds.size());
                         }
@@ -193,7 +194,7 @@ public class H2Helper {
                 
                 updateProgress(-1, -1);
                 updateMessage("Mise à jour des clés étrangères");
-                SQLHelper.addForeignKeys(conn);
+                CoreSqlHelper.getInstance().addForeignKeys(conn);
             }
             return true;
         }
