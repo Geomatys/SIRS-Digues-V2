@@ -12,6 +12,8 @@ import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SimpleFXEditMode;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Parent;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Tab;
@@ -22,6 +24,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Panneau regroupant les fonctionnalités de suivi de documents.
@@ -53,15 +56,17 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
         final SimpleFXEditMode editMode = new SimpleFXEditMode();
         final HBox topPane = new HBox(separator, editMode);
         HBox.setHgrow(separator, Priority.ALWAYS);
-        final ObligationsPojoTable obligationsPojoTable = new ObligationsPojoTable(Injector.getSession()
-                .getRepositoryForClass(ObligationReglementaire.class), tabPane);
+        final ObligationReglementaireRepository repo = Injector.getBean(ObligationReglementaireRepository.class);
+        final ObservableList<ObligationReglementaire> all = FXCollections.observableList(repo.getAll());
+        final ObligationsPojoTable obligationsPojoTable = new ObligationsPojoTable(ObligationReglementaire.class, tabPane);
+        obligationsPojoTable.setTableItems(() -> (ObservableList)all);
         obligationsPojoTable.editableProperty().bind(editMode.editionState());
         listTab.setContent(new BorderPane(obligationsPojoTable, topPane, null, null, null));
 
         // Onglet calendrier des obligations reglémentaires
         final Tab calendarTab = new Tab("Calendrier");
         calendarTab.setClosable(false);
-        final CalendarView calendarView = new ObligationsCalendarView(obligationsPojoTable.getUiTable().itemsProperty());
+        final CalendarView calendarView = new ObligationsCalendarView(all);
         calendarView.getStylesheets().add(SIRS.CSS_PATH_CALENDAR);
         calendarView.setShowTodayButton(false);
         calendarView.getCalendar().setTime(new Date());

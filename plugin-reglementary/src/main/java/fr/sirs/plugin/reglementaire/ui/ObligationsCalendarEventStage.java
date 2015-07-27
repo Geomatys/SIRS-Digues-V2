@@ -12,7 +12,6 @@ import fr.sirs.core.model.RefEcheanceRappelObligationReglementaire;
 import fr.sirs.ui.calendar.CalendarEvent;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -129,11 +128,7 @@ public final class ObligationsCalendarEventStage extends Stage {
             if (!calendarEvent.isAlert()) {
                 // Une obligation a été fournie et ce n'est pas une alerte de rappel, donc on peut supprimer directement l'obligation.
                 orr.remove(obligation);
-                if (obligations instanceof FilteredList) {
-                    ((FilteredList) obligations).getSource().remove(obligation);
-                } else {
-                    obligations.remove(obligation);
-                }
+                obligations.remove(obligation);
             } else {
                 // Une obligation a été fournie et c'est une alerte de rappel, donc on doit supprimer les rappels sur cette obligation
                 // et mettre à jour la date de rappel de l'échéance car ce n'est plus valide.
@@ -154,6 +149,8 @@ public final class ObligationsCalendarEventStage extends Stage {
                 orr.update(obligation);
             }
         }
+
+        hide();
     }
 
     /**
@@ -176,7 +173,11 @@ public final class ObligationsCalendarEventStage extends Stage {
         hbox.getChildren().add(lbl);
         final DatePicker dp = new DatePicker();
         final ObligationReglementaire obligation = (ObligationReglementaire) event.getParent();
-        dp.valueProperty().bindBidirectional(obligation.dateRealisationProperty());
+        if (obligation.getDateRealisation() != null) {
+            dp.setValue(obligation.getDateRealisation());
+        } else {
+            dp.setValue(obligation.getDateEcheance());
+        }
         hbox.getChildren().add(dp);
         vbox.getChildren().add(hbox);
 
@@ -187,6 +188,11 @@ public final class ObligationsCalendarEventStage extends Stage {
         okButton.setMaxWidth(Region.USE_PREF_SIZE);
         okButton.setTextAlignment(TextAlignment.CENTER);
         okButton.setOnAction(e -> {
+            if (obligation.getDateRealisation() != null) {
+                obligation.setDateRealisation(dp.getValue());
+            } else {
+                obligation.setDateEcheance(dp.getValue());
+            }
             Injector.getBean(ObligationReglementaireRepository.class).update(obligation);
             hide();
         });

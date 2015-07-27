@@ -2,7 +2,6 @@ package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.InjectorCore;
 import fr.sirs.core.component.RappelObligationReglementaireRepository;
 import fr.sirs.core.component.RefEcheanceRappelObligationReglementaireRepository;
 import fr.sirs.core.component.RefFrequenceObligationReglementaireRepository;
@@ -15,9 +14,7 @@ import fr.sirs.core.model.RefTypeObligationReglementaire;
 import fr.sirs.plugin.reglementaire.DocumentsTheme;
 import fr.sirs.ui.calendar.CalendarEvent;
 import fr.sirs.ui.calendar.CalendarView;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -46,7 +43,7 @@ public final class ObligationsCalendarView extends CalendarView {
     /**
      * Propriété pointant sur la liste des obligations réglementaires filtrées pour le calendrier.
      */
-    private final ObjectProperty<ObservableList<ObligationReglementaire>> obligationsProperty;
+    private final ObservableList<ObligationReglementaire> obligations;
 
     /**
      * En cas de changements sur une propriété d'un objet, mets à jour la vue du calendrier.
@@ -74,29 +71,16 @@ public final class ObligationsCalendarView extends CalendarView {
     /**
      * Vue calendrier pour les obligations réglementaires, permettant d'afficher les évènements.
      *
-     * @param obligationsProperty propriété pointant sur la liste des obligations réglementaires filtrées pour le calendrier.
+     * @param obligations propriété pointant sur la liste des obligations réglementaires filtrées pour le calendrier.
      */
-    public ObligationsCalendarView(final ObjectProperty<ObservableList<ObligationReglementaire>> obligationsProperty) {
+    public ObligationsCalendarView(final ObservableList<ObligationReglementaire> obligations) {
         super();
-        this.obligationsProperty = obligationsProperty;
-        obligationsProperty.addListener(new ChangeListener<ObservableList<ObligationReglementaire>>() {
-            @Override
-            public void changed(ObservableValue<? extends ObservableList<ObligationReglementaire>> observable, ObservableList<ObligationReglementaire> oldList, ObservableList<ObligationReglementaire> newList) {
-                update();
-                if (newList != null) {
-                    for (final ObligationReglementaire obl : newList) {
-                        attachPropertyListener(obl);
-                    }
-                    newList.addListener(listChangeListener);
-                }
-                if (oldList != null) {
-                    for (final ObligationReglementaire obl : oldList) {
-                        removePropertyListener(obl);
-                    }
-                    oldList.removeListener(listChangeListener);
-                }
-            }
-        });
+        this.obligations = obligations;
+        obligations.addListener(listChangeListener);
+        update();
+        for (final ObligationReglementaire obl : obligations) {
+            attachPropertyListener(obl);
+        }
     }
 
     /**
@@ -131,7 +115,6 @@ public final class ObligationsCalendarView extends CalendarView {
     private void update() {
         getCalendarEvents().clear();
 
-        final ObservableList<ObligationReglementaire> obligations = obligationsProperty.get();
         if (obligations != null && !obligations.isEmpty()) {
             final RappelObligationReglementaireRepository rorr = Injector.getBean(RappelObligationReglementaireRepository.class);
             final RefEcheanceRappelObligationReglementaireRepository rerorr = Injector.getBean(RefEcheanceRappelObligationReglementaireRepository.class);
@@ -204,7 +187,7 @@ public final class ObligationsCalendarView extends CalendarView {
      */
     @Override
     public void showCalendarPopupForEvent(final CalendarEvent calendarEvent, final Node parent) {
-        final ObligationsCalendarEventStage stage = new ObligationsCalendarEventStage(calendarEvent, obligationsProperty.get());
+        final ObligationsCalendarEventStage stage = new ObligationsCalendarEventStage(calendarEvent, obligations);
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setIconified(false);
         stage.setMaximized(false);

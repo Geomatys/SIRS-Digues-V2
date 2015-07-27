@@ -4,11 +4,13 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.RappelObligationReglementaire;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SimpleFXEditMode;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -43,11 +45,11 @@ public final class ObligationsPojoTable extends PojoTable {
     /**
      * Création de la table présentant les obligations réglementaires.
      *
-     * @param obligationRepository Repository d'accès aux données d'obligations réglementaires
-     * @param tabPane              Conteneur d'onglets dans lequel afficher l'onglet de planification
+     * @param clazz   Classe d'objets affichés par cette table
+     * @param tabPane Conteneur d'onglets dans lequel afficher l'onglet de planification
      */
-    public ObligationsPojoTable(final AbstractSIRSRepository obligationRepository, final TabPane tabPane) {
-        super(obligationRepository, "Liste des obligations réglementaires");
+    public ObligationsPojoTable(final Class clazz, final TabPane tabPane) {
+        super(clazz, "Liste des obligations réglementaires");
 
         getUiTable().getColumns().add(5, new SEClassTableColumn());
 
