@@ -3,22 +3,9 @@ package fr.sirs.importer.link;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Convention;
-import fr.sirs.core.model.EchelleLimnimetrique;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.ObjetReseau;
-import fr.sirs.core.model.OuvertureBatardable;
-import fr.sirs.core.model.OuvrageFranchissement;
-import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.OuvrageParticulier;
-import fr.sirs.core.model.OuvrageTelecomEnergie;
-import fr.sirs.core.model.OuvrageVoirie;
-import fr.sirs.core.model.PorteeConvention;
-import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
-import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.ReseauTelecomEnergie;
-import fr.sirs.core.model.StationPompage;
-import fr.sirs.core.model.VoieAcces;
-import fr.sirs.core.model.VoieDigue;
+import fr.sirs.core.model.PositionConvention;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.ELEMENT_RESEAU_CONVENTION;
 import fr.sirs.importer.documentTroncon.document.convention.ConventionImporter;
@@ -123,14 +110,40 @@ public class ElementReseauConventionImporter extends GenericEntityLinker {
 //                }
                 
                 // VERSION SI LES CONVENTIONS RÉFÉRENCENT INDIRECTEMENT LES OBJETS MAIS EN ÉVITANT UN POSITIONNEMENT SUR LE TRONCON
-                final PorteeConvention portee = ElementCreator.createAnonymValidElement(PorteeConvention.class);
-                portee.setObjetReseauId(reseau.getId());
+//                final PorteeConvention portee = ElementCreator.createAnonymValidElement(PorteeConvention.class);
+//                portee.setObjetReseauId(reseau.getId());
+//                // Par défaut, on initialise la portée à l'aide des pr et des dates de l'objet.
+//                portee.setPrDebut(reseau.getPrDebut());
+//                portee.setPrFin(reseau.getPrFin());
+//                portee.setDate_debut(reseau.getDate_debut());
+//                portee.setDate_fin(reseau.getDate_fin());
+//                convention.getPortees().add(portee);
+                
+                // VERSION SI LES CONVENTIONS RÉFÉRENCES INDIRECTEMENT LES OBJETS EN PASSANT PAR UN POSITIONNEMENT SUR LE TRONCON
+                final PositionConvention position = ElementCreator.createAnonymValidElement(PositionConvention.class);
+                position.setObjetReseauId(reseau.getId());
                 // Par défaut, on initialise la portée à l'aide des pr et des dates de l'objet.
-                portee.setPrDebut(reseau.getPrDebut());
-                portee.setPrFin(reseau.getPrFin());
-                portee.setDate_debut(reseau.getDate_debut());
-                portee.setDate_fin(reseau.getDate_fin());
-                convention.getPortees().add(portee);
+                position.setPrDebut(reseau.getPrDebut());
+                position.setPrFin(reseau.getPrFin());
+                position.setDate_debut(reseau.getDate_debut());
+                position.setDate_fin(reseau.getDate_fin());
+                position.setSystemeRepId(reseau.getSystemeRepId());
+                position.setBorneDebutId(reseau.getBorneDebutId());
+                position.setBorneFinId(reseau.getBorneFinId());
+                position.setBorne_debut_aval(reseau.getBorne_debut_aval());
+                position.setBorne_fin_aval(reseau.getBorne_fin_aval());
+                position.setBorne_debut_distance(reseau.getBorne_debut_distance());
+                position.setBorne_fin_distance(reseau.getBorne_fin_distance());
+                position.setDesignation(convention.getDesignation()+"/"+reseau.getDesignation());
+                position.setGeometry(reseau.getGeometry());
+                position.setLatitudeMax(reseau.getLatitudeMax());
+                position.setLatitudeMin(reseau.getLatitudeMin());
+                position.setLongitudeMax(reseau.getLongitudeMax());
+                position.setLongitudeMin(reseau.getLongitudeMin());
+                position.setLinearId(reseau.getLinearId());
+                position.setPositionDebut(reseau.getPositionDebut());
+                position.setPositionFin(reseau.getPositionFin());
+                position.setSirsdocument(convention.getId());
             }
         }
         couchDbConnector.executeBulk(conventions.values());

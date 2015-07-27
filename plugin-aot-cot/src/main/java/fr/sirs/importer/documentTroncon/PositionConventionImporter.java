@@ -9,11 +9,13 @@ import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Convention;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
+import fr.sirs.core.model.PositionConvention;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
+import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.documentTroncon.document.convention.ConventionImporter;
@@ -38,7 +40,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class PositionConventionImporter extends GenericPositionDocumentImporter<PositionDocument> {
+class PositionConventionImporter extends GenericPositionDocumentImporter<PositionConvention> {
 
     private final ConventionImporter conventionImporter;
     private final AotCotTypeDocumentImporter typeDocumentImporter;
@@ -65,8 +67,8 @@ class PositionConventionImporter extends GenericPositionDocumentImporter<Positio
         ////        REFERENCE_NUMERIQUE, // Pas dans le nouveau modèle
         ////        REFERENCE_CALQUE, // Pas dans le nouveau modèle
         ////        DATE_DOCUMENT,
-        ////        DATE_DEBUT_VAL, // Pas dans le nouveau modèle
-        ////        DATE_FIN_VAL, // Pas dans le nouveau modèle
+        DATE_DEBUT_VAL, // Pas dans le nouveau modèle
+        DATE_FIN_VAL, // Pas dans le nouveau modèle
         PR_DEBUT_CALCULE,
         PR_FIN_CALCULE,
         X_DEBUT,
@@ -125,7 +127,7 @@ class PositionConventionImporter extends GenericPositionDocumentImporter<Positio
 
             if (classeDocument != null && classeDocument.equals(Convention.class)) {
 
-                final PositionDocument position = importRow(row);
+                final PositionConvention position = importRow(row);
 
                 if (position != null) {
                     position.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
@@ -134,7 +136,7 @@ class PositionConventionImporter extends GenericPositionDocumentImporter<Positio
                     positions.put(row.getInt(Columns.ID_DOC.toString()), position);
 
                     // Set the list ByTronconId
-                    List<PositionDocument> listByTronconId = positionsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+                    List<PositionConvention> listByTronconId = positionsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
                     if (listByTronconId == null) {
                         listByTronconId = new ArrayList<>();
                         positionsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
@@ -147,14 +149,14 @@ class PositionConventionImporter extends GenericPositionDocumentImporter<Positio
     }
     
     @Override
-    PositionDocument importRow(Row row) throws IOException, AccessDbImporterException {
+    PositionConvention importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, Convention> conventions = conventionImporter.getRelated();
 
-        final PositionDocument position = createAnonymValidElement(PositionDocument.class);
+        final PositionConvention position = createAnonymValidElement(PositionConvention.class);
         position.setLinearId(troncon.getId());
 
         final GeometryFactory geometryFactory = new GeometryFactory();
@@ -193,6 +195,14 @@ class PositionConventionImporter extends GenericPositionDocumentImporter<Positio
             if (conventions.get(row.getInt(Columns.ID_CONVENTION.toString())) != null) {
                 position.setSirsdocument(conventions.get(row.getInt(Columns.ID_CONVENTION.toString())).getId());
             }
+        }
+
+        if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
+            position.setDate_debut(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter));
+        }
+
+        if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
+            position.setDate_fin(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter));
         }
 
         if (row.getDouble(Columns.ID_BORNEREF_DEBUT.toString()) != null) {
