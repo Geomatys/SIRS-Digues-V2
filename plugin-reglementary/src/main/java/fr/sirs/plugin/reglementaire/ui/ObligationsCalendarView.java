@@ -2,6 +2,7 @@ package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.InjectorCore;
 import fr.sirs.core.component.RappelObligationReglementaireRepository;
 import fr.sirs.core.component.RefEcheanceRappelObligationReglementaireRepository;
 import fr.sirs.core.component.RefFrequenceObligationReglementaireRepository;
@@ -204,17 +205,12 @@ public final class ObligationsCalendarView extends CalendarView {
     @Override
     public void showCalendarPopupForEvent(final CalendarEvent calendarEvent, final Node parent) {
         final ObligationsCalendarEventStage stage = new ObligationsCalendarEventStage(calendarEvent, obligationsProperty.get());
-        stage.initModality(Modality.NONE);
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.setIconified(false);
         stage.setMaximized(false);
         stage.setResizable(false);
-        stage.focusedProperty().addListener((obs,old,newVal) -> {
-            if (stage.isShowing() && !newVal) {
-                // Close the popup if the focus is lost
-                stage.hide();
-            }
-        });
         stage.getIcons().add(SIRS.ICON);
+        stage.initOwner(Injector.getSession().getFrame().getScene().getWindow());
         final Point2D popupPos = parent.localToScreen(20, 40);
         if (popupPos != null) {
             stage.sizeToScene();
