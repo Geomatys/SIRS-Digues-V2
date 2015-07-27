@@ -9,10 +9,10 @@
    <children>
       <BorderPane fx:id="uiConfigPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity">
          <left>
-            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0" BorderPane.alignment="CENTER">
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" spacing="5.0" BorderPane.alignment="CENTER">
                <children>
                   <Label styleClass="list-title" text="Application SIRS" />
-                  <ListView fx:id="uiDesktopList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="30.0" minWidth="30.0" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="SOMETIMES" />
+                  <ListView fx:id="uiDesktopList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="30.0" minWidth="30.0" prefHeight="200.0" VBox.vgrow="SOMETIMES" />
                </children>
                <padding>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -20,7 +20,7 @@
             </VBox>
          </left>
          <right>
-            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0" BorderPane.alignment="CENTER">
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" spacing="5.0" BorderPane.alignment="CENTER">
                <children>
                   <HBox alignment="CENTER_LEFT" spacing="10.0">
                      <children>
@@ -31,7 +31,7 @@
                         <Insets />
                      </VBox.margin>
                   </HBox>
-                  <ListView fx:id="uiMobileList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="30.0" minWidth="30.0" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="SOMETIMES" />
+                  <ListView fx:id="uiMobileList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="30.0" minWidth="30.0" prefHeight="200.0" VBox.vgrow="SOMETIMES" />
                </children>
                <padding>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -104,14 +104,26 @@
                     <rowConstraints>
                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+                        <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                        <RowConstraints maxHeight="-Infinity" minHeight="10.0" vgrow="NEVER" />
                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
                     </rowConstraints>
                      <children>
                         <Label text="Répertoire d'export" />
-                        <Button fx:id="uiExportBtn" mnemonicParsing="false" onAction="#exportToMobile" text="Exporter" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <Button fx:id="uiExportBtn" mnemonicParsing="false" onAction="#exportToMobile" text="Exporter" GridPane.columnIndex="2" GridPane.rowIndex="4">
+                           <GridPane.margin>
+                              <Insets top="10.0" />
+                           </GridPane.margin></Button>
                         <ChoiceBox fx:id="uiOutputChoice" maxWidth="1.7976931348623157E308" minWidth="0.0" prefWidth="200.0" GridPane.rowIndex="1" />
                         <Label text="Espace disponible :" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label fx:id="uiRemainingSpace" text="inconnu" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                        <Label text="Nombre de photos à importer (pour chaque objet sur les tronçons sélectionnés)" GridPane.columnSpan="2147483647" GridPane.rowIndex="2">
+                           <GridPane.margin>
+                              <Insets top="10.0" />
+                           </GridPane.margin>
+                        </Label>
+                        <ChoiceBox fx:id="uiPhotoChoice" GridPane.rowIndex="3" />
+                        <Spinner fx:id="uiPhotoSpinner" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" visible="false" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
                      </children>
                   </GridPane>
                </content>
@@ -121,9 +133,9 @@
             </TitledPane>
          </bottom>
       </BorderPane>
-      <BorderPane visible="false">
+      <BorderPane fx:id="uiCopyPane" visible="false">
          <center>
-            <BorderPane fx:id="uiCopyPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
+            <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
                <top>
                   <Label fx:id="uiCopyTitle" text="Aucune copie en cours" BorderPane.alignment="CENTER_LEFT">
                      <padding>
@@ -152,7 +164,12 @@
       </BorderPane>
       <BorderPane fx:id="uiLoadingPane" prefHeight="200.0" prefWidth="200.0" visible="false">
          <center>
-            <ProgressIndicator maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+            <VBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+               <children>
+                  <ProgressIndicator maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="200.0" />
+                  <Label fx:id="uiLoadingLabel" />
+               </children>
+            </VBox>
          </center>
       </BorderPane>
    </children>
