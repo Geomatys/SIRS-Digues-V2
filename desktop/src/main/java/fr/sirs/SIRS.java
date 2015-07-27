@@ -3,6 +3,7 @@ package fr.sirs;
 import com.sun.javafx.PlatformUtil;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.AbstractPositionDocumentRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.PositionDocumentRepository;
 import fr.sirs.core.component.PositionProfilTraversRepository;
@@ -33,6 +34,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -335,19 +337,21 @@ public final class SIRS extends SirsCore {
      * @return
      */
     public static ObservableList<? extends AbstractPositionDocumentAssociable> getPositionDocumentByDocumentId(final String documentId){
-        try {
-//            final PreviewLabel previewLabel = Injector.getSession().getPreviewLabelRepository().
-            final Preview summary = Injector.getSession().getPreviews().get(documentId);
-            final Class clazz = Class.forName(summary.getElementClass(), true, Thread.currentThread().getContextClassLoader());
-            if(clazz==ProfilTravers.class){
-                return FXCollections.observableList(((PositionProfilTraversRepository)Injector.getSession().getRepositoryForClass(PositionProfilTravers.class)).getByDocumentId(documentId));
-            } else {
-                return FXCollections.observableList(((PositionDocumentRepository)Injector.getSession().getRepositoryForClass(PositionDocument.class)).getByDocumentId(documentId));
+        ObservableList<? extends AbstractPositionDocumentAssociable> result = null;
+        final Collection<AbstractSIRSRepository> candidateRepos = Injector.getSession().getRepositoriesForClass(AbstractPositionDocumentAssociable.class);
+        for(AbstractSIRSRepository candidateRepo : candidateRepos){
+            if(candidateRepo instanceof AbstractPositionDocumentRepository){
+                result = FXCollections.observableList(((AbstractPositionDocumentRepository) candidateRepo).getByDocumentId(documentId));
+                if(!result.isEmpty()) return result; // Si la liste n'est pas vide c'est qu'on a trouvé le bon repo et on sort donc de la boucle en renvoyant la liste.
             }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(SIRS.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return null;
+        /* 
+        Si aucun repo n'a été trouvé (ce qui est normalement impossible étant 
+        donné le modèle, on renvoie null. Si des repos ont été trouvés mais qu'
+        on arrive tout de même à ce point c'est qu'ils ont tous renvoyé une 
+        liste vide. Parmi elles, la dernière est renvoyée.
+        */
+        return result;
     }
 
     /**
