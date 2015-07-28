@@ -3,6 +3,8 @@ package fr.sirs.query;
 
 import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
+import fr.sirs.Plugin;
+import fr.sirs.Plugins;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 
@@ -15,6 +17,7 @@ import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.SQLQueries;
 import fr.sirs.core.model.SQLQuery;
+import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.index.ElementHit;
 import fr.sirs.theme.ui.ObjectTable;
@@ -302,12 +305,27 @@ public class FXSearchPane extends BorderPane {
     @FXML
     private void refreshModel(ActionEvent event) {
         uiRefreshModel.setDisable(true);
-        Task t = H2Helper.init();
+        final Plugin[] plugins = Plugins.getPlugins();
+        final SQLHelper[] sqlHelpers = new SQLHelper[plugins.length];
+
+        for (int i=0; i<sqlHelpers.length; i++) {
+            sqlHelpers[i] = plugins[i].getSQLHelper();
+
+            //Il faut mettre le helper du coeur en premier !
+            if(plugins[i] instanceof CorePlugin && i!=0){
+                final SQLHelper tmpHelper = sqlHelpers[0];
+                sqlHelpers[0] = sqlHelpers[i];
+                sqlHelpers[i] = tmpHelper;
+            }
+        }
+                
+        Task t = H2Helper.init(sqlHelpers);
         t.setOnSucceeded(e -> {
             connectToH2Store().setOnSucceeded(e2 -> Platform.runLater(() -> uiRefreshModel.setDisable(false)));
         
         });
         t.setOnFailed(e -> Platform.runLater(() -> uiRefreshModel.setDisable(false)));
+//        uiRefreshModel.setDisable(false);
     }
     
     private Task connectToH2Store() {

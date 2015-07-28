@@ -30,7 +30,7 @@ import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.sql.CoreSqlHelper;
+import fr.sirs.core.model.sql.SQLHelper;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -42,12 +42,15 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.jdbc.DBCPDataSource;
 
 public class H2Helper {
-    
+
     private static final Pattern UNMANAGED_IDS = Pattern.compile("^($|_).*");
-    
+
     private static FeatureStore STORE = null;
 
-    public static Task init() {
+    private static SQLHelper[] sqlHelpers;
+
+    public static Task init(final SQLHelper... sqlHelpers) {
+
         if (STORE != null) {
             try {
                 STORE.close();
@@ -56,17 +59,19 @@ public class H2Helper {
             }
             STORE = null;
         }
-        
+
+        H2Helper.sqlHelpers = sqlHelpers;
+
         return TaskManager.INSTANCE.submit(new H2Helper.ExportToRDBMS(InjectorCore.getBean(CouchDbConnector.class)));
     }
-    
+
     public static Connection createConnection(CouchDbConnector connector) throws SQLException {
         final Path file = getDBFile(connector);
         final Connection connection = DriverManager.getConnection("jdbc:h2:" + file.toString(), "sirs$user", "sirs$pwd");
         CreateSpatialExtension.initSpatialExtension(connection);
         return connection;
     }
-    
+
     public static synchronized FeatureStore getStore(CouchDbConnector connector) throws SQLException, DataStoreException {
         if (STORE == null) {
             final Path file = getDBFile(connector);
@@ -96,7 +101,7 @@ public class H2Helper {
         Path file = SirsCore.H2_PATH.resolve(URLEncoder.encode(sirs.getUuid()));
         return file;
     }
-    
+
     public static void dumbSchema(Connection connection, Path file) throws SQLException {
         Statement stat = null;
         String create = "SCRIPT TO '" + file.resolve("sirs-schema.sql") + "' ";
@@ -144,58 +149,73 @@ public class H2Helper {
                 });
             }
 
-            try (Connection conn = createConnection(couchConnector)) {
-                
-                updateMessage("Création des tables.");
-                int srid = InjectorCore.getBean(SessionCore.class).getSrid();
-                CoreSqlHelper.getInstance().createTables(conn, srid);
-                conn.setAutoCommit(false);
+            if (sqlHelpers == null || sqlHelpers.length == 0) {
+                return false;
+            } else {
 
-                updateProgress(-1, -1);
-                updateMessage("Mise à jour des clés étrangères");
-                CoreSqlHelper.getInstance().addForeignKeys(conn);
-                
-                updateMessage("Création de la liste des éléments à insérer.");
-                List<String> allDocIds = couchConnector.getAllDocIds();
-                Iterator<String> idIt = allDocIds.iterator();
-                while (idIt.hasNext()) {
-                    if (UNMANAGED_IDS.matcher(idIt.next()).matches()) {
-                        idIt.remove();
+                try (Connection conn = createConnection(couchConnector)) {
+
+                    for (SQLHelper sqlHelper : sqlHelpers) {
+                        if (sqlHelper != null) {
+                            updateMessage("Création des tables.");
+                            conn.setAutoCommit(true);
+                            int srid = InjectorCore.getBean(SessionCore.class).getSrid();
+                            sqlHelper.createTables(conn, srid);
+                            conn.setAutoCommit(false);
+
+                            updateProgress(-1, -1);
+                            updateMessage("Mise à jour des clés étrangères");
+                            sqlHelper.addForeignKeys(conn);
+                            Statement stat = null;
+                            
+                            String create = "SET REFERENTIAL_INTEGRITY FALSE ";
+                            stat = conn.createStatement();
+                            stat.execute(create);
+
+                            updateMessage("Création de la liste des éléments à insérer.");
+                            List<String> allDocIds = couchConnector.getAllDocIds();
+                            Iterator<String> idIt = allDocIds.iterator();
+                            while (idIt.hasNext()) {
+                                if (UNMANAGED_IDS.matcher(idIt.next()).matches()) {
+                                    idIt.remove();
+                                }
+                            }
+                            DocHelper docHelper = new DocHelper(couchConnector);
+
+                            updateMessage("Insertion des éléments");
+                            int currentProgress = 0;
+                            updateProgress(currentProgress, allDocIds.size());
+                            final Thread currentThread = Thread.currentThread();
+
+                            try (final StreamingViewResult allDocsAsStream = docHelper.getAllDocsAsStream()) {
+                                Iterator<ViewResult.Row> iterator = allDocsAsStream.iterator();
+                                while (iterator.hasNext()) {
+                                    if (currentThread.isInterrupted()) {
+                                        return false;
+                                    }
+
+                                    final ViewResult.Row currentRow = iterator.next();
+                                    if (UNMANAGED_IDS.matcher(currentRow.getId()).matches()) {
+                                        continue;
+                                    }
+
+                                    Optional<Element> element = docHelper.toElement(currentRow.getDocAsNode());
+                                    if (element.isPresent()) {
+                                        sqlHelper.insertElement(conn, element.get());
+                                        conn.commit();
+                                        updateProgress(currentProgress++, allDocIds.size());
+                                    }
+                                }
+
+                            } catch (Exception e) {
+                                conn.rollback();
+                                throw e;
+                            }
+                        }
                     }
                 }
-                DocHelper docHelper = new DocHelper(couchConnector);
-
-                updateMessage("Insertion des éléments");
-                int currentProgress = 0;
-                updateProgress(currentProgress, allDocIds.size());
-                final Thread currentThread = Thread.currentThread();
-
-                try (final StreamingViewResult allDocsAsStream = docHelper.getAllDocsAsStream()) {
-                    Iterator<ViewResult.Row> iterator = allDocsAsStream.iterator();
-                    while (iterator.hasNext()) {
-                        if (currentThread.isInterrupted()) {
-                            return false;
-                        }
-
-                        final ViewResult.Row currentRow = iterator.next();
-                        if (UNMANAGED_IDS.matcher(currentRow.getId()).matches()) {
-                            continue;
-                        }
-
-                        Optional<Element> element = docHelper.toElement(currentRow.getDocAsNode());
-                        if (element.isPresent()) {
-                            CoreSqlHelper.getInstance().insertElement(conn, element.get());
-                            conn.commit();
-                            updateProgress(currentProgress++, allDocIds.size());
-                        }
-                    }
-
-                } catch (Exception e) {
-                    conn.rollback();
-                    throw e;
-                }
+                return true;
             }
-            return true;
         }
     }
 }

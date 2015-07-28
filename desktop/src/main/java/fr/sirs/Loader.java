@@ -35,6 +35,7 @@ import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Utilisateur;
+import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.util.SirsStringConverter;
 import java.util.List;
 import java.util.Objects;
@@ -312,7 +313,19 @@ public class Loader extends Application {
                 // COUCHDB TO SQL //////////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Export vers la base RDBMS");
-                H2Helper.init();
+                final SQLHelper[] sqlHelpers = new SQLHelper[plugins.length];
+                
+                for (int i=0; i<sqlHelpers.length; i++) {
+                    sqlHelpers[i] = plugins[i].getSQLHelper();
+                    
+                    //Il faut mettre le helper du coeur en premier !
+                    if(plugins[i] instanceof CorePlugin && i!=0){
+                        final SQLHelper tmpHelper = sqlHelpers[0];
+                        sqlHelpers[0] = sqlHelpers[i];
+                        sqlHelpers[i] = tmpHelper;
+                    }
+                }
+                H2Helper.init(sqlHelpers);
                 
                 // VÉRIFICATION DES RÉFÉRENCES
                 updateProgress(inc++, total);
