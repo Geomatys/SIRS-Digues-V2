@@ -17,9 +17,6 @@
 package org.geotoolkit.gui.javafx.util;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;

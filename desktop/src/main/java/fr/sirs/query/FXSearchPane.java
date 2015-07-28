@@ -31,6 +31,7 @@ import java.sql.Connection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -587,7 +588,7 @@ public class FXSearchPane extends BorderPane {
         if (layer == null || layer.getCollection().isEmpty()) {
             setCenter(new Label("Pas de résultat pour votre recherche."));
         } else {
-            final CustomizedFeatureTable table = new CustomizedFeatureTable(MODEL_PACKAGE+".");
+            final CustomizedFeatureTable table = new CustomizedFeatureTable(MODEL_PACKAGE+".", Locale.getDefault(), Thread.currentThread().getContextClassLoader());
             table.setLoadAll(true);
             table.init(layer);
             setCenter(table);
@@ -624,8 +625,8 @@ public class FXSearchPane extends BorderPane {
     
     private static class CustomizedFeatureTable extends FXFeatureTable {
         
-        CustomizedFeatureTable(final String path){
-            super(path);
+        CustomizedFeatureTable(final String path, final Locale locale, final ClassLoader classLoader){
+            super(path, locale, classLoader);
         }
         
         @Override

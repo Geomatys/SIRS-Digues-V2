@@ -61,6 +61,8 @@ import org.opengis.filter.identity.Identifier;
 /**
  *
  * @author Johann Sorel (Geomatys)
+ * 
+ * TODO : REPLACE BY THE SAME CLASS DEFINED IN GEOTOOLKIT
  */
 public class FXFeatureTable extends FXPropertyPane{
     
@@ -76,15 +78,118 @@ public class FXFeatureTable extends FXPropertyPane{
     private final Map<String, ResourceBundle> bundles = new HashMap<>();
     private String bundlePrefix;
     
+    private final Locale locale;
+    private final ClassLoader classLoader;
+    
+    /**
+     * Default constructor, without mapping policy.
+     */
     public FXFeatureTable() {
+        setCenter(initTable());
+        locale=Locale.getDefault();
+        classLoader=null;
+    }
+    
+    /**
+     * A constructor that allows to map the column table names using bundles.
+     * 
+     * For instance, if the following map is given :
+     * "TableA" => "fr.geotk.Bundle1"
+     * "TableB" => "fr.geotk.nmspace.Bundle2"
+     * The bundle "Bundle1" will be used to map TableA column names and the bundle
+     * "Bundle2" will be used to map TableB column names.
+     * 
+     * @param bundleMapping A mapping between table names (keys) and the 
+     * corresponding bundle base name (value). Must not be null.
+     * @param locale A locale. If null, the locale will be the default locale.
+     * @param classLoader The class loader necessary to find the ressource bundles.
+     */
+    public FXFeatureTable(final Map<String, String> bundleMapping, final Locale locale, final ClassLoader classLoader){
+        setCenter(initTable());
+        this.locale = (locale==null) ? Locale.getDefault() : locale;
+        this.classLoader = classLoader;
+        for(final String keyTableName : bundleMapping.keySet()){
+            final String bundleBaseName = bundleMapping.get(keyTableName);
+            try{
+                final ResourceBundle bundle;
+                if(classLoader!=null && locale!=null)
+                    bundle = ResourceBundle.getBundle(bundleBaseName, locale, classLoader);
+                else
+                    bundle = ResourceBundle.getBundle(bundleBaseName);
+                bundles.put(keyTableName, bundle);
+            }
+            catch(Exception ex){
+                Loggers.JAVAFX.log(Level.INFO, ex.getMessage(),ex);
+            }
+        }
+    }
+    
+    /**
+     * A constructor that allows to map the column table names using bundles.
+     * 
+     * For instance, if the following map is given :
+     * "TableA" => "fr.geotk.Bundle1"
+     * "TableB" => "fr.geotk.nmspace.Bundle2"
+     * The bundle "Bundle1" will be used to map TableA column names and the bundle
+     * "Bundle2" will be used to map TableB column names.
+     * 
+     * @param bundleMapping A mapping between table names (keys) and the correspondint bundle base name (value). Must not be null.
+     */
+    public FXFeatureTable(final Map<String, String> bundleMapping){
+        this(bundleMapping, Locale.getDefault(), null);
+    }
+    
+    /**
+     * A constructor that allows to map the column table names using bundles.
+     * 
+     * The bundleBaseNamePrefix is used to build a map bundle names from table names.
+     * 
+     * For instance, if the bundleBaseNamePrefix is "fr.geotk.nmspace.", the
+     * following map is built :
+     * "TableA" => "fr.geotk.nmspace.TableA"
+     * "TableB" => "fr.geotk.nmspace.TableB"
+     * 
+     * Thus, the bundle "TableA" will be used to map TableA column names and the 
+     * bundle "TableB" will be used to map TableB column names.
+     * 
+     * @param bundleBaseNamePrefix A base name prefix used to build a bundle mapping with table names.
+     * @param locale A locale. If null, the locale will be the default locale.
+     * @param classLoader The class loader necessary to find the ressource bundles.
+     */
+    public FXFeatureTable(final String bundleBaseNamePrefix, final Locale locale, final ClassLoader classLoader){
+        setCenter(initTable());
+        bundlePrefix = bundleBaseNamePrefix;
+        this.locale= (locale==null) ? Locale.getDefault() : locale;
+        this.classLoader=classLoader;
+    }
+    
+    /**
+     * A constructor that allows to map the column table names using bundles.
+     * 
+     * The bundleBaseNamePrefix is used to build a map bundle names from table names.
+     * 
+     * For instance, if the bundleBaseNamePrefix is "fr.geotk.nmspace.", the
+     * following map is built :
+     * "TableA" => "fr.geotk.nmspace.TableA"
+     * "TableB" => "fr.geotk.nmspace.TableB"
+     * 
+     * Thus, the bundle "TableA" will be used to map TableA column names and the 
+     * bundle "TableB" will be used to map TableB column names.
+     * 
+     * @param bundleBaseNamePrefix A base name prefix used to build a bundle mapping with table names.
+     */
+    public FXFeatureTable(final String bundleBaseNamePrefix){
+        this(bundleBaseNamePrefix, Locale.getDefault(), null);
+    }
+    
+    private ScrollPane initTable(){
         final ScrollPane scroll = new ScrollPane(table);
         scroll.setFitToHeight(true);
         scroll.setFitToWidth(true);
-        table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         scroll.setPrefSize(600, 400);
         scroll.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        setCenter(scroll);
         
+        table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         //listen to table selection
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         table.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<Feature>() {
@@ -107,25 +212,7 @@ public class FXFeatureTable extends FXPropertyPane{
         final Button loadButton = new Button("Load datas");
         loadButton.setOnAction(this::loadData);
         table.setPlaceholder(loadButton);
-    }
-    
-    public FXFeatureTable(final Map<String, String> bundleMapping){
-        this();
-        for(final String key : bundleMapping.keySet()){
-            final String bundleBaseName = bundleMapping.get(key);
-            try{
-                final ResourceBundle bundle = ResourceBundle.getBundle(bundleBaseName, Locale.getDefault(), Thread.currentThread().getContextClassLoader());
-                bundles.put(key, bundle);
-            }
-            catch(Exception ex){
-                Loggers.JAVAFX.log(Level.INFO, ex.getMessage(),ex);
-            }
-        }
-    }
-    
-    public FXFeatureTable(final String bundleBaseNamePrefix){
-        this();
-        bundlePrefix = bundleBaseNamePrefix;
+        return scroll;
     }
     
     @Override
@@ -225,7 +312,10 @@ public class FXFeatureTable extends FXPropertyPane{
             // If there isn't resource bundles (or not for the curruen table), try to generate.
             if (bundles.get(tableName) == null) {
                 if (bundlePrefix != null) {
-                    bundles.put(tableName, ResourceBundle.getBundle(bundlePrefix + tableName, Locale.getDefault(), Thread.currentThread().getContextClassLoader()));
+                    if(classLoader!=null && locale!=null)
+                        bundles.put(tableName, ResourceBundle.getBundle(bundlePrefix + tableName, Locale.getDefault(), classLoader));
+                    else
+                        bundles.put(tableName, ResourceBundle.getBundle(bundlePrefix + tableName));
                 }
             }
         }
