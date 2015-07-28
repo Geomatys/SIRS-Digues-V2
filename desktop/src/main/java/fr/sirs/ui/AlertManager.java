@@ -2,7 +2,10 @@ package fr.sirs.ui;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -15,7 +18,8 @@ public class AlertManager {
     /**
      * Liste des alertes à afficher.
      */
-    private final ObservableList<AlertItem> alerts = FXCollections.observableArrayList();
+    private final ObservableSet<AlertItem> alerts = FXCollections.observableSet(new HashSet<>());
+
     /**
      * Définit si les alertes doivent être affichées dans l'application ou non.
      */
@@ -31,7 +35,7 @@ public class AlertManager {
         return manager;
     }
 
-    public ObservableList<AlertItem> getAlerts() {
+    public ObservableSet<AlertItem> getAlerts() {
         return alerts;
     }
 
@@ -48,7 +52,7 @@ public class AlertManager {
      *
      * @param alerts Liste des alertes à afficher.
      */
-    public void addAlerts(final List<AlertItem> alerts) {
+    public void addAlerts(final Collection<AlertItem> alerts) {
         manager.setAlertsEnabled(true);
         manager.getAlerts().addAll(alerts);
     }

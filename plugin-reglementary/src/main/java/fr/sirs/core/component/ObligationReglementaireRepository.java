@@ -51,6 +51,18 @@ public class ObligationReglementaireRepository extends
     }
 
     /**
+     * Ajoute l'obligation réglementaire et répercute le changement sur l'affichage des alertes.
+     *
+     * @param entity L'obligation réglementaire à ajouter.
+     */
+    @Override
+    public void add(ObligationReglementaire entity) {
+        super.add(entity);
+
+        PluginReglementary.showAlerts();
+    }
+
+    /**
      * Mets à jour l'obligation réglementaire et répercute le changement sur l'affichage des alertes.
      *
      * @param entity L'obligation réglementaire à mettre à jour.

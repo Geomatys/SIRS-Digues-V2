@@ -15,8 +15,9 @@ import fr.sirs.ui.AlertManager;
 import javafx.scene.image.Image;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Plugin correspondant au module réglementaire, permettant de gérer des documents de suivis.
@@ -68,7 +69,7 @@ public class PluginReglementary extends Plugin {
      * et leurs échéances de rappel.
      */
     public static void showAlerts() {
-        final List<AlertItem> alerts = new ArrayList<>();
+        final Set<AlertItem> alerts = new HashSet<>();
 
         final ObligationReglementaireRepository orr = Injector.getBean(ObligationReglementaireRepository.class);
         final List<ObligationReglementaire> obligations = orr.getAll();
@@ -88,28 +89,28 @@ public class PluginReglementary extends Plugin {
                 continue;
             }
 
-            final RefEcheanceRappelObligationReglementaire echeance = repoEcheanceRappel.get(obligation.getEcheanceId());
-            // Construction du texte à afficher sur le calendrier
-            final StringBuilder sb = new StringBuilder();
-            if (obligation.getTypeId() != null) {
-                sb.append(repoTypeObl.get(obligation.getTypeId()).getAbrege()).append(" - ");
-            }
-            if (obligation.getSystemeEndiguementId() != null) {
-                final Preview previewSE = Injector.getSession().getPreviews().get(obligation.getSystemeEndiguementId());
-                sb.append(previewSE.getLibelle()).append(" - ");
-            }
-            sb.append(obligation.getAnnee());
-
             final LocalDate oblDate = obligation.getDateRealisation() != null ? obligation.getDateRealisation() :
                     obligation.getDateEcheance();
             if (oblDate == null) {
                 continue;
             }
 
+            final RefEcheanceRappelObligationReglementaire echeance = repoEcheanceRappel.get(obligation.getEcheanceId());
+
             // Compare la date actuelle avec la date d'échéance de l'obligation et le temps avant la date d'échéance
             // pour afficher l'alerte. Exemple : une obligation au 1er juillet avec un rappel 3 mois avant,
             // l'alerte sera affichée si la date du lancement de l'application est comprise dans cette période.
             if (oblDate.minusMonths(echeance.getNbMois()).compareTo(now) <= 0 && oblDate.compareTo(now) >= 0) {
+                // Construction du texte à afficher sur le calendrier
+                final StringBuilder sb = new StringBuilder();
+                if (obligation.getTypeId() != null) {
+                    sb.append(repoTypeObl.get(obligation.getTypeId()).getAbrege()).append(" - ");
+                }
+                if (obligation.getSystemeEndiguementId() != null) {
+                    final Preview previewSE = Injector.getSession().getPreviews().get(obligation.getSystemeEndiguementId());
+                    sb.append(previewSE.getLibelle()).append(" - ");
+                }
+                sb.append(obligation.getAnnee());
                 alerts.add(new AlertItem(sb.toString(), oblDate));
             }
         }

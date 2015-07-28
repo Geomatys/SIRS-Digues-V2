@@ -9,6 +9,8 @@ import fr.sirs.ui.AlertItem;
 import fr.sirs.ui.AlertManager;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -165,10 +167,10 @@ public class FXMainFrame extends BorderPane {
             return false;
         }, session.utilisateurProperty()));
 
-        final ObservableList<AlertItem> alerts = AlertManager.getInstance().getAlerts();
+        final ObservableSet<AlertItem> alerts = AlertManager.getInstance().getAlerts();
         uiAlertsBtn.setOnMouseClicked(event -> showAlertsPopup());
         uiAlertsBtn.setGraphic(new ImageView(ICON_ALERT));
-        alerts.addListener((ListChangeListener<AlertItem>) c -> uiAlertsBtn.setText(alerts.size() + " alerte(s)"));
+        alerts.addListener((SetChangeListener<AlertItem>) c -> uiAlertsBtn.setText(alerts.size() + " alerte(s)"));
         uiAlertsBtn.setText(alerts.size() + " alerte(s)");
         uiAlertsBtn.managedProperty().bind(uiAlertsBtn.visibleProperty());
         uiAlertsBtn.setVisible(AlertManager.getInstance().isAlertsEnabled());
@@ -177,7 +179,7 @@ public class FXMainFrame extends BorderPane {
     }
 
     public void showAlertsPopup() {
-        final ObservableList<AlertItem> alerts = AlertManager.getInstance().getAlerts();
+        final ObservableSet<AlertItem> alerts = AlertManager.getInstance().getAlerts();
         final VBox vbox = new VBox();
         vbox.getStylesheets().add(SIRS.CSS_PATH);
         vbox.getStyleClass().add(CSS_POPUP_ALERTS);
