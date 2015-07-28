@@ -15,6 +15,7 @@ import fr.sirs.core.model.RapportModeleDocument;
 import fr.sirs.core.model.RapportSectionDocument;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.plugin.document.FileTreeItem;
 import fr.sirs.plugin.document.ODTUtils;
 import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
 import static fr.sirs.plugin.document.ui.DocumentsPane.DYNAMIC;
@@ -91,9 +92,12 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
 
     private static final Logger LOGGER = Logging.getLogger(DocumentsPane.class);
     
-    public DynamicDocumentsPane() {
+    private final FileTreeItem root;
+    
+    public DynamicDocumentsPane(final FileTreeItem root) {
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
+        this.root = root;
     }
 
     /**
@@ -234,12 +238,17 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
         if (rootPath == null || rootPath.isEmpty()) {
             rootPath = setMainFolder();
         }
-        final File root = new File (rootPath);
+        
+        final File rootDir = new File (rootPath);
+        root.setValue(new File (rootPath));
         
         RapportModeleDocument modele = uiModelsList.getSelectionModel().getSelectedItem();
+        if (modele == null) {
+            showErrorDialog("Vous devez selectionner un modéle.");
+        }
         try {
             final Collection<TronconDigue> troncons = getTronconList();
-            final File seDir                        = getOrCreateSE(root, getSelectedSE());
+            final File seDir                        = getOrCreateSE(rootDir, getSelectedSE());
             if (uiOnlySEBox.isSelected()) {
                 final File docDir = new File (seDir, DocumentsPane.DOCUMENT_FOLDER);
                 final File newDoc = new File(docDir, docName); 
@@ -258,6 +267,7 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
             }
             
             // reload tree
+            root.update();
             
             showConfirmDialog("Les documents ont été generés.");
         } catch (Exception ex) {

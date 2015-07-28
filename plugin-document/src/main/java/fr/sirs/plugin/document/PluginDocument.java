@@ -17,9 +17,10 @@ public class PluginDocument extends Plugin {
 
     public PluginDocument() {
         name = NAME;
+        final FileTreeItem root = new FileTreeItem(null);
         loadingMessage.set("module document d'ouvrages");
-        themes.add(new DocumentManagementTheme());
-        themes.add(new DynamicDocumentTheme());
+        themes.add(new DocumentManagementTheme(root));
+        themes.add(new DynamicDocumentTheme(root));
     }
 
     @Override

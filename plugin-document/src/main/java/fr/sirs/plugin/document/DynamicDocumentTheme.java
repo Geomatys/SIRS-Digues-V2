@@ -13,12 +13,15 @@ import javafx.scene.image.Image;
 public class DynamicDocumentTheme extends AbstractPluginsButtonTheme {
     private static final Image BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/gen_etats.png"));
 
-    public DynamicDocumentTheme() {
+    private final FileTreeItem root;
+    
+    public DynamicDocumentTheme(final FileTreeItem root) {
         super("Documents dynamiques", "Documents dynamiques", BUTTON_IMAGE);
+        this.root = root;
     }
 
     @Override
     public Parent createPane() {
-        return new DynamicDocumentsPane();
+        return new DynamicDocumentsPane(root);
     }
 }

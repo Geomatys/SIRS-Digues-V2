@@ -14,14 +14,16 @@ import javafx.scene.layout.BorderPane;
 public final class DocumentManagementTheme extends AbstractPluginsButtonTheme {
     
     private static final Image BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/gen_etats.png"));
+    private final FileTreeItem root;
     
-    public DocumentManagementTheme() {
+    public DocumentManagementTheme(final FileTreeItem root) {
         super("Gestion des documents", "Gestion des documents", BUTTON_IMAGE);
+        this.root = root;
     }
 
     @Override
     public Parent createPane() {
-        final BorderPane borderPane = new BorderPane(new DocumentsPane());
+        final BorderPane borderPane = new BorderPane(new DocumentsPane(root));
 
         return borderPane;
     }

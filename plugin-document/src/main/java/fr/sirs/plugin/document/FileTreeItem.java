@@ -21,7 +21,7 @@ public class FileTreeItem extends TreeItem<File> {
     public FileTreeItem(File item) {
         super(item);
 
-        if (item.isDirectory()) {
+        if (item != null && item.isDirectory()) {
             for (File f : listFiles(item)) {
                 if (!f.getName().equals("sirs.properties")) {
                     getChildren().add(new FileTreeItem(f));
@@ -32,7 +32,11 @@ public class FileTreeItem extends TreeItem<File> {
     
     @Override
     public boolean isLeaf() {
-        return !getValue().isDirectory();
+        final File f = getValue();
+        if (f != null) {
+            return !getValue().isDirectory(); 
+        }
+        return true;
     }
     
     /**

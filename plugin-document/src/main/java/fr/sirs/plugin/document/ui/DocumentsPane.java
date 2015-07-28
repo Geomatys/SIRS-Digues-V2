@@ -107,11 +107,12 @@ public class DocumentsPane extends GridPane {
     
     private static final Logger LOGGER = Logging.getLogger(DocumentsPane.class);
     
-    private String rootPath;
+    private final FileTreeItem root;
     
-    public DocumentsPane() {
+    public DocumentsPane(final FileTreeItem root) {
         SIRS.loadFXML(this, DocumentsPane.class);
         Injector.injectDependencies(this);
+        this.root = root;
         
         getStylesheets().add(SIRS.CSS_PATH);
         
@@ -229,12 +230,13 @@ public class DocumentsPane extends GridPane {
         
         
         tree1.setShowRoot(false);
+        tree1.setRoot(root);
         
         final Preferences prefs = Preferences.userRoot().node("DocumentPlugin");
-        rootPath = prefs.get(ROOT_FOLDER, null);
+        final String rootPath   = prefs.get(ROOT_FOLDER, null);
         
         if (rootPath != null && verifyDatabaseVersion(new File(rootPath))) {
-            updateRoot();
+            updateRoot(rootPath);
             updateDatabaseIdentifier(new File(rootPath));
            
         } else {
@@ -317,7 +319,7 @@ public class DocumentsPane extends GridPane {
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
             File f = new File(ipane.rootFolderField.getText());
             if (f.isDirectory() && verifyDatabaseVersion(f)) {
-                rootPath = f.getPath();
+                String rootPath = f.getPath();
                 
                 final Preferences prefs = Preferences.userRoot().node("DocumentPlugin");
                 prefs.put(ROOT_FOLDER, rootPath);
@@ -327,7 +329,7 @@ public class DocumentsPane extends GridPane {
                 addFolderButton.disableProperty().set(false);
                 listButton .disableProperty().set(false);
                 // refresh tree
-                updateRoot();
+                updateRoot(rootPath);
                 updateDatabaseIdentifier(new File(rootPath));
             }
         }
@@ -347,7 +349,7 @@ public class DocumentsPane extends GridPane {
         final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
             String folderName  = ipane.folderNameField.getText();
-            final File rootDir = new File(rootPath);
+            final File rootDir = root.getValue();
             switch (ipane.locCombo.getValue()) {
                 case NewFolderPane.IN_CURRENT_FOLDER: 
                     addToSelectedFolder(folderName);
@@ -387,7 +389,7 @@ public class DocumentsPane extends GridPane {
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
             File f = new File(ipane.newFileFIeld.getText());
             try {
-                ODTUtils.write(new FileTreeItem(new File(rootPath)), f);
+                ODTUtils.write(root, f);
             } catch (Exception ex) {
                 showErrorDialog(ex.getMessage());
             }
@@ -413,7 +415,7 @@ public class DocumentsPane extends GridPane {
         return null;
     }
     
-    private void updateRoot() {
+    private void updateRoot(final String rootPath) {
         final File rootDirectory = new File(rootPath);
         
         final File saveDir = new File(rootDirectory, SAVE_FOLDER);
@@ -554,12 +556,11 @@ public class DocumentsPane extends GridPane {
         /**
          * Mise a jour de l'UI.
          */
-        TreeItem root = new FileTreeItem(rootDirectory);
-        tree1.setRoot(root);
+        root.setValue(rootDirectory);
+        root.update();
     }
     
     private void update() {
-        FileTreeItem root = (FileTreeItem) tree1.getRoot();
         root.update();
     }
     
