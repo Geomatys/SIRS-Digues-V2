@@ -3,11 +3,9 @@ package fr.sirs.plugin.reglementaire.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.ObligationReglementaireRepository;
-import fr.sirs.core.component.RappelObligationReglementaireRepository;
 import fr.sirs.core.component.RefEcheanceRappelObligationReglementaireRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ObligationReglementaire;
-import fr.sirs.core.model.RappelObligationReglementaire;
 import fr.sirs.core.model.RefEcheanceRappelObligationReglementaire;
 import fr.sirs.ui.calendar.CalendarEvent;
 import javafx.collections.FXCollections;
@@ -31,8 +29,6 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
-
-import java.util.List;
 
 
 /**
@@ -120,7 +116,6 @@ public final class ObligationsCalendarEventStage extends Stage {
         if(ButtonType.YES != res) return;
 
         final ObligationReglementaireRepository orr = Injector.getBean(ObligationReglementaireRepository.class);
-        final RappelObligationReglementaireRepository rorr = Injector.getBean(RappelObligationReglementaireRepository.class);
 
         final Element parent = calendarEvent.getParent();
         if (parent instanceof ObligationReglementaire) {
@@ -130,21 +125,8 @@ public final class ObligationsCalendarEventStage extends Stage {
                 orr.remove(obligation);
                 obligations.remove(obligation);
             } else {
-                // Une obligation a été fournie et c'est une alerte de rappel, donc on doit supprimer les rappels sur cette obligation
-                // et mettre à jour la date de rappel de l'échéance car ce n'est plus valide.
-                final List<RappelObligationReglementaire> rappels = rorr.getByObligation(obligation);
-                for (RappelObligationReglementaire rappel : rappels) {
-                    rorr.remove(rappel);
-                }
-                obligation.setEcheanceId(null);
-                orr.update(obligation);
-            }
-        } else if (parent instanceof RappelObligationReglementaire) {
-            // Suppression du rappel fourni et suppression de la date de rappel de l'échéance
-            final RappelObligationReglementaire rappel = (RappelObligationReglementaire) parent;
-            if (rappel.getObligationId() != null) {
-                final ObligationReglementaire obligation = orr.get(rappel.getObligationId());
-                rorr.remove(rappel);
+                // Une obligation a été fournie et c'est une alerte de rappel, donc on doit mettre à jour la date de
+                // rappel de l'échéance car ce n'est plus valide.
                 obligation.setEcheanceId(null);
                 orr.update(obligation);
             }
@@ -224,16 +206,10 @@ public final class ObligationsCalendarEventStage extends Stage {
         hbox.getChildren().add(lbl);
 
         // Récupération de l'obligation
-        final ObligationReglementaire obligation;
-        if (event.getParent() instanceof ObligationReglementaire) {
-            obligation = (ObligationReglementaire) event.getParent();
-        } else if (event.getParent() instanceof RappelObligationReglementaire) {
-            final RappelObligationReglementaire rappel = (RappelObligationReglementaire)event.getParent();
-            final ObligationReglementaireRepository orr = Injector.getBean(ObligationReglementaireRepository.class);
-            obligation = orr.get(rappel.getObligationId());
-        } else {
+        if (!(event.getParent() instanceof ObligationReglementaire)) {
             return;
         }
+        final ObligationReglementaire obligation = (ObligationReglementaire) event.getParent();
 
         // Génération de la liste déroulante des échéances possibles, avec l'ancienne valeur sélectionnée
         final RefEcheanceRappelObligationReglementaireRepository reorr = Injector.getBean(RefEcheanceRappelObligationReglementaireRepository.class);
