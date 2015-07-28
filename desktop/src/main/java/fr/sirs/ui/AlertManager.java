@@ -7,6 +7,7 @@ import javafx.collections.ObservableSet;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Predicate;
 
 
 /**
@@ -55,5 +56,14 @@ public class AlertManager {
     public void addAlerts(final Collection<AlertItem> alerts) {
         manager.setAlertsEnabled(true);
         manager.getAlerts().addAll(alerts);
+    }
+
+    /**
+     * Supprime les alertes pour le parent donné.
+     *
+     * @param parent Le parent des alertes à supprimer.
+     */
+    public void removeAlertsForParent(final Object parent) {
+        alerts.removeIf(alertItem -> alertItem.getParent() != null && alertItem.getParent().equals(parent));
     }
 }

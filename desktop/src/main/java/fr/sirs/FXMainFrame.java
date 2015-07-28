@@ -3,12 +3,9 @@ package fr.sirs;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.Desordre;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import fr.sirs.ui.AlertItem;
 import fr.sirs.ui.AlertManager;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.geometry.Point2D;
@@ -29,7 +26,7 @@ import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.Theme;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.query.FXSearchPane;
-import static fr.sirs.ui.AlertItem.AlertItemLevel.HIGHT;
+import static fr.sirs.ui.AlertItem.AlertItemLevel.HIGH;
 import static fr.sirs.ui.AlertItem.AlertItemLevel.INFORMATION;
 import fr.sirs.util.FXPreferenceEditor;
 import org.geotoolkit.gui.javafx.util.ProgressMonitor;
@@ -191,7 +188,7 @@ public class FXMainFrame extends BorderPane {
             
             final VBox alertBox = new VBox(label, new Label("Echéance " + alert.getDate().format(dfFormat)));
             alertBox.getStyleClass().add(CSS_POPUP_ALERT);
-            if(alert.getLevel()==HIGHT)
+            if(alert.getLevel()== HIGH)
                 alertBox.getStyleClass().add(CSS_POPUP_ALERT_HIGHT);
             else if(alert.getLevel()==INFORMATION)
                 alertBox.getStyleClass().add(CSS_POPUP_ALERT_INFORMATION);

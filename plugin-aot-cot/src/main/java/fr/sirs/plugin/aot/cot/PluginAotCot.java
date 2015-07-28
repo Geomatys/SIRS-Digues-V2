@@ -230,11 +230,11 @@ public class PluginAotCot extends Plugin {
             sb.append(new SirsStringConverter().toString(obligation));
             
 //            if (obligation.getDate_fin().compareTo(LocalDate.now())<0)
-//                alerts.add(new AlertItem(sb.toString(), obligation.getDate_fin(), AlertItem.AlertItemLevel.HIGHT));
+//                alerts.add(new AlertItem(sb.toString(), obligation.getDate_fin(), AlertItem.AlertItemLevel.HIGH));
 //            else 
                 if(obligation.getDate_fin().minusMonths(6).compareTo(LocalDate.now())<0
                         && obligation.getDate_fin().compareTo(LocalDate.now())>=0) // On ne veut pas d'alerte pour les conventions dont la date de fin est déjà dépassée
-                alerts.add(new AlertItem(sb.toString(), obligation.getDate_fin()));
+                alerts.add(new AlertItem(sb.toString(), obligation.getDate_fin(), obligation));
 //            else 
 //                alerts.add(new AlertItem(sb.toString(), obligation.getDate_fin(), AlertItem.AlertItemLevel.INFORMATION));
         }

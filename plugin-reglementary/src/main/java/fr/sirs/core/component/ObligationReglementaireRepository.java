@@ -6,6 +6,9 @@ import fr.sirs.core.SessionCore;
 
 import fr.sirs.core.model.PlanificationObligationReglementaire;
 import fr.sirs.plugin.reglementaire.PluginReglementary;
+import fr.sirs.ui.AlertItem;
+import fr.sirs.ui.AlertManager;
+import javafx.collections.ObservableSet;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
@@ -71,6 +74,7 @@ public class ObligationReglementaireRepository extends
     public void update(ObligationReglementaire entity) {
         super.update(entity);
 
+        AlertManager.getInstance().removeAlertsForParent(entity);
         PluginReglementary.showAlerts();
     }
 
@@ -84,7 +88,7 @@ public class ObligationReglementaireRepository extends
     public void remove(ObligationReglementaire entity) {
         super.remove(entity);
 
-        PluginReglementary.showAlerts();
+        AlertManager.getInstance().removeAlertsForParent(entity);
     }
 
 

@@ -5,23 +5,59 @@ import static fr.sirs.ui.AlertItem.AlertItemLevel.NORMAL;
 import java.time.LocalDate;
 
 /**
+ *
  * @author Cédric Briançon (Geomatys)
  */
 public class AlertItem {
+    /**
+     * Titre de l'alerte.
+     */
     private final String title;
-    private final LocalDate date;
-    private final AlertItemLevel level;
-    
-    public enum AlertItemLevel{HIGHT, NORMAL, WARNING, INFORMATION}
 
-    public AlertItem(String title, LocalDate date, AlertItemLevel level) {
+    /**
+     * Date de l'alerte.
+     */
+    private final LocalDate date;
+
+    /**
+     * Objet déclenchant l'alerte.
+     */
+    private final Object parent;
+
+    /**
+     * Niveau de l'alerte.
+     */
+    private final AlertItemLevel level;
+
+    /**
+     * Niveaux possibles d'alerte.
+     */
+    public enum AlertItemLevel{HIGH, NORMAL, WARNING, INFORMATION}
+
+    /**
+     * Création d'une alerte.
+     *
+     * @param title  Titre de l'alerte
+     * @param date   Date de l'alerte
+     * @param parent Parent, objet déclenchant l'alerte
+     * @param level  Niveau de l'alerte
+     */
+    public AlertItem(final String title, final LocalDate date, final Object parent, final AlertItemLevel level) {
         this.title = title;
         this.date = date;
         this.level = level;
+        this.parent = parent;
     }
-    
-    public AlertItem(String title, LocalDate date) {
-        this(title, date, NORMAL);
+
+    /**
+     * Création d'une alerte. Par défaut au niveau {@linkplain AlertItem.AlertItemLevel#NORMAL normal}.
+     *
+     * @param title  Titre de l'alerte
+     * @param date   Date de l'alerte
+     * @param parent Parent, objet déclenchant l'alerte
+     */
+    public AlertItem(final String title, final LocalDate date, final Object parent) {
+        this(title, date, parent, NORMAL);
     }
 
     public String getTitle() {
@@ -34,6 +70,10 @@ public class AlertItem {
     
     public AlertItemLevel getLevel(){
         return level;
+    }
+
+    public Object getParent() {
+        return parent;
     }
 
     @Override
