@@ -31,7 +31,6 @@ import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.sql.CoreSqlHelper;
-import fr.sirs.core.model.sql.SQLHelper;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -62,9 +61,8 @@ public class H2Helper {
     }
     
     public static Connection createConnection(CouchDbConnector connector) throws SQLException {
-        Path file = getDBFile(connector);
-        Connection connection = DriverManager.getConnection(
-                "jdbc:h2:" + file.toString(), "sirs$user", "sirs$pwd");
+        final Path file = getDBFile(connector);
+        final Connection connection = DriverManager.getConnection("jdbc:h2:" + file.toString(), "sirs$user", "sirs$pwd");
         CreateSpatialExtension.initSpatialExtension(connection);
         return connection;
     }
@@ -147,11 +145,16 @@ public class H2Helper {
             }
 
             try (Connection conn = createConnection(couchConnector)) {
+                
                 updateMessage("Création des tables.");
                 int srid = InjectorCore.getBean(SessionCore.class).getSrid();
                 CoreSqlHelper.getInstance().createTables(conn, srid);
                 conn.setAutoCommit(false);
 
+                updateProgress(-1, -1);
+                updateMessage("Mise à jour des clés étrangères");
+                CoreSqlHelper.getInstance().addForeignKeys(conn);
+                
                 updateMessage("Création de la liste des éléments à insérer.");
                 List<String> allDocIds = couchConnector.getAllDocIds();
                 Iterator<String> idIt = allDocIds.iterator();
@@ -191,10 +194,6 @@ public class H2Helper {
                     conn.rollback();
                     throw e;
                 }
-                
-                updateProgress(-1, -1);
-                updateMessage("Mise à jour des clés étrangères");
-                CoreSqlHelper.getInstance().addForeignKeys(conn);
             }
             return true;
         }

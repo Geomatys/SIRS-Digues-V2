@@ -53,6 +53,8 @@ import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
+import fr.sirs.core.model.sql.CoreSqlHelper;
+import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DocumentTheme;
 import fr.sirs.theme.EvenementsHydrauliquesTheme;
@@ -71,7 +73,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
@@ -408,6 +409,11 @@ public class CorePlugin extends Plugin {
         }
         
         return items;
+    }
+
+    @Override
+    public SQLHelper getSQLHelper() {
+        return CoreSqlHelper.getInstance();
     }
     
     private static class DocumentFilter<T> implements Filter{

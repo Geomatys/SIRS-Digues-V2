@@ -34,4 +34,10 @@ public class PluginExample extends Plugin {
         // TODO: choisir une image pour ce plugin
         return null;
     }
+
+    @Override
+    public SQLHelper getSQLHelper() {
+        // TODO: renvoyer le SQLHelper du plugin pour l'export RDBMS !
+        return null;
+    }
 }

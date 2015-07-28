@@ -19,6 +19,8 @@ import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.PositionConvention;
+import fr.sirs.core.model.sql.AotCotSqlHelper;
+import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.ui.AlertItem;
 import fr.sirs.ui.AlertManager;
@@ -165,6 +167,11 @@ public class PluginAotCot extends Plugin {
         }
         return lst;
     }
+
+    @Override
+    public SQLHelper getSQLHelper() {
+        return AotCotSqlHelper.getInstance();
+    }
     
     private class ViewFormReseauItem extends MenuItem {
 
@@ -173,17 +180,6 @@ public class PluginAotCot extends Plugin {
             setOnAction((ActionEvent event) -> {
                 consultationAotCotTheme.setReseauToConsultFromMap(candidate);
                 getSession().getFrame().addTab(getSession().getOrCreateThemeTab(consultationAotCotTheme));
-            });
-        }
-    }
-    
-    private class ViewFormPositionConventionItem extends MenuItem {
-
-        public ViewFormPositionConventionItem(PositionConvention candidate) {
-            setText(getSession().generateElementTitle(candidate));
-
-            setOnAction((ActionEvent event) -> {
-                getSession().showEditionTab(candidate);
             });
         }
     }

@@ -11,6 +11,8 @@ import fr.sirs.core.model.RappelObligationReglementaire;
 import fr.sirs.core.model.RefEcheanceRappelObligationReglementaire;
 import fr.sirs.core.model.RefFrequenceObligationReglementaire;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
+import fr.sirs.core.model.sql.ReglementarySqlHelper;
+import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.ui.AlertItem;
 import fr.sirs.ui.AlertManager;
 import javafx.scene.image.Image;
@@ -144,5 +146,10 @@ public class PluginReglementary extends Plugin {
         }
 
         AlertManager.getInstance().addAlerts(alerts);
+    }
+
+    @Override
+    public SQLHelper getSQLHelper() {
+        return ReglementarySqlHelper.getInstance();
     }
 }

@@ -3,6 +3,7 @@ package fr.sirs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.theme.Theme;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -93,6 +94,7 @@ public abstract class Plugin {
 
     /**
      * Renvoit l'image du plugin, si une image a été fournie. Peut être {@code null}.
+     * @return 
      */
     public abstract Image getImage();
 
@@ -107,16 +109,21 @@ public abstract class Plugin {
     public abstract void load() throws Exception;
     
     /**
-     * Opérations à effecture après importation. Il s'agit par exemple de la
+     * Opérations à effectuer après importation. Il s'agit par exemple de la
      * génération des vues.
      * 
      * Par défaut, on ne fait rien.
      * 
      * @throws Exception 
      */
-    public void afterImport() throws Exception {
-        return;
-    }
+    public void afterImport() throws Exception {}
+    
+    /**
+     * SQLHelper chargé de l'export des données dans la base RDBMS.
+     * 
+     * @return 
+     */
+    public abstract SQLHelper getSQLHelper();
     
     /**
      * Cherche une configuration valide pour le plugin courant. Par défaut, la

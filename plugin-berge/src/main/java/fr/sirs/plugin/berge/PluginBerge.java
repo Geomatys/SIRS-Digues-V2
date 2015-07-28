@@ -1,6 +1,8 @@
 package fr.sirs.plugin.berge;
 
 import fr.sirs.Plugin;
+import fr.sirs.core.model.sql.BergeSqlHelper;
+import fr.sirs.core.model.sql.SQLHelper;
 import javafx.scene.image.Image;
 
 /**
@@ -34,5 +36,10 @@ public class PluginBerge extends Plugin {
     public Image getImage() {
         // TODO: choisir une image pour ce plugin
         return null;
+    }
+
+    @Override
+    public SQLHelper getSQLHelper() {
+        return BergeSqlHelper.getInstance();
     }
 }
