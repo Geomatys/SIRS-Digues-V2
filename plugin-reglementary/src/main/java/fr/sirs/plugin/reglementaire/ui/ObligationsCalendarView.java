@@ -53,12 +53,12 @@ public final class ObligationsCalendarView extends CalendarView {
     private final ListChangeListener<ObligationReglementaire> listChangeListener = c -> {
         update();
         while(c.next()) {
-            for (final ObligationReglementaire obl : c.getAddedSubList()) {
-                attachPropertyListener(obl);
-            }
-
             for (final ObligationReglementaire obl : c.getRemoved()) {
                 removePropertyListener(obl);
+            }
+
+            for (final ObligationReglementaire obl : c.getAddedSubList()) {
+                attachPropertyListener(obl);
             }
         }
     };

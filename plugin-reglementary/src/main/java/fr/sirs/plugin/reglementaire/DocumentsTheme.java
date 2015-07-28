@@ -1,6 +1,9 @@
 package fr.sirs.plugin.reglementaire;
 
 import fr.sirs.SIRS;
+import fr.sirs.core.component.DocumentChangeEmiter;
+import fr.sirs.core.component.DocumentListener;
+import fr.sirs.core.model.Element;
 import fr.sirs.plugin.reglementaire.ui.ObligationsCalendarView;
 import fr.sirs.plugin.reglementaire.ui.ObligationsPojoTable;
 import fr.sirs.ui.calendar.CalendarView;
@@ -10,6 +13,7 @@ import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SimpleFXEditMode;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -25,6 +29,7 @@ import javafx.scene.layout.Priority;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Panneau regroupant les fonctionnalités de suivi de documents.
@@ -57,7 +62,11 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
         final HBox topPane = new HBox(separator, editMode);
         HBox.setHgrow(separator, Priority.ALWAYS);
         final ObligationReglementaireRepository repo = Injector.getBean(ObligationReglementaireRepository.class);
+        // Liste de toutes les obligations
         final ObservableList<ObligationReglementaire> all = FXCollections.observableList(repo.getAll());
+        final ObligationDocumentListener oblListener = new ObligationDocumentListener(all);
+        // Ajoute un listener sur tous les ajouts/suppression d'obligations pour mettre à jour la liste et donc la table.
+        Injector.getBean(DocumentChangeEmiter.class).addListener(oblListener);
         final ObligationsPojoTable obligationsPojoTable = new ObligationsPojoTable(ObligationReglementaire.class, tabPane);
         obligationsPojoTable.setTableItems(() -> (ObservableList)all);
         obligationsPojoTable.editableProperty().bind(editMode.editionState());
@@ -77,5 +86,49 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
         tabPane.getTabs().add(calendarTab);
         borderPane.setCenter(tabPane);
         return borderPane;
+    }
+
+    /**
+     * Ecouteur d'ajouts et suppressions d'obligations réglementaires sur la base, pour mettre à jour les vues
+     * montrant ces objets.
+     */
+    private class ObligationDocumentListener implements DocumentListener {
+        private final ObservableList<ObligationReglementaire> list;
+
+        public ObligationDocumentListener(final ObservableList<ObligationReglementaire> list) {
+            this.list = list;
+        }
+
+        @Override
+        public void documentCreated(Map<Class, List<Element>> added) {
+            final List addedObl = added.get(ObligationReglementaire.class);
+            if (addedObl == null || addedObl.isEmpty()) {
+                return;
+            }
+            final Runnable addRun = () -> list.addAll(addedObl);
+            if (!Platform.isFxApplicationThread()) {
+                Platform.runLater(addRun);
+            } else {
+                addRun.run();
+            }
+        }
+
+        @Override
+        public void documentChanged(Map<Class, List<Element>> changed) {
+        }
+
+        @Override
+        public void documentDeleted(Map<Class, List<Element>> deletedObject) {
+            final List deletedObj = deletedObject.get(ObligationReglementaire.class);
+            if (deletedObj == null || deletedObj.isEmpty()) {
+                return;
+            }
+            final Runnable delRun = () -> list.removeAll(deletedObj);
+            if (!Platform.isFxApplicationThread()) {
+                Platform.runLater(delRun);
+            } else {
+                delRun.run();
+            }
+        }
     }
 }
