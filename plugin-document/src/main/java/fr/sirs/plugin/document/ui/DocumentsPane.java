@@ -3,7 +3,6 @@ package fr.sirs.plugin.document.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.SirsDBInfo;
 import fr.sirs.plugin.document.DocumentManagementTheme;
 import fr.sirs.plugin.document.FileTreeItem;
 import java.io.File;
@@ -37,7 +36,6 @@ import org.geotoolkit.util.FileUtilities;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
@@ -232,12 +230,12 @@ public class DocumentsPane extends GridPane {
         
         tree1.setShowRoot(false);
         
-        final Preferences prefs = Preferences.userRoot().node(getClass().getName());
+        final Preferences prefs = Preferences.userRoot().node("DocumentPlugin");
         rootPath = prefs.get(ROOT_FOLDER, null);
         
         if (rootPath != null && verifyDatabaseVersion(new File(rootPath))) {
             updateRoot();
-            setDatabaseIdentifier(new File(rootPath), getDatabaseIdentifier());
+            updateDatabaseIdentifier(new File(rootPath));
            
         } else {
             importDocButton.disableProperty().set(true);
@@ -313,7 +311,7 @@ public class DocumentsPane extends GridPane {
         pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
         dialog.setDialogPane(pane);
         dialog.setResizable(true);
-        dialog.setTitle("Emplacement du dossier");
+        dialog.setTitle("Emplacement du dossier racine");
 
         final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
@@ -321,7 +319,7 @@ public class DocumentsPane extends GridPane {
             if (f.isDirectory() && verifyDatabaseVersion(f)) {
                 rootPath = f.getPath();
                 
-                final Preferences prefs = Preferences.userRoot().node(getClass().getName());
+                final Preferences prefs = Preferences.userRoot().node("DocumentPlugin");
                 prefs.put(ROOT_FOLDER, rootPath);
                 importDocButton.disableProperty().set(false);
                 deleteDocButton.disableProperty().set(false);
@@ -330,7 +328,7 @@ public class DocumentsPane extends GridPane {
                 listButton .disableProperty().set(false);
                 // refresh tree
                 updateRoot();
-                setDatabaseIdentifier(new File(rootPath), getDatabaseIdentifier());
+                updateDatabaseIdentifier(new File(rootPath));
             }
         }
     }
@@ -396,17 +394,6 @@ public class DocumentsPane extends GridPane {
         }
     }
     
-    private boolean verifyDatabaseVersion(final File rootDirectory) {
-        final String key         = getDatabaseIdentifier();
-        final String existingKey = getExistingDatabaseIdentifier(rootDirectory);
-        if (existingKey == null) {
-            return true;
-        } else if (!existingKey.equals(key)) {
-            return showBadVersionDialog(existingKey, key);
-        }
-        return true;
-    }
-    
     private void showErrorDialog(final String errorMsg) {
         final Dialog dialog    = new Alert(Alert.AlertType.ERROR);
         final DialogPane pane  = new DialogPane();
@@ -416,20 +403,6 @@ public class DocumentsPane extends GridPane {
         dialog.setTitle("Erreur");
         dialog.setContentText(errorMsg);
         dialog.showAndWait();
-    }
-    
-    private boolean showBadVersionDialog(final String existingKey, final String dbKey) {
-        final Dialog dialog    = new Alert(Alert.AlertType.ERROR);
-        final DialogPane pane  = new DialogPane();
-        final DatabaseVersionPane ipane = new DatabaseVersionPane(existingKey, dbKey);
-        pane.setContent(ipane);
-        pane.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
-        dialog.setDialogPane(pane);
-        dialog.setResizable(true);
-        dialog.setTitle("Version de la base differente");
-        dialog.setContentText("Le système de fichier que vous tenter d'ouvrir correspond a une autre base de données.\n Voulez vous l'ouvrir quand même?");
-        final Optional opt = dialog.showAndWait();
-        return opt.isPresent() && ButtonType.YES.equals(opt.get());
     }
     
     private File getSelectedFile() {
@@ -639,16 +612,6 @@ public class DocumentsPane extends GridPane {
                 }
             }
         }
-    }
-    
-    private String getDatabaseIdentifier() {
-        final SirsDBInfoRepository DBrepo = Injector.getBean(SirsDBInfoRepository.class);
-        final Optional<SirsDBInfo> info = DBrepo.get();
-        if (info.isPresent()) {
-            final SirsDBInfo dbInfo = info.get();
-            return dbInfo.getUuid() + "|" + dbInfo.getEpsgCode() + "|" + dbInfo.getVersion()  + "|" + dbInfo.getRemoteDatabase();
-        }
-        return null;
     }
     
     private static class DOIntegatedCell extends TreeTableCell {

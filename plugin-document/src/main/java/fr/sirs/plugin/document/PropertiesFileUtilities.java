@@ -1,9 +1,13 @@
 
 package fr.sirs.plugin.document;
 
+import fr.sirs.Injector;
+import fr.sirs.core.SirsDBInfo;
+import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.plugin.document.ui.DatabaseVersionPane;
 import fr.sirs.plugin.document.ui.DocumentsPane;
 import static fr.sirs.plugin.document.ui.DocumentsPane.*;
 import java.io.File;
@@ -16,10 +20,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.util.FileUtilities;
 
@@ -322,7 +331,8 @@ public class PropertiesFileUtilities {
         return (String) prop.get("database_identifier");
     }
     
-    public static void setDatabaseIdentifier(final File rootDirectory, final String key) {
+    public static void updateDatabaseIdentifier(final File rootDirectory) {
+        final String key = getDatabaseIdentifier();
         final Properties prop = getSirsProperties(rootDirectory, false);
         prop.put("database_identifier", key);
         
@@ -410,6 +420,41 @@ public class PropertiesFileUtilities {
                     return child;
                 }
             }
+        }
+        return null;
+    }
+    
+    public static boolean verifyDatabaseVersion(final File rootDirectory) {
+        final String key         = getDatabaseIdentifier();
+        final String existingKey = getExistingDatabaseIdentifier(rootDirectory);
+        if (existingKey == null) {
+            return true;
+        } else if (!existingKey.equals(key)) {
+            return showBadVersionDialog(existingKey, key);
+        }
+        return true;
+    }
+    
+    private static boolean showBadVersionDialog(final String existingKey, final String dbKey) {
+        final Dialog dialog    = new Alert(Alert.AlertType.ERROR);
+        final DialogPane pane  = new DialogPane();
+        final DatabaseVersionPane ipane = new DatabaseVersionPane(existingKey, dbKey);
+        pane.setContent(ipane);
+        pane.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Version de la base differente");
+        dialog.setContentText("Le système de fichier que vous tenter d'ouvrir correspond a une autre base de données.\n Voulez vous l'ouvrir quand même?");
+        final Optional opt = dialog.showAndWait();
+        return opt.isPresent() && ButtonType.YES.equals(opt.get());
+    }
+    
+    public static String getDatabaseIdentifier() {
+        final SirsDBInfoRepository DBrepo = Injector.getBean(SirsDBInfoRepository.class);
+        final Optional<SirsDBInfo> info = DBrepo.get();
+        if (info.isPresent()) {
+            final SirsDBInfo dbInfo = info.get();
+            return dbInfo.getUuid() + "|" + dbInfo.getEpsgCode() + "|" + dbInfo.getVersion()  + "|" + dbInfo.getRemoteDatabase();
         }
         return null;
     }

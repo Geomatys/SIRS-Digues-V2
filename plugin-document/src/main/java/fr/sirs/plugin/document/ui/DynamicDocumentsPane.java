@@ -16,6 +16,9 @@ import fr.sirs.core.model.RapportSectionDocument;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugin.document.ODTUtils;
+import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
+import static fr.sirs.plugin.document.ui.DocumentsPane.DYNAMIC;
+import static fr.sirs.plugin.document.ui.DocumentsPane.ROOT_FOLDER;
 import fr.sirs.util.SirsStringConverter;
 import java.io.File;
 import javafx.beans.value.ObservableValue;
@@ -34,16 +37,18 @@ import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 import java.net.URL;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -51,7 +56,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
-import org.apache.sis.measure.NumberRange;
 import org.apache.sis.util.logging.Logging;
 
 /**
@@ -224,17 +228,68 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
         if (!docName.endsWith(".odt")) {
             docName = docName + ".odt";
         }
-        final File newDoc = new File ("/home/guilhem/Bureau/" + docName);
+        final Preferences prefs = Preferences.userRoot().node("DocumentPlugin");
+        String rootPath = prefs.get(ROOT_FOLDER, null);
+        
+        if (rootPath == null || rootPath.isEmpty()) {
+            rootPath = setMainFolder();
+        }
+        final File root = new File (rootPath);
         
         RapportModeleDocument modele = uiModelsList.getSelectionModel().getSelectedItem();
         try {
-            ODTUtils.write(modele, newDoc, getElements());
+            final Collection<TronconDigue> troncons = getTronconList();
+            final File seDir                        = getOrCreateSE(root, getSelectedSE());
+            if (uiOnlySEBox.isSelected()) {
+                final File docDir = new File (seDir, DocumentsPane.DOCUMENT_FOLDER);
+                final File newDoc = new File(docDir, docName); 
+                
+                ODTUtils.write(modele, newDoc, getElements(troncons));
+                setBooleanProperty(newDoc, DYNAMIC, true);
+            } else {
+                final DigueRepository digueRepo = (DigueRepository) Injector.getSession().getRepositoryForClass(Digue.class);
+                for (TronconDigue troncon : troncons ) {
+                    final File digDir = getOrCreateDG(seDir, digueRepo.get(troncon.getDigueId()));
+                    final File docDir = new File(getOrCreateTR(digDir, troncon), DocumentsPane.DOCUMENT_FOLDER);
+                    final File newDoc = new File(docDir, docName); 
+                    ODTUtils.write(modele, newDoc, getElements(Collections.singleton(troncon)));
+                    setBooleanProperty(newDoc, DYNAMIC, true);
+                }
+            }
+            
+            // reload tree
+            
             showConfirmDialog("Les documents ont été generés.");
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, null, ex);
             showErrorDialog(ex.getMessage());
         }
         
+    }
+    
+    public String setMainFolder() {
+        final Dialog dialog    = new Dialog();
+        final DialogPane pane  = new DialogPane();
+        final MainFolderPane ipane = new MainFolderPane();
+        pane.setContent(ipane);
+        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Emplacement du dossier racine");
+
+        String rootPath = null;
+        final Optional opt = dialog.showAndWait();
+        if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
+            File f = new File(ipane.rootFolderField.getText());
+            if (f.isDirectory() && verifyDatabaseVersion(f)) {
+                rootPath = f.getPath();
+                
+                final Preferences prefs = Preferences.userRoot().node("DocumentPlugin");
+                prefs.put(ROOT_FOLDER, rootPath);
+                updateDatabaseIdentifier(new File(rootPath));
+            }
+        }
+        return rootPath;
     }
 
     /**
@@ -294,8 +349,31 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
         dialog.showAndWait();
     }
     
-    private Map<String, Objet> getElements() {
-        final ObservableList<TronconDigue> troncons = uiTronconsList.getSelectionModel().getSelectedItems();
+    
+    private SystemeEndiguement getSelectedSE() {
+        final Preview newValue = uiSECombo.getSelectionModel().getSelectedItem();
+        final SystemeEndiguementRepository sdRepo = (SystemeEndiguementRepository) Injector.getSession().getRepositoryForClass(SystemeEndiguement.class);
+        return sdRepo.get(newValue.getElementId());
+    }
+    
+    private Collection<TronconDigue> getTronconList() {
+        if (uiOnlySEBox.isSelected()) {
+            final SystemeEndiguement sd              = getSelectedSE();
+            final DigueRepository digueRepo          = (DigueRepository) Injector.getSession().getRepositoryForClass(Digue.class);
+            final TronconDigueRepository tronconRepo = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
+            final Set<TronconDigue> troncons         = new HashSet<>();
+            final List<Digue> digues                 = digueRepo.getBySystemeEndiguement(sd);
+            for(Digue digue : digues){
+                troncons.addAll(tronconRepo.getByDigue(digue));
+            }
+            return troncons;
+            
+        } else {
+            return  uiTronconsList.getSelectionModel().getSelectedItems();
+        }
+    }
+    
+    private Map<String, Objet> getElements(Collection<TronconDigue> troncons) {
         final Map<String, Objet> elements = new LinkedHashMap<>();
         for (TronconDigue troncon : troncons) {
             if (troncon == null) {
