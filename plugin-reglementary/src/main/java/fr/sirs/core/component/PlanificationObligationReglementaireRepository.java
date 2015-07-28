@@ -42,33 +42,31 @@ AbstractSIRSRepository
     }
 
     @Override
-    public void add(PlanificationObligationReglementaire entity) {
-        final PlanificationObligationReglementaire planif =
-                InjectorCore.getBean(SessionCore.class).getElementCreator().createElement(PlanificationObligationReglementaire.class);
-        super.add(entity);
+    public void update(PlanificationObligationReglementaire entity) {
+        super.update(entity);
 
-        if (planif.getFrequenceId() != null && planif.getDateEcheance() != null) {
+        final ObligationReglementaireRepository orr = Injector.getBean(ObligationReglementaireRepository.class);
+        final List<ObligationReglementaire> obligations = orr.getByPlanification(entity);
+        for (final ObligationReglementaire obligation : obligations) {
+            orr.remove(obligation);
+        }
+
+        if (entity.getFrequenceId() != null && entity.getDateEcheance() != null) {
             final RefFrequenceObligationReglementaireRepository rforr = Injector.getBean(RefFrequenceObligationReglementaireRepository.class);
-            final RefFrequenceObligationReglementaire frequence = rforr.get(planif.getFrequenceId());
+            final RefFrequenceObligationReglementaire frequence = rforr.get(entity.getFrequenceId());
             final int nbMois = frequence.getNbMois();
             // Ajoute la première obligation à la date choisie
-            LocalDate firstDate = LocalDate.from(planif.getDateEcheance());
-            generateObligation(planif, firstDate);
+            LocalDate firstDate = LocalDate.from(entity.getDateEcheance());
+            generateObligation(entity, firstDate);
 
             LocalDate candidDate = LocalDate.from(firstDate).plusMonths(nbMois);
             while (candidDate.getYear() - firstDate.getYear() < 10) {
                 if (candidDate.compareTo(firstDate) != 0) {
-                    generateObligation(planif, candidDate);
+                    generateObligation(entity, candidDate);
                 }
                 candidDate = candidDate.plusMonths(nbMois);
             }
         }
-    }
-
-    @Override
-    public void update(PlanificationObligationReglementaire entity) {
-        remove(entity);
-        add(entity);
     }
 
     @Override
@@ -93,15 +91,15 @@ AbstractSIRSRepository
         final ObligationReglementaire newObl = orr.create();
         newObl.setDateEcheance(echeanceDate);
         newObl.setEcheanceId(planif.getEcheanceId());
-        newObl.setAnnee(planif.getDateEcheance().getYear());
+        newObl.setAnnee(echeanceDate.getYear());
         newObl.setCommentaire(planif.getCommentaire());
         newObl.setEtapeId(planif.getEtapeId());
-        newObl.setPlanifId(planif.getDocumentId());
+        newObl.setPlanifId(planif.getId());
         newObl.setSystemeEndiguementId(planif.getSystemeEndiguementId());
         newObl.setTypeId(planif.getTypeId());
         newObl.setAuthor(planif.getAuthor());
         newObl.setValid(planif.getValid());
-        orr.update(newObl);
+        orr.add(newObl);
     }
 }
 
