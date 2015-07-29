@@ -29,7 +29,7 @@ import org.geotoolkit.display2d.primitive.ProjectedFeature;
 import org.geotoolkit.display2d.primitive.SearchAreaJ2D;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.gui.javafx.render2d.FXAbstractNavigationHandler;
+import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
@@ -41,7 +41,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class ConvertGeomToTronconHandler extends FXAbstractNavigationHandler {
+public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
 
     private static final int CROSS_SIZE = 5;
     
@@ -61,7 +61,7 @@ public class ConvertGeomToTronconHandler extends FXAbstractNavigationHandler {
         
     
     public ConvertGeomToTronconHandler(final FXMap map) {
-        super(map);
+        super();
     }
 
     /**
@@ -84,7 +84,7 @@ public class ConvertGeomToTronconHandler extends FXAbstractNavigationHandler {
         super.uninstall(component);
         component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
         component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
-        map.removeDecoration(geomlayer);
+        component.removeDecoration(geomlayer);
         return true;
     }
             

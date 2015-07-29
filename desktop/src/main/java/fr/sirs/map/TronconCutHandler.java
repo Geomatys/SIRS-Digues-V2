@@ -9,6 +9,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
+import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.TronconDigue;
@@ -29,7 +30,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
@@ -55,7 +55,6 @@ import org.geotoolkit.feature.FeatureTypeBuilder;
 import org.geotoolkit.feature.FeatureUtilities;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.gui.javafx.render2d.FXAbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
@@ -77,7 +76,7 @@ import org.opengis.util.FactoryException;
  * @author Johann Sorel (Geomatys)
  * @author Alexis Manin (Geomatys)
  */
-public class TronconCutHandler extends FXAbstractNavigationHandler {
+public class TronconCutHandler extends AbstractNavigationHandler {
 
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
     private final MouseListen mouseInputListener = new MouseListen();
@@ -93,7 +92,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
     private final Session session;
 
     public TronconCutHandler(final FXMap map) {
-        super(map);
+        super();
         session = Injector.getSession();
         geomlayer.setMap2D(map);
         editPane = new FXTronconCut();
@@ -160,7 +159,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                         FXCollections.observableArrayList(segments)
                 ));
 
-                submitted.setOnFailed((Event event) -> {
+                submitted.setOnFailed(event -> {
                     // Warn user that something has gone wrong.
                     final Dialog d;
                     if (submitted.getException() != null) {
@@ -174,7 +173,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
                 });
 
                 // TODO : show a popup on success.
-                submitted.setOnSucceeded((Event event) -> {
+                submitted.setOnSucceeded(event -> {
                     final Alert alert = new Alert(Alert.AlertType.INFORMATION,
                             "Le découpage du tronçon \"" + troncon.getLibelle() + "\" s'est terminé avec succcès.",
                             ButtonType.OK);
@@ -295,7 +294,7 @@ public class TronconCutHandler extends FXAbstractNavigationHandler {
             super.uninstall(component);
             component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
             component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
-            map.removeDecoration(geomlayer);
+            component.removeDecoration(geomlayer);
 
             uninstallDialog();
 

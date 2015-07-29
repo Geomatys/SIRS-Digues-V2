@@ -50,7 +50,7 @@ import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.display2d.service.OutputDef;
 import org.geotoolkit.feature.type.FeatureType;
-import org.geotoolkit.report.FeatureCollectionDataSource;
+import org.geotoolkit.report.CollectionDataSource;
 import org.geotoolkit.report.JasperReportService;
 
 /**
@@ -218,7 +218,7 @@ public class PrinterUtilities {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
             final Map<String, Object> parameters = new HashMap<>();
             parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
-            parameters.put(JRDomWriterQueryResultSheet.TABLE_DATA_SOURCE, new FeatureCollectionDataSource(featureCollection));
+            parameters.put(JRDomWriterQueryResultSheet.TABLE_DATA_SOURCE, new CollectionDataSource(featureCollection));
 
             final JasperPrint print = JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());
             JasperReportService.generate(print, output);

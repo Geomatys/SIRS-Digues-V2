@@ -20,7 +20,7 @@ import org.apache.sis.util.ObjectConverters;
 import org.apache.sis.util.UnconvertibleObjectException;
 import org.apache.sis.util.logging.Logging;
 import org.ektorp.DocumentNotFoundException;
-import org.geotoolkit.report.FeatureCollectionDataSource;
+import org.geotoolkit.report.CollectionDataSource;
 
 /**
  *
@@ -74,7 +74,7 @@ public class ObjectDataSource<T> implements JRDataSource {
                     final Object propertyValueToPrint = parsePropertyValue(propertyValue, clazz);
                     return ObjectConverters.convert(propertyValueToPrint, clazz);
                 } catch (UnconvertibleObjectException e) {
-                    Logging.recoverableException(FeatureCollectionDataSource.class, "getFieldValue", e);
+                    Logging.recoverableException(CollectionDataSource.class, "getFieldValue", e);
                     // TODO - do we really want to ignore?
                 }
             }

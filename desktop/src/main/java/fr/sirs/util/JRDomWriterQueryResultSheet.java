@@ -69,7 +69,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.geotoolkit.feature.type.AttributeType;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.feature.type.PropertyDescriptor;
-import org.geotoolkit.report.FeatureCollectionDataSource;
+import org.geotoolkit.report.CollectionDataSource;
 import org.opengis.feature.PropertyType;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Element;
@@ -247,7 +247,7 @@ public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
         datasetRun.setAttribute(ATT_SUB_DATASET, "Query Dataset");
         final Element datasourceExpression = document.createElementNS(URI_JRXML, TAG_DATA_SOURCE_EXPRESSION);
         
-        final CDATASection datasourceExpressionField = document.createCDATASection("(("+FeatureCollectionDataSource.class.getCanonicalName()+") $P{"+TABLE_DATA_SOURCE+"})");//.cloneDataSource()
+        final CDATASection datasourceExpressionField = document.createCDATASection("(("+CollectionDataSource.class.getCanonicalName()+") $P{"+TABLE_DATA_SOURCE+"})");//.cloneDataSource()
         
         datasourceExpression.appendChild(datasourceExpressionField);
         datasetRun.appendChild(datasourceExpression);

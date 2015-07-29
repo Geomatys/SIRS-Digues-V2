@@ -28,7 +28,7 @@ import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.filter.identity.DefaultFeatureId;
-import org.geotoolkit.gui.javafx.render2d.FXAbstractNavigationHandler;
+import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
@@ -42,7 +42,7 @@ import org.opengis.filter.identity.Identifier;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class TronconMergeHandler extends FXAbstractNavigationHandler {
+public class TronconMergeHandler extends AbstractNavigationHandler {
     
     private final MouseListen mouseInputListener = new MouseListen();
     
@@ -55,7 +55,7 @@ public class TronconMergeHandler extends FXAbstractNavigationHandler {
     private final Session session;
     
     public TronconMergeHandler(final FXMap map) {
-        super(map);
+        super();
         session = Injector.getSession();
         editPane = new FXTronconMerge(map);
         
@@ -151,7 +151,7 @@ public class TronconMergeHandler extends FXAbstractNavigationHandler {
             if (tronconLayer != null) {
                 tronconLayer.setSelectionFilter(null);
             }
-            map.setHandler(new FXPanHandler(map, false));
+            map.setHandler(new FXPanHandler(false));
         });
         
         cancelBtn.setOnAction((ActionEvent e)-> {
@@ -159,7 +159,7 @@ public class TronconMergeHandler extends FXAbstractNavigationHandler {
             if (tronconLayer != null) {
                 tronconLayer.setSelectionFilter(null);
             }
-            map.setHandler(new FXPanHandler(map, false));
+            map.setHandler(new FXPanHandler(false));
         });
         
         dialog.show();

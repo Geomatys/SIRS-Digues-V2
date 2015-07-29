@@ -49,7 +49,7 @@ import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.filter.identity.DefaultFeatureId;
 import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.gui.javafx.render2d.FXAbstractNavigationHandler;
+import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
@@ -64,7 +64,7 @@ import org.opengis.filter.identity.Identifier;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class BorneEditHandler extends FXAbstractNavigationHandler {
+public class BorneEditHandler extends AbstractNavigationHandler {
 
     private static final int CROSS_SIZE = 5;
 
@@ -95,7 +95,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
 
 
     public BorneEditHandler(final FXMap map) {
-        super(map);
+        super();
         session = Injector.getSession();
         dialog.getIcons().add(SIRS.ICON);
 
@@ -246,7 +246,7 @@ public class BorneEditHandler extends FXAbstractNavigationHandler {
             super.uninstall(component);
             component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
             component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
-            map.removeDecoration(geomlayer);
+            component.removeDecoration(geomlayer);
             component.setBottom(null);
 
             //déselection borne et troncon

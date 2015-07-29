@@ -24,7 +24,7 @@ import org.geotoolkit.display2d.canvas.RenderingContext2D;
 import org.geotoolkit.display2d.primitive.ProjectedCoverage;
 import org.geotoolkit.display2d.primitive.ProjectedFeature;
 import org.geotoolkit.display2d.primitive.SearchAreaJ2D;
-import org.geotoolkit.gui.javafx.render2d.FXAbstractNavigationHandler;
+import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXCanvasHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXMapAction;
@@ -63,12 +63,12 @@ public class FXOpenElementEditorAction extends FXMapAction {
         }
     }
 
-    private static class OpenElementEditorHandler extends FXAbstractNavigationHandler {
+    private static class OpenElementEditorHandler extends AbstractNavigationHandler {
 
         private final AbstractMouseHandler mouseListener;
 
         public OpenElementEditorHandler(FXMap map) {
-            super(map);
+            super();
             mouseListener = new InfoMouseListener();
         }
 

@@ -258,8 +258,8 @@ public class FXMapPane extends BorderPane {
         
         setCenter(split);
         
-        uiMap1.setHandler(new FXPanHandler(uiMap1, false));
-        uiMap2.setHandler(new FXPanHandler(uiMap2, false));
+        uiMap1.setHandler(new FXPanHandler(false));
+        uiMap2.setHandler(new FXPanHandler(false));
         
         //ajout des ecouteurs souris sur click droit
         uiMap1.addEventHandler(MouseEvent.MOUSE_CLICKED, new MapActionHandler(uiMap1));
@@ -330,7 +330,7 @@ public class FXMapPane extends BorderPane {
     
     /** 
      * Try to get the map layer which contains {@link Element}s of given class.
-     * @param elementClass The particular class of element we want to retrieve on map.
+     * @param element The element we want to retrieve on map.
      * @return The Map layer in which are contained elements of input type, or null.
      */
     private MapLayer getMapLayerForElement(Element element) {

@@ -70,7 +70,7 @@ import org.geotoolkit.display2d.container.ContextContainer2D;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.filter.identity.DefaultFeatureId;
 import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.gui.javafx.render2d.FXAbstractNavigationHandler;
+import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
@@ -84,7 +84,6 @@ import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.util.collection.CollectionChangeEvent;
-import org.opengis.filter.Filter;
 import org.opengis.filter.Id;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
@@ -93,7 +92,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class TronconEditHandler extends FXAbstractNavigationHandler implements ItemListener {
+public class TronconEditHandler extends AbstractNavigationHandler implements ItemListener {
 
     private static final int CROSS_SIZE = 5;
     
@@ -119,7 +118,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
     private Id selectionFilter;
     
     public TronconEditHandler(final FXMap map) {
-        super(map);
+        super();
         session = Injector.getSession();
         tronconProperty.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
             // IL FAUT ÉGALEMENT VÉRIFIER LES AUTRE OBJETS "CONTENUS" : POSITIONS DE DOCUMENTS, PHOTOS, PROPRIETAIRES ET GARDIENS
@@ -205,7 +204,7 @@ public class TronconEditHandler extends FXAbstractNavigationHandler implements I
             super.uninstall(component);
             component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
             component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
-            map.removeDecoration(geomlayer);
+            component.removeDecoration(geomlayer);
             if (tronconLayer != null) {
                 try {
                     tronconLayer.setSelectionStyle(CorePlugin.createTronconSelectionStyle(false));
