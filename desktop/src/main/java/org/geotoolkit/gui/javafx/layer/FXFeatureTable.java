@@ -312,10 +312,14 @@ public class FXFeatureTable extends FXPropertyPane{
             // If there isn't resource bundles (or not for the curruen table), try to generate.
             if (bundles.get(tableName) == null) {
                 if (bundlePrefix != null) {
-                    if(classLoader!=null && locale!=null)
-                        bundles.put(tableName, ResourceBundle.getBundle(bundlePrefix + tableName, Locale.getDefault(), classLoader));
-                    else
-                        bundles.put(tableName, ResourceBundle.getBundle(bundlePrefix + tableName));
+                    try {
+                        if(classLoader!=null && locale!=null)
+                            bundles.put(tableName, ResourceBundle.getBundle(bundlePrefix + tableName, Locale.getDefault(), classLoader));
+                        else
+                            bundles.put(tableName, ResourceBundle.getBundle(bundlePrefix + tableName));
+                    } catch (MissingResourceException e){
+                        /*If resourcebundle is not found, do nothing : let the bundle null for this table name.*/
+                    }
                 }
             }
         }
