@@ -109,12 +109,16 @@
                       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
                     </rowConstraints>
                      <children>
-                        <Label text="Répertoire d'export" />
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <Label text="Périphérique d'export" />
+                              <Button fx:id="uiOutputDriveBtn" mnemonicParsing="false" onAction="#chooseOutputDir" text="Choisir" />
+                           </children>
+                        </HBox>
                         <Button fx:id="uiExportBtn" mnemonicParsing="false" onAction="#exportToMobile" text="Exporter" GridPane.columnIndex="2" GridPane.rowIndex="4">
                            <GridPane.margin>
                               <Insets top="10.0" />
                            </GridPane.margin></Button>
-                        <ChoiceBox fx:id="uiOutputChoice" maxWidth="1.7976931348623157E308" minWidth="0.0" prefWidth="200.0" GridPane.rowIndex="1" />
                         <Label text="Espace disponible :" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label fx:id="uiRemainingSpace" text="inconnu" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                         <Label text="Nombre de photos à importer (pour chaque objet sur les tronçons sélectionnés)" GridPane.columnSpan="2147483647" GridPane.rowIndex="2">
@@ -124,6 +128,7 @@
                         </Label>
                         <ChoiceBox fx:id="uiPhotoChoice" GridPane.rowIndex="3" />
                         <Spinner fx:id="uiPhotoSpinner" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" visible="false" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
+                        <Label fx:id="uiOutputDriveLabel" GridPane.rowIndex="1" />
                      </children>
                   </GridPane>
                </content>

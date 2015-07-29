@@ -5,18 +5,12 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractPositionDocumentRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.component.PositionDocumentRepository;
-import fr.sirs.core.component.PositionProfilTraversRepository;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.PositionDocument;
-import fr.sirs.core.model.PositionProfilTravers;
-import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.model.Preview;
 import fr.sirs.theme.ui.FXDiguePane;
 import fr.sirs.theme.ui.FXTronconDiguePane;
 import fr.sirs.other.FXContactPane;
@@ -34,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -41,7 +36,6 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ModifiableObservableListBase;
@@ -345,10 +339,10 @@ public final class SIRS extends SirsCore {
                 if(!result.isEmpty()) return result; // Si la liste n'est pas vide c'est qu'on a trouvé le bon repo et on sort donc de la boucle en renvoyant la liste.
             }
         }
-        /* 
-        Si aucun repo n'a été trouvé (ce qui est normalement impossible étant 
+        /*
+        Si aucun repo n'a été trouvé (ce qui est normalement impossible étant
         donné le modèle, on renvoie null. Si des repos ont été trouvés mais qu'
-        on arrive tout de même à ce point c'est qu'ils ont tous renvoyé une 
+        on arrive tout de même à ce point c'est qu'ils ont tous renvoyé une
         liste vide. Parmi elles, la dernière est renvoyée.
         */
         return result;
@@ -413,6 +407,31 @@ public final class SIRS extends SirsCore {
     }
 
 
+    /**
+     * Convert byte number given in parameter in a human readable string. It tries
+     * to fit the best unit. Ex : if you've got a number higher than a thousand,
+     * input byte number will be expressed in kB. If you've got more than a million,
+     * you've got it as MB
+     * @param byteNumber Byte quantity to display
+     * @return A string displaying byte number converted in fitting unit, along with unit symbol.
+     */
+    public static String toReadableSize(final long byteNumber) {
+        NumberFormat format = NumberFormat.getNumberInstance();
+        format.setMaximumFractionDigits(2);
+        if (byteNumber < 0) {
+            return "inconnu";
+        } else if (byteNumber < 1e3) {
+            return "" + byteNumber + " octets";
+        } else if (byteNumber < 1e6) {
+            return "" + format.format(byteNumber / 1e3) + " ko";
+        } else if (byteNumber < 1e9) {
+            return "" + format.format(byteNumber / 1e6) + " Mo";
+        } else if (byteNumber < 1e12) {
+            return "" + format.format(byteNumber / 1e9) + " Go";
+        } else {
+            return "" + (byteNumber / 1e12) + " To";
+        }
+    }
 
     public static ObservableList view(ObservableList ... listes){
         return new ViewList(listes);

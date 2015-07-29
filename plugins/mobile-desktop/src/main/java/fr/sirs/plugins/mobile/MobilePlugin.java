@@ -1,6 +1,7 @@
 package fr.sirs.plugins.mobile;
 
 import fr.sirs.Plugin;
+import fr.sirs.core.model.sql.SQLHelper;
 import java.awt.Color;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
@@ -37,5 +38,10 @@ public class MobilePlugin extends Plugin {
     @Override
     public Image getImage() {
         return PLUGIN_ICON;
+    }
+
+    @Override
+    public SQLHelper getSQLHelper() {
+        return null;
     }
 }
