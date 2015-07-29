@@ -504,12 +504,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                         final Alert alert = new Alert(CONFIRMATION, "Voulez-vous vraiment supprimer le tronçon ainsi que les systèmes de repérage et tous les positionnables qui le réfèrent ?", YES, NO);
                         final Optional<ButtonType> result = alert.showAndWait();
                         if(result.isPresent() && result.get()==YES){
-                            final SystemeReperageRepository srRepo = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class));
-                            final List<SystemeReperage> srs = srRepo.getByLinear(tronconProperty.get());
-                            srRepo.executeBulkDelete(srs);
-                            
                             final Map<Class, List<Positionable>> positionablesByClass = new HashMap<>();
-                            
                             
                             final List<Positionable> positionableList = TronconUtils.getPositionableList(tronconProperty.get());
                             for(final Positionable positionable : positionableList){
@@ -525,8 +520,13 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                                     repo.executeBulkDelete(positionablesByClass.get(positionableClass));
                                 }
                             }
-                            
-                            
+
+                            final SystemeReperageRepository srRepo = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class));
+                            final List<SystemeReperage> srs = srRepo.getByLinear(tronconProperty.get());
+                            for (final SystemeReperage sr : srs) {
+                                srRepo.remove(sr, tronconProperty.get());
+                            }
+
                             session.getRepositoryForClass(TronconDigue.class).remove(tronconProperty.get());
                             tronconProperty.set(null);
                         }
