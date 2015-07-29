@@ -385,13 +385,12 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             this.setOnAction((ActionEvent t) -> {
                 final Digue digue = session.getElementCreator().createElement(Digue.class);
                 digue.setLibelle("Digue vide");
-                session.getRepositoryForClass(Digue.class).add(digue);
                 
                 if(parent!=null){
                     final SystemeEndiguement se = (SystemeEndiguement) parent.getValue();
                     digue.setSystemeEndiguementId(se.getId());
-                    session.getRepositoryForClass(SystemeEndiguement.class).update(se);
                 }
+                session.getRepositoryForClass(Digue.class).add(digue);
                 
             });
         }
