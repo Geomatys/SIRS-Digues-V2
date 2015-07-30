@@ -11,7 +11,7 @@ import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
 import static fr.sirs.core.ModuleDescription.getLayerDescription;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.component.ConventionRepository;
+import fr.sirs.core.component.PositionConventionRepository;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.ObjetReseau;
@@ -196,9 +196,16 @@ public class PluginAotCot extends Plugin {
     }
     
     public static PojoTable getConventionsForReseau(final ObjetReseau reseau){
-        final ConventionRepository conventionRepo = (ConventionRepository) Injector.getSession().getRepositoryForClass(Convention.class);
+        final PositionConventionRepository positionRepo = (PositionConventionRepository) Injector.getSession().getRepositoryForClass(PositionConvention.class);
+        final AbstractSIRSRepository<Convention> conventionRepo = Injector.getSession().getRepositoryForClass(Convention.class);
                 
-        final List<Convention> conventionsLiees = conventionRepo.getByReseau(reseau);
+        final List<PositionConvention> positionsLiees = positionRepo.getByReseau(reseau);
+        final List<String> conventionLieesIds = new ArrayList<>();
+        for(final PositionConvention positionLiee : positionsLiees){
+            if(positionLiee.getSirsdocument()!=null) conventionLieesIds.add(positionLiee.getSirsdocument());
+        }
+        
+        final List<Convention> conventionsLiees = conventionRepo.get(conventionLieesIds);
 
         final PojoTable table = new PojoTable(Convention.class, "Conventions de l'élément de réseau "+reseau.getDesignation());
         table.setTableItems(() -> (ObservableList) FXCollections.observableList(conventionsLiees));
