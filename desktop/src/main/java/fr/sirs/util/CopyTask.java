@@ -19,6 +19,8 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.HashSet;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -35,10 +37,12 @@ import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
- * A task whose role is to copy all files under application root path to the
+ * A task whose role is to copy all files / folders in input to the
  * given directory. If target directory does not exists, it will be created.
  * If a conflict is detected dduring the operation, user is asked what to do
  * (replace, ignore, cancel).
+ *
+ * Note : If you set a path resolver, using
  *
  * @author Alexis Manin (Geomatys)
  */
@@ -48,14 +52,25 @@ public class CopyTask extends Task<Boolean> {
         private final Path destination;
 
         /**
+         * A path used for making relative paths from input absolute paths. It's
+         * needed if you want input files not to be copied directly in destination
+         * directory. All path fragment under relativized paths are reproduced into
+         * destination.
+         */
+        private final SimpleObjectProperty<Path> pathResolver = new SimpleObjectProperty<>();
+
+        /**
          * Create a new task which is parametered to copy each file of the given
          * collection into destination directory.
          *
-         * @param toCopy List of files or folders to copy. It must be paths retrieved
-         * using {@link SIRS#getDocumentAbsolutePath(java.lang.String) }.
+         * @param toCopy List of files or folders to copy. It must be absolute paths.
          * @param destination The output directory.
          */
         public CopyTask(final Collection<Path> toCopy, final Path destination) {
+            this(toCopy, destination, null);
+        }
+
+        public CopyTask(final Collection<Path> toCopy, final Path destination, final Path resolver) {
             ArgumentChecks.ensureNonNull("Files to copy", toCopy);
             ArgumentChecks.ensureNonNull("Destination", destination);
             if (toCopy.isEmpty()) {
@@ -67,6 +82,39 @@ public class CopyTask extends Task<Boolean> {
             }
             this.toCopy = toCopy;
             this.destination = destination;
+
+            pathResolver.set(resolver);
+        }
+
+        /**
+         * @return the path used for making relative paths from input absolute paths. It's
+         * needed if you want input files not to be copied directly in destination
+         * directory. All path fragment under relativized paths are reproduced into
+         * destination.
+         */
+        public Path getPathResolver() {
+            return pathResolver.get();
+        }
+
+        /**
+         *
+         * @param resolver the path to use to relativize input paths, in order to
+         * make them relative to the given parameter. It allow us to reproduce
+         * folders of the relativized path into destination. If null, no fragment
+         * will be reproduced into destination.
+         */
+        public void setPathResolver(final Path resolver) {
+            pathResolver.set(resolver);
+        }
+
+        /**
+         * @return the path used for making relative paths from input absolute paths. It's
+         * needed if you want input files not to be copied directly in destination
+         * directory. All path fragment under relativized paths are reproduced into
+         * destination.
+         */
+        public ObjectProperty<Path> pathResolverProperty() {
+            return pathResolver;
         }
 
         @Override
@@ -107,18 +155,24 @@ public class CopyTask extends Task<Boolean> {
             boolean replaceAll = false;
             boolean ignoreAll = false;
 
-            Path srcRoot = SIRS.getDocumentRootPath();
+            final Path srcRoot = pathResolver.get();
+
             final Thread currentThread = Thread.currentThread();
+            int progress = 0;
             for (final Path p : inputs) {
                 if (currentThread.isInterrupted() || isCancelled()) {
                     return false;
                 }
-                Path target = destination.resolve(srcRoot.relativize(p));
 
-                updateProgress(0, inputs.size());
-                updateMessage("Copie de " + p.toString() + " vers " + target.toString());
+                // If no resolver has beeen given, we put input file directly in
+                // destination folder. otherwise, we reproduce folder structure
+                // from given resolver to current input file.
+                Path target = destination.resolve(srcRoot == null? p.getFileName() : srcRoot.relativize(p));
 
-                if (!Files.isDirectory(target.getParent())) {
+                updateProgress(progress++, inputs.size());
+                updateMessage("Copie de\n" + p.toString() + "\nvers\n" + target.toString());
+
+                if (srcRoot != null && !Files.isDirectory(target.getParent())) {
                     Files.createDirectories(target.getParent());
                 }
 
@@ -139,8 +193,6 @@ public class CopyTask extends Task<Boolean> {
                      * We also propose user to repeat the same operation for all
                      * future conflicts.
                      */
-                    ButtonType replace = new ButtonType("Remplacer");
-                    ButtonType ignore = new ButtonType("Ignorer");
                     final StringBuilder strBuilder = new StringBuilder("Impossible de copier \n")
                             .append('\t').append(p.toString()).append('\n')
                             .append("vers")
@@ -173,6 +225,8 @@ public class CopyTask extends Task<Boolean> {
 
                     final BorderPane msgDisplay = new BorderPane(new Label("vers"), header, dstInfo, repeat, srcInfo);
 
+                    final ButtonType replace = new ButtonType("Remplacer");
+                    final ButtonType ignore = new ButtonType("Ignorer");
                     final Task<ButtonType> askUser = new TaskManager.MockTask(() -> {
                         final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Un conflit a été détecté", ButtonType.CANCEL, ignore, replace);
                         alert.getDialogPane().setContent(new VBox(10, msgDisplay, repeat));

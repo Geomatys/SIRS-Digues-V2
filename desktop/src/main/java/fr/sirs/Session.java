@@ -1,6 +1,5 @@
 package fr.sirs;
 
-import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.core.ModuleDescription;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
@@ -370,11 +369,15 @@ public class Session extends SessionCore {
             return openThemes.getOrCreate(theme, new Callable<FXFreeTab>() {
                 @Override
                 public FXFreeTab call() throws Exception {
-                    final FXFreeTab tab = new FXFreeTab(theme.getName());
                     Parent parent = theme.createPane();
-                    tab.setContent(parent);
-                    tab.setOnClosed(event -> openThemes.remove(theme));
-                    return tab;
+                    if (parent == null) {
+                        return null;
+                    } else {
+                        final FXFreeTab tab = new FXFreeTab(theme.getName());
+                        tab.setContent(parent);
+                        tab.setOnClosed(event -> openThemes.remove(theme));
+                        return tab;
+                    }
                 }
             });
         } catch (Exception e) {

@@ -72,6 +72,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.stage.DirectoryChooser;
@@ -156,6 +157,8 @@ public class DocumentExportPane extends StackPane {
     @Autowired
     private DesordreRepository desordreRepo;
 
+    private final Tooltip copyMessageTooltip = new Tooltip();
+
     private final SimpleLongProperty outputSize = new SimpleLongProperty();
     private final SimpleObjectProperty<Path> mobileDocumentDir = new SimpleObjectProperty<>();
     private final SimpleObjectProperty<CopyTask> copyTaskProperty = new SimpleObjectProperty<>();
@@ -204,6 +207,9 @@ public class DocumentExportPane extends StackPane {
         uiDelete.setGraphic(new ImageView(GeotkFX.ICON_DELETE));
 
         mobileDocumentDir.addListener(this::updateOutputDriveInfo);
+
+        uiCopyMessage.setTooltip(copyMessageTooltip);
+        copyTaskProperty.addListener(this::copyTaskUpdate);
 
         ObservableList<Integer> photoList = FXCollections.observableArrayList();
         photoList.addAll(0, 1, -1, Integer.MAX_VALUE);
@@ -499,13 +505,20 @@ public class DocumentExportPane extends StackPane {
      * @param oldTask
      * @param newTask
      */
-    void updateTask(final ObservableValue<? extends Task> obs, final Task oldTask, final Task newTask) {
-        if (newTask != null) {
-            uiCopyPane.visibleProperty().bind(newTask.runningProperty());
-            uiCopyTitle.textProperty().bind(newTask.titleProperty());
-            uiCopyMessage.textProperty().bind(newTask.messageProperty());
-
-            uiCopyProgress.progressProperty().bind(newTask.progressProperty());
+    void copyTaskUpdate(final ObservableValue<? extends CopyTask> obs, CopyTask oldValue, CopyTask newValue) {
+        if (oldValue != null) {
+            uiCopyPane.visibleProperty().unbind();
+            uiCopyTitle.textProperty().unbind();
+            uiCopyMessage.textProperty().unbind();
+            copyMessageTooltip.textProperty().unbind();
+            uiCopyProgress.progressProperty().unbind();
+        }
+        if (newValue != null) {
+            uiCopyPane.visibleProperty().bind(newValue.runningProperty());
+            uiCopyTitle.textProperty().bind(newValue.titleProperty());
+            uiCopyMessage.textProperty().bind(newValue.messageProperty());
+            copyMessageTooltip.textProperty().bind(newValue.messageProperty());
+            uiCopyProgress.progressProperty().bind(newValue.progressProperty());
         }
     }
 
@@ -685,7 +698,7 @@ public class DocumentExportPane extends StackPane {
                             ButtonType choice = alert.showAndWait().orElse(ButtonType.NO);
 
                             if (ButtonType.YES.equals(choice)) {
-                                final CopyTask copyTask = new CopyTask(toCopy, destination);
+                                final CopyTask copyTask = new CopyTask(toCopy, destination, SIRS.getDocumentRootPath());
                                 // 5
                                 copyTaskProperty.set(copyTask);
                                 // 6 & 7 : Let's do it !
