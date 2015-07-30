@@ -1,6 +1,5 @@
 package fr.sirs.core.component;
 
-import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import static fr.sirs.core.component.Previews.BY_CLASS;
 import static fr.sirs.core.component.Previews.BY_ID;
@@ -18,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.ServiceLoader;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.Options;
@@ -27,11 +25,11 @@ import org.ektorp.support.Views;
 
 /**
  * A read-only repository to get previews of current elements in database.
- * There's three types of map : 
+ * There's three types of map :
  * - By Id : Default view, sort element summaries by id.
  * - By class : A view which render previews according to the pointed element class.
  * - By validation : sort previews by validation state of target element.
- * 
+ *
  * @author Alexis Manin (Geomatys)
  */
 @Views({
@@ -39,7 +37,7 @@ import org.ektorp.support.Views;
     @View(name = BY_CLASS, map="classpath:Preview-by-class-map.js"),
     @View(name = VALIDATION, map="classpath:Preview-by-validation-map.js")})
 public class Previews extends CouchDbRepositorySupport<Preview> {
-    
+
     public static final String BY_ID = "previews";
     public static final String BY_CLASS = "designation";
     public static final String VALIDATION = "validation";
@@ -67,35 +65,35 @@ public class Previews extends CouchDbRepositorySupport<Preview> {
         final ViewQuery viewQuery = createQuery(BY_ID).includeDocs(false).keys(Arrays.asList(ids));
         return db.queryView(viewQuery, Preview.class);
     }
-    
+
     @Override
     public List<Preview> getAll() {
         final ViewQuery viewQuery = createQuery(BY_ID).includeDocs(false);
         return db.queryView(viewQuery, Preview.class);
     }
-    
-    
+
+
     /**
      * Retrieve the previews for objects of given canonicalClassNames (only for
      * concrete classes).
-     * 
+     *
      * @param canonicalClassNames
-     * @return 
+     * @return
      */
     public List<Preview> getByClass(final String... canonicalClassNames) {
         return Previews.this.getByClass(Arrays.asList(canonicalClassNames));
     }
-    
+
     /**
      * Retrieve the previews for objects of given canonicalClassNames (only for
      * concrete classes).
-     * 
+     *
      * @param canonicalClassNames
-     * @return 
+     * @return
      */
     public List<Preview> getByClass(final Collection<String> canonicalClassNames) {
         ArgumentChecks.ensureNonNull("Class", canonicalClassNames);
-        
+
         ViewQuery viewQuery = createQuery(BY_CLASS).includeDocs(false);
         if (canonicalClassNames.size() == 1) {
             viewQuery = viewQuery.key(canonicalClassNames.iterator().next());
@@ -104,18 +102,18 @@ public class Previews extends CouchDbRepositorySupport<Preview> {
         }
         return db.queryView(viewQuery, Preview.class);
     }
-    
+
     /**
      * Retrieve the previews for objects of given classes.
-     * 
+     *
      * For a concrete class,retrieve the previews of the objects of this class.
-     * 
-     * For an abstract class or an interface, retrive the previews of the 
+     *
+     * For an abstract class or an interface, retrive the previews of the
      * objects of all classes extending the abstract class or implementing the
      * interface.
-     * 
+     *
      * @param classes
-     * @return 
+     * @return
      */
     public List<Preview> getByClass(final Class... classes) {
         final ArrayList<String> classNames = new ArrayList();
@@ -124,10 +122,10 @@ public class Previews extends CouchDbRepositorySupport<Preview> {
                 final Iterator<Class<? extends Element>> classIt = SessionCore.getElements().iterator();
                 while (classIt.hasNext()){
                     final Class<? extends Element> slClass = classIt.next();
-                    if(!Modifier.isAbstract(slClass.getModifiers()) 
+                    if(!Modifier.isAbstract(slClass.getModifiers())
                             && !slClass.isInterface()
                             && c.isAssignableFrom(slClass)){
-                        classNames.add(slClass.getCanonicalName());   
+                        classNames.add(slClass.getCanonicalName());
                     }
                 }
             } else {
@@ -136,22 +134,22 @@ public class Previews extends CouchDbRepositorySupport<Preview> {
         }
         return Previews.this.getByClass(classNames);
     }
-    
+
     public List<Preview> getAllByClass() {
         final ViewQuery viewQuery = createQuery(BY_CLASS).includeDocs(false);
         return db.queryView(viewQuery, Preview.class);
     }
-    
+
     public List<Preview> getValidation() {
         final ViewQuery viewQuery = createQuery(VALIDATION).includeDocs(false);
         return db.queryView(viewQuery, Preview.class);
     }
-    
+
     public List<Preview> getAllByValidationState(final boolean valid) {
         final ViewQuery viewQuery = createQuery(VALIDATION).includeDocs(false).key(valid);
         return db.queryView(viewQuery, Preview.class);
     }
-    
+
     /*
      * UNSUPPORTED OPERATIONS
      */
@@ -164,12 +162,12 @@ public class Previews extends CouchDbRepositorySupport<Preview> {
     public void remove(Preview entity) {
         throw new UnsupportedOperationException("Read-only repository. We only work on views here.");
     }
-    
+
     @Override
     public void add(Preview entity) {
         throw new UnsupportedOperationException("Read-only repository. We only work on views here.");
     }
-    
+
     @Override
     public Preview get(String id, Options options) {
         throw new UnsupportedOperationException("We only work on views here, result cannot be parameterized.");

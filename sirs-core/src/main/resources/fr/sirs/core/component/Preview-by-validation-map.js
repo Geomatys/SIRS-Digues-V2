@@ -1,14 +1,17 @@
 function(doc) {
-    // On transmet le document, puis on va parcourir l'ensemble de ses clefs pour trouver les élements contenus.
-    emitDocument(doc);
-    var objectKeys = Object.keys(doc);
-    for (key in objectKeys) {
-        // Si on a un attribut de type tableau ou objet, on recherche un element ou une collection d'élements à l'interieur.
-        if (Array.isArray(doc[objectKeys[key]])) {
-            parseTab(doc, doc[objectKeys[key]]);
-        }
-        else if (typeof doc[objectKeys[key]] === "object") {
-            parseObject(doc, doc[objectKeys[key]]);
+    if (doc['@class'] && doc._id !== "$sirs") {
+        // On transmet le document, puis on va parcourir l'ensemble de ses clefs pour trouver les élements contenus.
+        emitDocument(doc);
+        var objectKeys = Object.keys(doc);
+        for (key in objectKeys) {
+            // Si on a un attribut de type tableau ou objet, on recherche un element ou une collection d'élements à l'interieur.
+            var attr = doc[objectKeys[key]];
+            if (Array.isArray(attr)) {
+                parseTab(doc, attr);
+            }
+            else if (typeof attr === "object") {
+                parseObject(doc, attr);
+            }
         }
     }
 
@@ -16,22 +19,33 @@ function(doc) {
      * Si le contenu de field correspond à l'ID recherché, pour un document.
      */
     function emitDocument(object) {
-        var label;
-        if(object.nom) label = object.nom;
-        else if(object.libelle) label = object.libelle;
-        else if(object.login) label = object.login;
-        if(object.valid!=null) emit(object.valid, {docId: object._id, docClass: object['@class'], elementId: object._id, elementClass: object['@class'], author: object.author, valid: object.valid, designation: object.designation, libelle: label});
+        if (object['@class'] && object._id !== "$sirs") {
+            var label;
+            if (object.nom)
+                label = object.nom;
+            else if (object.libelle)
+                label = object.libelle;
+            else if (object.login)
+                label = object.login;
+            if (object.valid != null)
+                emit(object.valid, {docId: object._id, docClass: object['@class'], elementId: object._id, elementClass: object['@class'], author: object.author, valid: object.valid, designation: object.designation, libelle: label});
+        }
     }
 
     /**
      * Si le contenu de field correspond à l'ID recherché, pour un élément non document.
      */
     function emitInnerElement(docu, object) {
-        var label;
-        if(object.nom) label = object.nom;
-        else if(object.libelle) label = object.libelle;
-        else if(object.login) label = object.login;
-        emit(object.valid, {docId: docu._id, docClass: docu['@class'], elementId: object.id, elementClass: object['@class'], author: object.author, valid: object.valid, designation: object.designation, libelle: label});
+        if (object['@class'] && object._id !== "$sirs") {
+            var label;
+            if (object.nom)
+                label = object.nom;
+            else if (object.libelle)
+                label = object.libelle;
+            else if (object.login)
+                label = object.login;
+            emit(object.valid, {docId: docu._id, docClass: docu['@class'], elementId: object.id, elementClass: object['@class'], author: object.author, valid: object.valid, designation: object.designation, libelle: label});
+        }
     }
 
     /**
@@ -52,16 +66,19 @@ function(doc) {
      * Analyse un élément.
      */
     function parseObject(docu, object) {
-        // On transmet le document, puis on va parcourir l'ensemble de ses clefs pour trouver les élements contenus.
-        emitInnerElement(docu, object);
-        var objectKeys = Object.keys(object);
-        for (key1 in objectKeys) {
-            // Si c'est un objet, il faut procéder récursivement
-            if (Array.isArray(object[objectKeys[key1]])) {
-                parseTab(docu, object[objectKeys[key1]]);
-            }
-            else if (typeof object[objectKeys[key1]] === "object") {
-                parseObject(docu, object[objectKeys[key1]]);
+        if (object['@class'] && object._id !== "$sirs") {
+            // On transmet le document, puis on va parcourir l'ensemble de ses clefs pour trouver les élements contenus.
+            emitInnerElement(docu, object);
+            var objectKeys = Object.keys(object);
+            for (key1 in objectKeys) {
+                // Si c'est un objet, il faut procéder récursivement
+                var attr = object[objectKeys[key1]];
+                if (Array.isArray(attr)) {
+                    parseTab(docu, attr);
+                }
+                else if (typeof attr === "object") {
+                    parseObject(docu, attr);
+                }
             }
         }
     }
