@@ -243,7 +243,7 @@ public class FXValidationPane extends BorderPane {
                             if (vSummary != null) {
                                 final Session session = Injector.getSession();
                                 final AbstractSIRSRepository repo = session.getRepositoryForType(vSummary.getDocClass());
-                                final Element docu = (Element) repo.get(vSummary.getDocId());
+                                final Element docu = (Element) repo.get(vSummary.getDocId() == null ? vSummary.getElementId() : vSummary.getDocId());
 
                                 // Si l'elementid est null, c'est que l'élément est le document lui-même
                                 if (vSummary.getElementId() == null) {
