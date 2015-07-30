@@ -198,6 +198,9 @@ public class FXLauncherPane extends BorderPane {
         localRegistry = new DatabaseRegistry();
 
         errorLabel.setTextFill(Color.RED);
+        errorLabel.visibleProperty().bind(errorLabel.textProperty().isNotEmpty());
+        uiRestartLbl.visibleProperty().bind(uiRestartAppBtn.visibleProperty().and(errorLabel.visibleProperty().not()));
+
         uiProgressImport.visibleProperty().bindBidirectional(uiImportButton.disableProperty());
         uiProgressCreate.visibleProperty().bindBidirectional(uiCreateButton.disableProperty());
 
@@ -298,8 +301,6 @@ public class FXLauncherPane extends BorderPane {
     }
 
     private void restartApplicationNeeded() {
-        errorLabel.setVisible(false);
-        uiRestartLbl.setVisible(true);
         uiRestartAppBtn.setVisible(true);
         uiLocalTab.setDisable(true);
         uiDistantTab.setDisable(true);
@@ -338,7 +339,7 @@ public class FXLauncherPane extends BorderPane {
         try {
             serverURL = new URL(uiMajServerURL.getText());
         } catch (MalformedURLException e) {
-            LOGGER.log(Level.WARNING, "Invalid plugin server URL !", e);
+            LOGGER.log(Level.FINE, "Invalid plugin server URL !", e);
             errorLabel.setText("L'URL du serveur de plugins est invalide.");
             return;
         }
@@ -359,7 +360,7 @@ public class FXLauncherPane extends BorderPane {
                 uiAvailablePlugins.setItems(distant.plugins);
             } catch (Exception e) {
                 ex.addSuppressed(e);
-                LOGGER.log(Level.WARNING, "Cannot update distant plugin list !", ex);
+                LOGGER.log(Level.FINE, "Cannot update distant plugin list !", ex);
                 errorLabel.setText("Impossible de récupérer la liste des plugins disponibles.");
             }
         }
@@ -511,15 +512,15 @@ public class FXLauncherPane extends BorderPane {
                 final File cartoDbFile = new File(uiImportDBCarto.getText());
                 SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
                 sirsDBInfoRepository.setSRID(epsgCode);
-                
+
                 final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
                 createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());
-                
+
                 DbImporter importer = new DbImporter(appCtx);
                 importer.setDatabase(DatabaseBuilder.open(mainDbFile),
                         DatabaseBuilder.open(cartoDbFile), uiImportCRS.crsProperty().get());
                 importer.importation();
-                
+
                 // Opérations ultérieures à l'importation à réaliser par les plugins.
                 // Should initialize most of couchdb views
                 for(final Plugin p : Plugins.getPlugins()) {
@@ -529,7 +530,7 @@ public class FXLauncherPane extends BorderPane {
                         LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                     }
                 }
-                
+
                 //aller au panneau principal
                 Platform.runLater(() -> {
                     uiTabPane.getSelectionModel().clearAndSelect(0);
@@ -584,7 +585,6 @@ public class FXLauncherPane extends BorderPane {
 
         try {
             PluginInstaller.install(serverURL, input);
-            //updatePluginList(null);
         } catch (IOException ex) {
             errorLabel.setText("Une erreur inattendue est survenue pendant l'installation du plugin " + name);
             LOGGER.log(Level.SEVERE, "Plugin " + name + " cannot be installed !", ex);

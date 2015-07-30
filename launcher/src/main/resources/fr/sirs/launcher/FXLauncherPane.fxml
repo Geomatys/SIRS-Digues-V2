@@ -9,7 +9,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <TabPane fx:id="uiTabPane" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
@@ -204,7 +204,7 @@
                               </TableView>
                            </content>
                         </ScrollPane>
-                        <Label fx:id="errorLabel" GridPane.columnSpan="2147483647" />
+                        <Label fx:id="errorLabel" />
                         <HBox spacing="5.0" GridPane.hgrow="NEVER" GridPane.rowIndex="3" GridPane.vgrow="NEVER">
                            <children>
                               <Button fx:id="uiInstallPluginBtn" mnemonicParsing="false" text="Installer" />
