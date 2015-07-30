@@ -34,10 +34,12 @@ import fr.sirs.core.model.sql.SQLHelper;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javafx.concurrent.Task;
 import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewResult;
+import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.jdbc.DBCPDataSource;
 
@@ -45,16 +47,19 @@ public class H2Helper {
 
     private static final Pattern UNMANAGED_IDS = Pattern.compile("^($|_).*");
 
-    private static FeatureStore STORE = null;
+    private static JDBCFeatureStore STORE = null;
 
     private static SQLHelper[] sqlHelpers;
 
-    public static Task init(final SQLHelper... sqlHelpers) {
+    public static synchronized Task init(final SQLHelper... sqlHelpers) {
 
         if (STORE != null) {
             try {
-                STORE.close();
-            } catch (DataStoreException ex) {
+                Connection cnx = STORE.getDataSource().getConnection();
+                cnx.createStatement().executeUpdate("SHUTDOWN");
+
+                //STORE.close();
+            } catch (Exception ex) {
                 SirsCore.LOGGER.log(Level.WARNING, "Cannot close H2 feature store.", ex);
             }
             STORE = null;
@@ -90,7 +95,7 @@ public class H2Helper {
             Parameters.getOrCreate(H2FeatureStoreFactory.SIMPLETYPE, params).setValue(Boolean.FALSE);
             Parameters.getOrCreate(H2FeatureStoreFactory.DATASOURCE, params).setValue(new DBCPDataSource(ds));
 
-            STORE = new H2FeatureStoreFactory().create(params);
+            STORE = (JDBCFeatureStore) new H2FeatureStoreFactory().create(params);
         }
 
         return STORE;
