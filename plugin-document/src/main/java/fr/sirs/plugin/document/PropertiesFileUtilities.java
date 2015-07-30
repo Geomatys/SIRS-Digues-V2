@@ -3,8 +3,10 @@ package fr.sirs.plugin.document;
 
 import fr.sirs.Injector;
 import fr.sirs.core.SirsDBInfo;
+import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugin.document.ui.DatabaseVersionPane;
@@ -18,6 +20,8 @@ import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -457,5 +461,42 @@ public class PropertiesFileUtilities {
             return dbInfo.getUuid() + "|" + dbInfo.getEpsgCode() + "|" + dbInfo.getVersion()  + "|" + dbInfo.getRemoteDatabase();
         }
         return null;
+    }
+    
+    public static  Map<String, Objet> getElements(Collection<TronconDigue> troncons) {
+        final Map<String, Objet> elements = new LinkedHashMap<>();
+        for (TronconDigue troncon : troncons) {
+            if (troncon == null) {
+                continue;
+            }
+
+            final List<Objet> objetList = TronconUtils.getObjetList(troncon.getDocumentId());
+            for (Objet obj : objetList) {
+                elements.put(obj.getDocumentId(), obj);
+            }
+        }
+        return elements;
+    }
+    
+    public static void showErrorDialog(final String errorMsg) {
+        final Dialog dialog    = new Alert(Alert.AlertType.ERROR);
+        final DialogPane pane  = new DialogPane();
+        pane.getButtonTypes().addAll(ButtonType.OK);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Erreur");
+        dialog.setContentText(errorMsg);
+        dialog.showAndWait();
+    }
+    
+    public static void showConfirmDialog(final String errorMsg) {
+        final Dialog dialog    = new Alert(Alert.AlertType.CONFIRMATION);
+        final DialogPane pane  = new DialogPane();
+        pane.getButtonTypes().addAll(ButtonType.OK);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Succés");
+        dialog.setContentText(errorMsg);
+        dialog.showAndWait();
     }
 }

@@ -35,18 +35,23 @@ import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.util.FileUtilities;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.DigueRepository;
+import fr.sirs.core.component.RapportModeleDocumentRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.RapportModeleDocument;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugin.document.ODTUtils;
         
 import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.prefs.Preferences;
-import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 
 /**
@@ -99,6 +104,7 @@ public class DocumentsPane extends GridPane {
     public static final String DO_INTEGRATED    = "do_integrated";
     public static final String LIBELLE          = "libelle";
     public static final String DYNAMIC          = "dynamic";
+    public static final String MODELE           = "modele";
     
     public static final String SE = "se";
     public static final String TR = "tr";
@@ -224,7 +230,7 @@ public class DocumentsPane extends GridPane {
         tree1.getColumns().get(6).setCellFactory(new Callback() {
             @Override
             public TreeTableCell call(Object param) {
-                return new PublicationCell();
+                return new PublicationCell(root);
             }
         });
         
@@ -394,17 +400,6 @@ public class DocumentsPane extends GridPane {
                 showErrorDialog(ex.getMessage());
             }
         }
-    }
-    
-    private void showErrorDialog(final String errorMsg) {
-        final Dialog dialog    = new Alert(Alert.AlertType.ERROR);
-        final DialogPane pane  = new DialogPane();
-        pane.getButtonTypes().addAll(ButtonType.OK);
-        dialog.setDialogPane(pane);
-        dialog.setResizable(true);
-        dialog.setTitle("Erreur");
-        dialog.setContentText(errorMsg);
-        dialog.showAndWait();
     }
     
     private File getSelectedFile() {
@@ -686,8 +681,11 @@ public class DocumentsPane extends GridPane {
 
         private final Button button = new Button();
 
-        public PublicationCell() {
+        private final FileTreeItem root;
+        
+        public PublicationCell(final FileTreeItem root) {
             setGraphic(button);
+            this.root = root;
             button.setGraphic(new ImageView(PUB_BUTTON_IMAGE));
             button.getStyleClass().add(BUTTON_STYLE);
             button.disableProperty().bind(editingProperty());
@@ -696,14 +694,62 @@ public class DocumentsPane extends GridPane {
         }
         
         public void handle(ActionEvent event) {
-            // TODO publier ouvrage de synthese
+            File item = (File) getItem();
+            final RapportModeleDocumentRepository rmdr = Injector.getBean(RapportModeleDocumentRepository.class);
+            String modelId = getProperty(item, MODELE);
+            if (modelId != null && !modelId.isEmpty()) {
+                RapportModeleDocument modele = rmdr.get(modelId);
+                if (modele != null) {
+                    // re-geenrate file
+                    try {
+                        ODTUtils.write(modele, item, getElements(getTronconList()));
+                    } catch (Exception ex) {
+                       LOGGER.log(Level.SEVERE, null, ex);
+                    }
+                    showConfirmDialog("Les documents ont été generés.");
+                }
+            } else {
+                showErrorDialog("Impossible de resoudre l'identifiant du modèle pour le fichier: " + item.getName());
+            }
         }
         
+        private Collection<TronconDigue> getTronconList() {
+            final File item       = (File) getItem();
+            final File modelFolder = getModelFolder(item);
+            Collection<TronconDigue> elements;
+            if (getIsModelFolder(modelFolder, SE)) {
+                final SystemeEndiguementRepository sdRepo = (SystemeEndiguementRepository) Injector.getSession().getRepositoryForClass(SystemeEndiguement.class);
+                final SystemeEndiguement sd                = sdRepo.get(modelFolder.getName());
+                final DigueRepository digueRepo          = (DigueRepository) Injector.getSession().getRepositoryForClass(Digue.class);
+                final TronconDigueRepository tronconRepo = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
+                final Set<TronconDigue> troncons         = new HashSet<>();
+                final List<Digue> digues                 = digueRepo.getBySystemeEndiguement(sd);
+                for(Digue digue : digues){
+                    troncons.addAll(tronconRepo.getByDigue(digue));
+                }
+                return troncons;
+            } else if (getIsModelFolder(modelFolder, TR)) {
+                final TronconDigueRepository tronconRepo = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
+                return Collections.singleton(tronconRepo.get(modelFolder.getName()));
+            } else {
+                elements = new ArrayList<>();
+            }
+            return elements;
+        }
+
+        private File getModelFolder(File f) {
+            if (getIsModelFolder(f)) {
+                return f;
+            } else if (!f.getParentFile().equals(root.getValue())) {
+                return getModelFolder(f.getParentFile());
+            }
+            return null;
+        }
         @Override
         public void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
             final File f = (File) item;
-            if (f != null && (f.getName().equals(DOCUMENT_FOLDER) || getBooleanProperty(f, DYNAMIC))){
+            if (f != null && getBooleanProperty(f, DYNAMIC)){
                 button.setVisible(true);
             } else {
                 button.setVisible(false);

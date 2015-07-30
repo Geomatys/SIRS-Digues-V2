@@ -2,14 +2,12 @@ package fr.sirs.plugin.document.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.RapportModeleDocumentRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RapportModeleDocument;
 import fr.sirs.core.model.RapportSectionDocument;
@@ -19,6 +17,7 @@ import fr.sirs.plugin.document.FileTreeItem;
 import fr.sirs.plugin.document.ODTUtils;
 import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
 import static fr.sirs.plugin.document.ui.DocumentsPane.DYNAMIC;
+import static fr.sirs.plugin.document.ui.DocumentsPane.MODELE;
 import static fr.sirs.plugin.document.ui.DocumentsPane.ROOT_FOLDER;
 import fr.sirs.util.SirsStringConverter;
 import java.io.File;
@@ -41,9 +40,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -245,6 +242,7 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
         RapportModeleDocument modele = uiModelsList.getSelectionModel().getSelectedItem();
         if (modele == null) {
             showErrorDialog("Vous devez selectionner un modéle.");
+            return;
         }
         try {
             final Collection<TronconDigue> troncons = getTronconList();
@@ -255,6 +253,7 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
                 
                 ODTUtils.write(modele, newDoc, getElements(troncons));
                 setBooleanProperty(newDoc, DYNAMIC, true);
+                setProperty(newDoc, MODELE, modele.getId());
             } else {
                 final DigueRepository digueRepo = (DigueRepository) Injector.getSession().getRepositoryForClass(Digue.class);
                 for (TronconDigue troncon : troncons ) {
@@ -263,6 +262,7 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
                     final File newDoc = new File(docDir, docName); 
                     ODTUtils.write(modele, newDoc, getElements(Collections.singleton(troncon)));
                     setBooleanProperty(newDoc, DYNAMIC, true);
+                    setProperty(newDoc, MODELE, modele.getId());
                 }
             }
             
@@ -337,29 +337,6 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
         uiParagraphesVbox.getChildren().add(new ModelParagraphePane(uiParagraphesVbox, model, newSection, model.getSections().size()));
     }
     
-    private void showErrorDialog(final String errorMsg) {
-        final Dialog dialog    = new Alert(Alert.AlertType.ERROR);
-        final DialogPane pane  = new DialogPane();
-        pane.getButtonTypes().addAll(ButtonType.OK);
-        dialog.setDialogPane(pane);
-        dialog.setResizable(true);
-        dialog.setTitle("Erreur");
-        dialog.setContentText(errorMsg);
-        dialog.showAndWait();
-    }
-    
-    private void showConfirmDialog(final String errorMsg) {
-        final Dialog dialog    = new Alert(Alert.AlertType.CONFIRMATION);
-        final DialogPane pane  = new DialogPane();
-        pane.getButtonTypes().addAll(ButtonType.OK);
-        dialog.setDialogPane(pane);
-        dialog.setResizable(true);
-        dialog.setTitle("Succés");
-        dialog.setContentText(errorMsg);
-        dialog.showAndWait();
-    }
-    
-    
     private SystemeEndiguement getSelectedSE() {
         final Preview newValue = uiSECombo.getSelectionModel().getSelectedItem();
         final SystemeEndiguementRepository sdRepo = (SystemeEndiguementRepository) Injector.getSession().getRepositoryForClass(SystemeEndiguement.class);
@@ -383,18 +360,4 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
         }
     }
     
-    private Map<String, Objet> getElements(Collection<TronconDigue> troncons) {
-        final Map<String, Objet> elements = new LinkedHashMap<>();
-        for (TronconDigue troncon : troncons) {
-            if (troncon == null) {
-                continue;
-            }
-
-            final List<Objet> objetList = TronconUtils.getObjetList(troncon.getDocumentId());
-            for (Objet obj : objetList) {
-                elements.put(obj.getDocumentId(), obj);
-            }
-        }
-        return elements;
-    }
 }

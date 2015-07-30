@@ -119,7 +119,7 @@ public class ODTUtils {
         doc.save(file);
     }
     
-    public static void write(final TextDocument doc, final FileTreeItem item, String margin) {
+    private static void write(final TextDocument doc, final FileTreeItem item, String margin) {
         final Paragraph paragraph = doc.addParagraph("");
         
         if (item.isSe()) {
@@ -256,9 +256,9 @@ public class ODTUtils {
         for(Element ele : validElements){
             final File f = new File(tempFolder, section.getId()+"_"+inc.incrementAndGet()+".odt");
             if(isDefaultTemplate){
-                ODTUtils.generateReport(templateDoc, ODTUtils.toTemplateMap(ele), f);
+                generateReport(templateDoc, ODTUtils.toTemplateMap(ele), f);
             }else{
-                ODTUtils.generateReport(templateDoc, ele, f);
+                generateReport(templateDoc, ele, f);
             }
 
             parts.add(f);
@@ -410,7 +410,7 @@ public class ODTUtils {
         return validElements;
     }
     
-    public static void concatenateFile(TextDocument doc, Object candidate) throws Exception {
+    private static void concatenateFile(TextDocument doc, Object candidate) throws Exception {
 
         if(candidate instanceof File || candidate instanceof Path){
             final File file;
@@ -466,7 +466,7 @@ public class ODTUtils {
      * @param doc ODT document
      * @param imageUri image path
      */
-    public static void insertImageFullPage(final TextDocument doc, final URI imageUri) throws Exception {
+    private static void insertImageFullPage(final TextDocument doc, final URI imageUri) throws Exception {
         final BufferedImage img = ImageIO.read(imageUri.toURL());
         final MasterPage pdfpageStyle = createMasterPage(doc, img.getWidth()>img.getHeight(), 0);
         doc.addPageBreak(null, pdfpageStyle);
@@ -511,7 +511,7 @@ public class ODTUtils {
      * @return
      * @throws Exception
      */
-    public static MasterPage createMasterPage(Document doc, boolean landscape, int margin) throws Exception{
+    private static MasterPage createMasterPage(Document doc, boolean landscape, int margin) throws Exception{
         final MasterPage masterPage;
         if(landscape){
             masterPage = MasterPage.getOrCreateMasterPage(doc, "pageLandScape");
@@ -571,14 +571,14 @@ public class ODTUtils {
         public Object print(Object candidate) throws Exception;
     }
     
-    public static synchronized DocumentTemplate getDefaultTemplate() throws IOException{
+    private static synchronized DocumentTemplate getDefaultTemplate() throws IOException{
         if(DEFAULT_TEMPLATE!=null) return DEFAULT_TEMPLATE;
         final DocumentTemplateFactory documentTemplateFactory = new DocumentTemplateFactory();
         DEFAULT_TEMPLATE = documentTemplateFactory.getTemplate(ODTUtils.class.getResourceAsStream("/fr/sirs/plugin/document/defaultTemplate.odt"));
         return DEFAULT_TEMPLATE;
     }
     
-    public static Map toTemplateMap(Object candidate) throws IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+    private static Map toTemplateMap(Object candidate) throws IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
         final Class pojoClass = candidate.getClass();
         final HashMap<String, PropertyDescriptor> props = SIRS.listSimpleProperties(pojoClass);
         final LabelMapper labelMapper = LabelMapper.get(pojoClass);
@@ -613,26 +613,6 @@ public class ODTUtils {
      *
      * Template au format JODReport : http://jodreports.sourceforge.net/?q=node/23
      *
-     * @param templateFile fichier ODT template
-     * @param candidate bean servant au remplissage
-     * @param outputFile fichier ODT de sortie
-     * @throws IOException
-     * @throws TemplateModelException
-     * @throws DocumentTemplateException
-     */
-    public static void generateReport(File templateFile, Object candidate, File outputFile)
-            throws IOException, TemplateModelException, DocumentTemplateException, IllegalAccessException,
-            IntrospectionException, InvocationTargetException {
-        final DocumentTemplateFactory documentTemplateFactory = new DocumentTemplateFactory();
-        final DocumentTemplate template = documentTemplateFactory.getTemplate(templateFile);
-        generateReport(template, candidate, outputFile);
-    }
-
-    /**
-     * Remplissage d'un modèle de rapport pour un objet donné.
-     *
-     * Template au format JODReport : http://jodreports.sourceforge.net/?q=node/23
-     *
      * @param template template JOOReport
      * @param candidate bean servant au remplissage
      * @param outputFile fichier ODT de sortie
@@ -640,7 +620,7 @@ public class ODTUtils {
      * @throws TemplateModelException
      * @throws DocumentTemplateException
      */
-    public static void generateReport(DocumentTemplate template, Object candidate, File outputFile)
+    private static void generateReport(DocumentTemplate template, Object candidate, File outputFile)
             throws IOException, TemplateModelException, DocumentTemplateException, IntrospectionException,
             InvocationTargetException, IllegalAccessException {
         if(!(candidate instanceof Map || candidate instanceof TemplateModel)){
