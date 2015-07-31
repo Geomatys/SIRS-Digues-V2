@@ -12,7 +12,7 @@
   <groupId>fr.sirs</groupId>
   <artifactId>sirs</artifactId>
   <packaging>pom</packaging>
-  <version>0.x-SNAPSHOT</version>
+  <version>0.12</version>
   <name>SIRS</name>
 
   <organization>
@@ -181,7 +181,7 @@
         <plugin>
           <groupId>com.geomatys.maven</groupId>
           <artifactId>maven-fxmodel-plugin</artifactId>
-          <version>0.5.71-SNAPSHOT</version>
+          <version>0.5.71</version>
         </plugin>
       </plugins>
     </pluginManagement>
