@@ -650,66 +650,83 @@ public class FXLauncherPane extends BorderPane {
      * l'éxecutable permettant de démarrer l'application.
      */
     private static void restartCore() throws URISyntaxException, IOException {
-        final Pattern jarPattern = Pattern.compile("(?i).*\\.jar");
-        final Path javaHome = Paths.get(System.getProperty("java.home"));
-        final Path javaBin = javaHome.resolve("bin").resolve("java")
-                .toAbsolutePath();
-
-        /*
-         * If we cannot find java executable in java home, it means application
-         * has been deployed and started from a native package context. We have
-         * to find the native executable and launch it.
-         * Into native package, jre is located into :
-         * $APP_DIR/runtime/jre
-         * Application executable should be named sirs-launcher* and located in :
-         * $APP_DIR/
-         * TODO : Find a better way to retrieve application executable
-         */
         final List<String> args = new ArrayList<>();
-        if (!Files.isExecutable(javaBin)) {
-            final Path appDir = javaHome.getParent().getParent();
+        final Pattern jarPattern = Pattern.compile("(?i).*\\.jar");
+
+        /**
+         * First, we check if application has been deployed through native package.
+         * If it's the case, we should find ths class jar location, and retrieve
+         * application executable in the parent directory. Otherwise, we'll try
+         * to use the java machine from which this process has been launched, to
+         * restart java process.
+         */
+        final Optional<Path> nativeExec;
+        final URL location = FXLauncherPane.class.getProtectionDomain().getCodeSource().getLocation();
+        if (location != null) {
+            final Path jarPath = Paths.get(location.toURI());
+            final Path appDir = jarPath.getParent().getParent();
+
             LOGGER.log(Level.INFO, "Application directory : {0}", appDir.toString());
             // we seek for a sirs + something executable file which is not the
             // uninstaller.
-            Optional<Path> appExec = Files.walk(appDir, 1).filter(path -> {
+            nativeExec = Files.walk(appDir, 2).filter(path -> {
                 final String str = path.getFileName().toString();
                 return str.matches("(?i)sirs.*")
                         && !str.toLowerCase().contains("unins")
                         && Files.isExecutable(path)
                         && Files.isRegularFile(path); // Check needed, cause a diectory can be marked executable...
             }).findFirst();
-            if (appExec.isPresent()) {
-                LOGGER.log(Level.INFO, "Application executable {0}", appExec.toString());
-                args.add(appExec.get().toString());
+        } else {
+            nativeExec = Optional.empty();
+        }
+
+        if (nativeExec.isPresent()) {
+            LOGGER.log(Level.INFO, "Application executable {0}", nativeExec.get().toString());
+            args.add(nativeExec.get().toString());
+
+        } else {
+            // No native executable, we try to find java executable.
+            final Path javaHome = Paths.get(System.getProperty("java.home"));
+            final Path javaBin = javaHome.resolve("bin").resolve("java").toAbsolutePath();
+
+            if (Files.isExecutable(javaBin)) {
+                args.add(javaBin.toAbsolutePath().toString());
             } else {
                 throw new IOException("No executable file can be found to restart SIRS application.");
             }
 
-        } else {
-            args.add(javaBin.toString());
             String command = System.getProperty("sun.java.command");
             /* If java command has not been saved (which is really unlikely to
              * happen), we must retrieve the Launcher application context (jar
              * or class).
              */
             if (command == null || command.isEmpty()) {
-                final String applJar = Paths.get(
-                        Launcher.class.getProtectionDomain().getCodeSource().getLocation().toURI())
-                        .toAbsolutePath().toString();
-                if (jarPattern.matcher(applJar).matches()) {
+                // Try to find jar file from code source location
+                final String applJar;
+                if (location !=null) {
+                    applJar = Paths.get(location.toURI()).toAbsolutePath().toString();
+                } else {
+                    applJar = null;
+                }
+
+                // If we cannot retrieve jar file, we just put class name as command (IDE case).
+                if (applJar != null && jarPattern.matcher(applJar).matches()) {
                     command = applJar;
                 } else {
                     command = Launcher.class.getName();
                 }
+
             } else {
                 final String[] splitted = command.split(" ");
                 if (splitted != null && splitted.length > 0) {
                     command = splitted[0];
                 }
             }
+
             args.add("-classpath");
             args.add(System.getProperty("java.class.path"));
             args.add("-Djava.system.class.loader=fr.sirs.core.plugins.PluginLoader");
+
             if (jarPattern.matcher(command).matches()) {
                 args.add("-jar");
             }
@@ -719,6 +736,7 @@ public class FXLauncherPane extends BorderPane {
         final ProcessBuilder builder = new ProcessBuilder(args);
         builder.directory(new File(System.getProperty("user.dir")));
         builder.start();
+
         System.exit(0);
     }
 
