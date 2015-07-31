@@ -39,7 +39,7 @@ public class TemplatePane extends GridPane implements Initializable {
         ArgumentChecks.ensureNonNull("rapport", rapport);
         this.template = rapport;
         
-        SIRS.loadFXML(this, TemplatePane.class);
+        SIRS.loadFXML(this);
         Injector.injectDependencies(this);
 
     }

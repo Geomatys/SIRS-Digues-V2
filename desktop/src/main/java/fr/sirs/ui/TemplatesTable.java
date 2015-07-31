@@ -4,7 +4,6 @@ package fr.sirs.ui;
 import fr.sirs.Injector;
 import fr.sirs.core.model.TemplateOdt;
 import fr.sirs.theme.ui.PojoTable;
-import javafx.collections.FXCollections;
 import javafx.scene.control.TableColumn;
 
 /**
@@ -15,7 +14,6 @@ public class TemplatesTable extends PojoTable {
 
     public TemplatesTable() {
         super(Injector.getSession().getRepositoryForClass(TemplateOdt.class), "Modèles disponibles");
-        setTableItems(() -> FXCollections.observableList(repo.getAll()));
         editableProperty().set(true);
         detaillableProperty().set(true);
         fichableProperty().set(false);
@@ -49,7 +47,6 @@ public class TemplatesTable extends PojoTable {
         final TemplateOdt rapport = TemplatePane.showEditDialog((TemplateOdt) pojo);
         if(rapport!=null){
             repo.update(rapport);
-
         }
     }
 
