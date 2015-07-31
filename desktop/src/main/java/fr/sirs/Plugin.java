@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import org.geotoolkit.map.MapItem;
 
@@ -83,6 +84,15 @@ public abstract class Plugin {
      */
     public List<MenuItem> getMapActions(Object candidate) {
         return Collections.EMPTY_LIST;
+    }
+
+    /**
+     * Barre d'outils complémentaire pour la carte.
+     * 
+     * @return list, peut etre null
+     */
+    public List<ToolBar> getMapToolBars(){
+        return null;
     }
 
     /**

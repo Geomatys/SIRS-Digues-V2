@@ -9,6 +9,8 @@ import javafx.stage.Stage;
 import org.geotoolkit.display2d.Canvas2DSynchronizer;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import fr.sirs.Plugin;
+import fr.sirs.Plugins;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
@@ -29,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
@@ -46,12 +49,10 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.RowConstraints;
 import org.apache.sis.measure.NumberRange;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.FeatureCollection;
@@ -226,23 +227,37 @@ public class FXMapPane extends BorderPane {
         uiEditBar.setMaxHeight(Double.MAX_VALUE);
         uiSplitBar.setMaxHeight(Double.MAX_VALUE);
         
-        final GridPane topgrid = new GridPane();
-        topgrid.add(uiCtxBar,  0, 0);
-        topgrid.add(uiAddBar,  1, 0);
-        topgrid.add(uiNavBar,  2, 0);
-        topgrid.add(uiToolBar, 3, 0);
-        topgrid.add(uiEditBar, 4, 0);
-        topgrid.add(uiSplitBar, 5, 0);
+        uiCtxBar.setBackground(Background.EMPTY);
+        uiAddBar.setBackground(Background.EMPTY);
+        uiNavBar.setBackground(Background.EMPTY);
+        uiToolBar.setBackground(Background.EMPTY);
+        uiEditBar.setBackground(Background.EMPTY);
+
         
-        final ColumnConstraints col4 = new ColumnConstraints();
-        col4.setHgrow(Priority.ALWAYS);
-        topgrid.getColumnConstraints().addAll(new ColumnConstraints(), 
-                new ColumnConstraints(), new ColumnConstraints(), 
-                new ColumnConstraints(), col4);
-        
-        final RowConstraints row0 = new RowConstraints();
-        row0.setVgrow(Priority.ALWAYS);
-        topgrid.getRowConstraints().add(row0);
+        final BorderPane topgrid = new BorderPane();
+        final FlowPane flowPane = new FlowPane(Orientation.HORIZONTAL,uiCtxBar,uiAddBar,uiNavBar,uiToolBar,uiEditBar);
+        flowPane.setHgap(0);
+        flowPane.setVgap(0);
+        flowPane.setPrefWrapLength(Double.MAX_VALUE);
+        flowPane.setMaxWidth(Double.MAX_VALUE);
+        flowPane.getStyleClass().add("tool-bar");
+
+        //add plugin toolbars
+        for(Plugin p : Plugins.getPlugins()){
+            final List<ToolBar> toolbars = p.getMapToolBars();
+            if(toolbars!=null){
+                for(ToolBar t : toolbars){
+                    t.setMaxHeight(Double.MAX_VALUE);
+                    t.setBackground(Background.EMPTY);
+                    flowPane.getChildren().add(t);
+                }
+            }
+        }
+
+//        final ToolBar flowBar = new ToolBar(flowPane);
+//        flowBar.setMaxWidth(Double.MAX_VALUE);
+        topgrid.setCenter(flowPane);
+        topgrid.setRight(uiSplitBar);
         
         mapsplit.getItems().add(paneMap1);
         

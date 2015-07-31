@@ -1,8 +1,11 @@
-package fr.sirs.plugins;
+package fr.sirs.plugin.vegetation;
 
 import fr.sirs.Plugin;
 import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.core.model.sql.VegetationSqlHelper;
+import java.util.Collections;
+import java.util.List;
+import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 
 /**
@@ -11,13 +14,15 @@ import javafx.scene.image.Image;
  * @author Alexis Manin (Geomatys)
  * @author Cédric Briançon (Geomatys)
  */
-public class PluginExample extends Plugin {
-    private static final String NAME = "plugin-example";
-    private static final String TITLE = "Module exemple";
+public class PluginVegetation extends Plugin {
+    private static final String NAME = "plugin-vegetation";
+    private static final String TITLE = "Module végétation";
 
-    public PluginExample() {
+    private final VegetationToolBar toolbar = new VegetationToolBar();
+
+    public PluginVegetation() {
         name = NAME;
-        loadingMessage.set("Chargement du module d'exemple");
+        loadingMessage.set("module végétation");
         themes.add(new ButtonExampleTheme());
     }
 
@@ -33,8 +38,12 @@ public class PluginExample extends Plugin {
 
     @Override
     public Image getImage() {
-        // TODO: choisir une image pour ce plugin
         return null;
+    }
+
+    @Override
+    public List<ToolBar> getMapToolBars() {
+        return Collections.singletonList(toolbar);
     }
 
     @Override

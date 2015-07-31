@@ -1,4 +1,4 @@
-package fr.sirs.plugins;
+package fr.sirs.plugin.vegetation;
 
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import javafx.scene.Parent;
