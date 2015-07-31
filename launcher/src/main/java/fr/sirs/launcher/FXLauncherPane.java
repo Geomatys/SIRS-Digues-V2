@@ -1,6 +1,7 @@
 package fr.sirs.launcher;
 
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import com.sun.javafx.PlatformUtil;
 
 import fr.sirs.AbstractRestartableStage;
 import fr.sirs.Loader;
@@ -669,12 +670,17 @@ public class FXLauncherPane extends BorderPane {
             LOGGER.log(Level.INFO, "Application directory : {0}", appDir.toString());
             // we seek for a sirs + something executable file which is not the
             // uninstaller.
+            final String execName;
+            if (PlatformUtil.isWindows()) {
+                execName = "sirs2.exe";
+            } else {
+                execName = "sirs2";
+            }
             nativeExec = Files.walk(appDir, 2).filter(path -> {
                 final String str = path.getFileName().toString();
-                return str.matches("(?i)sirs.*")
-                        && !str.toLowerCase().contains("unins")
+                return str.equalsIgnoreCase(execName)
                         && Files.isExecutable(path)
-                        && Files.isRegularFile(path); // Check needed, cause a diectory can be marked executable...
+                        && Files.isRegularFile(path); // Check needed, cause a directory can be marked executable...
             }).findFirst();
         } else {
             nativeExec = Optional.empty();
