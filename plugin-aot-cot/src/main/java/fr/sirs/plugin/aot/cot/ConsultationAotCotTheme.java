@@ -9,16 +9,20 @@ import java.util.List;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 
 /**
  * Bouton de suivi d'AOT / COT.
  *
  * @author Cédric Briançon (Geomatys)
+ * @author Samuel Andrés (Geomatys)
  */
 public final class ConsultationAotCotTheme extends AbstractPluginsButtonTheme {
+    private static final Image BUTTON_IMAGE = new Image(
+            ConsultationAotCotTheme.class.getResourceAsStream("images/aot-objAssocies.png"));
     public ConsultationAotCotTheme() {
-        super("Consulation AOT/COT", "Consultation AOT/COT", null);
+        super("Consulation AOT/COT", "Consultation AOT/COT", BUTTON_IMAGE);
     }
     
     private ObjetReseau reseauToConsultFromMap = null;

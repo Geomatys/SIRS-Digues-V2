@@ -7,6 +7,7 @@ import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SimpleFXEditMode;
 import javafx.scene.Parent;
 import javafx.scene.control.Separator;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -17,8 +18,11 @@ import javafx.scene.layout.Priority;
  * @author Cédric Briançon (Geomatys)
  */
 public final class SuiviAotCotTheme extends AbstractPluginsButtonTheme {
+    private static final Image BUTTON_IMAGE = new Image(
+            SuiviAotCotTheme.class.getResourceAsStream("images/aot-suivi.png"));
+    
     public SuiviAotCotTheme() {
-        super("Suivi AOT/COT", "Suivi AOT/COT", null);
+        super("Suivi AOT/COT", "Suivi AOT/COT", BUTTON_IMAGE);
     }
 
     @Override
