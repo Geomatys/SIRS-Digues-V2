@@ -264,7 +264,9 @@ final class MonthView extends DatePane {
                 final ObservableList<CalendarEvent> eventsForDate = calendarView.getCalendarEventsForCalendarDate(calendar);
                 eventsForDate.addListener((ListChangeListener<CalendarEvent>) c -> updateDays());
                 if (!eventsForDate.isEmpty()) {
-                    gridBtn.getStyleClass().add(CSS_CALENDAR_DAY_HAS_EVENTS);
+                    if (calendar.get(Calendar.MONTH) == month) {
+                        gridBtn.getStyleClass().add(CSS_CALENDAR_DAY_HAS_EVENTS);
+                    }
                     for (int j=0; j<eventsForDate.size(); j++) {
                         final CalendarEvent calendarEvent = eventsForDate.get(j);
                         final Button control = new Button();
