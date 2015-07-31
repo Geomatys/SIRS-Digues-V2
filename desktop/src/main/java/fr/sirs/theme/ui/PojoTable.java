@@ -6,8 +6,6 @@ import org.geotoolkit.gui.javafx.util.FXStringCell;
 import org.geotoolkit.gui.javafx.util.FXLocalDateTimeCell;
 import org.geotoolkit.gui.javafx.util.FXBooleanCell;
 import com.sun.javafx.property.PropertyReference;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Session;
 import fr.sirs.SIRS;
@@ -25,9 +23,7 @@ import static fr.sirs.SIRS.LONGITUDE_MIN_FIELD;
 import static fr.sirs.SIRS.VALID_FIELD;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.BorneDigue;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
@@ -40,9 +36,11 @@ import fr.sirs.core.model.PrZPointImporter;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeEndiguement;
-import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.map.ExportTask;
 import fr.sirs.theme.ColumnOrder;
+import fr.sirs.theme.ui.PojoTablePointBindings.DXYZBinding;
+import fr.sirs.theme.ui.PojoTablePointBindings.PRXYZBinding;
+import fr.sirs.theme.ui.PojoTablePointBindings.PRZBinding;
 import fr.sirs.util.FXReferenceEqualsOperator;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.ReferenceTableCell;
@@ -75,7 +73,6 @@ import java.util.logging.Level;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -1230,112 +1227,26 @@ public class PojoTable extends BorderPane {
         }
     }
 
-    private static abstract class PointBinding<T extends PointZ> extends DoubleBinding {
-
-        protected final T point;
-
-        public PointBinding(final T point){
-            this.point = point;
-        }
-    }
-
-    private static class DXYZBinding extends PointBinding<PointXYZ> {
-
-        protected final PointXYZ origine;
-
-        public DXYZBinding(final PointXYZ point, final PointXYZ origine){
-            super(point);
-            this.origine = origine;
-            super.bind(point.xProperty(), point.yProperty(), origine.xProperty(), origine.yProperty());
-        }
-
-        @Override
-        protected double computeValue() {
-            return Math.sqrt(Math.pow(point.getX() - origine.getX(), 2) + Math.pow(point.getY() - origine.getY(), 2));
-        }
-    }
-
-    private static class PRXYZBinding extends PointBinding<PointXYZ> {
-
-        protected final TronconUtils.PosInfo posInfo;
-
-        public PRXYZBinding(final PointXYZ pointLeve, final Positionable positionable){
-            super(pointLeve);
-            posInfo = new TronconUtils.PosInfo(positionable, Injector.getSession());
-            super.bind(pointLeve.xProperty(), pointLeve.yProperty());
-        }
-
-        @Override
-        protected double computeValue() {
-            if(posInfo.getTroncon()==null) throw new IllegalStateException("L'élément positionable doit être associé à un linéaire.");
-            else if(posInfo.getTroncon().getSystemeRepDefautId()==null) throw new IllegalStateException("Le linéaire associé doit avoir un système de repérage par défaut.");
-            else{
-                final double result = (double) TronconUtils.computePR(
-                        posInfo.getTronconSegments(false),
-                        Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(posInfo.getTroncon().getSystemeRepDefautId()),
-                        new GeometryFactory().createPoint(new Coordinate(point.getX(),point.getY())),
-                        Injector.getSession().getRepositoryForClass(BorneDigue.class));
-                return result;
-            }
-        }
-    }
-
-
-    private static class PRZBinding extends PointBinding<PointDZ> {
-
-        protected final TronconUtils.PosInfo posInfo;
-        protected final PrZPointImporter pointImporter;
-
-        public PRZBinding(final PointDZ point, final PrZPointImporter pointImporter){
-            super(point);
-            if(pointImporter instanceof Positionable){
-                this.pointImporter = pointImporter;
-                posInfo = new TronconUtils.PosInfo((Positionable) pointImporter, Injector.getSession());
-                super.bind(point.dProperty(), pointImporter.systemeRepDzIdProperty());
-            }
-            else throw new UnsupportedOperationException(pointImporter.toString()+"("+pointImporter.getClass().getName()+") must be "+Positionable.class.getName());
-        }
-
-        @Override
-        protected double computeValue() {
-
-            final double result = TronconUtils.switchSRForPR(posInfo.getTronconSegments(false),
-                    point.getD(),
-                    Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(pointImporter.getSystemeRepDzId()),
-                    Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(posInfo.getTroncon().getSystemeRepDefautId()),
-                    Injector.getSession().getRepositoryForClass(BorneDigue.class));
-            return result;
-        }
-    }
-
-    private static abstract class ComputedPropertyColumn extends TableColumn<Element, Double>{
-        public ComputedPropertyColumn(){
-            setCellFactory((TableColumn<Element, Double> param) -> new FXNumberCell(Double.class));
-            setEditable(false);
-        }
-    }
-
-    private class DistanceComputedPropertyColumn extends ComputedPropertyColumn{
+    private class DistanceComputedPropertyColumn extends TableColumn<Element, Double>{
 
         private boolean titleSet = false;
+        
 
         public DistanceComputedPropertyColumn(){
-            super();
+            setCellFactory((TableColumn<Element, Double> param) -> new FXNumberCell(Double.class));
+            setEditable(false);
+            setText("Valeur calculée");
             setCellValueFactory(new Callback<CellDataFeatures<Element, Double>, ObservableValue<Double>>() {
 
                 @Override
                 public ObservableValue<Double> call(CellDataFeatures<Element, Double> param) {
 
                     if(param.getValue() instanceof PointXYZ){
-                        // Cas des XYZ de profils en long avec PR calculé
-                        if(parentElementProperty().get() instanceof ProfilLong){
+                        // Cas des XYZ de profils en long et des lignes d'eau avec PR calculé
+                        if(parentElementProperty().get() instanceof ProfilLong 
+                                || parentElementProperty().get() instanceof LigneEau){
                             if(!titleSet){setText("PR calculé");titleSet=true;}
-                            return new PRXYZBinding((PointXYZ) param.getValue(), (ProfilLong) parentElementProperty().get()).asObject();
-                        }
-                        // Cas des XYZ de lignes d'eau avec PR calculé
-                        else if(parentElementProperty().get() instanceof LigneEau){
-                            if(!titleSet){setText("PR calculé");titleSet=true;}
-                            return new PRXYZBinding((PointXYZ) param.getValue(), (LigneEau) parentElementProperty().get()).asObject();
+                            return new PRXYZBinding((PointXYZ) param.getValue(), (Positionable) parentElementProperty().get()).asObject();
                         }
                         // Cas des XYZ de levés de profils en travers avec distance calculée
                         else {
@@ -1344,18 +1255,25 @@ public class PojoTable extends BorderPane {
                                 if(!titleSet){setText("Distance calculée");titleSet=true;}
                                 return new DXYZBinding((PointXYZ) param.getValue(), (PointXYZ) origine).asObject();
                             }
-                            else return null;
+                            else{
+                                // Sinon la colonne ne sert à rien et on la retire dès que possible.
+                                if(uiTable.getColumns().contains(DistanceComputedPropertyColumn.this)) uiTable.getColumns().remove(DistanceComputedPropertyColumn.this);
+                                return null;
+                            }
                         }
                     }
 
                     // Das des PrZ de profils en long ou lignes d'eau avec PR saisi converti en PR calculé dans le SR par défaut
                     else if(param.getValue() instanceof PointDZ
-                            && parentElementProperty().get() instanceof PrZPointImporter){
-                        if(!titleSet){setText("PR calculé");titleSet=true;}
-                        return new PRZBinding((PointDZ) param.getValue(), (PrZPointImporter) parentElementProperty().get()).asObject();
+                            && parentElementProperty().get() instanceof PrZPointImporter
+                            && parentElementProperty().get() instanceof Positionable){
+                        if(!titleSet){setText("PR calculé"); titleSet=true;}
+                        return new PRZBinding((PointDZ) param.getValue(), (Positionable) parentElementProperty().get()).asObject();
                     }
                     else {
-                        return null;
+                        // Sinon la colonne ne sert à rien et on la retire dès que possible.
+                        if(uiTable.getColumns().contains(DistanceComputedPropertyColumn.this)) uiTable.getColumns().remove(DistanceComputedPropertyColumn.this);
+                        return null; 
                     }
                 }
             });
