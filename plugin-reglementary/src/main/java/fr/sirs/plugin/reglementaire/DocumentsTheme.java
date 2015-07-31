@@ -99,12 +99,20 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
             this.list = list;
         }
 
+        /**
+         * A la création de documents, mise à jour de la liste en conséquence.
+         *
+         * @param added Nouveaux éléments à ajouter.
+         */
         @Override
         public void documentCreated(Map<Class, List<Element>> added) {
             final List addedObl = added.get(ObligationReglementaire.class);
             if (addedObl == null || addedObl.isEmpty()) {
                 return;
             }
+            // On enlève les éléments déjà présents dans la liste de base, pour ne garder que les nouveaux
+            // et ne pas les ajouter plusieurs fois dans la liste.
+            addedObl.removeAll(list);
             final Runnable addRun = () -> list.addAll(addedObl);
             if (!Platform.isFxApplicationThread()) {
                 Platform.runLater(addRun);
@@ -117,6 +125,11 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
         public void documentChanged(Map<Class, List<Element>> changed) {
         }
 
+        /**
+         * Suppression des objets dans la liste.
+         *
+         * @param deletedObject Liste d'éléments à supprimer de la liste.
+         */
         @Override
         public void documentDeleted(Map<Class, List<Element>> deletedObject) {
             final List deletedObj = deletedObject.get(ObligationReglementaire.class);
