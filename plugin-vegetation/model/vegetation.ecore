@@ -24,7 +24,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="planifParcelle" upperBound="-1"
         eType="#//PlanifParcelleVegetation" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="parametres" upperBound="-1"
-        eType="#//ParamPlanVegetation" containment="true"/>
+        eType="#//ParamTraitementVegetation" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -36,15 +36,32 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="traitements" upperBound="-1"
         eType="#//ParcelleTraitementVegetation" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="modeAuto" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="planifications" upperBound="10"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBooleanObject"
+        transient="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ParcelleTraitementVegetation">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="cout" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="surface" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//RefTraitementVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sousType" eType="#//RefSousTraitementVegetation"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ParamPlanVegetation">
+  <eClassifiers xsi:type="ecore:EClass" name="ParamTraitementVegetation">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="cout" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="frequence" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//RefTraitementVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sousType" eType="#//RefSousTraitementVegetation"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefTraitementVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RefSousTraitementVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType"/>
 </ecore:EPackage>
