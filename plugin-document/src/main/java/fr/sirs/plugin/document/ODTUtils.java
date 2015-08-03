@@ -119,19 +119,19 @@ public class ODTUtils {
         final TextDocument doc = TextDocument.newTextDocument();
         for (FileTreeItem child : item.listChildrenItem()) {
             if (!child.getLibelle().equals(DocumentsPane.SAVE_FOLDER)) {
-                write(doc, child, "", false);
+                write(doc, child, "", false, null);
             }
         }
         doc.save(file);
     }
     
-    public static void writeDoSynth(final FileTreeItem item, File file) throws Exception {
+    public static void writeDoSynth(final FileTreeItem item, File file, final Label uiProgressLabel) throws Exception {
         final TextDocument doc = TextDocument.newTextDocument();
-        write(doc, (FileTreeItem) item, "", true);
+        write(doc, (FileTreeItem) item, "", true, uiProgressLabel);
         doc.save(file);
     }
     
-    private static void write(final TextDocument doc, final FileTreeItem item, String margin, boolean doSynth) {
+    private static void write(final TextDocument doc, final FileTreeItem item, String margin, boolean doSynth, final Label uiProgressLabel) {
         final Paragraph paragraph = doc.addParagraph("");
         
         if (item.isSe()) {
@@ -157,13 +157,18 @@ public class ODTUtils {
         
         if (!files.isEmpty()) {
             if (doSynth) {
+                final String prefix = item.getLibelle() + " concatenation des fichiers: ";
+                final int n = files.size();
+                int i = 1;
                 for (FileTreeItem child : files) {
                     try {
                         final Paragraph fileNameparagraph = doc.addParagraph("");
                         fileNameparagraph.setFont(new Font("Arial", StyleTypeDefinitions.FontStyle.BOLDITALIC, 12, Color.BLACK, StyleTypeDefinitions.TextLinePosition.REGULAR));
                         fileNameparagraph.appendTextContent(TAB + margin + " -- " + child.getLibelle() + " -- \n");
-                        
+                        final int I = i;
+                        Platform.runLater(()-> uiProgressLabel.setText(prefix + I + "/" + n));
                         concatenateFile(doc, child.getValue());
+                        i++;
                     } catch (Exception ex) {
                         LOGGER.log(Level.SEVERE, null, ex);
                     }
@@ -203,7 +208,7 @@ public class ODTUtils {
         }
         
         for (FileTreeItem child : directories) {
-            write(doc, child, TAB + margin, doSynth);
+            write(doc, child, TAB + margin, doSynth, uiProgressLabel);
         }
     }
     
@@ -562,7 +567,7 @@ public class ODTUtils {
         return masterPage;
     }
     
-    private static void insertImage(final TextDocument doc, final URI imageUri, BufferedImage image) throws Exception {
+    private static void insertImage(final TextDocument doc, final URI imageUri, final BufferedImage image) throws Exception {
         final OdfContentDom contentDom = doc.getContentDom();
         final TextPElement lastPara = doc.newParagraph("");
         final OdfDrawFrame drawFrame = contentDom.newOdfElement(OdfDrawFrame.class);
@@ -594,7 +599,9 @@ public class ODTUtils {
         drawFrame.setTextAnchorTypeAttribute(TextAnchorTypeAttribute.Value.PARAGRAPH.toString());
         drawFrame.setSvgWidthAttribute(IMAGE_WIDTH+"mm");
         //Calculate relative height
-        drawFrame.setSvgHeightAttribute((int)(((float)image.getHeight() / (float)image.getWidth()) * IMAGE_WIDTH)+"mm");
+        if (image != null) {
+            drawFrame.setSvgHeightAttribute((int)(((float)image.getHeight() / (float)image.getWidth()) * IMAGE_WIDTH)+"mm");
+        }
     }
     
     private static interface Printer{

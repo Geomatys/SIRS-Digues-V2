@@ -40,18 +40,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.sis.util.logging.Logging;
 
@@ -255,6 +253,7 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
         dialog.setScene(new Scene(pane));
         dialog.setResizable(true);
         dialog.setTitle("Generation des document");
+        dialog.initModality(Modality.APPLICATION_MODAL);
         
         final Collection<TronconDigue> troncons = getTronconList();
         final File seDir                        = getOrCreateSE(rootDir, getSelectedSE());

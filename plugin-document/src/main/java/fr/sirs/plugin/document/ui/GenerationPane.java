@@ -118,7 +118,26 @@ public class GenerationPane extends GridPane {
             uiGenerateFinish.setVisible(true);
 
         } catch (Exception ex) {
-            Logger.getAnonymousLogger().log(Level.WARNING, null, ex);
+            LOGGER.log(Level.WARNING, null, ex);
+            uiProgress.setVisible(false);
+            uiGenerateFinish.setVisible(true);
+            uiProgressLabel.setText("Erreur pendant la generation");
+        }
+    }
+    
+    public void writeDoSynth(final FileTreeItem item, final File f) {
+        uiProgress.setVisible(true);
+        try {
+            Platform.runLater(() -> uiProgressLabel.setText("Recherche des fichers a aggréger..."));
+            
+            ODTUtils.writeDoSynth(item, f, uiProgressLabel);
+            
+            uiProgress.setVisible(false);
+            Platform.runLater(() -> uiProgressLabel.setText("Génération terminée"));
+            uiGenerateFinish.setVisible(true);
+            
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, null, ex);
             uiProgress.setVisible(false);
             uiGenerateFinish.setVisible(true);
             uiProgressLabel.setText("Erreur pendant la generation");

@@ -56,6 +56,7 @@ import java.util.prefs.Preferences;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
@@ -730,7 +731,24 @@ public class DocumentsPane extends GridPane {
             if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
                 File f = new File(ipane.newFileFIeld.getText());
                 try {
-                    ODTUtils.writeDoSynth(item, f);
+                    final Stage stage         = new Stage();
+                    final DialogPane stagePane      = new DialogPane();
+                    final GenerationPane gpane = new GenerationPane();
+                    gpane.uiGenerateFinish.setOnAction((ActionEvent event1) -> {stage.hide();});
+                    stagePane.setContent(gpane);
+                    stage.setScene(new Scene(stagePane));
+                    stage.setResizable(true);
+                    stage.setTitle("Generation du document de synthèse");
+                    stage.initModality(Modality.APPLICATION_MODAL);
+                    
+                    new Thread() {
+                       @Override
+                       public void run() {
+                           gpane.writeDoSynth(item, f);
+                       }
+                    }.start();
+
+                    stage.show();
                 } catch (Exception ex) {
                     showErrorDialog(ex.getMessage());
                 }
@@ -752,7 +770,8 @@ public class DocumentsPane extends GridPane {
                     dialog.setScene(new Scene(pane));
                     dialog.setResizable(true);
                     dialog.setTitle("Mise à jour du document");
-
+                    dialog.initModality(Modality.APPLICATION_MODAL);
+                    
                     final Collection<TronconDigue> troncons = getTronconList();
                     new Thread() {
                        @Override
