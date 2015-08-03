@@ -47,7 +47,7 @@
          <children>
             <Button fx:id="addFolderButton" mnemonicParsing="false" onAction="#showAddFolderDialog" />
             <Button fx:id="importDocButton" mnemonicParsing="false" onAction="#showImportDialog" />
-            <Button fx:id="addDocButton" mnemonicParsing="false" />
+            <Button fx:id="addDocButton" mnemonicParsing="false" onAction="#openDynamicDocTab" />
             <Button fx:id="deleteDocButton" mnemonicParsing="false" onAction="#showRemoveDialog" />
             <Pane prefHeight="20.0" prefWidth="20.0" />
             <Button fx:id="setFolderButton" mnemonicParsing="false" onAction="#setMainFolder" />

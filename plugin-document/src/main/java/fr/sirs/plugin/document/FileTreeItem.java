@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import javafx.scene.control.TreeItem;
+import static fr.sirs.plugin.document.PropertiesFileUtilities.getBooleanProperty;
+import static fr.sirs.plugin.document.ui.DocumentsPane.DO_INTEGRATED;
 
 /**
  * Tree item used in the tree-table representing the documents.
@@ -104,16 +106,35 @@ public class FileTreeItem extends TreeItem<File> {
         return results;
     }
     
-    public List<FileTreeItem> listChildrenItem(boolean directory) {
+    public List<FileTreeItem> listChildrenItem(boolean directory, boolean doSynt) {
         final List<FileTreeItem> results = new ArrayList<>();
         for (TreeItem item : getChildren()) {
             final FileTreeItem fitem = (FileTreeItem) item;
-            if (fitem.isDirectory() && directory || 
-                !fitem.isDirectory() && !directory ) {
-                results.add(fitem);
+            
+            if (doSynt) {
+                if (!fitem.isDirectory() && !directory && getBooleanProperty(fitem.getValue(), DO_INTEGRATED) ||
+                     fitem.isDirectory() &&  directory && containsDoSynth(fitem.getValue())) {
+                    results.add(fitem);
+                }    
+            } else {
+                if ( fitem.isDirectory() &&  directory || 
+                    !fitem.isDirectory() && !directory) {
+                    results.add(fitem);
+                }
             }
         }
         return results;
+    }
+    
+    private boolean containsDoSynth(File directory) {
+        for (File f : directory.listFiles()) {
+            if (f.isDirectory() && containsDoSynth(f)) {
+                return true;
+            } else if (getBooleanProperty(f, DO_INTEGRATED)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public String getLibelle() {

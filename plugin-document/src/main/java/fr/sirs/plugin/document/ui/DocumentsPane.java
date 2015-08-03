@@ -3,6 +3,7 @@ package fr.sirs.plugin.document.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.Session;
 import fr.sirs.plugin.document.DocumentManagementTheme;
 import fr.sirs.plugin.document.FileTreeItem;
 import java.io.File;
@@ -41,6 +42,7 @@ import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.RapportModeleDocument;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.plugin.document.DynamicDocumentTheme;
 import fr.sirs.plugin.document.ODTUtils;
         
 import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
@@ -50,9 +52,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import javafx.scene.Scene;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -117,10 +119,13 @@ public class DocumentsPane extends GridPane {
     
     private final FileTreeItem root;
     
-    public DocumentsPane(final FileTreeItem root) {
+    private final DynamicDocumentTheme dynDcTheme;
+    
+    public DocumentsPane(final FileTreeItem root, final DynamicDocumentTheme dynDcTheme) {
         SIRS.loadFXML(this, DocumentsPane.class);
         Injector.injectDependencies(this);
         this.root = root;
+        this.dynDcTheme = dynDcTheme;
         
         getStylesheets().add(SIRS.CSS_PATH);
         
@@ -225,7 +230,7 @@ public class DocumentsPane extends GridPane {
         tree1.getColumns().get(6).setCellValueFactory(new Callback() {
             @Override
             public ObservableValue call(Object param) {
-                final File f = (File) ((CellDataFeatures)param).getValue().getValue();
+                final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
                 return new SimpleObjectProperty(f);
             }
         });
@@ -397,11 +402,18 @@ public class DocumentsPane extends GridPane {
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
             File f = new File(ipane.newFileFIeld.getText());
             try {
-                ODTUtils.write(root, f);
+                ODTUtils.writeSummary(root, f);
             } catch (Exception ex) {
                 showErrorDialog(ex.getMessage());
             }
         }
+    }
+    
+    @FXML
+    public void openDynamicDocTab(ActionEvent event) {
+        Session session = Injector.getSession();
+        final Tab result = session.getOrCreateThemeTab(dynDcTheme);
+        session.getFrame().addTab(result);
     }
     
     private File getSelectedFile() {
@@ -614,7 +626,7 @@ public class DocumentsPane extends GridPane {
     
     private static class DOIntegatedCell extends TreeTableCell {
 
-        private CheckBox box = new CheckBox();
+        private final CheckBox box = new CheckBox();
 
         public DOIntegatedCell() {
             setGraphic(box);
@@ -696,7 +708,36 @@ public class DocumentsPane extends GridPane {
         }
         
         public void handle(ActionEvent event) {
-            final File item = (File) getItem();
+            final FileTreeItem item = (FileTreeItem) getItem();
+            if (getBooleanProperty(item.getValue(), DYNAMIC)) {
+                regenerateDynamicDocument(item.getValue());
+            } else if (item.getValue().getName().equals(DOCUMENT_FOLDER)) {
+                printSynthesisDoc(item);
+            }
+        }
+        
+        private void printSynthesisDoc(final FileTreeItem item) {
+            final Dialog dialog    = new Dialog();
+            final DialogPane pane  = new DialogPane();
+            final SaveSummaryPane ipane = new SaveSummaryPane();
+            pane.setContent(ipane);
+            pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+            dialog.setDialogPane(pane);
+            dialog.setResizable(true);
+            dialog.setTitle("Exporter le dossier de synthèse");
+
+            final Optional opt = dialog.showAndWait();
+            if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
+                File f = new File(ipane.newFileFIeld.getText());
+                try {
+                    ODTUtils.writeDoSynth(item, f);
+                } catch (Exception ex) {
+                    showErrorDialog(ex.getMessage());
+                }
+            }
+        }
+        
+        private void regenerateDynamicDocument(final File item) {
             final RapportModeleDocumentRepository rmdr = Injector.getBean(RapportModeleDocumentRepository.class);
             String modelId = getProperty(item, MODELE);
             if (modelId != null && !modelId.isEmpty()) {
@@ -728,8 +769,8 @@ public class DocumentsPane extends GridPane {
         }
         
         private Collection<TronconDigue> getTronconList() {
-            final File item       = (File) getItem();
-            final File modelFolder = getModelFolder(item);
+            final FileTreeItem item = (FileTreeItem) getItem();
+            final File modelFolder  = getModelFolder(item.getValue());
             Collection<TronconDigue> elements;
             if (getIsModelFolder(modelFolder, SE)) {
                 final SystemeEndiguementRepository sdRepo = (SystemeEndiguementRepository) Injector.getSession().getRepositoryForClass(SystemeEndiguement.class);
@@ -759,14 +800,18 @@ public class DocumentsPane extends GridPane {
             }
             return null;
         }
+        
         @Override
         public void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
-            final File f = (File) item;
-            if (f != null && getBooleanProperty(f, DYNAMIC)){
-                button.setVisible(true);
-            } else {
-                button.setVisible(false);
+            final FileTreeItem ft = (FileTreeItem) item;
+            if (ft != null) {
+                final File f          = ft.getValue();
+                if (f != null && (getBooleanProperty(f, DYNAMIC) || f.getName().equals(DOCUMENT_FOLDER))) {
+                    button.setVisible(true);
+                } else {
+                    button.setVisible(false);
+                }
             }
         }
     }

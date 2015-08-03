@@ -54,6 +54,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javax.imageio.ImageIO;
@@ -64,6 +65,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.util.ImageIOUtil;
 import org.apache.sis.storage.DataStoreException;
+import org.apache.sis.util.logging.Logging;
 import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureIterator;
@@ -111,17 +113,25 @@ public class ODTUtils {
     
     private static final String TAB = "        ";
     
-    public static void write(final FileTreeItem item, File file) throws Exception {
+    private static final Logger LOGGER = Logging.getLogger(ODTUtils.class);
+    
+    public static void writeSummary(final FileTreeItem item, File file) throws Exception {
         final TextDocument doc = TextDocument.newTextDocument();
         for (FileTreeItem child : item.listChildrenItem()) {
             if (!child.getLibelle().equals(DocumentsPane.SAVE_FOLDER)) {
-                write(doc, child, "");
+                write(doc, child, "", false);
             }
         }
         doc.save(file);
     }
     
-    private static void write(final TextDocument doc, final FileTreeItem item, String margin) {
+    public static void writeDoSynth(final FileTreeItem item, File file) throws Exception {
+        final TextDocument doc = TextDocument.newTextDocument();
+        write(doc, (FileTreeItem) item, "", true);
+        doc.save(file);
+    }
+    
+    private static void write(final TextDocument doc, final FileTreeItem item, String margin, boolean doSynth) {
         final Paragraph paragraph = doc.addParagraph("");
         
         if (item.isSe()) {
@@ -142,44 +152,58 @@ public class ODTUtils {
             paragraph.appendTextContent(margin + " - " + item.getLibelle() + "\n");
         }
                 
-        List<FileTreeItem> directories = item.listChildrenItem(true);
-        List<FileTreeItem> files       = item.listChildrenItem(false);
+        List<FileTreeItem> directories = item.listChildrenItem(true, doSynth);
+        List<FileTreeItem> files       = item.listChildrenItem(false, doSynth);
         
         if (!files.isEmpty()) {
-            final Table table = Table.newTable(doc, files.size() + 1, 4);
-            table.getCellByPosition(0, 0).setStringValue("Nom");
-            table.getCellByPosition(0, 0).setCellBackgroundColor(new Color(109,149,182));
-            
-            table.getCellByPosition(1, 0).setStringValue("Taille");
-            table.getCellByPosition(1, 0).setCellBackgroundColor(new Color(109,149,182));
-            
-            table.getCellByPosition(2, 0).setStringValue("N° Inventaire");
-            table.getCellByPosition(2, 0).setCellBackgroundColor(new Color(109,149,182));
-            
-            table.getCellByPosition(3, 0).setStringValue("Lieu classement");
-            table.getCellByPosition(3, 0).setCellBackgroundColor(new Color(109,149,182));
-                    
-            table.getRowByIndex(0).getDefaultCellStyle();
-            int i = 1; 
-            for (FileTreeItem child : files) {
-        
-                final String name      = child.getLibelle();
-                final String size      = child.getSize();
-                final String inventory = child.getInventoryNumber();
-                final String place     = child.getClassPlace();
+            if (doSynth) {
+                for (FileTreeItem child : files) {
+                    try {
+                        final Paragraph fileNameparagraph = doc.addParagraph("");
+                        fileNameparagraph.setFont(new Font("Arial", StyleTypeDefinitions.FontStyle.BOLDITALIC, 12, Color.BLACK, StyleTypeDefinitions.TextLinePosition.REGULAR));
+                        fileNameparagraph.appendTextContent(TAB + margin + " -- " + child.getLibelle() + " -- \n");
+                        
+                        concatenateFile(doc, child.getValue());
+                    } catch (Exception ex) {
+                        LOGGER.log(Level.SEVERE, null, ex);
+                    }
+                }
+            } else {
+                final Table table = Table.newTable(doc, files.size() + 1, 4);
+                table.getCellByPosition(0, 0).setStringValue("Nom");
+                table.getCellByPosition(0, 0).setCellBackgroundColor(new Color(109,149,182));
 
-                table.getCellByPosition(0, i).setStringValue(name);
-                table.getCellByPosition(1, i).setStringValue(size);
-                table.getCellByPosition(2, i).setStringValue(inventory);
-                table.getCellByPosition(3, i).setStringValue(place);
+                table.getCellByPosition(1, 0).setStringValue("Taille");
+                table.getCellByPosition(1, 0).setCellBackgroundColor(new Color(109,149,182));
 
-                i++;
+                table.getCellByPosition(2, 0).setStringValue("N° Inventaire");
+                table.getCellByPosition(2, 0).setCellBackgroundColor(new Color(109,149,182));
+
+                table.getCellByPosition(3, 0).setStringValue("Lieu classement");
+                table.getCellByPosition(3, 0).setCellBackgroundColor(new Color(109,149,182));
+
+                table.getRowByIndex(0).getDefaultCellStyle();
+                int i = 1; 
+                for (FileTreeItem child : files) {
+
+                    final String name      = child.getLibelle();
+                    final String size      = child.getSize();
+                    final String inventory = child.getInventoryNumber();
+                    final String place     = child.getClassPlace();
+
+                    table.getCellByPosition(0, i).setStringValue(name);
+                    table.getCellByPosition(1, i).setStringValue(size);
+                    table.getCellByPosition(2, i).setStringValue(inventory);
+                    table.getCellByPosition(3, i).setStringValue(place);
+
+                    i++;
+                }
+                doc.addParagraph("");
             }
-            doc.addParagraph("");
         }
         
         for (FileTreeItem child : directories) {
-            write(doc, child, TAB + margin);
+            write(doc, child, TAB + margin, doSynth);
         }
     }
     
