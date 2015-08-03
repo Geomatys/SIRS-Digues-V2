@@ -12,7 +12,6 @@ import java.net.Authenticator;
 import java.net.ProxySelector;
 import java.util.Optional;
 
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
@@ -61,8 +60,15 @@ public class Launcher extends Application {
 
         try {
             Thread.setDefaultUncaughtExceptionHandler((Thread t, Throwable e) -> {
-                final String errorCode = UUID.randomUUID().toString();
-                SirsCore.LOGGER.log(Level.SEVERE, errorCode, e);
+                if ((e instanceof OutOfMemoryError) || (e.getCause() instanceof OutOfMemoryError)) {
+                    try {
+                        SirsCore.LOGGER.log(Level.SEVERE, null, e);
+                    } finally {
+                        System.exit(1);
+                    }
+                } else {
+                    SirsCore.LOGGER.log(Level.SEVERE, "Uncaught error !", e);
+                }
             });
         } catch (Exception e) {
             SirsCore.LOGGER.log(Level.SEVERE, "Cannot initialize uncaught exception management.", e);

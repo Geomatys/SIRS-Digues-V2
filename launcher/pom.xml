@@ -53,7 +53,6 @@
                         end users work on Win7-32bits system, so they need memory saving.
                         As application performance is not affected when running with 
                         512MB, we define it as maximal heap amount. -->
-                        <jvmArg>-XXexitOnOutOfMemory</jvmArg>
                         <jvmArg>-Xms256m</jvmArg>
                         <jvmArg>-Xmx512m</jvmArg>
                         <!-- We delegate proxy detection to Java (Note : Use of Proxy-vole 
