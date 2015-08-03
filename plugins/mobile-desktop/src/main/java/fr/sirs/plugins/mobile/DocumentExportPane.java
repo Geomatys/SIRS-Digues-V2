@@ -23,10 +23,8 @@ import fr.sirs.core.model.SIRSReference;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.CopyTask;
 import fr.sirs.util.SirsStringConverter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileStore;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,7 +36,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -75,7 +72,6 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
-import javafx.stage.DirectoryChooser;
 import javafx.util.StringConverter;
 import org.apache.sis.measure.NumberRange;
 import org.geotoolkit.gui.javafx.util.TaskManager;
@@ -88,8 +84,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Alexis Manin (Geomatys)
  */
 public class DocumentExportPane extends StackPane {
-
-    private static final Path MOBILE_APP_DIR = Paths.get("Android/data/com.rdardie.sirsMobile");
 
     @FXML
     private BorderPane uiConfigPane;
@@ -246,88 +240,7 @@ public class DocumentExportPane extends StackPane {
      */
     @FXML
     private void chooseOutputDir() {
-        final DirectoryChooser chooser = new DirectoryChooser();
-        chooser.setTitle("Choisir un périphérique portable.");
-        chooser.setInitialDirectory(FileSystems.getDefault().getRootDirectories().iterator().next().toFile());
-
-        final File chosen = chooser.showDialog(getScene().getWindow());
-        if (chosen == null) {
-            mobileDocumentDir.set(null);
-        } else {
-            try {
-                final Path chosenPath = chosen.toPath();
-                FileStore fileStore = Files.getFileStore(chosenPath);
-                if (fileStore.isReadOnly()) {
-                    Alert alert = new Alert(Alert.AlertType.WARNING, "Le périphérique ne peut pas être choisi, car il est en lecture seule.", ButtonType.OK);
-                    alert.setResizable(true);
-                    alert.show();
-                } else if (fileStore.getUsableSpace() < 1) {
-                    Alert alert = new Alert(Alert.AlertType.WARNING, "Le périphérique ne peut pas être choisi, car il ne reste plus de place disponible.", ButtonType.OK);
-                    alert.setResizable(true);
-                    alert.show();
-                } else {
-                    Path toSet = null;
-                    final HashSet<Path> toIterateOn = new HashSet<>();
-                    toIterateOn.add(chosenPath);
-                    for (final Path root : chosenPath.getFileSystem().getRootDirectories()) {
-                        toIterateOn.add(root);
-                    }
-
-                    for (final Path toAnalyze : toIterateOn) {
-                        final Path appDir = resolvePath(toAnalyze, MOBILE_APP_DIR);
-                        if (Files.isDirectory(appDir)) {
-                            toSet = appDir;
-                            break;
-                        }
-                    }
-
-                    if (toSet == null) {
-                        Alert alert = new Alert(Alert.AlertType.WARNING, "Impossible de trouver l'application SIRS mobile sur le media choisi.", ButtonType.OK);
-                        alert.setResizable(true);
-                        alert.show();
-                    } else {
-                        mobileDocumentDir.set(toSet);
-                    }
-                }
-            } catch (Exception e) {
-                SIRS.LOGGER.log(Level.WARNING, "Impossible to analyze chosen output drive.", e);
-                GeotkFX.newExceptionDialog("Une erreur est survenue pendant l'analyse du média choisi.", e).show();
-            }
-        }
-    }
-
-    /**
-     * Resolve suffix path over a given prefix. If prefix path contains a part of
-     * given suffix, we truncate suffix to resolve its non-common parts over prefix.
-     * If the two paths have no common parts, calling this method is functionally
-     * equivalent to {@link Path#resolve(java.nio.file.Path) } with prefix path as
-     * caller, and suffix as parameter.
-     *
-     * Ex :
-     * prefix is /home/user/toto/tata
-     * suffix is tata/titi/
-     * result will be /home/user/toto/tata/titi.
-     *
-     * @param prefix The path which will form root part of the result.
-     * @param suffix The path which will form the
-     * @return
-     */
-    private static Path resolvePath(final Path prefix, final Path suffix) {
-        Iterator<Path> fragments = suffix.iterator();
-        Path searchedEnd = Paths.get("");
-        while (fragments.hasNext()) {
-            searchedEnd = searchedEnd.resolve(fragments.next());
-            if (prefix.endsWith(searchedEnd)) {
-                // Concordance found. Now we'll add remaining suffix fragments.
-                Path result = prefix;
-                while (fragments.hasNext())
-                    result = result.resolve(fragments.next());
-                return result;
-            }
-        }
-
-        // No common part found, we just resolve input paths.
-        return prefix.resolve(suffix);
+        mobileDocumentDir.set(MobilePlugin.chooseMedia(getScene().getWindow()));
     }
 
     /**
