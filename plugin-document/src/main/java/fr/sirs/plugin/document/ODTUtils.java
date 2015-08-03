@@ -54,6 +54,8 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
+import javafx.application.Platform;
+import javafx.scene.control.Label;
 import javax.imageio.ImageIO;
 import net.sf.jooreports.templates.DocumentTemplate;
 import net.sf.jooreports.templates.DocumentTemplateException;
@@ -181,10 +183,11 @@ public class ODTUtils {
         }
     }
     
-    public static void write(final RapportModeleDocument item, File file, Map<String,Objet> elements) throws Exception {
+    public static void write(final RapportModeleDocument item, File file, Map<String,Objet> elements, final Label uiProgressLabel, final String prefix) throws Exception {
         final List parts = new ArrayList<>();
         final File tempFolder = new File(file.getParentFile(),"temp_"+file.getName().split("\\.")[0]);
         for (RapportSectionDocument section : item.sections) {
+            Platform.runLater(()->uiProgressLabel.setText(prefix + "Génération de la section : "+section.getLibelle()));
             switch (section.getType()) {
                 case DOCUMENT : 
                     final TextDocument doc = TextDocument.newTextDocument();
@@ -205,12 +208,16 @@ public class ODTUtils {
             }
         }
         
+        Platform.runLater(()->uiProgressLabel.setText(prefix + "Aggrégation des sections"));
         final TextDocument doc = TextDocument.newTextDocument();
         for(int i=0,n=parts.size();i<n;i++){
+            final int I = i;
+            Platform.runLater(()->uiProgressLabel.setText(prefix + "Aggrégation des sections "+I+"/"+n));
             ODTUtils.concatenateFile(doc, parts.get(i));
         }
         FileUtilities.deleteDirectory(tempFolder);
         doc.save(file);
+        Platform.runLater(()->uiProgressLabel.setText(prefix + "Génération terminée"));
     }
     
     private static List generateFiches(RapportSectionDocument section,

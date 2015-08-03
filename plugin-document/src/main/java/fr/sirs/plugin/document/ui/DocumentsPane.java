@@ -52,7 +52,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
+import javafx.scene.Scene;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
 /**
  *
@@ -694,19 +696,31 @@ public class DocumentsPane extends GridPane {
         }
         
         public void handle(ActionEvent event) {
-            File item = (File) getItem();
+            final File item = (File) getItem();
             final RapportModeleDocumentRepository rmdr = Injector.getBean(RapportModeleDocumentRepository.class);
             String modelId = getProperty(item, MODELE);
             if (modelId != null && !modelId.isEmpty()) {
-                RapportModeleDocument modele = rmdr.get(modelId);
+                final RapportModeleDocument modele = rmdr.get(modelId);
                 if (modele != null) {
-                    // re-geenrate file
-                    try {
-                        ODTUtils.write(modele, item, getElements(getTronconList()));
-                    } catch (Exception ex) {
-                       LOGGER.log(Level.SEVERE, null, ex);
-                    }
-                    showConfirmDialog("Les documents ont été generés.");
+                    
+                    final Stage dialog         = new Stage();
+                    final DialogPane pane      = new DialogPane();
+                    final GenerationPane ipane = new GenerationPane();
+                    ipane.uiGenerateFinish.setOnAction((ActionEvent event1) -> {dialog.hide();});
+                    pane.setContent(ipane);
+                    dialog.setScene(new Scene(pane));
+                    dialog.setResizable(true);
+                    dialog.setTitle("Mise à jour du document");
+
+                    final Collection<TronconDigue> troncons = getTronconList();
+                    new Thread() {
+                       @Override
+                       public void run() {
+                           ipane.reGenerateDoc(modele, troncons, item, root);
+                       }
+                    }.start();
+
+                    dialog.show();
                 }
             } else {
                 showErrorDialog("Impossible de resoudre l'identifiant du modèle pour le fichier: " + item.getName());

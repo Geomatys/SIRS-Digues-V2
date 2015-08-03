@@ -14,10 +14,7 @@ import fr.sirs.core.model.RapportSectionDocument;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugin.document.FileTreeItem;
-import fr.sirs.plugin.document.ODTUtils;
 import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
-import static fr.sirs.plugin.document.ui.DocumentsPane.DYNAMIC;
-import static fr.sirs.plugin.document.ui.DocumentsPane.MODELE;
 import static fr.sirs.plugin.document.ui.DocumentsPane.ROOT_FOLDER;
 import fr.sirs.util.SirsStringConverter;
 import java.io.File;
@@ -38,7 +35,6 @@ import javafx.util.Callback;
 
 import java.net.URL;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -47,13 +43,16 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Alert;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
 import org.apache.sis.util.logging.Logging;
 
 /**
@@ -220,14 +219,17 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
     
     @FXML
     private void generateDocument(ActionEvent event) {
-        String docName = uiDocumentNameField.getText();
-        if (docName.isEmpty()) {
+        String tmp = uiDocumentNameField.getText();
+        if (tmp.isEmpty()) {
             showErrorDialog("Vous devez remplir le nom du fichier");
             return;
         }
         
-        if (!docName.endsWith(".odt")) {
-            docName = docName + ".odt";
+        final String docName;
+        if (!tmp.endsWith(".odt")) {
+            docName = tmp + ".odt";
+        } else {
+            docName= tmp;
         }
         final Preferences prefs = Preferences.userRoot().node("DocumentPlugin");
         String rootPath = prefs.get(ROOT_FOLDER, null);
@@ -239,43 +241,35 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
         final File rootDir = new File (rootPath);
         root.setValue(new File (rootPath));
         
-        RapportModeleDocument modele = uiModelsList.getSelectionModel().getSelectedItem();
+        final RapportModeleDocument modele = uiModelsList.getSelectionModel().getSelectedItem();
         if (modele == null) {
             showErrorDialog("Vous devez selectionner un modéle.");
             return;
         }
-        try {
-            final Collection<TronconDigue> troncons = getTronconList();
-            final File seDir                        = getOrCreateSE(rootDir, getSelectedSE());
-            if (uiOnlySEBox.isSelected()) {
-                final File docDir = new File (seDir, DocumentsPane.DOCUMENT_FOLDER);
-                final File newDoc = new File(docDir, docName); 
-                
-                ODTUtils.write(modele, newDoc, getElements(troncons));
-                setBooleanProperty(newDoc, DYNAMIC, true);
-                setProperty(newDoc, MODELE, modele.getId());
-            } else {
-                final DigueRepository digueRepo = (DigueRepository) Injector.getSession().getRepositoryForClass(Digue.class);
-                for (TronconDigue troncon : troncons ) {
-                    final File digDir = getOrCreateDG(seDir, digueRepo.get(troncon.getDigueId()));
-                    final File docDir = new File(getOrCreateTR(digDir, troncon), DocumentsPane.DOCUMENT_FOLDER);
-                    final File newDoc = new File(docDir, docName); 
-                    ODTUtils.write(modele, newDoc, getElements(Collections.singleton(troncon)));
-                    setBooleanProperty(newDoc, DYNAMIC, true);
-                    setProperty(newDoc, MODELE, modele.getId());
-                }
-            }
-            
-            // reload tree
-            root.update();
-            
-            showConfirmDialog("Les documents ont été generés.");
-        } catch (Exception ex) {
-            LOGGER.log(Level.WARNING, null, ex);
-            showErrorDialog(ex.getMessage());
-        }
         
+        final Stage dialog         = new Stage();
+        final DialogPane pane      = new DialogPane();
+        final GenerationPane ipane = new GenerationPane();
+        ipane.uiGenerateFinish.setOnAction((ActionEvent event1) -> {dialog.hide();});
+        pane.setContent(ipane);
+        dialog.setScene(new Scene(pane));
+        dialog.setResizable(true);
+        dialog.setTitle("Generation des document");
+        
+        final Collection<TronconDigue> troncons = getTronconList();
+        final File seDir                        = getOrCreateSE(rootDir, getSelectedSE());
+
+        new Thread() {
+           @Override
+           public void run() {
+               ipane.generateDoc(docName, uiOnlySEBox.isSelected(), modele, troncons, seDir, root); 
+           }
+        }.start();
+            
+        dialog.show();
     }
+        
+
     
     public String setMainFolder() {
         final Dialog dialog    = new Dialog();
