@@ -410,7 +410,8 @@ public class TronconCutHandler extends AbstractNavigationHandler {
                 updateProgress(i, n);
 
                 final FXTronconCut.Segment segment = segments.get(i);
-                final TronconDigue cut = TronconUtils.cutTroncon(toCut, segment.geometryProp.get(), toCut.getLibelle() + "[" + i + "]", session);
+                final String segmentName = segment.nameProperty.get()==null || segment.nameProperty.get().equals("") ? toCut.getLibelle() + "[" + i + "]" : segment.nameProperty.get();
+                final TronconDigue cut = TronconUtils.cutTroncon(toCut, segment.geometryProp.get(), segmentName, session);
 
                 final FXTronconCut.SegmentType type = segment.typeProp.get();
                 if (FXTronconCut.SegmentType.CONSERVER.equals(type)) {

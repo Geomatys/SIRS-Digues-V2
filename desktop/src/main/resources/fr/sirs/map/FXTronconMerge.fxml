@@ -7,30 +7,14 @@
 
 <fx:root spacing="10.0" type="VBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
-        <columnConstraints>
-          <ColumnConstraints hgrow="ALWAYS" />
-          <ColumnConstraints hgrow="NEVER" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints vgrow="NEVER" />
-          <RowConstraints vgrow="NEVER" />
-        </rowConstraints>
-         <children>
-            <TableView fx:id="uiTable" editable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2">
-               <columnResizePolicy>
-                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-               </columnResizePolicy>
-            </TableView>
-            <Label text="Les tronçons avant fusion seront archivés." GridPane.rowIndex="1" />
-         </children>
-         <VBox.margin>
-            <Insets />
-         </VBox.margin>
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
-      </GridPane>
+      <Label text="Nom du tronçon résultant de la fusion :" />
+      <TextField fx:id="uiLinearName" />
+      <TableView fx:id="uiTable" editable="true" prefHeight="200.0" prefWidth="200.0">
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+      </TableView>
+      <Label text="Les tronçons avant fusion seront archivés." />
    </children>
    <padding>
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

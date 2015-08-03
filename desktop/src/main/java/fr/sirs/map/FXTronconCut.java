@@ -16,6 +16,8 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -39,6 +41,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.gui.javafx.util.FXStringCell2;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.geotoolkit.internal.GeotkFX;
 
@@ -74,8 +77,16 @@ public class FXTronconCut extends VBox {
         uiCutTable.getColumns().add(new DistanceColumn());
         
         uiSegmentTable.setItems(segments);
+        uiSegmentTable.setEditable(true);
         uiSegmentTable.getColumns().add(new ColorColumn());
         uiSegmentTable.getColumns().add(new TypeColumn());
+        
+        final TableColumn<Segment, String> nameColumn = new TableColumn<>("nom");
+        nameColumn.setCellValueFactory((TableColumn.CellDataFeatures<Segment, String> param) -> param.getValue().nameProperty);
+        nameColumn.setCellFactory((TableColumn<Segment, String> param) -> new FXStringCell2());
+        nameColumn.setEditable(true);
+        
+        uiSegmentTable.getColumns().add(nameColumn);
         
         // Recalcul des segments lors d'un changement de point de coupe
         cutPoints.addListener(this::cutPointChanged);
@@ -183,6 +194,7 @@ public class FXTronconCut extends VBox {
         public ObjectProperty<Color> colorProp = new SimpleObjectProperty<>(Color.BLACK);
         public ObjectProperty<SegmentType> typeProp = new SimpleObjectProperty<>(SegmentType.CONSERVER);
         public ObjectProperty<LineString> geometryProp = new SimpleObjectProperty<>();
+        public final StringProperty nameProperty = new SimpleStringProperty();
     }
     
     public static enum SegmentType{

@@ -12,7 +12,6 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Positionable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.logging.Level;
 import javafx.collections.FXCollections;
@@ -23,6 +22,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXDeleteTableColumn;
@@ -33,9 +33,10 @@ import org.geotoolkit.gui.javafx.util.FXMoveUpTableColumn;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXTronconMerge extends VBox{
+public class FXTronconMerge extends VBox {
     
     @FXML private TableView uiTable;
+    @FXML private TextField uiLinearName;
 
     private final ObservableList<TronconDigue> troncons = FXCollections.observableArrayList();
     private final MergeTask task = new MergeTask();
@@ -62,10 +63,10 @@ public class FXTronconMerge extends VBox{
  
     public void processMerge() {
         
-        final Alert confirmCut = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment fusionner les tronçons ? Si oui, vos modifications seront enregistrées.", ButtonType.YES, ButtonType.NO);
-        confirmCut.setResizable(true);
-        confirmCut.showAndWait();
-        final ButtonType result = confirmCut.getResult();
+        final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment fusionner les tronçons ? Si oui, vos modifications seront enregistrées.", ButtonType.YES, ButtonType.NO);
+        confirm.setResizable(true);
+        confirm.showAndWait();
+        final ButtonType result = confirm.getResult();
         if(result==ButtonType.YES){
             if (!task.isDone() || !task.isRunning()) {
                 TaskManager.INSTANCE.submit(task);
@@ -104,7 +105,10 @@ public class FXTronconMerge extends VBox{
                     TronconUtils.mergeTroncon(merge, current, session);
                     sb.append(" + ").append(current.getLibelle());
                 }
-                merge.setLibelle(sb.toString());
+                final String mergedName;
+                if(uiLinearName.getText()==null || uiLinearName.getText().equals("")) mergedName = sb.toString();
+                else mergedName = uiLinearName.getText();
+                merge.setLibelle(mergedName);
                 tronconRepo.update(merge);
             } catch (Exception e) {
                 /* An exception has been thrown. We remove the resulting troncon from
@@ -128,8 +132,7 @@ public class FXTronconMerge extends VBox{
                     if (obj instanceof AvecBornesTemporelles) {
                         ((AvecBornesTemporelles) obj).date_finProperty().set(LocalDate.now());
                         try {
-                            AbstractSIRSRepository repo = session.getRepositoryForClass(obj.getClass());
-                            repo.add(obj);
+                            ((AbstractSIRSRepository) session.getRepositoryForClass(obj.getClass())).add(obj);
                         } catch (Exception e) {
                             SirsCore.LOGGER.log(Level.WARNING, "Positioned object cannot be archived : " + obj.getId(), e);
                         }
