@@ -274,6 +274,28 @@ public class FXSearchPane extends BorderPane {
         // Action on admin button
         uiQueryManagement.setOnAction((ActionEvent e)-> FXAdminQueryPane.showAndWait());
     }
+    
+    @FXML 
+    private void cancel(){
+        
+            if(uiToggleSimple.isSelected()){
+                if(uiRadioDesignation.isSelected()){
+                    searchDesignation();
+                } else if (uiRadioPlainText.isSelected()){
+                    searchText();
+                }
+                
+            } else if(uiToggleSQL.isSelected()) {
+                if(h2Store==null) {
+                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Veuillez attendre que la connexion à la base de donnée SQL soit établie.", ButtonType.OK);
+                    alert.setResizable(true);
+                    alert.show();
+                } else {
+                    final String query = getCurrentSQLQuery();
+                    searchSQL(query);
+                }
+            } 
+    }
 
     @FXML
     private void viewDBModel(ActionEvent event) {

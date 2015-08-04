@@ -28,6 +28,8 @@ import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -43,6 +45,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -119,6 +122,14 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         uiArchived.setSelected(false);
         uiArchived.setGraphic(new ImageView(SIRS.ICON_ARCHIVE_WHITE));
         uiArchived.setOnAction(event -> updateTree());
+        uiArchived.setTooltip(new Tooltip("Voir les tronconsArchivés"));
+        uiArchived.selectedProperty().addListener(new ChangeListener<Boolean>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
         
         uiSearch.setGraphic(searchNone);
         uiSearch.textProperty().bind(currentSearch);

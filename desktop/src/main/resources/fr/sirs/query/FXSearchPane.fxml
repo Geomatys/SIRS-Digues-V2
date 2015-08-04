@@ -215,6 +215,7 @@
                     <columnConstraints>
                       <ColumnConstraints hgrow="NEVER" />
                         <ColumnConstraints hgrow="NEVER" />
+                        <ColumnConstraints hgrow="NEVER" />
                     </columnConstraints>
                     <rowConstraints>
                       <RowConstraints vgrow="NEVER" />
@@ -227,6 +228,12 @@
                            </styleClass>
                         </Button>
                         <Button fx:id="uiCarto" mnemonicParsing="false" onAction="#exportMap" style="-fx-border-color: white; -fx-border-radius: 5;" text="Afficher sur la carte">
+                           <styleClass>
+                              <String fx:value="buttonbar-button" />
+                              <String fx:value="label-header" />
+                           </styleClass>
+                        </Button>
+                        <Button mnemonicParsing="false" onAction="#cancel" style="-fx-border-color: white; -fx-border-radius: 5;" text="ANNULER" GridPane.columnIndex="2">
                            <styleClass>
                               <String fx:value="buttonbar-button" />
                               <String fx:value="label-header" />
