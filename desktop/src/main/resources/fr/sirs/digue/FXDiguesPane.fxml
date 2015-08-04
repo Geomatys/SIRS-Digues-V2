@@ -17,16 +17,12 @@
                   <ColumnConstraints hgrow="NEVER" />
                   <ColumnConstraints hgrow="NEVER" />
                         <ColumnConstraints hgrow="NEVER" />
+                  <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints vgrow="NEVER" />
                     </rowConstraints>
                     <children>
-                        <Button fx:id="uiSearch" mnemonicParsing="false" onAction="#openSearchPopup" GridPane.columnIndex="3" GridPane.hgrow="NEVER">
-                     <styleClass>
-                        <String fx:value="btn-without-style" />
-                        <String fx:value="label-header" />
-                     </styleClass></Button>
                         <Label layoutX="10.0" layoutY="14.0" maxWidth="1.7976931348623157E308" styleClass="label-header" text="Systèmes d'endiguement" GridPane.halignment="CENTER" GridPane.hgrow="NEVER">
                      <padding>
                         <Insets left="5.0" right="5.0" />
@@ -44,6 +40,17 @@
                         <String fx:value="label-header" />
                      </styleClass>
                   </Button>
+                        <Button fx:id="uiSearch" mnemonicParsing="false" onAction="#openSearchPopup" GridPane.columnIndex="3" GridPane.hgrow="NEVER">
+                     <styleClass>
+                        <String fx:value="btn-without-style" />
+                        <String fx:value="label-header" />
+                     </styleClass></Button>
+                  <ToggleButton fx:id="uiArchived" mnemonicParsing="false" GridPane.columnIndex="4">
+                     <styleClass>
+                        <String fx:value="btn-without-style" />
+                        <String fx:value="label-header" />
+                     </styleClass>
+                  </ToggleButton>
                     </children>
                 </GridPane>
             </top>

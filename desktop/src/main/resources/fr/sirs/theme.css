@@ -64,6 +64,10 @@
     -fx-font-weight: bold;
 }
 
+.label-header:selected{
+    -fx-background-color: rgb(74,123,165);
+}
+
 .blue-dark{
     -fx-background-color:  rgb(74,123,165);
     -fx-background-radius:  30 0 0 30;

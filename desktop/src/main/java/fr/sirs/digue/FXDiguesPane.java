@@ -17,6 +17,7 @@ import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.ui.AbstractFXElementPane;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +42,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -81,6 +83,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
     @FXML private BorderPane uiRight;
     @FXML private Button uiSearch;
     @FXML private Button uiDelete;
+    @FXML private ToggleButton uiArchived;
     @FXML private MenuButton uiAdd;
 
     //etat de la recherche
@@ -112,6 +115,10 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         searchRunning.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         searchRunning.setPrefSize(22, 22);
         searchRunning.setStyle(" -fx-progress-color: white;");
+        
+        uiArchived.setSelected(false);
+        uiArchived.setGraphic(new ImageView(SIRS.ICON_ARCHIVE_WHITE));
+        uiArchived.setOnAction(event -> updateTree());
         
         uiSearch.setGraphic(searchNone);
         uiSearch.textProperty().bind(currentSearch);
@@ -215,6 +222,31 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         popup.show(uiSearch, sc.getX(), sc.getY());
     }
 
+    private final Predicate<TronconDigue> nonArchivedPredicate = (TronconDigue t) -> {
+        final boolean result = (t.getDate_fin()==null || t.getDate_fin().isAfter(LocalDate.now()));
+        
+//        System.out.println("Le prédicat vaut "+ t.getLibelle() +" est archivé : "+!result);
+        return result;
+    };
+            
+    private final Predicate<TronconDigue> searchedPredicate = (TronconDigue t) -> {
+        final String str = currentSearch.get();
+        if (str != null && !str.isEmpty()) {
+            final ElasticSearchEngine searchEngine = Injector.getElasticSearchEngine();
+            HashMap<String, HashSet<String>> foundClasses = searchEngine.searchByClass(QueryBuilders.queryString(str));
+            final HashSet resultSet = new HashSet();
+            HashSet tmp;
+            for (final String className : SEARCH_CLASSES) {
+                tmp = foundClasses.get(className);
+                if (tmp != null && !tmp.isEmpty()) {
+                    resultSet.addAll(tmp);
+                }
+            }
+            return resultSet.contains(t.getDocumentId());
+        }
+        else return true;
+    };
+    
     private void updateTree() {
         
         new Thread(){
@@ -228,25 +260,11 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                 final Set extendeds = new HashSet();
                 searchExtended(uiTree.getRoot(),extendeds);
                 
-                //creation du filtre
-                final String str = currentSearch.get();
-                Predicate<Element> filter = null;
-                if (str != null && !str.isEmpty()) {
-                    final ElasticSearchEngine searchEngine = Injector.getElasticSearchEngine();
-//                    final String type = TronconDigue.class.getSimpleName();
-                    HashMap<String, HashSet<String>> foundClasses = searchEngine.searchByClass(QueryBuilders.queryString(str));
-                    final HashSet resultSet = new HashSet();
-                    HashSet tmp;
-                    for (final String className : SEARCH_CLASSES) {
-                        tmp = foundClasses.get(className);
-                        if (tmp != null && !tmp.isEmpty()) {
-                            resultSet.addAll(tmp);
-                        }
-                    }
-
-                    filter = (Element t) -> {
-                        return resultSet.contains(t.getDocumentId());
-                    };
+                //creation des filtres
+                Predicate<TronconDigue> filter = searchedPredicate;
+                if(!uiArchived.isSelected()) {
+//                    System.out.println("uiArchived n'est pas sélectionné !");
+                    filter = filter.and(nonArchivedPredicate);
                 }
                 
                 //creation de l'arbre
@@ -309,15 +327,19 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         }
     }
     
-    private static TreeItem toNode(Digue digue, Set<TronconDigue> troncons, Set<TronconDigue> tronconsFound, Predicate<Element> filter){
+    private static TreeItem toNode(Digue digue, Set<TronconDigue> troncons, Set<TronconDigue> tronconsFound, Predicate<TronconDigue> filter){
         final TreeItem digueItem = new TreeItem(digue);
         for(final TronconDigue td : troncons){
             if(td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
             tronconsFound.add(td);
             if(filter==null || filter.test(td)){
+//                System.out.println("Ajout du troncon "+td.getLibelle());
                 final TreeItem tronconItem = new TreeItem(td);
                 digueItem.getChildren().add(tronconItem);
-            }
+            } 
+//            else {
+//                System.out.println("bloqué"+td);
+//            }
         }
         return digueItem;
     }
