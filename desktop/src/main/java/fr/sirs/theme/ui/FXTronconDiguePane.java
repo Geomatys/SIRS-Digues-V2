@@ -19,6 +19,9 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.digue.FXSystemeReperagePane;
 import java.util.List;
+import java.util.logging.Level;
+
+import fr.sirs.ui.Growl;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -41,6 +44,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
+import org.geotoolkit.internal.GeotkFX;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -214,9 +218,18 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     }
 
     private void save(){
-        preSave();
-        srController.save();
-        session.getRepositoryForClass(TronconDigue.class).update(getTroncon());
+        try {
+            preSave();
+            srController.save();
+            session.getRepositoryForClass(TronconDigue.class).update(getTroncon());
+            final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
+            growlInfo.showAndFade();
+        } catch (Exception e) {
+            final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant l'enregistrement.");
+            growlError.showAndFade();
+            GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
+            SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
+        }
     }
 
     private void initFields(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newElement) {

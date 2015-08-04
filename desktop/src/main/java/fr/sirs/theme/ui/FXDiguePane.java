@@ -11,20 +11,18 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
-import java.time.LocalDateTime;
+import java.util.logging.Level;
+
+import fr.sirs.ui.Growl;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.HTMLEditor;
-import jidefx.scene.control.field.LocalDateTimeField;
+import org.geotoolkit.internal.GeotkFX;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -77,8 +75,17 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
     }
     
     private void save() {
-        preSave();
-        session.getRepositoryForClass(Digue.class).update(this.elementProperty.get());
+        try {
+            preSave();
+            session.getRepositoryForClass(Digue.class).update(this.elementProperty.get());
+            final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
+            growlInfo.showAndFade();
+        } catch (Exception e) {
+            final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant l'enregistrement.");
+            growlError.showAndFade();
+            GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
+            SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
+        }
     }
 
     /**

@@ -12,12 +12,15 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.ui.Growl;
 import fr.sirs.util.ReferenceTableCell;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -29,6 +32,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.util.Callback;
+import org.geotoolkit.internal.GeotkFX;
 
 /**
  *
@@ -121,13 +125,22 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
     }
 
     private void save(){
-        if (elementProperty.get() != null) {
-            contactRepository.update(elementProperty.get());
+        try {
+            if (elementProperty.get() != null) {
+                contactRepository.update(elementProperty.get());
+            }
+            for (final Element org : orgsOfContact) {
+                orgRepository.update((Organisme) org.getParent());
+            }
+            modifiedOrgs.clear();
+            final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
+            growlInfo.showAndFade();
+        } catch (Exception e) {
+            final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant l'enregistrement.");
+            growlError.showAndFade();
+            GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
+            SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
-        for(final Element org : orgsOfContact){
-            orgRepository.update((Organisme) org.getParent());
-        }
-        modifiedOrgs.clear();
     }
 
     private void initFields(ObservableValue<? extends Contact> observable, Contact oldValue, Contact newValue) {
