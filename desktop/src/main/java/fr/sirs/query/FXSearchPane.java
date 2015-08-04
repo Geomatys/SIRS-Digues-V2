@@ -36,6 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
@@ -130,6 +131,7 @@ public class FXSearchPane extends BorderPane {
     @FXML private Button uiRefreshModel;
     @FXML private Button uiViewModel;
     @FXML private Button uiCarto;
+    @FXML private Button uiCancel;
     
     // 1- Recherche simple
     @FXML private ToggleButton uiToggleSimple;
@@ -207,6 +209,9 @@ public class FXSearchPane extends BorderPane {
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
+            } 
+            else {
+                uiFilterEditor.setType(null);
             }
         });
         
@@ -233,6 +238,22 @@ public class FXSearchPane extends BorderPane {
         
         uiSQLQueryOptions.visibleProperty().bind(uiToggleSQL.selectedProperty());
         uiSQLQueryOptions.managedProperty().bind(uiSQLQueryOptions.visibleProperty());
+        
+        uiCancel.visibleProperty().bind(new BooleanBinding() {
+
+            {
+                super.bind(
+                        uiToggleSQL.selectedProperty(),
+                        uiToggleSimple.selectedProperty(),
+                        uiRadioDesignation.selectedProperty(),
+                        uiRadioPlainText.selectedProperty());
+            } 
+                
+            @Override
+            protected boolean computeValue() {
+                return (uiToggleSimple.isSelected() && (uiRadioDesignation.isSelected() || uiRadioPlainText.isSelected())) || uiToggleSQL.isSelected();
+            }
+        });
         
         uiPlainTextPane.visibleProperty().bind(new BooleanBinding() {
             {super.bind(uiRadioPlainText.selectedProperty(), uiToggleSimple.selectedProperty());}
@@ -280,20 +301,14 @@ public class FXSearchPane extends BorderPane {
         
             if(uiToggleSimple.isSelected()){
                 if(uiRadioDesignation.isSelected()){
-                    searchDesignation();
+                    uiDesignation.setText("");
+                    uiDesignationClass.getSelectionModel().select(null);
                 } else if (uiRadioPlainText.isSelected()){
-                    searchText();
+                    uiElasticKeywords.setText("");
                 }
-                
             } else if(uiToggleSQL.isSelected()) {
-                if(h2Store==null) {
-                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Veuillez attendre que la connexion à la base de donnée SQL soit établie.", ButtonType.OK);
-                    alert.setResizable(true);
-                    alert.show();
-                } else {
-                    final String query = getCurrentSQLQuery();
-                    searchSQL(query);
-                }
+                uiSQLText.setText("");
+                uiTableChoice.getSelectionModel().select(null);
             } 
     }
 

@@ -179,9 +179,11 @@ public class FXSQLFilterEditor extends GridPane {
     }
 
     public void setType(ComplexType type) {
-        this.type = type;
+        if(type!=null){
+            this.type = type;
+            choices.setAll(listProps("", type));
+        }
         uiTypeBox.getSelectionModel().select(Type.NONE);
-        choices.setAll(listProps("", type));
     }
 
     private static List<String> listProps(String base, ComplexType ct) {

@@ -122,12 +122,13 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         uiArchived.setSelected(false);
         uiArchived.setGraphic(new ImageView(SIRS.ICON_ARCHIVE_WHITE));
         uiArchived.setOnAction(event -> updateTree());
-        uiArchived.setTooltip(new Tooltip("Voir les tronconsArchivés"));
+        uiArchived.setTooltip(new Tooltip("Voir les troncons archivés"));
         uiArchived.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                if(uiArchived!=null && uiArchived.getTooltip()!=null)
+                    uiArchived.getTooltip().setText(uiArchived.isSelected() ? "Voir les troncons archivés" : "Masquer les troncons archivés");
             }
         });
         
