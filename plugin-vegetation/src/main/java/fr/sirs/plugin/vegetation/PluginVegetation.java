@@ -3,6 +3,7 @@ package fr.sirs.plugin.vegetation;
 import fr.sirs.Plugin;
 import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.core.model.sql.VegetationSqlHelper;
+import fr.sirs.plugin.vegetation.map.CreateParcelleTool;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,6 +32,12 @@ public class PluginVegetation extends Plugin {
     @Override
     public void load() throws Exception {
         getConfiguration();
+
+        //on force le chargement
+        final CreateParcelleTool.Spi spi = CreateParcelleTool.SPI;
+        spi.getTitle().toString();
+        spi.getAbstract().toString();
+
     }
 
     @Override
