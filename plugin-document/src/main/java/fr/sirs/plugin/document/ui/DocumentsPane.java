@@ -250,8 +250,9 @@ public class DocumentsPane extends GridPane {
         final String rootPath   = prefs.get(ROOT_FOLDER, null);
         
         if (rootPath != null && verifyDatabaseVersion(new File(rootPath))) {
-            updateRoot(rootPath);
-            updateDatabaseIdentifier(new File(rootPath));
+            final File rootDirectory = new File(rootPath);
+            root.setValue(rootDirectory);
+            updateDatabaseIdentifier(rootDirectory);
            
         } else {
             importDocButton.disableProperty().set(true);
@@ -343,8 +344,11 @@ public class DocumentsPane extends GridPane {
                 addFolderButton.disableProperty().set(false);
                 listButton .disableProperty().set(false);
                 // refresh tree
-                updateRoot(rootPath);
-                updateDatabaseIdentifier(new File(rootPath));
+                final File rootDirectory = new File(rootPath);
+                updateFileSystem(rootDirectory);
+                root.setValue(rootDirectory);
+                root.update();
+                updateDatabaseIdentifier(rootDirectory);
             }
         }
     }
@@ -423,151 +427,6 @@ public class DocumentsPane extends GridPane {
             return item.getValue();
         }
         return null;
-    }
-    
-    private void updateRoot(final String rootPath) {
-        final File rootDirectory = new File(rootPath);
-        
-        final File saveDir = new File(rootDirectory, SAVE_FOLDER);
-        if (!saveDir.exists()) {
-            saveDir.mkdir();
-        }
-        
-        final File unclassifiedDir = getOrCreateUnclassif(rootDirectory);
-                
-        final SystemeEndiguementRepository SErepo = Injector.getBean(SystemeEndiguementRepository.class);
-        final DigueRepository Drepo = Injector.getBean(DigueRepository.class);
-        final TronconDigueRepository TRrepo = Injector.getBean(TronconDigueRepository.class);
-        
-        /**
-         * On recupere tous les elements.
-         */
-        final List<SystemeEndiguement> ses    = SErepo.getAll();
-        final Set<Digue> digues               = new HashSet<>(Drepo.getAll());
-        final Set<TronconDigue> troncons      = new HashSet<>(TRrepo.getAllLight());
-        final Set<Digue> diguesFound          = new HashSet<>();
-        final Set<TronconDigue> tronconsFound = new HashSet<>();
-        final Set<File> seFiles               = listModel(rootDirectory, SE);
-        final Set<File> digueMoved            = new HashSet<>();
-        final Set<File> tronMoved             = new HashSet<>();
-        
-        for (SystemeEndiguement se : ses) {
-            final File seDir = getOrCreateSE(rootDirectory, se);
-            seFiles.remove(seDir);
-            
-            final Set<File> digueFiles = listModel(seDir, DG);
-            final List<Digue> diguesForSE = Drepo.getBySystemeEndiguement(se);
-            for (Digue digue : digues) {
-                if (!diguesForSE.contains(digue)) continue;
-                diguesFound.add(digue);
-                
-                final File digueDir = getOrCreateDG(seDir, digue);
-                digueFiles.remove(digueDir);
-                
-                final Set<File> trFiles = listModel(digueDir, TR);
-
-                final List<TronconDigue> tronconForDigue = TRrepo.getByDigue(digue);
-                for (final TronconDigue td : troncons) {
-                    if (!tronconForDigue.contains(td)) continue;
-                    tronconsFound.add(td);
-
-                    final File trDir = getOrCreateTR(digueDir, td);
-                    trFiles.remove(trDir);
-                }
-                
-                // on place les tronçon disparus dans les fichiers deplacé
-                tronMoved.addAll(trFiles);
-            }
-            
-            // on place les digues disparues dans les fichiers deplacé
-            digueMoved.addAll(digueFiles);
-        }
-        digues.removeAll(diguesFound);
-        
-        // on recupere les repertoire des digues / tronçons dans les SE detruits
-        for (File seFile : seFiles) {
-            digueMoved.addAll(listModel(seFile, DG));
-            tronMoved.addAll(listModel(seFile, TR));
-        }
-        
-        /**
-         * On place toute les digues et troncons non trouvé dans un group a part.
-         */      
-        final Set<File> digueFiles = listModel(unclassifiedDir, DG);
-        
-        for (final Digue digue : digues) {
-            final File digueDir = getOrCreateDG(unclassifiedDir, digue);
-            digueFiles.remove(digueDir);
-            
-            final Set<File> trFiles = listModel(digueDir, TR);
-            
-            for (final TronconDigue td : troncons) {
-                if (td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
-                tronconsFound.add(td);
-
-                final File trDir = getOrCreateTR(digueDir, td);
-                trFiles.remove(trDir);
-            }
-            
-            // on place les tronçon disparus dans les fichiers deplacé
-            tronMoved.addAll(trFiles);
-        }
-        
-        // on place les digues disparues dans les fichiers deplacé
-        digueMoved.addAll(digueFiles);
-        
-        // on recupere les repertoire tronçons dans les digues detruites
-        for (File digueFile : digueFiles) {
-            tronMoved.addAll(listModel(digueFile, TR));
-        }
-        
-        troncons.removeAll(tronconsFound);
-        
-        final Set<File> trFiles = listModel(unclassifiedDir, TR, false);
-        
-        for(final TronconDigue td : troncons){
-            final File trDir = getOrCreateTR(unclassifiedDir, td);
-            trFiles.remove(trDir);
-        }
-        
-        // on place les tronçon disparus dans les fichiers deplacé
-        tronMoved.addAll(trFiles);
-        
-        /**
-         * On restore les fichier deplacé dans leur nouvel emplacement.
-         */
-        final Set<File> tronMovedFound = new HashSet<>();
-        for (File movedFile : tronMoved) {
-            final File newFile = findFile(rootDirectory, movedFile);
-            if (newFile != null) {
-                backupDirectory(newFile.getParentFile(), movedFile);
-                tronMovedFound.add(movedFile);
-            }
-        }
-        tronMoved.removeAll(tronMovedFound);
-        
-        final Set<File> digueMovedFound = new HashSet<>();
-        for (File movedFile : digueMoved) {
-            final File newFile = findFile(rootDirectory, movedFile);
-            if (newFile != null) {
-                backupDirectory(newFile.getParentFile(), movedFile);
-                digueMovedFound.add(movedFile);
-            }
-        }
-        digueMoved.removeAll(digueMovedFound);
-        
-        /**
-         * On place les fichiers deplacé non relocaliser dans le backup.
-         */ 
-        backupDirectories(saveDir, tronMoved);
-        backupDirectories(saveDir, digueMoved);
-        backupDirectories(saveDir, seFiles);
-        
-        /**
-         * Mise a jour de l'UI.
-         */
-        root.setValue(rootDirectory);
-        root.update();
     }
     
     private void update() {

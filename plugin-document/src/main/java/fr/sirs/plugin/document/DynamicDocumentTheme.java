@@ -2,6 +2,8 @@ package fr.sirs.plugin.document;
 
 import fr.sirs.plugin.document.ui.DynamicDocumentsPane;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
 
@@ -23,5 +25,20 @@ public class DynamicDocumentTheme extends AbstractPluginsButtonTheme {
     @Override
     public Parent createPane() {
         return new DynamicDocumentsPane(root);
+    }
+    
+    @Override
+    public ChangeListener<Boolean> getSelectedPropertyListener() {
+        return new ChangeListener<Boolean>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue && root.getValue() != null) {
+                    PropertiesFileUtilities.updateFileSystem(root.getValue());
+                    root.update();
+                    System.out.println("Tree updated (dyn)");
+                }
+            }
+        };
     }
 }

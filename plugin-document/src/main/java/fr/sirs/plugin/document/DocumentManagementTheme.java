@@ -2,6 +2,8 @@ package fr.sirs.plugin.document;
 
 import fr.sirs.plugin.document.ui.DocumentsPane;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
@@ -13,7 +15,7 @@ import javafx.scene.layout.BorderPane;
  */
 public final class DocumentManagementTheme extends AbstractPluginsButtonTheme {
     
-    private static final Image BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/gen_etats.png"));
+    private static final Image BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/gestion_documents.png"));
     private final FileTreeItem root;
     private final DynamicDocumentTheme dynDcTheme;
     
@@ -29,4 +31,20 @@ public final class DocumentManagementTheme extends AbstractPluginsButtonTheme {
 
         return borderPane;
     }
+
+    @Override
+    public ChangeListener<Boolean> getSelectedPropertyListener() {
+        return new ChangeListener<Boolean>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue && root.getValue() != null) {
+                    PropertiesFileUtilities.updateFileSystem(root.getValue());
+                    root.update();
+                    System.out.println("Tree updated (doc)");
+                }
+            }
+        };
+    }
+    
 }

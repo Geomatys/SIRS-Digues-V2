@@ -2,6 +2,8 @@ package fr.sirs.theme;
 
 import java.util.ArrayList;
 import java.util.List;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Parent;
 import org.apache.sis.util.ArgumentChecks;
 
@@ -76,4 +78,14 @@ public abstract class Theme {
      */
     public abstract Parent createPane();
     
+    
+    /**
+     * Un listener sur la selection du theme. Ne fais rien par default, doit etre surchargé par les sous classes.
+     * @return 
+     */
+    public ChangeListener<Boolean> getSelectedPropertyListener() {
+        return (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            // ne fais rien par defaut.
+        };
+    }
 }

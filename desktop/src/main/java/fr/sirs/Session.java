@@ -49,6 +49,7 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
@@ -376,6 +377,7 @@ public class Session extends SessionCore {
                         final FXFreeTab tab = new FXFreeTab(theme.getName());
                         tab.setContent(parent);
                         tab.setOnClosed(event -> openThemes.remove(theme));
+                        tab.selectedProperty().addListener(theme.getSelectedPropertyListener());
                         return tab;
                     }
                 }
