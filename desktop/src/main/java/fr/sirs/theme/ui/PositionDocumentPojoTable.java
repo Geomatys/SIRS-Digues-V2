@@ -22,9 +22,9 @@ public class PositionDocumentPojoTable<T extends AbstractPositionDocument> exten
     
     @Override
     protected T createPojo() {
-        final T position = (T) super.createPojo();
         final TronconDigue premierTroncon = Injector.getSession().getRepositoryForClass(TronconDigue.class).getOne();
-        position.setForeignParentId(premierTroncon.getId());
+        final T position = (T) super.createPojo(premierTroncon);
+        
         try {
             ((Property<String>) propertyMethodToListen.invoke(position)).setValue(propertyReference);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {

@@ -24,6 +24,7 @@ import static fr.sirs.SIRS.VALID_FIELD;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.AvecForeignParent;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
@@ -1108,7 +1109,6 @@ public class PojoTable extends BorderPane {
         }
     }
 
-
     /**
      * Create a new element and add it to table items. If the table {@link Repository}
      * is not null, we also add the element to the database. We also set its parent
@@ -1117,11 +1117,16 @@ public class PojoTable extends BorderPane {
      * @return The newly created object.
      */
     protected Element createPojo() {
-        Object result = null;
+        return createPojo(null);
+    }
+    
+    protected Element createPojo(final Element foreignParent) {
+        Element result = null;
 
         if (repo != null) {
-            result = repo.create();
-            repo.add((Identifiable)result);
+            result = (Element) repo.create();
+            if(foreignParent!=null && result instanceof AvecForeignParent) ((AvecForeignParent) result).setForeignParentId(foreignParent.getId());
+            repo.add(result);
         }
         else if (pojoClass != null) {
             try {
