@@ -135,6 +135,8 @@ public class H2Helper {
         @Override
         protected Boolean call() throws Exception {
             updateMessage("Nettoyage de la base.");
+            updateProgress(-1, -1);
+
             Path file = getDBFile(couchConnector);
             if (Files.isDirectory(file.getParent())) {
                 Files.walkFileTree(file.getParent(), new SimpleFileVisitor<Path>() {
@@ -156,71 +158,79 @@ public class H2Helper {
 
             if (sqlHelpers == null || sqlHelpers.length == 0) {
                 return false;
-            } else {
+            }
 
-                try (Connection conn = createConnection(couchConnector)) {
+            final Connection conn = createConnection(couchConnector);
+            try {
+                String create = "SET REFERENTIAL_INTEGRITY FALSE ";
+                try (final Statement stat = conn.createStatement()) {
+                    stat.execute(create);
+                }
 
-                    for (SQLHelper sqlHelper : sqlHelpers) {
-                        if (sqlHelper != null) {
-                            updateMessage("Création des tables.");
-                            conn.setAutoCommit(true);
-                            int srid = InjectorCore.getBean(SessionCore.class).getSrid();
-                            sqlHelper.createTables(conn, srid);
-                            conn.setAutoCommit(false);
+                int srid = InjectorCore.getBean(SessionCore.class).getSrid();
 
-                            updateProgress(-1, -1);
-                            updateMessage("Mise à jour des clés étrangères");
-                            sqlHelper.addForeignKeys(conn);
-                            Statement stat = null;
-                            
-                            String create = "SET REFERENTIAL_INTEGRITY FALSE ";
-                            stat = conn.createStatement();
-                            stat.execute(create);
+                conn.setAutoCommit(false);
 
-                            updateMessage("Création de la liste des éléments à insérer.");
-                            List<String> allDocIds = couchConnector.getAllDocIds();
-                            Iterator<String> idIt = allDocIds.iterator();
-                            while (idIt.hasNext()) {
-                                if (UNMANAGED_IDS.matcher(idIt.next()).matches()) {
-                                    idIt.remove();
-                                }
-                            }
-                            DocHelper docHelper = new DocHelper(couchConnector);
+                /**
+                 * First, we ask SQL helpers to create database structure.
+                 */
+                updateMessage("Création des tables et contraintes");
+                for (SQLHelper sqlHelper : sqlHelpers) {
+                    if (sqlHelper != null) {
+                        sqlHelper.createTables(conn, srid);
+                        sqlHelper.addForeignKeys(conn);
+                    }
+                }
 
-                            updateMessage("Insertion des éléments");
-                            int currentProgress = 0;
-                            updateProgress(currentProgress, allDocIds.size());
-                            final Thread currentThread = Thread.currentThread();
+                conn.commit();
 
-                            try (final StreamingViewResult allDocsAsStream = docHelper.getAllDocsAsStream()) {
-                                Iterator<ViewResult.Row> iterator = allDocsAsStream.iterator();
-                                while (iterator.hasNext()) {
-                                    if (currentThread.isInterrupted()) {
-                                        return false;
-                                    }
+                // Compute number of documents to export
+                updateMessage("Analyse des éléments à exporter");
+                List<String> allDocIds = couchConnector.getAllDocIds();
+                Iterator<String> idIt = allDocIds.iterator();
+                while (idIt.hasNext()) {
+                    if (UNMANAGED_IDS.matcher(idIt.next()).matches()) {
+                        idIt.remove();
+                    }
+                }
 
-                                    final ViewResult.Row currentRow = iterator.next();
-                                    if (UNMANAGED_IDS.matcher(currentRow.getId()).matches()) {
-                                        continue;
-                                    }
+                // Start document insertion
+                DocHelper docHelper = new DocHelper(couchConnector);
+                try (final StreamingViewResult allDocsAsStream = docHelper.getAllDocsAsStream()) {
 
-                                    Optional<Element> element = docHelper.toElement(currentRow.getDocAsNode());
-                                    if (element.isPresent()) {
-                                        sqlHelper.insertElement(conn, element.get());
-                                        conn.commit();
-                                        updateProgress(currentProgress++, allDocIds.size());
-                                    }
-                                }
+                    Iterator<ViewResult.Row> iterator = allDocsAsStream.iterator();
 
-                            } catch (Exception e) {
-                                conn.rollback();
-                                throw e;
+                    final Thread currentThread = Thread.currentThread();
+                    int currentProgress = 0;
+                    updateMessage("Insertion des éléments");
+                    while (iterator.hasNext()) {
+                        if (currentThread.isInterrupted()) {
+                            return false;
+                        }
+
+                        final ViewResult.Row currentRow = iterator.next();
+                        if (UNMANAGED_IDS.matcher(currentRow.getId()).matches()) {
+                            continue;
+                        }
+
+                        updateProgress(currentProgress++, allDocIds.size());
+                        Optional<Element> element = docHelper.toElement(currentRow.getDocAsNode());
+                        if (element.isPresent()) {
+                            for (final SQLHelper sqlHelper : sqlHelpers) {
+                                sqlHelper.insertElement(conn, element.get());
+                                conn.commit();
                             }
                         }
                     }
                 }
-                return true;
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.close();
             }
+
+            return true;
         }
     }
 }
