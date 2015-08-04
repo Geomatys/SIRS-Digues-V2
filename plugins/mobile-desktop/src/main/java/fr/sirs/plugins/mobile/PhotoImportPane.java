@@ -603,7 +603,8 @@ public class PhotoImportPane extends StackPane {
 
                 scan:
                 for (final AvecPhotos obs : photoContainers) {
-                    for (final Photo p : obs.getPhotos()) {
+                    for (final Object o : obs.getPhotos()) {
+                        final Photo p = (Photo) o;
                         if (p.getChemin().equals(t.getFileName().toString()) || p.getChemin().equals(t.toString())) {
                             photo = p;
                             break scan;
