@@ -16,6 +16,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugin.document.FileTreeItem;
 import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
 import static fr.sirs.plugin.document.ui.DocumentsPane.ROOT_FOLDER;
+import fr.sirs.ui.Growl;
 import fr.sirs.util.SirsStringConverter;
 import java.io.File;
 import javafx.beans.value.ObservableValue;
@@ -226,6 +227,9 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
         uiModelsList.setItems(null);
         uiModelsList.setItems(oldModels);
         uiModelsList.getSelectionModel().select(model);
+        
+        final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
+        growlInfo.showAndFade();
     }
     
     @FXML
