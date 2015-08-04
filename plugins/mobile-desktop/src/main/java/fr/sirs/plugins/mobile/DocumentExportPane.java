@@ -611,7 +611,8 @@ public class DocumentExportPane extends StackPane {
                             ButtonType choice = alert.showAndWait().orElse(ButtonType.NO);
 
                             if (ButtonType.YES.equals(choice)) {
-                                final CopyTask copyTask = new CopyTask(toCopy, destination, SIRS.getDocumentRootPath());
+                                final Path documentRootPath = SIRS.getDocumentRootPath();
+                                final CopyTask copyTask = new CopyTask(toCopy, destination, input -> documentRootPath.relativize(input));
                                 // 5
                                 copyTaskProperty.set(copyTask);
                                 // 6 & 7 : Let's do it !

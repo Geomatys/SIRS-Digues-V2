@@ -18,6 +18,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.function.Function;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -52,12 +53,13 @@ public class CopyTask extends Task<Boolean> {
         private final Path destination;
 
         /**
-         * A path used for making relative paths from input absolute paths. It's
-         * needed if you want input files not to be copied directly in destination
-         * directory. All path fragment under relativized paths are reproduced into
-         * destination.
+         * A function whose role is to analyze input paths to give a new path, relative
+         * to destination directory. The returned path will be used as new location for
+         * input file.
+         * This resolver can be used to specify a sub-directory to copy into destination,
+         * or simply to rename input files are they're copied.
          */
-        private final SimpleObjectProperty<Path> pathResolver = new SimpleObjectProperty<>();
+        private final SimpleObjectProperty<Function<Path, Path>> pathResolver = new SimpleObjectProperty<>();
 
         /**
          * Create a new task which is parametered to copy each file of the given
@@ -70,7 +72,7 @@ public class CopyTask extends Task<Boolean> {
             this(toCopy, destination, null);
         }
 
-        public CopyTask(final Collection<Path> toCopy, final Path destination, final Path resolver) {
+        public CopyTask(final Collection<Path> toCopy, final Path destination, final Function<Path, Path> resolver) {
             ArgumentChecks.ensureNonNull("Files to copy", toCopy);
             ArgumentChecks.ensureNonNull("Destination", destination);
             if (toCopy.isEmpty()) {
@@ -87,33 +89,33 @@ public class CopyTask extends Task<Boolean> {
         }
 
         /**
-         * @return the path used for making relative paths from input absolute paths. It's
+         * @return the function used for making relative paths from input absolute paths. It's
          * needed if you want input files not to be copied directly in destination
          * directory. All path fragment under relativized paths are reproduced into
          * destination.
          */
-        public Path getPathResolver() {
+        public Function<Path, Path> getPathResolver() {
             return pathResolver.get();
         }
 
         /**
          *
-         * @param resolver the path to use to relativize input paths, in order to
-         * make them relative to the given parameter. It allow us to reproduce
-         * folders of the relativized path into destination. If null, no fragment
-         * will be reproduced into destination.
+         * @param resolver the function to use to relativize input paths, in order to
+         * make them relative to the given destination. It allow us to copy files
+         * in sub-directories of destination, or to rename them when copied. If
+         * null, no rename will be applied nor sub-directory created.
          */
-        public void setPathResolver(final Path resolver) {
+        public void setPathResolver(final Function<Path, Path> resolver) {
             pathResolver.set(resolver);
         }
 
         /**
-         * @return the path used for making relative paths from input absolute paths. It's
+         * @return the function used for making relative paths from input absolute paths. It's
          * needed if you want input files not to be copied directly in destination
          * directory. All path fragment under relativized paths are reproduced into
          * destination.
          */
-        public ObjectProperty<Path> pathResolverProperty() {
+        public ObjectProperty<Function<Path, Path>> pathResolverProperty() {
             return pathResolver;
         }
 
@@ -155,7 +157,7 @@ public class CopyTask extends Task<Boolean> {
             boolean replaceAll = false;
             boolean ignoreAll = false;
 
-            final Path srcRoot = pathResolver.get();
+            final Function<Path, Path> resolver = pathResolver.get();
 
             final Thread currentThread = Thread.currentThread();
             int progress = 0;
@@ -167,12 +169,12 @@ public class CopyTask extends Task<Boolean> {
                 // If no resolver has beeen given, we put input file directly in
                 // destination folder. otherwise, we reproduce folder structure
                 // from given resolver to current input file.
-                Path target = destination.resolve(srcRoot == null? p.getFileName() : srcRoot.relativize(p));
+                Path target = destination.resolve(resolver == null? p.getFileName() : resolver.apply(p));
 
                 updateProgress(progress++, inputs.size());
                 updateMessage("Copie de\n" + p.toString() + "\nvers\n" + target.toString());
 
-                if (srcRoot != null && !Files.isDirectory(target.getParent())) {
+                if (resolver != null && !Files.isDirectory(target.getParent())) {
                     Files.createDirectories(target.getParent());
                 }
 
