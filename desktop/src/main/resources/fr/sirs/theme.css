@@ -302,3 +302,21 @@
     -fx-border-width: 1px;
     -fx-border-radius: 5;
 }
+
+// GROWL
+.growl {
+   -fx-padding: 20px;
+   -fx-background-radius: 7;
+}
+
+.growl-info {
+    -fx-background-color: lightgreen;
+}
+
+.growl-warning {
+    -fx-background-color: sandybrown;
+}
+
+.growl-error {
+    -fx-background-color: #C65757;
+}

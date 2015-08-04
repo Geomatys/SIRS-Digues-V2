@@ -14,6 +14,8 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.map.FXMapTab;
 import java.lang.reflect.Constructor;
 import java.util.logging.Level;
+
+import fr.sirs.ui.Growl;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -85,7 +87,12 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
             }
 
             repo.update(couchDbDocument);
+
+            final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
+            growlInfo.showAndFade();
         } catch (Exception e) {
+            final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant l'enregistrement.");
+            growlError.showAndFade();
             GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
             SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
