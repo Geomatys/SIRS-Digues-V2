@@ -4,19 +4,16 @@
   <eClassifiers xsi:type="ecore:EClass" name="ParcelleVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//Positionable">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ZoneVegetation" abstract="true" eSuperTypes="../../sirs-core/model/sirs.ecore#//Positionable">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="parcelleId" eType="#//ParcelleVegetation"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ArbreVegetation" eSuperTypes="#//ZoneVegetation">
+  <eClassifiers xsi:type="ecore:EClass" name="ArbreVegetation" eSuperTypes="#//PositionableVegetation">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PeuplementVegetation" eSuperTypes="#//ZoneVegetation">
+  <eClassifiers xsi:type="ecore:EClass" name="PeuplementVegetation" eSuperTypes="#//PositionableVegetation">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="InvasiveVegetation" eSuperTypes="#//ZoneVegetation">
+  <eClassifiers xsi:type="ecore:EClass" name="InvasiveVegetation" eSuperTypes="#//PositionableVegetation">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="HerbaceeVegetation" eSuperTypes="#//ZoneVegetation">
+  <eClassifiers xsi:type="ecore:EClass" name="HerbaceeVegetation" eSuperTypes="#//PositionableVegetation">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PlanVegetation">
@@ -64,4 +61,21 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTraitementVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType"/>
   <eClassifiers xsi:type="ecore:EClass" name="RefSousTraitementVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType"/>
+  <eClassifiers xsi:type="ecore:EEnum" name="GeometryType">
+    <eLiterals name="PONCTUAL"/>
+    <eLiterals name="LINEAR"/>
+    <eLiterals name="AREAL"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PositionableVegetation" abstract="true"
+      eSuperTypes="../../sirs-core/model/sirs.ecore#//Positionable">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometryType" eType="#//GeometryType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typePositionId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefPosition"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeCoteId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefCote"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="explicitGeometry" eType="ecore:EDataType ../../sirs-core/model/jts.ecore#//Geometry"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="distanceDebutMin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="distanceDebutMax" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="distanceFinMin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="distanceFinMax" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parcelleId" eType="#//ParcelleVegetation"/>
+  </eClassifiers>
 </ecore:EPackage>

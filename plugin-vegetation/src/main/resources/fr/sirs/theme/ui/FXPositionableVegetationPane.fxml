@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import org.geotoolkit.gui.javafx.util.*?>
+<?import jidefx.scene.control.field.*?>
+<?import jfxtras.scene.control.*?>
+<?import javafx.scene.web.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<fx:root type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <center>
+      <StackPane BorderPane.alignment="CENTER">
+         <children>
+            <BorderPane>
+                <top>
+                    <VBox styleClass="pos-top">
+                        <children>
+                            <GridPane BorderPane.alignment="CENTER">
+                                <columnConstraints>
+                                    <ColumnConstraints hgrow="NEVER" />
+                                    <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                                    <ColumnConstraints hgrow="NEVER" />
+                                    <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" />
+                                    <ColumnConstraints hgrow="SOMETIMES" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                    <RowConstraints vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                <children>
+                                    <HBox GridPane.columnIndex="2">
+                                        <children>
+                                            <ToggleButton fx:id="uiTypeCoord" maxWidth="120.0" minWidth="120.0" mnemonicParsing="false" prefWidth="120.0" selected="true" styleClass="state-button-left" text="Coordonnée" />
+                                            <ToggleButton fx:id="uiTypeBorne" maxWidth="120.0" minWidth="120.0" mnemonicParsing="false" prefWidth="120.0" styleClass="state-button-right" text="Borne" />
+                                        </children>
+                                    </HBox>
+                                    <Label styleClass="label-header" text="Positionnement" />
+                                    <Button fx:id="uiImport" mnemonicParsing="false" onAction="#importCoord" styleClass="buttonbar-button" GridPane.columnIndex="4" />
+                                    <Button fx:id="uiView" mnemonicParsing="false" onAction="#viewAllSR" styleClass="buttonbar-button" GridPane.columnIndex="5" />
+                                </children>
+                                <BorderPane.margin>
+                                    <Insets />
+                                </BorderPane.margin>
+                                <padding>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                </padding>
+                            </GridPane>
+                            <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5d">  
+                                <children>
+                              <Label style="-fx-font-style: italic;" styleClass="label-header" text="SR par défaut :" HBox.hgrow="NEVER" />
+                                    <HBox alignment="BASELINE_CENTER" maxWidth="1.7976931348623157E308" spacing="5d" HBox.hgrow="ALWAYS">  
+                                        <children>                    
+                                            <Label alignment="BASELINE_LEFT" styleClass="label-header" text="PR de début :" />
+                                            <Label fx:id="uiPRDebut" alignment="BASELINE_LEFT" styleClass="label-header" text="" />
+                                        </children>
+                                    </HBox>        
+                                    <HBox alignment="BASELINE_CENTER" maxWidth="1.7976931348623157E308" spacing="5d" HBox.hgrow="ALWAYS">  
+                                        <children>
+                                            <Label alignment="BASELINE_RIGHT" styleClass="label-header" text="PR de fin :" />
+                                            <Label fx:id="uiPRFin" alignment="BASELINE_RIGHT" styleClass="label-header" text="" />
+                                        </children>
+                                    </HBox>             
+                                </children>
+                                <padding>
+                                    <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+                                </padding>
+                            </HBox>
+                        </children>
+                    </VBox>
+                </top>
+               <center>
+                  <StackPane BorderPane.alignment="CENTER">
+                     <children>
+                        <GridPane fx:id="uiCoordPane" hgap="10.0" styleClass="pos-bottom" vgap="10.0" visible="false">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="NEVER" />
+                            <ColumnConstraints hgrow="SOMETIMES" />
+                              <ColumnConstraints hgrow="SOMETIMES" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints vgrow="NEVER" />
+                              <RowConstraints vgrow="NEVER" />
+                            <RowConstraints vgrow="NEVER" />
+                            <RowConstraints vgrow="NEVER" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Système de coordonnées" />
+                              <Label text="X (longitude)" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                              <Label text="Y (latitude)" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                              <Spinner fx:id="uiLongitudeStart" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <Spinner fx:id="uiLatitudeStart" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                              <ComboBox fx:id="uiCRSs" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2" />
+                              <Label text="Début" GridPane.rowIndex="2" />
+                              <Label text="Fin" GridPane.rowIndex="3" />
+                              <Spinner fx:id="uiLongitudeEnd" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <Spinner fx:id="uiLatitudeEnd" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                           </children>
+                           <padding>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </padding>
+                        </GridPane>
+                        <GridPane fx:id="uiBornePane" hgap="10.0" styleClass="pos-bottom" vgap="10.0">
+                          <columnConstraints>
+                              <ColumnConstraints hgrow="NEVER" />
+                              <ColumnConstraints hgrow="NEVER" />
+                              <ColumnConstraints hgrow="NEVER" />
+                              <ColumnConstraints hgrow="NEVER" />
+                              <ColumnConstraints hgrow="NEVER" />
+                          </columnConstraints>
+                          <rowConstraints>
+                              <RowConstraints minHeight="10.0" vgrow="NEVER" />
+                              <RowConstraints vgrow="NEVER" />
+                              <RowConstraints vgrow="NEVER" />
+                              <RowConstraints vgrow="NEVER" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Systeme de Reperage" />
+                              <ComboBox fx:id="uiSRs" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" />
+                              <Label text="Borne" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                              <Label text="Amont/Aval" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                              <Label text="Distance" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                              <Label text="Début " GridPane.rowIndex="2" />
+                              <ComboBox fx:id="uiBorneStart" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <Spinner fx:id="uiDistanceStart" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
+                              <ImageView fx:id="uiImageStartValid" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="4" GridPane.hgrow="NEVER" GridPane.rowIndex="2" />
+                              <Label text="Fin" GridPane.rowIndex="3" />
+                              <ComboBox fx:id="uiBorneEnd" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <Spinner fx:id="uiDistanceEnd" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
+                              <ImageView fx:id="uiImageEndValid" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="4" GridPane.hgrow="NEVER" GridPane.rowIndex="3" />
+                              <HBox GridPane.columnIndex="2" GridPane.rowIndex="3">
+                                 <children>
+                                    <RadioButton fx:id="uiAmontEnd" mnemonicParsing="false" text="Amont">
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="amontAvalEnd" />
+                                       </toggleGroup>
+                                    </RadioButton>
+                                    <RadioButton fx:id="uiAvalEnd" mnemonicParsing="false" text="Aval" toggleGroup="$amontAvalEnd" />
+                                 </children>
+                              </HBox>
+                              <HBox GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                 <children>
+                                    <RadioButton fx:id="uiAmontStart" mnemonicParsing="false" text="Amont">
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="amontAvalStart" />
+                                       </toggleGroup>
+                                    </RadioButton>
+                                    <RadioButton fx:id="uiAvalStart" mnemonicParsing="false" text="Aval" toggleGroup="$amontAvalStart" />
+                                 </children>
+                              </HBox>
+                           </children>
+                           <padding>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </padding>
+                        </GridPane>
+                     </children>
+                  </StackPane>
+               </center>
+            </BorderPane>
+            <ProgressIndicator fx:id="uiLoading" maxHeight="100.0" maxWidth="100.0" visible="false" />
+         </children>
+      </StackPane>
+   </center>
+</fx:root>
