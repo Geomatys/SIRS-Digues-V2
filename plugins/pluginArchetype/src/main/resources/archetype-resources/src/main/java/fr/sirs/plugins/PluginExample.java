@@ -1,6 +1,7 @@
 package fr.sirs.plugins;
 
 import fr.sirs.Plugin;
+import fr.sirs.core.model.sql.SQLHelper;
 import javafx.scene.image.Image;
 
 /**
