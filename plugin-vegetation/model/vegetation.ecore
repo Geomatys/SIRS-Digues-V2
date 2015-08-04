@@ -6,15 +6,29 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ArbreVegetation" eSuperTypes="#//PositionableVegetation">
     <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="contactEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="hauteurId" eType="#//RefHauteurVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="diametreId" eType="#//RefDiametreVegetation"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PeuplementVegetation" eSuperTypes="#//PositionableVegetation">
     <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typePeuplementId" eType="#//RefTypePeuplementVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="contactEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="densite" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="diametre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="surface" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="InvasiveVegetation" eSuperTypes="#//PositionableVegetation">
     <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="densiteId" eType="#//RefDensiteVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeInvasive" eType="#//RefTypeInvasiveVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="contactEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="HerbaceeVegetation" eSuperTypes="#//PositionableVegetation">
     <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="contactEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="surface" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PlanVegetation">
     <eAnnotations source="couchDBDocument"/>
@@ -59,8 +73,12 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//RefTraitementVegetation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sousType" eType="#//RefSousTraitementVegetation"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefTraitementVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType"/>
-  <eClassifiers xsi:type="ecore:EClass" name="RefSousTraitementVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RefTraitementVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefSousTraitementVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="GeometryType">
     <eLiterals name="PONCTUAL"/>
     <eLiterals name="LINEAR"/>
@@ -77,5 +95,20 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="distanceFinMin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="distanceFinMax" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="parcelleId" eType="#//ParcelleVegetation"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefDiametreVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefHauteurVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefDensiteVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeInvasiveVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypePeuplementVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
 </ecore:EPackage>
