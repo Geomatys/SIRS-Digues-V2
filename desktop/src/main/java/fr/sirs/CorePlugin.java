@@ -232,6 +232,12 @@ public class CorePlugin extends Plugin {
     @Override
     public List<MapItem> getMapItems() {
         final List<MapItem> items = new ArrayList<>();
+
+        final MapItem sirsGroup = MapBuilder.createItem();
+        sirsGroup.setName("Description des ouvrages");
+        sirsGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+        items.add(sirsGroup);
+
         try{
             final Map<String,String> nameMap = new HashMap<>();
             for(Class elementClass : suppliers.keySet()) {
@@ -280,12 +286,12 @@ public class CorePlugin extends Plugin {
 
             //troncons
             final BeanStore tronconStore = new BeanStore(suppliers.get(TronconDigue.class));
-            items.addAll(buildLayers(tronconStore,TRONCON_LAYER_NAME,createTronconStyle(),createTronconSelectionStyle(false),true));
-
+            sirsGroup.items().addAll(buildLayers(tronconStore,TRONCON_LAYER_NAME,createTronconStyle(),createTronconSelectionStyle(false),true));
+            
             //bornes
             final BeanStore borneStore = new BeanStore(suppliers.get(BorneDigue.class));
-            items.addAll(buildLayers(borneStore,BORNE_LAYER_NAME,createBorneStyle(),createBorneSelectionStyle(),true));
-
+            sirsGroup.items().addAll(buildLayers(borneStore,BORNE_LAYER_NAME,createBorneStyle(),createBorneSelectionStyle(),true));
+            
             //structures
             final BeanStore structStore = new BeanStore(
                     suppliers.get(Crete.class),
@@ -301,8 +307,8 @@ public class CorePlugin extends Plugin {
             structLayer.setName("Structures");
             structLayer.items().addAll( buildLayers(structStore, nameMap, colors, createDefaultSelectionStyle(),false));
             structLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            items.add(structLayer);
-
+            sirsGroup.items().add(structLayer);
+            
             // Franc-bords
             final BeanStore fbStore = new BeanStore(
                     suppliers.get(LargeurFrancBord.class));
@@ -310,8 +316,8 @@ public class CorePlugin extends Plugin {
             fbLayer.setName("Francs-bords");
             fbLayer.items().addAll( buildLayers(fbStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             fbLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            items.add(fbLayer);
-
+            sirsGroup.items().add(fbLayer);
+            
             // Réseaux de voirie
             final BeanStore rvStore = new BeanStore(
                     suppliers.get(VoieAcces.class),
@@ -323,8 +329,8 @@ public class CorePlugin extends Plugin {
             rvLayer.setName("Réseaux de voirie");
             rvLayer.items().addAll( buildLayers(rvStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             rvLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            items.add(rvLayer);
-
+            sirsGroup.items().add(rvLayer);
+            
             // Réseaux et ouvrages
             final BeanStore roStore = new BeanStore(
                     suppliers.get(StationPompage.class),
@@ -339,24 +345,24 @@ public class CorePlugin extends Plugin {
             roLayer.setName("Réseaux et ouvrages");
             roLayer.items().addAll( buildLayers(roStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             roLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            items.add(roLayer);
-
+            sirsGroup.items().add(roLayer);
+            
             // Désordres
             final BeanStore desordreStore = new BeanStore(suppliers.get(Desordre.class));
             final MapItem desordresLayer = MapBuilder.createItem();
             desordresLayer.setName("Désordres");
             desordresLayer.items().addAll( buildLayers(desordreStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             desordresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            items.add(desordresLayer);
-
+            sirsGroup.items().add(desordresLayer);
+            
             // Prestations
             final BeanStore prestaStore = new BeanStore(suppliers.get(Prestation.class));
             final MapItem prestaLayer = MapBuilder.createItem();
             prestaLayer.setName("Prestations");
             prestaLayer.items().addAll( buildLayers(prestaStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             prestaLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            items.add(prestaLayer);
-
+            sirsGroup.items().add(prestaLayer);
+                        
             // Mesures d'évènements
             final BeanStore mesuresStore = new BeanStore(
                     suppliers.get(LaisseCrue.class),
@@ -366,8 +372,8 @@ public class CorePlugin extends Plugin {
             mesuresLayer.setName("Mesures d'évènements");
             mesuresLayer.items().addAll( buildLayers(mesuresStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             mesuresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            items.add(mesuresLayer);
-
+            sirsGroup.items().add(mesuresLayer);
+                        
             // Positionnement des documents
             final BeanStore documentsStore = new BeanStore(
                     suppliers.get(PositionDocument.class),
@@ -377,8 +383,8 @@ public class CorePlugin extends Plugin {
             documentsLayer.setName("Documents");
             documentsLayer.items().addAll(buildLayers(documentsStore, mapDesTypesDeDocs, nameMap, colors, createDefaultSelectionStyle(),false) );
             documentsLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            items.add(documentsLayer);
-
+            sirsGroup.items().add(documentsLayer);
+            
             // Proprietes et gardes
             final BeanStore periodesLocaliseesTroncon = new BeanStore(
                     suppliers.get(ProprieteTroncon.class),
@@ -387,8 +393,8 @@ public class CorePlugin extends Plugin {
             periodesLocaliseesLayer.setName("Propriétés et gardiennages");
             periodesLocaliseesLayer.items().addAll(buildLayers(periodesLocaliseesTroncon, nameMap, colors, createDefaultSelectionStyle(), false));
             periodesLocaliseesLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            items.add(periodesLocaliseesLayer);
-
+            sirsGroup.items().add(periodesLocaliseesLayer);
+            
             // Emprises communales
             //final BeanStore communesStore = new BeanStore(suppliers.get(CommuneTroncon.class));
 

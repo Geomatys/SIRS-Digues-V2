@@ -95,7 +95,6 @@ public class Session extends SessionCore {
 
     ////////////////////////////////////////////////////////////////////////////
     private MapContext mapContext;
-    private final MapItem sirsGroup = MapBuilder.createItem();
     private final MapItem backgroundGroup = MapBuilder.createItem();
 
     private FXMainFrame frame = null;
@@ -140,7 +139,6 @@ public class Session extends SessionCore {
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
         super(couchDbConnector);
-        sirsGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
         final String referenceUrl;
         if(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.REFERENCE_URL)!=null){
             referenceUrl = SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.REFERENCE_URL);
@@ -171,10 +169,7 @@ public class Session extends SessionCore {
             mapContext.setName("Carte");
 
             try {
-                //sirs layers
-                sirsGroup.setName("Description des ouvrages");
-                mapContext.items().add(0,sirsGroup);
-
+                //modules layers
                 final Plugin[] plugins = Plugins.getPlugins();
                 final HashMap<String, ModuleDescription> moduleDescriptions = new HashMap<>(plugins.length);
                 for(Plugin plugin : plugins){
@@ -188,7 +183,7 @@ public class Session extends SessionCore {
                         setPluginProvider(item, plugin);
                         ModuleDescription.getLayerDescription(item).ifPresent(desc -> d.layers.add(desc));
                     }
-                    sirsGroup.items().addAll(mapItems);
+                    mapContext.items().addAll(mapItems);
                     moduleDescriptions.put(d.getName(), d);
                 }
                 mapContext.setAreaOfInterest(mapContext.getBounds(true));
@@ -245,11 +240,6 @@ public class Session extends SessionCore {
         for (final MapItem child : mapItem.items()) {
             setPluginProvider(child, provider);
         }
-    }
-
-    public synchronized MapItem getSirsLayerGroup() {
-        getMapContext();
-        return sirsGroup;
     }
 
     public synchronized MapItem getBackgroundLayerGroup() {
