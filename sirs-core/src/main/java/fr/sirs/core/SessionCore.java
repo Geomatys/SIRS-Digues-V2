@@ -6,8 +6,6 @@ import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.PositionProfilTraversRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 
-import java.text.CollationKey;
-import java.text.Collator;
 import java.util.Comparator;
 import java.util.List;
 
@@ -390,25 +388,28 @@ public class SessionCore implements ApplicationContextAware {
     // REFERENCES
     private static final List<Class<? extends ReferenceType>> REFERENCES = new ArrayList<>();
     private static final List<Class<? extends Element>> ELEMENTS = new ArrayList<>();
-    private static void initReferences(){
-        ServiceLoader.load(ReferenceType.class).forEach((ReferenceType t) -> {
-            REFERENCES.add(t.getClass());
-            Collections.sort(REFERENCES, new Comparator<Class<? extends ReferenceType>>() {
-                @Override
-                public int compare(Class<? extends ReferenceType> o1, Class<? extends ReferenceType> o2) {
-                    final ResourceBundle bdl1 = ResourceBundle.getBundle(o1.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
-                    final ResourceBundle bdl2 = ResourceBundle.getBundle(o2.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
-                    return bdl1.getString(BUNDLE_KEY_CLASS).compareTo(bdl2.getString(BUNDLE_KEY_CLASS));
-                }
-            });
-        });
-    }
+    private static final Comparator<Class<? extends Element>> BUNDLE_CLASS_NAME_COMPARATOR = new Comparator<Class<? extends Element>>() {
+            @Override
+            public int compare(Class<? extends Element> o1, Class<? extends Element> o2) {
+                final ResourceBundle bdl1 = ResourceBundle.getBundle(o1.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
+                final ResourceBundle bdl2 = ResourceBundle.getBundle(o2.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
+                return bdl1.getString(BUNDLE_KEY_CLASS).compareTo(bdl2.getString(BUNDLE_KEY_CLASS));
+            }
+        };
+    public Comparator<Class<? extends Element>> getBundleClassNameComparator(){return BUNDLE_CLASS_NAME_COMPARATOR;}
+    
     private static void initElements(){
-        ServiceLoader.load(Element.class).forEach((Element t) -> ELEMENTS.add(t.getClass()));
+        final Iterator<Element> it = ServiceLoader.load(Element.class).iterator();
+        while(it.hasNext()){
+            final Class c = it.next().getClass();
+            ELEMENTS.add(c);
+            if(ReferenceType.class.isAssignableFrom(c)) REFERENCES.add(c);
+        }
+        Collections.sort(REFERENCES, BUNDLE_CLASS_NAME_COMPARATOR);
+        Collections.sort(ELEMENTS, BUNDLE_CLASS_NAME_COMPARATOR);
     }
 
     static{
-        initReferences();
         initElements();
     }
 
