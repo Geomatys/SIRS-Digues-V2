@@ -22,7 +22,7 @@
                <children>
                   <HBox alignment="CENTER_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity">
                      <children>
-                        <Label text="Modèles de documents" />
+                        <Label styleClass="pojotable-header" text="Modèles de documents" />
                         <Pane HBox.hgrow="ALWAYS" />
                         <HBox styleClass="buttonbarfull">
                            <children>
@@ -45,7 +45,7 @@
             </VBox>
             <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="1">
                <children>
-                  <Label maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefHeight="20.0" prefWidth="482.0" text="Génération du document" />
+                  <Label maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefHeight="20.0" prefWidth="482.0" styleClass="pojotable-header" text="Génération du document" />
                   <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="gray-light">
                      <center>
                         <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER">
@@ -101,7 +101,7 @@
                <children>
                   <HBox maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefHeight="26.0">
                      <children>
-                        <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Structure du modèle sélectionné" />
+                        <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="pojotable-header" text="Structure du modèle sélectionné" />
                      </children>
                   </HBox>
                   <ScrollPane fitToWidth="true" prefHeight="514.0" prefWidth="482.0" VBox.vgrow="ALWAYS">

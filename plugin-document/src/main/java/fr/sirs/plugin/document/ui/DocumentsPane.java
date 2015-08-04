@@ -56,6 +56,7 @@ import java.util.prefs.Preferences;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -136,6 +137,13 @@ public class DocumentsPane extends GridPane {
         setFolderButton.setGraphic(new ImageView(SET_BUTTON_IMAGE));
         addDocButton.setGraphic(new ImageView(ADDD_BUTTON_IMAGE));
         listButton.setGraphic(new ImageView(LIST_BUTTON_IMAGE));
+        
+        addFolderButton.setTooltip(new Tooltip("Ajouter un dossier"));
+        importDocButton.setTooltip(new Tooltip("Importer un fichier"));
+        deleteDocButton.setTooltip(new Tooltip("Supprimer un fichier"));
+        setFolderButton.setTooltip(new Tooltip("Configurer le dossier racine"));
+        addDocButton.setTooltip(new Tooltip("Ajouter un dossier dynamique"));
+        listButton.setTooltip(new Tooltip("Exporter le sommaire"));
         
         addFolderButton.getStyleClass().add(BUTTON_STYLE);
         importDocButton.getStyleClass().add(BUTTON_STYLE);
@@ -686,10 +694,17 @@ public class DocumentsPane extends GridPane {
             if (ft != null) {
                 final File f          = ft.getValue();
                 if (f != null && (getBooleanProperty(f, DYNAMIC) || f.getName().equals(DOCUMENT_FOLDER))) {
+                    if (getBooleanProperty(f, DYNAMIC)) {
+                        button.setTooltip(new Tooltip("Mettre a jour le fichier dynamique"));
+                    } else if (f.getName().equals(DOCUMENT_FOLDER)) {
+                        button.setTooltip(new Tooltip("Exporter le dossier de synthèse"));
+                    }
                     button.setVisible(true);
                 } else {
                     button.setVisible(false);
                 }
+            } else {
+                button.setVisible(false);
             }
         }
     }

@@ -49,6 +49,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.sis.util.logging.Logging;
@@ -83,6 +84,12 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
     @FXML private Button uiGenerateBtn;
     
     @FXML private TextField uiDocumentNameField;
+    
+    @FXML private Button uiSaveModelBtn;
+    
+    @FXML private Button uiDeleteBtn;
+    
+    @FXML private Button uiNewModelBtn;
 
     private static final Logger LOGGER = Logging.getLogger(DocumentsPane.class);
     
@@ -104,6 +111,12 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         final Previews previewRepository = Injector.getSession().getPreviews();
 
+        uiAddParagrapheBtn.setTooltip(new Tooltip("Ajouter un paragraphe au modèle"));
+        uiGenerateBtn.setTooltip(new Tooltip("Générer le document dynamique"));
+        uiSaveModelBtn.setTooltip(new Tooltip("Sauvegarder le modèle"));
+        uiDeleteBtn.setTooltip(new Tooltip("Supprimer le modèle"));
+        uiNewModelBtn.setTooltip(new Tooltip("Créer un nouveau modèle"));
+        
         // Gestion de la liste de système d'endiguements et de tronçons associés
         uiSECombo.setEditable(false);
         uiSECombo.valueProperty().addListener(this::systemeEndiguementChange);
