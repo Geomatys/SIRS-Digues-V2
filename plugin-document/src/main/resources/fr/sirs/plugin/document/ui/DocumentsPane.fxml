@@ -34,6 +34,7 @@
             <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="140.0" prefWidth="-1.0" text="Lieu classement" />
             <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="50.0" prefWidth="-1.0" text="Intégré au DO de synthèse" />
             <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="50.0" prefWidth="-1.0" text="Publier" />
+            <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="50.0" prefWidth="-1.0" text="Ouvrir" />
         </columns>
          <columnResizePolicy>
             <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

@@ -46,12 +46,14 @@ import fr.sirs.plugin.document.DynamicDocumentTheme;
 import fr.sirs.plugin.document.ODTUtils;
         
 import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
+import java.awt.Desktop;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
@@ -96,6 +98,7 @@ public class DocumentsPane extends GridPane {
     private static final Image SET_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/set.png"));
     private static final Image LIST_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/list.png"));
     private static final Image PUB_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/publish.png"));
+    private static final Image OP_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/publish.png"));
     
     private static final DateFormat DATE_FORMATTER = new SimpleDateFormat("dd/MM/yyyy");
     
@@ -247,6 +250,21 @@ public class DocumentsPane extends GridPane {
             @Override
             public TreeTableCell call(Object param) {
                 return new PublicationCell(root);
+            }
+        });
+        
+        // open column
+        tree1.getColumns().get(7).setCellValueFactory(new Callback() {
+            @Override
+            public ObservableValue call(Object param) {
+                final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
+                return new SimpleObjectProperty(f);
+            }
+        });
+        tree1.getColumns().get(7).setCellFactory(new Callback() {
+            @Override
+            public TreeTableCell call(Object param) {
+                return new OpenCell();
             }
         });
         
@@ -699,6 +717,66 @@ public class DocumentsPane extends GridPane {
                     } else if (f.getName().equals(DOCUMENT_FOLDER)) {
                         button.setTooltip(new Tooltip("Exporter le dossier de synthèse"));
                     }
+                    button.setVisible(true);
+                } else {
+                    button.setVisible(false);
+                }
+            } else {
+                button.setVisible(false);
+            }
+        }
+    }
+    
+    private static class OpenCell extends TreeTableCell {
+
+        private final Button button = new Button();
+
+        
+        public OpenCell() {
+            setGraphic(button);
+            button.setGraphic(new ImageView(OP_BUTTON_IMAGE));
+            button.getStyleClass().add(BUTTON_STYLE);
+            button.disableProperty().bind(editingProperty());
+            button.setOnAction(this::handle);
+            
+        }
+        
+        public void handle(ActionEvent event) {
+            final FileTreeItem item = (FileTreeItem) getItem();
+            if (item != null && item.getValue() != null) {
+                File file = item.getValue();
+
+                //first check if Desktop is supported by Platform or not
+                if(!Desktop.isDesktopSupported()){
+                    showErrorDialog("Impossible d'ouvrir des fichiers sur cette application.");
+                    return;
+                }
+
+                 new Thread(new Runnable() {  
+                        @Override  
+                        public void run() {  
+                            try {
+                                Desktop.getDesktop().open(file);
+                            } catch (IOException ex) {
+                               LOGGER.log(Level.WARNING, null, ex);
+                                showErrorDialog(ex.getMessage());
+                            }
+                        }
+                 }).start();
+
+            }
+        }
+        
+        
+        
+        @Override
+        public void updateItem(Object item, boolean empty) {
+            super.updateItem(item, empty);
+            final FileTreeItem ft = (FileTreeItem) item;
+            if (ft != null) {
+                final File f          = ft.getValue();
+                if (f != null && !f.isDirectory()) {
+                    button.setTooltip(new Tooltip("Ouvrir le fichier"));
                     button.setVisible(true);
                 } else {
                     button.setVisible(false);
