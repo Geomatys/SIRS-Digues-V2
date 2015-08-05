@@ -127,7 +127,7 @@ public class ElementReseauConventionImporter extends GenericPositionDocumentImpo
                 position.setPositionDebut(reseau.getPositionDebut());
                 position.setPositionFin(reseau.getPositionFin());
                 
-                position.setObjetReseauId(reseau.getId());
+                position.setObjetId(reseau.getId());
                 position.setSirsdocument(convention.getId());
             } else {
                 position = null;

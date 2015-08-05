@@ -267,7 +267,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_gcSn0DqiEeWreJjG-DKPRw" name="dossierComplet : EBoolean = false" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@3c5eaa7c{platform:/resource/plugin-aot-cot/model/aot_cot.ecore#//Convention/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_gcSn0DqiEeWreJjG-DKPRw" name="dossierComplet : EBoolean = false" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="aot_cot.ecore#//Convention/dossierComplet"/>
           <semanticElements xmi:type="ecore:EAttribute" href="aot_cot.ecore#//Convention/dossierComplet"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_jF2EADqiEeWreJjG-DKPRw" labelAlignment="LEFT">
@@ -311,7 +311,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_53eBsDqiEeWreJjG-DKPRw" name="montantRedevance : EDouble = 0.0" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@37242f9a{platform:/resource/plugin-aot-cot/model/aot_cot.ecore#//Convention/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_53eBsDqiEeWreJjG-DKPRw" name="montantRedevance : EDouble = 0.0" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="aot_cot.ecore#//Convention/montantRedevance"/>
           <semanticElements xmi:type="ecore:EAttribute" href="aot_cot.ecore#//Convention/montantRedevance"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_8AlDQDqiEeWreJjG-DKPRw" labelAlignment="LEFT">
