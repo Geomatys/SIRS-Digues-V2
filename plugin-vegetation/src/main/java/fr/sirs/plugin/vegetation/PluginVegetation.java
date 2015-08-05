@@ -16,6 +16,8 @@ import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.core.model.sql.VegetationSqlHelper;
 import fr.sirs.plugin.vegetation.map.CreateParcelleTool;
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +27,9 @@ import java.util.logging.Level;
 import fr.sirs.map.FXMapPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
+import javax.imageio.ImageIO;
 import javax.measure.unit.NonSI;
+import javax.swing.ImageIcon;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.QueryBuilder;
@@ -207,16 +211,17 @@ public class PluginVegetation extends Plugin {
         return items;
     }
 
-    private static MutableStyle createParcelleStyle(){
+    private static MutableStyle createParcelleStyle() throws IOException{
         final MutableStyle style = SF.style();
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
         final MutableRule rule = SF.rule();
         style.featureTypeStyles().add(fts);
         fts.rules().add(rule);
 
-        final ExternalGraphic external = SF.externalGraphic(PluginVegetation.class.getResource("/fr/sirs/plugin/vegetation/style/parcelle.png"), "image/png");
+        final BufferedImage img = ImageIO.read(Thread.currentThread().getContextClassLoader().getResource("/fr/sirs/plugin/vegetation/style/parcelle.png"));
+        final ExternalGraphic external = SF.externalGraphic(new ImageIcon(img),Collections.EMPTY_LIST);
 
-        final Expression size = GO2Utilities.FILTER_FACTORY.literal(2);
+        final Expression size = GO2Utilities.FILTER_FACTORY.literal(20);
         final List<GraphicalSymbol> symbols = new ArrayList<>();
         symbols.add(external);
         final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
