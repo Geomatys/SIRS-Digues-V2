@@ -16,7 +16,6 @@ import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.core.model.sql.VegetationSqlHelper;
 import fr.sirs.plugin.vegetation.map.CreateParcelleTool;
 import java.awt.Color;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,7 +26,6 @@ import fr.sirs.map.FXMapPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javax.measure.unit.NonSI;
-import javax.measure.unit.Unit;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.QueryBuilder;
@@ -37,8 +35,6 @@ import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.sld.xml.Specification;
-import org.geotoolkit.sld.xml.StyleXmlIO;
 import org.geotoolkit.style.MutableFeatureTypeStyle;
 import org.geotoolkit.style.MutableRule;
 import org.geotoolkit.style.MutableStyle;
@@ -114,6 +110,7 @@ public class PluginVegetation extends Plugin {
         final List<MapItem> items = new ArrayList<>();
         final MapItem vegetationGroup = MapBuilder.createItem();
         vegetationGroup.setName("Végétation");
+        vegetationGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
         items.add(vegetationGroup);
 
         try{
@@ -139,7 +136,7 @@ public class PluginVegetation extends Plugin {
             final MapLayer herbeLayer = MapBuilder.createFeatureLayer(herbeStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(herbeStore.getNames().iterator().next())));
             herbeLayer.setName("Strates herbacée");
-            herbeLayer.setStyle(createPolygonStyle(Color.YELLOW));
+            herbeLayer.setStyle(createPolygonStyle(Color.ORANGE));
             herbeLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             vegetationGroup.items().add(0,herbeLayer);
 
@@ -159,6 +156,7 @@ public class PluginVegetation extends Plugin {
             final org.geotoolkit.data.session.Session peuplementSession = peuplementStore.createSession(true);
             final MapItem peuplementGroup = MapBuilder.createItem();
             peuplementGroup.setName("Peuplements");
+            peuplementGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             vegetationGroup.items().add(0,peuplementGroup);
             //une couche pour chaque type
             final AbstractSIRSRepository<RefTypePeuplementVegetation> typePeuplementRepo = getSession().getRepositoryForClass(RefTypePeuplementVegetation.class);
@@ -168,6 +166,7 @@ public class PluginVegetation extends Plugin {
                 final FeatureCollection col = peuplementSession.getFeatureCollection(
                         QueryBuilder.filtered(peuplementStore.getNames().iterator().next(),filter));
                 final MapLayer layer = MapBuilder.createFeatureLayer(col);
+                layer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
                 layer.setStyle(createPolygonStyle(RandomStyleBuilder.randomColor()));
                 layer.setName(ref.getLibelle());
                 peuplementGroup.items().add(layer);
@@ -178,6 +177,7 @@ public class PluginVegetation extends Plugin {
             final BeanStore invasiveStore = new BeanStore(invasiveSupplier);
             final org.geotoolkit.data.session.Session invasiveSession = invasiveStore.createSession(true);
             final MapItem invasivesGroup = MapBuilder.createItem();
+            invasivesGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             invasivesGroup.setName("Invasives");
             vegetationGroup.items().add(0,invasivesGroup);
             //une couche pour chaque type
@@ -188,6 +188,7 @@ public class PluginVegetation extends Plugin {
                 final FeatureCollection col = invasiveSession.getFeatureCollection(
                         QueryBuilder.filtered(invasiveStore.getNames().iterator().next(),filter));
                 final MapLayer layer = MapBuilder.createFeatureLayer(col);
+                layer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
                 layer.setStyle(createPolygonStyle(RandomStyleBuilder.randomColor()));
                 layer.setName(ref.getLibelle());
                 invasivesGroup.items().add(layer);
@@ -195,6 +196,7 @@ public class PluginVegetation extends Plugin {
 
             //traitements
             final MapItem traitementGroup = MapBuilder.createItem();
+            traitementGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             traitementGroup.setName("Traitements");
             vegetationGroup.items().add(0,traitementGroup);
 
@@ -243,7 +245,7 @@ public class PluginVegetation extends Plugin {
 
         final Mark mark = SF.mark(extMark, fill, stroke);
 
-        final Expression size = GO2Utilities.FILTER_FACTORY.literal(18);
+        final Expression size = GO2Utilities.FILTER_FACTORY.literal(16);
         final List<GraphicalSymbol> symbols = new ArrayList<>();
         symbols.add(mark);
         final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
@@ -263,7 +265,7 @@ public class PluginVegetation extends Plugin {
         style.featureTypeStyles().add(fts);
         fts.rules().add(rule);
 
-        final Stroke stroke = SF.stroke(Color.WHITE, 0);
+        final Stroke stroke = SF.stroke(Color.BLACK, 1);
         final Fill fill = SF.fill(color);
         final PolygonSymbolizer symbolizer = SF.polygonSymbolizer(stroke, fill, null);
         rule.symbolizers().add(symbolizer);

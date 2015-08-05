@@ -1,0 +1,16 @@
+fr.sirs.core.model.ArbreVegetation
+fr.sirs.core.model.HerbaceeVegetation
+fr.sirs.core.model.InvasiveVegetation
+fr.sirs.core.model.ParamTraitementVegetation
+fr.sirs.core.model.ParcelleTraitementVegetation
+fr.sirs.core.model.ParcelleVegetation
+fr.sirs.core.model.PeuplementVegetation
+fr.sirs.core.model.PlanVegetation
+fr.sirs.core.model.PlanifParcelleVegetation
+fr.sirs.core.model.RefDensiteVegetation
+fr.sirs.core.model.RefDiametreVegetation
+fr.sirs.core.model.RefHauteurVegetation
+fr.sirs.core.model.RefSousTraitementVegetation
+fr.sirs.core.model.RefTraitementVegetation
+fr.sirs.core.model.RefTypeInvasiveVegetation
+fr.sirs.core.model.RefTypePeuplementVegetation
