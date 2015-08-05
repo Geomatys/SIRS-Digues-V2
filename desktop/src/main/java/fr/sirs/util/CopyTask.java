@@ -166,7 +166,7 @@ public class CopyTask extends Task<Boolean> {
                     return false;
                 }
 
-                // If no resolver has beeen given, we put input file directly in
+                // If no resolver has been given, we put input file directly in
                 // destination folder. otherwise, we reproduce folder structure
                 // from given resolver to current input file.
                 Path target = destination.resolve(resolver == null? p.getFileName() : resolver.apply(p));
