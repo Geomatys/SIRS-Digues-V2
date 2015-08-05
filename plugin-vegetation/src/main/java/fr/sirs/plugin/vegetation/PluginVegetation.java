@@ -71,7 +71,7 @@ public class PluginVegetation extends Plugin {
     public PluginVegetation() {
         name = NAME;
         loadingMessage.set("module végétation");
-        themes.add(new ButtonExampleTheme());
+        themes.add(new ParcelleTheme());
     }
 
     @Override

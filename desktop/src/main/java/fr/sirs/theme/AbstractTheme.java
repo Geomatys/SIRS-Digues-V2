@@ -89,7 +89,7 @@ public abstract class AbstractTheme extends Theme {
     }
 
 
-    protected static <T extends Positionable> ThemeManager<T> generateThemeManager(final Class<T> themeClass){
+    public static <T extends Positionable> ThemeManager<T> generateThemeManager(final Class<T> themeClass){
         final ResourceBundle bundle = ResourceBundle.getBundle(themeClass.getCanonicalName(), Locale.getDefault(),
                 Thread.currentThread().getContextClassLoader());
         final Function<String, ObservableList<T>> extractor = (String linearId) -> {
