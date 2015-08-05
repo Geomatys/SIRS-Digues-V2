@@ -128,6 +128,7 @@ public class Launcher extends Application {
                 primaryStage.show();
             } catch (Exception ex) {
                 GeotkFX.newExceptionDialog("impossible de se connecter au serveur CouchDb local.", ex).showAndWait();
+                SirsCore.LOGGER.log(Level.SEVERE, "Impossible d'initialiser le launcher.", ex);
                 System.exit(1);
             }
         });

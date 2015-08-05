@@ -31,6 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.WeakHashMap;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,14 +54,19 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
+import javafx.util.StringConverter;
+import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.TaskManager;
@@ -82,6 +88,11 @@ public class PhotoImportPane extends StackPane {
     private static final Pattern IMG_PATTERN = Pattern.compile("(?i)^(\\w{32})(.*)(\\.(jpe?g|png|bmp|tiff?))$");
 
     public static final Image ICON_TRASH_BLACK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TRASH_O,16,Color.BLACK),null);
+
+    private static enum DIRECTION {
+        UP,
+        DOWN;
+    }
 
     @FXML
     private VBox uiParameterContainer;
@@ -134,6 +145,9 @@ public class PhotoImportPane extends StackPane {
     private Button uiImportBtn;
 
     @FXML
+    private TitledPane uiPrefixTitledPane;
+
+    @FXML
     private Label uiCopyMessage;
     private final Tooltip copyMessageTooltip = new Tooltip();
 
@@ -153,6 +167,8 @@ public class PhotoImportPane extends StackPane {
     private final SimpleObjectProperty<Path> subDirProperty = new SimpleObjectProperty<>();
 
     private final SimpleObjectProperty<CopyTask> copyTaskProperty = new SimpleObjectProperty<>();
+
+    private final ObservableList<PropertyDescriptor> availablePrefixes = FXCollections.observableArrayList();
 
     public PhotoImportPane() {
         super();
@@ -176,6 +192,7 @@ public class PhotoImportPane extends StackPane {
 
         uiPrefixListView.setItems(FXCollections.observableArrayList());
         uiPrefixListView.setCellFactory(param -> new PrefixCell());
+        uiPrefixListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         // Set button icons
         uiAddPrefixBtn.setGraphic(new ImageView(SIRS.ICON_ADD_BLACK));
@@ -186,6 +203,14 @@ public class PhotoImportPane extends StackPane {
         uiMoveDownBtn.setText(null);
         uiDeletePrefixBtn.setGraphic(new ImageView(ICON_TRASH_BLACK));
         uiDeletePrefixBtn.setText(null);
+
+        try {
+            availablePrefixes.addAll(SIRS.listSimpleProperties(Photo.class).values());
+        } catch (IntrospectionException ex) {
+            SIRS.LOGGER.log(Level.WARNING, "Cannot identify available prefixes.", ex);
+            uiPrefixTitledPane.setVisible(false);
+            uiPrefixTitledPane.setManaged(false);
+        }
     }
 
     private void sourceChanged(final ObservableValue<? extends Path> obs, final Path oldValue, final Path newValue) {
@@ -256,60 +281,44 @@ public class PhotoImportPane extends StackPane {
 
     @FXML
     void addPrefix(ActionEvent event) {
-        try {
-            uiPrefixListView.getItems().addAll(SIRS.listSimpleProperties(Photo.class).values());
-        } catch (IntrospectionException ex) {
-            SIRS.LOGGER.log(Level.SEVERE, null, ex);
+        ComboBox<PropertyDescriptor> choices = new ComboBox<>();
+        SIRS.initCombo(choices, availablePrefixes, null);
+        choices.setConverter(new DescriptorConverter());
+
+        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, null, ButtonType.CANCEL, ButtonType.OK);
+        alert.setResizable(true);
+        alert.setWidth(400);
+        alert.getDialogPane().setContent(choices);
+
+        ButtonType result = alert.showAndWait().orElse(ButtonType.CANCEL);
+        if (ButtonType.OK.equals(result)) {
+            PropertyDescriptor value = choices.getValue();
+            if (value != null) {
+                uiPrefixListView.getItems().add(value);
+                availablePrefixes.remove(value);
+            }
         }
     }
 
     @FXML
     void deletePrefix(ActionEvent event) {
-        final ObservableList<PropertyDescriptor> selected = uiPrefixListView.getSelectionModel().getSelectedItems();
+        final MultipleSelectionModel<PropertyDescriptor> selectionModel = uiPrefixListView.getSelectionModel();
+        final ObservableList<PropertyDescriptor> selected = selectionModel.getSelectedItems();
         if (!selected.isEmpty()) {
             uiPrefixListView.getItems().removeAll(selected);
+            availablePrefixes.addAll(selected);
         }
+        selectionModel.clearSelection();
     }
 
     @FXML
     void movePrefixDown(ActionEvent event) {
-        final ObservableList<PropertyDescriptor> items = uiPrefixListView.getItems();
-        final ArrayList<Integer> selected = new ArrayList<>(uiPrefixListView.getSelectionModel().getSelectedIndices());
-        // Hack to allow listIterator.previous immediatly.
-        selected.add(items.size());
-
-        /* We won't move items while browsing selected indices, to avoid messing with iterator position.
-         * We'll store movements to make here (in the order they must be performed), and execute them afterhand.
-        */
-        final LinkedHashMap<Integer, Integer> movements = new LinkedHashMap<>();
-
-        ListIterator<Integer> sIt = selected.listIterator(selected.size() -1);
-        while (sIt.hasPrevious()) {
-            final Integer index = sIt.previous();
-            final Integer moveTo = index + 1;
-            if (index >= items.size() -1) continue;
-            // If next element is also selected, we cannot move this one.
-            if (sIt.hasNext()) {// TODO 
-                final Integer nextSelected = sIt.next();
-                // rollback iterator position
-                sIt.previous();
-                if (moveTo >= nextSelected)
-                    continue;
-            }
-            movements.put(index, moveTo);
-        }
-
-        final Iterator<Map.Entry<Integer, Integer>> movIt = movements.entrySet().iterator();
-            // move element
-        while (movIt.hasNext()) {
-            final Map.Entry<Integer, Integer> movement = movIt.next();
-            items.add(movement.getValue(), items.remove((int)movement.getKey()));
-        }
+        moveSelectedElements(uiPrefixListView, DIRECTION.DOWN);
     }
 
     @FXML
     void movePrefixUp(ActionEvent event) {
-
+        moveSelectedElements(uiPrefixListView, DIRECTION.UP);
     }
 
     @FXML
@@ -444,6 +453,84 @@ public class PhotoImportPane extends StackPane {
         });
     }
 
+    /**
+     * Move elements selected in the given listview one step up or down.
+     * @param source The list view to work with
+     * @param direction Direction to move selected elements to (up or down).
+     */
+    static void moveSelectedElements(final ListView source, final DIRECTION direction) {
+        ArgumentChecks.ensureNonNull("Input list", source);
+        ArgumentChecks.ensureNonNull("Movement direction", direction);
+
+        final boolean up = DIRECTION.UP.equals(direction);
+        final ObservableList<PropertyDescriptor> items = source.getItems();
+        final MultipleSelectionModel<PropertyDescriptor> selectionModel = source.getSelectionModel();
+        // defensive copy
+        final ArrayList<Integer> selected = new ArrayList<>(selectionModel.getSelectedIndices());
+
+        final int[] newSelection = new int[selected.size()];
+        int counter = 0;
+        /* We won't move items while browsing selected indices, to avoid messing with iterator position.
+         * We'll store movements to make here (in the order they must be performed), and execute them afterhand.
+         */
+        final LinkedHashMap<Integer, Integer> movements = new LinkedHashMap<>();
+
+        final ListIterator<Integer> sIt;
+        if (up) {
+            sIt = selected.listIterator();
+        } else {
+            sIt = selected.listIterator(selected.size());
+        }
+
+        while (up? sIt.hasNext() : sIt.hasPrevious()) {
+            final Integer index = up? sIt.next() : sIt.previous();
+            // If element is on the edge of list, we don't move it.
+            if (up? index <= 0 : index >= items.size() -1) continue;
+
+            final Integer moveTo = up? index -1 : index + 1;
+            // If next element is also selected, and it won't move, we cannot move this one neither.
+            if (up)
+                sIt.previous();
+            else
+                sIt.next();
+            if (up? sIt.hasPrevious() : sIt.hasNext()) {
+                final Integer nextSelected = up ? sIt.previous() : sIt.next();
+                // rollback iterator position
+                if (up)
+                    sIt.next();
+                else
+                    sIt.previous();
+
+                if (moveTo >= nextSelected && !movements.containsKey(nextSelected)) {
+                    if (up)
+                        sIt.next();
+                    else
+                        sIt.previous();
+                    newSelection[counter++] = index;
+                    continue;
+                }
+            }
+            if (up)
+                sIt.next();
+            else
+                sIt.previous();
+
+            movements.put(index, moveTo);
+            newSelection[counter++] = moveTo;
+        }
+
+        final Iterator<Map.Entry<Integer, Integer>> movIt = movements.entrySet().iterator();
+        // move elements
+        while (movIt.hasNext()) {
+            final Map.Entry<Integer, Integer> movement = movIt.next();
+            items.add(movement.getValue(), items.remove((int)movement.getKey()));
+        }
+
+        // update selection to keep same objects selected.
+        selectionModel.clearSelection();
+        selectionModel.selectIndices(-1, newSelection);
+    }
+
     /*
      * UTILITIES
      */
@@ -566,7 +653,7 @@ public class PhotoImportPane extends StackPane {
     }
 
     /**
-     * A cell which display proper title for a given property descriptor.
+     * A cell displaying proper title for a given property descriptor.
      */
     private static class PrefixCell extends ListCell<PropertyDescriptor> {
 
@@ -580,6 +667,29 @@ public class PhotoImportPane extends StackPane {
             } else {
                 setText(mapper.mapPropertyName(item.getName()));
             }
+        }
+    }
+
+    /**
+     * A converter displaying proper title for a given property descriptor.
+     */
+    private static class DescriptorConverter extends StringConverter<PropertyDescriptor> {
+
+        final WeakHashMap<String, PropertyDescriptor> fromString = new WeakHashMap<>();
+
+        final LabelMapper mapper = LabelMapper.get(Photo.class);
+
+        @Override
+        public String toString(PropertyDescriptor object) {
+            if (object == null) return "";
+            final String pName = mapper.mapPropertyName(object.getName());
+            fromString.put(pName, object);
+            return pName;
+        }
+
+        @Override
+        public PropertyDescriptor fromString(String string) {
+            return fromString.get(string);
         }
 
     }

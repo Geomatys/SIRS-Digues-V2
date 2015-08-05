@@ -95,6 +95,8 @@ public class SirsStringConverter extends StringConverter {
             }
         } else if(item!=null && item.getClass().isEnum()){
             text.append(((Enum)item).name());
+        } else if (item instanceof Character) {
+            text.append(item);
         }
 
         // Whatever object we've got, if we can append a libelle, we do.
