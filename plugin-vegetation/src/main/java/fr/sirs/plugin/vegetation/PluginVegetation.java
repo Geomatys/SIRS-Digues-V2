@@ -4,12 +4,20 @@ import fr.sirs.Plugin;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ArbreVegetation;
 import fr.sirs.core.model.HerbaceeVegetation;
+import fr.sirs.core.model.InvasiveVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
+import fr.sirs.core.model.PeuplementVegetation;
+import fr.sirs.core.model.RefTypeInvasiveVegetation;
+import fr.sirs.core.model.RefTypePeuplementVegetation;
 import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.core.model.sql.VegetationSqlHelper;
 import fr.sirs.plugin.vegetation.map.CreateParcelleTool;
+import java.awt.Color;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,14 +26,37 @@ import java.util.logging.Level;
 import fr.sirs.map.FXMapPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
+import javax.measure.unit.NonSI;
+import javax.measure.unit.Unit;
+import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.QueryBuilder;
+import org.geotoolkit.display2d.GO2Utilities;
+import org.geotoolkit.font.FontAwesomeIcons;
+import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.sld.xml.Specification;
 import org.geotoolkit.sld.xml.StyleXmlIO;
+import org.geotoolkit.style.MutableFeatureTypeStyle;
+import org.geotoolkit.style.MutableRule;
 import org.geotoolkit.style.MutableStyle;
+import org.geotoolkit.style.MutableStyleFactory;
+import org.geotoolkit.style.RandomStyleBuilder;
+import static org.geotoolkit.style.StyleConstants.*;
+import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory2;
+import org.opengis.filter.expression.Expression;
+import org.opengis.style.ExternalGraphic;
+import org.opengis.style.ExternalMark;
+import org.opengis.style.Fill;
+import org.opengis.style.Graphic;
+import org.opengis.style.GraphicalSymbol;
+import org.opengis.style.Mark;
+import org.opengis.style.PointSymbolizer;
+import org.opengis.style.PolygonSymbolizer;
+import org.opengis.style.Stroke;
 
 /**
  * Minimal example of a plugin.
@@ -36,6 +67,8 @@ import org.geotoolkit.style.MutableStyle;
 public class PluginVegetation extends Plugin {
     private static final String NAME = "plugin-vegetation";
     private static final String TITLE = "Module végétation";
+    private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
+    private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
 
     private final VegetationToolBar toolbar = new VegetationToolBar();
 
@@ -94,8 +127,7 @@ public class PluginVegetation extends Plugin {
             vegetationGroup.items().add(0,parcelleLayer);
 
             try{
-                final MutableStyle style = new StyleXmlIO().readStyle(Thread.currentThread().getContextClassLoader()
-                        .getResource("/fr/sirs/plugin/vegetation/style/parcelle.xml"), Specification.SymbologyEncoding.V_1_1_0);
+                final MutableStyle style = createParcelleStyle();
                 parcelleLayer.setStyle(style);
             }catch(Exception ex){
                 SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
@@ -107,6 +139,7 @@ public class PluginVegetation extends Plugin {
             final MapLayer herbeLayer = MapBuilder.createFeatureLayer(herbeStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(herbeStore.getNames().iterator().next())));
             herbeLayer.setName("Strates herbacée");
+            herbeLayer.setStyle(createPolygonStyle(Color.YELLOW));
             herbeLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             vegetationGroup.items().add(0,herbeLayer);
 
@@ -117,17 +150,48 @@ public class PluginVegetation extends Plugin {
                     .getFeatureCollection(QueryBuilder.all(arbreStore.getNames().iterator().next())));
             arbreLayer.setName("Arbres exceptionnels");
             arbreLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            arbreLayer.setStyle(createArbreStyle());
             vegetationGroup.items().add(0,arbreLayer);
 
             //peuplements
+            final StructBeanSupplier peuplementSupplier = new StructBeanSupplier(PeuplementVegetation.class, () -> getSession().getRepositoryForClass(PeuplementVegetation.class).getAll());
+            final BeanStore peuplementStore = new BeanStore(peuplementSupplier);
+            final org.geotoolkit.data.session.Session peuplementSession = peuplementStore.createSession(true);
             final MapItem peuplementGroup = MapBuilder.createItem();
             peuplementGroup.setName("Peuplements");
             vegetationGroup.items().add(0,peuplementGroup);
+            //une couche pour chaque type
+            final AbstractSIRSRepository<RefTypePeuplementVegetation> typePeuplementRepo = getSession().getRepositoryForClass(RefTypePeuplementVegetation.class);
+            for(RefTypePeuplementVegetation ref : typePeuplementRepo.getAll()){
+                final String id = ref.getId();
+                final Filter filter = FF.equal(FF.property("typePeuplementId"),FF.literal(id));
+                final FeatureCollection col = peuplementSession.getFeatureCollection(
+                        QueryBuilder.filtered(peuplementStore.getNames().iterator().next(),filter));
+                final MapLayer layer = MapBuilder.createFeatureLayer(col);
+                layer.setStyle(createPolygonStyle(RandomStyleBuilder.randomColor()));
+                layer.setName(ref.getLibelle());
+                peuplementGroup.items().add(layer);
+            }
 
             //invasives
+            final StructBeanSupplier invasiveSupplier = new StructBeanSupplier(InvasiveVegetation.class, () -> getSession().getRepositoryForClass(InvasiveVegetation.class).getAll());
+            final BeanStore invasiveStore = new BeanStore(invasiveSupplier);
+            final org.geotoolkit.data.session.Session invasiveSession = invasiveStore.createSession(true);
             final MapItem invasivesGroup = MapBuilder.createItem();
             invasivesGroup.setName("Invasives");
             vegetationGroup.items().add(0,invasivesGroup);
+            //une couche pour chaque type
+            final AbstractSIRSRepository<RefTypeInvasiveVegetation> typeInvasiveRepo = getSession().getRepositoryForClass(RefTypeInvasiveVegetation.class);
+            for(RefTypeInvasiveVegetation ref : typeInvasiveRepo.getAll()){
+                final String id = ref.getId();
+                final Filter filter = FF.equal(FF.property("typeInvasive"),FF.literal(id));
+                final FeatureCollection col = invasiveSession.getFeatureCollection(
+                        QueryBuilder.filtered(invasiveStore.getNames().iterator().next(),filter));
+                final MapLayer layer = MapBuilder.createFeatureLayer(col);
+                layer.setStyle(createPolygonStyle(RandomStyleBuilder.randomColor()));
+                layer.setName(ref.getLibelle());
+                invasivesGroup.items().add(layer);
+            }
 
             //traitements
             final MapItem traitementGroup = MapBuilder.createItem();
@@ -139,6 +203,71 @@ public class PluginVegetation extends Plugin {
         }
 
         return items;
+    }
+
+    private static MutableStyle createParcelleStyle(){
+        final MutableStyle style = SF.style();
+        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
+        final MutableRule rule = SF.rule();
+        style.featureTypeStyles().add(fts);
+        fts.rules().add(rule);
+
+        final ExternalGraphic external = SF.externalGraphic(PluginVegetation.class.getResource("/fr/sirs/plugin/vegetation/style/parcelle.png"), "image/png");
+
+        final Expression size = GO2Utilities.FILTER_FACTORY.literal(2);
+        final List<GraphicalSymbol> symbols = new ArrayList<>();
+        symbols.add(external);
+        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
+                size, DEFAULT_GRAPHIC_ROTATION, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
+
+        final PointSymbolizer ptStart = SF.pointSymbolizer("", FF.function("startPoint", FF.property("geometry")), null, NonSI.PIXEL, graphic);
+        final PointSymbolizer ptEnd = SF.pointSymbolizer("", FF.function("endPoint", FF.property("geometry")), null, NonSI.PIXEL, graphic);
+
+        rule.symbolizers().add(ptStart);
+        rule.symbolizers().add(ptEnd);
+        return style;
+    }
+
+    private static MutableStyle createArbreStyle() throws URISyntaxException{
+        final MutableStyle style = SF.style();
+        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
+        final MutableRule rule = SF.rule();
+        style.featureTypeStyles().add(fts);
+        fts.rules().add(rule);
+
+        final Stroke stroke = SF.stroke(Color.BLACK, 1);
+        final Fill fill = SF.fill(new Color(0, 200, 0));
+        final ExternalMark extMark = SF.externalMark(
+                    SF.onlineResource(IconBuilder.FONTAWESOME.toURI()),
+                    "ttf",FontAwesomeIcons.ICON_TREE.codePointAt(0));
+
+        final Mark mark = SF.mark(extMark, fill, stroke);
+
+        final Expression size = GO2Utilities.FILTER_FACTORY.literal(18);
+        final List<GraphicalSymbol> symbols = new ArrayList<>();
+        symbols.add(mark);
+        final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
+                size, DEFAULT_GRAPHIC_ROTATION, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
+
+        final PointSymbolizer ptSymbol = SF.pointSymbolizer("", FF.property("geometry"), null, NonSI.PIXEL, graphic);
+
+        rule.symbolizers().add(ptSymbol);
+        return style;
+    }
+
+
+    private static MutableStyle createPolygonStyle(Color color){
+        final MutableStyle style = SF.style();
+        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
+        final MutableRule rule = SF.rule();
+        style.featureTypeStyles().add(fts);
+        fts.rules().add(rule);
+
+        final Stroke stroke = SF.stroke(Color.WHITE, 0);
+        final Fill fill = SF.fill(color);
+        final PolygonSymbolizer symbolizer = SF.polygonSymbolizer(stroke, fill, null);
+        rule.symbolizers().add(symbolizer);
+        return style;
     }
     
 }
