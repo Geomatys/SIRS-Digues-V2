@@ -72,13 +72,6 @@ public class ListenPropertyPojoTable<T> extends PojoTable {
         this.propertyReference = propertyReference;
     }
     
-//    @Override
-//    protected Element createPojo() {
-//        final Element element = super.createPojo();
-//        addListener(element);
-//        return element;
-//    }
-    
     private void addListener(final Element element){
         if(propertyMethodToListen==null) return;
         
