@@ -619,8 +619,10 @@ public class FXPositionableVegetationPane extends BorderPane {
         else {
             // On privilégie le chemin AvecForeignParent
             if(element instanceof AvecForeignParent){
-                String id = ((AvecForeignParent) element).getForeignParentId();
-                candidate = getTronconFromElement(Injector.getSession().getRepositoryForClass(TronconDigue.class).get(id));
+                final String id = ((AvecForeignParent) element).getForeignParentId();
+                final Optional<? extends Element> opt = Injector.getSession().getElement(id);
+                if(!opt.isPresent()) return null;
+                candidate = getTronconFromElement(opt.get());
             }
             // Si on n'a pas (ou pas trouvé) de troncon via la référence ForeignParent on cherche via le conteneur
             if (candidate==null && element.getParent()!=null) {
