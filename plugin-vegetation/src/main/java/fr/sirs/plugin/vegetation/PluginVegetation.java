@@ -66,6 +66,9 @@ import org.opengis.style.Stroke;
  * @author Cédric Briançon (Geomatys)
  */
 public class PluginVegetation extends Plugin {
+
+    public static final String PARCELLE_LAYER_NAME = "Parcelles";
+
     private static final String NAME = "plugin-vegetation";
     private static final String TITLE = "Module végétation";
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
@@ -124,16 +127,12 @@ public class PluginVegetation extends Plugin {
             final BeanStore parcelleStore = new BeanStore(parcelleSupplier);
             final MapLayer parcelleLayer = MapBuilder.createFeatureLayer(parcelleStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(parcelleStore.getNames().iterator().next())));
-            parcelleLayer.setName("Parcelles");
+            parcelleLayer.setName(PARCELLE_LAYER_NAME);
             parcelleLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             vegetationGroup.items().add(0,parcelleLayer);
 
-            try{
-                final MutableStyle style = createParcelleStyle();
-                parcelleLayer.setStyle(style);
-            }catch(Exception ex){
-                SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-            }
+            parcelleLayer.setStyle(createParcelleStyle());
+            parcelleLayer.setSelectionStyle(createParcelleStyleSelected());
 
             //strates herbacée
             final StructBeanSupplier herbeSupplier = new StructBeanSupplier(HerbaceeVegetation.class, () -> getSession().getRepositoryForClass(HerbaceeVegetation.class).getAll());
@@ -222,8 +221,6 @@ public class PluginVegetation extends Plugin {
         final BufferedImage img = ImageIO.read(Thread.currentThread().getContextClassLoader().getResource("fr/sirs/plugin/vegetation/style/parcelle.png"));
         final ExternalGraphic external = SF.externalGraphic(new ImageIcon(img),Collections.EMPTY_LIST);
 
-//        final Mark mark = SF.getTriangleMark();
-
         final Expression rotationStart = FF.subtract(FF.literal(0),FF.function("toDegrees", FF.function("startAngle", FF.property("geometry"))));
         final Expression rotationEnd = FF.subtract(FF.literal(0),FF.function("toDegrees", FF.function("endAngle", FF.property("geometry"))));
 
@@ -243,6 +240,41 @@ public class PluginVegetation extends Plugin {
 
         //line
         final Stroke lineStroke = SF.stroke(Color.GRAY, 2, new float[]{8,8,8,8,8});
+        final LineSymbolizer lineSymbol = SF.lineSymbolizer(lineStroke, null);
+        rule.symbolizers().add(lineSymbol);
+
+        return style;
+    }
+
+    private static MutableStyle createParcelleStyleSelected() throws IOException{
+        final MutableStyle style = SF.style();
+        final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
+        final MutableRule rule = SF.rule();
+        style.featureTypeStyles().add(fts);
+        fts.rules().add(rule);
+
+        final BufferedImage img = ImageIO.read(Thread.currentThread().getContextClassLoader().getResource("fr/sirs/plugin/vegetation/style/parcelleselect.png"));
+        final ExternalGraphic external = SF.externalGraphic(new ImageIcon(img),Collections.EMPTY_LIST);
+
+        final Expression rotationStart = FF.subtract(FF.literal(0),FF.function("toDegrees", FF.function("startAngle", FF.property("geometry"))));
+        final Expression rotationEnd = FF.subtract(FF.literal(0),FF.function("toDegrees", FF.function("endAngle", FF.property("geometry"))));
+
+        final Expression size = GO2Utilities.FILTER_FACTORY.literal(252);
+        final List<GraphicalSymbol> symbols = new ArrayList<>();
+        symbols.add(external);
+        final Graphic graphicStart = SF.graphic(symbols, LITERAL_ONE_FLOAT,
+                size, rotationStart, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
+        final Graphic graphicEnd = SF.graphic(symbols, LITERAL_ONE_FLOAT,
+                size, rotationEnd, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
+
+        final PointSymbolizer ptStart = SF.pointSymbolizer("", FF.function("startPoint", FF.property("geometry")), null, NonSI.PIXEL, graphicStart);
+        final PointSymbolizer ptEnd = SF.pointSymbolizer("", FF.function("endPoint", FF.property("geometry")), null, NonSI.PIXEL, graphicEnd);
+
+        rule.symbolizers().add(ptStart);
+        rule.symbolizers().add(ptEnd);
+
+        //line
+        final Stroke lineStroke = SF.stroke(Color.GREEN, 3);
         final LineSymbolizer lineSymbol = SF.lineSymbolizer(lineStroke, null);
         rule.symbolizers().add(lineSymbol);
 

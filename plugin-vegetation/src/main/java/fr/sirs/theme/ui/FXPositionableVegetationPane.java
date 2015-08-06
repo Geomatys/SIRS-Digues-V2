@@ -23,6 +23,7 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.theme.ui.FXImportCoordinate;
 import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;

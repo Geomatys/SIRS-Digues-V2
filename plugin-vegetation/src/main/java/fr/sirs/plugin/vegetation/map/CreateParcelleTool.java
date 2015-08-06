@@ -3,6 +3,7 @@ package fr.sirs.plugin.vegetation.map;
 
 import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
+import static fr.sirs.SIRS.CSS_PATH;
 import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.component.AbstractSIRSRepository;
@@ -14,33 +15,39 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.ResourceInternationalString;
 import fr.sirs.util.SirsStringConverter;
 import java.awt.geom.Rectangle2D;
-import javafx.beans.binding.Bindings;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import static javafx.scene.layout.Region.USE_PREF_SIZE;
 import javafx.scene.layout.VBox;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display.VisitFilter;
+import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.canvas.AbstractGraphicVisitor;
 import org.geotoolkit.display2d.canvas.RenderingContext2D;
 import org.geotoolkit.display2d.primitive.ProjectedCoverage;
 import org.geotoolkit.display2d.primitive.ProjectedFeature;
 import org.geotoolkit.display2d.primitive.SearchAreaJ2D;
+import org.geotoolkit.filter.identity.DefaultFeatureId;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.AbstractEditionTool;
 import org.geotoolkit.gui.javafx.render2d.edition.AbstractEditionToolSpi;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
 import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
-import org.geotoolkit.internal.GeotkFX;
+import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
+import org.opengis.filter.identity.FeatureId;
 
 /**
  *
@@ -57,7 +64,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
                         "fr.sirs.plugin.vegetation.map.CreateParcelleTool.title",CreateParcelleTool.class.getClassLoader()),
                 new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle", 
                         "fr.sirs.plugin.vegetation.map.CreateParcelleTool.abstract",CreateParcelleTool.class.getClassLoader()),
-                GeotkFX.ICON_ADD);
+                new Image("fr/sirs/plugin/vegetation/parcelle.png"));
         }
 
         @Override
@@ -77,10 +84,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
     private final AbstractSIRSRepository<BorneDigue> borneRepo;
     private final AbstractSIRSRepository<TronconDigue> tronconRepo;
 
-
-    private final FXPositionableForm form = new FXPositionableForm();
     private final MouseListen mouseInputListener = new MouseListen();
-
     private final BorderPane wizard = new BorderPane();
 
     private ParcelleVegetation parcell = new ParcelleVegetation();
@@ -90,11 +94,12 @@ public class CreateParcelleTool extends AbstractEditionTool{
     private final Label lblLastPoint = new Label();
     private final Button end = new Button("Enregistrer");
 
-    private MapLayer tronconLayer = null;
-    private MapLayer borneLayer = null;
+    private FeatureMapLayer tronconLayer = null;
+    private FeatureMapLayer borneLayer = null;
 
     public CreateParcelleTool(FXMap map) {
         super(SPI);
+        wizard.getStylesheets().add(CSS_PATH);
 
         session = Injector.getSession();
         borneRepo = session.getRepositoryForClass(BorneDigue.class);
@@ -129,13 +134,24 @@ public class CreateParcelleTool extends AbstractEditionTool{
             }
         });
 
+        final Label lbl1 = new Label("Tronçon :");
+        final Label lbl2 = new Label("Borne de début :");
+        final Label lbl3 = new Label("Borne de fin :");
+        lbl1.getStyleClass().add("label-header");
+        lbl2.getStyleClass().add("label-header");
+        lbl3.getStyleClass().add("label-header");
+        lblTroncon.getStyleClass().add("label-text");
+        lblFirstPoint.getStyleClass().add("label-text");
+        lblLastPoint.getStyleClass().add("label-text");
+        end.getStyleClass().add("btn-single");
+        wizard.getStyleClass().add("blue-light");
 
-        final VBox vbox = new VBox(10,
-                new Label("Troncon :"),
+        final VBox vbox = new VBox(15,
+                lbl1,
                 lblTroncon,
-                new Label("Borne de début :"),
+                lbl2,
                 lblFirstPoint,
-                new Label("Borne de fin :"),
+                lbl3,
                 lblLastPoint,
                 end);
         vbox.setMaxSize(USE_PREF_SIZE,USE_PREF_SIZE);
@@ -148,6 +164,12 @@ public class CreateParcelleTool extends AbstractEditionTool{
         end.disableProperty().bind( parcell.linearIdProperty().isNull()
                                 .or(parcell.borneDebutIdProperty().isNull()
                                 .or(parcell.borneFinIdProperty().isNull())));
+        lblTroncon.setText("Sélectionner un tronçon sur la carte");
+        lblFirstPoint.setText("");
+        lblLastPoint.setText("");
+
+        if(tronconLayer!=null) tronconLayer.setSelectionFilter(null);
+        if(borneLayer!=null) borneLayer.setSelectionFilter(null);
     }
 
     @Override
@@ -171,10 +193,10 @@ public class CreateParcelleTool extends AbstractEditionTool{
         for(MapLayer layer : context.layers()){
             layer.setSelectable(false);
             if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
-                tronconLayer = layer;
+                tronconLayer = (FeatureMapLayer) layer;
             }
             if(layer.getName().equalsIgnoreCase(CorePlugin.BORNE_LAYER_NAME)){
-                borneLayer = layer;
+                borneLayer = (FeatureMapLayer) layer;
             }
         }
         component.setCursor(Cursor.CROSSHAIR);
@@ -216,6 +238,13 @@ public class CreateParcelleTool extends AbstractEditionTool{
                             tronconDigue = Injector.getSession().getRepositoryForClass(TronconDigue.class).get(tronconDigue.getDocumentId());
                             parcell.setLinearId(tronconDigue.getId());
                             lblTroncon.setText(cvt.toString(tronconDigue));
+                            lblFirstPoint.setText("Sélectionner une borne sur la carte");
+
+                            //troncon et bornes sur la carte
+                            tronconLayer.setSelectionFilter(GO2Utilities.FILTER_FACTORY.id(Collections.singleton(graphic.getCandidate().getIdentifier())));
+                            final Set<FeatureId> borneIds = new HashSet<>();
+                            for(String str : tronconDigue.getBorneIds()) borneIds.add(new DefaultFeatureId(str));
+                            borneLayer.setSelectionFilter(GO2Utilities.FILTER_FACTORY.id(borneIds));
                         }
                     }
                     @Override
@@ -236,6 +265,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
                         if(bean instanceof BorneDigue && tronconDigue.getBorneIds().contains(((BorneDigue)bean).getId())){
                             parcell.setBorneDebutId(((BorneDigue)bean).getId());
                             lblFirstPoint.setText(cvt.toString(bean));
+                            lblLastPoint.setText("Sélectionner une borne sur la carte");
                         }
                     }
                     @Override

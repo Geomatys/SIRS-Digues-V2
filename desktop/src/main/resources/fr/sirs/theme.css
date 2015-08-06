@@ -75,6 +75,10 @@
     -fx-font-weight: bold;
 }
 
+.label-text {
+    -fx-text-fill: white;
+}
+
 .label-header:selected{
     -fx-background-color: -sirs-color-normal;
 }

@@ -2,7 +2,12 @@
 package fr.sirs.plugin.vegetation;
 
 import fr.sirs.Injector;
+import fr.sirs.plugin.vegetation.map.CreateArbreTool;
+import fr.sirs.plugin.vegetation.map.CreateHerbaceTool;
+import fr.sirs.plugin.vegetation.map.CreateInvasiveTool;
 import fr.sirs.plugin.vegetation.map.CreateParcelleTool;
+import fr.sirs.plugin.vegetation.map.CreatePeuplementTool;
+import fr.sirs.plugin.vegetation.map.EditVegetationTool;
 import java.util.Iterator;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -11,7 +16,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
@@ -30,9 +34,6 @@ import org.geotoolkit.map.MapBuilder;
  * @author Johann Sorel
  */
 public class VegetationToolBar extends ToolBar {
-
-    private static final Image ICON_VEGETATION = new Image("fr/sirs/plugin/vegetation/vegetation.png");
-    private static final Image ICON_PARCELLE = new Image("fr/sirs/plugin/vegetation/parcelle.png");
 
     private Stage dialog = null;
 
@@ -54,16 +55,6 @@ public class VegetationToolBar extends ToolBar {
             }
         });
 
-
-//        final MenuItem menuPeuplement = new MenuItem("Peuplement");
-//        final MenuItem menuInvasives = new MenuItem("Invasives");
-//        final MenuItem menuArbres = new MenuItem("Arbres exceptionnels");
-//        final MenuItem menuStrates = new MenuItem("Strates herbacées");
-//
-//        final MenuButton buttonPeuplement = new MenuButton(null, new ImageView(ICON_VEGETATION),
-//                menuPeuplement, menuInvasives, menuArbres, menuStrates);
-//        getItems().add(buttonPeuplement);
-
     }
 
     private void showEditor(){
@@ -71,12 +62,17 @@ public class VegetationToolBar extends ToolBar {
         toolbox.commitRollbackVisibleProperty().setValue(false);
         toolbox.getToolPerRow().set(6);
         toolbox.getTools().add(CreateParcelleTool.SPI);
+        toolbox.getTools().add(CreatePeuplementTool.SPI);
+        toolbox.getTools().add(CreateInvasiveTool.SPI);
+        toolbox.getTools().add(CreateHerbaceTool.SPI);
+        toolbox.getTools().add(CreateArbreTool.SPI);
+        toolbox.getTools().add(EditVegetationTool.SPI);
 
         dialog = new Stage();
         dialog.setAlwaysOnTop(true);
         dialog.initModality(Modality.NONE);
         dialog.initStyle(StageStyle.UTILITY);
-        dialog.setTitle(GeotkFX.getString(FXEditAction.class,"edit"));
+        dialog.setTitle(GeotkFX.getString(FXEditAction.class,"Végétation"));
 
         toolbox.setMaxHeight(Double.MAX_VALUE);
         toolbox.setMaxWidth(Double.MAX_VALUE);
