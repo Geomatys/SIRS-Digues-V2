@@ -16,18 +16,18 @@ import org.ektorp.ViewQuery;
 public abstract class AbstractPositionableRepository<T extends Positionable> extends AbstractSIRSRepository<T> {
 
     public static final String BY_LINEAR_ID = "byLinearId";
-    
+
     public AbstractPositionableRepository(Class<T> type, CouchDbConnector db) {
         super(type, db);
     }
 
     public List<T> getByLinear(final TronconDigue linear) {
         ArgumentChecks.ensureNonNull("Linear", linear);
-        return this.queryView(BY_LINEAR_ID, linear.getId());
+        return this.getByLinearId(linear.getId());
     }
 
     public List<T> getByLinearId(final String linearId) {
         ArgumentChecks.ensureNonNull("Linear", linearId);
-        return this.queryView(BY_LINEAR_ID, linearId);
+        return cacheList(globalRepo.getByLinearId(type, linearId));
     }
 }

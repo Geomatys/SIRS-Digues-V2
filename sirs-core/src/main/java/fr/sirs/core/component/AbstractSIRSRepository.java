@@ -5,7 +5,6 @@ import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.ReferenceType;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,6 +18,7 @@ import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentOperationResult;
 import org.ektorp.ViewQuery;
 import org.ektorp.support.CouchDbRepositorySupport;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Base pour les outils gérant les échanges avec la bdd CouchDB.
@@ -55,6 +55,9 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
     protected final Cache<String, T> cache = new Cache(20, 0, false);
 
+    @Autowired
+    protected GlobalRepository globalRepo;
+
     protected AbstractSIRSRepository(Class<T> type, CouchDbConnector db) {
         super(type, db);
     }
@@ -73,29 +76,29 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
     @Override
     public List<T> getAll() {
-        return cacheList(super.getAll());
+        return cacheList(globalRepo.getAllForClass(type));
     }
-    
+
     private void checkIntegrity(T entity){
         if(entity instanceof AvecForeignParent){
             if(((AvecForeignParent) entity).getForeignParentId()==null) throw new IllegalArgumentException("L'élément ne peut être enregistré sans élement parent.");
         }
     }
-    
+
     /**
-     * Retrieve the elements of the given parameter class which Ids are provided 
+     * Retrieve the elements of the given parameter class which Ids are provided
      * as parameters.
-     * 
+     *
      * @param ids
-     * @return 
+     * @return
      */
     public List<T> get(final String... ids) {
         return get(Arrays.asList(ids));
     }
-    
+
     public List<T> get(final List<String> ids) {
         final ArrayList result = new ArrayList();
-        
+
         final List<String> toGet = new ArrayList<>(ids);
         final Iterator<String> idIt = toGet.iterator();
         while (idIt.hasNext()) {
@@ -105,25 +108,25 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
                 idIt.remove();
             }
         }
-        
+
         // On va chercher uniquement les documents qui ne sont pas en cache
         final ViewQuery q = new ViewQuery().allDocs().includeDocs(true).keys(toGet);
         final List<T> bulkLoaded = db.queryView(q, getModelClass());
-        
+
         for(T loaded : bulkLoaded) {
             loaded = onLoad(loaded);
             cache.put(loaded.getId(), loaded);
             result.add(loaded);
         }
-        
+
         return result;
     }
-    
+
     /**
      * Execute bulk for add/update operation on several documents.
-     * 
+     *
      * @param bulkList
-     * @return 
+     * @return
      */
     public List<DocumentOperationResult> executeBulk(final Collection<T> bulkList){
         final List<T> cachedBulkList = new ArrayList<>();
@@ -144,9 +147,9 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
                 }
             }
             cachedBulkList.add(entity);
-        } 
+        }
         final List<DocumentOperationResult> result = db.executeBulk(cachedBulkList);
-        
+
         // Avant de renvoyer le résultat, il faut ajouter au cache les entités qui n'avaient pas d'ID et qui en ont maintenant un après leur premier enregistrement.
         for (T e : entitiesWithoutIDs){
             e = onLoad(e);
@@ -154,20 +157,20 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         }
         return result;
     }
-    
+
     /**
      * Execute bulk for add/update operation on several documents.
-     * 
+     *
      * @param bulkList
-     * @return 
+     * @return
      */
     public List<DocumentOperationResult> executeBulk(final T... bulkList){
         return executeBulk(Arrays.asList(bulkList));
     }
-    
-    
+
+
     public List<DocumentOperationResult> executeBulkDelete(final List<T> bulkList){
-        
+
         final List<BulkDeleteDocument> toDelete = new ArrayList<>();
         for(final T toBeDeleted : bulkList){
             toDelete.add(BulkDeleteDocument.of(toBeDeleted));
@@ -207,7 +210,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         cache.remove(entity.getId());
         super.remove(entity);
     }
-    
+
     public void clearCache() {
         cache.clear();
     }
@@ -231,14 +234,14 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     protected List<T> queryView(String viewName, String key) {
         return cacheList(super.queryView(viewName, key));
     }
-    
+
     /**
      * Put all input element in cache, or replace by a previously cached element
      * if an input element Id can be found in the cache. Cannot be null.
      * @param source The list of element to put in cache or replace by previously cached value.
-     * @return A list of cached elements. Never null, but can be empty. Should be of the 
+     * @return A list of cached elements. Never null, but can be empty. Should be of the
      * same size as input list.
-     * 
+     *
      * @throws NullPointerException if input list is null.
      */
     protected List<T> cacheList(List<T> source) {
@@ -251,40 +254,40 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
                 throw new RuntimeException(ex);
             }
         }
-        return result;        
+        return result;
     }
-    
+
     /**
      * Perform an operation when loading an object. By default, nothing is done,
      * but implementations can override this to work with an element before putting
-     * it in cache. 
+     * it in cache.
      * @param loaded The object which must be loaded.
      * @return The object to load. By default, the one in parameter.
      */
     protected T onLoad(final T loaded) {
         return loaded;
     }
-    
-    
+
+
     /**
      * Return the class of the managed object type.
-     * @return 
+     * @return
      */
     public Class<T> getModelClass(){
         return type;
     }
-    
+
     /**
      * Create a new instance of Pojo in memory. No creation in database.
-     * @return 
+     * @return
      */
     public abstract T create();
-    
+
     /**
      * Return one element of T type.
      * If such elements exist into the database, this method returns the first found of all.
      * If such elements do not exist into the database, this method creates a new one, adds it to the database and returns it.
-     * @return 
+     * @return
      */
     public T getOne(){
         final T one = getAll().get(0);
