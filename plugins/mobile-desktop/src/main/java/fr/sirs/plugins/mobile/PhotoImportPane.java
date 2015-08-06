@@ -553,7 +553,7 @@ public class PhotoImportPane extends StackPane {
      * in charge of photo rename (prefix additions). It also update couchDB documents
      * to change the saved path in them.
      */
-    private static class PathResolver implements Function<Path, Path> {
+    static class PathResolver implements Function<Path, Path> {
 
         @Autowired
         private Session session;
