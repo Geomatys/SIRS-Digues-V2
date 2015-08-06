@@ -522,6 +522,8 @@ public class FXLauncherPane extends BorderPane {
                         DatabaseBuilder.open(cartoDbFile), uiImportCRS.crsProperty().get());
                 importer.importation();
 
+                importer = null;
+
                 // Opérations ultérieures à l'importation à réaliser par les plugins.
                 // Should initialize most of couchdb views
                 for(final Plugin p : Plugins.getPlugins()) {
