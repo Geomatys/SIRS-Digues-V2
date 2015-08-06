@@ -238,6 +238,7 @@ public class DatabaseRegistry {
 
         // Configure http client
         final StdHttpClient.Builder builder = new SirsClientBuilder()
+                .caching(false)
                 .url(couchDbUrl)
                 .connectionTimeout(CONNECTION_TIMEOUT)
                 .socketTimeout(SOCKET_TIMEOUT)
