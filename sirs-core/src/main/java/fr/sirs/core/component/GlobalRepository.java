@@ -5,10 +5,12 @@
  */
 package fr.sirs.core.component;
 
+import fr.sirs.core.JacksonIterator;
 import fr.sirs.core.model.Element;
 import java.util.List;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.ViewQuery;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.View;
 import org.ektorp.support.Views;
@@ -36,19 +38,35 @@ public class GlobalRepository extends CouchDbRepositorySupport<Element> {
         initStandardDesignDocument();
     }
 
+    private <T> ViewQuery createByClassQuery(Class<T> type) {
+        final ComplexKey startKey = ComplexKey.of(type.getCanonicalName());
+        final ComplexKey endKey = ComplexKey.of(type.getCanonicalName(), ComplexKey.emptyObject());
+        return createQuery(BY_CLASS_AND_LINEAR_VIEW)
+                .startKey(startKey)
+                .endKey(endKey)
+                .includeDocs(true);
+    }
+
+    private <T> ViewQuery createByLinearIdQuery(Class<T> type, final String linearId) {
+        return createQuery(BY_CLASS_AND_LINEAR_VIEW)
+                .key(ComplexKey.of(type == null? ComplexKey.emptyObject() : type.getCanonicalName(), linearId))
+                .includeDocs(true);
+    }
+
     <T> List<T> getAllForClass(Class<T> type) {
-        return db.queryView(createQuery(BY_CLASS_AND_LINEAR_VIEW)
-                        .key(ComplexKey.of(type.getCanonicalName(), ComplexKey.emptyObject()))
-                        .includeDocs(true),
-                type
-        );
+        return db.queryView(createByClassQuery(type), type);
+    }
+
+    <T> JacksonIterator<T> getAllForClassStreaming(Class<T> type) {
+        return JacksonIterator.create(type, db.queryForStreamingView(createByClassQuery(type)));
     }
 
     <T> List<T> getByLinearId(Class<T> type, final String linearId) {
-        return db.queryView(createQuery(BY_CLASS_AND_LINEAR_VIEW)
-                        .key(ComplexKey.of(type.getCanonicalName(), linearId))
-                        .includeDocs(true),
-                type
-        );
+        return db.queryView(createByLinearIdQuery(type, linearId), type);
     }
+
+    <T> JacksonIterator<T> getAllByLinearIdStreaming(Class<T> type, final String linearId) {
+        return JacksonIterator.create(type, db.queryForStreamingView(createByLinearIdQuery(type, linearId)));
+    }
+
 }
