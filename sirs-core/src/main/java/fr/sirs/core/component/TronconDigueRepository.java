@@ -52,14 +52,12 @@ import org.springframework.stereotype.Component;
  * @author Alexis Manin (Geomatys)
  */
 @Views({
-        @View(name = "all", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc._id, doc._id)}}"),
-        @View(name = TronconDigueRepository.STREAM, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc._id, doc)}}"),
         @View(name = TronconDigueRepository.STREAM_LIGHT, map = "classpath:TronconDigueLight-map.js"),
-        @View(name = TronconDigueRepository.BY_DIGUE_ID, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}") })
+        @View(name = TronconDigueRepository.BY_DIGUE_ID, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}")
+})
 @Component("fr.sirs.core.component.TronconDigueRepository")
 public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue> {
 
-    public static final String STREAM = "stream";
     public static final String STREAM_LIGHT = "streamLight";
     public static final String BY_DIGUE_ID = "byDigueId";
 
@@ -110,11 +108,6 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
             lst.add(ite.next());
         }
         return lst;
-    }
-
-    public JacksonIterator<TronconDigue> getAllIterator() {
-        return JacksonIterator.create(TronconDigue.class,
-                db.queryForStreamingView(createQuery(STREAM)));
     }
 
     public JacksonIterator<TronconDigue> getAllLightIterator() {

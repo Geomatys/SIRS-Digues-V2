@@ -14,12 +14,9 @@ import org.springframework.stereotype.Component;
 import fr.sirs.core.model.Utilisateur;
 import java.util.Collections;
 import java.util.List;
-import org.ektorp.support.Views;
 
 
-@Views({
-        @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.Utilisateur') {emit(doc._id, doc._id)}}"),
-        @View(name = BY_LOGIN, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.Utilisateur') {emit(doc.login, doc._id)}}") })
+@View(name = BY_LOGIN, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.Utilisateur') {emit(doc.login, doc._id)}}")
 @Component("fr.sirs.core.component.UtilisateurRepository")
 public class UtilisateurRepository extends AbstractSIRSRepository<Utilisateur>{
 
@@ -35,11 +32,6 @@ public class UtilisateurRepository extends AbstractSIRSRepository<Utilisateur>{
        super(Utilisateur.class, db);
        initStandardDesignDocument();
    }
-
-    @Override
-    public Class<Utilisateur> getModelClass() {
-        return Utilisateur.class;
-    }
 
     @Override
     public Utilisateur create(){

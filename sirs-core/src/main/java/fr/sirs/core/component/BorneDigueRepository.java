@@ -8,7 +8,6 @@ import fr.sirs.core.JacksonIterator;
 import fr.sirs.core.SessionCore;
 
 import org.ektorp.CouchDbConnector;
-import org.ektorp.support.View;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
@@ -46,7 +45,6 @@ import java.util.List;
  * @author Olivier Nouguier (Geomatys)
  * @author Alexis Manin     (Geomatys)
  */
-@View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.BorneDigue') {emit(doc._id, doc._id)}}")
 @Component("fr.sirs.core.component.BorneDigueRepository")
 public class BorneDigueRepository extends AbstractSIRSRepository<BorneDigue> {
 

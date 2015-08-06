@@ -1,5 +1,6 @@
 package fr.sirs.core.component;
 
+import fr.sirs.core.JacksonIterator;
 import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Identifiable;
@@ -77,6 +78,10 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     @Override
     public List<T> getAll() {
         return cacheList(globalRepo.getAllForClass(type));
+    }
+
+    public JacksonIterator<T> getAllIterator() {
+        return globalRepo.getAllForClassStreaming(type);
     }
 
     private void checkIntegrity(T entity){

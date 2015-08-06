@@ -8,10 +8,8 @@ import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.TronconUtils;
-import static fr.sirs.core.component.SystemeReperageRepository.BY_LINEAR_ID;
 import fr.sirs.core.model.Positionable;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.support.View;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
@@ -25,18 +23,10 @@ import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.DocumentOperationResult;
-import org.ektorp.support.Views;
 import org.geotoolkit.referencing.LinearReferencing;
 
-
-@Views({
-    @View(name="all",         map="function(doc) {if(doc['@class']=='fr.sirs.core.model.SystemeReperage') {emit(doc._id, doc._id)}}"),
-    @View(name=BY_LINEAR_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.SystemeReperage') {emit(doc.linearId, doc._id)}}")
-})
 @Component("fr.sirs.core.component.SystemeReperageRepository")
-public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeReperage>{
-
-    public static final String BY_LINEAR_ID = "byLinarId";
+public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeReperage> {
 
     @Autowired
     protected TronconDigueRepository tronconDigueRepo;
@@ -63,11 +53,13 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     }
 
     public List<SystemeReperage> getByLinear(final TronconDigue linear) {
-        return this.queryView(BY_LINEAR_ID, linear.getId());
+        ArgumentChecks.ensureNonNull("Linear", linear);
+        return this.getByLinearId(linear.getId());
     }
 
     public List<SystemeReperage> getByLinearId(final String linearId) {
-        return this.queryView(BY_LINEAR_ID, linearId);
+        ArgumentChecks.ensureNonNull("Linear", linearId);
+        return cacheList(globalRepo.getByLinearId(type, linearId));
     }
 
     public void update(SystemeReperage entity, TronconDigue troncon) {
