@@ -55,6 +55,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
+import javafx.beans.binding.Bindings;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
@@ -104,10 +106,11 @@ public class DocumentsPane extends GridPane {
     private static final Image DEL_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/remove.png"));
     private static final Image SET_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/set.png"));
     private static final Image LIST_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/list.png"));
-    private static final Image PUB_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/publish.png"));
-    private static final Image OP_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/publish.png"));
-    private static final Image HIDE_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/set.png"));
-    private static final Image HISH_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/set.png"));
+    private static final Image PUB_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/publish.png"), 17, 20, false, false);
+    private static final Image OP_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/ouvrir2.png"));
+    private static final Image HIDE_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/cocher-decocher.png"));
+    private static final Image HI_HISH_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/afficher.png"));
+    private static final Image SH_HISH_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/masquer.png"));
     
     private static final DateFormat DATE_FORMATTER = new SimpleDateFormat("dd/MM/yyyy");
     
@@ -150,8 +153,13 @@ public class DocumentsPane extends GridPane {
         setFolderButton.setGraphic(new ImageView(SET_BUTTON_IMAGE));
         addDocButton.setGraphic(new ImageView(ADDD_BUTTON_IMAGE));
         listButton.setGraphic(new ImageView(LIST_BUTTON_IMAGE));
-        hideShowButton.setGraphic(new ImageView(HISH_BUTTON_IMAGE));
         hideFileButton.setGraphic(new ImageView(HIDE_BUTTON_IMAGE));
+        if (root.rootShowHiddenFile) {
+            hideShowButton.setGraphic(new ImageView(SH_HISH_BUTTON_IMAGE));
+        } else {
+            hideShowButton.setGraphic(new ImageView(HI_HISH_BUTTON_IMAGE));
+        }
+            
         
         addFolderButton.setTooltip(new Tooltip("Ajouter un dossier"));
         importDocButton.setTooltip(new Tooltip("Importer un fichier"));
@@ -176,8 +184,12 @@ public class DocumentsPane extends GridPane {
         tree1.getColumns().get(0).setCellValueFactory(new Callback() {
             @Override
             public ObservableValue call(Object param) {
-                final File f = (File) ((CellDataFeatures)param).getValue().getValue();
-                return new SimpleObjectProperty(f);
+                final TreeItem item = ((CellDataFeatures)param).getValue();
+                if (item != null) {
+                    final File f = (File) item.getValue();
+                    return new SimpleObjectProperty(f);
+                }
+                return null;
             }
         });
         tree1.getColumns().get(0).setCellFactory(new Callback() {
@@ -192,10 +204,14 @@ public class DocumentsPane extends GridPane {
         tree1.getColumns().get(1).setCellValueFactory(new Callback() {
             @Override
             public ObservableValue call(Object param) {
-                final File f = (File) ((CellDataFeatures)param).getValue().getValue();
-                synchronized (DATE_FORMATTER) {
-                    return new SimpleStringProperty(DATE_FORMATTER.format(new Date(f.lastModified())));
+                final TreeItem item = ((CellDataFeatures)param).getValue();
+                if (item != null) {
+                    final File f = (File) item.getValue();
+                    synchronized (DATE_FORMATTER) {
+                        return new SimpleStringProperty(DATE_FORMATTER.format(new Date(f.lastModified())));
+                    }
                 }
+                return null;
             }
         });
         
@@ -205,7 +221,10 @@ public class DocumentsPane extends GridPane {
             @Override
             public ObservableValue call(Object param) {
                 final FileTreeItem f = (FileTreeItem) ((CellDataFeatures)param).getValue();
-                return new SimpleStringProperty(f.getSize());
+                if (f != null) {
+                    return new SimpleStringProperty(f.getSize());
+                }
+                return null;
             }
         });
         
@@ -213,8 +232,12 @@ public class DocumentsPane extends GridPane {
         tree1.getColumns().get(3).setCellValueFactory(new Callback() {
             @Override
             public ObservableValue call(Object param) {
-                final File f = (File) ((CellDataFeatures)param).getValue().getValue();
-                return new SimpleObjectProperty(f);
+                final TreeItem item = ((CellDataFeatures)param).getValue();
+                if (item != null) {
+                    final File f = (File) item.getValue();
+                    return new SimpleObjectProperty(f);
+                }
+                return null;
             }
         });
         tree1.getColumns().get(3).setCellFactory(new Callback() {
@@ -228,8 +251,12 @@ public class DocumentsPane extends GridPane {
         tree1.getColumns().get(4).setCellValueFactory(new Callback() {
             @Override
             public ObservableValue call(Object param) {
-                final File f = (File) ((CellDataFeatures)param).getValue().getValue();
-                return new SimpleObjectProperty(f);
+                final TreeItem item = ((CellDataFeatures)param).getValue();
+                if (item != null) {
+                    final File f = (File) item.getValue();
+                    return new SimpleObjectProperty(f);
+                }
+                return null;
             }
         });
         tree1.getColumns().get(4).setCellFactory(new Callback() {
@@ -243,8 +270,12 @@ public class DocumentsPane extends GridPane {
         tree1.getColumns().get(5).setCellValueFactory(new Callback() {
             @Override
             public ObservableValue call(Object param) {
-                final File f = (File) ((CellDataFeatures)param).getValue().getValue();
-                return new SimpleObjectProperty(f);
+                final TreeItem item = ((CellDataFeatures)param).getValue();
+                if (item != null) {
+                    final File f = (File) item.getValue();
+                    return new SimpleObjectProperty(f);
+                }
+                return null;
             }
         });
         tree1.getColumns().get(5).setCellFactory(new Callback() {
@@ -465,15 +496,19 @@ public class DocumentsPane extends GridPane {
     
     @FXML
     public void hideFiles(ActionEvent event) {
-        File f = getSelectedFile();
-        boolean previousState = getBooleanProperty(f, HIDDEN);
-        setBooleanProperty(f, HIDDEN, !previousState);
+        FileTreeItem item = (FileTreeItem) tree1.getSelectionModel().getSelectedItem();
+        item.hidden.setValue(!item.hidden.getValue());
         update();
     }
 
     @FXML
     public void hideShowFiles(ActionEvent event) {
         root.rootShowHiddenFile = !root.rootShowHiddenFile;
+        if (root.rootShowHiddenFile) {
+            hideShowButton.setGraphic(new ImageView(SH_HISH_BUTTON_IMAGE));
+        } else {
+            hideShowButton.setGraphic(new ImageView(HI_HISH_BUTTON_IMAGE));
+        }
         update();
     }
     
@@ -546,6 +581,7 @@ public class DocumentsPane extends GridPane {
 
         public DOIntegatedCell() {
             setGraphic(box);
+            setAlignment(Pos.CENTER);
             box.disableProperty().bind(editingProperty());
             box.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
@@ -829,6 +865,7 @@ public class DocumentsPane extends GridPane {
         public void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
             File f = (File) item;
+            label.opacityProperty().unbind();
             if (f != null) {
                 final String name;
                 if (getIsModelFolder(f)) {
@@ -837,9 +874,9 @@ public class DocumentsPane extends GridPane {
                     name = f.getName();
                 }
                 label.setText(name);
-                label.setOpacity(1.0);
-                if (getBooleanProperty(f, HIDDEN)) {
-                    label.setOpacity(0.5);
+                FileTreeItem fti = (FileTreeItem) getTreeTableRow().getTreeItem();
+                if (fti != null) {
+                    label.opacityProperty().bind(Bindings.when(fti.hidden).then(0.5).otherwise(1.0));
                 }
             }
         }

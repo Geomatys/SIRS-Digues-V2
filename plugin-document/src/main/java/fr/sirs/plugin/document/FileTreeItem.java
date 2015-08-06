@@ -5,13 +5,15 @@ import fr.sirs.plugin.document.ui.DocumentsPane;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import javafx.scene.control.TreeItem;
 import static fr.sirs.plugin.document.PropertiesFileUtilities.getBooleanProperty;
 import static fr.sirs.plugin.document.ui.DocumentsPane.DO_INTEGRATED;
 import static fr.sirs.plugin.document.ui.DocumentsPane.HIDDEN;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 
 /**
  * Tree item used in the tree-table representing the documents.
@@ -21,6 +23,9 @@ import static fr.sirs.plugin.document.ui.DocumentsPane.HIDDEN;
 public class FileTreeItem extends TreeItem<File> {
     
     public boolean rootShowHiddenFile;
+    
+    public final BooleanProperty hidden = new SimpleBooleanProperty();
+    
     
     /**
      * Constructor for shared root instance.
@@ -33,7 +38,11 @@ public class FileTreeItem extends TreeItem<File> {
     
     public FileTreeItem(File item, boolean showHiddenFile) {
         super(item);
-
+        hidden.setValue(getBooleanProperty(item, HIDDEN));
+        hidden.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            PropertiesFileUtilities.setBooleanProperty(getValue(), HIDDEN, newValue);
+        });
+        
         if (item != null && item.isDirectory()) {
             for (File f : listFiles(item, showHiddenFile)) {
                 if (!f.getName().equals("sirs.properties")) {
