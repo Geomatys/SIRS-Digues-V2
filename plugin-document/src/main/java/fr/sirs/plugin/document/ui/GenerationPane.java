@@ -88,7 +88,7 @@ public class GenerationPane extends GridPane {
             }
 
             // reload tree
-            root.update();
+            root.update(false);
             uiProgress.setVisible(false);
             uiGenerateFinish.setVisible(true);
 
@@ -101,7 +101,7 @@ public class GenerationPane extends GridPane {
     }
     
     
-    public void reGenerateDoc(final RapportModeleDocument modele, final Collection<TronconDigue> troncons, final File item, final FileTreeItem root) {
+    public void reGenerateDoc(final RapportModeleDocument modele, final Collection<TronconDigue> troncons, final File item, final FileTreeItem root, boolean showhiddenFile) {
 
         uiProgress.setVisible(true);
         try {
@@ -112,8 +112,8 @@ public class GenerationPane extends GridPane {
 
             Platform.runLater(() -> uiProgressLabel.setText("Génération terminée"));
 
-            // reload tree
-            root.update();
+            // reload tree (why?)
+            root.update(showhiddenFile);
             uiProgress.setVisible(false);
             uiGenerateFinish.setVisible(true);
 

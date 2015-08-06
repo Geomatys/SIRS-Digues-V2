@@ -11,6 +11,7 @@ import java.util.List;
 import javafx.scene.control.TreeItem;
 import static fr.sirs.plugin.document.PropertiesFileUtilities.getBooleanProperty;
 import static fr.sirs.plugin.document.ui.DocumentsPane.DO_INTEGRATED;
+import static fr.sirs.plugin.document.ui.DocumentsPane.HIDDEN;
 
 /**
  * Tree item used in the tree-table representing the documents.
@@ -19,16 +20,27 @@ import static fr.sirs.plugin.document.ui.DocumentsPane.DO_INTEGRATED;
  */
 public class FileTreeItem extends TreeItem<File> {
     
+    public boolean rootShowHiddenFile;
     
-    public FileTreeItem(File item) {
+    /**
+     * Constructor for shared root instance.
+     * @param rootShowHiddenFile 
+     */
+    public FileTreeItem(boolean rootShowHiddenFile) {
+        super(null);
+        this.rootShowHiddenFile = rootShowHiddenFile;
+    }
+    
+    public FileTreeItem(File item, boolean showHiddenFile) {
         super(item);
 
         if (item != null && item.isDirectory()) {
-            for (File f : listFiles(item)) {
+            for (File f : listFiles(item, showHiddenFile)) {
                 if (!f.getName().equals("sirs.properties")) {
-                    getChildren().add(new FileTreeItem(f));
+                    getChildren().add(new FileTreeItem(f, showHiddenFile));
                 }
             }
+            getChildren().sort(new FileTreeItemComparator());
         }
     }
     
@@ -47,26 +59,36 @@ public class FileTreeItem extends TreeItem<File> {
      * @param directory
      * @return 
      */
-    private List<File> listFiles(File directory) {
-        final List<File> result = Arrays.asList(directory.listFiles());
-        Collections.sort(result, new FileComparator());
+    private List<File> listFiles(File directory, boolean showHiddenFile) {
+        final List<File> result = new ArrayList<>(Arrays.asList(directory.listFiles()));
+        
+        if (!showHiddenFile) {
+            final List<File> toRemove = new ArrayList<>();
+            for (File f : result) {
+                if (getBooleanProperty(f, HIDDEN)) {
+                    toRemove.add(f);
+                }
+            }
+            result.removeAll(toRemove);
+        }
         return result;
     }
     
     /**
      * Update the current items. 
+     * @param showHiddenFile
      */
-    public void update() {
+    public void update(boolean showHiddenFile) {
         if (getValue().isDirectory()) {
             List<FileTreeItem> children = listChildrenItem();
-            for (File f : listFiles(getValue())) {
+            for (File f : listFiles(getValue(), showHiddenFile)) {
                 if (!f.getName().equals("sirs.properties")) {
                     FileTreeItem item = getChildrenItem(f);
                     if (item == null) {
-                        getChildren().add(new FileTreeItem(f));
+                        getChildren().add(new FileTreeItem(f, showHiddenFile));
                     } else {
                         children.remove(item);
-                        item.update();
+                        item.update(showHiddenFile);
                     }
                 }
             }
@@ -74,6 +96,7 @@ public class FileTreeItem extends TreeItem<File> {
             for (FileTreeItem item : children) {
                 getChildren().remove(item);
             }
+            getChildren().sort(new FileTreeItemComparator());
         }
     }
     
@@ -174,31 +197,31 @@ public class FileTreeItem extends TreeItem<File> {
         return PropertiesFileUtilities.getIsModelFolder(getValue(), DocumentsPane.TR);
     }
             
-    private static class FileComparator implements Comparator<File> {
+    private static class FileTreeItemComparator implements Comparator<TreeItem<File>> {
 
         @Override
-        public int compare(File o1, File o2) {
+        public int compare(TreeItem<File> o1, TreeItem<File> o2) {
             if (o1 == null && o2 == null) {
                 return 0;
-            } else if (o1 != null && o2 != null) {
-                if (o1.getName().equals(DocumentsPane.SAVE_FOLDER)) {
+            } else if (o1 != null && o2 != null && o1.getValue() != null && o2.getValue() != null) {
+                if (o1.getValue().getName().equals(DocumentsPane.SAVE_FOLDER)) {
                     return 1;
-                } else if (o1.getName().equals(DocumentsPane.UNCLASSIFIED)) {
+                } else if (o1.getValue().getName().equals(DocumentsPane.UNCLASSIFIED)) {
                     return 1;
-                } else if (o2.getName().equals(DocumentsPane.SAVE_FOLDER)) {
+                } else if (o2.getValue().getName().equals(DocumentsPane.SAVE_FOLDER)) {
                     return -1;
-                } else if (o2.getName().equals(DocumentsPane.UNCLASSIFIED)) {
+                } else if (o2.getValue().getName().equals(DocumentsPane.UNCLASSIFIED)) {
                     return -1;
-                } else if (o1.getName().equals(DocumentsPane.DOCUMENT_FOLDER)) {
+                } else if (o1.getValue().getName().equals(DocumentsPane.DOCUMENT_FOLDER)) {
                     return -1;
-                } else if (o2.getName().equals(DocumentsPane.DOCUMENT_FOLDER)) {
+                } else if (o2.getValue().getName().equals(DocumentsPane.DOCUMENT_FOLDER)) {
                     return 1;
                 } else {
-                    return o1.getName().compareTo(o2.getName());
+                    return o1.getValue().getName().compareTo(o2.getValue().getName());
                 }
-            } else if (o1 == null){
+            } else if (o1 == null || o1.getValue() == null){
                 return -1;
-            } else if (o2 == null){
+            } else if (o2 == null || o2.getValue() == null){
                 return 1;
             }
             // should never happen

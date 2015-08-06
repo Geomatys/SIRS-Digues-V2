@@ -17,7 +17,7 @@ public class PluginDocument extends Plugin {
 
     public PluginDocument() {
         name = NAME;
-        final FileTreeItem root = new FileTreeItem(null);
+        final FileTreeItem root = new FileTreeItem(false);
         loadingMessage.set("module document d'ouvrages");
         final DynamicDocumentTheme dynDcTheme = new DynamicDocumentTheme(root);
         themes.add(new DocumentManagementTheme(root, dynDcTheme));

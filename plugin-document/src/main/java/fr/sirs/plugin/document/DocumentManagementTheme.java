@@ -40,8 +40,7 @@ public final class DocumentManagementTheme extends AbstractPluginsButtonTheme {
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 if (newValue && root.getValue() != null) {
                     PropertiesFileUtilities.updateFileSystem(root.getValue());
-                    root.update();
-                    System.out.println("Tree updated (doc)");
+                    root.update(root.rootShowHiddenFile);
                 }
             }
         };

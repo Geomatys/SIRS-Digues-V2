@@ -35,8 +35,7 @@ public class DynamicDocumentTheme extends AbstractPluginsButtonTheme {
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 if (newValue && root.getValue() != null) {
                     PropertiesFileUtilities.updateFileSystem(root.getValue());
-                    root.update();
-                    System.out.println("Tree updated (dyn)");
+                    root.update(root.rootShowHiddenFile);
                 }
             }
         };

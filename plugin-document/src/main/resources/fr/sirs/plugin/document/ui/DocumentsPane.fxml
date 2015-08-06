@@ -53,6 +53,9 @@
             <Pane prefHeight="20.0" prefWidth="20.0" />
             <Button fx:id="setFolderButton" mnemonicParsing="false" onAction="#setMainFolder" />
             <Button fx:id="listButton" mnemonicParsing="false" onAction="#exportOdtSummary" />
+            <Pane prefHeight="20.0" prefWidth="20.0" />
+            <Button fx:id="hideFileButton" mnemonicParsing="false" onAction="#hideFiles" />
+            <Button fx:id="hideShowButton" mnemonicParsing="false" onAction="#hideShowFiles" />
          </children>
       </VBox>
    </children>
