@@ -878,6 +878,8 @@ public class DocumentsPane extends GridPane {
                 if (fti != null) {
                     label.opacityProperty().bind(Bindings.when(fti.hidden).then(0.5).otherwise(1.0));
                 }
+            } else {
+               label.setText("");
             }
         }
     }

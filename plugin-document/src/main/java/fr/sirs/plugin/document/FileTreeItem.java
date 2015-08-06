@@ -215,10 +215,10 @@ public class FileTreeItem extends TreeItem<File> {
             } else if (o1 != null && o2 != null && o1.getValue() != null && o2.getValue() != null) {
                 if (o1.getValue().getName().equals(DocumentsPane.SAVE_FOLDER)) {
                     return 1;
-                } else if (o1.getValue().getName().equals(DocumentsPane.UNCLASSIFIED)) {
-                    return 1;
                 } else if (o2.getValue().getName().equals(DocumentsPane.SAVE_FOLDER)) {
                     return -1;
+                } else if (o1.getValue().getName().equals(DocumentsPane.UNCLASSIFIED)) {
+                    return 1;
                 } else if (o2.getValue().getName().equals(DocumentsPane.UNCLASSIFIED)) {
                     return -1;
                 } else if (o1.getValue().getName().equals(DocumentsPane.DOCUMENT_FOLDER)) {
