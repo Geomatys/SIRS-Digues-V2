@@ -474,8 +474,6 @@ public class ODTUtils {
                         try(final FileOutputStream imgStream = new FileOutputStream(imgFile)){
                             ImageIOUtil.writeImage(bim, "png", imgStream, 300);
                             insertImageFullPage(doc, imgFile.toURI());
-                        }finally{
-                            file.delete();
                         }
                     }
                 }
