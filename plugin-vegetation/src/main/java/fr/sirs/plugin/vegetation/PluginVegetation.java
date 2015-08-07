@@ -36,6 +36,7 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
+import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
@@ -166,12 +167,26 @@ public class PluginVegetation extends Plugin {
             final AbstractSIRSRepository<RefTypePeuplementVegetation> typePeuplementRepo = getSession().getRepositoryForClass(RefTypePeuplementVegetation.class);
             for(RefTypePeuplementVegetation ref : typePeuplementRepo.getAll()){
                 final String id = ref.getId();
-                final Filter filter = FF.equal(FF.property("typePeuplementId"),FF.literal(id));
+                final Filter filter = FF.equals(FF.property("typePeuplementId"),FF.literal(id));
                 final FeatureCollection col = peuplementSession.getFeatureCollection(
-                        QueryBuilder.filtered(peuplementStore.getNames().iterator().next(),filter));
-                final MapLayer layer = MapBuilder.createFeatureLayer(col);
+                        QueryBuilder.all(peuplementStore.getNames().iterator().next()));
+                final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col);
+                layer.setQuery(QueryBuilder.filtered(col.getFeatureType().getName(), filter));
                 layer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-                layer.setStyle(createPolygonStyle(RandomStyleBuilder.randomColor()));
+                final Color color;
+                switch(id){
+                    case "RefTypePeuplementVegetation:1" : color = new Color(  0, 200,   0); break;
+                    case "RefTypePeuplementVegetation:2" : color = new Color(200, 200,   0); break;
+                    case "RefTypePeuplementVegetation:3" : color = new Color(  0, 200, 200); break;
+                    case "RefTypePeuplementVegetation:4" : color = new Color(200, 200, 100); break;
+                    case "RefTypePeuplementVegetation:5" : color = new Color(  0, 150,   0); break;
+                    case "RefTypePeuplementVegetation:6" : color = new Color(150, 200,   0); break;
+                    case "RefTypePeuplementVegetation:7" : color = new Color(100, 250, 100); break;
+                    case "RefTypePeuplementVegetation:99": color = new Color(200, 200, 200); break;
+                    default : color = RandomStyleBuilder.randomColor();
+                }
+
+                layer.setStyle(createPolygonStyle(color));
                 layer.setName(ref.getLibelle());
                 peuplementGroup.items().add(layer);
             }
@@ -188,12 +203,28 @@ public class PluginVegetation extends Plugin {
             final AbstractSIRSRepository<RefTypeInvasiveVegetation> typeInvasiveRepo = getSession().getRepositoryForClass(RefTypeInvasiveVegetation.class);
             for(RefTypeInvasiveVegetation ref : typeInvasiveRepo.getAll()){
                 final String id = ref.getId();
-                final Filter filter = FF.equal(FF.property("typeInvasive"),FF.literal(id));
+                final Filter filter = FF.equals(FF.property("typeInvasive"),FF.literal(id));
                 final FeatureCollection col = invasiveSession.getFeatureCollection(
                         QueryBuilder.filtered(invasiveStore.getNames().iterator().next(),filter));
-                final MapLayer layer = MapBuilder.createFeatureLayer(col);
+                final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col);
+                layer.setQuery(QueryBuilder.filtered(col.getFeatureType().getName(), filter));
                 layer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-                layer.setStyle(createPolygonStyle(RandomStyleBuilder.randomColor()));
+                final Color color;
+                switch(id){
+                    case "RefTypeInvasiveVegetation:1" : color = new Color(  0, 200,   0); break;
+                    case "RefTypeInvasiveVegetation:2" : color = new Color(200, 200,   0); break;
+                    case "RefTypeInvasiveVegetation:3" : color = new Color(  0, 200, 200); break;
+                    case "RefTypeInvasiveVegetation:4" : color = new Color(200, 200, 100); break;
+                    case "RefTypeInvasiveVegetation:5" : color = new Color(  0, 150,   0); break;
+                    case "RefTypeInvasiveVegetation:6" : color = new Color(150, 200,   0); break;
+                    case "RefTypeInvasiveVegetation:7" : color = new Color(100, 250, 100); break;
+                    case "RefTypeInvasiveVegetation:8" : color = new Color( 50, 250, 100); break;
+                    case "RefTypeInvasiveVegetation:9" : color = new Color(100, 250,  50); break;
+                    case "RefTypeInvasiveVegetation:99": color = new Color(200, 200, 200); break;
+                    default : color = RandomStyleBuilder.randomColor();
+                }
+
+                layer.setStyle(createPolygonStyle(color));
                 layer.setName(ref.getLibelle());
                 invasivesGroup.items().add(layer);
             }

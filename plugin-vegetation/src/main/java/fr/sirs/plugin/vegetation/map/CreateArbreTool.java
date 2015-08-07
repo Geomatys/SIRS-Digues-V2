@@ -20,6 +20,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import static javafx.scene.layout.Region.USE_PREF_SIZE;
@@ -104,6 +105,8 @@ public class CreateArbreTool extends AbstractEditionTool{
         wizard.getStyleClass().add("blue-light");
         lblParcelle.getStyleClass().add("label-text");
         lblPoint.getStyleClass().add("label-text");
+        lblPoint.setWrapText(true);
+        lblParcelle.setWrapText(true);
 
         final VBox vbox = new VBox(15,
                 lbl1,
@@ -168,6 +171,11 @@ public class CreateArbreTool extends AbstractEditionTool{
 
         @Override
         public void mouseClicked(MouseEvent event) {
+            mousebutton = event.getButton();
+            if(mousebutton!=MouseButton.PRIMARY){
+                super.mouseClicked(event);
+                return;
+            }
 
             final Rectangle2D clickArea = new Rectangle2D.Double(event.getX()-2, event.getY()-2, 4, 4);
 
