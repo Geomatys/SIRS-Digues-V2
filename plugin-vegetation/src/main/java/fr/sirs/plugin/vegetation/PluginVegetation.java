@@ -80,7 +80,9 @@ public class PluginVegetation extends Plugin {
     public PluginVegetation() {
         name = NAME;
         loadingMessage.set("module végétation");
-        themes.add(new ParcelleTheme());
+        themes.add(new VegetationTraitementTheme());
+        themes.add(new PlanDeGestionTheme());
+        themes.add(new ExploitationTheme());
     }
 
     @Override
