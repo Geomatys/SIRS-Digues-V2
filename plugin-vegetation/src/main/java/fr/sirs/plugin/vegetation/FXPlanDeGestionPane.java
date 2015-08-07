@@ -19,6 +19,9 @@ public class FXPlanDeGestionPane extends BorderPane {
         SIRS.loadFXML(this, FXParametragePane.class);
     }
 
+    public void initialize() {
+        tabParametrage.setContent(new FXParametragePane());
+    }
 
 
 }
