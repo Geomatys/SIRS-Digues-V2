@@ -215,8 +215,23 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
     @FXML
     private void deleteModel() {
         final RapportModeleDocument model = uiModelsList.getSelectionModel().getSelectedItem();
-        uiModelsList.getItems().remove(model);
-        Injector.getBean(RapportModeleDocumentRepository.class).remove(model);
+        if (model != null) {
+            final Dialog dialog    = new Dialog();
+            final DialogPane pane  = new DialogPane();
+            pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+            dialog.setDialogPane(pane);
+            dialog.setResizable(true);
+            dialog.setTitle("Detruire modèle");
+            dialog.setContentText("Detruire le modèle dans la base de données?");
+
+            final Optional opt = dialog.showAndWait();
+            if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
+               uiModelsList.getItems().remove(model);
+               Injector.getBean(RapportModeleDocumentRepository.class).remove(model);
+            }
+        } else {
+            showErrorDialog("Vous devez selectionner un modèle.");
+        }
     }
 
     @FXML
