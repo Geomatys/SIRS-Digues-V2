@@ -39,7 +39,6 @@ import org.geotoolkit.gui.javafx.render2d.edition.AbstractEditionTool;
 import org.geotoolkit.gui.javafx.render2d.edition.AbstractEditionToolSpi;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
-import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
