@@ -202,7 +202,8 @@ public final class SIRS extends SirsCore {
     private SIRS(){};
 
     public static void loadFXML(Parent candidate) {
-        loadFXML(candidate, null);
+        final Class modelClass = null;
+        loadFXML(candidate, modelClass);
     }
 
     /**
@@ -235,6 +236,32 @@ public final class SIRS extends SirsCore {
                 LOGGER.log(Level.INFO, "Missing bundle for : {0}", modelClass.getName());
             }
         }
+
+        try {
+            loader.load();
+        } catch (IOException ex) {
+            throw new IllegalArgumentException(ex.getMessage(), ex);
+        }
+
+        candidate.getStylesheets().add(CSS_PATH);
+    }
+    
+    public static void loadFXML(Parent candidate, final ResourceBundle bundle) {
+        ArgumentChecks.ensureNonNull("JavaFX controller object", candidate);
+        final Class cdtClass = candidate.getClass();
+        final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
+        final URL resource = cdtClass.getResource(fxmlpath);
+        if (resource == null) {
+            throw new RuntimeException("No FXMl document can be found for path : "+fxmlpath);
+        }
+        final FXMLLoader loader = new FXMLLoader(resource);
+        loader.setController(candidate);
+        loader.setRoot(candidate);
+        //in special environement like osgi or other, we must use the proper class loaders
+        //not necessarly the one who loaded the FXMLLoader class
+        loader.setClassLoader(cdtClass.getClassLoader());
+
+        if(bundle!=null) loader.setResources(bundle);
 
         try {
             loader.load();
