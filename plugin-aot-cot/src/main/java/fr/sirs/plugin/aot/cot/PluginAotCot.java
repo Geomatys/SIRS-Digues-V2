@@ -14,7 +14,7 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.PositionConventionRepository;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.ObjetReseau;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.PositionConvention;
 import fr.sirs.core.model.sql.AotCotSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
@@ -159,8 +159,8 @@ public class PluginAotCot extends Plugin {
     public List<MenuItem> getMapActions(Object obj) {
         final List<MenuItem> lst = new ArrayList<>();
         
-        if(obj instanceof ObjetReseau) {
-            lst.add(new ViewFormReseauItem((ObjetReseau) obj));
+        if(obj instanceof Objet) {
+            lst.add(new ViewFormObjetItem((Objet) obj));
         }
         return lst;
     }
@@ -170,36 +170,22 @@ public class PluginAotCot extends Plugin {
         return AotCotSqlHelper.getInstance();
     }
     
-    private class ViewFormReseauItem extends MenuItem {
+    private class ViewFormObjetItem extends MenuItem {
 
-        public ViewFormReseauItem(ObjetReseau candidate) {
+        public ViewFormObjetItem(Objet candidate) {
             setText("Consulter les conventions de "+getSession().generateElementTitle(candidate));
             setOnAction((ActionEvent event) -> {
-                consultationAotCotTheme.setReseauToConsultFromMap(candidate);
+                consultationAotCotTheme.setObjetToConsultFromMap(candidate);
                 getSession().getFrame().addTab(getSession().getOrCreateThemeTab(consultationAotCotTheme));
             });
         }
     }
     
-    /**
-     * Inutilisé pour le moment
-     */
-    private class ViewFormObjectOfPositionConventionItem extends MenuItem {
-
-        public ViewFormObjectOfPositionConventionItem(PositionConvention candidate, ObjetReseau reseau) {
-            setText("Consulter l'objet de la convention "+getSession().generateElementTitle(candidate));
-
-            setOnAction((ActionEvent event) -> {
-                getSession().showEditionTab(reseau);
-            });
-        }
-    }
-    
-    public static PojoTable getConventionsForReseau(final ObjetReseau reseau){
+    public static PojoTable getConventionsForObjet(final Objet objet){
         final PositionConventionRepository positionRepo = (PositionConventionRepository) Injector.getSession().getRepositoryForClass(PositionConvention.class);
         final AbstractSIRSRepository<Convention> conventionRepo = Injector.getSession().getRepositoryForClass(Convention.class);
                 
-        final List<PositionConvention> positionsLiees = positionRepo.getByReseau(reseau);
+        final List<PositionConvention> positionsLiees = positionRepo.getByObjet(objet);
         final List<String> conventionLieesIds = new ArrayList<>();
         for(final PositionConvention positionLiee : positionsLiees){
             if(positionLiee.getSirsdocument()!=null) conventionLieesIds.add(positionLiee.getSirsdocument());
@@ -207,7 +193,7 @@ public class PluginAotCot extends Plugin {
         
         final List<Convention> conventionsLiees = conventionRepo.get(conventionLieesIds);
 
-        final PojoTable table = new PojoTable(Convention.class, "Conventions de l'élément de réseau "+reseau.getDesignation());
+        final PojoTable table = new PojoTable(Convention.class, "Conventions de l'objet "+objet.getDesignation());
         table.setTableItems(() -> (ObservableList) FXCollections.observableList(conventionsLiees));
         table.editableProperty().set(false);
         table.fichableProperty().set(false);
@@ -236,14 +222,9 @@ public class PluginAotCot extends Plugin {
             final StringBuilder sb = new StringBuilder();
             sb.append(new SirsStringConverter().toString(obligation));
             
-//            if (obligation.getDate_fin().compareTo(LocalDate.now())<0)
-//                alerts.add(new AlertItem(sb.toString(), obligation.getDate_fin(), AlertItem.AlertItemLevel.HIGH));
-//            else 
-                if(obligation.getDate_fin().minusMonths(6).compareTo(LocalDate.now())<0
-                        && obligation.getDate_fin().compareTo(LocalDate.now())>=0) // On ne veut pas d'alerte pour les conventions dont la date de fin est déjà dépassée
-                alerts.add(new AlertItem(sb.toString(), obligation.getDate_fin(), obligation));
-//            else 
-//                alerts.add(new AlertItem(sb.toString(), obligation.getDate_fin(), AlertItem.AlertItemLevel.INFORMATION));
+            if(obligation.getDate_fin().minusMonths(6).compareTo(LocalDate.now())<0
+                    && obligation.getDate_fin().compareTo(LocalDate.now())>=0) // On ne veut pas d'alerte pour les conventions dont la date de fin est déjà dépassée
+            alerts.add(new AlertItem(sb.toString(), obligation.getDate_fin(), obligation));
         }
 
         AlertManager.getInstance().addAlerts(alerts);

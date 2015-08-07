@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import fr.sirs.theme.ui.*?>
+<?import org.geotoolkit.gui.javafx.util.*?>
+<?import jidefx.scene.control.field.*?>
+<?import jfxtras.scene.control.*?>
+<?import javafx.scene.web.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<fx:root fx:id="uiBorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <center>
+      <VBox spacing="50.0" BorderPane.alignment="CENTER">
+         <children>
+
+<!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
+            <!-- Utilisateur -->
+             <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+              <columnConstraints>
+                  <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                  <ColumnConstraints hgrow="ALWAYS" />
+              </columnConstraints>
+              <!--rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints-->
+               <children>
+                  <Label text="Type :" />
+                  <ComboBox fx:id="ui_types" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" />
+                  <Label text="Linéaire :" GridPane.rowIndex="1" />
+                  <ComboBox fx:id="ui_linear" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label text="SR de saisie des PRs :" GridPane.rowIndex="2" />
+                  <ComboBox fx:id="ui_sr" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label text="PRs :" GridPane.rowIndex="3" />
+                  <GridPane GridPane.columnIndex="1" GridPane.rowIndex="3">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" />
+                      <ColumnConstraints hgrow="SOMETIMES" />
+                        <ColumnConstraints hgrow="SOMETIMES" />
+                        <ColumnConstraints hgrow="SOMETIMES" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label text="Début : " />
+                        <Spinner fx:id="ui_prDebut" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" />
+                        <Label fx:id="ui_prDebutComputed" GridPane.columnIndex="2" />
+                        <Label text="Fin : " GridPane.columnIndex="3" />
+                        <Spinner fx:id="ui_prFin" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="4" />
+                        <Label fx:id="ui_prFinComputed" GridPane.columnIndex="5" />
+                     </children>
+                  </GridPane>
+                  <Label text="Objets trouvés :" GridPane.rowIndex="4" />
+                  <ListView fx:id="ui_list" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <HBox GridPane.columnIndex="1" GridPane.rowIndex="5">
+                      <children>
+                        <Button fx:id="ui_cancel" text="Annuler" />
+                        <Button fx:id="ui_add" text="Ajouter" />
+                      </children>
+                  </HBox>
+               </children>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" />
+                  <RowConstraints />
+                  <RowConstraints />
+               </rowConstraints>
+            </GridPane>
+
+
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="50.0" right="50.0" top="10.0" />
+         </padding>
+      </VBox>
+   </center>
+</fx:root>

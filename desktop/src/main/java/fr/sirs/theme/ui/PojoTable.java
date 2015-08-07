@@ -1518,9 +1518,7 @@ public class PojoTable extends BorderPane {
         return tronconSourceProperty;
     }
 
-    private class ChoiceStage extends Stage {
-
-        private ObjectProperty<Element> retrievedElement = new SimpleObjectProperty<>();
+    private class ChoiceStage extends PojoTableChoiceStage {
 
         private ChoiceStage(){
             super();
@@ -1569,10 +1567,6 @@ public class PojoTable extends BorderPane {
             vBox.setAlignment(Pos.CENTER);
             vBox.setPadding(new Insets(20));
             setScene(new Scene(vBox));
-        }
-
-        private ObjectProperty<Element> getRetrievedElement(){
-            return retrievedElement;
         }
 
         protected Element addExistingPojo(final Preview preview) {

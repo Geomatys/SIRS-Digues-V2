@@ -1122,7 +1122,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_7jtrcDp-EeWreJjG-DKPRw" name="explicitGeometry : Geometry" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@3a831744{platform:/resource/plugin-vegetation/model/vegetation.ecore#//PositionableVegetation/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_7jtrcDp-EeWreJjG-DKPRw" name="explicitGeometry : Geometry" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="vegetation.ecore#//PositionableVegetation/explicitGeometry"/>
           <semanticElements xmi:type="ecore:EAttribute" href="vegetation.ecore#//PositionableVegetation/explicitGeometry"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_-Aa-cDp-EeWreJjG-DKPRw" labelAlignment="LEFT">
@@ -1133,7 +1133,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_AbAKgDp_EeWreJjG-DKPRw" name="distanceDebutMin : EDouble = 0.0" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@6761bbd{platform:/resource/plugin-vegetation/model/vegetation.ecore#//PositionableVegetation/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_AbAKgDp_EeWreJjG-DKPRw" name="distanceDebutMin : EDouble = 0.0" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="vegetation.ecore#//PositionableVegetation/distanceDebutMin"/>
           <semanticElements xmi:type="ecore:EAttribute" href="vegetation.ecore#//PositionableVegetation/distanceDebutMin"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_MYYigDp_EeWreJjG-DKPRw" labelAlignment="LEFT">

@@ -4,7 +4,9 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
 import java.util.List;
 import org.apache.sis.util.ArgumentChecks;
+import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.ViewQuery;
 
 /**
  *

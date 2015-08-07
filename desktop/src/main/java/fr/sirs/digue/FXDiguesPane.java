@@ -128,7 +128,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 if(uiArchived!=null && uiArchived.getTooltip()!=null)
-                    uiArchived.getTooltip().setText(uiArchived.isSelected() ? "Voir les troncons archivés" : "Masquer les troncons archivés");
+                    uiArchived.getTooltip().setText(uiArchived.isSelected() ? "Masquer les troncons archivés" : "Voir les troncons archivés");
             }
         });
         
