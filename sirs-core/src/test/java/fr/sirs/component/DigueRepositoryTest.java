@@ -5,7 +5,6 @@
  */
 package fr.sirs.component;
 
-import java.util.List;
 
 import org.junit.Test;
 
@@ -72,12 +71,12 @@ public class DigueRepositoryTest extends CouchDBTestCase {
 
     @Test
     public void testGetAll() {
-    	  List<Digue> result = digueRepository.getAll();
+    	  Iterable<Digue> result = digueRepository.getAllStreaming();
           for (Digue digue : result) {
               System.out.println(digue);
           }
 
-          for(TronconDigue troncon: tronconRepository.getAll()) {
+          for(TronconDigue troncon: tronconRepository.getAllStreaming()) {
               for(Objet str: TronconUtils.getObjetList(troncon)) {
                   System.out.println(str.getParent() + " " + str.getDocumentId());
               }

@@ -183,7 +183,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
 
         // Retrieve all organisms current newValue is / was part of.
         if (newValue.getId() != null) {
-            for (final Organisme org : orgRepository.getAll()) {
+            for (final Organisme org : orgRepository.getAllStreaming()) {
                 orgsOfContact.addAll(org.contactOrganisme.filtered((ContactOrganisme co) -> {
                     return newValue.getId().equals(co.getContactId());
                 }));

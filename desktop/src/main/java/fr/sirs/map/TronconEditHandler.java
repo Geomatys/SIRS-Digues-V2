@@ -19,6 +19,7 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.util.SirsStringConverter;
+import fr.sirs.util.StreamingIterable;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.net.URISyntaxException;
@@ -92,6 +93,7 @@ import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.referencing.CRS;
+import org.geotoolkit.util.collection.CloseableIterator;
 import org.geotoolkit.util.collection.CollectionChangeEvent;
 import org.opengis.filter.Id;
 import org.opengis.referencing.operation.TransformException;
@@ -568,11 +570,12 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                             }
 
                             final SystemeReperageRepository srRepo = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class));
-                            final List<SystemeReperage> srs = srRepo.getByLinear(tronconProperty.get());
-                            for (final SystemeReperage sr : srs) {
-                                srRepo.remove(sr, tronconProperty.get());
+                            final StreamingIterable<SystemeReperage> srs = srRepo.getByLinearStreaming(tronconProperty.get());
+                            try (final CloseableIterator<SystemeReperage> it = srs.iterator()) {
+                            while (it.hasNext()) {
+                                srRepo.remove(it.next(), tronconProperty.get());
                             }
-
+                            }
                             session.getRepositoryForClass(TronconDigue.class).remove(tronconProperty.get());
                             tronconProperty.set(null);
                         }

@@ -94,9 +94,7 @@ public abstract class AbstractTheme extends Theme {
                 Thread.currentThread().getContextClassLoader());
         final Function<String, ObservableList<T>> extractor = (String linearId) -> {
             final List<T> result = ((AbstractPositionableRepository<T>) Injector.getSession().getRepositoryForClass(themeClass)).getByLinearId(linearId);
-            final ObservableList<T> observableResult = FXCollections.observableArrayList();
-            for(final T t : result) observableResult.add(t);
-            return observableResult;
+            return FXCollections.observableList(result);
         };
         final Consumer<T> deletor = (T themeElement) -> Injector.getSession().getRepositoryForClass(themeClass).remove(themeElement);
 

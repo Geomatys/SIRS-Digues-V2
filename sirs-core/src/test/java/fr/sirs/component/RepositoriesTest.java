@@ -44,15 +44,11 @@ public class RepositoriesTest extends CouchDBTestCase {
     }
 
     public void removeDigues() {
-        List<Digue> digues = digueRepository.getAll();
-        for(Digue digue : digues) digueRepository.remove(digue);
+        digueRepository.executeBulkDelete(digueRepository.getAllStreaming());
     }
 
     public void removeTronconsDigue() {
-        final List<TronconDigue> troncons = tronconRepository.getAll();
-        troncons.stream().forEach((troncon) -> {
-            tronconRepository.remove(troncon);
-        });
+        tronconRepository.executeBulkDelete(tronconRepository.getAllStreaming());
     }
 
     public void insertDigues() {
@@ -134,7 +130,7 @@ public class RepositoriesTest extends CouchDBTestCase {
 
     public void linkTronconsToDigues(){
         final List<Digue> digues = digueRepository.getAll();
-        final List<TronconDigue> troncons = tronconRepository.getAll();
+        final Iterable<TronconDigue> troncons = tronconRepository.getAllStreaming();
         final int nbDigues = digues.size();
 
         int i=0;
@@ -166,7 +162,7 @@ public class RepositoriesTest extends CouchDBTestCase {
     public void testGetAll() {
         System.out.println("getAll");
         final List<Digue> expResult = new ArrayList<>();
-        final List<Digue> result = digueRepository.getAll();
+        final Iterable<Digue> result = digueRepository.getAllStreaming();
         for (Digue digue : result) {
             System.out.println(digue);
         }

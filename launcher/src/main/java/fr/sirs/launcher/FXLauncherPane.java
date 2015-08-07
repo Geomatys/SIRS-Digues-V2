@@ -15,7 +15,7 @@ import static fr.sirs.core.SirsCore.LOGGER;
 
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.SirsCoreRuntimeExecption;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
@@ -1026,7 +1026,7 @@ public class FXLauncherPane extends BorderPane {
                             "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
                             "puis relancer l'application.", ex).showAndWait();
                 } catch (Exception ex) {
-                    throw new SirsCoreRuntimeExecption(ex);
+                    throw new SirsCoreRuntimeException(ex);
                 }
             }
         }

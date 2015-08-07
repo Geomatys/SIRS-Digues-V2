@@ -6,7 +6,7 @@ import fr.sirs.core.InjectorCore;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.SirsCoreRuntimeExecption;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Positionable;
 import org.ektorp.CouchDbConnector;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.StreamingIterable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -48,7 +49,7 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
         if(session!=null){
             return session.getElementCreator().createElement(SystemeReperage.class);
         } else {
-            throw new SirsCoreRuntimeExecption("Pas de session courante");
+            throw new SirsCoreRuntimeException("Pas de session courante");
         }
     }
 
@@ -60,6 +61,16 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     public List<SystemeReperage> getByLinearId(final String linearId) {
         ArgumentChecks.ensureNonNull("Linear", linearId);
         return cacheList(globalRepo.getByLinearId(type, linearId));
+    }
+
+    public StreamingIterable<SystemeReperage> getByLinearStreaming(final TronconDigue linear) {
+        ArgumentChecks.ensureNonNull("Linear", linear);
+        return this.getByLinearIdStreaming(linear.getId());
+    }
+
+    public StreamingIterable<SystemeReperage> getByLinearIdStreaming(final String linearId) {
+        ArgumentChecks.ensureNonNull("Linear", linearId);
+        return new StreamingViewIterable(globalRepo.createByLinearIdQuery(type, linearId));
     }
 
     public void update(SystemeReperage entity, TronconDigue troncon) {
@@ -154,7 +165,7 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     }
 
     @Override
-    public List<DocumentOperationResult> executeBulkDelete(List<SystemeReperage> bulkList) {
+    public List<DocumentOperationResult> executeBulkDelete(Iterable<SystemeReperage> bulkList) {
         throw new UnsupportedOperationException("Forbidden due to SR integrity constraints.");
     }
 

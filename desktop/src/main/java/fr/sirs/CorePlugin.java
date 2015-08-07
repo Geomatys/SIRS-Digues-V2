@@ -168,7 +168,7 @@ public class CorePlugin extends Plugin {
         final TronconDigueRepository repository = (TronconDigueRepository) getSession().getRepositoryForClass(TronconDigue.class);
 
         final Function<Class<? extends Element>, StructBeanSupplier> getDefaultSupplierForClass = (Class<? extends Element> c) ->{
-            return new StructBeanSupplier(c, () -> getSession().getRepositoryForClass(c).getAll());
+            return new StructBeanSupplier(c, () -> getSession().getRepositoryForClass(c).getAllStreaming());
         };
 
         //troncons

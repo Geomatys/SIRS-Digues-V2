@@ -28,7 +28,7 @@ import javafx.collections.FXCollections;
  * @author Samuel Andrés (Geomatys)
  */
 public class PositionDocumentTheme extends TronconTheme {
-    
+
     private static final ThemeManager ARTICLE = generateThemeManager(PositionDocument.class, ArticleJournal.class);
     private static final ThemeManager MARCHE = generateThemeManager(PositionDocument.class, Marche.class);
     private static final ThemeManager RAPPORT_ETUDE = generateThemeManager(PositionDocument.class, RapportEtude.class);
@@ -36,11 +36,11 @@ public class PositionDocumentTheme extends TronconTheme {
     private static final ThemeManager AUTRE = generateThemeManager(PositionDocument.class, null);
     private static final ThemeManager PROFIL_LONG = generateThemeManager(ProfilLong.class);
     private static final ThemeManager PROFIL_TRAVERS = generateThemeManager(PositionProfilTravers.class);
-    
+
     public PositionDocumentTheme() {
         super("Documents localisés", ARTICLE, MARCHE, RAPPORT_ETUDE, DOCUMENT_GRANDE_ECHELLE, AUTRE, PROFIL_LONG, PROFIL_TRAVERS);
     }
-    
+
     private static <T extends Positionable, D extends SIRSDocument> ThemeManager<T> generateThemeManager(final Class<T> themeClass, Class<D> documentClass){
         final String title;
         if(documentClass!=null){
@@ -50,20 +50,20 @@ public class PositionDocumentTheme extends TronconTheme {
         } else{
             title = "Sans document associé";
         }
-        return new ThemeManager<>(title, 
-                "Thème "+title, 
-                themeClass,               
+        return new ThemeManager<>(title,
+                "Thème "+title,
+                themeClass,
             (String linearId) -> {
-                return FXCollections.observableArrayList(FXCollections.observableArrayList(((AbstractPositionableRepository<T>) Injector.getSession().getRepositoryForClass(themeClass)).getByLinearId(linearId)).filtered(new DocumentPredicate(documentClass)));
+                return FXCollections.observableList(((AbstractPositionableRepository<T>) Injector.getSession().getRepositoryForClass(themeClass)).getByLinearId(linearId)).filtered(new DocumentPredicate(documentClass));
             },
             (T c) -> Injector.getSession().getRepositoryForClass(themeClass).remove(c));
     }
-    
+
     private static class DocumentPredicate<T extends SIRSDocument> implements Predicate<AbstractPositionDocumentAssociable>{
-        
+
         private final Class<T> documentClass;
         private final Map<String, String> cache;
-        
+
         DocumentPredicate(final Class<T> documentClass){
             this.documentClass = documentClass;
             cache = new HashMap<>();
@@ -82,7 +82,7 @@ public class PositionDocumentTheme extends TronconTheme {
                 if(documentClass.getName().equals(cache.get(documentId))){
                     return true;
                 }
-            } 
+            }
             // Dans le cas où documentClass==null, on retourne les positions de documents non associées à des documents.
             else if(documentId==null && documentClass==null){
                 return true;

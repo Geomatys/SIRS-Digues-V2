@@ -72,13 +72,13 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         });
         JTS.setCRS(TRONCON_GEOM_WGS84, CommonCRS.WGS84.normalizedGeographic());
     }
-    
+
     private static final String[] SEARCH_CLASSES = new String[]{
         TronconDigue.class.getCanonicalName(),
         Digue.class.getCanonicalName(),
         SystemeEndiguement.class.getCanonicalName()
     };
-    
+
     @Autowired
     private Session session;
 
@@ -97,7 +97,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
     public FXDiguesPane() {
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
-        
+
         uiTree.setShowRoot(false);
         uiTree.setCellFactory((Object param) -> new CustomizedTreeCell());
 
@@ -114,11 +114,11 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                 displayElement(session.getRepositoryForClass(TronconDigue.class).get(((TronconDigue) obj).getDocumentId()));
             }
         });
-        
+
         searchRunning.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         searchRunning.setPrefSize(22, 22);
         searchRunning.setStyle(" -fx-progress-color: white;");
-        
+
         uiArchived.setSelected(false);
         uiArchived.setGraphic(new ImageView(SIRS.ICON_ARCHIVE_WHITE));
         uiArchived.setOnAction(event -> updateTree());
@@ -131,10 +131,10 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                     uiArchived.getTooltip().setText(uiArchived.isSelected() ? "Masquer les troncons archivés" : "Voir les troncons archivés");
             }
         });
-        
+
         uiSearch.setGraphic(searchNone);
         uiSearch.textProperty().bind(currentSearch);
-        
+
         uiDelete.setGraphic(new ImageView(SIRS.ICON_TRASH_WHITE));
         uiDelete.setOnAction(this::deleteSelection);
         uiDelete.setDisable(!session.nonGeometryEditionProperty().get());
@@ -142,14 +142,14 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         uiAdd.getItems().add(new NewSystemeMenuItem(null));
         uiAdd.getItems().add(new NewDigueMenuItem(null));
         uiAdd.setDisable(!session.nonGeometryEditionProperty().get());
-        
+
         updateTree();
-        
+
         //listen to changes in the db to update tree
         Injector.getDocumentChangeEmiter().addListener(this);
-        
+
     }
-    
+
     /**
      * Affiche un éditeur pour l'élément en entrée.
      * @param obj L'élément à éditer.
@@ -165,10 +165,10 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         if(obj instanceof TreeItem){
             obj = ((TreeItem)obj).getValue();
         }
-        
+
         if(obj instanceof SystemeEndiguement){
             final SystemeEndiguement se = (SystemeEndiguement) obj;
-            
+
             final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
                     "La suppression de la digue "+se.getLibelle()+" ne supprimera pas les digues qui la compose, "
                    +"celles ci seront déplacées dans le groupe 'Non classés. Confirmer la suppression ?",
@@ -178,7 +178,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             if (res == ButtonType.YES) {
                 session.getRepositoryForClass(SystemeEndiguement.class).remove(se);
             }
-                        
+
         }else if(obj instanceof Digue){
             final Digue digue = (Digue) obj;
             final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
@@ -209,19 +209,19 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             }
         }
     }
-    
+
     @FXML
     private void openSearchPopup(ActionEvent event) {
         if (uiSearch.getGraphic() != searchNone) {
             //une recherche est deja en cours
             return;
         }
-        
+
         final Popup popup = new Popup();
         final TextField textField = new TextField(currentSearch.get());
         popup.setAutoHide(true);
         popup.getContent().add(textField);
-        
+
         textField.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -236,11 +236,11 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
 
     private final Predicate<TronconDigue> nonArchivedPredicate = (TronconDigue t) -> {
         final boolean result = (t.getDate_fin()==null || t.getDate_fin().isAfter(LocalDate.now()));
-        
+
 //        System.out.println("Le prédicat vaut "+ t.getLibelle() +" est archivé : "+!result);
         return result;
     };
-            
+
     private final Predicate<TronconDigue> searchedPredicate = (TronconDigue t) -> {
         final String str = currentSearch.get();
         if (str != null && !str.isEmpty()) {
@@ -258,37 +258,37 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         }
         else return true;
     };
-    
+
     private void updateTree() {
-        
+
         new Thread(){
             @Override
             public void run() {
                 Platform.runLater(() -> {
                     uiSearch.setGraphic(searchRunning);
                 });
-                
+
                 //on stoque les noeuds ouverts
                 final Set extendeds = new HashSet();
                 searchExtended(uiTree.getRoot(),extendeds);
-                
+
                 //creation des filtres
                 Predicate<TronconDigue> filter = searchedPredicate;
                 if(!uiArchived.isSelected()) {
 //                    System.out.println("uiArchived n'est pas sélectionné !");
                     filter = filter.and(nonArchivedPredicate);
                 }
-                
+
                 //creation de l'arbre
                 final TreeItem treeRootItem = new TreeItem("root");
-                
+
                 //on recupere tous les elements
-                final List<SystemeEndiguement> sds = session.getRepositoryForClass(SystemeEndiguement.class).getAll();
+                final Iterable<SystemeEndiguement> sds = session.getRepositoryForClass(SystemeEndiguement.class).getAllStreaming();
                 final Set<Digue> digues = new HashSet<>(session.getRepositoryForClass(Digue.class).getAll());
                 final Set<TronconDigue> troncons = new HashSet<>(((TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class)).getAllLight());
                 final Set<Digue> diguesFound = new HashSet<>();
                 final Set<TronconDigue> tronconsFound = new HashSet<>();
-                
+
                 for(final SystemeEndiguement sd : sds){
                     final TreeItem sdItem = new TreeItem(sd);
                     treeRootItem.getChildren().add(sdItem);
@@ -303,13 +303,13 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                         sdItem.getChildren().add(digueItem);
                     }
                 }
-                
+
                 //on place toute les digues et troncons non trouvé dans un group a part
                 digues.removeAll(diguesFound);
-                final TreeItem ncItem = new TreeItem("Non classés"); 
+                final TreeItem ncItem = new TreeItem("Non classés");
                 ncItem.setExpanded(extendeds.contains(ncItem.getValue()));
                 treeRootItem.getChildren().add(ncItem);
-                
+
                 for(final Digue digue : digues){
                     final TreeItem digueItem = toNode(digue, troncons, tronconsFound, filter);
                     ncItem.getChildren().add(digueItem);
@@ -319,14 +319,14 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                 for(final TronconDigue tc : troncons){
                     ncItem.getChildren().add(new TreeItem(tc));
                 }
-                
+
                 Platform.runLater(() -> {
                     uiTree.setRoot(treeRootItem);
                     uiSearch.setGraphic(searchNone);
                 });
             }
         }.start();
-        
+
     }
 
     private static void searchExtended(TreeItem<?> ti, Set objects){
@@ -338,7 +338,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             searchExtended(t, objects);
         }
     }
-    
+
     private static TreeItem toNode(Digue digue, Set<TronconDigue> troncons, Set<TronconDigue> tronconsFound, Predicate<TronconDigue> filter){
         final TreeItem digueItem = new TreeItem(digue);
         for(final TronconDigue td : troncons){
@@ -348,7 +348,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
 //                System.out.println("Ajout du troncon "+td.getLibelle());
                 final TreeItem tronconItem = new TreeItem(td);
                 digueItem.getChildren().add(tronconItem);
-            } 
+            }
 //            else {
 //                System.out.println("bloqué"+td);
 //            }
@@ -382,7 +382,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
            updateTree();
         }
     }
-    
+
     private class NewTronconMenuItem extends MenuItem {
 
         public NewTronconMenuItem(TreeItem parent) {
@@ -397,7 +397,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
 
                 try {
                     //on crée un géométrie au centre de la france
-                    final Geometry geom = JTS.transform(TRONCON_GEOM_WGS84, 
+                    final Geometry geom = JTS.transform(TRONCON_GEOM_WGS84,
                             CRS.findMathTransform(CommonCRS.WGS84.normalizedGeographic(),session.getProjection(),true));
                     troncon.setGeometry(geom);
                 } catch (FactoryException | TransformException | MismatchedDimensionException ex) {
@@ -411,7 +411,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             });
         }
     }
-        
+
     private class NewDigueMenuItem extends MenuItem {
 
         public NewDigueMenuItem(TreeItem parent) {
@@ -419,17 +419,17 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             this.setOnAction((ActionEvent t) -> {
                 final Digue digue = session.getElementCreator().createElement(Digue.class);
                 digue.setLibelle("Digue vide");
-                
+
                 if(parent!=null){
                     final SystemeEndiguement se = (SystemeEndiguement) parent.getValue();
                     digue.setSystemeEndiguementId(se.getId());
                 }
                 session.getRepositoryForClass(Digue.class).add(digue);
-                
+
             });
         }
     }
-    
+
     private class NewSystemeMenuItem extends MenuItem {
 
         public NewSystemeMenuItem(TreeItem parent) {
@@ -441,7 +441,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             });
         }
     }
-    
+
     private class CustomizedTreeCell extends TreeCell {
 
         private final ContextMenu addMenu;

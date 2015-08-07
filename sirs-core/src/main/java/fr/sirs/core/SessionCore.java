@@ -33,6 +33,7 @@ import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.index.ElementHit;
+import fr.sirs.util.StreamingIterable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -268,7 +269,7 @@ public class SessionCore implements ApplicationContextAware {
                     srid = IdentifiedObjects.lookupEpsgCode(projection, true);
                 }
             } catch (FactoryException e) {
-                throw new SirsCoreRuntimeExecption(e);
+                throw new SirsCoreRuntimeException(e);
             }
         }
         return projection;
@@ -323,13 +324,15 @@ public class SessionCore implements ApplicationContextAware {
     }
 
     public List<Photo> getPhotoList(final String linearId) {
-                final List<Photo> photos = new ArrayList<>();
-        final List<PositionProfilTravers> positions = ((PositionProfilTraversRepository) getRepositoryForClass(PositionProfilTravers.class)).getByLinearId(linearId);
-        final List<Objet> objets = getObjetsByTronconId(linearId);
-        for(final PositionProfilTravers position : positions){
+        final List<Photo> photos = new ArrayList<>();
+        final StreamingIterable<PositionProfilTravers> positions = InjectorCore.getBean(PositionProfilTraversRepository.class).getByLinearIdStreaming(linearId);
+        for (final PositionProfilTravers position : positions) {
             final List<Photo> p = position.getPhotos();
-            if(p!=null && !p.isEmpty()) photos.addAll(p);
+            if (p != null && !p.isEmpty())
+                photos.addAll(p);
         }
+
+        final List<Objet> objets = getObjetsByTronconId(linearId);
         for(final Objet objet : objets){
             if (objet instanceof ObjetPhotographiable){
                 final List<Photo> p = ((ObjetPhotographiable) objet).getPhotos();
@@ -345,12 +348,12 @@ public class SessionCore implements ApplicationContextAware {
         final Collection<AbstractSIRSRepository> repos = getRepositoriesForClass(AvecPhotos.class);
         for (final AbstractSIRSRepository repo : repos) {
             if (repo instanceof AbstractPositionableRepository) {
-                List byLinearId = ((AbstractPositionableRepository)repo).getByLinearId(linearId);
+                Iterable byLinearId = ((AbstractPositionableRepository)repo).getByLinearIdStreaming(linearId);
                 for (Object o : byLinearId) {
                     photos.addAll(((AvecPhotos)o).getPhotos());
                 }
             } else {
-                for (final Object photoContainer : repo.getAll()) {
+                for (final Object photoContainer : repo.getAllStreaming()) {
                     for (final Photo photo : ((AvecPhotos<Photo>)photoContainer).getPhotos()) {
                         Element parent = photo.getParent();
                         while (parent != null) {
@@ -366,7 +369,7 @@ public class SessionCore implements ApplicationContextAware {
         }
 
         // Special case :
-        for (final Desordre d : ((AbstractPositionableRepository<Desordre>)getRepositoryForClass(Desordre.class)).getByLinearId(linearId)) {
+        for (final Desordre d : ((AbstractPositionableRepository<Desordre>)getRepositoryForClass(Desordre.class)).getByLinearIdStreaming(linearId)) {
             for (final Observation o : d.observations) {
                 photos.addAll(o.photos);
             }

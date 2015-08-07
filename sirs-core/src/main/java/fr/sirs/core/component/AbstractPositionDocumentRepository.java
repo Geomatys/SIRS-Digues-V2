@@ -25,7 +25,7 @@ public abstract class AbstractPositionDocumentRepository<T extends AbstractPosit
 
     public List<T> getByDocument(final SIRSDocument document) {
         ArgumentChecks.ensureNonNull("Document", document);
-        return this.queryView(BY_DOCUMENT_ID, document.getId());
+        return this.getByDocumentId(document.getId());
     }
 
     public List<T> getByDocumentId(final String documentId) {

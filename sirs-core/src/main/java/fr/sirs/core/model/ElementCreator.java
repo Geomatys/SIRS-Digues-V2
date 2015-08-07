@@ -1,7 +1,7 @@
 package fr.sirs.core.model;
 
 import fr.sirs.core.SessionCore;
-import fr.sirs.core.SirsCoreRuntimeExecption;
+import fr.sirs.core.SirsCoreRuntimeException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -54,7 +54,7 @@ public class ElementCreator {
             
             return element;
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            throw new SirsCoreRuntimeExecption(ex.getMessage());
+            throw new SirsCoreRuntimeException(ex.getMessage());
         }
     }
     
@@ -66,7 +66,7 @@ public class ElementCreator {
             element.setValid(true);
             return element;
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            throw new SirsCoreRuntimeExecption(ex.getMessage());
+            throw new SirsCoreRuntimeException(ex.getMessage());
         }
     }
 }

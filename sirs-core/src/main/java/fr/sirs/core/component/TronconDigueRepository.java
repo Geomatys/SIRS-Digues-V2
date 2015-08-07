@@ -8,18 +8,20 @@ import org.ektorp.support.View;
 import org.ektorp.support.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fr.sirs.core.JacksonIterator;
+import fr.sirs.core.SirsViewIterator;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.SirsCoreRuntimeExecption;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.StreamingIterable;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
+import org.geotoolkit.util.collection.CloseableIterator;
 import org.springframework.stereotype.Component;
 
 /**
@@ -90,19 +92,17 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         if(session!=null){
             return session.getElementCreator().createElement(TronconDigue.class);
         } else {
-            throw new SirsCoreRuntimeExecption("Pas de session courante");
+            throw new SirsCoreRuntimeException("Pas de session courante");
         }
     }
 
     /**
-     * Return a light version of the tronçon, without sub-structures.
-     *
      * Note : As the objects returned here are incomplete, they're not cached.
      *
-     * @return
+     * @return a light version of the tronçon, without sub-structures.
      */
     public List<TronconDigue> getAllLight() {
-        final JacksonIterator<TronconDigue> ite = JacksonIterator.create(TronconDigue.class, db.queryForStreamingView(createQuery(STREAM_LIGHT)));
+        final SirsViewIterator<TronconDigue> ite = SirsViewIterator.create(TronconDigue.class, db.queryForStreamingView(createQuery(STREAM_LIGHT)));
         final List<TronconDigue> lst = new ArrayList<>();
         while (ite.hasNext()) {
             lst.add(ite.next());
@@ -110,8 +110,8 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
         return lst;
     }
 
-    public JacksonIterator<TronconDigue> getAllLightIterator() {
-        return JacksonIterator.create(TronconDigue.class,
+    public SirsViewIterator<TronconDigue> getAllLightIterator() {
+        return SirsViewIterator.create(TronconDigue.class,
                 db.queryForStreamingView(createQuery(STREAM_LIGHT)));
     }
 
@@ -122,9 +122,11 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
     private void constraintDeleteBoundEntities(TronconDigue entity) {
         //on supprime tous les SR associés
         final SystemeReperageRepository srrepo = InjectorCore.getBean(SystemeReperageRepository.class);
-        final List<SystemeReperage> srs = srrepo.getByLinearId(entity.getId());
-        for(SystemeReperage sr : srs) {
-            srrepo.remove(sr, entity);
+        final StreamingIterable<SystemeReperage> srs = srrepo.getByLinearIdStreaming(entity.getId());
+        try (final CloseableIterator<SystemeReperage>  srIt = srs.iterator()) {
+            while (srIt.hasNext()) {
+                srrepo.remove(srIt.next(), entity);
+            }
         }
         List<Positionable> boundPositions = TronconUtils.getPositionableList(entity);
         for (Positionable p : boundPositions) {

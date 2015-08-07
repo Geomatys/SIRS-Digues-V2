@@ -10,7 +10,7 @@ import org.ektorp.ViewResult.Row;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
-public class JacksonIterator<T> implements Iterator<T>, AutoCloseable {
+public class SirsViewIterator<T> implements Iterator<T>, AutoCloseable {
 
     private final StreamingViewResult result;
     private final Class<? extends T> clazz;
@@ -18,7 +18,7 @@ public class JacksonIterator<T> implements Iterator<T>, AutoCloseable {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public JacksonIterator(Class<? extends T> clazz, StreamingViewResult result) {
+    public SirsViewIterator(Class<? extends T> clazz, StreamingViewResult result) {
         this.clazz = clazz;
         this.result = result;
         if (result.getTotalRows() > 0)
@@ -46,24 +46,19 @@ public class JacksonIterator<T> implements Iterator<T>, AutoCloseable {
                 throw new SirsCoreRuntimeExecption(e);
             }
         } catch (IOException e) {
-            throw new SirsCoreRuntimeExecption(e);
+            throw new SirsCoreRuntimeException(e);
         }
 
     }
 
-
-
     @Override
     public void close() throws Exception {
         result.close();
-
     }
 
-    public static <T> JacksonIterator<T> create(
+    public static <T> SirsViewIterator<T> create(
             Class<T> class1,
             StreamingViewResult queryForStreamingView) {
-        
-        return new JacksonIterator<T>(class1, queryForStreamingView);
+        return new SirsViewIterator<>(class1, queryForStreamingView);
     }
-
 }

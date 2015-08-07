@@ -5,7 +5,6 @@
  */
 package fr.sirs.core.component;
 
-import fr.sirs.core.JacksonIterator;
 import fr.sirs.core.model.Element;
 import java.util.List;
 import org.ektorp.ComplexKey;
@@ -38,7 +37,7 @@ public class GlobalRepository extends CouchDbRepositorySupport<Element> {
         initStandardDesignDocument();
     }
 
-    private <T> ViewQuery createByClassQuery(Class<T> type) {
+    protected <T> ViewQuery createByClassQuery(Class<T> type) {
         final ComplexKey startKey = ComplexKey.of(type.getCanonicalName());
         final ComplexKey endKey = ComplexKey.of(type.getCanonicalName(), ComplexKey.emptyObject());
         return createQuery(BY_CLASS_AND_LINEAR_VIEW)
@@ -47,7 +46,7 @@ public class GlobalRepository extends CouchDbRepositorySupport<Element> {
                 .includeDocs(true);
     }
 
-    private <T> ViewQuery createByLinearIdQuery(Class<T> type, final String linearId) {
+    protected <T> ViewQuery createByLinearIdQuery(Class<T> type, final String linearId) {
         return createQuery(BY_CLASS_AND_LINEAR_VIEW)
                 .key(ComplexKey.of(type == null? ComplexKey.emptyObject() : type.getCanonicalName(), linearId))
                 .includeDocs(true);
@@ -57,16 +56,7 @@ public class GlobalRepository extends CouchDbRepositorySupport<Element> {
         return db.queryView(createByClassQuery(type), type);
     }
 
-    <T> JacksonIterator<T> getAllForClassStreaming(Class<T> type) {
-        return JacksonIterator.create(type, db.queryForStreamingView(createByClassQuery(type)));
-    }
-
     <T> List<T> getByLinearId(Class<T> type, final String linearId) {
         return db.queryView(createByLinearIdQuery(type, linearId), type);
     }
-
-    <T> JacksonIterator<T> getAllByLinearIdStreaming(Class<T> type, final String linearId) {
-        return JacksonIterator.create(type, db.queryForStreamingView(createByLinearIdQuery(type, linearId)));
-    }
-
 }

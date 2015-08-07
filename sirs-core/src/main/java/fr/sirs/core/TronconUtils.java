@@ -41,12 +41,14 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.ProprieteTroncon;
+import fr.sirs.util.StreamingIterable;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import org.geotoolkit.referencing.LinearReferencing;
+import org.geotoolkit.util.collection.CloseableIterator;
 
 /**
  * A set of utility methods for manipulation of geometries of {@link Positionable}
@@ -128,19 +130,22 @@ public class TronconUtils {
          * des structures.
          */
         final HashMap<String, SystemeReperage> newSRs = new HashMap<>();
-        for (final SystemeReperage sr : srRepo.getByLinearId(troncon.getId())) {
-            final SystemeReperage srCp = sr.copy();
-            final ListIterator<SystemeReperageBorne> srBorneIt = srCp.getSystemeReperageBornes().listIterator();
-            while (srBorneIt.hasNext()) {
-                if (!keptBornes.contains(srBorneIt.next().getBorneId())) {
-                    srBorneIt.remove();
+        final StreamingIterable<SystemeReperage> srs = srRepo.getByLinearStreaming(troncon);
+        try (final CloseableIterator<SystemeReperage> srIt = srs.iterator()) {
+            while (srIt.hasNext()) {
+                final SystemeReperage sr = srIt.next();
+                final SystemeReperage srCp = sr.copy();
+                final ListIterator<SystemeReperageBorne> srBorneIt = srCp.getSystemeReperageBornes().listIterator();
+                while (srBorneIt.hasNext()) {
+                    if (!keptBornes.contains(srBorneIt.next().getBorneId())) {
+                        srBorneIt.remove();
+                    }
+                }
+                if (!srCp.systemeReperageBornes.isEmpty()) {
+                    newSRs.put(sr.getId(), srCp);
                 }
             }
-            if (!srCp.systemeReperageBornes.isEmpty()) {
-                newSRs.put(sr.getId(), srCp);
-            }
         }
-
         // On essaye de trouver un SR par défaut pour notre nouveau tronçon et on enregistre les SR.
         // On l'enleve de la map pour le remettre après insertion de tous les autres SRs, car il doit
         // être traité différemment.
@@ -446,42 +451,47 @@ public class TronconUtils {
          * des deux. Pour le reste, on fait une simple copie des SR.
          */
         final HashMap<String, String> modifiedSRs = new HashMap<>();
-        for(SystemeReperage sr2 : srRepo.getByLinearId(mergeParam.getId())){
 
-            //on cherche le SR du meme nom
-            SystemeReperage sibling = null;
-            for(SystemeReperage sr1 : srRepo.getByLinearId(mergeResult.getId())){
-                if(sr1.getLibelle().equals(sr2.getLibelle())){
-                    sibling = sr1;
-                    break;
-                }
-            }
+        final StreamingIterable<SystemeReperage> srs = srRepo.getByLinearStreaming(mergeParam);
+        try (final CloseableIterator<SystemeReperage> srIt = srs.iterator()) {
+            while (srIt.hasNext()) {
+                SystemeReperage sr2 = srIt.next();
 
-            if(sibling==null){
-                //on copie le SR
-                final SystemeReperage srCp = sr2.copy();
-                srCp.setLinearId(mergeResult.getDocumentId());
-                //sauvegarde du sr
-                srRepo.add(srCp, mergeResult);
-                modifiedSRs.put(sr2.getId(), srCp.getId());
-            }else{
-                //on merge les bornes
-                final List<SystemeReperageBorne> srbs1 = sibling.getSystemeReperageBornes();
-                final List<SystemeReperageBorne> srbs2 = sr2.getSystemeReperageBornes();
-
-                loop:
-                for(SystemeReperageBorne srb2 : srbs2){
-                    for(SystemeReperageBorne srb1 : srbs1){
-                        if(srb1.getBorneId().equals(srb2.getBorneId())){
-                            continue loop;
-                        }
+                //on cherche le SR du meme nom
+                SystemeReperage sibling = null;
+                for (SystemeReperage sr1 : srRepo.getByLinearId(mergeResult.getId())) {
+                    if (sr1.getLibelle().equals(sr2.getLibelle())) {
+                        sibling = sr1;
+                        break;
                     }
-                    //cette borne n'existe pas dans l'autre SR, on la copie
-                    srbs1.add(srb2.copy());
                 }
-                //maj du sr
-                srRepo.update(sibling, mergeResult);
-                modifiedSRs.put(sr2.getId(), sibling.getId());
+
+                if (sibling == null) {
+                    //on copie le SR
+                    final SystemeReperage srCp = sr2.copy();
+                    srCp.setLinearId(mergeResult.getDocumentId());
+                    //sauvegarde du sr
+                    srRepo.add(srCp, mergeResult);
+                    modifiedSRs.put(sr2.getId(), srCp.getId());
+                } else {
+                    //on merge les bornes
+                    final List<SystemeReperageBorne> srbs1 = sibling.getSystemeReperageBornes();
+                    final List<SystemeReperageBorne> srbs2 = sr2.getSystemeReperageBornes();
+
+                    loop:
+                    for (SystemeReperageBorne srb2 : srbs2) {
+                        for (SystemeReperageBorne srb1 : srbs1) {
+                            if (srb1.getBorneId().equals(srb2.getBorneId())) {
+                                continue loop;
+                            }
+                        }
+                        //cette borne n'existe pas dans l'autre SR, on la copie
+                        srbs1.add(srb2.copy());
+                    }
+                    //maj du sr
+                    srRepo.update(sibling, mergeResult);
+                    modifiedSRs.put(sr2.getId(), sibling.getId());
+                }
             }
         }
 
@@ -557,13 +567,15 @@ public class TronconUtils {
         final SystemeReperageRepository srRepo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
         final AbstractSIRSRepository<BorneDigue> bdRepo = session.getRepositoryForClass(BorneDigue.class);
 
-        final List<SystemeReperage> srs = srRepo.getByLinearId(troncon.getId());
-
         SystemeReperage sr = null;
-        for(SystemeReperage csr : srs){
-            if(SR_ELEMENTAIRE.equalsIgnoreCase(csr.getLibelle())){
-                sr = csr;
-                break;
+        final StreamingIterable<SystemeReperage> srs = srRepo.getByLinearStreaming(troncon);
+        try (final CloseableIterator<SystemeReperage> srIt = srs.iterator()) {
+            while (srIt.hasNext()) {
+                final SystemeReperage csr = srIt.next();
+                if (SR_ELEMENTAIRE.equalsIgnoreCase(csr.getLibelle())) {
+                    sr = csr;
+                    break;
+                }
             }
         }
 
@@ -716,7 +728,7 @@ public class TronconUtils {
             return computePR(refLinear, targetSR, initialPointPR, borneRepo);
         }
         else{
-            throw new SirsCoreRuntimeExecption("Unable to compute segment for the given PR and SRs.");
+            throw new SirsCoreRuntimeException("Unable to compute segment for the given PR and SRs.");
         }
     }
 

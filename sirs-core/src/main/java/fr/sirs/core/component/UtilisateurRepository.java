@@ -2,7 +2,7 @@ package fr.sirs.core.component;
 
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
-import fr.sirs.core.SirsCoreRuntimeExecption;
+import fr.sirs.core.SirsCoreRuntimeException;
 import static fr.sirs.core.component.UtilisateurRepository.BY_LOGIN;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Role;
@@ -40,7 +40,7 @@ public class UtilisateurRepository extends AbstractSIRSRepository<Utilisateur>{
             final ElementCreator elementCreator = session.getElementCreator();
             return elementCreator.createElement(Utilisateur.class);
         } else {
-            throw new SirsCoreRuntimeExecption("Pas de session courante");
+            throw new SirsCoreRuntimeException("Pas de session courante");
         }
     }
 

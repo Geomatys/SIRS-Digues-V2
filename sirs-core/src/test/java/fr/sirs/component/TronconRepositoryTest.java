@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.sirs.core.CouchDBTestCase;
-import fr.sirs.core.JacksonIterator;
+import fr.sirs.core.SirsViewIterator;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
@@ -21,6 +21,7 @@ import fr.sirs.core.model.TronconDigue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.core.TronconUtils;
+import org.geotoolkit.util.collection.CloseableIterator;
 
 /**
  *
@@ -37,7 +38,7 @@ public class TronconRepositoryTest extends CouchDBTestCase {
     @Test
     public void testGetAll() {
         System.out.println("getAll");
-        for (TronconDigue troncon : tronconRepository.getAll()) {
+        for (TronconDigue troncon : tronconRepository.getAllStreaming()) {
             System.out.println(troncon);
             for (Objet struct : TronconUtils.getObjetList(troncon)) {
                 System.out.println("DocuumentId: " + struct.getDocumentId());
@@ -56,8 +57,8 @@ public class TronconRepositoryTest extends CouchDBTestCase {
     @Test
     public void testGetAllAsStream() {
         System.out.println("getAllAsStream");
-        try (JacksonIterator<TronconDigue> allAsStream = tronconRepository
-                .getAllIterator()) {
+        try (CloseableIterator<TronconDigue> allAsStream = tronconRepository
+                .getAllStreaming().iterator()) {
             while (allAsStream.hasNext()) {
                 TronconDigue troncon = allAsStream.next();
                 System.out.println(troncon);
@@ -80,7 +81,7 @@ public class TronconRepositoryTest extends CouchDBTestCase {
     @Test
     public void testGetAllLightAsStream() {
         System.out.println("getAllAsStream");
-        try (JacksonIterator<TronconDigue> allAsStream = tronconRepository
+        try (SirsViewIterator<TronconDigue> allAsStream = tronconRepository
                 .getAllLightIterator()) {
             while (allAsStream.hasNext()) {
                 TronconDigue troncon = allAsStream.next();

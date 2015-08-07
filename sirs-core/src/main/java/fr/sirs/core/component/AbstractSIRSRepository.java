@@ -1,24 +1,34 @@
 package fr.sirs.core.component;
 
-import fr.sirs.core.JacksonIterator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.ReferenceType;
+import fr.sirs.util.StreamingIterable;
+import java.lang.ref.PhantomReference;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import javax.annotation.PostConstruct;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
 import org.ektorp.BulkDeleteDocument;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentOperationResult;
+import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewQuery;
+import org.ektorp.ViewResult;
 import org.ektorp.support.CouchDbRepositorySupport;
+import org.geotoolkit.util.collection.CloseableIterator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -59,8 +69,15 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     @Autowired
     protected GlobalRepository globalRepo;
 
+    private StreamingViewIterable allStreaming;
+
     protected AbstractSIRSRepository(Class<T> type, CouchDbConnector db) {
         super(type, db);
+    }
+
+    @PostConstruct
+    private void init() {
+        allStreaming = new StreamingViewIterable(globalRepo.createByClassQuery(type));
     }
 
     @Override
@@ -80,8 +97,15 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         return cacheList(globalRepo.getAllForClass(type));
     }
 
-    public JacksonIterator<T> getAllIterator() {
-        return globalRepo.getAllForClassStreaming(type);
+    /**
+     *
+     * @return An iterable object which provides an iterator querying all documents
+     * managed by current using a stream, to avoid memory overload.
+     *
+     * Note : provided iteratorss are closeable.
+     */
+    public StreamingIterable<T> getAllStreaming() {
+        return allStreaming;
     }
 
     private void checkIntegrity(T entity){
@@ -174,8 +198,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     }
 
 
-    public List<DocumentOperationResult> executeBulkDelete(final List<T> bulkList){
-
+    public List<DocumentOperationResult> executeBulkDelete(final Iterable<T> bulkList){
         final List<BulkDeleteDocument> toDelete = new ArrayList<>();
         for(final T toBeDeleted : bulkList){
             toDelete.add(BulkDeleteDocument.of(toBeDeleted));
@@ -303,12 +326,89 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * @return
      */
     public T getOne(){
-        final T one = getAll().get(0);
-        if (one==null) {
-            final T other = create();
-            add(other);
-            return other;
+        try (final CloseableIterator<T> it = allStreaming.iterator()) {
+            if (it.hasNext()) {
+                return it.next();
+            } else {
+                final T newOne = create();
+                add(newOne);
+                return newOne;
+            }
         }
-        else return one;
+    }
+
+    /**
+     * Provides iterators which stream view result when browsing.
+     *
+     * TODO : Use {@link PhantomReference} to ensure freed iterators are closed.
+     */
+    public class StreamingViewIterable implements StreamingIterable<T> {
+        private final ViewQuery query;
+
+        protected StreamingViewIterable(final ViewQuery query) {
+            ArgumentChecks.ensureNonNull("View to query", query);
+            this.query = query;
+        }
+
+        @Override
+        public CloseableIterator<T> iterator() {
+            return new StreamingViewIterator(db.queryForStreamingView(query));
+        }
+    }
+
+    private class StreamingViewIterator implements CloseableIterator<T> {
+
+        private final StreamingViewResult result;
+        private final Iterator<ViewResult.Row> iterator;
+
+        private final ObjectReader objectMapper = new ObjectMapper().reader(type);
+
+        public StreamingViewIterator(StreamingViewResult result) {
+            this.result = result;
+            if (result.getTotalRows() > 0) {
+                this.iterator = result.iterator();
+            } else {
+                this.iterator = null;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            /* If using directly parent iterable in a for each statement,
+             * iterator won't be closed, so we close it automatically when
+             * reaching end of the stream. We have to catch exceptions here, because
+             * it appears that iterator fails on empty views.
+             */
+            if (iterator == null) {
+                return false;
+            } else if (iterator.hasNext()) {
+                return true;
+            } else {
+                close();
+                return false;
+            }
+        }
+
+        @Override
+        public T next() {
+            if (iterator == null) {
+                throw new IllegalStateException("Cannot call next when there is no more elements available.");
+            }
+            ViewResult.Row next = iterator.next();
+            try {
+                return cache.getOrCreate(next.getId(), () -> objectMapper.readValue(next.getDocAsNode()));
+            } catch (Exception e) {
+                throw new SirsCoreRuntimeException(e);
+            }
+        }
+
+        @Override
+        public void close() {
+            try {
+                result.close();
+            } catch (Exception e) {
+                SirsCore.LOGGER.log(Level.WARNING, "A streamed CouchDB view result cannot be closed. It's likely to cause memory leaks.", e);
+            }
+        }
     }
 }

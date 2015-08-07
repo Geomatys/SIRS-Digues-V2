@@ -30,15 +30,17 @@ import javafx.concurrent.Task;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import static fr.sirs.SIRS.REFERENCE_GET_ID;
+import fr.sirs.util.StreamingIterable;
 import static java.util.logging.Level.WARNING;
+import org.geotoolkit.util.collection.CloseableIterator;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
 public class ReferenceChecker extends Task<Void> {
-    
-    
+
+
     private static final String BOOLEAN_PRIMITIVE_NAME = "boolean";
     private static final String FLOAT_PRIMITIVE_NAME = "float";
     private static final String DOUBLE_PRIMITIVE_NAME = "double";
@@ -46,16 +48,16 @@ public class ReferenceChecker extends Task<Void> {
     private static final String LONG_PRIMITIVE_NAME = "long";
 
     private String referencesDirectoryPath;
-    
+
     private ReferenceChecker(){}
-    
+
     public ReferenceChecker(final String referencesDirectoryPath){
         this.referencesDirectoryPath = referencesDirectoryPath;
         updateTitle("Vérification des références");
     }
 
     private final Map<Class<ReferenceType>, Map<ReferenceType, ReferenceType>> incoherentReferences = new HashMap<>();
-    
+
     private final Map<Class, List<ReferenceType>> serverInstancesNotLocal = new HashMap<>();
     public Map<Class, List<ReferenceType>> getServerInstancesNotLocal() { return serverInstancesNotLocal;}
 
@@ -73,7 +75,7 @@ public class ReferenceChecker extends Task<Void> {
 
         ////////////////////////////////////////////////////////////////////////
         /*
-         Récupération des classes de référence de l'application. 
+         Récupération des classes de référence de l'application.
          */
         localClassReferences = Session.getReferences();
         final int progressSize = localClassReferences.size();
@@ -81,7 +83,7 @@ public class ReferenceChecker extends Task<Void> {
         updateProgress(0, progressSize);
         
         /*
-         On vérifie ensuite l'identité des instances : pour chaque classe de 
+         On vérifie ensuite l'identité des instances : pour chaque classe de
          référence locale, pourvu qu'elle soit référencée sur le serveur,
          on va vérifier que les instances sont "identiques" (identité à définir).
          */
@@ -109,10 +111,11 @@ public class ReferenceChecker extends Task<Void> {
 
         private final Class<ReferenceType> referenceClass;
         private List<ReferenceType> fileReferences;
-        private List<ReferenceType> localReferences;
+        private final StreamingIterable<ReferenceType> localReferences;
 
         private ReferenceClassChecker(final Class referenceClass) {
             this.referenceClass = referenceClass;
+            localReferences = Injector.getSession().getRepositoryForClass(referenceClass).getAllStreaming();
         }
 
         /**
@@ -125,7 +128,6 @@ public class ReferenceChecker extends Task<Void> {
                 final File referenceFile = retriveFileFromURL(referenceURL());
 
                 fileReferences = readReferenceFile(referenceFile);
-                localReferences = Injector.getSession().getRepositoryForClass(referenceClass).getAll();
 
                 final List<ReferenceType> currentServerInstances = new ArrayList(fileReferences);
 
@@ -142,50 +144,53 @@ public class ReferenceChecker extends Task<Void> {
                  3) Si elle est présente sur le serveur et que son état a changé, on enregistre les deux états dans la map dédiée.
                  4) Si elle n'est pas présente sur le serveur, on l'enregistre dans la liste dédiée.
                  */
-                for (final ReferenceType localReferenceInstance : localReferences) {
-                    boolean presentOnServer = false;
+                try (final CloseableIterator<ReferenceType> it = localReferences.iterator()) {
+                    while (it.hasNext()) {
+                        final ReferenceType localReferenceInstance = it.next();
+                        boolean presentOnServer = false;
 
-                    try {
-                        final Object localId = getId.invoke(localReferenceInstance);
-                        for (final ReferenceType serverReferenceInstance : currentServerInstances) {
-                            try {
-                                final Object serverId = getId.invoke(serverReferenceInstance);
-                                if (localId instanceof String
-                                        && localId.equals(serverId)) {
-                                    presentOnServer = true;
-                                    currentServerInstances.remove(serverReferenceInstance);
-                                    if (!sameReferences(localReferenceInstance, serverReferenceInstance)) {
-                                        registerIncoherentReferences(localReferenceInstance, serverReferenceInstance);
+                        try {
+                            final Object localId = getId.invoke(localReferenceInstance);
+                            for (final ReferenceType serverReferenceInstance : currentServerInstances) {
+                                try {
+                                    final Object serverId = getId.invoke(serverReferenceInstance);
+                                    if (localId instanceof String
+                                            && localId.equals(serverId)) {
+                                        presentOnServer = true;
+                                        currentServerInstances.remove(serverReferenceInstance);
+                                        if (!sameReferences(localReferenceInstance, serverReferenceInstance)) {
+                                            registerIncoherentReferences(localReferenceInstance, serverReferenceInstance);
+                                        }
+                                        break;
                                     }
-                                    break;
+                                } catch (IllegalAccessException | InvocationTargetException ex) {
+                                    SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
                                 }
-                            } catch (IllegalAccessException | InvocationTargetException ex) {
-                                SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
                             }
+                        } catch (IllegalAccessException | InvocationTargetException ex) {
+                            SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
                         }
-                    } catch (IllegalAccessException | InvocationTargetException ex) {
-                        SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
-                    }
 
-                    if (!presentOnServer) {
-                        if (localInstancesNotOnTheServer.get(referenceClass) == null) {
-                            localInstancesNotOnTheServer.put(referenceClass, new ArrayList());
+                        if (!presentOnServer) {
+                            if (localInstancesNotOnTheServer.get(referenceClass) == null) {
+                                localInstancesNotOnTheServer.put(referenceClass, new ArrayList());
+                            }
+                            localInstancesNotOnTheServer.get(referenceClass).add(localReferenceInstance);
                         }
-                        localInstancesNotOnTheServer.get(referenceClass).add(localReferenceInstance);
                     }
                 }
 
                 /*
-                 Maintenant qu'on a vérifié que toutes les références locales de la 
-                 classe étaient sur le serveur (cas des instances de références qui 
-                 auraient été supprimées sur le serveur), il faut vérifier s'il n'y 
-                 aurait pas des instances de références qui seraient présentes sur 
-                 le serveur mais pas localement (cas des instances de références qui 
-                 auraient été ajoutées sur le serveur). 
-            
-                 Pour cela Il faut examiner uniquement les instances de références du 
-                 serveur qui n'auraient pas trouvé de référence locale 
-                 correspondante (danslla liste currentServerInstances qui a été mise 
+                 Maintenant qu'on a vérifié que toutes les références locales de la
+                 classe étaient sur le serveur (cas des instances de références qui
+                 auraient été supprimées sur le serveur), il faut vérifier s'il n'y
+                 aurait pas des instances de références qui seraient présentes sur
+                 le serveur mais pas localement (cas des instances de références qui
+                 auraient été ajoutées sur le serveur).
+
+                 Pour cela Il faut examiner uniquement les instances de références du
+                 serveur qui n'auraient pas trouvé de référence locale
+                 correspondante (danslla liste currentServerInstances qui a été mise
                  à jour au fur et à mesure).
                  */
                 serverInstancesNotLocal.put(referenceClass, currentServerInstances);
@@ -211,10 +216,10 @@ public class ReferenceChecker extends Task<Void> {
         private URL referenceURL() throws MalformedURLException {
             return new URL(referencesDirectoryPath + referenceClass.getSimpleName() + ".csv");
         }
-        
-        
+
+
         /**
-         * 
+         *
          * Builds a reference instance form A CSV record.
          *
          * Note : this method needs the name fiels of the given referenceClass
@@ -229,14 +234,14 @@ public class ReferenceChecker extends Task<Void> {
          * <li>LocalDate (see ISO_DATE format);</li>
          * <li>LocalDateTime (see ISO_DATE_TIME format).</li>
          * </ol>
-         * 
+         *
          * @param record
          * @return
          * @throws NoSuchMethodException
          * @throws InstantiationException
          * @throws IllegalAccessException
          * @throws IllegalArgumentException
-         * @throws InvocationTargetException 
+         * @throws InvocationTargetException
          */
         private ReferenceType buildReferenceInstance(final CSVRecord record) {
 
@@ -261,7 +266,7 @@ public class ReferenceChecker extends Task<Void> {
                     final Method setter = referenceClass.getMethod("set" + header.substring(0, 1).toUpperCase() + header.substring(1), type);
 
                     if (String.class.equals(type)) {
-                        
+
                         // POUR LES REFERENCES, L'identifiant sert
                         if ("id".equals(header)) {
                             // On construit un identifiant couchDB en concaténant le nom de la référence à l'identifiant avec le séparateur ":"
@@ -309,9 +314,9 @@ public class ReferenceChecker extends Task<Void> {
         }
 
         private List<ReferenceType> readReferenceFile(final File file) throws FileNotFoundException, IOException {
-            
+
             final List<ReferenceType> fileRefs = new ArrayList<>();
-            
+
             try(final InputStream inputStream = new FileInputStream(file)){
                 final Iterable<CSVRecord> records = CSVFormat.EXCEL.withHeader().parse(new InputStreamReader(inputStream, "UTF-8"));
                 for (final CSVRecord record : records) {
@@ -321,7 +326,7 @@ public class ReferenceChecker extends Task<Void> {
             }
             return fileRefs;
         }
-        
+
         private void update(){
             final List<ReferenceType> updated = new ArrayList<>();
             if(fileReferences!=null){
@@ -354,14 +359,14 @@ public class ReferenceChecker extends Task<Void> {
                 }
                 if(!updated.isEmpty()) Injector.getSession().getRepositoryForClass(referenceClass).executeBulk(updated);
             }
-            
+
             // On élimine les instances de références mises à jour des map correspondantes du ReferenceChecker (on se base sur l'identifiant).
             if(serverInstancesNotLocal.get(referenceClass)!=null){
                 serverInstancesNotLocal.get(referenceClass).removeAll(updated);
             } else {
                 SIRS.LOGGER.log(WARNING, referenceClass.getCanonicalName() + " n'a pas été correctement récupérée du serveur.");
             }
-            
+
             // On retire les références mises à jour de la liste des instances incohérentes.
             final Map<ReferenceType, ReferenceType> incoherentInstances = incoherentReferences.get(referenceClass);
             if(incoherentInstances!=null){
@@ -379,12 +384,12 @@ public class ReferenceChecker extends Task<Void> {
 
         private void registerIncoherentReferences(final ReferenceType localReferenceInstance, final ReferenceType serverReferenceInstance) {
 
-            if (referenceClass == null 
-                    || localReferenceInstance == null 
-                    || serverReferenceInstance == null) 
+            if (referenceClass == null
+                    || localReferenceInstance == null
+                    || serverReferenceInstance == null)
                 return;
 
-            if (incoherentReferences.get(referenceClass) == null) 
+            if (incoherentReferences.get(referenceClass) == null)
                 incoherentReferences.put(referenceClass, new HashMap<>());
 
             incoherentReferences.get(referenceClass).put(localReferenceInstance, serverReferenceInstance);
@@ -399,14 +404,14 @@ public class ReferenceChecker extends Task<Void> {
      * @param serverReferenceInstance
      * @return
      */
-    private static boolean sameReferences(final ReferenceType localReferenceInstance, 
+    private static boolean sameReferences(final ReferenceType localReferenceInstance,
             final ReferenceType serverReferenceInstance) {
         // equals ne vérifie pas l'identité de contenu, mais l'égalité des identifiants !!!!
         // La méthode equals ne se basant que sur les ID, on vérifie en plus l'égalité des contenus avec "toString"
         return localReferenceInstance.equals(serverReferenceInstance)
                 && localReferenceInstance.toString().equals(serverReferenceInstance.toString());
     }
-    
+
     /**
      * Return the file content located at the URL.
      *
@@ -420,8 +425,8 @@ public class ReferenceChecker extends Task<Void> {
             return null;
         }
 
-        final File file = File.createTempFile("tempReference", ".csv"); 
-        
+        final File file = File.createTempFile("tempReference", ".csv");
+
         final URLConnection connection = url.openConnection();
         try{
             try (final InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
@@ -439,7 +444,7 @@ public class ReferenceChecker extends Task<Void> {
                 outputStreamWriter.flush();
                 outputStreamWriter.close();
                 inputStreamReader.close();
-            } 
+            }
         } catch (NullPointerException ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage());
             return null;
