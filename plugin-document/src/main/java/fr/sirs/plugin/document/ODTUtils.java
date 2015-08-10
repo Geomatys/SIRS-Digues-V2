@@ -468,11 +468,11 @@ public class ODTUtils {
                     final List<PDPage> pages = document.getDocumentCatalog().getAllPages();
                     for(int i=0,n=pages.size();i<n;i++) {
                         final PDPage page = pages.get(i);
-                        final BufferedImage bim = page.convertToImage(BufferedImage.TYPE_INT_RGB, 300);
-                        final File imgFile = File.createTempFile("pdf_"+page+"_", ".png");
+                        final BufferedImage bim = page.convertToImage(BufferedImage.TYPE_INT_RGB, 180);
+                        final File imgFile = File.createTempFile("pdf_"+page+"_", ".jpeg");
                         imgFile.deleteOnExit();
                         try(final FileOutputStream imgStream = new FileOutputStream(imgFile)){
-                            ImageIOUtil.writeImage(bim, "png", imgStream, 300);
+                            ImageIOUtil.writeImage(bim, "jpeg", imgStream, 180);
                             insertImageFullPage(doc, imgFile.toURI());
                         }
                     }
@@ -501,6 +501,9 @@ public class ODTUtils {
      * @param imageUri image path
      */
     private static void insertImageFullPage(final TextDocument doc, final URI imageUri) throws Exception {
+        Paragraph parabreak1 = doc.addParagraph("  ");
+        doc.addPageBreak(parabreak1);
+
         final BufferedImage img = ImageIO.read(imageUri.toURL());
         final MasterPage pdfpageStyle = createMasterPage(doc, img.getWidth()>img.getHeight(), 0);
         doc.addPageBreak(null, pdfpageStyle);
