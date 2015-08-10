@@ -1,16 +1,17 @@
 
 package fr.sirs.plugin.vegetation;
 
+import fr.sirs.theme.ui.FXPlanVegetationPane;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.PlanifParcelleVegetation;
 import fr.sirs.util.SirsStringConverter;
 import java.util.List;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -22,7 +23,6 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.cell.ComboBoxListCell;
 import javafx.scene.layout.BorderPane;
-import javafx.util.Callback;
 
 
 /**
@@ -39,19 +39,34 @@ public class FXParametragePane extends BorderPane {
     private final AbstractSIRSRepository<PlanVegetation> planRepo = session.getRepositoryForClass(PlanVegetation.class);
     private final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = session.getRepositoryForClass(ParcelleVegetation.class);
     
-    
 
     public FXParametragePane() {
         SIRS.loadFXML(this, FXParametragePane.class);
         initialize();
     }
     
-    private class UpdatableListCell<T extends Element> extends ListCell<T>{
+    private class UpdatableListCell extends ListCell<PlanVegetation>{
+        
+        private final SirsStringConverter cvt = new SirsStringConverter();
         
         @Override
-        protected void updateItem(T item, boolean empty) {
+        protected void updateItem(final PlanVegetation item, boolean empty) {
             super.updateItem(item, empty);
-            setText(new SirsStringConverter().toString(item));
+            
+            textProperty().unbind();
+            if(item!=null){
+                textProperty().bind(new ObjectBinding<String>() {
+
+                    {
+                        bind(item.libelleProperty(),item.designationProperty());
+                    }
+
+                    @Override
+                    protected String computeValue() {
+                        return cvt.toString(item);
+                    }
+                });
+            }
         }
     }
     
@@ -63,14 +78,14 @@ public class FXParametragePane extends BorderPane {
         refreshPlanList();
         uiPlanList.setCellFactory(ComboBoxListCell.forListView(new SirsStringConverter()));
         
-        uiPlanList.setCellFactory((ListView<PlanVegetation> param)-> new UpdatableListCell<>());
+        uiPlanList.setCellFactory((ListView<PlanVegetation> param)-> new UpdatableListCell());
         
         uiPlanList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         uiPlanList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<PlanVegetation>() {
             @Override
             public void changed(ObservableValue<? extends PlanVegetation> observable, PlanVegetation oldValue, PlanVegetation newValue) {
                 if(newValue!=null){
-                    pane.setCenter(new FXPlanVegetationPane(newValue, FXParametragePane.this::refreshPlanList));
+                    pane.setCenter(new FXPlanVegetationPane(newValue));
                 }
             }
         });
@@ -81,7 +96,6 @@ public class FXParametragePane extends BorderPane {
     }
     
     void refreshPlanList() {
-        uiPlanList.setItems(FXCollections.emptyObservableList());
         uiPlanList.setItems(FXCollections.observableList(planRepo.getAll()));
     }
     

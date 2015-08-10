@@ -1,9 +1,7 @@
 package fr.sirs;
 
-import static fr.sirs.SIRS.MODEL_PACKAGE;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ReferenceType;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -65,49 +63,23 @@ public class ReferenceChecker extends Task<Void> {
     private final Map<Class<ReferenceType>, List<ReferenceType>> localInstancesNotOnTheServer = new HashMap<>();
     public Map<Class<ReferenceType>, List<ReferenceType>> getLocalInstancesNotOnTheServer() { return localInstancesNotOnTheServer;}
 
-    private List<Class<ReferenceType>> serverClassReferences;
-    public List<Class<ReferenceType>> getServerClassReferences() {return serverClassReferences;}
-
-    private List<String> serverClassNameReferencesNotLocal;
-    public List<String> getServerClassNameReferencesNotLocal() {return serverClassNameReferencesNotLocal;}
-
     private List<Class<? extends ReferenceType>> localClassReferences;
     public List<Class<? extends ReferenceType>> getLocalClassReferences() {return localClassReferences;}
 
     private List<String> localClassNameReferencesNotOnServer;
     public List<String> getLocalClassNameReferencesNotOnServer() {return localClassNameReferencesNotOnServer;}
 
-    private void checkAllReferences() throws IOException {
+    private void checkAllReferences() {
         updateMessage("Vérification des références.");
-
-        /*
-         Récupération des classes de référence du serveur. Inclut la
-         vérification que ces classes existent bien dans l'application.
-         */
-        serverClassReferences = buildServerClassReferences();
 
         ////////////////////////////////////////////////////////////////////////
         /*
          Récupération des classes de référence de l'application. 
          */
         localClassReferences = Session.getReferences();
-        final int progressSize = localClassReferences.size()*2;
+        final int progressSize = localClassReferences.size();
         int progress = 0;
         updateProgress(0, progressSize);
-
-        /*
-         Vérification que les classes de l'application sont toutes recensées sur
-         le serveur.
-         */
-        localClassNameReferencesNotOnServer = new ArrayList<>();
-        updateMessage("Vérification de la présence des classes de références locales sur le serveur.");
-        for (final Class reference : localClassReferences) {
-            updateMessage("Vérification de la présence sur le serveur de la classe de référence "+reference.getName());
-            if (!serverClassReferences.contains(reference)) {
-                localClassNameReferencesNotOnServer.add(reference.getSimpleName());
-            }
-            updateProgress(progress++, progressSize);
-        }
         
         /*
          On vérifie ensuite l'identité des instances : pour chaque classe de 
@@ -117,10 +89,12 @@ public class ReferenceChecker extends Task<Void> {
         updateMessage("Vérification des instances de références.");
         for (final Class reference : localClassReferences) {
             updateMessage("Vérification des instances de la classe de référence "+reference.getName());
-            if (serverClassReferences.contains(reference)) {
+            try {
                 final ReferenceClassChecker referenceClassChecker = new ReferenceClassChecker(reference);
                 referenceClassChecker.checkReferenceClass();
                 referenceClassChecker.update();
+            } catch (IOException ex) {
+                SIRS.LOGGER.log(WARNING, "Unable to check reference class "+reference.getName(), ex);
             }
             updateProgress(progress++, progressSize);
         }
@@ -147,10 +121,9 @@ public class ReferenceChecker extends Task<Void> {
          *
          * @param referenceClass
          */
-        private void checkReferenceClass() {
+        private boolean checkReferenceClass() throws IOException {
             try {
-                final URL referenceURL = referenceURL();
-                final File referenceFile = retriveFileFromURL(referenceURL);
+                final File referenceFile = retriveFileFromURL(referenceURL());
 
                 fileReferences = readReferenceFile(referenceFile);
                 localReferences = Injector.getSession().getRepositoryForClass(referenceClass).getAll();
@@ -220,11 +193,12 @@ public class ReferenceChecker extends Task<Void> {
 
             } catch (MalformedURLException ex) {
                 SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
-            } catch (IOException ex) {
-                SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
+                return false;
             } catch (NoSuchMethodException | SecurityException ex) {
                 SIRS.LOGGER.log(Level.SEVERE, ex.getMessage());
+                return false;
             }
+            return true;
         }
 
         /**
@@ -449,12 +423,9 @@ public class ReferenceChecker extends Task<Void> {
         
         final URLConnection connection = url.openConnection();
         try{
-            try (final InputStream inputStream = connection.getInputStream();
-                final FileOutputStream fos = new FileOutputStream(file)) {
-
-                final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fos);
-
+            try (final InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
+                 final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(file))) {
+                
                 int r = 0;
                 while (true) {
                     r = inputStreamReader.read();
@@ -466,80 +437,12 @@ public class ReferenceChecker extends Task<Void> {
                 }
                 outputStreamWriter.flush();
                 outputStreamWriter.close();
-                fos.close();
                 inputStreamReader.close();
             } 
         } catch (NullPointerException ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage());
-        }
-        return file;
-    }
-
-    /**
-     * Reference names located on the server references index file are supposed
-     * to be the simple name of the model class related to the given reference.
-     *
-     * @return
-     */
-    private List<Class<ReferenceType>> buildServerClassReferences() throws IOException {
-        final List<String> names = retrieveServerClassNameReferences();
-        final List<Class<ReferenceType>> classes = new ArrayList<>();
-        serverClassNameReferencesNotLocal = new ArrayList<>();
-        for (final String name : names) {
-            final String className = MODEL_PACKAGE + "." + name;
-            try {
-                classes.add((Class<ReferenceType>) Class.forName(className, true, Thread.currentThread().getContextClassLoader()));
-            } catch (ClassNotFoundException ex) {
-                serverClassNameReferencesNotLocal.add(className);
-            }
-        }
-        return classes;
-    }
-
-    /**
-     * TODO Retrive all the server references (parse the index.csv file).
-     *
-     * @return
-     */
-    private List<String> retrieveServerClassNameReferences() throws MalformedURLException, IOException {
-        final List<String> result;
-        final URL indexURL = new URL(referencesDirectoryPath + "index.csv");
-        result = readIndexFile(retriveFileFromURL(indexURL));
-        return result;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-    //
-    // UTILITY STATIC METHODS
-    //
-    ////////////////////////////////////////////////////////////////////////////
-    /**
-     * Reads server references index file and retrieve all corresponding class
-     * names.
-     *
-     * @param file
-     * @return
-     * @throws IOException
-     */
-    private static List<String> readIndexFile(final File file) throws IOException {
-        if (file == null) {
             return null;
         }
-
-        final List<String> result = new ArrayList<>();
-        
-        try(final InputStream inputStream = new FileInputStream(file)){
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-
-            while (true) {
-                final String line = bufferedReader.readLine();
-
-                if (line == null) break;
-
-                result.add(line.replaceAll("\\s", ""));
-            }
-            bufferedReader.close();
-        }
-        return result;
+        return file;
     }
 }
