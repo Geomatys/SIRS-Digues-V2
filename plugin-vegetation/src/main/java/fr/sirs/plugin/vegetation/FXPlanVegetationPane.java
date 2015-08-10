@@ -6,16 +6,19 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.PlanVegetation;
+import fr.sirs.core.model.ParamCoutTraitementVegetation;
+import fr.sirs.theme.ui.PojoTable;
 import java.time.LocalDate;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 
 
 /**
@@ -28,8 +31,11 @@ public class FXPlanVegetationPane extends BorderPane {
     @FXML private TextField uiDesignation;
     @FXML private Spinner uiPlanDebut;
     @FXML private Spinner uiPlanFin;
-    @FXML private TableView<?> uiCoutTable;
-    @FXML private TableView<?> uiTraitementTable;
+    @FXML private VBox uiVBox;
+//    @FXML 
+    private PojoTable uiCoutTable;
+//    @FXML 
+    private final PojoTable uiTraitementTable;
     @FXML private Button uiSave;
 
     private final Session session = Injector.getSession();
@@ -53,6 +59,11 @@ public class FXPlanVegetationPane extends BorderPane {
             planRepo.update(FXPlanVegetationPane.this.plan);
             onUpdateAction.run();
         });
+        
+        uiTraitementTable = new PojoTable(ParamCoutTraitementVegetation.class, "Coûts des traitements");
+        uiTraitementTable.setParentElement(plan);
+        uiTraitementTable.setTableItems(() -> (ObservableList) FXCollections.observableList(plan.paramCout));
+        uiVBox.getChildren().add(uiTraitementTable);
     }
 
     public void initialize() {

@@ -34,14 +34,16 @@
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="planifParcelle" upperBound="-1"
         eType="#//PlanifParcelleVegetation" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="parametres" upperBound="-1"
-        eType="#//ParamTraitementVegetation" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="paramFrequence" upperBound="-1"
+        eType="#//ParamFrequenceTraitementVegetation" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="anneDebut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="anneFin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="paramCout" upperBound="-1"
+        eType="#//ParamCoutTraitementVegetation" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PlanifParcelleVegetation">
     <eStructuralFeatures xsi:type="ecore:EReference" name="parcelleId" eType="#//ParcelleVegetation"/>
@@ -67,7 +69,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//RefTraitementVegetation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sousType" eType="#//RefSousTraitementVegetation"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ParamTraitementVegetation">
+  <eClassifiers xsi:type="ecore:EClass" name="ParamFrequenceTraitementVegetation">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -115,5 +117,12 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypePeuplementVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ParamCoutTraitementVegetation">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="cout" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//RefTraitementVegetation"/>
   </eClassifiers>
 </ecore:EPackage>
