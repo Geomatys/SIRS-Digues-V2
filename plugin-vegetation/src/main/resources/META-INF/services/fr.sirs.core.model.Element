@@ -1,7 +1,6 @@
 fr.sirs.core.model.ArbreVegetation
 fr.sirs.core.model.HerbaceeVegetation
 fr.sirs.core.model.InvasiveVegetation
-fr.sirs.core.model.ParamFrequenceTraitementVegetation
 fr.sirs.core.model.ParamCoutTraitementVegetation
 fr.sirs.core.model.ParcelleTraitementVegetation
 fr.sirs.core.model.ParcelleVegetation
