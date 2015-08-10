@@ -36,7 +36,7 @@ public class FXPlanVegetationPane extends BorderPane {
     private final AbstractSIRSRepository<PlanVegetation> planRepo = session.getRepositoryForClass(PlanVegetation.class);
     private final PlanVegetation plan;
 
-    public FXPlanVegetationPane(PlanVegetation plan) {
+    public FXPlanVegetationPane(PlanVegetation plan, Runnable onUpdateAction) {
         SIRS.loadFXML(this, FXPlanVegetationPane.class);
         this.plan = plan;
         
@@ -49,7 +49,10 @@ public class FXPlanVegetationPane extends BorderPane {
         uiPlanFin.setEditable(true);
         uiPlanFin.getValueFactory().valueProperty().bindBidirectional(plan.anneFinProperty());
         
-        uiSave.setOnAction((ActionEvent event) -> planRepo.update(FXPlanVegetationPane.this.plan));
+        uiSave.setOnAction((ActionEvent event) -> {
+            planRepo.update(FXPlanVegetationPane.this.plan);
+            onUpdateAction.run();
+        });
     }
 
     public void initialize() {

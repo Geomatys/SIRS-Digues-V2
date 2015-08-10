@@ -5,6 +5,7 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.PlanifParcelleVegetation;
@@ -15,11 +16,13 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.cell.ComboBoxListCell;
 import javafx.scene.layout.BorderPane;
+import javafx.util.Callback;
 
 
 /**
@@ -35,11 +38,23 @@ public class FXParametragePane extends BorderPane {
     private final Session session = Injector.getSession();
     private final AbstractSIRSRepository<PlanVegetation> planRepo = session.getRepositoryForClass(PlanVegetation.class);
     private final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = session.getRepositoryForClass(ParcelleVegetation.class);
+    
+    
 
     public FXParametragePane() {
         SIRS.loadFXML(this, FXParametragePane.class);
         initialize();
     }
+    
+    private class UpdatableListCell<T extends Element> extends ListCell<T>{
+        
+        @Override
+        protected void updateItem(T item, boolean empty) {
+            super.updateItem(item, empty);
+            setText(new SirsStringConverter().toString(item));
+        }
+    }
+    
 
     private void initialize() {
         final BorderPane pane = new BorderPane();
@@ -47,14 +62,15 @@ public class FXParametragePane extends BorderPane {
 
         refreshPlanList();
         uiPlanList.setCellFactory(ComboBoxListCell.forListView(new SirsStringConverter()));
+        
+        uiPlanList.setCellFactory((ListView<PlanVegetation> param)-> new UpdatableListCell<>());
+        
         uiPlanList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         uiPlanList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<PlanVegetation>() {
             @Override
             public void changed(ObservableValue<? extends PlanVegetation> observable, PlanVegetation oldValue, PlanVegetation newValue) {
                 if(newValue!=null){
-                    pane.setCenter(new FXPlanVegetationPane(newValue));
-                }else{
-                    pane.setCenter(null);
+                    pane.setCenter(new FXPlanVegetationPane(newValue, FXParametragePane.this::refreshPlanList));
                 }
             }
         });
@@ -65,6 +81,7 @@ public class FXParametragePane extends BorderPane {
     }
     
     void refreshPlanList() {
+        uiPlanList.setItems(FXCollections.emptyObservableList());
         uiPlanList.setItems(FXCollections.observableList(planRepo.getAll()));
     }
     
