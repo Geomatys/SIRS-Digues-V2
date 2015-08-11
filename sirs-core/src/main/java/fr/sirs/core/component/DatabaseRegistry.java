@@ -81,6 +81,7 @@ public class DatabaseRegistry {
     private static final Pattern URL_START = Pattern.compile("(?i)^[A-Za-z]+://([^@]+@)?");
     private static final Pattern AUTH_ERROR_CODE = Pattern.compile("40(1|3)");
 
+    private static final int MAX_CONNECTIONS = 100;
     private static final int SOCKET_TIMEOUT = 45000;
     private static final int CONNECTION_TIMEOUT = 5000;
 
@@ -231,6 +232,7 @@ public class DatabaseRegistry {
 
         // Configure http client
         final StdHttpClient.Builder builder = new SirsClientBuilder()
+                .maxConnections(MAX_CONNECTIONS)
                 .caching(false)
                 .url(couchDbUrl)
                 .connectionTimeout(CONNECTION_TIMEOUT)

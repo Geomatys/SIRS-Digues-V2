@@ -8,6 +8,7 @@ import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.ReferenceType;
+import fr.sirs.util.ClosingDaemon;
 import fr.sirs.util.StreamingIterable;
 import java.lang.ref.PhantomReference;
 import java.time.LocalDate;
@@ -16,7 +17,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
+import javafx.beans.property.SimpleObjectProperty;
 import javax.annotation.PostConstruct;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
@@ -63,6 +66,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @param <T> The type of object managed by the current repository implementation.
  */
 public abstract class AbstractSIRSRepository<T extends Identifiable> extends CouchDbRepositorySupport<T> {
+
+        public static final AtomicLong openedConnections = new AtomicLong(0);
 
     protected final Cache<String, T> cache = new Cache(20, 0, false);
 
@@ -260,7 +265,11 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
     @Override
     protected List<T> queryView(String viewName, String key) {
+        try {
         return cacheList(super.queryView(viewName, key));
+        } finally {
+            System.out.println("OPENED CONNECTION VIA STREAMS : "+openedConnections);
+        }
     }
     
     protected List<T> queryView(String viewName, Object... keys) {
@@ -342,7 +351,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      *
      * TODO : Use {@link PhantomReference} to ensure freed iterators are closed.
      */
-    public class StreamingViewIterable implements StreamingIterable<T> {
+    protected class StreamingViewIterable implements StreamingIterable<T> {
         private final ViewQuery query;
 
         protected StreamingViewIterable(final ViewQuery query) {
@@ -352,60 +361,98 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
         @Override
         public CloseableIterator<T> iterator() {
-            return new StreamingViewIterator(db.queryForStreamingView(query));
+            final StreamingViewIterator iterator = new StreamingViewIterator(query);
+            ClosingDaemon.watchResource(iterator, iterator.result);
+            return iterator;
         }
     }
 
+    /**
+     * Create a connection to the given query and iterate through its results.
+     * View is query on first {@link #hasNext()} call, to avoid keeping useless
+     * connections opened.
+     *
+     * Note : Thiss implementation is not thread-safe.
+     */
     private class StreamingViewIterator implements CloseableIterator<T> {
 
-        private final StreamingViewResult result;
-        private final Iterator<ViewResult.Row> iterator;
+        private final ViewQuery query;
+        private final SimpleObjectProperty<StreamingViewResult> result = new SimpleObjectProperty<>();
+        private Iterator<ViewResult.Row> iterator;
 
-        private final ObjectReader objectMapper = new ObjectMapper().reader(type);
+        // Will be created only if we can effectively iterate on results.
+        private ObjectReader objectReader = new ObjectMapper().reader(type);
 
-        public StreamingViewIterator(StreamingViewResult result) {
-            this.result = result;
-            if (result.getTotalRows() > 0) {
-                this.iterator = result.iterator();
-            } else {
-                this.iterator = null;
-            }
+        private T next;
+
+        public StreamingViewIterator(ViewQuery query) {
+            ArgumentChecks.ensureNonNull("Input query", query);
+            this.query = query;
         }
 
         @Override
         public boolean hasNext() {
-            /* If using directly parent iterable in a for each statement,
-             * iterator won't be closed, so we close it automatically when
-             * reaching end of the stream. We have to catch exceptions here, because
-             * it appears that iterator fails on empty views.
-             */
-            if (iterator == null) {
-                return false;
-            } else if (iterator.hasNext()) {
-                return true;
-            } else {
-                close();
-                return false;
+            // No element cached, we analyze input stream
+            if (next == null) {
+                // Open connection on first call.
+                if (result.get() == null) {
+                    openedConnections.incrementAndGet();
+                    final StreamingViewResult viewResult = db.queryForStreamingView(query);
+                    result.set(viewResult);
+                    if (viewResult.getTotalRows() > 0) {
+                        this.iterator = viewResult.iterator();
+                        objectReader = new ObjectMapper().reader(type);
+                    } else {
+                        this.iterator = null;
+                    }
+                }
+
+                /* If using directly parent iterable in a for each statement,
+                 * iterator won't be closed, so we close it automatically when
+                 * reaching end of the stream. We have to catch exceptions here, because
+                 * it appears that iterator fails on empty views.
+                 */
+                final boolean hasNext = iterator != null && iterator.hasNext();
+                if (hasNext) {
+                    // Cache next element
+                    ViewResult.Row nextRow = iterator.next();
+                    try {
+                        next = cache.getOrCreate(nextRow.getId(), () -> objectReader.readValue(nextRow.getDocAsNode()));
+                    } catch (Exception e) {
+                        throw new SirsCoreRuntimeException(e);
+                    }
+
+                } else {
+                    close();
+                }
             }
+
+            return next != null;
         }
 
         @Override
         public T next() {
-            if (iterator == null) {
+            if (!hasNext()) {
                 throw new IllegalStateException("Cannot call next when there is no more elements available.");
             }
-            ViewResult.Row next = iterator.next();
+
             try {
-                return cache.getOrCreate(next.getId(), () -> objectMapper.readValue(next.getDocAsNode()));
-            } catch (Exception e) {
-                throw new SirsCoreRuntimeException(e);
+                return next;
+            } finally {
+                // allow hasNext() method to search for next element.
+                next = null;
             }
         }
 
         @Override
         public void close() {
             try {
-                result.close();
+                iterator = null;
+                if (result.get() != null) {
+                    result.get().close();
+                    result.set(null);
+                    openedConnections.decrementAndGet();
+                }
             } catch (Exception e) {
                 SirsCore.LOGGER.log(Level.WARNING, "A streamed CouchDB view result cannot be closed. It's likely to cause memory leaks.", e);
             }
