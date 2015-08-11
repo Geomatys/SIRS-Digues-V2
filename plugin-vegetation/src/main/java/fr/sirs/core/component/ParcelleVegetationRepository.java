@@ -5,6 +5,7 @@ package fr.sirs.core.component;
 
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
+import static fr.sirs.core.component.ParcelleVegetationRepository.BY_PLAN_ID;
 
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
@@ -24,13 +25,15 @@ import org.apache.sis.util.ArgumentChecks;
  */
 @Views ({
 @View(name=AbstractPositionableRepository.BY_LINEAR_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.ParcelleVegetation') {emit(doc.linearId, doc._id)}}"),
-@View(name="byPlanId", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.ParcelleVegetation') {emit(doc.planId, doc._id)}}"),
+@View(name=BY_PLAN_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.ParcelleVegetation') {emit(doc.planId, doc._id)}}"),
 @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.ParcelleVegetation') {emit(doc._id, doc._id)}}")
 })
 @Component("fr.sirs.core.component.ParcelleVegetationRepository")
 public class ParcelleVegetationRepository extends 
 AbstractPositionableRepository
 <ParcelleVegetation> {
+    
+    public static final String BY_PLAN_ID = "byPlanId";
         
     @Autowired
     private ParcelleVegetationRepository ( CouchDbConnector db) {
@@ -45,7 +48,7 @@ AbstractPositionableRepository
     
     public List<ParcelleVegetation> getByPlanId(final String planId) {
         ArgumentChecks.ensureNonNull("Plan", planId);
-        return this.queryView("byPlanId", planId);
+        return this.queryView(BY_PLAN_ID, planId);
     }
 }
 

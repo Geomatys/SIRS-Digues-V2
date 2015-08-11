@@ -5,6 +5,7 @@ package fr.sirs.core.component;
 
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
+import static fr.sirs.core.component.ArbreVegetationRepository.BY_PARCELLE_ID;
 
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
@@ -23,13 +24,15 @@ import org.apache.sis.util.ArgumentChecks;
  * @author Alexis Manin     (Geomatys)
  */
 @Views({
-@View(name="byParcelleId", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.ArbreVegetation') {emit(doc.parcelleId, doc._id)}}"),
+@View(name=BY_PARCELLE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.ArbreVegetation') {emit(doc.parcelleId, doc._id)}}"),
 @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.ArbreVegetation') {emit(doc._id, doc._id)}}")
 })
 @Component("fr.sirs.core.component.ArbreVegetationRepository")
 public class ArbreVegetationRepository extends 
 AbstractSIRSRepository
 <ArbreVegetation> {
+    
+    public static final String BY_PARCELLE_ID = "byParcelleId";
         
     @Autowired
     private ArbreVegetationRepository ( CouchDbConnector db) {
@@ -44,7 +47,7 @@ AbstractSIRSRepository
     
     public List<ArbreVegetation> getByParcelleId(final String parcelleId) {
         ArgumentChecks.ensureNonNull("Parcelle", parcelleId);
-        return this.queryView("byParcelleId", parcelleId);
+        return this.queryView(BY_PARCELLE_ID, parcelleId);
     }
 }
 

@@ -5,6 +5,7 @@ package fr.sirs.core.component;
 
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
+import static fr.sirs.core.component.PeuplementVegetationRepository.BY_PARCELLE_ID;
 
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
@@ -23,7 +24,7 @@ import org.apache.sis.util.ArgumentChecks;
  * @author Alexis Manin     (Geomatys)
  */
 @Views({
-@View(name="byParcelleId", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.PeuplementVegetation') {emit(doc.parcelleId, doc._id)}}"),
+@View(name=BY_PARCELLE_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.PeuplementVegetation') {emit(doc.parcelleId, doc._id)}}"),
 @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.PeuplementVegetation') {emit(doc._id, doc._id)}}")
 })
 @Component("fr.sirs.core.component.PeuplementVegetationRepository")
@@ -31,6 +32,8 @@ public class PeuplementVegetationRepository extends
 AbstractSIRSRepository
 <PeuplementVegetation> {
         
+    public static final String BY_PARCELLE_ID = "byParcelleId";
+    
     @Autowired
     private PeuplementVegetationRepository ( CouchDbConnector db) {
        super(PeuplementVegetation.class, db);
@@ -44,7 +47,7 @@ AbstractSIRSRepository
     
     public List<PeuplementVegetation> getByParcelleId(final String parcelleId) {
         ArgumentChecks.ensureNonNull("Parcelle", parcelleId);
-        return this.queryView("byParcelleId", parcelleId);
+        return this.queryView(BY_PARCELLE_ID, parcelleId);
     }
 }
 

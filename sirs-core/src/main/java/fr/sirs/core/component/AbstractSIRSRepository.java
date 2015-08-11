@@ -239,7 +239,15 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     protected List<T> queryView(String viewName, String key) {
         return cacheList(super.queryView(viewName, key));
     }
+    
+    protected List<T> queryView(String viewName, Object... keys) {
+        return this.queryView(viewName, Arrays.asList(keys));
+    }
 
+    protected List<T> queryView(String viewName, Collection keys) {
+        return cacheList(db.queryView(createQuery(viewName).includeDocs(true).keys(keys), type));
+    }
+    
     /**
      * Put all input element in cache, or replace by a previously cached element
      * if an input element Id can be found in the cache. Cannot be null.
