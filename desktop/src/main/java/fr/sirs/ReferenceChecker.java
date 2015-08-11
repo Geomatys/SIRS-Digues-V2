@@ -281,7 +281,7 @@ public class ReferenceChecker extends Task<Void> {
                     } else if(Double.class.equals(type) || DOUBLE_PRIMITIVE_NAME.equals(type.getName())){
                         setter.invoke(referenceInstance, Double.parseDouble(record.get(header)));
                     } else if(Boolean.class.equals(type) || BOOLEAN_PRIMITIVE_NAME.equals(type.getName())){
-                        setter.invoke(referenceInstance, Double.parseDouble(record.get(header)));
+                        setter.invoke(referenceInstance, Boolean.parseBoolean(record.get(header)));
                     } else if (LocalDateTime.class.equals(type)) {
                         try {
                             setter.invoke(referenceInstance, LocalDateTime.of(LocalDate.parse(record.get(header), DateTimeFormatter.ISO_DATE), LocalTime.MIN));
