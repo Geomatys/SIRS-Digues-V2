@@ -7,11 +7,14 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.PlanifParcelleVegetation;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -24,6 +27,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
+import org.elasticsearch.common.base.Objects;
 
 /**
  *
@@ -39,7 +43,7 @@ public class FXPlanTable extends BorderPane{
     private final Session session = Injector.getSession();
     private final BooleanProperty editable = new SimpleBooleanProperty(true);
 
-    public FXPlanTable(PlanVegetation plan, boolean exploitation){
+    public FXPlanTable(PlanVegetation plan, TronconDigue troncon, boolean exploitation){
         this.plan = plan;
         this.exploitation = exploitation;
         
@@ -67,8 +71,10 @@ public class FXPlanTable extends BorderPane{
         setTop(gridTop);
 
         //on crée et synchronize toutes les colonnes
-        int dateStart = 2009;
-        int dateEnd = 2019;
+        int dateStart = plan.getAnneDebut();
+        //NOTE : on ne peut pas afficher plus de X ans sur la table
+        //on considere que l'enregistrement est mauvais et on evite de bloquer l'interface
+        int dateEnd = Math.min(plan.getAnneFin(),dateStart+20);
 
         //nom des types
         final Label fake0 = new Label();
@@ -130,7 +136,7 @@ public class FXPlanTable extends BorderPane{
 
             gridTop   .add(lblAuto,       gridTop   .getColumnConstraints().size()-1, 0);
             gridBottom.add(new Label(""), gridBottom.getColumnConstraints().size()-1, 0);
-            
+
         }
 
 
@@ -143,12 +149,18 @@ public class FXPlanTable extends BorderPane{
         for(PlanifParcelleVegetation state : planifParcelle){
             gridCenter.getRowConstraints().add(new RowConstraints(USE_PREF_SIZE, USE_COMPUTED_SIZE, USE_PREF_SIZE, Priority.NEVER, VPos.CENTER, true));
             final ParcelleVegetation parcelle = parcelleRepo.get(state.getParcelleId());
+
+            //on vérifie que la parcelle fait partie du troncon
+            if(troncon!=null && !Objects.equal(parcelle.getForeignParentId(),troncon.getDocumentId())){
+                continue;
+            }
+
             colIndex=0;
             gridCenter.add(new Label(cvt.toString(parcelle)), colIndex, rowIndex);
             colIndex++;
 
             for(int year=dateStart;year<dateEnd;year++,colIndex++){
-                gridCenter.add(new ParcelleDateCell(parcelle,state,year), colIndex, rowIndex);
+                gridCenter.add(new ParcelleDateCell(parcelle,state,year-dateStart), colIndex, rowIndex);
             }
 
             //on ajoute la colonne 'Mode auto'
@@ -166,13 +178,17 @@ public class FXPlanTable extends BorderPane{
         lblSum .prefWidthProperty().bind(fake0.widthProperty());
 
 
-        //ligne d'estimation
+        //ligne de dates et d'estimation
         gridTop.add(lblYear, 0, 0);
         gridBottom.add(lblSum, 0, 0);
         colIndex=1;
         for(int year=dateStart;year<dateEnd;year++,colIndex++){
             final Label lblYearN = new Label(""+year);
             lblYearN.getStyleClass().add("pojotable-header");
+            lblYearN.setAlignment(Pos.CENTER);
+            lblYearN.setPrefSize(20, 20);
+            lblYearN.setMinSize(20, 20);
+            lblYearN.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
             gridTop.add(lblYearN, colIndex, 0);
             gridBottom.add(new EstimationCell(year), colIndex, 0);
         }
@@ -184,6 +200,11 @@ public class FXPlanTable extends BorderPane{
 
     }
 
+    private void save(){
+        final AbstractSIRSRepository<PlanVegetation> repo = session.getRepositoryForClass(PlanVegetation.class);
+        repo.update(plan);
+    }
+
     public BooleanProperty editableProperty(){
         return editable;
     }
@@ -193,38 +214,70 @@ public class FXPlanTable extends BorderPane{
     }
 
 
-    private final class ParcelleDateCell extends BorderPane{
+    private final class ParcelleDateCell extends CheckBox{
 
         private final ParcelleVegetation parcelle;
         private final PlanifParcelleVegetation state;
-        private final int year;
-        private final CheckBox checkBox = new CheckBox();
+        private final int index;
 
-        public ParcelleDateCell(ParcelleVegetation parcelle, PlanifParcelleVegetation state, int year) {
-            checkBox.disableProperty().bind(editable.not());
+        public ParcelleDateCell(ParcelleVegetation parcelle, PlanifParcelleVegetation state, int index) {
+            disableProperty().bind(editable.not());
             this.parcelle = parcelle;
             this.state = state;
-            this.year = year;
-            setCenter(checkBox);
-            setPadding(new Insets(10, 10, 10, 10));
+            this.index = index;
+            setPadding(new Insets(5, 0, 5, 0));
+            setAlignment(Pos.CENTER);
+
+            if(state.getPlanifications()==null){
+                state.setPlanifications(new ArrayList<>());
+            }
+
+            setSelected(getVal());
+            selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                setVal(newValue);
+            });
+        }
+
+        private boolean getVal(){
+            final List<Boolean> planifications = state.getPlanifications();
+            while(planifications.size()<=index){
+                planifications.add(Boolean.FALSE);
+            }
+            return planifications.get(index);
+        }
+
+        private void setVal(Boolean v){
+            final List<Boolean> planifications = state.getPlanifications();
+            while(planifications.size()<=index){
+                planifications.add(Boolean.FALSE);
+            }
+            final Boolean old = planifications.set(index,v);
+            if(!Objects.equal(old,v)){
+                save();
+            }
         }
 
     }
 
-    private final class ParcelleAutoCell extends BorderPane{
+    private final class ParcelleAutoCell extends CheckBox{
 
         private final ParcelleVegetation parcelle;
         private final PlanifParcelleVegetation state;
-        private final CheckBox checkBox = new CheckBox();
 
         public ParcelleAutoCell(ParcelleVegetation parcelle, PlanifParcelleVegetation state) {
             setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-            checkBox.disableProperty().bind(editable.not());
+            disableProperty().bind(editable.not());
+            setSelected(state.getModeAuto());
+            selectedProperty().bindBidirectional(state.modeAutoProperty());
             setStyle(AUTO_STYLE);
             this.parcelle = parcelle;
             this.state = state;
-            setCenter(checkBox);
             setPadding(new Insets(5, 5, 5, 5));
+
+            selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                save();
+            });
+
         }
 
     }
