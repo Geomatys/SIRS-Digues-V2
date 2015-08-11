@@ -16,6 +16,7 @@ import fr.sirs.core.model.ParcelleTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.PlanVegetation;
+import fr.sirs.core.model.ZoneVegetation;
 import java.time.LocalDate;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
@@ -133,4 +134,11 @@ public final class VegetationSession {
         }
     }
 
+//    public List<ZoneVegetation> getAllZonesVegetation(){
+//        
+//    }
+//
+//    public List<ZoneVegetation> getAllZonesVegetation(){
+//        
+//    }
 }

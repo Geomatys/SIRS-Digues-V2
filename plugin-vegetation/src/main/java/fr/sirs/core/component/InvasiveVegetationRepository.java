@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
 import fr.sirs.core.model.InvasiveVegetation;
-import java.util.List;
-import org.apache.sis.util.ArgumentChecks;
 
 /**
  * Outil g�rant les �changes avec la bdd CouchDB pour tous les objets InvasiveVegetation.
@@ -47,16 +45,5 @@ public class InvasiveVegetationRepository extends AbstractZoneVegetationReposito
     public InvasiveVegetation create() {
         return InjectorCore.getBean(SessionCore.class).getElementCreator().createElement(InvasiveVegetation.class);
     }
-    
-    public List<InvasiveVegetation> getByParcelleId(final String parcelleId) {
-        ArgumentChecks.ensureNonNull("Parcelle", parcelleId);
-        return this.queryView(BY_PARCELLE_ID, parcelleId);
-    }
-
-    public List<InvasiveVegetation> getByParcelleIds(final String ... parcelleIds) {
-        ArgumentChecks.ensureNonNull("Parcelles", parcelleIds);
-        return this.queryView(BY_PARCELLE_ID, (Object[])parcelleIds);
-    }
-    
 }
 

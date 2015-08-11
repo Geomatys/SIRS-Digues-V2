@@ -47,16 +47,5 @@ public class ArbreVegetationRepository extends AbstractZoneVegetationRepository<
     public ArbreVegetation create() {
         return InjectorCore.getBean(SessionCore.class).getElementCreator().createElement(ArbreVegetation.class);
     }
-    
-    public List<ArbreVegetation> getByParcelleId(final String parcelleId) {
-        ArgumentChecks.ensureNonNull("Parcelle", parcelleId);
-        return this.queryView(BY_PARCELLE_ID, parcelleId);
-    }
-
-    public List<ArbreVegetation> getByParcelleIds(final String ... parcelleIds) {
-        ArgumentChecks.ensureNonNull("Parcelles", parcelleIds);
-        return this.queryView(BY_PARCELLE_ID, (Object[])parcelleIds);
-    }
-
 }
 

@@ -1,21 +1,28 @@
 
 package fr.sirs.plugin.vegetation;
 
+import static com.sun.tools.internal.xjc.reader.Ring.add;
 import fr.sirs.theme.ui.FXPlanVegetationPane;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.ParcelleVegetationRepository;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
+import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.util.SirsStringConverter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -38,6 +45,7 @@ public class FXParametragePane extends BorderPane {
     private final Session session = Injector.getSession();
     private final AbstractSIRSRepository<PlanVegetation> planRepo = session.getRepositoryForClass(PlanVegetation.class);
     private final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = session.getRepositoryForClass(ParcelleVegetation.class);
+    private final SirsStringConverter converter = new SirsStringConverter();
     
 
     public FXParametragePane() {
@@ -47,7 +55,6 @@ public class FXParametragePane extends BorderPane {
     
     private class UpdatableListCell extends ListCell<PlanVegetation>{
         
-        private final SirsStringConverter cvt = new SirsStringConverter();
         
         @Override
         protected void updateItem(final PlanVegetation item, boolean empty) {
@@ -63,7 +70,7 @@ public class FXParametragePane extends BorderPane {
 
                     @Override
                     protected String computeValue() {
-                        return cvt.toString(item);
+                        return converter.toString(item);
                     }
                 });
             }
@@ -102,17 +109,58 @@ public class FXParametragePane extends BorderPane {
     @FXML
     void planAdd(ActionEvent event) {
         final PlanVegetation newPlan = planRepo.create();
-        final List<ParcelleVegetation> parcelles = parcelleRepo.getAll();
-        
-//        for(final ParcelleVegetation parcelle : parcelles){
-//            final PlanifParcelleVegetation planif = session.getElementCreator().createElement(PlanifParcelleVegetation.class);
-//            planif.setParcelleId(parcelle.getId());
-//            newPlan.getPlanifParcelle().add(planif);
-//        }
-        
         planRepo.add(newPlan);
         refreshPlanList();
         uiPlanList.getSelectionModel().select(newPlan);
+    }
+    
+    @FXML
+    void planDuplicate(ActionEvent event) {
+        final PlanVegetation toDuplicate = uiPlanList.getSelectionModel().getSelectedItem();
+        if(toDuplicate!=null){
+        
+            final Alert alert = new Alert(Alert.AlertType.WARNING, "Voulez-vous vraiment dupliquer le plan "+converter.toString(toDuplicate)+" ?\n"
+                    + "Cette opération dupliquera les parcelles de ce plan, leurs zones de végétation, ainsi que tous les paramétrages liés aux plans et aux parcelles.", ButtonType.YES, ButtonType.NO);
+            alert.setResizable(true);
+            final Optional<ButtonType> result = alert.showAndWait();
+            
+            
+            if(result.isPresent() && result.get()==ButtonType.YES){
+                
+                
+                
+                // Duplication du plan.
+                final PlanVegetation newPlan = toDuplicate.copy();
+                planRepo.add(newPlan);
+                
+                
+                // Récupération des parcelles de l'ancien plan.
+//                final List<ParcelleVegetation> oldParcelles = parcelleRepo.queryView(ParcelleVegetationRepository.BY_PLAN_ID, toDuplicate.getId());
+//                final List<ParcelleVegetation> newParcelles = new ArrayList<>();
+//                
+//                // Duplication des parcelles.
+//                for(final ParcelleVegetation oldParcelle : oldParcelles){
+//                    final ParcelleVegetation newParcelle = oldParcelle.copy();
+//                    
+//                    // Récupération des zones de végétation de la parcelle
+//                    final List<ZoneVegetation> oldZones = 
+//                    
+//                    
+//                    
+//                    
+//                    newParcelles.add(newParcelle);
+//                }
+
+
+                refreshPlanList();
+                uiPlanList.getSelectionModel().select(newPlan);
+            }
+        }
+        else {
+            final Alert alert = new Alert(Alert.AlertType.WARNING, "Veuillez sélectionner un plan à dupliquer.", ButtonType.CLOSE);
+            alert.setResizable(true);
+            alert.showAndWait();
+        }
     }
 
     @FXML

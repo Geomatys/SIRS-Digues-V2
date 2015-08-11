@@ -47,17 +47,5 @@ public class HerbaceeVegetationRepository extends AbstractZoneVegetationReposito
     public HerbaceeVegetation create() {
         return InjectorCore.getBean(SessionCore.class).getElementCreator().createElement(HerbaceeVegetation.class);
     }
-    
-
-    public List<HerbaceeVegetation> getByParcelleId(final String parcelleId) {
-        ArgumentChecks.ensureNonNull("Parcelle", parcelleId);
-        return this.queryView(BY_PARCELLE_ID, parcelleId);
-    }
-
-    public List<HerbaceeVegetation> getByParcelleIds(final String ... parcelleIds) {
-        ArgumentChecks.ensureNonNull("Parcelles", parcelleIds);
-        return this.queryView(BY_PARCELLE_ID, (Object[])parcelleIds);
-    }
-    
 }
 

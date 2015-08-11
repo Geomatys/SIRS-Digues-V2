@@ -47,16 +47,5 @@ public class PeuplementVegetationRepository extends AbstractZoneVegetationReposi
     public PeuplementVegetation create() {
         return InjectorCore.getBean(SessionCore.class).getElementCreator().createElement(PeuplementVegetation.class);
     }
-    
-    public List<PeuplementVegetation> getByParcelleId(final String parcelleId) {
-        ArgumentChecks.ensureNonNull("Parcelle", parcelleId);
-        return this.queryView(BY_PARCELLE_ID, parcelleId);
-    }
-
-    public List<PeuplementVegetation> getByParcelleIds(final String ... parcelleIds) {
-        ArgumentChecks.ensureNonNull("Parcelles", parcelleIds);
-        return this.queryView(BY_PARCELLE_ID, (Object[])parcelleIds);
-    }
-
 }
 
