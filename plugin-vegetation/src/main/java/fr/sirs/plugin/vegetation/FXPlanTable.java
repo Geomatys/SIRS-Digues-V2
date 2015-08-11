@@ -6,7 +6,6 @@ import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
-import fr.sirs.core.model.PlanifParcelleVegetation;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
 import java.util.ArrayList;
@@ -145,32 +144,32 @@ public class FXPlanTable extends BorderPane{
         final SirsStringConverter cvt = new SirsStringConverter();
         int rowIndex = 0;
         int colIndex = 0;
-        final List<PlanifParcelleVegetation> planifParcelle = plan.getPlanifParcelle();
-        for(PlanifParcelleVegetation state : planifParcelle){
-            gridCenter.getRowConstraints().add(new RowConstraints(USE_PREF_SIZE, USE_COMPUTED_SIZE, USE_PREF_SIZE, Priority.NEVER, VPos.CENTER, true));
-            final ParcelleVegetation parcelle = parcelleRepo.get(state.getParcelleId());
-
-            //on vérifie que la parcelle fait partie du troncon
-            if(troncon!=null && !Objects.equal(parcelle.getForeignParentId(),troncon.getDocumentId())){
-                continue;
-            }
-
-            colIndex=0;
-            gridCenter.add(new Label(cvt.toString(parcelle)), colIndex, rowIndex);
-            colIndex++;
-
-            for(int year=dateStart;year<dateEnd;year++,colIndex++){
-                gridCenter.add(new ParcelleDateCell(parcelle,state,year-dateStart), colIndex, rowIndex);
-            }
-
-            //on ajoute la colonne 'Mode auto'
-            colIndex++;
-            if(!exploitation){
-                gridCenter.add(new ParcelleAutoCell(parcelle,state), colIndex, rowIndex);
-            }
-
-            rowIndex++;
-        }
+//        final List<PlanifParcelleVegetation> planifParcelle = plan.getPlanifParcelle();
+//        for(ParcelleVegetation state : planifParcelle){
+//            gridCenter.getRowConstraints().add(new RowConstraints(USE_PREF_SIZE, USE_COMPUTED_SIZE, USE_PREF_SIZE, Priority.NEVER, VPos.CENTER, true));
+//            final ParcelleVegetation parcelle = parcelleRepo.get(state.getParcelleId());
+//
+//            //on vérifie que la parcelle fait partie du troncon
+//            if(troncon!=null && !Objects.equal(parcelle.getForeignParentId(),troncon.getDocumentId())){
+//                continue;
+//            }
+//
+//            colIndex=0;
+//            gridCenter.add(new Label(cvt.toString(parcelle)), colIndex, rowIndex);
+//            colIndex++;
+//
+//            for(int year=dateStart;year<dateEnd;year++,colIndex++){
+//                gridCenter.add(new ParcelleDateCell(parcelle,state,year-dateStart), colIndex, rowIndex);
+//            }
+//
+//            //on ajoute la colonne 'Mode auto'
+//            colIndex++;
+//            if(!exploitation){
+//                gridCenter.add(new ParcelleAutoCell(parcelle,state), colIndex, rowIndex);
+//            }
+//
+//            rowIndex++;
+//        }
 
         //on bind la taille des cellules
         gridCenter.add(fake0, 0, rowIndex);
@@ -217,19 +216,17 @@ public class FXPlanTable extends BorderPane{
     private final class ParcelleDateCell extends CheckBox{
 
         private final ParcelleVegetation parcelle;
-        private final PlanifParcelleVegetation state;
         private final int index;
 
-        public ParcelleDateCell(ParcelleVegetation parcelle, PlanifParcelleVegetation state, int index) {
+        public ParcelleDateCell(ParcelleVegetation parcelle, int index) {
             disableProperty().bind(editable.not());
             this.parcelle = parcelle;
-            this.state = state;
             this.index = index;
             setPadding(new Insets(5, 0, 5, 0));
             setAlignment(Pos.CENTER);
 
-            if(state.getPlanifications()==null){
-                state.setPlanifications(new ArrayList<>());
+            if(parcelle.getPlanifications()==null){
+                parcelle.setPlanifications(new ArrayList<>());
             }
 
             setSelected(getVal());
@@ -239,7 +236,7 @@ public class FXPlanTable extends BorderPane{
         }
 
         private boolean getVal(){
-            final List<Boolean> planifications = state.getPlanifications();
+            final List<Boolean> planifications = parcelle.getPlanifications();
             while(planifications.size()<=index){
                 planifications.add(Boolean.FALSE);
             }
@@ -247,7 +244,7 @@ public class FXPlanTable extends BorderPane{
         }
 
         private void setVal(Boolean v){
-            final List<Boolean> planifications = state.getPlanifications();
+            final List<Boolean> planifications = parcelle.getPlanifications();
             while(planifications.size()<=index){
                 planifications.add(Boolean.FALSE);
             }
@@ -262,16 +259,14 @@ public class FXPlanTable extends BorderPane{
     private final class ParcelleAutoCell extends CheckBox{
 
         private final ParcelleVegetation parcelle;
-        private final PlanifParcelleVegetation state;
 
-        public ParcelleAutoCell(ParcelleVegetation parcelle, PlanifParcelleVegetation state) {
+        public ParcelleAutoCell(ParcelleVegetation parcelle) {
             setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
             disableProperty().bind(editable.not());
-            setSelected(state.getModeAuto());
-            selectedProperty().bindBidirectional(state.modeAutoProperty());
+            setSelected(parcelle.getModeAuto());
+            selectedProperty().bindBidirectional(parcelle.modeAutoProperty());
             setStyle(AUTO_STYLE);
             this.parcelle = parcelle;
-            this.state = state;
             setPadding(new Insets(5, 5, 5, 5));
 
             selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {

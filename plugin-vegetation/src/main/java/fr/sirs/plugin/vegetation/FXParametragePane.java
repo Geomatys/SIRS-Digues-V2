@@ -8,7 +8,6 @@ import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
-import fr.sirs.core.model.PlanifParcelleVegetation;
 import fr.sirs.util.SirsStringConverter;
 import java.util.List;
 import javafx.beans.binding.ObjectBinding;
@@ -104,11 +103,11 @@ public class FXParametragePane extends BorderPane {
         final PlanVegetation newPlan = planRepo.create();
         final List<ParcelleVegetation> parcelles = parcelleRepo.getAll();
         
-        for(final ParcelleVegetation parcelle : parcelles){
-            final PlanifParcelleVegetation planif = session.getElementCreator().createElement(PlanifParcelleVegetation.class);
-            planif.setParcelleId(parcelle.getId());
-            newPlan.getPlanifParcelle().add(planif);
-        }
+//        for(final ParcelleVegetation parcelle : parcelles){
+//            final PlanifParcelleVegetation planif = session.getElementCreator().createElement(PlanifParcelleVegetation.class);
+//            planif.setParcelleId(parcelle.getId());
+//            newPlan.getPlanifParcelle().add(planif);
+//        }
         
         planRepo.add(newPlan);
         refreshPlanList();
