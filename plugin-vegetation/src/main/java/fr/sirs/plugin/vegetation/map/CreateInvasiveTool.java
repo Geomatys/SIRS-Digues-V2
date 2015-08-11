@@ -11,7 +11,7 @@ import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
 
 /**
  *
- * @author Johann Sorel
+ * @author Johann Sorel (Geomatys)
  */
 public class CreateInvasiveTool extends CreateVegetationPolygonTool{
 

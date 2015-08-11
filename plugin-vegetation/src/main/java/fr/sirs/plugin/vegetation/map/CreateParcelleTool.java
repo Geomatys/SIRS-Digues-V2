@@ -55,7 +55,7 @@ import org.opengis.filter.identity.FeatureId;
 
 /**
  *
- * @author Johann Sorel
+ * @author Johann Sorel (Geomatys)
  */
 public class CreateParcelleTool extends AbstractEditionTool{
 
@@ -92,7 +92,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
     private final BorderPane wizard = new BorderPane();
 
     private PlanVegetation plan;
-    private ParcelleVegetation parcell = new ParcelleVegetation();
+    private ParcelleVegetation parcelle = new ParcelleVegetation();
     private TronconDigue tronconDigue = null;
     private final Label lblTroncon = new Label();
     private final Label lblFirstPoint = new Label();
@@ -113,11 +113,12 @@ public class CreateParcelleTool extends AbstractEditionTool{
         end.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                parcell.setValid(true);
+                parcelle.setValid(true);
+                parcelle.setPlanId(plan.getId());
 
                 //calcule de la geometrie
-                parcell.setGeometry(LinearReferencingUtilities.buildGeometry(
-                        tronconDigue.getGeometry(), parcell, Injector.getSession().getRepositoryForClass(BorneDigue.class)));
+                parcelle.setGeometry(LinearReferencingUtilities.buildGeometry(
+                        tronconDigue.getGeometry(), parcelle, Injector.getSession().getRepositoryForClass(BorneDigue.class)));
 
                 //recuperation des PR
                 final String srId = tronconDigue.getSystemeRepDefautId();
@@ -125,15 +126,15 @@ public class CreateParcelleTool extends AbstractEditionTool{
                 final SystemeReperage sr = srRepo.get(srId);
 
                 for(SystemeReperageBorne srb : sr.getSystemeReperageBornes()){
-                    if(srb.getBorneId().equals(parcell.getBorneDebutId())){
-                        parcell.setPrDebut(srb.getValeurPR());
-                    }else if(srb.getBorneId().equals(parcell.getBorneFinId())){
-                        parcell.setPrFin(srb.getValeurPR());
+                    if(srb.getBorneId().equals(parcelle.getBorneDebutId())){
+                        parcelle.setPrDebut(srb.getValeurPR());
+                    }else if(srb.getBorneId().equals(parcelle.getBorneFinId())){
+                        parcelle.setPrFin(srb.getValeurPR());
                     }
                 }
 
                 final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = session.getRepositoryForClass(ParcelleVegetation.class);
-                parcelleRepo.add(parcell);
+                parcelleRepo.add(parcelle);
                 map.setHandler(new FXPanHandler(true));
                 reset();
             }
@@ -164,11 +165,11 @@ public class CreateParcelleTool extends AbstractEditionTool{
     }
 
     private void reset(){
-        parcell = new ParcelleVegetation();
+        parcelle = new ParcelleVegetation();
         end.disableProperty().unbind();
-        end.disableProperty().bind( parcell.linearIdProperty().isNull()
-                                .or(parcell.borneDebutIdProperty().isNull()
-                                .or(parcell.borneFinIdProperty().isNull())));
+        end.disableProperty().bind( parcelle.linearIdProperty().isNull()
+                                .or(parcelle.borneDebutIdProperty().isNull()
+                                .or(parcelle.borneFinIdProperty().isNull())));
         lblTroncon.setText("Sélectionner un tronçon sur la carte");
         lblFirstPoint.setText("");
         lblLastPoint.setText("");
@@ -242,7 +243,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
 
             final Rectangle2D clickArea = new Rectangle2D.Double(event.getX()-2, event.getY()-2, 4, 4);
 
-            if(parcell.getLinearId()==null || parcell.getLinearId().isEmpty()){
+            if(parcelle.getLinearId()==null || parcelle.getLinearId().isEmpty()){
                 tronconLayer.setSelectable(true);
                 borneLayer.setSelectable(false);
                 //recherche un troncon sous la souris
@@ -254,7 +255,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
                             tronconDigue = (TronconDigue) bean;
                             //on recupere l'object complet
                             tronconDigue = Injector.getSession().getRepositoryForClass(TronconDigue.class).get(tronconDigue.getDocumentId());
-                            parcell.setLinearId(tronconDigue.getId());
+                            parcelle.setLinearId(tronconDigue.getId());
                             lblTroncon.setText(cvt.toString(tronconDigue));
                             lblFirstPoint.setText("Sélectionner une borne sur la carte");
 
@@ -267,12 +268,12 @@ public class CreateParcelleTool extends AbstractEditionTool{
                     }
                     @Override
                     public boolean isStopRequested() {
-                        return parcell.getLinearId()!=null && !parcell.getLinearId().isEmpty();
+                        return parcelle.getLinearId()!=null && !parcelle.getLinearId().isEmpty();
                     }
                     @Override
                     public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
                 }, VisitFilter.INTERSECTS);
-            }else if(parcell.getBorneDebutId()==null || parcell.getBorneDebutId().isEmpty()){
+            }else if(parcelle.getBorneDebutId()==null || parcelle.getBorneDebutId().isEmpty()){
                 tronconLayer.setSelectable(false);
                 borneLayer.setSelectable(true);
                 //recherche une borne sous la souris
@@ -281,20 +282,20 @@ public class CreateParcelleTool extends AbstractEditionTool{
                     public void visit(ProjectedFeature graphic, RenderingContext2D context, SearchAreaJ2D area) {
                         final Object bean = graphic.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
                         if(bean instanceof BorneDigue && tronconDigue.getBorneIds().contains(((BorneDigue)bean).getId())){
-                            parcell.setBorneDebutId(((BorneDigue)bean).getId());
+                            parcelle.setBorneDebutId(((BorneDigue)bean).getId());
                             lblFirstPoint.setText(cvt.toString(bean));
                             lblLastPoint.setText("Sélectionner une borne sur la carte");
                         }
                     }
                     @Override
                     public boolean isStopRequested() {
-                        return parcell.getBorneDebutId()!=null && !parcell.getBorneDebutId().isEmpty();
+                        return parcelle.getBorneDebutId()!=null && !parcelle.getBorneDebutId().isEmpty();
                     }
                     @Override
                     public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
                 }, VisitFilter.INTERSECTS);
             }
-            else if(parcell.getBorneFinId()==null || parcell.getBorneFinId().isEmpty()){
+            else if(parcelle.getBorneFinId()==null || parcelle.getBorneFinId().isEmpty()){
                 tronconLayer.setSelectable(false);
                 borneLayer.setSelectable(true);
                 //recherche une borne sous la souris
@@ -303,13 +304,13 @@ public class CreateParcelleTool extends AbstractEditionTool{
                     public void visit(ProjectedFeature graphic, RenderingContext2D context, SearchAreaJ2D area) {
                         final Object bean = graphic.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
                         if(bean instanceof BorneDigue && tronconDigue.getBorneIds().contains(((BorneDigue)bean).getId())){
-                            parcell.setBorneFinId(((BorneDigue)bean).getId());
+                            parcelle.setBorneFinId(((BorneDigue)bean).getId());
                             lblLastPoint.setText(cvt.toString(bean));
                         }
                     }
                     @Override
                     public boolean isStopRequested() {
-                        return parcell.getBorneFinId()!=null && !parcell.getBorneFinId().isEmpty();
+                        return parcelle.getBorneFinId()!=null && !parcelle.getBorneFinId().isEmpty();
                     }
                     @Override
                     public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}

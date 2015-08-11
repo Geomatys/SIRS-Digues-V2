@@ -49,7 +49,7 @@ import org.opengis.util.FactoryException;
 
 /**
  *
- * @author Johann Sorel
+ * @author Johann Sorel (Geomatys)
  */
 public class CreateArbreTool extends AbstractEditionTool{
 

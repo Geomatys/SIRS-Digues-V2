@@ -28,9 +28,7 @@ import org.apache.sis.util.ArgumentChecks;
 @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.ArbreVegetation') {emit(doc._id, doc._id)}}")
 })
 @Component("fr.sirs.core.component.ArbreVegetationRepository")
-public class ArbreVegetationRepository extends 
-AbstractSIRSRepository
-<ArbreVegetation> {
+public class ArbreVegetationRepository extends AbstractSIRSRepository<ArbreVegetation> {
     
     public static final String BY_PARCELLE_ID = "byParcelleId";
         
@@ -49,5 +47,11 @@ AbstractSIRSRepository
         ArgumentChecks.ensureNonNull("Parcelle", parcelleId);
         return this.queryView(BY_PARCELLE_ID, parcelleId);
     }
+
+    public List<ArbreVegetation> getByParcelleIds(final String ... parcelleIds) {
+        ArgumentChecks.ensureNonNull("Parcelles", parcelleIds);
+        return this.queryView(BY_PARCELLE_ID, (Object[])parcelleIds);
+    }
+
 }
 

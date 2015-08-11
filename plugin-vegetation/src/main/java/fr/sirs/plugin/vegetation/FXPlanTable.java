@@ -21,6 +21,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Background;
@@ -152,7 +153,7 @@ public class FXPlanTable extends BorderPane{
         int colIndex = 0;
         final List<ParcelleVegetation> planifParcelle = parcelleRepo.getByPlanId(plan.getDocumentId());
         for(ParcelleVegetation parcelle : planifParcelle){
-            gridCenter.getRowConstraints().add(new RowConstraints(USE_PREF_SIZE, USE_COMPUTED_SIZE, USE_PREF_SIZE, Priority.NEVER, VPos.CENTER, true));
+            gridCenter.getRowConstraints().add(new RowConstraints(30, 30, 30, Priority.NEVER, VPos.CENTER, true));
             
             //on vérifie que la parcelle fait partie du troncon
             if(troncon!=null && !Objects.equal(parcelle.getForeignParentId(),troncon.getDocumentId())){
@@ -232,8 +233,9 @@ public class FXPlanTable extends BorderPane{
             this.parcelle = parcelle;
             this.year = year;
             this.index = index;
-            setPadding(new Insets(5, 0, 5, 0));
+            setPadding(new Insets(10));
             setAlignment(Pos.CENTER);
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 
             if(parcelle.getPlanifications()==null){
                 parcelle.setPlanifications(new ArrayList<>());
@@ -274,12 +276,14 @@ public class FXPlanTable extends BorderPane{
          * Vert : Planifié, traité
          */
         private void updateColor(){
+            if(!exploitation) return;
+            
             final boolean planifie = getVal();
             final Color color = VegetationSession.INSTANCE.getColor(parcelle, planifie, year);
             if(color==null){
                 setBackground(Background.EMPTY);
             }else{
-                setBackground(new Background(new BackgroundFill(color, new CornerRadii(20), Insets.EMPTY)));
+                setBackground(new Background(new BackgroundFill(color, new CornerRadii(30), Insets.EMPTY)));
             }
         }
 

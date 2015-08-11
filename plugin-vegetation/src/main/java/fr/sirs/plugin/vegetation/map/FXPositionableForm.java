@@ -16,7 +16,7 @@ import javafx.scene.layout.BorderPane;
 
 /**
  *
- * @author Johann Sorel
+ * @author Johann Sorel (Geomatys)
  */
 public class FXPositionableForm extends BorderPane {
 

@@ -148,10 +148,12 @@ public class PluginVegetation extends Plugin {
 
         if(plan==null) return;
 
+        final VegetationSession vs = VegetationSession.INSTANCE;
 
         try{
             //parcelles
-            final StructBeanSupplier parcelleSupplier = new StructBeanSupplier(ParcelleVegetation.class, () -> getSession().getRepositoryForClass(ParcelleVegetation.class).getAll());
+            final StructBeanSupplier parcelleSupplier = new StructBeanSupplier(ParcelleVegetation.class, () -> 
+                    vs.getParcelleRepo().getByPlanId(plan.getId()));
             final BeanStore parcelleStore = new BeanStore(parcelleSupplier);
             final MapLayer parcelleLayer = MapBuilder.createFeatureLayer(parcelleStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(parcelleStore.getNames().iterator().next())));
@@ -163,7 +165,8 @@ public class PluginVegetation extends Plugin {
             parcelleLayer.setSelectionStyle(createParcelleStyleSelected());
 
             //strates herbacée
-            final StructBeanSupplier herbeSupplier = new StructBeanSupplier(HerbaceeVegetation.class, () -> getSession().getRepositoryForClass(HerbaceeVegetation.class).getAll());
+            final StructBeanSupplier herbeSupplier = new StructBeanSupplier(HerbaceeVegetation.class, 
+                    () -> vs.getHerbaceeRepo().getByParcelleIds(getParcelleIds(plan.getId())));
             final BeanStore herbeStore = new BeanStore(herbeSupplier);
             final MapLayer herbeLayer = MapBuilder.createFeatureLayer(herbeStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(herbeStore.getNames().iterator().next())));
@@ -173,7 +176,8 @@ public class PluginVegetation extends Plugin {
             vegetationGroup.items().add(0,herbeLayer);
 
             //arbres
-            final StructBeanSupplier arbreSupplier = new StructBeanSupplier(ArbreVegetation.class, () -> getSession().getRepositoryForClass(ArbreVegetation.class).getAll());
+            final StructBeanSupplier arbreSupplier = new StructBeanSupplier(ArbreVegetation.class,
+                    () -> vs.getArbreRepo().getByParcelleIds(getParcelleIds(plan.getId())));
             final BeanStore arbreStore = new BeanStore(arbreSupplier);
             final MapLayer arbreLayer = MapBuilder.createFeatureLayer(arbreStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(arbreStore.getNames().iterator().next())));
@@ -183,7 +187,8 @@ public class PluginVegetation extends Plugin {
             vegetationGroup.items().add(0,arbreLayer);
 
             //peuplements
-            final StructBeanSupplier peuplementSupplier = new StructBeanSupplier(PeuplementVegetation.class, () -> getSession().getRepositoryForClass(PeuplementVegetation.class).getAll());
+            final StructBeanSupplier peuplementSupplier = new StructBeanSupplier(PeuplementVegetation.class,
+                    () -> vs.getPeuplementRepo().getByParcelleIds(getParcelleIds(plan.getId())));
             final BeanStore peuplementStore = new BeanStore(peuplementSupplier);
             final org.geotoolkit.data.session.Session peuplementSession = peuplementStore.createSession(true);
             final MapItem peuplementGroup = MapBuilder.createItem();
@@ -219,7 +224,8 @@ public class PluginVegetation extends Plugin {
             }
 
             //invasives
-            final StructBeanSupplier invasiveSupplier = new StructBeanSupplier(InvasiveVegetation.class, () -> getSession().getRepositoryForClass(InvasiveVegetation.class).getAll());
+            final StructBeanSupplier invasiveSupplier = new StructBeanSupplier(InvasiveVegetation.class,
+                    () -> vs.getInvasiveRepo().getByParcelleIds(getParcelleIds(plan.getId())));
             final BeanStore invasiveStore = new BeanStore(invasiveSupplier);
             final org.geotoolkit.data.session.Session invasiveSession = invasiveStore.createSession(true);
             final MapItem invasivesGroup = MapBuilder.createItem();
@@ -261,6 +267,15 @@ public class PluginVegetation extends Plugin {
         }
     }
 
+    private String[] getParcelleIds(String planId){
+        final VegetationSession vs = VegetationSession.INSTANCE;
+        final List<ParcelleVegetation> parcelles = vs.getParcelleRepo().getByPlanId(planId);
+        final String[] parcelleIds = new String[parcelles.size()];
+        for(int i=0;i<parcelleIds.length;i++){
+            parcelleIds[i] = parcelles.get(i).getDocumentId();
+        }
+        return parcelleIds;
+    }
 
     private static MutableStyle createParcelleStyle() throws IOException{
         final MutableStyle style = SF.style();
