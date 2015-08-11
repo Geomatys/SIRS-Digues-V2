@@ -6,7 +6,6 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.util.SirsStringConverter;
-import java.util.Collections;
 import java.util.List;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -18,15 +17,11 @@ import javafx.geometry.VPos;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
-import javafx.scene.paint.Color;
 
 /**
  *

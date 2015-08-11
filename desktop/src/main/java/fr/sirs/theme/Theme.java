@@ -2,6 +2,8 @@ package fr.sirs.theme;
 
 import java.util.ArrayList;
 import java.util.List;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Parent;
@@ -27,7 +29,7 @@ public abstract class Theme {
         PLUGINS
     }
     
-    private final String name;
+    private final StringProperty name = new SimpleStringProperty("");
     private final Type type;
     private final List<Theme> subThemes = new ArrayList<>();
 
@@ -40,7 +42,7 @@ public abstract class Theme {
     public Theme(String name, Type type) {
         ArgumentChecks.ensureNonNull("name", name);
         ArgumentChecks.ensureNonNull("type", type);
-        this.name = name;
+        this.name.set(name);
         this.type = type;
     }
     
@@ -49,7 +51,7 @@ public abstract class Theme {
      * @return String, jamais nulle
      */
     public String getName(){
-        return name;
+        return name.get();
     }
 
     /**

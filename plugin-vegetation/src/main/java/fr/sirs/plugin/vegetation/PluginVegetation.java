@@ -1,5 +1,6 @@
 package fr.sirs.plugin.vegetation;
 
+import fr.sirs.Injector;
 import fr.sirs.Plugin;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
@@ -10,6 +11,7 @@ import fr.sirs.core.model.HerbaceeVegetation;
 import fr.sirs.core.model.InvasiveVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PeuplementVegetation;
+import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.RefTypeInvasiveVegetation;
 import fr.sirs.core.model.RefTypePeuplementVegetation;
 import fr.sirs.core.model.sql.SQLHelper;
@@ -23,8 +25,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
-
 import fr.sirs.map.FXMapPane;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javax.imageio.ImageIO;
@@ -63,12 +66,12 @@ import org.opengis.style.Stroke;
 /**
  * Minimal example of a plugin.
  *
- * @author Alexis Manin (Geomatys)
- * @author Cédric Briançon (Geomatys)
+ * @author Johann Sorel (Geomatys)
  */
 public class PluginVegetation extends Plugin {
 
     public static final String PARCELLE_LAYER_NAME = "Parcelles";
+    public static final String VEGETATION_GROUP_NAME = "Végétation";
 
     private static final String NAME = "plugin-vegetation";
     private static final String TITLE = "Module végétation";
@@ -76,6 +79,7 @@ public class PluginVegetation extends Plugin {
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
 
     private final VegetationToolBar toolbar = new VegetationToolBar();
+    private MapItem vegetationGroup;
 
     public PluginVegetation() {
         name = NAME;
@@ -93,6 +97,14 @@ public class PluginVegetation extends Plugin {
         final CreateParcelleTool.Spi spi = CreateParcelleTool.SPI;
         spi.getTitle().toString();
         spi.getAbstract().toString();
+
+        //on ecoute le changement de plan de gestion
+        VegetationSession.INSTANCE.planProperty().addListener(new ChangeListener<PlanVegetation>() {
+            @Override
+            public void changed(ObservableValue<? extends PlanVegetation> observable, PlanVegetation oldValue, PlanVegetation newValue) {
+                updatePlanLayers(newValue);
+            }
+        });
 
     }
 
@@ -119,10 +131,23 @@ public class PluginVegetation extends Plugin {
     @Override
     public List<MapItem> getMapItems() {
         final List<MapItem> items = new ArrayList<>();
-        final MapItem vegetationGroup = MapBuilder.createItem();
+        vegetationGroup = MapBuilder.createItem();
         vegetationGroup.setName("Végétation");
         vegetationGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
         items.add(vegetationGroup);
+
+
+        return items;
+    }
+
+    private void updatePlanLayers(PlanVegetation plan){
+        final Session session = Injector.getSession();
+
+        //on efface les anciens layers
+        vegetationGroup.items().clear();
+
+        if(plan==null) return;
+
 
         try{
             //parcelles
@@ -240,9 +265,8 @@ public class PluginVegetation extends Plugin {
         }catch(Exception ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
-
-        return items;
     }
+
 
     private static MutableStyle createParcelleStyle() throws IOException{
         final MutableStyle style = SF.style();
