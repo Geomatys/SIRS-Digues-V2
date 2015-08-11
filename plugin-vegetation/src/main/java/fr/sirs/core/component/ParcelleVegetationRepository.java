@@ -29,9 +29,7 @@ import org.apache.sis.util.ArgumentChecks;
 @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.ParcelleVegetation') {emit(doc._id, doc._id)}}")
 })
 @Component("fr.sirs.core.component.ParcelleVegetationRepository")
-public class ParcelleVegetationRepository extends 
-AbstractPositionableRepository
-<ParcelleVegetation> {
+public class ParcelleVegetationRepository extends AbstractPositionableRepository<ParcelleVegetation> {
     
     public static final String BY_PLAN_ID = "byPlanId";
         

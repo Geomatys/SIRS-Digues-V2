@@ -27,6 +27,7 @@ import javafx.scene.layout.BorderPane;
 /**
  *
  * @author Johann Sorel (Geomatys)
+ * @author Samuel Andrés (Geomatys)
  */
 public class FXParametragePane extends BorderPane {
     
@@ -57,7 +58,7 @@ public class FXParametragePane extends BorderPane {
                 textProperty().bind(new ObjectBinding<String>() {
 
                     {
-                        bind(item.libelleProperty(),item.designationProperty());
+                        bind(item.libelleProperty(), item.designationProperty());
                     }
 
                     @Override
