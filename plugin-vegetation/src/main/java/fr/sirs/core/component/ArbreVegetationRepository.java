@@ -29,13 +29,6 @@ import org.apache.sis.util.ArgumentChecks;
 })
 @Component("fr.sirs.core.component.ArbreVegetationRepository")
 public class ArbreVegetationRepository extends AbstractZoneVegetationRepository<ArbreVegetation> {
-    
-    /**
-     * 
-     * @deprecated use AbstractZoneVegetationRepository.BY_PARCELLE_ID
-     */
-    @Deprecated
-    public static final String BY_PARCELLE_ID = "byParcelleId";
         
     @Autowired
     private ArbreVegetationRepository ( CouchDbConnector db) {

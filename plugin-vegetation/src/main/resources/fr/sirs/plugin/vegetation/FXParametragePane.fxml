@@ -23,6 +23,7 @@
                            <children>
                               <Button mnemonicParsing="false" onAction="#planAdd" styleClass="buttonbar-button" text="+" />
                               <Button mnemonicParsing="false" onAction="#planDelete" styleClass="buttonbar-button" text="-" />
+                              <Button fx:id="uiDuplicate" mnemonicParsing="false" styleClass="buttonbar-button" text="2" />
                            </children>
                            <opaqueInsets>
                               <Insets />

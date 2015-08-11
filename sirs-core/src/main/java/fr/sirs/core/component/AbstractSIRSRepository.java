@@ -240,11 +240,11 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         return cacheList(super.queryView(viewName, key));
     }
     
-    public List<T> queryView(String viewName, Object... keys) {
+    protected List<T> queryView(String viewName, Object... keys) {
         return this.queryView(viewName, Arrays.asList(keys));
     }
 
-    public List<T> queryView(String viewName, Collection keys) {
+    protected List<T> queryView(String viewName, Collection keys) {
         return cacheList(db.queryView(createQuery(viewName).includeDocs(true).keys(keys), type));
     }
     

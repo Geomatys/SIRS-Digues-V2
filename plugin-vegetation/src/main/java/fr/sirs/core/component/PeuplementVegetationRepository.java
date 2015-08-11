@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
 import fr.sirs.core.model.PeuplementVegetation;
-import java.util.List;
-import org.apache.sis.util.ArgumentChecks;
 
 /**
  * Outil g�rant les �changes avec la bdd CouchDB pour tous les objets PeuplementVegetation.
@@ -29,13 +27,6 @@ import org.apache.sis.util.ArgumentChecks;
 })
 @Component("fr.sirs.core.component.PeuplementVegetationRepository")
 public class PeuplementVegetationRepository extends AbstractZoneVegetationRepository<PeuplementVegetation> {
-        
-    /**
-     * 
-     * @deprecated use AbstractZoneVegetationRepository.BY_PARCELLE_ID
-     */
-    @Deprecated
-    public static final String BY_PARCELLE_ID = "byParcelleId";
     
     @Autowired
     private PeuplementVegetationRepository ( CouchDbConnector db) {

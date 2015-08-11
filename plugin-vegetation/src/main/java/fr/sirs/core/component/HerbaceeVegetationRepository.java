@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
 import fr.sirs.core.model.HerbaceeVegetation;
-import java.util.List;
-import org.apache.sis.util.ArgumentChecks;
 
 /**
  * Outil g�rant les �changes avec la bdd CouchDB pour tous les objets HerbaceeVegetation.
@@ -29,13 +27,6 @@ import org.apache.sis.util.ArgumentChecks;
 })
 @Component("fr.sirs.core.component.HerbaceeVegetationRepository")
 public class HerbaceeVegetationRepository extends AbstractZoneVegetationRepository<HerbaceeVegetation> {
-    
-    /**
-     * 
-     * @deprecated use AbstractZoneVegetationRepository.BY_PARCELLE_ID
-     */
-    @Deprecated
-    public static final String BY_PARCELLE_ID = "byParcelleId";
         
     @Autowired
     private HerbaceeVegetationRepository ( CouchDbConnector db) {

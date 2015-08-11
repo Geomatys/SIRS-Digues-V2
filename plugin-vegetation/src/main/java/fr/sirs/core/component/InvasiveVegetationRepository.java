@@ -27,13 +27,6 @@ import fr.sirs.core.model.InvasiveVegetation;
 })
 @Component("fr.sirs.core.component.InvasiveVegetationRepository")
 public class InvasiveVegetationRepository extends AbstractZoneVegetationRepository<InvasiveVegetation> {
-    
-    /**
-     * 
-     * @deprecated use AbstractZoneVegetationRepository.BY_PARCELLE_ID
-     */
-    @Deprecated
-    public static final String BY_PARCELLE_ID = "byParcelleId";
         
     @Autowired
     private InvasiveVegetationRepository ( CouchDbConnector db) {
