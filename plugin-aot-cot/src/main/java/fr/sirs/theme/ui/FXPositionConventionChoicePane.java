@@ -128,7 +128,7 @@ public class FXPositionConventionChoicePane extends BorderPane {
 
     public FXPositionConventionChoicePane() {
 
-        SIRS.loadFXML(this, null);
+        SIRS.loadFXML(this, (Class)null);
         
         final List<Class<? extends Objet>> concreteObjetClasses = new ArrayList<>();
         for(final Class co : Session.getElements()){
