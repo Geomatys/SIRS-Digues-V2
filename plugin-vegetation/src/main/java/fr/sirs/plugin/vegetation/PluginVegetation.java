@@ -256,12 +256,6 @@ public class PluginVegetation extends Plugin {
                 invasivesGroup.items().add(layer);
             }
 
-            //traitements
-            final MapItem traitementGroup = MapBuilder.createItem();
-            traitementGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            traitementGroup.setName("Traitements");
-            vegetationGroup.items().add(0,traitementGroup);
-
         }catch(Exception ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }

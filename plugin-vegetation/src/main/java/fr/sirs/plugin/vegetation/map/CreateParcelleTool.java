@@ -9,9 +9,11 @@ import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.ParcelleVegetation;
+import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.plugin.vegetation.VegetationSession;
 import fr.sirs.util.ResourceInternationalString;
 import fr.sirs.util.SirsStringConverter;
 import java.awt.geom.Rectangle2D;
@@ -22,7 +24,9 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
@@ -87,6 +91,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
     private final MouseListen mouseInputListener = new MouseListen();
     private final BorderPane wizard = new BorderPane();
 
+    private PlanVegetation plan;
     private ParcelleVegetation parcell = new ParcelleVegetation();
     private TronconDigue tronconDigue = null;
     private final Label lblTroncon = new Label();
@@ -186,6 +191,19 @@ public class CreateParcelleTool extends AbstractEditionTool{
     public void install(FXMap component) {
         reset();
         super.install(component);
+
+        //on vérifie qu'il y a une plan de gestion actif
+        plan = VegetationSession.INSTANCE.planProperty().get();
+        if(plan==null){
+            final Dialog dialog = new Alert(Alert.AlertType.INFORMATION);
+            dialog.setContentText("Veuillez activer un plan de gestion avant de commencer l'édition.");
+            dialog.showAndWait();
+
+            component.setHandler(new FXPanHandler(true));
+            return;
+        }
+
+
         component.addEventHandler(MouseEvent.ANY, mouseInputListener);
 
         //on rend les couches troncon et borne selectionnables

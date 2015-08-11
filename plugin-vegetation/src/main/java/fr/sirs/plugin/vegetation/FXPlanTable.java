@@ -4,6 +4,8 @@ package fr.sirs.plugin.vegetation;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.ParcelleVegetationRepository;
+import fr.sirs.core.model.ParcelleTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.TronconDigue;
@@ -21,11 +23,15 @@ import javafx.geometry.VPos;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.paint.Color;
 import org.elasticsearch.common.base.Objects;
 
 /**
@@ -140,36 +146,35 @@ public class FXPlanTable extends BorderPane{
 
 
         //une ligne par parcelle
-        final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = session.getRepositoryForClass(ParcelleVegetation.class);
+        final ParcelleVegetationRepository parcelleRepo = (ParcelleVegetationRepository)session.getRepositoryForClass(ParcelleVegetation.class);
         final SirsStringConverter cvt = new SirsStringConverter();
         int rowIndex = 0;
         int colIndex = 0;
-//        final List<PlanifParcelleVegetation> planifParcelle = plan.getPlanifParcelle();
-//        for(ParcelleVegetation state : planifParcelle){
-//            gridCenter.getRowConstraints().add(new RowConstraints(USE_PREF_SIZE, USE_COMPUTED_SIZE, USE_PREF_SIZE, Priority.NEVER, VPos.CENTER, true));
-//            final ParcelleVegetation parcelle = parcelleRepo.get(state.getParcelleId());
-//
-//            //on vérifie que la parcelle fait partie du troncon
-//            if(troncon!=null && !Objects.equal(parcelle.getForeignParentId(),troncon.getDocumentId())){
-//                continue;
-//            }
-//
-//            colIndex=0;
-//            gridCenter.add(new Label(cvt.toString(parcelle)), colIndex, rowIndex);
-//            colIndex++;
-//
-//            for(int year=dateStart;year<dateEnd;year++,colIndex++){
-//                gridCenter.add(new ParcelleDateCell(parcelle,state,year-dateStart), colIndex, rowIndex);
-//            }
-//
-//            //on ajoute la colonne 'Mode auto'
-//            colIndex++;
-//            if(!exploitation){
-//                gridCenter.add(new ParcelleAutoCell(parcelle,state), colIndex, rowIndex);
-//            }
-//
-//            rowIndex++;
-//        }
+        final List<ParcelleVegetation> planifParcelle = parcelleRepo.getByPlanId(plan.getDocumentId());
+        for(ParcelleVegetation parcelle : planifParcelle){
+            gridCenter.getRowConstraints().add(new RowConstraints(USE_PREF_SIZE, USE_COMPUTED_SIZE, USE_PREF_SIZE, Priority.NEVER, VPos.CENTER, true));
+            
+            //on vérifie que la parcelle fait partie du troncon
+            if(troncon!=null && !Objects.equal(parcelle.getForeignParentId(),troncon.getDocumentId())){
+                continue;
+            }
+
+            colIndex=0;
+            gridCenter.add(new Label(cvt.toString(parcelle)), colIndex, rowIndex);
+            colIndex++;
+
+            for(int year=dateStart;year<dateEnd;year++,colIndex++){
+                gridCenter.add(new ParcelleDateCell(parcelle,year,year-dateStart), colIndex, rowIndex);
+            }
+
+            //on ajoute la colonne 'Mode auto'
+            colIndex++;
+            if(!exploitation){
+                gridCenter.add(new ParcelleAutoCell(parcelle), colIndex, rowIndex);
+            }
+
+            rowIndex++;
+        }
 
         //on bind la taille des cellules
         gridCenter.add(fake0, 0, rowIndex);
@@ -212,15 +217,20 @@ public class FXPlanTable extends BorderPane{
         return plan;
     }
 
-
+    /**
+     * Cellule de date.
+     * 
+     */
     private final class ParcelleDateCell extends CheckBox{
 
         private final ParcelleVegetation parcelle;
+        private final int year;
         private final int index;
 
-        public ParcelleDateCell(ParcelleVegetation parcelle, int index) {
+        public ParcelleDateCell(ParcelleVegetation parcelle, int year,  int index) {
             disableProperty().bind(editable.not());
             this.parcelle = parcelle;
+            this.year = year;
             this.index = index;
             setPadding(new Insets(5, 0, 5, 0));
             setAlignment(Pos.CENTER);
@@ -233,6 +243,7 @@ public class FXPlanTable extends BorderPane{
             selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
                 setVal(newValue);
             });
+            updateColor();
         }
 
         private boolean getVal(){
@@ -251,11 +262,32 @@ public class FXPlanTable extends BorderPane{
             final Boolean old = planifications.set(index,v);
             if(!Objects.equal(old,v)){
                 save();
+                updateColor();
+            }
+        }
+
+        /**
+         * On change la couleur en fonction de l'etat des traitements.
+         * Void : Non planifié, Non traité
+         * Orange : Non planifié, traité
+         * Rouge : Planifié, Non traité
+         * Vert : Planifié, traité
+         */
+        private void updateColor(){
+            final boolean planifie = getVal();
+            final Color color = VegetationSession.INSTANCE.getColor(parcelle, planifie, year);
+            if(color==null){
+                setBackground(Background.EMPTY);
+            }else{
+                setBackground(new Background(new BackgroundFill(color, new CornerRadii(20), Insets.EMPTY)));
             }
         }
 
     }
 
+    /**
+     * Colonne 'Mode Auto'.
+     */
     private final class ParcelleAutoCell extends CheckBox{
 
         private final ParcelleVegetation parcelle;
@@ -272,11 +304,12 @@ public class FXPlanTable extends BorderPane{
             selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
                 save();
             });
-
         }
-
     }
 
+    /**
+     * Ligne des couts
+     */
     private final class EstimationCell extends BorderPane{
 
         private final int year;

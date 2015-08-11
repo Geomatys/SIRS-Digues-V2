@@ -13,6 +13,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
@@ -31,7 +32,7 @@ import org.geotoolkit.map.MapBuilder;
 
 /**
  *
- * @author Johann Sorel
+ * @author Johann Sorel (Geomatys)
  */
 public class VegetationToolBar extends ToolBar {
 
@@ -55,6 +56,14 @@ public class VegetationToolBar extends ToolBar {
             }
         });
 
+        final Button recherche = new Button("Recherche");
+        recherche.setOnAction(this::showSearchDialog);
+        getItems().add(recherche);
+
+    }
+
+    private void showSearchDialog(ActionEvent evt){
+        
     }
 
     private void showEditor(){
