@@ -138,7 +138,7 @@ public class ReferenceChecker extends Task<Void> {
 
                 /*
                  Pour toutes les instances de références locales :
-                 1) On vérifie qu'elle est bien présente sur les serveur ;
+                 1) On vérifie qu'elle est bien présente sur le serveur ;
                  2) Que son état sur le serveur est identique à son état local ;
                  3) Si elle est présente sur le serveur et que son état a changé, on enregistre les deux états dans la map dédiée.
                  4) Si elle n'est pas présente sur le serveur, on l'enregistre dans la liste dédiée.
@@ -279,6 +279,8 @@ public class ReferenceChecker extends Task<Void> {
                     } else if(Float.class.equals(type) || FLOAT_PRIMITIVE_NAME.equals(type.getName())){
                         setter.invoke(referenceInstance, Float.parseFloat(record.get(header)));
                     } else if(Double.class.equals(type) || DOUBLE_PRIMITIVE_NAME.equals(type.getName())){
+                        setter.invoke(referenceInstance, Double.parseDouble(record.get(header)));
+                    } else if(Boolean.class.equals(type) || BOOLEAN_PRIMITIVE_NAME.equals(type.getName())){
                         setter.invoke(referenceInstance, Double.parseDouble(record.get(header)));
                     } else if (LocalDateTime.class.equals(type)) {
                         try {

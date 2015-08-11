@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="vegetation" nsURI="http://fr.sirs/vegetation" nsPrefix="veg">
-  <eClassifiers xsi:type="ecore:EClass" name="ParcelleVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//Objet">
-    <eAnnotations source="couchDBDocument"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ArbreVegetation" eSuperTypes="#//ZoneVegetation">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="contactEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
@@ -32,8 +29,6 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PlanVegetation">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="planifParcelle" upperBound="-1"
-        eType="#//PlanifParcelleVegetation" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -43,17 +38,15 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="paramCout" upperBound="-1"
         eType="#//ParamCoutTraitementVegetation" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PlanifParcelleVegetation">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="parcelleId" eType="#//ParcelleVegetation"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ParcelleVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//Objet">
+    <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="traitements" upperBound="-1"
         eType="#//ParcelleTraitementVegetation" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="modeAuto" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="planifications" upperBound="10"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBooleanObject"
         transient="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="planId" eType="#//PlanVegetation"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ParcelleTraitementVegetation">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -69,6 +62,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTraitementVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="ponctuel" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefSousTraitementVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
@@ -123,5 +117,9 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="frequenceId" eType="#//RefFrequenceTraitementVegetation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeTraitementId" eType="#//RefTraitementVegetation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sousTypeTraitementId" eType="#//RefSousTraitementVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sousTypeTraitementPonctuelId"
+        eType="#//RefSousTraitementVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeTraitementPonctuelId"
+        eType="#//RefTraitementVegetation"/>
   </eClassifiers>
 </ecore:EPackage>

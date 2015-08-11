@@ -104,5 +104,21 @@ public interface Element extends Identifiable, Serializable {
      * @return The Element matching input ID, or null if we cannot find 
      * any in child structures.
      */
-    public Element getChildById(final String toSearch);
+    Element getChildById(final String toSearch);
+    
+    /**
+     * The implementation of equals() method is based on identifiers, 
+     * considering two instances are equals if they describe the same entity.
+     * 
+     * On the contrary, this method explores the content of the object 
+     * attributes in order to determine if their content is equal.
+     * 
+     * All the attributes are not examined, but only the single valued ones.
+     * 
+     * @param other
+     * @return 
+     */
+    default boolean contentBasedEquals(final Element element){
+        return this.equals(element);
+    }
 }
