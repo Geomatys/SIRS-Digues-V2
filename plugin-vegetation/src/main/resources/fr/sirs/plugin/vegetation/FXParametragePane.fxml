@@ -21,9 +21,9 @@
                      <right>
                         <HBox styleClass="buttonbarfull">
                            <children>
-                              <Button mnemonicParsing="false" onAction="#planAdd" styleClass="buttonbar-button" text="+" />
-                              <Button mnemonicParsing="false" onAction="#planDelete" styleClass="buttonbar-button" text="-" />
-                              <Button fx:id="uiDuplicate" mnemonicParsing="false" styleClass="buttonbar-button" text="2" />
+                              <Button fx:id="uiAdd" mnemonicParsing="false" styleClass="buttonbar-button" />
+                              <Button fx:id="uiDuplicate" mnemonicParsing="false" styleClass="buttonbar-button" />
+                              <Button fx:id="uiDelete" mnemonicParsing="false" styleClass="buttonbar-button" />
                            </children>
                            <opaqueInsets>
                               <Insets />

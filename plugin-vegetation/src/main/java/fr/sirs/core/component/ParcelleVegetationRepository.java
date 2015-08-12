@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
 import fr.sirs.core.model.ParcelleVegetation;
+import fr.sirs.core.model.PlanVegetation;
 import java.util.List;
 import org.apache.sis.util.ArgumentChecks;
 
@@ -47,6 +48,11 @@ public class ParcelleVegetationRepository extends AbstractPositionableRepository
     public List<ParcelleVegetation> getByPlanId(final String planId) {
         ArgumentChecks.ensureNonNull("Plan", planId);
         return this.queryView(BY_PLAN_ID, planId);
+    }
+    
+    public List<ParcelleVegetation> getByPlan(final PlanVegetation plan) {
+        ArgumentChecks.ensureNonNull("Plan", plan);
+        return getByPlanId(plan.getId());
     }
 }
 

@@ -32,6 +32,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.cell.ComboBoxListCell;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 
 
@@ -45,7 +46,9 @@ public class FXParametragePane extends BorderPane {
 
     @FXML private SplitPane uisplit;
     @FXML private ListView<PlanVegetation> uiPlanList;
+    @FXML private Button uiAdd;
     @FXML private Button uiDuplicate;
+    @FXML private Button uiDelete;
 
     private final Session session = Injector.getSession();
     private final AbstractSIRSRepository<PlanVegetation> planRepo = session.getRepositoryForClass(PlanVegetation.class);
@@ -78,6 +81,8 @@ public class FXParametragePane extends BorderPane {
                         return converter.toString(item);
                     }
                 });
+            } else {
+                setText("");
             }
         }
     }
@@ -101,12 +106,16 @@ public class FXParametragePane extends BorderPane {
                 }
             }
         });
+        
+        uiAdd.setOnAction(this::planAdd);
+        uiAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
+        
         uiDuplicate.disableProperty().bind(uiPlanList.getSelectionModel().selectedItemProperty().isNull());
         uiDuplicate.setOnAction(this::planDuplicate);
-    }
-
-    private void setPlan(){
-
+        uiDuplicate.setGraphic(new ImageView(SIRS.ICON_COPY_WHITE));
+        
+        uiDelete.setOnAction(this::planDelete);
+        uiDelete.setGraphic(new ImageView(SIRS.ICON_TRASH_WHITE));
     }
     
     void refreshPlanList() {
@@ -125,12 +134,12 @@ public class FXParametragePane extends BorderPane {
         final PlanVegetation toDuplicate = uiPlanList.getSelectionModel().getSelectedItem();
         if(toDuplicate!=null){
         
-            final Alert alert = new Alert(Alert.AlertType.WARNING, "Voulez-vous vraiment dupliquer le plan "+converter.toString(toDuplicate)+" ?\n"
+            // Vérification des intentions de l'utilisateur.
+            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment dupliquer le plan "+converter.toString(toDuplicate)+" ?\n"
                     + "Cette opération dupliquera les parcelles de ce plan, leurs zones de végétation, ainsi que tous les paramétrages liés aux plans et aux parcelles.", ButtonType.YES, ButtonType.NO);
             alert.setResizable(true);
+            
             final Optional<ButtonType> result = alert.showAndWait();
-            
-            
             if(result.isPresent() && result.get()==ButtonType.YES){
                 
                 // Duplication du plan.
@@ -141,12 +150,11 @@ public class FXParametragePane extends BorderPane {
                 // Récupération des parcelles de l'ancien plan.
                 final List<ParcelleVegetation> oldParcelles = parcelleRepo.getByPlanId(toDuplicate.getId());
                 
-                final List<String> oldParcellesIds = new ArrayList<>();
+                final List<String> oldParcellesIds = new ArrayList<>(); 
                 for(final ParcelleVegetation oldParcelle : oldParcelles) oldParcellesIds.add(oldParcelle.getId());
                 
-                final Map<String, ParcelleVegetation> newParcelles = new HashMap<>();
-                
                 // Duplication des parcelles.
+                final Map<String, ParcelleVegetation> newParcelles = new HashMap<>();
                 for(final ParcelleVegetation oldParcelle : oldParcelles){
                     final ParcelleVegetation newParcelle = oldParcelle.copy();
                     newParcelle.setPlanId(newPlan.getId());
@@ -155,7 +163,6 @@ public class FXParametragePane extends BorderPane {
                 
                 // Enregistrement des parcelles (nécessaire pour les doter d'identifiants)
                 parcelleRepo.executeBulk(newParcelles.values());
-                
                     
                 // Récupération des zones de végétation des parcelles de l'ancien plan, pour chaque sorte de zone.
                 final Collection<AbstractSIRSRepository> zonesVegetationRepos = session.getRepositoriesForClass(ZoneVegetation.class);
@@ -172,7 +179,7 @@ public class FXParametragePane extends BorderPane {
                 
                 final Map<Class<? extends ZoneVegetation>, List<ZoneVegetation>> zonesByClass = new HashMap<>();
                 
-                // Duplication des zones
+                // Duplication des zones et affectation aux nouvelles parcelles (on a besoin de leur identifiant.
                 for(final ZoneVegetation oldZone : oldZonesVegetation){
                     final ZoneVegetation newZone = oldZone.copy();
                     
@@ -189,7 +196,6 @@ public class FXParametragePane extends BorderPane {
                     session.getRepositoryForClass(clazz).executeBulk(zonesByClass.get(clazz));
                 }
 
-
                 refreshPlanList();
                 uiPlanList.getSelectionModel().select(newPlan);
             }
@@ -205,8 +211,42 @@ public class FXParametragePane extends BorderPane {
     void planDelete(ActionEvent event) {
         final PlanVegetation toDelete = uiPlanList.getSelectionModel().getSelectedItem();
         if(toDelete!=null){
-            planRepo.remove(toDelete);
-            refreshPlanList();
+            
+            // Vérification des intentions de l'utilisateur
+            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment supprimer le plan "+converter.toString(toDelete)+" ?\n"
+                    + "Cette opération supprimera les parcelles de ce plan, leurs zones de végétation, ainsi que tous les paramétrages liés aux plans et aux parcelles.", ButtonType.YES, ButtonType.NO);
+            alert.setResizable(true);
+            final Optional<ButtonType> result = alert.showAndWait();
+            
+            if(result.isPresent() && result.get()==ButtonType.YES){
+                
+                // Récupération des parcelles à supprimer
+                final List<ParcelleVegetation> parcellesToDelete = parcelleRepo.getByPlan(toDelete);
+                
+                if(parcellesToDelete!=null && !parcellesToDelete.isEmpty()){
+                
+                    final List<String> parcellesIdsToDelete = new ArrayList();
+                    for(final ParcelleVegetation parcelle : parcellesToDelete) parcellesIdsToDelete.add(parcelle.getId());
+                    
+                    // Récupération des zones à supprimer et suppression
+                    final Collection<AbstractSIRSRepository> zoneVegetationRepos = session.getRepositoriesForClass(ZoneVegetation.class);
+                    
+                    for(final AbstractSIRSRepository zoneVegetationRepo : zoneVegetationRepos){
+                        if(zoneVegetationRepo instanceof AbstractZoneVegetationRepository){
+                            final AbstractZoneVegetationRepository repo = (AbstractZoneVegetationRepository) zoneVegetationRepo;
+                            final List<ZoneVegetation> zones = repo.getByParcelleIds(parcellesIdsToDelete);
+                            repo.executeBulkDelete(zones);
+                        }
+                    }
+
+                    // Suppression des parcelles
+                    parcelleRepo.executeBulkDelete(parcellesToDelete);
+                }
+                
+                // Suppression du plan
+                planRepo.remove(toDelete);
+                refreshPlanList();
+            }
         }
     }
 

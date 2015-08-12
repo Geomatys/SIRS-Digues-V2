@@ -68,30 +68,11 @@ public class FXPlanVegetationPane extends BorderPane {
         uiCoutTable = new PojoTable(ParamCoutTraitementVegetation.class, "Coûts des traitements");
         uiCoutTable.setParentElement(plan);
         uiCoutTable.setTableItems(() -> (ObservableList) FXCollections.observableList(plan.paramCout));
+        uiCoutTable.commentAndPhotoProperty().set(false);
         uiVBox.getChildren().add(uiCoutTable);
     }
 
     public void initialize() {
-
-    }
-
-    @FXML
-    void coutAdd(ActionEvent event) {
-
-    }
-
-    @FXML
-    void coutDelete(ActionEvent event) {
-
-    }
-
-    @FXML
-    void traitementAdd(ActionEvent event) {
-
-    }
-
-    @FXML
-    void traitementDelete(ActionEvent event) {
 
     }
 
