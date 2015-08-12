@@ -3,14 +3,12 @@
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="vegetation" nsURI="http://fr.sirs/vegetation" nsPrefix="veg">
   <eClassifiers xsi:type="ecore:EClass" name="ArbreVegetation" eSuperTypes="#//ZoneVegetation">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="contactEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="hauteurId" eType="#//RefHauteurVegetation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="diametreId" eType="#//RefDiametreVegetation"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PeuplementVegetation" eSuperTypes="#//ZoneVegetation">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typePeuplementId" eType="#//RefTypePeuplementVegetation"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="contactEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="densite" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="diametre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
@@ -20,11 +18,9 @@
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="densiteId" eType="#//RefDensiteVegetation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeInvasive" eType="#//RefTypeInvasiveVegetation"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="contactEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="HerbaceeVegetation" eSuperTypes="#//ZoneVegetation">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="contactEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="surface" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PlanVegetation">
@@ -121,5 +117,6 @@
         eType="#//RefSousTraitementVegetation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeTraitementPonctuelId"
         eType="#//RefTraitementVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="contactEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
 </ecore:EPackage>

@@ -326,7 +326,7 @@ public class ReferenceChecker extends Task<Void> {
         private void update(){
             final List<ReferenceType> updated = new ArrayList<>();
             if(fileReferences!=null){
-                final AbstractSIRSRepository repository = Injector.getSession().getRepositoryForClass(referenceClass);
+                
                 for(final ReferenceType fileReference : fileReferences){
                     ReferenceType localInstance = null;
                     for(final ReferenceType localReference : localReferences){
@@ -353,7 +353,7 @@ public class ReferenceChecker extends Task<Void> {
                         }
                     }
                 }
-                if(!updated.isEmpty()) repository.executeBulk(updated);
+                if(!updated.isEmpty()) Injector.getSession().getRepositoryForClass(referenceClass).executeBulk(updated);
             }
             
             // On élimine les instances de références mises à jour des map correspondantes du ReferenceChecker (on se base sur l'identifiant).
