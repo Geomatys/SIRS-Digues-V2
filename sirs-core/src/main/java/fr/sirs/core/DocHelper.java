@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.sirs.core.model.Element;
-import java.util.logging.Level;
 import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewQuery;
 
@@ -24,18 +23,17 @@ public class DocHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DocHelper.class);
     
-    private CouchDbConnector connector;
+    private final CouchDbConnector connector;
     
     public DocHelper(CouchDbConnector db) {
         connector = db;
     }
 
     private Optional<String> getAsString(String id, Optional<String> rev) {
-        try (final InputStream inputStream = rev.isPresent()?
+        try (final InputStream inputStream = rev.isPresent() ?
                 connector.getAsStream(id, rev.get()) :
-                connector.getAsStream(id);
-                ) {
-            StringWriter stringWriter = new StringWriter();
+                connector.getAsStream(id)) {
+            final StringWriter stringWriter = new StringWriter();
             IOUtils.copy(inputStream, stringWriter, "UTF-8");
             return Optional.of(stringWriter.toString());
         } catch (Exception e) {
@@ -55,12 +53,12 @@ public class DocHelper {
     }
     
     public Optional<Element> toElement(final JsonNode node) {
-        JsonNode classNode = node.get("@class");
+        final JsonNode classNode = node.get("@class");
         if (classNode != null) {
-            Optional<Class<?>> asClass = asClass(classNode.asText());
+            final Optional<Class<?>> asClass = asClass(classNode.asText());
             if (asClass.isPresent()) {
                 try {
-                    Object readValue = objectMapper.readValue(node.traverse(), asClass.get());
+                    final Object readValue = objectMapper.readValue(node.traverse(), asClass.get());
                     if (readValue instanceof Element) {
                         return Optional.of((Element) readValue);
                     }
@@ -69,14 +67,12 @@ public class DocHelper {
                 }
             }
         }
-        
         return Optional.empty();
     }
     
     private Optional<Element> toElement(String str, Class<?> clazz) {
         try {
-            return Optional.of((Element) objectMapper.reader(clazz).readValue(
-                    str));
+            return Optional.of((Element) objectMapper.reader(clazz).readValue(str));
         } catch (Exception e) {
             LOGGER.debug("Cannot cast input document as Element", e);
             return Optional.empty();

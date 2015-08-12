@@ -132,13 +132,13 @@ public class FXPlanLayerPane extends GridPane{
             for(ParcelleVegetation pv : parcelleRepo.getByPlanId(plan.getId())){
                 final List<Boolean> planifications = pv.getPlanifications();
                 int index = year - plan.getAnneDebut();
-                boolean planifié = false;
-                if(planifications!=null && planifications.size()>index) planifié = planifications.get(index);
+                boolean planified = false;
+                if(planifications!=null && planifications.size()>index) planified = planifications.get(index);
 
                 final Feature feature = writer.next();
                 feature.setPropertyValue("id", pv.getId());
                 feature.setPropertyValue("geometry", pv.getGeometry());
-                feature.setPropertyValue("etat", VegetationSession.getParcelleEtat(pv, planifié, year));
+                feature.setPropertyValue("etat", VegetationSession.getParcelleEtat(pv, planified, year));
                 feature.getUserData().put(BeanFeature.KEY_BEAN, pv);
                 writer.write();
             }

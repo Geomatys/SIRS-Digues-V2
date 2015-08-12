@@ -84,15 +84,17 @@ public class CreateParcelleTool extends AbstractEditionTool{
 
 
     //session and repo
-    private final Session session;
-    private final AbstractSIRSRepository<BorneDigue> borneRepo;
-    private final AbstractSIRSRepository<TronconDigue> tronconRepo;
+    private final Session session = Injector.getSession();
+    private final AbstractSIRSRepository<BorneDigue> borneRepo = session.getRepositoryForClass(BorneDigue.class);
+    private final AbstractSIRSRepository<TronconDigue> tronconRepo = session.getRepositoryForClass(TronconDigue.class);
+    private final AbstractSIRSRepository<SystemeReperage> srRepo = session.getRepositoryForClass(SystemeReperage.class);
+    private final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = session.getRepositoryForClass(ParcelleVegetation.class);
 
     private final MouseListen mouseInputListener = new MouseListen();
     private final BorderPane wizard = new BorderPane();
 
     private PlanVegetation plan;
-    private ParcelleVegetation parcelle = new ParcelleVegetation();
+    private ParcelleVegetation parcelle = parcelleRepo.create();
     private TronconDigue tronconDigue = null;
     private final Label lblTroncon = new Label();
     private final Label lblFirstPoint = new Label();
@@ -106,23 +108,18 @@ public class CreateParcelleTool extends AbstractEditionTool{
         super(SPI);
         wizard.getStylesheets().add(CSS_PATH);
 
-        session = Injector.getSession();
-        borneRepo = session.getRepositoryForClass(BorneDigue.class);
-        tronconRepo = session.getRepositoryForClass(TronconDigue.class);
-
         end.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 parcelle.setValid(true);
                 parcelle.setPlanId(plan.getId());
-
+                
                 //calcule de la geometrie
                 parcelle.setGeometry(LinearReferencingUtilities.buildGeometry(
-                        tronconDigue.getGeometry(), parcelle, Injector.getSession().getRepositoryForClass(BorneDigue.class)));
+                        tronconDigue.getGeometry(), parcelle, session.getRepositoryForClass(BorneDigue.class)));
 
                 //recuperation des PR
                 final String srId = tronconDigue.getSystemeRepDefautId();
-                final AbstractSIRSRepository<SystemeReperage> srRepo = session.getRepositoryForClass(SystemeReperage.class);
                 final SystemeReperage sr = srRepo.get(srId);
 
                 for(SystemeReperageBorne srb : sr.getSystemeReperageBornes()){
@@ -133,7 +130,6 @@ public class CreateParcelleTool extends AbstractEditionTool{
                     }
                 }
 
-                final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = session.getRepositoryForClass(ParcelleVegetation.class);
                 parcelleRepo.add(parcelle);
                 map.setHandler(new FXPanHandler(true));
                 reset();
@@ -165,7 +161,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
     }
 
     private void reset(){
-        parcelle = new ParcelleVegetation();
+        parcelle = parcelleRepo.create();
         end.disableProperty().unbind();
         end.disableProperty().bind( parcelle.linearIdProperty().isNull()
                                 .or(parcelle.borneDebutIdProperty().isNull()
@@ -254,7 +250,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
                         if(bean instanceof TronconDigue){
                             tronconDigue = (TronconDigue) bean;
                             //on recupere l'object complet
-                            tronconDigue = Injector.getSession().getRepositoryForClass(TronconDigue.class).get(tronconDigue.getDocumentId());
+                            tronconDigue = tronconRepo.get(tronconDigue.getDocumentId());
                             parcelle.setLinearId(tronconDigue.getId());
                             lblTroncon.setText(cvt.toString(tronconDigue));
                             lblFirstPoint.setText("Sélectionner une borne sur la carte");

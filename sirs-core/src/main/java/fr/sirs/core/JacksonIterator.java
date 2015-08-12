@@ -12,8 +12,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class JacksonIterator<T> implements Iterator<T>, AutoCloseable {
 
     private final StreamingViewResult result;
-    private Iterator<Row> iterator;
     private final Class<? extends T> clazz;
+    private Iterator<Row> iterator;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -31,9 +31,9 @@ public class JacksonIterator<T> implements Iterator<T>, AutoCloseable {
 
     @Override
     public T next() {
-        if (iterator == null)
-            return null;
-        Row next = iterator.next();
+        if (iterator == null) return null;
+        
+        final Row next = iterator.next();
         try {
             return objectMapper.reader(clazz).readValue(next.getValueAsNode());
         } catch (IOException e) {

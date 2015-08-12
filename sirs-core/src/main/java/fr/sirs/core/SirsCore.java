@@ -223,7 +223,7 @@ public class SirsCore {
     };
 
     /**
-     * Récupération des attributes simple pour affichage dans les tables.
+     * Récupération des attributs simple pour affichage dans les tables.
      *
      * @param clazz
      * @return liste des propriétés simples
