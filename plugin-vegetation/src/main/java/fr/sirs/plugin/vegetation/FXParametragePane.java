@@ -41,10 +41,9 @@ import javafx.scene.layout.BorderPane;
  * @author Johann Sorel (Geomatys)
  * @author Samuel Andrés (Geomatys)
  */
-public class FXParametragePane extends BorderPane {
+public class FXParametragePane extends SplitPane {
     
 
-    @FXML private SplitPane uisplit;
     @FXML private ListView<PlanVegetation> uiPlanList;
     @FXML private Button uiAdd;
     @FXML private Button uiDuplicate;
@@ -90,7 +89,7 @@ public class FXParametragePane extends BorderPane {
 
     private void initialize() {
         final BorderPane pane = new BorderPane();
-        uisplit.getItems().add(pane);
+        this.getItems().add(pane);
 
         refreshPlanList();
         uiPlanList.setCellFactory(ComboBoxListCell.forListView(new SirsStringConverter()));
