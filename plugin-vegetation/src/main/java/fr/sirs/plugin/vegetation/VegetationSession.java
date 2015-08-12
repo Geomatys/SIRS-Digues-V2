@@ -72,7 +72,7 @@ public final class VegetationSession {
     public AbstractSIRSRepository<PlanVegetation> getPlanRepository() {
         return planRepo;
     }
-
+    
     public ArbreVegetationRepository getArbreRepo() {
         return arbreRepo;
     }

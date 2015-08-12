@@ -204,9 +204,8 @@ public class FXPlanTable extends BorderPane{
 
     }
 
-    private void save(){
-        final AbstractSIRSRepository<PlanVegetation> repo = session.getRepositoryForClass(PlanVegetation.class);
-        repo.update(plan);
+    private void save(ParcelleVegetation parcelle){
+        VegetationSession.INSTANCE.getParcelleRepo().update(parcelle);
     }
 
     public BooleanProperty editableProperty(){
@@ -263,7 +262,7 @@ public class FXPlanTable extends BorderPane{
             }
             final Boolean old = planifications.set(index,v);
             if(!Objects.equal(old,v)){
-                save();
+                save(parcelle);
                 updateColor();
             }
         }
@@ -306,7 +305,7 @@ public class FXPlanTable extends BorderPane{
             setPadding(new Insets(5, 5, 5, 5));
 
             selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                save();
+                save(parcelle);
             });
         }
     }

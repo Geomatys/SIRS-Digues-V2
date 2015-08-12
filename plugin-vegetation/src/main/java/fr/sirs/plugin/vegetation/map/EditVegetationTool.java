@@ -1,54 +1,48 @@
 
 package fr.sirs.plugin.vegetation.map;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
-import fr.sirs.SIRS;
 import static fr.sirs.SIRS.CSS_PATH;
 import fr.sirs.Session;
-import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.ArbreVegetation;
-import fr.sirs.core.model.ParcelleVegetation;
-import fr.sirs.plugin.vegetation.PluginVegetation;
+import fr.sirs.core.model.PositionableVegetation;
 import fr.sirs.util.ResourceInternationalString;
-import fr.sirs.util.SirsStringConverter;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
-import java.util.logging.Level;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
-import static javafx.scene.layout.Region.USE_PREF_SIZE;
-import javafx.scene.layout.VBox;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display.VisitFilter;
-import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.canvas.AbstractGraphicVisitor;
 import org.geotoolkit.display2d.canvas.RenderingContext2D;
 import org.geotoolkit.display2d.primitive.ProjectedCoverage;
 import org.geotoolkit.display2d.primitive.ProjectedFeature;
 import org.geotoolkit.display2d.primitive.SearchAreaJ2D;
+import org.geotoolkit.feature.Feature;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
-import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.AbstractEditionTool;
 import org.geotoolkit.gui.javafx.render2d.edition.AbstractEditionToolSpi;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
-import org.geotoolkit.map.MapContext;
-import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.referencing.CRS;
-import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
+import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
+import org.geotoolkit.map.FeatureMapLayer;
 
 /**
- *
+ * Outil d'édition de vegetation existante.
+ * 
  * @author Johann Sorel (Geomatys)
  */
 public class EditVegetationTool extends AbstractEditionTool{
@@ -57,11 +51,11 @@ public class EditVegetationTool extends AbstractEditionTool{
     public static final class Spi extends AbstractEditionToolSpi{
 
         public Spi() {
-            super("CreatePeuplement",
+            super("EditVegetation",
                 new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle", 
-                        "fr.sirs.plugin.vegetation.map.CreateArbreTool.title",EditVegetationTool.class.getClassLoader()),
+                        "fr.sirs.plugin.vegetation.map.EditVegetationTool.title",EditVegetationTool.class.getClassLoader()),
                 new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle", 
-                        "fr.sirs.plugin.vegetation.map.CreateArbreTool.abstract",EditVegetationTool.class.getClassLoader()),
+                        "fr.sirs.plugin.vegetation.map.EditVegetationTool.abstract",EditVegetationTool.class.getClassLoader()),
                 SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PENCIL,24,new Color(15,112,183)),null)
             );
         }
@@ -80,37 +74,46 @@ public class EditVegetationTool extends AbstractEditionTool{
 
     //session and repo
     private final Session session;
-    private final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo;
-
     private final MouseListen mouseInputListener = new MouseListen();
     private final BorderPane wizard = new BorderPane();
+    private final FXPositionableForm form = new FXPositionableForm();
 
-    private ArbreVegetation arbre = new ArbreVegetation();
-    private ParcelleVegetation parcelle = null;
-    private final Label lblParcelle = new Label();
-    private final Label lblPoint = new Label();
 
-    private MapLayer parcelleLayer = null;
+    //geometry en cours
+    private EditionHelper helper;
+    private final FXGeometryLayer decoration = new FXGeometryLayer();
+    private final EditionHelper.EditionGeometry selection = new EditionHelper.EditionGeometry();
+    private boolean modified = false;
+    private MouseButton pressed = null;
 
     public EditVegetationTool(FXMap map) {
         super(SPI);
         wizard.getStylesheets().add(CSS_PATH);
-
         session = Injector.getSession();
-        parcelleRepo = session.getRepositoryForClass(ParcelleVegetation.class);
+    }
 
-        final VBox vbox = new VBox(10,
-                new Label("Parcelle :"),
-                lblParcelle,
-                new Label("Position :"),
-                lblPoint);
-        vbox.setMaxSize(USE_PREF_SIZE,USE_PREF_SIZE);
-        wizard.setCenter(vbox);
+    public void setCurrentFeature(final Feature feature, FeatureMapLayer layer){
+        final Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
+        form.positionableProperty().set((PositionableVegetation)bean);
+        helper = new EditionHelper(map, layer);
+        if(feature != null){
+            this.selection.geometry = helper.toObjectiveCRS(feature);
+        }else{
+            this.selection.geometry = null;
+        }
+        refreshDecoration();
     }
 
     private void reset(){
-        arbre = new ArbreVegetation();
-        parcelle = null;
+        selection.reset();
+        modified = false;
+        decoration.getGeometries().clear();
+        decoration.setNodeSelection(null);
+    }
+
+    private void refreshDecoration(){
+        decoration.getGeometries().setAll(this.selection.geometry);
+        decoration.setNodeSelection(this.selection);
     }
 
     @Override
@@ -128,91 +131,124 @@ public class EditVegetationTool extends AbstractEditionTool{
         reset();
         super.install(component);
         component.addEventHandler(MouseEvent.ANY, mouseInputListener);
-
-        //on rend les couches troncon et borne selectionnables
-        final MapContext context = component.getContainer().getContext();
-        for(MapLayer layer : context.layers()){
-            layer.setSelectable(false);
-            if(layer.getName().equalsIgnoreCase(PluginVegetation.PARCELLE_LAYER_NAME)){
-                parcelleLayer = layer;
-            }
-        }
+        component.addEventHandler(ScrollEvent.ANY, mouseInputListener);
+        component.addEventHandler(KeyEvent.ANY, mouseInputListener);
         component.setCursor(Cursor.CROSSHAIR);
+        component.addDecoration(decoration);
     }
 
     @Override
     public boolean uninstall(FXMap component) {
         super.uninstall(component);
         component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
+        component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
+        component.removeEventHandler(KeyEvent.ANY, mouseInputListener);
         component.setCursor(Cursor.DEFAULT);
+        component.removeDecoration(decoration);
         reset();
         return true;
     }
 
     private class MouseListen extends FXPanMouseListen {
 
-        private final SirsStringConverter cvt = new SirsStringConverter();
-
         public MouseListen() {
             super(EditVegetationTool.this);
         }
 
         @Override
-        public void mouseClicked(MouseEvent event) {
+        public void mouseClicked(MouseEvent e) {
 
-            final Rectangle2D clickArea = new Rectangle2D.Double(event.getX()-2, event.getY()-2, 4, 4);
+            final MouseButton button = e.getButton();
 
-            if(parcelle==null){
-                parcelleLayer.setSelectable(true);
-                //recherche une parcelle sous la souris
-                map.getCanvas().getGraphicsIn(clickArea, new AbstractGraphicVisitor() {
-                    @Override
-                    public void visit(ProjectedFeature graphic, RenderingContext2D context, SearchAreaJ2D area) {
-                        final Object bean = graphic.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
-                        if(bean instanceof ParcelleVegetation){
-                            //on recupere l'object complet
-                            parcelle = (ParcelleVegetation) bean;
-                            //on recupere l'object complet
-                            parcelle = parcelleRepo.get(parcelle.getDocumentId());
-                            lblParcelle.setText(cvt.toString(parcelle));
+            if(button == MouseButton.PRIMARY){
+                if(selection.geometry == null){
+                    final Rectangle2D clickArea = new Rectangle2D.Double(e.getX()-2, e.getY()-2, 4, 4);
+
+                    //recherche d'un object a editer
+                    map.getCanvas().getGraphicsIn(clickArea, new AbstractGraphicVisitor() {
+                        @Override
+                        public void visit(ProjectedFeature graphic, RenderingContext2D context, SearchAreaJ2D area) {
+                            final Object bean = graphic.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
+                            if(bean instanceof PositionableVegetation){
+                                setCurrentFeature(graphic.getCandidate(),graphic.getLayer());
+                            }
                         }
-                    }
-                    @Override
-                    public boolean isStopRequested() {
-                        return parcelle!=null;
-                    }
-                    @Override
-                    public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
-                }, VisitFilter.INTERSECTS);
-            }else if(parcelle!=null){
-                parcelleLayer.setSelectable(false);
+                        @Override
+                        public boolean isStopRequested() {
+                            return form.positionableProperty().get()!=null;
+                        }
+                        @Override
+                        public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
+                    }, VisitFilter.INTERSECTS);
 
-                //on crée l'arbre
-                final EditionHelper helper = new EditionHelper(map, null);
-                final Coordinate coord = helper.toCoord(event.getX(), event.getY());
-                Geometry pt = GO2Utilities.JTS_FACTORY.createPoint(coord);
-                JTS.setCRS(pt, map.getCanvas().getObjectiveCRS2D());
-                try {
-                    //on s'assure d'etre dans le crs de la base
-                    pt = JTS.transform(pt, CRS.findMathTransform(JTS.findCoordinateReferenceSystem(pt),session.getProjection()));
-                } catch (FactoryException | TransformException ex) {
-                    SIRS.LOGGER.log(Level.WARNING,ex.getMessage(),ex);
+                }else if(e.getClickCount() >= 2){
+                    //double click = add a node
+                    final Geometry result;
+                    if(selection.geometry instanceof LineString){
+                        result = helper.insertNode((LineString)selection.geometry, e.getX(), e.getY());
+                    }else if(selection.geometry instanceof Polygon){
+                        result = helper.insertNode((Polygon)selection.geometry, e.getX(), e.getY());
+                    }else if(selection.geometry instanceof GeometryCollection){
+                        result = helper.insertNode((GeometryCollection)selection.geometry, e.getX(), e.getY());
+                    }else{
+                        result = selection.geometry;
+                    }
+                    modified = modified || result != selection.geometry;
+                    selection.geometry = result;
+                    decoration.getGeometries().setAll(selection.geometry);
+                }else if(e.getClickCount() == 1){
+                    //single click with a geometry = select a node
+                    helper.grabGeometryNode(e.getX(), e.getY(), selection);
+                    decoration.setNodeSelection(selection);
                 }
-                arbre.setExplicitGeometry(pt);
-                arbre.setGeometry(pt);
-                arbre.setValid(true);
-                arbre.setForeignParentId(parcelle.getDocumentId());
-
-
-                final AbstractSIRSRepository<ArbreVegetation> arbreRepo = session.getRepositoryForClass(ArbreVegetation.class);
-                arbreRepo.add(arbre);
-                final ParcelleVegetation p = parcelle;
+            }else if(button == MouseButton.SECONDARY){
+                //TODO on sauvegarde
                 reset();
-                parcelle = p;
-                
             }
 
         }
+
+        @Override
+        public void mousePressed(final MouseEvent e) {
+            pressed = e.getButton();
+
+            if(pressed == MouseButton.PRIMARY){
+                if(selection.geometry == null){
+                    //setCurrentFeature(helper.grabFeature(e.getX(), e.getY(), false));
+                }else if(e.getClickCount() == 1){
+                    //single click with a geometry = select a node
+                    helper.grabGeometryNode(e.getX(), e.getY(), selection);
+                    decoration.setNodeSelection(selection);
+                }
+            }
+
+            super.mousePressed(e);
+        }
+
+        @Override
+        public void mouseDragged(final MouseEvent e) {
+
+            if(pressed == MouseButton.PRIMARY && selection != null){
+                //dragging node
+                selection.moveSelectedNode(helper.toCoord(e.getX(), e.getY()));
+                refreshDecoration();
+                modified = true;
+                return;
+            }
+
+            super.mouseDragged(e);
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            if(KeyCode.DELETE == e.getCode() && selection != null){
+                //delete node
+                selection.deleteSelectedNode();
+                refreshDecoration();
+                modified = true;
+            }
+        }
+
 
     }
 

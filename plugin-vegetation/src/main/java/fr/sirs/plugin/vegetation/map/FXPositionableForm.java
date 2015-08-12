@@ -1,6 +1,7 @@
 
 package fr.sirs.plugin.vegetation.map;
 
+import fr.sirs.Injector;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PositionableVegetation;
 import fr.sirs.theme.ui.FXPositionablePane;
@@ -31,14 +32,16 @@ public class FXPositionableForm extends BorderPane {
             @Override
             public void handle(ActionEvent event) {
                 final Positionable pos = positionableProperty.get();
-                
+                if(pos!=null){
+                    Injector.getSession().showEditionTab(pos);
+                }
             }
         });
         final Button delete = new Button("Supprimer");
         delete.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                throw new UnsupportedOperationException("Not supported yet.");
+                
             }
         });
 
@@ -52,7 +55,7 @@ public class FXPositionableForm extends BorderPane {
 
     }
 
-    public ObjectProperty<Positionable> getPositionableProperty(){
+    public ObjectProperty<Positionable> positionableProperty(){
         return positionableProperty;
     }
 
