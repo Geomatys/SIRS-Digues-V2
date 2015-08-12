@@ -16,12 +16,13 @@ import fr.sirs.core.model.ParcelleTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.PlanVegetation;
-import fr.sirs.core.model.ZoneVegetation;
 import java.time.LocalDate;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
+import org.geotoolkit.map.MapBuilder;
+import org.geotoolkit.map.MapItem;
 
 /**
  * Session de vegetation.
@@ -32,6 +33,12 @@ import javafx.scene.paint.Color;
 public final class VegetationSession {
 
     public static final VegetationSession INSTANCE = new VegetationSession();
+    public static final String ETAT_PLANIFIE_TRAITE = "Planifié / Traité";
+    public static final String ETAT_PLANIFIE_NONTRAITE = "Planifié / Non traité";
+    public static final String ETAT_NONPLANIFIE_TRAITE = "Non planifié / Traité";
+    public static final String ETAT_NONPLANIFIE_NONTRAITE = "Non planifié / Non traité";
+    public static final String ETAT_PLANIFIE_FUTUR = "Planifié (futur)";
+    public static final String ETAT_NONPLANIFIE_FUTUR = "Non planifié (futur)";
 
     private final ObjectProperty<PlanVegetation> planProperty = new SimpleObjectProperty<>();
 
@@ -42,6 +49,7 @@ public final class VegetationSession {
     private final ParcelleVegetationRepository parcelleRepo;
     private final PeuplementVegetationRepository peuplementRepo;
 
+    private final MapItem vegetationGroup;
 
     private VegetationSession(){
         final Session session = Injector.getSession();
@@ -52,6 +60,13 @@ public final class VegetationSession {
         parcelleRepo = (ParcelleVegetationRepository)session.getRepositoryForClass(ParcelleVegetation.class);
         peuplementRepo = (PeuplementVegetationRepository)session.getRepositoryForClass(PeuplementVegetation.class);
 
+        vegetationGroup = MapBuilder.createItem();
+        vegetationGroup.setName("Végétation");
+        vegetationGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+    }
+
+    public MapItem getVegetationGroup() {
+        return vegetationGroup;
     }
 
     public AbstractSIRSRepository<PlanVegetation> getPlanRepository() {
@@ -93,18 +108,15 @@ public final class VegetationSession {
     }
 
     /**
-     * Couleur en fonction de l'etat des traitements.
-     * Void : Non planifié, Non traité
-     * Orange : Non planifié, traité
-     * Rouge : Planifié, Non traité
-     * Vert : Planifié, traité
+     * String en fonction de l'etat des traitements.
+     * Voir constantes : ETAT_X
      * 
      * @param parcelle
      * @param planifie
      * @param year
-     * @return
+     * @return 
      */
-    public static Color getColor(ParcelleVegetation parcelle, boolean planifie, int year){
+    public static String getParcelleEtat(ParcelleVegetation parcelle, boolean planifie, int year){
         final int thisYear = LocalDate.now().getYear();
 
         boolean done = false;
@@ -116,29 +128,45 @@ public final class VegetationSession {
 
         if(year>thisYear){
             //pas de couleur pour les années futurs
-            return null;
+            return planifie ? ETAT_PLANIFIE_FUTUR : ETAT_NONPLANIFIE_FUTUR;
         }
 
         if(done){
             if(planifie){
-                return Color.GREEN;
+                return ETAT_PLANIFIE_TRAITE;
             }else{
-                return Color.ORANGE;
+                return ETAT_NONPLANIFIE_TRAITE;
             }
         }else{
             if(planifie){
-                return Color.RED;
+                return ETAT_PLANIFIE_NONTRAITE;
             }else{
-                return null;
+                return ETAT_NONPLANIFIE_NONTRAITE;
             }
         }
     }
 
-//    public List<ZoneVegetation> getAllZonesVegetation(){
-//        
-//    }
-//
-//    public List<ZoneVegetation> getAllZonesVegetation(){
-//        
-//    }
+    /**
+     * Couleur en fonction de l'etat des traitements.
+     * Void : Non planifié, Non traité
+     * Orange : Non planifié, traité
+     * Rouge : Planifié, Non traité
+     * Vert : Planifié, traité
+     * 
+     * @param parcelle
+     * @param planifie
+     * @param year
+     * @return
+     */
+    public static Color getParcelleEtatColor(ParcelleVegetation parcelle, boolean planifie, int year){
+        final String state = getParcelleEtat(parcelle, planifie, year);
+        switch(state){
+            case ETAT_PLANIFIE_TRAITE : return Color.GREEN;
+            case ETAT_PLANIFIE_NONTRAITE : return Color.RED;
+            case ETAT_NONPLANIFIE_TRAITE : return Color.ORANGE;
+            case ETAT_NONPLANIFIE_NONTRAITE : return null;
+            default : return null;
+        }
+    }
+
 }

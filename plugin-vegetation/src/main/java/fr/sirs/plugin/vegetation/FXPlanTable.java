@@ -279,7 +279,7 @@ public class FXPlanTable extends BorderPane{
             if(!exploitation) return;
             
             final boolean planifie = getVal();
-            final Color color = VegetationSession.INSTANCE.getColor(parcelle, planifie, year);
+            final Color color = VegetationSession.getParcelleEtatColor(parcelle, planifie, year);
             if(color==null){
                 setBackground(Background.EMPTY);
             }else{

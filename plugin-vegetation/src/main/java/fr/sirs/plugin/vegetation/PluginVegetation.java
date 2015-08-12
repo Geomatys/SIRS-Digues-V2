@@ -79,7 +79,6 @@ public class PluginVegetation extends Plugin {
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
 
     private final VegetationToolBar toolbar = new VegetationToolBar();
-    private MapItem vegetationGroup;
 
     public PluginVegetation() {
         name = NAME;
@@ -131,12 +130,8 @@ public class PluginVegetation extends Plugin {
     @Override
     public List<MapItem> getMapItems() {
         final List<MapItem> items = new ArrayList<>();
-        vegetationGroup = MapBuilder.createItem();
-        vegetationGroup.setName("Végétation");
-        vegetationGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+        final MapItem vegetationGroup = VegetationSession.INSTANCE.getVegetationGroup();
         items.add(vegetationGroup);
-
-
         return items;
     }
 
@@ -144,6 +139,7 @@ public class PluginVegetation extends Plugin {
         final Session session = Injector.getSession();
 
         //on efface les anciens layers
+        final MapItem vegetationGroup = VegetationSession.INSTANCE.getVegetationGroup();
         vegetationGroup.items().clear();
 
         if(plan==null) return;

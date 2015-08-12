@@ -2,6 +2,7 @@
 package fr.sirs.plugin.vegetation;
 
 import fr.sirs.Injector;
+import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.plugin.vegetation.map.CreateArbreTool;
 import fr.sirs.plugin.vegetation.map.CreateHerbaceTool;
 import fr.sirs.plugin.vegetation.map.CreateInvasiveTool;
@@ -13,7 +14,9 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
@@ -37,6 +40,7 @@ import org.geotoolkit.map.MapBuilder;
 public class VegetationToolBar extends ToolBar {
 
     private Stage dialog = null;
+    private Stage dialogRecherche = null;
 
     public VegetationToolBar() {
         getItems().add(new Label("Végétation"));
@@ -62,11 +66,46 @@ public class VegetationToolBar extends ToolBar {
 
     }
 
-    private void showSearchDialog(ActionEvent evt){
+    private boolean checkPlan(){
+        //on vérifie qu'il y a une plan de gestion actif
+        PlanVegetation plan = VegetationSession.INSTANCE.planProperty().get();
+        if(plan==null){
+            final Dialog dialog = new Alert(Alert.AlertType.INFORMATION);
+            dialog.setContentText("Veuillez activer un plan de gestion avant de commencer l'édition.");
+            dialog.showAndWait();
+            return false;
+        }
+        return true;
+    }
+
+    private void showSearchDialog(ActionEvent act){
+        if(!checkPlan()) return;
         
+        dialogRecherche = new Stage();
+        dialogRecherche.setAlwaysOnTop(true);
+        dialogRecherche.initModality(Modality.NONE);
+        dialogRecherche.initStyle(StageStyle.UTILITY);
+        dialogRecherche.setTitle(GeotkFX.getString(FXEditAction.class,"Végétation"));
+
+        final FXPlanLayerPane pan = new FXPlanLayerPane();
+
+        final BorderPane pane = new BorderPane(pan);
+        pane.setPadding(new Insets(10, 10, 10, 10));
+
+        final Scene scene = new Scene(pane);
+
+        dialogRecherche.setOnCloseRequest((WindowEvent evt) -> dialogRecherche = null);
+        dialogRecherche.setScene(scene);
+        dialogRecherche.setResizable(true);
+        dialogRecherche.setWidth(350);
+        dialogRecherche.setHeight(450);
+        dialogRecherche.show();
+
     }
 
     private void showEditor(){
+        if(!checkPlan()) return;
+
         final FXToolBox toolbox = new FXToolBox(Injector.getSession().getFrame().getMapTab().getMap().getUiMap(), MapBuilder.createEmptyMapLayer());
         toolbox.commitRollbackVisibleProperty().setValue(false);
         toolbox.getToolPerRow().set(6);

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root hgap="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" type="GridPane" vgap="10.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+  <columnConstraints>
+    <ColumnConstraints hgrow="NEVER" minWidth="-Infinity" />
+    <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints vgrow="NEVER" />
+    <RowConstraints vgrow="NEVER" />
+    <RowConstraints minHeight="-Infinity" vgrow="NEVER" />
+      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" valignment="CENTER" vgrow="NEVER" />
+  </rowConstraints>
+   <children>
+      <Label text="Année" />
+      <ChoiceBox fx:id="uiAnnee" maxHeight="1.7976931348623157E308" GridPane.columnIndex="1" />
+      <Button fx:id="uiAddButton" mnemonicParsing="false" onAction="#addLayer" text="Ajouter" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+      <Label text="Parcelles" GridPane.rowIndex="1" />
+      <Label text="Traitements" GridPane.rowIndex="2" />
+      <CheckBox fx:id="uiParcelleType" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      <CheckBox fx:id="uiTraitementType" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</fx:root>
