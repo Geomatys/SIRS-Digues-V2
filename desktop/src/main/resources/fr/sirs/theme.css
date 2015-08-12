@@ -1,4 +1,11 @@
 
+
+{
+    -sirs-color-normal : rgb(74,123,165);
+    -sirs-color-bright : rgb(109,149,182);
+    -sirs-text-dark : rgb(34,93,135);
+}
+
 // FOR ALL WIDGETS
 
 .table-row-cell {
@@ -14,12 +21,12 @@
 }
 
 .object-mode{
-    -fx-background-color: rgb(74,123,165);
+    -fx-background-color: -sirs-color-normal;
     -fx-background-radius: 0 0 0 5;
 }
 
 .button-list-objects{
-    -fx-background-color: rgb(74,123,165);
+    -fx-background-color: -sirs-color-normal;
     -fx-background-radius: 5 0 0 0;
 }
 
@@ -28,7 +35,7 @@
 }
 
 .info-block{
-    -fx-background-color: rgb(109,149,182);
+    -fx-background-color: -sirs-color-bright;
 }
 
 .btn-without-style{
@@ -44,7 +51,7 @@
 }
 
 .btn-single {
-    -fx-background-color:rgb(74,123,165);
+    -fx-background-color: -sirs-color-normal;
     -fx-background-radius:  10 10 10 10;
     -fx-text-fill: white;
     -fx-font-weight: bold;
@@ -55,7 +62,7 @@
 }
 
 .blue-light{
-    -fx-background-color: rgb(109,149,182);
+    -fx-background-color: -sirs-color-bright;
     -fx-background-radius: 5 5 5 5;
 }
 
@@ -65,11 +72,11 @@
 }
 
 .label-header:selected{
-    -fx-background-color: rgb(74,123,165);
+    -fx-background-color: -sirs-color-normal;
 }
 
 .blue-dark{
-    -fx-background-color:  rgb(74,123,165);
+    -fx-background-color:  -sirs-color-normal;
     -fx-background-radius:  30 0 0 30;
 }
 
@@ -80,13 +87,13 @@
 
 .state-button-left {
     -fx-focus-color: transparent;
-    -fx-background-color: linear-gradient(to bottom, rgb(109,149,182), rgb(109,149,182));
+    -fx-background-color: linear-gradient(to bottom, -sirs-color-bright, -sirs-color-bright);
     -fx-background-radius: 10 0 0 10;
     -fx-border-width: 0px;
     -fx-border-style: solid;
     -fx-border-color: rgba(0,0,0,0); 
     -fx-border-radius: 10 0 0 10;
-    -fx-text-fill: rgb(34,93,135);
+    -fx-text-fill: -sirs-text-dark;
 }
 
 .state-button-left:selected {
@@ -96,13 +103,13 @@
 
 .state-button-center {
     -fx-focus-color: transparent;
-    -fx-background-color: linear-gradient(to bottom, rgb(109,149,182), rgb(109,149,182));
+    -fx-background-color: linear-gradient(to bottom, -sirs-color-bright, -sirs-color-bright);
     -fx-background-radius: 0 0 0 0;
     -fx-border-width: 0px;
     -fx-border-style: solid;
     -fx-border-color: rgba(0,0,0,0); 
     -fx-border-radius: 0 0 0 0;
-    -fx-text-fill: rgb(34,93,135);
+    -fx-text-fill: -sirs-text-dark;
 }
 
 .state-button-center:selected {
@@ -112,13 +119,13 @@
 
 .state-button-right {
     -fx-focus-color: transparent;
-    -fx-background-color: linear-gradient(to bottom, rgb(109,149,182), rgb(109,149,182));
+    -fx-background-color: linear-gradient(to bottom, -sirs-color-bright, -sirs-color-bright);
     -fx-background-radius: 0 10 10 0;
     -fx-border-width: 0px;
     -fx-border-style: solid;
     -fx-border-color: rgba(0,0,0,0); 
     -fx-border-radius: 0 10 10 0;
-    -fx-text-fill: rgb(34,93,135);
+    -fx-text-fill: -sirs-text-dark;
 }
 
 .state-button-right:selected {
@@ -127,22 +134,22 @@
 }
 
 .buttonbar{
-    -fx-background-color: rgb(109,149,182);
+    -fx-background-color: -sirs-color-bright;
     -fx-background-radius: 5 0 0 0;
 }
 
 .buttonbarleft{
-    -fx-background-color: rgb(109,149,182);
+    -fx-background-color: -sirs-color-bright;
     -fx-background-radius: 0 5 0 0;
 }
 
 .buttonbarleftvert{
-    -fx-background-color: rgb(109,149,182);
+    -fx-background-color: -sirs-color-bright;
     -fx-background-radius: 0 5 5 0;
 }
 
 .buttonbarfull{
-    -fx-background-color: rgb(109,149,182);
+    -fx-background-color: -sirs-color-bright;
     -fx-background-radius: 5 5 0 0;
 }
 
@@ -155,15 +162,15 @@
 }
 
 .buttonbar-button:selected{
-    -fx-background-color: rgb(74,123,165);
+    -fx-background-color: -sirs-color-normal;
 }
 
 .buttonbar-button:armed{
-    -fx-background-color: rgb(74,123,165);
+    -fx-background-color: -sirs-color-normal;
 }
 
 .geobutton{
-    -fx-background-color:rgb(74,123,165);
+    -fx-background-color: -sirs-color-normal;
     -fx-text-fill: white;
     -fx-background-radius:  0 30 30 0;
 }
@@ -173,7 +180,7 @@
 }
 
 .geobutton:armed{
-    -fx-background-color:rgb(109,149,182);
+    -fx-background-color:-sirs-color-bright;
 }
 
 .pojotable-header {
@@ -182,7 +189,7 @@
 }
 
 .pos-top{
-    -fx-background-color: rgb(74,123,165);
+    -fx-background-color: -sirs-color-normal;
     -fx-background-radius: 10 10 0 0;
 }
 
