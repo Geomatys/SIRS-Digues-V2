@@ -16,16 +16,19 @@
     <RowConstraints vgrow="NEVER" />
     <RowConstraints vgrow="NEVER" />
     <RowConstraints minHeight="-Infinity" vgrow="NEVER" />
+      <RowConstraints vgrow="NEVER" />
       <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" valignment="CENTER" vgrow="NEVER" />
   </rowConstraints>
    <children>
       <Label text="Année" />
       <ChoiceBox fx:id="uiAnnee" maxHeight="1.7976931348623157E308" GridPane.columnIndex="1" />
-      <Button fx:id="uiAddButton" mnemonicParsing="false" onAction="#addLayer" text="Ajouter" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+      <Button fx:id="uiAddButton" mnemonicParsing="false" onAction="#addLayer" text="Ajouter" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
       <Label text="Parcelles" GridPane.rowIndex="1" />
-      <Label text="Traitements" GridPane.rowIndex="2" />
-      <CheckBox fx:id="uiParcelleType" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-      <CheckBox fx:id="uiTraitementType" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      <Label text="Traitements réels" GridPane.rowIndex="2" />
+      <CheckBox fx:id="uiParcelleType" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      <CheckBox fx:id="uiTrmtReel" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      <Label text="Traitemens planifiés" GridPane.rowIndex="3" />
+      <CheckBox fx:id="uiTrmtPlanif" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
    </children>
    <padding>
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

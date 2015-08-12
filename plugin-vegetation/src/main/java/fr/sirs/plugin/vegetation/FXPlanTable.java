@@ -5,7 +5,6 @@ import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.ParcelleVegetationRepository;
-import fr.sirs.core.model.ParcelleTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.TronconDigue;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -41,7 +39,8 @@ import org.elasticsearch.common.base.Objects;
  */
 public class FXPlanTable extends BorderPane{
 
-    private static final String AUTO_STYLE = "-fx-border-color: lightgray;-fx-border-insets: 0;-fx-border-width: 0 0 0 3;\n";
+    private static final String AUTO_STYLE = "-fx-border-color: lightgray;-fx-border-insets: 0;-fx-border-width: 0 0 0 3;-fx-label-padding: 0;";
+    private static final String CHECKBOX_NOPADDING = "-fx-label-padding: 0;";
 
     private final PlanVegetation plan;
     private final boolean exploitation;
@@ -236,6 +235,7 @@ public class FXPlanTable extends BorderPane{
             setPadding(new Insets(10));
             setAlignment(Pos.CENTER);
             setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            setStyle(CHECKBOX_NOPADDING);
 
             if(parcelle.getPlanifications()==null){
                 parcelle.setPlanifications(new ArrayList<>());

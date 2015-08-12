@@ -108,6 +108,49 @@ public final class VegetationSession {
     }
 
     /**
+     * Retourne vrai si la parcelle est traité pour l'année donnée.
+     * 
+     * @param parcelle
+     * @param year
+     * @return 
+     */
+    public static boolean isParcelleTraite(ParcelleVegetation parcelle, int year){
+        boolean done = false;
+        for(ParcelleTraitementVegetation traitement : parcelle.getTraitements()){
+            if(traitement.getDate().getYear() == year){
+                done = true;
+            }
+        }
+        return done;
+    }
+
+    /**
+     * Retourne l'etat de planification de la parcelle pour l'année donnée.
+     * 0 : non planifié
+     * 1 : planifié, premiere fois
+     * 2 : planifié
+     *
+     * @param plan
+     * @param parcelle
+     * @param year
+     * @return
+     */
+    public static int getParcellePlanifState(PlanVegetation plan, ParcelleVegetation parcelle, int year){
+        final List<Boolean> planifications = parcelle.getPlanifications();
+
+        final int index = year - plan.getAnneDebut();
+        if(planifications==null || planifications.size()<=index) return 0;
+
+        if(!planifications.get(index)) return 0;
+
+        //on regarde si c'est la premiere année
+        for(int i=0;i<index-1;i++){
+            if(planifications.get(i)) return 2;
+        }
+        return 1;
+    }
+
+    /**
      * String en fonction de l'etat des traitements.
      * Voir constantes : ETAT_X
      * 
@@ -119,12 +162,7 @@ public final class VegetationSession {
     public static String getParcelleEtat(ParcelleVegetation parcelle, boolean planifie, int year){
         final int thisYear = LocalDate.now().getYear();
 
-        boolean done = false;
-        for(ParcelleTraitementVegetation traitement : parcelle.getTraitements()){
-            if(traitement.getDate().getYear() == year){
-                done = true;
-            }
-        }
+        final boolean done = isParcelleTraite(parcelle, year);
 
         if(year>thisYear){
             //pas de couleur pour les années futurs

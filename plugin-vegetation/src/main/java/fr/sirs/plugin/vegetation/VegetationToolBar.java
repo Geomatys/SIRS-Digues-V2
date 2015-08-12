@@ -85,7 +85,7 @@ public class VegetationToolBar extends ToolBar {
         dialogRecherche.setAlwaysOnTop(true);
         dialogRecherche.initModality(Modality.NONE);
         dialogRecherche.initStyle(StageStyle.UTILITY);
-        dialogRecherche.setTitle(GeotkFX.getString(FXEditAction.class,"Végétation"));
+        dialogRecherche.setTitle("Végétation");
 
         final FXPlanLayerPane pan = new FXPlanLayerPane();
 
@@ -97,8 +97,8 @@ public class VegetationToolBar extends ToolBar {
         dialogRecherche.setOnCloseRequest((WindowEvent evt) -> dialogRecherche = null);
         dialogRecherche.setScene(scene);
         dialogRecherche.setResizable(true);
-        dialogRecherche.setWidth(350);
-        dialogRecherche.setHeight(450);
+        dialogRecherche.setWidth(300);
+        dialogRecherche.setHeight(300);
         dialogRecherche.show();
 
     }
@@ -120,7 +120,7 @@ public class VegetationToolBar extends ToolBar {
         dialog.setAlwaysOnTop(true);
         dialog.initModality(Modality.NONE);
         dialog.initStyle(StageStyle.UTILITY);
-        dialog.setTitle(GeotkFX.getString(FXEditAction.class,"Végétation"));
+        dialog.setTitle("Végétation");
 
         toolbox.setMaxHeight(Double.MAX_VALUE);
         toolbox.setMaxWidth(Double.MAX_VALUE);
