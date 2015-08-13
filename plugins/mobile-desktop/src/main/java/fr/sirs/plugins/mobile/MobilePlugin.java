@@ -24,7 +24,7 @@ import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.internal.GeotkFX;
 
 /**
- * Minimal example of a plugin.
+ * Plugin for synchronisation between mobile application and desktop one.
  *
  * @author Alexis Manin (Geomatys)
  * @author Cédric Briançon (Geomatys)
@@ -42,6 +42,7 @@ public class MobilePlugin extends Plugin {
         name = NAME;
         loadingMessage.set("Chargement du module pour la synchronisation bureau/mobile");
         themes.add(new DocumentExportTheme());
+        themes.add(new PhotoImportTheme());
     }
 
     @Override

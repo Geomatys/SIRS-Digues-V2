@@ -291,6 +291,7 @@ public class FXMainFrame extends BorderPane {
     }
 
     public final synchronized void addTab(Tab tab){
+        if (tab == null) return;
         if (!uiTabs.equals(tab.getTabPane())) {
             uiTabs.getTabs().add(tab);
         }

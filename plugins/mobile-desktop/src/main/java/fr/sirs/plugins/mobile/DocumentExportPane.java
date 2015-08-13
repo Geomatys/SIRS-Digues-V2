@@ -1,5 +1,6 @@
 package fr.sirs.plugins.mobile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
@@ -25,10 +26,14 @@ import fr.sirs.util.CopyTask;
 import fr.sirs.util.SirsStringConverter;
 import java.io.IOException;
 import java.nio.file.FileStore;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -39,6 +44,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -84,6 +90,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Alexis Manin (Geomatys)
  */
 public class DocumentExportPane extends StackPane {
+
+    private static final Path DOCUMENT_FOLDER = Paths.get("files", "documents");
 
     @FXML
     private BorderPane uiConfigPane;
@@ -219,9 +227,6 @@ public class DocumentExportPane extends StackPane {
             }
         });
         uiPhotoSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
-
-        // DEBUG PURPOSE
-        mobileDocumentDir.set(Paths.get("/home/geomatys/temp"));
     }
 
     /**
@@ -487,10 +492,21 @@ public class DocumentExportPane extends StackPane {
      */
     @FXML
     void exportToMobile(ActionEvent event) {
-        final Path destination = mobileDocumentDir.get();
-        if (destination == null || !Files.isDirectory(destination)) {
+        final Path mobileDir = mobileDocumentDir.get();
+        if (mobileDir == null || !Files.isDirectory(mobileDir)) {
             new Alert(Alert.AlertType.WARNING, "Impossible de déterminer le répertoire de sortie.", ButtonType.OK).show();
             return;
+        }
+
+        final Path destination = mobileDir.resolve(DOCUMENT_FOLDER);
+        if (!Files.isDirectory(destination)) {
+            try {
+                Files.createDirectories(destination);
+            } catch (Exception ex) {
+                SirsCore.LOGGER.log(Level.WARNING, "Cannot create following directory on mobile device : "+destination.toString(), ex);
+                new Alert(Alert.AlertType.WARNING, "Impossible de déterminer le répertoire de sortie.", ButtonType.OK).show();
+                return;
+            }
         }
 
         // Before launching copy, we check if user has selected troncons for photo export.
@@ -555,8 +571,7 @@ public class DocumentExportPane extends StackPane {
 
                         photos.addAll((Collection<? extends Photo>) repos.stream()
                                 .flatMap(repo -> repo.getByLinearId(linearId).stream())
-                                // for each object, we take the keep only valid
-                                // photo, and keep only the most recent ones.
+                                // for each object, we take the most recent valid photos.
                                 .flatMap(pos -> ((AvecPhotos) pos).getPhotos().stream()
                                         .filter(photoFilter)
                                         .sorted(photoComparator)
@@ -612,7 +627,7 @@ public class DocumentExportPane extends StackPane {
 
                             if (ButtonType.YES.equals(choice)) {
                                 final Path documentRootPath = SIRS.getDocumentRootPath();
-                                final CopyTask copyTask = new CopyTask(toCopy, destination, input -> documentRootPath.relativize(input));
+                                final CopyTask copyTask = new DocumentCopy(toCopy, destination, input -> documentRootPath.relativize(input));
                                 // 5
                                 copyTaskProperty.set(copyTask);
                                 // 6 & 7 : Let's do it !
@@ -774,6 +789,95 @@ public class DocumentExportPane extends StackPane {
             } else {
                 return o1.getDate().compareTo(o2.getDate());
             }
+        }
+    }
+
+    private static class DocumentCopy extends CopyTask {
+
+        public DocumentCopy(Collection<Path> toCopy, Path destination) {
+            super(toCopy, destination);
+        }
+
+        public DocumentCopy(final Collection<Path> toCopy, final Path destination, final Function<Path, Path> resolver) {
+            super(toCopy, destination, resolver);
+        }
+
+        @Override
+        protected Boolean call() throws Exception {
+            final boolean success = super.call();
+
+            // Create a JSON object mirroring file structure, to ease mobile app future scans.
+            if (success) {
+                final List<JsonPath> files = new ArrayList<>();
+                Files.walkFileTree(destination, new SimpleFileVisitor<Path>(){
+
+                    JsonPath parentDir = null;
+                    JsonPath currentDir = null;
+
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                        final JsonPath jsonFile = new JsonPath(file.getFileName().toString(), attrs.creationTime().toMillis(), attrs.lastModifiedTime().toMillis(), attrs.size(), attrs.isSymbolicLink(), attrs.isDirectory());
+                        if (currentDir == null) {
+                            files.add(jsonFile);
+                        } else {
+                            currentDir.children.add(jsonFile);
+                        }
+                        return super.visitFile(file, attrs);
+                    }
+
+                    @Override
+                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                        currentDir = new JsonPath(dir.getFileName().toString(), attrs.creationTime().toMillis(), attrs.lastModifiedTime().toMillis(), attrs.size(), attrs.isSymbolicLink(), attrs.isDirectory());
+                        if (parentDir != null) {
+                            parentDir.children.add(currentDir);
+                            currentDir.parent = parentDir;
+                        } else {
+                            files.add(currentDir);
+                        }
+                        return super.preVisitDirectory(dir, attrs);
+                    }
+
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                        if (currentDir != null) {
+                            parentDir = currentDir.parent;
+                        }
+                        currentDir = null;
+                        return super.postVisitDirectory(dir, exc);
+                    }
+                });
+                new ObjectMapper().writeValue(Files.newOutputStream(destination.resolve("index.json"), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING), files);
+            }
+            return success;
+        }
+
+
+
+
+    }
+
+    /**
+     * Simple structure giving information about a file-tree item.
+     */
+    private static class JsonPath {
+        public String name;
+        public long creationTime;
+        public long lastModified;
+        public long size;
+        public boolean isDir;
+        public boolean isSymbolicLink;
+        public transient JsonPath parent;
+        public final List<JsonPath> children = new ArrayList<>();
+
+        public JsonPath() {};
+
+        public JsonPath(final String name, final long creationTime, final long lastModified, final long size, final boolean isSymbolicLink, final boolean isDir) {
+            this.name = name;
+            this.creationTime = creationTime;
+            this.lastModified = lastModified;
+            this.size = size;
+            this.isSymbolicLink = isSymbolicLink;
+            this.isDir = isDir;
         }
     }
 }

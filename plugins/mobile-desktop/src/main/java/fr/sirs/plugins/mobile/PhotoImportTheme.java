@@ -22,8 +22,7 @@ public class PhotoImportTheme extends AbstractPluginsButtonTheme {
 
     @Override
     public Parent createPane() {
-
-        return null;
+        return new PhotoImportPane();
     }
 
 }

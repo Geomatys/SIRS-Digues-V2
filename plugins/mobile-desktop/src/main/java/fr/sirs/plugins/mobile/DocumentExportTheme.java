@@ -5,7 +5,6 @@ import java.awt.Color;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
-import javafx.scene.layout.BorderPane;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 
@@ -24,8 +23,6 @@ public final class DocumentExportTheme extends AbstractPluginsButtonTheme {
 
     @Override
     public Parent createPane() {
-        final BorderPane borderPane = new BorderPane();
-
-        return borderPane;
+        return new DocumentExportPane();
     }
 }

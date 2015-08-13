@@ -79,6 +79,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class PhotoImportPane extends StackPane {
 
+    private static final Path PHOTO_FOLDER = Paths.get("files", "nouvellesPhotos");
+
     /**
      * Expected structure for the name of images to import. It should start with
      * the related document id, followed by any suffix judged convinient by mobile
@@ -382,9 +384,15 @@ public class PhotoImportPane extends StackPane {
 
         uiImportProgress.setProgress(-1);
         // Ensure source media is configured
-        final Path source = sourceDirProperty.get();
+        Path source = sourceDirProperty.get();
         if (source == null || !Files.isDirectory(source)) {
             warning("aucun périphérique d'entrée valide spécifié. Veuillez vérifiez vos paramètres d'import.");
+            return;
+        }
+
+        source = source.resolve(PHOTO_FOLDER);
+        if (!Files.isDirectory(source)) {
+            warning("Aucune photo disponible pour import sur le périphérique mobile.");
             return;
         }
 

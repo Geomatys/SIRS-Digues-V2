@@ -49,8 +49,8 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
  */
 public class CopyTask extends Task<Boolean> {
 
-        private final Collection<Path> toCopy;
-        private final Path destination;
+        protected final Collection<Path> toCopy;
+        protected final Path destination;
 
         /**
          * A function whose role is to analyze input paths to give a new path, relative
@@ -59,7 +59,7 @@ public class CopyTask extends Task<Boolean> {
          * This resolver can be used to specify a sub-directory to copy into destination,
          * or simply to rename input files are they're copied.
          */
-        private final SimpleObjectProperty<Function<Path, Path>> pathResolver = new SimpleObjectProperty<>();
+        protected final SimpleObjectProperty<Function<Path, Path>> pathResolver = new SimpleObjectProperty<>();
 
         /**
          * Create a new task which is parametered to copy each file of the given
