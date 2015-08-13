@@ -34,7 +34,6 @@ import fr.sirs.core.model.sql.SQLHelper;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javafx.concurrent.Task;
 import org.ektorp.StreamingViewResult;
@@ -217,8 +216,10 @@ public class H2Helper {
                         Optional<Element> element = docHelper.toElement(currentRow.getDocAsNode());
                         if (element.isPresent()) {
                             for (final SQLHelper sqlHelper : sqlHelpers) {
-                                sqlHelper.insertElement(conn, element.get());
-                                conn.commit();
+                                if (sqlHelper != null) {
+                                    sqlHelper.insertElement(conn, element.get());
+                                    conn.commit();
+                                }
                             }
                         }
                     }

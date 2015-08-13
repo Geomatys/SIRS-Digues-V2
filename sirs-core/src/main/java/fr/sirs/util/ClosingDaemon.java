@@ -2,7 +2,6 @@
 package fr.sirs.util;
 
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
@@ -64,7 +63,6 @@ public class ClosingDaemon {
             try {
                 if (streamToClose.get() != null) {
                     streamToClose.get().close();
-                    AbstractSIRSRepository.openedConnections.decrementAndGet();
                 }
             } catch (Exception e) {
                 SirsCore.LOGGER.log(Level.WARNING, "A streamed CouchDB view result cannot be closed. It's likely to cause memory leaks.", e);

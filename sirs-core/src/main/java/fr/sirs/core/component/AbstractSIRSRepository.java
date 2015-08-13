@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import javafx.beans.property.SimpleObjectProperty;
 import javax.annotation.PostConstruct;
@@ -26,6 +25,7 @@ import org.apache.sis.util.collection.Cache;
 import org.ektorp.BulkDeleteDocument;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.DbAccessException;
 import org.ektorp.DocumentOperationResult;
 import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewQuery;
@@ -66,8 +66,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @param <T> The type of object managed by the current repository implementation.
  */
 public abstract class AbstractSIRSRepository<T extends Identifiable> extends CouchDbRepositorySupport<T> {
-
-        public static final AtomicLong openedConnections = new AtomicLong(0);
 
     protected final Cache<String, T> cache = new Cache(20, 0, false);
 
@@ -265,11 +263,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
     @Override
     protected List<T> queryView(String viewName, String key) {
-        try {
         return cacheList(super.queryView(viewName, key));
-        } finally {
-            System.out.println("OPENED CONNECTION VIA STREAMS : "+openedConnections);
-        }
     }
     
     protected List<T> queryView(String viewName, Object... keys) {
@@ -396,7 +390,6 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
             if (next == null) {
                 // Open connection on first call.
                 if (result.get() == null) {
-                    openedConnections.incrementAndGet();
                     final StreamingViewResult viewResult = db.queryForStreamingView(query);
                     result.set(viewResult);
                     if (viewResult.getTotalRows() > 0) {
@@ -412,7 +405,14 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
                  * reaching end of the stream. We have to catch exceptions here, because
                  * it appears that iterator fails on empty views.
                  */
-                final boolean hasNext = iterator != null && iterator.hasNext();
+                boolean hasNext = false;
+                try {
+                    hasNext = iterator != null && iterator.hasNext();
+                } catch (DbAccessException e) {
+                    // Don't throw error because ektorp fails if view result returns an empty result set...
+                    SirsCore.LOGGER.log(Level.WARNING, "Ektorp Streaming iterator failed retrieving next view element ! (maybe due to empty result set).", e);
+                }
+
                 if (hasNext) {
                     // Cache next element
                     ViewResult.Row nextRow = iterator.next();
@@ -451,7 +451,6 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
                 if (result.get() != null) {
                     result.get().close();
                     result.set(null);
-                    openedConnections.decrementAndGet();
                 }
             } catch (Exception e) {
                 SirsCore.LOGGER.log(Level.WARNING, "A streamed CouchDB view result cannot be closed. It's likely to cause memory leaks.", e);
