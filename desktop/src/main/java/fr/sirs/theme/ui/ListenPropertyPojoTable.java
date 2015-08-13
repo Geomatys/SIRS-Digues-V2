@@ -79,6 +79,12 @@ public class ListenPropertyPojoTable<T> extends PojoTable {
         this.propertyReference = propertyReference;
     }
     
+    /**
+     * 
+     * @return the reference value of the listened property. 
+     */
+    public T getPropertyReference(){return propertyReference;}
+    
     private void addListener(final Element element){
         if(propertyMethodToListen==null) return;
         
