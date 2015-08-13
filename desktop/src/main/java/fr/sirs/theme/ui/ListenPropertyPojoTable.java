@@ -58,8 +58,11 @@ public class ListenPropertyPojoTable<T> extends PojoTable {
     @Override
     public synchronized void setTableItems(Supplier<ObservableList<Element>> producer) {
         super.setTableItems(producer);
-        for(Element element : getAllValues()){
-            addListener(element);
+        
+        synchronized (tableUpdater) {
+            for(Element element : getAllValues()){
+                addListener(element);
+            }
         }
     }
     

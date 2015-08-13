@@ -361,7 +361,9 @@ public final class SIRS extends SirsCore {
      *
      * @param documentId
      * @return
+     * @deprecated use instead AbstractPositionDocumentRepository.getPositionDocumentByDocumentId(documentId, sessionCore)
      */
+    @Deprecated
     public static ObservableList<? extends AbstractPositionDocumentAssociable> getPositionDocumentByDocumentId(final String documentId){
         ObservableList<? extends AbstractPositionDocumentAssociable> result = null;
         final Collection<AbstractSIRSRepository> candidateRepos = Injector.getSession().getRepositoriesForClass(AbstractPositionDocumentAssociable.class);

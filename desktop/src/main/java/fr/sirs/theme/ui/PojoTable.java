@@ -926,78 +926,80 @@ public class PojoTable extends BorderPane {
 
         tableUpdater = new TaskManager.MockTask("Recherche...", (Runnable)() -> {
 
-            try{
-                allValues = producer.get();
-            }catch(Throwable ex){
-                allValues = FXCollections.observableArrayList();
-                filteredValues = allValues.filtered((Element t) -> true);
-                decoratedValues = new SortedList<>(filteredValues);
-                decoratedValues.comparatorProperty().bind(uiTable.comparatorProperty());
-                throw ex;
-            }
-            if(allValues==null){
-                allValues = FXCollections.observableArrayList();
-            }
-            if (allValues.isEmpty()) {
-                Platform.runLater(() -> {
-                    uiSearch.setGraphic(searchNone);
-                });
-            }
-
-            // Apply filter on properties
-            final Filter firstFilter = getFilter();
-
-            final Thread currentThread = Thread.currentThread();
-            if (currentThread.isInterrupted()) {
-                return;
-            }
-
-            // Apply "Plain text" filter
-            final String str = currentSearch.get();
-            if ((str == null || str.isEmpty()) && firstFilter == null) {
-                filteredValues = allValues.filtered((Element t) -> true);
-            } else {
-                final Set<String> result = new HashSet<>();
-                SearchResponse search = Injector.getElasticSearchEngine().search(QueryBuilders.queryString(str));
-                Iterator<SearchHit> iterator = search.getHits().iterator();
-                while (iterator.hasNext() && !currentThread.isInterrupted()) {
-                    result.add(iterator.next().getId());
+            synchronized(tableUpdater){
+                try{
+                    allValues = producer.get();
+                }catch(Throwable ex){
+                    allValues = FXCollections.observableArrayList();
+                    filteredValues = allValues.filtered((Element t) -> true);
+                    decoratedValues = new SortedList<>(filteredValues);
+                    decoratedValues.comparatorProperty().bind(uiTable.comparatorProperty());
+                    throw ex;
+                }
+                if(allValues==null){
+                    allValues = FXCollections.observableArrayList();
+                }
+                if (allValues.isEmpty()) {
+                    Platform.runLater(() -> {
+                        uiSearch.setGraphic(searchNone);
+                    });
                 }
 
+                // Apply filter on properties
+                final Filter firstFilter = getFilter();
+
+                final Thread currentThread = Thread.currentThread();
                 if (currentThread.isInterrupted()) {
                     return;
                 }
 
-                final Predicate<Element> filterPredicate;
-                if (firstFilter == null) {
-                    filterPredicate = element -> element==null || result.contains(element.getId());
-                } else if (str == null || str.isEmpty()) {
-                    filterPredicate = element -> element==null || firstFilter.evaluate(element);
+                // Apply "Plain text" filter
+                final String str = currentSearch.get();
+                if ((str == null || str.isEmpty()) && firstFilter == null) {
+                    filteredValues = allValues.filtered((Element t) -> true);
                 } else {
-                    filterPredicate = element -> element==null || result.contains(element.getId()) && firstFilter.evaluate(element);
+                    final Set<String> result = new HashSet<>();
+                    SearchResponse search = Injector.getElasticSearchEngine().search(QueryBuilders.queryString(str));
+                    Iterator<SearchHit> iterator = search.getHits().iterator();
+                    while (iterator.hasNext() && !currentThread.isInterrupted()) {
+                        result.add(iterator.next().getId());
+                    }
+
+                    if (currentThread.isInterrupted()) {
+                        return;
+                    }
+
+                    final Predicate<Element> filterPredicate;
+                    if (firstFilter == null) {
+                        filterPredicate = element -> element==null || result.contains(element.getId());
+                    } else if (str == null || str.isEmpty()) {
+                        filterPredicate = element -> element==null || firstFilter.evaluate(element);
+                    } else {
+                        filterPredicate = element -> element==null || result.contains(element.getId()) && firstFilter.evaluate(element);
+                    }
+                    filteredValues = allValues.filtered(filterPredicate);
                 }
-                filteredValues = allValues.filtered(filterPredicate);
+
+                //list contenant zero ou un element null en fonction du contenue de la liste filtrée
+                //NOTE : bug javafx ici, la premiere ligne n'est plus editable a cause de ca
+                // probleme avec la selection/focus qui cause trop d'événement
+    //            final ObservableList<Element> emptyRecord = FXCollections.observableArrayList();
+    //            filteredValues.addListener(new ListChangeListener<Element>() {
+    //                @Override
+    //                public void onChanged(ListChangeListener.Change<? extends Element> c) {
+    //                    if(filteredValues.isEmpty()){
+    //                        if(emptyRecord.isEmpty()) emptyRecord.add(null);
+    //                    }else{
+    //                        emptyRecord.clear();
+    //                    }
+    //                }
+    //            });
+    //            if(filteredValues.isEmpty()) emptyRecord.add(null);
+    //            decoratedValues = SIRS.view(filteredValues,emptyRecord);
+
+                decoratedValues = new SortedList<>(filteredValues);
+                decoratedValues.comparatorProperty().bind(uiTable.comparatorProperty());
             }
-
-            //list contenant zero ou un element null en fonction du contenue de la liste filtrée
-            //NOTE : bug javafx ici, la premiere ligne n'est plus editable a cause de ca
-            // probleme avec la selection/focus qui cause trop d'événement
-//            final ObservableList<Element> emptyRecord = FXCollections.observableArrayList();
-//            filteredValues.addListener(new ListChangeListener<Element>() {
-//                @Override
-//                public void onChanged(ListChangeListener.Change<? extends Element> c) {
-//                    if(filteredValues.isEmpty()){
-//                        if(emptyRecord.isEmpty()) emptyRecord.add(null);
-//                    }else{
-//                        emptyRecord.clear();
-//                    }
-//                }
-//            });
-//            if(filteredValues.isEmpty()) emptyRecord.add(null);
-//            decoratedValues = SIRS.view(filteredValues,emptyRecord);
-
-            decoratedValues = new SortedList<>(filteredValues);
-            decoratedValues.comparatorProperty().bind(uiTable.comparatorProperty());
         });
 
 
@@ -1022,6 +1024,7 @@ public class PojoTable extends BorderPane {
                 }
             }
         });
+        
         tableUpdater = TaskManager.INSTANCE.submit("Recherche...", tableUpdater);
     }
 
