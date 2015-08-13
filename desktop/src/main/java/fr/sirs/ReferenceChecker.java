@@ -1,6 +1,5 @@
 package fr.sirs;
 
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ReferenceType;
 import java.io.File;
 import java.io.FileInputStream;
