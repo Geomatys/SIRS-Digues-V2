@@ -111,8 +111,8 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ZoneVegetation" abstract="true" eSuperTypes="#//PositionableVegetation">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="contactEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="traitement" eType="#//TraitementZoneVegetation"
-        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="traitement" lowerBound="1"
+        eType="#//TraitementZoneVegetation" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TraitementZoneVegetation">
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeTraitementPonctuelId"

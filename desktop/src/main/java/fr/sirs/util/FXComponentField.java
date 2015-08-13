@@ -47,6 +47,14 @@ public class FXComponentField<P extends Element, C extends Element> extends HBox
     protected final Label label = new Label();
     
     private final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty(false);
+    private final BooleanProperty deletableProperty = new SimpleBooleanProperty(true);
+    
+    /**
+     * Controls the visibility of the delete button.
+     * 
+     * @return 
+     */
+    public final BooleanProperty deletableProperty(){return deletableProperty;}
     
     private final ChangeListener<C> changeListener;
     
@@ -54,13 +62,13 @@ public class FXComponentField<P extends Element, C extends Element> extends HBox
     private ObjectProperty<C> property;
     private P parent;
     
-    
     private ResourceBundle bundle;
     
     public FXComponentField() {
         
         setSpacing(10);
         
+        removeButton.visibleProperty().bind(deletableProperty);
         removeButton.setOnAction((ActionEvent event) -> {
             final Alert alert = new Alert(Alert.AlertType.NONE, "Le/La "+bundle.getString(SIRS.BUNDLE_KEY_CLASS)+" sera définitivement supprimé(e).", ButtonType.OK, ButtonType.CANCEL);
             alert.setResizable(true);
