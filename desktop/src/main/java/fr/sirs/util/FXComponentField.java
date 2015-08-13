@@ -1,11 +1,10 @@
 package fr.sirs.util;
 
-import com.healthmarketscience.jackcess.impl.complex.UnsupportedColumnInfoImpl;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Element;
 import java.awt.Color;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.beans.binding.StringBinding;
@@ -32,7 +31,7 @@ import org.geotoolkit.font.IconBuilder;
 
 /**
  *
- * @author Alexis Manin (Geomatys)
+ * @author Samuel Andrés (Geomatys)
  * @param <P> Container element type (parent)
  * @param <C> Contained element type (child)
  */
@@ -137,7 +136,7 @@ public class FXComponentField<P extends Element, C extends Element> extends HBox
     
     public void initChildClass(final Class<C> childClass){
         this.childClass = childClass;
-        bundle = ResourceBundle.getBundle(childClass.getName());
+        bundle = ResourceBundle.getBundle(childClass.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
         openPathButton.setTooltip(new Tooltip("Accéder au/à la "+bundle.getString(SIRS.BUNDLE_KEY_CLASS)));
         removeButton.setTooltip(new Tooltip("Supprimer le/la "+bundle.getString(SIRS.BUNDLE_KEY_CLASS)));
         addButton.setTooltip(new Tooltip("Créer un(e) "+bundle.getString(SIRS.BUNDLE_KEY_CLASS)));

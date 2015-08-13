@@ -235,16 +235,18 @@ public class FXPlanLayerPane extends GridPane{
                 for(ZoneVegetation zone : vegetations){
                     String etat = null;
 
-                    if(planifState == 1){
-                        //premiere année
-                        String tid = zone.getTypeTraitementPonctuelId();
-                        if(tid==null || tid.isEmpty()){
-                            tid = zone.getTypeTraitementId();
+                    if(zone.getTraitement()!=null){
+                        if(planifState == 1){
+                            //premiere année
+                            String tid = zone.getTraitement().getTypeTraitementPonctuelId();
+                            if(tid==null || tid.isEmpty()){
+                                tid = zone.getTraitement().getTypeTraitementId();
+                            }
+                            etat = trmts.get(tid);
+                        }else if(planifState == 1){
+                            final String tid = zone.getTraitement().getTypeTraitementId();
+                            etat = trmts.get(tid);
                         }
-                        etat = trmts.get(tid);
-                    }else if(planifState == 1){
-                        final String tid = zone.getTypeTraitementId();
-                        etat = trmts.get(tid);
                     }
 
                     final Feature feature = writer.next();
