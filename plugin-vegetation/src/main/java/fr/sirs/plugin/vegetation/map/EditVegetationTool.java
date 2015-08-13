@@ -8,13 +8,17 @@ import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import static fr.sirs.SIRS.CSS_PATH;
 import fr.sirs.Session;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PositionableVegetation;
 import fr.sirs.util.ResourceInternationalString;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -71,25 +75,42 @@ public class EditVegetationTool extends AbstractEditionTool{
         }
     };
 
-
     //session and repo
     private final Session session;
     private final MouseListen mouseInputListener = new MouseListen();
     private final BorderPane wizard = new BorderPane();
     private final FXPositionableForm form = new FXPositionableForm();
 
-
     //geometry en cours
     private EditionHelper helper;
     private final FXGeometryLayer decoration = new FXGeometryLayer();
     private final EditionHelper.EditionGeometry selection = new EditionHelper.EditionGeometry();
+    private final Label lblMessage = new Label("Sélectionner une zone de végétation sur la carte.");
     private boolean modified = false;
     private MouseButton pressed = null;
 
     public EditVegetationTool(FXMap map) {
         super(SPI);
         wizard.getStylesheets().add(CSS_PATH);
+        wizard.setCenter(lblMessage);
+        wizard.getStyleClass().add("blue-light");
+        lblMessage.getStyleClass().add("label-header");
+        lblMessage.setWrapText(true);
+
         session = Injector.getSession();
+
+        form.positionableProperty().addListener(new ChangeListener<Positionable>() {
+            @Override
+            public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
+                reset();
+                refreshDecoration();
+                if(newValue==null){
+                    wizard.setCenter(lblMessage);
+                }else{
+                    wizard.setCenter(form);
+                }
+            }
+        });
     }
 
     public void setCurrentFeature(final Feature feature, FeatureMapLayer layer){
@@ -156,6 +177,12 @@ public class EditVegetationTool extends AbstractEditionTool{
         }
 
         @Override
+        public void mouseEntered(MouseEvent me) {
+            super.mouseEntered(me);
+            ((Node)me.getSource()).requestFocus();
+        }
+
+        @Override
         public void mouseClicked(MouseEvent e) {
 
             final MouseButton button = e.getButton();
@@ -201,11 +228,7 @@ public class EditVegetationTool extends AbstractEditionTool{
                     helper.grabGeometryNode(e.getX(), e.getY(), selection);
                     decoration.setNodeSelection(selection);
                 }
-            }else if(button == MouseButton.SECONDARY){
-                //TODO on sauvegarde
-                reset();
             }
-
         }
 
         @Override
@@ -214,7 +237,7 @@ public class EditVegetationTool extends AbstractEditionTool{
 
             if(pressed == MouseButton.PRIMARY){
                 if(selection.geometry == null){
-                    //setCurrentFeature(helper.grabFeature(e.getX(), e.getY(), false));
+                    
                 }else if(e.getClickCount() == 1){
                     //single click with a geometry = select a node
                     helper.grabGeometryNode(e.getX(), e.getY(), selection);
@@ -241,7 +264,7 @@ public class EditVegetationTool extends AbstractEditionTool{
 
         @Override
         public void keyReleased(KeyEvent e) {
-            if(KeyCode.DELETE == e.getCode() && selection != null){
+           if(KeyCode.DELETE == e.getCode() && selection != null){
                 //delete node
                 selection.deleteSelectedNode();
                 refreshDecoration();
