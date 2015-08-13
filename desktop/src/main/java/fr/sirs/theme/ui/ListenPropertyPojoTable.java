@@ -4,6 +4,7 @@ import fr.sirs.core.model.Element;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.WeakHashMap;
+import java.util.concurrent.locks.Condition;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,12 +58,15 @@ public class ListenPropertyPojoTable<T> extends PojoTable {
     
     @Override
     public synchronized void setTableItems(Supplier<ObservableList<Element>> producer) {
-        super.setTableItems(producer);
-        
-        synchronized (tableUpdater) {
+        try {
+            super.setTableItems(producer);
+            
+            this.wait();
             for(Element element : getAllValues()){
                 addListener(element);
             }
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ListenPropertyPojoTable.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

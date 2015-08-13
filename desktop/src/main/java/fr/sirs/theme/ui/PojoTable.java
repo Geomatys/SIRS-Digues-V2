@@ -67,6 +67,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -925,8 +927,7 @@ public class PojoTable extends BorderPane {
         }
 
         tableUpdater = new TaskManager.MockTask("Recherche...", (Runnable)() -> {
-
-            synchronized(tableUpdater){
+            synchronized (PojoTable.this){
                 try{
                     allValues = producer.get();
                 }catch(Throwable ex){
@@ -999,6 +1000,8 @@ public class PojoTable extends BorderPane {
 
                 decoratedValues = new SortedList<>(filteredValues);
                 decoratedValues.comparatorProperty().bind(uiTable.comparatorProperty());
+                
+                PojoTable.this.notify();
             }
         });
 
@@ -1026,8 +1029,10 @@ public class PojoTable extends BorderPane {
         });
         
         tableUpdater = TaskManager.INSTANCE.submit("Recherche...", tableUpdater);
+        
     }
-
+    
+//    protected final Lock lock = new ReentrantReadWriteLock().readLock();
     /**
      * Check if the input element can be deleted by current user. If not, an
      * alert is displyed on screen.
