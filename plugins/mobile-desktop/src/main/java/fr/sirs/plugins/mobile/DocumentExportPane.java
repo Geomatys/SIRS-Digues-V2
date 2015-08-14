@@ -816,6 +816,7 @@ public class DocumentExportPane extends StackPane {
 
                     @Override
                     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                        // TODO : check mime-type using Files.probeContentType
                         final JsonPath jsonFile = new JsonPath(file.getFileName().toString(), attrs.creationTime().toMillis(), attrs.lastModifiedTime().toMillis(), attrs.size(), attrs.isSymbolicLink(), attrs.isDirectory());
                         if (currentDir == null) {
                             files.add(jsonFile);

@@ -1,6 +1,7 @@
 package fr.sirs.core;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import org.opengis.util.GenericName;
  * @author Alexis Manin (Geomatys)
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ModuleDescription {
 
     public final SimpleStringProperty name = new SimpleStringProperty();
@@ -72,6 +74,7 @@ public class ModuleDescription {
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.ANY, setterVisibility = JsonAutoDetect.Visibility.ANY)
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Layer {
 
         public final SimpleStringProperty title = new SimpleStringProperty();
