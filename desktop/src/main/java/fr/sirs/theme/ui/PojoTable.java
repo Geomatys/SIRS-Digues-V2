@@ -65,6 +65,7 @@ import java.util.logging.Level;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -85,7 +86,6 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -408,10 +408,23 @@ public class PojoTable extends BorderPane {
                     editPojo(p);
                 }
             }
-            else{
-                final ChoiceStage stage = new ChoiceStage();
+            else {
+                final PojoTableChoiceStage<Element> stage = new ChoiceStage();
                 stage.showAndWait();
                 p = stage.getRetrievedElement().get();
+                if (p!=null) {
+                    if(getAllValues().contains(p)){
+                        final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le lien que vous souhaitez ajouter est déjà présent dans la table.");
+                        alert.setResizable(true);
+                        alert.showAndWait();
+                    } else {
+                        getAllValues().add(p);
+                    }
+                } else {
+                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
+                    alert.setResizable(true);
+                    alert.showAndWait();
+                }
             }
         });
         uiAdd.disableProperty().bind(editableProperty.not());
@@ -420,8 +433,7 @@ public class PojoTable extends BorderPane {
         uiDelete.setOnAction((ActionEvent event) -> {
             final Element[] elements = ((List<Element>) uiTable.getSelectionModel().getSelectedItems()).toArray(new Element[0]);
             if (elements.length > 0) {
-                final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
-                        ButtonType.NO, ButtonType.YES);
+                final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?", ButtonType.NO, ButtonType.YES);
                 alert.setResizable(true);
                 final Optional<ButtonType> res = alert.showAndWait();
                 if (res.isPresent() && ButtonType.YES.equals(res.get())) {
@@ -1519,60 +1531,38 @@ public class PojoTable extends BorderPane {
 
     private class ChoiceStage extends PojoTableComboBoxChoiceStage<Element, Preview> {
 
+            
+        private final ObjectBinding<Element> elementBinding = new ObjectBinding<Element>() {
+
+            {
+                bind(comboBox.getSelectionModel().selectedItemProperty());
+            }
+
+            @Override
+            protected Element computeValue() {
+                if(comboBox.valueProperty()!=null){
+                    final Preview preview = comboBox.valueProperty().get();
+                    if(preview!=null){
+                        return (Element) repo.get(preview.getDocId());
+                    }
+                }
+                return null;
+            }
+        };
+
         private ChoiceStage(){
             super();
             setTitle("Choix de l'élément");
 
             if(tronconSourceProperty.get()==null){
-                comboBox.setItems(FXCollections.observableArrayList(Injector.getSession().getPreviews().getByClass(pojoClass)));
+                comboBox.setItems(FXCollections.observableArrayList(session.getPreviews().getByClass(pojoClass)));
             }
             else{
-                comboBox.setItems(FXCollections.observableArrayList(Injector.getSession().getPreviews().getByClass(pojoClass))
+                comboBox.setItems(FXCollections.observableArrayList(session.getPreviews().getByClass(pojoClass))
                         .filtered((Preview t) -> { return tronconSourceProperty.get().equals(t.getDocId());}));
             }
 
-            final Button cancel = new Button("Annuler");
-            cancel.setOnAction((ActionEvent event) -> {
-                    retrievedElement.unbind();
-                    retrievedElement.set(null);
-                    hide();
-            });
-            final Button add = new Button("Ajouter");
-            add.setOnAction((ActionEvent event) -> {
-                    retrievedElement.set(addExistingPojo());
-                    hide();
-            });
-            final HBox hBox = new HBox(cancel, add);
-            hBox.setAlignment(Pos.CENTER);
-            hBox.setPadding(new Insets(20));
-
-            final VBox vBox = new VBox(comboBox, hBox);
-            vBox.setAlignment(Pos.CENTER);
-            vBox.setPadding(new Insets(20));
-            setScene(new Scene(vBox));
-        }
-
-        private Element addExistingPojo() {
-            final Preview preview = comboBox.valueProperty().get();
-            Object result = null;
-            if (repo != null) {
-                result = repo.get(preview.getDocId());
-            }
-
-            if (result!=null && result instanceof Element) {
-                if(getAllValues().contains((Element) result)){
-                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le lien que vous souhaitez ajouter est déjà présent dans la table.");
-                    alert.setResizable(true);
-                    alert.showAndWait();
-                } else {
-                    getAllValues().add((Element) result);
-                }
-            } else {
-                final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
-                alert.setResizable(true);
-                alert.showAndWait();
-            }
-            return (Element) result;
+            retrievedElement.bind(elementBinding);
         }
     }
 }
