@@ -42,12 +42,26 @@ import org.geotoolkit.internal.GeotkFX;
  */
 public class Launcher extends Application {
 
+    private static final String MINIMAL_JAVA_VERSION = "1.8.0_40";
+
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        // Embedded version of Java is corrupted.
+        if (!isJavaValid()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "La version de Java détectée est invalide. Il se peut que votre installation de l'application soit corrompue.\n\n"
+                    + "Pour résoudre le problème, désinstallez manuellement toute version de l'application présente sur votre machine, puis ré-installez la version la plus récente.\n\n"
+                    + "Si le problème persiste, contactez un administrateur.", ButtonType.OK);
+            alert.setResizable(true);
+            alert.setWidth(400);
+            alert.setHeight(600);
+            alert.showAndWait();
+            System.exit(1);
+        }
+
         // add SLF4JBridgeHandler to j.u.l's root logger, should be done once during
         // the initialization phase of your application
         try {
@@ -220,5 +234,17 @@ public class Launcher extends Application {
             updateMessage("Lancement de l'application");
             return true;
         }
+    }
+
+    /**
+     * Test wether or not java version is sufficient to run SIRS application without
+     * any further problem.
+     *
+     * @return true if found version of Java is recent enough, false if found jvm
+     * cannot run application.
+     */
+    private static boolean isJavaValid() {
+        final String javaVersion = System.getProperty("java.version");
+        return MINIMAL_JAVA_VERSION.compareTo(javaVersion) < 0;
     }
 }
