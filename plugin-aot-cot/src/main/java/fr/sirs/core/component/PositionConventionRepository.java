@@ -1,21 +1,17 @@
-
-
 package fr.sirs.core.component;
 
 
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.model.Objet;
-
+import fr.sirs.core.model.PositionConvention;
+import java.util.List;
+import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
 import org.ektorp.support.Views;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Component;
-import fr.sirs.core.model.PositionConvention;
-import java.util.List;
-import org.apache.sis.util.ArgumentChecks;
 
 /**
  * Outil g�rant les �changes avec la bdd CouchDB pour tous les objets PositionConvention.
@@ -24,7 +20,6 @@ import org.apache.sis.util.ArgumentChecks;
  * @author Alexis Manin     (Geomatys)
  */
 @Views ({
-@View(name=AbstractPositionableRepository.BY_LINEAR_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.PositionConvention') {emit(doc.linearId, doc._id)}}"),
 @View(name=AbstractPositionDocumentRepository.BY_DOCUMENT_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.PositionConvention') {emit(doc.sirsdocument, doc._id)}}"),
 @View(name=PositionConventionRepository.BY_OBJET_ID, map="classpath:positionsConventionsByObjetId.js"),
 @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.PositionConvention') {emit(doc._id, doc._id)}}")

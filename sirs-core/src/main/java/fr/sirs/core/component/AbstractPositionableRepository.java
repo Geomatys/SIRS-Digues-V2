@@ -4,9 +4,7 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
 import java.util.List;
 import org.apache.sis.util.ArgumentChecks;
-import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.ViewQuery;
 
 /**
  *
@@ -14,7 +12,7 @@ import org.ektorp.ViewQuery;
  * @param <T>
  */
 public abstract class AbstractPositionableRepository<T extends Positionable> extends AbstractSIRSRepository<T> {
-
+    
     public AbstractPositionableRepository(Class<T> type, CouchDbConnector db) {
         super(type, db);
     }
