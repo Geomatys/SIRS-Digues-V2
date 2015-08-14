@@ -1,18 +1,22 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
-import fr.sirs.core.model.ArbreVegetation;
+import fr.sirs.Session;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.util.SirsStringConverter;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.stage.Modality;
 import javafx.util.StringConverter;
 
 /**
@@ -50,14 +54,18 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
         
         final ZoneVegetation position;
         if(result.isPresent()&&result.get()==ButtonType.YES){
-            position = Injector.getSession().getElementCreator().createElement(ArbreVegetation.class);
+
+            final ChoiceStage stage = new ChoiceStage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+            final Class<? extends ZoneVegetation> retrievedElement = stage.getRetrievedElement().get();
+
+
+            final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(retrievedElement);
+            position = (ZoneVegetation) repo.create();
             position.setForeignParentId(getPropertyReference());
-            Injector.getSession().getRepositoryForClass(ArbreVegetation.class).add((ArbreVegetation) position);
-//            final ChoiceStage stage = new ChoiceStage();
-//            stage.initModality(Modality.APPLICATION_MODAL);
-//            stage.showAndWait();
-//            final Element retrievedElement = stage.getRetrievedElement().get();
-//
+            repo.add(position);
+            
 //            final TronconDigue troncon;
 //            if(retrievedElement instanceof Objet && ((Objet) retrievedElement).getLinearId()!=null){
 //                troncon = Injector.getSession().getRepositoryForClass(TronconDigue.class).get(((Objet) retrievedElement).getLinearId());
@@ -96,25 +104,35 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
         }
         return position;
     }
-    /*
-    private static class ChoiceStage extends PojoTableChoiceStage {
-        private final DoubleProperty prMinProperty = new SimpleDoubleProperty();
-        private final DoubleProperty prMaxProperty = new SimpleDoubleProperty();
+
+    private static class ChoiceStage extends PojoTableComboBoxChoiceStage<Class<? extends ZoneVegetation>, Class<? extends ZoneVegetation>> {
+
         private final StringConverter converter = new SirsStringConverter();
         
         private ChoiceStage(){
             super();
             setTitle("Choix de l'élément");
-            final FXPositionConventionChoicePane positionConventionChoicePane = new FXPositionConventionChoicePane();
-            setScene(new Scene(positionConventionChoicePane));
-            retrievedElement.bind(positionConventionChoicePane.selectedObjetProperty());
-            prMinProperty.bind(positionConventionChoicePane.prDebutProperty());
-            prMaxProperty.bind(positionConventionChoicePane.prFinProperty());
+
+            final List<Class<? extends Element>> classes = Session.getElements();
+
+            final List<Class<? extends ZoneVegetation>> zoneTypes = new ArrayList<>();
+            for(final Class element : classes){
+                if(ZoneVegetation.class.isAssignableFrom(element) && !Modifier.isAbstract(element.getModifiers())){
+                    zoneTypes.add(element);
+                }
+            }
+
+            comboBox.setItems(FXCollections.observableList(zoneTypes));
+
+            retrievedElement.bind(comboBox.getSelectionModel().selectedItemProperty());
+
+            setScene(new Scene(comboBox));
+//            retrievedElement.bind(positionConventionChoicePane.selectedObjetProperty());
             
-            retrievedElement.addListener(new ChangeListener<Element>() {
+            retrievedElement.addListener(new ChangeListener<Class<? extends ZoneVegetation>>() {
 
                 @Override
-                public void changed(ObservableValue<? extends Element> observable, Element oldValue, Element newValue) {
+                public void changed(ObservableValue<? extends Class<? extends ZoneVegetation>> observable, Class<? extends ZoneVegetation> oldValue, Class<? extends ZoneVegetation> newValue) {
                     final Alert alert;
                     if(newValue==null){
                         alert = new Alert(Alert.AlertType.CONFIRMATION, "Voulez allez quitter la procédure de choix sans avoir choisi d'élément associé à la convention.", ButtonType.YES, ButtonType.NO);
@@ -131,11 +149,5 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
                 }
             });
         }
-        
-        public DoubleProperty prMinProperty(){return prMinProperty;}
-        public DoubleProperty prMaxProperty(){return prMaxProperty;}
-        
     }
-    */
-    
 }

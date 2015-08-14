@@ -1,17 +1,10 @@
 package fr.sirs.theme.ui;
 
-import org.geotoolkit.gui.javafx.util.FXNumberCell;
-import org.geotoolkit.gui.javafx.util.FXStringCell;
-import org.geotoolkit.gui.javafx.util.FXLocalDateTimeCell;
-import org.geotoolkit.gui.javafx.util.FXBooleanCell;
 import com.sun.javafx.property.PropertyReference;
 import com.vividsolutions.jts.geom.Point;
-import fr.sirs.Session;
-import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import fr.sirs.StructBeanSupplier;
+import fr.sirs.SIRS;
 import static fr.sirs.SIRS.AUTHOR_FIELD;
-import static fr.sirs.SIRS.BUNDLE_KEY_CLASS_ABREGE;
 import static fr.sirs.SIRS.COMMENTAIRE_FIELD;
 import static fr.sirs.SIRS.DATE_MAJ_FIELD;
 import static fr.sirs.SIRS.FOREIGN_PARENT_ID_FIELD;
@@ -20,21 +13,22 @@ import static fr.sirs.SIRS.LATITUDE_MIN_FIELD;
 import static fr.sirs.SIRS.LONGITUDE_MAX_FIELD;
 import static fr.sirs.SIRS.LONGITUDE_MIN_FIELD;
 import static fr.sirs.SIRS.VALID_FIELD;
+import fr.sirs.Session;
+import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecForeignParent;
-import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.LigneEau;
-import fr.sirs.core.model.PointZ;
 import fr.sirs.core.model.PointDZ;
 import fr.sirs.core.model.PointXYZ;
+import fr.sirs.core.model.PointZ;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PrZPointImporter;
-import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.map.ExportTask;
 import fr.sirs.theme.ColumnOrder;
@@ -42,9 +36,9 @@ import fr.sirs.theme.ui.PojoTablePointBindings.DXYZBinding;
 import fr.sirs.theme.ui.PojoTablePointBindings.PRXYZBinding;
 import fr.sirs.theme.ui.PojoTablePointBindings.PRZBinding;
 import fr.sirs.util.FXReferenceEqualsOperator;
-import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.SEClassementEqualsOperator;
+import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.Reference;
 import java.beans.BeanInfo;
@@ -62,9 +56,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -97,7 +89,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Hyperlink;
@@ -128,7 +119,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Popup;
 import javafx.util.Callback;
 import javafx.util.Duration;
-import javafx.util.StringConverter;
 import jidefx.scene.control.field.NumberField;
 import org.apache.sis.feature.AbstractIdentifiedType;
 import org.apache.sis.feature.DefaultAssociationRole;
@@ -144,9 +134,14 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.feature.FeatureTypeBuilder;
 import org.geotoolkit.gui.javafx.filter.FXFilterBuilder;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
+import org.geotoolkit.gui.javafx.util.FXBooleanCell;
 import org.geotoolkit.gui.javafx.util.FXEnumTableCell;
 import org.geotoolkit.gui.javafx.util.FXLocalDateCell;
+import org.geotoolkit.gui.javafx.util.FXLocalDateTimeCell;
+import org.geotoolkit.gui.javafx.util.FXNumberCell;
+import org.geotoolkit.gui.javafx.util.FXStringCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -1522,45 +1517,29 @@ public class PojoTable extends BorderPane {
         return tronconSourceProperty;
     }
 
-    private class ChoiceStage extends PojoTableChoiceStage {
+    private class ChoiceStage extends PojoTableComboBoxChoiceStage<Element, Preview> {
 
         private ChoiceStage(){
             super();
             setTitle("Choix de l'élément");
 
-            final ResourceBundle bundle = ResourceBundle.getBundle(pojoClass.getName(), Locale.getDefault(),
-                    Thread.currentThread().getContextClassLoader());
-            final String prefix = bundle.getString(BUNDLE_KEY_CLASS_ABREGE)+" : ";
-            final ComboBox<Preview> comboBox;
             if(tronconSourceProperty.get()==null){
-                comboBox = new ComboBox<>(FXCollections.observableArrayList(Injector.getSession().getPreviews().getByClass(pojoClass)));
+                comboBox.setItems(FXCollections.observableArrayList(Injector.getSession().getPreviews().getByClass(pojoClass)));
             }
             else{
-
-                comboBox = new ComboBox<>(FXCollections.observableArrayList(Injector.getSession().getPreviews().getByClass(pojoClass))
+                comboBox.setItems(FXCollections.observableArrayList(Injector.getSession().getPreviews().getByClass(pojoClass))
                         .filtered((Preview t) -> { return tronconSourceProperty.get().equals(t.getDocId());}));
             }
-            comboBox.setConverter(new StringConverter<Preview>() {
-
-                @Override
-                public String toString(Preview object) {
-                    return prefix+object.getDesignation() + ((object.getLibelle()==null) ? "" : " - "+object.getLibelle());
-                }
-
-                @Override
-                public Preview fromString(String string) {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-            });
 
             final Button cancel = new Button("Annuler");
             cancel.setOnAction((ActionEvent event) -> {
+                    retrievedElement.unbind();
                     retrievedElement.set(null);
                     hide();
             });
             final Button add = new Button("Ajouter");
             add.setOnAction((ActionEvent event) -> {
-                    retrievedElement.set(addExistingPojo(comboBox.valueProperty().get()));
+                    retrievedElement.set(addExistingPojo());
                     hide();
             });
             final HBox hBox = new HBox(cancel, add);
@@ -1573,7 +1552,8 @@ public class PojoTable extends BorderPane {
             setScene(new Scene(vBox));
         }
 
-        protected Element addExistingPojo(final Preview preview) {
+        private Element addExistingPojo() {
+            final Preview preview = comboBox.valueProperty().get();
             Object result = null;
             if (repo != null) {
                 result = repo.get(preview.getDocId());

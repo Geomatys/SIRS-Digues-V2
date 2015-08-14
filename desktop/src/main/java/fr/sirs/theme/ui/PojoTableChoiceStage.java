@@ -1,6 +1,5 @@
 package fr.sirs.theme.ui;
 
-import fr.sirs.core.model.Element;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.stage.Stage;
@@ -8,12 +7,14 @@ import javafx.stage.Stage;
 /**
  *
  * @author Samuel Andrés (Geomatys)
+ * 
+ * @param <T> The type of the retrieved element.
  */
-public abstract class PojoTableChoiceStage extends Stage {
+public abstract class PojoTableChoiceStage<T> extends Stage {
 
-    protected ObjectProperty<Element> retrievedElement = new SimpleObjectProperty<>();
+    protected final ObjectProperty<T> retrievedElement = new SimpleObjectProperty<>();
     
-    public ObjectProperty<Element> getRetrievedElement(){
+    public ObjectProperty<T> getRetrievedElement(){
         return retrievedElement;
     }
 }

@@ -96,7 +96,7 @@ public class PositionConventionPojoTable extends ListenPropertyPojoTable<String>
         return position;
     }
     
-    private static class ChoiceStage extends PojoTableChoiceStage {
+    private static class ChoiceStage extends PojoTableChoiceStage<Element> {
 
         private final Button ui_add;
         private final Button ui_cancel;

@@ -351,7 +351,7 @@ public class SessionCore implements ApplicationContextAware {
                 }
             } else {
                 for (final Object photoContainer : repo.getAll()) {
-                    for (final Photo photo : ((AvecPhotos)photoContainer).getPhotos()) {
+                    for (final Photo photo : ((AvecPhotos<Photo>)photoContainer).getPhotos()) {
                         Element parent = photo.getParent();
                         while (parent != null) {
                             if (parent instanceof AvecForeignParent && linearId.equalsIgnoreCase(((AvecForeignParent)parent).getForeignParentId())) {
@@ -386,8 +386,8 @@ public class SessionCore implements ApplicationContextAware {
     }
 
     // REFERENCES
-    private static final List<Class<? extends ReferenceType>> REFERENCES = new ArrayList<>();
-    private static final List<Class<? extends Element>> ELEMENTS = new ArrayList<>();
+    private static final List<Class<? extends Element>> ELEMENTS;
+    private static final List<Class<? extends ReferenceType>> REFERENCES;
     private static final Comparator<Class<? extends Element>> BUNDLE_CLASS_NAME_COMPARATOR = new Comparator<Class<? extends Element>>() {
             @Override
             public int compare(Class<? extends Element> o1, Class<? extends Element> o2) {
@@ -397,20 +397,22 @@ public class SessionCore implements ApplicationContextAware {
             }
         };
     public Comparator<Class<? extends Element>> getBundleClassNameComparator(){return BUNDLE_CLASS_NAME_COMPARATOR;}
-    
-    private static void initElements(){
-        final Iterator<Element> it = ServiceLoader.load(Element.class).iterator();
-        while(it.hasNext()){
-            final Class c = it.next().getClass();
-            ELEMENTS.add(c);
-            if(ReferenceType.class.isAssignableFrom(c)) REFERENCES.add(c);
-        }
-        Collections.sort(REFERENCES, BUNDLE_CLASS_NAME_COMPARATOR);
-        Collections.sort(ELEMENTS, BUNDLE_CLASS_NAME_COMPARATOR);
-    }
 
     static{
-        initElements();
+        final Iterator<Element> it = ServiceLoader.load(Element.class).iterator();
+
+        final List<Class<? extends Element>> elements = new ArrayList<>();
+        final List<Class<? extends ReferenceType>> references = new ArrayList<>();
+
+        while(it.hasNext()){
+            final Class c = it.next().getClass();
+            elements.add(c);
+            if(ReferenceType.class.isAssignableFrom(c)) references.add(c);
+        }
+        Collections.sort(elements, BUNDLE_CLASS_NAME_COMPARATOR);
+        Collections.sort(references, BUNDLE_CLASS_NAME_COMPARATOR);
+        ELEMENTS = Collections.unmodifiableList(elements);
+        REFERENCES = Collections.unmodifiableList(references);
     }
 
     public static List<Class<? extends ReferenceType>> getReferences(){return REFERENCES;}
