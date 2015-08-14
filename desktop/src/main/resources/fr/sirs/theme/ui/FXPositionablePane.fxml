@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import org.geotoolkit.gui.javafx.util.*?>
-<?import jidefx.scene.control.field.*?>
-<?import jfxtras.scene.control.*?>
-<?import javafx.scene.web.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 
 <fx:root type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <center>
@@ -109,7 +103,6 @@
                               <ColumnConstraints hgrow="NEVER" />
                               <ColumnConstraints hgrow="NEVER" />
                               <ColumnConstraints hgrow="NEVER" />
-                              <ColumnConstraints hgrow="NEVER" />
                           </columnConstraints>
                           <rowConstraints>
                               <RowConstraints minHeight="10.0" vgrow="NEVER" />
@@ -119,18 +112,16 @@
                           </rowConstraints>
                            <children>
                               <Label text="Systeme de Reperage" />
-                              <ComboBox fx:id="uiSRs" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" />
+                              <ComboBox fx:id="uiSRs" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.hgrow="ALWAYS" />
                               <Label text="Borne" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                               <Label text="Amont/Aval" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                               <Label text="Distance" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                               <Label text="Début " GridPane.rowIndex="2" />
                               <ComboBox fx:id="uiBorneStart" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                               <Spinner fx:id="uiDistanceStart" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
-                              <ImageView fx:id="uiImageStartValid" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="4" GridPane.hgrow="NEVER" GridPane.rowIndex="2" />
                               <Label text="Fin" GridPane.rowIndex="3" />
                               <ComboBox fx:id="uiBorneEnd" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                               <Spinner fx:id="uiDistanceEnd" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
-                              <ImageView fx:id="uiImageEndValid" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="4" GridPane.hgrow="NEVER" GridPane.rowIndex="3" />
                               <HBox GridPane.columnIndex="2" GridPane.rowIndex="3">
                                  <children>
                                     <RadioButton fx:id="uiAmontEnd" mnemonicParsing="false" text="Amont">

@@ -1,14 +1,11 @@
 package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import static fr.sirs.SIRS.CRS_WGS84;
-import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
-import static fr.sirs.SIRS.ICON_EXCLAMATION_TRIANGLE;
 import static fr.sirs.SIRS.ICON_IMPORT_WHITE;
 import static fr.sirs.SIRS.ICON_VIEWOTHER_WHITE;
 import fr.sirs.core.LinearReferencingUtilities;
@@ -16,13 +13,13 @@ import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.SystemeReperageRepository;
-import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import static fr.sirs.theme.ui.FXPositionableMode.fxNumberValue;
 import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -69,7 +66,6 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -123,8 +119,6 @@ public class FXPositionablePane extends BorderPane {
     @FXML private RadioButton uiAvalEnd;
     @FXML private Spinner<Double> uiDistanceStart;
     @FXML private Spinner<Double> uiDistanceEnd;
-    @FXML private ImageView uiImageStartValid;
-    @FXML private ImageView uiImageEndValid;
 
     // Coordinate mode
     @FXML private GridPane uiCoordPane;
@@ -289,8 +283,8 @@ public class FXPositionablePane extends BorderPane {
         uiPRFin.textProperty().bind(prFin.asString("%.2f"));
 
         // Check if the positionable distances are on the troncon
-        distanceChangeListenerStart = new DistanceChangeListener(uiBorneStart.valueProperty(), uiDistanceStart, uiAmontStart.selectedProperty(), uiImageStartValid.imageProperty());
-        distanceChangeListenerEnd = new DistanceChangeListener(uiBorneEnd.valueProperty(), uiDistanceEnd, uiAmontEnd.selectedProperty(), uiImageEndValid.imageProperty());
+        distanceChangeListenerStart = new DistanceChangeListener(uiBorneStart.valueProperty(), uiDistanceStart, uiAmontStart.selectedProperty() );
+        distanceChangeListenerEnd = new DistanceChangeListener(uiBorneEnd.valueProperty(), uiDistanceEnd, uiAmontEnd.selectedProperty() );
     }
 
     public ObjectProperty<Positionable> positionableProperty() {
@@ -485,18 +479,7 @@ public class FXPositionablePane extends BorderPane {
     private LinearReferencing.SegmentInfo[] getSourceLinear(final SystemeReperage source) {
         final TronconDigue t = getTroncon();
         if (tronconSegments == null) {
-            Geometry linearSource = (t == null) ? null : t.getGeometry();
-            if (linearSource == null) {
-                if (source != null && source.getLinearId() != null) {
-                    final TronconDigue tmpTroncon = Injector.getSession().getRepositoryForClass(TronconDigue.class).get(source.getLinearId());
-                    if (tmpTroncon != null) {
-                        linearSource = tmpTroncon.getGeometry();
-                    }
-                }
-            }
-            if (linearSource != null) {
-                tronconSegments = LinearReferencingUtilities.buildSegments(LinearReferencing.asLineString(linearSource));
-            }
+            tronconSegments = LinearReferencingUtilities.getSourceLinear(t, source);
         }
         return tronconSegments;
     }
@@ -596,41 +579,6 @@ public class FXPositionablePane extends BorderPane {
     }
 
     /**
-     * Searche recursively the troncon of the positionable.
-     *
-     * @param pos
-     * @return
-     */
-    private TronconDigue getTronconFromPositionable(final Positionable pos){
-        final Element currentElement = getTronconFromElement(pos);
-        if(currentElement instanceof TronconDigue) return (TronconDigue) currentElement;
-        else return null;
-    }
-
-    private Element getTronconFromElement(final Element element){
-        Element candidate = null;
-
-        // Si on arrive sur un Troncon, on renvoie le troncon.
-        if(element instanceof TronconDigue){
-            candidate = element;
-        }
-
-        // Sinon on cherche un troncon dans les parents
-        else {
-            // On privilégie le chemin AvecForeignParent
-            if(element instanceof AvecForeignParent){
-                String id = ((AvecForeignParent) element).getForeignParentId();
-                candidate = getTronconFromElement(Injector.getSession().getRepositoryForClass(TronconDigue.class).get(id));
-            }
-            // Si on n'a pas (ou pas trouvé) de troncon via la référence ForeignParent on cherche via le conteneur
-            if (candidate==null && element.getParent()!=null) {
-                candidate = getTronconFromElement(element.getParent());
-            }
-        }
-        return candidate;
-    }
-
-    /**
      * Return the {@link TronconDigue} object associated to the current positionable.
      *
      * There's a high probability that our Positionable is contained in its
@@ -647,7 +595,7 @@ public class FXPositionablePane extends BorderPane {
             if (pos == null) {
                 return null;
             }
-            troncon = getTronconFromPositionable(pos);
+            troncon = FXPositionableMode.getTronconFromPositionable(pos);
             // Maybe we have an incomplete version of the document, so we try by querying repository.
             if (troncon == null) {
                 try {
@@ -1212,16 +1160,13 @@ public class FXPositionablePane extends BorderPane {
         private final ObjectProperty<BorneDigue> borneProperty;
         private final Spinner<Double> uiDistance;
         private final BooleanProperty amontSelectedProperty;
-        private final ObjectProperty<Image> imageProperty;
 
         DistanceChangeListener(final ObjectProperty<BorneDigue> borneProperty,
                 final Spinner<Double> uiDistance,
-                final BooleanProperty amontSelectedProperty,
-                final ObjectProperty<Image> imageProperty){
+                final BooleanProperty amontSelectedProperty){
             this.borneProperty = borneProperty;
             this.uiDistance = uiDistance;
             this.amontSelectedProperty = amontSelectedProperty;
-            this.imageProperty = imageProperty;
         }
 
         @Override
@@ -1247,22 +1192,20 @@ public class FXPositionablePane extends BorderPane {
                         // cas aval pour le début : distance saisie supérieure à la longueur du tronçon - la distance de la borne de depart depuis le début du tronçon
                         || (!amontSelectedProperty.get() && uiDistance.valueProperty().get() > (tronconLength-startBorneProj.distanceAlongLinear))){
                     uiDistance.setStyle("-fx-text-fill: #cc0000");
+                    uiDistance.getStyleClass().remove("valid");
+                    uiDistance.getStyleClass().add("unvalid");
                     uiDistance.setTooltip(new Tooltip("La distance saisie est en-dehors du tronçon."));
-                    imageProperty.set(ICON_EXCLAMATION_TRIANGLE);
                 }
 
                 // Dans les autres cas, on restaure le texte en noir.
                 else {
                     uiDistance.setStyle("-fx-text-fill: #000000");
+                    uiDistance.getStyleClass().add("valid");
+                    uiDistance.getStyleClass().remove("unvalid");
                     uiDistance.setTooltip(null);
-                    imageProperty.set(ICON_CHECK_CIRCLE);
                 }
             }
         }
     }
 
-    private double fxNumberValue(ObjectProperty<Double> spinnerNumber){
-        if(spinnerNumber.get()==null) return 0;
-        return spinnerNumber.get();
-    }
 }

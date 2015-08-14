@@ -11,6 +11,7 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
+import fr.sirs.core.model.TronconDigue;
 
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
@@ -40,6 +41,32 @@ public final class LinearReferencingUtilities extends LinearReferencing {
             return 0;
         }
     };
+
+    /**
+     * Return the Linear geometry on which the input {@link SystemeReperage} is based on.
+     *
+     * @param t
+     * @param source The SR to get linear for. If null, we'll try to get tronçon
+     * geometry of the currently edited {@link Positionable}.
+     *
+     * @return The linear associated, or null if we cannot get it.
+     */
+    public static LinearReferencing.SegmentInfo[] getSourceLinear(TronconDigue t, final SystemeReperage source) {
+        LinearReferencing.SegmentInfo[] tronconSegments = null;
+        Geometry linearSource = (t == null) ? null : t.getGeometry();
+        if (linearSource == null) {
+            if (source != null && source.getLinearId() != null) {
+                final TronconDigue tmpTroncon = InjectorCore.getBean(SessionCore.class).getRepositoryForClass(TronconDigue.class).get(source.getLinearId());
+                if (tmpTroncon != null) {
+                    linearSource = tmpTroncon.getGeometry();
+                }
+            }
+        }
+        if (linearSource != null) {
+            tronconSegments = LinearReferencingUtilities.buildSegments(LinearReferencing.asLineString(linearSource));
+        }
+        return tronconSegments;
+    }
 
     /**
      * Builds a geometry for a target positionable that has prDebut, prFin and an SRId.
@@ -235,69 +262,104 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      */
     public static LineString buildGeometry(Geometry tronconGeom, Positionable structure, AbstractSIRSRepository<BorneDigue> repo) {
 
-        final LineString tronconLineString = asLineString(tronconGeom);
-        SegmentInfo[] segments = buildSegments(tronconLineString);
+        final Point positionDebut = structure.getPositionDebut();
+        final Point positionFin = structure.getPositionFin();
 
-        Point positionDebut = structure.getPositionDebut();
-        Point positionFin = structure.getPositionFin();
         if (positionDebut != null || positionFin != null) {
-            ProjectedPoint refDebut = null, refFin = null;
-            if (positionDebut != null) {
-                refDebut = projectReference(segments, positionDebut);
-            }
-            if (positionFin != null) {
-                refFin = projectReference(segments, positionFin);
-            }
-            if (refDebut == null) {
-                refDebut = refFin;
-            } else if (refFin == null) {
-                refFin = refDebut;
-            }
-
-            return cut(tronconLineString, refDebut.distanceAlongLinear, refFin.distanceAlongLinear);
-
+            return buildGeometryFromGeo(tronconGeom, positionDebut, positionFin);
         } else {
-            //reconstruction a partir de bornes et de distances
-            final BorneDigue borneDebut = (structure.getBorneDebutId() != null) ? repo.get(structure.getBorneDebutId()) : null;
-            final BorneDigue borneFin = (structure.getBorneFinId() != null) ? repo.get(structure.getBorneFinId()) : null;
-            if (borneDebut == null && borneFin == null) {
-                //aucune borne définie, on ne peut pas calculer la géométrie
-                return null;
-            }
-
-            double distanceDebut = structure.getBorne_debut_distance();
-            double distanceFin = structure.getBorne_fin_distance();
-            //on considére que les troncons sont numérisé dans le sens amont vers aval.
-            if (structure.getBorne_debut_aval()) {
-                distanceDebut *= -1.0;
-            }
-            if (structure.getBorne_fin_aval()) {
-                distanceFin *= -1.0;
-            }
-
-            //calcul de la distance des bornes. Il peut y avoir qu'une seule borne définie dans le cas d'un ponctuel.
-            final Point tronconStart = GO2Utilities.JTS_FACTORY.createPoint(tronconLineString.getCoordinates()[0]);
-            if (borneDebut != null) {
-                final Point borneDebutGeom = borneDebut.getGeometry();
-                final double borneDebutDistance = computeRelative(segments, new Point[]{tronconStart}, borneDebutGeom).getValue();
-                //conversion des distances au borne en distance par rapport au debut du troncon
-                distanceDebut += borneDebutDistance;
-            }
-
-            if (borneFin != null) {
-                final Point borneFinGeom = borneFin.getGeometry();
-                final double borneFinDistance = computeRelative(segments, new Point[]{tronconStart}, borneFinGeom).getValue();
-                distanceFin += borneFinDistance;
-            }
-
-            if (borneDebut == null) {
-                distanceDebut = distanceFin;
-            } else if (borneFin == null) {
-                distanceFin = distanceDebut;
-            }
-
-            return cut(tronconLineString, StrictMath.min(distanceDebut, distanceFin), StrictMath.max(distanceDebut, distanceFin));
+            return buildGeometryFromBorne(tronconGeom, structure, repo);
         }
+    }
+
+    /**
+     * Create a JTS geometry for the input {@link Positionable}. Generated
+     * geometry is a line string along an input geometry, whose beginning and
+     * end are defined by given borne.
+     *
+     * @param tronconGeom The source geometry to follow when creating the new
+     * one.
+     * @param structure The object to generate a geometry for.
+     * @param repo The {@link BorneDigueRepository} to use to retrieve input
+     * @return A line string for the given structure. Never null.
+     */
+    public static LineString buildGeometryFromBorne(Geometry tronconGeom, Positionable structure, AbstractSIRSRepository<BorneDigue> repo) {
+
+        final LineString tronconLineString = asLineString(tronconGeom);
+        final SegmentInfo[] segments = buildSegments(tronconLineString);
+
+        //reconstruction a partir de bornes et de distances
+        final BorneDigue borneDebut = (structure.getBorneDebutId() != null) ? repo.get(structure.getBorneDebutId()) : null;
+        final BorneDigue borneFin = (structure.getBorneFinId() != null) ? repo.get(structure.getBorneFinId()) : null;
+        if (borneDebut == null && borneFin == null) {
+            //aucune borne définie, on ne peut pas calculer la géométrie
+            return null;
+        }
+
+        double distanceDebut = structure.getBorne_debut_distance();
+        double distanceFin = structure.getBorne_fin_distance();
+        //on considére que les troncons sont numérisé dans le sens amont vers aval.
+        if (structure.getBorne_debut_aval()) {
+            distanceDebut *= -1.0;
+        }
+        if (structure.getBorne_fin_aval()) {
+            distanceFin *= -1.0;
+        }
+
+        //calcul de la distance des bornes. Il peut y avoir qu'une seule borne définie dans le cas d'un ponctuel.
+        final Point tronconStart = GO2Utilities.JTS_FACTORY.createPoint(tronconLineString.getCoordinates()[0]);
+        if (borneDebut != null) {
+            final Point borneDebutGeom = borneDebut.getGeometry();
+            final double borneDebutDistance = computeRelative(segments, new Point[]{tronconStart}, borneDebutGeom).getValue();
+            //conversion des distances au borne en distance par rapport au debut du troncon
+            distanceDebut += borneDebutDistance;
+        }
+
+        if (borneFin != null) {
+            final Point borneFinGeom = borneFin.getGeometry();
+            final double borneFinDistance = computeRelative(segments, new Point[]{tronconStart}, borneFinGeom).getValue();
+            distanceFin += borneFinDistance;
+        }
+
+        if (borneDebut == null) {
+            distanceDebut = distanceFin;
+        } else if (borneFin == null) {
+            distanceFin = distanceDebut;
+        }
+
+        return cut(tronconLineString, StrictMath.min(distanceDebut, distanceFin), StrictMath.max(distanceDebut, distanceFin));
+    }
+
+    /**
+     * Create a JTS geometry for the input {@link Positionable}. Generated
+     * geometry is a line string along an input geometry, whose beginning and
+     * end are defined by given geographic begin and end position.
+     *
+     * @param tronconGeom The source geometry to follow when creating the new
+     * one.
+     * @param positionDebut
+     * @param positionFin
+     * @return A line string for the given structure. Never null.
+     */
+    public static LineString buildGeometryFromGeo(Geometry tronconGeom, Point positionDebut, Point positionFin) {
+
+        final LineString tronconLineString = asLineString(tronconGeom);
+        final SegmentInfo[] segments = buildSegments(tronconLineString);
+        
+        ProjectedPoint refDebut = null, refFin = null;
+        if (positionDebut != null) {
+            refDebut = projectReference(segments, positionDebut);
+        }
+        if (positionFin != null) {
+            refFin = projectReference(segments, positionFin);
+        }
+        if (refDebut == null) {
+            refDebut = refFin;
+        } else if (refFin == null) {
+            refFin = refDebut;
+        }
+
+        return cut(tronconLineString, refDebut.distanceAlongLinear, refFin.distanceAlongLinear);
     }
 
     /**

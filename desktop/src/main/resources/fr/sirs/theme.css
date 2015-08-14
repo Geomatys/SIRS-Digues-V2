@@ -8,8 +8,12 @@
 
 // FOR ALL WIDGETS
 
-.table-row-cell {
-    -fx-cell-size: 35;
+.unvalid {
+    -fx-base : #FF6666;
+}
+
+.valid {
+    -fx-base : #66FF66;
 }
 
 //special classes
