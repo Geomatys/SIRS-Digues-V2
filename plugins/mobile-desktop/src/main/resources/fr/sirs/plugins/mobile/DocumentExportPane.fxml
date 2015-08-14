@@ -7,9 +7,9 @@
 
 <fx:root stylesheets="@MobilePluginStyle.css" type="StackPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <BorderPane fx:id="uiConfigPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity">
+      <BorderPane fx:id="uiConfigPane" minHeight="10.0" minWidth="10.0">
          <left>
-            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" spacing="5.0" BorderPane.alignment="CENTER">
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="30.0" minWidth="10.0" spacing="5.0" BorderPane.alignment="CENTER">
                <children>
                   <Label styleClass="list-title" text="Application SIRS" />
                   <ListView fx:id="uiDesktopList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="30.0" minWidth="30.0" prefHeight="200.0" VBox.vgrow="SOMETIMES" />
@@ -20,7 +20,7 @@
             </VBox>
          </left>
          <right>
-            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" spacing="5.0" BorderPane.alignment="CENTER">
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="30.0" minWidth="10.0" spacing="5.0" BorderPane.alignment="CENTER">
                <children>
                   <HBox alignment="CENTER_LEFT" spacing="10.0">
                      <children>
@@ -138,7 +138,7 @@
             </TitledPane>
          </bottom>
       </BorderPane>
-      <BorderPane fx:id="uiCopyPane" visible="false">
+      <BorderPane fx:id="uiCopyPane" styleClass="header" visible="false">
          <center>
             <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
                <top>

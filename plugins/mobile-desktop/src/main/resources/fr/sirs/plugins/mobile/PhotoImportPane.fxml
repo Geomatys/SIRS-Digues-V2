@@ -5,11 +5,11 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@MobilePluginStyle.css" type="StackPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@MobilePluginStyle.css" type="StackPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <VBox spacing="10.0">
+      <VBox minHeight="0.0" minWidth="0.0" spacing="10.0">
          <children>
-            <VBox fx:id="uiParameterContainer" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" spacing="10.0">
+            <VBox fx:id="uiParameterContainer" minHeight="0.0" minWidth="0.0" spacing="10.0">
                <children>
                   <TitledPane maxWidth="1.7976931348623157E308" minWidth="10.0" styleClass="header" text="Périphérique d'entrée">
                      <content>
@@ -109,7 +109,7 @@
                   </TitledPane>
                </children>
             </VBox>
-            <VBox styleClass="footer">
+            <VBox minHeight="0.0" minWidth="0.0" styleClass="footer">
                <children>
                   <HBox alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" minWidth="10.0" spacing="10.0">
                      <children>
