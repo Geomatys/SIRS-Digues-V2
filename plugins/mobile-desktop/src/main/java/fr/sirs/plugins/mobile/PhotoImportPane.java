@@ -443,6 +443,10 @@ public class PhotoImportPane extends StackPane {
         /* We give root directory as destination. sub-directory will be managed by
          * the resolver, because we have to update CouchDB documents accordingly.
          */
+        if (filesToCopy.isEmpty()) {
+            warning("Aucune photo n'a été trouvée pour l'import.");
+            return;
+        }
         final CopyTask cpTask = new CopyTask(filesToCopy, root, resolver);
         copyTaskProperty.set(cpTask);
 
