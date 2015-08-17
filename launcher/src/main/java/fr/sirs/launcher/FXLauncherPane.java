@@ -1,18 +1,13 @@
 package fr.sirs.launcher;
 
+import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.sun.javafx.PlatformUtil;
-
 import fr.sirs.AbstractRestartableStage;
 import fr.sirs.Loader;
 import fr.sirs.Plugin;
-import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
-import fr.sirs.core.component.DatabaseRegistry;
-import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.PluginInfo;
 import fr.sirs.Plugins;
-import fr.sirs.core.model.Role;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.binaryMD5;
 import static fr.sirs.SIRS.hexaMD5;
@@ -20,15 +15,19 @@ import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.authentication.AuthenticationWallet;
+import fr.sirs.core.component.DatabaseRegistry;
+import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.ElementCreator;
+import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Utilisateur;
+import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.DbImporter;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
 import fr.sirs.util.FXAuthenticationWalletEditor;
 import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.property.SirsPreferences;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -48,7 +47,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
-
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -82,7 +80,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
-
 import org.apache.sis.util.logging.Logging;
 import org.ektorp.ReplicationStatus;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
@@ -516,13 +513,13 @@ public class FXLauncherPane extends BorderPane {
 
                 final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
                 createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());
-
-                DbImporter importer = new DbImporter(appCtx);
-                importer.setDatabase(DatabaseBuilder.open(mainDbFile),
-                        DatabaseBuilder.open(cartoDbFile), uiImportCRS.crsProperty().get());
-                importer.importation();
-
-                importer = null;
+                
+                final DbImporter importer = new DbImporter(appCtx);
+                try(final Database mainDb = DatabaseBuilder.open(mainDbFile);
+                    final Database cartoDb = DatabaseBuilder.open(cartoDbFile)){
+                    importer.setDatabase(mainDb, cartoDb, uiImportCRS.crsProperty().get());
+                    importer.importation();
+                }
 
                 // Opérations ultérieures à l'importation à réaliser par les plugins.
                 // Should initialize most of couchdb views
