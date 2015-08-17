@@ -172,11 +172,20 @@ public class PropertiesFileUtilities {
      * @param parent {@code true} if the file f is not the root directory.
      */
     private static void storeSirsProperties(final Properties prop, final File f, boolean parent) {
+        final File sirsPropFile;
         try {
-            final File sirsPropFile = getSirsPropertiesFile(f, parent);
-            prop.store(new FileWriter(sirsPropFile), "");
+            sirsPropFile = getSirsPropertiesFile(f, parent);
         } catch (IOException ex) {
             LOGGER.log(Level.WARNING, "Error while accessing sirs properties file.", ex);
+            return;
+        }
+
+        if (sirsPropFile != null && sirsPropFile.exists()) {
+            try (final FileWriter writer = new FileWriter(sirsPropFile)) {
+                prop.store(writer, "");
+            } catch (IOException ex) {
+                LOGGER.log(Level.WARNING, "Error while writing sirs properties file.", ex);
+            }
         }
     }
     
@@ -215,14 +224,21 @@ public class PropertiesFileUtilities {
      */
     private static Properties getSirsProperties(final File f, final boolean parent) {
         final Properties prop = new Properties();
+        File sirsPropFile = null;
         try {
-            final File sirsPropFile = getSirsPropertiesFile(f, parent);
-            if (sirsPropFile != null) {
-                prop.load(new FileReader(sirsPropFile));
-            } 
+            sirsPropFile = getSirsPropertiesFile(f, parent);
         } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Erro while loading/creating sirs properties file.", ex);
+            LOGGER.log(Level.WARNING, "Error while loading/creating sirs properties file.", ex);
         }
+
+        if (sirsPropFile != null) {
+            try (final FileReader reader = new FileReader(sirsPropFile)) {
+                prop.load(reader);
+            } catch (IOException ex) {
+                LOGGER.log(Level.WARNING, "Error while reading sirs properties file.", ex);
+            }
+        }
+
         return prop;
     }
     
