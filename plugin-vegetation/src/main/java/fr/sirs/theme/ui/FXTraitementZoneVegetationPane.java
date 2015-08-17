@@ -1,11 +1,16 @@
 
 package fr.sirs.theme.ui;
 
+import fr.sirs.Injector;
+import fr.sirs.SIRS;
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.RefSousTraitementVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
+import java.util.List;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
+import javafx.collections.FXCollections;
 
 /**
  *
@@ -15,40 +20,37 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
     
     public FXTraitementZoneVegetationPane(final TraitementZoneVegetation traitementZoneVegetation){
         super(traitementZoneVegetation);
-    }
-    
-    /**
-     * Initialize fields at element setting.
-     */
-    protected void initFields(ObservableValue<? extends TraitementZoneVegetation > observableElement, TraitementZoneVegetation oldElement, TraitementZoneVegetation newElement) {
-        super.initFields(observableElement, oldElement, newElement);
+
+        ui_typeTraitementId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                if(newValue instanceof Preview){
+                    final AbstractSIRSRepository<RefSousTraitementVegetation> sousTypeRepo = Injector.getSession().getRepositoryForClass(RefSousTraitementVegetation.class);
+                    final String traitementId = ((Preview) newValue).getElementId();
+                    if(traitementId!=null){
+                        final List<RefSousTraitementVegetation> sousTypesDispos = sousTypeRepo.getAll();
+                        sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTraitementId()));
+                        SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.observableArrayList(sousTypesDispos), null);
+                    }
+                }
+            }
+        });
 
         ui_typeTraitementPonctuelId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
 
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                final Alert alert = new Alert(Alert.AlertType.NONE, "coucou", ButtonType.OK);
-                alert.showAndWait();
+                if(newValue instanceof Preview){
+                    final AbstractSIRSRepository<RefSousTraitementVegetation> sousTypeRepo = Injector.getSession().getRepositoryForClass(RefSousTraitementVegetation.class);
+                    final String traitementId = ((Preview) newValue).getElementId();
+                    if(traitementId!=null){
+                        final List<RefSousTraitementVegetation> sousTypesDispos = sousTypeRepo.getAll();
+                        sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTraitementId()));
+                        SIRS.initCombo(ui_sousTypeTraitementPonctuelId, FXCollections.observableArrayList(sousTypesDispos), null);
+                    }
+                }
             }
         });
-        /*
-//         * Bind control properties to Element ones.
-//         */
-//        // Propriétés de TraitementZoneVegetation
-//        SIRS.initCombo(ui_typeTraitementPonctuelId, FXCollections.observableArrayList(
-//            previewRepository.getByClass(RefTraitementVegetation.class)),
-//            newElement.getTypeTraitementPonctuelId() == null? null : previewRepository.get(newElement.getTypeTraitementPonctuelId()));
-//        SIRS.initCombo(ui_sousTypeTraitementPonctuelId, FXCollections.observableArrayList(
-//            previewRepository.getByClass(RefSousTraitementVegetation.class)),
-//            newElement.getSousTypeTraitementPonctuelId() == null? null : previewRepository.get(newElement.getSousTypeTraitementPonctuelId()));
-//        SIRS.initCombo(ui_typeTraitementId, FXCollections.observableArrayList(
-//            previewRepository.getByClass(RefTraitementVegetation.class)),
-//            newElement.getTypeTraitementId() == null? null : previewRepository.get(newElement.getTypeTraitementId()));
-//        SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.observableArrayList(
-//            previewRepository.getByClass(RefSousTraitementVegetation.class)),
-//            newElement.getSousTypeTraitementId() == null? null : previewRepository.get(newElement.getSousTypeTraitementId()));
-//        SIRS.initCombo(ui_frequenceId, FXCollections.observableArrayList(
-//            previewRepository.getByClass(RefFrequenceTraitementVegetation.class)),
-//            newElement.getFrequenceId() == null? null : previewRepository.get(newElement.getFrequenceId()));
     }
 }
