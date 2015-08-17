@@ -106,7 +106,7 @@ public class DocumentsPane extends GridPane {
     private static final Image DEL_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/remove.png"));
     private static final Image SET_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/set.png"));
     private static final Image LIST_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/list.png"));
-    private static final Image PUB_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/publish.png"), 17, 20, false, false);
+    private static final Image PUB_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/publish2.png"), 17, 20, false, false);
     private static final Image OP_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/ouvrir2.png"));
     private static final Image HIDE_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/cocher-decocher.png"));
     private static final Image HI_HISH_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/afficher.png"));
