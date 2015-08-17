@@ -1,12 +1,12 @@
 package fr.sirs.theme.ui;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.LinearReferencingUtilities;
+import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.BorneDigue;
@@ -14,8 +14,8 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import static fr.sirs.theme.ui.FXPositionableMode.computeLinearFromGeo;
 import fr.sirs.util.SirsStringConverter;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +36,6 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
-import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 import org.geotoolkit.referencing.LinearReferencing;
 
@@ -87,6 +86,8 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
         uiAvalEnd.disableProperty().bind(disableProperty);
         uiDistanceStart.disableProperty().bind(disableProperty);
         uiDistanceEnd.disableProperty().bind(disableProperty);
+        uiDistanceStart.setEditable(true);
+        uiDistanceEnd.setEditable(true);
 
         final ToggleGroup groupStart = new ToggleGroup();
         uiAvalStart.setToggleGroup(groupStart);
@@ -137,6 +138,16 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
     }
 
     @Override
+    public String getID() {
+        return MODE;
+    }
+
+    @Override
+    public String getTitle() {
+        return "Borne";
+    }
+
+    @Override
     public Node getFXNode() {
         return this;
     }
@@ -154,10 +165,8 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
     private void updateFields(){
         reseting = true;
 
-
         final Positionable pos = posProperty.get();
         final String mode = pos.getGeometryMode();
-
 
         final TronconDigue t = FXPositionableMode.getTronconFromPositionable(pos);
         final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
@@ -170,6 +179,7 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
         } else {
             defaultSR = null;
         }
+        uiSRs.setValue(defaultSR);
 
         if(MODE.equals(mode)){
             //on assigne les valeurs sans changement
@@ -203,18 +213,18 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
 
         }else{
             //on calcule les valeurs en fonction des points de debut et fin
-            final Point ptStart = pos.getPositionDebut();
-            final Point ptEnd   = pos.getPositionFin();
-            Map.Entry<BorneDigue, Double> relStart = computeLinearFromGeo(defaultSR, ptStart);
-            Map.Entry<BorneDigue, Double> relEnd = computeLinearFromGeo(defaultSR, ptEnd);
+            final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t, Injector.getSession());
+            final TronconUtils.PosSR rp = ps.getForSR(defaultSR);
 
-            uiAmontStart.setSelected(relStart.getValue() < 0);
-            uiDistanceStart.getValueFactory().setValue(StrictMath.abs(relStart.getValue()));
-            uiBorneStart.getSelectionModel().select(relStart.getKey());
+            uiAmontStart.setSelected(!rp.startAval);
+            uiAvalStart.setSelected(rp.startAval);
+            uiDistanceStart.getValueFactory().setValue(rp.distanceStartBorne);
+            uiBorneStart.getSelectionModel().select(rp.borneDigueStart);
 
-            uiAmontEnd.setSelected(relEnd.getValue() < 0);
-            uiDistanceEnd.getValueFactory().setValue(StrictMath.abs(relEnd.getValue()));
-            uiBorneEnd.getSelectionModel().select(relEnd.getKey());
+            uiAmontEnd.setSelected(!rp.endAval);
+            uiAvalEnd.setSelected(rp.endAval);
+            uiDistanceEnd.getValueFactory().setValue(rp.distanceEndBorne);
+            uiBorneEnd.getSelectionModel().select(rp.borneDigueEnd);
 
         }
 
@@ -232,6 +242,10 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
         positionable.setSystemeRepId(sr==null ? null : sr.getDocumentId());
         positionable.setBorneDebutId(startBorne==null ? null : startBorne.getDocumentId());
         positionable.setBorneFinId(endBorne==null ? null : endBorne.getDocumentId());
+        positionable.setBorne_debut_aval(uiAvalStart.isSelected());
+        positionable.setBorne_fin_aval(uiAvalEnd.isSelected());
+        positionable.setBorne_debut_distance(uiDistanceStart.getValue());
+        positionable.setBorne_fin_distance(uiDistanceEnd.getValue());
 
         //on recalculate la geometrie
         final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
@@ -283,8 +297,9 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
         //calcul de la position relative dans le nouveau SR
         final Point ptStart = computeGeoFromLinear(uiDistanceStart.getValue(), uiBorneStart.getValue(), uiAmontStart.isSelected());
         final Point ptEnd   = computeGeoFromLinear(uiDistanceEnd.getValue(), uiBorneEnd.getValue(), uiAmontEnd.isSelected());
-        Map.Entry<BorneDigue, Double> relStart = computeLinearFromGeo(newSR, ptStart);
-        Map.Entry<BorneDigue, Double> relEnd = computeLinearFromGeo(newSR, ptEnd);
+        final LinearReferencing.SegmentInfo[] segments = getSourceLinear(newSR);
+        Map.Entry<BorneDigue, Double> relStart = computeLinearFromGeo(segments, newSR, ptStart);
+        Map.Entry<BorneDigue, Double> relEnd = computeLinearFromGeo(segments, newSR, ptEnd);
 
         uiAmontStart.setSelected(relStart.getValue() < 0);
         uiDistanceStart.getValueFactory().setValue(StrictMath.abs(relStart.getValue()));
@@ -313,63 +328,6 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
             tronconSegments = LinearReferencingUtilities.getSourceLinear(t, source);
         }
         return tronconSegments;
-    }
-
-
-    /**
-     * Return valid bornes defined by the input {@link SystemeReperage} PRs ({@link SystemeReperageBorne}).
-     * Only bornes containing a geometry are returned.
-     * @param source The SR to extract bornes from.
-     * @return A map, whose values are found bornes, and keys are their associated geometry. Never null, but can be empty.
-     */
-    private HashMap<Point, BorneDigue> getAvailableBornes(final SystemeReperage source) {
-        ArgumentChecks.ensureNonNull("Système de repérage source", source);
-        final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-        final HashMap<Point, BorneDigue> availableBornes = new HashMap<>(source.systemeReperageBornes.size());
-        for (final SystemeReperageBorne pr : source.systemeReperageBornes) {
-            if (pr.getBorneId() != null) {
-                final BorneDigue borne = borneRepo.get(pr.getBorneId());
-                if (borne != null && borne.getGeometry() != null) {
-                    availableBornes.put(borne.getGeometry(), borne);
-                }
-            }
-        }
-        return availableBornes;
-    }
-
-    /**
-     * Compute a linear position for the edited {@link Positionable} using defined
-     * geographic position.
-     *
-     * @param targetSR The SR to use to generate linear position.
-     * @return The borne to use as start point, and the distance from the borne
-     * until the input geographic position. It's negative if we go from downhill
-     * to uphill.
-     *
-     * @throws RuntimeException If the computing fails.
-     */
-    private Map.Entry<BorneDigue, Double> computeLinearFromGeo(final SystemeReperage targetSR, final Point geoPoint) {
-        ArgumentChecks.ensureNonNull("Geographic point", geoPoint);
-
-        // Get troncon geometry
-        final LinearReferencing.SegmentInfo[] linearSource = getSourceLinear(targetSR);
-        if (linearSource == null) throw new IllegalStateException("No computing can be done without a source linear object.");
-
-        // Get list of bornes which can be possibly used.
-        final HashMap<Point, BorneDigue> availableBornes = getAvailableBornes(targetSR);
-        final Point[] arrayGeom = availableBornes.keySet().toArray(new Point[0]);
-
-        // Get nearest borne from our start geographic point.
-        final Map.Entry<Integer, Double> computedRelative = LinearReferencingUtilities.computeRelative(linearSource, arrayGeom, geoPoint);
-        final int borneIndex = computedRelative.getKey();
-        if (borneIndex < 0 || borneIndex >= availableBornes.size()) {
-            throw new RuntimeException("Computing failed : no valid borne found.");
-        }
-        final double foundDistance = computedRelative.getValue();
-        if (Double.isNaN(foundDistance) || Double.isInfinite(foundDistance)) {
-            throw new RuntimeException("Computing failed : no valid distance found.");
-        }
-        return new AbstractMap.SimpleEntry<>(availableBornes.get(arrayGeom[borneIndex]), foundDistance);
     }
 
     /**

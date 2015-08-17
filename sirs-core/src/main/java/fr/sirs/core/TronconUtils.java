@@ -1078,6 +1078,7 @@ public class TronconUtils {
 
             final Map.Entry<Integer, Double> startRef = computeRelative(getTronconSegments(false), references.toArray(new Point[0]), startPoint);
             final BorneDigue startBorne = bornes.get(startRef.getKey());
+            possr.borneDigueStart = startBorne;
             possr.borneStartId = startBorne.getDocumentId();
             possr.distanceStartBorne = startRef.getValue();
             possr.startAval = possr.distanceStartBorne < 0;
@@ -1085,6 +1086,7 @@ public class TronconUtils {
 
             final Map.Entry<Integer, Double> endRef = computeRelative(getTronconSegments(false), references.toArray(new Point[0]), endPoint);
             final BorneDigue endBorne = bornes.get(endRef.getKey());
+            possr.borneDigueEnd = endBorne;
             possr.borneEndId = endBorne.getDocumentId();
             possr.distanceEndBorne = endRef.getValue();
             possr.endAval = possr.distanceEndBorne < 0;
@@ -1096,9 +1098,13 @@ public class TronconUtils {
 
     public static final class PosSR{
         public String srid = "";
+
+        public BorneDigue borneDigueStart;
         public String borneStartId = "";
         public double distanceStartBorne;
         public boolean startAval;
+
+        public BorneDigue borneDigueEnd;
         public String borneEndId = "";
         public double distanceEndBorne;
         public boolean endAval;

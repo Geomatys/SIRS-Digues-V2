@@ -7,10 +7,15 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.CRS_WGS84;
+import static fr.sirs.SIRS.ICON_IMPORT_WHITE;
 import fr.sirs.core.LinearReferencingUtilities;
+import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.theme.ui.FXPositionableMode.fxNumberValue;
+import fr.sirs.util.SirsStringConverter;
+import java.util.Collections;
+import java.util.List;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -20,11 +25,18 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.geometry.jts.JTS;
@@ -53,10 +65,19 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
     @FXML private Spinner<Double> uiLatitudeStart;
     @FXML private Spinner<Double> uiLatitudeEnd;
 
+    private Button uiImport;
+
     private boolean reseting = false;
 
     public FXPositionableCoordMode() {
         SIRS.loadFXML(this, Positionable.class);
+
+        //bouton d'import
+        uiImport = new Button();
+        uiImport.setGraphic(new ImageView(ICON_IMPORT_WHITE));
+        uiImport.getStyleClass().add("buttonbar-button");
+        uiImport.setOnAction(this::importCoord);
+        uiImport.visibleProperty().bind(disableProperty);
 
         //liste par défaut des systemes de coordonnées
         final ObservableList<CoordinateReferenceSystem> crss = FXCollections.observableArrayList();
@@ -65,6 +86,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
         uiCRSs.setItems(crss);
         uiCRSs.getSelectionModel().clearAndSelect(1);
         uiCRSs.disableProperty().bind(disableProperty);
+        uiCRSs.setConverter(new SirsStringConverter());
         
         uiLongitudeStart.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
         uiLatitudeStart.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
@@ -111,6 +133,20 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
     }
 
     @Override
+    public String getID() {
+        return MODE;
+    }
+    
+    @Override
+    public String getTitle() {
+        return "Coordonnée";
+    }
+
+    public List<Node> getExtraButton(){
+        return Collections.singletonList(uiImport);
+    }
+
+    @Override
     public Node getFXNode() {
         return this;
     }
@@ -123,6 +159,19 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
     @Override
     public BooleanProperty disablingProperty() {
         return disableProperty;
+    }
+
+    private void importCoord(ActionEvent event) {
+        final FXImportCoordinate importCoord = new FXImportCoordinate(posProperty.get());
+        final Dialog dialog = new Dialog();
+        final DialogPane pane = new DialogPane();
+        pane.getButtonTypes().add(ButtonType.CLOSE);
+        pane.setContent(importCoord);
+        dialog.setDialogPane(pane);
+        dialog.setResizable(true);
+        dialog.setTitle("Import de coordonnée");
+        dialog.setOnCloseRequest((Event event1) -> {dialog.hide();});
+        dialog.show();
     }
 
     private void updateFields(){
