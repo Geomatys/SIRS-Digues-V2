@@ -39,7 +39,7 @@ public class DatabaseVersionPane extends GridPane{
 
     
     public DatabaseVersionPane(final String existingKey, final String dbKey) {
-        SIRS.loadFXML(this, ImportPane.class);
+        SIRS.loadFXML(this);
         Injector.injectDependencies(this);
         String[] sfKey = existingKey.split("\\|");
         

@@ -46,7 +46,7 @@ public class GenerationPane extends GridPane {
     private static final Logger LOGGER = Logging.getLogger(GenerationPane.class);
     
     public GenerationPane() {
-        SIRS.loadFXML(this, GenerationPane.class);
+        SIRS.loadFXML(this);
         Injector.injectDependencies(this);
         uiProgress.setVisible(false);
         uiGenerateFinish.setVisible(false);
@@ -96,7 +96,7 @@ public class GenerationPane extends GridPane {
             LOGGER.log(Level.WARNING, null, ex);
             uiProgress.setVisible(false);
             uiGenerateFinish.setVisible(true);
-            uiProgressLabel.setText("Erreur pendant la generation");
+            uiProgressLabel.setText("Erreur pendant la génération");
         }
     }
     
@@ -121,14 +121,14 @@ public class GenerationPane extends GridPane {
             LOGGER.log(Level.WARNING, null, ex);
             uiProgress.setVisible(false);
             uiGenerateFinish.setVisible(true);
-            uiProgressLabel.setText("Erreur pendant la generation");
+            uiProgressLabel.setText("Erreur pendant la génération");
         }
     }
     
     public void writeDoSynth(final FileTreeItem item, final File f) {
         uiProgress.setVisible(true);
         try {
-            Platform.runLater(() -> uiProgressLabel.setText("Recherche des fichers a aggréger..."));
+            Platform.runLater(() -> uiProgressLabel.setText("Recherche des fichers à aggréger..."));
             
             ODTUtils.writeDoSynth(item, f, uiProgressLabel);
             
@@ -140,7 +140,7 @@ public class GenerationPane extends GridPane {
             LOGGER.log(Level.WARNING, null, ex);
             uiProgress.setVisible(false);
             uiGenerateFinish.setVisible(true);
-            uiProgressLabel.setText("Erreur pendant la generation");
+            uiProgressLabel.setText("Erreur pendant la génération");
         }
     }
 }

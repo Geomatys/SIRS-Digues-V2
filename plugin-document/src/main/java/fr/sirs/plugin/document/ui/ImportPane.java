@@ -30,7 +30,7 @@ public class ImportPane extends GridPane {
     public TextField inventoryNumField;
     
     public ImportPane() {
-        SIRS.loadFXML(this, ImportPane.class);
+        SIRS.loadFXML(this);
         Injector.injectDependencies(this);
     }
     

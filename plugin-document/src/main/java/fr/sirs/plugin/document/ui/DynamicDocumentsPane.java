@@ -221,8 +221,8 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
             pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
             dialog.setDialogPane(pane);
             dialog.setResizable(true);
-            dialog.setTitle("Detruire modèle");
-            dialog.setContentText("Detruire le modèle dans la base de données?");
+            dialog.setTitle("Détruire modèle");
+            dialog.setContentText("Détruire le modèle dans la base de données ?");
 
             final Optional opt = dialog.showAndWait();
             if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
@@ -230,7 +230,7 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
                Injector.getBean(RapportModeleDocumentRepository.class).remove(model);
             }
         } else {
-            showErrorDialog("Vous devez selectionner un modèle.");
+            showErrorDialog("Vous devez sélectionner un modèle.");
         }
     }
 
@@ -273,7 +273,7 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
         
         final RapportModeleDocument modele = uiModelsList.getSelectionModel().getSelectedItem();
         if (modele == null) {
-            showErrorDialog("Vous devez selectionner un modéle.");
+            showErrorDialog("Vous devez sélectionner un modèle.");
             return;
         }
         
@@ -284,7 +284,7 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
         pane.setContent(ipane);
         dialog.setScene(new Scene(pane));
         dialog.setResizable(true);
-        dialog.setTitle("Generation des document");
+        dialog.setTitle("Génération des documents");
         dialog.initModality(Modality.APPLICATION_MODAL);
         
         final Collection<TronconDigue> troncons = getTronconList();

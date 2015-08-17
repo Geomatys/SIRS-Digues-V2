@@ -140,7 +140,7 @@ public class DocumentsPane extends GridPane {
     private final DynamicDocumentTheme dynDcTheme;
     
     public DocumentsPane(final FileTreeItem root, final DynamicDocumentTheme dynDcTheme) {
-        SIRS.loadFXML(this, DocumentsPane.class);
+        SIRS.loadFXML(this);
         Injector.injectDependencies(this);
         this.root = root;
         this.dynDcTheme = dynDcTheme;
@@ -168,7 +168,7 @@ public class DocumentsPane extends GridPane {
         addDocButton.setTooltip(new Tooltip("Ajouter un dossier dynamique"));
         listButton.setTooltip(new Tooltip("Exporter le sommaire"));
         hideShowButton.setTooltip(new Tooltip("Cacher/Afficher les fichiers cachés"));
-        hideFileButton.setTooltip(new Tooltip("Cacher/Afficher le fichier selectionné"));
+        hideFileButton.setTooltip(new Tooltip("Cacher/Afficher le fichier sélectionné"));
         
         addFolderButton.getStyleClass().add(BUTTON_STYLE);
         importDocButton.getStyleClass().add(BUTTON_STYLE);
@@ -370,8 +370,8 @@ public class DocumentsPane extends GridPane {
         pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
         dialog.setDialogPane(pane);
         dialog.setResizable(true);
-        dialog.setTitle("Detruire document");
-        dialog.setContentText("Detruire le fichier/dossier dans le système de fichier?");
+        dialog.setTitle("Détruire document");
+        dialog.setContentText("Détruire le fichier/dossier dans le système de fichier ?");
 
         final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
@@ -387,7 +387,7 @@ public class DocumentsPane extends GridPane {
                 // refresh tree
                 update();
             } else {
-                showErrorDialog("Vous devez selectionner un dossier.");
+                showErrorDialog("Vous devez sélectionner un dossier.");
             }
         }
     }
@@ -537,7 +537,7 @@ public class DocumentsPane extends GridPane {
             newDir.mkdir();
             update();
         } else {
-            showErrorDialog("Vous devez selectionner un dossier.");
+            showErrorDialog("Vous devez sélectionner un dossier.");
         }
     }
     
@@ -689,7 +689,7 @@ public class DocumentsPane extends GridPane {
                     stagePane.setContent(gpane);
                     stage.setScene(new Scene(stagePane));
                     stage.setResizable(true);
-                    stage.setTitle("Generation du document de synthèse");
+                    stage.setTitle("Génération du document de synthèse");
                     stage.initModality(Modality.APPLICATION_MODAL);
                     
                     new Thread() {
@@ -734,7 +734,7 @@ public class DocumentsPane extends GridPane {
                     dialog.show();
                 }
             } else {
-                showErrorDialog("Impossible de resoudre l'identifiant du modèle pour le fichier: " + item.getName());
+                showErrorDialog("Impossible de résoudre l'identifiant du modèle pour le fichier: " + item.getName());
             }
         }
         
@@ -779,7 +779,7 @@ public class DocumentsPane extends GridPane {
                 final File f          = ft.getValue();
                 if (f != null && (getBooleanProperty(f, DYNAMIC) || f.getName().equals(DOCUMENT_FOLDER))) {
                     if (getBooleanProperty(f, DYNAMIC)) {
-                        button.setTooltip(new Tooltip("Mettre a jour le fichier dynamique"));
+                        button.setTooltip(new Tooltip("Mettre à jour le fichier dynamique"));
                     } else if (f.getName().equals(DOCUMENT_FOLDER)) {
                         button.setTooltip(new Tooltip("Exporter le dossier de synthèse"));
                     }

@@ -59,7 +59,7 @@ public class ModelParagraphePane extends BorderPane {
     private final RapportSectionDocument section;
     private final RapportModeleDocument model;
 
-    public static final String SELECT_DOC     = "Selectionner un document";
+    public static final String SELECT_DOC     = "Sélectionner un document";
     public static final String GENERATE_TAB   = "Générer un tableau";
     public static final String GENERATE_SHEET = "Générer des fiches";
     
@@ -107,7 +107,7 @@ public class ModelParagraphePane extends BorderPane {
                         protected void updateItem(Object item, boolean empty) {
                             super.updateItem(item, empty);
                             if (item == null || empty) {
-                                setText("Séléctionner une requête");
+                                setText("Sélectionner une requête");
                             } else {
                                 SQLQuery query = (SQLQuery) item;
                                 setText("SQLQ : " + query.getLibelle());

@@ -33,7 +33,7 @@ public class MainFolderPane extends GridPane {
     }
     
     public MainFolderPane() {
-        SIRS.loadFXML(this, MainFolderPane.class);
+        SIRS.loadFXML(this);
         Injector.injectDependencies(this);
     }
     

@@ -29,7 +29,7 @@ public class NewFolderPane extends GridPane {
     public ComboBox<String> locCombo;
     
     public NewFolderPane() {
-        SIRS.loadFXML(this, NewFolderPane.class);
+        SIRS.loadFXML(this);
         Injector.injectDependencies(this);
         
         final ObservableList prop = FXCollections.observableArrayList();

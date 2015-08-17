@@ -24,7 +24,7 @@ public class SaveSummaryPane extends GridPane {
     private Button saveButton;
 
     public SaveSummaryPane() {
-        SIRS.loadFXML(this, SaveSummaryPane.class);
+        SIRS.loadFXML(this);
         Injector.injectDependencies(this);
     }
     
