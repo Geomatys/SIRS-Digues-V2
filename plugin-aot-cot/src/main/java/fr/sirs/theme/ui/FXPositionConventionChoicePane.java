@@ -10,7 +10,11 @@ import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.SystemeReperageRepository;
-import fr.sirs.core.model.*;
+import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
 import static java.lang.Double.max;
 import static java.lang.Double.min;
@@ -24,13 +28,15 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.cell.ComboBoxListCell;
 import javafx.scene.layout.BorderPane;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -52,14 +58,12 @@ public class FXPositionConventionChoicePane extends BorderPane {
     @FXML private Label ui_prFinComputed;
     
     @FXML private ListView<? extends Objet> ui_list;
-    
-    @FXML private Button ui_add;
-    @FXML private Button ui_cancel;
 
-    private static final Session SESSION = Injector.getSession();
-    private static final Previews PREVIEWS = SESSION.getPreviews();
-    private static final SystemeReperageRepository SR_REPO = (SystemeReperageRepository) SESSION.getRepositoryForClass(SystemeReperage.class);
-    private static final AbstractSIRSRepository<BorneDigue> BORNE_REPO = SESSION.getRepositoryForClass(BorneDigue.class);
+    private final Session session = Injector.getSession();
+    private final Previews previews = session.getPreviews();
+    private final SystemeReperageRepository sr_repo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
+    private final AbstractSIRSRepository<BorneDigue> borneRepo = session.getRepositoryForClass(BorneDigue.class);
+    private final SirsStringConverter converter = new SirsStringConverter();
 
     private TronconDigue currentLinear = null;
     private ObservableList<Objet> objetList;
@@ -87,17 +91,17 @@ public class FXPositionConventionChoicePane extends BorderPane {
             
             final Class<? extends Objet> selectedClass = ui_types.getSelectionModel().getSelectedItem();
             final SystemeReperage initialSR = ui_sr.getSelectionModel().getSelectedItem();
-            final SystemeReperage targetSR = SR_REPO.get(currentLinear.getSystemeRepDefautId());
+            final SystemeReperage targetSR = sr_repo.get(currentLinear.getSystemeRepDefautId());
             
             if(selectedClass!=null && newValue!=null && initialSR!=null && targetSR!=null){
-                final AbstractSIRSRepository repo = SESSION.getRepositoryForClass(selectedClass);
+                final AbstractSIRSRepository repo = session.getRepositoryForClass(selectedClass);
                 if(repo instanceof AbstractPositionableRepository){
                     if(targetSR.equals(initialSR)){
                         pr.set(newValue);
                     } 
                     else {
                         final LinearReferencing.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(LinearReferencing.asLineString(currentLinear.getGeometry()));
-                        pr.set(TronconUtils.switchSRForPR(segments, newValue, initialSR, targetSR, BORNE_REPO));
+                        pr.set(TronconUtils.switchSRForPR(segments, newValue, initialSR, targetSR, borneRepo));
                     }
 
                     ui_prComputed.setText(String.format("%.2f", pr.get()));
@@ -139,9 +143,10 @@ public class FXPositionConventionChoicePane extends BorderPane {
         }
         
         ui_types.setItems(FXCollections.observableArrayList(concreteObjetClasses));
+        ui_types.setConverter(converter);
         ui_types.getSelectionModel().selectedItemProperty().addListener(typeChangeListener);
 
-        SIRS.initCombo(ui_linear, FXCollections.observableArrayList(PREVIEWS.getByClass(TronconDigue.class)), null);
+        SIRS.initCombo(ui_linear, FXCollections.observableArrayList(previews.getByClass(TronconDigue.class)), null);
         ui_linear.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Preview>() {
 
             @Override
@@ -151,7 +156,7 @@ public class FXPositionConventionChoicePane extends BorderPane {
                     // Mise à jour de la liste des SRs
                     currentLinear = Injector.getSession().getRepositoryForClass(TronconDigue.class).get(newValue.getElementId());
                     if(currentLinear!=null){
-                        SIRS.initCombo(ui_sr, FXCollections.observableArrayList(SR_REPO.getByLinear(currentLinear)), null);
+                        SIRS.initCombo(ui_sr, FXCollections.observableArrayList(sr_repo.getByLinear(currentLinear)), null);
 
                         // Mise à jour de la liste des objets
                         updateObjetList(ui_types.getSelectionModel().getSelectedItem(), currentLinear);
@@ -174,9 +179,9 @@ public class FXPositionConventionChoicePane extends BorderPane {
                 if(currentLinear!=null){
                     final LinearReferencing.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(LinearReferencing.asLineString(currentLinear.getGeometry()));
                     final Point pt0 = GO2Utilities.JTS_FACTORY.createPoint(segments[0].segmentCoords[0]);
-                    final double pr0 = TronconUtils.computePR(segments, newValue, pt0, BORNE_REPO);
+                    final double pr0 = TronconUtils.computePR(segments, newValue, pt0, borneRepo);
                     final Point pt1 = GO2Utilities.JTS_FACTORY.createPoint(segments[segments.length - 1].segmentCoords[1]);
-                    final double pr1 = TronconUtils.computePR(segments, newValue, pt1, BORNE_REPO);
+                    final double pr1 = TronconUtils.computePR(segments, newValue, pt1, borneRepo);
 
                     ui_prDebut.getValueFactory().setValue(min(pr0, pr1));
                     ui_prFin.getValueFactory().setValue(max(pr0, pr1));
@@ -187,10 +192,8 @@ public class FXPositionConventionChoicePane extends BorderPane {
         ui_prDebut.valueProperty().addListener(new PrChangeListener(prDebutProperty, ui_prDebutComputed));
         ui_prFin.valueProperty().addListener(new PrChangeListener(prFinProperty, ui_prFinComputed));
         ui_prDebut.setEditable(true); ui_prFin.setEditable(true);
-        ui_list.setCellFactory(ComboBoxListCell.forListView(new SirsStringConverter()));
-
-        ui_add.setOnAction((ActionEvent event) -> selectedObjetProperty.set(ui_list.getSelectionModel().getSelectedItem()));
-        ui_cancel.setOnAction((ActionEvent event) -> selectedObjetProperty.set(null));
+        ui_list.setCellFactory(ComboBoxListCell.forListView(converter));
+        selectedObjetProperty.bind(ui_list.getSelectionModel().selectedItemProperty());
     }
     
     

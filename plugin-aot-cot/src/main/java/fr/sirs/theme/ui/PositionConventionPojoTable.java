@@ -9,7 +9,6 @@ import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.PositionConvention;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.util.SirsStringConverter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -17,13 +16,16 @@ import java.util.logging.Logger;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
-import javafx.util.StringConverter;
 
 /**
  *
@@ -59,7 +61,6 @@ public class PositionConventionPojoTable extends ListenPropertyPojoTable<String>
             }
             else {
                 troncon = Injector.getSession().getRepositoryForClass(TronconDigue.class).getOne();
-
             }
 
             position = (PositionConvention) super.createPojo(troncon);
@@ -77,9 +78,9 @@ public class PositionConventionPojoTable extends ListenPropertyPojoTable<String>
                 position.setPositionFin(positionGeometry.getEndPoint());
                 position.setGeometry(positionGeometry);
                 position.setLinearId(retrievedObjet.getLinearId());
+                position.setObjetId(retrievedElement.getId());
             }
                 
-            position.setObjetId(retrievedElement.getId());
                 
             try {
                 ((Property<String>) propertyMethodToListen.invoke(position)).setValue(propertyReference);
@@ -96,42 +97,40 @@ public class PositionConventionPojoTable extends ListenPropertyPojoTable<String>
                 Logger.getLogger(PositionDocumentPojoTable.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+
+        session.getRepositoryForClass(PositionConvention.class).update(position);
         return position;
     }
     
     private static class ChoiceStage extends PojoTableChoiceStage {
         private final DoubleProperty prMinProperty = new SimpleDoubleProperty();
         private final DoubleProperty prMaxProperty = new SimpleDoubleProperty();
-        private final StringConverter converter = new SirsStringConverter();
+
+        private final Button ui_add;
+        private final Button ui_cancel;
         
         private ChoiceStage(){
             super();
             setTitle("Choix de l'élément");
             final FXPositionConventionChoicePane positionConventionChoicePane = new FXPositionConventionChoicePane();
-            setScene(new Scene(positionConventionChoicePane));
+            ui_add = new Button("Ajouter");
+            ui_cancel = new Button("Annuler");
+
+            final HBox hBox = new HBox(20., ui_add, ui_cancel);
+            hBox.setAlignment(Pos.CENTER);
+            hBox.setPadding(new Insets(10));
+            
+            setScene(new Scene(new VBox(positionConventionChoicePane, hBox)));
             retrievedElement.bind(positionConventionChoicePane.selectedObjetProperty());
             prMinProperty.bind(positionConventionChoicePane.prDebutProperty());
             prMaxProperty.bind(positionConventionChoicePane.prFinProperty());
-            
-            retrievedElement.addListener(new ChangeListener<Element>() {
 
-                @Override
-                public void changed(ObservableValue<? extends Element> observable, Element oldValue, Element newValue) {
-                    final Alert alert;
-                    if(newValue==null){
-                        alert = new Alert(Alert.AlertType.CONFIRMATION, "Voulez allez quitter la procédure de choix sans avoir choisi d'élément associé à la convention.", ButtonType.YES, ButtonType.NO);
-                    }
-                    else {
-                        alert = new Alert(Alert.AlertType.CONFIRMATION, "Voulez vous choisir "+converter.toString(newValue)+" et quitter la procédure de choix ?", ButtonType.YES, ButtonType.NO);
-                    }
-                    alert.setResizable(true);
-                    
-                    final Optional<ButtonType> result = alert.showAndWait();
-                    if(result.isPresent() && result.get()==ButtonType.YES){
-                        hide();
-                    }
-                }
-            });
+            ui_add.setOnAction((ActionEvent event) -> hide());
+            ui_cancel.setOnAction((ActionEvent event) -> {
+                retrievedElement.unbind();
+                retrievedElement.set(null);
+                hide();
+                    });
         }
         
         public DoubleProperty prMinProperty(){return prMinProperty;}
