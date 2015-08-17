@@ -70,7 +70,8 @@ public class FXPositionConventionChoicePane extends BorderPane {
     private final ObjectProperty<Objet> selectedObjetProperty = new SimpleObjectProperty<>();
     private final DoubleProperty prDebutProperty = new SimpleDoubleProperty();
     private final DoubleProperty prFinProperty = new SimpleDoubleProperty();
-    private final Predicate<Objet> inclusivePrPredicate = (Objet t) -> t.getPrDebut()<prDebutProperty.doubleValue() && t.getPrFin()>prFinProperty.doubleValue();
+//    private final Predicate<Objet> inclusivePrPredicate = (Objet t) -> t.getPrDebut()<prDebutProperty.doubleValue() && t.getPrFin()>prFinProperty.doubleValue();
+    private final Predicate<Objet> exclusivePrPredicate = (Objet t) -> t.getPrDebut()>prDebutProperty.doubleValue() && t.getPrFin()<prFinProperty.doubleValue();
     
     public ObjectProperty<Objet> selectedObjetProperty(){return selectedObjetProperty;}
     public DoubleProperty prDebutProperty(){return prDebutProperty;}
@@ -107,7 +108,7 @@ public class FXPositionConventionChoicePane extends BorderPane {
                     ui_prComputed.setText(String.format("%.2f", pr.get()));
 
                     if(objetList!=null && !objetList.isEmpty()){
-                        ui_list.setItems((ObservableList) objetList.filtered(inclusivePrPredicate));
+                        ui_list.setItems((ObservableList) objetList.filtered(exclusivePrPredicate));
                     } else {
                         ui_list.setItems(FXCollections.emptyObservableList());
                     }
@@ -123,13 +124,7 @@ public class FXPositionConventionChoicePane extends BorderPane {
         }
         
     }
-    
-    private final ChangeListener<Class<? extends Objet>> typeChangeListener = 
-            (ObservableValue<? extends Class<? extends Objet>> observable, Class<? extends Objet> oldValue, Class<? extends Objet> newValue) ->
-            {
-                updateObjetList(newValue, currentLinear);
-                ui_list.setItems((ObservableList) objetList);
-            };
+            
 
     public FXPositionConventionChoicePane() {
 
@@ -144,7 +139,11 @@ public class FXPositionConventionChoicePane extends BorderPane {
         
         ui_types.setItems(FXCollections.observableArrayList(concreteObjetClasses));
         ui_types.setConverter(converter);
-        ui_types.getSelectionModel().selectedItemProperty().addListener(typeChangeListener);
+        ui_types.getSelectionModel().selectedItemProperty().addListener(
+                (ObservableValue<? extends Class<? extends Objet>> observable, Class<? extends Objet> oldValue, Class<? extends Objet> newValue) ->
+                {
+                    updateObjetList(newValue, currentLinear);
+                });
 
         SIRS.initCombo(ui_linear, FXCollections.observableArrayList(previews.getByClass(TronconDigue.class)), null);
         ui_linear.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Preview>() {
@@ -160,7 +159,6 @@ public class FXPositionConventionChoicePane extends BorderPane {
 
                         // Mise à jour de la liste des objets
                         updateObjetList(ui_types.getSelectionModel().getSelectedItem(), currentLinear);
-                        ui_list.setItems((ObservableList) objetList);
                     }
                     
                 } catch (Exception e) {
@@ -221,5 +219,6 @@ public class FXPositionConventionChoicePane extends BorderPane {
                 objetList = FXCollections.emptyObservableList();
             }
         }
+        ui_list.setItems((ObservableList) objetList);
     }
 }

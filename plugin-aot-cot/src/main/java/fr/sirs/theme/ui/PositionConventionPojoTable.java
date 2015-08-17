@@ -1,21 +1,15 @@
 package fr.sirs.theme.ui;
 
-import com.vividsolutions.jts.geom.LineString;
 import fr.sirs.Injector;
-import fr.sirs.core.LinearReferencingUtilities;
-import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.PositionConvention;
-import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.Property;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -69,14 +63,14 @@ public class PositionConventionPojoTable extends ListenPropertyPojoTable<String>
             if(retrievedElement instanceof Objet){
                 final Objet retrievedObjet = (Objet) retrievedElement;
                 position.setSystemeRepId(retrievedObjet.getSystemeRepId());
-                position.setPrDebut(stage.prMinProperty().floatValue());
-                position.setPrFin(stage.prMaxProperty().floatValue());
-                final LineString positionGeometry = LinearReferencingUtilities.buildSubGeometry(retrievedObjet, position, 
-                        Injector.getSession().getRepositoryForClass(BorneDigue.class), 
-                        Injector.getSession().getRepositoryForClass(SystemeReperage.class));
-                position.setPositionDebut(positionGeometry.getStartPoint());
-                position.setPositionFin(positionGeometry.getEndPoint());
-                position.setGeometry(positionGeometry);
+                position.setPrDebut(retrievedObjet.getPrDebut());
+                position.setPrFin(retrievedObjet.getPrFin());
+//                final LineString positionGeometry = LinearReferencingUtilities.buildSubGeometry(retrievedObjet, position,
+//                        Injector.getSession().getRepositoryForClass(BorneDigue.class),
+//                        Injector.getSession().getRepositoryForClass(SystemeReperage.class));
+                position.setPositionDebut(retrievedObjet.getPositionDebut());
+                position.setPositionFin(retrievedObjet.getPositionFin());
+                position.setGeometry(retrievedObjet.getGeometry());
                 position.setLinearId(retrievedObjet.getLinearId());
                 position.setObjetId(retrievedElement.getId());
             }
@@ -103,8 +97,6 @@ public class PositionConventionPojoTable extends ListenPropertyPojoTable<String>
     }
     
     private static class ChoiceStage extends PojoTableChoiceStage {
-        private final DoubleProperty prMinProperty = new SimpleDoubleProperty();
-        private final DoubleProperty prMaxProperty = new SimpleDoubleProperty();
 
         private final Button ui_add;
         private final Button ui_cancel;
@@ -122,8 +114,6 @@ public class PositionConventionPojoTable extends ListenPropertyPojoTable<String>
             
             setScene(new Scene(new VBox(positionConventionChoicePane, hBox)));
             retrievedElement.bind(positionConventionChoicePane.selectedObjetProperty());
-            prMinProperty.bind(positionConventionChoicePane.prDebutProperty());
-            prMaxProperty.bind(positionConventionChoicePane.prFinProperty());
 
             ui_add.setOnAction((ActionEvent event) -> hide());
             ui_cancel.setOnAction((ActionEvent event) -> {
@@ -132,9 +122,6 @@ public class PositionConventionPojoTable extends ListenPropertyPojoTable<String>
                 hide();
                     });
         }
-        
-        public DoubleProperty prMinProperty(){return prMinProperty;}
-        public DoubleProperty prMaxProperty(){return prMaxProperty;}
         
     }
 }
