@@ -96,7 +96,7 @@ public class Growl {
         final FXMainFrame mainFrame = Injector.getSession().getFrame();
         final Point2D point = mainFrame.localToScreen(mainFrame.getWidth(), 20);
         popup.show(mainFrame.getScene().getWindow(), point.getX(), point.getY());
-        popup.setX(popup.getX() - popup.getWidth());
+        popup.setX(popup.getX() - popup.getWidth() - 20);
         timeline.play();
     }
 }
