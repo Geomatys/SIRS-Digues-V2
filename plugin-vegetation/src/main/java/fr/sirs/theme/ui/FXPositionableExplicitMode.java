@@ -27,7 +27,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
  */
 public class FXPositionableExplicitMode extends BorderPane implements FXPositionableMode {
 
-    private static final String MODE = "EXPLICIT";
+    public static final String MODE = "EXPLICIT";
 
     private final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
     
@@ -40,7 +40,7 @@ public class FXPositionableExplicitMode extends BorderPane implements FXPosition
     private boolean reseting = false;
 
     public FXPositionableExplicitMode() {
-        SIRS.loadFXML(this, PositionableVegetation.class);
+        SIRS.loadFXML(this, Positionable.class);
 
         uiText.disableProperty().bind(disableProperty);
 

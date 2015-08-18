@@ -10,9 +10,11 @@ import static fr.sirs.SIRS.CSS_PATH;
 import fr.sirs.Session;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PositionableVegetation;
+import fr.sirs.theme.ui.FXPositionableExplicitMode;
 import fr.sirs.util.ResourceInternationalString;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
@@ -99,41 +101,46 @@ public class EditVegetationTool extends AbstractEditionTool{
 
         session = Injector.getSession();
 
+        final ChangeListener<Geometry> geomListener = new ChangeListener<Geometry>() {
+            @Override
+            public void changed(ObservableValue<? extends Geometry> observable, Geometry oldValue, Geometry newValue) {
+                refreshDecoration();
+            }
+        };
         form.positionableProperty().addListener(new ChangeListener<Positionable>() {
             @Override
             public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
-                reset();
-                refreshDecoration();
-                if(newValue==null){
-                    wizard.setCenter(lblMessage);
-                }else{
-                    wizard.setCenter(form);
+                if(oldValue!=null){
+                    oldValue.geometryProperty().removeListener(geomListener);
+                    selection.geometry.unbindBidirectional(oldValue.geometryProperty());
+                    selection.geometry.set(null);
                 }
+                if(newValue!=null){
+                    wizard.setCenter(form);
+                    newValue.geometryProperty().addListener(geomListener);
+                    selection.geometry.bindBidirectional(newValue.geometryProperty());
+                }else{
+                    reset();
+                }
+                refreshDecoration();
             }
         });
+
     }
 
-    public void setCurrentFeature(final Feature feature, FeatureMapLayer layer){
-        final Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
-        form.positionableProperty().set((PositionableVegetation)bean);
-        helper = new EditionHelper(map, layer);
-        if(feature != null){
-            this.selection.geometry = helper.toObjectiveCRS(feature);
-        }else{
-            this.selection.geometry = null;
-        }
-        refreshDecoration();
-    }
 
     private void reset(){
+        pressed = null;
+        selection.geometry.unbind();        
         selection.reset();
         modified = false;
         decoration.getGeometries().clear();
         decoration.setNodeSelection(null);
+        wizard.setCenter(lblMessage);
     }
 
     private void refreshDecoration(){
-        decoration.getGeometries().setAll(this.selection.geometry);
+        decoration.getGeometries().setAll(this.selection.geometry.get());
         decoration.setNodeSelection(this.selection);
     }
 
@@ -150,6 +157,8 @@ public class EditVegetationTool extends AbstractEditionTool{
     @Override
     public void install(FXMap component) {
         reset();
+        form.positionableProperty().set(null);
+        helper = null;
         super.install(component);
         component.addEventHandler(MouseEvent.ANY, mouseInputListener);
         component.addEventHandler(ScrollEvent.ANY, mouseInputListener);
@@ -167,6 +176,8 @@ public class EditVegetationTool extends AbstractEditionTool{
         component.setCursor(Cursor.DEFAULT);
         component.removeDecoration(decoration);
         reset();
+        form.positionableProperty().set(null);
+        helper = null;
         return true;
     }
 
@@ -188,7 +199,7 @@ public class EditVegetationTool extends AbstractEditionTool{
             final MouseButton button = e.getButton();
 
             if(button == MouseButton.PRIMARY){
-                if(selection.geometry == null){
+                if(form.positionableProperty().get() == null){
                     final Rectangle2D clickArea = new Rectangle2D.Double(e.getX()-2, e.getY()-2, 4, 4);
 
                     //recherche d'un object a editer
@@ -197,7 +208,8 @@ public class EditVegetationTool extends AbstractEditionTool{
                         public void visit(ProjectedFeature graphic, RenderingContext2D context, SearchAreaJ2D area) {
                             final Object bean = graphic.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
                             if(bean instanceof PositionableVegetation){
-                                setCurrentFeature(graphic.getCandidate(),graphic.getLayer());
+                                form.positionableProperty().set((PositionableVegetation)bean);
+                                helper = new EditionHelper(map, graphic.getLayer());
                             }
                         }
                         @Override
@@ -208,25 +220,27 @@ public class EditVegetationTool extends AbstractEditionTool{
                         public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
                     }, VisitFilter.INTERSECTS);
 
-                }else if(e.getClickCount() >= 2){
+                }else if(e.getClickCount() >= 2 && helper!=null){
                     //double click = add a node
                     final Geometry result;
-                    if(selection.geometry instanceof LineString){
-                        result = helper.insertNode((LineString)selection.geometry, e.getX(), e.getY());
-                    }else if(selection.geometry instanceof Polygon){
-                        result = helper.insertNode((Polygon)selection.geometry, e.getX(), e.getY());
-                    }else if(selection.geometry instanceof GeometryCollection){
-                        result = helper.insertNode((GeometryCollection)selection.geometry, e.getX(), e.getY());
+                    final Geometry geom = form.positionableProperty().get().geometryProperty().get();
+                    if(geom instanceof LineString){
+                        result = helper.insertNode((LineString)geom, e.getX(), e.getY());
+                    }else if(geom instanceof Polygon){
+                        result = helper.insertNode((Polygon)geom, e.getX(), e.getY());
+                    }else if(geom instanceof GeometryCollection){
+                        result = helper.insertNode((GeometryCollection)geom, e.getX(), e.getY());
                     }else{
-                        result = selection.geometry;
+                        result = geom;
                     }
-                    modified = modified || result != selection.geometry;
-                    selection.geometry = result;
-                    decoration.getGeometries().setAll(selection.geometry);
-                }else if(e.getClickCount() == 1){
+                    modified = modified || result != geom;
+                    form.positionableProperty().get().setGeometryMode(FXPositionableExplicitMode.MODE);
+                    form.positionableProperty().get().geometryProperty().set( result );
+                    refreshDecoration();
+                }else if(e.getClickCount() == 1 && helper!=null){
                     //single click with a geometry = select a node
                     helper.grabGeometryNode(e.getX(), e.getY(), selection);
-                    decoration.setNodeSelection(selection);
+                    refreshDecoration();
                 }
             }
         }
@@ -236,12 +250,12 @@ public class EditVegetationTool extends AbstractEditionTool{
             pressed = e.getButton();
 
             if(pressed == MouseButton.PRIMARY){
-                if(selection.geometry == null){
-                    
-                }else if(e.getClickCount() == 1){
+                final Positionable pos = form.positionableProperty().get();
+                final Geometry geom = pos==null ? null : pos.geometryProperty().get();
+                if(geom != null && e.getClickCount() == 1){
                     //single click with a geometry = select a node
                     helper.grabGeometryNode(e.getX(), e.getY(), selection);
-                    decoration.setNodeSelection(selection);
+                    refreshDecoration();
                 }
             }
 
@@ -251,10 +265,10 @@ public class EditVegetationTool extends AbstractEditionTool{
         @Override
         public void mouseDragged(final MouseEvent e) {
 
-            if(pressed == MouseButton.PRIMARY && selection != null){
+            if(pressed == MouseButton.PRIMARY && helper != null){
                 //dragging node
-                selection.moveSelectedNode(helper.toCoord(e.getX(), e.getY()));
-                refreshDecoration();
+                form.positionableProperty().get().setGeometryMode(FXPositionableExplicitMode.MODE);
+                selection.moveSelectedNode(helper.toCoord(e.getX(), e.getY()), true);
                 modified = true;
                 return;
             }
@@ -266,6 +280,7 @@ public class EditVegetationTool extends AbstractEditionTool{
         public void keyReleased(KeyEvent e) {
            if(KeyCode.DELETE == e.getCode() && selection != null){
                 //delete node
+                form.positionableProperty().get().setGeometryMode(FXPositionableExplicitMode.MODE);
                 selection.deleteSelectedNode();
                 refreshDecoration();
                 modified = true;

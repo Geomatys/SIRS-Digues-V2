@@ -34,7 +34,7 @@ public class FXPositionableForm extends BorderPane {
     private Node editor = null;
 
     public FXPositionableForm() {
-        SIRS.loadFXML(this, FXPositionableForm.class);
+        SIRS.loadFXML(this, Positionable.class);
 
         positionableProperty.addListener(this::changed);
         uiGoto.disableProperty().bind(positionableProperty.isNull());
@@ -80,10 +80,13 @@ public class FXPositionableForm extends BorderPane {
         if(newValue instanceof PositionableVegetation){
             editor = new FXPositionableVegetationPane();
             ((FXPositionableVegetationPane)editor).setPositionable(newValue);
+            ((FXPositionableVegetationPane)editor).disableFieldsProperty().set(false);
         }else if(newValue instanceof Positionable){
             editor = new FXPositionablePane();
             ((FXPositionablePane)editor).setPositionable(newValue);
+            ((FXPositionablePane)editor).disableFieldsProperty().set(false);
         }
+
         setCenter(editor);
     }
     
