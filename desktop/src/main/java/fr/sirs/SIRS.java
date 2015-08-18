@@ -98,6 +98,7 @@ public final class SIRS extends SirsCore {
     public static final Image ICON_EXCLAMATION_TRIANGLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_TRIANGLE, 16, Color.decode(COLOR_WARNING_ICON)),null);
 
     public static final Image ICON_LINK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXTERNAL_LINK, 16, Color.BLACK),null);
+    public static final Image ICON_WARNING = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_TRIANGLE, 16, Color.BLACK),null);
 
     public static final String CSS_PATH = "/fr/sirs/theme.css";
     public static final String CSS_PATH_CALENDAR = "/fr/sirs/calendar.css";

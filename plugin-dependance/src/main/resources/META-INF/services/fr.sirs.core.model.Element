@@ -1,4 +1,3 @@
-fr.sirs.core.model.AbstractDependance
 fr.sirs.core.model.OuvrageVoirieDependance
 fr.sirs.core.model.AireStockageDependance
 fr.sirs.core.model.AutreDependance

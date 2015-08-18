@@ -1,8 +1,15 @@
 package fr.sirs.plugin.dependance;
 
+import fr.sirs.Injector;
+import fr.sirs.core.model.DesordreDependance;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
+import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.util.SimpleFXEditMode;
 import javafx.scene.Parent;
+import javafx.scene.control.Separator;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 
 /**
  * Panneau regroupant les désordres pour les dépendances.
@@ -14,10 +21,22 @@ public final class DesordresDependanceTheme extends AbstractPluginsButtonTheme {
         super("Désordres", "Désordres", null);
     }
 
+    /**
+     * Création du panneau principal de ce thème qui regroupera tous les éléments.
+     *
+     * @return Le panneau généré pour ce thème.
+     */
     @Override
     public Parent createPane() {
-        final BorderPane borderPane = new BorderPane();
+        // Gestion du bouton consultation / édition pour la pojo table
+        final Separator separator = new Separator();
+        separator.setVisible(false);
+        final SimpleFXEditMode editMode = new SimpleFXEditMode();
+        final HBox topPane = new HBox(separator, editMode);
+        HBox.setHgrow(separator, Priority.ALWAYS);
 
-        return borderPane;
+        final PojoTable dependancesTable = new PojoTable(Injector.getSession().getRepositoryForClass(DesordreDependance.class), "Liste des désordres");
+        dependancesTable.editableProperty().bind(editMode.editionState());
+        return new BorderPane(dependancesTable, topPane, null, null, null);
     }
 }

@@ -1,11 +1,17 @@
 package fr.sirs.plugin.dependance;
 
 import fr.sirs.Plugin;
+import fr.sirs.core.model.sql.DependanceSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
+import fr.sirs.plugin.dependance.map.DependanceToolBar;
+import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
- * Minimal example of a plugin.
+ * Plugin correspondant au module dépendance.
  *
  * @author Alexis Manin (Geomatys)
  * @author Cédric Briançon (Geomatys)
@@ -13,6 +19,8 @@ import javafx.scene.image.Image;
 public class PluginDependance extends Plugin {
     private static final String NAME = "plugin-dependance";
     private static final String TITLE = "Module dépendance";
+
+    private final DependanceToolBar toolbar = new DependanceToolBar();
 
     public PluginDependance() {
         name = NAME;
@@ -33,13 +41,16 @@ public class PluginDependance extends Plugin {
 
     @Override
     public Image getImage() {
-        // TODO: choisir une image pour ce plugin
         return null;
     }
 
     @Override
+    public List<ToolBar> getMapToolBars() {
+        return Collections.singletonList(toolbar);
+    }
+
+    @Override
     public SQLHelper getSQLHelper() {
-        // TODO: renvoyer le SQLHelper du plugin pour l'export RDBMS !
-        return null;
+        return DependanceSqlHelper.getInstance();
     }
 }

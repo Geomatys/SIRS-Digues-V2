@@ -9,7 +9,7 @@
     <packaging>jar</packaging>
     
     <name>plugin-dependance</name>
-    <description>A template showing plugin structure for SIRS2 application.</description>
+    <description>Plugin dépendance</description>
     <!--url>http://www.myorganization.org</url-->
 
     <parent>
