@@ -239,7 +239,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="latitudeMax" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometryMode" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Objet" abstract="true" eSuperTypes="#//Positionable">
+  <eClassifiers xsi:type="ecore:EClass" name="Objet" abstract="true" eSuperTypes="#//Positionable #//AotCotAssociable">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
       <eAnnotations source="localDate"/>
@@ -386,7 +386,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sirsdocument" eType="#//SIRSDefaultDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable #//SIRSFileReference">
+  <eClassifiers xsi:type="ecore:EClass" name="Photo" eSuperTypes="#//Positionable #//SIRSFileReference #//AbstractPhoto">
     <eStructuralFeatures xsi:type="ecore:EReference" name="orientationPhoto" eType="#//RefOrientationPhoto"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
@@ -1420,4 +1420,27 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="odt" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EByteArray"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractPhoto" abstract="true" interface="true">
+    <eOperations name="setLibelle">
+      <eParameters name="ref" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eOperations name="getLibelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="setCommentaire">
+      <eParameters name="ref" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eOperations name="getCommentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="getDate" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="return">
+        <details key="type" value="LocalDate"/>
+      </eAnnotations>
+    </eOperations>
+    <eOperations name="setDate">
+      <eAnnotations source="parameter">
+        <details key="order" value="1"/>
+        <details key="type" value="LocalDate"/>
+      </eAnnotations>
+      <eParameters name="ref" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AotCotAssociable" abstract="true" interface="true"/>
 </ecore:EPackage>

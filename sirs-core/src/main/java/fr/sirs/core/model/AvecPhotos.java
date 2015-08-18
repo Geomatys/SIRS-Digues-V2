@@ -5,10 +5,11 @@ import java.util.List;
 /**
  *
  * @author Samuel Andrés (Geomatys)
+ * @param <T>
  */
-public interface AvecPhotos {
+public interface AvecPhotos<T extends AbstractPhoto> {
     
-    List<Photo> getPhotos();
+    List<T> getPhotos();
 
-    void setPhotos(List<Photo> photos);
+    void setPhotos(List<T> photos);
 }

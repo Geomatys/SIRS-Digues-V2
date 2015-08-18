@@ -1097,7 +1097,7 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EEnum']/@subNodeMappings[name='EC%20EEnumLiteral']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_ZEfeMDp-EeWreJjG-DKPRw" name="PositionableVegetation" tooltipText="" outgoingEdges="_boAAcB5pEeWA0duXPY-0yg" incomingEdges="_BfNMMDePEeWHafKXYg7_NQ __Vj_IDeOEeWHafKXYg7_NQ _-vGcEDeOEeWHafKXYg7_NQ _5wEWQDeOEeWHafKXYg7_NQ" width="12" height="10">
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_ZEfeMDp-EeWreJjG-DKPRw" name="PositionableVegetation" tooltipText="" outgoingEdges="_boAAcB5pEeWA0duXPY-0yg" incomingEdges="_-vGcEDeOEeWHafKXYg7_NQ __Vj_IDeOEeWHafKXYg7_NQ _5wEWQDeOEeWHafKXYg7_NQ _BfNMMDePEeWHafKXYg7_NQ" width="12" height="10">
         <target xmi:type="ecore:EClass" href="vegetation.ecore#//PositionableVegetation"/>
         <semanticElements xmi:type="ecore:EClass" href="vegetation.ecore#//PositionableVegetation"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>

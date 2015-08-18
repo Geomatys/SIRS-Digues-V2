@@ -85,6 +85,55 @@
                 </configuration>
             </plugin>
             
+            
+            
+            <plugin>
+                <groupId>com.geomatys.maven</groupId>
+                <artifactId>maven-fxmodel-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>fxmodel</id>
+                        <goals>
+                            <goal>fxmodel</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>fxmodel2sql</id>
+                        <goals>
+                            <goal>fxmodel2sql</goal>
+                        </goals>
+                      <configuration>
+                        <helperName>DependanceSqlHelper</helperName>
+                      </configuration>
+                    </execution>
+                    <execution>
+                      <id>fxml</id>
+                      <goals>
+                        <goal>fxml</goal>
+                      </goals>
+                      <configuration>
+                        <packageName>fr.sirs.theme.ui</packageName>
+                      </configuration>
+                    </execution>
+                    <execution>
+                      <id>fx-controller</id>
+                      <goals>
+                        <goal>fxcontroller</goal>
+                      </goals>
+                      <configuration>
+                        <packageName>fr.sirs.theme.ui</packageName>
+                      </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generateEquals>true</generateEquals>
+                    <model>model/dependance.ecore</model>
+                    <modelPackage>fr.sirs.core.model</modelPackage>
+                    <repositoryPackage>fr.sirs.core.component</repositoryPackage>
+                    <repositoryInterface>fr.sirs.core.Repository</repositoryInterface>
+                </configuration>
+            </plugin>
+            
         </plugins>
     </build>
 
