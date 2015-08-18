@@ -203,23 +203,15 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
             }
         }else{
             //on refait les points a partir de la géométrie
-            final Coordinate[] coords = pos.getGeometry().getCoordinates();
-            if(coords.length>0){
-                final Coordinate sc = coords[0];
-                final Coordinate ec = coords[coords.length-1];
+            final TronconDigue t = FXPositionableMode.getTronconFromPositionable(pos);
+            final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t, Injector.getSession());
+            final Point geoPointStart = ps.getGeoPointStart();
+            final Point geoPointEnd = ps.getGeoPointEnd();
 
-                uiLongitudeStart.getValueFactory().setValue(sc.x);
-                uiLatitudeStart.getValueFactory().setValue(sc.y);
-                uiLongitudeEnd.getValueFactory().setValue(ec.x);
-                uiLatitudeEnd.getValueFactory().setValue(ec.y);
-
-            }else{
-                uiLongitudeStart.getValueFactory().setValue(null);
-                uiLatitudeStart.getValueFactory().setValue(null);
-                uiLongitudeEnd.getValueFactory().setValue(null);
-                uiLatitudeEnd.getValueFactory().setValue(null);
-            }
-
+            uiLongitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getX());
+            uiLatitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getY());
+            uiLongitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getX());
+            uiLatitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getY());
         }
 
         reseting = false;

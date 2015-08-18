@@ -951,7 +951,15 @@ public class TronconUtils {
                     point = computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
 
                 } else {
-                    throw new IllegalStateException("Pas de borne ou position de début/fin définie pour l'objet " + pos);
+                    //we extract point from the geometry
+                    Geometry geom = pos.getGeometry();
+                    if(!(geom instanceof LineString)){
+                        geom = LinearReferencing.project(getTronconSegments(false), geom);
+                    }
+                    final Coordinate[] coords = geom.getCoordinates();
+                    point = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(coords[0]));
+                    final CoordinateReferenceSystem crs = session.getProjection();
+                    JTS.setCRS(point, crs);
                 }
             }
             return point;
@@ -1008,7 +1016,15 @@ public class TronconUtils {
                     point = computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
 
                 } else {
-                    throw new IllegalStateException("Pas de borne ou position de début/fin définie pour l'objet " + pos);
+                    //we extract point from the geometry
+                    Geometry geom = pos.getGeometry();
+                    if(!(geom instanceof LineString)){
+                        geom = LinearReferencing.project(linearSegments, geom);
+                    }
+                    final Coordinate[] coords = geom.getCoordinates();
+                    point = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(coords[coords.length-1]));
+                    final CoordinateReferenceSystem crs = session.getProjection();
+                    JTS.setCRS(point, crs);
                 }
             }
             return point;

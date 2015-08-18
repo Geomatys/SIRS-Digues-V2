@@ -3,12 +3,14 @@ package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
+import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
@@ -137,7 +139,14 @@ public interface FXPositionableMode {
             // On privilégie le chemin AvecForeignParent
             if(element instanceof AvecForeignParent){
                 String id = ((AvecForeignParent) element).getForeignParentId();
-                candidate = getTronconFromElement(Injector.getSession().getRepositoryForClass(TronconDigue.class).get(id));
+                final Session session = Injector.getSession();
+                final Preview preview = session.getPreviews().get(id);
+                if(preview==null){
+                    return null;
+                }
+
+                final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForType(preview.getElementClass());
+                candidate = getTronconFromElement((Element)repo.get(id));
             }
             // Si on n'a pas (ou pas trouvé) de troncon via la référence ForeignParent on cherche via le conteneur
             if (candidate==null && element.getParent()!=null) {
