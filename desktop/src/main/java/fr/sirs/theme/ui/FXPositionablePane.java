@@ -2,8 +2,8 @@ package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
-import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import static fr.sirs.SIRS.CRS_WGS84;
 import static fr.sirs.SIRS.ICON_VIEWOTHER_WHITE;
 import fr.sirs.core.LinearReferencingUtilities;
@@ -84,7 +84,11 @@ public class FXPositionablePane extends BorderPane {
     }
 
     public FXPositionablePane(List<FXPositionableMode> lstModes) {
-        SIRS.loadFXML(this, Positionable.class);
+        this(lstModes, Positionable.class);
+    }
+
+    public FXPositionablePane(List<FXPositionableMode> lstModes, final Class<? extends Positionable> clazz) {
+        SIRS.loadFXML(this, clazz);
 
         uiView.setGraphic(new ImageView(ICON_VIEWOTHER_WHITE));
 

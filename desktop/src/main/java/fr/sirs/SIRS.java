@@ -11,12 +11,12 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.theme.ui.FXDiguePane;
-import fr.sirs.theme.ui.FXTronconDiguePane;
 import fr.sirs.other.FXContactPane;
 import fr.sirs.other.FXOrganismePane;
 import fr.sirs.theme.ui.AbstractFXElementPane;
+import fr.sirs.theme.ui.FXDiguePane;
 import fr.sirs.theme.ui.FXElementContainerPane;
+import fr.sirs.theme.ui.FXTronconDiguePane;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.SirsPreferences;
 import java.awt.Color;
@@ -214,37 +214,16 @@ public final class SIRS extends SirsCore {
      * @param modelClass A class which will be used for bundle loading.
      */
     public static void loadFXML(Parent candidate, final Class modelClass) {
-        ArgumentChecks.ensureNonNull("JavaFX controller object", candidate);
-        final Class cdtClass = candidate.getClass();
-        final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
-        final URL resource = cdtClass.getResource(fxmlpath);
-        if (resource == null) {
-            throw new RuntimeException("No FXMl document can be found for path : "+fxmlpath);
-        }
-        final FXMLLoader loader = new FXMLLoader(resource);
-        loader.setController(candidate);
-        loader.setRoot(candidate);
-        //in special environement like osgi or other, we must use the proper class loaders
-        //not necessarly the one who loaded the FXMLLoader class
-        loader.setClassLoader(cdtClass.getClassLoader());
-
-        // If possible, initialize traduction bundle.
+        ResourceBundle bundle = null;
         if (modelClass != null) {
             try{
-                loader.setResources(ResourceBundle.getBundle(modelClass.getName(), Locale.FRENCH,
-                        Thread.currentThread().getContextClassLoader()));
+                bundle = ResourceBundle.getBundle(modelClass.getName(), Locale.FRENCH,
+                        Thread.currentThread().getContextClassLoader());
             }catch(MissingResourceException ex){
                 LOGGER.log(Level.INFO, "Missing bundle for : {0}", modelClass.getName());
             }
         }
-
-        try {
-            loader.load();
-        } catch (IOException ex) {
-            throw new IllegalArgumentException(ex.getMessage(), ex);
-        }
-
-        candidate.getStylesheets().add(CSS_PATH);
+        loadFXML(candidate, bundle);
     }
     
     public static void loadFXML(Parent candidate, final ResourceBundle bundle) {

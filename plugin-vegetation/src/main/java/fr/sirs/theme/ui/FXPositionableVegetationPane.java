@@ -1,6 +1,7 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.PositionableVegetation;
 import java.util.Arrays;
 
 /**
@@ -16,7 +17,7 @@ public class FXPositionableVegetationPane extends FXPositionablePane {
                 new FXPositionableCoordMode(),
                 new FXPositionableLinearMode(),
                 new FXPositionableExplicitMode()
-                ));
+                ), PositionableVegetation.class);
     }
 
 }
