@@ -6,3 +6,4 @@ fr.sirs.core.model.MateriauDependance
 fr.sirs.core.model.RefOuvrageVoirieDependance
 fr.sirs.core.model.RefDestinationDependance
 fr.sirs.core.model.PhotoDependance
+fr.sirs.core.model.ObservationDependance

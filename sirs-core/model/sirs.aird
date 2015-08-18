@@ -2259,7 +2259,7 @@
             </children>
             <styles xmi:type="notation:ConnectorStyle" xmi:id="_ITU6QWpNEeSly6KCFHFN8A" routing="Rectilinear" jumpLinkStatus="Above"/>
             <styles xmi:type="notation:FontStyle" xmi:id="_ITU6QmpNEeSly6KCFHFN8A" fontColor="7490599" fontName="Lucida Grande" fontHeight="8"/>
-            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_ITU6Q2pNEeSly6KCFHFN8A" points="[206, 75, -266, -33]$[331, 75, -141, -33]"/>
+            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_ITU6Q2pNEeSly6KCFHFN8A" points="[280, 91, -210, -37]$[349, 91, -141, -37]"/>
             <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_ITWIYGpNEeSly6KCFHFN8A" id="(0.022857142857142857,0.23348017621145375)"/>
             <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_ITWIYWpNEeSly6KCFHFN8A" id="(0.9083969465648855,0.32335329341317365)"/>
           </edges>
@@ -2275,7 +2275,7 @@
             </children>
             <styles xmi:type="notation:ConnectorStyle" xmi:id="_KOK2UWpNEeSly6KCFHFN8A" routing="Rectilinear" jumpLinkStatus="Above"/>
             <styles xmi:type="notation:FontStyle" xmi:id="_KOK2UmpNEeSly6KCFHFN8A" fontColor="7490599" fontName="Lucida Grande" fontHeight="8"/>
-            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_KOK2U2pNEeSly6KCFHFN8A" points="[206, 72, -267, -32]$[331, 72, -142, -32]"/>
+            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_KOK2U2pNEeSly6KCFHFN8A" points="[280, 88, -211, -36]$[349, 88, -142, -36]"/>
             <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_KOLdZmpNEeSly6KCFHFN8A" id="(0.022857142857142857,0.31718061674008813)"/>
             <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_KOLdZ2pNEeSly6KCFHFN8A" id="(0.916030534351145,0.4311377245508982)"/>
           </edges>
