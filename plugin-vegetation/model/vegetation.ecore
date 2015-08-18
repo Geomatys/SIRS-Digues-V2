@@ -72,8 +72,6 @@
   <eClassifiers xsi:type="ecore:EClass" name="PositionableVegetation" abstract="true"
       eSuperTypes="../../sirs-core/model/sirs.ecore#//Positionable">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="geometryType" eType="#//GeometryType"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typePositionId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeCoteId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="explicitGeometry" eType="ecore:EDataType ../../sirs-core/model/jts.ecore#//Geometry"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="distanceDebutMin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="distanceDebutMax" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
@@ -114,6 +112,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="contactEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="traitement" lowerBound="1"
         eType="#//TraitementZoneVegetation" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typePositionId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefPosition"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeCoteId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefCote"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TraitementZoneVegetation">
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeTraitementPonctuelId"
