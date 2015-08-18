@@ -26,20 +26,29 @@ public final class DependancesTheme extends AbstractPluginsButtonTheme {
         super("Gestion des dépendances", "Gestion des dépendances", null);
     }
 
+    /**
+     * Création du panneau contenant les 4 types possibles de dépendances.
+     *
+     * @return le conteneur de ce panneau.
+     */
     @Override
     public Parent createPane() {
         final TabPane tabPane = new TabPane();
         final Tab ouvragesTab = new Tab("Ouvrages de voirie");
         ouvragesTab.setContent(createTablePane(OuvrageVoirieDependance.class, "Liste d'ouvrages de voirie"));
+        ouvragesTab.setClosable(false);
 
         final Tab areaTab = new Tab("Aires de stockage");
         areaTab.setContent(createTablePane(AireStockageDependance.class, "Liste des aires de stockage"));
+        areaTab.setClosable(false);
 
         final Tab accessPathTab = new Tab("Chemins d'accès");
         accessPathTab.setContent(createTablePane(CheminAccesDependance.class, "Liste des chemins d'accès"));
+        accessPathTab.setClosable(false);
 
         final Tab othersTab = new Tab("Autres");
         othersTab.setContent(createTablePane(AutreDependance.class, "Liste des dépendances d'autres types"));
+        othersTab.setClosable(false);
 
         tabPane.getTabs().add(ouvragesTab);
         tabPane.getTabs().add(areaTab);
@@ -48,6 +57,13 @@ public final class DependancesTheme extends AbstractPluginsButtonTheme {
         return new BorderPane(tabPane);
     }
 
+    /**
+     * Créé une {@linkplain PojoTable table} pour la classe fournie avec le titre donné.
+     *
+     * @param clazz Classe d'objets montrés par cette table.
+     * @param title Titre à placer en tête de table.
+     * @return le conteneur de cette table.
+     */
     private BorderPane createTablePane(final Class clazz, final String title) {
         // Gestion du bouton consultation / édition pour la pojo table
         final Separator separator = new Separator();
