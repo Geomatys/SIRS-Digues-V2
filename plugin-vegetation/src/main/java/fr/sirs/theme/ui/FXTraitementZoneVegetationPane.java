@@ -15,6 +15,7 @@ import java.util.Map;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.scene.control.ComboBox;
 
 /**
  *
@@ -94,8 +95,6 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
 
 
         // Initialisation des sous-types
-
-
         final AbstractSIRSRepository<RefSousTraitementVegetation> repoSousTraitements = Injector.getSession().getRepositoryForClass(RefSousTraitementVegetation.class);
         final Map<String, RefSousTraitementVegetation> sousTraitements = new HashMap<>();
 
@@ -105,34 +104,20 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
 
         final List<Preview> sousTraitementPreviews = previewRepository.getByClass(RefSousTraitementVegetation.class);
 
+        initSubType(newElement.getTypeTraitementPonctuelId(), newElement.getSousTypeTraitementPonctuelId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementPonctuelId);
+
+        initSubType(newElement.getTypeTraitementId(), newElement.getSousTypeTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementId);
+    }
+
+
+    private void initSubType(final String typeTraitementId, final String sousTypeTraitementId, 
+            final List<Preview> sousTraitementPreviews,
+            final Map<String, RefSousTraitementVegetation> sousTraitements, final ComboBox comboBox){
+
 
         // 1- si le type est null, on ne peut charger aucune liste de sous-types
-        final String typeTraitementPonctuelId = newElement.getTypeTraitementPonctuelId();
-        if(typeTraitementPonctuelId == null){
-            SIRS.initCombo(ui_sousTypeTraitementPonctuelId, FXCollections.emptyObservableList(),null);
-        }
-        // 2- sinon on va chercher ses éventuels sous-types
-        else {
-            Preview selectedPreview = null;
-            final List<Preview> sousTypes = new ArrayList<>();
-            for(final Preview sousType : sousTraitementPreviews){
-                final String sousTypeId = sousType.getElementId();
-                if(sousTypeId!=null){
-                    final RefSousTraitementVegetation sousTraitement = sousTraitements.get(sousTypeId);
-                    if(typeTraitementPonctuelId.equals(sousTraitement.getTraitementId())){
-                        sousTypes.add(sousType);
-                    }
-
-                    if(sousTypeId.equals(typeTraitementPonctuelId)) selectedPreview = sousType;
-                }
-            }
-            SIRS.initCombo(ui_sousTypeTraitementPonctuelId, FXCollections.observableList(sousTypes), selectedPreview);
-        }
-
-        // 1- si le type est null, on ne peut charger aucune liste de sous-types
-        final String typeTraitementId = newElement.getTypeTraitementId();
         if(typeTraitementId == null){
-            SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.emptyObservableList(),null);
+            SIRS.initCombo(comboBox, FXCollections.emptyObservableList(),null);
         }
         // 2- sinon on va chercher ses éventuels sous-types
         else {
@@ -146,11 +131,10 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
                         sousTypes.add(sousType);
                     }
 
-                    if(sousTypeId.equals(typeTraitementId)) selectedPreview = sousType;
+                    if(sousTypeId.equals(sousTypeTraitementId)) selectedPreview = sousType;
                 }
             }
-            SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.observableList(sousTypes), selectedPreview);
+            SIRS.initCombo(comboBox, FXCollections.observableList(sousTypes), selectedPreview);
         }
-
     }
 }
