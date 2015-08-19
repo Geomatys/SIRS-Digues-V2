@@ -98,7 +98,13 @@ public class FXPositionableExplicitMode extends BorderPane implements FXPosition
         reseting = true;
 
         final Positionable pos = posProperty.get();
-        final String wkt = pos.getGeometry().toText();
+        final Geometry geom = pos.getGeometry();
+        final String wkt;
+        if(geom==null){
+            wkt = "";
+        }else{
+            wkt = pos.getGeometry().toText();
+        }
 
         uiText.setText(wkt);
 

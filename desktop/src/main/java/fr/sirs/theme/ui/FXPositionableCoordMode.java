@@ -77,7 +77,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
         uiImport.setGraphic(new ImageView(ICON_IMPORT_WHITE));
         uiImport.getStyleClass().add("buttonbar-button");
         uiImport.setOnAction(this::importCoord);
-        uiImport.visibleProperty().bind(disableProperty);
+        uiImport.visibleProperty().bind(disableProperty.not());
 
         //liste par défaut des systemes de coordonnées
         final ObservableList<CoordinateReferenceSystem> crss = FXCollections.observableArrayList();

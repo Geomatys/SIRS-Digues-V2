@@ -101,23 +101,18 @@ public class EditVegetationTool extends AbstractEditionTool{
 
         session = Injector.getSession();
 
-        final ChangeListener<Geometry> geomListener = new ChangeListener<Geometry>() {
-            @Override
-            public void changed(ObservableValue<? extends Geometry> observable, Geometry oldValue, Geometry newValue) {
-                refreshDecoration();
-            }
-        };
+        //refresh geometry on change
+        selection.geometry.addListener((ObservableValue<? extends Geometry> observable, Geometry oldValue, Geometry newValue) ->  refreshDecoration() );
+
         form.positionableProperty().addListener(new ChangeListener<Positionable>() {
             @Override
             public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
                 if(oldValue!=null){
-                    oldValue.geometryProperty().removeListener(geomListener);
                     selection.geometry.unbindBidirectional(oldValue.geometryProperty());
                     selection.geometry.set(null);
                 }
                 if(newValue!=null){
                     wizard.setCenter(form);
-                    newValue.geometryProperty().addListener(geomListener);
                     selection.geometry.bindBidirectional(newValue.geometryProperty());
                 }else{
                     reset();
