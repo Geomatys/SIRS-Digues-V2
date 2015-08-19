@@ -18,6 +18,7 @@ import fr.sirs.core.model.PositionableVegetation;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.ZoneVegetation;
 import static fr.sirs.theme.ui.FXPositionableMode.computeLinearFromGeo;
 import fr.sirs.util.SirsStringConverter;
 import java.awt.geom.AffineTransform;
@@ -300,7 +301,7 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
     private void buildGeometry(){
 
         //sauvegarde des propriétés
-        final PositionableVegetation positionable = posProperty.get();
+        final ZoneVegetation positionable = (ZoneVegetation) posProperty.get();
 
         final SystemeReperage sr = uiSRs.getValue();
         final BorneDigue startBorne = uiBorneStart.getValue();
