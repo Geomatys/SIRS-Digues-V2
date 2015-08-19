@@ -36,7 +36,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-import org.geotoolkit.gui.javafx.util.FXNumberCell2;
+import org.geotoolkit.gui.javafx.util.FXDoubleCell;
 
 
 /**
@@ -235,6 +235,7 @@ public class FXPlanVegetationPane extends BorderPane {
         ////////////////////////////////////////////////////////////////////////
         // Construction des paramètes de coûts.
         ////////////////////////////////////////////////////////////////////////
+
         uiCoutTable = new TableView<>(FXCollections.observableList(plan.paramCout));
         uiCoutTable.setEditable(true);
         final TableColumn<ParamCoutTraitementVegetation, String> traitementColumn = new TableColumn<>("Type de traitement");
@@ -247,7 +248,7 @@ public class FXPlanVegetationPane extends BorderPane {
         sousTraitementColumn.setEditable(false);
         final TableColumn<ParamCoutTraitementVegetation, Number> coutColumn = new TableColumn<>("Coût");
         coutColumn.setCellValueFactory((TableColumn.CellDataFeatures<ParamCoutTraitementVegetation, Number> param) -> param.getValue().coutProperty());
-        coutColumn.setCellFactory((TableColumn<ParamCoutTraitementVegetation, Number> param) -> new FXNumberCell2.FXDoubleCell<>(0.));
+        coutColumn.setCellFactory((TableColumn<ParamCoutTraitementVegetation, Number> param) -> new FXDoubleCell<>(0.));
         uiCoutTable.getColumns().addAll(traitementColumn, sousTraitementColumn, coutColumn);
 
 

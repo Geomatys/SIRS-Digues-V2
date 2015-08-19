@@ -27,28 +27,12 @@ import javafx.util.StringConverter;
 /**
  *
  * @author Samuel Andrés (Geomatys)
- * @param <S>
- * @param <T>
+ * @param <S> The type of the TableView generic type (i.e. S == TableView&lt;S&gt;).
+ *           This should also match with the first generic type in TableColumn.
+ * @param <T> The type of the item contained within the Cell.
  */
 public abstract class FXNumberCell2<S, T extends Number> extends TableCell<S, Number> {
-
-    public static final class FXIntegerCell<S> extends FXNumberCell2<S, Integer> {
-
-        public FXIntegerCell(Integer initValue) {
-            super(Integer.class, initValue);
-            field.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(Integer.MIN_VALUE, Integer.MAX_VALUE, initNumber, 1));
-        }
-    }
-
-    public static final class FXDoubleCell<S> extends FXNumberCell2<S, Double> {
-
-        public FXDoubleCell(Double initValue) {
-            super(Double.class, initValue);
-            field.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(Double.MIN_VALUE, Double.MAX_VALUE, initNumber, 1));
-        }
-    }
-
-
+    
     protected final Spinner<T> field = new Spinner<>();
     protected final T initNumber;
 
