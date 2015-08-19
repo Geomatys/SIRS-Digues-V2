@@ -12,6 +12,8 @@ import fr.sirs.core.model.InvasiveVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.PlanVegetation;
+import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.RefSousTraitementVegetation;
 import fr.sirs.core.model.RefTypeInvasiveVegetation;
 import fr.sirs.core.model.RefTypePeuplementVegetation;
 import fr.sirs.core.model.sql.SQLHelper;
@@ -24,10 +26,13 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import fr.sirs.map.FXMapPane;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javax.imageio.ImageIO;
@@ -48,7 +53,10 @@ import org.geotoolkit.style.MutableRule;
 import org.geotoolkit.style.MutableStyle;
 import org.geotoolkit.style.MutableStyleFactory;
 import org.geotoolkit.style.RandomStyleBuilder;
-import static org.geotoolkit.style.StyleConstants.*;
+import static org.geotoolkit.style.StyleConstants.DEFAULT_ANCHOR_POINT;
+import static org.geotoolkit.style.StyleConstants.DEFAULT_DISPLACEMENT;
+import static org.geotoolkit.style.StyleConstants.DEFAULT_GRAPHIC_ROTATION;
+import static org.geotoolkit.style.StyleConstants.LITERAL_ONE_FLOAT;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
@@ -383,6 +391,37 @@ public class PluginVegetation extends Plugin {
         final PolygonSymbolizer symbolizer = SF.polygonSymbolizer(stroke, fill, null);
         rule.symbolizers().add(symbolizer);
         return style;
+    }
+
+
+
+
+    public static void initSubType(final String typeTraitementId, final String sousTypeTraitementId,
+            final List<Preview> sousTraitementPreviews,
+            final Map<String, RefSousTraitementVegetation> sousTraitements, final ComboBox comboBox){
+
+
+        // 1- si le type est null, on ne peut charger aucune liste de sous-types
+        if(typeTraitementId == null){
+            SIRS.initCombo(comboBox, FXCollections.emptyObservableList(),null);
+        }
+        // 2- sinon on va chercher ses éventuels sous-types
+        else {
+            Preview selectedPreview = null;
+            final List<Preview> sousTypes = new ArrayList<>();
+            for(final Preview sousType : sousTraitementPreviews){
+                final String sousTypeId = sousType.getElementId();
+                if(sousTypeId!=null){
+                    final RefSousTraitementVegetation sousTraitement = sousTraitements.get(sousTypeId);
+                    if(typeTraitementId.equals(sousTraitement.getTraitementId())){
+                        sousTypes.add(sousType);
+                    }
+
+                    if(sousTypeId.equals(sousTypeTraitementId)) selectedPreview = sousType;
+                }
+            }
+            SIRS.initCombo(comboBox, FXCollections.observableList(sousTypes), selectedPreview);
+        }
     }
     
 }

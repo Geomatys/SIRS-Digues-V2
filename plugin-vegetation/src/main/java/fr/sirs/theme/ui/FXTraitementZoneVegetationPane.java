@@ -8,6 +8,7 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefSousTraitementVegetation;
 import fr.sirs.core.model.RefTraitementVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
+import static fr.sirs.plugin.vegetation.PluginVegetation.initSubType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +16,6 @@ import java.util.Map;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.scene.control.ComboBox;
 
 /**
  *
@@ -107,34 +107,5 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
         initSubType(newElement.getTypeTraitementPonctuelId(), newElement.getSousTypeTraitementPonctuelId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementPonctuelId);
 
         initSubType(newElement.getTypeTraitementId(), newElement.getSousTypeTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementId);
-    }
-
-
-    private void initSubType(final String typeTraitementId, final String sousTypeTraitementId, 
-            final List<Preview> sousTraitementPreviews,
-            final Map<String, RefSousTraitementVegetation> sousTraitements, final ComboBox comboBox){
-
-
-        // 1- si le type est null, on ne peut charger aucune liste de sous-types
-        if(typeTraitementId == null){
-            SIRS.initCombo(comboBox, FXCollections.emptyObservableList(),null);
-        }
-        // 2- sinon on va chercher ses éventuels sous-types
-        else {
-            Preview selectedPreview = null;
-            final List<Preview> sousTypes = new ArrayList<>();
-            for(final Preview sousType : sousTraitementPreviews){
-                final String sousTypeId = sousType.getElementId();
-                if(sousTypeId!=null){
-                    final RefSousTraitementVegetation sousTraitement = sousTraitements.get(sousTypeId);
-                    if(typeTraitementId.equals(sousTraitement.getTraitementId())){
-                        sousTypes.add(sousType);
-                    }
-
-                    if(sousTypeId.equals(sousTypeTraitementId)) selectedPreview = sousType;
-                }
-            }
-            SIRS.initCombo(comboBox, FXCollections.observableList(sousTypes), selectedPreview);
-        }
     }
 }
