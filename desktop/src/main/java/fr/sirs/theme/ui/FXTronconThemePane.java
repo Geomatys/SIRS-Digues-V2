@@ -1,8 +1,8 @@
 package fr.sirs.theme.ui;
 
-import fr.sirs.Session;
-import fr.sirs.SIRS;
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
+import fr.sirs.Session;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.TronconDigue;
@@ -34,11 +34,14 @@ public class FXTronconThemePane extends BorderPane {
 
     @FXML private BorderPane uiCenter;
     @FXML private ComboBox<Preview> uiLinearChoice;
+
     private final StringProperty linearIdProperty = new SimpleStringProperty();
     private final Session session = Injector.getBean(Session.class);
 
+    public StringProperty linearIdProperty(){return linearIdProperty;}
+
     public FXTronconThemePane(TronconTheme.ThemeManager ... groups) {
-        SIRS.loadFXML(this);
+        SIRS.loadFXML(this, FXTronconThemePane.class, null);
 
         if (groups.length==1) {
             uiCenter.setCenter(createContent(groups[0]));
@@ -66,7 +69,7 @@ public class FXTronconThemePane extends BorderPane {
         }
     }
 
-    private class TronconThemePojoTable<T extends AvecForeignParent> extends ForeignParentPojoTable<T>{
+    protected class TronconThemePojoTable<T extends AvecForeignParent> extends ForeignParentPojoTable<T>{
 
         private final TronconTheme.ThemeManager<T> group;
 

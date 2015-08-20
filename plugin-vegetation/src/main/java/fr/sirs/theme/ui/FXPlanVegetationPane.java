@@ -197,7 +197,7 @@ public class FXPlanVegetationPane extends BorderPane {
         uiTraitementsTable.getColumns().addAll(vegetationColumn, typeTraitementColumn, typeSousTraitementColumn, frequenceTraitementColumn);
 
         // Construction du titre
-        final Label uiTraitementsTableTitle = new Label("Recension des types traitements par type de zone de végétation");
+        final Label uiTraitementsTableTitle = new Label("Traitements par type de zone de végétation");
         uiTraitementsTableTitle.getStyleClass().add("pojotable-header");
 
         // Bouton de raffraîchissement du tableau
@@ -212,7 +212,7 @@ public class FXPlanVegetationPane extends BorderPane {
         // Construction de l'en-tête
         final HBox uiTraitementsTableHeader = new HBox(uiTraitementsTableTitle, separaPane1, uiTraitementsRefresh);
         HBox.setHgrow(separaPane1, Priority.ALWAYS);
-        uiTraitementsTableHeader.setPadding(new Insets(5));
+        uiTraitementsTableHeader.setPadding(new Insets(15, 5, 5, 5));
 
 
      
@@ -252,7 +252,7 @@ public class FXPlanVegetationPane extends BorderPane {
         // Construction de l'en-tête
         final HBox uiCoutsTableHeader = new HBox(uiCoutTableTitle, separaPane2, uiCostRefresh);
         HBox.setHgrow(separaPane2, Priority.ALWAYS);
-        uiCoutsTableHeader.setPadding(new Insets(5));
+        uiCoutsTableHeader.setPadding(new Insets(15, 5, 5, 5));
 
         // Mise en page
         uiVBox.getChildren().addAll(uiCoutsTableHeader, uiCoutTable, uiTraitementsTableHeader, uiTraitementsTable);
@@ -300,7 +300,7 @@ public class FXPlanVegetationPane extends BorderPane {
         final List<TraitementSummary> traitementsAvecCout = new ArrayList<>();
         final List<ParamCoutTraitementVegetation> coutAvecTraitement = new ArrayList<>();
         for(final ParamCoutTraitementVegetation param : plan.getParamCout()){
-            final TraitementSummary paramTraitementStub = toSummary(param);
+            final TraitementSummary paramTraitementStub = TraitementSummary.toSummary(param);
             for(final TraitementSummary traitement : traitements){
                 if(paramTraitementStub.equalsTraitementSummary(traitement)){
                     traitementsAvecCout.add(traitement);
@@ -334,22 +334,6 @@ public class FXPlanVegetationPane extends BorderPane {
         }
 
         planRepo.update(plan);
-    }
-
-    /**
-     * Construit une ébauche de TraitementSummary à l'aide des informations
-     * présentens dans le ParamCoutTraitementVegetation donné en paramètres.
-     *
-     * Cette opération est réalisée à des fins de simple comparaison de manière
-     * à évaluer si un ParamCoutTraitementVegetation prend en charge un
-     * Traitement summary (c'est-à-dire correspond à son type et sous-type de
-     * traitement).
-     *
-     * @param param
-     * @return
-     */
-    private TraitementSummary toSummary(final ParamCoutTraitementVegetation param){
-        return new TraitementSummary(null, param.getType(), param.getSousType(), null, true);
     }
 
     /**
@@ -400,6 +384,9 @@ public class FXPlanVegetationPane extends BorderPane {
         }
     }
 
+    /**
+     * Utility class to represent different kinds of treatments.
+     */
     private static class TraitementSummary {
         private final ObjectProperty<Class<? extends ZoneVegetation>> typeVegetationClass = new SimpleObjectProperty<>();
         private final StringProperty typeTraitementId = new SimpleStringProperty();
@@ -470,6 +457,22 @@ public class FXPlanVegetationPane extends BorderPane {
                 return false;
             }
             return true;
+        }
+
+        /**
+         * Construit une ébauche de TraitementSummary à l'aide des informations
+         * présentens dans le ParamCoutTraitementVegetation donné en paramètres.
+         *
+         * Cette opération est réalisée à des fins de simple comparaison de manière
+         * à évaluer si un ParamCoutTraitementVegetation prend en charge un
+         * Traitement summary (c'est-à-dire correspond à son type et sous-type de
+         * traitement).
+         *
+         * @param param
+         * @return
+         */
+        private static TraitementSummary toSummary(final ParamCoutTraitementVegetation param){
+            return new TraitementSummary(null, param.getType(), param.getSousType(), null, true);
         }
     }
 

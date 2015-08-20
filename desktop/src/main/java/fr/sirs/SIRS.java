@@ -97,6 +97,7 @@ public final class SIRS extends SirsCore {
     public static final Image ICON_CHECK_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CHECK_CIRCLE, 16, Color.decode(COLOR_VALID_ICON)),null);
     public static final String COLOR_WARNING_ICON = "#EEB422";
     public static final Image ICON_EXCLAMATION_TRIANGLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_TRIANGLE, 16, Color.decode(COLOR_WARNING_ICON)),null);
+    public static final Image ICON_EXCLAMATION_TRIANGLE_BLACK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_TRIANGLE, 16, Color.BLACK),null);
 
     public static final Image ICON_LINK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXTERNAL_LINK, 16, Color.BLACK),null);
     public static final Image ICON_WARNING = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_TRIANGLE, 16, Color.BLACK),null);
@@ -227,10 +228,13 @@ public final class SIRS extends SirsCore {
     }
     
     public static void loadFXML(Parent candidate, final ResourceBundle bundle) {
+        loadFXML(candidate, candidate.getClass(), bundle);
+    }
+
+    public static void loadFXML(Parent candidate, final Class fxmlClass, final ResourceBundle bundle) {
         ArgumentChecks.ensureNonNull("JavaFX controller object", candidate);
-        final Class cdtClass = candidate.getClass();
-        final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
-        final URL resource = cdtClass.getResource(fxmlpath);
+        final String fxmlpath = "/"+fxmlClass.getName().replace('.', '/')+".fxml";
+        final URL resource = fxmlClass.getResource(fxmlpath);
         if (resource == null) {
             throw new RuntimeException("No FXMl document can be found for path : "+fxmlpath);
         }
@@ -239,7 +243,7 @@ public final class SIRS extends SirsCore {
         loader.setRoot(candidate);
         //in special environement like osgi or other, we must use the proper class loaders
         //not necessarly the one who loaded the FXMLLoader class
-        loader.setClassLoader(cdtClass.getClassLoader());
+        loader.setClassLoader(fxmlClass.getClassLoader());
 
         if(bundle!=null) loader.setResources(bundle);
 

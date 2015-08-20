@@ -5,6 +5,7 @@ import fr.sirs.theme.AbstractTheme;
 import fr.sirs.theme.AbstractTheme.ThemeManager;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import fr.sirs.theme.ui.FXTronconThemePane;
+import fr.sirs.theme.ui.FXVegetationTronconThemePane;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
 
@@ -21,7 +22,7 @@ public final class VegetationTraitementTheme extends AbstractPluginsButtonTheme 
     @Override
     public Parent createPane() {
         final ThemeManager themeManager = AbstractTheme.generateThemeManager(ParcelleVegetation.class);
-        final FXTronconThemePane pane = new FXTronconThemePane(themeManager);
+        final FXTronconThemePane pane = new FXVegetationTronconThemePane(themeManager);
         return pane;
     }
 

@@ -1851,7 +1851,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_GHZPkEZGEeWaT-j8RIAk3g" name="horsGestion : EBoolean = false" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@4f731bd2{platform:/resource/plugin-vegetation/model/vegetation.ecore#//TraitementZoneVegetation/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_GHZPkEZGEeWaT-j8RIAk3g" name="horsGestion : EBoolean = false" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="vegetation.ecore#//TraitementZoneVegetation/horsGestion"/>
           <semanticElements xmi:type="ecore:EAttribute" href="vegetation.ecore#//TraitementZoneVegetation/horsGestion"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_PdA7IEZGEeWaT-j8RIAk3g" labelAlignment="LEFT">
