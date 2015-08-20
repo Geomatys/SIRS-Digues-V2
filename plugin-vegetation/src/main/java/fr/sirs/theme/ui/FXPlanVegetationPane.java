@@ -15,6 +15,8 @@ import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.util.SirsStringConverter;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -26,7 +28,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableCell;
@@ -34,6 +38,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import org.geotoolkit.gui.javafx.util.FXDoubleCell;
@@ -123,6 +130,7 @@ public class FXPlanVegetationPane extends BorderPane {
             };
 
     private final PlanVegetation plan;
+    private final ObservableList<TraitementSummary> traitements = FXCollections.observableArrayList();
 
     public FXPlanVegetationPane(PlanVegetation plan) {
         SIRS.loadFXML(this, FXPlanVegetationPane.class);
@@ -147,48 +155,7 @@ public class FXPlanVegetationPane extends BorderPane {
         // Construction des résumés des traitements planifiés sur les zones.
         ////////////////////////////////////////////////////////////////////////
 
-        /*
-        On commence par parcourir les zones de végétation de toutes les
-        parcelles du plan.
-
-        Pour chaque zone, on récupère le traitement qui lui est associé.
-
-        |-> S'il n'y a pas de traitement associé, ou si le traitement est hors
-            gestion, on passe à la zone suivante.
-
-        |-> Avec ce traitement, s'il exite et doit être pris en compte dans la
-            gestion, on construit deux "résumés de traitement", un pour le
-            traitement ponctuel et un pour le traitemnet non ponctuel,
-            mémorisant le type de la zone de végétation, le type de traitement,
-            le type de sous-traitement et un booleen indiquant la ponctualité
-            du traitement. En plus, les traitements non ponctuels mémorisent la
-            fréquence de traitement.
-            [Note: on a besoin du booleen indiquant la ponctualité du traitement
-            car la nullité de la fréquence n'est pas suffisante (on pourrait
-            avoir une fréquence nulle pour un traitement non ponctuel si celle-
-            -ci n'avait pas été initializée). On serait alors contraint de faire
-            une requête sur la liste de référence du type de traitement afin de
-            vérifier s'il est ponctuel ou non.]
-            On vérifie ensuite que les résumés de traitement ne sont pas déjà
-            dans la liste des traitements avant de les y ajouter.
-
-            À l'issue de cette étape on a donc une liste des traitements
-            recensés dans le plan de gestion.
-        */
-        final ObservableList<TraitementSummary> traitements = FXCollections.observableArrayList();
-        for(final ParcelleVegetation parcelle : parcelleRepo.getByPlan(plan)){
-            ObservableList<? extends ZoneVegetation> allZoneVegetationByParcelleId = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), session);
-            for(final ZoneVegetation zone : allZoneVegetationByParcelleId){
-                final TraitementZoneVegetation traitement = zone.getTraitement();
-                if(traitement!=null && !traitement.getHorsGestion()){
-                    final TraitementSummary summaryNonPonctuel = new TraitementSummary(zone.getClass(), traitement.getTypeTraitementId(), traitement.getSousTypeTraitementId(), traitement.getFrequenceId(), false);
-                    final TraitementSummary summaryPonctuel = new TraitementSummary(zone.getClass(), traitement.getTypeTraitementPonctuelId(), traitement.getSousTypeTraitementPonctuelId(), null, true);
-                    if(traitement.getTypeTraitementId()!=null && !traitements.contains(summaryNonPonctuel)) traitements.add(summaryNonPonctuel);
-                    if(traitement.getTypeTraitementPonctuelId()!=null && !traitements.contains(summaryPonctuel)) traitements.add(summaryPonctuel);
-                }
-            }
-        }
-
+        initTraitements(null);
         uiTraitementsTable = new TableView<>(traitements);
 
         final TableColumn<TraitementSummary, Class<? extends ZoneVegetation>> vegetationColumn = new TableColumn<>("Type de zone");
@@ -227,17 +194,35 @@ public class FXPlanVegetationPane extends BorderPane {
                 return sum.typeFrequenceId;
                 });
         frequenceTraitementColumn.setCellFactory(fromIdCellFactory);
-
         uiTraitementsTable.getColumns().addAll(vegetationColumn, typeTraitementColumn, typeSousTraitementColumn, frequenceTraitementColumn);
+
+        // Construction du titre
+        final Label uiTraitementsTableTitle = new Label("Recension des types traitements par type de zone de végétation");
+        uiTraitementsTableTitle.getStyleClass().add("pojotable-header");
+
+        // Bouton de raffraîchissement du tableau
+        final Button uiTraitementsRefresh = new Button("Mettre à jour");
+        uiTraitementsRefresh.setOnAction(this::initTraitements);
+
+        // Panneau de séparation (mise en forme)
+        final Pane separaPane1 = new Pane();
+        separaPane1.setPrefSize(USE_PREF_SIZE, USE_PREF_SIZE);
+        separaPane1.setMaxSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
+
+        // Construction de l'en-tête
+        final HBox uiTraitementsTableHeader = new HBox(uiTraitementsTableTitle, separaPane1, uiTraitementsRefresh);
+        HBox.setHgrow(separaPane1, Priority.ALWAYS);
+        uiTraitementsTableHeader.setPadding(new Insets(5));
+
 
      
 
         ////////////////////////////////////////////////////////////////////////
         // Construction des paramètes de coûts.
         ////////////////////////////////////////////////////////////////////////
-
         uiCoutTable = new TableView<>(FXCollections.observableList(plan.paramCout));
         uiCoutTable.setEditable(true);
+
         final TableColumn<ParamCoutTraitementVegetation, String> traitementColumn = new TableColumn<>("Type de traitement");
         traitementColumn.setCellValueFactory((TableColumn.CellDataFeatures<ParamCoutTraitementVegetation, String> param) -> param.getValue().typeProperty());
         traitementColumn.setCellFactory(fromIdCellFactory2);
@@ -251,13 +236,169 @@ public class FXPlanVegetationPane extends BorderPane {
         coutColumn.setCellFactory((TableColumn<ParamCoutTraitementVegetation, Number> param) -> new FXDoubleCell<>(0.));
         uiCoutTable.getColumns().addAll(traitementColumn, sousTraitementColumn, coutColumn);
 
+        // Construction du titre
+        final Label uiCoutTableTitle = new Label("Paramétrage des coûts");
+        uiCoutTableTitle.getStyleClass().add("pojotable-header");
 
+        //Bouton de raffraîchissement du tableau
+        final Button uiCostRefresh = new Button("Mettre à jour");
+        uiCostRefresh.setOnAction(this::initCosts);
 
-        uiVBox.getChildren().addAll(uiCoutTable, uiTraitementsTable);
+        // Panneau de séparation (mise en forme)
+        final Pane separaPane2 = new Pane();
+        separaPane2.setPrefSize(USE_PREF_SIZE, USE_PREF_SIZE);
+        separaPane2.setMaxSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
 
+        // Construction de l'en-tête
+        final HBox uiCoutsTableHeader = new HBox(uiCoutTableTitle, separaPane2, uiCostRefresh);
+        HBox.setHgrow(separaPane2, Priority.ALWAYS);
+        uiCoutsTableHeader.setPadding(new Insets(5));
+
+        // Mise en page
+        uiVBox.getChildren().addAll(uiCoutsTableHeader, uiCoutTable, uiTraitementsTableHeader, uiTraitementsTable);
     }
 
+    /**
+     * Méthode d'initialisation des coûts.
+     *
+     * Les coûts sont enregistrés dans la parcelle, mais dépendent des
+     * traitements dans le sens où d'une part chaque combinaison de traitement
+     * présente dans la table de recension des traitements doit avoir un coût
+     * associé et réciproquement les coûts n'ont de sens que lorsqu'ils
+     * correspondent à une combinaison de traitements existant dans le plan.
+     *
+     * Cela a plusieurs conséquences en termes d'édition :
+     *
+     * 1)
+     * Il ne faut donc pas laisser totalement la main sur l'édition de la table
+     * afin de ne pas permettre d'ajouter n'importe quel coût pour un traitement
+     * qui ne correspondrait à rien, mais seulement autoriser l'édition des
+     * montants.
+     *
+     * 2)
+     * Il faut néanmoins pouvoir mettre le tableau à jour afin d'y ajouter des
+     * paramétrages de coûts pour de nouvelles combinaisons de traitements et
+     * d'en retirer les paramétrages de coûts qui ne correspondent plus à aucun
+     * traitement.
+     *
+     * Ces opérations de mise à jour sont l'objet de cette méthode.
+     *
+     * @param event
+     */
+    private void initCosts(ActionEvent event){
+        /*
+        1) Les traitements sont disponibles dans la liste des traitements et les
+        paramètres de coûts dans la liste des paramètres de coûts du plan.
 
+        Il faut les parcourir et les comparer de manière à recenser les
+        paramètres de coûts qui ne correspondent plus à aucun traitement et les
+        traitements pour lesquels il n'existe pas de paramètre de coût.
+
+        On parcours tous les paramètres et les traitements de manière à
+        détecter les associations.
+        */
+        final List<TraitementSummary> traitementsAvecCout = new ArrayList<>();
+        final List<ParamCoutTraitementVegetation> coutAvecTraitement = new ArrayList<>();
+        for(final ParamCoutTraitementVegetation param : plan.getParamCout()){
+            final TraitementSummary paramTraitementStub = toSummary(param);
+            for(final TraitementSummary traitement : traitements){
+                if(paramTraitementStub.equalsTraitementSummary(traitement)){
+                    traitementsAvecCout.add(traitement);
+                    coutAvecTraitement.add(param);
+                }
+            }
+        }
+
+        /*
+        On retranche des traitements, ceux qui ont un coût déterminé afin d'avoir une liste des traitements sans coût.
+        */
+        final List<TraitementSummary> traitementsSansCout = new ArrayList<>(traitements);
+        traitementsSansCout.removeAll(traitementsAvecCout);
+        
+        /*
+        On retranche de la liste des coûts ceux qui n'ont pas de traitement associé.
+        */
+        final List<ParamCoutTraitementVegetation> coutSansTraitement = new ArrayList<>(plan.getParamCout());
+        coutSansTraitement.removeAll(coutAvecTraitement);
+
+        // On commence par retrancher de la liste des paramètres ceux qui ne servent plus à rien
+        plan.getParamCout().removeAll(coutSansTraitement);
+
+        // Puis on crée des paramètres pour les traitements qui n'ont pas de coût
+        for(final TraitementSummary traitement : traitementsSansCout){
+            final ParamCoutTraitementVegetation param = session.getElementCreator().createElement(ParamCoutTraitementVegetation.class);
+            param.getId();// On affecte un Id à l'élément imbriqué
+            param.setType(traitement.typeTraitementId.get());
+            param.setSousType(traitement.typeSousTraitementId.get());
+            plan.getParamCout().add(param);
+        }
+
+        planRepo.update(plan);
+    }
+
+    /**
+     * Construit une ébauche de TraitementSummary à l'aide des informations
+     * présentens dans le ParamCoutTraitementVegetation donné en paramètres.
+     *
+     * Cette opération est réalisée à des fins de simple comparaison de manière
+     * à évaluer si un ParamCoutTraitementVegetation prend en charge un
+     * Traitement summary (c'est-à-dire correspond à son type et sous-type de
+     * traitement).
+     *
+     * @param param
+     * @return
+     */
+    private TraitementSummary toSummary(final ParamCoutTraitementVegetation param){
+        return new TraitementSummary(null, param.getType(), param.getSousType(), null, true);
+    }
+
+    /**
+     * Méthode d'initialisation des traitements.
+     *
+     * On commence par parcourir les zones de végétation de toutes les
+     * parcelles du plan.
+     *
+     * Pour chaque zone, on récupère le traitement qui lui est associé.
+     *
+     * |-> S'il n'y a pas de traitement associé, ou si le traitement est hors
+     *     gestion, on passe à la zone suivante.
+     *
+     * |-> Avec ce traitement, s'il exite et doit être pris en compte dans la
+     *     gestion, on construit deux "résumés de traitement", un pour le
+     *     traitement ponctuel et un pour le traitemnet non ponctuel,
+     *     mémorisant le type de la zone de végétation, le type de traitement,
+     *     le type de sous-traitement et un booleen indiquant la ponctualité
+     *     du traitement. En plus, les traitements non ponctuels mémorisent la
+     *     fréquence de traitement.
+     *     [Note: on a besoin du booleen indiquant la ponctualité du traitement
+     *     car la nullité de la fréquence n'est pas suffisante (on pourrait
+     *     avoir une fréquence nulle pour un traitement non ponctuel si celle-
+     *     -ci n'avait pas été initializée). On serait alors contraint de faire
+     *     une requête sur la liste de référence du type de traitement afin de
+     *     vérifier s'il est ponctuel ou non.]
+     *     On vérifie ensuite que les résumés de traitement ne sont pas déjà
+     *     dans la liste des traitements avant de les y ajouter.
+     *
+     *     À l'issue de cette étape on a donc une liste des traitements
+     *     recensés dans le plan de gestion.
+     * 
+     * @param event
+     */
+    private void initTraitements(ActionEvent event){
+        traitements.remove(0, traitements.size());
+        for(final ParcelleVegetation parcelle : parcelleRepo.getByPlan(plan)){
+            ObservableList<? extends ZoneVegetation> allZoneVegetationByParcelleId = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), session);
+            for(final ZoneVegetation zone : allZoneVegetationByParcelleId){
+                final TraitementZoneVegetation traitement = zone.getTraitement();
+                if(traitement!=null && !traitement.getHorsGestion()){
+                    final TraitementSummary summaryNonPonctuel = new TraitementSummary(zone.getClass(), traitement.getTypeTraitementId(), traitement.getSousTypeTraitementId(), traitement.getFrequenceId(), false);
+                    final TraitementSummary summaryPonctuel = new TraitementSummary(zone.getClass(), traitement.getTypeTraitementPonctuelId(), traitement.getSousTypeTraitementPonctuelId(), null, true);
+                    if(traitement.getTypeTraitementId()!=null && !traitements.contains(summaryNonPonctuel)) traitements.add(summaryNonPonctuel);
+                    if(traitement.getTypeTraitementPonctuelId()!=null && !traitements.contains(summaryPonctuel)) traitements.add(summaryPonctuel);
+                }
+            }
+        }
+    }
 
     private static class TraitementSummary {
         private final ObjectProperty<Class<? extends ZoneVegetation>> typeVegetationClass = new SimpleObjectProperty<>();
@@ -330,7 +471,6 @@ public class FXPlanVegetationPane extends BorderPane {
             }
             return true;
         }
-
     }
 
 }
