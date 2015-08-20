@@ -71,7 +71,7 @@ public class BorneEditHandler extends AbstractNavigationHandler {
     private final MouseListen mouseInputListener = new MouseListen();
     private final FXGeometryLayer geomlayer= new FXGeometryLayer(){
         @Override
-        protected Node createVerticeNode(Coordinate c){
+        protected Node createVerticeNode(Coordinate c, boolean selected){
             final Line h = new Line(c.x-CROSS_SIZE, c.y, c.x+CROSS_SIZE, c.y);
             final Line v = new Line(c.x, c.y-CROSS_SIZE, c.x, c.y+CROSS_SIZE);
             h.setStroke(Color.RED);
@@ -268,13 +268,13 @@ public class BorneEditHandler extends AbstractNavigationHandler {
         if(borne==null){
             editGeometry.reset();
         }else{
-            editGeometry.geometry = borne.getGeometry();
+            editGeometry.geometry.set(borne.getGeometry());
         }
 
         if(editGeometry.geometry==null){
             geomlayer.getGeometries().clear();
         }else{
-            geomlayer.getGeometries().setAll(editGeometry.geometry);
+            geomlayer.getGeometries().setAll(editGeometry.geometry.get());
         }
     }
 
@@ -381,7 +381,7 @@ public class BorneEditHandler extends AbstractNavigationHandler {
         public void mouseReleased(MouseEvent me) {
             mouseDragged(me);
             if(borne!=null && editGeometry.selectedNode[0]>=0){
-                borne.setGeometry((Point) editGeometry.geometry);
+                borne.setGeometry((Point) editGeometry.geometry.get());
                 session.getRepositoryForClass(BorneDigue.class).update(borne);
                 editPane.selectSRB(null);
                 //les event vont induire le repaint de la carte

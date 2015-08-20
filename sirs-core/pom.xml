@@ -158,7 +158,7 @@
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-feature-h2</artifactId>
-      <version>${geotoolkit.version}</version>
+      <version>${geotoolkit.h2.version}</version>
     </dependency>
     
         <!-- JAI -->

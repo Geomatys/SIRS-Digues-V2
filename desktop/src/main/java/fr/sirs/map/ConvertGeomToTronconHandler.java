@@ -48,7 +48,7 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
     private final MouseListen mouseInputListener = new MouseListen();
     private final FXGeometryLayer geomlayer= new FXGeometryLayer(){
         @Override
-        protected Node createVerticeNode(Coordinate c){
+        protected Node createVerticeNode(Coordinate c, boolean selected){
             final Line h = new Line(c.x-CROSS_SIZE, c.y, c.x+CROSS_SIZE, c.y);
             final Line v = new Line(c.x, c.y-CROSS_SIZE, c.x, c.y+CROSS_SIZE);
             h.setStroke(Color.RED);

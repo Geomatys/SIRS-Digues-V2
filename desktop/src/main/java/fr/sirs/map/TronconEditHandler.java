@@ -99,7 +99,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
     private final MouseListen mouseInputListener = new MouseListen();
     private final FXGeometryLayer geomlayer= new FXGeometryLayer(){
         @Override
-        protected Node createVerticeNode(Coordinate c){
+        protected Node createVerticeNode(Coordinate c, boolean selected){
             final Line h = new Line(c.x-CROSS_SIZE, c.y, c.x+CROSS_SIZE, c.y);
             final Line v = new Line(c.x, c.y-CROSS_SIZE, c.x, c.y+CROSS_SIZE);
             h.setStroke(Color.RED);
@@ -136,7 +136,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
 
             editGeometry.reset();
             if (tronconProperty.get() != null) {
-                editGeometry.geometry = (Geometry) tronconProperty.get().getGeometry().clone();
+                editGeometry.geometry.set((Geometry) tronconProperty.get().getGeometry().clone());
             }
             updateGeometry();
 
@@ -225,7 +225,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         if(editGeometry.geometry==null){
             geomlayer.getGeometries().clear();
         }else{
-            geomlayer.getGeometries().setAll(editGeometry.geometry);
+            geomlayer.getGeometries().setAll(editGeometry.geometry.get());
         }
     }
     
@@ -416,16 +416,17 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                 if (mousebutton == MouseButton.PRIMARY && e.getClickCount() >= 2) {
                     //ajout d'un noeud                    
                     final Geometry result;
-                    if (editGeometry.geometry instanceof LineString) {
-                        result = helper.insertNode((LineString) editGeometry.geometry, startX, startY);
-                    } else if (editGeometry.geometry instanceof Polygon) {
-                        result = helper.insertNode((Polygon) editGeometry.geometry, startX, startY);
-                    } else if (editGeometry.geometry instanceof GeometryCollection) {
-                        result = helper.insertNode((GeometryCollection) editGeometry.geometry, startX, startY);
+                    final Geometry geom = editGeometry.geometry.get();
+                    if (geom instanceof LineString) {
+                        result = helper.insertNode((LineString) geom, startX, startY);
+                    } else if (geom instanceof Polygon) {
+                        result = helper.insertNode((Polygon) geom, startX, startY);
+                    } else if (geom instanceof GeometryCollection) {
+                        result = helper.insertNode((GeometryCollection) geom, startX, startY);
                     } else {
-                        result = editGeometry.geometry;
+                        result = geom;
                     }
-                    editGeometry.geometry = result;
+                    editGeometry.geometry.set(result);
                     updateGeometry();
                 } else if (mousebutton == MouseButton.SECONDARY) {
                     // popup : 
@@ -457,7 +458,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                             final MenuItem invert = new MenuItem("Inverser le tracé du tronçon");
                             invert.setOnAction((ActionEvent ae) -> {
                                 // HACK : On est forcé de sauvegarder le tronçon pour mettre à jour le SR élémentaire.
-                                tronconProperty.get().setGeometry(editGeometry.geometry.reverse());
+                                tronconProperty.get().setGeometry(editGeometry.geometry.get().reverse());
                                 session.getRepositoryForClass(TronconDigue.class).update(tronconProperty.get());
                                 TronconUtils.updateSRElementaire(tronconProperty.get(), session);
                                 tronconProperty.set(null);
@@ -470,7 +471,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                         if (!editGeometry.geometry.equals(tronconProperty.get().getGeometry())) {
                             final MenuItem saveItem = new MenuItem("Sauvegarder les modifications");
                             saveItem.setOnAction((ActionEvent event) -> {
-                                tronconProperty.get().setGeometry(editGeometry.geometry);
+                                tronconProperty.get().setGeometry(editGeometry.geometry.get());
                                 session.getRepositoryForClass(TronconDigue.class).update(tronconProperty.get());
 
                                 TronconUtils.updateSRElementaire(tronconProperty.get(), session);
@@ -570,7 +571,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                 updateGeometry();
             }else if(editGeometry.numSubGeom != -1){
                 //deplacement de la geometry
-                helper.moveGeometry(editGeometry.geometry, diffX, diffY);
+                helper.moveGeometry(editGeometry.geometry.get(), diffX, diffY);
                 updateGeometry();
             } else {
                 super.mouseDragged(me);

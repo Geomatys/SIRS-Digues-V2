@@ -106,12 +106,12 @@
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-feature-dwg</artifactId>
-      <version>${geotoolkit.version}</version>
+      <version>${geotoolkit.dwg.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-feature-esri-geodb</artifactId>
-      <version>${geotoolkit.version}</version>
+      <version>${geotoolkit.esri.version}</version>
     </dependency>
   </dependencies>
 
