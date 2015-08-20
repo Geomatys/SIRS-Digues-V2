@@ -220,7 +220,7 @@ public class FXPlanVegetationPane extends BorderPane {
         ////////////////////////////////////////////////////////////////////////
         // Construction des paramètes de coûts.
         ////////////////////////////////////////////////////////////////////////
-        uiCoutTable = new TableView<>(FXCollections.observableList(plan.paramCout));
+        uiCoutTable = new TableView<>((ObservableList) plan.paramCout);
         uiCoutTable.setEditable(true);
 
         final TableColumn<ParamCoutTraitementVegetation, String> traitementColumn = new TableColumn<>("Type de traitement");
@@ -463,10 +463,10 @@ public class FXPlanVegetationPane extends BorderPane {
                 return false;
             }
 
-            if (!Objects.equals(this.typeTraitementId, obj.typeTraitementId)) {
+            if (!Objects.equals(this.typeTraitementId.get(), obj.typeTraitementId.get())) {
                 return false;
             }
-            if (!Objects.equals(this.typeSousTraitementId, obj.typeSousTraitementId)) {
+            if (!Objects.equals(this.typeSousTraitementId.get(), obj.typeSousTraitementId.get())) {
                 return false;
             }
             return true;
