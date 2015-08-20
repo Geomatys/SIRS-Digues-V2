@@ -233,7 +233,7 @@ public class FXMapPane extends BorderPane {
         uiToolBar.setBackground(Background.EMPTY);
         uiEditBar.setBackground(Background.EMPTY);
 
-        
+
         final BorderPane topgrid = new BorderPane();
         final FlowPane flowPane = new FlowPane(Orientation.HORIZONTAL,uiCtxBar,uiAddBar,uiNavBar,uiToolBar,uiEditBar);
         flowPane.setHgap(0);
@@ -244,7 +244,7 @@ public class FXMapPane extends BorderPane {
 
         //add plugin toolbars
         for(Plugin p : Plugins.getPlugins()){
-            final List<ToolBar> toolbars = p.getMapToolBars();
+            final List<ToolBar> toolbars = p.getMapToolBars(this);
             if(toolbars!=null){
                 for(ToolBar t : toolbars){
                     t.setMaxHeight(Double.MAX_VALUE);
@@ -258,31 +258,31 @@ public class FXMapPane extends BorderPane {
 //        flowBar.setMaxWidth(Double.MAX_VALUE);
         topgrid.setCenter(flowPane);
         topgrid.setRight(uiSplitBar);
-        
+
         mapsplit.getItems().add(paneMap1);
-        
+
         final BorderPane border = new BorderPane();
         border.setTop(topgrid);
         border.setCenter(mapsplit);
-        
+
         final SplitPane split = new SplitPane();
         split.setOrientation(Orientation.HORIZONTAL);
         split.getItems().add(uiTree);
         split.getItems().add(border);
         split.setDividerPositions(0.3);
-        
+
         setCenter(split);
-        
+
         uiMap1.setHandler(new FXPanHandler(false));
         uiMap2.setHandler(new FXPanHandler(false));
-        
+
         //ajout des ecouteurs souris sur click droit
         uiMap1.addEventHandler(MouseEvent.MOUSE_CLICKED, new MapActionHandler(uiMap1));
         uiMap2.addEventHandler(MouseEvent.MOUSE_CLICKED, new MapActionHandler(uiMap2));
-        
+
         //Affiche le contexte carto et le déplace à la date du jour
         TaskManager.INSTANCE.submit("Initialisation de la carte", () -> {
-            
+
             final MapContext context = Injector.getSession().getMapContext();
                         final Task t = new Task() {
                 @Override
@@ -294,17 +294,17 @@ public class FXMapPane extends BorderPane {
                     return null;
                 }
             };
-            
+
         if (Platform.isFxApplicationThread()) {
             t.run();
         } else {
             Platform.runLater(t);
         }
-            
+
             return null;
         });
     }
-    
+
     /**
      * Déplace la temporalité de la carte sélectionnée sur la date demandée.
      * @param ldt La Date pour la carte. Ne doit pas être nulle.

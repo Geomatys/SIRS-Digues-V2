@@ -4,6 +4,7 @@ package fr.sirs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.sql.SQLHelper;
+import fr.sirs.map.FXMapPane;
 import fr.sirs.theme.Theme;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -88,10 +89,11 @@ public abstract class Plugin {
 
     /**
      * Barre d'outils complémentaire pour la carte.
-     * 
+     *
+     * @param mapPane Panneau de la carte.
      * @return list, peut etre null
      */
-    public List<ToolBar> getMapToolBars(){
+    public List<ToolBar> getMapToolBars(final FXMapPane mapPane){
         return null;
     }
 

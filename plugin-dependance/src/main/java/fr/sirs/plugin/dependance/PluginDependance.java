@@ -3,6 +3,7 @@ package fr.sirs.plugin.dependance;
 import fr.sirs.Plugin;
 import fr.sirs.core.model.sql.DependanceSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
+import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.dependance.map.DependanceToolBar;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
@@ -19,8 +20,6 @@ import java.util.List;
 public class PluginDependance extends Plugin {
     private static final String NAME = "plugin-dependance";
     private static final String TITLE = "Module dépendance";
-
-    private final DependanceToolBar toolbar = new DependanceToolBar();
 
     public PluginDependance() {
         name = NAME;
@@ -45,8 +44,8 @@ public class PluginDependance extends Plugin {
     }
 
     @Override
-    public List<ToolBar> getMapToolBars() {
-        return Collections.singletonList(toolbar);
+    public List<ToolBar> getMapToolBars(final FXMapPane mapPane) {
+        return Collections.singletonList(new DependanceToolBar(mapPane.getUiMap()));
     }
 
     @Override

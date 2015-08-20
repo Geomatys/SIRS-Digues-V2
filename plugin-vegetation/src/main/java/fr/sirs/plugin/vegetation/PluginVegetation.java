@@ -5,6 +5,8 @@ import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.core.model.sql.VegetationSqlHelper;
 import java.util.Collections;
 import java.util.List;
+
+import fr.sirs.map.FXMapPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 
@@ -42,7 +44,7 @@ public class PluginVegetation extends Plugin {
     }
 
     @Override
-    public List<ToolBar> getMapToolBars() {
+    public List<ToolBar> getMapToolBars(final FXMapPane mapPane) {
         return Collections.singletonList(toolbar);
     }
 
