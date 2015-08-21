@@ -1,7 +1,6 @@
 
 package fr.sirs.plugin.vegetation;
 
-import fr.sirs.theme.ui.FXPlanVegetationPane;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
@@ -11,6 +10,7 @@ import fr.sirs.core.component.ParcelleVegetationRepository;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.ZoneVegetation;
+import fr.sirs.theme.ui.FXPlanVegetationPane;
 import fr.sirs.util.SirsStringConverter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -85,7 +85,6 @@ public class FXParametragePane extends SplitPane {
             }
         }
     }
-    
 
     private void initialize() {
         final BorderPane pane = new BorderPane();

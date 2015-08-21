@@ -40,7 +40,7 @@ public class FXParcelleVegetationPane extends FXParcelleVegetationPaneStub {
 
         ui_anneePlanifiee.setDisable(true);
         ui_anneePlanifiee.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
-
+        
         ui_planId_link.setVisible(false);
     }
 

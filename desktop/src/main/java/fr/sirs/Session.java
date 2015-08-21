@@ -5,24 +5,11 @@ import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.UtilisateurRepository;
-
-import java.util.List;
-
-import fr.sirs.ui.TemplateGeneratorPane;
-import fr.sirs.ui.TemplatesTable;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import org.geotoolkit.map.MapBuilder;
-import org.geotoolkit.map.MapContext;
-import org.geotoolkit.map.MapItem;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.AvecLibelle;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.ReferenceType;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.other.FXDesignationPane;
@@ -30,6 +17,8 @@ import fr.sirs.other.FXReferencePane;
 import fr.sirs.other.FXValidationPane;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.ui.TemplateGeneratorPane;
+import fr.sirs.ui.TemplatesTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.SirsPreferences;
@@ -40,6 +29,7 @@ import java.awt.Insets;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -49,26 +39,31 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
-
 import org.ektorp.CouchDbConnector;
 import org.geotoolkit.display2d.ext.DefaultBackgroundTemplate;
 import org.geotoolkit.display2d.ext.legend.DefaultLegendTemplate;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.CoverageMapLayer;
+import org.geotoolkit.map.MapBuilder;
+import org.geotoolkit.map.MapContext;
+import org.geotoolkit.map.MapItem;
 import org.geotoolkit.osmtms.OSMTileMapClient;
 import org.geotoolkit.storage.coverage.CoverageReference;
 import org.geotoolkit.storage.coverage.CoverageStore;
 import org.geotoolkit.style.DefaultDescription;
 import org.opengis.util.GenericName;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * La session contient toutes les données chargées dans l'instance courante de
