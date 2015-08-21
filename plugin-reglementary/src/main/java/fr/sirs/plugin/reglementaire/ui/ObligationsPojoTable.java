@@ -56,8 +56,8 @@ public final class ObligationsPojoTable extends PojoTable {
         uiPlanificationBtn.setOnMouseClicked(event -> showPlanificationTable(tabPane));
         searchEditionToolbar.getChildren().add(2, uiPlanificationBtn);
 
-        if (uiFilterPane.getContent() instanceof VBox) {
-            final VBox vbox = (VBox) uiFilterPane.getContent();
+        if (getFilterUI() instanceof VBox) {
+            final VBox vbox = (VBox) getFilterUI();
             vbox.getChildren().add(vbox.getChildren().size() - 1, uiHideRealizedCheckBox);
         }
     }

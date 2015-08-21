@@ -268,8 +268,7 @@
 }
 
 .filter-root {
-    -fx-background-color:#AAAAAA;
-    -fx-background-radius: 0 0 7 7;
+    -fx-background-color: -sirs-color-normal;
     -fx-border-color: transparent;
 }
 

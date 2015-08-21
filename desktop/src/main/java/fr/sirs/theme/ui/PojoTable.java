@@ -103,7 +103,6 @@ import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -191,7 +190,7 @@ public class PojoTable extends BorderPane {
 
     /** Composant de filtrage. Propose de filtrer la liste d'objets actuels en éditant des contraintes sur leur propriété. */
     protected FXFilterBuilder uiFilterBuilder;
-    protected final TitledPane uiFilterPane = new TitledPane();
+//    protected final TitledPane uiFilterPane = new TitledPane();
     private final Button resetFilterBtn = new Button("Réinitialiser");
     private final Button applyFilterBtn = new Button("Filtrer");
 
@@ -205,7 +204,8 @@ public class PojoTable extends BorderPane {
     protected final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH_WHITE));
     protected final Button uiImport = new Button(null, new ImageView(SIRS.ICON_IMPORT_WHITE));
     protected final Button uiExport = new Button(null, new ImageView(SIRS.ICON_EXPORT_WHITE));
-    protected final HBox searchEditionToolbar = new HBox(uiFicheMode, uiImport, uiExport, uiSearch, uiAdd, uiDelete);
+    protected final ToggleButton uiFilter = new ToggleButton(null, new ImageView(SIRS.ICON_FILTER_WHITE));
+    protected final HBox searchEditionToolbar = new HBox(uiFicheMode, uiImport, uiExport, uiSearch, uiAdd, uiDelete, uiFilter);
 
     // Barre de gauche : navigation dans le parcours de fiches
     protected FXElementPane elementPane = null;
@@ -223,6 +223,8 @@ public class PojoTable extends BorderPane {
 
     protected final StringProperty currentSearch = new SimpleStringProperty("");
     protected final BorderPane topPane;
+
+    private final VBox filterContent;
 
     // Colonnes de suppression et d'ouverture d'éditeur.
     protected final DeleteColumn deleteColumn = new DeleteColumn();
@@ -570,29 +572,30 @@ public class PojoTable extends BorderPane {
         titleBoxing.setAlignment(Pos.CENTER);
         final VBox titleAndFilterBox = new VBox(titleBoxing);
 
+
+        uiFilter.getStyleClass().add(BUTTON_STYLE);
+        uiFilter.managedProperty().bind(uiFilter.visibleProperty());
+        uiFilter.disableProperty().bind(uiFicheMode.selectedProperty());
+        resetFilterBtn.getStyleClass().addAll("label-header", "buttonbar-button", "white-rounded");
+        applyFilterBtn.getStyleClass().addAll("label-header", "buttonbar-button", "white-rounded");
+        final Separator separator = new Separator(Orientation.VERTICAL);
+        separator.setMaxWidth(Double.MAX_VALUE);
+        separator.setVisible(false);
+        final HBox confirmationBox = new HBox(5, separator, resetFilterBtn, applyFilterBtn);
+        HBox.setHgrow(separator, Priority.ALWAYS);
+        filterContent = new VBox(10);
+        filterContent.getStyleClass().add("filter-root");
+        filterContent.visibleProperty().bind(uiFilter.selectedProperty().and(uiFilter.visibleProperty()).and(uiFilter.disableProperty().not()));
+        filterContent.managedProperty().bind(filterContent.visibleProperty());
+
         try {
             initFilterBuilder();
+            filterContent.getChildren().addAll(uiFilterBuilder, confirmationBox);
 
-            resetFilterBtn.getStyleClass().addAll("label-header", "buttonbar-button", "white-rounded");
-            applyFilterBtn.getStyleClass().addAll("label-header", "buttonbar-button", "white-rounded");
-            final Separator separator = new Separator(Orientation.VERTICAL);
-            separator.setMaxWidth(Double.MAX_VALUE);
-            separator.setVisible(false);
-            final HBox confirmationBox = new HBox(5, separator, resetFilterBtn, applyFilterBtn);
-            HBox.setHgrow(separator, Priority.ALWAYS);
-            final VBox filterContent = new VBox(10, uiFilterBuilder, confirmationBox);
-            filterContent.getStyleClass().add("filter-root");
-            uiFilterPane.setText("Filtrer");
-            uiFilterPane.setContent(filterContent);
-            uiFilterPane.setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
-            uiFilterPane.managedProperty().bind(uiFilterPane.visibleProperty());
+            applyFilterBtn.managedProperty().bind(filterContent.visibleProperty());
+            resetFilterBtn.managedProperty().bind(filterContent.visibleProperty());
+            uiFilterBuilder.managedProperty().bind(filterContent.visibleProperty());
 
-            uiFilterPane.setExpanded(false);
-            applyFilterBtn.managedProperty().bind(uiFilterPane.expandedProperty());
-            resetFilterBtn.managedProperty().bind(uiFilterPane.expandedProperty());
-            uiFilterBuilder.managedProperty().bind(uiFilterPane.expandedProperty());
-
-            titleAndFilterBox.getChildren().add(uiFilterPane);
             resetFilterBtn.setOnAction(event -> resetFilter(filterContent));
             applyFilterBtn.setOnAction(event -> setTableItems(() -> allValues));
         } catch (Exception e) {
@@ -600,7 +603,7 @@ public class PojoTable extends BorderPane {
         }
 
         titleAndFilterBox.setFillWidth(true);
-        topPane = new BorderPane(notifier, titleAndFilterBox, searchEditionToolbar, null, navigationToolbar);
+        topPane = new BorderPane(notifier, titleAndFilterBox, searchEditionToolbar, filterContent, navigationToolbar);
         setTop(topPane);
 
         updateView();
@@ -754,13 +757,13 @@ public class PojoTable extends BorderPane {
     public BooleanProperty ficheModeVisibleProperty() {
         return uiFicheMode.visibleProperty();
     }
+
     public BooleanProperty filterVisibleProperty() {
-        return uiFilterPane.visibleProperty();
+        return uiFilter.visibleProperty();
     }
 
-    public void setFilterBuilder(final FXFilterBuilder newFilterBuilder) {
-        uiFilterBuilder = newFilterBuilder;
-        uiFilterPane.setContent(uiFilterBuilder);
+    public VBox getFilterUI(){
+        return filterContent;
     }
 
     protected void initFilterBuilder() throws IntrospectionException {
@@ -774,7 +777,7 @@ public class PojoTable extends BorderPane {
                         return "classe";
                     }
 
-                    String pName = candidate.getName().head().toString();
+                    final String pName = candidate.getName().head().toString();
                     if (labelMapper != null) {
                         final String pTitle = labelMapper.mapPropertyName(pName);
                         if (pTitle != null) {
@@ -787,12 +790,13 @@ public class PojoTable extends BorderPane {
         }
 
         // If no property has been given for filtering, we analyze model class to find them.
-        ObservableList<PropertyType> props = uiFilterBuilder.getAvailableProperties();
+        final ObservableList<PropertyType> props = uiFilterBuilder.getAvailableProperties();
         if (props.isEmpty()) {
             final BeanInfo info = Introspector.getBeanInfo(pojoClass);
             for (final PropertyDescriptor desc : info.getPropertyDescriptors()) {
                 final Method readMethod = desc.getReadMethod();
                 if (readMethod != null) {
+
                     // Do not filter on java standard property like getClass(), etc.
                     if (readMethod.getAnnotation(Internal.class) != null
                             || readMethod.getDeclaringClass().equals(Object.class))
@@ -800,8 +804,9 @@ public class PojoTable extends BorderPane {
 
                     final HashMap identification = new HashMap(1);
                     identification.put(AbstractIdentifiedType.NAME_KEY, desc.getName());
+
                     // If we've got a reference to another document, property is declared as an association.
-                    Reference annot = readMethod.getAnnotation(Reference.class);
+                    final Reference annot = readMethod.getAnnotation(Reference.class);
                     if (annot != null) {
                         final FeatureTypeBuilder builder = new FeatureTypeBuilder();
                         builder.setName(desc.getName());
