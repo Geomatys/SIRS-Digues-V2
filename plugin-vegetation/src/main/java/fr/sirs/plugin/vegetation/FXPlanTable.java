@@ -3,7 +3,6 @@ package fr.sirs.plugin.vegetation;
 
 import fr.sirs.Injector;
 import fr.sirs.Session;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.ParcelleVegetationRepository;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
@@ -51,7 +50,6 @@ public class FXPlanTable extends BorderPane{
     public FXPlanTable(PlanVegetation plan, TronconDigue troncon, boolean exploitation){
         this.plan = plan;
         this.exploitation = exploitation;
-        
 
         final GridPane gridCenter = new GridPane();
         final GridPane gridTop = new GridPane();
@@ -76,10 +74,10 @@ public class FXPlanTable extends BorderPane{
         setTop(gridTop);
 
         //on crée et synchronize toutes les colonnes
-        int dateStart = plan.getAnneDebut();
+        int dateStart = plan.getAnneeDebut();
         //NOTE : on ne peut pas afficher plus de X ans sur la table
         //on considere que l'enregistrement est mauvais et on evite de bloquer l'interface
-        int dateEnd = Math.min(plan.getAnneFin(),dateStart+20);
+        int dateEnd = Math.min(plan.getAnneeFin(),dateStart+20);
 
         //nom des types
         final Label fake0 = new Label();
@@ -146,10 +144,11 @@ public class FXPlanTable extends BorderPane{
 
 
         //une ligne par parcelle
-        final ParcelleVegetationRepository parcelleRepo = (ParcelleVegetationRepository)session.getRepositoryForClass(ParcelleVegetation.class);
+        final ParcelleVegetationRepository parcelleRepo = (ParcelleVegetationRepository) session.getRepositoryForClass(ParcelleVegetation.class);
         final SirsStringConverter cvt = new SirsStringConverter();
         int rowIndex = 0;
         int colIndex = 0;
+
         final List<ParcelleVegetation> planifParcelle = parcelleRepo.getByPlanId(plan.getDocumentId());
         for(ParcelleVegetation parcelle : planifParcelle){
             gridCenter.getRowConstraints().add(new RowConstraints(30, 30, 30, Priority.NEVER, VPos.CENTER, true));
@@ -163,8 +162,8 @@ public class FXPlanTable extends BorderPane{
             gridCenter.add(new Label(cvt.toString(parcelle)), colIndex, rowIndex);
             colIndex++;
 
-            for(int year=dateStart;year<dateEnd;year++,colIndex++){
-                gridCenter.add(new ParcelleDateCell(parcelle,year,year-dateStart), colIndex, rowIndex);
+            for(int year=dateStart; year<dateEnd; year++,colIndex++){
+                gridCenter.add(new ParcelleDateCell(parcelle, year, year-dateStart), colIndex, rowIndex);
             }
 
             //on ajoute la colonne 'Mode auto'
@@ -220,13 +219,13 @@ public class FXPlanTable extends BorderPane{
      * Cellule de date.
      * 
      */
-    private final class ParcelleDateCell extends CheckBox{
+    private final class ParcelleDateCell extends CheckBox {
 
         private final ParcelleVegetation parcelle;
         private final int year;
         private final int index;
 
-        public ParcelleDateCell(ParcelleVegetation parcelle, int year,  int index) {
+        public ParcelleDateCell(final ParcelleVegetation parcelle, final int year,  final int index) {
             disableProperty().bind(editable.not());
             this.parcelle = parcelle;
             this.year = year;

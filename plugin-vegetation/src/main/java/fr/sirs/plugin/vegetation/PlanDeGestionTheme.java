@@ -18,6 +18,4 @@ public final class PlanDeGestionTheme extends AbstractPluginsButtonTheme {
     public Parent createPane() {
         return new FXPlanDeGestionPane();
     }
-
-
 }

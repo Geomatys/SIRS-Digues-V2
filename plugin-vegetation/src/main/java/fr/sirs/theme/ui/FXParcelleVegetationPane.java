@@ -67,8 +67,8 @@ public class FXParcelleVegetationPane extends FXParcelleVegetationPaneStub {
 
                 // S'il n'y a pas de plan, on lance une exception car la parcelle devrait être associée à un plan.
                 if(plan!=null){
-                    final int debutPlan = plan.getAnneDebut();
-                    final int finPlan = plan.getAnneFin();
+                    final int debutPlan = plan.getAnneeDebut();
+                    final int finPlan = plan.getAnneeFin();
                     final int anneeEnCours = LocalDate.now().getYear();
                     final int dureePlan = finPlan-debutPlan;
 

@@ -138,7 +138,7 @@ public final class VegetationSession {
     public static int getParcellePlanifState(PlanVegetation plan, ParcelleVegetation parcelle, int year){
         final List<Boolean> planifications = parcelle.getPlanifications();
 
-        final int index = year - plan.getAnneDebut();
+        final int index = year - plan.getAnneeDebut();
         if(planifications==null || planifications.size()<=index) return 0;
 
         if(!planifications.get(index)) return 0;

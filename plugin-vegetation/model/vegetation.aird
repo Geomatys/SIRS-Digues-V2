@@ -916,9 +916,9 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_6SfQwD83EeWb1trpDLKdVg" name="anneDebut : EInt = 0" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="vegetation.ecore#//PlanVegetation/anneDebut"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="vegetation.ecore#//PlanVegetation/anneDebut"/>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_6SfQwD83EeWb1trpDLKdVg" name="anneeDebut : EInt = 0" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="vegetation.ecore#//PlanVegetation/anneeDebut"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="vegetation.ecore#//PlanVegetation/anneeDebut"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_8bYP4D83EeWb1trpDLKdVg" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_8bYP4T83EeWb1trpDLKdVg"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
@@ -927,9 +927,9 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_9k2ZYD83EeWb1trpDLKdVg" name="anneFin : EInt = 0" tooltipText="">
-          <target xmi:type="ecore:EAttribute" href="vegetation.ecore#//PlanVegetation/anneFin"/>
-          <semanticElements xmi:type="ecore:EAttribute" href="vegetation.ecore#//PlanVegetation/anneFin"/>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_9k2ZYD83EeWb1trpDLKdVg" name="anneeFin : EInt = 0" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="vegetation.ecore#//PlanVegetation/anneeFin"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="vegetation.ecore#//PlanVegetation/anneeFin"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_9k3AcD83EeWb1trpDLKdVg" labelAlignment="LEFT">
             <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_9k3AcT83EeWb1trpDLKdVg"/>
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>

@@ -34,6 +34,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.cell.ComboBoxListCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import org.elasticsearch.common.joda.time.LocalDate;
 
 
 /**
@@ -123,6 +124,11 @@ public class FXParametragePane extends SplitPane {
     @FXML
     void planAdd(ActionEvent event) {
         final PlanVegetation newPlan = planRepo.create();
+
+        // Par défaut, on crée le plan commençant à l'année courante pour une durée de dix ans.
+        newPlan.setAnneeDebut(LocalDate.now().getYear());
+        newPlan.setAnneeFin(LocalDate.now().getYear()+10);
+
         planRepo.add(newPlan);
         refreshPlanList();
         uiPlanList.getSelectionModel().select(newPlan);

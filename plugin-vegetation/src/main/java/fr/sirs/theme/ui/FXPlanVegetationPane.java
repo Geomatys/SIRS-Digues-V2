@@ -24,6 +24,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -132,6 +134,11 @@ public class FXPlanVegetationPane extends BorderPane {
     private final PlanVegetation plan;
     private final ObservableList<TraitementSummary> traitements = FXCollections.observableArrayList();
 
+    // Ces entiers mémorisent la date initiale du plan, puis les dates lors du précédent enregistrement :
+    // si elles ont changé alors cele signifie qu'il faut mettre à jour les planifications des parcelles du plan.
+
+    private int initialDebutPlan, initialFinPlan;
+
     public FXPlanVegetationPane(PlanVegetation plan) {
         SIRS.loadFXML(this, FXPlanVegetationPane.class);
         this.plan = plan;
@@ -140,13 +147,55 @@ public class FXPlanVegetationPane extends BorderPane {
         uiPlanName.textProperty().bindBidirectional(plan.libelleProperty());
         uiPlanDebut.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, LocalDate.now().getYear()));
         uiPlanDebut.setEditable(true);
-        uiPlanDebut.getValueFactory().valueProperty().bindBidirectional(plan.anneDebutProperty());
+        uiPlanDebut.getValueFactory().valueProperty().bindBidirectional(plan.anneeDebutProperty());
         uiPlanFin.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, LocalDate.now().getYear()+10));
         uiPlanFin.setEditable(true);
-        uiPlanFin.getValueFactory().valueProperty().bindBidirectional(plan.anneFinProperty());
+        uiPlanFin.getValueFactory().valueProperty().bindBidirectional(plan.anneeFinProperty());
+        initialDebutPlan = plan.getAnneeDebut();
+        initialFinPlan = plan.getAnneeFin();
+        uiPlanFin.valueProperty().addListener((ChangeListener) new ChangeListener<Integer>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+                if(newValue.compareTo((Integer) uiPlanDebut.getValue())<=0) uiPlanDebut.decrement();
+            }
+        });
+
+        uiPlanDebut.valueProperty().addListener((ChangeListener) new ChangeListener<Integer>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+                if(newValue.compareTo((Integer) uiPlanFin.getValue())>=0) uiPlanFin.increment();
+            }
+        });
         
         uiSave.setOnAction((ActionEvent event) -> {
             planRepo.update(FXPlanVegetationPane.this.plan);
+
+            // Si les dates ont changé, il faut également mettre à jour les
+            // planifications des parcelles !
+            boolean updatePlanifs = false;
+            if(this.plan.getAnneeDebut()!=initialDebutPlan) {
+                initialDebutPlan = this.plan.getAnneeDebut();
+                updatePlanifs = true;
+            }
+            if(this.plan.getAnneeFin()!=initialFinPlan) {
+                initialFinPlan = this.plan.getAnneeFin();
+                if(!updatePlanifs) updatePlanifs=true;
+            }
+
+            if(updatePlanifs){
+                final int index = initialFinPlan-initialDebutPlan;
+                final List<ParcelleVegetation> parcelles = parcelleRepo.getByPlan(plan);
+                for(final ParcelleVegetation parcelle : parcelles){
+                    final List<Boolean> planifs = parcelle.getPlanifications();
+
+                    while(planifs.size()<index){
+                        planifs.add(Boolean.FALSE);
+                    }
+                }
+            }
+
         });
         
 

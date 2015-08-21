@@ -25,6 +25,4 @@ public final class VegetationTraitementTheme extends AbstractPluginsButtonTheme 
         final FXTronconThemePane pane = new FXVegetationTronconThemePane(themeManager);
         return pane;
     }
-
-
 }

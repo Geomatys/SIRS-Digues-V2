@@ -88,8 +88,8 @@ public class FXPlanLayerPane extends GridPane{
     }
 
     public void initialize(){
-        final int anneDebut = plan.getAnneDebut();
-        final int anneFin = plan.getAnneFin();
+        final int anneDebut = plan.getAnneeDebut();
+        final int anneFin = plan.getAnneeFin();
 
         final ObservableList<Integer> years = FXCollections.observableArrayList();
         for(int year = anneDebut;year<anneFin;year++) years.add(year);
@@ -131,7 +131,7 @@ public class FXPlanLayerPane extends GridPane{
             }
             for(ParcelleVegetation pv : parcelleRepo.getByPlanId(plan.getId())){
                 final List<Boolean> planifications = pv.getPlanifications();
-                int index = year - plan.getAnneDebut();
+                int index = year - plan.getAnneeDebut();
                 boolean planified = false;
                 if(planifications!=null && planifications.size()>index) planified = planifications.get(index);
 
