@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<fx:root spacing="30.0" type="VBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <GridPane fx:id="uiGrid" hgap="10.0" maxWidth="1.7976931348623157E308" vgap="10.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+          <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="-Infinity" />
+            <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="-Infinity" />
+            <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label text="Tronçon :" GridPane.columnSpan="2" />
+            <ComboBox fx:id="uiSourceTroncon" maxWidth="1.7976931348623157E308" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+            <Label text="Système de repèrage :" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+            <ComboBox fx:id="uiSourceSR" maxWidth="1.7976931348623157E308" GridPane.columnSpan="3" GridPane.rowIndex="3" />
+            <RadioButton fx:id="uiChoosePR" mnemonicParsing="false" text="Valeur PR" GridPane.rowIndex="4" />
+            <RadioButton fx:id="uiChooseCoord" mnemonicParsing="false" text="Coordonée X/Y" GridPane.rowIndex="5" />
+            <RadioButton fx:id="uiChooseBorne" mnemonicParsing="false" text="Borne / Distance" GridPane.rowIndex="6" />
+            <ToggleButton fx:id="uiPickCoord" mnemonicParsing="false" onAction="#pickCoord" text="*" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+            <ToggleButton mnemonicParsing="false" onAction="#pickTroncon" text="*" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            <ComboBox fx:id="uiSourceBorne" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+            <Button fx:id="uiCalculate" mnemonicParsing="false" onAction="#calculate" text="Calculer" GridPane.columnSpan="2147483647" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </GridPane>
+      <GridPane hgap="10.0" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" styleClass="gray-light" vgap="10.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+          <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="-Infinity" />
+            <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="-Infinity" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+        </rowConstraints>
+         <children>
+            <ComboBox fx:id="uiTargetSR" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+            <Label text="Destination :" GridPane.rowIndex="1" />
+            <Label text="Résultat dans le SR destination" GridPane.columnSpan="3">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+            </Label>
+            <Label text="PR calculé :" GridPane.rowIndex="2" />
+            <TextField fx:id="uiTargetPR" editable="false" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+            <Label text="X/Y sur le tronçon :" GridPane.rowIndex="3" />
+            <TextField fx:id="uiTargetY" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+            <TextField fx:id="uiTargetX" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Label text="Borne amont :" GridPane.rowIndex="4" />
+            <TextField fx:id="uiTargetBorneAmont" editable="false" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+            <TextField fx:id="uiTagetBorneAmontDist" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+            <Label text="Distance par rapport à la borne amont :" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+            <Label text="Borne aval :" GridPane.rowIndex="6" />
+            <Label text="Distance par rapport à la borne aval :" GridPane.columnSpan="2" GridPane.rowIndex="7" />
+            <CheckBox fx:id="uiTargetView" mnemonicParsing="false" text="Visualiser le PR calculé sur la carte" GridPane.columnSpan="3" GridPane.rowIndex="8" />
+            <TextField fx:id="uiTargetBorneAvalDist" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+            <TextField fx:id="uiTargetBorneAval" editable="false" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="6" />
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </GridPane>
+   </children>
+   <opaqueInsets>
+      <Insets />
+   </opaqueInsets>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+</fx:root>

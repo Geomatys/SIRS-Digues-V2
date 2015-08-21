@@ -33,6 +33,8 @@ public class FXTronconEditBar extends ToolBar {
         butMerge.getStyleClass().add(CENTER);
         final ToggleButton butEditSr = new BorneEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butEditSr.getStyleClass().add(CENTER);
+        final ToggleButton butCalc = new PointCalculatorAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
+        butCalc.getStyleClass().add(CENTER);
         final ToggleButton butEditConvert = new ConvertGeomToTronconAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butEditConvert.getStyleClass().add(CENTER);
         final Button importBornes = new FXImportBornesAction(map).createButton(ActionUtils.ActionTextBehavior.HIDE);
@@ -40,7 +42,7 @@ public class FXTronconEditBar extends ToolBar {
         final ToggleButton butInfo = new FXOpenElementEditorAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butInfo.getStyleClass().add(RIGHT);
         
-        getItems().add(new HBox(butEditTroncon, butCut, butMerge, butEditSr, butEditConvert, importBornes, butInfo));
+        getItems().add(new HBox(butEditTroncon, butCut, butMerge, butEditSr, butCalc, butEditConvert, importBornes, butInfo));
 
     }
 
