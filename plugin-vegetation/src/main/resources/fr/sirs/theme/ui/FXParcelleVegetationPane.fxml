@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import fr.sirs.theme.ui.*?>
+<?import fr.sirs.util.FXFileTextField?>
+<?import fr.sirs.util.FXComponentField?>
+<?import org.geotoolkit.gui.javafx.util.*?>
+<?import jidefx.scene.control.field.*?>
+<?import jfxtras.scene.control.*?>
+<?import javafx.scene.web.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+
+
+<fx:root fx:id="uiBorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+  <center>
+    <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <tabs>
+
+<!-- ATTRIBUTE TAB-->
+        <Tab text="Informations">
+          <ScrollPane>
+            <content>
+          <VBox spacing="30.0" BorderPane.alignment="CENTER">
+            <children>
+
+  <FXValidityPeriodPane fx:id="uiValidityPeriod"/>
+            <HBox fx:id="ui_parent_box" spacing="20.0" alignment="CENTER_LEFT" styleClass="gray-light">
+              <children>
+                <Label fx:id="linearId" text="%linearId" maxHeight="-Infinity" maxWidth="-Infinity"/>
+                <ComboBox fx:id="ui_linearId"/>
+                <Button fx:id="ui_linearId_link"/>
+              </children>
+              <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+              </padding>
+            </HBox>
+
+<!-- POSITIONEMENT -->
+    <FXPositionablePane fx:id="uiPositionable" />  
+
+<!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
+
+
+            <!-- ParcelleVegetation -->
+            <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="NEVER" />
+                <ColumnConstraints hgrow="ALWAYS" />
+              </columnConstraints>
+              <!--rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints-->
+              <children>
+                   <!-- EBoolean -->                 
+                   <Label text="%modeAuto" GridPane.rowIndex="0" />
+                   <CheckBox fx:id="ui_modeAuto" GridPane.columnIndex="1" GridPane.rowIndex="0"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- EString -->                 
+                   <Label text="%libelle" GridPane.rowIndex="1" />
+                   <TextField fx:id="ui_libelle" GridPane.columnIndex="1" GridPane.rowIndex="1"  />
+                   
+                   <Label text="%planId" GridPane.rowIndex="2" />
+                   <ComboBox fx:id="ui_planId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                   <Button fx:id="ui_planId_link" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+
+                   <Label text="Dernier traitement" GridPane.rowIndex="3" />
+                   <DatePicker fx:id="ui_dernierTraitement" GridPane.columnIndex="1" GridPane.rowIndex="3"  />
+                   
+                   <Label text="Fréquence de traitement" GridPane.rowIndex="4" />
+                   <Spinner fx:id="ui_frequenceTraitement" GridPane.columnIndex="1" GridPane.rowIndex="4"  />
+                   
+                   <Label text="Année planifiée" GridPane.rowIndex="5" />
+                   <Spinner fx:id="ui_anneePlanifiee" GridPane.columnIndex="1" GridPane.rowIndex="5"  />
+                   <Label fx:id="ui_anneePlanifieeInfo"  GridPane.columnIndex="2" GridPane.rowIndex="5" />
+              </children>
+              <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+              </padding>
+            </GridPane>
+            <HTMLEditor fx:id="ui_commentaire" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contentediTable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" maxHeight="-Infinity"  prefHeight="200.0" styleClass="gray-light" />
+
+            </children>
+            <padding>
+              <Insets bottom="10.0" left="50.0" right="50.0" top="30.0" />
+            </padding>
+          </VBox>
+            </content>
+          </ScrollPane>
+        </Tab>
+
+<!-- REFERENCE TABS -->
+        <Tab fx:id="ui_traitements" text="%traitements"/>
+        <Tab fx:id="ui_zoneVegetation" text="Zones de végétation"/>
+
+      </tabs>
+    </TabPane>
+  </center>
+
+</fx:root>
+

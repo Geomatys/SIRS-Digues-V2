@@ -6,32 +6,38 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.AbstractZoneVegetationRepository;
 import fr.sirs.core.model.ArbreVegetation;
 import fr.sirs.core.model.HerbaceeVegetation;
 import fr.sirs.core.model.InvasiveVegetation;
+import fr.sirs.core.model.ParcelleTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.RefFrequenceTraitementVegetation;
 import fr.sirs.core.model.RefSousTraitementVegetation;
 import fr.sirs.core.model.RefTypeInvasiveVegetation;
 import fr.sirs.core.model.RefTypePeuplementVegetation;
+import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.core.model.sql.VegetationSqlHelper;
+import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.vegetation.map.CreateParcelleTool;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import fr.sirs.map.FXMapPane;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
@@ -394,9 +400,25 @@ public class PluginVegetation extends Plugin {
     }
 
 
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    //  UTILITY METHODS FOR THIS PLUGIN
+    //
+    ////////////////////////////////////////////////////////////////////////////
 
 
-    public static void initSubType(final String typeTraitementId, final String sousTypeTraitementId,
+    /**
+     * Méthode d'initialisation des comboboxes de sous-types de traitements
+     * de manière à préserver la cohérence des choix qu'elles proposent en
+     * fonction d'un choix de traitement.
+     *
+     * @param typeTraitementId
+     * @param sousTypeTraitementId
+     * @param sousTraitementPreviews
+     * @param sousTraitements
+     * @param comboBox
+     */
+    public static void initComboSousTraitement(final String typeTraitementId, final String sousTypeTraitementId,
             final List<Preview> sousTraitementPreviews,
             final Map<String, RefSousTraitementVegetation> sousTraitements, final ComboBox comboBox){
 
@@ -422,6 +444,147 @@ public class PluginVegetation extends Plugin {
             }
             SIRS.initCombo(comboBox, FXCollections.observableList(sousTypes), selectedPreview);
         }
+    }
+
+    /**
+     * Calcule la fréquence de traitement de la parcelle en parcourant
+     * la liste des zones de végétation afin d'examiner leurs deux traitements
+     * associés (ponctuel et non ponctuel).
+     *
+     * Le traitement non ponctuel est associé à une certaine fréquence. La
+     * fréquence de traitement de la parcelle est égale à la plus petite des
+     * fréquences des traitements non ponctuels des zones de végétation de la
+     * parcelle (pour celles des parcelles dont le traitement n'est pas
+     * spécifié "hors-gestion").
+     *
+     * S'il n'y a pas de zone de végétation dans la parcelle, ou si aucune
+     * d'entre elle n'a de traitement inclus dans la gestion, la fréquence de
+     * traitement de la parcelle est fixée par convention à 0.
+     *
+     * @param parcelle
+     * @return
+     */
+    public static int frequenceTraitement(final ParcelleVegetation parcelle){
+
+        // On initialise la plus courte fréquence à la durée du plan
+        int plusCourteFrequence = 0;
+
+        // On récupère toutes les fréquences de traitement de la parcelle
+        final List<String> frequenceIds = new ArrayList<>();
+        final ObservableList<? extends ZoneVegetation> zones = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), Injector.getSession());
+        for(final ZoneVegetation zone : zones){
+            if(zone.getTraitement()!=null && !zone.getTraitement().getHorsGestion()){
+                final String frequenceId = zone.getTraitement().getFrequenceId();
+                if(frequenceId!=null) frequenceIds.add(frequenceId);
+            }
+        }
+
+        // Si on a récupéré des identifiants de fréquences, il faut obtenir les fréquences elles-mêmes !
+        if(!frequenceIds.isEmpty()){
+            final List<RefFrequenceTraitementVegetation> frequences = Injector.getSession().getRepositoryForClass(RefFrequenceTraitementVegetation.class).get(frequenceIds);
+            for(final RefFrequenceTraitementVegetation frequence : frequences){
+                final int f = frequence.getFrequence();
+                if(f>0 && (f<plusCourteFrequence || plusCourteFrequence==0)) plusCourteFrequence=f;
+            }
+        }
+
+        return plusCourteFrequence;
+    }
+
+
+    /**
+     * Gives the information if the parcelle is coherent.
+     *
+     * @param parcelle
+     * @param plusCourteFrequence
+     * @return
+     */
+    public static boolean isCoherent(final ParcelleVegetation parcelle, final int plusCourteFrequence){
+
+        /*
+        La fréquence de traitement de la parcelle doit être positive.
+        Si elle ne l'est pas (pour une raison inconnue), on enregistre l'erreur dans le log et on signale
+        la parcelle incohérente.
+        */
+        if(plusCourteFrequence<0){
+            SIRS.LOGGER.log(Level.WARNING, "La fréquence de la parcelle {0} est indiquée négative ("+plusCourteFrequence+"). Une fréquence de traitement doit être positive (ou nulle).", parcelle);
+            return false;
+        }
+
+        /*
+        D'autre part, si la fréquence est nulle, c'est qu'il n'y a pas de zone
+        de végétation dans la parcelle ou qu'aucune d'elle n'a de traitement
+        associé. On ne peut donc pas être incohérent dans ce cas et on renvoie
+        tout de suite "vrai".
+        */
+        if(plusCourteFrequence==0) return true;
+
+        /*
+        Dans les autre cas, on a maintenant la plus courte fréquence de
+        traitement touvée sur toutes les zones de la parcelle.
+
+        Il faut d'autre part examiner les traitements qui ont eu lieu sur la
+        parcelle.
+
+        Si l'année courante moins l'année de l'un de ces traitements est
+        inférieure à la fréquence la plus courte qui a été trouvée, c'est que le
+        dernier traitement ayant eu lieu sur la parcelle remonte à moins
+        longtemps que la fréquence minimale. On peut alors arrêter le parcours
+        des traitements car la parcelle est a priori cohérente.
+
+        Si a l'issue du parcours des traitements on n'a pas trouvé de traitement
+        ayant eu lieu depuis un intervalle de temps inférieur à la fréquence
+        minimale, il faut alors lancer une alerte.
+        */
+        final int anneeCourante = LocalDate.now().getYear();
+        boolean coherent = false;// On part de l'a priori d'une parcelle incohérente.
+        for(final ParcelleTraitementVegetation traitement : parcelle.getTraitements()){
+            if(traitement.getDate()!=null){
+                final int anneeTraitement = traitement.getDate().getYear();
+                if(anneeCourante-anneeTraitement<plusCourteFrequence){
+                    coherent = true; break;
+                }
+            }
+        }
+
+        return coherent;
+    }
+    
+    /**
+     * Gives the information if the parcelle is coherent.
+     * 
+     * Cette version calcule la plus courte fréquence de traitement de la 
+     * parcelle, ce qui nécessite plusieurs boucles et des appels à des dépôts 
+     * de données.
+     * 
+     * Si la plus courte fréquence a déjà été utilisée dans le contexte d'appel 
+     * de cette méthode et qu'elle est a priori toujours valide, préférer 
+     * l'utilisation de:
+     * 
+     * isCoherent(ParcelleVegetation parcelle, int plusCourteFrequence)
+     *
+     * @param parcelle
+     * @return
+     */
+    public static boolean isCoherent(final ParcelleVegetation parcelle){
+        return isCoherent(parcelle, frequenceTraitement(parcelle));
+    }
+
+    /**
+     *
+     * @param parcelle the parcelle. Must not be null.
+     * @return the date of the last traitement. Null if no traitement was done yet.
+     */
+    public static LocalDate dernierTraitement(final ParcelleVegetation parcelle){
+        LocalDate result = null;
+        for(final ParcelleTraitementVegetation traitement : parcelle.getTraitements()){
+            if(traitement.getDate()!=null){
+                if(result==null || traitement.getDate().isAfter(result)){
+                    result = traitement.getDate();
+                }
+            }
+        }
+        return result;
     }
     
 }

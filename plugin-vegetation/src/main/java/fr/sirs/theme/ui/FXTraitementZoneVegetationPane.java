@@ -8,7 +8,7 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefSousTraitementVegetation;
 import fr.sirs.core.model.RefTraitementVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
-import static fr.sirs.plugin.vegetation.PluginVegetation.initSubType;
+import static fr.sirs.plugin.vegetation.PluginVegetation.initComboSousTraitement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -104,8 +104,8 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
 
         final List<Preview> sousTraitementPreviews = previewRepository.getByClass(RefSousTraitementVegetation.class);
 
-        initSubType(newElement.getTypeTraitementPonctuelId(), newElement.getSousTypeTraitementPonctuelId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementPonctuelId);
+        initComboSousTraitement(newElement.getTypeTraitementPonctuelId(), newElement.getSousTypeTraitementPonctuelId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementPonctuelId);
 
-        initSubType(newElement.getTypeTraitementId(), newElement.getSousTypeTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementId);
+        initComboSousTraitement(newElement.getTypeTraitementId(), newElement.getSousTypeTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementId);
     }
 }

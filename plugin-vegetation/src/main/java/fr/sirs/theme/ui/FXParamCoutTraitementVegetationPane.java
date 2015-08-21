@@ -61,6 +61,6 @@ public class FXParamCoutTraitementVegetationPane extends FXParamCoutTraitementVe
         }
         final List<Preview> sousTraitementPreviews = previewRepository.getByClass(RefSousTraitementVegetation.class);
 
-        PluginVegetation.initSubType(newElement.getType(), newElement.getSousType(), sousTraitementPreviews, sousTraitements, ui_sousType);
+        PluginVegetation.initComboSousTraitement(newElement.getType(), newElement.getSousType(), sousTraitementPreviews, sousTraitements, ui_sousType);
     }
 }
