@@ -22,7 +22,7 @@ public class DependanceEditAction extends FXMapAction {
 
     @Override
     public void accept(ActionEvent event) {
-        if (map != null) {
+        if (map != null && !(map.getHandler() instanceof DependanceEditHandler)) {
             map.setHandler(new DependanceEditHandler());
         }
     }

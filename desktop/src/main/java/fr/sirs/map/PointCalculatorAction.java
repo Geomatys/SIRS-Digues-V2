@@ -38,7 +38,7 @@ public class PointCalculatorAction extends FXMapAction {
 
     @Override
     public void accept(ActionEvent event) {
-        if (map != null) {
+        if (map != null && !(map.getHandler() instanceof PointCalculatorHandler)) {
             map.setHandler(new PointCalculatorHandler());
         }
     }
