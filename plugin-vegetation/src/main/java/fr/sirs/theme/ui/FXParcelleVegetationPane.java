@@ -121,8 +121,14 @@ public class FXParcelleVegetationPane extends FXParcelleVegetationPaneStub {
                 // Il faut signaler ici une erreur avec une petite icône d'erreur
             }
         }
+    }
 
-
-}
+    @Override
+    public void preSave(){
+        if(ui_modeAuto.isSelected()){
+            PluginVegetation.resetAutoPlanif(this.elementProperty.get());
+        }
+        super.preSave();
+    }
     
 }

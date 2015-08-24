@@ -13,6 +13,7 @@ import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
+import fr.sirs.plugin.vegetation.PluginVegetation;
 import fr.sirs.util.SirsStringConverter;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -170,10 +171,22 @@ public class FXPlanVegetationPane extends BorderPane {
         });
         
         uiSave.setOnAction((ActionEvent event) -> {
-            planRepo.update(FXPlanVegetationPane.this.plan);
 
+            // On sauvegarde la plan.
+            planRepo.update(FXPlanVegetationPane.this.plan);
+            
             // Si les dates ont changé, il faut également mettre à jour les
             // planifications des parcelles !
+
+            // On mémorise le décalade des années du début afin de décaler les
+            // planifications avec le même décalage.
+            final int beginShift = initialDebutPlan - this.plan.getAnneeDebut();
+
+            /*
+            On réinitialise la mémorisation des dates de début et de fin et on
+            détermine également s'il est nécessaire de mettre à jour la liste de
+            planifications des parcelles.
+            */
             boolean updatePlanifs = false;
             if(this.plan.getAnneeDebut()!=initialDebutPlan) {
                 initialDebutPlan = this.plan.getAnneeDebut();
@@ -184,20 +197,78 @@ public class FXPlanVegetationPane extends BorderPane {
                 if(!updatePlanifs) updatePlanifs=true;
             }
 
+            /*
+            Si les dates de début et de fin du plan ont bougé, il faut mettre à
+            jour les planifications des parcelles.
+            */
+
             if(updatePlanifs){
+
                 final int index = initialFinPlan-initialDebutPlan;
                 final List<ParcelleVegetation> parcelles = parcelleRepo.getByPlan(plan);
                 for(final ParcelleVegetation parcelle : parcelles){
                     final List<Boolean> planifs = parcelle.getPlanifications();
 
-                    while(planifs.size()<index){
-                        planifs.add(Boolean.FALSE);
+                    // Si on est en mode automatique, il faut recalculer les planifications
+                    if(parcelle.getModeAuto()){
+                       PluginVegetation.resetAutoPlanif(parcelle, index);
+                    }
+                    // Si on n'est pas en mode automatique, il faut décaler les planifications déjà 
+                    else{
+                        /*==========================================================
+                        Il faut commencer par décaler les planifications du nombre
+                        d'années dont on a décalé le début, afin que les
+                        planifications déjà programmées soient conservées et qu'on
+                        ne soit pas obligé de tout refaire.
+                        */
+
+                        /*
+                        Si la nouvelle date est antérieure, il faut ajouter des
+                        planifications avant.
+                        */
+                        if(beginShift<0){
+                            for(int i=0; i<(-beginShift); i++){
+                                planifs.remove(0);
+                            }
+                        }
+
+                        /*
+                        Si la nouvelle date est postérieure, il faut retrancher autant
+                        de planifications du début qu'il y a d'années de décalage, dans
+                        la limite de la taille de la liste des planifications
+                        */
+                        else if(beginShift>0){
+                            for(int i=0; i<beginShift && i<planifs.size(); i++){
+                                planifs.add(0, Boolean.FALSE);
+                            }
+                        }
+
+
+
+                        /*==========================================================
+                        En dernier lieu, on ajuste la taille des listes de
+                        planifications en ajoutant les planifications manquantes et
+                        en retirant les planifications qui dépassent la date du plan.
+                        */
+
+                        // S'il n'y a pas assez d'éléments, il faut en rajouter
+                        while(planifs.size()<index){
+                            planifs.add(Boolean.FALSE);
+                        }
+
+                        // S'il y en a trop il faut en enlever
+                        while(planifs.size()>index){
+                            planifs.remove(index);
+                        }
                     }
                 }
+
+                // Une fois toutes les planifications mises à jour, on
+                // sauvegarde les parcelles du plan.
+                parcelleRepo.executeBulk(parcelles);
             }
 
         });
-        
 
 
         ////////////////////////////////////////////////////////////////////////
@@ -263,8 +334,6 @@ public class FXPlanVegetationPane extends BorderPane {
         HBox.setHgrow(separaPane1, Priority.ALWAYS);
         uiTraitementsTableHeader.setPadding(new Insets(15, 5, 5, 5));
 
-
-     
 
         ////////////////////////////////////////////////////////////////////////
         // Construction des paramètes de coûts.

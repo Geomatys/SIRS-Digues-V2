@@ -41,8 +41,6 @@ public class FXVegetationTronconThemePane extends FXTronconThemePane {
 
             final TableColumn<ParcelleVegetation, ParcelleVegetation> alertColumn = new AlertTableColumn();
             getTable().getColumns().add((TableColumn) alertColumn);
-
-
         }
 
         @Override
@@ -71,11 +69,11 @@ public class FXVegetationTronconThemePane extends FXTronconThemePane {
                     // Association au plan actif
                     created.setPlanId(planActif.getId());
 
-                    // Initialisation et initialisation des planifications pour les années du plan.
+                    // Initialisation des planifications pour les années du plan.
                     if(created.getPlanifications()==null)created.setPlanifications(new ArrayList<>());
                     final List<Boolean> planifications = created.getPlanifications();
 
-                    while(planifications.size()<=dureePlan){
+                    while(planifications.size()<dureePlan){
                         planifications.add(Boolean.FALSE);
                     }
                     repo.add(created);

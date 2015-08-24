@@ -97,11 +97,10 @@ public abstract class AbstractZoneVegetationRepository<T extends ZoneVegetation>
             }
         }
         /*
-        Si aucun repo n'a été trouvé (ce qui est normalement impossible étant
-        donné le modèle, on renvoie null. Si des repos ont été trouvés mais qu'
-        on arrive tout de même à ce point c'est qu'ils ont tous renvoyé une
-        liste vide. Parmi elles, la dernière est renvoyée.
+        Si on n'a rien trouvé, on renvoie une liste vide.
         */
-        return result;
+        if(result==null)
+            return FXCollections.emptyObservableList();
+        else return result;
     }
 }

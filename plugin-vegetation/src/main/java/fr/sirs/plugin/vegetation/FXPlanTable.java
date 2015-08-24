@@ -162,14 +162,18 @@ public class FXPlanTable extends BorderPane{
             gridCenter.add(new Label(cvt.toString(parcelle)), colIndex, rowIndex);
             colIndex++;
 
+            final CheckBox modeAuto = new ParcelleAutoCell(parcelle);
+            
             for(int year=dateStart; year<dateEnd; year++,colIndex++){
-                gridCenter.add(new ParcelleDateCell(parcelle, year, year-dateStart), colIndex, rowIndex);
+                final CheckBox parcelleDateCell = new ParcelleDateCell(parcelle, year, year-dateStart);
+                parcelleDateCell.disableProperty().bind(modeAuto.selectedProperty());
+                gridCenter.add(parcelleDateCell, colIndex, rowIndex);
             }
 
             //on ajoute la colonne 'Mode auto'
             colIndex++;
             if(!exploitation){
-                gridCenter.add(new ParcelleAutoCell(parcelle), colIndex, rowIndex);
+                gridCenter.add(modeAuto, colIndex, rowIndex);
             }
 
             rowIndex++;
@@ -304,6 +308,11 @@ public class FXPlanTable extends BorderPane{
             setPadding(new Insets(5, 5, 5, 5));
 
             selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                // Si on sélectionne le modeAuto, alors il faut calculer la planification automatique
+                if(newValue){
+                    PluginVegetation.resetAutoPlanif(parcelle);
+                }
+                // Dans tous les cas, il faut sauvegader la modification faite sur la parcelle ne serait-ce que pour mémoriser le mode de planification.
                 save(parcelle);
             });
         }

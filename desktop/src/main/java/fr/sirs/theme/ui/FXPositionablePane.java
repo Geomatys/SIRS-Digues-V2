@@ -183,7 +183,7 @@ public class FXPositionablePane extends BorderPane {
             sr = null;
         }
 
-        if(sr!=null){
+        if(sr!=null && pos.getGeometry()!=null){
             final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr);
             final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(pos, troncon, segments, Injector.getSession());
 

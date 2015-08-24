@@ -491,6 +491,75 @@ public class PluginVegetation extends Plugin {
         return plusCourteFrequence;
     }
 
+    /**
+     * Set planification values for auto-planification.
+     *
+     * NOTE : This method does not check if the parcelle planification mode is set to "auto".
+     * You must check this condition before to call this method.
+     *
+     * NOTE : This method do not save process result. You must save the parcelle
+     * to make the modification persistant.
+     *
+     * @param parcelle must not be null.
+     * @param planDuration
+     * @throws NullPointerException if parcelle is null
+     */
+    public static void resetAutoPlanif(final ParcelleVegetation parcelle, final int planDuration){
+        final List<Boolean> planifs = parcelle.getPlanifications();
+
+        // 1- on récupère la plus petite fréquence
+        final int frequenceTraitement = PluginVegetation.frequenceTraitement(parcelle);
+        // 2- on retire toutes les anciennes planifications
+        while(planifs.size()>0){
+            planifs.remove(0);
+        }
+        // 3- on réinitialise les planifications
+        // a- Si on n'a pas de traitement sur zone de végétation, inclus dans la gestion, on ne planifie rien.
+        if(frequenceTraitement==0){
+            for(int i=0; i<planDuration; i++){
+                planifs.add(i, Boolean.FALSE);
+            }
+        }
+        // b- Sinon, on initialise les planifications à la fréquence de traitement de la parcelle.
+        else {
+            for(int i=0; i<planDuration; i++){
+                planifs.add(i, i%frequenceTraitement==0);
+            }
+        }
+    }
+
+    /**
+     * Use setAutoPlanifs(ParcelleVegetation parcelle, int planDuration) if you
+     * already know planDuration.
+     *
+     * @param parcelle
+     * @throws NullPointerException if parcelle is null
+     * @throws IllegalStateException if:
+     * 1) the planId of the parcelle is null,
+     * 2) no repository is found for PlanVegetation class,
+     * 3) no plan was found for the planId of the parcelle,
+     * 4) plan duration is strictly negative.
+     */
+    public static void resetAutoPlanif(final ParcelleVegetation parcelle){
+        final String planId = parcelle.getPlanId();
+
+        if(planId==null) throw new IllegalStateException("planId must not be null");
+
+        final AbstractSIRSRepository<PlanVegetation> planRepo = Injector.getSession().getRepositoryForClass(PlanVegetation.class);
+
+        if(planRepo==null) throw new IllegalStateException("No repository found for "+PlanVegetation.class);
+
+        final PlanVegetation plan = planRepo.get(planId);
+
+        if(plan==null) throw new IllegalStateException("No plan found for id "+planId);
+
+        final int planDuration = plan.getAnneeFin()-plan.getAnneeDebut();
+
+        if(planDuration<0) throw new IllegalStateException("Plan duration must be positive.");
+        
+        resetAutoPlanif(parcelle, planDuration);
+    }
+
 
     /**
      * Gives the information if the parcelle is coherent.
