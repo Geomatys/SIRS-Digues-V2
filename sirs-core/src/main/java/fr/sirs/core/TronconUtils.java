@@ -41,8 +41,10 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.ProprieteTroncon;
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import org.geotoolkit.referencing.LinearReferencing;
 
@@ -294,7 +296,7 @@ public class TronconUtils {
 
         // Et on termine par la sérialisation des objets positionés sur le nouveau tronçon.
         session.executeBulk((Collection)newPositions);
-        
+
         return tronconCp;
     }
 
@@ -332,7 +334,7 @@ public class TronconUtils {
      * @param linear
      * @return
      */
-    public static List<GardeTroncon> getGardeList(final TronconDigue linear){
+    public static List<GardeTroncon> getGardeList(final TronconDigue linear) {
         return getGardeList(linear.getId());
     }
 
@@ -351,7 +353,7 @@ public class TronconUtils {
      * @param linear
      * @return
      */
-    public static List<Objet> getObjetList(final TronconDigue linear){
+    public static List<Objet> getObjetList(final TronconDigue linear) {
         return getObjetList(linear.getId());
     }
 
@@ -413,7 +415,7 @@ public class TronconUtils {
      * @param linear
      * @return
      */
-    public static List<Photo> getPhotoList(final TronconDigue linear){
+    public static List<Photo> getPhotoList(final TronconDigue linear) {
         return getPhotoList(linear.getId());
     }
 
@@ -738,69 +740,74 @@ public class TronconUtils {
         ArgumentChecks.ensureNonNull("Point to compute PR for", toGetPRFor);
         ArgumentChecks.ensureNonNull("Database connection", borneRepo);
 
-        /* Compute PR for start position. We project its current location on its
-         * parent linear, an try to find the nearest bornes which enclose it.
-         * If the object is located at start or end of the SR, we'll try to compute
-         * it's PR from the nearest bornes, even if they're not bounding it.
-         *
-         * To find nearest bornes, we project each borne of the SR on linear,
-         * then sort them by distance from our input projected positionable object.
-         * After that, we try to peek the nearest bornes, whose one is before and
-         * the other is after our input object. If it is not possible, we will
-         * get the closest, not matter which side they are.
-         *
-         * To ease object manipulation, we'll store for each borne an array :
-         * - First element is the borne PR.
-         * - Second is the distance from the input point to the borne (negative if
-         * borne is uphill from our object, positive if it's downhill).
-         */
-        ProjectedPoint startPoint = projectReference(refLinear, toGetPRFor);
-        double[][] prAndDistances = targetSR.systemeReperageBornes.stream()
-                .map((SystemeReperageBorne srBorne) -> {
-                    BorneDigue borne = borneRepo.get(srBorne.getBorneId());
-                    ProjectedPoint projBorne = projectReference(refLinear, borne.getGeometry());
-                    return new double[] {
-                            srBorne.getValeurPR(),
-                            startPoint.distanceAlongLinear - projBorne.distanceAlongLinear
-                    };
-                })
-                .sorted(((double[] first, double[] second)-> {
-                    final double firstDistance = StrictMath.abs(first[1]);
-                    final double secondDistance = StrictMath.abs(second[1]);
-                    return Double.compare(firstDistance, secondDistance);
-                }))
-                .toArray((int size) -> {return new double[size][2];});
+        final ProjectedPoint prjPt = projectReference(refLinear, toGetPRFor);
 
-        final double[] nearestBorne = prAndDistances[0];
-        double[] secondBorne = prAndDistances[1];
-
-        int borneCounter = 1;
-        final double nearestSignum = StrictMath.signum(nearestBorne[1]);
-        double secondSignum = StrictMath.signum(secondBorne[1]);
-        while (++borneCounter < prAndDistances.length && nearestSignum == secondSignum) {
-            secondSignum = StrictMath.signum(prAndDistances[borneCounter][1]);
-            if (secondSignum != nearestSignum) {
-                secondBorne = prAndDistances[borneCounter];
-            }
+        final TreeMap<Double,SystemeReperageBorne> bornes = new TreeMap<>();
+        for(SystemeReperageBorne srb : targetSR.systemeReperageBornes){
+            final BorneDigue borne = borneRepo.get(srb.getBorneId());
+            final ProjectedPoint projBorne = projectReference(refLinear, borne.getGeometry());
+            bornes.put(projBorne.distanceAlongLinear, srb);
         }
 
-        final double upHillBorneDistance, downHillBorneDistance;
-        final double upHillBornePR, downHillBornePR;
-        if (nearestBorne[1] > secondBorne[1]) {
-            upHillBorneDistance = nearestBorne[1];
-            upHillBornePR = nearestBorne[0];
-            downHillBorneDistance = secondBorne[1];
-            downHillBornePR = secondBorne[0];
-        } else {
-            upHillBorneDistance = secondBorne[1];
-            upHillBornePR = secondBorne[0];
-            downHillBorneDistance = nearestBorne[1];
-            downHillBornePR = nearestBorne[0];
-        }
-        final double distanceBetweenBornes = StrictMath.abs(downHillBorneDistance - upHillBorneDistance);
-        final double prRatio = (downHillBornePR - upHillBornePR) / distanceBetweenBornes;
+        Map.Entry<Double, SystemeReperageBorne> under = bornes.floorEntry(prjPt.distanceAlongLinear);
+        Map.Entry<Double, SystemeReperageBorne> above = bornes.ceilingEntry(prjPt.distanceAlongLinear);
+        if(under==null) under = above;
+        if(above==null) above = under;
+        if(under==null) return 0.0f;
 
-        return (float)(upHillBornePR + prRatio * upHillBorneDistance);
+        if(under.equals(above)){
+            //exactement sur le point.
+            return under.getValue().getValeurPR();
+        }else{
+            //on interpole entre les deux bornes.
+            final double distance = prjPt.distanceAlongLinear;
+            final SystemeReperageBorne underBorne = under.getValue();
+            final SystemeReperageBorne aboveBorne = above.getValue();
+            final double diffPr = aboveBorne.getValeurPR()-underBorne.getValeurPR();
+            final double diffDist = above.getKey() - under.getKey();
+            final double ratio = (distance - under.getKey()) / diffDist;
+            final double pr = underBorne.getValeurPR() + ratio*diffPr;
+            return (float) pr;
+        }
+
+    }
+
+    /**
+     * Recherche des bornes amont et aval les plus proches.
+     *
+     * @param refLinear
+     * @param targetSR
+     * @param toGetPRFor
+     * @param borneRepo
+     * @return [0] distance<->Borne amont
+     *         [1] distance<->Borne aval
+     */
+    public static Map.Entry<Double, SystemeReperageBorne>[] findNearest(final SegmentInfo[] refLinear, final SystemeReperage targetSR, final Point toGetPRFor, final AbstractSIRSRepository<BorneDigue> borneRepo) {
+        ArgumentChecks.ensureNonNull("Reference linear", refLinear);
+        ArgumentChecks.ensureNonNull("Target SR", targetSR);
+        ArgumentChecks.ensureNonNull("Point to compute PR for", toGetPRFor);
+        ArgumentChecks.ensureNonNull("Database connection", borneRepo);
+
+        final ProjectedPoint prjPt = projectReference(refLinear, toGetPRFor);
+
+        final TreeMap<Double,SystemeReperageBorne> bornes = new TreeMap<>();
+        for(SystemeReperageBorne srb : targetSR.systemeReperageBornes){
+            final BorneDigue borne = borneRepo.get(srb.getBorneId());
+            final ProjectedPoint projBorne = projectReference(refLinear, borne.getGeometry());
+            bornes.put(projBorne.distanceAlongLinear, srb);
+        }
+
+        Map.Entry<Double, SystemeReperageBorne> under = bornes.floorEntry(prjPt.distanceAlongLinear);
+        Map.Entry<Double, SystemeReperageBorne> above = bornes.ceilingEntry(prjPt.distanceAlongLinear);
+
+        if(under!=null){
+            under = new AbstractMap.SimpleImmutableEntry(prjPt.distanceAlongLinear-under.getKey(),under.getValue());
+        }
+        if(above!=null){
+            above = new AbstractMap.SimpleImmutableEntry(above.getKey()-prjPt.distanceAlongLinear,above.getValue());
+        }
+
+        return new Map.Entry[]{under,above};
     }
 
     /**
@@ -880,7 +887,7 @@ public class TronconUtils {
             final double diffPr = borneHaute.getValeurPR()-borneBasse.getValeurPR();
             final double diffDist = rel1.distanceAlongLinear - rel0.distanceAlongLinear;
             final double ratio = (pr - borneBasse.getValeurPR()) / diffPr;
-            final double distance = rel0.distanceAlongLinear + ratio*diffDist;
+            final double distance = ratio*diffDist;
 
             pt = LinearReferencingUtilities.computeCoordinate(linear, borne0.getGeometry(), distance, 0.0);
         }

@@ -21,6 +21,7 @@ import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
+import java.util.Map;
 import static javafx.beans.binding.Bindings.*;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
@@ -42,6 +43,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.referencing.LinearReferencing;
@@ -199,7 +201,7 @@ public class FXPRPane extends VBox {
             pt = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(uiSourceX.getValue(), uiSourceY.getValue()));
             JTS.setCRS(pt, session.getProjection());
         }else if(uiChooseBorne.isSelected()){
-            pt = TronconUtils.computeCoordinate(uiSourceSR.getValue(), uiSourceBorne.getValue(), uiSourcePR.getValue());
+            pt = TronconUtils.computeCoordinate(uiSourceSR.getValue(), uiSourceBorne.getValue(), uiSourceDist.getValue());
         }else{
             pt = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(0, 0));
             JTS.setCRS(pt, session.getProjection());
@@ -219,7 +221,23 @@ public class FXPRPane extends VBox {
         uiTargetPR.setText(DF.format(targetPR));
 
         //calcule de la position par rapport aux bornes
-        //TODO
+        final StringConverter strCvt = new SirsStringConverter();
+        final Map.Entry<Double, SystemeReperageBorne>[] nearest = TronconUtils.findNearest(segments, uiTargetSR.getValue(), pt, borneRepo);
+        if(nearest[0]!=null){
+            uiTargetBorneAmont.setText(strCvt.toString(nearest[0].getValue()));
+            uiTagetBorneAmontDist.setText(DF.format(nearest[0].getKey()));
+        }else{
+            uiTargetBorneAmont.setText("");
+            uiTagetBorneAmontDist.setText("");
+        }
+        if(nearest[1]!=null){
+            uiTargetBorneAval.setText(strCvt.toString(nearest[1].getValue()));
+            uiTargetBorneAvalDist.setText(DF.format(nearest[1].getKey()));
+        }else{
+            uiTargetBorneAval.setText("");
+            uiTargetBorneAvalDist.setText("");
+        }
+
 
     }
 
