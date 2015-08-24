@@ -34,6 +34,7 @@ import org.opengis.util.FactoryException;
 
 import static fr.sirs.core.LinearReferencingUtilities.*;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.Element;
@@ -831,6 +832,90 @@ public class TronconUtils {
     }
 
     /**
+     * Calcul de la position avec un systeme de reperage et un PR.
+     *
+     * @param sr
+     * @param pr
+     * @return
+     */
+    public static Point computeCoordinate(SystemeReperage sr, double pr){
+        final TronconDigueRepository tronconRepo = InjectorCore.getBean(TronconDigueRepository.class);
+        final BorneDigueRepository borneRepo = InjectorCore.getBean(BorneDigueRepository.class);
+        final TronconDigue troncon = tronconRepo.get(sr.getLinearId());
+
+        final List<SystemeReperageBorne> srbs = sr.getSystemeReperageBornes();
+
+        //on cherche les bornes les plus proche
+        SystemeReperageBorne borneBasse = null;
+        SystemeReperageBorne borneHaute = null;
+        for(SystemeReperageBorne srb : srbs){
+            if( (borneBasse==null || borneBasse.getValeurPR() < srb.getValeurPR() ) && srb.getValeurPR()<= pr){
+                borneBasse = srb;
+            }
+            if( (borneHaute==null || borneHaute.getValeurPR() > srb.getValeurPR() ) && srb.getValeurPR()>= pr){
+                borneHaute = srb;
+            }
+        }
+
+        if(borneBasse == null) borneBasse = borneHaute;
+        if(borneHaute == null) borneHaute = borneBasse;
+        if(borneBasse == null) return null;
+
+        final Geometry linear = troncon.getGeometry();
+        Point pt;
+        if(borneBasse == borneHaute){
+            //une seule borne, on ne peut pas caluler la valeur réel des PR.
+            final BorneDigue borne = borneRepo.get(borneBasse.getBorneId());
+            pt = LinearReferencingUtilities.computeCoordinate(linear, borne.getGeometry(), 0.0, 0.0);
+        }else{
+            final BorneDigue borne0 = borneRepo.get(borneBasse.getBorneId());
+            final BorneDigue borne1 = borneRepo.get(borneHaute.getBorneId());
+
+            final SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(LinearReferencing.asLineString(linear));
+
+            final LinearReferencing.ProjectedPoint rel0 = LinearReferencingUtilities.projectReference(segments, borne0.getGeometry());
+            final LinearReferencing.ProjectedPoint rel1 = LinearReferencingUtilities.projectReference(segments, borne1.getGeometry());
+
+            //on converti le PR en distance le long du lineaire
+            final double diffPr = borneHaute.getValeurPR()-borneBasse.getValeurPR();
+            final double diffDist = rel1.distanceAlongLinear - rel0.distanceAlongLinear;
+            final double ratio = (pr - borneBasse.getValeurPR()) / diffPr;
+            final double distance = rel0.distanceAlongLinear + ratio*diffDist;
+
+            pt = LinearReferencingUtilities.computeCoordinate(linear, borne0.getGeometry(), distance, 0.0);
+        }
+
+        pt.setSRID(linear.getSRID());
+        pt.setUserData(linear.getUserData());
+        return pt;
+
+    }
+
+    /**
+     * Calcul de la position avec un systeme de reperage, une borne et une distance.
+     *
+     * @param sr
+     * @param srBorne
+     * @param distance
+     * @return
+     */
+    public static Point computeCoordinate(SystemeReperage sr, SystemeReperageBorne srBorne, double distance){
+        final TronconDigueRepository tronconRepo = InjectorCore.getBean(TronconDigueRepository.class);
+        final BorneDigueRepository borneRepo = InjectorCore.getBean(BorneDigueRepository.class);
+
+        final TronconDigue troncon = tronconRepo.get(sr.getLinearId());
+
+        //une seule borne, on ne peut pas caluler la valeur réel des PR.
+        final BorneDigue borne = borneRepo.get(srBorne.getBorneId());
+        final Geometry linear = troncon.getGeometry();
+        final Point pt = LinearReferencingUtilities.computeCoordinate(linear, borne.getGeometry(), distance, 0.0);
+
+        pt.setSRID(linear.getSRID());
+        pt.setUserData(linear.getUserData());
+        return pt;
+    }
+
+    /**
      * Utility object for manipulation of spatial information of a {@link Positionable} object.
      */
     public static final class PosInfo {
@@ -937,7 +1022,7 @@ public class TronconUtils {
                     if (pos.getBorne_debut_aval()) {
                         dist *= -1;
                     }
-                    point = computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
+                    point = LinearReferencingUtilities.computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
 
                 } else if (pos.getPositionFin() != null) {
                     point = pos.getPositionFin();
@@ -948,7 +1033,7 @@ public class TronconUtils {
                     if (pos.getBorne_fin_aval()) {
                         dist *= -1;
                     }
-                    point = computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
+                    point = LinearReferencingUtilities.computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
 
                 } else {
                     //we extract point from the geometry
@@ -1002,7 +1087,7 @@ public class TronconUtils {
                     if (pos.getBorne_fin_aval()) {
                         dist *= -1;
                     }
-                    point = computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
+                    point = LinearReferencingUtilities.computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
 
                 } else if (pos.getPositionDebut() != null) {
                     point = pos.getPositionDebut();
@@ -1013,7 +1098,7 @@ public class TronconUtils {
                     if (pos.getBorne_debut_aval()) {
                         dist *= -1;
                     }
-                    point = computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
+                    point = LinearReferencingUtilities.computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
 
                 } else {
                     //we extract point from the geometry

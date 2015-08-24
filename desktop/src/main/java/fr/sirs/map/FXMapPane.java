@@ -235,7 +235,9 @@ public class FXMapPane extends BorderPane {
 
 
         final BorderPane topgrid = new BorderPane();
+        topgrid.setPadding(Insets.EMPTY);
         final FlowPane flowPane = new FlowPane(Orientation.HORIZONTAL,uiCtxBar,uiAddBar,uiNavBar,uiToolBar,uiEditBar);
+        flowPane.setPadding(Insets.EMPTY);
         flowPane.setHgap(0);
         flowPane.setVgap(0);
         flowPane.setPrefWrapLength(Double.MAX_VALUE);

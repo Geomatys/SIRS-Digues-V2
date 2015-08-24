@@ -1,10 +1,15 @@
 
 package fr.sirs.map;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -21,13 +26,30 @@ import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
  */
 public class PointCalculatorHandler extends AbstractNavigationHandler {
 
-    private final MouseListen mouseInputListener = new MouseListen();
-    private final FXGeometryLayer geomlayer= new FXGeometryLayer();
+    private static final int CROSS_SIZE = 20;
 
-    private final FXPRPane pane = new FXPRPane();
+    private final MouseListen mouseInputListener = new MouseListen();
+    private final FXGeometryLayer decoration= new FXGeometryLayer(){
+        @Override
+        protected Node createVerticeNode(Coordinate c, boolean selected){
+            final Line h = new Line(c.x-CROSS_SIZE, c.y, c.x+CROSS_SIZE, c.y);
+            final Line v = new Line(c.x, c.y-CROSS_SIZE, c.x, c.y+CROSS_SIZE);
+            h.setStroke(Color.RED);
+            h.setStrokeWidth(2);
+            v.setStroke(Color.RED);
+            v.setStrokeWidth(2);
+            return new Group(h,v);
+        }
+    };
+
+    private final FXPRPane pane = new FXPRPane(this);
     private Stage dialog = null;
 
     public PointCalculatorHandler() {
+    }
+
+    public FXGeometryLayer getDecoration() {
+        return decoration;
     }
     
     /**
@@ -38,7 +60,7 @@ public class PointCalculatorHandler extends AbstractNavigationHandler {
         super.install(component);
         component.addEventHandler(MouseEvent.ANY, mouseInputListener);
         component.addEventHandler(ScrollEvent.ANY, mouseInputListener);
-        map.addDecoration(0,geomlayer);
+        map.addDecoration(0,decoration);
 
         dialog = new Stage();
         dialog.setAlwaysOnTop(true);
@@ -52,8 +74,6 @@ public class PointCalculatorHandler extends AbstractNavigationHandler {
         dialog.setOnCloseRequest((WindowEvent evt) -> component.setHandler(new FXPanHandler(true)));
         dialog.setScene(scene);
         dialog.setResizable(true);
-        dialog.setWidth(350);
-        dialog.setHeight(450);
         dialog.show();
 
     }
@@ -66,7 +86,7 @@ public class PointCalculatorHandler extends AbstractNavigationHandler {
         super.uninstall(component);
         component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
         component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
-        component.removeDecoration(geomlayer);
+        component.removeDecoration(decoration);
         dialog.close();
         return true;
     }
