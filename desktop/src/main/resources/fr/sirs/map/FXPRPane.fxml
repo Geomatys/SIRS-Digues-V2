@@ -27,15 +27,15 @@
         </rowConstraints>
          <children>
             <Label text="Tronçon :" GridPane.columnSpan="2" />
-            <ComboBox fx:id="uiSourceTroncon" maxWidth="1.7976931348623157E308" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+            <ComboBox fx:id="uiSourceTroncon" maxWidth="1.7976931348623157E308" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="1" />
             <Label text="Système de repèrage :" GridPane.columnSpan="2" GridPane.rowIndex="2" />
-            <ComboBox fx:id="uiSourceSR" maxWidth="1.7976931348623157E308" GridPane.columnSpan="3" GridPane.rowIndex="3" />
+            <ComboBox fx:id="uiSourceSR" maxWidth="1.7976931348623157E308" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="3" />
             <RadioButton fx:id="uiChoosePR" mnemonicParsing="false" text="Valeur PR" GridPane.rowIndex="4" />
             <RadioButton fx:id="uiChooseCoord" mnemonicParsing="false" text="Coordonée X/Y" GridPane.rowIndex="5" />
             <RadioButton fx:id="uiChooseBorne" mnemonicParsing="false" text="Borne / Distance" GridPane.rowIndex="6" />
             <ToggleButton fx:id="uiPickCoord" mnemonicParsing="false" onAction="#pickCoord" text="*" GridPane.columnIndex="3" GridPane.rowIndex="5" />
-            <ToggleButton mnemonicParsing="false" onAction="#pickTroncon" text="*" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-            <ComboBox fx:id="uiSourceBorne" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+            <ToggleButton fx:id="uiPickTroncon" mnemonicParsing="false" onAction="#pickTroncon" text="*" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            <ComboBox fx:id="uiSourceBorne" maxWidth="1.7976931348623157E308" prefWidth="80.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
             <Button fx:id="uiCalculate" mnemonicParsing="false" onAction="#calculate" text="Calculer" GridPane.columnSpan="2147483647" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
          </children>
          <padding>
@@ -70,16 +70,16 @@
             <Label text="PR calculé :" GridPane.rowIndex="2" />
             <TextField fx:id="uiTargetPR" editable="false" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
             <Label text="X/Y sur le tronçon :" GridPane.rowIndex="3" />
-            <TextField fx:id="uiTargetY" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-            <TextField fx:id="uiTargetX" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <TextField fx:id="uiTargetY" editable="false" maxWidth="1.7976931348623157E308" prefWidth="120.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+            <TextField fx:id="uiTargetX" editable="false" maxWidth="1.7976931348623157E308" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
             <Label text="Borne amont :" GridPane.rowIndex="4" />
             <TextField fx:id="uiTargetBorneAmont" editable="false" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="4" />
-            <TextField fx:id="uiTagetBorneAmontDist" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+            <TextField fx:id="uiTagetBorneAmontDist" editable="false" maxWidth="1.7976931348623157E308" prefWidth="120.0" GridPane.columnIndex="2" GridPane.rowIndex="5" />
             <Label text="Distance par rapport à la borne amont :" GridPane.columnSpan="2" GridPane.rowIndex="5" />
             <Label text="Borne aval :" GridPane.rowIndex="6" />
             <Label text="Distance par rapport à la borne aval :" GridPane.columnSpan="2" GridPane.rowIndex="7" />
             <CheckBox fx:id="uiTargetView" mnemonicParsing="false" text="Visualiser le PR calculé sur la carte" GridPane.columnSpan="3" GridPane.rowIndex="8" />
-            <TextField fx:id="uiTargetBorneAvalDist" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+            <TextField fx:id="uiTargetBorneAvalDist" editable="false" maxWidth="1.7976931348623157E308" prefWidth="120.0" GridPane.columnIndex="2" GridPane.rowIndex="7" />
             <TextField fx:id="uiTargetBorneAval" editable="false" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="6" />
          </children>
          <padding>

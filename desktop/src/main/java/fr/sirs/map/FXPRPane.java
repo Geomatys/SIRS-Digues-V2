@@ -30,6 +30,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -41,10 +42,14 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import org.geotoolkit.display2d.GO2Utilities;
+import org.geotoolkit.font.FontAwesomeIcons;
+import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.referencing.LinearReferencing;
 import org.geotoolkit.referencing.LinearReferencing.SegmentInfo;
@@ -56,20 +61,23 @@ import org.geotoolkit.referencing.LinearReferencing.SegmentInfo;
  */
 public class FXPRPane extends VBox {
 
+    public static final Image ICON_MARKER = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_MAP_MARKER,16,FontAwesomeIcons.DEFAULT_COLOR),null);
+
     private final NumberFormat DF = new DecimalFormat("0.###");
 
     //source
     @FXML private GridPane uiGrid;
-    @FXML private ComboBox<TronconDigue> uiSourceTroncon;
+    @FXML ComboBox<TronconDigue> uiSourceTroncon;
     @FXML private ComboBox<SystemeReperage> uiSourceSR;
     @FXML private ComboBox<SystemeReperageBorne> uiSourceBorne;
     @FXML private RadioButton uiChoosePR;
     @FXML private RadioButton uiChooseCoord;
     @FXML private RadioButton uiChooseBorne;
-    @FXML private ToggleButton uiPickCoord;
+    @FXML ToggleButton uiPickCoord;
+    @FXML ToggleButton uiPickTroncon;
     private final Spinner<Double> uiSourcePR = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE,0));
-    private final Spinner<Double> uiSourceX = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE,0));
-    private final Spinner<Double> uiSourceY = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE,0));
+    final Spinner<Double> uiSourceX = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE,0));
+    final Spinner<Double> uiSourceY = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE,0));
     private final Spinner<Double> uiSourceDist = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE,0));
 
     @FXML private Button uiCalculate;
@@ -152,6 +160,10 @@ public class FXPRPane extends VBox {
         targetPoint.addListener((ObservableValue<? extends Geometry> observable, Geometry oldValue, Geometry newValue) -> updateMap());
         uiTargetView.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> updateMap());
 
+        uiPickCoord.setText(null);
+        uiPickCoord.setGraphic(new ImageView(ICON_MARKER));
+        uiPickTroncon.setText(null);
+        uiPickTroncon.setGraphic(new ImageView(ICON_MARKER));
         
     }
 
@@ -206,12 +218,15 @@ public class FXPRPane extends VBox {
             pt = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(0, 0));
             JTS.setCRS(pt, session.getProjection());
         }
-        targetPoint.set(pt);
 
         //calcule de la position dans le systeme cible
         final SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(
                 LinearReferencing.asLineString(uiSourceTroncon.getValue().getGeometry()));
         final LinearReferencing.ProjectedPoint pos = LinearReferencingUtilities.projectReference(segments, pt);
+        final Point projPt = GO2Utilities.JTS_FACTORY.createPoint(pos.projected);
+        projPt.setSRID(pt.getSRID());
+        projPt.setUserData(pt.getUserData());
+        targetPoint.set(projPt);
 
         uiTargetX.setText(DF.format(pos.projected.x));
         uiTargetY.setText(DF.format(pos.projected.y));
@@ -238,17 +253,26 @@ public class FXPRPane extends VBox {
             uiTargetBorneAvalDist.setText("");
         }
 
-
     }
 
     @FXML
     void pickCoord(ActionEvent event) {
-
+        uiPickTroncon.setSelected(false);
+        if(uiPickCoord.isSelected()){
+            handler.setPickType(2);
+        }else{
+            handler.setPickType(0);
+        }
     }
 
     @FXML
     void pickTroncon(ActionEvent event) {
-
+        uiPickCoord.setSelected(false);
+        if(uiPickTroncon.isSelected()){
+            handler.setPickType(1);
+        }else{
+            handler.setPickType(0);
+        }
     }
 
 }

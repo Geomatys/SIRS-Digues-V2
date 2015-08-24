@@ -2,9 +2,15 @@
 package fr.sirs.map;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import fr.sirs.CorePlugin;
+import fr.sirs.Injector;
+import fr.sirs.Session;
+import fr.sirs.core.model.TronconDigue;
+import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
@@ -14,11 +20,18 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import org.geotoolkit.data.bean.BeanFeature;
+import org.geotoolkit.display2d.container.ContextContainer2D;
+import org.geotoolkit.feature.Feature;
 import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
+import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
+import org.geotoolkit.map.FeatureMapLayer;
+import org.geotoolkit.map.MapContext;
+import org.geotoolkit.map.MapLayer;
 
 /**
  *
@@ -44,6 +57,9 @@ public class PointCalculatorHandler extends AbstractNavigationHandler {
 
     private final FXPRPane pane = new FXPRPane(this);
     private Stage dialog = null;
+    private int pickType = 0;
+    private FeatureMapLayer tronconLayer = null;
+    private EditionHelper helperTroncon;
 
     public PointCalculatorHandler() {
     }
@@ -51,7 +67,23 @@ public class PointCalculatorHandler extends AbstractNavigationHandler {
     public FXGeometryLayer getDecoration() {
         return decoration;
     }
-    
+
+    /**
+     * Activer le mode de selection.
+     * 
+     * @param type  0 : -
+     *              1 : troncon
+     *              2 : coordonnée
+     */
+    void setPickType(int type){
+        this.pickType = type;
+        if(type==0){
+            map.setCursor(Cursor.DEFAULT);
+        }else{
+            map.setCursor(Cursor.CROSSHAIR);
+        }
+    }
+
     /**
      * {@inheritDoc }
      */
@@ -76,6 +108,19 @@ public class PointCalculatorHandler extends AbstractNavigationHandler {
         dialog.setResizable(true);
         dialog.show();
 
+
+        final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
+        final MapContext context = cc.getContext();
+        for(MapLayer layer : context.layers()){
+            layer.setSelectable(false);
+            if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
+                tronconLayer = (FeatureMapLayer) layer;
+                layer.setSelectable(true);
+            }
+        }
+        helperTroncon = new EditionHelper(map, tronconLayer);
+        helperTroncon.setMousePointerSize(6);
+
     }
 
     /**
@@ -95,6 +140,39 @@ public class PointCalculatorHandler extends AbstractNavigationHandler {
 
         public MouseListen() {
             super(PointCalculatorHandler.this);
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            super.mouseClicked(e);
+
+            if(e.getButton()==MouseButton.PRIMARY){
+                if(pickType==1){
+                    //on recherche un troncon
+                    final Feature feature = helperTroncon.grabFeature(e.getX(), e.getY(), false);
+                    if(feature !=null){
+                        Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
+                        if(bean instanceof TronconDigue){
+                            final Session session = Injector.getSession();
+                            bean = session.getRepositoryForClass(TronconDigue.class).get(((TronconDigue)bean).getDocumentId());
+                            pane.uiSourceTroncon.setValue((TronconDigue)bean);
+                            setPickType(0);
+                            pane.uiPickTroncon.setSelected(false);
+                            pane.uiPickCoord.setSelected(false);
+                        }
+                    }
+
+                }else if(pickType==2){
+                    //on prend la coordonnée du click
+                    final Coordinate coord = helperTroncon.toCoord(e.getX(), e.getY());
+                    pane.uiSourceX.getValueFactory().setValue(coord.x);
+                    pane.uiSourceY.getValueFactory().setValue(coord.y);
+                    setPickType(0);
+                    pane.uiPickTroncon.setSelected(false);
+                    pane.uiPickCoord.setSelected(false);
+                }
+            }
+
         }
 
     }
