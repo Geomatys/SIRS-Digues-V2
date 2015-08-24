@@ -38,6 +38,10 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -59,29 +63,15 @@ import javafx.stage.StageStyle;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 
+/**
+ *
+ * @author Geomatys
+ */
 public class FXMainFrame extends BorderPane {
 
     public static final Image ICON_ALL  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TABLE,16,FontAwesomeIcons.DEFAULT_COLOR),null);
     public static final Image ICON_ALERT  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_BELL,16,FontAwesomeIcons.DEFAULT_COLOR),null);
-    private final Session session = Injector.getBean(Session.class);
-    private final ResourceBundle bundle = ResourceBundle.getBundle(FXMainFrame.class.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
     
-    @FXML private MenuButton uiThemesLocalized;
-    @FXML private MenuButton uiThemesUnlocalized;
-    @FXML private MenuButton uiPlugins;
-    @FXML private Button uiAlertsBtn;
-    @FXML private ImageView uiPluginsImg;
-    @FXML private ToolBar uiToolBarPlugins;
-    @FXML private TabPane uiTabs;
-    @FXML private MenuBar uiMenu;
-
-    private FXMapTab mapTab;
-    private DiguesTab diguesTab;
-    private Tab searchTab;
-
-
-    private final Popup alertPopup = new Popup();
-
     private static final String BUNDLE_KEY_ADMINISTATION = "administration";
     private static final String BUNDLE_KEY_USERS = "users";
     private static final String BUNDLE_KEY_VALIDATION = "validation";
@@ -95,13 +85,27 @@ public class FXMainFrame extends BorderPane {
     private static final String CSS_POPUP_ALERT_NORMAL = "popup-alert-normal";
     private static final String CSS_POPUP_ALERT_HIGHT = "popup-alert-hight";
     private static final String CSS_POPUP_ALERT_INFORMATION = "popup-alert-information";
-    
-    /** 
-     * A cache to get back tab as long as their displayed in application, 
-     * allowing fast search on Theme keys.
-     */
-    
+
+
+    private final Session session = Injector.getBean(Session.class);
+    private final ResourceBundle bundle = ResourceBundle.getBundle(FXMainFrame.class.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
+    private final Popup alertPopup = new Popup();
+    private final ObjectProperty<Plugin> activePlugin = new SimpleObjectProperty<>();
+
+    @FXML private MenuButton uiThemesLocalized;
+    @FXML private MenuButton uiThemesUnlocalized;
+    @FXML private MenuButton uiPlugins;
+    @FXML private Button uiAlertsBtn;
+    @FXML private ImageView uiPluginsImg;
+    @FXML private ToolBar uiToolBarPlugins;
+    @FXML private TabPane uiTabs;
+    @FXML private MenuBar uiMenu;
+
+    private FXMapTab mapTab;
+    private DiguesTab diguesTab;
+    private Tab searchTab;
     private Stage prefEditor;
+
 
     public FXMainFrame() {
         SIRS.loadFXML(this, FXMainFrame.class);
@@ -173,6 +177,19 @@ public class FXMainFrame extends BorderPane {
         uiAlertsBtn.setVisible(AlertManager.getInstance().isAlertsEnabled());
 
         SIRS.LOGGER.log(Level.FINE, org.apache.sis.setup.About.configuration().toString());
+
+        //on change les boutons de la barre en fonction du plugin actif.
+        activePlugin.addListener(new ChangeListener<Plugin>() {
+            @Override
+            public void changed(ObservableValue<? extends Plugin> observable, Plugin oldValue, Plugin newValue) {
+                uiPlugins.setText(newValue.getTitle().toString());
+                uiToolBarPlugins.getItems().clear();
+                for (Theme theme : newValue.getThemes()) {
+                    uiToolBarPlugins.getItems().add(toButton((AbstractPluginsButtonTheme) theme));
+                }
+            }
+        });
+
     }
 
     public void showAlertsPopup() {
@@ -260,6 +277,15 @@ public class FXMainFrame extends BorderPane {
         return item;
     }
     
+    /**
+     * Property contenant le plugin actif.
+     * 
+     * @return 
+     */
+    public ObjectProperty<Plugin> activePluginProperty(){
+        return activePlugin;
+    }
+
     @FXML 
     private void clearCache(){
         session.clearCache();
@@ -284,13 +310,7 @@ public class FXMainFrame extends BorderPane {
             // chargement de l'image par défaut
             uiPluginsImg.setImage(new Image(this.getClass().getResourceAsStream("images/menu-modules.png")));
         }
-        item.setOnAction(event -> {
-            uiPlugins.setText(plugin.getTitle().toString());
-            uiToolBarPlugins.getItems().clear();
-            for (Theme theme : plugin.getThemes()) {
-                uiToolBarPlugins.getItems().add(toButton((AbstractPluginsButtonTheme) theme));
-            }
-        });
+        item.setOnAction(event -> activePlugin.set(plugin));
         return item;
     }
 

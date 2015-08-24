@@ -1,6 +1,7 @@
 package fr.sirs.map;
 
 import fr.sirs.CorePlugin;
+import fr.sirs.FXMainFrame;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonBar;
@@ -245,19 +246,23 @@ public class FXMapPane extends BorderPane {
         flowPane.getStyleClass().add("tool-bar");
 
         //add plugin toolbars
-        for(Plugin p : Plugins.getPlugins()){
-            final List<ToolBar> toolbars = p.getMapToolBars(this);
-            if(toolbars!=null){
-                for(ToolBar t : toolbars){
-                    t.setMaxHeight(Double.MAX_VALUE);
-                    t.setBackground(Background.EMPTY);
-                    flowPane.getChildren().add(t);
+        final FXMainFrame frame = Injector.getSession().getFrame();
+        frame.activePluginProperty().addListener(new ChangeListener<Plugin>() {
+            @Override
+            public void changed(ObservableValue<? extends Plugin> observable, Plugin oldValue, Plugin newValue) {
+                flowPane.getChildren().clear();
+                flowPane.getChildren().addAll(uiCtxBar,uiAddBar,uiNavBar,uiToolBar,uiEditBar);
+                final List<ToolBar> toolbars = newValue.getMapToolBars(FXMapPane.this);
+                if(toolbars!=null){
+                    for(ToolBar t : toolbars){
+                        t.setMaxHeight(Double.MAX_VALUE);
+                        t.setBackground(Background.EMPTY);
+                        flowPane.getChildren().add(t);
+                    }
                 }
             }
-        }
+        });
 
-//        final ToolBar flowBar = new ToolBar(flowPane);
-//        flowBar.setMaxWidth(Double.MAX_VALUE);
         topgrid.setCenter(flowPane);
         topgrid.setRight(uiSplitBar);
 
