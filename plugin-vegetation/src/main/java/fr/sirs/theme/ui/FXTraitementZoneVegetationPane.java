@@ -5,14 +5,13 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefSousTraitementVegetation;
 import fr.sirs.core.model.RefTraitementVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
-import fr.sirs.plugin.vegetation.PluginVegetation;
 import static fr.sirs.plugin.vegetation.PluginVegetation.initComboSousTraitement;
+import static fr.sirs.plugin.vegetation.PluginVegetation.updateParcelleAutoPlanif;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -117,46 +116,11 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
     public void preSave(){
         super.preSave();
 
-
-        /*
-        Si la parcelle de la zone à laquelle le traitement se réfère est en mode
-        de planification automatique, alors la modification du traitement peut
-        avoir un effet sur les planfications de la parcelle.
-        Il faut donc vérifier si la parcelle est en mode automatique et dans ce
-        cas mettre à jour les planifications de la parcelle.
-
-        NOTE (*) : il faut faire cette opération après avoir fait une première
-        sauvegarde provisoire du traitement en cours de sauvegarde définitive,
-        car sinon, lors du passage en planification automatique, la parcelle n'
-        aura accès qu'à l'ancienne valeur du présent traitement. On la nouvelle
-        valeur (en particulier avec la nouvelle valeur de fréquence du
-        traitement non ponctuel peut être décisive pour le calcul des
-        planifications automatiques
-        */
-
         final TraitementZoneVegetation traitement = elementProperty.get();
         if(traitement!=null){
             final Element parent = traitement.getParent();
             if(parent instanceof ZoneVegetation){
-                final String parcelleId = ((ZoneVegetation) parent).getParcelleId();
-                if(parcelleId!=null){
-                    final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = Injector.getSession().getRepositoryForClass(ParcelleVegetation.class);
-                    if(parcelleRepo!=null){
-                        final ParcelleVegetation parcelle=parcelleRepo.get(parcelleId);
-                        if(parcelle!=null){
-                            if(parcelle.getModeAuto()){
-
-                                //(*) opération préalable de sauvegarde du traitement.
-                                final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(parent.getClass());
-                                repo.update(parent);
-                                
-                                // Calcul proprement dit de la planification automatique de la parcelle
-                                PluginVegetation.resetAutoPlanif(parcelle);
-                                parcelleRepo.update(parcelle);// Il faut sauvegarder la parcelle car la méthode setAutoPlanifs ne s'en charge pas.
-                            }
-                        }
-                    }
-                }
+                updateParcelleAutoPlanif((ZoneVegetation) parent);
             }
         }
     }

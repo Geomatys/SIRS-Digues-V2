@@ -483,8 +483,8 @@ public class PluginVegetation extends Plugin {
         if(!frequenceIds.isEmpty()){
             final List<RefFrequenceTraitementVegetation> frequences = Injector.getSession().getRepositoryForClass(RefFrequenceTraitementVegetation.class).get(frequenceIds);
             for(final RefFrequenceTraitementVegetation frequence : frequences){
-                final int f = frequence.getFrequence();
-                if(f>0 && (f<plusCourteFrequence || plusCourteFrequence==0)) plusCourteFrequence=f;
+                final int freq = frequence.getFrequence();
+                if(freq>0 && (freq<plusCourteFrequence || plusCourteFrequence==0)) plusCourteFrequence=freq;
             }
         }
 
@@ -505,14 +505,17 @@ public class PluginVegetation extends Plugin {
      * @throws NullPointerException if parcelle is null
      */
     public static void resetAutoPlanif(final ParcelleVegetation parcelle, final int planDuration){
-        final List<Boolean> planifs = parcelle.getPlanifications();
 
         // 1- on récupère la plus petite fréquence
         final int frequenceTraitement = PluginVegetation.frequenceTraitement(parcelle);
-        // 2- on retire toutes les anciennes planifications
-        while(planifs.size()>0){
-            planifs.remove(0);
-        }
+
+        /*
+        On fait une nouvelle liste, de manière à ajouter d'un coup toutes les
+        modifications et ne pas déclencher à contretemps les écouteurs des
+        planifications sur le tableau de bord.
+        */
+        final List<Boolean> planifs = new ArrayList<>(0);
+
         // 3- on réinitialise les planifications
         // a- Si on n'a pas de traitement sur zone de végétation, inclus dans la gestion, on ne planifie rien.
         if(frequenceTraitement==0){
@@ -526,6 +529,8 @@ public class PluginVegetation extends Plugin {
                 planifs.add(i, i%frequenceTraitement==0);
             }
         }
+
+        parcelle.setPlanifications(planifs);
     }
 
     /**
@@ -560,6 +565,54 @@ public class PluginVegetation extends Plugin {
         resetAutoPlanif(parcelle, planDuration);
     }
 
+
+    /**
+     * Met à jour la parcelle de la zone de végétation donnée en paramètre
+     * au cas où le traitement de celle-ci aurait été modifié, ce qui pourrait
+     * avoir une incidence sur la planification automatique de la parcelle.
+     *
+     * @param changed
+     */
+    public static void updateParcelleAutoPlanif(final ZoneVegetation changed){
+
+
+        /*
+        Si la parcelle de la zone à laquelle le traitement se réfère est en mode
+        de planification automatique, alors la modification du traitement peut
+        avoir un effet sur les planfications de la parcelle.
+        Il faut donc vérifier si la parcelle est en mode automatique et dans ce
+        cas mettre à jour les planifications de la parcelle.
+
+        NOTE (*) : il faut faire cette opération après avoir fait une première
+        sauvegarde provisoire du traitement en cours de sauvegarde définitive,
+        car sinon, lors du passage en planification automatique, la parcelle n'
+        aura accès qu'à l'ancienne valeur du présent traitement. On la nouvelle
+        valeur (en particulier avec la nouvelle valeur de fréquence du
+        traitement non ponctuel peut être décisive pour le calcul des
+        planifications automatiques
+        */
+
+
+        final String parcelleId = changed.getParcelleId();
+        if(parcelleId!=null){
+            final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = Injector.getSession().getRepositoryForClass(ParcelleVegetation.class);
+            if(parcelleRepo!=null){
+                final ParcelleVegetation parcelle=parcelleRepo.get(parcelleId);
+                if(parcelle!=null){
+                    if(parcelle.getModeAuto()){
+
+                        //(*) opération préalable de sauvegarde du traitement.
+                        final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(changed.getClass());
+                        repo.update(changed);
+
+                        // Calcul proprement dit de la planification automatique de la parcelle
+                        PluginVegetation.resetAutoPlanif(parcelle);
+                        parcelleRepo.update(parcelle);// Il faut sauvegarder la parcelle car la méthode setAutoPlanifs ne s'en charge pas.
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Gives the information if the parcelle is coherent.

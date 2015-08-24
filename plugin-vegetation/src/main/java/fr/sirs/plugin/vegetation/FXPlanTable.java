@@ -13,6 +13,8 @@ import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
+import javafx.collections.WeakListChangeListener;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -243,6 +245,15 @@ public class FXPlanTable extends BorderPane{
                 parcelle.setPlanifications(new ArrayList<>());
             }
 
+            final WeakListChangeListener<Boolean> weakListener = new WeakListChangeListener<>(new ListChangeListener<Boolean>() {
+
+                @Override
+                public void onChanged(ListChangeListener.Change<? extends Boolean> c) {
+                    setSelected(getVal());
+                }
+            });
+            parcelle.getPlanifications().addListener(weakListener);
+
             setSelected(getVal());
             selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
                 setVal(newValue);
@@ -250,23 +261,24 @@ public class FXPlanTable extends BorderPane{
             updateColor();
         }
 
+        /**
+         * return the value of the planification if exists. If there is no planification at the cell index, then returns false.
+         * @return
+         */
         private boolean getVal(){
-            final List<Boolean> planifications = parcelle.getPlanifications();
-            while(planifications.size()<=index){
-                planifications.add(Boolean.FALSE);
+            if(index<parcelle.getPlanifications().size()){
+                return parcelle.getPlanifications().get(index);
             }
-            return planifications.get(index);
+            else return false;
         }
 
         private void setVal(Boolean v){
-            final List<Boolean> planifications = parcelle.getPlanifications();
-            while(planifications.size()<=index){
-                planifications.add(Boolean.FALSE);
-            }
-            final Boolean old = planifications.set(index,v);
-            if(!Objects.equal(old,v)){
-                save(parcelle);
-                updateColor();
+            if(index<parcelle.getPlanifications().size()){
+                final Boolean old = parcelle.getPlanifications().set(index, v);
+                if(!Objects.equal(old,v)){
+                    save(parcelle);
+                    updateColor();
+                }
             }
         }
 
