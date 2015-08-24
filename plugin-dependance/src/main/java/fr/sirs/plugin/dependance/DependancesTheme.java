@@ -12,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -22,8 +23,11 @@ import javafx.scene.layout.Priority;
  * @author Cédric Briançon (Geomatys)
  */
 public final class DependancesTheme extends AbstractPluginsButtonTheme {
+    private static final Image BUTTON_IMAGE = new Image(
+            DependancesTheme.class.getResourceAsStream("images/dependance.png"));
+
     public DependancesTheme() {
-        super("Gestion des dépendances", "Gestion des dépendances", null);
+        super("Gestion des dépendances", "Gestion des dépendances", BUTTON_IMAGE);
     }
 
     /**
