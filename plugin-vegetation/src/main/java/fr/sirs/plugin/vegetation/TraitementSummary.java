@@ -38,6 +38,7 @@ public class TraitementSummary {
             this.typeSousTraitementId.set(typeSousTraitementId);
             this.typeFrequenceId.set(typeFrequenceId);
             this.ponctuel.set(ponctuel);
+            this.typeTraitementId.equals(null);
         }
 
         @Override

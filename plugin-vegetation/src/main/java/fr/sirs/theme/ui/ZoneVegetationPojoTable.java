@@ -1,5 +1,6 @@
 package fr.sirs.theme.ui;
 
+import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
@@ -7,6 +8,7 @@ import fr.sirs.core.model.ZoneVegetation;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import javafx.collections.FXCollections;
 import javafx.stage.Modality;
 
@@ -18,6 +20,13 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
 
     public ZoneVegetationPojoTable(String title) {
         super(ZoneVegetation.class, title);
+        setDeletor(new Consumer<Element>() {
+
+            @Override
+            public void accept(Element pojo) {
+                if(pojo instanceof ZoneVegetation) ((AbstractSIRSRepository) Injector.getSession().getRepositoryForClass(pojo.getClass())).remove(pojo);
+            }
+        });
     }
     
     @Override
@@ -31,7 +40,7 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
 
         final Class<? extends ZoneVegetation> retrievedClass = stage.getRetrievedElement().get();
         if(retrievedClass!=null){
-            final AbstractSIRSRepository zoneVegetationRepo = session.getRepositoryForClass(retrievedClass);
+            final AbstractSIRSRepository zoneVegetationRepo = Injector.getSession().getRepositoryForClass(retrievedClass);
             position = (ZoneVegetation) zoneVegetationRepo.create();
             position.setForeignParentId(getPropertyReference());
             zoneVegetationRepo.add(position);

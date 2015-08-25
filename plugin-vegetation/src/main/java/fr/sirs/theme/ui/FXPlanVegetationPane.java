@@ -86,14 +86,15 @@ public class FXPlanVegetationPane extends BorderPane {
 
                         if(item == null){
                             super.setText(null);
-                        } else {
+                        }
+                        else {
                             try{
                                 super.setText(converter.toString(previews.get(item)));
                             } catch (Exception e){
                                 super.setText(item);
                             }
                         }
-                        super.setGraphic(null);
+                        setGraphic(null);
                     }
                 };
             };
@@ -116,14 +117,15 @@ public class FXPlanVegetationPane extends BorderPane {
 
                         if(item == null){
                             super.setText(null);
-                        } else {
+                        }
+                        else {
                             try{
                                 super.setText(converter.toString(previews.get(item)));
                             } catch (Exception e){
                                 super.setText(item);
                             }
                         }
-                        super.setGraphic(null);
+                        setGraphic(null);
                     }
                 };
             };
@@ -485,7 +487,7 @@ public class FXPlanVegetationPane extends BorderPane {
     private void initTraitements(ActionEvent event){
         traitements.remove(0, traitements.size());
         for(final ParcelleVegetation parcelle : parcelleRepo.getByPlan(plan)){
-            ObservableList<? extends ZoneVegetation> allZoneVegetationByParcelleId = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), session);
+            final ObservableList<? extends ZoneVegetation> allZoneVegetationByParcelleId = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), session);
             for(final ZoneVegetation zone : allZoneVegetationByParcelleId){
                 final TraitementZoneVegetation traitement = zone.getTraitement();
                 if(traitement!=null && !traitement.getHorsGestion()){

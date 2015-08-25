@@ -59,31 +59,6 @@ public class FXParametragePane extends SplitPane {
         SIRS.loadFXML(this, FXParametragePane.class);
         initialize();
     }
-    
-    private class UpdatableListCell extends ListCell<PlanVegetation> {
-        
-        @Override
-        protected void updateItem(final PlanVegetation item, boolean empty) {
-            super.updateItem(item, empty);
-            
-            textProperty().unbind();
-            if(item!=null){
-                textProperty().bind(new ObjectBinding<String>() {
-
-                    {
-                        bind(item.libelleProperty(), item.designationProperty());
-                    }
-
-                    @Override
-                    protected String computeValue() {
-                        return converter.toString(item);
-                    }
-                });
-            } else {
-                setText("");
-            }
-        }
-    }
 
     private void initialize() {
         final BorderPane pane = new BorderPane();
@@ -114,11 +89,19 @@ public class FXParametragePane extends SplitPane {
         uiDelete.setOnAction(this::planDelete);
         uiDelete.setGraphic(new ImageView(SIRS.ICON_TRASH_WHITE));
     }
-    
+
+    /**
+     * Updates the planification list.
+     */
     void refreshPlanList() {
         uiPlanList.setItems(FXCollections.observableList(planRepo.getAll()));
     }
-    
+
+    /**
+     * Creates a new planification.
+     * 
+     * @param event
+     */
     @FXML
     void planAdd(ActionEvent event) {
         final PlanVegetation newPlan = planRepo.create();
@@ -131,7 +114,12 @@ public class FXParametragePane extends SplitPane {
         refreshPlanList();
         uiPlanList.getSelectionModel().select(newPlan);
     }
-    
+
+    /**
+     * Duplicates a planification.
+     *
+     * @param event
+     */
     void planDuplicate(ActionEvent event) {
         final PlanVegetation toDuplicate = uiPlanList.getSelectionModel().getSelectedItem();
         if(toDuplicate!=null){
@@ -209,6 +197,11 @@ public class FXParametragePane extends SplitPane {
         }
     }
 
+    /**
+     * Deletes a planification.
+     *
+     * @param event
+     */
     @FXML
     void planDelete(ActionEvent event) {
         final PlanVegetation toDelete = uiPlanList.getSelectionModel().getSelectedItem();
@@ -248,6 +241,34 @@ public class FXParametragePane extends SplitPane {
                 // Suppression du plan
                 planRepo.remove(toDelete);
                 refreshPlanList();
+            }
+        }
+    }
+
+    /**
+     * A specific ListCell bound to the libelle and designation fields of the planification it represents.
+     */
+    private class UpdatableListCell extends ListCell<PlanVegetation> {
+
+        @Override
+        protected void updateItem(final PlanVegetation item, boolean empty) {
+            super.updateItem(item, empty);
+
+            textProperty().unbind();
+            if(item!=null){
+                textProperty().bind(new ObjectBinding<String>() {
+
+                    {
+                        bind(item.libelleProperty(), item.designationProperty());
+                    }
+
+                    @Override
+                    protected String computeValue() {
+                        return converter.toString(item);
+                    }
+                });
+            } else {
+                setText("");
             }
         }
     }
