@@ -7,6 +7,7 @@ import fr.sirs.core.component.ParcelleVegetationRepository;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.TronconDigue;
+import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.PLANIFICATION;
 import fr.sirs.util.SirsStringConverter;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,28 +41,32 @@ import org.elasticsearch.common.base.Objects;
  */
 public class FXPlanTable extends BorderPane{
 
+    public enum Mode{PLANIFICATION, EXPLOITATION};
+
     private static final String AUTO_STYLE = "-fx-border-color: lightgray;-fx-border-insets: 0;-fx-border-width: 0 0 0 3;-fx-label-padding: 0;";
     private static final String CHECKBOX_NOPADDING = "-fx-label-padding: 0;";
 
     private final PlanVegetation plan;
-    private final boolean exploitation;
-    private final List<EstimationCell> esimations = new ArrayList<>();
+    private final Mode mode;
+    private final List<EstimationCell> estimations = new ArrayList<>();
     private final Session session = Injector.getSession();
     private final BooleanProperty editable = new SimpleBooleanProperty(true);
 
-    public FXPlanTable(PlanVegetation plan, TronconDigue troncon, boolean exploitation){
+    
+    public FXPlanTable(final PlanVegetation plan, final TronconDigue troncon, final Mode mode){
         this.plan = plan;
-        this.exploitation = exploitation;
+        this.mode = mode;
 
-        final GridPane gridCenter = new GridPane();
+        // En-têtes
         final GridPane gridTop = new GridPane();
-        final GridPane gridBottom = new GridPane();
+        gridTop.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        setTop(gridTop);
+
+        // Planifications des traitements
+        final GridPane gridCenter = new GridPane();
         gridCenter.setMinSize(50, 50);
         gridCenter.setVgap(0);
         gridCenter.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        gridTop.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        gridBottom.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        gridBottom.setStyle("-fx-background-color: lightgray;");
 
         final ScrollPane scroll = new ScrollPane(gridCenter);
         scroll.setMinSize(200, 200);
@@ -70,16 +75,19 @@ public class FXPlanTable extends BorderPane{
         scroll.setFitToWidth(true);
         scroll.setFitToHeight(false);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-
         setCenter(scroll);
+
+        // Côut des traitements
+        final GridPane gridBottom = new GridPane();
+        gridBottom.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        gridBottom.setStyle("-fx-background-color: lightgray;");
         setBottom(gridBottom);
-        setTop(gridTop);
 
         //on crée et synchronize toutes les colonnes
         int dateStart = plan.getAnneeDebut();
         //NOTE : on ne peut pas afficher plus de X ans sur la table
         //on considere que l'enregistrement est mauvais et on evite de bloquer l'interface
-        int dateEnd = Math.min(plan.getAnneeFin(),dateStart+20);
+        int dateEnd = Math.min(plan.getAnneeFin(), dateStart+20);
 
         //nom des types
         final Label fake0 = new Label();
@@ -87,14 +95,15 @@ public class FXPlanTable extends BorderPane{
         fake0.setMinSize(150, 20);
         final Label lblYear = new Label("Année");
         final Label lblSum;
-        if(!exploitation){
+        if(mode==PLANIFICATION){
             lblSum  = new Label("Somme*");
-        }else{
+        }
+        else{
             lblSum  = new Label("Somme");
         }
         lblYear.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        lblSum .setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         lblYear.getStyleClass().add("pojotable-header");
+        lblSum .setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         lblSum.getStyleClass().add("pojotable-header");
 
 
@@ -117,7 +126,7 @@ public class FXPlanTable extends BorderPane{
         }
 
         //on ajoute la colonne 'Mode auto'
-        if(!exploitation){
+        if(mode==PLANIFICATION){
             //colonne vide
             cstTop    = new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,Double.MAX_VALUE,Priority.SOMETIMES,HPos.CENTER,true);
             cstCenter = new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,Double.MAX_VALUE,Priority.SOMETIMES,HPos.CENTER,true);
@@ -125,6 +134,7 @@ public class FXPlanTable extends BorderPane{
             gridTop.getColumnConstraints().add(cstTop);
             gridCenter.getColumnConstraints().add(cstCenter);
             gridBottom.getColumnConstraints().add(cstBottom);
+            
             //colonne mode auto
             cstTop    = new ColumnConstraints(67,67,67,Priority.NEVER,HPos.CENTER,true);
             cstCenter = new ColumnConstraints(50,50,50,Priority.NEVER,HPos.CENTER,true);
@@ -141,7 +151,6 @@ public class FXPlanTable extends BorderPane{
 
             gridTop   .add(lblAuto,       gridTop   .getColumnConstraints().size()-1, 0);
             gridBottom.add(new Label(""), gridBottom.getColumnConstraints().size()-1, 0);
-
         }
 
 
@@ -174,7 +183,7 @@ public class FXPlanTable extends BorderPane{
 
             //on ajoute la colonne 'Mode auto'
             colIndex++;
-            if(!exploitation){
+            if(mode==PLANIFICATION){
                 gridCenter.add(modeAuto, colIndex, rowIndex);
             }
 
@@ -203,7 +212,7 @@ public class FXPlanTable extends BorderPane{
         }
 
         //ligne de commentaire
-        if(!exploitation){
+        if(mode==PLANIFICATION){
             gridBottom.add(new Label("* La somme prend en compte le coût de traitements des invasives"), 0, 1, 6, 1);
         }
 
@@ -290,7 +299,7 @@ public class FXPlanTable extends BorderPane{
          * Vert : Planifié, traité
          */
         private void updateColor(){
-            if(!exploitation) return;
+            if(mode==PLANIFICATION) return;
             
             final boolean planifie = getVal();
             final Color color = VegetationSession.getParcelleEtatColor(parcelle, planifie, year);

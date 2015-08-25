@@ -5,6 +5,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.TronconDigue;
+import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.PLANIFICATION;
 import fr.sirs.util.SirsStringConverter;
 import java.util.List;
 import javafx.beans.value.ChangeListener;
@@ -83,14 +84,14 @@ public class FXPlanificationPane extends GridPane {
         add(tablePane, 0, 1, 3, 1);
 
         if(planChoiceBox.getValue()!=null){
-            tablePane.setCenter(new FXPlanTable(planChoiceBox.getValue(), tronconChoiceBox.getValue(), false));
+            tablePane.setCenter(new FXPlanTable(planChoiceBox.getValue(), tronconChoiceBox.getValue(), PLANIFICATION));
         }
 
         //on ecoute les changements de troncon et de plan
         final ChangeListener chgListener = new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                tablePane.setCenter(new FXPlanTable(planChoiceBox.getValue(), tronconChoiceBox.getValue(), false));
+                tablePane.setCenter(new FXPlanTable(planChoiceBox.getValue(), tronconChoiceBox.getValue(), PLANIFICATION));
             }
         };
 
