@@ -18,6 +18,7 @@ import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
+import javafx.scene.web.WebView;
 import javafx.stage.Popup;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Role;
@@ -484,7 +485,12 @@ public class FXMainFrame extends BorderPane {
     private void templatesPrint(){
         addTab(session.getOrCreatePrintTab(Session.PrintTab.TEMPLATE, "Modèles de mise en forme"));
     }
-    
+
+    @FXML
+    public void showUserGuide() {
+        addTab(session.getOrCreateUserGuideTab());
+    }
+
     @FXML
     public void openAppInfo() {
         final Stage infoStage = new Stage();

@@ -44,9 +44,11 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.web.WebView;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
 import org.ektorp.CouchDbConnector;
@@ -102,6 +104,7 @@ public class Session extends SessionCore {
     private final Cache<AdminTab, FXFreeTab> openAdminTabs = new Cache<>(2, 0, false);
     public enum PrintTab{DESORDRE, TEMPLATE}
     private final Cache<PrintTab, FXFreeTab> openPrintTabs = new Cache<>(2, 0, false);
+    private static FXFreeTab userGuideTab = null;
 
     //generate a template for the legend
     final DefaultLegendTemplate legendTemplate = new DefaultLegendTemplate(
@@ -263,6 +266,23 @@ public class Session extends SessionCore {
                 getFrame().addTab(getOrCreateElementTab(element.get()));
             }
         }
+    }
+
+    public FXFreeTab getOrCreateUserGuideTab() {
+        if (userGuideTab == null) {
+            userGuideTab = new FXFreeTab("Guide utilisateur");
+            final WebView webView = new WebView();
+            webView.setMaxWidth(Double.MAX_VALUE);
+            webView.setMaxHeight(Double.MAX_VALUE);
+            webView.getEngine().load("http://sirs-digues.info/documents/");
+            final ScrollPane scroll = new ScrollPane(webView);
+            scroll.setHmax(Double.MAX_VALUE);
+            scroll.setVmax(Double.MAX_VALUE);
+            scroll.setFitToHeight(true);
+            scroll.setFitToWidth(true);
+            userGuideTab.setContent(scroll);
+        }
+        return userGuideTab;
     }
 
     public FXFreeTab getOrCreatePrintTab(final PrintTab printTab, final String title){
