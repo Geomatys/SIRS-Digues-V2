@@ -185,14 +185,15 @@ public class FXSearchPane extends BorderPane {
         });
         
         final List<Class<? extends Element>> modelClasses = Session.getElements();
-        modelClasses.removeIf(new Predicate<Class<? extends Element>>() {
-
+        final ObservableList<Class<? extends Element>> modelObs = FXCollections.observableArrayList(modelClasses);
+        modelObs.removeIf(new Predicate<Class<? extends Element>>() {
             @Override
             public boolean test(Class<? extends Element> t) {
                 return ReferenceType.class.isAssignableFrom(t);
             }
         });
-        uiDesignationClass.setItems(FXCollections.observableArrayList(modelClasses));
+
+        uiDesignationClass.setItems(modelObs);
         uiDesignationClass.setConverter(new SirsStringConverter());
         
         uiToggleSimple.setSelected(true);
