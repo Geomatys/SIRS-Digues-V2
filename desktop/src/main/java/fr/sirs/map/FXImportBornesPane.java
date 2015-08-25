@@ -7,16 +7,21 @@ import fr.sirs.SIRS;
 import static fr.sirs.SIRS.CRS_WGS84;
 
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.SystemeReperageRepository;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.EventObject;
+import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -76,42 +81,23 @@ import org.opengis.util.GenericName;
  */
 public class FXImportBornesPane extends BorderPane {
 
-    @FXML
-    private TextField uiPath;
-    @FXML
-    private TextField uiSeparator;
-    @FXML
-    private Label uiSeparatorLabel;
-
-    @FXML
-    private ComboBox<CoordinateReferenceSystem> uiCRS;
-    @FXML
-    private ComboBox<PropertyType> uiAttX;
-    @FXML
-    private ComboBox<PropertyType> uiAttY;
-    @FXML
-    private FXFeatureTable uiTable;
-
-    @FXML
-    private ComboBox uiLibelleBox;
-    
-    @FXML
-    private ComboBox uiCodeBox;
-    
-    @FXML
-    private ComboBox uiTronconBox;
-
-    @FXML
-    private GridPane uiPaneConfig;
-    
-    @FXML
-    private GridPane uiPaneImport;
-    
-    @FXML
-    private Button uiImportButton;
+    @FXML private TextField uiPath;
+    @FXML private TextField uiSeparator;
+    @FXML private Label uiSeparatorLabel;
+    @FXML private ComboBox<CoordinateReferenceSystem> uiCRS;
+    @FXML private ComboBox<PropertyType> uiAttX;
+    @FXML private ComboBox<PropertyType> uiAttY;
+    @FXML private FXFeatureTable uiTable;
+    @FXML private ComboBox uiLibelleBox;
+    @FXML private ComboBox<SystemeReperage> uiSRBox;
+    @FXML private ComboBox<PropertyType> uiPRBox;
+    @FXML private ComboBox<PropertyType> uiCodeBox;
+    @FXML private ComboBox<Preview> uiTronconBox;
+    @FXML private GridPane uiPaneConfig;
+    @FXML private GridPane uiPaneImport;    
+    @FXML private Button uiImportButton;
 
     private FeatureMapLayer loadedData;
-    
     private FeatureCollection selection;
 
     public FXImportBornesPane() {
@@ -124,6 +110,8 @@ public class FXImportBornesPane extends BorderPane {
         uiAttX.setConverter(stringConverter);
         uiAttY.setConverter(stringConverter);
         uiLibelleBox.setConverter(stringConverter);
+        uiSRBox.setConverter(stringConverter);
+        uiPRBox.setConverter(stringConverter);
         uiCodeBox.setConverter(stringConverter);
 
         // TODO : make visible if we activate back csv import.
@@ -144,6 +132,30 @@ public class FXImportBornesPane extends BorderPane {
         uiTronconBox.setItems(FXCollections.observableList(
                 Injector.getSession().getPreviews().getByClass(TronconDigue.class)));
         uiTronconBox.setConverter(stringConverter);
+        uiTronconBox.valueProperty().addListener(this::updateSrList);
+
+    }
+
+    private void updateSrList(ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue){
+        if(newValue==null){
+            uiSRBox.setItems(FXCollections.emptyObservableList());
+        } else {
+            final fr.sirs.Session session = Injector.getSession();
+            final TronconDigue troncon = session.getRepositoryForClass(TronconDigue.class).get(newValue.getElementId());
+            final List<SystemeReperage> srs = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).getByLinear(troncon);
+            uiSRBox.setItems(FXCollections.observableArrayList(srs));
+            uiSRBox.getSelectionModel().selectFirst();
+
+            final String defaultSRID = troncon.getSystemeRepDefautId();
+            if (defaultSRID != null) {
+                for (final SystemeReperage sr : srs) {
+                    if (defaultSRID.equals(sr.getId())) {
+                        uiSRBox.getSelectionModel().select(sr);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     @FXML
@@ -220,8 +232,14 @@ public class FXImportBornesPane extends BorderPane {
                     CharSequence.class.isAssignableFrom(
                             ((AttributeType)p).getValueClass());
         });
+        final ObservableList numberProperties = properties.filtered((PropertyType p) -> {
+            return (p instanceof AttributeType) &&
+                    Number.class.isAssignableFrom(
+                            ((AttributeType)p).getValueClass());
+        });
         uiLibelleBox.setItems(stringProperties);
         uiCodeBox.setItems(stringProperties);
+        uiPRBox.setItems(numberProperties);
         
         if (!properties.isEmpty()) {
             uiAttX.getSelectionModel().clearAndSelect(0);
@@ -296,10 +314,22 @@ public class FXImportBornesPane extends BorderPane {
         } else {
             libelleProperty = null;
         }
+
+        Object selectedPR = uiPRBox.getSelectionModel().getSelectedItem();
+        final String prProperty;
+        if (selectedPR instanceof PropertyType) {
+            prProperty = ((PropertyType) selectedPR).getName().head().toString();
+        } else {
+            prProperty = null;
+        }
         
+        final SystemeReperage sr = uiSRBox.getValue();
+
         final Task importTask = new Task() {
             @Override
             protected Object call() throws Exception {
+                final fr.sirs.Session session = Injector.getSession();
+
                 final TronconDigue troncon;
                 final AbstractSIRSRepository<TronconDigue> tdRepo = Injector.getSession().getRepositoryForClass(TronconDigue.class);
                 if (selectedTd instanceof TronconDigue) {
@@ -343,8 +373,18 @@ Injector.getSession().getProjection(),
                             if (libelleProperty != null) {
                                 newBorn.setLibelle(current.getPropertyValue(libelleProperty).toString());
                             }
+
                             borneRepo.add(newBorn);
                             mustUpdateTroncon = (troncon.getBorneIds().add(newBorn.getId()) || mustUpdateTroncon);
+
+                            if(sr!=null && prProperty!=null){
+                                //reference dans le SR
+                                final SystemeReperageBorne srb = session.getElementCreator().createElement(SystemeReperageBorne.class);
+                                srb.borneIdProperty().set(newBorn.getDocumentId());
+                                srb.setValeurPR(((Number)current.getPropertyValue(prProperty)).floatValue());
+                                sr.systemeReperageBornes.add(srb);
+                            }
+
                         } else {
                     // TODO : store unmanaged feature libelle to alert user at
                             // the end of import.
@@ -355,6 +395,12 @@ Injector.getSession().getProjection(),
                         tdRepo.update(troncon);
                     }
                 }
+
+                //sauvegarde du SR
+                if(sr!=null){
+                    ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).update(sr, troncon);
+                }
+
                 return mustUpdateTroncon;
             }
         };
