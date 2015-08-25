@@ -395,8 +395,8 @@ public class FXPlanTable extends BorderPane{
 
 
                                 // On vérifie ensuite que ce traitement se trouve dans les paramètres de coûts du plan en ce qui concerne son volet ponctuel et son volet non ponctuel
-                                TraitementSummary ponctuelSummary = new TraitementSummary(zone.getClass(), traitement.getTypeTraitementPonctuelId(), traitement.getSousTypeTraitementPonctuelId(), null, true);
-                                TraitementSummary nonPonctuelSummary = new TraitementSummary(zone.getClass(), traitement.getTypeTraitementId(), traitement.getSousTypeTraitementId(), traitement.getFrequenceId(), false);
+                                TraitementSummary ponctuelSummary = new TraitementSummary(zone.getClass(), traitement.getTraitementPonctuelId(), traitement.getSousTraitementPonctuelId(), null, true);
+                                TraitementSummary nonPonctuelSummary = new TraitementSummary(zone.getClass(), traitement.getTraitementId(), traitement.getSousTraitementId(), traitement.getFrequenceId(), false);
 
 
 

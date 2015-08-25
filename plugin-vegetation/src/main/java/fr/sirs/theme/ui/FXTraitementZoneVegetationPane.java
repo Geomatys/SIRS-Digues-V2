@@ -29,7 +29,7 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
     public FXTraitementZoneVegetationPane(final TraitementZoneVegetation traitementZoneVegetation){
         super(traitementZoneVegetation);
 
-        ui_typeTraitementId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+        ui_traitementId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
 
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -39,13 +39,13 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
                     if(traitementId!=null){
                         final List<RefSousTraitementVegetation> sousTypesDispos = sousTypeRepo.getAll();
                         sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTraitementId()));
-                        SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.observableList(sousTypesDispos), null);
+                        SIRS.initCombo(ui_sousTraitementId, FXCollections.observableList(sousTypesDispos), null);
                     }
                 }
             }
         });
 
-        ui_typeTraitementPonctuelId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+        ui_traitementPonctuelId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
 
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -55,7 +55,7 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
                     if(traitementId!=null){
                         final List<RefSousTraitementVegetation> sousTypesDispos = sousTypeRepo.getAll();
                         sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTraitementId()));
-                        SIRS.initCombo(ui_sousTypeTraitementPonctuelId, FXCollections.observableList(sousTypesDispos), null);
+                        SIRS.initCombo(ui_sousTraitementPonctuelId, FXCollections.observableList(sousTypesDispos), null);
                     }
                 }
             }
@@ -90,10 +90,10 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
             }
         }
 
-        SIRS.initCombo(ui_typeTraitementPonctuelId, FXCollections.observableList(traitementsPonctuels),
-            newElement.getTypeTraitementPonctuelId() == null? null : previewRepository.get(newElement.getTypeTraitementPonctuelId()));
-        SIRS.initCombo(ui_typeTraitementId, FXCollections.observableList(traitementsNonPonctuels),
-            newElement.getTypeTraitementId() == null? null : previewRepository.get(newElement.getTypeTraitementId()));
+        SIRS.initCombo(ui_traitementPonctuelId, FXCollections.observableList(traitementsPonctuels),
+            newElement.getTraitementPonctuelId() == null? null : previewRepository.get(newElement.getTraitementPonctuelId()));
+        SIRS.initCombo(ui_traitementId, FXCollections.observableList(traitementsNonPonctuels),
+            newElement.getTraitementId() == null? null : previewRepository.get(newElement.getTraitementId()));
 
 
 
@@ -107,9 +107,9 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
 
         final List<Preview> sousTraitementPreviews = previewRepository.getByClass(RefSousTraitementVegetation.class);
 
-        initComboSousTraitement(newElement.getTypeTraitementPonctuelId(), newElement.getSousTypeTraitementPonctuelId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementPonctuelId);
+        initComboSousTraitement(newElement.getTraitementPonctuelId(), newElement.getSousTraitementPonctuelId(), sousTraitementPreviews, sousTraitements, ui_sousTraitementPonctuelId);
 
-        initComboSousTraitement(newElement.getTypeTraitementId(), newElement.getSousTypeTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementId);
+        initComboSousTraitement(newElement.getTraitementId(), newElement.getSousTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTraitementId);
     }
 
     @Override

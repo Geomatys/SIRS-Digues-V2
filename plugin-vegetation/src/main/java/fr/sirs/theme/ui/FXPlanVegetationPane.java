@@ -340,11 +340,11 @@ public class FXPlanVegetationPane extends BorderPane {
         uiCoutTable.setEditable(true);
 
         final TableColumn<ParamCoutTraitementVegetation, String> traitementColumn = new TableColumn<>("Type de traitement");
-        traitementColumn.setCellValueFactory((TableColumn.CellDataFeatures<ParamCoutTraitementVegetation, String> param) -> param.getValue().typeProperty());
+        traitementColumn.setCellValueFactory((TableColumn.CellDataFeatures<ParamCoutTraitementVegetation, String> param) -> param.getValue().traitementIdProperty());
         traitementColumn.setCellFactory(fromIdCellFactory2);
         traitementColumn.setEditable(false);
         final TableColumn<ParamCoutTraitementVegetation, String> sousTraitementColumn = new TableColumn<>("Sous-type de traitement");
-        sousTraitementColumn.setCellValueFactory((TableColumn.CellDataFeatures<ParamCoutTraitementVegetation, String> param) -> param.getValue().sousTypeProperty());
+        sousTraitementColumn.setCellValueFactory((TableColumn.CellDataFeatures<ParamCoutTraitementVegetation, String> param) -> param.getValue().sousTraitementIdProperty());
         sousTraitementColumn.setCellFactory(fromIdCellFactory2);
         sousTraitementColumn.setEditable(false);
         final TableColumn<ParamCoutTraitementVegetation, Number> coutColumn = new TableColumn<>("Coût");
@@ -444,8 +444,8 @@ public class FXPlanVegetationPane extends BorderPane {
         for(final TraitementSummary traitement : traitementsSansCout){
             final ParamCoutTraitementVegetation param = session.getElementCreator().createElement(ParamCoutTraitementVegetation.class);
             param.getId();// On affecte un Id à l'élément imbriqué
-            param.setType(traitement.typeTraitementId().get());
-            param.setSousType(traitement.typeSousTraitementId().get());
+            param.setTraitementId(traitement.typeTraitementId().get());
+            param.setSousTraitementId(traitement.typeSousTraitementId().get());
             plan.getParamCout().add(param);
         }
 
@@ -491,10 +491,10 @@ public class FXPlanVegetationPane extends BorderPane {
             for(final ZoneVegetation zone : allZoneVegetationByParcelleId){
                 final TraitementZoneVegetation traitement = zone.getTraitement();
                 if(traitement!=null && !traitement.getHorsGestion()){
-                    final TraitementSummary summaryNonPonctuel = new TraitementSummary(zone.getClass(), traitement.getTypeTraitementId(), traitement.getSousTypeTraitementId(), traitement.getFrequenceId(), false);
-                    final TraitementSummary summaryPonctuel = new TraitementSummary(zone.getClass(), traitement.getTypeTraitementPonctuelId(), traitement.getSousTypeTraitementPonctuelId(), null, true);
-                    if(traitement.getTypeTraitementId()!=null && !traitements.contains(summaryNonPonctuel)) traitements.add(summaryNonPonctuel);
-                    if(traitement.getTypeTraitementPonctuelId()!=null && !traitements.contains(summaryPonctuel)) traitements.add(summaryPonctuel);
+                    final TraitementSummary summaryNonPonctuel = new TraitementSummary(zone.getClass(), traitement.getTraitementId(), traitement.getSousTraitementId(), traitement.getFrequenceId(), false);
+                    final TraitementSummary summaryPonctuel = new TraitementSummary(zone.getClass(), traitement.getTraitementPonctuelId(), traitement.getSousTraitementPonctuelId(), null, true);
+                    if(traitement.getTraitementId()!=null && !traitements.contains(summaryNonPonctuel)) traitements.add(summaryNonPonctuel);
+                    if(traitement.getTraitementPonctuelId()!=null && !traitements.contains(summaryPonctuel)) traitements.add(summaryPonctuel);
                 }
             }
         }

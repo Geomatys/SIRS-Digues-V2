@@ -238,13 +238,13 @@ public class FXPlanLayerPane extends GridPane{
                     if(zone.getTraitement()!=null){
                         if(planifState == 1){
                             //premiere année
-                            String tid = zone.getTraitement().getTypeTraitementPonctuelId();
+                            String tid = zone.getTraitement().getTraitementPonctuelId();
                             if(tid==null || tid.isEmpty()){
-                                tid = zone.getTraitement().getTypeTraitementId();
+                                tid = zone.getTraitement().getTraitementId();
                             }
                             etat = trmts.get(tid);
                         }else if(planifState == 1){
-                            final String tid = zone.getTraitement().getTypeTraitementId();
+                            final String tid = zone.getTraitement().getTraitementId();
                             etat = trmts.get(tid);
                         }
                     }

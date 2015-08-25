@@ -116,6 +116,6 @@ public class TraitementSummary {
          * @return
          */
         public static TraitementSummary toSummary(final ParamCoutTraitementVegetation param){
-            return new TraitementSummary(null, param.getType(), param.getSousType(), null, true);
+            return new TraitementSummary(null, param.getTraitementId(), param.getSousTraitementId(), null, true);
         }
 }
