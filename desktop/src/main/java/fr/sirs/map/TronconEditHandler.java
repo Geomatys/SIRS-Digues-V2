@@ -511,9 +511,9 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                             popup.getItems().add(invert);
                         }
 
-                    // On peut sauvegarder ou annuler nos changements si la geometrie du tronçon
+                        // On peut sauvegarder ou annuler nos changements si la geometrie du tronçon
                         // diffère de celle de l'éditeur.
-                        if (!editGeometry.geometry.equals(tronconProperty.get().getGeometry())) {
+                        if (!editGeometry.geometry.get().equals(tronconProperty.get().getGeometry())) {
                             final MenuItem saveItem = new MenuItem("Sauvegarder les modifications");
                             saveItem.setOnAction((ActionEvent event) -> {
                                 tronconProperty.get().setGeometry(editGeometry.geometry.get());
@@ -530,7 +530,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                         }
 
                         //action : annuler edition
-                        final String cancelTitle = (!editGeometry.geometry.equals(tronconProperty.get().getGeometry()))?
+                        final String cancelTitle = (!editGeometry.geometry.get().equals(tronconProperty.get().getGeometry()))?
                                 "Annuler les modifications" : "Désélectionner le tronçon";
 
                         final MenuItem cancelItem = new MenuItem(cancelTitle);
@@ -593,7 +593,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             startY = getMouseY(e);
             mousebutton = e.getButton();
 
-            if(editGeometry.geometry!=null && mousebutton == MouseButton.PRIMARY){
+            if(editGeometry.geometry.get()!=null && mousebutton == MouseButton.PRIMARY){
                 //selection d'un noeud
                 helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
             }

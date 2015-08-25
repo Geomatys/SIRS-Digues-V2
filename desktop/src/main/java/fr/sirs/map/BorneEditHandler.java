@@ -354,7 +354,7 @@ public class BorneEditHandler extends AbstractNavigationHandler {
             startX = getMouseX(e);
             startY = getMouseY(e);
 
-            if(editGeometry.geometry!=null){
+            if(editGeometry.geometry.get()!=null){
                 helperBorne.grabGeometryNode(startX, startY, editGeometry);
             }
         }
