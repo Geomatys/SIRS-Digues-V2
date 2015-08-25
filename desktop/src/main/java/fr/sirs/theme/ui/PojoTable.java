@@ -1079,7 +1079,6 @@ public class PojoTable extends BorderPane {
                 items.remove(pojo);
             }
         }
-
     }
 
     // Default deletor

@@ -44,7 +44,7 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
     }
 
     private static class ChoiceStage extends PojoTableComboBoxChoiceStage<Class<? extends ZoneVegetation>, Class<? extends ZoneVegetation>> {
-        
+
         private ChoiceStage(){
             super();
             setTitle("Choix du type de zone");

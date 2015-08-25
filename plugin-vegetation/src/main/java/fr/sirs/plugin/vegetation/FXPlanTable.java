@@ -3,18 +3,27 @@ package fr.sirs.plugin.vegetation;
 
 import fr.sirs.Injector;
 import fr.sirs.Session;
+import fr.sirs.core.component.AbstractZoneVegetationRepository;
 import fr.sirs.core.component.ParcelleVegetationRepository;
+import fr.sirs.core.model.ParamCoutTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
+import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.ZoneVegetation;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.PLANIFICATION;
 import fr.sirs.util.SirsStringConverter;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -47,6 +56,7 @@ public class FXPlanTable extends BorderPane{
     private static final String CHECKBOX_NOPADDING = "-fx-label-padding: 0;";
 
     private final PlanVegetation plan;
+    private final List<ParcelleVegetation> tableParcelles = new ArrayList<>();
     private final Mode mode;
     private final List<EstimationCell> estimations = new ArrayList<>();
     private final Session session = Injector.getSession();
@@ -93,7 +103,7 @@ public class FXPlanTable extends BorderPane{
         final Label fake0 = new Label();
         fake0.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         fake0.setMinSize(150, 20);
-        final Label lblYear = new Label("Année");
+        final Label lblYear = new Label("Parcelle | Année");
         final Label lblSum;
         if(mode==PLANIFICATION){
             lblSum  = new Label("Somme*");
@@ -161,13 +171,16 @@ public class FXPlanTable extends BorderPane{
         int colIndex = 0;
 
         final List<ParcelleVegetation> planifParcelle = parcelleRepo.getByPlanId(plan.getDocumentId());
-        for(ParcelleVegetation parcelle : planifParcelle){
+        for(final ParcelleVegetation parcelle : planifParcelle){
             gridCenter.getRowConstraints().add(new RowConstraints(30, 30, 30, Priority.NEVER, VPos.CENTER, true));
             
             //on vérifie que la parcelle fait partie du troncon
-            if(troncon!=null && !Objects.equal(parcelle.getForeignParentId(),troncon.getDocumentId())){
+            if(troncon!=null && !Objects.equal(parcelle.getForeignParentId(), troncon.getDocumentId())){
                 continue;
             }
+            
+            // On ajoute la parcelle aux parcelles contenues dans le tableau (on en aura besoin pour les calculs des coûts).
+            tableParcelles.add(parcelle);
 
             colIndex=0;
             gridCenter.add(new Label(cvt.toString(parcelle)), colIndex, rowIndex);
@@ -200,7 +213,7 @@ public class FXPlanTable extends BorderPane{
         gridTop.add(lblYear, 0, 0);
         gridBottom.add(lblSum, 0, 0);
         colIndex=1;
-        for(int year=dateStart;year<dateEnd;year++,colIndex++){
+        for(int year=dateStart; year<dateEnd; year++,colIndex++){
             final Label lblYearN = new Label(""+year);
             lblYearN.getStyleClass().add("pojotable-header");
             lblYearN.setAlignment(Pos.CENTER);
@@ -208,7 +221,7 @@ public class FXPlanTable extends BorderPane{
             lblYearN.setMinSize(20, 20);
             lblYearN.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
             gridTop.add(lblYearN, colIndex, 0);
-            gridBottom.add(new EstimationCell(year), colIndex, 0);
+            gridBottom.add(new EstimationCell(year-dateStart), colIndex, 0);
         }
 
         //ligne de commentaire
@@ -226,9 +239,9 @@ public class FXPlanTable extends BorderPane{
         return editable;
     }
 
-    public PlanVegetation getPlanVegetation() {
-        return plan;
-    }
+//    public PlanVegetation getPlanVegetation() {
+//        return plan;
+//    }
 
     /**
      * Cellule de date.
@@ -344,14 +357,102 @@ public class FXPlanTable extends BorderPane{
      */
     private final class EstimationCell extends BorderPane{
 
-        private final int year;
-        private final Label label = new Label("200.000");
+        private final int index;
+        private final Label label = new Label();
 
-        public EstimationCell(int year) {
-            this.year = year;
+        public EstimationCell(final int index) {
+            this.index = index;
             label.getStyleClass().add("pojotable-header");
             setCenter(label);
+
+            /*
+            En mode planification le coût suppose que l'on fasse la somme de
+            tous les côuts de traitements des zones de la parcelle, dès que
+            celle-ci est planifiée "traitée".
+            
+            Les coûts planifiés se trouvent dans le plan.
+            */
+            double cout = 0.;
+            if(mode==PLANIFICATION){
+                final ObservableList<ParamCoutTraitementVegetation> params = plan.getParamCout();
+                final Map<TraitementSummary, ParamCoutTraitementVegetation> indexedParams = new HashMap<>();
+
+                //On parcourt toutes les parcelles du tableau
+                for (final ParcelleVegetation parcelle : tableParcelles){
+
+                    // On vérifie que la parcelle est bien planifiée cette année
+                    if(parcelle.getPlanifications().get(index)){
+
+                        // On parcourt toutes les zones de végétation de la parcelle
+                        final ObservableList<? extends ZoneVegetation> allZoneVegetationByParcelleId = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), session);
+                        for(final ZoneVegetation zone : allZoneVegetationByParcelleId){
+
+                            // On vérifie que la zone a bien un traitement planifié et que celui-ci entre dans le plan de gestion
+                            if(zone.getTraitement()!=null && !zone.getTraitement().getHorsGestion()){
+
+                                // Dans ce cas, on construit un
+                                final TraitementZoneVegetation traitement = zone.getTraitement();
+
+
+                                // On vérifie ensuite que ce traitement se trouve dans les paramètres de coûts du plan en ce qui concerne son volet ponctuel et son volet non ponctuel
+                                TraitementSummary ponctuelSummary = new TraitementSummary(zone.getClass(), traitement.getTypeTraitementPonctuelId(), traitement.getSousTypeTraitementPonctuelId(), null, true);
+                                TraitementSummary nonPonctuelSummary = new TraitementSummary(zone.getClass(), traitement.getTypeTraitementId(), traitement.getSousTypeTraitementId(), traitement.getFrequenceId(), false);
+
+
+
+
+                                // On parcourt enfin les paramètres de traitement du plan afin de trouver ceux qui correspondent aux traitements ponctuel et non ponctuel examinés
+
+                                // 1- Un tel traitement a-t-il déjà été indexé ?
+                                for(final TraitementSummary sum : indexedParams.keySet()){
+                                    if(ponctuelSummary!=null && sum.equalsTraitementSummary(ponctuelSummary)){
+                                        cout+=computeCost(zone, indexedParams.get(sum));
+                                        ponctuelSummary=null;// On passe à null pour détecter qu'on a déjà fait le calcul
+                                    }
+                                    if(sum.equalsTraitementSummary(nonPonctuelSummary)){
+                                        cout+=computeCost(zone, indexedParams.get(sum));
+                                        nonPonctuelSummary=null; // On passe à null pour détecter qu'on a déjà fait le calcul
+                                    }
+
+                                    // On sort de la boucle dès qu'on détecte que les traitements ponctuel et non ponctuel ont été trouvés.
+                                    if(ponctuelSummary==null && nonPonctuelSummary==null) break;
+                                }
+
+                                // 2- Si un tel traitement n'avait pas été indexé, on regarde les autres traitements
+                                for(final ParamCoutTraitementVegetation param : params){
+                                    // On vérifie que le paramètre n'a pas été déjà indexé
+                                    if(!indexedParams.containsValue(param)){
+                                        // Dans ce cas, on indexe le paramètre
+                                        final TraitementSummary sum = TraitementSummary.toSummary(param);
+                                        indexedParams.put(sum, param);
+
+                                        // Puis on regarde s'il correspond au traitement ponctuel ou nonPonctuel
+                                        if(ponctuelSummary!=null && sum.equalsTraitementSummary(ponctuelSummary)){
+                                            cout+=computeCost(zone, param);
+                                            ponctuelSummary=null;// On passe à null pour détecter qu'on a déjà fait le calcul
+                                        }
+                                        if(sum.equalsTraitementSummary(nonPonctuelSummary)){
+                                            cout+=computeCost(zone, param);
+                                            nonPonctuelSummary=null; // On passe à null pour détecter qu'on a déjà fait le calcul
+                                        }
+
+                                        // On sort de la boucle dès qu'on détecte que les traitements ponctuel et non ponctuel ont été trouvés.
+                                        if(ponctuelSummary==null && nonPonctuelSummary==null) break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
+            final NumberFormat numberFormat = new DecimalFormat("0.00");
+            label.setText(numberFormat.format(cout));
         }
+
+
 
         private void update(){
             //TODO
@@ -359,4 +460,11 @@ public class FXPlanTable extends BorderPane{
 
     }
 
+        private static double computeCost(final ZoneVegetation zone, final ParamCoutTraitementVegetation param){
+
+            if(zone.getGeometry()!=null){
+                return zone.getGeometry().getArea() * param.getCout();
+            }
+            else return 0.;
+        }
 }

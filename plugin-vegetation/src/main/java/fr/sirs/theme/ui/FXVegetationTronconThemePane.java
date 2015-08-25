@@ -2,15 +2,20 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.component.AbstractZoneVegetationRepository;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
+import fr.sirs.core.model.ZoneVegetation;
 import static fr.sirs.plugin.vegetation.PluginVegetation.isCoherent;
 import fr.sirs.plugin.vegetation.VegetationSession;
 import fr.sirs.theme.AbstractTheme;
 import fr.sirs.theme.TronconTheme;
 import fr.sirs.util.SimpleFXEditMode;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Parent;
@@ -82,6 +87,36 @@ public class FXVegetationTronconThemePane extends FXTronconThemePane {
                 return created;
             }
         }
+
+        @Override
+        protected void deletePojos(Element... pojos) {
+            // Avant de supprimer les parcelles, il faut supprimer les zones de végétation qu'elles contiennent !
+
+            final Map<Class, List<ZoneVegetation>> indexedZones = new HashMap<>();
+            for(final Element pojo : pojos){
+
+                if(pojo instanceof ParcelleVegetation){
+                    // 1-Pour cela il faut commencer par les récupérer
+                    final List<? extends ZoneVegetation> zones = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(pojo.getId(), session);
+
+                    // 2-Ensuite on les indexe en fonction de leur classe
+                    for(final ZoneVegetation zone : zones){
+                        if(indexedZones.get(zone.getClass())==null) indexedZones.put(zone.getClass(), new ArrayList<>());
+                        indexedZones.get(zone.getClass()).add(zone);
+                    }
+                }
+            }
+
+
+            // 3-Une fois qu'on a indexé les zones par classe, on peut les supprimer en masse
+            for(final Class zoneClass : indexedZones.keySet()){
+                session.getRepositoryForClass(zoneClass).executeBulkDelete(indexedZones.get(zoneClass));
+            }
+
+
+            // On peut ensuite supprimer les parcelles.
+            super.deletePojos(pojos);
+        }
     }
 
     @Override
@@ -100,6 +135,9 @@ public class FXVegetationTronconThemePane extends FXTronconThemePane {
         return new BorderPane(table, topPane, null, null, null);
     }
 
+    /**
+     * Colonne d'alerte lorsque les traitements réalisés sur une parcelle paraissent incohérents avec la planification.
+     */
     private static class AlertTableColumn extends TableColumn<ParcelleVegetation, ParcelleVegetation> {
 
         public AlertTableColumn(){
@@ -113,6 +151,9 @@ public class FXVegetationTronconThemePane extends FXTronconThemePane {
     }
 
 
+    /**
+     * Cellule d'alerte lorsque les traitements réalisés sur une parcelle paraissent incohérents avec la planification.
+     */
     private static class AlertTableCell extends TableCell<ParcelleVegetation, ParcelleVegetation>{
         @Override
         protected void updateItem(final ParcelleVegetation item, boolean empty){
@@ -126,6 +167,9 @@ public class FXVegetationTronconThemePane extends FXTronconThemePane {
                 };
 
                 Injector.getSession().getTaskManager().submit("Vérification de la cohérence de traitement de la parcelle "+item.getDesignation(), cellUpdater);
+            }
+            else{
+                setGraphic(null);
             }
         }
     }

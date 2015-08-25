@@ -43,7 +43,6 @@ import org.elasticsearch.common.joda.time.LocalDate;
  * @author Samuel Andrés (Geomatys)
  */
 public class FXParametragePane extends SplitPane {
-    
 
     @FXML private ListView<PlanVegetation> uiPlanList;
     @FXML private Button uiAdd;
@@ -61,8 +60,7 @@ public class FXParametragePane extends SplitPane {
         initialize();
     }
     
-    private class UpdatableListCell extends ListCell<PlanVegetation>{
-        
+    private class UpdatableListCell extends ListCell<PlanVegetation> {
         
         @Override
         protected void updateItem(final PlanVegetation item, boolean empty) {

@@ -14,17 +14,12 @@ import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
+import fr.sirs.plugin.vegetation.TraitementSummary;
 import fr.sirs.util.SirsStringConverter;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -52,6 +47,7 @@ import org.geotoolkit.gui.javafx.util.FXDoubleCell;
 /**
  *
  * @author Johann Sorel (Geomatys)
+ * @author Samuel Andrés (Geomatys)
  */
 public class FXPlanVegetationPane extends BorderPane {
     
@@ -279,7 +275,7 @@ public class FXPlanVegetationPane extends BorderPane {
         uiTraitementsTable = new TableView<>(traitements);
 
         final TableColumn<TraitementSummary, Class<? extends ZoneVegetation>> vegetationColumn = new TableColumn<>("Type de zone");
-        vegetationColumn.setCellValueFactory((TableColumn.CellDataFeatures<TraitementSummary, Class<? extends ZoneVegetation>> param) -> param.getValue().typeVegetationClass);
+        vegetationColumn.setCellValueFactory((TableColumn.CellDataFeatures<TraitementSummary, Class<? extends ZoneVegetation>> param) -> param.getValue().typeVegetationClass());
         vegetationColumn.setCellFactory((TableColumn<TraitementSummary, Class<? extends ZoneVegetation>> param) -> {
                 return new TableCell<TraitementSummary, Class<? extends ZoneVegetation>>() {
 
@@ -300,18 +296,18 @@ public class FXPlanVegetationPane extends BorderPane {
         });
 
         final TableColumn<TraitementSummary, String> typeTraitementColumn = new TableColumn<>("Type de traitement");
-        typeTraitementColumn.setCellValueFactory((TableColumn.CellDataFeatures<TraitementSummary, String> param) -> param.getValue().typeTraitementId);
+        typeTraitementColumn.setCellValueFactory((TableColumn.CellDataFeatures<TraitementSummary, String> param) -> param.getValue().typeTraitementId());
         typeTraitementColumn.setCellFactory(fromIdCellFactory);
         final TableColumn<TraitementSummary, String> typeSousTraitementColumn = new TableColumn<>("Sous-type de traitement");
-        typeSousTraitementColumn.setCellValueFactory((TableColumn.CellDataFeatures<TraitementSummary, String> param) -> param.getValue().typeSousTraitementId);
+        typeSousTraitementColumn.setCellValueFactory((TableColumn.CellDataFeatures<TraitementSummary, String> param) -> param.getValue().typeSousTraitementId());
         typeSousTraitementColumn.setCellFactory(fromIdCellFactory);
         final TableColumn<TraitementSummary, String> frequenceTraitementColumn = new TableColumn<>("Fréquence de traitement");
         frequenceTraitementColumn.setCellValueFactory((TableColumn.CellDataFeatures<TraitementSummary, String> param) -> {
             final TraitementSummary sum = param.getValue();
-            if(sum.ponctuel.get())
+            if(sum.ponctuel().get())
                 return new SimpleStringProperty("Ponctuel");
             else
-                return sum.typeFrequenceId;
+                return sum.typeFrequenceId();
                 });
         frequenceTraitementColumn.setCellFactory(fromIdCellFactory);
         uiTraitementsTable.getColumns().addAll(vegetationColumn, typeTraitementColumn, typeSousTraitementColumn, frequenceTraitementColumn);
@@ -446,8 +442,8 @@ public class FXPlanVegetationPane extends BorderPane {
         for(final TraitementSummary traitement : traitementsSansCout){
             final ParamCoutTraitementVegetation param = session.getElementCreator().createElement(ParamCoutTraitementVegetation.class);
             param.getId();// On affecte un Id à l'élément imbriqué
-            param.setType(traitement.typeTraitementId.get());
-            param.setSousType(traitement.typeSousTraitementId.get());
+            param.setType(traitement.typeTraitementId().get());
+            param.setSousType(traitement.typeSousTraitementId().get());
             plan.getParamCout().add(param);
         }
 
@@ -501,97 +497,4 @@ public class FXPlanVegetationPane extends BorderPane {
             }
         }
     }
-
-    /**
-     * Utility class to represent different kinds of treatments.
-     */
-    private static class TraitementSummary {
-        private final ObjectProperty<Class<? extends ZoneVegetation>> typeVegetationClass = new SimpleObjectProperty<>();
-        private final StringProperty typeTraitementId = new SimpleStringProperty();
-        private final StringProperty typeSousTraitementId = new SimpleStringProperty();
-        private final StringProperty typeFrequenceId = new SimpleStringProperty();
-        private final BooleanProperty ponctuel = new SimpleBooleanProperty();
-
-        public TraitementSummary(final Class<? extends ZoneVegetation> typeVegetationClass,
-                final String typeTraitementId, final String typeSousTraitementId,
-                final String typeFrequenceId, final boolean ponctuel){
-            this.typeVegetationClass.set(typeVegetationClass);
-            this.typeTraitementId.set(typeTraitementId);
-            this.typeSousTraitementId.set(typeSousTraitementId);
-            this.typeFrequenceId.set(typeFrequenceId);
-            this.ponctuel.set(ponctuel);
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = 83 * hash + Objects.hashCode(this.typeVegetationClass);
-            hash = 83 * hash + Objects.hashCode(this.typeTraitementId);
-            hash = 83 * hash + Objects.hashCode(this.typeSousTraitementId);
-            hash = 83 * hash + Objects.hashCode(this.typeFrequenceId);
-            hash = 83 * hash + Objects.hashCode(this.ponctuel);
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final TraitementSummary other = (TraitementSummary) obj;
-            if (!Objects.equals(this.typeVegetationClass, other.typeVegetationClass)) {
-                return false;
-            }
-            if (!Objects.equals(this.typeTraitementId, other.typeTraitementId)) {
-                return false;
-            }
-            if (!Objects.equals(this.typeSousTraitementId, other.typeSousTraitementId)) {
-                return false;
-            }
-            if (!Objects.equals(this.typeFrequenceId, other.typeFrequenceId)) {
-                return false;
-            }
-            if (!Objects.equals(this.ponctuel, other.ponctuel)) {
-                return false;
-            }
-            return true;
-        }
-
-        public boolean equalsTraitementSummary(TraitementSummary obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-
-            if (!Objects.equals(this.typeTraitementId.get(), obj.typeTraitementId.get())) {
-                return false;
-            }
-            if (!Objects.equals(this.typeSousTraitementId.get(), obj.typeSousTraitementId.get())) {
-                return false;
-            }
-            return true;
-        }
-
-        /**
-         * Construit une ébauche de TraitementSummary à l'aide des informations
-         * présentens dans le ParamCoutTraitementVegetation donné en paramètres.
-         *
-         * Cette opération est réalisée à des fins de simple comparaison de manière
-         * à évaluer si un ParamCoutTraitementVegetation prend en charge un
-         * Traitement summary (c'est-à-dire correspond à son type et sous-type de
-         * traitement).
-         *
-         * @param param
-         * @return
-         */
-        private static TraitementSummary toSummary(final ParamCoutTraitementVegetation param){
-            return new TraitementSummary(null, param.getType(), param.getSousType(), null, true);
-        }
-    }
-
 }
