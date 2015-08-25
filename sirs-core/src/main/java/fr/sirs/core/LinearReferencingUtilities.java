@@ -5,8 +5,12 @@ import fr.sirs.core.model.BorneDigue;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
@@ -41,6 +45,38 @@ public final class LinearReferencingUtilities extends LinearReferencing {
             return 0;
         }
     };
+
+    /**
+     * Overload method from LinearReferencing to for a LineString and forbid LinearRing.
+     *
+     * @param candidate The geometry to convert. If null, a null value is returned.
+     * @return The resulting linear, or null.
+     */
+    public static LineString asLineString(Geometry candidate) {
+        LineString linear = null;
+        if (candidate instanceof LineString) {
+            linear = (LineString) candidate;
+        } else if (candidate instanceof Polygon) {
+            linear = ((Polygon)candidate).getExteriorRing();
+        } else if (candidate instanceof Point) {
+            Coordinate coordinate = candidate.getCoordinate();
+            return GO2Utilities.JTS_FACTORY.createLineString(new Coordinate[]{coordinate, coordinate});
+        } else if (candidate instanceof MultiPoint) {
+            return GO2Utilities.JTS_FACTORY.createLineString(((candidate).getCoordinates()));
+        } else if (candidate instanceof GeometryCollection) {
+            final GeometryCollection gc = (GeometryCollection) candidate;
+            final int nb = gc.getNumGeometries();
+            if(nb>0){
+                linear = asLineString(gc.getGeometryN(0));
+            }
+        }
+
+        if(linear instanceof LinearRing){
+            linear = GO2Utilities.JTS_FACTORY.createLineString(linear.getCoordinates());
+        }
+
+        return linear;
+    }
 
     /**
      * Return the Linear geometry on which the input {@link SystemeReperage} is based on.
