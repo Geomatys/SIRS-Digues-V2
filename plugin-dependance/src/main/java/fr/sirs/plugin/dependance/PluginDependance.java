@@ -8,10 +8,12 @@ import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.component.AireStockageDependanceRepository;
 import fr.sirs.core.component.AutreDependanceRepository;
 import fr.sirs.core.component.CheminAccesDependanceRepository;
+import fr.sirs.core.component.DesordreDependanceRepository;
 import fr.sirs.core.component.OuvrageVoirieDependanceRepository;
 import fr.sirs.core.model.AireStockageDependance;
 import fr.sirs.core.model.AutreDependance;
 import fr.sirs.core.model.CheminAccesDependance;
+import fr.sirs.core.model.DesordreDependance;
 import fr.sirs.core.model.OuvrageVoirieDependance;
 import fr.sirs.core.model.sql.DependanceSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
@@ -41,6 +43,7 @@ public class PluginDependance extends Plugin {
     public static final String AUTRE_LAYER_NAME = "Autres";
     public static final String CHEMIN_ACCES_LAYER_NAME = "Chemins d'accès";
     public static final String OUVRAGE_VOIRIE_LAYER_NAME = "Ouvrages de voirie";
+    public static final String DESORDRE_LAYER_NAME = "Désordres";
     private static final String NAME = "plugin-dependance";
     private static final String TITLE = "Module dépendance";
 
@@ -48,6 +51,7 @@ public class PluginDependance extends Plugin {
     private static FeatureMapLayer autreLayer;
     private static FeatureMapLayer cheminLayer;
     private static FeatureMapLayer ouvrageLayer;
+    private static FeatureMapLayer desordreLayer;
 
     public PluginDependance() {
         name = NAME;
@@ -137,6 +141,24 @@ public class PluginDependance extends Plugin {
         }
 
         items.add(depGroup);
+
+        final DesordreDependanceRepository desordreRepo = Injector.getBean(DesordreDependanceRepository.class);
+        final MapItem desordreGroup = MapBuilder.createItem();
+        desordreGroup.setName("Désordres");
+        desordreGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+        try {
+            final StructBeanSupplier desSupplier = new StructBeanSupplier(DesordreDependance.class, desordreRepo::getAll);
+            final BeanStore desStore = new BeanStore(desSupplier);
+            desordreLayer = MapBuilder.createFeatureLayer(desStore.createSession(true)
+                    .getFeatureCollection(QueryBuilder.all(desStore.getNames().iterator().next())));
+            desordreLayer.setName(DESORDRE_LAYER_NAME);
+            desordreLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            desordreGroup.items().add(desordreLayer);
+        } catch(Exception ex) {
+            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+        }
+        items.add(desordreGroup);
+
         return items;
     }
 
@@ -154,6 +176,10 @@ public class PluginDependance extends Plugin {
 
     public static FeatureMapLayer getOuvrageLayer() {
         return ouvrageLayer;
+    }
+
+    public static FeatureMapLayer getDesordreLayer() {
+        return desordreLayer;
     }
 
     @Override
