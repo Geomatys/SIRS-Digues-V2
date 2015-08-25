@@ -19,11 +19,14 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.util.SirsStringConverter;
+import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,6 +36,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
@@ -65,9 +69,14 @@ import javafx.scene.shape.Line;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.geotoolkit.data.bean.BeanFeature;
+import org.geotoolkit.display.VisitFilter;
 import org.geotoolkit.display2d.GO2Utilities;
+import org.geotoolkit.display2d.canvas.AbstractGraphicVisitor;
+import org.geotoolkit.display2d.canvas.RenderingContext2D;
 import org.geotoolkit.display2d.container.ContextContainer2D;
-import org.geotoolkit.feature.Feature;
+import org.geotoolkit.display2d.primitive.ProjectedCoverage;
+import org.geotoolkit.display2d.primitive.ProjectedFeature;
+import org.geotoolkit.display2d.primitive.SearchAreaJ2D;
 import org.geotoolkit.filter.identity.DefaultFeatureId;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
@@ -95,7 +104,7 @@ import org.opengis.util.FactoryException;
 public class TronconEditHandler extends AbstractNavigationHandler implements ItemListener {
 
     private static final int CROSS_SIZE = 5;
-    
+
     private final MouseListen mouseInputListener = new MouseListen();
     private final FXGeometryLayer geomlayer= new FXGeometryLayer(){
         @Override
@@ -107,7 +116,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             return new Group(h,v);
         }
     };
-    
+
     //edition variables
     private FeatureMapLayer tronconLayer;
     private final ObjectProperty<TronconDigue> tronconProperty = new SimpleObjectProperty<>();
@@ -116,13 +125,13 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
     private final Session session;
 
     private Id selectionFilter;
-    
+
     public TronconEditHandler(final FXMap map) {
         super();
         session = Injector.getSession();
         tronconProperty.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
             // IL FAUT ÉGALEMENT VÉRIFIER LES AUTRE OBJETS "CONTENUS" : POSITIONS DE DOCUMENTS, PHOTOS, PROPRIETAIRES ET GARDIENS
-            
+
             if (newValue != null && !TronconUtils.getPositionableList(newValue).isEmpty()) {
                 final Alert alert = new Alert(Alert.AlertType.WARNING,
                         "Attention, ce tronçon contient des données. Toute modification du tracé risque de changer leur position.", ButtonType.CANCEL, ButtonType.OK);
@@ -164,7 +173,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         component.addEventHandler(ScrollEvent.ANY, mouseInputListener);
         map.setCursor(Cursor.CROSSHAIR);
         map.addDecoration(0,geomlayer);
-        
+
         //recuperation du layer de troncon
         tronconLayer = null;
         tronconProperty.set(null);
@@ -185,7 +194,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                 tronconLayer.addItemListener(this);
             }
         }
-        
+
         helper = new EditionHelper(map, tronconLayer);
         helper.setMousePointerSize(6);
     }
@@ -193,13 +202,13 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
     /**
      * {@inheritDoc }
      * @param component
-     * @return 
+     * @return
      */
     @Override
     public boolean uninstall(final FXMap component) {
-        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition ? Les modifications non sauvegardées seront perdues.", 
+        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition ? Les modifications non sauvegardées seront perdues.",
                         ButtonType.YES,ButtonType.NO);
-        if (tronconProperty.get()==null || 
+        if (tronconProperty.get()==null ||
                 ButtonType.YES.equals(alert.showAndWait().get())) {
             super.uninstall(component);
             component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
@@ -217,10 +226,10 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             }
             return true;
         }
-        
+
         return false;
     }
-    
+
     private void updateGeometry(){
         if(editGeometry.geometry==null){
             geomlayer.getGeometries().clear();
@@ -228,7 +237,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             geomlayer.getGeometries().setAll(editGeometry.geometry.get());
         }
     }
-    
+
     /**
      * Show a dialog allowing user to create a new {@link TronconDigue} by setting
      * its libelle, {@link Digue} and {@link RefRive}. Other fields as Geometry are
@@ -241,7 +250,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         final ComboBox<Preview> diguesChoice = new ComboBox<>(FXCollections.observableList(digues));
         final ComboBox<RefRive> rives = new ComboBox<>(
                 FXCollections.observableList(session.getRepositoryForClass(RefRive.class).getAll()));
-        
+
         final SirsStringConverter strConverter = new SirsStringConverter();
         diguesChoice.setConverter(strConverter);
         diguesChoice.setEditable(true);
@@ -249,14 +258,14 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         rives.setConverter(strConverter);
 
         final TextField nameField = new TextField();
-        
+
         final Stage dialog = new Stage();
         dialog.getIcons().add(SIRS.ICON);
         dialog.setTitle("Nouveau tronçon");
         dialog.setResizable(true);
         dialog.initModality(Modality.WINDOW_MODAL);
         dialog.initOwner(session.getFrame().getScene().getWindow());
-        
+
         //choix de la digue
         final GridPane bp = new GridPane();
         bp.getRowConstraints().setAll(
@@ -274,32 +283,32 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         bp.add(diguesChoice, 0, 3);
         bp.add(new Label("Sur la rive"), 0, 4);
         bp.add(rives, 0, 5);
-        
+
         final Button finishBtn = new Button("Terminer");
         // Do not allow creation of a troncon without a name.
         finishBtn.disableProperty().bind(nameField.textProperty().isEmpty());
-        
+
         final Button cancelBtn = new Button("Annuler");
         cancelBtn.setCancelButton(true);
-        
+
         finishBtn.setOnAction((ActionEvent e)-> {
             dialog.close();
         });
-        
+
         cancelBtn.setOnAction((ActionEvent e)-> {
             nameField.setText(null);
             dialog.close();
         });
-        
+
         final ButtonBar babar = new ButtonBar();
         babar.getButtons().addAll(cancelBtn, finishBtn);
 
         final BorderPane main = new BorderPane(bp);
         main.setBottom(babar);
-        
+
         dialog.setScene(new Scene(main));
         dialog.showAndWait();
-        
+
         String tronconName = nameField.getText();
         if (tronconName == null || tronconName.isEmpty()) {
             return null;
@@ -325,7 +334,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
 
     /**
      * We force focus on currently edited {@link TronconDigue}.
-     * @param evt 
+     * @param evt
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -336,7 +345,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             }
         }
     }
-    
+
     private class MouseListen extends FXPanMouseListen {
 
         private final ContextMenu popup = new ContextMenu();
@@ -349,11 +358,11 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             super(TronconEditHandler.this);
             popup.setAutoHide(true);
         }
-        
+
         @Override
         public void mouseClicked(final MouseEvent e) {
             if(tronconLayer==null) return;
-            
+
             startX = getMouseX(e);
             startY = getMouseY(e);
             mousebutton = e.getButton();
@@ -363,20 +372,56 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
 
                 if (mousebutton == MouseButton.PRIMARY) {
                     //selection d'un troncon
-                    final Feature feature = helper.grabFeature(e.getX(), e.getY(), false);
-                    if (feature != null) {
-                        final Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
-                        if (bean instanceof TronconDigue) {
-                            //on recupere le troncon complet, celui ci n'est qu'une mise a plat
-                            tronconProperty.set(session.getRepositoryForClass(TronconDigue.class).get(((TronconDigue) bean).getDocumentId()));
+                    final AbstractGraphicVisitor visitor = new AbstractGraphicVisitor() {
+                        final HashSet<TronconDigue> foundElements = new HashSet<>();
+                        @Override
+                        public void visit(ProjectedFeature feature, RenderingContext2D context, SearchAreaJ2D area) {
+                            Object userData = feature.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
+                            if (userData instanceof TronconDigue) {
+                                //on recupere le troncon complet, celui ci n'est qu'une mise a plat
+                                final TronconDigue trc = session.getRepositoryForClass(TronconDigue.class).get(((TronconDigue)userData).getDocumentId());
+                                foundElements.add(trc);
+                            }
                         }
-                    }
+
+                        @Override
+                        public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {
+                            SIRS.LOGGER.log(Level.FINE, "Coverage elements are not managed yet.");
+                        }
+
+                        @Override
+                        public void endVisit() {
+                            SIRS.LOGGER.log(Level.FINE, "End of visit.");
+                            super.endVisit();
+                            if (foundElements.size() == 1) {
+                                tronconProperty.set(foundElements.iterator().next());
+                            } else if (foundElements.size() > 1) {
+                                final ContextMenu choice = new ContextMenu();
+                                choice.setAutoHide(true);
+                                final Session session = Injector.getSession();
+                                final Iterator<TronconDigue> it = foundElements.iterator();
+                                final ObservableList<MenuItem> items = choice.getItems();
+                                while (it.hasNext()) {
+                                    final TronconDigue current = it.next();
+                                    final MenuItem item = new MenuItem(session.generateElementTitle(current));
+                                    item.setOnAction((ActionEvent ae) -> tronconProperty.set(current));
+                                    items.add(item);
+                                }
+                                choice.show(map, e.getScreenX(), e.getScreenY());
+                            }
+                        }
+                    };
+
+                    Rectangle2D.Double searchArea = new Rectangle2D.Double(
+                            getMouseX(e) - 6, getMouseY(e) - 6, 6 * 2, 6 * 2);
+                    map.getCanvas().getGraphicsIn(searchArea, visitor, VisitFilter.INTERSECTS);
+
 
                 } else if (mousebutton == MouseButton.SECONDARY) {
                     // popup :
                     // -commencer un nouveau troncon
                     popup.getItems().clear();
-                    
+
                     final MenuItem createItem = new MenuItem("Créer un nouveau tronçon");
                     createItem.setOnAction((ActionEvent event) -> {
                         final TronconDigue tmpTroncon = showTronconDialog();
@@ -396,25 +441,25 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                             //sauvegarde du troncon
                             session.getRepositoryForClass(TronconDigue.class).add(tmpTroncon);
                             TronconUtils.updateSRElementaire(tmpTroncon, session);
-                            
+
                             // Prepare l'edition du tronçon
                             tronconProperty.set(tmpTroncon);
-                            
+
                         } catch (TransformException | FactoryException ex) {
                             // TODO : better error management
                             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                         }
-                        
+
                     });
                     popup.getItems().add(createItem);
-                    
+
                     popup.show(geomlayer, Side.TOP, e.getX(), e.getY());
                 }
-                
+
             } else {
-                //actions sur troncon                
+                //actions sur troncon
                 if (mousebutton == MouseButton.PRIMARY && e.getClickCount() >= 2) {
-                    //ajout d'un noeud                    
+                    //ajout d'un noeud
                     final Geometry result;
                     final Geometry geom = editGeometry.geometry.get();
                     if (geom instanceof LineString) {
@@ -429,7 +474,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                     editGeometry.geometry.set(result);
                     updateGeometry();
                 } else if (mousebutton == MouseButton.SECONDARY) {
-                    // popup : 
+                    // popup :
                     // -suppression d'un noeud
                     // -terminer édition
                     // -annuler édition
@@ -447,7 +492,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                         });
                         popup.getItems().add(item);
                     }
-                    
+
                     if (editGeometry.geometry != null) {
                         // Si le tronçon est vide, on peut inverser son tracé
                         // IL FAUT ÉGALEMENT VÉRIFIER LES AUTRE OBJETS "CONTENUS" : POSITIONS DE DOCUMENTS, PHOTOS, PROPRIETAIRES ET GARDIENS
@@ -487,7 +532,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                         //action : annuler edition
                         final String cancelTitle = (!editGeometry.geometry.equals(tronconProperty.get().getGeometry()))?
                                 "Annuler les modifications" : "Désélectionner le tronçon";
-                                
+
                         final MenuItem cancelItem = new MenuItem(cancelTitle);
                         cancelItem.setOnAction((ActionEvent event) -> {
                             tronconProperty.set(null);
@@ -499,14 +544,14 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                     if (!popup.getItems().isEmpty()) {
                         popup.getItems().add(new SeparatorMenuItem());
                     }
-                    
+
                     final MenuItem deleteItem = new MenuItem("Supprimer tronçon", new ImageView(GeotkFX.ICON_DELETE));
                     deleteItem.setOnAction((ActionEvent event) -> {
                         final Alert alert = new Alert(CONFIRMATION, "Voulez-vous vraiment supprimer le tronçon ainsi que les systèmes de repérage et tous les positionnables qui le réfèrent ?", YES, NO);
                         final Optional<ButtonType> result = alert.showAndWait();
                         if(result.isPresent() && result.get()==YES){
                             final Map<Class, List<Positionable>> positionablesByClass = new HashMap<>();
-                            
+
                             final List<Positionable> positionableList = TronconUtils.getPositionableList(tronconProperty.get());
                             for(final Positionable positionable : positionableList){
                                 final Class positionableClass = positionable.getClass();
@@ -514,7 +559,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                                     positionablesByClass.put(positionableClass, new ArrayList<>());
                                 positionablesByClass.get(positionableClass).add(positionable);
                             }
-                            
+
                             for(final Class positionableClass : positionablesByClass.keySet()){
                                 if(positionablesByClass.get(positionableClass)!=null){
                                     final AbstractSIRSRepository repo = session.getRepositoryForClass(positionableClass);
@@ -543,11 +588,11 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         public void mousePressed(final MouseEvent e) {
             super.mousePressed(e);
             if(tronconProperty==null) return;
-            
+
             startX = getMouseX(e);
             startY = getMouseY(e);
             mousebutton = e.getButton();
-            
+
             if(editGeometry.geometry!=null && mousebutton == MouseButton.PRIMARY){
                 //selection d'un noeud
                 helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
@@ -558,13 +603,13 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         public void mouseDragged(MouseEvent me) {
             //do not use getX/getY to calculate difference
             //JavaFX Bug : https://javafx-jira.kenai.com/browse/RT-34608
-            
+
             //calcul du deplacement
             diffX = getMouseX(me)-startX;
             diffY = getMouseY(me)-startY;
             startX = getMouseX(me);
             startY = getMouseY(me);
-                        
+
             if(editGeometry.selectedNode[0] != -1){
                 //deplacement d'un noeud
                 editGeometry.moveSelectedNode(helper.toCoord(startX,startY));
@@ -578,5 +623,5 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             }
         }
     }
-        
+
 }
