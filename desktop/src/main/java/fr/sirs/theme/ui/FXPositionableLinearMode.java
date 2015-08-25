@@ -211,7 +211,7 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
             uiBorneStart.valueProperty().set(borneMap.get(pos.borneDebutIdProperty().get()));
             uiBorneEnd.valueProperty().set(borneMap.get(pos.borneFinIdProperty().get()));
 
-        }else{
+        }else if(pos.getGeometry()!=null){
             //on calcule les valeurs en fonction des points de debut et fin
             final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t, Injector.getSession());
             final TronconUtils.PosSR rp = ps.getForSR(defaultSR);
@@ -226,6 +226,17 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
             uiDistanceEnd.getValueFactory().setValue(rp.distanceEndBorne);
             uiBorneEnd.getSelectionModel().select(rp.borneDigueEnd);
 
+        }else{
+            //pas de geometrie
+            uiAmontStart.setSelected(true);
+            uiAvalStart.setSelected(false);
+            uiDistanceStart.getValueFactory().setValue(0.0);
+            uiBorneStart.getSelectionModel().selectFirst();
+
+            uiAmontEnd.setSelected(true);
+            uiAvalEnd.setSelected(false);
+            uiDistanceEnd.getValueFactory().setValue(0.0);
+            uiBorneEnd.getSelectionModel().selectFirst();
         }
 
         reseting = false;

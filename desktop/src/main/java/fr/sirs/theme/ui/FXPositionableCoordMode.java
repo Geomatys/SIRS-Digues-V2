@@ -201,7 +201,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
                 uiLongitudeEnd.getValueFactory().setValue(null);
                 uiLatitudeEnd.getValueFactory().setValue(null);
             }
-        }else{
+        }else if(pos.getGeometry()!=null){
             //on refait les points a partir de la géométrie
             final TronconDigue t = FXPositionableMode.getTronconFromPositionable(pos);
             final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t, Injector.getSession());
@@ -212,6 +212,12 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
             uiLatitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getY());
             uiLongitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getX());
             uiLatitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getY());
+        }else{
+            //pas de geometrie
+            uiLongitudeStart.getValueFactory().setValue(0.0);
+            uiLatitudeStart.getValueFactory().setValue(0.0);
+            uiLongitudeEnd.getValueFactory().setValue(0.0);
+            uiLatitudeEnd.getValueFactory().setValue(0.0);
         }
 
         reseting = false;

@@ -42,6 +42,8 @@ public class FXImpression extends GridPane{
 
         //on liste les troncons du plan actif.
 
+
+
     }
 
     @FXML
