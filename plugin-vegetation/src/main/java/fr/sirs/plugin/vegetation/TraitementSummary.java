@@ -53,7 +53,7 @@ public class TraitementSummary {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (obj == null) {
                 return false;
             }
@@ -61,25 +61,32 @@ public class TraitementSummary {
                 return false;
             }
             final TraitementSummary other = (TraitementSummary) obj;
-            if (!Objects.equals(this.typeVegetationClass, other.typeVegetationClass)) {
+            if (!Objects.equals(this.typeVegetationClass.get(), other.typeVegetationClass.get())) {
                 return false;
             }
-            if (!Objects.equals(this.typeTraitementId, other.typeTraitementId)) {
+            if (!Objects.equals(this.typeTraitementId.get(), other.typeTraitementId.get())) {
                 return false;
             }
-            if (!Objects.equals(this.typeSousTraitementId, other.typeSousTraitementId)) {
+            if (!Objects.equals(this.typeSousTraitementId.get(), other.typeSousTraitementId.get())) {
                 return false;
             }
-            if (!Objects.equals(this.typeFrequenceId, other.typeFrequenceId)) {
+            if (!Objects.equals(this.typeFrequenceId.get(), other.typeFrequenceId.get())) {
                 return false;
             }
-            if (!Objects.equals(this.ponctuel, other.ponctuel)) {
+            if (!Objects.equals(this.ponctuel.get(), other.ponctuel.get())) {
                 return false;
             }
             return true;
         }
 
-        public boolean equalsTraitementSummary(TraitementSummary obj) {
+        /**
+         * Detects if the parameter TraitementSummary is equivalent to the
+         * current object.
+         *
+         * @param obj
+         * @return true if this and the parameter reference the same typeTraitementId and the same typeSousTraitementId. false otherwise.
+         */
+        public boolean equalsTraitementSummary(final TraitementSummary obj) {
             if (obj == null) {
                 return false;
             }
