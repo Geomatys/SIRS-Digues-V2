@@ -130,7 +130,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="horsGestion" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="TypeZoneVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TypeZoneVegetation" abstract="true"
+      eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType"/>
   <eClassifiers xsi:type="ecore:EClass" name="ParamFrequenceTraitementVegetation">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>

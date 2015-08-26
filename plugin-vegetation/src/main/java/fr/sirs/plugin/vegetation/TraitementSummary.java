@@ -19,6 +19,7 @@ import javafx.beans.property.StringProperty;
  */
 public class TraitementSummary {
         private final ObjectProperty<Class<? extends ZoneVegetation>> typeVegetationClass = new SimpleObjectProperty<>();
+        private final StringProperty typeVegetationId = new SimpleStringProperty();
         private final StringProperty typeTraitementId = new SimpleStringProperty();
         private final StringProperty typeSousTraitementId = new SimpleStringProperty();
         private final StringProperty typeFrequenceId = new SimpleStringProperty();
@@ -29,7 +30,9 @@ public class TraitementSummary {
         public StringProperty typeFrequenceId(){return typeFrequenceId;}
         public BooleanProperty ponctuel(){return ponctuel;}
         public ObjectProperty<Class<? extends ZoneVegetation>> typeVegetationClass(){return typeVegetationClass;}
+        public StringProperty typeVegetationId(){return typeVegetationId;}
 
+        @Deprecated
         public TraitementSummary(final Class<? extends ZoneVegetation> typeVegetationClass,
                 final String typeTraitementId, final String typeSousTraitementId,
                 final String typeFrequenceId, final boolean ponctuel){
@@ -38,13 +41,25 @@ public class TraitementSummary {
             this.typeSousTraitementId.set(typeSousTraitementId);
             this.typeFrequenceId.set(typeFrequenceId);
             this.ponctuel.set(ponctuel);
-            this.typeTraitementId.equals(null);
+            this.typeVegetationId.set(null);
+        }
+
+        public TraitementSummary(final Class<? extends ZoneVegetation> typeVegetationClass, final String typeVegetationId,
+                final String typeTraitementId, final String typeSousTraitementId,
+                final String typeFrequenceId, final boolean ponctuel){
+            this.typeVegetationClass.set(typeVegetationClass);
+            this.typeTraitementId.set(typeTraitementId);
+            this.typeSousTraitementId.set(typeSousTraitementId);
+            this.typeFrequenceId.set(typeFrequenceId);
+            this.ponctuel.set(ponctuel);
+            this.typeVegetationId.set(typeVegetationId);
         }
 
         @Override
         public int hashCode() {
             int hash = 7;
             hash = 83 * hash + Objects.hashCode(this.typeVegetationClass);
+            hash = 83 * hash + Objects.hashCode(this.typeVegetationId);
             hash = 83 * hash + Objects.hashCode(this.typeTraitementId);
             hash = 83 * hash + Objects.hashCode(this.typeSousTraitementId);
             hash = 83 * hash + Objects.hashCode(this.typeFrequenceId);
@@ -62,6 +77,9 @@ public class TraitementSummary {
             }
             final TraitementSummary other = (TraitementSummary) obj;
             if (!Objects.equals(this.typeVegetationClass.get(), other.typeVegetationClass.get())) {
+                return false;
+            }
+            if (!Objects.equals(this.typeVegetationId.get(), other.typeVegetationId.get())) {
                 return false;
             }
             if (!Objects.equals(this.typeTraitementId.get(), other.typeTraitementId.get())) {
@@ -116,6 +134,6 @@ public class TraitementSummary {
          * @return
          */
         public static TraitementSummary toSummary(final ParamCoutTraitementVegetation param){
-            return new TraitementSummary(null, param.getTraitementId(), param.getSousTraitementId(), null, true);
+            return new TraitementSummary(null, null, param.getTraitementId(), param.getSousTraitementId(), null, true);
         }
 }
