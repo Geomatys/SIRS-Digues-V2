@@ -197,11 +197,16 @@ public class FXPositionablePane extends BorderPane {
             uiSR.setText(sr.getLibelle());
             uiPRDebut.setText(PR_FORMAT.format(startPr));
             uiPRFin.setText(PR_FORMAT.format(endPr));
+            //on sauvegarde les PR dans le positionable.
+            pos.setPrDebut(startPr);
+            pos.setPrFin(endPr);
 
         }else{
             uiSR.setText("");
             uiPRDebut.setText("");
             uiPRFin.setText("");
+            pos.setPrDebut(0);
+            pos.setPrFin(0);
         }
 
 
