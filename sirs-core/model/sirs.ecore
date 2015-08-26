@@ -1443,4 +1443,10 @@
     </eOperations>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AotCotAssociable" abstract="true" interface="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AvecGeometrie" abstract="true" interface="true">
+    <eOperations name="setGeometry">
+      <eParameters name="geometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
+    </eOperations>
+    <eOperations name="getGeometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
+  </eClassifiers>
 </ecore:EPackage>

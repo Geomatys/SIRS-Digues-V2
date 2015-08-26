@@ -2,7 +2,7 @@
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="dependance" nsURI="http://fr.sirs/dependance">
   <eClassifiers xsi:type="ecore:EClass" name="AbstractDependance" abstract="true"
-      eSuperTypes="../../sirs-core/model/sirs.ecore#//AotCotAssociable">
+      eSuperTypes="../../sirs-core/model/sirs.ecore#//AotCotAssociable ../../sirs-core/model/sirs.ecore#//AvecGeometrie">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
