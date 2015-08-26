@@ -8,6 +8,7 @@ import fr.sirs.Injector;
 import static fr.sirs.core.model.Role.ADMIN;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecDateMaj;
+import fr.sirs.core.model.AvecGeometrie;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Positionable;
@@ -101,7 +102,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
     @FXML
     private void showOnMap() {
         final Element object = elementProperty.get();
-        if (object instanceof Positionable) {
+        if (object instanceof Positionable || object instanceof AvecGeometrie) {
             final FXMapTab tab = session.getFrame().getMapTab();
 
             tab.getMap().focusOnElement(object);
@@ -176,7 +177,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
             }
         }
 
-        uiShowOnMapButton.setVisible(newValue instanceof Positionable);
+        uiShowOnMapButton.setVisible(newValue instanceof Positionable || newValue instanceof AvecGeometrie);
     }
 
     @Override

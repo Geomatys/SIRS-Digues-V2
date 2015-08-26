@@ -39,11 +39,11 @@ import java.util.logging.Level;
  * @author Cédric Briançon (Geomatys)
  */
 public class PluginDependance extends Plugin {
-    public static final String AIRE_STOCKAGE_LAYER_NAME = "Aires de stockage";
-    public static final String AUTRE_LAYER_NAME = "Autres";
-    public static final String CHEMIN_ACCES_LAYER_NAME = "Chemins d'accès";
-    public static final String OUVRAGE_VOIRIE_LAYER_NAME = "Ouvrages de voirie";
-    public static final String DESORDRE_LAYER_NAME = "Désordres";
+    public static final String AIRE_STOCKAGE_LAYER_NAME = "Aire de stockage (dépendance)";
+    public static final String AUTRE_LAYER_NAME = "Autre (dépendance)";
+    public static final String CHEMIN_ACCES_LAYER_NAME = "Chemin d'accès (dépendance)";
+    public static final String OUVRAGE_VOIRIE_LAYER_NAME = "Ouvrage de voirie (dépendance)";
+    public static final String DESORDRE_LAYER_NAME = "Désordre (dépendance)";
     private static final String NAME = "plugin-dependance";
     private static final String TITLE = "Module dépendance";
 
