@@ -24,12 +24,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.util.Callback;
 import org.geotoolkit.gui.javafx.util.FXListTableCell;
 
 
@@ -158,10 +156,7 @@ public class FXPlanVegetationPane extends BorderPane {
             vegetationClasses = zoneVegetationClasses();
 
             final TableColumn<T, Class> classColumn = new TableColumn<>("Type de zone");
-            classColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<T, Class>, ObservableValue<Class>>() {
-
-                @Override
-                public ObservableValue<Class> call(TableColumn.CellDataFeatures<T, Class> param) {
+            classColumn.setCellValueFactory( param -> {
 
                     if(param.getValue() instanceof ParamFrequenceTraitementVegetation){
                         return ((ParamFrequenceTraitementVegetation) param.getValue()).typeProperty();
@@ -172,15 +167,8 @@ public class FXPlanVegetationPane extends BorderPane {
                     else{
                         throw new IllegalArgumentException();
                     }
-                }
             });
-            classColumn.setCellFactory(new Callback<TableColumn<T, Class>, TableCell<T, Class>>() {
-
-                @Override
-                public TableCell<T, Class> call(TableColumn<T, Class> param) {
-                    return new FXListTableCell<>(vegetationClasses, converter);
-                }
-            });
+            classColumn.setCellFactory( param -> new FXListTableCell<>(vegetationClasses, converter));
             getTable().getColumns().add(2, (TableColumn) classColumn);
         }
     }

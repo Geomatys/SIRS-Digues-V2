@@ -51,38 +51,6 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
             //Création du traitement associé
             final TraitementZoneVegetation traitement = Injector.getSession().getElementCreator().createElement(TraitementZoneVegetation.class);
 
-            ////////////////////////////////////////////////////////////////////
-            // Remplissage par défaut du traitement en fonction des paramétrages du plan
-            ////////////////////////////////////////////////////////////////////
-
-//            // 1- Récupération de la parcelle :
-//            final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = Injector.getSession().getRepositoryForClass(ParcelleVegetation.class);
-//            if(parcelleRepo!=null){
-//                final ParcelleVegetation parcelle = parcelleRepo.get(getPropertyReference());// L'identifiant de la parcelle est la référence qui est écoutée !!
-//                if(parcelle!=null && parcelle.getPlanId()!=null){
-//
-//                    // 2- Récupération du plan
-//                    final AbstractSIRSRepository<PlanVegetation> planRepo = Injector.getSession().getRepositoryForClass(PlanVegetation.class);
-//                    if(planRepo!=null){
-//                        final PlanVegetation plan = planRepo.get(parcelle.getPlanId());
-//
-//                        if(plan!=null){
-//
-//                            // 3- Récupération des paramétrages de fréquences
-//                            final ObservableList<ParamFrequenceTraitementVegetation> params = plan.getParamFrequence();
-//                            boolean poncuelSet=false, nonPonctuelSet=false;
-//                            for(final ParamFrequenceTraitementVegetation param : params){
-//
-//                                // On ne s'intéresse qu'aux paramètres relatifs au type de zone concerné.
-//                                if(param.getType().equals(retrievedClass)){
-//
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-
             zone.setTraitement(traitement);
         }
         else {
