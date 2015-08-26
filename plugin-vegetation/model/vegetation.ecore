@@ -141,5 +141,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="frequenceId" eType="#//RefFrequenceTraitementVegetation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeVegetationId" eType="#//TypeZoneVegetation"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaClass"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="ponctuel" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
 </ecore:EPackage>
