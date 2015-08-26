@@ -102,7 +102,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
     @FXML
     private void showOnMap() {
         final Element object = elementProperty.get();
-        if (object instanceof Positionable || object instanceof AvecGeometrie) {
+        if (object instanceof Positionable || (object instanceof AvecGeometrie && ((AvecGeometrie)object).getGeometry() != null)) {
             final FXMapTab tab = session.getFrame().getMapTab();
 
             tab.getMap().focusOnElement(object);
