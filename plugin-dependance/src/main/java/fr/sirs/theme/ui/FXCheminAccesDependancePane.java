@@ -21,6 +21,8 @@ public class FXCheminAccesDependancePane extends FXCheminAccesDependancePaneStub
 		 * Disabling rules.
 		 */
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
+
+        uiPosition.dependanceProperty().bind(elementProperty);
     }
     
     public FXCheminAccesDependancePane(final CheminAccesDependance cheminAccesDependance){

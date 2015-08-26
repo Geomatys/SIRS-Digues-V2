@@ -22,6 +22,8 @@ public class FXAutreDependancePane extends FXAutreDependancePaneStub {
 		 * Disabling rules.
 		 */
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
+
+        uiPosition.dependanceProperty().bind(elementProperty);
     }
     
     public FXAutreDependancePane(final AutreDependance autreDependance){

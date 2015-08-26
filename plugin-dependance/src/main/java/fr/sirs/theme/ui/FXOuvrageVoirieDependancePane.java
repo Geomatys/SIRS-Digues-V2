@@ -22,6 +22,8 @@ public class FXOuvrageVoirieDependancePane extends FXOuvrageVoirieDependancePane
 		 * Disabling rules.
 		 */
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
+
+        uiPosition.dependanceProperty().bind(elementProperty);
     }
     
     public FXOuvrageVoirieDependancePane(final OuvrageVoirieDependance ouvrageVoirieDependance){

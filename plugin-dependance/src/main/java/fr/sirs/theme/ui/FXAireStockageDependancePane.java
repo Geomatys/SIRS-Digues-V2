@@ -22,6 +22,8 @@ public class FXAireStockageDependancePane extends FXAireStockageDependancePaneSt
 		 * Disabling rules.
 		 */
         uiPosition.disableFieldsProperty().bind(disableFieldsProperty());
+
+        uiPosition.dependanceProperty().bind(elementProperty);
     }
     
     public FXAireStockageDependancePane(final AireStockageDependance aireStockageDependance){
