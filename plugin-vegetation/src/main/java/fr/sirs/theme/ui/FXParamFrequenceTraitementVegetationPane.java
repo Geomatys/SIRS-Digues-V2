@@ -4,7 +4,7 @@ package fr.sirs.theme.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.ParamCoutTraitementVegetation;
+import fr.sirs.core.model.ParamFrequenceTraitementVegetation;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefSousTraitementVegetation;
 import fr.sirs.core.model.ZoneVegetation;
@@ -22,12 +22,12 @@ import javafx.scene.control.ComboBox;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class FXParamCoutTraitementVegetationPane extends FXParamCoutTraitementVegetationPaneStub {
+public class FXParamFrequenceTraitementVegetationPane extends FXParamFrequenceTraitementVegetationPaneStub {
 
     @FXML ComboBox<Class<? extends ZoneVegetation>> ui_type;
-
-    public FXParamCoutTraitementVegetationPane(final ParamCoutTraitementVegetation paramCoutTraitementVegetation){
-        super(paramCoutTraitementVegetation);
+    
+    public FXParamFrequenceTraitementVegetationPane(final ParamFrequenceTraitementVegetation paramFrequenceTraitementVegetation){
+        super(paramFrequenceTraitementVegetation);
 
         ui_type.disableProperty().bind(disableFieldsProperty());
 
@@ -55,7 +55,8 @@ public class FXParamCoutTraitementVegetationPane extends FXParamCoutTraitementVe
      * @param newElement
      */
     @Override
-    protected void initFields(ObservableValue<? extends ParamCoutTraitementVegetation > observableElement, ParamCoutTraitementVegetation oldElement, ParamCoutTraitementVegetation newElement) {
+    protected void initFields(ObservableValue<? extends ParamFrequenceTraitementVegetation > observableElement, ParamFrequenceTraitementVegetation oldElement, ParamFrequenceTraitementVegetation newElement) {
+
         super.initFields(observableElement, oldElement, newElement);
 
         SIRS.initCombo(ui_type, FXCollections.observableList(PluginVegetation.zoneVegetationClasses()), newElement.getType() == null? null : newElement.getType());
@@ -72,14 +73,12 @@ public class FXParamCoutTraitementVegetationPane extends FXParamCoutTraitementVe
         PluginVegetation.initComboSousTraitement(newElement.getTraitementId(), newElement.getSousTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTraitementId);
     }
 
-    /**
-     * 
-     */
+
     @Override
-    public void preSave(){
+    public void preSave() {
         super.preSave();
 
-        final ParamCoutTraitementVegetation element = (ParamCoutTraitementVegetation) elementProperty().get();
+        final ParamFrequenceTraitementVegetation element = (ParamFrequenceTraitementVegetation) elementProperty().get();
         element.setType(ui_type.getSelectionModel().getSelectedItem());
     }
 }

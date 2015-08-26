@@ -15,6 +15,7 @@ import fr.sirs.core.model.RefSousTraitementVegetation;
 import fr.sirs.core.model.RefTraitementVegetation;
 import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
+import static fr.sirs.plugin.vegetation.PluginVegetation.zoneVegetationClasses;
 import fr.sirs.plugin.vegetation.TraitementSummary;
 import fr.sirs.util.SirsStringConverter;
 import java.time.LocalDate;
@@ -282,16 +283,15 @@ public class FXPlanVegetationPane extends BorderPane {
 
     private static class ParamPojoTable<T> extends PojoTable{
 
-        private final List<Class> vegetationClasses;
+        private final List<Class<? extends ZoneVegetation>> vegetationClasses;
         private final SirsStringConverter converter = new SirsStringConverter();
 
         public ParamPojoTable(Class<T> pojoClass, String title) {
             super(pojoClass, title);
             // On garde les classes de zones de végétation.
-            vegetationClasses = new ArrayList<>(Session.getElements());
-            vegetationClasses.removeIf((Class c) -> !ZoneVegetation.class.isAssignableFrom(c));
+            vegetationClasses = zoneVegetationClasses();
 
-            final TableColumn<T, Class> classColumn = new TableColumn<>("type de zone");
+            final TableColumn<T, Class> classColumn = new TableColumn<>("Type de zone");
             classColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<T, Class>, ObservableValue<Class>>() {
 
                 @Override

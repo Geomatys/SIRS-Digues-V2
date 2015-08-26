@@ -8,6 +8,7 @@ import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.AbstractZoneVegetationRepository;
 import fr.sirs.core.model.ArbreVegetation;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.HerbaceeVegetation;
 import fr.sirs.core.model.InvasiveVegetation;
 import fr.sirs.core.model.ParcelleTraitementVegetation;
@@ -725,6 +726,14 @@ public class PluginVegetation extends Plugin {
         } else{
             while(planifications.size()>dureePlan) planifications.remove(planifications.size()-1);
         }
+    }
+    
+    public static List<Class<? extends ZoneVegetation>> zoneVegetationClasses(){
+        final List<Class<? extends ZoneVegetation>> vegetationClasses = new ArrayList<>();
+        for(final Class<? extends Element> eltClass : Session.getElements()){
+            if(ZoneVegetation.class.isAssignableFrom(eltClass))vegetationClasses.add((Class<? extends ZoneVegetation>) eltClass);
+        }
+        return vegetationClasses;
     }
     
 }
