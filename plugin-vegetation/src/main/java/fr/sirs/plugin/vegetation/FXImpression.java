@@ -218,9 +218,15 @@ public class FXImpression extends GridPane{
                         final BufferedImage mapImage = DefaultPortrayalService.portray(cdef, sdef, vdef);
 
                         final File mapFile = File.createTempFile("map", ".png");
-                        ImageIO.write(mapImage, "PNG", file);
+                        ImageIO.write(mapImage, "png", file);
                         ODTUtils.insertImage(doc, mapFile.toURI());
 
+                        //on construit les listes
+                        final List<ParcelleVegetation> planifieTraitee = new ArrayList<>();
+                        final List<ParcelleVegetation> planifieNonTraitee = new ArrayList<>();
+                        final List<ParcelleVegetation> NonPlanifieTraitee = new ArrayList<>();
+                        final List<ParcelleVegetation> NonPlanifieNonTraitee = new ArrayList<>();
+                        //TODO
 
                     }
 
@@ -233,7 +239,7 @@ public class FXImpression extends GridPane{
 
                 }catch(Exception ex){
                     SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-                    GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du rapport.", ex).show();
+                    Platform.runLater(()->GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du rapport.", ex).show());
                 }finally{
                     Platform.runLater(()->{
                         uiProgressLabel.setText("");
