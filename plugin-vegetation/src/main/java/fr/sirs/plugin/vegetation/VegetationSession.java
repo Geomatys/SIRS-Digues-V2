@@ -163,7 +163,7 @@ public final class VegetationSession {
     public static boolean isParcelleTraite(ParcelleVegetation parcelle, int year){
         boolean done = false;
         for(ParcelleTraitementVegetation traitement : parcelle.getTraitements()){
-            if(traitement.getDate().getYear() == year){
+            if(traitement.getDate()!=null && traitement.getDate().getYear() == year){
                 done = true;
             }
         }
