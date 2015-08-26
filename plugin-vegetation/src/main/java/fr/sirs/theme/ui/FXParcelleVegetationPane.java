@@ -7,9 +7,9 @@ import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.logging.Level;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -77,24 +77,24 @@ public class FXParcelleVegetationPane extends FXParcelleVegetationPaneStub {
                     // n'a pas de sens.
                     if(anneeEnCours>=debutPlan && anneeEnCours<=finPlan){
                         // On vérifie alors l'état des planifications de la parcelle
-                        final List<Boolean> planifications = newElement.getPlanifications();
+                        final ObservableList<Boolean> planifications = newElement.getPlanifications();
                         if(planifications!=null){
-                            if(planifications.size()==dureePlan){
-                                final int index = anneeEnCours-debutPlan;
-                                Integer anneePlanif = 0;
-                                ui_anneePlanifieeInfo.setText("(pas de traitement planifié)");
-                                for(int i=index; i<dureePlan; i++){
-                                    if(planifications.get(i)) {
-                                        anneePlanif = debutPlan+i;
-                                        ui_anneePlanifieeInfo.setText("");
-                                        break;
-                                    }
+                            if(planifications.size()!=dureePlan){
+                                // Il faut réparer le nombre de planifications (provisoire)
+                                PluginVegetation.fixPlanifs(planifications, dureePlan);
+                            }
+
+                            final int index = anneeEnCours-debutPlan;
+                            Integer anneePlanif = 0;
+                            ui_anneePlanifieeInfo.setText("(pas de traitement planifié)");
+                            for(int i=index; i<dureePlan; i++){
+                                if(planifications.get(i)) {
+                                    anneePlanif = debutPlan+i;
+                                    ui_anneePlanifieeInfo.setText("");
+                                    break;
                                 }
-                                ui_anneePlanifiee.getValueFactory().setValue(anneePlanif);
                             }
-                            else {
-                                throw new IllegalStateException("Le nombre de planifications de la parcelle "+newElement+" ne correspond pas au nombre d'années du plan ("+(finPlan-debutPlan)+")");
-                            }
+                            ui_anneePlanifiee.getValueFactory().setValue(anneePlanif);
                         }
                         else{
                             throw new IllegalStateException("Impossible de retrouver les planifications de la parcelle");

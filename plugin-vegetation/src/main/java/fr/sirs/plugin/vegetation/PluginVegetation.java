@@ -708,5 +708,23 @@ public class PluginVegetation extends Plugin {
         }
         return result;
     }
+
+    /**
+     * On ne devrait jamais avoir à réparer les planifications car leur intégrité devrait être gérée lors de la création d'une parcelle ou du changement de la durée du plan.
+     *
+     * Mais cette méthode est bien pratique pour contourner les erreurs lors du développement.
+     * 
+     * @param planifications
+     * @param dureePlan
+     */
+    @Deprecated
+    public static void fixPlanifs(final ObservableList<Boolean> planifications, final int dureePlan){
+        SIRS.LOGGER.log(Level.WARNING, "Réparation des planifications de la parcelle !");
+        if(planifications.size()<dureePlan){
+            while(planifications.size()<dureePlan) planifications.add(Boolean.FALSE);
+        } else{
+            while(planifications.size()>dureePlan) planifications.remove(planifications.size()-1);
+        }
+    }
     
 }

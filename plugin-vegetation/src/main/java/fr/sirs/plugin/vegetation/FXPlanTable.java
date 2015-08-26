@@ -381,7 +381,8 @@ public class FXPlanTable extends BorderPane{
                 for (final ParcelleVegetation parcelle : tableParcelles){
 
                     // On vérifie que la parcelle est bien planifiée cette année
-                    if(parcelle.getPlanifications().get(index)){
+                    if(parcelle.getPlanifications().size()>index // vérification provisoire pour éviter de faire exploser l'ouverture du panneau en attendant une nouvelle gestion des planifications
+                            && parcelle.getPlanifications().get(index)){
 
                         // On parcourt toutes les zones de végétation de la parcelle
                         final ObservableList<? extends ZoneVegetation> allZoneVegetationByParcelleId = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), session);
