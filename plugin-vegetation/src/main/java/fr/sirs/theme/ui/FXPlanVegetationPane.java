@@ -6,20 +6,15 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.ParcelleVegetationRepository;
-import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.ParamCoutTraitementVegetation;
 import fr.sirs.core.model.ParamFrequenceTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
-import fr.sirs.core.model.RefSousTraitementVegetation;
-import fr.sirs.core.model.RefTraitementVegetation;
 import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
 import static fr.sirs.plugin.vegetation.PluginVegetation.zoneVegetationClasses;
-import fr.sirs.plugin.vegetation.TraitementSummary;
 import fr.sirs.util.SirsStringConverter;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -59,77 +54,11 @@ public class FXPlanVegetationPane extends BorderPane {
     private final Session session = Injector.getSession();
     private final AbstractSIRSRepository<PlanVegetation> planRepo = session.getRepositoryForClass(PlanVegetation.class);
     private final ParcelleVegetationRepository parcelleRepo = (ParcelleVegetationRepository) session.getRepositoryForClass(ParcelleVegetation.class);
-    private final SirsStringConverter converter = new SirsStringConverter();
-    private final Previews previews = session.getPreviews();
-
-    /**
-     * CellFactory pour le tableau récapitulatif des traitements.
-     * => essaye d'interpréter la chaine de caractères comme un identifiant en
-     * allant chercher le Preview correspondant, puis en délégant l'affichage
-     * à un SirsStringConverter.
-     * => si cela échoue, affiche la chaine de caractère donnée en paramètre.
-     */
-    private final Callback<TableColumn<ParamFrequenceTraitementVegetation, String>, TableCell<ParamFrequenceTraitementVegetation, String>> fromIdCellFactory =
-            (TableColumn<ParamFrequenceTraitementVegetation, String> param) -> {
-                return new TableCell<ParamFrequenceTraitementVegetation, String>(){
-                    @Override
-                    protected void updateItem(String item, boolean empty){
-                        if(item == getItem()) return;
-
-                        super.updateItem(item, empty);
-
-                        if(item == null){
-                            super.setText(null);
-                        }
-                        else {
-                            try{
-                                super.setText(converter.toString(previews.get(item)));
-                            } catch (Exception e){
-                                super.setText(item);
-                            }
-                        }
-                        setGraphic(null);
-                    }
-                };
-            };
-
-    /**
-     * CellFactory pour le tableau récapitulatif des traitements.
-     * => essaye d'interpréter la chaine de caractères comme un identifiant en
-     * allant chercher le Preview correspondant, puis en délégant l'affichage
-     * à un SirsStringConverter.
-     * => si cela échoue, affiche la chaine de caractère donnée en paramètre.
-     */
-    private final Callback<TableColumn<ParamCoutTraitementVegetation, String>, TableCell<ParamCoutTraitementVegetation, String>> fromIdCellFactory2 =
-            (TableColumn<ParamCoutTraitementVegetation, String> param) -> {
-                return new TableCell<ParamCoutTraitementVegetation, String>(){
-                    @Override
-                    protected void updateItem(String item, boolean empty){
-                        if(item == getItem()) return;
-
-                        super.updateItem(item, empty);
-
-                        if(item == null){
-                            super.setText(null);
-                        }
-                        else {
-                            try{
-                                super.setText(converter.toString(previews.get(item)));
-                            } catch (Exception e){
-                                super.setText(item);
-                            }
-                        }
-                        setGraphic(null);
-                    }
-                };
-            };
 
     private final PlanVegetation plan;
-//    private final ObservableList<TraitementSummary> traitements = FXCollections.observableArrayList();
 
     // Ces entiers mémorisent la date initiale du plan, puis les dates lors du précédent enregistrement :
     // si elles ont changé alors cele signifie qu'il faut mettre à jour les planifications des parcelles du plan.
-
     private int initialDebutPlan, initialFinPlan;
 
     public FXPlanVegetationPane(final PlanVegetation plan) {
@@ -193,71 +122,8 @@ public class FXPlanVegetationPane extends BorderPane {
             Si les dates de début et de fin du plan ont bougé, il faut mettre à
             jour les planifications des parcelles.
             */
-
             if(updatePlanifs){
-
-                final int index = initialFinPlan-initialDebutPlan;
-                final List<ParcelleVegetation> parcelles = parcelleRepo.getByPlan(plan);
-                for(final ParcelleVegetation parcelle : parcelles){
-                    final List<Boolean> planifs = parcelle.getPlanifications();
-
-                    // Si on est en mode automatique, il faut recalculer les planifications
-                    if(parcelle.getModeAuto()){
-                       PluginVegetation.resetAutoPlanif(parcelle, index);
-                    }
-                    // Si on n'est pas en mode automatique, il faut décaler les planifications déjà 
-                    else{
-                        /*==========================================================
-                        Il faut commencer par décaler les planifications du nombre
-                        d'années dont on a décalé le début, afin que les
-                        planifications déjà programmées soient conservées et qu'on
-                        ne soit pas obligé de tout refaire.
-                        */
-
-                        /*
-                        Si la nouvelle date est antérieure, il faut ajouter des
-                        planifications avant.
-                        */
-                        if(beginShift<0){
-                            for(int i=0; i<(-beginShift); i++){
-                                planifs.remove(0);
-                            }
-                        }
-
-                        /*
-                        Si la nouvelle date est postérieure, il faut retrancher autant
-                        de planifications du début qu'il y a d'années de décalage, dans
-                        la limite de la taille de la liste des planifications
-                        */
-                        else if(beginShift>0){
-                            for(int i=0; i<beginShift && i<planifs.size(); i++){
-                                planifs.add(0, Boolean.FALSE);
-                            }
-                        }
-
-
-
-                        /*==========================================================
-                        En dernier lieu, on ajuste la taille des listes de
-                        planifications en ajoutant les planifications manquantes et
-                        en retirant les planifications qui dépassent la date du plan.
-                        */
-
-                        // S'il n'y a pas assez d'éléments, il faut en rajouter
-                        while(planifs.size()<index){
-                            planifs.add(Boolean.FALSE);
-                        }
-
-                        // S'il y en a trop il faut en enlever
-                        while(planifs.size()>index){
-                            planifs.remove(index);
-                        }
-                    }
-                }
-
-                // Une fois toutes les planifications mises à jour, on
-                // sauvegarde les parcelles du plan.
-                parcelleRepo.executeBulk(parcelles);
+                PluginVegetation.updatePlanifs(this.plan, beginShift);
             }
 
         });
@@ -317,51 +183,50 @@ public class FXPlanVegetationPane extends BorderPane {
             });
             getTable().getColumns().add(2, (TableColumn) classColumn);
         }
-
     }
 
 
 
 
-    private static ParamFrequenceTraitementVegetation toParamFrequence(final TraitementSummary summary){
-        final ParamFrequenceTraitementVegetation param = Injector.getSession().getElementCreator().createElement(ParamFrequenceTraitementVegetation.class);
-        param.setType(summary.typeVegetationClass().get());
-        param.setTypeVegetationId(summary.typeVegetationId().get());
-        param.setTraitementId(summary.typeTraitementId().get());
-        param.setSousTraitementId(summary.typeSousTraitementId().get());
-        return param;
-    }
-
-    private static TraitementSummary toSummary(final ParamFrequenceTraitementVegetation param){
-        return new TraitementSummary(param.getType(), param.getTypeVegetationId(), param.getTraitementId(), param.getSousTraitementId(), param.getFrequenceId(), true);
-    }
-
-    private static List<TraitementSummary> toSummaries(final Class<? extends ZoneVegetation> zoneType, final String typeZoneVegetationId){
-        final List<TraitementSummary> summaries = new ArrayList<>();
-        //Récupération des sous-types de traitement
-        final List<RefSousTraitementVegetation> sousTraitements = Injector.getSession().getRepositoryForClass(RefSousTraitementVegetation.class).getAll();
-
-        //Récupération des types de traitements
-        final List<RefTraitementVegetation> traitements = Injector.getSession().getRepositoryForClass(RefTraitementVegetation.class).getAll();
-
-        // On commence par créer une instance par type de traitement, pour un sous-type null
-        for(final RefTraitementVegetation traitement : traitements){
-            summaries.add(toSummary(zoneType, typeZoneVegetationId, traitement.getId(), null, traitement.getPonctuel()));
-        }
-
-        // Puis on parcours les sous-traitements
-        for(final RefSousTraitementVegetation sousTraitement : sousTraitements){
-            if(sousTraitement.getTraitementId()!=null){
-                final RefTraitementVegetation traitement = Injector.getSession().getRepositoryForClass(RefTraitementVegetation.class).get(sousTraitement.getTraitementId());
-                if(traitement!=null){
-                    summaries.add(toSummary(zoneType, typeZoneVegetationId, sousTraitement.getTraitementId(), sousTraitement.getId(), traitement.getPonctuel()));
-                }
-            }
-        }
-        return summaries;
-    }
-
-    private static TraitementSummary toSummary(final Class<? extends ZoneVegetation> zonetype, final String typeZoneVegetationId, final String traitementId, final String sousTraitementId, final boolean ponctuel){
-        return new TraitementSummary(zonetype, traitementId, sousTraitementId, null, ponctuel);
-    }
+//    private static ParamFrequenceTraitementVegetation toParamFrequence(final TraitementSummary summary){
+//        final ParamFrequenceTraitementVegetation param = Injector.getSession().getElementCreator().createElement(ParamFrequenceTraitementVegetation.class);
+//        param.setType(summary.typeVegetationClass().get());
+//        param.setTypeVegetationId(summary.typeVegetationId().get());
+//        param.setTraitementId(summary.typeTraitementId().get());
+//        param.setSousTraitementId(summary.typeSousTraitementId().get());
+//        return param;
+//    }
+//
+//    private static TraitementSummary toSummary(final ParamFrequenceTraitementVegetation param){
+//        return new TraitementSummary(param.getType(), param.getTypeVegetationId(), param.getTraitementId(), param.getSousTraitementId(), param.getFrequenceId(), true);
+//    }
+//
+//    private static List<TraitementSummary> toSummaries(final Class<? extends ZoneVegetation> zoneType, final String typeZoneVegetationId){
+//        final List<TraitementSummary> summaries = new ArrayList<>();
+//        //Récupération des sous-types de traitement
+//        final List<RefSousTraitementVegetation> sousTraitements = Injector.getSession().getRepositoryForClass(RefSousTraitementVegetation.class).getAll();
+//
+//        //Récupération des types de traitements
+//        final List<RefTraitementVegetation> traitements = Injector.getSession().getRepositoryForClass(RefTraitementVegetation.class).getAll();
+//
+//        // On commence par créer une instance par type de traitement, pour un sous-type null
+//        for(final RefTraitementVegetation traitement : traitements){
+//            summaries.add(toSummary(zoneType, typeZoneVegetationId, traitement.getId(), null, traitement.getPonctuel()));
+//        }
+//
+//        // Puis on parcours les sous-traitements
+//        for(final RefSousTraitementVegetation sousTraitement : sousTraitements){
+//            if(sousTraitement.getTraitementId()!=null){
+//                final RefTraitementVegetation traitement = Injector.getSession().getRepositoryForClass(RefTraitementVegetation.class).get(sousTraitement.getTraitementId());
+//                if(traitement!=null){
+//                    summaries.add(toSummary(zoneType, typeZoneVegetationId, sousTraitement.getTraitementId(), sousTraitement.getId(), traitement.getPonctuel()));
+//                }
+//            }
+//        }
+//        return summaries;
+//    }
+//
+//    private static TraitementSummary toSummary(final Class<? extends ZoneVegetation> zonetype, final String typeZoneVegetationId, final String traitementId, final String sousTraitementId, final boolean ponctuel){
+//        return new TraitementSummary(zonetype, traitementId, sousTraitementId, null, ponctuel);
+//    }
 }

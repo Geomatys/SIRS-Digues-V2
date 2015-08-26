@@ -7,6 +7,7 @@ import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.AbstractZoneVegetationRepository;
+import fr.sirs.core.component.ParcelleVegetationRepository;
 import fr.sirs.core.model.ArbreVegetation;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.HerbaceeVegetation;
@@ -735,5 +736,72 @@ public class PluginVegetation extends Plugin {
         }
         return vegetationClasses;
     }
-    
+
+    public static void updatePlanifs(final PlanVegetation plan, final int beginShift){
+        final ParcelleVegetationRepository parcelleRepo = (ParcelleVegetationRepository) Injector.getSession().getRepositoryForClass(ParcelleVegetation.class);
+
+        final int index = plan.getAnneeFin()-plan.getAnneeDebut();
+        final List<ParcelleVegetation> parcelles = parcelleRepo.getByPlan(plan);
+
+        for(final ParcelleVegetation parcelle : parcelles){
+            final List<Boolean> planifs = parcelle.getPlanifications();
+
+            // Si on est en mode automatique, il faut recalculer les planifications
+            if(parcelle.getModeAuto()){
+               PluginVegetation.resetAutoPlanif(parcelle, index);
+            }
+            // Si on n'est pas en mode automatique, il faut décaler les planifications déjà
+            else{
+                /*==========================================================
+                Il faut commencer par décaler les planifications du nombre
+                d'années dont on a décalé le début, afin que les
+                planifications déjà programmées soient conservées et qu'on
+                ne soit pas obligé de tout refaire.
+                */
+
+                /*
+                Si la nouvelle date est antérieure, il faut ajouter des
+                planifications avant.
+                */
+                if(beginShift<0){
+                    for(int i=0; i<(-beginShift); i++){
+                        planifs.remove(0);
+                    }
+                }
+
+                /*
+                Si la nouvelle date est postérieure, il faut retrancher autant
+                de planifications du début qu'il y a d'années de décalage, dans
+                la limite de la taille de la liste des planifications
+                */
+                else if(beginShift>0){
+                    for(int i=0; i<beginShift && i<planifs.size(); i++){
+                        planifs.add(0, Boolean.FALSE);
+                    }
+                }
+
+
+
+                /*==========================================================
+                En dernier lieu, on ajuste la taille des listes de
+                planifications en ajoutant les planifications manquantes et
+                en retirant les planifications qui dépassent la date du plan.
+                */
+
+                // S'il n'y a pas assez d'éléments, il faut en rajouter
+                while(planifs.size()<index){
+                    planifs.add(Boolean.FALSE);
+                }
+
+                // S'il y en a trop il faut en enlever
+                while(planifs.size()>index){
+                    planifs.remove(index);
+                }
+            }
+        }
+
+        // Une fois toutes les planifications mises à jour, on
+        // sauvegarde les parcelles du plan.
+        parcelleRepo.executeBulk(parcelles);
+    }
 }
