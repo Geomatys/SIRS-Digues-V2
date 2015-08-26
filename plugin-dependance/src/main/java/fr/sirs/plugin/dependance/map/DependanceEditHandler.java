@@ -105,6 +105,12 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
         super();
     }
 
+    public DependanceEditHandler(final AbstractDependance dependance) {
+        this();
+        this.dependance = dependance;
+        newDependance = true;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -187,6 +193,21 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                 } else {
                     // La dépendance existe, on peut travailler avec sa géométrie.
                     if (newDependance) {
+                        // Le helper peut être null si on a choisi d'activer ce handler pour une dépendance existante,
+                        // sans passer par le clic droit pour choisir un type de dépendance.
+                        if (helper == null) {
+                            final Class clazz = dependance.getClass();
+                            if (AireStockageDependance.class.isAssignableFrom(clazz)) {
+                                helper = new EditionHelper(map, aireLayer);
+                            } else if (AutreDependance.class.isAssignableFrom(clazz)) {
+                                helper = new EditionHelper(map, autreLayer);
+                            } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
+                                helper = new EditionHelper(map, cheminLayer);
+                            } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
+                                helper = new EditionHelper(map, ouvrageLayer);
+                            }
+                        }
+
                         // On vient de créer la dépendance, le clic gauche va permettre d'ajouter des points.
 
                         if(justCreated){

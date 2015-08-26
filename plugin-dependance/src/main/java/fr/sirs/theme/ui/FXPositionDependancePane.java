@@ -6,13 +6,19 @@ import fr.sirs.SIRS;
 import fr.sirs.core.model.AbstractDependance;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.plugin.dependance.map.DependanceEditHandler;
+import fr.sirs.ui.Growl;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.sis.storage.DataStoreException;
@@ -38,10 +44,17 @@ import java.util.logging.Level;
 
 
 /**
+ * Panneau de positionnement d'une dépendance, permettant d'éditer sa géométrie sur la carte ou
+ * d'en importer une pour cette dépendance.
  *
+ * @author Cédric Briançon (Geomatys)
  */
 public class FXPositionDependancePane extends BorderPane {
     private final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty(true);
+
+    /**
+     * La dépendance à éditer.
+     */
     private final ObjectProperty<AbstractDependance> dependance = new SimpleObjectProperty<>();
 
     public FXPositionDependancePane() {
@@ -60,16 +73,19 @@ public class FXPositionDependancePane extends BorderPane {
     public void drawOnMap() {
         final FXMapTab tab = Injector.getSession().getFrame().getMapTab();
         tab.show();
-        tab.getMap().getUiMap().setHandler(new DependanceEditHandler());
+        tab.getMap().getUiMap().setHandler(new DependanceEditHandler(dependance.get()));
     }
 
+    /**
+     * Importe une géométrie provenant d'un fichier SHP comme géométrie de la dépendance.
+     */
     @FXML
     public void importGeometry() {
         final FileChooser fileChooser = new FileChooser();
+        // Demande du fichier SHP à considérer
         final File shpFile = fileChooser.showOpenDialog(null);
         final FXFeatureTable shpTable = new FXFeatureTable();
         shpTable.setLoadAll(true);
-
 
         try {
             final URL shpUrl = shpFile.toURI().toURL();
@@ -80,11 +96,23 @@ public class FXPositionDependancePane extends BorderPane {
                     shpStore.createSession(true).getFeatureCollection(QueryBuilder.all(name)));
             shpTable.init(mapLayer);
 
+            // Affichage d'une popup présentant les features contenues dans le SHP
             final Stage stage = new Stage();
-            final Scene scene = new Scene(shpTable);
+            final HBox hBox = new HBox();
+            hBox.setAlignment(Pos.CENTER_RIGHT);
+            hBox.setPadding(new Insets(10));
+            HBox.setHgrow(hBox, Priority.ALWAYS);
+            final Button validateBtn = new Button("Valider");
+            validateBtn.setOnAction(event -> stage.close());
+            hBox.getChildren().add(validateBtn);
+            final BorderPane mainPane = new BorderPane(shpTable, null, null, hBox, null);
+            final Scene scene = new Scene(mainPane);
             stage.setScene(scene);
+            stage.setTitle("Choisir une géométrie à importer");
+            stage.getIcons().add(SIRS.ICON);
             stage.showAndWait();
 
+            // La feature sélectionnée dans la table de la popup précédente sera utilisée comme géométrie de cette dépendance.
             final FeatureCollection ids = shpStore.createSession(true).getFeatureCollection(
                     QueryBuilder.filtered(name, mapLayer.getSelectionFilter()));
             try (final FeatureIterator it = ids.iterator()) {
@@ -93,6 +121,9 @@ public class FXPositionDependancePane extends BorderPane {
                     Geometry geom = (Geometry) feature.getDefaultGeometryProperty().getValue();
                     geom = JTS.transform(geom, Injector.getSession().getProjection());
                     dependance.get().setGeometry(geom);
+
+                    final Growl successGrowl = new Growl(Growl.Type.INFO, "Géométrie importée avec succès");
+                    successGrowl.showAndFade();
                 }
             }
         } catch (DataStoreException | TransformException | FactoryException | MalformedURLException ex) {
