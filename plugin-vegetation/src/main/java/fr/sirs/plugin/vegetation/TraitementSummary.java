@@ -17,7 +17,8 @@ import javafx.beans.property.StringProperty;
  * 
  * @author Samuel Andrés
  */
-public class TraitementSummary {
+@Deprecated
+class TraitementSummary {
         private final ObjectProperty<Class<? extends ZoneVegetation>> typeVegetationClass = new SimpleObjectProperty<>();
         private final StringProperty typeVegetationId = new SimpleStringProperty();
         private final StringProperty typeTraitementId = new SimpleStringProperty();
@@ -33,7 +34,7 @@ public class TraitementSummary {
         public StringProperty typeVegetationId(){return typeVegetationId;}
 
         @Deprecated
-        public TraitementSummary(final Class<? extends ZoneVegetation> typeVegetationClass,
+        private TraitementSummary(final Class<? extends ZoneVegetation> typeVegetationClass,
                 final String typeTraitementId, final String typeSousTraitementId,
                 final String typeFrequenceId, final boolean ponctuel){
             this.typeVegetationClass.set(typeVegetationClass);
@@ -44,7 +45,7 @@ public class TraitementSummary {
             this.typeVegetationId.set(null);
         }
 
-        public TraitementSummary(final Class<? extends ZoneVegetation> typeVegetationClass, final String typeVegetationId,
+        private TraitementSummary(final Class<? extends ZoneVegetation> typeVegetationClass, final String typeVegetationId,
                 final String typeTraitementId, final String typeSousTraitementId,
                 final String typeFrequenceId, final boolean ponctuel){
             this.typeVegetationClass.set(typeVegetationClass);

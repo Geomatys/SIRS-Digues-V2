@@ -145,76 +145,26 @@ public class FXPlanVegetationPane extends BorderPane {
         uiVBox.getChildren().addAll(uiCoutTable, uiFrequenceTable);
     }
 
-    private static class ParamPojoTable<T> extends PojoTable{
+    private static class ParamPojoTable<T> extends PojoTable {
 
         private final List<Class<? extends ZoneVegetation>> vegetationClasses;
         private final SirsStringConverter converter = new SirsStringConverter();
 
         public ParamPojoTable(Class<T> pojoClass, String title) {
             super(pojoClass, title);
-            // On garde les classes de zones de végétation.
-            vegetationClasses = zoneVegetationClasses();
 
-            final TableColumn<T, Class> classColumn = new TableColumn<>("Type de zone");
-            classColumn.setCellValueFactory( param -> {
-
-                    if(param.getValue() instanceof ParamFrequenceTraitementVegetation){
-                        return ((ParamFrequenceTraitementVegetation) param.getValue()).typeProperty();
-                    }
-                    else if(param.getValue() instanceof ParamCoutTraitementVegetation){
-                        return ((ParamCoutTraitementVegetation) param.getValue()).typeProperty();
-                    }
-                    else{
-                        throw new IllegalArgumentException();
-                    }
-            });
-            classColumn.setCellFactory( param -> new FXListTableCell<>(vegetationClasses, converter));
-            getTable().getColumns().add(2, (TableColumn) classColumn);
+            if(pojoClass==ParamFrequenceTraitementVegetation.class){
+                // On garde les classes de zones de végétation.
+                vegetationClasses = zoneVegetationClasses();
+                final TableColumn<T, Class> classColumn = new TableColumn<>("Type de zone");
+                classColumn.setCellValueFactory( param -> {
+                    return ((ParamFrequenceTraitementVegetation) param.getValue()).typeProperty();
+                });
+                classColumn.setCellFactory( param -> new FXListTableCell<>(vegetationClasses, converter));
+                getTable().getColumns().add(2, (TableColumn) classColumn);
+            }else{
+                vegetationClasses=null;
+            }
         }
     }
-
-
-
-
-//    private static ParamFrequenceTraitementVegetation toParamFrequence(final TraitementSummary summary){
-//        final ParamFrequenceTraitementVegetation param = Injector.getSession().getElementCreator().createElement(ParamFrequenceTraitementVegetation.class);
-//        param.setType(summary.typeVegetationClass().get());
-//        param.setTypeVegetationId(summary.typeVegetationId().get());
-//        param.setTraitementId(summary.typeTraitementId().get());
-//        param.setSousTraitementId(summary.typeSousTraitementId().get());
-//        return param;
-//    }
-//
-//    private static TraitementSummary toSummary(final ParamFrequenceTraitementVegetation param){
-//        return new TraitementSummary(param.getType(), param.getTypeVegetationId(), param.getTraitementId(), param.getSousTraitementId(), param.getFrequenceId(), true);
-//    }
-//
-//    private static List<TraitementSummary> toSummaries(final Class<? extends ZoneVegetation> zoneType, final String typeZoneVegetationId){
-//        final List<TraitementSummary> summaries = new ArrayList<>();
-//        //Récupération des sous-types de traitement
-//        final List<RefSousTraitementVegetation> sousTraitements = Injector.getSession().getRepositoryForClass(RefSousTraitementVegetation.class).getAll();
-//
-//        //Récupération des types de traitements
-//        final List<RefTraitementVegetation> traitements = Injector.getSession().getRepositoryForClass(RefTraitementVegetation.class).getAll();
-//
-//        // On commence par créer une instance par type de traitement, pour un sous-type null
-//        for(final RefTraitementVegetation traitement : traitements){
-//            summaries.add(toSummary(zoneType, typeZoneVegetationId, traitement.getId(), null, traitement.getPonctuel()));
-//        }
-//
-//        // Puis on parcours les sous-traitements
-//        for(final RefSousTraitementVegetation sousTraitement : sousTraitements){
-//            if(sousTraitement.getTraitementId()!=null){
-//                final RefTraitementVegetation traitement = Injector.getSession().getRepositoryForClass(RefTraitementVegetation.class).get(sousTraitement.getTraitementId());
-//                if(traitement!=null){
-//                    summaries.add(toSummary(zoneType, typeZoneVegetationId, sousTraitement.getTraitementId(), sousTraitement.getId(), traitement.getPonctuel()));
-//                }
-//            }
-//        }
-//        return summaries;
-//    }
-//
-//    private static TraitementSummary toSummary(final Class<? extends ZoneVegetation> zonetype, final String typeZoneVegetationId, final String traitementId, final String sousTraitementId, final boolean ponctuel){
-//        return new TraitementSummary(zonetype, traitementId, sousTraitementId, null, ponctuel);
-//    }
 }

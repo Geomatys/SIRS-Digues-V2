@@ -7,7 +7,6 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ParamCoutTraitementVegetation;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefSousTraitementVegetation;
-import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
 import java.util.HashMap;
 import java.util.List;
@@ -15,8 +14,6 @@ import java.util.Map;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
 
 /**
  *
@@ -24,12 +21,8 @@ import javafx.scene.control.ComboBox;
  */
 public class FXParamCoutTraitementVegetationPane extends FXParamCoutTraitementVegetationPaneStub {
 
-    @FXML ComboBox<Class<? extends ZoneVegetation>> ui_type;
-
     public FXParamCoutTraitementVegetationPane(final ParamCoutTraitementVegetation paramCoutTraitementVegetation){
         super(paramCoutTraitementVegetation);
-
-        ui_type.disableProperty().bind(disableFieldsProperty());
 
         ui_traitementId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
 
@@ -58,8 +51,6 @@ public class FXParamCoutTraitementVegetationPane extends FXParamCoutTraitementVe
     protected void initFields(ObservableValue<? extends ParamCoutTraitementVegetation > observableElement, ParamCoutTraitementVegetation oldElement, ParamCoutTraitementVegetation newElement) {
         super.initFields(observableElement, oldElement, newElement);
 
-        SIRS.initCombo(ui_type, FXCollections.observableList(PluginVegetation.zoneVegetationClasses()), newElement.getType() == null? null : newElement.getType());
-
         // Initialisation des sous-types
         final AbstractSIRSRepository<RefSousTraitementVegetation> repoSousTraitements = Injector.getSession().getRepositoryForClass(RefSousTraitementVegetation.class);
         final Map<String, RefSousTraitementVegetation> sousTraitements = new HashMap<>();
@@ -78,8 +69,5 @@ public class FXParamCoutTraitementVegetationPane extends FXParamCoutTraitementVe
     @Override
     public void preSave(){
         super.preSave();
-
-        final ParamCoutTraitementVegetation element = (ParamCoutTraitementVegetation) elementProperty().get();
-        element.setType(ui_type.getSelectionModel().getSelectedItem());
     }
 }

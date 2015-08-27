@@ -253,10 +253,6 @@ public class FXPlanTable extends BorderPane{
             setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             setStyle(CHECKBOX_NOPADDING);
 
-            if(parcelle.getPlanifications()==null){
-                parcelle.setPlanifications(new ArrayList<>());
-            }
-
             final WeakListChangeListener<Boolean> weakListener = new WeakListChangeListener<>(new ListChangeListener<Boolean>() {
 
                 @Override
@@ -264,7 +260,7 @@ public class FXPlanTable extends BorderPane{
                     setSelected(getVal());
                 }
             });
-            parcelle.getPlanifications().addListener(weakListener);
+            this.parcelle.getPlanifications().addListener(weakListener);
 
             setSelected(getVal());
             selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
