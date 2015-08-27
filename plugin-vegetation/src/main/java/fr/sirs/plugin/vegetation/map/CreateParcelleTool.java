@@ -130,6 +130,11 @@ public class CreateParcelleTool extends AbstractEditionTool{
                     }
                 }
 
+                //configuration de base des planifs
+                final int nb = plan.getAnneeFin() - plan.getAnneeDebut();
+                for(int i=0;i<nb;i++) parcelle.getPlanifications().add(Boolean.FALSE);
+
+                //sauvegarde
                 parcelleRepo.add(parcelle);
                 map.setHandler(new FXPanHandler(true));
                 reset();

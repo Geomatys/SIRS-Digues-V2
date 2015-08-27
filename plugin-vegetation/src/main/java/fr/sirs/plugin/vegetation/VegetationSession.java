@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.AbstractZoneVegetationRepository;
 import fr.sirs.core.component.ArbreVegetationRepository;
 import fr.sirs.core.component.HerbaceeVegetationRepository;
 import fr.sirs.core.component.InvasiveVegetationRepository;
@@ -13,12 +14,15 @@ import fr.sirs.core.component.PeuplementVegetationRepository;
 import fr.sirs.core.model.ArbreVegetation;
 import fr.sirs.core.model.HerbaceeVegetation;
 import fr.sirs.core.model.InvasiveVegetation;
+import fr.sirs.core.model.ParamCoutTraitementVegetation;
 import fr.sirs.core.model.ParcelleTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.RefTraitementVegetation;
+import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
+import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.PLANIFICATION;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.net.URISyntaxException;
@@ -31,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 import javax.measure.unit.NonSI;
 import javax.swing.ImageIcon;
@@ -151,6 +156,97 @@ public final class VegetationSession {
      */
     public ObjectProperty<PlanVegetation> planProperty() {
         return planProperty;
+    }
+
+    public static double estimateCoutPlanification(PlanVegetation plan, int yearIndex, List<? extends ParcelleVegetation> parcelles){
+        /*
+        En mode planification le coût suppose que l'on fasse la somme de
+        tous les côuts de traitements des zones de la parcelle, dès que
+        celle-ci est planifiée "traitée".
+
+        Les coûts planifiés se trouvent dans le plan.
+        */
+        double cout = 0.0;
+        final ObservableList<ParamCoutTraitementVegetation> params = plan.getParamCout();
+        final Map<TraitementSummary, ParamCoutTraitementVegetation> indexedParams = new HashMap<>();
+        final Session session = Injector.getSession();
+
+        //On parcourt toutes les parcelles du tableau
+        for (final ParcelleVegetation parcelle : parcelles){
+
+            // On vérifie que la parcelle est bien planifiée cette année
+            if(parcelle.getPlanifications().size()>yearIndex && parcelle.getPlanifications().get(yearIndex)){
+
+                // On parcourt toutes les zones de végétation de la parcelle
+                final ObservableList<? extends ZoneVegetation> allZoneVegetationByParcelleId = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), session);
+                for(final ZoneVegetation zone : allZoneVegetationByParcelleId){
+
+                    // On vérifie que la zone a bien un traitement planifié et que celui-ci entre dans le plan de gestion
+                    if(zone.getTraitement()!=null && !zone.getTraitement().getHorsGestion()){
+
+                        // Dans ce cas, on construit un
+                        final TraitementZoneVegetation traitement = zone.getTraitement();
+
+
+                        // On vérifie ensuite que ce traitement se trouve dans les paramètres de coûts du plan en ce qui concerne son volet ponctuel et son volet non ponctuel
+                        TraitementSummary ponctuelSummary = new TraitementSummary(zone.getClass(), traitement.getTraitementPonctuelId(), traitement.getSousTraitementPonctuelId(), null, true);
+                        TraitementSummary nonPonctuelSummary = new TraitementSummary(zone.getClass(), traitement.getTraitementId(), traitement.getSousTraitementId(), traitement.getFrequenceId(), false);
+
+
+
+
+                        // On parcourt enfin les paramètres de traitement du plan afin de trouver ceux qui correspondent aux traitements ponctuel et non ponctuel examinés
+
+                        // 1- Un tel traitement a-t-il déjà été indexé ?
+                        for(final TraitementSummary sum : indexedParams.keySet()){
+                            if(ponctuelSummary!=null && sum.equalsTraitementSummary(ponctuelSummary)){
+                                cout+=computeCost(zone, indexedParams.get(sum));
+                                ponctuelSummary=null;// On passe à null pour détecter qu'on a déjà fait le calcul
+                            }
+                            if(sum.equalsTraitementSummary(nonPonctuelSummary)){
+                                cout+=computeCost(zone, indexedParams.get(sum));
+                                nonPonctuelSummary=null; // On passe à null pour détecter qu'on a déjà fait le calcul
+                            }
+
+                            // On sort de la boucle dès qu'on détecte que les traitements ponctuel et non ponctuel ont été trouvés.
+                            if(ponctuelSummary==null && nonPonctuelSummary==null) break;
+                        }
+
+                        // 2- Si un tel traitement n'avait pas été indexé, on regarde les autres traitements
+                        for(final ParamCoutTraitementVegetation param : params){
+                            // On vérifie que le paramètre n'a pas été déjà indexé
+                            if(!indexedParams.containsValue(param)){
+                                // Dans ce cas, on indexe le paramètre
+                                final TraitementSummary sum = TraitementSummary.toSummary(param);
+                                indexedParams.put(sum, param);
+
+                                // Puis on regarde s'il correspond au traitement ponctuel ou nonPonctuel
+                                if(ponctuelSummary!=null && sum.equalsTraitementSummary(ponctuelSummary)){
+                                    cout+=computeCost(zone, param);
+                                    ponctuelSummary=null;// On passe à null pour détecter qu'on a déjà fait le calcul
+                                }
+                                if(sum.equalsTraitementSummary(nonPonctuelSummary)){
+                                    cout+=computeCost(zone, param);
+                                    nonPonctuelSummary=null; // On passe à null pour détecter qu'on a déjà fait le calcul
+                                }
+
+                                // On sort de la boucle dès qu'on détecte que les traitements ponctuel et non ponctuel ont été trouvés.
+                                if(ponctuelSummary==null && nonPonctuelSummary==null) break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return cout;
+    }
+
+    private static double computeCost(final ZoneVegetation zone, final ParamCoutTraitementVegetation param){
+        if(zone.getGeometry()!=null){
+            return zone.getGeometry().getArea() * param.getCout();
+        }
+        else return 0.0;
     }
 
     /**

@@ -3,27 +3,21 @@ package fr.sirs.plugin.vegetation;
 
 import fr.sirs.Injector;
 import fr.sirs.Session;
-import fr.sirs.core.component.AbstractZoneVegetationRepository;
 import fr.sirs.core.component.ParcelleVegetationRepository;
-import fr.sirs.core.model.ParamCoutTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
-import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.model.ZoneVegetation;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.PLANIFICATION;
 import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -40,6 +34,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import org.elasticsearch.common.base.Objects;
@@ -62,18 +57,20 @@ public class FXPlanTable extends BorderPane{
     private final Session session = Injector.getSession();
     private final BooleanProperty editable = new SimpleBooleanProperty(true);
 
+    private final GridPane gridTop = new GridPane();
+    private final GridPane gridCenter = new GridPane();
+    private final GridPane gridBottom = new GridPane();
+    private Region[] headerNodes;
     
     public FXPlanTable(final PlanVegetation plan, final TronconDigue troncon, final Mode mode){
         this.plan = plan;
         this.mode = mode;
 
         // En-têtes
-        final GridPane gridTop = new GridPane();
         gridTop.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         setTop(gridTop);
 
         // Planifications des traitements
-        final GridPane gridCenter = new GridPane();
         gridCenter.setMinSize(50, 50);
         gridCenter.setVgap(0);
         gridCenter.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -88,7 +85,6 @@ public class FXPlanTable extends BorderPane{
         setCenter(scroll);
 
         // Côut des traitements
-        final GridPane gridBottom = new GridPane();
         gridBottom.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         gridBottom.setStyle("-fx-background-color: lightgray;");
         setBottom(gridBottom);
@@ -98,11 +94,9 @@ public class FXPlanTable extends BorderPane{
         //NOTE : on ne peut pas afficher plus de X ans sur la table
         //on considere que l'enregistrement est mauvais et on evite de bloquer l'interface
         int dateEnd = Math.min(plan.getAnneeFin(), dateStart+20);
+        headerNodes = new Region[1+dateEnd-dateStart+2];
 
         //nom des types
-        final Label fake0 = new Label();
-        fake0.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        fake0.setMinSize(150, 20);
         final Label lblYear = new Label("Parcelle | Année");
         final Label lblSum;
         if(mode==PLANIFICATION){
@@ -116,51 +110,41 @@ public class FXPlanTable extends BorderPane{
         lblSum .setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         lblSum.getStyleClass().add("pojotable-header");
 
+        //ecouteur sur les composants de la premiere ligne
+        final ChangeListener widthListener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> updateColumnWidth();
 
         //colonne des noms
-        ColumnConstraints cstTop    = new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,USE_PREF_SIZE,Priority.NEVER,HPos.LEFT,true);
-        ColumnConstraints cstCenter = new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,USE_PREF_SIZE,Priority.NEVER,HPos.LEFT,true);
-        ColumnConstraints cstBottom = new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,USE_PREF_SIZE,Priority.NEVER,HPos.LEFT,true);
-        gridTop.getColumnConstraints().add(cstTop);
-        gridCenter.getColumnConstraints().add(cstCenter);
-        gridBottom.getColumnConstraints().add(cstBottom);
+        gridTop.getColumnConstraints().add(new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,USE_PREF_SIZE,Priority.NEVER,HPos.LEFT,true));
 
         //une colonne par année
         for(int year=dateStart;year<dateEnd;year++){
-            cstTop    = new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,Double.MAX_VALUE,Priority.ALWAYS,HPos.CENTER,true);
-            cstCenter = new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,Double.MAX_VALUE,Priority.ALWAYS,HPos.CENTER,true);
-            cstBottom = new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,Double.MAX_VALUE,Priority.ALWAYS,HPos.CENTER,true);
-            gridTop.getColumnConstraints().add(cstTop);
-            gridCenter.getColumnConstraints().add(cstCenter);
-            gridBottom.getColumnConstraints().add(cstBottom);
+            gridTop.getColumnConstraints().add(new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,Double.MAX_VALUE,Priority.ALWAYS,HPos.CENTER,true));
         }
 
         //on ajoute la colonne 'Mode auto'
         if(mode==PLANIFICATION){
             //colonne vide
-            cstTop    = new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,Double.MAX_VALUE,Priority.SOMETIMES,HPos.CENTER,true);
-            cstCenter = new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,Double.MAX_VALUE,Priority.SOMETIMES,HPos.CENTER,true);
-            cstBottom = new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,Double.MAX_VALUE,Priority.SOMETIMES,HPos.CENTER,true);
-            gridTop.getColumnConstraints().add(cstTop);
-            gridCenter.getColumnConstraints().add(cstCenter);
-            gridBottom.getColumnConstraints().add(cstBottom);
-            
+            gridTop.getColumnConstraints().add(new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,Double.MAX_VALUE,Priority.SOMETIMES,HPos.CENTER,true));
+            final Label lblVide = new Label();
+            lblVide.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            gridTop.add(lblVide, headerNodes.length-2, 0);
+            headerNodes[headerNodes.length-2] = lblVide;
+            lblVide.widthProperty().addListener(widthListener);
+
             //colonne mode auto
-            cstTop    = new ColumnConstraints(67,67,67,Priority.NEVER,HPos.CENTER,true);
-            cstCenter = new ColumnConstraints(50,50,50,Priority.NEVER,HPos.CENTER,true);
-            cstBottom = new ColumnConstraints(50,50,50,Priority.NEVER,HPos.CENTER,true);
-            gridTop.getColumnConstraints().add(cstTop);
-            gridCenter.getColumnConstraints().add(cstCenter);
-            gridBottom.getColumnConstraints().add(cstBottom);
+            gridTop.getColumnConstraints().add(new ColumnConstraints(67,67,67,Priority.NEVER,HPos.CENTER,true));
 
             final Label lblAuto = new Label("Mode auto");
+            lblAuto.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
             lblAuto.setAlignment(Pos.CENTER);
             lblAuto.setWrapText(true);
             lblAuto.getStyleClass().add("pojotable-header");
             lblAuto.setStyle(AUTO_STYLE);
+            lblAuto.widthProperty().addListener(widthListener);
+            headerNodes[headerNodes.length-1] = lblAuto;
 
-            gridTop   .add(lblAuto,       gridTop   .getColumnConstraints().size()-1, 0);
-            gridBottom.add(new Label(""), gridBottom.getColumnConstraints().size()-1, 0);
+            gridTop   .add(lblAuto,       headerNodes.length-1, 0);
+            gridBottom.add(new Label(""), headerNodes.length-1, 0);
         }
 
 
@@ -203,13 +187,10 @@ public class FXPlanTable extends BorderPane{
             rowIndex++;
         }
 
-        //on bind la taille des cellules
-        gridCenter.add(fake0, 0, rowIndex);
-        lblYear.prefWidthProperty().bind(fake0.widthProperty());
-        lblSum .prefWidthProperty().bind(fake0.widthProperty());
-
+        headerNodes[0] = lblYear;
 
         //ligne de dates et d'estimation
+        lblYear.widthProperty().addListener(widthListener);
         gridTop.add(lblYear, 0, 0);
         gridBottom.add(lblSum, 0, 0);
         colIndex=1;
@@ -220,6 +201,8 @@ public class FXPlanTable extends BorderPane{
             lblYearN.setPrefSize(20, 20);
             lblYearN.setMinSize(20, 20);
             lblYearN.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            lblYearN.widthProperty().addListener(widthListener);
+            headerNodes[colIndex] = lblYearN;
             gridTop.add(lblYearN, colIndex, 0);
             gridBottom.add(new EstimationCell(year-dateStart), colIndex, 0);
         }
@@ -231,6 +214,17 @@ public class FXPlanTable extends BorderPane{
 
     }
 
+    private void updateColumnWidth(){
+        gridCenter.getColumnConstraints().clear();
+        gridBottom.getColumnConstraints().clear();
+
+        for(int i=0;i<headerNodes.length;i++){
+            gridCenter.getColumnConstraints().add(new ColumnConstraints(USE_PREF_SIZE,headerNodes[i].getWidth(),USE_PREF_SIZE,Priority.NEVER,HPos.CENTER,true));
+            gridBottom.getColumnConstraints().add(new ColumnConstraints(USE_PREF_SIZE,headerNodes[i].getWidth(),USE_PREF_SIZE,Priority.NEVER,HPos.CENTER,true));
+        }
+
+    }
+
     private void save(ParcelleVegetation parcelle){
         VegetationSession.INSTANCE.getParcelleRepo().update(parcelle);
     }
@@ -238,10 +232,6 @@ public class FXPlanTable extends BorderPane{
     public BooleanProperty editableProperty(){
         return editable;
     }
-
-//    public PlanVegetation getPlanVegetation() {
-//        return plan;
-//    }
 
     /**
      * Cellule de date.
@@ -365,107 +355,15 @@ public class FXPlanTable extends BorderPane{
             label.getStyleClass().add("pojotable-header");
             setCenter(label);
 
-            /*
-            En mode planification le coût suppose que l'on fasse la somme de
-            tous les côuts de traitements des zones de la parcelle, dès que
-            celle-ci est planifiée "traitée".
-            
-            Les coûts planifiés se trouvent dans le plan.
-            */
-            double cout = 0.;
-            if(mode==PLANIFICATION){
-                final ObservableList<ParamCoutTraitementVegetation> params = plan.getParamCout();
-                final Map<TraitementSummary, ParamCoutTraitementVegetation> indexedParams = new HashMap<>();
+            update();
+        }
 
-                //On parcourt toutes les parcelles du tableau
-                for (final ParcelleVegetation parcelle : tableParcelles){
-
-                    // On vérifie que la parcelle est bien planifiée cette année
-                    if(parcelle.getPlanifications().size()>index // vérification provisoire pour éviter de faire exploser l'ouverture du panneau en attendant une nouvelle gestion des planifications
-                            && parcelle.getPlanifications().get(index)){
-
-                        // On parcourt toutes les zones de végétation de la parcelle
-                        final ObservableList<? extends ZoneVegetation> allZoneVegetationByParcelleId = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), session);
-                        for(final ZoneVegetation zone : allZoneVegetationByParcelleId){
-
-                            // On vérifie que la zone a bien un traitement planifié et que celui-ci entre dans le plan de gestion
-                            if(zone.getTraitement()!=null && !zone.getTraitement().getHorsGestion()){
-
-                                // Dans ce cas, on construit un
-                                final TraitementZoneVegetation traitement = zone.getTraitement();
-
-
-                                // On vérifie ensuite que ce traitement se trouve dans les paramètres de coûts du plan en ce qui concerne son volet ponctuel et son volet non ponctuel
-                                TraitementSummary ponctuelSummary = new TraitementSummary(zone.getClass(), traitement.getTraitementPonctuelId(), traitement.getSousTraitementPonctuelId(), null, true);
-                                TraitementSummary nonPonctuelSummary = new TraitementSummary(zone.getClass(), traitement.getTraitementId(), traitement.getSousTraitementId(), traitement.getFrequenceId(), false);
-
-
-
-
-                                // On parcourt enfin les paramètres de traitement du plan afin de trouver ceux qui correspondent aux traitements ponctuel et non ponctuel examinés
-
-                                // 1- Un tel traitement a-t-il déjà été indexé ?
-                                for(final TraitementSummary sum : indexedParams.keySet()){
-                                    if(ponctuelSummary!=null && sum.equalsTraitementSummary(ponctuelSummary)){
-                                        cout+=computeCost(zone, indexedParams.get(sum));
-                                        ponctuelSummary=null;// On passe à null pour détecter qu'on a déjà fait le calcul
-                                    }
-                                    if(sum.equalsTraitementSummary(nonPonctuelSummary)){
-                                        cout+=computeCost(zone, indexedParams.get(sum));
-                                        nonPonctuelSummary=null; // On passe à null pour détecter qu'on a déjà fait le calcul
-                                    }
-
-                                    // On sort de la boucle dès qu'on détecte que les traitements ponctuel et non ponctuel ont été trouvés.
-                                    if(ponctuelSummary==null && nonPonctuelSummary==null) break;
-                                }
-
-                                // 2- Si un tel traitement n'avait pas été indexé, on regarde les autres traitements
-                                for(final ParamCoutTraitementVegetation param : params){
-                                    // On vérifie que le paramètre n'a pas été déjà indexé
-                                    if(!indexedParams.containsValue(param)){
-                                        // Dans ce cas, on indexe le paramètre
-                                        final TraitementSummary sum = TraitementSummary.toSummary(param);
-                                        indexedParams.put(sum, param);
-
-                                        // Puis on regarde s'il correspond au traitement ponctuel ou nonPonctuel
-                                        if(ponctuelSummary!=null && sum.equalsTraitementSummary(ponctuelSummary)){
-                                            cout+=computeCost(zone, param);
-                                            ponctuelSummary=null;// On passe à null pour détecter qu'on a déjà fait le calcul
-                                        }
-                                        if(sum.equalsTraitementSummary(nonPonctuelSummary)){
-                                            cout+=computeCost(zone, param);
-                                            nonPonctuelSummary=null; // On passe à null pour détecter qu'on a déjà fait le calcul
-                                        }
-
-                                        // On sort de la boucle dès qu'on détecte que les traitements ponctuel et non ponctuel ont été trouvés.
-                                        if(ponctuelSummary==null && nonPonctuelSummary==null) break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-
-
+        private void update(){
+            final double cout = VegetationSession.estimateCoutPlanification(plan, index, tableParcelles);
             final NumberFormat numberFormat = new DecimalFormat("0.00");
             label.setText(numberFormat.format(cout));
         }
 
-
-
-        private void update(){
-            //TODO
-        }
-
     }
 
-        private static double computeCost(final ZoneVegetation zone, final ParamCoutTraitementVegetation param){
-
-            if(zone.getGeometry()!=null){
-                return zone.getGeometry().getArea() * param.getCout();
-            }
-            else return 0.;
-        }
 }
