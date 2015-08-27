@@ -53,7 +53,7 @@ public class FXPlanTable extends BorderPane{
     private final PlanVegetation plan;
     private final List<ParcelleVegetation> tableParcelles = new ArrayList<>();
     private final Mode mode;
-    private final List<EstimationCell> estimations = new ArrayList<>();
+    
     private final Session session = Injector.getSession();
     private final BooleanProperty editable = new SimpleBooleanProperty(true);
 
@@ -317,15 +317,12 @@ public class FXPlanTable extends BorderPane{
      */
     private final class ParcelleAutoCell extends CheckBox{
 
-        private final ParcelleVegetation parcelle;
-
         public ParcelleAutoCell(ParcelleVegetation parcelle) {
             setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
             disableProperty().bind(editable.not());
             setSelected(parcelle.getModeAuto());
             selectedProperty().bindBidirectional(parcelle.modeAutoProperty());
             setStyle(AUTO_STYLE);
-            this.parcelle = parcelle;
             setPadding(new Insets(5, 5, 5, 5));
 
             selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
