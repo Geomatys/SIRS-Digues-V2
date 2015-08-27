@@ -374,7 +374,7 @@ public class FXLauncherPane extends BorderPane {
             SIRS.setLauncher(restartableStage);
         }
         currentWindow.hide();
-        runDesktop(db);
+        runDesktop(db, localRegistry);
     }
 
     @FXML
@@ -604,9 +604,9 @@ public class FXLauncherPane extends BorderPane {
         return name.trim();
     }
 
-    private static void runDesktop(final String database) {
+    private static void runDesktop(final String database, final DatabaseRegistry localRegistry) {
         try {
-            (SIRS.LOADER = new Loader(database)).start(null);
+            (SIRS.LOADER = new Loader(database, localRegistry)).start(null);
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Cannot run desktop application with database : " + database, ex);
             final Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());

@@ -2,33 +2,6 @@ package fr.sirs;
 
 
 import static fr.sirs.SIRS.hexaMD5;
-import java.io.IOException;
-import java.util.Properties;
-import java.util.logging.Level;
-
-import javafx.animation.FadeTransition;
-import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
-import javafx.concurrent.Worker;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
-import javafx.util.Duration;
-
-import javax.imageio.ImageIO;
-
-import org.geotoolkit.factory.Hints;
-import org.geotoolkit.image.jai.Registry;
-import org.geotoolkit.lang.Setup;
-import org.geotoolkit.sld.xml.JAXBSLDUtilities;
-import org.geotoolkit.sld.xml.StyleXmlIO;
-
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.UtilisateurRepository;
@@ -37,16 +10,38 @@ import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.util.SirsStringConverter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
+import java.util.logging.Level;
+import javafx.animation.FadeTransition;
+import javafx.application.Application;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.DialogEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
+import javafx.util.Duration;
+import javax.imageio.ImageIO;
 import org.apache.sis.util.ArgumentChecks;
 import org.controlsfx.dialog.ExceptionDialog;
+import org.geotoolkit.factory.Hints;
+import org.geotoolkit.image.jai.Registry;
 import org.geotoolkit.internal.GeotkFX;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.geotoolkit.lang.Setup;
+import org.geotoolkit.sld.xml.JAXBSLDUtilities;
+import org.geotoolkit.sld.xml.StyleXmlIO;
 
 /**
  *
@@ -56,15 +51,19 @@ public class Loader extends Application {
 
     private final Stage splashStage;
     private final String databaseName;
+    private final DatabaseRegistry localRegistry;
 
-    public Loader(String databaseName) {
+    public Loader(String databaseName, final DatabaseRegistry localRegistry) {
         ArgumentChecks.ensureNonEmpty("Database name", databaseName);
+        ArgumentChecks.ensureNonNull("Database registry", localRegistry);
+        
         this.databaseName = databaseName;
         // Initialize splash screen
         splashStage = new Stage(StageStyle.TRANSPARENT);
         splashStage.setTitle("SIRS-Digues V2");
         splashStage.getIcons().add(SIRS.ICON);
         splashStage.initStyle(StageStyle.TRANSPARENT);
+        this.localRegistry = localRegistry;
     }
 
     @Override
@@ -294,8 +293,7 @@ public class Loader extends Application {
                 // LOAD SIRS DATABASE //////////////////////////////////////////
                 updateProgress(inc++, total);
                 updateMessage("Chargement et création des index ...");
-                final ConfigurableApplicationContext context =
-                        new DatabaseRegistry().connectToSirsDatabase(databaseName, true, true, true);
+                localRegistry.connectToSirsDatabase(databaseName, true, true, true);
 
                 // LOAD PLUGINS ////////////////////////////////////////////////
                 for (Plugin plugin : plugins) {
