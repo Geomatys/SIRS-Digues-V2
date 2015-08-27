@@ -152,7 +152,6 @@ public class PluginVegetation extends Plugin {
     }
 
     private void updatePlanLayers(PlanVegetation plan){
-        final Session session = Injector.getSession();
 
         //on efface les anciens layers
         final MapItem vegetationGroup = VegetationSession.INSTANCE.getVegetationGroup();
@@ -620,18 +619,18 @@ public class PluginVegetation extends Plugin {
      * Gives the information if the parcelle is coherent.
      *
      * @param parcelle
-     * @param plusCourteFrequence
+     * @param frequence
      * @return
      */
-    public static boolean isCoherent(final ParcelleVegetation parcelle, final int plusCourteFrequence){
+    public static boolean isCoherent(final ParcelleVegetation parcelle, final int frequence){
 
         /*
         La fréquence de traitement de la parcelle doit être positive.
         Si elle ne l'est pas (pour une raison inconnue), on enregistre l'erreur dans le log et on signale
         la parcelle incohérente.
         */
-        if(plusCourteFrequence<0){
-            SIRS.LOGGER.log(Level.WARNING, "La fréquence de la parcelle {0} est indiquée négative ("+plusCourteFrequence+"). Une fréquence de traitement doit être positive (ou nulle).", parcelle);
+        if(frequence<0){
+            SIRS.LOGGER.log(Level.WARNING, "La fréquence de la parcelle {0} est indiquée négative ("+frequence+"). Une fréquence de traitement doit être positive (ou nulle).", parcelle);
             return false;
         }
 
@@ -641,7 +640,7 @@ public class PluginVegetation extends Plugin {
         associé. On ne peut donc pas être incohérent dans ce cas et on renvoie
         tout de suite "vrai".
         */
-        if(plusCourteFrequence==0) return true;
+        if(frequence==0) return true;
 
         /*
         Dans les autre cas, on a maintenant la plus courte fréquence de
@@ -665,7 +664,7 @@ public class PluginVegetation extends Plugin {
         for(final ParcelleTraitementVegetation traitement : parcelle.getTraitements()){
             if(traitement.getDate()!=null){
                 final int anneeTraitement = traitement.getDate().getYear();
-                if(anneeCourante-anneeTraitement<plusCourteFrequence){
+                if(anneeCourante-anneeTraitement<frequence){
                     coherent = true; break;
                 }
             }
@@ -712,16 +711,13 @@ public class PluginVegetation extends Plugin {
     }
 
     /**
-     * On ne devrait jamais avoir à réparer les planifications car leur intégrité devrait être gérée lors de la création d'une parcelle ou du changement de la durée du plan.
-     *
-     * Mais cette méthode est bien pratique pour contourner les erreurs lors du développement.
+     * Initialisation des planifications (doit être appelée à la création d'une parcelle, soit à partir de la carte, soit à partir du tableau des parcelles).
      * 
-     * @param planifications
+     * @param parcelle
      * @param dureePlan
      */
-    @Deprecated
-    public static void fixPlanifs(final ObservableList<Boolean> planifications, final int dureePlan){
-        SIRS.LOGGER.log(Level.WARNING, "Réparation des planifications de la parcelle !");
+    public static void initPlanifs(final ParcelleVegetation parcelle, final int dureePlan){
+        final ObservableList<Boolean> planifications = parcelle.getPlanifications();
         if(planifications.size()<dureePlan){
             while(planifications.size()<dureePlan) planifications.add(Boolean.FALSE);
         } else{
@@ -737,6 +733,12 @@ public class PluginVegetation extends Plugin {
         return vegetationClasses;
     }
 
+    /**
+     * Update parcelle planifications of a plan.
+     *
+     * @param plan
+     * @param beginShift
+     */
     public static void updatePlanifs(final PlanVegetation plan, final int beginShift){
         final ParcelleVegetationRepository parcelleRepo = (ParcelleVegetationRepository) Injector.getSession().getRepositoryForClass(ParcelleVegetation.class);
 
@@ -750,7 +752,8 @@ public class PluginVegetation extends Plugin {
             if(parcelle.getModeAuto()){
                PluginVegetation.resetAutoPlanif(parcelle, index);
             }
-            // Si on n'est pas en mode automatique, il faut décaler les planifications déjà
+
+            // Si on n'est pas en mode automatique, il faut décaler les planifications déjà construites.
             else{
                 /*==========================================================
                 Il faut commencer par décaler les planifications du nombre

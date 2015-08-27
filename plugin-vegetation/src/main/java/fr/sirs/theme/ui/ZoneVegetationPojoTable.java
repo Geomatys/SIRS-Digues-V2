@@ -49,9 +49,7 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
             getAllValues().add(zone);
 
             //Création du traitement associé
-            final TraitementZoneVegetation traitement = Injector.getSession().getElementCreator().createElement(TraitementZoneVegetation.class);
-
-            zone.setTraitement(traitement);
+            zone.setTraitement(Injector.getSession().getElementCreator().createElement(TraitementZoneVegetation.class));
         }
         else {
             zone = null;

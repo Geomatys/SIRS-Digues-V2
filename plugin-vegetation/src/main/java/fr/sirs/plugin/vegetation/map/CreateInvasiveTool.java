@@ -2,7 +2,6 @@
 package fr.sirs.plugin.vegetation.map;
 
 import fr.sirs.core.model.InvasiveVegetation;
-import fr.sirs.core.model.PositionableVegetation;
 import fr.sirs.util.ResourceInternationalString;
 import javafx.scene.image.Image;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
@@ -13,7 +12,7 @@ import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class CreateInvasiveTool extends CreateVegetationPolygonTool{
+public class CreateInvasiveTool extends CreateVegetationPolygonTool<InvasiveVegetation> {
 
     public static final Spi SPI = new Spi();
 
@@ -44,8 +43,8 @@ public class CreateInvasiveTool extends CreateVegetationPolygonTool{
     }
 
     @Override
-    protected PositionableVegetation newVegetation() {
-        final InvasiveVegetation candidate = new InvasiveVegetation();
+    protected InvasiveVegetation newVegetation() {
+        final InvasiveVegetation candidate = super.newVegetation();
         //classement indéfini
         candidate.setTypeInvasive("RefTypeInvasiveVegetation:99");
         return candidate;

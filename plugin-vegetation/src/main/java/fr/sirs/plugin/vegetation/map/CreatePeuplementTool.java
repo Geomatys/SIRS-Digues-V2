@@ -2,7 +2,6 @@
 package fr.sirs.plugin.vegetation.map;
 
 import fr.sirs.core.model.PeuplementVegetation;
-import fr.sirs.core.model.PositionableVegetation;
 import fr.sirs.util.ResourceInternationalString;
 import javafx.scene.image.Image;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
@@ -13,7 +12,7 @@ import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class CreatePeuplementTool extends CreateVegetationPolygonTool{
+public class CreatePeuplementTool extends CreateVegetationPolygonTool<PeuplementVegetation>{
 
     public static final Spi SPI = new Spi();
 
@@ -44,8 +43,8 @@ public class CreatePeuplementTool extends CreateVegetationPolygonTool{
     }
 
     @Override
-    protected PositionableVegetation newVegetation() {
-        final PeuplementVegetation candidate = new PeuplementVegetation();
+    protected PeuplementVegetation newVegetation() {
+        final PeuplementVegetation candidate = super.newVegetation();
         //classement indéfini
         candidate.setTypePeuplementId("RefTypePeuplementVegetation:99");
         return candidate;

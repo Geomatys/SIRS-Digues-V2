@@ -2,7 +2,6 @@
 package fr.sirs.plugin.vegetation.map;
 
 import fr.sirs.core.model.HerbaceeVegetation;
-import fr.sirs.core.model.PositionableVegetation;
 import fr.sirs.util.ResourceInternationalString;
 import javafx.scene.image.Image;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
@@ -13,7 +12,7 @@ import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class CreateHerbaceTool extends CreateVegetationPolygonTool{
+public class CreateHerbaceTool extends CreateVegetationPolygonTool<HerbaceeVegetation> {
 
     public static final Spi SPI = new Spi();
 
@@ -42,11 +41,4 @@ public class CreateHerbaceTool extends CreateVegetationPolygonTool{
     public CreateHerbaceTool(FXMap map) {
         super(map,SPI, HerbaceeVegetation.class);
     }
-
-    @Override
-    protected PositionableVegetation newVegetation() {
-        final HerbaceeVegetation candidate = new HerbaceeVegetation();
-        return candidate;
-    }
-
 }

@@ -79,10 +79,6 @@ public class FXParcelleVegetationPane extends FXParcelleVegetationPaneStub {
                         // On vérifie alors l'état des planifications de la parcelle
                         final ObservableList<Boolean> planifications = newElement.getPlanifications();
                         if(planifications!=null){
-                            if(planifications.size()!=dureePlan){
-                                // Il faut réparer le nombre de planifications (provisoire)
-                                PluginVegetation.fixPlanifs(planifications, dureePlan);
-                            }
 
                             final int index = anneeEnCours-debutPlan;
                             Integer anneePlanif = 0;

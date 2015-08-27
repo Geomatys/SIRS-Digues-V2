@@ -7,6 +7,7 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.ZoneVegetation;
+import fr.sirs.plugin.vegetation.PluginVegetation;
 import static fr.sirs.plugin.vegetation.PluginVegetation.isCoherent;
 import fr.sirs.plugin.vegetation.VegetationSession;
 import fr.sirs.theme.AbstractTheme;
@@ -75,12 +76,8 @@ public class FXVegetationTronconThemePane extends FXTronconThemePane {
                     created.setPlanId(planActif.getId());
 
                     // Initialisation des planifications pour les années du plan.
-                    if(created.getPlanifications()==null)created.setPlanifications(new ArrayList<>());
-                    final List<Boolean> planifications = created.getPlanifications();
-
-                    while(planifications.size()<dureePlan){
-                        planifications.add(Boolean.FALSE);
-                    }
+                    PluginVegetation.initPlanifs(created, dureePlan);
+                    
                     repo.add(created);
                     getAllValues().add(created);
                 }

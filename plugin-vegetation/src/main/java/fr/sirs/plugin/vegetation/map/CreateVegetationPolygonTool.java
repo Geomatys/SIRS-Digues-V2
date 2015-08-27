@@ -10,7 +10,8 @@ import static fr.sirs.SIRS.CSS_PATH;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ParcelleVegetation;
-import fr.sirs.core.model.PositionableVegetation;
+import fr.sirs.core.model.TraitementZoneVegetation;
+import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
 import fr.sirs.util.SirsStringConverter;
 import java.awt.geom.Rectangle2D;
@@ -51,8 +52,9 @@ import org.opengis.util.FactoryException;
 /**
  *
  * @author Johann Sorel (Geomatys)
+ * @param <T>
  */
-public abstract class CreateVegetationPolygonTool<T extends PositionableVegetation> extends AbstractEditionTool{
+public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> extends AbstractEditionTool{
 
 
     //session and repo
@@ -75,7 +77,7 @@ public abstract class CreateVegetationPolygonTool<T extends PositionableVegetati
     private EditionHelper helper;
     private final FXGeometryLayer geomLayer = new FXGeometryLayer();
     private Polygon geometry = null;
-    private final List<Coordinate> coords = new ArrayList<Coordinate>();
+    private final List<Coordinate> coords = new ArrayList<>();
     private boolean justCreated = false;
     
 
@@ -106,7 +108,11 @@ public abstract class CreateVegetationPolygonTool<T extends PositionableVegetati
         wizard.setCenter(vbox);
     }
 
-    protected abstract T newVegetation();
+    protected T newVegetation(){
+        final T candidate = Injector.getSession().getElementCreator().createElement(vegetationClass);
+        candidate.setTraitement(Injector.getSession().getElementCreator().createElement(TraitementZoneVegetation.class));
+        return candidate;
+    }
 
     private void reset(){
         vegetation = newVegetation();
