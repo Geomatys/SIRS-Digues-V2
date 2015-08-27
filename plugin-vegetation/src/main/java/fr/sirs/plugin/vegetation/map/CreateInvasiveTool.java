@@ -2,6 +2,8 @@
 package fr.sirs.plugin.vegetation.map;
 
 import fr.sirs.core.model.InvasiveVegetation;
+import fr.sirs.plugin.vegetation.PluginVegetation;
+import static fr.sirs.plugin.vegetation.PluginVegetation.DEFAULT_INVASIVE_VEGETATION_TYPE;
 import fr.sirs.util.ResourceInternationalString;
 import javafx.scene.image.Image;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
@@ -46,7 +48,16 @@ public class CreateInvasiveTool extends CreateVegetationPolygonTool<InvasiveVege
     protected InvasiveVegetation newVegetation() {
         final InvasiveVegetation candidate = super.newVegetation();
         //classement indéfini
-        candidate.setTypeInvasive("RefTypeInvasiveVegetation:99");
+        candidate.setTypeInvasive(DEFAULT_INVASIVE_VEGETATION_TYPE);
+
+        /*
+        Si on peut, on paramètre le traitement qui a été associé dans super.newVegetation();
+        Il est nécessaire pour cela d'associer un identifiant de parcelle à la zone de végétation.
+        */
+        if(parcelle!=null && parcelle.getId()!=null){
+            candidate.setParcelleId(parcelle.getId());
+            PluginVegetation.paramTraitement(InvasiveVegetation.class, candidate, DEFAULT_INVASIVE_VEGETATION_TYPE);
+        }
         return candidate;
     }
 

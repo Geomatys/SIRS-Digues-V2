@@ -4,6 +4,8 @@ import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.InvasiveVegetation;
+import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
 import java.lang.reflect.Modifier;
@@ -50,6 +52,15 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
 
             //Création du traitement associé
             zone.setTraitement(Injector.getSession().getElementCreator().createElement(TraitementZoneVegetation.class));
+
+            // S'il s'agit d'une zone d'invasive ou de peuplement, il faut affecter le type par défaut et effectuer le paramétrage éventuel
+
+            if(retrievedClass==PeuplementVegetation.class){
+                ((PeuplementVegetation) zone).setTypePeuplementId("");
+            }
+            else if(retrievedClass==InvasiveVegetation.class){
+
+            }
         }
         else {
             zone = null;

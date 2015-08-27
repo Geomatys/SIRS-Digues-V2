@@ -148,13 +148,35 @@ public class FXPlanTable extends BorderPane{
             headerNodes = new Region[1+dateEnd-dateStart];
         }
 
+        int colIndex = 0;
+
+        headerNodes[0] = lblYear;
+
+        //ligne de dates et d'estimation
+        lblYear.widthProperty().addListener(widthListener);
+        gridTop.add(lblYear, 0, 0);
+        gridBottom.add(lblSum, 0, 0);
+        colIndex=1;
+        final EstimationCell[] estCells = new EstimationCell[dateEnd-dateStart];
+        for(int year=dateStart; year<dateEnd; year++,colIndex++){
+            final Label lblYearN = new Label(""+year);
+            lblYearN.getStyleClass().add("pojotable-header");
+            lblYearN.setAlignment(Pos.CENTER);
+            lblYearN.setPrefSize(20, 20);
+            lblYearN.setMinSize(20, 20);
+            lblYearN.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            lblYearN.widthProperty().addListener(widthListener);
+            headerNodes[colIndex] = lblYearN;
+            gridTop.add(lblYearN, colIndex, 0);
+            estCells[year-dateStart] = new EstimationCell(year-dateStart);
+            gridBottom.add(estCells[year-dateStart], colIndex, 0);
+        }
 
         //une ligne par parcelle
         final ParcelleVegetationRepository parcelleRepo = (ParcelleVegetationRepository) session.getRepositoryForClass(ParcelleVegetation.class);
         final SirsStringConverter cvt = new SirsStringConverter();
-        int rowIndex = 0;
-        int colIndex = 0;
 
+        int rowIndex = 0;
         final List<ParcelleVegetation> planifParcelle = parcelleRepo.getByPlanId(plan.getDocumentId());
         for(final ParcelleVegetation parcelle : planifParcelle){
             gridCenter.getRowConstraints().add(new RowConstraints(30, 30, 30, Priority.NEVER, VPos.CENTER, true));
@@ -174,7 +196,7 @@ public class FXPlanTable extends BorderPane{
             final CheckBox modeAuto = new ParcelleAutoCell(parcelle);
             
             for(int year=dateStart; year<dateEnd; year++,colIndex++){
-                final CheckBox parcelleDateCell = new ParcelleDateCell(parcelle, year, year-dateStart);
+                final CheckBox parcelleDateCell = new ParcelleDateCell(parcelle, year, year-dateStart, estCells[year-dateStart]);
                 parcelleDateCell.disableProperty().bind(modeAuto.selectedProperty());
                 gridCenter.add(parcelleDateCell, colIndex, rowIndex);
             }
@@ -188,24 +210,8 @@ public class FXPlanTable extends BorderPane{
             rowIndex++;
         }
 
-        headerNodes[0] = lblYear;
-
-        //ligne de dates et d'estimation
-        lblYear.widthProperty().addListener(widthListener);
-        gridTop.add(lblYear, 0, 0);
-        gridBottom.add(lblSum, 0, 0);
-        colIndex=1;
         for(int year=dateStart; year<dateEnd; year++,colIndex++){
-            final Label lblYearN = new Label(""+year);
-            lblYearN.getStyleClass().add("pojotable-header");
-            lblYearN.setAlignment(Pos.CENTER);
-            lblYearN.setPrefSize(20, 20);
-            lblYearN.setMinSize(20, 20);
-            lblYearN.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-            lblYearN.widthProperty().addListener(widthListener);
-            headerNodes[colIndex] = lblYearN;
-            gridTop.add(lblYearN, colIndex, 0);
-            gridBottom.add(new EstimationCell(year-dateStart), colIndex, 0);
+            estCells[year-dateStart].update();
         }
 
         //ligne de commentaire
@@ -238,30 +244,25 @@ public class FXPlanTable extends BorderPane{
      * Cellule de date.
      * 
      */
-    private final class ParcelleDateCell extends CheckBox {
+    private final class ParcelleDateCell extends CheckBox implements ListChangeListener<Boolean>{
 
         private final ParcelleVegetation parcelle;
         private final int year;
         private final int index;
+        private final EstimationCell estCell;
 
-        public ParcelleDateCell(final ParcelleVegetation parcelle, final int year,  final int index) {
+        public ParcelleDateCell(final ParcelleVegetation parcelle, final int year,  final int index, EstimationCell estCell) {
             disableProperty().bind(editable.not());
             this.parcelle = parcelle;
             this.year = year;
             this.index = index;
+            this.estCell = estCell;
             setPadding(new Insets(10));
             setAlignment(Pos.CENTER);
             setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             setStyle(CHECKBOX_NOPADDING);
 
-            final WeakListChangeListener<Boolean> weakListener = new WeakListChangeListener<>(new ListChangeListener<Boolean>() {
-
-                @Override
-                public void onChanged(ListChangeListener.Change<? extends Boolean> c) {
-                    setSelected(getVal());
-                }
-            });
-            this.parcelle.getPlanifications().addListener(weakListener);
+            this.parcelle.getPlanifications().addListener(new WeakListChangeListener<>(this));
 
             setSelected(getVal());
             selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
@@ -287,6 +288,7 @@ public class FXPlanTable extends BorderPane{
                 if(!Objects.equal(old,v)){
                     save(parcelle);
                     updateColor();
+                    estCell.update();
                 }
             }
         }
@@ -308,6 +310,11 @@ public class FXPlanTable extends BorderPane{
             }else{
                 setBackground(new Background(new BackgroundFill(color, new CornerRadii(30), Insets.EMPTY)));
             }
+        }
+
+        @Override
+        public void onChanged(Change<? extends Boolean> c) {
+            setSelected(getVal());
         }
 
     }

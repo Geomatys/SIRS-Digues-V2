@@ -67,7 +67,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     private final Class<T> vegetationClass;
 
     private T vegetation = null;
-    private ParcelleVegetation parcelle = null;
+    protected ParcelleVegetation parcelle = null;
     private final Label lblParcelle = new Label();
     private final Label lblGeom = new Label();
 

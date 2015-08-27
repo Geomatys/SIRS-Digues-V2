@@ -95,6 +95,9 @@ public class PluginVegetation extends Plugin {
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
 
+    public static final String DEFAULT_PEUPLEMENT_VEGETATION_TYPE = "RefTypePeuplementVegetation:99";
+    public static final String DEFAULT_INVASIVE_VEGETATION_TYPE = "RefTypeInvasiveVegetation:99";
+
     private final VegetationToolBar toolbar = new VegetationToolBar();
 
     public PluginVegetation() {
@@ -808,8 +811,6 @@ public class PluginVegetation extends Plugin {
         // sauvegarde les parcelles du plan.
         parcelleRepo.executeBulk(parcelles);
     }
-
-
 
     /**
      * Parametrization of the traitement of a vegetation zone.

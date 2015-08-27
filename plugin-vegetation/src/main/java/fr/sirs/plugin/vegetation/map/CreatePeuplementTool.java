@@ -2,6 +2,8 @@
 package fr.sirs.plugin.vegetation.map;
 
 import fr.sirs.core.model.PeuplementVegetation;
+import fr.sirs.plugin.vegetation.PluginVegetation;
+import static fr.sirs.plugin.vegetation.PluginVegetation.DEFAULT_PEUPLEMENT_VEGETATION_TYPE;
 import fr.sirs.util.ResourceInternationalString;
 import javafx.scene.image.Image;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
@@ -45,8 +47,19 @@ public class CreatePeuplementTool extends CreateVegetationPolygonTool<Peuplement
     @Override
     protected PeuplementVegetation newVegetation() {
         final PeuplementVegetation candidate = super.newVegetation();
+
         //classement indéfini
-        candidate.setTypePeuplementId("RefTypePeuplementVegetation:99");
+        candidate.setTypePeuplementId(DEFAULT_PEUPLEMENT_VEGETATION_TYPE);
+
+        /*
+        Si on peut, on paramètre le traitement qui a été associé dans super.newVegetation();
+        Il est nécessaire pour cela d'associer un identifiant de parcelle à la zone de végétation.
+        */
+        if(parcelle!=null && parcelle.getId()!=null){
+            candidate.setParcelleId(parcelle.getId());
+            PluginVegetation.paramTraitement(PeuplementVegetation.class, candidate, DEFAULT_PEUPLEMENT_VEGETATION_TYPE);
+        }
+
         return candidate;
     }
 

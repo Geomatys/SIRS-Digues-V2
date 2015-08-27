@@ -28,7 +28,6 @@ import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
-import org.geotoolkit.gui.javafx.render2d.edition.FXEditAction;
 import org.geotoolkit.gui.javafx.render2d.edition.FXToolBox;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.MapBuilder;
