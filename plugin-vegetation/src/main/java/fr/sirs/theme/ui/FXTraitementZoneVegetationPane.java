@@ -25,6 +25,7 @@ import javafx.collections.FXCollections;
  * @author Samuel Andrés (Geomatys)
  */
 public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPaneStub {
+
     
     public FXTraitementZoneVegetationPane(final TraitementZoneVegetation traitementZoneVegetation){
         super(traitementZoneVegetation);
