@@ -213,6 +213,7 @@ public class Session extends SessionCore {
                             new SimpleInternationalString("Open Street Map")));
                     cml.setVisible(false);
                     backgroundGroup.items().add(cml);
+                    break;
                 }
             } catch(Exception ex){
                 SirsCore.LOGGER.log(Level.WARNING, "Cannot retrieve background layers.", ex);

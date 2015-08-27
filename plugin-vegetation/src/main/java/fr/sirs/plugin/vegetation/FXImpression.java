@@ -1,6 +1,7 @@
 
 package fr.sirs.plugin.vegetation;
 
+import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
@@ -10,16 +11,20 @@ import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.util.SirsStringConverter;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -36,7 +41,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
@@ -45,23 +49,81 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
-import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javax.imageio.ImageIO;
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
+import javax.swing.SwingConstants;
+import org.apache.sis.storage.DataStoreException;
+import org.apache.sis.util.iso.SimpleInternationalString;
+import org.geotoolkit.display.PortrayalException;
+import org.geotoolkit.display2d.canvas.J2DCanvas;
+import org.geotoolkit.display2d.ext.DecorationXMLParser;
+import org.geotoolkit.display2d.ext.DefaultBackgroundTemplate;
+import org.geotoolkit.display2d.ext.legend.DefaultLegendTemplate;
+import org.geotoolkit.display2d.ext.legend.GraphicLegendJ2D;
+import org.geotoolkit.display2d.ext.legend.LegendTemplate;
+import org.geotoolkit.display2d.ext.scalebar.DefaultScaleBarTemplate;
+import org.geotoolkit.display2d.ext.scalebar.GraphicScaleBarJ2D;
+import org.geotoolkit.display2d.ext.scalebar.ScaleBarTemplate;
 import org.geotoolkit.display2d.service.CanvasDef;
 import org.geotoolkit.display2d.service.DefaultPortrayalService;
+import org.geotoolkit.display2d.service.PortrayalExtension;
 import org.geotoolkit.display2d.service.SceneDef;
 import org.geotoolkit.display2d.service.ViewDef;
+import org.geotoolkit.factory.Hints;
 import org.geotoolkit.internal.GeotkFX;
+import org.geotoolkit.map.CoverageMapLayer;
+import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
+import org.geotoolkit.map.MapLayer;
+import org.geotoolkit.osmtms.OSMTileMapClient;
+import org.geotoolkit.storage.coverage.CoverageReference;
+import org.geotoolkit.storage.coverage.CoverageStore;
+import org.geotoolkit.style.DefaultDescription;
 import org.odftoolkit.simple.TextDocument;
+import org.odftoolkit.simple.style.Font;
+import org.odftoolkit.simple.style.StyleTypeDefinitions;
+import org.odftoolkit.simple.table.Cell;
+import org.odftoolkit.simple.table.Table;
+import org.odftoolkit.simple.text.Paragraph;
+import org.opengis.util.GenericName;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
 public class FXImpression extends GridPane{
+
+    private static final LegendTemplate LEGEND_TEMPLATE = new DefaultLegendTemplate(
+                new DefaultBackgroundTemplate( //legend background
+                    new BasicStroke(0), //stroke
+                    Color.WHITE, //stroke paint
+                    new Color(1f, 1f, 1f, 0.5f), // fill paint
+                    new Insets(10, 10, 10, 10), //border margins
+                    0//round border
+                    ),
+                2, //gap between legend elements
+                null, //glyph size, we can let it to null for the legend to use the best size
+                new java.awt.Font("Serial",java.awt.Font.PLAIN,10), //Font used for style rules
+                false, // show layer names
+                new java.awt.Font("Serial",java.awt.Font.BOLD,12) //Font used for layer names
+                );
+
+    private static final ScaleBarTemplate SCALEBAR_TEMPLATE = new DefaultScaleBarTemplate(
+                            new DefaultBackgroundTemplate( //legend background
+                                new BasicStroke(0), //stroke
+                                Color.WHITE, //stroke paint
+                                new Color(1f, 1f, 1f, 0.5f), // fill paint
+                                new Insets(10, 10, 10, 10), //border margins
+                                0//round border
+                                ),
+                            new Dimension(300,30),6,
+                            false, 4, NumberFormat.getNumberInstance(),
+                            Color.BLACK, Color.BLACK, Color.WHITE,
+                            3,true,false, new java.awt.Font("Serial", java.awt.Font.PLAIN, 8),true,SI.METRE);
+
 
     @FXML private GridPane uiGrid;
     @FXML private ListView<Preview> uiTroncons;
@@ -210,30 +272,153 @@ public class FXImpression extends GridPane{
                         }
                     }
 
+                    final StringConverter strCvt = new SirsStringConverter();
 
                     //generation des cartes et table pour chaque année
+                    boolean first = true;
                     for(int year : years){
-                        Platform.runLater(()->uiProgressLabel.setText("Génération de la carte "+year));
-                        
+                        Platform.runLater(()->uiProgressLabel.setText("Génération pour l'année "+year));
+
+                        if(first){
+                            first = false;
+                        }else{
+                            final Paragraph breakPara = doc.addParagraph("");
+                            doc.addPageBreak(breakPara);
+                        }
+
+                        final Paragraph paragraph = doc.addParagraph(""+year);
+                        paragraph.setFont(new Font("Serial", StyleTypeDefinitions.FontStyle.BOLD, 18));
+
                         //generation de la carte
                         final MapContext context = MapBuilder.createContext();
-                        context.layers().add(VegetationSession.parcellePanifState(plan,year,parcelles));
+                        final MapContext legendContext = MapBuilder.createContext();
+                        context.layers().add(createOSMLayer());
 
-                        final CanvasDef cdef = new CanvasDef(new Dimension(1280, 1024), Color.WHITE);
-                        final SceneDef sdef = new SceneDef(context);
-                        final ViewDef vdef = new ViewDef(context.getBounds());
+                        for(MapLayer layer : session.getMapContext().layers()){
+                            if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
+                                FeatureMapLayer fml = (FeatureMapLayer) layer;
+                                fml = MapBuilder.createFeatureLayer(fml.getCollection(), fml.getStyle());
+                                context.layers().add(fml);
+                            }
+//                            else if(layer.getName().equalsIgnoreCase(CorePlugin.BORNE_LAYER_NAME)){
+//                                FeatureMapLayer fml = (FeatureMapLayer) layer;
+//                                fml = MapBuilder.createFeatureLayer(fml.getCollection(), fml.getStyle());
+//                                context.layers().add(fml);
+//                            }
+                        }
+                        final MapLayer parcelleLayer = VegetationSession.parcellePanifState(plan,year,parcelles);
+                        context.layers().add(parcelleLayer);
+                        legendContext.layers().add(parcelleLayer);
+
+                        final PortrayalExtension ext = new PortrayalExtension() {
+
+                            @Override
+                            public void completeCanvas(J2DCanvas jdc) throws PortrayalException {
+                                final LegendGraphic legend = new LegendGraphic(jdc, LEGEND_TEMPLATE,legendContext);
+                                legend.setPosition(SwingConstants.SOUTH_EAST);
+                                jdc.getContainer().getRoot().getChildren().add(legend);
+
+                                final GraphicScaleBarJ2D bar = new GraphicScaleBarJ2D(jdc);
+                                bar.setTemplate(SCALEBAR_TEMPLATE);
+                                bar.setPosition(SwingConstants.SOUTH_WEST);
+                                jdc.getContainer().getRoot().getChildren().add(bar);
+                            }
+                        };
+
+                        final Hints hints = new Hints();
+                        hints.add(new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON));
+                        hints.add(new RenderingHints(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC));
+
+                        final CanvasDef cdef = new CanvasDef(new Dimension(1000, 600), Color.WHITE, false);
+                        final SceneDef sdef = new SceneDef(context,hints,ext);
+                        final ViewDef vdef = new ViewDef(parcelleLayer.getBounds());
                         final BufferedImage mapImage = DefaultPortrayalService.portray(cdef, sdef, vdef);
 
                         final File mapFile = File.createTempFile("map", ".png");
-                        ImageIO.write(mapImage, "png", file);
-                        ODTUtils.insertImage(doc, mapFile.toURI());
+                        ImageIO.write(mapImage, "PNG", mapFile);
+                        ODTUtils.insertImage(doc, mapFile.toURI(), mapImage);
 
                         //on construit les listes
-                        final List<ParcelleVegetation> planifieTraitee = new ArrayList<>();
-                        final List<ParcelleVegetation> planifieNonTraitee = new ArrayList<>();
-                        final List<ParcelleVegetation> NonPlanifieTraitee = new ArrayList<>();
-                        final List<ParcelleVegetation> NonPlanifieNonTraitee = new ArrayList<>();
-                        //TODO
+                        final List<ParcelleVegetation> planifieTraitee = uiTraiteePlanif.isSelected() ? new ArrayList<>() : null ;
+                        final List<ParcelleVegetation> planifieNonTraitee = uiNonTraiteePlanif.isSelected() ? new ArrayList<>() : null ;
+                        final List<ParcelleVegetation> NonPlanifieTraitee = uiTraiteeNonPlanif.isSelected() ? new ArrayList<>() : null ;
+                        final List<ParcelleVegetation> NonPlanifieNonTraitee = uiNonTraiteeNonPlanif.isSelected() ? new ArrayList<>() : null ;
+
+                        for(ParcelleVegetation parcelle : parcelles){
+                            final boolean traitee = VegetationSession.isParcelleTraite(parcelle, year);
+                            final int planif = VegetationSession.getParcellePlanifState(plan, parcelle, year);
+
+                            if(traitee){
+                                if(planif!=0){
+                                    if(planifieTraitee!=null) planifieTraitee.add(parcelle);
+                                }else{
+                                    if(NonPlanifieTraitee!=null) NonPlanifieTraitee.add(parcelle);
+                                }
+                            }else{
+                                if(planif!=0){
+                                    if(planifieNonTraitee!=null) planifieNonTraitee.add(parcelle);
+                                }else{
+                                    if(NonPlanifieNonTraitee!=null) NonPlanifieNonTraitee.add(parcelle);
+                                }
+                            }
+                        }
+                        
+                        final int nbRow = Math.max(
+                                        Math.max(planifieTraitee==null       ? 0:planifieTraitee.size(),
+                                                 planifieNonTraitee==null    ? 0:planifieNonTraitee.size()),
+                                        Math.max(NonPlanifieTraitee==null    ? 0:NonPlanifieTraitee.size(),
+                                                 NonPlanifieNonTraitee==null ? 0:NonPlanifieNonTraitee.size())
+                                    );
+                        final int nbCol = (planifieTraitee==null?0:1)
+                                        + (planifieNonTraitee==null?0:1)
+                                        + (NonPlanifieTraitee==null?0:1)
+                                        + (NonPlanifieNonTraitee==null?0:1);
+
+                        //on fait le tableau
+                        final Paragraph paragraph2 = doc.addParagraph("");
+                        final Table table = doc.addTable(nbRow+1, nbCol);
+                        int col = 0;
+                        if(planifieTraitee!=null){
+                            Cell cell = table.getCellByPosition(col,0);
+                            cell.setStringValue("Planifiée/Traitée");
+                            for(int i=0,n=planifieTraitee.size();i<n;i++){
+                                cell = table.getCellByPosition(col,i+1);
+                                final ParcelleVegetation parcelle = planifieTraitee.get(i);
+                                cell.setStringValue(strCvt.toString(parcelle));
+                            }
+                            col++;
+                        }
+                        if(planifieNonTraitee!=null){
+                            Cell cell = table.getCellByPosition(col,0);
+                            cell.setStringValue("Planifiée/Non-traitée");
+                            for(int i=0,n=planifieNonTraitee.size();i<n;i++){
+                                cell = table.getCellByPosition(col,i+1);
+                                final ParcelleVegetation parcelle = planifieNonTraitee.get(i);
+                                cell.setStringValue(strCvt.toString(parcelle));
+                            }
+                            col++;
+                        }
+                        if(NonPlanifieTraitee!=null){
+                            Cell cell = table.getCellByPosition(col,0);
+                            cell.setStringValue("Non-planifiée/Traitée");
+                            for(int i=0,n=NonPlanifieTraitee.size();i<n;i++){
+                                cell = table.getCellByPosition(col,i+1);
+                                final ParcelleVegetation parcelle = NonPlanifieTraitee.get(i);
+                                cell.setStringValue(strCvt.toString(parcelle));
+                            }
+                            col++;
+                        }
+                        if(NonPlanifieNonTraitee!=null){
+                            Cell cell = table.getCellByPosition(col,0);
+                            cell.setStringValue("Non-planifiée/Non-traitée");
+                            for(int i=0,n=NonPlanifieNonTraitee.size();i<n;i++){
+                                cell = table.getCellByPosition(col,i+1);
+                                final ParcelleVegetation parcelle = NonPlanifieNonTraitee.get(i);
+                                cell.setStringValue(strCvt.toString(parcelle));
+                            }
+                            col++;
+                        }
+
 
                     }
 
@@ -257,6 +442,21 @@ public class FXImpression extends GridPane{
         }.start();
         
 
+    }
+
+    private static MapLayer createOSMLayer() throws MalformedURLException, DataStoreException{
+        final CoverageStore store = new OSMTileMapClient(new URL("http://tile.openstreetmap.org"), null, 18, true);
+        for (GenericName n : store.getNames()) {
+            final CoverageReference cr = store.getCoverageReference(n);
+            final CoverageMapLayer cml = MapBuilder.createCoverageLayer(cr);
+            cml.setName("Open Street Map");
+            cml.setDescription(new DefaultDescription(
+                    new SimpleInternationalString("Open Street Map"),
+                    new SimpleInternationalString("Open Street Map")));
+            cml.setOpacity(0.4);
+            return cml;
+        }
+        return null;
     }
 
 }

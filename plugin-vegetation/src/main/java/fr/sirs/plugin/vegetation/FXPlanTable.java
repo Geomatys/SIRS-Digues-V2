@@ -94,15 +94,13 @@ public class FXPlanTable extends BorderPane{
         //NOTE : on ne peut pas afficher plus de X ans sur la table
         //on considere que l'enregistrement est mauvais et on evite de bloquer l'interface
         int dateEnd = Math.min(plan.getAnneeFin(), dateStart+20);
-        headerNodes = new Region[1+dateEnd-dateStart+2];
 
         //nom des types
         final Label lblYear = new Label("Parcelle | Année");
         final Label lblSum;
         if(mode==PLANIFICATION){
             lblSum  = new Label("Somme*");
-        }
-        else{
+        }else{
             lblSum  = new Label("Somme");
         }
         lblYear.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -123,6 +121,7 @@ public class FXPlanTable extends BorderPane{
 
         //on ajoute la colonne 'Mode auto'
         if(mode==PLANIFICATION){
+            headerNodes = new Region[1+dateEnd-dateStart+2];
             //colonne vide
             gridTop.getColumnConstraints().add(new ColumnConstraints(USE_PREF_SIZE,USE_COMPUTED_SIZE,Double.MAX_VALUE,Priority.SOMETIMES,HPos.CENTER,true));
             final Label lblVide = new Label();
@@ -145,6 +144,8 @@ public class FXPlanTable extends BorderPane{
 
             gridTop   .add(lblAuto,       headerNodes.length-1, 0);
             gridBottom.add(new Label(""), headerNodes.length-1, 0);
+        }else{
+            headerNodes = new Region[1+dateEnd-dateStart];
         }
 
 

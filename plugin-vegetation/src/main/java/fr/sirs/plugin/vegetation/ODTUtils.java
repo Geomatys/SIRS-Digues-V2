@@ -52,7 +52,7 @@ import org.odftoolkit.simple.text.Paragraph;
  */
 public final class ODTUtils extends Static{
 
-    private static final int IMAGE_WIDTH = 140;
+    private static final int IMAGE_WIDTH = 190;
     private static DocumentTemplate DEFAULT_TEMPLATE;
 
     public static synchronized DocumentTemplate getDefaultTemplate() throws IOException{
@@ -236,7 +236,7 @@ public final class ODTUtils extends Static{
         insertImage(doc, imageUri, null);
     }
 
-    private static void insertImage(final TextDocument doc, final URI imageUri, BufferedImage image) throws Exception {
+    public static void insertImage(final TextDocument doc, final URI imageUri, BufferedImage image) throws Exception {
         final OdfContentDom contentDom = doc.getContentDom();
         final TextPElement lastPara = doc.newParagraph("");
         final OdfDrawFrame drawFrame = contentDom.newOdfElement(OdfDrawFrame.class);
