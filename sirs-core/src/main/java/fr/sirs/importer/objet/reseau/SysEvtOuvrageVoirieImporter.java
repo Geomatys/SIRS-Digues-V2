@@ -9,21 +9,21 @@ import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.OuvrageVoirie;
-import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.BorneDigueImporter;
-import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefOuvrageVoirie;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.SYS_EVT_OUVRAGE_VOIRIE;
 import static fr.sirs.importer.DbImporter.cleanNullString;
+import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TypeCoteImporter;
-import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
+import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -253,7 +253,8 @@ class SysEvtOuvrageVoirieImporter extends GenericReseauImporter<OuvrageVoirie> {
         }
 
         if (row.getInt(Columns.ID_TYPE_OUVRAGE_VOIRIE.toString()) != null) {
-            ouvrage.setTypeOuvrageVoirieId(typesOuvrageVoirie.get(row.getInt(Columns.ID_TYPE_OUVRAGE_VOIRIE.toString())).getId());
+            final RefOuvrageVoirie type = typesOuvrageVoirie.get(row.getInt(Columns.ID_TYPE_OUVRAGE_VOIRIE.toString()));// Vérification nécessaire car données corrompues dans la base Loire
+            if(type!=null) ouvrage.setTypeOuvrageVoirieId(type.getId());
         }
 
         ouvrage.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));

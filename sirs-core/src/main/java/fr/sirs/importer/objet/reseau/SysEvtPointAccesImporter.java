@@ -9,10 +9,6 @@ import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.OuvrageFranchissement;
-import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.BorneDigueImporter;
-import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefRevetement;
@@ -20,11 +16,15 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.RefUsageVoie;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.SYS_EVT_POINT_ACCES;
 import static fr.sirs.importer.DbImporter.cleanNullString;
+import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TypeCoteImporter;
-import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
+import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -254,11 +254,13 @@ class SysEvtPointAccesImporter extends GenericReseauImporter<OuvrageFranchisseme
         pointAcces.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
         if (row.getInt(Columns.ID_TYPE_REVETEMENT_HAUT.toString()) != null) {
-            pointAcces.setRevetementHautId(typesRevetement.get(row.getInt(Columns.ID_TYPE_REVETEMENT_HAUT.toString())).getId());
+            final RefRevetement revetement = typesRevetement.get(row.getInt(Columns.ID_TYPE_REVETEMENT_HAUT.toString()));
+            if(revetement!=null) pointAcces.setRevetementHautId(revetement.getId());// Vérification nécessaire car données corrompues dans la base Loire
         }
 
         if (row.getInt(Columns.ID_TYPE_REVETEMENT_BAS.toString()) != null) {
-            pointAcces.setRevetementBasId(typesRevetement.get(row.getInt(Columns.ID_TYPE_REVETEMENT_BAS.toString())).getId());
+            final RefRevetement revetement = typesRevetement.get(row.getInt(Columns.ID_TYPE_REVETEMENT_BAS.toString()));
+            if(revetement!=null) pointAcces.setRevetementBasId(revetement.getId());// Vérification nécessaire car données corrompues dans la base Loire
         }
 
         if (row.getInt(Columns.ID_TYPE_USAGE_VOIE.toString()) != null) {
