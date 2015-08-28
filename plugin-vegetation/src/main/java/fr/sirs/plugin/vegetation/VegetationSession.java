@@ -158,6 +158,37 @@ public final class VegetationSession {
         return planProperty;
     }
 
+    /**
+     * Calcul du coût planifié d'un plan pour une année.
+     *
+     * Pour une année de planification, le coût est calculé en faisant la somme
+     * de tous les coûts de traitements sur toutes les zones de la parcelle, dès
+     * que cette dernière est planifiée "traitée" pour cette année.
+     *
+     * Calcul du coût d'une zone :
+     * ==========================
+     * Le coût surfacique de traitement, entré dans les paramètres du plan, est
+     * multiplié par la survace de la zone (s'il s'agit d'une surface), ou bien
+     * ajouté tel quel s'il s'agit d'un arbre.
+     *
+     * Pour une zone de végétation, le traitement n'est pris en compte que s'il
+     * n'a pas été spécifié comme "hors-gestion".
+     *
+     * Prise en compte des traitements ponctuels et non-ponctuels :
+     * ============================================================
+     * Enfin, une zone de végétation est associée à deux traitements :
+     * un ponctuel et un non ponctuel.
+     *
+     * Les traitements ponctuels sont pris en compte pour toutes les années
+     * planifiées alors que le traitement ponctuel n'est pris en compte que la
+     * première année du plan, pourvu que la parcelle soit planifiée cette
+     * année-là.
+     *
+     * @param plan
+     * @param yearIndex
+     * @param parcelles
+     * @return
+     */
     public static double estimateCoutPlanification(PlanVegetation plan, int yearIndex, List<? extends ParcelleVegetation> parcelles){
         /*
         En mode planification le coût suppose que l'on fasse la somme de
@@ -226,7 +257,7 @@ public final class VegetationSession {
                                     p=indexedParams2.get(traitementPonctuelId);
                                 }
 
-                                if(p!=null) cout+=computeCost(zone, p);
+                                if(p!=null) cout+=computePlanifiedCost(zone, p);
                             }
                         }
 
@@ -247,7 +278,7 @@ public final class VegetationSession {
                                 p=indexedParams2.get(traitementId);
                             }
 
-                            if(p!=null) cout+=computeCost(zone, p);
+                            if(p!=null) cout+=computePlanifiedCost(zone, p);
                         }
                     }
                 }
@@ -257,9 +288,27 @@ public final class VegetationSession {
         return cout;
     }
 
-    private static double computeCost(final ZoneVegetation zone, final ParamCoutTraitementVegetation param){
+    /**
+     * Calcule la planification d'un coût sur une zone de végétation à partir du
+     * coût paramétré.
+     *
+     * Si la zone est un arbre, le coût est considéré comme unitaire pour la zone.
+     * Si la zone est d'un autre type, le coût est considéré comme surfacique et donc multiplié par la surface de la zone.
+     *
+     * @param zone
+     * @param param
+     * @return
+     */
+    private static double computePlanifiedCost(final ZoneVegetation zone, final ParamCoutTraitementVegetation param){
         if(zone.getGeometry()!=null){
-            return zone.getGeometry().getArea() * param.getCout();
+            // Dans le cas des arbres, le coût est unitaire
+            if(zone instanceof ArbreVegetation){
+                return param.getCout();
+            }
+            // Dans le cas des autres zones, le coût est surfacique
+            else{
+                return zone.getGeometry().getArea() * param.getCout();
+            }
         }
         else return 0.0;
     }

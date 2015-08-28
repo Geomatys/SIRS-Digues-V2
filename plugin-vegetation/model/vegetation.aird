@@ -279,7 +279,7 @@
               <styles xmi:type="notation:FilteringStyle" xmi:id="_MN2L0z90EeWGZND6LjOJ-g"/>
             </children>
             <styles xmi:type="notation:ShapeStyle" xmi:id="_MN1kwT90EeWGZND6LjOJ-g" fontName="Ubuntu" fontHeight="8"/>
-            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MN1kwj90EeWGZND6LjOJ-g" x="775" y="335" width="195" height="58"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MN1kwj90EeWGZND6LjOJ-g" x="775" y="335" width="195" height="83"/>
           </children>
           <children xmi:type="notation:Node" xmi:id="_ApwhkEG5EeWUWumUU2-UqA" type="2003" element="_An-Y4EG5EeWUWumUU2-UqA">
             <children xmi:type="notation:Node" xmi:id="_Ap65oEG5EeWUWumUU2-UqA" type="5007"/>
@@ -1615,7 +1615,7 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:EdgeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_ASa9oD9eEeWBxdNG5Zah_Q" name="ParamCoutTraitementVegetation" tooltipText="&#xA;WARNING : The generic type associated with the 'EJavaClass' classifier should have 1 type argument(s) to match the number of type parameter(s) of the classifier " outgoingEdges="_ATxBcD9eEeWBxdNG5Zah_Q _YRBqkETqEeWzM_dL22YB8A" incomingEdges="_VJQCkD9eEeWBxdNG5Zah_Q" width="12" height="10">
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_ASa9oD9eEeWBxdNG5Zah_Q" name="ParamCoutTraitementVegetation" tooltipText="" outgoingEdges="_ATxBcD9eEeWBxdNG5Zah_Q _YRBqkETqEeWzM_dL22YB8A" incomingEdges="_VJQCkD9eEeWBxdNG5Zah_Q" width="12" height="10">
         <target xmi:type="ecore:EClass" href="vegetation.ecore#//ParamCoutTraitementVegetation"/>
         <semanticElements xmi:type="ecore:EClass" href="vegetation.ecore#//ParamCoutTraitementVegetation"/>
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>

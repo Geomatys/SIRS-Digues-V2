@@ -360,7 +360,11 @@ public class FXPlanTable extends BorderPane{
         }
 
         private void update(){
-            final double cout = VegetationSession.estimateCoutPlanification(plan, index, tableParcelles);
+            
+            final double cout;
+            if(mode==PLANIFICATION)
+                cout = VegetationSession.estimateCoutPlanification(plan, index, tableParcelles);
+            else cout = 0.;
             final NumberFormat numberFormat = new DecimalFormat("0.00");
             label.setText(numberFormat.format(cout));
         }
