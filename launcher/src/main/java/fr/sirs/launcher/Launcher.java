@@ -8,13 +8,17 @@ import static fr.sirs.core.SirsCore.browseURL;
 import fr.sirs.core.plugins.PluginLoader;
 import fr.sirs.core.authentication.SIRSAuthenticator;
 import fr.sirs.util.SystemProxySelector;
+
+import java.io.IOException;
 import java.net.Authenticator;
+import java.net.MalformedURLException;
 import java.net.ProxySelector;
 import java.util.Optional;
 
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
+import org.ektorp.DbAccessException;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import javafx.application.Application;
@@ -140,15 +144,38 @@ public class Launcher extends Application {
                 primaryStage.setScene(new Scene(launcherPane));
                 splashStage.close();
                 primaryStage.show();
-            } catch (Exception ex) {
-                GeotkFX.newExceptionDialog("impossible de se connecter au serveur CouchDb local.", ex).showAndWait();
+            } catch (DbAccessException ex) {
+                GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
+                        "Veuillez réinstaller votre CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB", ex).showAndWait();
+                SirsCore.LOGGER.log(Level.SEVERE, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits adminstrateur.", ex);
+                System.exit(1);
+            } catch (RuntimeException ex) {
+                GeotkFX.newExceptionDialog("Impossible de se connecter au serveur CouchDb local.", ex).showAndWait();
+                SirsCore.LOGGER.log(Level.SEVERE, "Impossible d'initialiser le launcher avec l'URL fournie.", ex);
+                System.exit(1);
+            } catch (IOException ex) {
+                GeotkFX.newExceptionDialog(
+                        ex instanceof MalformedURLException ?
+                        "URL de connexion à la base de données couchDB invalide" :
+                        "Impossible de se connecter au serveur CouchDb local.", ex)
+                        .showAndWait();
                 SirsCore.LOGGER.log(Level.SEVERE, "Impossible d'initialiser le launcher.", ex);
                 System.exit(1);
             }
         });
 
         initer.setOnFailed((WorkerStateEvent event) -> {
-            GeotkFX.newExceptionDialog("Impossible de se connecter à la base EPSG.", event.getSource().getException()).showAndWait();
+            final Throwable tr = event.getSource().getException();
+            final String trText;
+            if (tr instanceof SecurityException) {
+                trText = "Configuration du proxy invalide.";
+            } else if (tr instanceof IllegalStateException) {
+                trText = "Problème rencontré au chargement d'un plugin, vérifier l'URL fournie";
+            } else {
+                trText = "Impossible de se connecter à la base EPSG.";
+            }
+
+            GeotkFX.newExceptionDialog(trText, event.getSource().getException()).showAndWait();
             System.exit(1);
         });
 

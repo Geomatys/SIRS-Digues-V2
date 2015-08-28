@@ -213,13 +213,9 @@ public class DatabaseRegistry {
      * provided user does not exists in given database, we will try to create it.
      * If we cannot, we'll ask user for authentication login.
      *
-     * @param couchDbUrl The database to connect to.
-     * @param user The user login for CouchDb connection.
-     * @param password The user password.
-     * @return A connection instance, with sufficient rights for read operations.
      * @throws IOException If input url is not valid, or a connection failure happens.
      * @throws DbAccessException If login information is invalid.
-     * @throws IllegalArgumentExeption If login information is null.
+     * @throws IllegalArgumentException If login information is null.
      */
     private void connect() throws IOException {
         final AuthenticationWallet wallet = AuthenticationWallet.getDefault();
@@ -374,8 +370,8 @@ public class DatabaseRegistry {
      * @param distant The source database name if it's in current service, complete URL otherwise.
      * @param local Name of target database. It have to be in current service.
      * @param continuous True if we must keep databases synchronized over time. False for one shot synchronization.
-     * @throws java.io.IOException If an error occurs while rying to connect to one database.
-     * @throws java.io.IllegalArgumentException If databases are incompatible (different SRID, or distant bdd is not a SIRS one).
+     * @throws IOException If an error occurs while rying to connect to one database.
+     * @throws IllegalArgumentException If databases are incompatible (different SRID, or distant bdd is not a SIRS one).
      */
     public void synchronizeSirsDatabases(String distant, String local, boolean continuous) throws IOException {
         Optional<SirsDBInfo> distantInfo = getInfo(distant);
@@ -669,6 +665,8 @@ public class DatabaseRegistry {
 
     /**
      * Configure CouchDB to force client authentication. Not avoidable.
+     *
+     * @throws DbAccessException if unable to authenticate on the couchDB with the given user.
      */
     private void setAuthenticationRequired() {
         String authValue;
