@@ -1,6 +1,5 @@
 package fr.sirs.importer;
 
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import fr.sirs.core.SirsCore;
@@ -10,6 +9,8 @@ import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.importer.documentTroncon.CoreTypeDocumentImporter;
+import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
 import fr.sirs.importer.link.DesordreEvenementHydrauImporter;
@@ -29,13 +30,11 @@ import fr.sirs.importer.link.PrestationIntervenantImporter;
 import fr.sirs.importer.link.photo.OrientationImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnPrImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnXyImporter;
-import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
-import fr.sirs.importer.documentTroncon.CoreTypeDocumentImporter;
 import fr.sirs.importer.objet.ObjetManager;
-import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import fr.sirs.importer.system.TypeDonneesSousGroupeImporter;
 import fr.sirs.importer.troncon.GardienTronconGestionImporter;
 import fr.sirs.importer.troncon.ProprietaireTronconGestionImporter;
+import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -51,12 +50,20 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
-import org.geotoolkit.factory.Hints;
-import org.geotoolkit.lang.Setup;
 import org.ektorp.support.CouchDbRepositorySupport;
+import org.geotoolkit.data.FeatureStore;
+import org.geotoolkit.esrigeodb.GeoDBStore;
+import org.geotoolkit.factory.Hints;
+import org.geotoolkit.feature.type.FeatureType;
+import org.geotoolkit.feature.type.GeometryDescriptor;
+import org.geotoolkit.lang.Setup;
+import org.geotoolkit.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.util.FactoryException;
+import org.opengis.util.GenericName;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -681,8 +688,36 @@ public class DbImporter {
     public ObjetManager getObjetManager(){
         return objetManager;
     }
-    
-    public void importation() throws IOException, AccessDbImporterException{
+
+    public static CoordinateReferenceSystem IMPORT_CRS;
+    public void importation(final File cartoDbFile) throws IOException, AccessDbImporterException{
+
+        FeatureStore store;
+        CoordinateReferenceSystem crs = null;
+        try {
+            store = new GeoDBStore("test", cartoDbFile.toURI().toURL());
+
+            for(final GenericName name : store.getNames()){
+                final FeatureType type = store.getFeatureType(name);
+                GeometryDescriptor geomDesc = type.getGeometryDescriptor();
+                if(geomDesc!=null){
+                    crs = geomDesc.getType().getCoordinateReferenceSystem();
+                    if(crs!=null) break;
+                }
+                
+            }
+        } catch (DataStoreException ex) {
+            Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        System.out.println("C.R.S : "+crs);
+        if(crs==null) try {
+            crs = CRS.decode("EPSG:27593", true);
+        } catch (FactoryException ex) {
+            Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        IMPORT_CRS=crs;
 /*
         => troncons
             => digues

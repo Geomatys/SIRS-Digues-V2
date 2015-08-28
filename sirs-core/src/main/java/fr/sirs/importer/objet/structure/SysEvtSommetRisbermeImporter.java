@@ -207,7 +207,7 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
         GeometryFactory geometryFactory = new GeometryFactory();
         final MathTransform lambertToRGF;
         try {
-            lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
+            lambertToRGF = CRS.findMathTransform(DbImporter.IMPORT_CRS, getOutputCrs(), true);
 
             try {
 

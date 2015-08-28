@@ -528,7 +528,13 @@ public class FXLauncherPane extends BorderPane {
                 try(final Database mainDb = DatabaseBuilder.open(mainDbFile);
                     final Database cartoDb = DatabaseBuilder.open(cartoDbFile)){
                     importer.setDatabase(mainDb, cartoDb, uiImportCRS.crsProperty().get());
-                    importer.importation();
+
+
+
+
+
+
+                    importer.importation(cartoDbFile);
                 }
 
                 // Opérations ultérieures à l'importation à réaliser par les plugins.

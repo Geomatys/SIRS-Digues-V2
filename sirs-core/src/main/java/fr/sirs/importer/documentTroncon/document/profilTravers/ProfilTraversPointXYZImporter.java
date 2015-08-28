@@ -8,7 +8,8 @@ import com.vividsolutions.jts.geom.Point;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.XYZLeveProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
-import static fr.sirs.importer.DbImporter.TableName.*;
+import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.PROFIL_EN_TRAVERS_XYZ;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -85,7 +86,7 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
             GeometryFactory geometryFactory = new GeometryFactory();
             final MathTransform lambertToRGF;
             try {
-                lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
+                lambertToRGF = CRS.findMathTransform(DbImporter.IMPORT_CRS, getOutputCrs(), true);
 
                 try {
 

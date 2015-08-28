@@ -3,40 +3,27 @@ package fr.sirs.core.component;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.stream.Stream;
-
-import org.ektorp.CouchDbConnector;
-import org.ektorp.CouchDbInstance;
-import org.ektorp.ReplicationCommand;
-import org.ektorp.http.StdHttpClient;
-import org.ektorp.impl.StdCouchDbInstance;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-
 import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.util.property.SirsPreferences;
+import static fr.sirs.util.property.SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.ProxySelector;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.ektorp.DbAccessException;
-import org.ektorp.http.RestTemplate;
-import org.geotoolkit.util.FileUtilities;
-
-import static fr.sirs.util.property.SirsPreferences.PROPERTIES.*;
-import java.io.InputStream;
-import java.net.ProxySelector;
-import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import org.apache.http.client.HttpClient;
@@ -44,12 +31,21 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.apache.sis.util.ArgumentChecks;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.CouchDbInstance;
+import org.ektorp.DbAccessException;
+import org.ektorp.ReplicationCommand;
 import org.ektorp.ReplicationStatus;
 import org.ektorp.ReplicationTask;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.PreemptiveAuthRequestInterceptor;
+import org.ektorp.http.RestTemplate;
+import org.ektorp.http.StdHttpClient;
+import org.ektorp.impl.StdCouchDbInstance;
 import org.ektorp.impl.StdReplicationTask;
+import org.geotoolkit.util.FileUtilities;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Create a wrapper for connections on a CouchDb service.
@@ -132,7 +128,7 @@ public class DatabaseRegistry {
      * @param passParam Password for given user.
      * @throws IOException If URL found in configuration is not valid, or a connection problem occurs.
      */
-    public DatabaseRegistry(final String urlParam, final String userParam, final String passParam) throws IOException {
+   public DatabaseRegistry(final String urlParam, final String userParam, final String passParam) throws IOException {
         if (urlParam == null || urlParam.equals(SirsPreferences.INSTANCE.getPropertySafe(COUCHDB_LOCAL_ADDR))) {
             this.couchDbUrl = toURL(SirsPreferences.INSTANCE.getProperty(COUCHDB_LOCAL_ADDR));
             isLocal = true;

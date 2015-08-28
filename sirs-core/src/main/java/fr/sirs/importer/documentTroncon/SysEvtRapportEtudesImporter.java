@@ -14,7 +14,8 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import static fr.sirs.importer.DbImporter.TableName.*;
+import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.SYS_EVT_RAPPORT_ETUDES;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.documentTroncon.document.rapportEtude.RapportEtudeImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
@@ -184,7 +185,7 @@ class SysEvtRapportEtudesImporter extends GenericPositionDocumentImporter<Positi
         GeometryFactory geometryFactory = new GeometryFactory();
         final MathTransform lambertToRGF;
         try {
-            lambertToRGF = CRS.findMathTransform(CRS.decode("EPSG:27563"), getOutputCrs(), true);
+            lambertToRGF = CRS.findMathTransform(DbImporter.IMPORT_CRS, getOutputCrs(), true);
 
             try {
 
