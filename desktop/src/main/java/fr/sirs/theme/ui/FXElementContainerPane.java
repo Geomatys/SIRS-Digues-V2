@@ -165,13 +165,13 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
                     final String className = "fr.sirs.theme.ui.FX" + newValue.getClass().getSimpleName() + "Pane";
                     final Class controllerClass = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
                     final Constructor cstr = controllerClass.getConstructor(newValue.getClass());
-                    specificThemePane = (FXElementPane) cstr.newInstance(newValue);
+                    SIRS.fxRunAndWait( ()-> {specificThemePane = (FXElementPane) cstr.newInstance(newValue);});
                     specificThemePane.disableFieldsProperty().bind(disableFieldsProperty());
                     if (specificThemePane instanceof FXUtilisateurPane) {
                         ((FXUtilisateurPane) specificThemePane).setAdministrable(ADMIN.equals(session.getRole()));
                     }
                     setCenter((Node) specificThemePane);
-                } catch (Exception ex) {
+                } catch (Throwable ex) {
                     throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
                 }
             }

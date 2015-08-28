@@ -35,20 +35,24 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
+import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.web.WebView;
+import javafx.util.Duration;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
 import org.ektorp.CouchDbConnector;
@@ -441,10 +445,26 @@ public class Session extends SessionCore {
                     @Override
                     public FXFreeTab call() throws Exception {
                         final FXFreeTab tab = new FXFreeTab();
-                        Node content = (Node) SIRS.generateEditionPane(element);
-                        if (content == null) {
-                            content = new BorderPane(new Label("Pas d'éditeur pour le type : " + element.getClass().getSimpleName()));
-                        }
+
+                        final ProgressIndicator wait = new ProgressIndicator();
+                        wait.setMaxSize(200, 200);
+                        wait.setProgress(-1);
+                        final BorderPane content = new BorderPane(wait);
+
+                        new Thread(){
+                            public void run() {
+                                Node edit = (Node) SIRS.generateEditionPane(element);
+                                if (edit == null) {
+                                    edit = new BorderPane(new Label("Pas d'éditeur pour le type : " + element.getClass().getSimpleName()));
+                                }
+                                final Node n = edit;
+                                FadeTransition ft = new FadeTransition(Duration.millis(1000), n);
+                                ft.setFromValue(0.0);
+                                ft.setToValue(1.0);
+                                Platform.runLater(()->{content.setCenter(n);ft.play();});
+                            }
+                        }.start();
+                        
 
                         tab.setContent(content);
                         if(element instanceof PositionDocument){

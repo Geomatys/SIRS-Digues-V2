@@ -35,7 +35,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ModifiableObservableListBase;
@@ -248,11 +255,13 @@ public final class SIRS extends SirsCore {
 
         if(bundle!=null) loader.setResources(bundle);
 
-        try {
-            loader.load();
-        } catch (IOException ex) {
-            throw new IllegalArgumentException(ex.getMessage(), ex);
-        }
+        fxRunAndWait(() -> {
+            try {
+                loader.load();
+            } catch (IOException ex) {
+                throw new IllegalArgumentException(ex.getMessage(), ex);
+            }
+        });
 
         candidate.getStylesheets().add(CSS_PATH);
     }
@@ -533,6 +542,53 @@ public final class SIRS extends SirsCore {
             endChange();
         }
 
+    }
+
+    public static void fxRunAndWait(final Executable run)
+            throws RuntimeException {
+        if (Platform.isFxApplicationThread()) {
+            try {
+                run.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            final Lock lock = new ReentrantLock();
+            final Condition condition = lock.newCondition();
+            final Throwable[] throwableWrapper = new Throwable[1];
+            lock.lock();
+            try {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        lock.lock();
+                        try {
+                            run.call();
+                        } catch (Throwable e) {
+                            throwableWrapper[0] = e;
+                        } finally {
+                            try {
+                                condition.signal();
+                            } finally {
+                                lock.unlock();
+                            }
+                        }
+                    }
+                });
+                condition.await();
+                if (throwableWrapper[0] != null) {
+                    throw new RuntimeException(throwableWrapper[0]);
+                }
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
+
+    public static interface Executable{
+        void call() throws Exception;
     }
 
 }

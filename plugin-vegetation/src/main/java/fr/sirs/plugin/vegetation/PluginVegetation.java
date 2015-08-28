@@ -12,6 +12,7 @@ import fr.sirs.core.model.ArbreVegetation;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.HerbaceeVegetation;
 import fr.sirs.core.model.InvasiveVegetation;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.ParamFrequenceTraitementVegetation;
 import fr.sirs.core.model.ParcelleTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
@@ -87,7 +88,7 @@ import org.opengis.style.Stroke;
  */
 public class PluginVegetation extends Plugin {
 
-    public static final String PARCELLE_LAYER_NAME = "Parcelles";
+    public static final String PARCELLE_LAYER_NAME = LabelMapper.get(ParcelleVegetation.class).mapClassName();
     public static final String VEGETATION_GROUP_NAME = "Végétation";
 
     private static final String NAME = "plugin-vegetation";
@@ -172,6 +173,7 @@ public class PluginVegetation extends Plugin {
             final BeanStore parcelleStore = new BeanStore(parcelleSupplier);
             final MapLayer parcelleLayer = MapBuilder.createFeatureLayer(parcelleStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(parcelleStore.getNames().iterator().next())));
+
             parcelleLayer.setName(PARCELLE_LAYER_NAME);
             parcelleLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             vegetationGroup.items().add(0,parcelleLayer);
@@ -185,7 +187,7 @@ public class PluginVegetation extends Plugin {
             final BeanStore herbeStore = new BeanStore(herbeSupplier);
             final MapLayer herbeLayer = MapBuilder.createFeatureLayer(herbeStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(herbeStore.getNames().iterator().next())));
-            herbeLayer.setName("Strates herbacée");
+            herbeLayer.setName(LabelMapper.get(HerbaceeVegetation.class).mapClassName());
             herbeLayer.setStyle(createPolygonStyle(Color.ORANGE));
             herbeLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             vegetationGroup.items().add(0,herbeLayer);
@@ -196,7 +198,7 @@ public class PluginVegetation extends Plugin {
             final BeanStore arbreStore = new BeanStore(arbreSupplier);
             final MapLayer arbreLayer = MapBuilder.createFeatureLayer(arbreStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(arbreStore.getNames().iterator().next())));
-            arbreLayer.setName("Arbres exceptionnels");
+            arbreLayer.setName(LabelMapper.get(ArbreVegetation.class).mapClassName());
             arbreLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             arbreLayer.setStyle(createArbreStyle());
             vegetationGroup.items().add(0,arbreLayer);
@@ -207,7 +209,7 @@ public class PluginVegetation extends Plugin {
             final BeanStore peuplementStore = new BeanStore(peuplementSupplier);
             final org.geotoolkit.data.session.Session peuplementSession = peuplementStore.createSession(true);
             final MapItem peuplementGroup = MapBuilder.createItem();
-            peuplementGroup.setName("Peuplements");
+            peuplementGroup.setName(LabelMapper.get(PeuplementVegetation.class).mapClassName());
             peuplementGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             vegetationGroup.items().add(0,peuplementGroup);
             //une couche pour chaque type
@@ -245,7 +247,7 @@ public class PluginVegetation extends Plugin {
             final org.geotoolkit.data.session.Session invasiveSession = invasiveStore.createSession(true);
             final MapItem invasivesGroup = MapBuilder.createItem();
             invasivesGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            invasivesGroup.setName("Invasives");
+            invasivesGroup.setName(LabelMapper.get(InvasiveVegetation.class).mapClassName());
             vegetationGroup.items().add(0,invasivesGroup);
             //une couche pour chaque type
             final AbstractSIRSRepository<RefTypeInvasiveVegetation> typeInvasiveRepo = getSession().getRepositoryForClass(RefTypeInvasiveVegetation.class);

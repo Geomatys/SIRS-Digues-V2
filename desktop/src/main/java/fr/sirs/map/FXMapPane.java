@@ -1,5 +1,6 @@
 package fr.sirs.map;
 
+import com.vividsolutions.jts.geom.Geometry;
 import fr.sirs.CorePlugin;
 import fr.sirs.FXMainFrame;
 import javafx.geometry.Insets;
@@ -16,14 +17,17 @@ import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.AvecBornesTemporelles;
+import fr.sirs.core.model.AvecGeometrie;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.PositionProfilTravers;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.map.style.FXStyleAggregatedPane;
+import fr.sirs.ui.Growl;
 import java.awt.Color;
 import java.awt.RenderingHints;
 import java.sql.Timestamp;
@@ -69,6 +73,8 @@ import org.geotoolkit.feature.type.NamesExt;
 import org.geotoolkit.filter.identity.DefaultFeatureId;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
+import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.geometry.jts.JTSEnvelope2D;
 import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
 import org.geotoolkit.gui.javafx.contexttree.MapItemFilterColumn;
 import org.geotoolkit.gui.javafx.contexttree.MapItemGlyphColumn;
@@ -424,12 +430,30 @@ public class FXMapPane extends BorderPane {
         protected Boolean call() throws Exception {
             final int maxProgress = 3;
             int currentProgress = 0;
-            
+
             updateProgress(currentProgress++, maxProgress);
             updateMessage("Recherche de la couche correspondante");
             
             final MapLayer container = getMapLayerForElement(toFocusOn);
             if (!(container instanceof FeatureMapLayer)) {
+
+                final Growl growlInfo = new Growl(Growl.Type.WARNING, "L'objet n'est présent dans aucune couche cartographique.");
+                Platform.runLater(growlInfo::showAndFade);
+
+                if(toFocusOn instanceof AvecGeometrie){
+                    Geometry geom = ((AvecGeometrie)toFocusOn).getGeometry();
+                    if(geom!=null){
+                        final JTSEnvelope2D env = JTS.toEnvelope(geom);
+                        final Envelope selectionEnvelope = SIRS.pseudoBuffer(env);
+                        final TaskManager.MockTask displayUpdate = new TaskManager.MockTask(() -> {
+                                uiMap1.getCanvas().setVisibleArea(selectionEnvelope);
+                                return null;
+                        });
+                        Platform.runLater(displayUpdate);
+                        displayUpdate.get();
+                    }
+                }
+
                 return false;
             }
 
@@ -445,7 +469,8 @@ public class FXMapPane extends BorderPane {
             
             updateProgress(currentProgress++, maxProgress);
             updateMessage("Calcul de la zone à afficher");
-            
+
+
             // Envelope spatiale
             final FeatureType fType = fLayer.getCollection().getFeatureType();
             final GenericName typeName = fType.getName();
