@@ -22,6 +22,10 @@ import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.RefTraitementVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
+import fr.sirs.plugin.vegetation.map.PlanifState;
+import static fr.sirs.plugin.vegetation.map.PlanifState.NON_PLANIFIE;
+import static fr.sirs.plugin.vegetation.map.PlanifState.PLANIFIE;
+import static fr.sirs.plugin.vegetation.map.PlanifState.PLANIFIE_PREMIERE_FOIS;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.net.URISyntaxException;
@@ -159,6 +163,27 @@ public final class VegetationSession {
     }
 
     /**
+     * Le cout d'exploitation d'une liste de parcelles pour une année est donné
+     * par la somme des couts des traitements de la parcelle dont la date
+     * correspond à l'année indiquée.
+     * @param parcelles
+     * @return
+     */
+    public static double coutExploitation(final int year, final List<ParcelleVegetation> parcelles){
+
+        double cost = 0.;
+
+        for(final ParcelleVegetation parcelle : parcelles){
+            for(final ParcelleTraitementVegetation traitement : parcelle.getTraitements()){
+                if(traitement.getDate()!=null && traitement.getDate().getYear()==year){
+                    cost+=traitement.getCout();
+                }
+            }
+        }
+        return cost;
+    }
+
+    /**
      * Calcul du coût planifié d'un plan pour une année.
      *
      * Pour une année de planification, le coût est calculé en faisant la somme
@@ -189,7 +214,7 @@ public final class VegetationSession {
      * @param parcelles
      * @return
      */
-    public static double estimateCoutPlanification(PlanVegetation plan, int yearIndex, List<? extends ParcelleVegetation> parcelles){
+    public static double estimateCoutPlanification(final PlanVegetation plan, final int yearIndex, final List<ParcelleVegetation> parcelles){
         /*
         En mode planification le coût suppose que l'on fasse la somme de
         tous les côuts de traitements des zones de la parcelle, dès que
@@ -315,6 +340,9 @@ public final class VegetationSession {
 
     /**
      * Retourne vrai si la parcelle est traité pour l'année donnée.
+     *
+     * Il suffit qu'un traitement ait eu lieu pour que la parcelle soit déclarée
+     * traitée dans l'année.
      * 
      * @param parcelle
      * @param year
@@ -325,6 +353,7 @@ public final class VegetationSession {
         for(ParcelleTraitementVegetation traitement : parcelle.getTraitements()){
             if(traitement.getDate()!=null && traitement.getDate().getYear() == year){
                 done = true;
+                break;
             }
         }
         return done;
@@ -332,28 +361,25 @@ public final class VegetationSession {
 
     /**
      * Retourne l'etat de planification de la parcelle pour l'année donnée.
-     * 0 : non planifié
-     * 1 : planifié, premiere fois
-     * 2 : planifié
      *
      * @param plan
      * @param parcelle
      * @param year
      * @return
      */
-    public static int getParcellePlanifState(PlanVegetation plan, ParcelleVegetation parcelle, int year){
+    public static PlanifState getParcellePlanifState(final PlanVegetation plan, final ParcelleVegetation parcelle, final int year){
         final List<Boolean> planifications = parcelle.getPlanifications();
 
         final int index = year - plan.getAnneeDebut();
-        if(planifications==null || planifications.size()<=index) return 0;
+        if(planifications==null || planifications.size()<=index) return NON_PLANIFIE;
 
-        if(!planifications.get(index)) return 0;
+        if(!planifications.get(index)) return NON_PLANIFIE;
 
         //on regarde si c'est la premiere année
-        for(int i=0;i<index-1;i++){
-            if(planifications.get(i)) return 2;
+        for(int i=0; i<index-1; i++){
+            if(planifications.get(i)) return PLANIFIE;
         }
-        return 1;
+        return PLANIFIE_PREMIERE_FOIS;
     }
 
     /**
@@ -555,7 +581,7 @@ public final class VegetationSession {
         for(ParcelleVegetation pv : parcelleRepo.getByPlanId(plan.getId())){
 
             //on regarde si c'est la premiere année
-            final int planifState = VegetationSession.getParcellePlanifState(plan, pv, year);
+            final PlanifState planifState = VegetationSession.getParcellePlanifState(plan, pv, year);
 
             final List<ZoneVegetation> vegetations = new ArrayList<>();
             vegetations.addAll(VegetationSession.INSTANCE.getHerbaceeRepo().getByParcelleId(pv.getDocumentId()));
@@ -567,14 +593,14 @@ public final class VegetationSession {
                 String etat = null;
 
                 if(zone.getTraitement()!=null){
-                    if(planifState == 1){
+                    if(planifState==PLANIFIE_PREMIERE_FOIS){
                         //premiere année
                         String tid = zone.getTraitement().getTraitementPonctuelId();
                         if(tid==null || tid.isEmpty()){
                             tid = zone.getTraitement().getTraitementId();
                         }
                         etat = trmts.get(tid);
-                    }else if(planifState == 1){
+                    }else if(planifState==PLANIFIE_PREMIERE_FOIS){
                         final String tid = zone.getTraitement().getTraitementId();
                         etat = trmts.get(tid);
                     }

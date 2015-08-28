@@ -10,6 +10,8 @@ import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
+import fr.sirs.plugin.vegetation.map.PlanifState;
+import static fr.sirs.plugin.vegetation.map.PlanifState.NON_PLANIFIE;
 import fr.sirs.util.SirsStringConverter;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -52,16 +54,13 @@ import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 import javax.imageio.ImageIO;
 import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
 import javax.swing.SwingConstants;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.iso.SimpleInternationalString;
 import org.geotoolkit.display.PortrayalException;
 import org.geotoolkit.display2d.canvas.J2DCanvas;
-import org.geotoolkit.display2d.ext.DecorationXMLParser;
 import org.geotoolkit.display2d.ext.DefaultBackgroundTemplate;
 import org.geotoolkit.display2d.ext.legend.DefaultLegendTemplate;
-import org.geotoolkit.display2d.ext.legend.GraphicLegendJ2D;
 import org.geotoolkit.display2d.ext.legend.LegendTemplate;
 import org.geotoolkit.display2d.ext.scalebar.DefaultScaleBarTemplate;
 import org.geotoolkit.display2d.ext.scalebar.GraphicScaleBarJ2D;
@@ -346,19 +345,19 @@ public class FXImpression extends GridPane{
 
                         for(ParcelleVegetation parcelle : parcelles){
                             final boolean traitee = VegetationSession.isParcelleTraite(parcelle, year);
-                            final int planif = VegetationSession.getParcellePlanifState(plan, parcelle, year);
+                            final PlanifState planif = VegetationSession.getParcellePlanifState(plan, parcelle, year);
 
                             if(traitee){
-                                if(planif!=0){
-                                    if(planifieTraitee!=null) planifieTraitee.add(parcelle);
-                                }else{
+                                if(planif==NON_PLANIFIE){
                                     if(NonPlanifieTraitee!=null) NonPlanifieTraitee.add(parcelle);
+                                }else {
+                                    if(planifieTraitee!=null) planifieTraitee.add(parcelle);
                                 }
                             }else{
-                                if(planif!=0){
-                                    if(planifieNonTraitee!=null) planifieNonTraitee.add(parcelle);
-                                }else{
+                                if(planif==NON_PLANIFIE){
                                     if(NonPlanifieNonTraitee!=null) NonPlanifieNonTraitee.add(parcelle);
+                                }else{
+                                    if(planifieNonTraitee!=null) planifieNonTraitee.add(parcelle);
                                 }
                             }
                         }

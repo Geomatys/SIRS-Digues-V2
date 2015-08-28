@@ -362,9 +362,17 @@ public class FXPlanTable extends BorderPane{
         private void update(){
             
             final double cout;
-            if(mode==PLANIFICATION)
+            if(mode==PLANIFICATION){
                 cout = VegetationSession.estimateCoutPlanification(plan, index, tableParcelles);
-            else cout = 0.;
+            }
+            else {
+                if(plan!=null){
+                    cout = VegetationSession.coutExploitation(plan.getAnneeDebut()+index, tableParcelles);
+                }
+                else {
+                    throw new IllegalStateException("Plan must not be null");
+                }
+            }
             final NumberFormat numberFormat = new DecimalFormat("0.00");
             label.setText(numberFormat.format(cout));
         }
