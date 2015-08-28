@@ -81,6 +81,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 import org.apache.sis.util.logging.Logging;
+import org.ektorp.DbAccessException;
 import org.ektorp.ReplicationStatus;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
 import org.geotoolkit.internal.GeotkFX;
@@ -392,6 +393,11 @@ public class FXLauncherPane extends BorderPane {
             //aller au panneau principal
             updateLocalDbList();
             uiTabPane.getSelectionModel().clearAndSelect(0);
+        } catch (DbAccessException ex) {
+            GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
+                    "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
+                    "puis relancer l'application.", ex).showAndWait();
+            LOGGER.log(Level.WARNING, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
         } catch (Exception ex) {
             SirsCore.LOGGER.log(Level.WARNING, "Impossible de synchroniser deux bases de données.", ex);
             GeotkFX.newExceptionDialog("Impossible de synchroniser les bases de données.", ex).show();
@@ -446,7 +452,11 @@ public class FXLauncherPane extends BorderPane {
                     uiTabPane.getSelectionModel().clearAndSelect(0);
                     updateLocalDbList();
                 });
-
+            } catch (DbAccessException ex) {
+                GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
+                        "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
+                        "puis relancer l'application.", ex).showAndWait();
+                LOGGER.log(Level.WARNING, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
             } catch (Exception ex) {
                 LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 Platform.runLater(() -> {
@@ -540,6 +550,11 @@ public class FXLauncherPane extends BorderPane {
             } catch (IOException | AccessDbImporterException ex) {
                 LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 GeotkFX.newExceptionDialog("Une erreur est survenue pendant la création de la base de données.", ex).showAndWait();
+            } catch (DbAccessException ex) {
+                GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
+                        "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
+                        "puis relancer l'application.", ex).showAndWait();
+                LOGGER.log(Level.WARNING, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
             } finally {
                 Platform.runLater(() -> {
                     uiImportButton.setDisable(false);
@@ -943,7 +958,7 @@ public class FXLauncherPane extends BorderPane {
                     // Disposition transitoire destinée à permettre l'effacement des bases pour une personne dont le mot de passe a précédemment été enregistré en binaire.
                     // Seulement en cas d'échec de l'indentification en hexadécimal
                     final String binaryEncryptedPassword = binaryMD5(password.getText());
-                    if(!allowedToDropDB){
+                    if (!allowedToDropDB) {
                         for (final Utilisateur utilisateur : utilisateurs) {
                             if (binaryEncryptedPassword.equals(utilisateur.getPassword())) {
                                 allowedToDropDB = true;
@@ -961,6 +976,11 @@ public class FXLauncherPane extends BorderPane {
                         alert.showAndWait();
                     }
 
+                } catch (DbAccessException ex) {
+                    GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
+                            "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
+                            "puis relancer l'application.", ex).showAndWait();
+                    SirsCore.LOGGER.log(Level.SEVERE, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
                 } catch (Exception ex) {
                     throw new SirsCoreRuntimeExecption(ex);
                 }

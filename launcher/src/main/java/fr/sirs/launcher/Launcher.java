@@ -146,8 +146,9 @@ public class Launcher extends Application {
                 primaryStage.show();
             } catch (DbAccessException ex) {
                 GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
-                        "Veuillez réinstaller votre CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB", ex).showAndWait();
-                SirsCore.LOGGER.log(Level.SEVERE, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits adminstrateur.", ex);
+                        "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
+                        "puis relancer l'application.", ex).showAndWait();
+                SirsCore.LOGGER.log(Level.SEVERE, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
                 System.exit(1);
             } catch (RuntimeException ex) {
                 GeotkFX.newExceptionDialog("Impossible de se connecter au serveur CouchDb local.", ex).showAndWait();
