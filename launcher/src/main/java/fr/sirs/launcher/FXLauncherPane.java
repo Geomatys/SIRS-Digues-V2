@@ -482,7 +482,7 @@ public class FXLauncherPane extends BorderPane {
     synchronized void createFromAccess(ActionEvent event) {
         final String dbName = cleanDbName(uiImportName.getText());
         if (dbName.isEmpty()) {
-            final Alert alert = new Alert(Alert.AlertType.ERROR, "Veuillez remplir le nom de la base de donnée.", ButtonType.OK);
+            final Alert alert = new Alert(Alert.AlertType.ERROR, "Veuillez remplir le nom de la base de données.", ButtonType.OK);
             alert.setResizable(true);
             alert.showAndWait();
             return;
@@ -527,12 +527,6 @@ public class FXLauncherPane extends BorderPane {
                 try(final Database mainDb = DatabaseBuilder.open(mainDbFile);
                     final Database cartoDb = DatabaseBuilder.open(cartoDbFile)){
                     importer.setDatabase(mainDb, cartoDb, uiImportCRS.crsProperty().get());
-
-
-
-
-
-
                     importer.importation(cartoDbFile);
                 }
 
@@ -560,10 +554,11 @@ public class FXLauncherPane extends BorderPane {
                 GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
                         "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
                         "puis relancer l'application.", ex).showAndWait();
+            } catch (RuntimeException ex) {
+                LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                GeotkFX.newExceptionDialog("Une erreur est survenue pendant l'import de la base.", ex).showAndWait();
             } finally {
-                Platform.runLater(() -> {
-                    uiImportButton.setDisable(false);
-                });
+                Platform.runLater(() -> uiImportButton.setDisable(false));
             }
         }).start();
     }
