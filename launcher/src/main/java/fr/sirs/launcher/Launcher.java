@@ -145,22 +145,22 @@ public class Launcher extends Application {
                 splashStage.close();
                 primaryStage.show();
             } catch (DbAccessException ex) {
+                SirsCore.LOGGER.log(Level.SEVERE, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
                 GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
                         "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
                         "puis relancer l'application.", ex).showAndWait();
-                SirsCore.LOGGER.log(Level.SEVERE, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
                 System.exit(1);
             } catch (RuntimeException ex) {
-                GeotkFX.newExceptionDialog("Impossible de se connecter au serveur CouchDb local.", ex).showAndWait();
                 SirsCore.LOGGER.log(Level.SEVERE, "Impossible d'initialiser le launcher avec l'URL fournie.", ex);
+                GeotkFX.newExceptionDialog("Impossible de se connecter au serveur CouchDb local.", ex).showAndWait();
                 System.exit(1);
             } catch (IOException ex) {
+                SirsCore.LOGGER.log(Level.SEVERE, "Impossible d'initialiser le launcher.", ex);
                 GeotkFX.newExceptionDialog(
                         ex instanceof MalformedURLException ?
                         "URL de connexion à la base de données couchDB invalide" :
                         "Impossible de se connecter au serveur CouchDb local.", ex)
                         .showAndWait();
-                SirsCore.LOGGER.log(Level.SEVERE, "Impossible d'initialiser le launcher.", ex);
                 System.exit(1);
             }
         });
