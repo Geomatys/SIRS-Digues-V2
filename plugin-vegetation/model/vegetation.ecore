@@ -116,6 +116,12 @@
         eType="#//TraitementZoneVegetation" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typePositionId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeCoteId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefCote"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_debut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date_fin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TraitementZoneVegetation">
     <eStructuralFeatures xsi:type="ecore:EReference" name="traitementPonctuelId" eType="#//RefTraitementVegetation"/>
