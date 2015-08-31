@@ -39,6 +39,6 @@ public class CreateHerbaceTool extends CreateVegetationPolygonTool<HerbaceeVeget
     };
 
     public CreateHerbaceTool(FXMap map) {
-        super(map,SPI, HerbaceeVegetation.class);
+        super(map, SPI, HerbaceeVegetation.class);
     }
 }

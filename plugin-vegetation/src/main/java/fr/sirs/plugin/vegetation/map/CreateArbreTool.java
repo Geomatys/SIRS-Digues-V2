@@ -9,7 +9,9 @@ import static fr.sirs.SIRS.CSS_PATH;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ArbreVegetation;
+import fr.sirs.core.model.GeometryType;
 import fr.sirs.core.model.ParcelleVegetation;
+import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
 import fr.sirs.util.ResourceInternationalString;
 import fr.sirs.util.SirsStringConverter;
@@ -118,7 +120,8 @@ public class CreateArbreTool extends AbstractEditionTool{
     }
 
     private void reset(){
-        arbre = new ArbreVegetation();
+        arbre = Injector.getSession().getElementCreator().createElement(ArbreVegetation.class);
+        arbre.setTraitement(Injector.getSession().getElementCreator().createElement(TraitementZoneVegetation.class));
         parcelle = null;
         lblParcelle.setText("Sélectionner une parcelle sur la carte");
         lblPoint.setText("");
@@ -220,6 +223,7 @@ public class CreateArbreTool extends AbstractEditionTool{
                 }
                 arbre.setExplicitGeometry(pt);
                 arbre.setGeometry(pt);
+                arbre.setGeometryType(GeometryType.PONCTUAL);
                 arbre.setValid(true);
                 arbre.setForeignParentId(parcelle.getDocumentId());
 

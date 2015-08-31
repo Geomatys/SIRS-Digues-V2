@@ -3,11 +3,14 @@ package fr.sirs.theme.ui;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.ArbreVegetation;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.GeometryType;
 import fr.sirs.core.model.InvasiveVegetation;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
+import fr.sirs.plugin.vegetation.PluginVegetation;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,10 +59,13 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
             // S'il s'agit d'une zone d'invasive ou de peuplement, il faut affecter le type par défaut et effectuer le paramétrage éventuel
 
             if(retrievedClass==PeuplementVegetation.class){
-                ((PeuplementVegetation) zone).setTypePeuplementId("");
+                ((PeuplementVegetation) zone).setTypePeuplementId(PluginVegetation.DEFAULT_PEUPLEMENT_VEGETATION_TYPE);
             }
             else if(retrievedClass==InvasiveVegetation.class){
-
+                ((InvasiveVegetation) zone).setTypeInvasive(PluginVegetation.DEFAULT_INVASIVE_VEGETATION_TYPE);
+            }
+            else if(retrievedClass==ArbreVegetation.class){
+                zone.setGeometryType(GeometryType.PONCTUAL);
             }
         }
         else {

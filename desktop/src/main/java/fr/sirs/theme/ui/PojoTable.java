@@ -8,6 +8,7 @@ import static fr.sirs.SIRS.AUTHOR_FIELD;
 import static fr.sirs.SIRS.COMMENTAIRE_FIELD;
 import static fr.sirs.SIRS.DATE_MAJ_FIELD;
 import static fr.sirs.SIRS.FOREIGN_PARENT_ID_FIELD;
+import static fr.sirs.SIRS.GEOMETRY_MODE_FIELD;
 import static fr.sirs.SIRS.LATITUDE_MAX_FIELD;
 import static fr.sirs.SIRS.LATITUDE_MIN_FIELD;
 import static fr.sirs.SIRS.LONGITUDE_MAX_FIELD;
@@ -160,7 +161,7 @@ public class PojoTable extends BorderPane {
     public static final String[] COLUMNS_TO_IGNORE = new String[] {
         AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD,
         LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD,
-        DATE_MAJ_FIELD, COMMENTAIRE_FIELD};
+        DATE_MAJ_FIELD, COMMENTAIRE_FIELD, GEOMETRY_MODE_FIELD};
 
     protected final Class pojoClass;
     protected final AbstractSIRSRepository repo;
