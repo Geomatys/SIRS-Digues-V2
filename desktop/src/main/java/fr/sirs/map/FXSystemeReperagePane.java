@@ -231,7 +231,12 @@ public class FXSystemeReperagePane extends BorderPane {
         final TronconDigue troncon = tronconProperty().get();
         if (troncon == null) return null;
 
-        final SortedSet<BorneDigue> bornes = new TreeSet<>((BorneDigue o1, BorneDigue o2) -> o1.getLibelle().compareToIgnoreCase(o2.getLibelle()));
+        final SortedSet<BorneDigue> bornes = new TreeSet<>((BorneDigue b1, BorneDigue b2) -> {
+            if (b1.getLibelle() == null) {
+                return 1;
+            }
+            return b1.getLibelle().compareToIgnoreCase(b2.getLibelle());
+        });
 
         final AbstractSIRSRepository<BorneDigue> repo = session.getRepositoryForClass(BorneDigue.class);
         bornes.addAll(repo.get(troncon.getBorneIds()));

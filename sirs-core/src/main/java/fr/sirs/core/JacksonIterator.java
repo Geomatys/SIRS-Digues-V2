@@ -3,6 +3,7 @@ package fr.sirs.core;
 import java.io.IOException;
 import java.util.Iterator;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewResult.Row;
 
@@ -36,6 +37,14 @@ public class JacksonIterator<T> implements Iterator<T>, AutoCloseable {
         final Row next = iterator.next();
         try {
             return objectMapper.reader(clazz).readValue(next.getValueAsNode());
+        } catch (JsonMappingException ex) {
+            // Fix for some javascript views, that put the value into the document node
+            // instead of the value node.
+            try {
+                return objectMapper.reader(clazz).readValue(next.getDocAsNode());
+            } catch (IOException e) {
+                throw new SirsCoreRuntimeExecption(e);
+            }
         } catch (IOException e) {
             throw new SirsCoreRuntimeExecption(e);
         }
