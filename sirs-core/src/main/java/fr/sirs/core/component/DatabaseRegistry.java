@@ -43,6 +43,7 @@ import org.ektorp.http.RestTemplate;
 import org.ektorp.http.StdHttpClient;
 import org.ektorp.impl.StdCouchDbInstance;
 import org.ektorp.impl.StdReplicationTask;
+import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.util.FileUtilities;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -128,7 +129,7 @@ public class DatabaseRegistry {
      * @param passParam Password for given user.
      * @throws IOException If URL found in configuration is not valid, or a connection problem occurs.
      */
-   public DatabaseRegistry(final String urlParam, final String userParam, final String passParam) throws IOException {
+    public DatabaseRegistry(final String urlParam, final String userParam, final String passParam) throws IOException {
         if (urlParam == null || urlParam.equals(SirsPreferences.INSTANCE.getPropertySafe(COUCHDB_LOCAL_ADDR))) {
             this.couchDbUrl = toURL(SirsPreferences.INSTANCE.getProperty(COUCHDB_LOCAL_ADDR));
             isLocal = true;
@@ -431,8 +432,15 @@ public class DatabaseRegistry {
                 .continuous(continuous).source(localPath).target(distant)
                 .createTarget(true).build();
 
-        couchDbInstance.replicate(cmd);
-        couchDbInstance.replicate(cmdRev);
+        try {
+            couchDbInstance.replicate(cmd);
+            couchDbInstance.replicate(cmdRev);
+        } catch (DbAccessException ex) {
+            SirsCore.LOGGER.log(Level.WARNING, "La réplication de la base a échoué.", ex);
+            GeotkFX.newExceptionDialog("La réplication de la base a échoué. Veuillez vérifier l'URL de la base distante saisie\n " +
+                    "ansi que les identifiants de la base CouchDB indiqués dans l'URL.", ex).show();
+            return;
+        }
 
         new SirsDBInfoRepository(localConnector).set(srid, distant);
     }

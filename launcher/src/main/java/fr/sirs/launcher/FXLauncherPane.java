@@ -12,7 +12,6 @@ import fr.sirs.SIRS;
 import static fr.sirs.SIRS.binaryMD5;
 import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.core.component.DatabaseRegistry;
@@ -394,12 +393,12 @@ public class FXLauncherPane extends BorderPane {
             updateLocalDbList();
             uiTabPane.getSelectionModel().clearAndSelect(0);
         } catch (DbAccessException ex) {
+            LOGGER.log(Level.WARNING, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
             GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
                     "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
                     "puis relancer l'application.", ex).showAndWait();
-            LOGGER.log(Level.WARNING, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
         } catch (Exception ex) {
-            SirsCore.LOGGER.log(Level.WARNING, "Impossible de synchroniser deux bases de données.", ex);
+            LOGGER.log(Level.WARNING, "Impossible de synchroniser deux bases de données.", ex);
             GeotkFX.newExceptionDialog("Impossible de synchroniser les bases de données.", ex).show();
         }
     }
@@ -453,10 +452,10 @@ public class FXLauncherPane extends BorderPane {
                     updateLocalDbList();
                 });
             } catch (DbAccessException ex) {
+                LOGGER.log(Level.WARNING, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
                 GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
                         "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
                         "puis relancer l'application.", ex).showAndWait();
-                LOGGER.log(Level.WARNING, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
             } catch (Exception ex) {
                 LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 Platform.runLater(() -> {
@@ -557,10 +556,10 @@ public class FXLauncherPane extends BorderPane {
                 LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 GeotkFX.newExceptionDialog("Une erreur est survenue pendant la création de la base de données.", ex).showAndWait();
             } catch (DbAccessException ex) {
+                LOGGER.log(Level.WARNING, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
                 GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
                         "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
                         "puis relancer l'application.", ex).showAndWait();
-                LOGGER.log(Level.WARNING, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
             } finally {
                 Platform.runLater(() -> {
                     uiImportButton.setDisable(false);
@@ -882,7 +881,7 @@ public class FXLauncherPane extends BorderPane {
                                         }
                                         updateLocalDbList();
                                     } catch (Exception ex) {
-                                        SirsCore.LOGGER.log(Level.WARNING, "Database copy from " + sourceDb + " to " + destDbName + " failed", ex);
+                                        LOGGER.log(Level.WARNING, "Database copy from " + sourceDb + " to " + destDbName + " failed", ex);
                                         GeotkFX.newExceptionDialog("Impossible de copier les bases de données.", ex).show();
                                     }
                                 }
@@ -983,10 +982,10 @@ public class FXLauncherPane extends BorderPane {
                     }
 
                 } catch (DbAccessException ex) {
+                    LOGGER.log(Level.SEVERE, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
                     GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
                             "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
                             "puis relancer l'application.", ex).showAndWait();
-                    SirsCore.LOGGER.log(Level.SEVERE, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
                 } catch (Exception ex) {
                     throw new SirsCoreRuntimeExecption(ex);
                 }
