@@ -359,9 +359,7 @@ public class FXPositionablePane extends BorderPane {
         pane.getButtonTypes().add(ButtonType.CLOSE);
         dialog.setDialogPane(pane);
         dialog.setTitle("Position");
-        dialog.setOnCloseRequest((Event event1) -> {
-            dialog.hide();
-        });
+        dialog.setOnCloseRequest(event1 -> dialog.hide());
         dialog.show();
     }
 

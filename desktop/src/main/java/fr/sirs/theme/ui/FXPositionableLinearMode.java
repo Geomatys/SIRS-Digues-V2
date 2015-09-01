@@ -126,7 +126,7 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
 
         uiSRs.getSelectionModel().selectedItemProperty().addListener(this::srsChange);
         
-        final ChangeListener chgListener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> coordChange();
+        final ChangeListener chgListener = (ObservableValue observable, Object oldValue, Object newValue) -> coordChange();
         groupStart.selectedToggleProperty().addListener(chgListener);
         groupEnd.selectedToggleProperty().addListener(chgListener);
         uiBorneStart.valueProperty().addListener(chgListener);
@@ -181,7 +181,7 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
         }
         uiSRs.setValue(defaultSR);
 
-        if(MODE.equals(mode)){
+        if(mode == null || MODE.equals(mode)){
             //on assigne les valeurs sans changement
             uiAvalStart.setSelected(pos.getBorne_debut_aval());
             uiAmontStart.setSelected(!pos.getBorne_debut_aval());

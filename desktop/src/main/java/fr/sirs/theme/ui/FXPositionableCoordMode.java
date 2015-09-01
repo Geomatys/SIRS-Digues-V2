@@ -170,7 +170,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
         dialog.setDialogPane(pane);
         dialog.setResizable(true);
         dialog.setTitle("Import de coordonnée");
-        dialog.setOnCloseRequest((Event event1) -> {dialog.hide();});
+        dialog.setOnCloseRequest(event1 -> dialog.hide());
         dialog.show();
     }
 
@@ -183,7 +183,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
         final Positionable pos = posProperty.get();
         final String mode = pos.getGeometryMode();
 
-        if(MODE.equals(mode)){
+        if(mode == null || MODE.equals(mode)){
             //on peut réutiliser les points enregistré dans la position
             final Point startPos = pos.getPositionDebut();
             final Point endPos = pos.getPositionFin();
