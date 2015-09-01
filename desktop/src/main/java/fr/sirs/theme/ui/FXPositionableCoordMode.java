@@ -13,12 +13,10 @@ import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
 
-import static fr.sirs.core.SirsCore.LOGGER;
 import static fr.sirs.theme.ui.FXPositionableMode.fxNumberValue;
 import fr.sirs.util.SirsStringConverter;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -30,7 +28,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -202,25 +199,15 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
                 uiLongitudeStart.getValueFactory().valueProperty().set(startPos.getX());
                 uiLatitudeStart.getValueFactory().valueProperty().set(startPos.getY());
             }else{
-                try {
-                    uiLongitudeStart.getValueFactory().setValue(null);
-                    uiLatitudeStart.getValueFactory().setValue(null);
-                } catch (NullPointerException e) {
-                    // On réinitialise la valeur en la mettant à null, mais le spinner va envoyer une NPE
-                    LOGGER.log(Level.FINE, e.getLocalizedMessage(), e);
-                }
+                uiLongitudeStart.getValueFactory().setValue(null);
+                uiLatitudeStart.getValueFactory().setValue(null);
             }
             if (endPos != null) {
                 uiLongitudeEnd.getValueFactory().valueProperty().set(endPos.getX());
                 uiLatitudeEnd.getValueFactory().valueProperty().set(endPos.getY());
             }else{
-                try {
-                    uiLongitudeEnd.getValueFactory().setValue(null);
-                    uiLatitudeEnd.getValueFactory().setValue(null);
-                } catch (NullPointerException e) {
-                    // On réinitialise la valeur en la mettant à null, mais le spinner va envoyer une NPE
-                    LOGGER.log(Level.FINE, e.getLocalizedMessage(), e);
-                }
+                uiLongitudeEnd.getValueFactory().setValue(null);
+                uiLatitudeEnd.getValueFactory().setValue(null);
             }
         }else if(pos.getGeometry()!=null){
             //on refait les points a partir de la géométrie
@@ -229,26 +216,16 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
             final Point geoPointStart = ps.getGeoPointStart();
             final Point geoPointEnd = ps.getGeoPointEnd();
 
-            try {
-                uiLongitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getX());
-                uiLatitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getY());
-                uiLongitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getX());
-                uiLatitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getY());
-            } catch (NullPointerException e) {
-                // On réinitialise la valeur en la mettant à null, mais le spinner va envoyer une NPE
-                LOGGER.log(Level.FINE, e.getLocalizedMessage(), e);
-            }
+            uiLongitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getX());
+            uiLatitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getY());
+            uiLongitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getX());
+            uiLatitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getY());
         }else{
             //pas de geometrie
-            try {
-                uiLongitudeStart.getValueFactory().setValue(null);
-                uiLatitudeStart.getValueFactory().setValue(null);
-                uiLongitudeEnd.getValueFactory().setValue(null);
-                uiLatitudeEnd.getValueFactory().setValue(null);
-            } catch (NullPointerException e) {
-                // On réinitialise la valeur en la mettant à null, mais le spinner va envoyer une NPE
-                LOGGER.log(Level.FINE, e.getLocalizedMessage(), e);
-            }
+            uiLongitudeStart.getValueFactory().setValue(null);
+            uiLatitudeStart.getValueFactory().setValue(null);
+            uiLongitudeEnd.getValueFactory().setValue(null);
+            uiLatitudeEnd.getValueFactory().setValue(null);
         }
 
         reseting = false;
