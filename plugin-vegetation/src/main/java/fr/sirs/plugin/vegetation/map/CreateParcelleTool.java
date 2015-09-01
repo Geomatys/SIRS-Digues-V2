@@ -114,6 +114,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
             public void handle(ActionEvent event) {
                 parcelle.setValid(true);
                 parcelle.setPlanId(plan.getId());
+                parcelle.setModeAuto(true);
                 
                 //calcule de la geometrie
                 parcelle.setGeometry(LinearReferencingUtilities.buildGeometry(
@@ -167,6 +168,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
 
     private void reset(){
         parcelle = parcelleRepo.create();
+        parcelle.setModeAuto(true);
         end.disableProperty().unbind();
         end.disableProperty().bind( parcelle.linearIdProperty().isNull()
                                 .or(parcelle.borneDebutIdProperty().isNull()

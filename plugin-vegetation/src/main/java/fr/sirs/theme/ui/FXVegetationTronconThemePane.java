@@ -72,6 +72,9 @@ public class FXVegetationTronconThemePane extends FXTronconThemePane {
                     // Association au troçon sélectionné
                     created.setForeignParentId(getForeignParentId());
 
+                    // Mode auto par défaut
+                    created.setModeAuto(true);
+
                     // Association au plan actif
                     created.setPlanId(planActif.getId());
 

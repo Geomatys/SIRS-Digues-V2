@@ -1305,9 +1305,14 @@ public class PojoTable extends BorderPane {
 
         private final ObservableList refList;
         private final Reference ref;
+        private final String name;
+
+        public String getName(){return name;}
 
         public PropertyColumn(final PropertyDescriptor desc) {
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
+
+            this.name = desc.getDisplayName();
 
             //choix de l'editeur en fonction du type de données
             boolean isEditable = true;

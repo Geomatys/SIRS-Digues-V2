@@ -11,6 +11,7 @@ import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.PLANIFICATION;
 import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.BooleanProperty;
@@ -194,10 +195,11 @@ public class FXPlanTable extends BorderPane{
             colIndex++;
 
             final CheckBox modeAuto = new ParcelleAutoCell(parcelle);
-            
+
+            final PlanifGroup planifGroup = new PlanifGroup();
             for(int year=dateStart; year<dateEnd; year++,colIndex++){
-                final CheckBox parcelleDateCell = new ParcelleDateCell(parcelle, year, year-dateStart, estCells[year-dateStart]);
-                parcelleDateCell.disableProperty().bind(modeAuto.selectedProperty());
+                final ParcelleDateCell parcelleDateCell = new ParcelleDateCell(parcelle, year, year-dateStart, estCells[year-dateStart], planifGroup);
+                parcelleDateCell.autoProperty().bind(modeAuto.selectedProperty());
                 gridCenter.add(parcelleDateCell, colIndex, rowIndex);
             }
 
@@ -241,6 +243,15 @@ public class FXPlanTable extends BorderPane{
     }
 
     /**
+     * Classe utilitaire permettant à une cellule de date de la planif de savoir
+     * quand la planif est modifiée depuis une autre cellule de date.
+     */
+    private class PlanifGroup {
+        private final BooleanProperty planifChangeProperty = new SimpleBooleanProperty(false);
+        public BooleanProperty planifChangeProperty() {return planifChangeProperty;}
+    }
+
+    /**
      * Cellule de date.
      * 
      */
@@ -250,8 +261,11 @@ public class FXPlanTable extends BorderPane{
         private final int year;
         private final int index;
         private final EstimationCell estCell;
+        private final BooleanProperty autoProperty = new SimpleBooleanProperty();
+        private final PlanifGroup planifGroup;
 
-        public ParcelleDateCell(final ParcelleVegetation parcelle, final int year,  final int index, EstimationCell estCell) {
+        public ParcelleDateCell(final ParcelleVegetation parcelle, final int year,  
+                final int index, final EstimationCell estCell, final PlanifGroup planifGroup) {
             disableProperty().bind(editable.not());
             this.parcelle = parcelle;
             this.year = year;
@@ -261,15 +275,66 @@ public class FXPlanTable extends BorderPane{
             setAlignment(Pos.CENTER);
             setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             setStyle(CHECKBOX_NOPADDING);
+            this.planifGroup = planifGroup;
 
             this.parcelle.getPlanifications().addListener(new WeakListChangeListener<>(this));
 
             setSelected(getVal());
             selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                setVal(newValue);
+
+                /*
+                Si on est en mode auto, il faut regarder si on cherche à
+                modifier une planification du passé ou une planification de
+                l'année en cours ou d'une année future.
+
+                Si on modifie la planif de l'année en cours ou d'une année
+                future, il suffit de recalculer la planification automatique à
+                partir de cette année. La cellule en cours écoutant la liste des
+                planifications, elle se mettra à jour.
+
+                Si on modifie une valeur du passé, cela doit rester sans effet
+                sur la planification.
+                */
+                if(autoProperty.get() 
+                        && newValue
+                        && this.index>=LocalDate.now().getYear()-plan.getAnneeDebut()){
+                    /*
+                    Comme la cellule écoute la liste, le changement d'état sélectionné
+                    provoquant la mise à jour de la liste des planifications déclenche
+                    à son tour le changement d'état sélectionné et ainsi de suite.
+
+                    Il faut donc veiller, avant de lancer une mise à jour de la liste,
+                    que celle-ci n'est pas déjà en cours.
+                    */
+                    if(!this.planifGroup.planifChangeProperty().get()){
+                        /*
+                        On bloque la mise à jour de la planif depuis les autres
+                        cellules de date de la planif lorque leur propriété de
+                        sélection sera modifiée du fait de la modification de la
+                        planification.
+                        */
+                        this.planifGroup.planifChangeProperty().set(true);
+                        PluginVegetation.resetAutoPlanif(this.parcelle, this.index);
+                        
+                        // On sauvegarde le nouvel état de la parcelle avec ses planifications
+                        save(parcelle);
+
+                        // On change l'état de planification en cours : FAUX
+                        this.planifGroup.planifChangeProperty().set(false);
+                    }
+
+                    
+                    updateColor();
+                    estCell.update();
+                }
+                else{
+                    setVal(newValue);
+                }
             });
             updateColor();
         }
+        
+        public BooleanProperty autoProperty(){return autoProperty;}
 
         /**
          * return the value of the planification if exists. If there is no planification at the cell index, then returns false.
@@ -282,11 +347,18 @@ public class FXPlanTable extends BorderPane{
             else return false;
         }
 
-        private void setVal(Boolean v){
+        private void setVal(final Boolean v){
             if(index<parcelle.getPlanifications().size()){
                 final Boolean old = parcelle.getPlanifications().set(index, v);
-                if(!Objects.equal(old,v)){
-                    save(parcelle);
+                if(!Objects.equal(old, v)){
+                    /*
+                    On ne sauvegarde la parcelle que si un calcul de la planif
+                    n'est pas en cours, car en cas de recalcul de la planif, on
+                    sauvegardera l'état de la parcelle à la fin du processus.
+                    */
+                    if(!this.planifGroup.planifChangeProperty().get()){
+                        save(parcelle);
+                    }
                     updateColor();
                     estCell.update();
                 }
@@ -314,7 +386,9 @@ public class FXPlanTable extends BorderPane{
 
         @Override
         public void onChanged(Change<? extends Boolean> c) {
-            setSelected(getVal());
+            if(getVal()!=isSelected()) {
+                setSelected(getVal());
+            }
         }
 
     }
@@ -326,6 +400,7 @@ public class FXPlanTable extends BorderPane{
 
         public ParcelleAutoCell(ParcelleVegetation parcelle) {
             setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            
             disableProperty().bind(editable.not());
             setSelected(parcelle.getModeAuto());
             selectedProperty().bindBidirectional(parcelle.modeAutoProperty());
@@ -333,11 +408,6 @@ public class FXPlanTable extends BorderPane{
             setPadding(new Insets(5, 5, 5, 5));
 
             selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                // Si on sélectionne le modeAuto, alors il faut calculer la planification automatique
-                if(newValue){
-                    PluginVegetation.resetAutoPlanif(parcelle);
-                }
-                // Dans tous les cas, il faut sauvegader la modification faite sur la parcelle ne serait-ce que pour mémoriser le mode de planification.
                 save(parcelle);
             });
         }

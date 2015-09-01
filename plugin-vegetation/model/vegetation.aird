@@ -1762,7 +1762,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_R12k8E_BEeWBDfC2tADsbQ" name="date_debut : EDate" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@6cf22b65{platform:/resource/plugin-vegetation/model/vegetation.ecore#//ZoneVegetation/date_debut}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_R12k8E_BEeWBDfC2tADsbQ" name="date_debut : EDate" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="vegetation.ecore#//ZoneVegetation/date_debut"/>
           <semanticElements xmi:type="ecore:EAttribute" href="vegetation.ecore#//ZoneVegetation/date_debut"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_UU9EoE_BEeWBDfC2tADsbQ" labelAlignment="LEFT">
@@ -1773,7 +1773,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_R15BMU_BEeWBDfC2tADsbQ" name="date_fin : EDate" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@37e61d{platform:/resource/plugin-vegetation/model/vegetation.ecore#//ZoneVegetation/date_fin}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_R15BMU_BEeWBDfC2tADsbQ" name="date_fin : EDate" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="vegetation.ecore#//ZoneVegetation/date_fin"/>
           <semanticElements xmi:type="ecore:EAttribute" href="vegetation.ecore#//ZoneVegetation/date_fin"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_VDgzwE_BEeWBDfC2tADsbQ" labelAlignment="LEFT">

@@ -507,44 +507,58 @@ public class PluginVegetation extends Plugin {
      * NOTE : This method do not save process result. You must save the parcelle
      * to make the modification persistant.
      *
+     * NOTE : Do nothing if initialIndex is negative.
+     *
      * @param parcelle must not be null.
+     * @param initialIndex Index correspondant à la date à partir de laquelle on
+     * souhaite faire la mise à jour. En pratique cela corresponda à l'année en
+     * cours de manière à ce que les modifications dans le plan n'aient pas d'
+     * impact sur les planifications des années passées.
      * @param planDuration
      * @throws NullPointerException if parcelle is null
      */
-    public static void resetAutoPlanif(final ParcelleVegetation parcelle, final int planDuration){
+    public static void resetAutoPlanif(final ParcelleVegetation parcelle, final int initialIndex, final int planDuration){
 
         // 1- on récupère la plus petite fréquence
         final int frequenceTraitement = PluginVegetation.frequenceTraitement(parcelle);
 
-        /*
-        On fait une nouvelle liste, de manière à ajouter d'un coup toutes les
-        modifications et ne pas déclencher à contretemps les écouteurs des
-        planifications sur le tableau de bord.
-        */
-        final List<Boolean> planifs = new ArrayList<>(0);
+        if(initialIndex>=0){
+            /*
+            On fait une nouvelle liste, de manière à ajouter d'un coup toutes les
+            modifications et ne pas déclencher à contretemps les écouteurs des
+            planifications sur le tableau de bord.
+            */
+            final List<Boolean> planifs = new ArrayList<>(parcelle.getPlanifications().subList(0, initialIndex));
 
-        // 3- on réinitialise les planifications
-        // a- Si on n'a pas de traitement sur zone de végétation, inclus dans la gestion, on ne planifie rien.
-        if(frequenceTraitement==0){
-            for(int i=0; i<planDuration; i++){
-                planifs.add(i, Boolean.FALSE);
+            // 3- on réinitialise les planifications
+            // a- Si on n'a pas de traitement sur zone de végétation, inclus dans la gestion, on ne planifie rien.
+            if(frequenceTraitement==0){
+                planifs.add(initialIndex, Boolean.TRUE);
+                for(int i=initialIndex+1; i<planDuration; i++){
+                    planifs.add(i, Boolean.FALSE);
+                }
             }
-        }
-        // b- Sinon, on initialise les planifications à la fréquence de traitement de la parcelle.
-        else {
-            for(int i=0; i<planDuration; i++){
-                planifs.add(i, i%frequenceTraitement==0);
+            // b- Sinon, on initialise les planifications à la fréquence de traitement de la parcelle.
+            else {
+                for(int i=initialIndex; i<planDuration; i++){
+                    planifs.add(i, (i-initialIndex)%frequenceTraitement==0);
+                }
             }
-        }
 
-        parcelle.setPlanifications(planifs);
+            parcelle.setPlanifications(planifs);
+        }
     }
 
     /**
-     * Use setAutoPlanifs(ParcelleVegetation parcelle, int planDuration) if you
+     * Use resetAutoPlanif(ParcelleVegetation parcelle, int planDuration, int initialIndex) if you
      * already know planDuration.
      *
      * @param parcelle
+     * @param initialIndex Index correspondant à la date à partir de laquelle on
+     * souhaite faire la mise à jour. En pratique cela corresponda à l'année en
+     * cours de manière à ce que les modifications dans le plan n'aient pas d'
+     * impact sur les planifications des années passées.
+     * 
      * @throws NullPointerException if parcelle is null
      * @throws IllegalStateException if:
      * 1) the planId of the parcelle is null,
@@ -552,7 +566,7 @@ public class PluginVegetation extends Plugin {
      * 3) no plan was found for the planId of the parcelle,
      * 4) plan duration is strictly negative.
      */
-    public static void resetAutoPlanif(final ParcelleVegetation parcelle){
+    public static void resetAutoPlanif(final ParcelleVegetation parcelle, final int initialIndex){
         final String planId = parcelle.getPlanId();
 
         if(planId==null) throw new IllegalStateException("planId must not be null");
@@ -568,8 +582,8 @@ public class PluginVegetation extends Plugin {
         final int planDuration = plan.getAnneeFin()-plan.getAnneeDebut();
 
         if(planDuration<0) throw new IllegalStateException("Plan duration must be positive.");
-        
-        resetAutoPlanif(parcelle, planDuration);
+
+        resetAutoPlanif(parcelle, initialIndex, planDuration);
     }
 
 
@@ -613,7 +627,10 @@ public class PluginVegetation extends Plugin {
                         repo.update(changed);
 
                         // Calcul proprement dit de la planification automatique de la parcelle
-                        PluginVegetation.resetAutoPlanif(parcelle);
+                        final PlanVegetation plan = Injector.getSession().getRepositoryForClass(PlanVegetation.class).get(parcelle.getPlanId());
+                        if(plan!=null){
+                            PluginVegetation.resetAutoPlanif(parcelle, LocalDate.now().getYear()-plan.getAnneeDebut());
+                        }
                         parcelleRepo.update(parcelle);// Il faut sauvegarder la parcelle car la méthode setAutoPlanifs ne s'en charge pas.
                     }
                 }
@@ -717,7 +734,10 @@ public class PluginVegetation extends Plugin {
     }
 
     /**
-     * Initialisation des planifications (doit être appelée à la création d'une parcelle, soit à partir de la carte, soit à partir du tableau des parcelles).
+     * Initialisation des planifications : ajustement de la taille de la liste
+     * (doit être appelée à la création d'une parcelle,
+     * soit à partir de la carte, soit à partir du tableau des parcelles,
+     * soit lors de la duplication d'un plan).
      * 
      * @param parcelle
      * @param dureePlan
@@ -748,7 +768,7 @@ public class PluginVegetation extends Plugin {
     public static void updatePlanifs(final PlanVegetation plan, final int beginShift){
         final ParcelleVegetationRepository parcelleRepo = (ParcelleVegetationRepository) Injector.getSession().getRepositoryForClass(ParcelleVegetation.class);
 
-        final int index = plan.getAnneeFin()-plan.getAnneeDebut();
+        final int duration = plan.getAnneeFin()-plan.getAnneeDebut();
         final List<ParcelleVegetation> parcelles = parcelleRepo.getByPlan(plan);
 
         for(final ParcelleVegetation parcelle : parcelles){
@@ -756,7 +776,7 @@ public class PluginVegetation extends Plugin {
 
             // Si on est en mode automatique, il faut recalculer les planifications
             if(parcelle.getModeAuto()){
-               PluginVegetation.resetAutoPlanif(parcelle, index);
+               PluginVegetation.resetAutoPlanif(parcelle, LocalDate.now().getYear()-plan.getAnneeDebut(), duration);
             }
 
             // Si on n'est pas en mode automatique, il faut décaler les planifications déjà construites.
@@ -798,13 +818,13 @@ public class PluginVegetation extends Plugin {
                 */
 
                 // S'il n'y a pas assez d'éléments, il faut en rajouter
-                while(planifs.size()<index){
+                while(planifs.size()<duration){
                     planifs.add(Boolean.FALSE);
                 }
 
                 // S'il y en a trop il faut en enlever
-                while(planifs.size()>index){
-                    planifs.remove(index);
+                while(planifs.size()>duration){
+                    planifs.remove(duration);
                 }
             }
         }

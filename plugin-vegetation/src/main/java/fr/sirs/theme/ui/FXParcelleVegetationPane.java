@@ -22,13 +22,10 @@ import javafx.scene.control.SpinnerValueFactory;
  */
 public class FXParcelleVegetationPane extends FXParcelleVegetationPaneStub {
 
-
-
     @FXML protected DatePicker ui_dernierTraitement;
     @FXML protected Spinner<Integer> ui_frequenceTraitement;
     @FXML protected Spinner<Integer> ui_anneePlanifiee;
     @FXML protected Label ui_anneePlanifieeInfo;
-
 
     protected FXParcelleVegetationPane(){
         super();
@@ -52,7 +49,6 @@ public class FXParcelleVegetationPane extends FXParcelleVegetationPaneStub {
     @Override
     protected void initFields(ObservableValue<? extends ParcelleVegetation > observableElement, ParcelleVegetation oldElement, ParcelleVegetation newElement) {
         super.initFields(observableElement, oldElement, newElement);
-
 
         // Calcul de la fréquence de traitement
         // Calcul de la dernière année de traitement
@@ -118,13 +114,4 @@ public class FXParcelleVegetationPane extends FXParcelleVegetationPaneStub {
             }
         }
     }
-
-    @Override
-    public void preSave(){
-        if(ui_modeAuto.isSelected()){
-            PluginVegetation.resetAutoPlanif(this.elementProperty.get());
-        }
-        super.preSave();
-    }
-    
 }

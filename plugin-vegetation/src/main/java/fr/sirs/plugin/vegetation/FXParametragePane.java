@@ -148,6 +148,13 @@ public class FXParametragePane extends SplitPane {
                 final Map<String, ParcelleVegetation> newParcelles = new HashMap<>();
                 for(final ParcelleVegetation oldParcelle : oldParcelles){
                     final ParcelleVegetation newParcelle = oldParcelle.copy();
+                    // Réinitialisation des planifications
+                    for(int i=0; i<newParcelle.getPlanifications().size(); i++){
+                        newParcelle.getPlanifications().set(i, Boolean.FALSE);
+                    }
+                    // Réajustement de la taille (normalement inutile, mais par précaution…
+                    PluginVegetation.initPlanifs(newParcelle, newPlan.getAnneeFin()-newPlan.getAnneeDebut());
+                    
                     newParcelle.setPlanId(newPlan.getId());
                     newParcelles.put(oldParcelle.getId(), newParcelle);
                 }
