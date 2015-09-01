@@ -7,6 +7,7 @@ import fr.sirs.core.component.ParcelleVegetationRepository;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.TronconDigue;
+import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.EXPLOITATION;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.PLANIFICATION;
 import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -266,7 +268,7 @@ public class FXPlanTable extends BorderPane{
 
         public ParcelleDateCell(final ParcelleVegetation parcelle, final int year,  
                 final int index, final EstimationCell estCell, final PlanifGroup planifGroup) {
-            disableProperty().bind(editable.not());
+            disableProperty().bind(editable.not().or(new SimpleObjectProperty<>(mode).isEqualTo(EXPLOITATION)));
             this.parcelle = parcelle;
             this.year = year;
             this.index = index;
@@ -280,57 +282,68 @@ public class FXPlanTable extends BorderPane{
             this.parcelle.getPlanifications().addListener(new WeakListChangeListener<>(this));
 
             setSelected(getVal());
-            selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
 
-                /*
-                Si on est en mode auto, il faut regarder si on cherche à
-                modifier une planification du passé ou une planification de
-                l'année en cours ou d'une année future.
+            /*
+            En planification on écoute les modification de sélection.
+            Il ne faut pas l'activer en exploitation sinon cela provoque des
+            conflits entre les deux panneaux.
 
-                Si on modifie la planif de l'année en cours ou d'une année
-                future, il suffit de recalculer la planification automatique à
-                partir de cette année. La cellule en cours écoutant la liste des
-                planifications, elle se mettra à jour.
+            !!! SEUL LE PANNEAU DE PLANIFICATION DOIT AVOIR LA POSSIBILITÉ DE
+            MODIFIER LES PLANIFS TOUT EN LES ÉCOUTANT !!!
+            */
+            if(mode==PLANIFICATION){
+                selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
 
-                Si on modifie une valeur du passé, cela doit rester sans effet
-                sur la planification.
-                */
-                if(autoProperty.get() 
-                        && newValue
-                        && this.index>=LocalDate.now().getYear()-plan.getAnneeDebut()){
                     /*
-                    Comme la cellule écoute la liste, le changement d'état sélectionné
-                    provoquant la mise à jour de la liste des planifications déclenche
-                    à son tour le changement d'état sélectionné et ainsi de suite.
+                    Si on est en mode auto, il faut regarder si on cherche à
+                    modifier une planification du passé ou une planification de
+                    l'année en cours ou d'une année future.
 
-                    Il faut donc veiller, avant de lancer une mise à jour de la liste,
-                    que celle-ci n'est pas déjà en cours.
+                    Si on modifie la planif de l'année en cours ou d'une année
+                    future, il suffit de recalculer la planification automatique à
+                    partir de cette année. La cellule en cours écoutant la liste des
+                    planifications, elle se mettra à jour.
+
+                    Si on modifie une valeur du passé, cela doit rester sans effet
+                    sur la planification.
                     */
-                    if(!this.planifGroup.planifChangeProperty().get()){
+                    if(autoProperty.get()
+                            && newValue
+                            && this.index>=LocalDate.now().getYear()-plan.getAnneeDebut()){
                         /*
-                        On bloque la mise à jour de la planif depuis les autres
-                        cellules de date de la planif lorque leur propriété de
-                        sélection sera modifiée du fait de la modification de la
-                        planification.
+                        Comme la cellule écoute la liste, le changement d'état sélectionné
+                        provoquant la mise à jour de la liste des planifications déclenche
+                        à son tour le changement d'état sélectionné et ainsi de suite.
+
+                        Il faut donc veiller, avant de lancer une mise à jour de la liste,
+                        que celle-ci n'est pas déjà en cours.
                         */
-                        this.planifGroup.planifChangeProperty().set(true);
-                        PluginVegetation.resetAutoPlanif(this.parcelle, this.index);
-                        
-                        // On sauvegarde le nouvel état de la parcelle avec ses planifications
-                        save(parcelle);
+                        if(!this.planifGroup.planifChangeProperty().get()){
+                            /*
+                            On bloque la mise à jour de la planif depuis les autres
+                            cellules de date de la planif lorque leur propriété de
+                            sélection sera modifiée du fait de la modification de la
+                            planification.
+                            */
+                            this.planifGroup.planifChangeProperty().set(true);
+                            PluginVegetation.resetAutoPlanif(this.parcelle, this.index);
 
-                        // On change l'état de planification en cours : FAUX
-                        this.planifGroup.planifChangeProperty().set(false);
+                            // On sauvegarde le nouvel état de la parcelle avec ses planifications
+                            save(parcelle);
+
+                            // On change l'état de planification en cours : FAUX
+                            this.planifGroup.planifChangeProperty().set(false);
+                        }
+
+
+                        updateColor();
+                        estCell.update();
                     }
-
-                    
-                    updateColor();
-                    estCell.update();
-                }
-                else{
-                    setVal(newValue);
-                }
-            });
+                    else{
+                        setVal(newValue);
+                    }
+                });
+            }
             updateColor();
         }
         
