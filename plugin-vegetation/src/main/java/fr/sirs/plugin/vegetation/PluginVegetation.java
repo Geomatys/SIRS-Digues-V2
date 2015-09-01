@@ -458,6 +458,8 @@ public class PluginVegetation extends Plugin {
      * la liste des zones de végétation afin d'examiner leurs deux traitements
      * associés (ponctuel et non ponctuel).
      *
+     * NOTE : Cette méthode ignore les parcelles d'invasives.
+     * 
      * Le traitement non ponctuel est associé à une certaine fréquence. La
      * fréquence de traitement de la parcelle est égale à la plus petite des
      * fréquences des traitements non ponctuels des zones de végétation de la
@@ -471,7 +473,7 @@ public class PluginVegetation extends Plugin {
      * @param parcelle
      * @return
      */
-    public static int frequenceTraitement(final ParcelleVegetation parcelle){
+    public static int frequenceTraitementPlanifie(final ParcelleVegetation parcelle){
 
         // On initialise la plus courte fréquence à la durée du plan
         int plusCourteFrequence = 0;
@@ -480,7 +482,7 @@ public class PluginVegetation extends Plugin {
         final List<String> frequenceIds = new ArrayList<>();
         final ObservableList<? extends ZoneVegetation> zones = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), Injector.getSession());
         for(final ZoneVegetation zone : zones){
-            if(zone.getTraitement()!=null && !zone.getTraitement().getHorsGestion()){
+            if(zone.getTraitement()!=null && !zone.getTraitement().getHorsGestion() && !(zone instanceof InvasiveVegetation)){
                 final String frequenceId = zone.getTraitement().getFrequenceId();
                 if(frequenceId!=null) frequenceIds.add(frequenceId);
             }
@@ -520,7 +522,7 @@ public class PluginVegetation extends Plugin {
     public static void resetAutoPlanif(final ParcelleVegetation parcelle, final int initialIndex, final int planDuration){
 
         // 1- on récupère la plus petite fréquence
-        final int frequenceTraitement = PluginVegetation.frequenceTraitement(parcelle);
+        final int frequenceTraitement = PluginVegetation.frequenceTraitementPlanifie(parcelle);
 
         if(initialIndex>=0){
             /*
@@ -713,7 +715,7 @@ public class PluginVegetation extends Plugin {
      * @return
      */
     public static boolean isCoherent(final ParcelleVegetation parcelle){
-        return isCoherent(parcelle, frequenceTraitement(parcelle));
+        return isCoherent(parcelle, frequenceTraitementPlanifie(parcelle));
     }
 
     /**

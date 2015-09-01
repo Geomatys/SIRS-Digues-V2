@@ -55,7 +55,7 @@ public class FXParcelleVegetationPane extends FXParcelleVegetationPaneStub {
         // Calcul de l'année planifiée
 
         ui_dernierTraitement.setValue(PluginVegetation.dernierTraitement(newElement));
-        ui_frequenceTraitement.getValueFactory().setValue(PluginVegetation.frequenceTraitement(newElement));
+        ui_frequenceTraitement.getValueFactory().setValue(PluginVegetation.frequenceTraitementPlanifie(newElement));
 
         if(newElement.getPlanId()!=null){
             try{
