@@ -12,10 +12,14 @@ import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
+
+import static fr.sirs.core.SirsCore.LOGGER;
 import static fr.sirs.theme.ui.FXPositionableMode.fxNumberValue;
 import fr.sirs.util.SirsStringConverter;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -110,14 +114,21 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
             }
         };
 
+        // Listener pour les changements sur les points de début et de fin, dans le cadre de l'import de bornes par exemple.
+        final ChangeListener<Point> pointListener = (obs, oldVal, newVal) ->  updateFields();
+
         posProperty.addListener(new ChangeListener<Positionable>() {
             @Override
             public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
-                if(oldValue!=null){
+                if (oldValue != null) {
                     oldValue.geometryProperty().removeListener(geomListener);
+                    oldValue.positionDebutProperty().removeListener(pointListener);
+                    oldValue.positionFinProperty().removeListener(pointListener);
                 }
-                if(newValue!=null){
+                if (newValue != null) {
                     newValue.geometryProperty().addListener(geomListener);
+                    newValue.positionDebutProperty().addListener(pointListener);
+                    newValue.positionFinProperty().addListener(pointListener);
                     updateFields();
                 }
             }
@@ -191,15 +202,25 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
                 uiLongitudeStart.getValueFactory().valueProperty().set(startPos.getX());
                 uiLatitudeStart.getValueFactory().valueProperty().set(startPos.getY());
             }else{
-                uiLongitudeStart.getValueFactory().setValue(null);
-                uiLatitudeStart.getValueFactory().setValue(null);
+                try {
+                    uiLongitudeStart.getValueFactory().setValue(null);
+                    uiLatitudeStart.getValueFactory().setValue(null);
+                } catch (NullPointerException e) {
+                    // On réinitialise la valeur en la mettant à null, mais le spinner va envoyer une NPE
+                    LOGGER.log(Level.FINE, e.getLocalizedMessage(), e);
+                }
             }
             if (endPos != null) {
                 uiLongitudeEnd.getValueFactory().valueProperty().set(endPos.getX());
                 uiLatitudeEnd.getValueFactory().valueProperty().set(endPos.getY());
             }else{
-                uiLongitudeEnd.getValueFactory().setValue(null);
-                uiLatitudeEnd.getValueFactory().setValue(null);
+                try {
+                    uiLongitudeEnd.getValueFactory().setValue(null);
+                    uiLatitudeEnd.getValueFactory().setValue(null);
+                } catch (NullPointerException e) {
+                    // On réinitialise la valeur en la mettant à null, mais le spinner va envoyer une NPE
+                    LOGGER.log(Level.FINE, e.getLocalizedMessage(), e);
+                }
             }
         }else if(pos.getGeometry()!=null){
             //on refait les points a partir de la géométrie
@@ -208,16 +229,26 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
             final Point geoPointStart = ps.getGeoPointStart();
             final Point geoPointEnd = ps.getGeoPointEnd();
 
-            uiLongitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getX());
-            uiLatitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getY());
-            uiLongitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getX());
-            uiLatitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getY());
+            try {
+                uiLongitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getX());
+                uiLatitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getY());
+                uiLongitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getX());
+                uiLatitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getY());
+            } catch (NullPointerException e) {
+                // On réinitialise la valeur en la mettant à null, mais le spinner va envoyer une NPE
+                LOGGER.log(Level.FINE, e.getLocalizedMessage(), e);
+            }
         }else{
             //pas de geometrie
-            uiLongitudeStart.getValueFactory().setValue(0.0);
-            uiLatitudeStart.getValueFactory().setValue(0.0);
-            uiLongitudeEnd.getValueFactory().setValue(0.0);
-            uiLatitudeEnd.getValueFactory().setValue(0.0);
+            try {
+                uiLongitudeStart.getValueFactory().setValue(null);
+                uiLatitudeStart.getValueFactory().setValue(null);
+                uiLongitudeEnd.getValueFactory().setValue(null);
+                uiLatitudeEnd.getValueFactory().setValue(null);
+            } catch (NullPointerException e) {
+                // On réinitialise la valeur en la mettant à null, mais le spinner va envoyer une NPE
+                LOGGER.log(Level.FINE, e.getLocalizedMessage(), e);
+            }
         }
 
         reseting = false;

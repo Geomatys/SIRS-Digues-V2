@@ -109,7 +109,7 @@ public class FXPositionablePane extends BorderPane {
         //on change les panneaux visibles pour le mode actif
         group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
             if(oldValue!=null){
-                final FXPositionableMode mode = (FXPositionableMode) newValue.getUserData();
+                final FXPositionableMode mode = (FXPositionableMode) oldValue.getUserData();
                 uiContainer.setCenter(null);
                 uiExtraContainer.getChildren().clear();
                 mode.disablingProperty().unbind();
