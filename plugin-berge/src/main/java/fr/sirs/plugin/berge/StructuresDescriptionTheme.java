@@ -12,6 +12,14 @@ import javafx.scene.layout.BorderPane;
 public final class StructuresDescriptionTheme extends AbstractPluginsButtonTheme {
     public StructuresDescriptionTheme() {
         super("Description des ouvrages", "Description des ouvrages", null);
+        getSubThemes().add(new StructureElementTheme());
+        getSubThemes().add(new ReseauxVoirieTheme());
+        getSubThemes().add(new ReseauxOuvrageTheme());
+        getSubThemes().add(new DesordresTheme());
+        getSubThemes().add(new PrestationsTheme());
+        getSubThemes().add(new MesureEventHydroTheme());
+        getSubThemes().add(new DocumentTheme());
+
     }
 
     @Override
