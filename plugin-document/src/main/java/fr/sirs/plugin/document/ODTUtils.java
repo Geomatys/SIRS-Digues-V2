@@ -215,38 +215,41 @@ public class ODTUtils {
     public static void write(final RapportModeleDocument item, File file, Map<String,Objet> elements, final Label uiProgressLabel, final String prefix) throws Exception {
         final List parts = new ArrayList<>();
         final File tempFolder = new File(file.getParentFile(),"temp_"+file.getName().split("\\.")[0]);
-        for (RapportSectionDocument section : item.sections) {
-            Platform.runLater(()->uiProgressLabel.setText(prefix + "Génération de la section : "+section.getLibelle()));
-            switch (section.getType()) {
-                case DOCUMENT : 
-                    final TextDocument doc = TextDocument.newTextDocument();
-                    doc.addParagraph(section.getLibelle() + "\n");
-                    File f = new File(section.getDocumentPath());
-                    concatenateFile(doc, f);
-                    doc.addParagraph("\n");
-                    parts.add(doc);
-                    break;
-                case TABLE :
-                    parts.addAll(generateTable(section, elements));
-                    break;
-                case FICHE :    
-                    final AtomicInteger inc = new AtomicInteger();
-                    tempFolder.mkdir();
-                    parts.addAll(generateFiches(section, elements, tempFolder, inc));
-                    break;
+        try {
+            for (RapportSectionDocument section : item.sections) {
+                Platform.runLater(()->uiProgressLabel.setText(prefix + "Génération de la section : "+section.getLibelle()));
+                switch (section.getType()) {
+                    case DOCUMENT : 
+                        final TextDocument doc = TextDocument.newTextDocument();
+                        doc.addParagraph(section.getLibelle() + "\n");
+                        File f = new File(section.getDocumentPath());
+                        concatenateFile(doc, f);
+                        doc.addParagraph("\n");
+                        parts.add(doc);
+                        break;
+                    case TABLE :
+                        parts.addAll(generateTable(section, elements));
+                        break;
+                    case FICHE :    
+                        final AtomicInteger inc = new AtomicInteger();
+                        tempFolder.mkdir();
+                        parts.addAll(generateFiches(section, elements, tempFolder, inc));
+                        break;
+                }
             }
+
+            Platform.runLater(()->uiProgressLabel.setText(prefix + "Aggrégation des sections"));
+            final TextDocument doc = TextDocument.newTextDocument();
+            for(int i=0,n=parts.size();i<n;i++){
+                final int I = i;
+                Platform.runLater(()->uiProgressLabel.setText(prefix + "Aggrégation des sections "+I+"/"+n));
+                ODTUtils.concatenateFile(doc, parts.get(i));
+            }
+            doc.save(file);
+            Platform.runLater(()->uiProgressLabel.setText(prefix + "Génération terminée"));
+        } finally {
+            FileUtilities.deleteDirectory(tempFolder);
         }
-        
-        Platform.runLater(()->uiProgressLabel.setText(prefix + "Aggrégation des sections"));
-        final TextDocument doc = TextDocument.newTextDocument();
-        for(int i=0,n=parts.size();i<n;i++){
-            final int I = i;
-            Platform.runLater(()->uiProgressLabel.setText(prefix + "Aggrégation des sections "+I+"/"+n));
-            ODTUtils.concatenateFile(doc, parts.get(i));
-        }
-        FileUtilities.deleteDirectory(tempFolder);
-        doc.save(file);
-        Platform.runLater(()->uiProgressLabel.setText(prefix + "Génération terminée"));
     }
     
     private static List generateFiches(RapportSectionDocument section,
@@ -296,7 +299,7 @@ public class ODTUtils {
             }else{
                 generateReport(templateDoc, ele, f);
             }
-
+            
             parts.add(f);
 
             if(ele instanceof ObjetPhotographiable){

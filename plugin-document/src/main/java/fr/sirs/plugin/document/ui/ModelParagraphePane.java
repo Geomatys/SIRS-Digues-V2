@@ -5,9 +5,11 @@ import fr.sirs.SIRS;
 import fr.sirs.core.model.RapportModeleDocument;
 import fr.sirs.core.model.RapportSectionDocument;
 import fr.sirs.core.component.SQLQueryRepository;
+import fr.sirs.core.component.TemplateOdtRepository;
 import fr.sirs.core.model.PhotoChoiceDocument;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.SectionTypeDocument;
+import fr.sirs.core.model.TemplateOdt;
 import fr.sirs.util.SirsStringConverter;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -25,18 +27,21 @@ import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
+import org.apache.sis.util.logging.Logging;
+import org.ektorp.DocumentNotFoundException;
 
 
 /**
@@ -62,6 +67,8 @@ public class ModelParagraphePane extends BorderPane {
     public static final String SELECT_DOC     = "Sélectionner un document";
     public static final String GENERATE_TAB   = "Générer un tableau";
     public static final String GENERATE_SHEET = "Générer des fiches";
+    
+    private static final Logger LOGGER = Logging.getLogger(ModelParagraphePane.class);
     
     public ModelParagraphePane(final Pane parent, final RapportModeleDocument model, final RapportSectionDocument section, final int index) {
         SIRS.loadFXML(this);
@@ -130,6 +137,48 @@ public class ModelParagraphePane extends BorderPane {
                 }
             });
             
+            final TemplateOdtRepository templateRepo = Injector.getBean(TemplateOdtRepository.class);
+            final ComboBox<TemplateOdt> templateBox = new ComboBox<>();
+            templateBox.setId("templateBox");
+            final ObservableList templates = FXCollections.observableArrayList();
+            templates.addAll(templateRepo.getAll());
+            templateBox.setItems(templates);
+            templateBox.setCellFactory(new Callback() {
+
+                @Override
+                public ListCell call(Object param) {
+                    return new ListCell(){
+                        @Override
+                        protected void updateItem(Object item, boolean empty) {
+                            super.updateItem(item, empty);
+                            if (item == null || empty) {
+                                setText("Séléctionner un template");
+                            } else {
+                                TemplateOdt template = (TemplateOdt) item;
+                                setText("TPL : " + template.getLibelle());
+                            }
+                        }
+                    } ;
+                }
+            });
+            templateBox.setConverter(new SirsStringConverter());
+
+            if (section.getTemplateId() != null) {
+                try {
+                    TemplateOdt template = templateRepo.get(section.getTemplateId());
+                    templateBox.getSelectionModel().select(template);
+                } catch (DocumentNotFoundException ex) {
+                    LOGGER.log(Level.WARNING, "Error xhile loading template", ex);
+                }
+            }
+            
+            templateBox.valueProperty().addListener(new ChangeListener<TemplateOdt>() {
+                @Override
+                public void changed(ObservableValue<? extends TemplateOdt> observable, TemplateOdt oldValue, TemplateOdt newValue) {
+                    section.setTemplateId(newValue.getId());
+                }
+            });
+            
             switch (newValue) {
                 case SELECT_DOC     : 
                     final GridPane selectPane = new GridPane();
@@ -176,8 +225,12 @@ public class ModelParagraphePane extends BorderPane {
                 case GENERATE_SHEET : 
                     final GridPane sheetPane = new GridPane();
                     sheetPane.setId("sheet");
-                    queryBox.setPrefWidth(300);
-                    sheetPane.addColumn(0, queryBox);
+                    
+                    templateBox.setPrefWidth(150);
+                    sheetPane.addColumn(0, templateBox);
+                    
+                    queryBox.setPrefWidth(150);
+                    sheetPane.addColumn(1, queryBox);
                     
                     final ComboBox<String> photoBox = new ComboBox<>();
                     photoBox.setPrefWidth(200);
@@ -198,7 +251,7 @@ public class ModelParagraphePane extends BorderPane {
                         section.setPhotoChoice(PhotoChoiceDocument.fromBox(newValue1));
                     });
                     
-                    sheetPane.addColumn(1, photoBox);
+                    sheetPane.addColumn(2, photoBox);
                     
                     gridPane.add(sheetPane, 1, 2);
                     

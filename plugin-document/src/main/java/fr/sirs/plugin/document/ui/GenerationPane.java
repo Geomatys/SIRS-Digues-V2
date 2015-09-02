@@ -96,7 +96,7 @@ public class GenerationPane extends GridPane {
             LOGGER.log(Level.WARNING, null, ex);
             uiProgress.setVisible(false);
             uiGenerateFinish.setVisible(true);
-            uiProgressLabel.setText("Erreur pendant la génération");
+            Platform.runLater(()->uiProgressLabel.setText("Erreur pendant la génération"));
         }
     }
     
