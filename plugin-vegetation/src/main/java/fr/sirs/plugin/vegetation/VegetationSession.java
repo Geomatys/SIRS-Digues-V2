@@ -250,61 +250,66 @@ public final class VegetationSession {
         //On parcourt toutes les parcelles du tableau
         for (final ParcelleVegetation parcelle : parcelles){
 
-            // On vérifie que la parcelle est bien planifiée cette année
-            if(parcelle.getPlanifications().size()>yearIndex && parcelle.getPlanifications().get(yearIndex)){
+            // La parcelle est-elle planifiée cette année ?
+            final PlanifState planifState = getParcellePlanifState(parcelle, yearIndex);
 
-                // On parcourt toutes les zones de végétation de la parcelle
-                final ObservableList<? extends ZoneVegetation> allZoneVegetationByParcelleId = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), Injector.getSession());
-                for(final ZoneVegetation zone : allZoneVegetationByParcelleId){
+            // On parcourt toutes les zones de végétation de la parcelle
+            final ObservableList<? extends ZoneVegetation> allZoneVegetationByParcelleId = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), Injector.getSession());
 
-                    // On vérifie que la zone a bien un traitement planifié et que celui-ci entre dans le plan de gestion
-                    if(zone.getTraitement()!=null && !zone.getTraitement().getHorsGestion()){
+            for(final ZoneVegetation zone : allZoneVegetationByParcelleId){
 
-                        // Dans ce cas, on construit un
-                        final TraitementZoneVegetation traitement = zone.getTraitement();
+                /*
+                Les invasives entrent dans le calcul tous les ans, et les autres
+                zones uniquement les années planifiées.
+                */
+                if(!(zone instanceof InvasiveVegetation) && planifState==NON_PLANIFIE) continue;
 
+                // On vérifie que la zone a bien un traitement planifié et que celui-ci entre dans le plan de gestion
+                if(zone.getTraitement()!=null && !zone.getTraitement().getHorsGestion()){
 
-                        /*
-                        On commence par s'occuper du traitement ponctuel
-                        !!! (UNIQUEMENT SI ON EST LA PREMIÈRE ANNÉE DU PLAN) !!!
-                        */
-                        if(yearIndex==0){
-                            final String traitementPonctuelId = traitement.getTraitementPonctuelId();
-                            final String sousTraitementPonctuelId = traitement.getSousTraitementPonctuelId();
+                    // On récupère le traitement ponctuel et non ponctuel de la zone
+                    final TraitementZoneVegetation traitement = zone.getTraitement();
 
-                            // On récupère et on ajoute le cout sur la zone de la combinaison traitement/sous-traitement
-                            if(traitementPonctuelId!=null){
-                                final ParamCoutTraitementVegetation p;
-                                if(sousTraitementPonctuelId!=null){
-                                    p=indexedParams1.get(new HashMap.SimpleEntry<>(traitementPonctuelId, sousTraitementPonctuelId));
-                                }
-                                else{
-                                    p=indexedParams2.get(traitementPonctuelId);
-                                }
-
-                                if(p!=null) cout+=computePlanifiedCost(zone, p);
-                            }
-                        }
-
-
-                        /*
-                        Puis on s'occupe du traitement non ponctuel
-                        */
-                        final String traitementId = traitement.getTraitementId();
-                        final String sousTraitementId = traitement.getSousTraitementId();
+                    /*
+                    On commence par s'occuper du traitement ponctuel
+                    !!! (UNIQUEMENT SI ON EST LA PREMIÈRE ANNÉE DE TRAITEMENT DE LA PARCELLE DANS LE PLAN) !!!
+                    */
+                    if(planifState==PLANIFIE_PREMIERE_FOIS){
+                        final String traitementPonctuelId = traitement.getTraitementPonctuelId();
+                        final String sousTraitementPonctuelId = traitement.getSousTraitementPonctuelId();
 
                         // On récupère et on ajoute le cout sur la zone de la combinaison traitement/sous-traitement
-                        if(traitementId!=null){
+                        if(traitementPonctuelId!=null){
                             final ParamCoutTraitementVegetation p;
-                            if(sousTraitementId!=null){
-                                p=indexedParams1.get(new HashMap.SimpleEntry<>(traitementId, sousTraitementId));
+                            if(sousTraitementPonctuelId!=null){
+                                p=indexedParams1.get(new HashMap.SimpleEntry<>(traitementPonctuelId, sousTraitementPonctuelId));
                             }
                             else{
-                                p=indexedParams2.get(traitementId);
+                                p=indexedParams2.get(traitementPonctuelId);
                             }
 
                             if(p!=null) cout+=computePlanifiedCost(zone, p);
                         }
+                    }
+
+
+                    /*
+                    Puis on s'occupe du traitement non ponctuel
+                    */
+                    final String traitementId = traitement.getTraitementId();
+                    final String sousTraitementId = traitement.getSousTraitementId();
+
+                    // On récupère et on ajoute le cout sur la zone de la combinaison traitement/sous-traitement
+                    if(traitementId!=null){
+                        final ParamCoutTraitementVegetation p;
+                        if(sousTraitementId!=null){
+                            p=indexedParams1.get(new HashMap.SimpleEntry<>(traitementId, sousTraitementId));
+                        }
+                        else{
+                            p=indexedParams2.get(traitementId);
+                        }
+
+                        if(p!=null) cout+=computePlanifiedCost(zone, p);
                     }
                 }
             }
@@ -361,21 +366,35 @@ public final class VegetationSession {
 
     /**
      * Retourne l'etat de planification de la parcelle pour l'année donnée.
-     *
+     * 
      * @param plan
      * @param parcelle
      * @param year
      * @return
      */
     public static PlanifState getParcellePlanifState(final PlanVegetation plan, final ParcelleVegetation parcelle, final int year){
+        return getParcellePlanifState(parcelle, year - plan.getAnneeDebut());
+    }
+
+    /**
+     * Retourne l'etat de planification de la parcelle pour la planification à l'index donné.
+     *
+     * @param parcelle
+     * @param index
+     * @return
+     */
+    public static PlanifState getParcellePlanifState(final ParcelleVegetation parcelle, final int index){
         final List<Boolean> planifications = parcelle.getPlanifications();
 
-        final int index = year - plan.getAnneeDebut();
         if(planifications==null || planifications.size()<=index) return NON_PLANIFIE;
 
         if(!planifications.get(index)) return NON_PLANIFIE;
 
-        //on regarde si c'est la premiere année
+        /* À ce stade, on est sûr que la parcelle est planifiée pour l'année que
+        l'on examine. Mais est-ce la première fois ? Pour cela il faut aller
+        voir si la parcelle avait également été planifiée une année antérieure
+        du plan.
+        */
         for(int i=0; i<index-1; i++){
             if(planifications.get(i)) return PLANIFIE;
         }

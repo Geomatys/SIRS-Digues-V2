@@ -399,11 +399,18 @@ public class FXPlanTable extends BorderPane{
 
         @Override
         public void onChanged(Change<? extends Boolean> c) {
-            if(getVal()!=isSelected()) {
-                setSelected(getVal());
+            /*
+            Si la liste est vide, on ne fait rien, car c'est qu'on est en train 
+            de supprimer son contenu pour le réinitialiser depuis le méthode de 
+            calcul des planifications automatiques.
+            */
+            if(!parcelle.getPlanifications().isEmpty()){
+                final boolean val = getVal();
+                if(val!=isSelected()) {
+                    setSelected(val);
+                }
             }
         }
-
     }
 
     /**
