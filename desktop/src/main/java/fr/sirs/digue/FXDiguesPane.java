@@ -3,19 +3,20 @@ package fr.sirs.digue;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.Injector;
-import fr.sirs.Session;
 import fr.sirs.SIRS;
+import fr.sirs.Session;
+import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.AbstractTronconDigueRepository;
+import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.DocumentListener;
-import fr.sirs.theme.Theme;
+import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.TronconUtils;
-import fr.sirs.core.component.DigueRepository;
-import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.index.ElasticSearchEngine;
+import fr.sirs.theme.Theme;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -189,7 +190,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
             final ButtonType res = alert.showAndWait().get();
             if (res == ButtonType.YES) {
                 //on enleve la reference a la digue dans les troncons
-                final List<TronconDigue> troncons = ((TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class)).getByDigue(digue);
+                final List<TronconDigue> troncons = ((AbstractTronconDigueRepository) session.getRepositoryForClass(TronconDigue.class)).getByDigue(digue);
                 for(final TronconDigue td : troncons){
                     td.setDigueId(null);
                     session.getRepositoryForClass(TronconDigue.class).update(td);

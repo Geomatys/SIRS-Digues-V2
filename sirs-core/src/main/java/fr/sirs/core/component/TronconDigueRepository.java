@@ -1,11 +1,10 @@
 package fr.sirs.core.component;
 
+import static fr.sirs.core.component.AbstractTronconDigueRepository.STREAM_LIGHT;
 import fr.sirs.core.InjectorCore;
 import java.util.List;
-
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
-import org.ektorp.support.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fr.sirs.core.SirsViewIterator;
@@ -25,47 +24,16 @@ import org.geotoolkit.util.collection.CloseableIterator;
 import org.springframework.stereotype.Component;
 
 /**
- * Outil gérant les échanges avec la bdd CouchDB pour tous les objets tronçons.
  *
- * Note : Le cache qui permet de garder une instance unique en mémoire pour un
- * tronçon donné est extrêmement important pour les opérations de sauvegarde.
- *
- * Ex : On a un tronçon A, qui contient une crête tata et un talus de digue toto.
- *
- * On ouvre l'éditeur de toto. Le tronçon A est donc chargé en mémoire.
- * Dans le même temps on ouvre le panneau d'édition pour tata. On doit donc aussi
- * charger le tronçon A en mémoire.
- *
- * Maintenant, que se passe -'il sans cache ? On a deux copies du tronçon A en
- * mémoire pour une même révision (disons 0).
- *
- * Si on sauvegarde toto, tronçon A passe en révision 1 dans la bdd, mais pour
- * UNE SEULE des 2 copies en mémoire. En conséquence de quoi, lorsqu'on veut
- * sauvegarder tata, on a un problème : on demande à la base de faire une mise à
- * jour de la révision 1 en utilisant un objet de la révision 0.
- *
- * Résultat : ERREUR !
- *
- * Avec le cache, les deux éditeurs pointent sur la même copie en mémoire. Lorsqu'un
- * éditeur met à jour le tronçon, la révision de la copie est indentée, le deuxième
- * éditeur a donc un tronçon avec un numéro de révision correct.
- *
- * @author Samuel Andrés (Geomatys)
  * @author Alexis Manin (Geomatys)
  */
-@Views({
-        @View(name = TronconDigueRepository.STREAM_LIGHT, map = "classpath:TronconDigueLight-map.js"),
-        @View(name = TronconDigueRepository.BY_DIGUE_ID, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.TronconDigue') {emit(doc.digueId, doc._id)}}")
-})
-@Component("fr.sirs.core.component.TronconDigueRepository")
-public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue> {
-
-    public static final String STREAM_LIGHT = "streamLight";
-    public static final String BY_DIGUE_ID = "byDigueId";
+@View(name = AbstractTronconDigueRepository.STREAM_LIGHT, map = "classpath:TronconDigueLight-map.js")
+@Component
+public class TronconDigueRepository extends AbstractTronconDigueRepository<TronconDigue> {
 
     @Autowired
     private TronconDigueRepository(CouchDbConnector db) {
-        super(TronconDigue.class, db);
+        super(db, TronconDigue.class);
         initStandardDesignDocument();
     }
 

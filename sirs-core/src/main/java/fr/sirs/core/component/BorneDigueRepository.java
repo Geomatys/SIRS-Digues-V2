@@ -5,11 +5,6 @@ package fr.sirs.core.component;
 
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
-
-import org.ektorp.CouchDbConnector;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.stereotype.Component;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
@@ -19,6 +14,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import org.geotoolkit.util.collection.CloseableIterator;
+import org.ektorp.CouchDbConnector;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Outil gérant les échanges avec la bdd CouchDB pour tous les objets BorneDigue.
@@ -48,7 +46,7 @@ import org.geotoolkit.util.collection.CloseableIterator;
 @Component("fr.sirs.core.component.BorneDigueRepository")
 public class BorneDigueRepository extends AbstractSIRSRepository<BorneDigue> {
 
-    @Autowired TronconDigueRepository tdRepository;
+    @Autowired SessionCore session;
 
     @Autowired SystemeReperageRepository srRepository;
 
@@ -121,53 +119,55 @@ public class BorneDigueRepository extends AbstractSIRSRepository<BorneDigue> {
          * For all matching troncon, we will analyse its SRs to update the ones
          * which work with bornes marked for deletion.
          */
-        try (CloseableIterator<TronconDigue> tdIterator = tdRepository.getAllStreaming().iterator()) {
-            while (tdIterator.hasNext()) {
-                final TronconDigue t = tdIterator.next();
-                // Use list in case doublons where present in troncon borne list.
-                final ArrayList<String> joinToDeleteAndTroncon = new ArrayList<>();
-                for (final String bdId : t.getBorneIds()) {
-                    if (toDeleteIds.contains(bdId)) {
-                        joinToDeleteAndTroncon.add(bdId);
-                    }
-                }
-
-            // found matching bornes in the current troncon. We have to analyze
-                // its SRs.
-                if (joinToDeleteAndTroncon.size() > 0) {
-                    /*
-                     * We'll wait that all SR are updated before removing bornes from
-                     * tronçon, because if we ever update troncon first, if an error
-                     * happens while updating SRs, database would contain SRs with bornes
-                     * which are no longer in its parent troncon.
-                     */
-                    final StreamingIterable<SystemeReperage> srList = srRepository.getByLinearStreaming(t);
-                    try (final CloseableIterator<SystemeReperage> it = srList.iterator()) {
-                        while (it.hasNext()) {
-                            final SystemeReperage sr = it.next();
-                            final Iterator<SystemeReperageBorne> srBornes = sr.systemeReperageBornes.iterator();
-                            boolean mustUpdateSR = false;
-                            while (srBornes.hasNext()) {
-                                final SystemeReperageBorne srBorne = srBornes.next();
-                                /* HashSet implies a constant response time whatever its size. So we
-                                 * can use full set of Ids to perform comparison. It also could
-                                 * repair sr in case it references a borne which is not in its troncon.
-                                 */
-                                if (toDeleteIds.contains(srBorne.getBorneId())) {
-                                    mustUpdateSR = true;
-                                    srBornes.remove();
-                                }
-                            }
-                            if (mustUpdateSR) {
-                                srRepository.update(sr, t);
-                            }
+        for (final AbstractSIRSRepository tdRepository : session.getRepositoriesForClass(TronconDigue.class)) {
+            try (CloseableIterator<TronconDigue> tdIterator = tdRepository.getAllStreaming().iterator()) {
+                while (tdIterator.hasNext()) {
+                    final TronconDigue t = tdIterator.next();
+                    // Use list in case doublons where present in troncon borne list.
+                    final ArrayList<String> joinToDeleteAndTroncon = new ArrayList<>();
+                    for (final String bdId : t.getBorneIds()) {
+                        if (toDeleteIds.contains(bdId)) {
+                            joinToDeleteAndTroncon.add(bdId);
                         }
                     }
-                    t.getBorneIds().removeAll(joinToDeleteAndTroncon);
-                    tdRepository.update(t);
+
+                    // found matching bornes in the current troncon. We have to analyze
+                    // its SRs.
+                    if (joinToDeleteAndTroncon.size() > 0) {
+                        /*
+                         * We'll wait that all SR are updated before removing bornes from
+                         * tronçon, because if we ever update troncon first, if an error
+                         * happens while updating SRs, database would contain SRs with bornes
+                         * which are no longer in its parent troncon.
+                         */
+                        final StreamingIterable<SystemeReperage> srList = srRepository.getByLinearStreaming(t);
+                        try (final CloseableIterator<SystemeReperage> it = srList.iterator()) {
+                            while (it.hasNext()) {
+                                final SystemeReperage sr = it.next();
+                                final Iterator<SystemeReperageBorne> srBornes = sr.systemeReperageBornes.iterator();
+                                boolean mustUpdateSR = false;
+                                while (srBornes.hasNext()) {
+                                    final SystemeReperageBorne srBorne = srBornes.next();
+                                    /* HashSet implies a constant response time whatever its size. So we
+                                     * can use full set of Ids to perform comparison. It also could
+                                     * repair sr in case it references a borne which is not in its troncon.
+                                     */
+                                    if (toDeleteIds.contains(srBorne.getBorneId())) {
+                                        mustUpdateSR = true;
+                                        srBornes.remove();
+                                    }
+                                }
+                                if (mustUpdateSR) {
+                                    srRepository.update(sr, t);
+                                }
+                            }
+                        }
+                        t.getBorneIds().removeAll(joinToDeleteAndTroncon);
+                        tdRepository.update(t);
+                    }
                 }
             }
-    }
+        }
 
         for (final BorneDigue bd : entity) {
             super.remove(bd);

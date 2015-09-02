@@ -3,8 +3,8 @@ package fr.sirs.importer.troncon;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Geometry;
+import fr.sirs.core.component.AbstractTronconDigueRepository;
 import fr.sirs.core.component.BorneDigueRepository;
-import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Digue;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
@@ -15,7 +15,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
-import static fr.sirs.importer.DbImporter.TableName.*;
+import static fr.sirs.importer.DbImporter.TableName.TRONCON_GESTION_DIGUE;
 import fr.sirs.importer.DigueImporter;
 import fr.sirs.importer.DocumentsUpdatable;
 import fr.sirs.importer.GenericImporter;
@@ -47,12 +47,12 @@ implements DocumentsUpdatable {
     private final DigueImporter digueImporter;
     private final BorneDigueImporter borneDigueImporter;
     
-    private final TronconDigueRepository tronconDigueRepository;
+    private final AbstractTronconDigueRepository tronconDigueRepository;
     private final BorneDigueRepository borneDigueRepository;
     
     public TronconGestionDigueImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector, 
-            final TronconDigueRepository tronconDigueRepository,
+            final AbstractTronconDigueRepository tronconDigueRepository,
             final BorneDigueRepository borneDigueRepository,
             final DigueImporter digueImporter,
             final TronconDigueGeomImporter tronconDigueGeomImporter, 

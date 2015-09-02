@@ -99,7 +99,18 @@ import org.geotoolkit.style.MutableStyle;
 import org.geotoolkit.style.MutableStyleFactory;
 import org.geotoolkit.style.RandomStyleBuilder;
 import org.geotoolkit.style.StyleConstants;
-import static org.geotoolkit.style.StyleConstants.*;
+import static org.geotoolkit.style.StyleConstants.DEFAULT_ANCHOR_POINT;
+import static org.geotoolkit.style.StyleConstants.DEFAULT_DESCRIPTION;
+import static org.geotoolkit.style.StyleConstants.DEFAULT_DISPLACEMENT;
+import static org.geotoolkit.style.StyleConstants.DEFAULT_FILL_COLOR;
+import static org.geotoolkit.style.StyleConstants.DEFAULT_FONT;
+import static org.geotoolkit.style.StyleConstants.DEFAULT_GRAPHIC_ROTATION;
+import static org.geotoolkit.style.StyleConstants.LITERAL_ONE_FLOAT;
+import static org.geotoolkit.style.StyleConstants.LITERAL_ZERO_FLOAT;
+import static org.geotoolkit.style.StyleConstants.STROKE_CAP_BUTT;
+import static org.geotoolkit.style.StyleConstants.STROKE_CAP_ROUND;
+import static org.geotoolkit.style.StyleConstants.STROKE_CAP_SQUARE;
+import static org.geotoolkit.style.StyleConstants.STROKE_JOIN_BEVEL;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.FilterVisitor;
@@ -457,8 +468,7 @@ public class CorePlugin extends Plugin {
 
     }
 
-
-    private List<MapLayer> buildLayers(FeatureStore store, String layerName, MutableStyle baseStyle, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
+    public static List<MapLayer> buildLayers(FeatureStore store, String layerName, MutableStyle baseStyle, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);
         for(GenericName name : store.getNames()){

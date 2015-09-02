@@ -2,18 +2,17 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
-import fr.sirs.Session;
 import fr.sirs.SIRS;
+import fr.sirs.Session;
+import fr.sirs.core.component.AbstractTronconDigueRepository;
 import fr.sirs.core.component.Previews;
-import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
-import java.util.logging.Level;
-
 import fr.sirs.ui.Growl;
+import java.util.logging.Level;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -119,9 +118,7 @@ public class FXDiguePane extends AbstractFXElementPane<Digue> {
             uiMode.validProperty().bind(newValue.validProperty());
             uiMode.authorIDProperty().bind(newValue.authorProperty());
             
-            table.setTableItems(()->FXCollections.observableArrayList(
-                    ((TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class)).getByDigue(newValue)));
-            
+            table.setTableItems(()->FXCollections.observableArrayList(((AbstractTronconDigueRepository) session.getRepositoryForClass(TronconDigue.class)).getByDigue(newValue)));
             
             SIRS.initCombo(uiSystemeEndiguementId, FXCollections.observableArrayList(
                     previewRepository.getByClass(SystemeEndiguement.class)),

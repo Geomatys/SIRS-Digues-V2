@@ -9,10 +9,6 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Positionable;
-import org.ektorp.CouchDbConnector;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.stereotype.Component;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
@@ -22,15 +18,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
+import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.DocumentOperationResult;
 import org.geotoolkit.referencing.LinearReferencing;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component("fr.sirs.core.component.SystemeReperageRepository")
 public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeReperage> {
 
-    @Autowired
-    protected TronconDigueRepository tronconDigueRepo;
+    @Autowired SessionCore session;
 
     @Autowired
     private SystemeReperageRepository ( CouchDbConnector db) {
@@ -99,7 +97,12 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     public void update(SystemeReperage entity) {
         final TronconDigue srConstaint;
         try {
-            srConstaint = tronconDigueRepo.get(entity.getLinearId());
+            final Object tmp = session.getElement(entity.getLinearId()).orElse(null);
+            if (tmp instanceof TronconDigue) {
+                srConstaint = (TronconDigue) tmp;
+            } else {
+                throw new IllegalStateException("Cannot update SR because we cannot determine its linear.");
+            }
         } catch (Exception e) {
             throw new RuntimeException("Cannot update following SR, because we cannot check its constraints :"+ entity, e);
         }
@@ -110,7 +113,12 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     public void remove(SystemeReperage entity) {
         final TronconDigue srConstaint;
         try {
-            srConstaint = tronconDigueRepo.get(entity.getLinearId());
+            final Object tmp = session.getElement(entity.getLinearId()).orElse(null);
+            if (tmp instanceof TronconDigue) {
+                srConstaint = (TronconDigue) tmp;
+            } else {
+                throw new IllegalStateException("Cannot remove SR because we cannot determine its linear.");
+            }
         } catch (Exception e) {
             throw new RuntimeException("Cannot remove following SR, because we cannot check its constraints :"+ entity, e);
         }
@@ -121,7 +129,12 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     public void add(SystemeReperage entity) {
         final TronconDigue srConstaint;
         try {
-            srConstaint = tronconDigueRepo.get(entity.getLinearId());
+            final Object tmp = session.getElement(entity.getLinearId()).orElse(null);
+            if (tmp instanceof TronconDigue) {
+                srConstaint = (TronconDigue) tmp;
+            } else {
+                throw new IllegalStateException("Cannot add SR because we cannot determine its linear.");
+            }
         } catch (Exception e) {
             throw new RuntimeException("Cannot add following SR, because we cannot check its constraints :"+ entity, e);
         }
@@ -155,7 +168,8 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
             alternative = null;
         if (source.getId().equals(troncon.getSystemeRepDefautId())) {
             troncon.setSystemeRepDefautId(alternative == null ? null : alternative.getId());
-            tronconDigueRepo.update(troncon);
+            AbstractSIRSRepository repo = session.getRepositoryForClass(troncon.getClass());
+            repo.update(troncon);
         }
 
         updatePositionsForSR(troncon, source, alternative);
@@ -194,7 +208,12 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
 
         if(troncon==null){
             try{
-                troncon = tronconDigueRepo.get(tcId);
+                final Object tmp = session.getElement(entity.getLinearId()).orElse(null);
+                if (tmp instanceof TronconDigue) {
+                    troncon = (TronconDigue) tmp;
+                } else {
+                    throw new IllegalStateException("Cannot update SR because we cannot determine its linear.");
+                }
             }catch(DocumentNotFoundException ex){
                 //le troncon n'existe pas
                 return;
@@ -217,8 +236,9 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
             needSave = true;
         }
 
-        if(needSave){
-            tronconDigueRepo.update(troncon);
+        if (needSave) {
+            AbstractSIRSRepository repo = session.getRepositoryForClass(troncon.getClass());
+            repo.update(troncon);
         }
     }
 

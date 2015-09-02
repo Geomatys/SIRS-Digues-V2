@@ -3,6 +3,7 @@ package fr.sirs.importer;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.AbstractTronconDigueRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.TronconDigueRepository;
@@ -541,7 +542,7 @@ public class DbImporter {
         typeCoteImporter = new TypeCoteImporter(accessDatabase, couchDbConnector);
         tronconGestionDigueImporter = new TronconGestionDigueImporter(
                 accessDatabase, couchDbConnector,
-                (TronconDigueRepository) repositories.get(TronconDigue.class),
+                (AbstractTronconDigueRepository) repositories.get(TronconDigue.class),
                 (BorneDigueRepository) repositories.get(BorneDigue.class),
                 digueImporter, tronconDigueGeomImporter, systemeReperageImporter,
                 borneDigueImporter, organismeImporter);
