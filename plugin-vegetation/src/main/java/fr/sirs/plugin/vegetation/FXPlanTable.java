@@ -308,7 +308,6 @@ public class FXPlanTable extends BorderPane{
                     sur la planification.
                     */
                     if(autoProperty.get()
-                            && newValue
                             && this.index>=LocalDate.now().getYear()-plan.getAnneeDebut()){
                         /*
                         Comme la cellule écoute la liste, le changement d'état sélectionné
