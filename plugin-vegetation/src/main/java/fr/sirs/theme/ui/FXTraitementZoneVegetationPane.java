@@ -5,6 +5,7 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.InvasiveVegetation;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefSousTraitementVegetation;
 import fr.sirs.core.model.RefTraitementVegetation;
@@ -16,9 +17,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 /**
  *
@@ -26,6 +31,8 @@ import javafx.collections.FXCollections;
  */
 public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPaneStub {
 
+    boolean frequencyChanged = false;
+    String firstFrequencyId = "";
     
     public FXTraitementZoneVegetationPane(final TraitementZoneVegetation traitementZoneVegetation){
         super(traitementZoneVegetation);
@@ -61,6 +68,13 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
                 }
             }
         });
+
+        ui_frequenceId.getSelectionModel().selectedItemProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
+            if(!frequencyChanged && oldValue instanceof Preview){
+                firstFrequencyId = ((Preview) oldValue).getElementId();
+                frequencyChanged=true;
+            }
+                });
     }
 
 
@@ -117,11 +131,24 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
     public void preSave(){
         super.preSave();
 
-        final TraitementZoneVegetation traitement = elementProperty.get();
-        if(traitement!=null){
-            final Element parent = traitement.getParent();
-            if(parent instanceof ZoneVegetation){
-                updateParcelleAutoPlanif((ZoneVegetation) parent);
+        if(ui_frequenceId.getSelectionModel().getSelectedItem() instanceof Preview){
+            final String choosenFrequencyId = ((Preview) ui_frequenceId.getSelectionModel().getSelectedItem()).getElementId();
+            if(frequencyChanged && !Objects.equals(firstFrequencyId, choosenFrequencyId)){
+                final TraitementZoneVegetation traitement = elementProperty.get();
+                if(traitement!=null){
+                    final Element parent = traitement.getParent();
+                    if(parent instanceof ZoneVegetation && !(parent instanceof InvasiveVegetation)){
+                        final Alert alert = new Alert(Alert.AlertType.INFORMATION,
+                                "Il semblerait que la fréquence ait été modifiée.\n"
+                                        + "Voulez-vous mettre à jour la planification de la parcelle à partir de l'année courante ?",
+                                ButtonType.YES, ButtonType.NO);
+                        alert.setResizable(true);
+                        final Optional<ButtonType> result = alert.showAndWait();
+                        if(result.isPresent() && result.get()==ButtonType.YES){
+                            updateParcelleAutoPlanif((ZoneVegetation) parent);
+                        }
+                    }
+                }
             }
         }
     }
