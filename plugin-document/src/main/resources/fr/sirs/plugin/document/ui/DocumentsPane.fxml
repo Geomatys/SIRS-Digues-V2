@@ -30,11 +30,11 @@
           <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="200.0" prefWidth="-1.0" text="Nom" />
           <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="-1.0" text="Date de modification" />
             <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="70.0" prefWidth="-1.0" text="Taille" />
-            <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="-1.0" text="N° inventaire" />
+            <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="70.0" prefWidth="-1.0" text="N° inventaire" />
             <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="140.0" prefWidth="-1.0" text="Lieu classement" />
             <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="50.0" prefWidth="-1.0" text="Intégré au DO de synthèse" />
-            <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="50.0" prefWidth="-1.0" text="Publier" />
-            <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="50.0" prefWidth="-1.0" text="Ouvrir" />
+            <TreeTableColumn maxWidth="70.0" minWidth="50.0" prefWidth="-1.0" text="Publier" />
+            <TreeTableColumn maxWidth="70.0" minWidth="50.0" prefWidth="-1.0" text="Ouvrir" />
         </columns>
          <columnResizePolicy>
             <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
