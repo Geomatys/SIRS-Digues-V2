@@ -6,24 +6,26 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.CorePlugin;
-import fr.sirs.Session;
-import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.TronconDigue;
+import fr.sirs.SIRS;
+import fr.sirs.Session;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
+import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.StreamingIterable;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,11 +66,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display.VisitFilter;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -307,6 +311,33 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
 
         final BorderPane main = new BorderPane(bp);
         main.setBottom(babar);
+
+        // Find all registered implementations of linear objects.
+        Collection<AbstractSIRSRepository> tdRepositories = session.getRepositoriesForClass(TronconDigue.class);
+        final SimpleObjectProperty<AbstractSIRSRepository> chosenType = new SimpleObjectProperty<>();
+        if (tdRepositories.size() > 1) {
+            final ComboBox typeBox = new ComboBox();
+            typeBox.setItems(FXCollections.observableArrayList(tdRepositories));
+            typeBox.setConverter(new StringConverter<AbstractSIRSRepository>() {
+                @Override
+                public String toString(AbstractSIRSRepository object) {
+                    return LabelMapper.get(object.getModelClass()).mapClassName();
+                }
+
+                @Override
+                public AbstractSIRSRepository fromString(String string) {
+                    throw new UnsupportedOperationException("Not supported yet.");
+                }
+            });
+
+            HBox top = new HBox(new Label("Type de tronçon : "), typeBox);
+            main.setTop(top);
+            chosenType.bind(typeBox.valueProperty());
+        } else if (tdRepositories.size() == 1) {
+            chosenType.set(tdRepositories.iterator().next());
+        } else {
+            throw new IllegalStateException("Aucun type de tronçon disponible !");
+        }
 
         dialog.setScene(new Scene(main));
         dialog.showAndWait();
