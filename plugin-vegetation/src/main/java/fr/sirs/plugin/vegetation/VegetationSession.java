@@ -15,11 +15,11 @@ import fr.sirs.core.model.ArbreVegetation;
 import fr.sirs.core.model.HerbaceeVegetation;
 import fr.sirs.core.model.InvasiveVegetation;
 import fr.sirs.core.model.ParamCoutTraitementVegetation;
-import fr.sirs.core.model.ParcelleTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.RefTraitementVegetation;
+import fr.sirs.core.model.TraitementParcelleVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.plugin.vegetation.map.PlanifState;
@@ -174,7 +174,7 @@ public final class VegetationSession {
         double cost = 0.;
 
         for(final ParcelleVegetation parcelle : parcelles){
-            for(final ParcelleTraitementVegetation traitement : parcelle.getTraitements()){
+            for(final TraitementParcelleVegetation traitement : parcelle.getTraitements()){
                 if(traitement.getDate()!=null && traitement.getDate().getYear()==year){
                     cost+=traitement.getCout();
                 }
@@ -355,7 +355,7 @@ public final class VegetationSession {
      */
     public static boolean isParcelleTraitee(ParcelleVegetation parcelle, int year){
         boolean done = false;
-        for(ParcelleTraitementVegetation traitement : parcelle.getTraitements()){
+        for(TraitementParcelleVegetation traitement : parcelle.getTraitements()){
             if(traitement.getDate()!=null && traitement.getDate().getYear() == year){
                 done = true;
                 break;

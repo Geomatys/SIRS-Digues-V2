@@ -14,7 +14,6 @@ import fr.sirs.core.model.HerbaceeVegetation;
 import fr.sirs.core.model.InvasiveVegetation;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.ParamFrequenceTraitementVegetation;
-import fr.sirs.core.model.ParcelleTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.PlanVegetation;
@@ -23,6 +22,7 @@ import fr.sirs.core.model.RefFrequenceTraitementVegetation;
 import fr.sirs.core.model.RefSousTraitementVegetation;
 import fr.sirs.core.model.RefTypeInvasiveVegetation;
 import fr.sirs.core.model.RefTypePeuplementVegetation;
+import fr.sirs.core.model.TraitementParcelleVegetation;
 import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.core.model.sql.VegetationSqlHelper;
@@ -686,7 +686,7 @@ public class PluginVegetation extends Plugin {
         */
         final int anneeCourante = LocalDate.now().getYear();
         boolean coherent = false;// On part de l'a priori d'une parcelle incohérente.
-        for(final ParcelleTraitementVegetation traitement : parcelle.getTraitements()){
+        for(final TraitementParcelleVegetation traitement : parcelle.getTraitements()){
             if(traitement.getDate()!=null){
                 final int anneeTraitement = traitement.getDate().getYear();
                 if(anneeCourante-anneeTraitement<frequence){
@@ -725,7 +725,7 @@ public class PluginVegetation extends Plugin {
      */
     public static LocalDate dernierTraitement(final ParcelleVegetation parcelle){
         LocalDate result = null;
-        for(final ParcelleTraitementVegetation traitement : parcelle.getTraitements()){
+        for(final TraitementParcelleVegetation traitement : parcelle.getTraitements()){
             if(traitement.getDate()!=null){
                 if(result==null || traitement.getDate().isAfter(result)){
                     result = traitement.getDate();

@@ -5,10 +5,10 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.ParcelleVegetationRepository;
 import fr.sirs.core.component.Previews;
-import fr.sirs.core.model.ParcelleTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.TraitementParcelleVegetation;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SirsStringConverter;
@@ -98,7 +98,7 @@ public class FXTraitementsPane extends SplitPane {
         if(newValue==null){
             rightPane = new BorderPane();
         }else{
-            final PojoTable traitementsTable = new PojoTable(ParcelleTraitementVegetation.class, null);
+            final PojoTable traitementsTable = new PojoTable(TraitementParcelleVegetation.class, null);
             traitementsTable.setParentElement(newValue);
             traitementsTable.setTableItems(()-> (ObservableList) newValue.getTraitements());
             rightPane = traitementsTable;

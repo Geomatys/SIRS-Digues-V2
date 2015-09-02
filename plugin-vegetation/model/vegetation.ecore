@@ -38,7 +38,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="ParcelleVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//Objet">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="traitements" upperBound="-1"
-        eType="#//ParcelleTraitementVegetation" containment="true"/>
+        eType="#//TraitementParcelleVegetation" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="modeAuto" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="planifications" upperBound="10"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBooleanObject"
@@ -46,7 +46,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="planId" eType="#//PlanVegetation"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ParcelleTraitementVegetation">
+  <eClassifiers xsi:type="ecore:EClass" name="TraitementParcelleVegetation">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
