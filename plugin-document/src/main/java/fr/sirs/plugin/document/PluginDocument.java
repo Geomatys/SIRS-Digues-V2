@@ -13,12 +13,12 @@ import javafx.scene.image.Image;
  */
 public class PluginDocument extends Plugin {
     private static final String NAME = "plugin-document";
-    private static final String TITLE = "Module document d'ouvrages";
+    private static final String TITLE = "Module dossier d'ouvrages";
 
     public PluginDocument() {
         name = NAME;
         final FileTreeItem root = new FileTreeItem(false);
-        loadingMessage.set("module document d'ouvrages");
+        loadingMessage.set("module dossier d'ouvrages");
         final DynamicDocumentTheme dynDcTheme = new DynamicDocumentTheme(root);
         themes.add(new DocumentManagementTheme(root, dynDcTheme));
         themes.add(dynDcTheme);
