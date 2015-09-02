@@ -344,7 +344,7 @@ public class FXImpression extends GridPane{
                         final List<ParcelleVegetation> NonPlanifieNonTraitee = uiNonTraiteeNonPlanif.isSelected() ? new ArrayList<>() : null ;
 
                         for(ParcelleVegetation parcelle : parcelles){
-                            final boolean traitee = VegetationSession.isParcelleTraite(parcelle, year);
+                            final boolean traitee = VegetationSession.isParcelleTraitee(parcelle, year);
                             final PlanifState planif = VegetationSession.getParcellePlanifState(plan, parcelle, year);
 
                             if(traitee){

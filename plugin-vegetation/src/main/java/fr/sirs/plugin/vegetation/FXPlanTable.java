@@ -160,7 +160,7 @@ public class FXPlanTable extends BorderPane{
         gridTop.add(lblYear, 0, 0);
         gridBottom.add(lblSum, 0, 0);
         colIndex=1;
-        final EstimationCell[] estCells = new EstimationCell[dateEnd-dateStart];
+        final CostCell[] estCells = new CostCell[dateEnd-dateStart];
         for(int year=dateStart; year<dateEnd; year++,colIndex++){
             final Label lblYearN = new Label(""+year);
             lblYearN.getStyleClass().add("pojotable-header");
@@ -171,7 +171,7 @@ public class FXPlanTable extends BorderPane{
             lblYearN.widthProperty().addListener(widthListener);
             headerNodes[colIndex] = lblYearN;
             gridTop.add(lblYearN, colIndex, 0);
-            estCells[year-dateStart] = new EstimationCell(year-dateStart);
+            estCells[year-dateStart] = new CostCell(year-dateStart);
             gridBottom.add(estCells[year-dateStart], colIndex, 0);
         }
 
@@ -196,11 +196,11 @@ public class FXPlanTable extends BorderPane{
             gridCenter.add(new Label(cvt.toString(parcelle)), colIndex, rowIndex);
             colIndex++;
 
-            final CheckBox modeAuto = new ParcelleAutoCell(parcelle);
+            final CheckBox modeAuto = new AutoModeCell(parcelle);
 
             final PlanifGroup planifGroup = new PlanifGroup();
             for(int year=dateStart; year<dateEnd; year++,colIndex++){
-                final ParcelleDateCell parcelleDateCell = new ParcelleDateCell(parcelle, year, year-dateStart, estCells[year-dateStart], planifGroup);
+                final ParcelleDateCell parcelleDateCell = new ParcelleDateCell(parcelle, year, estCells[year-dateStart], planifGroup);
                 parcelleDateCell.autoProperty().bind(modeAuto.selectedProperty());
                 gridCenter.add(parcelleDateCell, colIndex, rowIndex);
             }
@@ -255,23 +255,68 @@ public class FXPlanTable extends BorderPane{
 
     /**
      * Cellule de date.
+     *
+     * Affiche l'état de planification d'une parcelle pour une année donnée.
+     *
+     * En mode d'exploitation, la couleur de la cellule indique la cohérence des
+     * traitements d'exploitation avec les planifications.
      * 
      */
     private final class ParcelleDateCell extends CheckBox implements ListChangeListener<Boolean>{
 
+        /**
+         * Parcelle.
+         */
         private final ParcelleVegetation parcelle;
         private final int year;
         private final int index;
-        private final EstimationCell estCell;
+
+        /**
+         * Référence vers la cellule d'affichage de coût.
+         *
+         * Cette référence existe afin que les changements intervenus dans la
+         * cellule courante puissent être répercutés sur la cellule de coût de
+         * l'année correspondante.
+         */
+        private final CostCell estCell;
+
+        /**
+         * Dans le cadre de la planification, cette propriété doit être reliée
+         * au mode de calcul des planifications de la parcelle : automatique ou
+         * manuel.
+         */
         private final BooleanProperty autoProperty = new SimpleBooleanProperty();
+
+        /**
+         * Le planifGroup sert à la cellule dans le cadre de la planification.
+         *
+         * Ce composant avertit la cellule que la planification a été modifiée
+         * manuellement depuis une cellule de date du groupe.
+         *
+         * Cela permet de savoir qu'une mise à jour des planifications
+         * automatiques est en cours et, tant que cette dernière n'est pas
+         * achevée, de ne pas lancer de nouvelle mise à jour en cascade de cette
+         * liste.
+         */
         private final PlanifGroup planifGroup;
 
-        public ParcelleDateCell(final ParcelleVegetation parcelle, final int year,  
-                final int index, final EstimationCell estCell, final PlanifGroup planifGroup) {
+        /**
+         * Écouteur des changements de l'état de la planification.
+         *
+         * L'état de la planification peut intervenir par sélection/désélection
+         * directe de la boîte à cocher, mais elle peut également intervenir
+         * automatiquement car la boîte à cocher écoute également la liste des
+         * planifications de la parcelle pour se mettre à jour lorsqu'elle
+         * change.
+         */
+        private final ChangeListener<Boolean> selectChangeListener;
+
+        public ParcelleDateCell(final ParcelleVegetation parcelle, final int year,
+                final CostCell estCell, final PlanifGroup planifGroup) {
             disableProperty().bind(editable.not().or(new SimpleObjectProperty<>(mode).isEqualTo(EXPLOITATION)));
             this.parcelle = parcelle;
             this.year = year;
-            this.index = index;
+            this.index = year - plan.getAnneeDebut();
             this.estCell = estCell;
             setPadding(new Insets(10));
             setAlignment(Pos.CENTER);
@@ -292,7 +337,7 @@ public class FXPlanTable extends BorderPane{
             MODIFIER LES PLANIFS TOUT EN LES ÉCOUTANT !!!
             */
             if(mode==PLANIFICATION){
-                selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                selectChangeListener = (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
 
                     /*
                     Si on est en mode auto, il faut regarder si on cherche à
@@ -333,17 +378,20 @@ public class FXPlanTable extends BorderPane{
                             // On change l'état de planification en cours : FAUX
                             this.planifGroup.planifChangeProperty().set(false);
                         }
-
-
-                        updateColor();
+                        
                         estCell.update();
                     }
                     else{
                         setVal(newValue);
                     }
-                });
+                };
             }
-            updateColor();
+            else {
+                selectChangeListener = (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> updateColor();
+                updateColor();
+            }
+
+            selectedProperty().addListener(selectChangeListener);
         }
         
         public BooleanProperty autoProperty(){return autoProperty;}
@@ -385,14 +433,14 @@ public class FXPlanTable extends BorderPane{
          * Vert : Planifié, traité
          */
         private void updateColor(){
-            if(mode==PLANIFICATION) return;
-            
-            final boolean planifie = getVal();
-            final Color color = VegetationSession.getParcelleEtatColor(parcelle, planifie, year);
-            if(color==null){
-                setBackground(Background.EMPTY);
-            }else{
-                setBackground(new Background(new BackgroundFill(color, new CornerRadii(30), Insets.EMPTY)));
+            if(mode==EXPLOITATION){
+                final boolean planifie = getVal();
+                final Color color = VegetationSession.getParcelleEtatColor(parcelle, planifie, year);
+                if(color==null){
+                    setBackground(Background.EMPTY);
+                }else{
+                    setBackground(new Background(new BackgroundFill(color, new CornerRadii(30), Insets.EMPTY)));
+                }
             }
         }
 
@@ -413,11 +461,11 @@ public class FXPlanTable extends BorderPane{
     }
 
     /**
-     * Colonne 'Mode Auto'.
+     * Cellule de contrôle du mode automatique d'une parcelle.
      */
-    private final class ParcelleAutoCell extends CheckBox{
+    private final class AutoModeCell extends CheckBox{
 
-        public ParcelleAutoCell(ParcelleVegetation parcelle) {
+        public AutoModeCell(ParcelleVegetation parcelle) {
             setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
             
             disableProperty().bind(editable.not());
@@ -433,14 +481,20 @@ public class FXPlanTable extends BorderPane{
     }
 
     /**
-     * Ligne des couts
+     * Cellule d'affichage des coûts.
+     *
+     * Cette cellule dispose d'une méthode update() permettant de calculer les
+     * coûts d'une année de planification.
+     *
+     * Le calcul est différent selon que l'affichage est en mode planification
+     * ou exploitation.
      */
-    private final class EstimationCell extends BorderPane{
+    private final class CostCell extends BorderPane{
 
         private final int index;
         private final Label label = new Label();
 
-        public EstimationCell(final int index) {
+        public CostCell(final int index) {
             this.index = index;
             label.getStyleClass().add("pojotable-header");
             setCenter(label);
@@ -452,11 +506,11 @@ public class FXPlanTable extends BorderPane{
             
             final double cout;
             if(mode==PLANIFICATION){
-                cout = VegetationSession.estimateCoutPlanification(plan, index, tableParcelles);
+                cout = VegetationSession.estimatedPlanificationCost(plan, index, tableParcelles);
             }
             else {
                 if(plan!=null){
-                    cout = VegetationSession.coutExploitation(plan.getAnneeDebut()+index, tableParcelles);
+                    cout = VegetationSession.exploitationCost(plan.getAnneeDebut()+index, tableParcelles);
                 }
                 else {
                     throw new IllegalStateException("Plan must not be null");

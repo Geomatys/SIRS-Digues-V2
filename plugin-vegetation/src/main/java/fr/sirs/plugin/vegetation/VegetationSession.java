@@ -169,7 +169,7 @@ public final class VegetationSession {
      * @param parcelles
      * @return
      */
-    public static double coutExploitation(final int year, final List<ParcelleVegetation> parcelles){
+    public static double exploitationCost(final int year, final List<ParcelleVegetation> parcelles){
 
         double cost = 0.;
 
@@ -214,7 +214,7 @@ public final class VegetationSession {
      * @param parcelles
      * @return
      */
-    public static double estimateCoutPlanification(final PlanVegetation plan, final int yearIndex, final List<ParcelleVegetation> parcelles){
+    public static double estimatedPlanificationCost(final PlanVegetation plan, final int yearIndex, final List<ParcelleVegetation> parcelles){
         /*
         En mode planification le coût suppose que l'on fasse la somme de
         tous les côuts de traitements des zones de la parcelle, dès que
@@ -353,7 +353,7 @@ public final class VegetationSession {
      * @param year
      * @return 
      */
-    public static boolean isParcelleTraite(ParcelleVegetation parcelle, int year){
+    public static boolean isParcelleTraitee(ParcelleVegetation parcelle, int year){
         boolean done = false;
         for(ParcelleTraitementVegetation traitement : parcelle.getTraitements()){
             if(traitement.getDate()!=null && traitement.getDate().getYear() == year){
@@ -410,13 +410,13 @@ public final class VegetationSession {
      * @param year
      * @return 
      */
-    public static String getParcelleEtat(ParcelleVegetation parcelle, boolean planifie, int year){
+    public static String getParcelleEtat(final ParcelleVegetation parcelle, final boolean planifie, final int year){
         final int thisYear = LocalDate.now().getYear();
 
-        final boolean done = isParcelleTraite(parcelle, year);
+        final boolean done = isParcelleTraitee(parcelle, year);
 
         if(year>thisYear){
-            //pas de couleur pour les années futurs
+            //pas de couleur pour les années futures
             return planifie ? ETAT_PLANIFIE_FUTUR : ETAT_NONPLANIFIE_FUTUR;
         }
 
@@ -447,7 +447,7 @@ public final class VegetationSession {
      * @param year
      * @return
      */
-    public static Color getParcelleEtatColor(ParcelleVegetation parcelle, boolean planifie, int year){
+    public static Color getParcelleEtatColor(final ParcelleVegetation parcelle, final boolean planifie, final int year){
         final String state = getParcelleEtat(parcelle, planifie, year);
         switch(state){
             case ETAT_PLANIFIE_TRAITE : return Color.GREEN;
@@ -468,7 +468,7 @@ public final class VegetationSession {
      * @param parcelles liste des parcelles voulue ou nulle pour toute
      * @return
      */
-    public static MapLayer parcelleTrmtState(PlanVegetation plan, int year, Collection<ParcelleVegetation> parcelles){
+    public static MapLayer parcelleTrmtState(final PlanVegetation plan, final int year, Collection<ParcelleVegetation> parcelles){
         //etat des parcelles : traité, non traité
         final ParcelleVegetationRepository parcelleRepo = VegetationSession.INSTANCE.getParcelleRepo();
 
@@ -494,7 +494,7 @@ public final class VegetationSession {
             final Feature feature = writer.next();
             feature.setPropertyValue("id", pv.getId());
             feature.setPropertyValue("geometry", pv.getGeometry());
-            feature.setPropertyValue("etat", VegetationSession.isParcelleTraite(pv, year));
+            feature.setPropertyValue("etat", VegetationSession.isParcelleTraitee(pv, year));
             feature.getUserData().put(BeanFeature.KEY_BEAN, pv);
             writer.write();
         }
@@ -521,7 +521,7 @@ public final class VegetationSession {
      * @param parcelles liste des parcelles voulue ou nulle pour toute
      * @return
      */
-    public static MapLayer parcellePanifState(PlanVegetation plan, int year, Collection<ParcelleVegetation> parcelles){
+    public static MapLayer parcellePanifState(final PlanVegetation plan, final int year, Collection<ParcelleVegetation> parcelles){
         //etat des parcelles : planifié, traité, non planifié etc...
 
         final ParcelleVegetationRepository parcelleRepo = VegetationSession.INSTANCE.getParcelleRepo();
