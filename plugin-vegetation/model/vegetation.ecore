@@ -51,12 +51,13 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="cout" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="surface" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="quantite" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
       <eAnnotations source="localDate"/>
     </eStructuralFeatures>
     <eStructuralFeatures xsi:type="ecore:EReference" name="traitementId" eType="#//RefTraitementVegetation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sousTraitementId" eType="#//RefSousTraitementVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prestation" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Prestation"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTraitementVegetation" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
