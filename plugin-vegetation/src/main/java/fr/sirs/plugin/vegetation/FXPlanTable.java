@@ -351,8 +351,12 @@ public class FXPlanTable extends BorderPane{
 
                     Si on modifie une valeur du passé, cela doit rester sans effet
                     sur la planification.
+
+                    D'autre part, la planif est recalculée uniquement si on coche la case
+                    à cocher, mais non si on la décoche.
                     */
                     if(autoProperty.get()
+                            && newValue
                             && this.index>=LocalDate.now().getYear()-plan.getAnneeDebut()){
                         /*
                         Comme la cellule écoute la liste, le changement d'état sélectionné
@@ -409,8 +413,9 @@ public class FXPlanTable extends BorderPane{
 
         private void setVal(final Boolean v){
             if(index<parcelle.getPlanifications().size()){
-                final Boolean old = parcelle.getPlanifications().set(index, v);
+                final Boolean old = parcelle.getPlanifications().get(index);
                 if(!Objects.equal(old, v)){
+                    parcelle.getPlanifications().set(index, v);
                     /*
                     On ne sauvegarde la parcelle que si un calcul de la planif
                     n'est pas en cours, car en cas de recalcul de la planif, on
@@ -419,9 +424,9 @@ public class FXPlanTable extends BorderPane{
                     if(!this.planifGroup.planifChangeProperty().get()){
                         save(parcelle);
                     }
-                    updateColor();
-                    estCell.update();
                 }
+                updateColor();
+                estCell.update();
             }
         }
 
