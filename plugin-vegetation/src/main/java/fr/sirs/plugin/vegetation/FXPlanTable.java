@@ -35,6 +35,7 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -43,10 +44,12 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
@@ -208,7 +211,16 @@ public class FXPlanTable extends BorderPane{
             /*==================================================================
             Colonne d'information et du libellé de la parcelle.
             */
-            final Label info = new Label(cvt.toString(parcelle), new ImageView(SIRS.ICON_INFO_CIRCLE_BLACK_16));
+            final Button toParcelle = new Button(null, new ImageView(SIRS.ICON_EDIT_BLACK));
+            toParcelle.setOnAction(e -> Injector.getSession().showEditionTab(parcelle));
+            toParcelle.setBackground(Background.EMPTY);
+            toParcelle.setBorder(Border.EMPTY);
+            toParcelle.setPadding(Insets.EMPTY);
+            final HBox hBox = new HBox(toParcelle, new ImageView(SIRS.ICON_INFO_CIRCLE_BLACK_16));
+            hBox.setAlignment(Pos.CENTER);
+            hBox.setSpacing(.5);
+
+            final Label info = new Label(cvt.toString(parcelle), hBox);
 
             final Runnable runnable = () -> {
                 final List<? extends ZoneVegetation> zones = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), session);
