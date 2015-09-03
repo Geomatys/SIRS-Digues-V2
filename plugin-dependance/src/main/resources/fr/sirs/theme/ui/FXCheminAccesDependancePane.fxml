@@ -26,7 +26,7 @@
   <FXPositionDependancePane fx:id="uiPosition" />
 
             <!-- CheminAccesDependance -->
-            <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+            <GridPane fx:id="uiGridAttributes" hgap="10.0" styleClass="gray-light" vgap="10.0">
               <columnConstraints>
                 <ColumnConstraints hgrow="NEVER" />
                 <ColumnConstraints hgrow="ALWAYS" />
