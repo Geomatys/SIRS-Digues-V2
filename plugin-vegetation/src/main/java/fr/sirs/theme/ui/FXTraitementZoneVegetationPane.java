@@ -4,26 +4,18 @@ package fr.sirs.theme.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.InvasiveVegetation;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefSousTraitementVegetation;
 import fr.sirs.core.model.RefTraitementVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
-import fr.sirs.core.model.ZoneVegetation;
 import static fr.sirs.plugin.vegetation.PluginVegetation.initComboSousTraitement;
-import static fr.sirs.plugin.vegetation.PluginVegetation.updateParcelleAutoPlanif;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 
 /**
  *
@@ -127,29 +119,29 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
         initComboSousTraitement(newElement.getTraitementId(), newElement.getSousTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTraitementId);
     }
 
-    @Override
-    public void preSave(){
-        super.preSave();
-
-        if(ui_frequenceId.getSelectionModel().getSelectedItem() instanceof Preview){
-            final String choosenFrequencyId = ((Preview) ui_frequenceId.getSelectionModel().getSelectedItem()).getElementId();
-            if(frequencyChanged && !Objects.equals(firstFrequencyId, choosenFrequencyId)){
-                final TraitementZoneVegetation traitement = elementProperty.get();
-                if(traitement!=null){
-                    final Element parent = traitement.getParent();
-                    if(parent instanceof ZoneVegetation && !(parent instanceof InvasiveVegetation)){
-                        final Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                                "Il semblerait que la fréquence ait été modifiée.\n"
-                                        + "Voulez-vous mettre à jour la planification de la parcelle à partir de l'année courante ?",
-                                ButtonType.YES, ButtonType.NO);
-                        alert.setResizable(true);
-                        final Optional<ButtonType> result = alert.showAndWait();
-                        if(result.isPresent() && result.get()==ButtonType.YES){
-                            updateParcelleAutoPlanif((ZoneVegetation) parent);
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    @Override
+//    public void preSave(){
+//        super.preSave();
+//
+//        if(ui_frequenceId.getSelectionModel().getSelectedItem() instanceof Preview){
+//            final String choosenFrequencyId = ((Preview) ui_frequenceId.getSelectionModel().getSelectedItem()).getElementId();
+//            if(frequencyChanged && !Objects.equals(firstFrequencyId, choosenFrequencyId)){
+//                final TraitementZoneVegetation traitement = elementProperty.get();
+//                if(traitement!=null){
+//                    final Element parent = traitement.getParent();
+//                    if(parent instanceof ZoneVegetation && !(parent instanceof InvasiveVegetation)){
+//                        final Alert alert = new Alert(Alert.AlertType.INFORMATION,
+//                                "Il semblerait que la fréquence ait été modifiée.\n"
+//                                        + "Voulez-vous mettre à jour la planification de la parcelle à partir de l'année courante ?",
+//                                ButtonType.YES, ButtonType.NO);
+//                        alert.setResizable(true);
+//                        final Optional<ButtonType> result = alert.showAndWait();
+//                        if(result.isPresent() && result.get()==ButtonType.YES){
+//                            updateParcelleAutoPlanif((ZoneVegetation) parent);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 }
