@@ -44,9 +44,9 @@ public class FXVegetationTronconThemePane extends FXTronconThemePane {
 
         public VegetationTronconThemePojoTable(TronconTheme.ThemeManager<ParcelleVegetation> group) {
             super(group);
-
-            final TableColumn<ParcelleVegetation, ParcelleVegetation> alertColumn = new AlertTableColumn();
-            getTable().getColumns().add((TableColumn) alertColumn);
+// On n'a plus de colonne d'alerte dans la nouvelle spec car elle n'a plus de sens du fait du panneau d'exploitation.
+//            final TableColumn<ParcelleVegetation, ParcelleVegetation> alertColumn = new AlertTableColumn();
+//            getTable().getColumns().add((TableColumn) alertColumn);
         }
 
         @Override
