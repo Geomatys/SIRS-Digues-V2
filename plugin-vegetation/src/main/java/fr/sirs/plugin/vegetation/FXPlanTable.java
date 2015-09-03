@@ -2,11 +2,18 @@
 package fr.sirs.plugin.vegetation;
 
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.component.AbstractZoneVegetationRepository;
 import fr.sirs.core.component.ParcelleVegetationRepository;
+import fr.sirs.core.model.InvasiveVegetation;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.ParcelleVegetation;
+import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.PlanVegetation;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.ZoneVegetation;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.EXPLOITATION;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.PLANIFICATION;
 import fr.sirs.util.SirsStringConverter;
@@ -14,7 +21,9 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -30,6 +39,8 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
@@ -193,21 +204,84 @@ public class FXPlanTable extends BorderPane{
             tableParcelles.add(parcelle);
 
             colIndex=0;
-            gridCenter.add(new Label(cvt.toString(parcelle)), colIndex, rowIndex);
+
+            /*==================================================================
+            Colonne d'information et du libellé de la parcelle.
+            */
+            final Label info = new Label(cvt.toString(parcelle), new ImageView(SIRS.ICON_INFO_CIRCLE_BLACK_16));
+
+            final Runnable runnable = () -> {
+                final List<? extends ZoneVegetation> zones = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), session);
+                if(zones.isEmpty()){
+                    info.setTooltip(new Tooltip("Aucune zone de végétation sur cette parcelle."));
+                }
+                else{
+                    final StringBuilder infoSb = new StringBuilder("Peuplement de la parcelle :\n");
+
+                    // Mémos pour vérifier qu'on n'indique pas deux fois les mêmes combinaisons de parcelle - type de végétation
+                    final Map<Class, Boolean> memo1 = new HashMap<>();
+                    final Map<Map.Entry<Class, String>, Boolean> memo2 = new HashMap<>();
+
+                    for(final ZoneVegetation zone : zones){
+                        final LabelMapper labelMapper = LabelMapper.get(zone.getClass());
+
+                        if(zone instanceof PeuplementVegetation || zone instanceof InvasiveVegetation){
+                            final String typeId = (zone instanceof PeuplementVegetation) ? ((PeuplementVegetation)zone).getTypePeuplementId() : ((InvasiveVegetation)zone).getTypeInvasive();
+
+                            if(typeId!=null){
+                                final Map.Entry<Class, String> key = new HashMap.SimpleEntry<>(zone.getClass(), typeId);
+                                if(memo2.get(key)==null){
+                                    final Preview preview = session.getPreviews().get(typeId);
+                                    if(preview!=null){
+                                        infoSb.append("\t- ").append(labelMapper.mapClassName()).append(" (").append(cvt.toString(preview)).append(")\n");
+                                    }
+                                    memo2.put(key, true);
+                                }
+                            }
+                            else{
+                                final Class key = zone.getClass();
+                                if(memo1.get(key)==null){
+                                    infoSb.append("\t- ").append(labelMapper.mapClassName()).append('\n');
+                                    memo1.put(key, true);
+                                }
+                            }
+                        }
+                        else{
+                            final Class key = zone.getClass();
+                            if(memo1.get(key)==null){
+                                infoSb.append("\t- ").append(labelMapper.mapClassName()).append('\n');
+                                memo1.put(key, true);
+                            }
+                        }
+                    }
+                    info.setTooltip(new Tooltip(infoSb.toString()));
+                }
+            };
+            session.getTaskManager().submit("Analyse de la végétation de la parcelle "+parcelle.getDesignation(), runnable);
+
+
+            gridCenter.add(info, colIndex, rowIndex);
+
+            /*==================================================================
+            Colonnes des planifications.
+            */
             colIndex++;
-
-            final CheckBox modeAuto = new AutoModeCell(parcelle);
-
+            /*
+            Groupement des planifications d'une parcelle de manière à ce que les
+            cellules de dates coordonnent leurs changements.
+            */
             final PlanifGroup planifGroup = new PlanifGroup();
             for(int year=dateStart; year<dateEnd; year++,colIndex++){
                 final ParcelleDateCell parcelleDateCell = new ParcelleDateCell(parcelle, year, estCells[year-dateStart], planifGroup);
-                parcelleDateCell.autoProperty().bind(modeAuto.selectedProperty());
                 gridCenter.add(parcelleDateCell, colIndex, rowIndex);
             }
 
-            //on ajoute la colonne 'Mode auto'
-            colIndex++;
+            /*==================================================================
+            En mode planification on ajoute la colonne de controle du mode auto.
+            */
             if(mode==PLANIFICATION){
+                colIndex++;
+                final CheckBox modeAuto = new AutoModeCell(parcelle);
                 gridCenter.add(modeAuto, colIndex, rowIndex);
             }
 
@@ -355,7 +429,7 @@ public class FXPlanTable extends BorderPane{
                     D'autre part, la planif est recalculée uniquement si on coche la case
                     à cocher, mais non si on la décoche.
                     */
-                    if(autoProperty.get()
+                    if(this.parcelle.getModeAuto()
                             && newValue
                             && this.index>=LocalDate.now().getYear()-plan.getAnneeDebut()){
                         /*
@@ -397,8 +471,6 @@ public class FXPlanTable extends BorderPane{
 
             selectedProperty().addListener(selectChangeListener);
         }
-        
-        public BooleanProperty autoProperty(){return autoProperty;}
 
         /**
          * return the value of the planification if exists. If there is no planification at the cell index, then returns false.
