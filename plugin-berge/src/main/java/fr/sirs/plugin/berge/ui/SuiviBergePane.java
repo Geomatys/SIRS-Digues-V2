@@ -35,7 +35,7 @@ public class SuiviBergePane extends BorderPane {
         HBox.setHgrow(separator, Priority.ALWAYS);
         final BergeRepository repo = Injector.getBean(BergeRepository.class);
         
-        // Liste de toutes les obligations
+        // Liste de toutes les berges
         final ObservableList<Berge> all = FXCollections.observableList(repo.getAll());
         final BergeDocumentListener oblListener = new BergeDocumentListener(all);
         

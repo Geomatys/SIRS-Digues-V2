@@ -111,7 +111,7 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
                     }
                     
                     if(geom !=null) {
-                        final TronconDigue troncon = showTronconDialog();
+                        final TronconDigue troncon = showTronconDialog("tronçon", TronconDigue.class);
                         if (troncon == null) return;
                         try{
                             final Session session = Injector.getSession();

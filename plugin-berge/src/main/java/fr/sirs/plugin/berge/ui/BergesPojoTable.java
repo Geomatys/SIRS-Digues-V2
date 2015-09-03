@@ -43,7 +43,7 @@ public class BergesPojoTable extends PojoTable {
     
     @Override
     public Filter getFilter() {
-        if (uiKeywordSearch == null || !uiKeywordSearch.getText().isEmpty()) {
+        if (uiKeywordSearch == null || uiKeywordSearch.getText().isEmpty()) {
             return super.getFilter();
         }
 

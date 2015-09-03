@@ -98,6 +98,7 @@ import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.util.collection.CloseableIterator;
+import org.geotoolkit.style.MutableStyle;
 import org.geotoolkit.util.collection.CollectionChangeEvent;
 import org.opengis.filter.Id;
 import org.opengis.referencing.operation.TransformException;
@@ -111,7 +112,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
 
     private static final int CROSS_SIZE = 5;
 
-    private final MouseListen mouseInputListener = new MouseListen();
+    private final MouseListen mouseInputListener;
     private final FXGeometryLayer geomlayer= new FXGeometryLayer(){
         @Override
         protected Node createVerticeNode(Coordinate c, boolean selected){
@@ -131,16 +132,42 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
     private final Session session;
 
     private Id selectionFilter;
-
+    
+    // overriden variable by init();
+    protected String layerName;
+    protected MutableStyle style;
+    protected String typeName;
+    protected Class<? extends TronconDigue> tronconClass;
+    
+    
+    protected void init() {
+        this.layerName = CorePlugin.TRONCON_LAYER_NAME;
+        this.tronconClass = TronconDigue.class;
+        try {
+            this.style = CorePlugin.createTronconSelectionStyle(false);
+        } catch (URISyntaxException ex) {
+            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+        }
+        this.typeName = "tronçon";
+    }
+    
+    
+    /**
+     * Constructor called directly by sub-classes
+     * @param map 
+     */
     public TronconEditHandler(final FXMap map) {
         super();
+        init();
+        mouseInputListener = new MouseListen(typeName, tronconClass);
+        
         session = Injector.getSession();
         tronconProperty.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
             // IL FAUT ÉGALEMENT VÉRIFIER LES AUTRE OBJETS "CONTENUS" : POSITIONS DE DOCUMENTS, PHOTOS, PROPRIETAIRES ET GARDIENS
 
             if (newValue != null && !TronconUtils.getPositionableList(newValue).isEmpty()) {
                 final Alert alert = new Alert(Alert.AlertType.WARNING,
-                        "Attention, ce tronçon contient des données. Toute modification du tracé risque de changer leur position.", ButtonType.CANCEL, ButtonType.OK);
+                        "Attention, ce " + typeName + " contient des données. Toute modification du tracé risque de changer leur position.", ButtonType.CANCEL, ButtonType.OK); // TODO GENDER
                 alert.setResizable(true);
                 final Optional<ButtonType> result = alert.showAndWait();
                 if (result.isPresent() && ButtonType.OK.equals(result.get())) {
@@ -187,15 +214,12 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         final MapContext context = cc.getContext();
         for(MapLayer layer : context.layers()){
             layer.setSelectable(false);
-            if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
+            if(layer.getName().equalsIgnoreCase(layerName)){
                 tronconLayer = (FeatureMapLayer) layer;
-                try {
-                    //TODO : activate back graduation after Geotk milestone MC0044
-                    tronconLayer.setSelectionStyle(CorePlugin.createTronconSelectionStyle(false));
-                    updateGeometry();
-                } catch (URISyntaxException ex) {
-                    SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-                }
+                //TODO : activate back graduation after Geotk milestone MC0044
+                tronconLayer.setSelectionStyle(style);
+                updateGeometry();
+                
                 layer.setSelectable(true);
                 tronconLayer.addItemListener(this);
             }
@@ -221,11 +245,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
             component.removeDecoration(geomlayer);
             if (tronconLayer != null) {
-                try {
-                    tronconLayer.setSelectionStyle(CorePlugin.createTronconSelectionStyle(false));
-                } catch (URISyntaxException ex) {
-                    SIRS.LOGGER.log(Level.WARNING, null, ex);
-                }
+                tronconLayer.setSelectionStyle(style);
                 tronconLayer.removeItemListener(this);
                 tronconLayer.setSelectionFilter(null);
                 selectionFilter = null;
@@ -248,9 +268,11 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
      * Show a dialog allowing user to create a new {@link TronconDigue} by setting
      * its libelle, {@link Digue} and {@link RefRive}. Other fields as Geometry are
      * left null.
+     * @param typeName
+     * @param tronconClass
      * @return Return the new troncon, or null if user has cancelled dialog.
      */
-    public static TronconDigue showTronconDialog() {
+    public static TronconDigue showTronconDialog(String typeName, Class<? extends TronconDigue> tronconClass) {
         final Session session = Injector.getBean(Session.class);
         final List<Preview> digues = session.getPreviews().getByClass(Digue.class);
         final ComboBox<Preview> diguesChoice = new ComboBox<>(FXCollections.observableList(digues));
@@ -267,7 +289,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
 
         final Stage dialog = new Stage();
         dialog.getIcons().add(SIRS.ICON);
-        dialog.setTitle("Nouveau tronçon");
+        dialog.setTitle("Nouveau " + typeName); // TODO GENDER
         dialog.setResizable(true);
         dialog.initModality(Modality.WINDOW_MODAL);
         dialog.initOwner(session.getFrame().getScene().getWindow());
@@ -283,7 +305,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         bp.setPadding(new Insets(10, 10, 10, 10));
         bp.setHgap(10);
         bp.setVgap(10);
-        bp.add(new Label("Nom du tronçon"), 0, 0);
+        bp.add(new Label("Nom du " + typeName), 0, 0); // TODO GENDER
         bp.add(nameField, 0, 1);
         bp.add(new Label("Rattacher à la digue"), 0, 2);
         bp.add(diguesChoice, 0, 3);
@@ -313,7 +335,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         main.setBottom(babar);
 
         // Find all registered implementations of linear objects.
-        Collection<AbstractSIRSRepository> tdRepositories = session.getRepositoriesForClass(TronconDigue.class);
+        Collection<AbstractSIRSRepository> tdRepositories = session.getRepositoriesForClass(tronconClass);
         final SimpleObjectProperty<AbstractSIRSRepository> chosenType = new SimpleObjectProperty<>();
         if (tdRepositories.size() > 1) {
             final ComboBox typeBox = new ComboBox();
@@ -330,13 +352,13 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                 }
             });
 
-            HBox top = new HBox(new Label("Type de tronçon : "), typeBox);
+            HBox top = new HBox(new Label("Type de " + typeName + " : "), typeBox);
             main.setTop(top);
             chosenType.bind(typeBox.valueProperty());
         } else if (tdRepositories.size() == 1) {
             chosenType.set(tdRepositories.iterator().next());
         } else {
-            throw new IllegalStateException("Aucun type de tronçon disponible !");
+            throw new IllegalStateException("Aucun type de " + typeName + " disponible !");
         }
 
         dialog.setScene(new Scene(main));
@@ -346,7 +368,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         if (tronconName == null || tronconName.isEmpty()) {
             return null;
         } else {
-            final TronconDigue tmpTroncon = Injector.getSession().getElementCreator().createElement(TronconDigue.class);
+            final TronconDigue tmpTroncon = Injector.getSession().getElementCreator().createElement(tronconClass);
             tmpTroncon.setLibelle(tronconName);
             final Preview digue = diguesChoice.getValue();
             if (digue != null) {
@@ -386,10 +408,16 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         private double startY;
         private double diffX;
         private double diffY;
+        
+        private final String typeName;
+        private final Class tronconClass;
+        
 
-        public MouseListen() {
+        public MouseListen(String typeName, Class<? extends TronconDigue> tronconClass) {
             super(TronconEditHandler.this);
             popup.setAutoHide(true);
+            this.tronconClass = tronconClass;
+            this.typeName = typeName;
         }
 
         @Override
@@ -455,9 +483,9 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                     // -commencer un nouveau troncon
                     popup.getItems().clear();
 
-                    final MenuItem createItem = new MenuItem("Créer un nouveau tronçon");
+                    final MenuItem createItem = new MenuItem("Créer un nouveau " + typeName); // TODO GENDER
                     createItem.setOnAction((ActionEvent event) -> {
-                        final TronconDigue tmpTroncon = showTronconDialog();
+                        final TronconDigue tmpTroncon = showTronconDialog(typeName, tronconClass);
                         if (tmpTroncon == null) {
                             return;
                         }
@@ -472,7 +500,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                             tmpTroncon.setGeometry(geom);
 
                             //sauvegarde du troncon
-                            session.getRepositoryForClass(TronconDigue.class).add(tmpTroncon);
+                            session.getRepositoryForClass(tronconClass).add(tmpTroncon);
                             TronconUtils.updateSRElementaire(tmpTroncon, session);
 
                             // Prepare l'edition du tronçon
@@ -533,11 +561,11 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                             if (!popup.getItems().isEmpty()) {
                                 popup.getItems().add(new SeparatorMenuItem());
                             }
-                            final MenuItem invert = new MenuItem("Inverser le tracé du tronçon");
+                            final MenuItem invert = new MenuItem("Inverser le tracé du " + typeName); // TODO GENDER
                             invert.setOnAction((ActionEvent ae) -> {
                                 // HACK : On est forcé de sauvegarder le tronçon pour mettre à jour le SR élémentaire.
                                 tronconProperty.get().setGeometry(editGeometry.geometry.get().reverse());
-                                session.getRepositoryForClass(TronconDigue.class).update(tronconProperty.get());
+                                session.getRepositoryForClass(tronconClass).update(tronconProperty.get());
                                 TronconUtils.updateSRElementaire(tronconProperty.get(), session);
                                 tronconProperty.set(null);
                             });
@@ -550,7 +578,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                             final MenuItem saveItem = new MenuItem("Sauvegarder les modifications");
                             saveItem.setOnAction((ActionEvent event) -> {
                                 tronconProperty.get().setGeometry(editGeometry.geometry.get());
-                                session.getRepositoryForClass(TronconDigue.class).update(tronconProperty.get());
+                                session.getRepositoryForClass(tronconClass).update(tronconProperty.get());
 
                                 TronconUtils.updateSRElementaire(tronconProperty.get(), session);
                                 //on recalcule les geometries des positionables du troncon.
@@ -564,7 +592,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
 
                         //action : annuler edition
                         final String cancelTitle = (!editGeometry.geometry.get().equals(tronconProperty.get().getGeometry()))?
-                                "Annuler les modifications" : "Désélectionner le tronçon";
+                                "Annuler les modifications" : "Désélectionner le " + typeName; // TODO GENDER
 
                         final MenuItem cancelItem = new MenuItem(cancelTitle);
                         cancelItem.setOnAction((ActionEvent event) -> {
@@ -578,9 +606,9 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                         popup.getItems().add(new SeparatorMenuItem());
                     }
 
-                    final MenuItem deleteItem = new MenuItem("Supprimer tronçon", new ImageView(GeotkFX.ICON_DELETE));
+                    final MenuItem deleteItem = new MenuItem("Supprimer " + typeName, new ImageView(GeotkFX.ICON_DELETE));
                     deleteItem.setOnAction((ActionEvent event) -> {
-                        final Alert alert = new Alert(CONFIRMATION, "Voulez-vous vraiment supprimer le tronçon ainsi que les systèmes de repérage et tous les positionnables qui le réfèrent ?", YES, NO);
+                        final Alert alert = new Alert(CONFIRMATION, "Voulez-vous vraiment supprimer le " + typeName + " ainsi que les systèmes de repérage et tous les positionnables qui le réfèrent ?", YES, NO); // TODO GENDER
                         final Optional<ButtonType> result = alert.showAndWait();
                         if(result.isPresent() && result.get()==YES){
                             final Map<Class, List<Positionable>> positionablesByClass = new HashMap<>();
@@ -607,7 +635,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                                     srRepo.remove(it.next(), tronconProperty.get());
                                 }
                             }
-                            session.getRepositoryForClass(TronconDigue.class).remove(tronconProperty.get());
+                            session.getRepositoryForClass(tronconClass).remove(tronconProperty.get());
                             tronconProperty.set(null);
                         }
                     });

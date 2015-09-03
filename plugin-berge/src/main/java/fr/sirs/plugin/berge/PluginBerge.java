@@ -9,11 +9,14 @@ import fr.sirs.core.model.Berge;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.sql.BergeSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
+import fr.sirs.map.FXMapPane;
+import fr.sirs.plugin.berge.map.BergeToolBar;
 import java.awt.Color;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javax.measure.unit.NonSI;
 import org.geotoolkit.cql.CQLException;
@@ -73,7 +76,14 @@ public class PluginBerge extends Plugin {
     public SQLHelper getSQLHelper() {
         return BergeSqlHelper.getInstance();
     }
+    
+    @Override
+    public List<ToolBar> getMapToolBars(final FXMapPane mapPane) {
+        return Collections.singletonList(new BergeToolBar(mapPane.getUiMap()));
+    }
 
+    public static String LAYER_NAME = "Berges";
+    
     @Override
     public List<MapItem> getMapItems() {
         try {
@@ -82,7 +92,7 @@ public class PluginBerge extends Plugin {
         };
             //troncons
             final BeanStore tronconStore = new BeanStore(getDefaultSupplierForClass.apply(Berge.class));
-            List<MapLayer> layers = CorePlugin.buildLayers(tronconStore, "Berges", createBergeStyle(), createTronconSelectionStyle(false),true);
+            List<MapLayer> layers = CorePlugin.buildLayers(tronconStore, LAYER_NAME, createBergeStyle(), createTronconSelectionStyle(false),true);
 
             MapItem bergeContainer = MapBuilder.createItem();
             bergeContainer.setName("Module berges");
@@ -93,7 +103,7 @@ public class PluginBerge extends Plugin {
         }
     }
 
-        private static MutableStyle createBergeStyle() throws CQLException, URISyntaxException{
+    public static MutableStyle createBergeStyle() throws CQLException, URISyntaxException{
         final Stroke stroke1 = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,FF.literal(9),
                 STROKE_JOIN_BEVEL, STROKE_CAP_SQUARE, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
