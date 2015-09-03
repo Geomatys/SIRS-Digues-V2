@@ -2,23 +2,18 @@
 package fr.sirs.plugin.berge.ui;
 
 import fr.sirs.Injector;
-import fr.sirs.SIRS;
 import fr.sirs.core.component.BergeRepository;
 import fr.sirs.core.component.DocumentChangeEmiter;
 import fr.sirs.core.component.DocumentListener;
 import fr.sirs.core.model.Berge;
 import fr.sirs.core.model.Element;
-import fr.sirs.ui.calendar.CalendarView;
 import fr.sirs.util.SimpleFXEditMode;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Separator;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;

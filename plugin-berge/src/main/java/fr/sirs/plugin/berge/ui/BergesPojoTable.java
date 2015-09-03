@@ -1,25 +1,16 @@
 
 package fr.sirs.plugin.berge.ui;
 
-import fr.sirs.SIRS;
 import fr.sirs.theme.ui.PojoTable;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import org.geotoolkit.filter.DefaultPropertyIsLike;
-import org.geotoolkit.filter.DefaultPropertyIsNull;
 import org.geotoolkit.filter.DefaultPropertyName;
 import org.geotoolkit.filter.binarylogic.DefaultAnd;
-import org.odftoolkit.odfdom.type.Color;
 import org.opengis.filter.Filter;
 
 /**
