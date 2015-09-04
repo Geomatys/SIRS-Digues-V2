@@ -2,6 +2,7 @@ package fr.sirs.plugin.dependance.map;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.core.component.AbstractSIRSRepository;
@@ -195,8 +196,8 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     if (newDependance) {
                         // Le helper peut être null si on a choisi d'activer ce handler pour une dépendance existante,
                         // sans passer par le clic droit pour choisir un type de dépendance.
+                        final Class clazz = dependance.getClass();
                         if (helper == null) {
-                            final Class clazz = dependance.getClass();
                             if (AireStockageDependance.class.isAssignableFrom(clazz)) {
                                 helper = new EditionHelper(map, aireLayer);
                             } else if (AutreDependance.class.isAssignableFrom(clazz)) {
@@ -207,6 +208,9 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                                 helper = new EditionHelper(map, ouvrageLayer);
                             }
                         }
+
+                        final boolean isPolygonGeom = AireStockageDependance.class.isAssignableFrom(clazz) ||
+                                AutreDependance.class.isAssignableFrom(clazz);
 
                         // On vient de créer la dépendance, le clic gauche va permettre d'ajouter des points.
 
@@ -232,14 +236,24 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                         }
 
                         // Création de la géométrie à éditer à partir des coordonnées
-                        editGeometry.geometry.set(EditionHelper.createPolygon(coords));
+                        if (isPolygonGeom) {
+                            editGeometry.geometry.set(EditionHelper.createPolygon(coords));
+                        } else {
+                            editGeometry.geometry.set(EditionHelper.createLine(coords));
+                        }
                         JTS.setCRS(editGeometry.geometry.get(), map.getCanvas().getObjectiveCRS2D());
                         decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
                     } else {
                         // On réédite une géométrie existante, le double clic gauche va nous permettre d'ajouter un nouveau
                         // point à la géométrie.
                         if (e.getClickCount() >= 2) {
-                            final Geometry result = helper.insertNode((Polygon)editGeometry.geometry.get(), x, y);
+                            final Geometry tempEditGeom = editGeometry.geometry.get();
+                            final Geometry result;
+                            if (tempEditGeom instanceof Polygon) {
+                                result = helper.insertNode((Polygon)editGeometry.geometry.get(), x, y);
+                            } else {
+                                result = helper.insertNode((LineString)editGeometry.geometry.get(), x, y);
+                            }
                             editGeometry.geometry.set(result);
                             decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
                         }
