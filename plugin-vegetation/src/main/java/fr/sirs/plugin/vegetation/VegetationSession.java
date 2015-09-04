@@ -93,12 +93,12 @@ import org.opengis.style.Stroke;
 public final class VegetationSession {
 
     public static final VegetationSession INSTANCE = new VegetationSession();
-    public static final String ETAT_PLANIFIE_TRAITE = "Planifié / Traité";
-    public static final String ETAT_PLANIFIE_NONTRAITE = "Planifié / Non traité";
-    public static final String ETAT_NONPLANIFIE_TRAITE = "Non planifié / Traité";
-    public static final String ETAT_NONPLANIFIE_NONTRAITE = "Non planifié / Non traité";
-    public static final String ETAT_PLANIFIE_FUTUR = "Planifié (futur)";
-    public static final String ETAT_NONPLANIFIE_FUTUR = "Non planifié (futur)";
+    public static final String PLANIFIE_TRAITE = "Planifié / Traité";
+    public static final String PLANIFIE_NON_TRAITE = "Planifié / Non traité";
+    public static final String NON_PLANIFIE_TRAITE = "Non planifié / Traité";
+    public static final String NON_PLANIFIE_NON_TRAITE = "Non planifié / Non traité";
+    public static final String PLANIFIE_FUTUR = "Planifié (futur)";
+    public static final String NON_PLANIFIE_FUTUR = "Non planifié (futur)";
 
     private final ObjectProperty<PlanVegetation> planProperty = new SimpleObjectProperty<>();
 
@@ -422,33 +422,33 @@ public final class VegetationSession {
 
         if(year>thisYear){
             //pas de couleur pour les années futures
-            return planifie ? ETAT_PLANIFIE_FUTUR : ETAT_NONPLANIFIE_FUTUR;
+            return planifie ? PLANIFIE_FUTUR : NON_PLANIFIE_FUTUR;
         }
 
         if(done){
             if(planifie){
-                return ETAT_PLANIFIE_TRAITE;
-            }else{
-                return ETAT_NONPLANIFIE_TRAITE;
+                return PLANIFIE_TRAITE;
+            } else{
+                return NON_PLANIFIE_TRAITE;
             }
         }else{
             if(planifie){
-                return ETAT_PLANIFIE_NONTRAITE;
-            }else{
-                return ETAT_NONPLANIFIE_NONTRAITE;
+                // Les parcelles planifiées non traitées de l'année en cours sont considérées comme planifiées dans le futur.
+                if(year==thisYear) return PLANIFIE_FUTUR;
+                else return PLANIFIE_NON_TRAITE;
+            } else{
+                return NON_PLANIFIE_NON_TRAITE;
             }
         }
     }
 
-
     public static void setCheckBoxColor(final CheckBox cb, final String state){
-
-            final Color color = getParcelleEtatColor(state);
-            if(color==null){
-                cb.setBackground(Background.EMPTY);
-            }else{
-                cb.setBackground(new Background(new BackgroundFill(color, new CornerRadii(30), new Insets(5))));
-            }
+        final Color color = getParcelleEtatColor(state);
+        if(color==null){
+            cb.setBackground(Background.EMPTY);
+        }else{
+            cb.setBackground(new Background(new BackgroundFill(color, new CornerRadii(30), new Insets(5))));
+        }
     }
 
     /**
@@ -464,10 +464,10 @@ public final class VegetationSession {
     public static Color getParcelleEtatColor(final String state){
         if (state==null) return null;
         switch(state){
-            case ETAT_PLANIFIE_TRAITE : return Color.GREEN;
-            case ETAT_PLANIFIE_NONTRAITE : return Color.RED;
-            case ETAT_NONPLANIFIE_TRAITE : return Color.ORANGE;
-            case ETAT_NONPLANIFIE_NONTRAITE : return null;
+            case PLANIFIE_TRAITE : return Color.GREEN;
+            case PLANIFIE_NON_TRAITE : return Color.RED;
+            case NON_PLANIFIE_TRAITE : return Color.ORANGE;
+            case NON_PLANIFIE_NON_TRAITE : return null;
             default : return null;
         }
     }
@@ -758,12 +758,12 @@ public final class VegetationSession {
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
         style.featureTypeStyles().add(fts);
 
-        fts.rules().add(createParcelleRule(VegetationSession.ETAT_PLANIFIE_TRAITE,      new java.awt.Color(0.0f, 0.7f, 0.0f, 0.6f)));
-        fts.rules().add(createParcelleRule(VegetationSession.ETAT_PLANIFIE_NONTRAITE,   new java.awt.Color(0.7f, 0.0f, 0.0f, 0.6f)));
-        fts.rules().add(createParcelleRule(VegetationSession.ETAT_PLANIFIE_FUTUR,       new java.awt.Color(0.0f, 0.0f, 0.7f, 0.6f)));
-        fts.rules().add(createParcelleRule(VegetationSession.ETAT_NONPLANIFIE_TRAITE,   new java.awt.Color(0.6f, 0.4f, 0.0f, 0.6f)));
-        fts.rules().add(createParcelleRule(VegetationSession.ETAT_NONPLANIFIE_NONTRAITE,new java.awt.Color(0.7f, 0.7f, 0.7f, 0.6f)));
-        fts.rules().add(createParcelleRule(VegetationSession.ETAT_NONPLANIFIE_FUTUR,    new java.awt.Color(0.7f, 0.7f, 0.7f, 0.6f)));
+        fts.rules().add(createParcelleRule(VegetationSession.PLANIFIE_TRAITE,      new java.awt.Color(0.0f, 0.7f, 0.0f, 0.6f)));
+        fts.rules().add(createParcelleRule(VegetationSession.PLANIFIE_NON_TRAITE,   new java.awt.Color(0.7f, 0.0f, 0.0f, 0.6f)));
+        fts.rules().add(createParcelleRule(VegetationSession.PLANIFIE_FUTUR,       new java.awt.Color(0.0f, 0.0f, 0.7f, 0.6f)));
+        fts.rules().add(createParcelleRule(VegetationSession.NON_PLANIFIE_TRAITE,   new java.awt.Color(0.6f, 0.4f, 0.0f, 0.6f)));
+        fts.rules().add(createParcelleRule(VegetationSession.NON_PLANIFIE_NON_TRAITE,new java.awt.Color(0.7f, 0.7f, 0.7f, 0.6f)));
+        fts.rules().add(createParcelleRule(VegetationSession.NON_PLANIFIE_FUTUR,    new java.awt.Color(0.7f, 0.7f, 0.7f, 0.6f)));
 
         return style;
     }
