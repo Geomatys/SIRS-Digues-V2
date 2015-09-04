@@ -40,19 +40,25 @@ public class PositionDocumentTheme extends TronconTheme {
     public PositionDocumentTheme() {
         super("Documents localisés", ARTICLE, MARCHE, RAPPORT_ETUDE, DOCUMENT_GRANDE_ECHELLE, AUTRE, PROFIL_LONG, PROFIL_TRAVERS);
     }
+   
+    public static <T extends Positionable, D extends SIRSDocument> ThemeManager<T> generateThemeManager(final Class<T> themeClass, Class<D> documentClass){
+        return generateThemeManager(null, themeClass, documentClass);
+    }
 
-    private static <T extends Positionable, D extends SIRSDocument> ThemeManager<T> generateThemeManager(final Class<T> themeClass, Class<D> documentClass){
+    public static <T extends Positionable, D extends SIRSDocument> ThemeManager<T> generateThemeManager(final String specifiedTitle, final Class<T> themeClass, Class<D> documentClass){
         final String title;
-        if(documentClass!=null){
+        if(specifiedTitle != null) {
+            title = specifiedTitle;
+        } else if(documentClass != null) {
             final ResourceBundle bundle = ResourceBundle.getBundle(documentClass.getCanonicalName(), Locale.getDefault(),
                     Thread.currentThread().getContextClassLoader());
-            title = bundle.getString(SIRS.BUNDLE_KEY_CLASS);
+            title = "Thème " + bundle.getString(SIRS.BUNDLE_KEY_CLASS);
         } else{
-            title = "Sans document associé";
+            title = "Thème Sans document associé";
         }
-        return new ThemeManager<>(title,
-                "Thème "+title,
-                themeClass,
+        return new ThemeManager<>(title, 
+                title, 
+                themeClass,               
             (String linearId) -> {
                 return FXCollections.observableList(((AbstractPositionableRepository<T>) Injector.getSession().getRepositoryForClass(themeClass)).getByLinearId(linearId)).filtered(new DocumentPredicate(documentClass));
             },
