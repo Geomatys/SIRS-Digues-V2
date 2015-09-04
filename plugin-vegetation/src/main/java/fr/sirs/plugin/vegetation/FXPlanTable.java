@@ -16,6 +16,8 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.ZoneVegetation;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.EXPLOITATION;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.PLANIFICATION;
+import static fr.sirs.plugin.vegetation.VegetationSession.getParcelleEtat;
+import static fr.sirs.plugin.vegetation.VegetationSession.setCheckBoxColor;
 import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -43,17 +45,14 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
-import javafx.scene.paint.Color;
 import org.elasticsearch.common.base.Objects;
 
 /**
@@ -65,7 +64,7 @@ public class FXPlanTable extends BorderPane{
     public enum Mode{PLANIFICATION, EXPLOITATION};
 
     private static final String AUTO_STYLE = "-fx-border-color: lightgray;-fx-border-insets: 0;-fx-border-width: 0 0 0 3;-fx-label-padding: 0;";
-    private static final String CHECKBOX_NOPADDING = "-fx-label-padding: 0;";
+    public static final String CHECKBOX_NO_LABEL_PADDING = "-fx-label-padding: 0;";
 
     private final PlanVegetation plan;
     private final List<ParcelleVegetation> tableParcelles = new ArrayList<>();
@@ -407,7 +406,7 @@ public class FXPlanTable extends BorderPane{
             setPadding(new Insets(10));
             setAlignment(Pos.CENTER);
             setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-            setStyle(CHECKBOX_NOPADDING);
+            setStyle(CHECKBOX_NO_LABEL_PADDING);
             this.planifGroup = planifGroup;
 
             this.parcelle.getPlanifications().addListener(new WeakListChangeListener<>(this));
@@ -523,13 +522,7 @@ public class FXPlanTable extends BorderPane{
          */
         private void updateColor(){
             if(mode==EXPLOITATION){
-                final boolean planifie = getVal();
-                final Color color = VegetationSession.getParcelleEtatColor(parcelle, planifie, year);
-                if(color==null){
-                    setBackground(Background.EMPTY);
-                }else{
-                    setBackground(new Background(new BackgroundFill(color, new CornerRadii(30), Insets.EMPTY)));
-                }
+                setCheckBoxColor(this, getParcelleEtat(parcelle, getVal(), year));
             }
         }
 

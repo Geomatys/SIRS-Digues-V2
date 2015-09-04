@@ -40,6 +40,11 @@ import java.util.Map.Entry;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.control.CheckBox;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javax.measure.unit.NonSI;
 import javax.swing.ImageIcon;
@@ -435,20 +440,29 @@ public final class VegetationSession {
         }
     }
 
+
+    public static void setCheckBoxColor(final CheckBox cb, final String state){
+
+            final Color color = getParcelleEtatColor(state);
+            if(color==null){
+                cb.setBackground(Background.EMPTY);
+            }else{
+                cb.setBackground(new Background(new BackgroundFill(color, new CornerRadii(30), new Insets(5))));
+            }
+    }
+
     /**
      * Couleur en fonction de l'etat des traitements.
      * Void : Non planifié, Non traité
      * Orange : Non planifié, traité
      * Rouge : Planifié, Non traité
      * Vert : Planifié, traité
-     * 
-     * @param parcelle
-     * @param planifie
-     * @param year
+     *
+     * @param state
      * @return
      */
-    public static Color getParcelleEtatColor(final ParcelleVegetation parcelle, final boolean planifie, final int year){
-        final String state = getParcelleEtat(parcelle, planifie, year);
+    public static Color getParcelleEtatColor(final String state){
+        if (state==null) return null;
         switch(state){
             case ETAT_PLANIFIE_TRAITE : return Color.GREEN;
             case ETAT_PLANIFIE_NONTRAITE : return Color.RED;
