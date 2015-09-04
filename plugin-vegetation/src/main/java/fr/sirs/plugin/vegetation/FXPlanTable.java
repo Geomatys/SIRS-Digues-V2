@@ -63,7 +63,7 @@ public class FXPlanTable extends BorderPane{
 
     public enum Mode{PLANIFICATION, EXPLOITATION};
 
-    private static final String AUTO_STYLE = "-fx-border-color: lightgray;-fx-border-insets: 0;-fx-border-width: 0 0 0 3;-fx-label-padding: 0;";
+    private static final String AUTO_STYLE = "-fx-border-color: lightgray; -fx-border-insets: 0; -fx-border-width: 0 0 0 3; -fx-label-padding: 0;";
     public static final String CHECKBOX_NO_LABEL_PADDING = "-fx-label-padding: 0;";
 
     private final PlanVegetation plan;
@@ -77,8 +77,8 @@ public class FXPlanTable extends BorderPane{
     private final GridPane gridCenter = new GridPane();
     private final GridPane gridBottom = new GridPane();
     private Region[] headerNodes;
-    
-    public FXPlanTable(final PlanVegetation plan, final TronconDigue troncon, final Mode mode){
+
+    public FXPlanTable(final PlanVegetation plan, final TronconDigue troncon, final Mode mode, final List<String> filteredStates, final int filterDate){
         this.plan = plan;
         this.mode = mode;
 
@@ -195,6 +195,13 @@ public class FXPlanTable extends BorderPane{
         int rowIndex = 0;
         final List<ParcelleVegetation> planifParcelle = parcelleRepo.getByPlanId(plan.getDocumentId());
         for(final ParcelleVegetation parcelle : planifParcelle){
+
+            // Clause de filtrage : on saute la ligne si une condition de filtrage est vérifiée pour l'année de filtrage
+            if(filteredStates!=null && !filteredStates.isEmpty() && filterDate>=plan.getAnneeDebut() && filterDate<plan.getAnneeFin()){
+                final String parcelleEtat = VegetationSession.getParcelleEtat(parcelle, parcelle.getPlanifications().get(filterDate-plan.getAnneeDebut()), filterDate);
+                if(filteredStates.contains(parcelleEtat)) continue;
+            }
+
             gridCenter.getRowConstraints().add(new RowConstraints(30, 30, 30, Priority.NEVER, VPos.CENTER, true));
             
             //on vérifie que la parcelle fait partie du troncon

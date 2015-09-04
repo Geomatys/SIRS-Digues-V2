@@ -84,14 +84,14 @@ public class FXPlanificationPane extends GridPane {
         add(tablePane, 0, 1, 3, 1);
 
         if(planChoiceBox.getValue()!=null){
-            tablePane.setCenter(new FXPlanTable(planChoiceBox.getValue(), tronconChoiceBox.getValue(), PLANIFICATION));
+            tablePane.setCenter(new FXPlanTable(planChoiceBox.getValue(), tronconChoiceBox.getValue(), PLANIFICATION, null, 0));
         }
 
         //on ecoute les changements de troncon et de plan
         final ChangeListener chgListener = new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                tablePane.setCenter(new FXPlanTable(planChoiceBox.getValue(), tronconChoiceBox.getValue(), PLANIFICATION));
+                tablePane.setCenter(new FXPlanTable(planChoiceBox.getValue(), tronconChoiceBox.getValue(), PLANIFICATION, null, 0));
             }
         };
 
