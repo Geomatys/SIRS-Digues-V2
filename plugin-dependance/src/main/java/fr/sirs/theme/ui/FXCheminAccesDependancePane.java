@@ -10,6 +10,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.GridPane;
 import org.geotoolkit.display.MeasureUtilities;
 
@@ -25,6 +27,10 @@ public class FXCheminAccesDependancePane extends FXCheminAccesDependancePaneStub
     @FXML FXPositionDependancePane uiPosition;
 
     @FXML GridPane uiGridAttributes;
+
+    @FXML RadioButton uiPrivateStatus;
+    @FXML RadioButton uiPublicStatus;
+    @FXML ToggleGroup groupStatus;
 
     private final Label lblGeomSize = new Label();
     private final Label geomSize = new Label();
@@ -44,7 +50,7 @@ public class FXCheminAccesDependancePane extends FXCheminAccesDependancePaneStub
         uiGridAttributes.add(lblGeomSize, 2, 0);
         uiGridAttributes.add(geomSize, 3, 0);
     }
-    
+
     public FXCheminAccesDependancePane(final CheminAccesDependance cheminAccesDependance){
         this();
         this.elementProperty().set(cheminAccesDependance);
@@ -68,6 +74,9 @@ public class FXCheminAccesDependancePane extends FXCheminAccesDependancePaneStub
     @Override
     protected void initFields(ObservableValue<? extends CheminAccesDependance> observableElement, CheminAccesDependance oldElement, CheminAccesDependance newElement) {
         super.initFields(observableElement, oldElement, newElement);
+
+        groupStatus.selectToggle((elementProperty.get().getStatut() ? uiPrivateStatus : uiPublicStatus));
+        elementProperty.get().statutProperty().bindBidirectional(uiPrivateStatus.selectedProperty());
 
         final Geometry geometry = elementProperty.get().getGeometry();
         setGeometrySize(geometry);
