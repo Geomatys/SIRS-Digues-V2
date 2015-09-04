@@ -646,7 +646,9 @@ public class PluginVegetation extends Plugin {
      * @param parcelle
      * @param frequence
      * @return
+     * @deprecated : plus utilisé d'après la spec 0.3
      */
+    @Deprecated
     public static boolean isCoherent(final ParcelleVegetation parcelle, final int frequence){
 
         /*
@@ -713,7 +715,9 @@ public class PluginVegetation extends Plugin {
      *
      * @param parcelle
      * @return
+     * @deprecated : plus utilisé d'après la spec 0.3
      */
+    @Deprecated
     public static boolean isCoherent(final ParcelleVegetation parcelle){
         return isCoherent(parcelle, frequenceTraitementPlanifie(parcelle));
     }
@@ -776,13 +780,13 @@ public class PluginVegetation extends Plugin {
         for(final ParcelleVegetation parcelle : parcelles){
             final List<Boolean> planifs = parcelle.getPlanifications();
 
-            // Si on est en mode automatique, il faut recalculer les planifications
-            if(parcelle.getModeAuto()){
-               PluginVegetation.resetAutoPlanif(parcelle, LocalDate.now().getYear()-plan.getAnneeDebut(), duration);
-            }
+            // Si on est en mode automatique, il faut recalculer les planifications [NE PLUS FAIRE POUR L'AUTO PLANIF DE LA SPEC 0.3]
+//            if(parcelle.getModeAuto()){
+//               PluginVegetation.resetAutoPlanif(parcelle, LocalDate.now().getYear()-plan.getAnneeDebut(), duration);
+//            }
 
             // Si on n'est pas en mode automatique, il faut décaler les planifications déjà construites.
-            else{
+//            else{
                 /*==========================================================
                 Il faut commencer par décaler les planifications du nombre
                 d'années dont on a décalé le début, afin que les
@@ -811,8 +815,6 @@ public class PluginVegetation extends Plugin {
                     }
                 }
 
-
-
                 /*==========================================================
                 En dernier lieu, on ajuste la taille des listes de
                 planifications en ajoutant les planifications manquantes et
@@ -828,7 +830,7 @@ public class PluginVegetation extends Plugin {
                 while(planifs.size()>duration){
                     planifs.remove(duration);
                 }
-            }
+//            }
         }
 
         // Une fois toutes les planifications mises à jour, on
@@ -888,7 +890,4 @@ public class PluginVegetation extends Plugin {
             }
         }
     }
-
-
-
 }

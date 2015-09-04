@@ -137,9 +137,15 @@ public class FXVegetationTronconThemePane extends FXTronconThemePane {
 
     /**
      * Colonne d'alerte lorsque les traitements réalisés sur une parcelle paraissent incohérents avec la planification.
+     * @deprecated : plus utilisé d'après la spec 0.3
      */
+    @Deprecated
     private static class AlertTableColumn extends TableColumn<ParcelleVegetation, ParcelleVegetation> {
 
+        /**
+         * @deprecated : plus utilisé d'après la spec 0.3
+         */
+        @Deprecated
         public AlertTableColumn(){
             setGraphic(new ImageView(SIRS.ICON_EXCLAMATION_TRIANGLE_BLACK));
             setPrefWidth(24);
@@ -153,7 +159,9 @@ public class FXVegetationTronconThemePane extends FXTronconThemePane {
 
     /**
      * Cellule d'alerte lorsque les traitements réalisés sur une parcelle paraissent incohérents avec la planification.
+     * @deprecated : plus utilisé d'après la spec 0.3
      */
+    @Deprecated
     private static class AlertTableCell extends TableCell<ParcelleVegetation, ParcelleVegetation>{
         @Override
         protected void updateItem(final ParcelleVegetation item, boolean empty){

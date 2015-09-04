@@ -5,17 +5,24 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.AbstractZoneVegetationRepository;
 import fr.sirs.core.component.ParcelleVegetationRepository;
+import fr.sirs.core.model.InvasiveVegetation;
 import fr.sirs.core.model.ParamCoutTraitementVegetation;
 import fr.sirs.core.model.ParamFrequenceTraitementVegetation;
 import fr.sirs.core.model.ParcelleVegetation;
+import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.PlanVegetation;
+import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
 import static fr.sirs.plugin.vegetation.PluginVegetation.zoneVegetationClasses;
 import fr.sirs.util.SirsStringConverter;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -126,18 +133,106 @@ public class FXPlanVegetationPane extends BorderPane {
 
         });
 
-
         ////////////////////////////////////////////////////////////////////////
         // Construction des résumés des traitements planifiés sur les zones.
         ////////////////////////////////////////////////////////////////////////
-        uiFrequenceTable = new ParamPojoTable(ParamFrequenceTraitementVegetation.class, "Paramétrage des traitements de zones");
+        uiFrequenceTable = new ParamPojoTable("Paramétrage des traitements de zones");
+        boolean costListModified=false, frequencyListModified=false;
+        final List<ParamFrequenceTraitementVegetation> frequencesDuPlan = new ArrayList<>(plan.paramFrequence);
+        final List<ParamCoutTraitementVegetation> coutsDuPlan = new ArrayList<>(plan.paramCout);
+        final List<ParamFrequenceTraitementVegetation> candidateFrequencesToAdd = new ArrayList<>();
+        final List<ParamCoutTraitementVegetation> candidateCoutsToAdd = new ArrayList<>();
+
+        // Calcul de toutes les combinaisons de traitements existant dans le plan
+        for(final ParcelleVegetation parcelle : parcelleRepo.getByPlan(plan)){
+            if(parcelle.getId()!=null){
+                final List<? extends ZoneVegetation> zones = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), session);
+                for(final ZoneVegetation zone : zones){
+
+                    // On détermine la classe de la zone.
+                    final Class type = zone.getClass();
+
+                    // On détermine le type de végétation éventuel.
+                    final String typeVegetation;
+                    if(type==PeuplementVegetation.class){
+                        typeVegetation = ((PeuplementVegetation) zone).getTypePeuplementId();
+                    }
+                    else if(type==InvasiveVegetation.class){
+                        typeVegetation = ((InvasiveVegetation) zone).getTypeInvasive();
+                    }
+                    else typeVegetation = null;
+
+                    // Il faut ensuite examiner les traitements ponctuel et non ponctuel de la zone
+                    final TraitementZoneVegetation traitement = zone.getTraitement();
+                    if(traitement!=null){
+                        candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTraitementPonctuelId(), traitement.getSousTraitementPonctuelId(), true));
+                        candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTraitementId(), traitement.getSousTraitementId(), false));
+                        candidateCoutsToAdd.add(toParamCout(traitement.getTraitementId(), traitement.getSousTraitementId()));
+                    }
+                }
+            }
+        }
+
+        /*
+        Toutes les combinaisons de paramètres de fréquences sont candidates à
+        l'ajout dans le plan :
+        Il faut examiner si le plan les contient déjà…
+        */
+        final Iterator<ParamFrequenceTraitementVegetation> freqIt = candidateFrequencesToAdd.iterator();
+        while(freqIt.hasNext()){
+            final ParamFrequenceTraitementVegetation candidate = freqIt.next();
+            boolean found = false;
+            for(final ParamFrequenceTraitementVegetation currentFrequence : frequencesDuPlan){
+                // Si le plan contient un paramètre équivalent au candidat, on retire ce dernier de la liste à ajouter.
+                if(equivParamFrequence(candidate, currentFrequence)){
+                    freqIt.remove();
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                frequencyListModified=true;
+                frequencesDuPlan.add(candidate);
+            }
+        }
+
+        /*
+        Toutes les combinaisons de paramètres de cout sont candidates à
+        l'ajout dans le plan :
+        Il faut examiner si le plan les contient déjà…
+        */
+        final Iterator<ParamCoutTraitementVegetation> coutIt = candidateCoutsToAdd.iterator();
+        while(coutIt.hasNext()){
+            final ParamCoutTraitementVegetation candidate = coutIt.next();
+            boolean found = false;
+            for(final ParamCoutTraitementVegetation currentCout : coutsDuPlan){
+                // Si le plan contient un paramètre équivalent au candidat, on retire ce dernier de la liste à ajouter.
+                if(equivParamCout(candidate, currentCout)){
+                    coutIt.remove();
+                    found=true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                costListModified=true;
+                coutsDuPlan.add(candidate);
+            }
+        }
+
+        // Si nécessaire, on ajoute les paramètres trouvés.
+        if(frequencyListModified) plan.setParamFrequence(frequencesDuPlan);
+        if(costListModified) plan.setParamCout(coutsDuPlan);
+        if(frequencyListModified || costListModified) planRepo.update(plan);
+
         uiFrequenceTable.setTableItems(() -> (ObservableList) plan.paramFrequence);
         uiFrequenceTable.commentAndPhotoProperty().set(false);
 
         ////////////////////////////////////////////////////////////////////////
         // Construction des paramètes de coûts.
         ////////////////////////////////////////////////////////////////////////
-        uiCoutTable = new ParamPojoTable(ParamCoutTraitementVegetation.class, "Paramétrage des coûts des traitements");
+        uiCoutTable = new PojoTable(ParamCoutTraitementVegetation.class, "Paramétrage des coûts des traitements");
         uiCoutTable.setTableItems(() -> (ObservableList) plan.paramCout);
         uiCoutTable.commentAndPhotoProperty().set(false);
         
@@ -145,26 +240,54 @@ public class FXPlanVegetationPane extends BorderPane {
         uiVBox.getChildren().addAll(uiCoutTable, uiFrequenceTable);
     }
 
-    private static class ParamPojoTable<T> extends PojoTable {
+    private static ParamFrequenceTraitementVegetation toParamFrequence(final Class type, final String typeVegetationId, final String traitementId, final String sousTraitementId, final boolean ponctuel){
+        final ParamFrequenceTraitementVegetation param = Injector.getSession().getElementCreator().createElement(ParamFrequenceTraitementVegetation.class);
+        param.setType(type);
+        param.setTypeVegetationId(typeVegetationId);
+        param.setTraitementId(traitementId);
+        param.setSousTraitementId(sousTraitementId);
+        param.setPonctuel(ponctuel);
+        return param;
+    }
+
+    private static boolean equivParamFrequence(final ParamFrequenceTraitementVegetation p1, final ParamFrequenceTraitementVegetation p2){
+        if(!Objects.equals(p1.getType(), p2.getType())) return false;
+        else if(!Objects.equals(p1.getTraitementId(), p2.getTraitementId())) return false;
+        else if(!Objects.equals(p1.getSousTraitementId(), p2.getSousTraitementId())) return false;
+        else if(!Objects.equals(p1.getTypeVegetationId(), p2.getTypeVegetationId())) return false;
+        else if(p1.getPonctuel()!=p2.getPonctuel()) return false;
+        else return true;
+    }
+
+    private static ParamCoutTraitementVegetation toParamCout(final String traitementId, final String sousTraitementId){
+        final ParamCoutTraitementVegetation param = Injector.getSession().getElementCreator().createElement(ParamCoutTraitementVegetation.class);
+        param.setTraitementId(traitementId);
+        param.setSousTraitementId(sousTraitementId);
+        return param;
+    }
+
+    private static boolean equivParamCout(final ParamCoutTraitementVegetation p1, final ParamCoutTraitementVegetation p2){
+        if(!Objects.equals(p1.getTraitementId(), p2.getTraitementId())) return false;
+        else if(!Objects.equals(p1.getSousTraitementId(), p2.getSousTraitementId())) return false;
+        else return true;
+    }
+
+    private static class ParamPojoTable extends PojoTable {
 
         private final List<Class<? extends ZoneVegetation>> vegetationClasses;
         private final SirsStringConverter converter = new SirsStringConverter();
 
-        public ParamPojoTable(Class<T> pojoClass, String title) {
-            super(pojoClass, title);
+        public ParamPojoTable(String title) {
+            super(ParamFrequenceTraitementVegetation.class, title);
 
-            if(pojoClass==ParamFrequenceTraitementVegetation.class){
                 // On garde les classes de zones de végétation.
                 vegetationClasses = zoneVegetationClasses();
-                final TableColumn<T, Class> classColumn = new TableColumn<>("Type de zone");
+                final TableColumn<ParamFrequenceTraitementVegetation, Class> classColumn = new TableColumn<>("Type de zone");
                 classColumn.setCellValueFactory( param -> {
                     return ((ParamFrequenceTraitementVegetation) param.getValue()).typeProperty();
                 });
                 classColumn.setCellFactory( param -> new FXListTableCell<>(vegetationClasses, converter));
                 getTable().getColumns().add(2, (TableColumn) classColumn);
-            }else{
-                vegetationClasses=null;
-            }
         }
     }
 }

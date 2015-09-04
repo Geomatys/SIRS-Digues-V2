@@ -94,7 +94,7 @@ public class FXParametragePane extends SplitPane {
     /**
      * Updates the planification list.
      */
-    void refreshPlanList() {
+    private void refreshPlanList() {
         uiPlanList.setItems(FXCollections.observableList(planRepo.getAll()));
     }
 
