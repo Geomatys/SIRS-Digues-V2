@@ -6,6 +6,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import fr.sirs.PluginInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.core.SirsCore;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import org.geotoolkit.internal.GeotkFX;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +48,7 @@ public class PluginInstaller {
         if (Files.isDirectory(SirsCore.PLUGINS_PATH)) {
             final Pattern jsonPattern = Pattern.compile("(?i).*(\\.json)$");
             final ObjectMapper jsonMapper = new ObjectMapper();
+            final List<PluginInfo> oldVersionPlugins = new ArrayList<>();
             Files.walkFileTree(SirsCore.PLUGINS_PATH, new HashSet<>(), 2, new SimpleFileVisitor<Path>(){
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes bfa) throws IOException {
@@ -51,14 +58,48 @@ public class PluginInstaller {
                             // Les plugins compatibles avec des versions précédentes de l'application
                             // ne sont pas montrés.
                             list.plugins.add(pluginInfo);
+                        } else {
+                            oldVersionPlugins.add(pluginInfo);
                         }
                     }
                     return super.visitFile(file, bfa);
                 }
-            
             });
+
+            if (!oldVersionPlugins.isEmpty()) {
+                showOldVersionPluginsPopup(oldVersionPlugins);
+            }
         }
         return list;
+    }
+
+    private static void showOldVersionPluginsPopup(final List<PluginInfo> oldVersionPlugins) {
+        final Stage stage = new Stage();
+        stage.setTitle("Gestion des plugins incompatibles");
+        final VBox vBox = new VBox();
+        final Label label1 = new Label("Des plugins précédemment installés sont incompatibles avec la version de l'application lancée.");
+        final Label label2 = new Label("Ils vont être supprimés.");
+        vBox.getChildren().add(label1);
+        vBox.getChildren().add(label2);
+        for (final PluginInfo oldPlugin : oldVersionPlugins) {
+            vBox.getChildren().add(new Label(oldPlugin.getName() +" v"+ oldPlugin.getVersionMajor() +"."+ oldPlugin.getVersionMinor()));
+        }
+        final Button ok = new Button("Valider");
+        ok.setOnAction(event -> {
+            for (final PluginInfo oldPlugin : oldVersionPlugins) {
+                try {
+                    uninstall(oldPlugin);
+                } catch (IOException ex) {
+                    SirsCore.LOGGER.log(Level.WARNING, ex.getLocalizedMessage(), ex);
+                    GeotkFX.newExceptionDialog(ex.getLocalizedMessage(), ex);
+                }
+            }
+            stage.hide();
+        });
+        vBox.getChildren().add(ok);
+        final Scene scene = new Scene(vBox);
+        stage.setScene(scene);
+        stage.show();
     }
     
     public static PluginList listDistantPlugins(URL serverUrl) throws IOException {
@@ -97,13 +138,19 @@ public class PluginInstaller {
     private static boolean isCompatible(final PluginInfo plugin) {
         String appVersion = SirsCore.getVersion();
         if (appVersion == null || appVersion.isEmpty()) {
-            appVersion = "0.13";
-            //return false;
+            // Impossible de récupérer la version de l'application, celà indique que l'application
+            // a été lancée via un IDE comme Intellij, pour ne pas bloquer les futures développements
+            // on valide tous les plugins.
+            return true;
         }
 
         final int currentAppVersion = Integer.parseInt(appVersion.substring(2));
-        return plugin.getAppVersionMin() == 0 ||
-               (plugin.getAppVersionMax() == 0 && currentAppVersion >= plugin.getAppVersionMin()) ||
+        if (plugin.getAppVersionMin() == 0) {
+            // La version minimale de l'application pour laquelle ce plugin fonctionne n'a pas été définie,
+            // ce plugin vient d'une ancienne version et doit être supprimé.
+            return false;
+        }
+        return (plugin.getAppVersionMax() == 0 && currentAppVersion >= plugin.getAppVersionMin()) ||
                (currentAppVersion >= plugin.getAppVersionMin() && currentAppVersion <= plugin.getAppVersionMax());
     }
         
