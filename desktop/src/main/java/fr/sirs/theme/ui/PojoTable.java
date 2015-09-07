@@ -198,6 +198,7 @@ public class PojoTable extends BorderPane {
     // Icônes de la barre d'action
 
     // Barre de droite : manipulation du tableau et passage en mode parcours de fiche
+    protected final Button uiRefresh = new Button(null, new ImageView(SIRS.ICON_REFRESH_WHITE));
     protected final ToggleButton uiFicheMode = new ToggleButton(null, new ImageView(SIRS.ICON_FILE_WHITE));
     protected final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH_WHITE);
     protected final Button uiSearch = new Button(null, searchNone);
@@ -206,7 +207,7 @@ public class PojoTable extends BorderPane {
     protected final Button uiImport = new Button(null, new ImageView(SIRS.ICON_IMPORT_WHITE));
     protected final Button uiExport = new Button(null, new ImageView(SIRS.ICON_EXPORT_WHITE));
     protected final ToggleButton uiFilter = new ToggleButton(null, new ImageView(SIRS.ICON_FILTER_WHITE));
-    protected final HBox searchEditionToolbar = new HBox(uiFicheMode, uiImport, uiExport, uiSearch, uiAdd, uiDelete, uiFilter);
+    protected final HBox searchEditionToolbar = new HBox(uiRefresh, uiFicheMode, uiImport, uiExport, uiSearch, uiAdd, uiDelete, uiFilter);
 
     // Barre de gauche : navigation dans le parcours de fiches
     protected FXElementPane elementPane = null;
@@ -216,7 +217,11 @@ public class PojoTable extends BorderPane {
     protected final HBox navigationToolbar = new HBox(uiPrevious, uiCurrent, uiNext);
 
     protected final ProgressIndicator searchRunning = new ProgressIndicator();
+    /** Supplier providing table data. Returned list will be used to set {@link #allValues}*/
+    private final SimpleObjectProperty<Supplier<ObservableList<Element>>> dataSupplierProperty = new SimpleObjectProperty<>();
+    /** Brut values returned by {@link #dataSupplier}. */
     private ObservableList<Element> allValues;
+    /** Values from {@link #allValues}, after applying text/property filters. */
     private ObservableList<Element> filteredValues;
     //Cette liste est uniquement pour de la visualisation, elle peut contenir un enregistrement en plus
     //afin d'afficher la barre de scroll horizontale.
@@ -241,7 +246,7 @@ public class PojoTable extends BorderPane {
     private final FXCommentPhotoView commentPhotoView = new FXCommentPhotoView();
 
     /** Task object designed for asynchronous update of the elements contained in the table. */
-    protected Task tableUpdater;
+    protected final SimpleObjectProperty<Task> tableUpdaterProperty = new SimpleObjectProperty<>();
 
     protected final StackPane notifier = new StackPane();
 
@@ -257,6 +262,9 @@ public class PojoTable extends BorderPane {
         if (pojoClass == null && repo == null) {
             throw new IllegalArgumentException("Pojo class to expose and Repository parameter are both null. At least one of them must be valid.");
         }
+
+        dataSupplierProperty.addListener(this::updateTableItems);
+
         if (pojoClass == null) {
             this.pojoClass = repo.getModelClass();
         } else {
@@ -280,6 +288,7 @@ public class PojoTable extends BorderPane {
         searchRunning.setPrefSize(22, 22);
         searchRunning.setStyle("-fx-progress-color: white;");
 
+        uiRefresh.managedProperty().bind(uiRefresh.visibleProperty());
         uiFicheMode.managedProperty().bind(uiFicheMode.visibleProperty());
         uiSearch.managedProperty().bind(uiSearch.visibleProperty());
         uiAdd.managedProperty().bind(uiAdd.visibleProperty());
@@ -401,6 +410,9 @@ public class PojoTable extends BorderPane {
         uiTitle.setAlignment(Pos.CENTER);
 
         searchEditionToolbar.getStyleClass().add("buttonbar");
+
+        uiRefresh.getStyleClass().add(BUTTON_STYLE);
+        uiRefresh.setOnAction((ActionEvent event) -> updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get()));
 
         uiAdd.getStyleClass().add(BUTTON_STYLE);
         uiAdd.setOnAction((ActionEvent event) -> {
@@ -598,7 +610,7 @@ public class PojoTable extends BorderPane {
             uiFilterBuilder.managedProperty().bind(filterContent.visibleProperty());
 
             resetFilterBtn.setOnAction(event -> resetFilter(filterContent));
-            applyFilterBtn.setOnAction(event -> setTableItems(() -> allValues));
+            applyFilterBtn.setOnAction(event -> updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get()));
         } catch (Exception e) {
             SIRS.LOGGER.log(Level.WARNING, "Filter panel cannot be initialized !", e);
         }
@@ -718,7 +730,7 @@ public class PojoTable extends BorderPane {
         return ownerElementProperty;
     }
 
-    public ObservableList<Element> getAllValues(){
+    public synchronized ObservableList<Element> getAllValues(){
         return allValues;
     }
 
@@ -850,7 +862,7 @@ public class PojoTable extends BorderPane {
             public void handle(ActionEvent event) {
                 currentSearch.set(textField.getText());
                 popup.hide();
-                setTableItems(() -> allValues);
+                updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get());
             }
         });
         final Point2D sc = uiSearch.localToScreen(0, 0);
@@ -931,91 +943,100 @@ public class PojoTable extends BorderPane {
      * @param producer Data provider.
      */
     public void setTableItems(Supplier<ObservableList<Element>> producer) {
-        if (tableUpdater != null && !tableUpdater.isDone()) {
-            tableUpdater.cancel();
+        dataSupplierProperty.set(producer);
+    }
+
+    private void updateTableItems(
+            final ObservableValue<? extends Supplier<ObservableList<Element>> > obs,
+            final Supplier<ObservableList<Element>> oldSupplier,
+            final Supplier<ObservableList<Element>> newSupplier) {
+
+        if (tableUpdaterProperty.get() != null && !tableUpdaterProperty.get().isDone()) {
+            tableUpdaterProperty.get().cancel();
         }
 
-        tableUpdater = new TaskManager.MockTask("Recherche...", (Runnable)() -> {
-            synchronized (PojoTable.this){
-                try{
-                    allValues = producer.get();
-                }catch(Throwable ex){
+        final Task updater = new TaskManager.MockTask("Recherche...", (Runnable)() -> {
+            synchronized (PojoTable.this) {
+                try {
+                    if (newSupplier == null) {
+                        allValues = FXCollections.observableArrayList();
+                    } else {
+                        allValues = newSupplier.get();
+                    }
+                } catch (Throwable ex) {
                     allValues = FXCollections.observableArrayList();
                     filteredValues = allValues.filtered((Element t) -> true);
                     decoratedValues = new SortedList<>(filteredValues);
                     decoratedValues.comparatorProperty().bind(uiTable.comparatorProperty());
                     throw ex;
                 }
-                if(allValues==null){
+                if (allValues == null) {
                     allValues = FXCollections.observableArrayList();
                 }
-                if (allValues.isEmpty()) {
-                    Platform.runLater(() -> {
-                        uiSearch.setGraphic(searchNone);
-                    });
+            }
+            if (allValues.isEmpty()) {
+                Platform.runLater(() -> {
+                    uiSearch.setGraphic(searchNone);
+                });
+            }
+
+            // Apply filter on properties
+            final Filter firstFilter = getFilter();
+
+            final Thread currentThread = Thread.currentThread();
+            if (currentThread.isInterrupted()) {
+                return;
+            }
+
+            // Apply "Plain text" filter
+            final String str = currentSearch.get();
+            if ((str == null || str.isEmpty()) && firstFilter == null) {
+                filteredValues = allValues.filtered((Element t) -> true);
+            } else {
+                final Set<String> result = new HashSet<>();
+                SearchResponse search = Injector.getElasticSearchEngine().search(QueryBuilders.queryString(str));
+                Iterator<SearchHit> iterator = search.getHits().iterator();
+                while (iterator.hasNext() && !currentThread.isInterrupted()) {
+                    result.add(iterator.next().getId());
                 }
 
-                // Apply filter on properties
-                final Filter firstFilter = getFilter();
-
-                final Thread currentThread = Thread.currentThread();
                 if (currentThread.isInterrupted()) {
                     return;
                 }
 
-                // Apply "Plain text" filter
-                final String str = currentSearch.get();
-                if ((str == null || str.isEmpty()) && firstFilter == null) {
-                    filteredValues = allValues.filtered((Element t) -> true);
+                final Predicate<Element> filterPredicate;
+                if (firstFilter == null) {
+                    filterPredicate = element -> element == null || result.contains(element.getId());
+                } else if (str == null || str.isEmpty()) {
+                    filterPredicate = element -> element == null || firstFilter.evaluate(element);
                 } else {
-                    final Set<String> result = new HashSet<>();
-                    SearchResponse search = Injector.getElasticSearchEngine().search(QueryBuilders.queryString(str));
-                    Iterator<SearchHit> iterator = search.getHits().iterator();
-                    while (iterator.hasNext() && !currentThread.isInterrupted()) {
-                        result.add(iterator.next().getId());
-                    }
-
-                    if (currentThread.isInterrupted()) {
-                        return;
-                    }
-
-                    final Predicate<Element> filterPredicate;
-                    if (firstFilter == null) {
-                        filterPredicate = element -> element==null || result.contains(element.getId());
-                    } else if (str == null || str.isEmpty()) {
-                        filterPredicate = element -> element==null || firstFilter.evaluate(element);
-                    } else {
-                        filterPredicate = element -> element==null || result.contains(element.getId()) && firstFilter.evaluate(element);
-                    }
-                    filteredValues = allValues.filtered(filterPredicate);
+                    filterPredicate = element -> element == null || result.contains(element.getId()) && firstFilter.evaluate(element);
                 }
+                filteredValues = allValues.filtered(filterPredicate);
+            }
 
                 //list contenant zero ou un element null en fonction du contenue de la liste filtrée
-                //NOTE : bug javafx ici, la premiere ligne n'est plus editable a cause de ca
-                // probleme avec la selection/focus qui cause trop d'événement
-    //            final ObservableList<Element> emptyRecord = FXCollections.observableArrayList();
-    //            filteredValues.addListener(new ListChangeListener<Element>() {
-    //                @Override
-    //                public void onChanged(ListChangeListener.Change<? extends Element> c) {
-    //                    if(filteredValues.isEmpty()){
-    //                        if(emptyRecord.isEmpty()) emptyRecord.add(null);
-    //                    }else{
-    //                        emptyRecord.clear();
-    //                    }
-    //                }
-    //            });
-    //            if(filteredValues.isEmpty()) emptyRecord.add(null);
-    //            decoratedValues = SIRS.view(filteredValues,emptyRecord);
-
-                decoratedValues = new SortedList<>(filteredValues);
-                decoratedValues.comparatorProperty().bind(uiTable.comparatorProperty());
-                
-                PojoTable.this.notify();
-            }
+            //NOTE : bug javafx ici, la premiere ligne n'est plus editable a cause de ca
+            // probleme avec la selection/focus qui cause trop d'événement
+            //            final ObservableList<Element> emptyRecord = FXCollections.observableArrayList();
+            //            filteredValues.addListener(new ListChangeListener<Element>() {
+            //                @Override
+            //                public void onChanged(ListChangeListener.Change<? extends Element> c) {
+            //                    if(filteredValues.isEmpty()){
+            //                        if(emptyRecord.isEmpty()) emptyRecord.add(null);
+            //                    }else{
+            //                        emptyRecord.clear();
+            //                    }
+            //                }
+            //            });
+            //            if(filteredValues.isEmpty()) emptyRecord.add(null);
+            //            decoratedValues = SIRS.view(filteredValues,emptyRecord);
+            decoratedValues = new SortedList<>(filteredValues);
+            decoratedValues.comparatorProperty().bind(uiTable.comparatorProperty());
         });
 
 
-        tableUpdater.stateProperty().addListener(new ChangeListener() {
+        updater.stateProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
                 if (Worker.State.SUCCEEDED.equals(newValue)) {
@@ -1024,7 +1045,7 @@ public class PojoTable extends BorderPane {
                         uiSearch.setGraphic(searchNone);
                     });
                 } else if (Worker.State.FAILED.equals(newValue) || Worker.State.CANCELLED.equals(newValue)) {
-                    final Throwable ex = tableUpdater.getException();
+                    final Throwable ex = updater.getException();
                     if(ex!=null){
                         SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                     }
@@ -1036,11 +1057,11 @@ public class PojoTable extends BorderPane {
                 }
             }
         });
-        
-        tableUpdater = TaskManager.INSTANCE.submit("Recherche...", tableUpdater);
-        
+
+        tableUpdaterProperty.set(TaskManager.INSTANCE.submit("Recherche...", updater));
+
     }
-    
+
 //    protected final Lock lock = new ReentrantReadWriteLock().readLock();
     /**
      * Check if the input element can be deleted by current user. If not, an
@@ -1135,7 +1156,7 @@ public class PojoTable extends BorderPane {
     protected Element createPojo() {
         return createPojo(null);
     }
-    
+
     protected Element createPojo(final Element foreignParent) {
         Element result = null;
 
@@ -1174,7 +1195,9 @@ public class PojoTable extends BorderPane {
                 ownerElementProperty.get().addChild(newlyCreated);
             }
 
-            allValues.add(newlyCreated);
+            synchronized(this) {
+                allValues.add(newlyCreated);
+            }
         } else {
             final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
             alert.setResizable(true);
@@ -1251,7 +1274,7 @@ public class PojoTable extends BorderPane {
     private class DistanceComputedPropertyColumn extends TableColumn<Element, Double>{
 
         private boolean titleSet = false;
-        
+
 
         public DistanceComputedPropertyColumn(){
             setCellFactory((TableColumn<Element, Double> param) -> new FXNumberCell(Double.class));
@@ -1264,7 +1287,7 @@ public class PojoTable extends BorderPane {
 
                     if(param.getValue() instanceof PointXYZ){
                         // Cas des XYZ de profils en long et des lignes d'eau avec PR calculé
-                        if(parentElementProperty().get() instanceof ProfilLong 
+                        if(parentElementProperty().get() instanceof ProfilLong
                                 || parentElementProperty().get() instanceof LigneEau){
                             if(!titleSet){setText("PR calculé");titleSet=true;}
                             return new PRXYZBinding((PointXYZ) param.getValue(), (Positionable) parentElementProperty().get()).asObject();
@@ -1294,7 +1317,7 @@ public class PojoTable extends BorderPane {
                     else {
                         // Sinon la colonne ne sert à rien et on la retire dès que possible.
                         if(uiTable.getColumns().contains(DistanceComputedPropertyColumn.this)) uiTable.getColumns().remove(DistanceComputedPropertyColumn.this);
-                        return null; 
+                        return null;
                     }
                 }
             });
@@ -1541,7 +1564,7 @@ public class PojoTable extends BorderPane {
 
     private class ChoiceStage extends PojoTableComboBoxChoiceStage<Element, Preview> {
 
-            
+
         private final ObjectBinding<Element> elementBinding = new ObjectBinding<Element>() {
 
             {
