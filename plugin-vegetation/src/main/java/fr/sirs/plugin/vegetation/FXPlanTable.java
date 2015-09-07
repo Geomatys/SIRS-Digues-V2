@@ -16,6 +16,8 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.ZoneVegetation;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.EXPLOITATION;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.PLANIFICATION;
+import static fr.sirs.plugin.vegetation.VegetationSession.estimatedPlanificationCost;
+import static fr.sirs.plugin.vegetation.VegetationSession.exploitationCost;
 import static fr.sirs.plugin.vegetation.VegetationSession.getParcelleEtat;
 import static fr.sirs.plugin.vegetation.VegetationSession.setCheckBoxColor;
 import fr.sirs.util.SirsStringConverter;
@@ -173,7 +175,7 @@ public class FXPlanTable extends BorderPane{
         gridTop.add(lblYear, 0, 0);
         gridBottom.add(lblSum, 0, 0);
         colIndex=1;
-        final CostCell[] estCells = new CostCell[dateEnd-dateStart];
+        final CostGroup costGroup = new CostGroup();
         for(int year=dateStart; year<dateEnd; year++,colIndex++){
             final Label lblYearN = new Label(""+year);
             lblYearN.getStyleClass().add("pojotable-header");
@@ -184,8 +186,9 @@ public class FXPlanTable extends BorderPane{
             lblYearN.widthProperty().addListener(widthListener);
             headerNodes[colIndex] = lblYearN;
             gridTop.add(lblYearN, colIndex, 0);
-            estCells[year-dateStart] = new CostCell(year-dateStart);
-            gridBottom.add(estCells[year-dateStart], colIndex, 0);
+            final CostCell costCell = new CostCell(year-dateStart);
+            costGroup.addCell(costCell);
+            gridBottom.add(costCell, colIndex, 0);
         }
 
         //une ligne par parcelle
@@ -290,7 +293,7 @@ public class FXPlanTable extends BorderPane{
             */
             final PlanifGroup planifGroup = new PlanifGroup();
             for(int year=dateStart; year<dateEnd; year++,colIndex++){
-                final ParcelleDateCell parcelleDateCell = new ParcelleDateCell(parcelle, year, estCells[year-dateStart], planifGroup);
+                final ParcelleDateCell parcelleDateCell = new ParcelleDateCell(parcelle, year, costGroup, planifGroup);
                 gridCenter.add(parcelleDateCell, colIndex, rowIndex);
             }
 
@@ -306,9 +309,7 @@ public class FXPlanTable extends BorderPane{
             rowIndex++;
         }
 
-        for(int year=dateStart; year<dateEnd; year++,colIndex++){
-            estCells[year-dateStart].update();
-        }
+        costGroup.update();
 
         //ligne de commentaire
         if(mode==PLANIFICATION){
@@ -346,6 +347,21 @@ public class FXPlanTable extends BorderPane{
     }
 
     /**
+     * Classe utilitaire permettant de recalculer l'ensemble des cellules de coût.
+     */
+    private class CostGroup {
+        private final List<CostCell> estimationCells = new ArrayList<>();
+        public void addCell(final CostCell cell){
+            estimationCells.add(cell);
+        }
+        public void update(){
+            for(final CostCell cell : estimationCells){
+                cell.update();
+            }
+        }
+    }
+
+    /**
      * Cellule de date.
      *
      * Affiche l'état de planification d'une parcelle pour une année donnée.
@@ -370,7 +386,7 @@ public class FXPlanTable extends BorderPane{
          * cellule courante puissent être répercutés sur la cellule de coût de
          * l'année correspondante.
          */
-        private final CostCell estCell;
+        private final CostGroup estGroup;
 
         /**
          * Dans le cadre de la planification, cette propriété doit être reliée
@@ -404,12 +420,12 @@ public class FXPlanTable extends BorderPane{
         private final ChangeListener<Boolean> selectChangeListener;
 
         public ParcelleDateCell(final ParcelleVegetation parcelle, final int year,
-                final CostCell estCell, final PlanifGroup planifGroup) {
+                final CostGroup estCell, final PlanifGroup planifGroup) {
             disableProperty().bind(editable.not().or(new SimpleObjectProperty<>(mode).isEqualTo(EXPLOITATION)));
             this.parcelle = parcelle;
             this.year = year;
             this.index = year - plan.getAnneeDebut();
-            this.estCell = estCell;
+            this.estGroup = estCell;
             setPadding(new Insets(10));
             setAlignment(Pos.CENTER);
             setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
@@ -475,7 +491,7 @@ public class FXPlanTable extends BorderPane{
                             this.planifGroup.planifChangeProperty().set(false);
                         }
                         
-                        estCell.update();
+                        this.estGroup.update();
                     }
                     else{
                         setVal(newValue);
@@ -516,7 +532,7 @@ public class FXPlanTable extends BorderPane{
                     }
                 }
                 updateColor();
-                estCell.update();
+                estGroup.update();
             }
         }
 
@@ -592,14 +608,14 @@ public class FXPlanTable extends BorderPane{
         }
 
         private void update(){
-            
+
             final double cout;
             if(mode==PLANIFICATION){
-                cout = VegetationSession.estimatedPlanificationCost(plan, index, tableParcelles);
+                cout = estimatedPlanificationCost(plan, index, tableParcelles);
             }
             else {
                 if(plan!=null){
-                    cout = VegetationSession.exploitationCost(plan.getAnneeDebut()+index, tableParcelles);
+                    cout = exploitationCost(plan.getAnneeDebut()+index, tableParcelles);
                 }
                 else {
                     throw new IllegalStateException("Plan must not be null");

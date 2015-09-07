@@ -400,7 +400,7 @@ public final class VegetationSession {
         voir si la parcelle avait également été planifiée une année antérieure
         du plan.
         */
-        for(int i=0; i<index-1; i++){
+        for(int i=0; i<index; i++){
             if(planifications.get(i)) return PLANIFIE;
         }
         return PLANIFIE_PREMIERE_FOIS;

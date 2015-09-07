@@ -168,6 +168,7 @@ public class FXPlanVegetationPane extends BorderPane {
                         candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTraitementPonctuelId(), traitement.getSousTraitementPonctuelId(), true));
                         candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTraitementId(), traitement.getSousTraitementId(), false));
                         candidateCoutsToAdd.add(toParamCout(traitement.getTraitementId(), traitement.getSousTraitementId()));
+                        candidateCoutsToAdd.add(toParamCout(traitement.getTraitementPonctuelId(), traitement.getSousTraitementPonctuelId()));
                     }
                 }
             }
