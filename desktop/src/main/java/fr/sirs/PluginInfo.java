@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -14,7 +17,9 @@ import javafx.beans.property.StringProperty;
  * Description d'un plugin. Les informations requises sont le nom et la version 
  * du plugin (séparée en deux variables : version majeure et mineure). Une 
  * description peut également apparaître pour faciliter l'identification du 
- * module. 
+ * module.
+ * Le plugin définit également les versions de l'application pour lesquelles il
+ * sera fonctionnel.
  * Une URL de téléchargement peut (et c'est fortement recommandé) être donnée
  * pour spécifier où récupérer le plugin. Par défaut, une URL de téléchargement
  * est construite. Elle dénote un chemin sur le serveur de plugins courant. Elle
@@ -25,15 +30,20 @@ import javafx.beans.property.StringProperty;
  * @author Johann Sorel (Geomatys)
  */
 @SuppressWarnings("serial")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PluginInfo {
         
     private static final String ASSEMBLY_SUFFIX = "-plugin-package";
     
     private final StringProperty name = new SimpleStringProperty();
+    private final StringProperty title = new SimpleStringProperty();
     private final StringProperty description = new SimpleStringProperty();
     private final StringProperty downloadURL = new SimpleStringProperty();
     private final IntegerProperty versionMajor = new SimpleIntegerProperty(1);
     private final IntegerProperty versionMinor = new SimpleIntegerProperty(0);
+    private final IntegerProperty appVersionMin = new SimpleIntegerProperty(0);
+    private final IntegerProperty appVersionMax = new SimpleIntegerProperty(0);
 
     public PluginInfo() {
     }
@@ -48,8 +58,20 @@ public class PluginInfo {
     
     public void setName(String name) {
         this.name.set(name);
-    }  
-    
+    }
+
+    public StringProperty titleProperty() {
+        return title;
+    }
+
+    public String getTitle() {
+        return this.title.get();
+    }
+
+    public void setTitle(String title) {
+        this.title.set(title);
+    }
+
     public StringProperty descriptionProperty() {
        return description;
     }
@@ -84,7 +106,31 @@ public class PluginInfo {
     
     public void setVersionMinor(int version){
         this.versionMinor.set(version);
-    }  
+    }
+
+    public IntegerProperty appVersionMinProperty() {
+        return appVersionMin;
+    }
+
+    public int getAppVersionMin(){
+        return this.appVersionMin.get();
+    }
+
+    public void setAppVersionMin(int version){
+        this.appVersionMin.set(version);
+    }
+
+    public IntegerProperty appVersionMaxProperty() {
+        return appVersionMax;
+    }
+
+    public int getAppVersionMax(){
+        return this.appVersionMax.get();
+    }
+
+    public void setAppVersionMax(int version){
+        this.appVersionMax.set(version);
+    }
 
     public String getDownloadURL() {
         return downloadURL.get();
@@ -136,10 +182,11 @@ public class PluginInfo {
 
     @Override
     public String toString() {
-        return "Module " + name.get() +
+        return "Module " + name.get() + ", " + title.get() +
                 ((description.get() == null || description.get().isEmpty())?
                 "" : "\nInformations : " + description.get()) + 
                 "\nVersion : " + versionMajor.get() + "." + versionMinor.get() +
+                "\nVersions de l'application compatibles : de 0."+ appVersionMin.get() +" à 0."+ appVersionMax.get() +
                 ((downloadURL.get() == null || downloadURL.get().isEmpty())?
                 "" : "\nTéléchargement : " + downloadURL.get());
     }

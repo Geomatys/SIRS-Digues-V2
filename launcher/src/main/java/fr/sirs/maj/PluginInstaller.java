@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,7 +46,12 @@ public class PluginInstaller {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes bfa) throws IOException {
                     if (jsonPattern.matcher(file.getFileName().toString()).matches()) {
-                        list.plugins.add(jsonMapper.readValue(file.toFile(), PluginInfo.class));
+                        final PluginInfo pluginInfo = jsonMapper.readValue(file.toFile(), PluginInfo.class);
+                        if (isCompatible(pluginInfo)) {
+                            // Les plugins compatibles avec des versions précédentes de l'application
+                            // ne sont pas montrés.
+                            list.plugins.add(pluginInfo);
+                        }
                     }
                     return super.visitFile(file, bfa);
                 }
@@ -59,8 +65,17 @@ public class PluginInstaller {
         final PluginList list = new PluginList();
         URLConnection connection = serverUrl.openConnection();
         try (final InputStream input = connection.getInputStream()) {
-            list.setPlugins(new ObjectMapper().readValue(
-                    input, new TypeReference<List<PluginInfo>>(){}));
+            final List<PluginInfo> plugins = new ObjectMapper().readValue(
+                    input, new TypeReference<List<PluginInfo>>() {});
+            final List<PluginInfo> finalList = new ArrayList<>();
+            for (final PluginInfo plugin : plugins) {
+                if (isCompatible(plugin)) {
+                    // Les plugins compatibles avec des versions précédentes de l'application
+                    // ne sont pas montrés.
+                    finalList.add(plugin);
+                }
+            }
+            list.setPlugins(finalList);
         } catch (JsonMappingException e) {
             // Allow URL pointing on a local plugin, try to load it
             URLConnection connection2 = serverUrl.openConnection();
@@ -71,6 +86,25 @@ public class PluginInstaller {
         }
 
         return list;
+    }
+
+    /**
+     * Vérifie si un plugin est compatible avec la version de l'application actuellement lancée.
+     *
+     * @param plugin Le plugin à vérifier.
+     * @return {@code True} si le plugin est compatible pour cette version de l'application, {@code false} sinon.
+     */
+    private static boolean isCompatible(final PluginInfo plugin) {
+        String appVersion = SirsCore.getVersion();
+        if (appVersion == null || appVersion.isEmpty()) {
+            appVersion = "0.13";
+            //return false;
+        }
+
+        final int currentAppVersion = Integer.parseInt(appVersion.substring(2));
+        return plugin.getAppVersionMin() == 0 ||
+               (plugin.getAppVersionMax() == 0 && currentAppVersion >= plugin.getAppVersionMin()) ||
+               (currentAppVersion >= plugin.getAppVersionMin() && currentAppVersion <= plugin.getAppVersionMax());
     }
         
     public static void install(URL serverUrl, PluginInfo toInstall) throws IOException {

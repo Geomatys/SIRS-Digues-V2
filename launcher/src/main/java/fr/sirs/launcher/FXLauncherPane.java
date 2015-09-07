@@ -762,7 +762,8 @@ public class FXLauncherPane extends BorderPane {
 
     private static TableColumn newNameColumn() {
         final TableColumn<PluginInfo, String> colName = new TableColumn<>("Plugin");
-        colName.setCellValueFactory((TableColumn.CellDataFeatures<PluginInfo, String> param) -> param.getValue().nameProperty());
+        colName.setCellValueFactory((TableColumn.CellDataFeatures<PluginInfo, String> param) ->
+                (param.getValue().getTitle() != null) ? param.getValue().titleProperty() : param.getValue().nameProperty());
         return colName;
     }
 

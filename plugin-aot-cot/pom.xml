@@ -8,8 +8,8 @@
     <version>1.0</version>
     <packaging>jar</packaging>
     
-    <name>plugin-aot-cot</name>
-    <description>Plugin AOT COT</description>
+    <name>Plugin AOT COT</name>
+    <description>Gestion des autorisations et conventions</description>
     <!--url>http://www.myorganization.org</url-->
 
     <parent>
@@ -17,6 +17,10 @@
         <artifactId>sirs</artifactId>
         <version>0.x-SNAPSHOT</version>
     </parent>
+
+    <properties>
+        <plugin.core.version.min>13</plugin.core.version.min>
+    </properties>
 
     <dependencies>
         <dependency>
