@@ -810,6 +810,4 @@ public final class VegetationSession {
 
         return rule;
     }
-
-
 }

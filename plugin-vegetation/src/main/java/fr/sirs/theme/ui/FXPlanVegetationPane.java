@@ -165,10 +165,23 @@ public class FXPlanVegetationPane extends BorderPane {
                     // Il faut ensuite examiner les traitements ponctuel et non ponctuel de la zone
                     final TraitementZoneVegetation traitement = zone.getTraitement();
                     if(traitement!=null){
-                        candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTraitementPonctuelId(), traitement.getSousTraitementPonctuelId(), true));
-                        candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTraitementId(), traitement.getSousTraitementId(), false));
-                        candidateCoutsToAdd.add(toParamCout(traitement.getTraitementId(), traitement.getSousTraitementId()));
-                        candidateCoutsToAdd.add(toParamCout(traitement.getTraitementPonctuelId(), traitement.getSousTraitementPonctuelId()));
+                        /*
+                        On vérifie que l'id du traitement n'est pas null car
+                        cela na pas de sens d'affecter un coût ou de paramétrer
+                        un traitement null a priori.
+
+                        L'id du sous-traitement pourrait par contre très bien
+                        rester null car il peut n'avoir pas de sous-traitement
+                        disponible ou affecté.
+                        */
+                        if(traitement.getTraitementPonctuelId()!=null){
+                            candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTraitementPonctuelId(), traitement.getSousTraitementPonctuelId(), true));
+                            candidateCoutsToAdd.add(toParamCout(traitement.getTraitementPonctuelId(), traitement.getSousTraitementPonctuelId()));
+                        }
+                        if(traitement.getTraitementId()!=null){
+                            candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTraitementId(), traitement.getSousTraitementId(), false));
+                            candidateCoutsToAdd.add(toParamCout(traitement.getTraitementId(), traitement.getSousTraitementId()));
+                        }
                     }
                 }
             }

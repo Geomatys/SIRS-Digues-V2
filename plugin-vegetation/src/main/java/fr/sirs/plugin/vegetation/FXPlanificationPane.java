@@ -11,28 +11,22 @@ import java.util.List;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.geometry.HPos;
+import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.geometry.VPos;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
-import static javafx.scene.layout.Region.USE_PREF_SIZE;
-import javafx.scene.layout.RowConstraints;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  * @author Samuel Andrés (Geomatys)
  */
-public class FXPlanificationPane extends GridPane {
+public class FXPlanificationPane extends BorderPane {
 
-    private final BorderPane tablePane = new BorderPane();
+    @FXML private GridPane uiHeader;
     private final Session session = Injector.getSession();
     private final ChoiceBox<PlanVegetation> planChoiceBox = new ChoiceBox<>();
     private final ChoiceBox<TronconDigue> tronconChoiceBox = new ChoiceBox<>();
@@ -44,10 +38,10 @@ public class FXPlanificationPane extends GridPane {
 
     private void initialize() {
 
-        tablePane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         //plan de gestion actif
-        planChoiceBox.setMaxWidth(400);
+        planChoiceBox.setMaxWidth(300);
         planChoiceBox.setConverter(new SirsStringConverter());
         final List<PlanVegetation> allPlan = session.getRepositoryForClass(PlanVegetation.class).getAll();
         planChoiceBox.setItems(FXCollections.observableArrayList(allPlan));
@@ -59,7 +53,7 @@ public class FXPlanificationPane extends GridPane {
         planBox.setPadding(new Insets(10));
 
         //troncon actif
-        tronconChoiceBox.setMaxWidth(400);
+        tronconChoiceBox.setMaxWidth(300);
         tronconChoiceBox.setConverter(new SirsStringConverter());
         final List<TronconDigue> allTroncon = session.getRepositoryForClass(TronconDigue.class).getAll();
         allTroncon.add(0, null);
@@ -70,28 +64,31 @@ public class FXPlanificationPane extends GridPane {
         tronconBox.getStyleClass().add("blue-light");
         tronconBox.setPadding(new Insets(10));
 
-        setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        setHgap(10);
-        setVgap(10);
-        setPadding(new Insets(10, 10, 10, 10));
-        getColumnConstraints().add(new ColumnConstraints(USE_PREF_SIZE, USE_COMPUTED_SIZE, USE_PREF_SIZE, Priority.NEVER, HPos.LEFT, true));
-        getColumnConstraints().add(new ColumnConstraints(USE_PREF_SIZE, USE_COMPUTED_SIZE, USE_PREF_SIZE, Priority.NEVER, HPos.LEFT, true));
-        getColumnConstraints().add(new ColumnConstraints(USE_PREF_SIZE, USE_COMPUTED_SIZE, Double.MAX_VALUE, Priority.ALWAYS, HPos.LEFT, true));
-        getRowConstraints().add(new RowConstraints(USE_PREF_SIZE, USE_COMPUTED_SIZE, USE_PREF_SIZE, Priority.NEVER, VPos.CENTER, true));
-        getRowConstraints().add(new RowConstraints(USE_PREF_SIZE, USE_COMPUTED_SIZE, Double.MAX_VALUE, Priority.ALWAYS, VPos.CENTER, true));
-        add(planBox, 0, 0);
-        add(tronconBox, 1, 0);
-        add(tablePane, 0, 1, 3, 1);
+        uiHeader.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        uiHeader.getStyleClass().add("blue-light");
+        uiHeader.setHgap(10);
+        uiHeader.setVgap(10);
+        uiHeader.setPadding(new Insets(10, 10, 10, 10));
+        uiHeader.add(lblPlan, 1, 0);
+        uiHeader.add(planChoiceBox, 2, 0);
+        uiHeader.add(lblTroncon, 3, 0);
+        uiHeader.add(tronconChoiceBox, 4, 0);
+        final Label lblTitle = new Label("Exploitation des parcelles");
+        lblTitle.setPadding(new Insets(0, 40, 0, 40));
+        lblTitle.getStyleClass().add("label-header");
+        lblTitle.setStyle("-fx-font-size: 1.5em;");
+        uiHeader.add(lblTitle, 0, 0);
+        
 
         if(planChoiceBox.getValue()!=null){
-            tablePane.setCenter(new FXPlanTable(planChoiceBox.getValue(), tronconChoiceBox.getValue(), PLANIFICATION, null, 0));
+            setCenter(new FXPlanTable(planChoiceBox.getValue(), tronconChoiceBox.getValue(), PLANIFICATION, null, 0));
         }
 
         //on ecoute les changements de troncon et de plan
         final ChangeListener chgListener = new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                tablePane.setCenter(new FXPlanTable(planChoiceBox.getValue(), tronconChoiceBox.getValue(), PLANIFICATION, null, 0));
+                setCenter(new FXPlanTable(planChoiceBox.getValue(), tronconChoiceBox.getValue(), PLANIFICATION, null, 0));
             }
         };
 
