@@ -8,8 +8,8 @@
     <version>1.0</version>
     <packaging>jar</packaging>
     
-    <name>plugin-document</name>
-    <description>Plugin dossier d'ouvrages</description>
+    <name>Plugin dossier d'ouvrages</name>
+    <description>Gestion de dossier d'ouvrages</description>
     <!--url>http://www.myorganization.org</url-->
 
     <parent>
@@ -17,6 +17,10 @@
         <artifactId>sirs</artifactId>
         <version>0.x-SNAPSHOT</version>
     </parent>
+
+    <properties>
+        <plugin.core.version.min>13</plugin.core.version.min>
+    </properties>
 
     <dependencies>
         <dependency>

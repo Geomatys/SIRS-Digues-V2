@@ -15,12 +15,13 @@ final File target = targetDir.resolve(project.getArtifactId()+".json").toFile();
 
 final PluginInfo info = new PluginInfo();
 info.setName(project.getArtifactId());
+info.setTitle(project.getName());
 info.setDescription(project.getDescription());
 
 final String[] version = project.getVersion().split("[^\\d]+");
 
 String vMajor = properties.getProperty("plugin.version.major");
-String vMinor = properties.getProperty("plugin.version.major");
+String vMinor = properties.getProperty("plugin.version.minor");
 
 if (vMajor == null || vMajor.isEmpty()) {
 	if (version.length > 0) {
@@ -39,6 +40,16 @@ if (vMinor == null || vMinor.isEmpty()) {
 	}
 }
 info.setVersionMinor(Integer.parseInt(vMinor));
+
+final String appMin = properties.getProperty("plugin.core.version.min");
+if (appMin != null && !appMin.isEmpty()) {
+    info.setAppVersionMin(Integer.parseInt(appMin));
+}
+
+final String appMax = properties.getProperty("plugin.core.version.max");
+if (appMax != null && !appMax.isEmpty()) {
+	info.setAppVersionMax(Integer.parseInt(appMax));
+}
 
 final String downloadURL = properties.getProperty("plugin.download.url");
 if (downloadURL != null) {

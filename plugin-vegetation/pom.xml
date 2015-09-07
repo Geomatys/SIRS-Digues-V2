@@ -8,8 +8,8 @@
     <version>1.0</version>
     <packaging>jar</packaging>
     
-    <name>plugin-vegetation</name>
-    <description>Plugin de vegetation.</description>
+    <name>Plugin de végétation</name>
+    <description>Gestion de la végétation</description>
     <!--url>http://www.myorganization.org</url-->
 
     <parent>
@@ -17,6 +17,10 @@
         <artifactId>sirs</artifactId>
         <version>0.x-SNAPSHOT</version>
     </parent>
+
+    <properties>
+        <plugin.core.version.min>13</plugin.core.version.min>
+    </properties>
 
     <dependencies>
         <dependency>

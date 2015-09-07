@@ -8,8 +8,8 @@
     <version>0.x-SNAPSHOT</version>
     <packaging>jar</packaging>
     
-    <name>mobile desktop</name>
-    <description>A plugin to perform synchronizations between mobile and desktop application</description>
+    <name>Plugin mobile</name>
+    <description>Gère la synchronization entre le mobile et l'application bureau</description>
     <!--url>http://www.myorganization.org</url-->
 
     <parent>
