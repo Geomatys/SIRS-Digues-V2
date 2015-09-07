@@ -78,7 +78,7 @@ public class FXPlanTable extends BorderPane{
     private final GridPane gridBottom = new GridPane();
     private Region[] headerNodes;
 
-    public FXPlanTable(final PlanVegetation plan, final TronconDigue troncon, final Mode mode, final List<String> filteredStates, final int filterDate){
+    public FXPlanTable(final PlanVegetation plan, final TronconDigue troncon, final Mode mode, final List<String> filteredStates, final int filterIndex){
         this.plan = plan;
         this.mode = mode;
 
@@ -197,8 +197,8 @@ public class FXPlanTable extends BorderPane{
         for(final ParcelleVegetation parcelle : planifParcelle){
 
             // Clause de filtrage : on saute la ligne si une condition de filtrage est vérifiée pour l'année de filtrage
-            if(filteredStates!=null && !filteredStates.isEmpty() && filterDate>=plan.getAnneeDebut() && filterDate<plan.getAnneeFin()){
-                final String parcelleEtat = VegetationSession.getParcelleEtat(parcelle, parcelle.getPlanifications().get(filterDate-plan.getAnneeDebut()), filterDate);
+            if(filteredStates!=null && !filteredStates.isEmpty() && filterIndex>=0 && filterIndex<parcelle.getPlanifications().size()){
+                final String parcelleEtat = getParcelleEtat(parcelle, parcelle.getPlanifications().get(filterIndex), filterIndex+plan.getAnneeDebut());
                 if(filteredStates.contains(parcelleEtat)) continue;
             }
 
