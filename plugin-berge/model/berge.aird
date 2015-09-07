@@ -40,7 +40,7 @@
           <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_oZNoNC7HEeWv4JwE7hUOUQ" red="255" green="252" blue="216"/>
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_gq__UC7HEeWv4JwE7hUOUQ" name="designation : EString" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@78af5261{platform:/resource/plugin-berge/model/berge.ecore#//Berge/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_gq__UC7HEeWv4JwE7hUOUQ" name="designation : EString" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="berge.ecore#//Berge/designation"/>
           <semanticElements xmi:type="ecore:EAttribute" href="berge.ecore#//Berge/designation"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_lN90MC7HEeWv4JwE7hUOUQ" labelAlignment="LEFT">
