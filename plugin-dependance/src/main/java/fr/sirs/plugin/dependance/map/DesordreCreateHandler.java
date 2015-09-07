@@ -137,9 +137,9 @@ public class DesordreCreateHandler extends AbstractNavigationHandler {
                         if (candidate instanceof DesordreDependance) {
                             desordre = (DesordreDependance) candidate;
                             // On récupère la géométrie de cet objet pour passer en mode édition
-                            editGeometry.geometry.set(desordre.getGeometry());
+                            editGeometry.geometry.set((Geometry)desordre.getGeometry().clone());
                             // Ajout de cette géométrie dans la couche d'édition sur la carte.
-                            decorationLayer.getGeometries().add(editGeometry.geometry.get());
+                            decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
                             newDesordre = false;
                         }
                     } else {

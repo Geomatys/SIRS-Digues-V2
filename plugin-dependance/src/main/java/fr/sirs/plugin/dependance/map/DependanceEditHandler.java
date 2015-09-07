@@ -178,9 +178,9 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                                 helper = new EditionHelper(map, graphic.getLayer());
                                 dependance = (AbstractDependance)bean;
                                 // On récupère la géométrie de cet objet pour passer en mode édition
-                                editGeometry.geometry.set(dependance.getGeometry());
+                                editGeometry.geometry.set((Geometry)dependance.getGeometry().clone());
                                 // Ajout de cette géométrie dans la couche d'édition sur la carte.
-                                decorationLayer.getGeometries().add(editGeometry.geometry.get());
+                                decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
                                 newDependance = false;
                             }
                         }
