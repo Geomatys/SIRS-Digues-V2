@@ -74,7 +74,9 @@ public interface FXPositionableMode {
      * Compute a linear position for the edited {@link Positionable} using defined
      * geographic position.
      *
+     * @param segments
      * @param sr The SR to use to generate linear position.
+     * @param geoPoint
      * @return The borne to use as start point, and the distance from the borne
      * until the input geographic position. It's negative if we go from downhill
      * to uphill.
@@ -82,7 +84,7 @@ public interface FXPositionableMode {
      * @throws RuntimeException If the computing fails.
      */
     public static Map.Entry<BorneDigue, Double> computeLinearFromGeo(
-            LinearReferencing.SegmentInfo[] segments, final SystemeReperage sr, final Point geoPoint) {
+            final LinearReferencing.SegmentInfo[] segments, final SystemeReperage sr, final Point geoPoint) {
         ArgumentChecks.ensureNonNull("Geographic point", geoPoint);
 
         if (segments == null) throw new IllegalStateException("No computing can be done without a source linear object.");
@@ -125,7 +127,11 @@ public interface FXPositionableMode {
         return availableBornes;
     }
 
-
+    /**
+     * 
+     * @param element
+     * @return
+     */
     public static Element getTronconFromElement(final Element element){
         Element candidate = null;
 
@@ -156,9 +162,13 @@ public interface FXPositionableMode {
         return candidate;
     }
 
-    public static double fxNumberValue(ObjectProperty<Double> spinnerNumber){
+    /**
+     * 
+     * @param spinnerNumber
+     * @return
+     */
+    public static double fxNumberValue(final ObjectProperty<Double> spinnerNumber){
         if(spinnerNumber.get()==null) return 0;
         return spinnerNumber.get();
     }
-    
 }

@@ -1,7 +1,9 @@
 package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.CRS_WGS84;
@@ -28,7 +30,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -42,6 +43,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
+import javax.measure.unit.SI;
+import org.geotoolkit.display.MeasureUtilities;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.LinearReferencing;
@@ -73,6 +76,7 @@ public class FXPositionablePane extends BorderPane {
     @FXML private Label uiSR;
     @FXML private Label uiPRDebut;
     @FXML private Label uiPRFin;
+    @FXML private Label uiGeomInfo;
 
     private final ObjectProperty<Positionable> posProperty = new SimpleObjectProperty<>();
     private final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty(true);
@@ -83,11 +87,11 @@ public class FXPositionablePane extends BorderPane {
         this(Arrays.asList(new FXPositionableCoordMode(), new FXPositionableLinearMode()));
     }
 
-    public FXPositionablePane(List<FXPositionableMode> lstModes) {
+    public FXPositionablePane(final List<FXPositionableMode> lstModes) {
         this(lstModes, Positionable.class);
     }
 
-    public FXPositionablePane(List<FXPositionableMode> lstModes, final Class<? extends Positionable> clazz) {
+    public FXPositionablePane(final List<FXPositionableMode> lstModes, final Class<? extends Positionable> clazz) {
         SIRS.loadFXML(this, clazz);
 
         uiView.setGraphic(new ImageView(ICON_VIEWOTHER_WHITE));
@@ -169,6 +173,30 @@ public class FXPositionablePane extends BorderPane {
         return LinearReferencingUtilities.getSourceLinear(t, source);
     }
 
+    /**
+     * Returns a label specifying the geometry area if the geometry is a Polygon
+     * or MultiPolygon, or the geometry length otherwise.
+     *
+     * @param geometry
+     */
+    private static String getGeometryInfo(final Geometry geometry) {
+        if (geometry != null) {
+            if (geometry instanceof Polygon || geometry instanceof MultiPolygon) {
+                final String surface = NumberFormat.getNumberInstance().format(
+                        MeasureUtilities.calculateArea(geometry, Injector.getSession().getProjection(), SI.SQUARE_METRE)) +" m²";
+                return "Surface : "+surface;
+            } else {
+                final String longueur = NumberFormat.getNumberInstance().format(
+                        MeasureUtilities.calculateLenght(geometry,
+                                Injector.getSession().getProjection(), SI.METRE)) +" m";
+                return "Longueur : "+longueur;
+            }
+        }
+        else {
+            return "";
+        }
+    }
+
     private void updateSRAndPRInfo(){
         final Positionable pos = getPositionable();
 
@@ -209,7 +237,9 @@ public class FXPositionablePane extends BorderPane {
             pos.setPrFin(0);
         }
 
-
+        if(pos.getGeometry()!=null){
+            uiGeomInfo.setText(getGeometryInfo(pos.getGeometry()));
+        }
     }
 
     public ObjectProperty<Positionable> positionableProperty() {
