@@ -110,7 +110,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
         };
 
         // Listener pour les changements sur les points de début et de fin, dans le cadre de l'import de bornes par exemple.
-        final ChangeListener<Point> pointListener = (obs, oldVal, newVal) ->  {if(reseting) return; else updateFields();};
+        final ChangeListener<Point> pointListener = (obs, oldVal, newVal) ->  updateFields();
 
         posProperty.addListener(new ChangeListener<Positionable>() {
             @Override
@@ -181,6 +181,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
     }
 
     private void updateFields(){
+
         reseting = true;
 
         //selectionner RGF93 par defaut
@@ -269,7 +270,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
             }
         }
         positionable.setPositionDebut(startPoint);
-        positionable.setPositionDebut(endPoint);
+        positionable.setPositionFin(endPoint);
         positionable.geometryModeProperty().set(MODE);
         positionable.geometryProperty().set(geometry);
     }
