@@ -12,12 +12,10 @@ import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
-
 import static fr.sirs.theme.ui.FXPositionableMode.fxNumberValue;
 import fr.sirs.util.SirsStringConverter;
 import java.util.Collections;
 import java.util.List;
-
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -112,7 +110,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
         };
 
         // Listener pour les changements sur les points de début et de fin, dans le cadre de l'import de bornes par exemple.
-        final ChangeListener<Point> pointListener = (obs, oldVal, newVal) ->  updateFields();
+        final ChangeListener<Point> pointListener = (obs, oldVal, newVal) ->  {if(reseting) return; else updateFields();};
 
         posProperty.addListener(new ChangeListener<Positionable>() {
             @Override
