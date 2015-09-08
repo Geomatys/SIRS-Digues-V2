@@ -5,12 +5,17 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import fr.sirs.PluginInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.geotoolkit.internal.GeotkFX;
 
 import java.io.IOException;
@@ -73,33 +78,61 @@ public class PluginInstaller {
         return list;
     }
 
+    /**
+     * Affiche une popup avertissant que des plugins sont incompatibles avec la version actuelle
+     * de l'application.
+     *
+     * @param oldVersionPlugins Liste des plugins incompatibles.
+     */
     private static void showOldVersionPluginsPopup(final List<PluginInfo> oldVersionPlugins) {
         final Stage stage = new Stage();
+        stage.getIcons().add(SIRS.ICON);
         stage.setTitle("Gestion des plugins incompatibles");
-        final VBox vBox = new VBox();
-        final Label label1 = new Label("Des plugins précédemment installés sont incompatibles avec la version de l'application lancée.");
-        final Label label2 = new Label("Ils vont être supprimés.");
-        vBox.getChildren().add(label1);
-        vBox.getChildren().add(label2);
+        stage.initModality(Modality.WINDOW_MODAL);
+        stage.initStyle(StageStyle.UTILITY);
+        stage.setAlwaysOnTop(true);
+        stage.setOnCloseRequest(event -> deleteOldPlugins(oldVersionPlugins));
+        final GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20));
+
+        int i = 0;
+        grid.add(new Label(oldVersionPlugins.size() > 1 ? "Des plugins précédemment installés sont incompatibles" :
+                "Un plugin précédemment installé est incompatible"), 0, i++);
+        grid.add(new Label("avec la version de l'application lancée."), 0, i++);
+        grid.add(new Label(oldVersionPlugins.size() > 1 ? "Ils vont être supprimés." : "Il va être supprimé."), 0, i++);
+        i++;
+        grid.add(new Label(oldVersionPlugins.size() > 1 ? "Plugins concernés :" : "Plugin concerné :"), 0, i++);
         for (final PluginInfo oldPlugin : oldVersionPlugins) {
-            vBox.getChildren().add(new Label(oldPlugin.getName() +" v"+ oldPlugin.getVersionMajor() +"."+ oldPlugin.getVersionMinor()));
+            grid.add(new Label(oldPlugin.getName() + " v" + oldPlugin.getVersionMajor() + "." + oldPlugin.getVersionMinor()), 0, i++);
         }
         final Button ok = new Button("Valider");
         ok.setOnAction(event -> {
-            for (final PluginInfo oldPlugin : oldVersionPlugins) {
-                try {
-                    uninstall(oldPlugin);
-                } catch (IOException ex) {
-                    SirsCore.LOGGER.log(Level.WARNING, ex.getLocalizedMessage(), ex);
-                    GeotkFX.newExceptionDialog(ex.getLocalizedMessage(), ex);
-                }
-            }
+            deleteOldPlugins(oldVersionPlugins);
             stage.hide();
         });
-        vBox.getChildren().add(ok);
-        final Scene scene = new Scene(vBox);
+        grid.add(ok, 0, ++i);
+        GridPane.setHalignment(ok, HPos.RIGHT);
+        final Scene scene = new Scene(grid);
         stage.setScene(scene);
         stage.show();
+    }
+
+    /**
+     * Supprime les anciens plugins non compatibles avec la version actuelle.
+     *
+     * @param oldVersionPlugins La liste des plugins à supprimer.
+     */
+    private static void deleteOldPlugins(final List<PluginInfo> oldVersionPlugins) {
+        for (final PluginInfo oldPlugin : oldVersionPlugins) {
+            try {
+                uninstall(oldPlugin);
+            } catch (IOException ex) {
+                SirsCore.LOGGER.log(Level.WARNING, ex.getLocalizedMessage(), ex);
+                GeotkFX.newExceptionDialog(ex.getLocalizedMessage(), ex);
+            }
+        }
     }
     
     public static PluginList listDistantPlugins(URL serverUrl) throws IOException {
@@ -142,9 +175,17 @@ public class PluginInstaller {
             // a été lancée via un IDE comme Intellij, pour ne pas bloquer les futures développements
             // on valide tous les plugins.
             return true;
+            //appVersion = "0.14";
         }
 
-        final int currentAppVersion = Integer.parseInt(appVersion.substring(2));
+        final int currentAppVersion;
+        try {
+            currentAppVersion = Integer.parseInt(appVersion.substring(2));
+        } catch (NumberFormatException e) {
+            // Nous sommes en dev dans une version de type 0.x-SNAPSHOT, dans ce cadre on active tous les plugins.
+            return true;
+        }
+
         if (plugin.getAppVersionMin() == 0) {
             // La version minimale de l'application pour laquelle ce plugin fonctionne n'a pas été définie,
             // ce plugin vient d'une ancienne version et doit être supprimé.
