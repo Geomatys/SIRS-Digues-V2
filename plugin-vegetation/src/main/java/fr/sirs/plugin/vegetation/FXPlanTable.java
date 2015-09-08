@@ -280,7 +280,6 @@ public class FXPlanTable extends BorderPane{
             };
             session.getTaskManager().submit("Analyse de la végétation de la parcelle "+parcelle.getDesignation(), runnable);
 
-
             gridCenter.add(info, colIndex, rowIndex);
 
             /*==================================================================

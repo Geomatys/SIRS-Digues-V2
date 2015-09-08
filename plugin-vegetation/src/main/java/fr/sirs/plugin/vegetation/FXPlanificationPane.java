@@ -73,7 +73,7 @@ public class FXPlanificationPane extends BorderPane {
         uiHeader.add(planChoiceBox, 2, 0);
         uiHeader.add(lblTroncon, 3, 0);
         uiHeader.add(tronconChoiceBox, 4, 0);
-        final Label lblTitle = new Label("Exploitation des parcelles");
+        final Label lblTitle = new Label("Planification des parcelles");
         lblTitle.setPadding(new Insets(0, 40, 0, 40));
         lblTitle.getStyleClass().add("label-header");
         lblTitle.setStyle("-fx-font-size: 1.5em;");
