@@ -218,6 +218,7 @@ public class Launcher extends Application {
                     final Optional<ButtonType> choice = alert.showAndWait();
                     if (ButtonType.YES.equals(choice.orElse(ButtonType.NO))) {
                         browseURL(info.updateURL, "Mise à jour", true);
+                        Thread.sleep(500);
                         // Once downloaded, we stop the system to allow user to install its new package.
                         return true;
                     }
