@@ -102,10 +102,13 @@ public class TronconDigueRepository extends AbstractSIRSRepository<TronconDigue>
      * @return a light version of the tronçon, without sub-structures.
      */
     public List<TronconDigue> getAllLight() {
-        final SirsViewIterator<TronconDigue> ite = SirsViewIterator.create(TronconDigue.class, db.queryForStreamingView(createQuery(STREAM_LIGHT)));
         final List<TronconDigue> lst = new ArrayList<>();
-        while (ite.hasNext()) {
-            lst.add(ite.next());
+        try (final SirsViewIterator<TronconDigue> ite = SirsViewIterator.create(TronconDigue.class, db.queryForStreamingView(createQuery(STREAM_LIGHT)))) {
+            while (ite.hasNext()) {
+                lst.add(ite.next());
+            }
+        } catch (Exception e) {
+            throw new SirsCoreRuntimeException("Cannot build Troncon view.", e);
         }
         return lst;
     }

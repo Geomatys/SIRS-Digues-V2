@@ -143,7 +143,8 @@ public class BorneDigueRepository extends AbstractSIRSRepository<BorneDigue> {
                      */
                     final StreamingIterable<SystemeReperage> srList = srRepository.getByLinearStreaming(t);
                     try (final CloseableIterator<SystemeReperage> it = srList.iterator()) {
-                        for (final SystemeReperage sr : srList) {
+                        while (it.hasNext()) {
+                            final SystemeReperage sr = it.next();
                             final Iterator<SystemeReperageBorne> srBornes = sr.systemeReperageBornes.iterator();
                             boolean mustUpdateSR = false;
                             while (srBornes.hasNext()) {

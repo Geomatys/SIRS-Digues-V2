@@ -572,9 +572,9 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                             final SystemeReperageRepository srRepo = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class));
                             final StreamingIterable<SystemeReperage> srs = srRepo.getByLinearStreaming(tronconProperty.get());
                             try (final CloseableIterator<SystemeReperage> it = srs.iterator()) {
-                            while (it.hasNext()) {
-                                srRepo.remove(it.next(), tronconProperty.get());
-                            }
+                                while (it.hasNext()) {
+                                    srRepo.remove(it.next(), tronconProperty.get());
+                                }
                             }
                             session.getRepositoryForClass(TronconDigue.class).remove(tronconProperty.get());
                             tronconProperty.set(null);

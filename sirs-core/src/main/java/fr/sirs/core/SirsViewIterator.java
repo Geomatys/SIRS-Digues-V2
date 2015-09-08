@@ -8,6 +8,8 @@ import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewResult.Row;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sirs.util.ClosingDaemon;
+import javafx.beans.property.SimpleObjectProperty;
 
 
 public class SirsViewIterator<T> implements Iterator<T>, AutoCloseable {
@@ -18,7 +20,7 @@ public class SirsViewIterator<T> implements Iterator<T>, AutoCloseable {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public SirsViewIterator(Class<? extends T> clazz, StreamingViewResult result) {
+    private SirsViewIterator(Class<? extends T> clazz, StreamingViewResult result) {
         this.clazz = clazz;
         this.result = result;
         if (result.getTotalRows() > 0)
@@ -33,7 +35,7 @@ public class SirsViewIterator<T> implements Iterator<T>, AutoCloseable {
     @Override
     public T next() {
         if (iterator == null) return null;
-        
+
         final Row next = iterator.next();
         try {
             return objectMapper.reader(clazz).readValue(next.getValueAsNode());
@@ -43,7 +45,7 @@ public class SirsViewIterator<T> implements Iterator<T>, AutoCloseable {
             try {
                 return objectMapper.reader(clazz).readValue(next.getDocAsNode());
             } catch (IOException e) {
-                throw new SirsCoreRuntimeExecption(e);
+                throw new SirsCoreRuntimeException(e);
             }
         } catch (IOException e) {
             throw new SirsCoreRuntimeException(e);
@@ -56,9 +58,9 @@ public class SirsViewIterator<T> implements Iterator<T>, AutoCloseable {
         result.close();
     }
 
-    public static <T> SirsViewIterator<T> create(
-            Class<T> class1,
-            StreamingViewResult queryForStreamingView) {
-        return new SirsViewIterator<>(class1, queryForStreamingView);
+    public static <T> SirsViewIterator<T> create(Class<T> resultType, StreamingViewResult queryForStreamingView) {
+        SirsViewIterator<T> iterator = new SirsViewIterator<>(resultType, queryForStreamingView);
+        ClosingDaemon.watchResource(iterator, new SimpleObjectProperty<AutoCloseable>(iterator.result));
+        return iterator;
     }
 }

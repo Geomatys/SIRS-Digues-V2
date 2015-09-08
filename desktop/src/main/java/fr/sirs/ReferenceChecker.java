@@ -24,14 +24,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import javafx.concurrent.Task;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import static fr.sirs.SIRS.REFERENCE_GET_ID;
 import fr.sirs.util.StreamingIterable;
+import java.util.HashSet;
+import java.util.Iterator;
 import static java.util.logging.Level.WARNING;
+import org.ektorp.DocumentOperationResult;
 import org.geotoolkit.util.collection.CloseableIterator;
 
 /**
@@ -81,7 +83,7 @@ public class ReferenceChecker extends Task<Void> {
         final int progressSize = localClassReferences.size();
         int progress = 0;
         updateProgress(0, progressSize);
-        
+
         /*
          On vérifie ensuite l'identité des instances : pour chaque classe de
          référence locale, pourvu qu'elle soit référencée sur le serveur,
@@ -151,13 +153,15 @@ public class ReferenceChecker extends Task<Void> {
 
                         try {
                             final Object localId = getId.invoke(localReferenceInstance);
-                            for (final ReferenceType serverReferenceInstance : currentServerInstances) {
+                            final Iterator<ReferenceType> serverIt = currentServerInstances.iterator();
+                            while (serverIt.hasNext()) {
+                            final ReferenceType serverReferenceInstance = serverIt.next();
                                 try {
                                     final Object serverId = getId.invoke(serverReferenceInstance);
                                     if (localId instanceof String
                                             && localId.equals(serverId)) {
                                         presentOnServer = true;
-                                        currentServerInstances.remove(serverReferenceInstance);
+                                        serverIt.remove();
                                         if (!sameReferences(localReferenceInstance, serverReferenceInstance)) {
                                             registerIncoherentReferences(localReferenceInstance, serverReferenceInstance);
                                         }
@@ -329,53 +333,59 @@ public class ReferenceChecker extends Task<Void> {
 
         private void update(){
             final List<ReferenceType> updated = new ArrayList<>();
-            if(fileReferences!=null){
-                
-                for(final ReferenceType fileReference : fileReferences){
-                    ReferenceType localInstance = null;
-                    for(final ReferenceType localReference : localReferences){
-                        if(fileReference.equals(localReference)) {
-                            localInstance = localReference;
-                            break;
-                        }
+            final List<ReferenceType> toAddInLocal = serverInstancesNotLocal.get(referenceClass);
+
+            // Add all references unknown locally.
+            if (toAddInLocal != null) {
+                for (final ReferenceType toAdd : toAddInLocal) {
+                    updated.add(toAdd);
+                }
+            }
+
+            Map<ReferenceType, ReferenceType> toUpdate = incoherentReferences.get(referenceClass);
+            if (toUpdate != null) {
+                for (final Map.Entry<ReferenceType, ReferenceType> entry : toUpdate.entrySet()) {
+                    try {
+                        final Method getRevision = referenceClass.getMethod("getRevision");
+                        final Method setRevision = referenceClass.getMethod("setRevision", String.class);
+                        final String revision = (String) getRevision.invoke(entry.getKey());
+                        setRevision.invoke(entry.getValue(), revision);
+                        updated.add(entry.getValue());// On mémorise la référence à mettre à jour
+                    } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                        SIRS.LOGGER.log(WARNING, ex.getMessage());
+                    }
+                }
+            }
+
+            // Once update is over, we clear incoherent reference lists.
+            if(!updated.isEmpty()) {
+                List<DocumentOperationResult> bulkResult = Injector.getSession().getRepositoryForClass(referenceClass).executeBulk(updated);
+                if (bulkResult == null || bulkResult.isEmpty()) {
+                    if (toAddInLocal != null) toAddInLocal.clear();
+                    if (toUpdate != null) toUpdate.clear();
+                } else {
+                    final HashSet<String> failures = new HashSet<>();
+                    for (final DocumentOperationResult result : bulkResult) {
+                        failures.add(result.getId());
                     }
 
-                    if(localInstance==null){
-                        updated.add(fileReference); // On mémorise la référence à ajouter
-                    }
-                    else{
-                        if(!localInstance.toString().equals(fileReference.toString())){
-                            try {
-                                final Method getRevision = referenceClass.getMethod("getRevision");
-                                final Method setRevision = referenceClass.getMethod("setRevision", String.class);
-                                final String revision = (String) getRevision.invoke(localInstance);
-                                setRevision.invoke(fileReference, revision);
-                                updated.add(fileReference);// On mémorise la référence à mettre à jour
-                            } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                                SIRS.LOGGER.log(WARNING, ex.getMessage());
+                    Iterator<ReferenceType> analysisIt;
+
+                    if (toAddInLocal != null) {
+                        analysisIt = toAddInLocal.iterator();
+                        while (analysisIt.hasNext()) {
+                            if (!failures.contains(analysisIt.next().getId())) {
+                                analysisIt.remove();
                             }
                         }
                     }
-                }
-                if(!updated.isEmpty()) Injector.getSession().getRepositoryForClass(referenceClass).executeBulk(updated);
-            }
 
-            // On élimine les instances de références mises à jour des map correspondantes du ReferenceChecker (on se base sur l'identifiant).
-            if(serverInstancesNotLocal.get(referenceClass)!=null){
-                serverInstancesNotLocal.get(referenceClass).removeAll(updated);
-            } else {
-                SIRS.LOGGER.log(WARNING, referenceClass.getCanonicalName() + " n'a pas été correctement récupérée du serveur.");
-            }
-
-            // On retire les références mises à jour de la liste des instances incohérentes.
-            final Map<ReferenceType, ReferenceType> incoherentInstances = incoherentReferences.get(referenceClass);
-            if(incoherentInstances!=null){
-                for(final ReferenceType updatedInstance : updated){
-                    final Set<ReferenceType> keySet = incoherentInstances.keySet();
-                    for(final ReferenceType localInstanceKey : keySet){
-                        if(incoherentInstances.get(localInstanceKey)==updatedInstance){
-                            incoherentInstances.remove(localInstanceKey);
-                            break;
+                    if (toUpdate != null) {
+                        analysisIt = toUpdate.keySet().iterator();
+                        while (analysisIt.hasNext()) {
+                            if (!failures.contains(analysisIt.next().getId())) {
+                                analysisIt.remove();
+                            }
                         }
                     }
                 }
@@ -394,7 +404,6 @@ public class ReferenceChecker extends Task<Void> {
 
             incoherentReferences.get(referenceClass).put(localReferenceInstance, serverReferenceInstance);
         }
-
     }
 
     /**
@@ -431,8 +440,8 @@ public class ReferenceChecker extends Task<Void> {
         try{
             try (final InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
                  final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(file))) {
-                
-                int r = 0;
+
+                int r;
                 while (true) {
                     r = inputStreamReader.read();
                     if (r != -1) {

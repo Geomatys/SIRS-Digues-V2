@@ -22,7 +22,7 @@ public class ClosingDaemon {
 
     private final ReferenceQueue phantomQueue = new ReferenceQueue();
 
-    private static final WeakHashMap<Object, PhantomReference> referenceCache = new WeakHashMap<>();
+    public static final WeakHashMap<Object, PhantomReference> referenceCache = new WeakHashMap<>();
 
     private ClosingDaemon() {
         final Thread closer = new Thread(() -> {

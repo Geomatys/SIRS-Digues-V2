@@ -33,6 +33,7 @@ import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.index.ElementHit;
+import fr.sirs.util.ClosingDaemon;
 import fr.sirs.util.StreamingIterable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,12 +53,17 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.sis.util.collection.Cache;
 
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentOperationResult;
+import org.ektorp.http.StdHttpClient;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.IdentifiedObjects;
+import org.geotoolkit.util.collection.CloseableIterator;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
 import org.springframework.beans.BeansException;
@@ -215,6 +221,36 @@ public class SessionCore implements ApplicationContextAware {
     public SessionCore(CouchDbConnector couchDbConnector) {
         this.connector = couchDbConnector;
 
+        PoolingClientConnectionManager connectionPool = null;
+        StdHttpClient connection = (StdHttpClient) connector.getConnection();
+        if (connection.getBackend() instanceof DefaultHttpClient) {
+            final DefaultHttpClient defaultConnection = (DefaultHttpClient)connection.getBackend();
+            ClientConnectionManager connectionManager = defaultConnection.getConnectionManager();
+            if (connectionManager instanceof PoolingClientConnectionManager) {
+                connectionPool = (PoolingClientConnectionManager)connectionManager;
+            }
+        }
+
+        if (connectionPool == null) {
+            SirsCore.LOGGER.warning("Cannot get connection pool stats");
+        } else {
+            final PoolingClientConnectionManager pool = connectionPool;
+            final Thread statDaemon = new Thread(() -> {
+                final Thread t = Thread.currentThread();
+                while (!t.isInterrupted()) {
+                    SirsCore.LOGGER.info(pool.getTotalStats().toString());
+                    SirsCore.LOGGER.info("Watched resources : "+ClosingDaemon.referenceCache.size());
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ex) {
+                        SirsCore.LOGGER.log(Level.WARNING, "Stat thread interrupted !", ex);
+                    }
+                }
+            });
+            statDaemon.setDaemon(true);
+            statDaemon.start();
+        }
+
         referenceUsageRepository = new ReferenceUsageRepository(connector);
         previews = new Previews(connector);
         elementCreator = new ElementCreator(this);
@@ -326,10 +362,12 @@ public class SessionCore implements ApplicationContextAware {
     public List<Photo> getPhotoList(final String linearId) {
         final List<Photo> photos = new ArrayList<>();
         final StreamingIterable<PositionProfilTravers> positions = InjectorCore.getBean(PositionProfilTraversRepository.class).getByLinearIdStreaming(linearId);
-        for (final PositionProfilTravers position : positions) {
-            final List<Photo> p = position.getPhotos();
-            if (p != null && !p.isEmpty())
-                photos.addAll(p);
+        try (CloseableIterator<PositionProfilTravers> iterator = positions.iterator()) {
+            while (iterator.hasNext()) {
+                final List<Photo> p = iterator.next().getPhotos();
+                if (p != null && !p.isEmpty())
+                    photos.addAll(p);
+            }
         }
 
         final List<Objet> objets = getObjetsByTronconId(linearId);
@@ -348,9 +386,11 @@ public class SessionCore implements ApplicationContextAware {
         final Collection<AbstractSIRSRepository> repos = getRepositoriesForClass(AvecPhotos.class);
         for (final AbstractSIRSRepository repo : repos) {
             if (repo instanceof AbstractPositionableRepository) {
-                Iterable byLinearId = ((AbstractPositionableRepository)repo).getByLinearIdStreaming(linearId);
-                for (Object o : byLinearId) {
-                    photos.addAll(((AvecPhotos)o).getPhotos());
+                StreamingIterable byLinearId = ((AbstractPositionableRepository)repo).getByLinearIdStreaming(linearId);
+                try (final CloseableIterator iterator = byLinearId.iterator()) {
+                    while (iterator.hasNext()) {
+                        photos.addAll(((AvecPhotos)iterator.next()).getPhotos());
+                    }
                 }
             } else {
                 for (final Object photoContainer : repo.getAllStreaming()) {
@@ -369,9 +409,13 @@ public class SessionCore implements ApplicationContextAware {
         }
 
         // Special case :
-        for (final Desordre d : ((AbstractPositionableRepository<Desordre>)getRepositoryForClass(Desordre.class)).getByLinearIdStreaming(linearId)) {
-            for (final Observation o : d.observations) {
-                photos.addAll(o.photos);
+        StreamingIterable<Desordre> desordres = ((AbstractPositionableRepository<Desordre>) getRepositoryForClass(Desordre.class)).getByLinearIdStreaming(linearId);
+        try (final CloseableIterator<Desordre> iterator = desordres.iterator()) {
+            while (iterator.hasNext()) {
+                final Desordre d = iterator.next();
+                for (final Observation o : d.observations) {
+                    photos.addAll(o.photos);
+                }
             }
         }
 
