@@ -21,14 +21,12 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.ZoneVegetation;
 import static fr.sirs.theme.ui.FXPositionableMode.computeLinearFromGeo;
 import fr.sirs.util.SirsStringConverter;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -68,10 +66,10 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
     @FXML private ComboBox<SystemeReperage> uiSRs;
     @FXML private ComboBox<BorneDigue> uiBorneStart;
     @FXML private ComboBox<BorneDigue> uiBorneEnd;
-    @FXML private RadioButton uiAmontStart;
-    @FXML private RadioButton uiAmontEnd;
     @FXML private RadioButton uiAvalStart;
     @FXML private RadioButton uiAvalEnd;
+    @FXML private RadioButton uiAmontStart;
+    @FXML private RadioButton uiAmontEnd;
     @FXML private Spinner<Double> uiDistanceStart;
     @FXML private Spinner<Double> uiDistanceEnd;
     //area
@@ -105,10 +103,10 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
         uiSRs.disableProperty().bind(disableProperty);
         uiBorneStart.disableProperty().bind(disableProperty);
         uiBorneEnd.disableProperty().bind(disableProperty);
-        uiAmontStart.disableProperty().bind(disableProperty);
         uiAvalStart.disableProperty().bind(disableProperty);
-        uiAmontEnd.disableProperty().bind(disableProperty);
+        uiAmontStart.disableProperty().bind(disableProperty);
         uiAvalEnd.disableProperty().bind(disableProperty);
+        uiAmontEnd.disableProperty().bind(disableProperty);
         uiDistanceStart.disableProperty().bind(disableProperty);
         uiDistanceEnd.disableProperty().bind(disableProperty);
         uiStartNear.disableProperty().bind(disableProperty);
@@ -123,14 +121,14 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
         uiEndFar.setEditable(true);
 
         final ToggleGroup groupStart = new ToggleGroup();
-        uiAvalStart.setToggleGroup(groupStart);
         uiAmontStart.setToggleGroup(groupStart);
-        uiAmontStart.setSelected(true);
+        uiAvalStart.setToggleGroup(groupStart);
+        uiAvalStart.setSelected(true);
 
         final ToggleGroup groupEnd = new ToggleGroup();
-        uiAvalEnd.setToggleGroup(groupEnd);
         uiAmontEnd.setToggleGroup(groupEnd);
-        uiAmontEnd.setSelected(true);
+        uiAvalEnd.setToggleGroup(groupEnd);
+        uiAvalEnd.setSelected(true);
         
         uiDistanceStart.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
         uiDistanceEnd.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
@@ -181,9 +179,9 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
         //on cache certain elements quand c'est un ponctuel
         lblFin.visibleProperty().bind(pctProp);
         uiBorneEnd.visibleProperty().bind(pctProp);
-        uiAmontEnd.visibleProperty().bind(pctProp);
-        uiDistanceEnd.visibleProperty().bind(pctProp);
         uiAvalEnd.visibleProperty().bind(pctProp);
+        uiDistanceEnd.visibleProperty().bind(pctProp);
+        uiAmontEnd.visibleProperty().bind(pctProp);
         uiEndNear.visibleProperty().bind(pctProp);
         uiEndFar.visibleProperty().bind(pctProp);
         lblStartFar.visibleProperty().bind(pctProp);
@@ -238,10 +236,10 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
 
         if(MODE.equals(mode)){
             //on assigne les valeurs sans changement
-            uiAvalStart.setSelected(pos.getBorne_debut_aval());
-            uiAmontStart.setSelected(!pos.getBorne_debut_aval());
-            uiAvalEnd.setSelected(pos.getBorne_fin_aval());
-            uiAmontEnd.setSelected(!pos.getBorne_fin_aval());
+            uiAmontStart.setSelected(pos.getBorne_debut_aval());
+            uiAvalStart.setSelected(!pos.getBorne_debut_aval());
+            uiAmontEnd.setSelected(pos.getBorne_fin_aval());
+            uiAvalEnd.setSelected(!pos.getBorne_fin_aval());
 
             uiDistanceStart.getValueFactory().setValue(pos.getBorne_debut_distance());
             uiDistanceEnd.getValueFactory().setValue(pos.getBorne_fin_distance());
@@ -275,13 +273,13 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
             final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t, Injector.getSession());
             final TronconUtils.PosSR rp = ps.getForSR(defaultSR);
 
-            uiAmontStart.setSelected(!rp.startAval);
-            uiAvalStart.setSelected(rp.startAval);
+            uiAvalStart.setSelected(!rp.startAval);
+            uiAmontStart.setSelected(rp.startAval);
             uiDistanceStart.getValueFactory().setValue(rp.distanceStartBorne);
             uiBorneStart.getSelectionModel().select(rp.borneDigueStart);
 
-            uiAmontEnd.setSelected(!rp.endAval);
-            uiAvalEnd.setSelected(rp.endAval);
+            uiAvalEnd.setSelected(!rp.endAval);
+            uiAmontEnd.setSelected(rp.endAval);
             uiDistanceEnd.getValueFactory().setValue(rp.distanceEndBorne);
             uiBorneEnd.getSelectionModel().select(rp.borneDigueEnd);
 
@@ -290,13 +288,13 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
             uiEndNear.getValueFactory().setValue(0.0);
             uiEndFar.getValueFactory().setValue(0.0);
         }else{
-            uiAmontStart.setSelected(true);
-            uiAvalStart.setSelected(false);
+            uiAvalStart.setSelected(true);
+            uiAmontStart.setSelected(false);
             uiDistanceStart.getValueFactory().setValue(0.0);
             uiBorneStart.getSelectionModel().selectFirst();
 
-            uiAmontEnd.setSelected(true);
-            uiAvalEnd.setSelected(false);
+            uiAvalEnd.setSelected(true);
+            uiAmontEnd.setSelected(false);
             uiDistanceEnd.getValueFactory().setValue(0.0);
             uiBorneEnd.getSelectionModel().selectFirst();
 
@@ -324,8 +322,8 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
         positionable.setSystemeRepId(sr==null ? null : sr.getDocumentId());
         positionable.setBorneDebutId(startBorne==null ? null : startBorne.getDocumentId());
         positionable.setBorneFinId(endBorne==null ? null : endBorne.getDocumentId());
-        positionable.setBorne_debut_aval(uiAvalStart.isSelected());
-        positionable.setBorne_fin_aval(uiAvalEnd.isSelected());
+        positionable.setBorne_debut_aval(uiAmontStart.isSelected());
+        positionable.setBorne_fin_aval(uiAmontEnd.isSelected());
         positionable.setBorne_debut_distance(uiDistanceStart.getValue());
         positionable.setBorne_fin_distance(uiDistanceEnd.getValue());
         positionable.setDistanceDebutMin(uiStartNear.getValue());
@@ -449,17 +447,17 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
 
 
         //calcul de la position relative dans le nouveau SR
-        final Point ptStart = computeGeoFromLinear(uiDistanceStart.getValue(), uiBorneStart.getValue(), uiAmontStart.isSelected());
-        final Point ptEnd   = computeGeoFromLinear(uiDistanceEnd.getValue(), uiBorneEnd.getValue(), uiAmontEnd.isSelected());
+        final Point ptStart = computeGeoFromLinear(uiDistanceStart.getValue(), uiBorneStart.getValue(), uiAvalStart.isSelected());
+        final Point ptEnd   = computeGeoFromLinear(uiDistanceEnd.getValue(), uiBorneEnd.getValue(), uiAvalEnd.isSelected());
         final LinearReferencing.SegmentInfo[] segments = getSourceLinear(newSR);
         Map.Entry<BorneDigue, Double> relStart = computeLinearFromGeo(segments, newSR, ptStart);
         Map.Entry<BorneDigue, Double> relEnd = computeLinearFromGeo(segments, newSR, ptEnd);
 
-        uiAmontStart.setSelected(relStart.getValue() < 0);
+        uiAvalStart.setSelected(relStart.getValue() < 0);
         uiDistanceStart.getValueFactory().setValue(StrictMath.abs(relStart.getValue()));
         uiBorneStart.getSelectionModel().select(relStart.getKey());
 
-        uiAmontEnd.setSelected(relEnd.getValue() < 0);
+        uiAvalEnd.setSelected(relEnd.getValue() < 0);
         uiDistanceEnd.getValueFactory().setValue(StrictMath.abs(relEnd.getValue()));
         uiBorneEnd.getSelectionModel().select(relEnd.getKey());
 
