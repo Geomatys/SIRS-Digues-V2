@@ -12,6 +12,7 @@ import fr.sirs.SIRS;
 import static fr.sirs.SIRS.binaryMD5;
 import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
 import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.core.component.DatabaseRegistry;
@@ -53,6 +54,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -83,6 +85,7 @@ import org.apache.sis.util.logging.Logging;
 import org.ektorp.DbAccessException;
 import org.ektorp.ReplicationStatus;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.IdentifiedObjects;
@@ -248,16 +251,29 @@ public class FXLauncherPane extends BorderPane {
                 uiInstallPluginBtn.setDisable(false);
                 uiInstallPluginBtn.setOnAction((ActionEvent event) -> {
                     restartApplicationNeeded();
-                    installPlugin(newValue);
-                    updatePluginList(null);
+                    uiProgressPlugins.setVisible(true);
+                    final Task installTask = SirsCore.getTaskManager().submit(new Thread(() -> {
+                        installPlugin(newValue);
+                    }));
+                    installTask.setOnSucceeded(e -> {
+                        Platform.runLater(() -> {
+                            uiProgressPlugins.setVisible(false);
+                            updatePluginList(null);
+                        });
+                    });
+                    installTask.setOnFailed(e -> {
+                        Platform.runLater(() -> {
+                            uiProgressPlugins.setVisible(false);
+                            updatePluginList(null);
+                        });
+                    });
                 });
             } else {
                 uiInstallPluginBtn.setDisable(true);
             }
         });
 
-        uiProgressPlugins.visibleProperty().bind(
-                uiInstallPluginBtn.armedProperty().or(uiDeletePluginBtn.armedProperty()));
+        uiProgressPlugins.setVisible(false);
 
         uiRestartAppBtn.setOnAction((ActionEvent event) -> {
             try {
