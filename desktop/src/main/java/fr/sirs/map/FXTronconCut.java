@@ -28,6 +28,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -44,6 +45,7 @@ import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.util.FXStringCell2;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.geotoolkit.internal.GeotkFX;
+import org.geotoolkit.util.StringUtilities;
 
 /**
  *
@@ -63,13 +65,16 @@ public class FXTronconCut extends VBox {
     @FXML private TableView<CutPoint> uiCutTable;
     @FXML private TableView<Segment> uiSegmentTable;
     @FXML private ToggleButton uiAddCut;
+    @FXML private Label TronconTypeNameLabel;
 
     private final ObjectProperty<TronconDigue> tronconProp = new SimpleObjectProperty<>();
     private final ObservableList<CutPoint> cutPoints = FXCollections.observableArrayList();
     private final ObservableList<Segment> segments = FXCollections.observableArrayList();
     
-    public FXTronconCut() {
+    public FXTronconCut(final String typeName) {
         SIRS.loadFXML(this);
+        
+        TronconTypeNameLabel.setText(StringUtilities.firstToUpper(typeName) + " :");
         uiTronconLabel.textProperty().bind(Bindings.createStringBinding(()->tronconProp.get()==null?"":tronconProp.get().getLibelle(),tronconProp));
         
         uiCutTable.setItems(cutPoints);

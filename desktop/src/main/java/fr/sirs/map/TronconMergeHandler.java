@@ -54,10 +54,22 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
     private final FXTronconMerge editPane;
     private final Session session;
     
+    // overriden variable by init();
+    protected String layerName;
+    protected String typeName;
+    
+    protected void init() {
+        this.layerName = CorePlugin.TRONCON_LAYER_NAME;
+        this.typeName = "tronçon";
+        
+    }
+    
     public TronconMergeHandler(final FXMap map) {
         super();
+        init();
+        
         session = Injector.getSession();
-        editPane = new FXTronconMerge(map);
+        editPane = new FXTronconMerge(map, typeName);
         
         editPane.getTroncons().addListener(this::tronconChanged);        
     }
@@ -87,7 +99,7 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
         final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
         final MapContext context = cc.getContext();
         for(MapLayer layer : context.layers()){
-            if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
+            if(layer.getName().equalsIgnoreCase(layerName)){
                 tronconLayer = (FeatureMapLayer) layer;
                 layer.setSelectable(true);
             } else {
@@ -137,7 +149,7 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
         dialogContent.setBottom(babar);
 
         dialog.getIcons().add(SIRS.ICON);
-        dialog.setTitle("Fusion de tronçons");
+        dialog.setTitle("Fusion de " + typeName + "s");
         dialog.setResizable(true);
         dialog.initModality(Modality.NONE);
         dialog.initOwner(map.getScene().getWindow());

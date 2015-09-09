@@ -55,15 +55,26 @@ public class PointCalculatorHandler extends AbstractNavigationHandler {
         }
     };
 
-    private final FXPRPane pane = new FXPRPane(this);
+    private final FXPRPane pane;
     private Stage dialog = null;
     private int pickType = 0;
     private FeatureMapLayer tronconLayer = null;
     private EditionHelper helperTroncon;
 
-    public PointCalculatorHandler() {
+    // overriden variable by init();
+    protected String layerName;
+    protected Class typeClass;
+    
+    protected void init() {
+        this.layerName = CorePlugin.TRONCON_LAYER_NAME;
+        this.typeClass = TronconDigue.class;
     }
-
+    
+    public PointCalculatorHandler() {
+        init();
+        pane = new FXPRPane(this, typeClass);
+    }
+    
     public FXGeometryLayer getDecoration() {
         return decoration;
     }
@@ -113,7 +124,7 @@ public class PointCalculatorHandler extends AbstractNavigationHandler {
         final MapContext context = cc.getContext();
         for(MapLayer layer : context.layers()){
             layer.setSelectable(false);
-            if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
+            if(layer.getName().equalsIgnoreCase(layerName)){
                 tronconLayer = (FeatureMapLayer) layer;
                 layer.setSelectable(true);
             }

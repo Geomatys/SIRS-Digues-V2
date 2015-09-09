@@ -97,7 +97,7 @@ public class FXPRPane extends VBox {
     private final ObjectProperty<Geometry> targetPoint = new SimpleObjectProperty<>();
     private final PointCalculatorHandler handler;
 
-    public FXPRPane(PointCalculatorHandler handler) {
+    public FXPRPane(PointCalculatorHandler handler, Class typeClass) {
         SIRS.loadFXML(this, Positionable.class);
 
         this.handler = handler;
@@ -152,7 +152,7 @@ public class FXPRPane extends VBox {
 
 
         //on remplit la liste des troncons
-        final AbstractSIRSRepository<TronconDigue> tronconRepo = Injector.getSession().getRepositoryForClass(TronconDigue.class);
+        final AbstractSIRSRepository<TronconDigue> tronconRepo = Injector.getSession().getRepositoryForClass(typeClass);
         uiSourceTroncon.setItems(FXCollections.observableArrayList(tronconRepo.getAll()));
         uiSourceTroncon.getSelectionModel().selectFirst();
 

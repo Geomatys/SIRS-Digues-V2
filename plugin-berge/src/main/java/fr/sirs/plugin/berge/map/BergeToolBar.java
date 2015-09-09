@@ -35,15 +35,15 @@ public class BergeToolBar extends ToolBar {
         
         final ToggleButton butEditBerge = new BergeEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butEditBerge.getStyleClass().add(LEFT);
-        final ToggleButton butCut = new TronconCutAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
+        final ToggleButton butCut = new BergeCutAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butCut.getStyleClass().add(CENTER);
-        final ToggleButton butMerge = new TronconMergeAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
+        final ToggleButton butMerge = new BergeMergeAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butMerge.getStyleClass().add(CENTER);
-        final ToggleButton butEditSr = new BorneEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
+        final ToggleButton butEditSr = new BergeBorneEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butEditSr.getStyleClass().add(CENTER);
-        final ToggleButton butCalc = new PointCalculatorAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
+        final ToggleButton butCalc = new BergePointCalculatorAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butCalc.getStyleClass().add(CENTER);
-        final ToggleButton butEditConvert = new ConvertGeomToTronconAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
+        final ToggleButton butEditConvert = new ConvertGeomToBergeAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butEditConvert.getStyleClass().add(CENTER);
         final Button importBornes = new FXImportBornesAction(map).createButton(ActionUtils.ActionTextBehavior.HIDE);
         importBornes.getStyleClass().add(CENTER);

@@ -5,7 +5,6 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
 <fx:root spacing="10.0" type="VBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
@@ -21,7 +20,7 @@
          <children>
             <Label text="Entrer un nouveau point de coupe" GridPane.rowIndex="2" />
             <TextField fx:id="uiTronconLabel" editable="false" GridPane.columnSpan="2" GridPane.rowIndex="1" />
-            <Label text="Tronçon :" />
+            <Label fx:id="TronconTypeNameLabel" text="Tronçon :" />
             <ToggleButton fx:id="uiAddCut" mnemonicParsing="false" text="Saisir" GridPane.columnIndex="1" GridPane.rowIndex="2" />
          </children>
          <VBox.margin>

@@ -45,6 +45,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Separator;
@@ -67,6 +68,7 @@ import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
+import org.geotoolkit.util.StringUtilities;
 
 /**
  *
@@ -91,14 +93,18 @@ public class FXSystemeReperagePane extends BorderPane {
     @FXML private Button uiAddBorne;
     @FXML private ToggleButton uiCreateBorne;
     @FXML private Button uiProject;
+    @FXML private Label typeNameLabel;
+    
 
     private final ObjectProperty<TronconDigue> tronconProp = new SimpleObjectProperty<>();
     private final ObjectProperty<Mode> mode = new SimpleObjectProperty<>(Mode.NONE);
     private final Session session;
     private final FXMap map;
 
-    public FXSystemeReperagePane(FXMap map) {
+    public FXSystemeReperagePane(FXMap map, final String typeName) {
         SIRS.loadFXML(this);
+        
+        typeNameLabel.setText(StringUtilities.firstToUpper(typeName)+ " :");
         this.map = map;
         session = Injector.getSession();
 

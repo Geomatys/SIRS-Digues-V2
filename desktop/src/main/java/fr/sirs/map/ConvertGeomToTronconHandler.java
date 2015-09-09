@@ -58,10 +58,18 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
     };
     private final double zoomFactor = 2;
     
-        
+     // overriden variable by init();
+    protected String typeName;
+    protected Class typeClass;
+    
+    protected void init() {
+        this.typeName = "tronçon";
+        this.typeClass = TronconDigue.class;
+    }    
     
     public ConvertGeomToTronconHandler(final FXMap map) {
         super();
+        init();
     }
 
     /**
@@ -111,7 +119,7 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
                     }
                     
                     if(geom !=null) {
-                        final TronconDigue troncon = showTronconDialog("tronçon", TronconDigue.class);
+                        final TronconDigue troncon = showTronconDialog(typeName, typeClass);
                         if (troncon == null) return;
                         try{
                             final Session session = Injector.getSession();
@@ -123,7 +131,7 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
                             troncon.setGeometry(geom);
 
                             //save troncon
-                            session.getRepositoryForClass(TronconDigue.class).add(troncon);
+                            session.getRepositoryForClass(typeClass).add(troncon);
                             TronconUtils.updateSRElementaire(troncon,session);
                             
                             map.getCanvas().repaint();

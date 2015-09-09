@@ -20,6 +20,7 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -37,14 +38,21 @@ public class FXTronconMerge extends VBox {
     
     @FXML private TableView uiTable;
     @FXML private TextField uiLinearName;
+    @FXML private Label infoLabel;
+    @FXML private Label nameLabel;
 
     private final ObservableList<TronconDigue> troncons = FXCollections.observableArrayList();
     private final MergeTask task = new MergeTask();
     private final FXMap map;
+    private final String typeName;
     
-    public FXTronconMerge(final FXMap map) {
+    public FXTronconMerge(final FXMap map, final String typeName) {
         SIRS.loadFXML(this);
         
+        this.typeName = typeName;
+        
+        infoLabel.setText("Nom du " + typeName + " résultant de la fusion :"); // TODO GENDER
+        nameLabel.setText("Les " + typeName + "s avant fusion seront archivés.");
         final TableColumn<TronconDigue,String> col = new TableColumn<>("Nom");
         col.setEditable(false);
         col.setCellValueFactory((TableColumn.CellDataFeatures<TronconDigue, String> param) -> param.getValue().libelleProperty());
@@ -63,7 +71,7 @@ public class FXTronconMerge extends VBox {
  
     public void processMerge() {
         
-        final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment fusionner les tronçons ? Si oui, vos modifications seront enregistrées.", ButtonType.YES, ButtonType.NO);
+        final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment fusionner les " + typeName + "s ? Si oui, vos modifications seront enregistrées.", ButtonType.YES, ButtonType.NO);
         confirm.setResizable(true);
         confirm.showAndWait();
         final ButtonType result = confirm.getResult();
@@ -85,7 +93,7 @@ public class FXTronconMerge extends VBox {
                 return false;
             }
             
-            updateTitle("Fusion de tronçons");
+            updateTitle("Fusion de " + typeName + "s");
             updateProgress(0, troncons.size());
             
             final Session session = Injector.getSession();
@@ -96,11 +104,11 @@ public class FXTronconMerge extends VBox {
             try {
                 final StringBuilder sb = new StringBuilder(troncons.get(0).getLibelle());
                 for (int i = 1, n = troncons.size(); i < n; i++) {
-                    if (Thread.currentThread().isInterrupted()) throw new InterruptedException("La fusion de tronçon a été interrompue.");
+                    if (Thread.currentThread().isInterrupted()) throw new InterruptedException("La fusion de " + typeName + " a été interrompue.");
                     
                     final TronconDigue current = troncons.get(i);
                     updateProgress(i, troncons.size());
-                    updateMessage("Ajout du tronçon "+current.getLibelle());
+                    updateMessage("Ajout du " + typeName + " "+current.getLibelle()); // TODO GENDER
                     
                     TronconUtils.mergeTroncon(merge, current, session);
                     sb.append(" + ").append(current.getLibelle());

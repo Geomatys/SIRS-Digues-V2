@@ -93,13 +93,23 @@ public class BorneEditHandler extends AbstractNavigationHandler {
     private final Stage dialog = new Stage();
     private final FXSystemeReperagePane editPane;
 
+    // overriden variable by init();
+    protected String layerName;
+    protected String typeName;
+    
+    protected void init() {
+        this.layerName = CorePlugin.TRONCON_LAYER_NAME;
+        this.typeName = "tronçon";
+        
+    }
 
     public BorneEditHandler(final FXMap map) {
         super();
+        init();
         session = Injector.getSession();
         dialog.getIcons().add(SIRS.ICON);
 
-        editPane = new FXSystemeReperagePane(map);
+        editPane = new FXSystemeReperagePane(map, typeName);
         // Prepare footer to set an "exit" button
         final Button exitButton = new Button("Fermer");
         exitButton.setCancelButton(true);
@@ -215,7 +225,7 @@ public class BorneEditHandler extends AbstractNavigationHandler {
         final MapContext context = cc.getContext();
         for(MapLayer layer : context.layers()){
             layer.setSelectable(false);
-            if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
+            if(layer.getName().equalsIgnoreCase(layerName)){
                 tronconLayer = (FeatureMapLayer) layer;
                 layer.setSelectable(true);
             }else if(layer.getName().equalsIgnoreCase(CorePlugin.BORNE_LAYER_NAME)){

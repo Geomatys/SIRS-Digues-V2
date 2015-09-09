@@ -65,6 +65,7 @@ import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.style.MutableStyleFactory;
+import org.geotoolkit.util.StringUtilities;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.style.LineSymbolizer;
@@ -90,12 +91,23 @@ public class TronconCutHandler extends AbstractNavigationHandler {
     private final FXTronconCut editPane;
     private final FeatureType featureType;
     private final Session session;
+    
+    // overriden variable by init();
+    protected String layerName;
+    protected String typeName;
+    
+    protected void init() {
+        this.layerName = CorePlugin.TRONCON_LAYER_NAME;
+        this.typeName = "tronçon";
+        
+    }
 
     public TronconCutHandler(final FXMap map) {
         super();
+        init();
         session = Injector.getSession();
         geomlayer.setMap2D(map);
-        editPane = new FXTronconCut();
+        editPane = new FXTronconCut(typeName);
 
         //recalcule l'affichage lorsque le tronçon cible change.
         editPane.tronconProperty().addListener(new ChangeListener<TronconDigue>() {
@@ -136,7 +148,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
         }
         if (i >= nbSegments) {
             final Alert choice = new Alert(Alert.AlertType.INFORMATION,
-                    "Êtes-vous sûr ? Tous les morceaux du tronçon sont marqués \"à conserver\". Aucune opération ne sera effectuée.",
+                    "Êtes-vous sûr ? Tous les morceaux du " + typeName + " sont marqués \"à conserver\". Aucune opération ne sera effectuée.", // TODO GENDER
                     ButtonType.NO, ButtonType.YES);
             choice.setResizable(true);
             final Optional result = choice.showAndWait();
@@ -147,7 +159,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
         } else {
             // finish button is bound to troncon property state to avoid null value here.
             final TronconDigue troncon = editPane.tronconProperty().get();
-            final Alert confirmCut = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment découper le tronçon ? Si oui, vos modifications seront enregistrées.", ButtonType.YES, ButtonType.NO);
+            final Alert confirmCut = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment découper le " + typeName + " ? Si oui, vos modifications seront enregistrées.", ButtonType.YES, ButtonType.NO); // TODO GENDER
             confirmCut.setResizable(true);
             confirmCut.showAndWait();
             final ButtonType result = confirmCut.getResult();
@@ -156,7 +168,8 @@ public class TronconCutHandler extends AbstractNavigationHandler {
                         troncon,
                         // defensive copies
                         FXCollections.observableArrayList(editPane.getCutpoints()),
-                        FXCollections.observableArrayList(segments)
+                        FXCollections.observableArrayList(segments),
+                        typeName
                 ));
 
                 submitted.setOnFailed(event -> {
@@ -175,7 +188,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
                 // TODO : show a popup on success.
                 submitted.setOnSucceeded(event -> {
                     final Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                            "Le découpage du tronçon \"" + troncon.getLibelle() + "\" s'est terminé avec succcès.",
+                            "Le découpage du " + typeName + " \"" + troncon.getLibelle() + "\" s'est terminé avec succcès.", // TODO GENDER
                             ButtonType.OK);
                     alert.setResizable(true);
                     alert.showAndWait();
@@ -212,7 +225,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
     private void installDialog() {
         dialog = new Stage();
         dialog.getIcons().add(SIRS.ICON);
-        dialog.setTitle("Découpage de tronçon");
+        dialog.setTitle("Découpage de " + typeName);
         dialog.setResizable(true);
         dialog.initModality(Modality.NONE);
         dialog.initOwner(map.getScene().getWindow());
@@ -265,7 +278,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
         final MapContext context = cc.getContext();
         for(MapLayer layer : context.layers()){
             layer.setSelectable(false);
-            if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
+            if(layer.getName().equalsIgnoreCase(layerName)){
                 tronconLayer = (FeatureMapLayer) layer;
                 layer.setSelectable(true);
             }
@@ -384,24 +397,26 @@ public class TronconCutHandler extends AbstractNavigationHandler {
         private final TronconDigue toCut;
         private final ObservableList<FXTronconCut.CutPoint> cutpoints;
         private final ObservableList<FXTronconCut.Segment> segments;
+        private final String typeName;
 
         public CutTask(final TronconDigue toCut,
                 final ObservableList<FXTronconCut.CutPoint> cutpoints,
-                final ObservableList<FXTronconCut.Segment> segments) {
+                final ObservableList<FXTronconCut.Segment> segments, final String typeName) {
             this.toCut = toCut;
             this.cutpoints = cutpoints;
             this.segments = segments;
+            this.typeName = typeName;
         }
 
         @Override
         protected Boolean call() throws Exception {
-            updateTitle("Découpage de tronçon");
+            updateTitle("Découpage de " + typeName);
 
             if (toCut == null || cutpoints.isEmpty() || segments.isEmpty()) {
                 return false;
             }
 
-            updateMessage("Tronçon "+toCut.getLibelle());
+            updateMessage(StringUtilities.firstToUpper(typeName) + " " + toCut.getLibelle());
 
             final Session session = Injector.getSession();
             TronconDigue aggregate = null;
