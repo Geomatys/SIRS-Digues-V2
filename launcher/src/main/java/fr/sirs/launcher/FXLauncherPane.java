@@ -11,10 +11,8 @@ import fr.sirs.Plugins;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.binaryMD5;
 import static fr.sirs.SIRS.hexaMD5;
-import static fr.sirs.core.SirsCore.LOGGER;
 
 import fr.sirs.Session;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.core.component.DatabaseRegistry;
@@ -39,9 +37,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
 import java.text.Normalizer;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -565,7 +561,7 @@ public class FXLauncherPane extends BorderPane {
 
                 final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
                 createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());
-                
+
                 final DbImporter importer = new DbImporter(appCtx);
                 try(final Database mainDb = DatabaseBuilder.open(mainDbFile);
                     final Database cartoDb = DatabaseBuilder.open(cartoDbFile)){
@@ -1036,9 +1032,12 @@ public class FXLauncherPane extends BorderPane {
      * Rewrite text to replace or remove all unsupported characters in database name.
      * Multiple steps :
      * - Replace all letters with accent by their equivalent without accent
+     * - Ensure database name starts with a letter
      * - Replace all spacing characters with an underscore
      * - Remove all other non-standard characters
      * - convert to lower case.
+     *
+     * See {@link https://wiki.apache.org/couchdb/HTTP_database_API#Naming_and_Addressing}
      */
     private static class DatabaseNameFormatter implements ChangeListener<String> {
         @Override
@@ -1046,9 +1045,10 @@ public class FXLauncherPane extends BorderPane {
                 if (newValue == null) return;
                 final String nfdText = Normalizer.normalize(newValue, Normalizer.Form.NFD);
                 ((WritableValue) observable).setValue(nfdText
+                        .replaceFirst("^[^A-Za-z]+", "")
                         .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
                         .replaceAll("\\s+", "_")
-                        .replaceAll("[^\\w\\d_-]", "")
+                        .replaceAll("[^\\w\\d_\\-\\$+\\(\\)]", "")
                         .toLowerCase()
                 );
             }
