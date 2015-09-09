@@ -238,8 +238,8 @@ public class SessionCore implements ApplicationContextAware {
             final Thread statDaemon = new Thread(() -> {
                 final Thread t = Thread.currentThread();
                 while (!t.isInterrupted()) {
-                    SirsCore.LOGGER.info(pool.getTotalStats().toString());
-                    SirsCore.LOGGER.info("Watched resources : "+ClosingDaemon.referenceCache.size());
+                    SirsCore.LOGGER.fine(pool.getTotalStats().toString());
+                    SirsCore.LOGGER.fine("Watched resources : "+ClosingDaemon.referenceCache.size());
                     try {
                         Thread.sleep(5000);
                     } catch (InterruptedException ex) {
