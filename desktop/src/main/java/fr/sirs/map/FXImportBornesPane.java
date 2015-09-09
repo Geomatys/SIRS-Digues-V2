@@ -99,9 +99,15 @@ public class FXImportBornesPane extends BorderPane {
 
     private FeatureMapLayer loadedData;
     private FeatureCollection selection;
+    
+    private final String typeName;
+    private final Class<? extends TronconDigue> typeClass;
 
-    public FXImportBornesPane() {
+    public FXImportBornesPane(final String typeName, final Class typeClass) {
         SIRS.loadFXML(this);
+        
+        this.typeName  = typeName;
+        this.typeClass = typeClass;
 
         final SirsStringConverter stringConverter = new SirsStringConverter();
         uiCRS.setItems(FXCollections.observableArrayList(Injector.getSession().getProjection(), CRS_WGS84));
@@ -130,7 +136,7 @@ public class FXImportBornesPane extends BorderPane {
         uiImportButton.setDisable(true);
         
         uiTronconBox.setItems(FXCollections.observableList(
-                Injector.getSession().getPreviews().getByClass(TronconDigue.class)));
+                Injector.getSession().getPreviews().getByClass(typeClass)));
         uiTronconBox.setConverter(stringConverter);
         uiTronconBox.valueProperty().addListener(this::updateSrList);
 
@@ -141,7 +147,7 @@ public class FXImportBornesPane extends BorderPane {
             uiSRBox.setItems(FXCollections.emptyObservableList());
         } else {
             final fr.sirs.Session session = Injector.getSession();
-            final TronconDigue troncon = session.getRepositoryForClass(TronconDigue.class).get(newValue.getElementId());
+            final TronconDigue troncon = session.getRepositoryForClass(typeClass).get(newValue.getElementId());
             final List<SystemeReperage> srs = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).getByLinear(troncon);
             uiSRBox.setItems(FXCollections.observableArrayList(srs));
             uiSRBox.getSelectionModel().selectFirst();
@@ -293,7 +299,7 @@ public class FXImportBornesPane extends BorderPane {
 
         final Object selectedTd = uiTronconBox.getSelectionModel().getSelectedItem();
         if (selectedTd == null) {
-            final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Veuillez sélectionner un tronçon.", ButtonType.OK);
+            final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Veuillez sélectionner un " + typeName + ".", ButtonType.OK);
             alert.setResizable(true);
             alert.showAndWait();
             return;
@@ -331,13 +337,13 @@ public class FXImportBornesPane extends BorderPane {
                 final fr.sirs.Session session = Injector.getSession();
 
                 final TronconDigue troncon;
-                final AbstractSIRSRepository<TronconDigue> tdRepo = Injector.getSession().getRepositoryForClass(TronconDigue.class);
+                final AbstractSIRSRepository tdRepo = Injector.getSession().getRepositoryForClass(typeClass);
                 if (selectedTd instanceof TronconDigue) {
                     troncon = (TronconDigue) selectedTd;
                 } else if (selectedTd instanceof Preview) {
-                    troncon = tdRepo.get(((Preview) selectedTd).getDocId());
+                    troncon = (TronconDigue) tdRepo.get(((Preview) selectedTd).getDocId());
                 } else {
-                    throw new IllegalStateException("Unknown object type for parameter Troncon");
+                    throw new IllegalStateException("Unknown object type for parameter " + typeName);
                 }
 
                 final MathTransform trs = CRS.findMathTransform(
@@ -435,8 +441,8 @@ Injector.getSession().getProjection(),
         prefs.put("path", path.getAbsolutePath());
     }
 
-    public static void showImportDialog() {
-        final FXImportBornesPane panel = new FXImportBornesPane();
+    public static void showImportDialog(String typeName, Class typeClass) {
+        final FXImportBornesPane panel = new FXImportBornesPane(typeName, typeClass);
         final Stage dialog = new Stage();
         dialog.setTitle("Import de bornes");
         dialog.getIcons().add(SIRS.ICON);

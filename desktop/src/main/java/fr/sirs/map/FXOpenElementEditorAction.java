@@ -43,7 +43,11 @@ public class FXOpenElementEditorAction extends FXMapAction {
     private static final double POINT_RADIUS = 1;
 
     public FXOpenElementEditorAction(final FXMap map) {
-        super(map, "informations sur l'élément", "Ouvre la fiche du tronçon/structure.", SIRS.ICON_INFO_BLACK_16);
+        this(map, "informations sur l'élément", "Ouvre la fiche du tronçon/structure.");
+    }
+    
+    public FXOpenElementEditorAction(final FXMap map, final String shortText, final String longText) {
+        super(map, shortText, longText, SIRS.ICON_INFO_BLACK_16);
 
         map.getHandlerProperty().addListener(new ChangeListener<FXCanvasHandler>() {
             @Override

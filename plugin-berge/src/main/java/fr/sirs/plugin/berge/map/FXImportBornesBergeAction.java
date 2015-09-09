@@ -1,8 +1,9 @@
-package fr.sirs.map;
+
+package fr.sirs.plugin.berge.map;
 
 import fr.sirs.Injector;
-import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.Berge;
+import fr.sirs.map.FXImportBornesPane;
 import java.awt.Dimension;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -12,16 +13,15 @@ import org.geotoolkit.gui.javafx.render2d.FXMapAction;
 import org.geotoolkit.internal.GeotkFX;
 
 /**
- * Map action to import {@link BorneDigue} into a selected {@link TronconDigue}.
- * 
- * @author Alexis Manin (Geomatys)
+ *
+ * @author guilhem
  */
-public class FXImportBornesAction extends FXMapAction {
+public class FXImportBornesBergeAction extends FXMapAction {
     // For unknown reason, making icon 16*16 as other buttons on toolbar makes it one pixel less tall on screen.
     public static final Image ICON = SwingFXUtils.toFXImage(GeotkFX.getBufferedImage("add-vector", new Dimension(16, 17)), null);
 
         
-    public FXImportBornesAction(FXMap map) {
+    public FXImportBornesBergeAction(FXMap map) {
         super(map, "Importer des bornes",
                 "Import de bornes depuis un fichier Shapefile.", ICON);
         disabledProperty().bind(Injector.getSession().geometryEditionProperty().not());
@@ -29,7 +29,7 @@ public class FXImportBornesAction extends FXMapAction {
     
     @Override
     public void accept(ActionEvent t) {
-        FXImportBornesPane.showImportDialog("tronçon", TronconDigue.class);
+        FXImportBornesPane.showImportDialog("berge", Berge.class);
     }
 
 }

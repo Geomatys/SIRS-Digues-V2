@@ -45,9 +45,9 @@ public class BergeToolBar extends ToolBar {
         butCalc.getStyleClass().add(CENTER);
         final ToggleButton butEditConvert = new ConvertGeomToBergeAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butEditConvert.getStyleClass().add(CENTER);
-        final Button importBornes = new FXImportBornesAction(map).createButton(ActionUtils.ActionTextBehavior.HIDE);
+        final Button importBornes = new FXImportBornesBergeAction(map).createButton(ActionUtils.ActionTextBehavior.HIDE);
         importBornes.getStyleClass().add(CENTER);
-        final ToggleButton butInfo = new FXOpenElementEditorAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
+        final ToggleButton butInfo = new FXOpenElementEditorAction(map, "informations sur l'élément", "Ouvre la fiche de la berge.").createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butInfo.getStyleClass().add(RIGHT);
         
         getItems().add(new HBox(butEditBerge, butCut, butMerge, butEditSr, butCalc, butEditConvert, importBornes, butInfo));
