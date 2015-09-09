@@ -80,7 +80,7 @@ public class ObjectTable extends BorderPane {
 
     private static final String BUTTON_STYLE = "buttonbar-button";
     private static final String[] COLUMNS_TO_IGNORE = new String[] {
-        "documentId", //ElementHit
+        "documentId", "elementClassName", //ElementHit
         "docClass","elementId","elementClass","docId", //Preview
         AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD};
 
@@ -213,7 +213,7 @@ public class ObjectTable extends BorderPane {
                         for(Object o : lst){
                             final Class clazz;
                             if(o instanceof ElementHit){
-                                clazz = ((ElementHit)o).geteElementClass();
+                                clazz = ((ElementHit)o).getElementClass();
                             }else if(o instanceof Preview){
                                 clazz = Class.forName(((Preview)o).getDocClass());
                             }else{
@@ -227,7 +227,7 @@ public class ObjectTable extends BorderPane {
                                         try{
                                             Class candidate = null;
                                             if(o instanceof ElementHit){
-                                                candidate = ((ElementHit)o).geteElementClass();
+                                                candidate = ((ElementHit)o).getElementClass();
                                             }else if(o instanceof Preview){
                                                 candidate = Class.forName(((Preview)o).getDocClass());
                                             }

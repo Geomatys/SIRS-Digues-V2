@@ -1,6 +1,9 @@
 
 package fr.sirs.index;
 
+import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.LabelMapper;
+import java.util.logging.Level;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 
@@ -34,12 +37,20 @@ public final class ElementHit {
     }
 
     public String getElementClassName() {
-        final String[] parts = clazz.split("\\.");
-        return parts[parts.length-1];
+        return clazz;
     }
 
-    public Class geteElementClass() throws ClassNotFoundException {
+    public String getElementClassTitle() {
+        try {
+            return LabelMapper.get(getElementClass()).mapClassName();
+        } catch (Exception e) {
+            SirsCore.LOGGER.log(Level.FINE, "No valid type for found element.", e);
+            return clazz == null || clazz.isEmpty()? "N/A" : clazz.substring(clazz.lastIndexOf('.')+1);
+        }
+    }
+
+    public Class getElementClass() throws ClassNotFoundException {
         return Class.forName(clazz, true, Thread.currentThread().getContextClassLoader());
     }
-    
+
 }
