@@ -3,11 +3,11 @@ package fr.sirs.plugins.mobile;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.Photo;
 import fr.sirs.util.CopyTask;
 import fr.sirs.util.property.SirsPreferences;
 import java.awt.Color;
@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.nio.file.FileStore;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
@@ -207,7 +208,13 @@ public class PhotoImportPane extends StackPane {
         uiDeletePrefixBtn.setText(null);
 
         try {
-            availablePrefixes.addAll(SIRS.listSimpleProperties(Photo.class).values());
+            rootDirProperty.set(SIRS.getDocumentRootPath());
+        } catch (InvalidPathException e) {
+            SirsCore.LOGGER.log(Level.FINE, "Cannot retrieve root directory", e);
+        }
+
+        try {
+            availablePrefixes.addAll(SIRS.listSimpleProperties(AbstractPhoto.class).values());
         } catch (IntrospectionException ex) {
             SIRS.LOGGER.log(Level.WARNING, "Cannot identify available prefixes.", ex);
             uiPrefixTitledPane.setVisible(false);
@@ -601,9 +608,9 @@ public class PhotoImportPane extends StackPane {
             }
 
             final Element e = opt.get();
-            Photo photo = null;
-            if (e instanceof Photo) {
-                photo = (Photo) e;
+            AbstractPhoto photo = null;
+            if (e instanceof AbstractPhoto) {
+                photo = (AbstractPhoto) e;
             } else {
                 // ID does not point on the photo. We'll have to retrieve it by analysing input element, which should contain it.
                 final HashSet<AvecPhotos> photoContainers = new HashSet();
@@ -614,9 +621,9 @@ public class PhotoImportPane extends StackPane {
                 }
 
                 scan:
-                for (final AvecPhotos obs : photoContainers) {
-                    for (final Object o : obs.getPhotos()) {
-                        final Photo p = (Photo) o;
+                for (final AvecPhotos<AbstractPhoto> obs : photoContainers) {
+                    for (final AbstractPhoto o : obs.getPhotos()) {
+                        final AbstractPhoto p = (AbstractPhoto) o;
                         if (p.getChemin().equals(t.getFileName().toString()) || p.getChemin().equals(t.toString())) {
                             photo = p;
                             break scan;
@@ -640,7 +647,7 @@ public class PhotoImportPane extends StackPane {
                         try {
                             nameBuilder.append(readMethod.invoke(photo)).append(separator);
                         } catch (Exception ex) {
-                            warning("Le préfixe "+LabelMapper.mapPropertyName(Photo.class, desc.getName())+" ne peut être ajouté. L'import est annulé.");
+                            warning("Le préfixe "+LabelMapper.mapPropertyName(AbstractPhoto.class, desc.getName())+" ne peut être ajouté. L'import est annulé.");
                             SirsCore.LOGGER.log(Level.WARNING, "Photo import : cannot add following prefix in file name : "+desc.getDisplayName(), ex);
                         }
                     }
@@ -670,7 +677,7 @@ public class PhotoImportPane extends StackPane {
      */
     private static class PrefixCell extends ListCell<PropertyDescriptor> {
 
-        final LabelMapper mapper = LabelMapper.get(Photo.class);
+        final LabelMapper mapper = LabelMapper.get(AbstractPhoto.class);
 
         @Override
         protected void updateItem(PropertyDescriptor item, boolean empty) {
@@ -690,7 +697,7 @@ public class PhotoImportPane extends StackPane {
 
         final WeakHashMap<String, PropertyDescriptor> fromString = new WeakHashMap<>();
 
-        final LabelMapper mapper = LabelMapper.get(Photo.class);
+        final LabelMapper mapper = LabelMapper.get(AbstractPhoto.class);
 
         @Override
         public String toString(PropertyDescriptor object) {
