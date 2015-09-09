@@ -9,7 +9,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.45" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <TabPane fx:id="uiTabPane" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
@@ -168,7 +168,7 @@
                   <GridPane hgap="10.0" vgap="10.0">
                     <columnConstraints>
                       <ColumnConstraints hgrow="SOMETIMES" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints minWidth="10.0" />
                       <ColumnConstraints hgrow="NEVER" />
                     </columnConstraints>
                     <rowConstraints>
@@ -209,6 +209,8 @@
                            <children>
                               <Button fx:id="uiInstallPluginBtn" mnemonicParsing="false" text="Installer" />
                               <Button fx:id="uiDeletePluginBtn" alignment="CENTER_RIGHT" contentDisplay="CENTER" mnemonicParsing="false" text="Supprimer" textAlignment="CENTER" HBox.hgrow="NEVER" />
+                              <BorderPane HBox.hgrow="ALWAYS" />
+                              <Label fx:id="uiDlLbl" maxHeight="1.7976931348623157E308" />
                            </children>
                         </HBox>
                         <ProgressBar fx:id="uiProgressPlugins" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />

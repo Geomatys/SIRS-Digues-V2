@@ -11,6 +11,8 @@ import fr.sirs.Plugins;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.binaryMD5;
 import static fr.sirs.SIRS.hexaMD5;
+import static fr.sirs.core.SirsCore.LOGGER;
+
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeExecption;
@@ -25,6 +27,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
+import fr.sirs.maj.PluginsDownloadManager;
 import fr.sirs.util.FXAuthenticationWalletEditor;
 import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.property.SirsPreferences;
@@ -36,7 +39,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.text.Normalizer;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -183,6 +188,8 @@ public class FXLauncherPane extends BorderPane {
     private Button uiRestartAppBtn;
 
     @FXML
+    private Label uiDlLbl;
+    @FXML
     private ProgressBar uiProgressPlugins;
 
     private URL serverURL;
@@ -234,6 +241,9 @@ public class FXLauncherPane extends BorderPane {
                 uiDeletePluginBtn.setOnAction((ActionEvent event) -> {
                     restartApplicationNeeded();
                     deletePlugin(newValue);
+                    if (!PluginsDownloadManager.INSTANCE.hasPendingDl()) {
+                        uiDlLbl.setText("");
+                    }
                     updatePluginList(null);
                 });
             } else {
@@ -252,27 +262,44 @@ public class FXLauncherPane extends BorderPane {
                 uiInstallPluginBtn.setOnAction((ActionEvent event) -> {
                     restartApplicationNeeded();
                     uiProgressPlugins.setVisible(true);
-                    final Task installTask = SirsCore.getTaskManager().submit(new Thread(() -> {
-                        installPlugin(newValue);
-                    }));
-                    installTask.setOnSucceeded(e -> {
-                        Platform.runLater(() -> {
-                            uiProgressPlugins.setVisible(false);
-                            updatePluginList(null);
+
+                    try {
+                        final URL bundleURL = newValue.bundleURL(serverURL);
+                        final double pluginSizeMo = bundleURL.openConnection().getContentLengthLong() / 1E6;
+                        final Task installTask = new TaskManager.MockTask(new Thread(() -> {
+                            installPlugin(newValue);
+                        }));
+                        PluginsDownloadManager.INSTANCE.addToDlQueue(installTask, pluginSizeMo);
+
+                        installTask.setOnSucceeded(e -> {
+                            PluginsDownloadManager.INSTANCE.finished(installTask);
+                            Platform.runLater(() -> {
+                                if (!PluginsDownloadManager.INSTANCE.hasPendingDl()) {
+                                    uiProgressPlugins.setVisible(false);
+                                    updatePluginList(null);
+                                }
+                            });
                         });
-                    });
-                    installTask.setOnFailed(e -> {
-                        Platform.runLater(() -> {
-                            uiProgressPlugins.setVisible(false);
-                            updatePluginList(null);
+                        installTask.setOnFailed(e -> {
+                            PluginsDownloadManager.INSTANCE.finished(installTask);
+                            Platform.runLater(() -> {
+                                if (!PluginsDownloadManager.INSTANCE.hasPendingDl()) {
+                                    uiProgressPlugins.setVisible(false);
+                                    updatePluginList(null);
+                                }
+                            });
                         });
-                    });
+                    } catch (IOException ex) {
+                        LOGGER.log(Level.INFO, ex.getLocalizedMessage(), ex);
+                        GeotkFX.newExceptionDialog("Erreur à l'installation d'un plugin", ex);
+                    }
                 });
             } else {
                 uiInstallPluginBtn.setDisable(true);
             }
         });
 
+        uiDlLbl.textProperty().bindBidirectional(PluginsDownloadManager.INSTANCE.txtProperty());
         uiProgressPlugins.setVisible(false);
 
         uiRestartAppBtn.setOnAction((ActionEvent event) -> {
@@ -607,15 +634,15 @@ public class FXLauncherPane extends BorderPane {
         }
     }
 
-    private void installPlugin(final PluginInfo input) {
-        final String name = input.getName();
+    private void installPlugin(final PluginInfo pluginInfo) {
+        final String name = pluginInfo.getName();
         Optional<PluginInfo> oldPlugin = local.getPluginInfo(name).findAny();
         if (oldPlugin.isPresent()) {
             deletePlugin(oldPlugin.get());
         }
 
         try {
-            PluginInstaller.install(serverURL, input);
+            PluginInstaller.install(serverURL, pluginInfo);
         } catch (IOException ex) {
             errorLabel.setText("Une erreur inattendue est survenue pendant l'installation du plugin " + name);
             LOGGER.log(Level.SEVERE, "Plugin " + name + " cannot be installed !", ex);
