@@ -94,7 +94,8 @@ public class FXPositionableExplicitMode extends BorderPane implements FXPosition
         return disableProperty;
     }
 
-    private void updateFields(){
+    @Override
+    public void updateFields(){
         reseting = true;
 
         final Positionable pos = posProperty.get();
@@ -111,7 +112,8 @@ public class FXPositionableExplicitMode extends BorderPane implements FXPosition
         reseting = false;
     }
 
-    private void buildGeometry(){
+    @Override
+    public void buildGeometry(){
 
         final String wkt = uiText.getText();
         final WKTReader reader = new WKTReader();
@@ -132,7 +134,6 @@ public class FXPositionableExplicitMode extends BorderPane implements FXPosition
             uiText.getStyleClass().remove("valid");
             uiText.getStyleClass().add("unvalid");
         }
-
     }
 
     private void coordChange(){

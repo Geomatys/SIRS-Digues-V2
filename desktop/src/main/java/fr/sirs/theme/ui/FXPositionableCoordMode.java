@@ -180,7 +180,8 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
         dialog.show();
     }
 
-    private void updateFields(){
+    @Override
+    public void updateFields(){
 
         reseting = true;
 
@@ -230,7 +231,14 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
         reseting = false;
     }
 
-    private void buildGeometry(){
+    @Override
+    public void buildGeometry(){
+
+        final Positionable positionable = posProperty.get();
+
+        // On ne met la géométrie à jour depuis ce panneau que si on est dans son mode.
+        if(!MODE.equals(positionable.getGeometryMode())) return;
+
         // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
         final CoordinateReferenceSystem crs = uiCRSs.getSelectionModel().getSelectedItem();
         if(crs==null) return;
@@ -239,13 +247,13 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
         Point endPoint = null;
         if(uiLongitudeStart.getValue()!=null && uiLatitudeStart.getValue()!=null){
             startPoint = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
-                    uiLongitudeStart.getValue(),uiLatitudeStart.getValue()));
+                    uiLongitudeStart.getValue(), uiLatitudeStart.getValue()));
             JTS.setCRS(startPoint, crs);
         }
 
         if(uiLongitudeEnd.getValue()!=null && uiLatitudeEnd.getValue()!=null){
             endPoint = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(
-                    uiLongitudeEnd.getValue(),uiLatitudeEnd.getValue()));
+                    uiLongitudeEnd.getValue(), uiLatitudeEnd.getValue()));
             JTS.setCRS(endPoint, crs);
         }
 
@@ -253,7 +261,6 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
         if(startPoint==null) startPoint = endPoint;
         if(endPoint==null) endPoint = startPoint;
 
-        final Positionable positionable = posProperty.get();
         final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
         final LineString geometry = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(),startPoint,endPoint);
 

@@ -128,6 +128,9 @@ public class FXPositionablePane extends BorderPane {
                 uiExtraContainer.getChildren().addAll(mode.getExtraButton());
                 mode.disablingProperty().bind(disableFieldsProperty);
                 mode.positionableProperty().bind(posProperty);
+                if(posProperty.get()!=null){
+                    posProperty.get().setGeometryMode(mode.getID());
+                }
             }
         });
         

@@ -162,7 +162,12 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
         return disableProperty;
     }
 
-    private void updateFields(){
+    /**
+     * Cette méthode ne doit s'occuper que de mettre à jour les champs et non
+     * de la mise à jour de l'information géométrique du positionable.
+     */
+    @Override
+    public void updateFields(){
         reseting = true;
 
         final Positionable pos = posProperty.get();
@@ -170,7 +175,6 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
 
         final TronconDigue t = FXPositionableMode.getTronconFromPositionable(pos);
         final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
-        final List<SystemeReperage> srs = srRepo.getByLinear(t);
         final SystemeReperage defaultSR;
         if (pos.getSystemeRepId() != null) {
             defaultSR = srRepo.get(pos.getSystemeRepId());
@@ -181,6 +185,12 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
         }
         uiSRs.setValue(defaultSR);
 
+        /*
+        Init list of bornes and SRs : must be done all the time to allow the user
+        to change/choose the positionable SR and bornes among list elements.
+        */
+        final Map<String, BorneDigue> borneMap = initSRBorneLists(t, defaultSR);
+
         if(mode == null || MODE.equals(mode)){
             //on assigne les valeurs sans changement
             uiAmontStart.setSelected(pos.getBorne_debut_aval());
@@ -190,23 +200,6 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
 
             uiDistanceStart.getValueFactory().setValue(pos.getBorne_debut_distance());
             uiDistanceEnd.getValueFactory().setValue(pos.getBorne_fin_distance());
-
-
-            uiSRs.setItems(FXCollections.observableList(srs));
-            uiSRs.getSelectionModel().select(defaultSR);
-
-            // Init list of bornes
-            final Map<String,BorneDigue> borneMap = new HashMap<>();
-            final ObservableList<BorneDigue> bornes = FXCollections.observableArrayList();
-            if (defaultSR != null) {
-                final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-                for(SystemeReperageBorne srb : defaultSR.systemeReperageBornes){
-                    borneMap.put(srb.getBorneId(), borneRepo.get(srb.getBorneId()));
-                }
-                bornes.addAll(borneMap.values());
-            }
-            uiBorneStart.setItems(bornes);
-            uiBorneEnd.setItems(bornes);
 
             uiBorneStart.valueProperty().set(borneMap.get(pos.borneDebutIdProperty().get()));
             uiBorneEnd.valueProperty().set(borneMap.get(pos.borneFinIdProperty().get()));
@@ -242,10 +235,48 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
         reseting = false;
     }
 
-    private void buildGeometry(){
+    /**
+     * Init SRs, borneStart and borneEnd UI lists.
+     *
+     * Return a map of BorneDigue accessible by their id.
+     *
+     * @param t
+     * @param defaultSR
+     * @return
+     */
+    private Map<String,BorneDigue> initSRBorneLists(final TronconDigue t, final SystemeReperage defaultSR){
+        final List<SystemeReperage> srs = ((SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class)).getByLinear(t);
+        uiSRs.setItems(FXCollections.observableList(srs));
+        uiSRs.getSelectionModel().select(defaultSR);
+
+        // Init list of bornes
+        final Map<String,BorneDigue> borneMap = new HashMap<>();
+        final ObservableList<BorneDigue> bornes = FXCollections.observableArrayList();
+        if (defaultSR != null) {
+            final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
+            for(SystemeReperageBorne srb : defaultSR.systemeReperageBornes){
+                borneMap.put(srb.getBorneId(), borneRepo.get(srb.getBorneId()));
+            }
+            bornes.addAll(borneMap.values());
+        }
+        uiBorneStart.setItems(bornes);
+        uiBorneEnd.setItems(bornes);
+        return borneMap;
+    }
+
+    /**
+     * Cette méthode ne doit s'occuper que de la mise à jour de l'information
+     * géométrique du positionable et non de la mise à jour des champs.
+     */
+    @Override
+    public void buildGeometry(){
+
 
         //sauvegarde des propriétés
         final Positionable positionable = posProperty.get();
+        
+        // On ne met la géométrie à jour depuis ce panneau que si on est dans son mode.
+        if(!MODE.equals(positionable.getGeometryMode())) return;
 
         final SystemeReperage sr = uiSRs.getValue();
         final BorneDigue startBorne = uiBorneStart.getValue();
@@ -262,10 +293,12 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
         final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
         final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
         final LineString geometry = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), positionable, borneRepo);
-
+        
         //sauvegarde de la geometrie
         positionable.geometryModeProperty().set(MODE);
         positionable.geometryProperty().set(geometry);
+        positionable.setPositionDebut(TronconUtils.getPointFromGeometry(positionable.getGeometry(), getSourceLinear(sr), Injector.getSession().getProjection(), false));
+        positionable.setPositionFin(TronconUtils.getPointFromGeometry(positionable.getGeometry(), getSourceLinear(sr), Injector.getSession().getProjection(), true));
     }
 
     private void coordChange(){
@@ -365,6 +398,4 @@ public class FXPositionableLinearMode extends BorderPane implements FXPositionab
             return null;
         }
     }
-
-
 }

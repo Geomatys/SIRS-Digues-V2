@@ -58,6 +58,37 @@ public interface FXPositionableMode {
     }
 
     /**
+     * Méthode de mise à jour des champs.
+     *
+     * Cette méthode doit permettre aux champs de rester à jour lorsque l'
+     * information géométrique du positionable est modifiée.
+     *
+     * Mais elle n'est pas chargée elle-même de modifier l'information
+     * géométrique.
+     */
+    void updateFields();
+
+    /**
+     * Méthode de mise à jour de la géométrie.
+     *
+     * Cette méthode doit permettre à la géométrie de rester à jour avec les
+     * champs. Elle doit pour cela veiller que la modification des champs ait
+     * bien eu lieu depuis le mode courant car sinon des modifications en boucle
+     * risquent de se produire, par exemple :
+     *
+     * modification d'un champ dans le mode A
+     * -> mise à jour de la géométrie
+     * -> modification d'un champ dans le mode B pour préserver la cohérence de
+     * l'affichage avec la géométrie modifiée depuis le mode A.
+     * -> mise à jour de la géométrie (si on n'a pas vérifié qu'on n'est pas en
+     * mode B)
+     * -> modification d'un champ dans le mode A pour présernver la cohérence de
+     * l'affichage avec la géométrie modifiée depuis le mode B.
+     * -> etc.
+     */
+    void buildGeometry();
+
+    /**
      * Searche recursively the troncon of the positionable.
      *
      * @param pos

@@ -215,7 +215,8 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
         return disableProperty;
     }
 
-    private void updateFields(){
+    @Override
+    public void updateFields(){
         reseting = true;
 
         final PositionableVegetation pos = posProperty.get();
@@ -311,7 +312,8 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
         reseting = false;
     }
 
-    private void buildGeometry(){
+    @Override
+    public void buildGeometry(){
 
         //sauvegarde des propriétés
         final ZoneVegetation positionable = (ZoneVegetation) posProperty.get();
@@ -566,13 +568,10 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
         while(coords.size()<4){
             coords.add(new Coordinate(coords.get(0)));
         }
-
-
+        
         final Polygon polygon = GO2Utilities.JTS_FACTORY.createPolygon(coords.toArray(new Coordinate[0]));
         polygon.setSRID(linear.getSRID());
         polygon.setUserData(linear.getUserData());
         return polygon;
     }
-
-
 }

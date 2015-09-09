@@ -26,6 +26,8 @@ import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.referencing.CRS;
+import org.geotoolkit.referencing.LinearReferencing.ProjectedPoint;
+import org.geotoolkit.referencing.LinearReferencing.SegmentInfo;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -49,6 +51,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import org.geotoolkit.referencing.LinearReferencing;
 import org.geotoolkit.util.collection.CloseableIterator;
+
 
 /**
  * A set of utility methods for manipulation of geometries of {@link Positionable}
@@ -935,6 +938,38 @@ public class TronconUtils {
     }
 
     /**
+     * Calcule un point à partir de l'information sur la distance à une borne.
+     *
+     * @param borneId
+     * @param distance
+     * @param amontAval
+     * @param tronconSegments
+     * @param borneRepo
+     * @return
+     */
+    public static Point getPointFromBorne(final String borneId, final double distance, final boolean amontAval, final SegmentInfo[] tronconSegments, final AbstractSIRSRepository<BorneDigue> borneRepo){
+        final Point bornePoint = borneRepo.get(borneId).getGeometry();
+        double dist = distance;
+        if (amontAval) {
+            dist *= -1;
+        }
+        return LinearReferencingUtilities.computeCoordinate(tronconSegments, bornePoint, dist, 0);
+    }
+
+    public static Point getPointFromGeometry(final Geometry geometry, final SegmentInfo[] linearSegments, final CoordinateReferenceSystem crs, final boolean endPoint){
+            Geometry geom = geometry;
+            if(!(geom instanceof LineString)){
+                geom = LinearReferencing.project(linearSegments, geom);
+            }
+            final Coordinate[] coords = geom.getCoordinates();
+            // Which point : first or last ?
+            final int index = endPoint ? coords.length-1 : 0;
+            final Point point = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(coords[index]));
+            JTS.setCRS(point, crs);
+            return point;
+        }
+
+    /**
      * Utility object for manipulation of spatial information of a {@link Positionable} object.
      */
     public static final class PosInfo {
@@ -1036,34 +1071,14 @@ public class TronconUtils {
             if (point == null) {
                 if (pos.getBorneDebutId() != null) {
                     //calcule a partir des bornes
-                    final Point bornePoint = session.getRepositoryForClass(BorneDigue.class).get(pos.getBorneDebutId()).getGeometry();
-                    double dist = pos.getBorne_debut_distance();
-                    if (pos.getBorne_debut_aval()) {
-                        dist *= -1;
-                    }
-                    point = LinearReferencingUtilities.computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
-
+                    point = getPointFromBorne(pos.getBorneDebutId(), pos.getBorne_debut_distance(), pos.getBorne_debut_aval());
                 } else if (pos.getPositionFin() != null) {
                     point = pos.getPositionFin();
-
                 } else if (pos.getBorneFinId() != null) {
-                    final Point bornePoint = session.getRepositoryForClass(BorneDigue.class).get(pos.getBorneFinId()).getGeometry();
-                    double dist = pos.getBorne_fin_distance();
-                    if (pos.getBorne_fin_aval()) {
-                        dist *= -1;
-                    }
-                    point = LinearReferencingUtilities.computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
-
+                    point = getPointFromBorne(pos.getBorneFinId(), pos.getBorne_fin_distance(), pos.getBorne_fin_aval());
                 } else {
                     //we extract point from the geometry
-                    Geometry geom = pos.getGeometry();
-                    if(!(geom instanceof LineString)){
-                        geom = LinearReferencing.project(getTronconSegments(false), geom);
-                    }
-                    final Coordinate[] coords = geom.getCoordinates();
-                    point = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(coords[0]));
-                    final CoordinateReferenceSystem crs = session.getProjection();
-                    JTS.setCRS(point, crs);
+                    point = getPointFromGeometry(false);
                 }
             }
             return point;
@@ -1090,6 +1105,25 @@ public class TronconUtils {
         }
 
         /**
+         * Calcule un point à partir de l'information sur la distance à une borne.
+         * @param borneId
+         * @param distance
+         * @param amontAval
+         * @return
+         */
+        private Point getPointFromBorne(final String borneId, final double distance, final boolean amontAval){
+            return TronconUtils.getPointFromBorne(borneId, distance, amontAval, getTronconSegments(false), session.getRepositoryForClass(BorneDigue.class));
+        }
+
+        /**
+         *
+         * @return
+         */
+        private Point getPointFromGeometry(final boolean endPoint){
+            return TronconUtils.getPointFromGeometry(pos.getGeometry(), linearSegments, session.getProjection(), endPoint);
+        }
+
+        /**
          * Get input Positionable end point in native CRS. If it does not exist,
          * it's computed from linear position of the Positionable.
          * @return A point, never null.
@@ -1101,34 +1135,13 @@ public class TronconUtils {
             if (point == null) {
                 if (pos.getBorneFinId() != null) {
                     //calcule a partir des bornes
-                    final Point bornePoint = session.getRepositoryForClass(BorneDigue.class).get(pos.getBorneFinId()).getGeometry();
-                    double dist = pos.getBorne_fin_distance();
-                    if (pos.getBorne_fin_aval()) {
-                        dist *= -1;
-                    }
-                    point = LinearReferencingUtilities.computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
-
+                    point = getPointFromBorne(pos.getBorneFinId(), pos.getBorne_fin_distance(), pos.getBorne_fin_aval());
                 } else if (pos.getPositionDebut() != null) {
                     point = pos.getPositionDebut();
-
                 } else if (pos.getBorneDebutId() != null) {
-                    final Point bornePoint = session.getRepositoryForClass(BorneDigue.class).get(pos.getBorneDebutId()).getGeometry();
-                    double dist = pos.getBorne_debut_distance();
-                    if (pos.getBorne_debut_aval()) {
-                        dist *= -1;
-                    }
-                    point = LinearReferencingUtilities.computeCoordinate(getTronconSegments(false), bornePoint, dist, 0);
-
+                    point = getPointFromBorne(pos.getBorneDebutId(), pos.getBorne_debut_distance(), pos.getBorne_debut_aval());
                 } else {
-                    //we extract point from the geometry
-                    Geometry geom = pos.getGeometry();
-                    if(!(geom instanceof LineString)){
-                        geom = LinearReferencing.project(linearSegments, geom);
-                    }
-                    final Coordinate[] coords = geom.getCoordinates();
-                    point = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(coords[coords.length-1]));
-                    final CoordinateReferenceSystem crs = session.getProjection();
-                    JTS.setCRS(point, crs);
+                    point = getPointFromGeometry(true);
                 }
             }
             return point;
