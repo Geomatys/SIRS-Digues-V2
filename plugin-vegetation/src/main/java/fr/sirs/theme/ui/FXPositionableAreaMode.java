@@ -78,7 +78,7 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
     @FXML private Spinner<Double> uiEndNear;
     @FXML private Spinner<Double> uiEndFar;
 
-    //label a caché si c'est un ponctuel
+    // Libellés à cacher si c'est un ponctuel
     @FXML private Label lblFin;
     @FXML private Label lblStartFar;
     @FXML private Label lblEndNear;

@@ -11,8 +11,6 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -53,6 +51,7 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
         references.fichableProperty().set(false);
         references.detaillableProperty().set(false);
         references.searchableProperty().set(false);
+        references.commentAndPhotoProperty().set(false);
         this.setCenter(references);
     }
     

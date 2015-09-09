@@ -6,51 +6,54 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
+import static fr.sirs.core.LinearReferencingUtilities.asLineString;
+import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
+import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.AbstractPositionDocument;
+import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Element;
+import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.StreamingIterable;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.referencing.CRS;
+import org.geotoolkit.referencing.LinearReferencing;
 import org.geotoolkit.referencing.LinearReferencing.ProjectedPoint;
 import org.geotoolkit.referencing.LinearReferencing.SegmentInfo;
+import static org.geotoolkit.referencing.LinearReferencing.buildSegments;
+import static org.geotoolkit.referencing.LinearReferencing.computeRelative;
+import static org.geotoolkit.referencing.LinearReferencing.projectReference;
+import org.geotoolkit.util.collection.CloseableIterator;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
-
-import static fr.sirs.core.LinearReferencingUtilities.*;
-import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.AbstractPositionDocument;
-import fr.sirs.core.model.AvecForeignParent;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.GardeTroncon;
-import fr.sirs.core.model.Photo;
-import fr.sirs.core.model.ProprieteTroncon;
-import fr.sirs.util.StreamingIterable;
-import java.util.AbstractMap;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.TreeMap;
-import java.util.logging.Level;
-import org.geotoolkit.referencing.LinearReferencing;
-import org.geotoolkit.util.collection.CloseableIterator;
 
 
 /**
@@ -1120,7 +1123,7 @@ public class TronconUtils {
          * @return
          */
         private Point getPointFromGeometry(final boolean endPoint){
-            return TronconUtils.getPointFromGeometry(pos.getGeometry(), linearSegments, session.getProjection(), endPoint);
+            return TronconUtils.getPointFromGeometry(pos.getGeometry(), getTronconSegments(false), session.getProjection(), endPoint);
         }
 
         /**

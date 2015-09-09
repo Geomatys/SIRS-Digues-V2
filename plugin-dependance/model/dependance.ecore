@@ -67,6 +67,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="chemin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="photographeId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Contact"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DesordreDependance">
     <eAnnotations source="couchDBDocument"/>
