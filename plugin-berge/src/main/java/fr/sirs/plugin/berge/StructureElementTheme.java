@@ -1,7 +1,11 @@
 
 package fr.sirs.plugin.berge;
 
-import fr.sirs.core.model.VoieAcces;
+import fr.sirs.core.model.EpiBerge;
+import fr.sirs.core.model.OuvrageRevancheBerge;
+import fr.sirs.core.model.PiedBerge;
+import fr.sirs.core.model.SommetRisbermeBerge;
+import fr.sirs.core.model.TalusDigueBerge;
 import fr.sirs.plugin.berge.ui.AbstractDescriptionPane;
 import fr.sirs.plugin.berge.util.TabContent;
 import java.util.ArrayList;
@@ -23,11 +27,11 @@ public class StructureElementTheme extends AbstractDescriptionTheme {
     @Override
     public Parent createPane() {
         List<TabContent> content = new ArrayList<>();
-        content.add(new TabContent("Sommet", "Tableau des sommets", VoieAcces.class)); // TODO set good class
-        content.add(new TabContent("Talus", "Tableau des talus", VoieAcces.class)); // TODO set good class
-        content.add(new TabContent("Pieds de berge", "Tableau des pieds de berge", VoieAcces.class)); // TODO set good class
-        content.add(new TabContent("Epis", "Tableau des épis", VoieAcces.class)); // TODO set good class
-        content.add(new TabContent("Ouvrage de revanche", "Tableau des ouvrage de revanche", VoieAcces.class)); // TODO set good class
+        content.add(new TabContent("Sommet", "Tableau des sommets", SommetRisbermeBerge.class));
+        content.add(new TabContent("Talus", "Tableau des talus", TalusDigueBerge.class));
+        content.add(new TabContent("Pieds de berge", "Tableau des pieds de berge", PiedBerge.class));
+        content.add(new TabContent("Epis", "Tableau des épis", EpiBerge.class));
+        content.add(new TabContent("Ouvrage de revanche", "Tableau des ouvrage de revanche", OuvrageRevancheBerge.class));
         
         final BorderPane borderPane = new AbstractDescriptionPane(content);
         return borderPane;
