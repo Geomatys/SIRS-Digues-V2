@@ -553,7 +553,7 @@ public class FXLauncherPane extends BorderPane {
 
         uiImportButton.setDisable(true);
         new Thread(() -> {
-            try (ConfigurableApplicationContext appCtx = localRegistry.connectToSirsDatabase(dbName, true, false, true)) {
+            try (ConfigurableApplicationContext appCtx = localRegistry.connectToSirsDatabase(dbName, true, false, false)) {
                 final File mainDbFile = new File(uiImportDBData.getText());
                 final File cartoDbFile = new File(uiImportDBCarto.getText());
                 SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
@@ -562,9 +562,9 @@ public class FXLauncherPane extends BorderPane {
                 final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
                 createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());
 
-                final DbImporter importer = new DbImporter(appCtx);
                 try(final Database mainDb = DatabaseBuilder.open(mainDbFile);
                     final Database cartoDb = DatabaseBuilder.open(cartoDbFile)){
+                    final DbImporter importer = new DbImporter(appCtx);
                     importer.setDatabase(mainDb, cartoDb, uiImportCRS.crsProperty().get());
                     importer.importation(cartoDbFile);
                 }
