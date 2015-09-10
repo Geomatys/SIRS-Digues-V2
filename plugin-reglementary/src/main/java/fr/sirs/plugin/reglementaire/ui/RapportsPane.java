@@ -1,6 +1,7 @@
 
 package fr.sirs.plugin.reglementaire.ui;
 
+import com.vividsolutions.jts.geom.LineString;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.AUTHOR_FIELD;
@@ -13,8 +14,11 @@ import static fr.sirs.SIRS.LONGITUDE_MAX_FIELD;
 import static fr.sirs.SIRS.LONGITUDE_MIN_FIELD;
 import static fr.sirs.SIRS.VALID_FIELD;
 import fr.sirs.Session;
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.component.Previews;
@@ -39,6 +43,7 @@ import fr.sirs.core.model.RefTypeObligationReglementaire;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.SectionTypeObligationReglementaire;
 import fr.sirs.core.model.SystemeEndiguement;
+import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TemplateOdt;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugin.reglementaire.ODTUtils;
@@ -49,6 +54,7 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -113,6 +119,7 @@ import org.geotoolkit.db.h2.H2FeatureStore;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.NamesExt;
 import org.geotoolkit.internal.GeotkFX;
+import org.geotoolkit.referencing.LinearReferencing;
 import org.geotoolkit.util.FileUtilities;
 import org.odftoolkit.simple.TextDocument;
 import org.odftoolkit.simple.style.Font;
@@ -181,7 +188,7 @@ public class RapportsPane extends BorderPane implements Initializable {
         uiTroncons.setCellFactory(new Callback<ListView<TronconDigue>, ListCell<TronconDigue>>() {
             @Override
             public ListCell<TronconDigue> call(ListView<TronconDigue> param) {
-                return new ListCell(){
+                return new ListCell() {
                     @Override
                     protected void updateItem(Object item, boolean empty) {
                         super.updateItem(item, empty);
@@ -193,13 +200,13 @@ public class RapportsPane extends BorderPane implements Initializable {
 
         uiSystemEndiguement.setConverter(new SirsStringConverter());
         uiSystemEndiguement.setItems(FXCollections.observableArrayList(
-            previewRepository.getByClass(SystemeEndiguement.class)));
+                previewRepository.getByClass(SystemeEndiguement.class)));
         if(uiSystemEndiguement.getItems()!=null){
             uiSystemEndiguement.getSelectionModel().select(0);
         }
 
         SIRS.initCombo(uiType, FXCollections.observableArrayList(
-            previewRepository.getByClass(RefTypeObligationReglementaire.class)), null);
+                previewRepository.getByClass(RefTypeObligationReglementaire.class)), null);
         if(uiType.getItems()!=null){
             uiType.getSelectionModel().select(0);
         }
@@ -232,10 +239,23 @@ public class RapportsPane extends BorderPane implements Initializable {
 
     private void tronconSelectionChange(ListChangeListener.Change<? extends TronconDigue> c){
         final ObservableList<TronconDigue> selectedItems = uiTroncons.getSelectionModel().getSelectedItems();
-        if(selectedItems.size()==1){
+        if (selectedItems.size() == 1) {
+            final TronconDigue troncon = selectedItems.get(0);
+            final LineString lineTroncon = LinearReferencing.asLineString(troncon.getGeometry());
+            final LinearReferencing.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(lineTroncon);
+            final SystemeReperage sr = Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(troncon.getSystemeRepDefautId());
+            final BorneDigueRepository borneRepo = InjectorCore.getBean(BorneDigueRepository.class);
+
+            final float prDebVal = TronconUtils.computePR(segments, sr, lineTroncon.getStartPoint(), borneRepo);
+            uiPrDebut.getValueFactory().setValue(new BigDecimal(prDebVal).doubleValue());
+            final float prFinVal = TronconUtils.computePR(segments, sr, lineTroncon.getEndPoint(), borneRepo);
+            uiPrFin.getValueFactory().setValue(new BigDecimal(prFinVal).doubleValue());
+
             uiPrDebut.setDisable(false);
             uiPrFin.setDisable(false);
         }else{
+            uiPrDebut.getValueFactory().setValue(0d);
+            uiPrFin.getValueFactory().setValue(0d);
             uiPrDebut.setDisable(true);
             uiPrFin.setDisable(true);
         }
