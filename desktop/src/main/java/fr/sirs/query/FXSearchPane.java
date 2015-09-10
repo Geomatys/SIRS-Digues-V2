@@ -36,11 +36,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -52,6 +53,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Alert;
@@ -61,6 +63,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
@@ -78,9 +81,11 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.sis.storage.DataStoreException;
 import org.elasticsearch.action.search.SearchResponse;
@@ -166,7 +171,13 @@ public class FXSearchPane extends BorderPane {
     private final Session session;
 
     private H2FeatureStore h2Store;
-    
+
+    /**
+     * Définit s'il est nécessaire de lancer le processus d'export RDBMS pour pouvoir faire
+     * des recherches SQL, ou s'il a été déjà lancé.
+     */
+    private static ObjectProperty<Boolean> needsSQLExportProperty = new SimpleObjectProperty<>(true);
+
     public FXSearchPane() {
         SIRS.loadFXML(this);
         session = Injector.getSession();
@@ -180,8 +191,16 @@ public class FXSearchPane extends BorderPane {
         final ToggleGroup group = new ToggleGroup();
         uiToggleSimple.setToggleGroup(group);
         uiToggleSQL.setToggleGroup(group);
+        uiToggleSQL.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            if (newValue && needsSQLExportProperty.get()) {
+                showPopupForRDBMSExport(group);
+            }
+
+        });
         group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
-            if (newValue == null) group.selectToggle(oldValue);
+            if (newValue == null) {
+                group.selectToggle(oldValue);
+            }
         });
         
         final List<Class<? extends Element>> modelClasses = Session.getElements();
@@ -231,13 +250,13 @@ public class FXSearchPane extends BorderPane {
             if (newValue == null) simpleRadio.selectToggle(oldValue);
         });
         
-        uiSQLPane.visibleProperty().bind(uiToggleSQL.selectedProperty());
+        uiSQLPane.visibleProperty().bind(uiToggleSQL.selectedProperty().and(needsSQLExportProperty.isEqualTo(false)));
         uiSQLPane.managedProperty().bind(uiSQLPane.visibleProperty());
         
-        uiSQLModelOptions.visibleProperty().bind(uiToggleSQL.selectedProperty());
+        uiSQLModelOptions.visibleProperty().bind(uiToggleSQL.selectedProperty().and(needsSQLExportProperty.isEqualTo(false)));
         uiSQLModelOptions.managedProperty().bind(uiSQLModelOptions.visibleProperty());
         
-        uiSQLQueryOptions.visibleProperty().bind(uiToggleSQL.selectedProperty());
+        uiSQLQueryOptions.visibleProperty().bind(uiToggleSQL.selectedProperty().and(needsSQLExportProperty.isEqualTo(false)));
         uiSQLQueryOptions.managedProperty().bind(uiSQLQueryOptions.visibleProperty());
         
         uiCancel.visibleProperty().bind(new BooleanBinding() {
@@ -277,11 +296,11 @@ public class FXSearchPane extends BorderPane {
         uiDesignationPane.managedProperty().bind(uiDesignationPane.visibleProperty());
         
         final SimpleBooleanProperty isAdmin = new ReadOnlyBooleanWrapper(Role.ADMIN.equals(Injector.getSession().getRole()));
-        uiAdminOptions.visibleProperty().bind(uiToggleSQL.selectedProperty().and(isAdmin));
+        uiAdminOptions.visibleProperty().bind(uiToggleSQL.selectedProperty().and(isAdmin).and(needsSQLExportProperty.isEqualTo(false)));
         uiAdminOptions.managedProperty().bind(uiAdminOptions.visibleProperty());
         
         // TODO : change binding to make it visible if selected result is positionable or has geometry ?
-        uiCarto.visibleProperty().bind(uiToggleSQL.selectedProperty());
+        uiCarto.visibleProperty().bind(uiToggleSQL.selectedProperty().and(needsSQLExportProperty.isEqualTo(false)));
         uiCarto.managedProperty().bind(uiCarto.visibleProperty());
         
         // TOOLTIPS
@@ -357,11 +376,11 @@ public class FXSearchPane extends BorderPane {
                 sqlHelpers[i] = tmpHelper;
             }
         }
-                
+
         Task t = H2Helper.init(sqlHelpers);
         t.setOnSucceeded(e -> {
             connectToH2Store().setOnSucceeded(e2 -> Platform.runLater(() -> uiRefreshModel.setDisable(false)));
-        
+
         });
         t.setOnFailed(e -> Platform.runLater(() -> uiRefreshModel.setDisable(false)));
 //        uiRefreshModel.setDisable(false);
@@ -369,19 +388,19 @@ public class FXSearchPane extends BorderPane {
     
     private Task connectToH2Store() {
         //h2 connection
-        Task<ObservableList> h2Names = TaskManager.INSTANCE.submit("Connexion à la base de données", ()-> {
+        Task<ObservableList> h2Names = TaskManager.INSTANCE.submit("Connexion à la base de données", () -> {
             h2Store = (H2FeatureStore) H2Helper.getStore(session.getConnector());
-            
+
             final Set<GenericName> names = h2Store.getNames();
             final ObservableList observableNames = FXCollections.observableArrayList();
-            for(GenericName n : names) observableNames.add(n.tip().toString());
+            for (GenericName n : names) observableNames.add(n.tip().toString());
             Collections.sort(observableNames);
-            
+
             SIRS.LOGGER.fine("RDBMS CONNEXION FINISHED");
             return observableNames;
         });
         
-        h2Names.setOnSucceeded((WorkerStateEvent e) -> Platform.runLater(()-> uiTableChoice.setItems(h2Names.getValue())));
+        h2Names.setOnSucceeded((WorkerStateEvent e) -> Platform.runLater(() -> uiTableChoice.setItems(h2Names.getValue())));
         return h2Names;
     }
     
@@ -533,7 +552,90 @@ public class FXSearchPane extends BorderPane {
     private String getCurrentSQLQuery() throws DataStoreException {
         return uiSQLText.getText().trim();
     }
-    
+
+    /**
+     * Affichage d'une popup de confirmation signalant que le processus d'export RDBMS peut être long.
+     */
+    private void showPopupForRDBMSExport(final ToggleGroup group) {
+        final Stage stage = new Stage();
+        stage.getIcons().add(SIRS.ICON);
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setAlwaysOnTop(true);
+        stage.setTitle("Initialisation de la recherche");
+
+        final Button okButton = new Button("Valider");
+        final Button cancelButton = new Button("Annuler");
+        final HBox hboxBtn = new HBox(cancelButton, okButton);
+        hboxBtn.setSpacing(10);
+        hboxBtn.setAlignment(Pos.CENTER_RIGHT);
+
+        final GridPane gridPane = new GridPane();
+        gridPane.setVgap(5);
+        gridPane.setPadding(new Insets(10, 10, 20, 10));
+
+        gridPane.add(new Label("La recherche nécessite une étape de préparation qui peut"), 0, 0);
+        gridPane.add(new Label("prendre de quelques secondes à plusieurs minutes sur des"), 0, 1);
+        gridPane.add(new Label("configurations modestes. Voulez vous continuer ?"), 0, 2);
+        gridPane.add(hboxBtn, 0, 6);
+
+        cancelButton.setOnAction(e -> {
+            final ObservableList<Toggle> toggles = group.getToggles();
+            for (final Toggle toggle : toggles) {
+                if (!toggle.isSelected()) {
+                    // On sélectionne l'autre onglet, vu que l'on souhaite annuler le chargement de la base SQL.
+                    group.selectToggle(toggle);
+                    break;
+                }
+            }
+            stage.close();
+        });
+        okButton.setOnAction(e -> {
+            final ProgressBar progressBar = new ProgressBar();
+            progressBar.setPrefWidth(300);
+            final Label progressLabel = new Label();
+            final VBox vboxProgress = new VBox(progressLabel, progressBar);
+            vboxProgress.setAlignment(Pos.CENTER);
+
+            gridPane.getChildren().remove(hboxBtn);
+            gridPane.add(vboxProgress, 0, 6);
+
+            final Task task = couchDbToSql();
+            task.setOnSucceeded(stateEvent -> {
+                needsSQLExportProperty.setValue(false);
+                stage.close();
+            });
+
+            task.setOnFailed(stEvent -> {
+                progressLabel.textProperty().unbind();
+                progressLabel.setText("Une erreur est survenue pendant le chargement de la base.");
+            });
+
+            progressLabel.textProperty().bind(task.messageProperty());
+            progressBar.progressProperty().bind(task.progressProperty());
+        });
+
+        final Scene scene = new Scene(gridPane);
+        stage.setScene(scene);
+        stage.showAndWait();
+    }
+
+    private Task couchDbToSql() {
+        final Plugin[] plugins = Plugins.getPlugins();
+        final SQLHelper[] sqlHelpers = new SQLHelper[plugins.length];
+
+        for (int i=0; i<sqlHelpers.length; i++) {
+            sqlHelpers[i] = plugins[i].getSQLHelper();
+
+            //Il faut mettre le helper du coeur en premier !
+            if(plugins[i] instanceof CorePlugin && i!=0){
+                final SQLHelper tmpHelper = sqlHelpers[0];
+                sqlHelpers[0] = sqlHelpers[i];
+                sqlHelpers[i] = tmpHelper;
+            }
+        }
+        return H2Helper.init(sqlHelpers);
+    }
+
     @FXML
     private void search(ActionEvent event) {
         

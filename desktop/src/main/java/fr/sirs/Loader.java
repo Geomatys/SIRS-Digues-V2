@@ -5,10 +5,8 @@ import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.UtilisateurRepository;
-import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Utilisateur;
-import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.util.SirsStringConverter;
 import java.io.IOException;
 import java.util.List;
@@ -248,7 +246,7 @@ public class Loader extends Application {
                 updateMessage("Recherche des plugins");
                 int inc = 0;
                 final Plugin[] plugins = Plugins.getPlugins();
-                final int total = 9 + plugins.length;
+                final int total = 8 + plugins.length;
 
                 // EPSG DATABASE ///////////////////////////////////////////////
                 updateProgress(inc++, total);
@@ -308,23 +306,6 @@ public class Loader extends Application {
                 updateMessage("Initialisation de la carte");
                 Injector.getSession().getMapContext().getAreaOfInterest();
 
-                // COUCHDB TO SQL //////////////////////////////////////////////
-                updateProgress(inc++, total);
-                updateMessage("Export vers la base RDBMS");
-                final SQLHelper[] sqlHelpers = new SQLHelper[plugins.length];
-                
-                for (int i=0; i<sqlHelpers.length; i++) {
-                    sqlHelpers[i] = plugins[i].getSQLHelper();
-                    
-                    //Il faut mettre le helper du coeur en premier !
-                    if(plugins[i] instanceof CorePlugin && i!=0){
-                        final SQLHelper tmpHelper = sqlHelpers[0];
-                        sqlHelpers[0] = sqlHelpers[i];
-                        sqlHelpers[i] = tmpHelper;
-                    }
-                }
-                H2Helper.init(sqlHelpers);
-                
                 // VÉRIFICATION DES RÉFÉRENCES
                 updateProgress(inc++, total);
                 updateMessage("Synchronisation des listes de références");
