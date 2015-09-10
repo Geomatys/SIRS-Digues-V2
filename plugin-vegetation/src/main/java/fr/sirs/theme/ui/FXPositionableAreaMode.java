@@ -90,6 +90,16 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
         lblStartFar.visibleProperty().bind(pctProp);
         lblEndNear.visibleProperty().bind(pctProp);
         lblEndFar.visibleProperty().bind(pctProp);
+        lblFin.managedProperty().bind(pctProp);
+        uiBorneEnd.managedProperty().bind(pctProp);
+        uiAvalEnd.managedProperty().bind(pctProp);
+        uiDistanceEnd.managedProperty().bind(pctProp);
+        uiAmontEnd.managedProperty().bind(pctProp);
+        uiEndNear.managedProperty().bind(pctProp);
+        uiEndFar.managedProperty().bind(pctProp);
+        lblStartFar.managedProperty().bind(pctProp);
+        lblEndNear.managedProperty().bind(pctProp);
+        lblEndFar.managedProperty().bind(pctProp);
 
     }
 
