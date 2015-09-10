@@ -10,9 +10,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.concurrent.Callable;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.Requests;
@@ -26,11 +24,11 @@ import org.elasticsearch.search.SearchHits;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
- * TODO : Improve configuration to allow nested documents (Crete, Photo, etc.) as return type. 
+ * TODO : Improve configuration to allow nested documents (Crete, Photo, etc.) as return type.
  * @author Johann Sorel (Geomatys)
  */
 public class ElasticSearchEngine implements Closeable {
-    
+
     // TODO : put elastic search configuration in a properties file.
     private static final HashMap<String, String> DEFAULT_CONFIGURATION = new HashMap<>();
     static {
@@ -38,17 +36,17 @@ public class ElasticSearchEngine implements Closeable {
         DEFAULT_CONFIGURATION.put("path.home", SirsCore.ELASTIC_SEARCH_PATH.toString().replace("\\", "\\\\"));
         DEFAULT_CONFIGURATION.put("index.mapping.ignore_malformed", "true");
     }
-    
+
     /**
      * List of fields to embed in search hits.
      */
     private static final String[] HIT_FIELDS = new String[]{"designation", "@class", "libelle"};
-    
+
     private final Node node;
     private final Client client;
     public final String currentDbName;
     private final String adName = "_river";
-    
+
     public ElasticSearchEngine(final String dbHost, final int dbPort, String dbName, String user, String password) throws IOException {
         String riverConfig = readConfig("/fr/sirs/db/riverConfig.json");
         String indexConfig = readConfig("/fr/sirs/db/indexConfig.json");
@@ -61,21 +59,18 @@ public class ElasticSearchEngine implements Closeable {
         final String cstConfig = riverConfig;
 
         this.node = nodeBuilder().settings(ImmutableSettings.settingsBuilder().put(DEFAULT_CONFIGURATION)).local(true).node();
-        this.client = node.client();        
+        this.client = node.client();
         currentDbName = dbName;
-        
-        TaskManager.INSTANCE.submit("Mise à jour des index", new Callable<IndexResponse>() {
 
-            public IndexResponse call() {
-                IndicesExistsResponse res = client.admin().indices().exists(Requests.indicesExistsRequest(adName)).actionGet();
-                if(res.isExists()){
-                    client.admin().indices().close(Requests.closeIndexRequest(adName)).actionGet();
-                    client.admin().indices().delete(Requests.deleteIndexRequest(adName)).actionGet();
-                }
-                client.admin().indices().create(Requests.createIndexRequest(adName).settings(indexConfig)).actionGet();
-                client.index(Requests.indexRequest(adName).type(dbName).id("_meta").source(cstConfig)).actionGet();
-                return null;
+        TaskManager.INSTANCE.submit("Mise à jour des index", () -> {
+            IndicesExistsResponse res = client.admin().indices().exists(Requests.indicesExistsRequest(adName)).actionGet();
+            if(res.isExists()){
+                client.admin().indices().close(Requests.closeIndexRequest(adName)).actionGet();
+                client.admin().indices().delete(Requests.deleteIndexRequest(adName)).actionGet();
             }
+            client.admin().indices().create(Requests.createIndexRequest(adName).settings(indexConfig).mapping(dbName, readConfig("/fr/sirs/db/mappingConfig.json"))).actionGet();
+            client.index(Requests.indexRequest(adName).type(dbName).id("_meta").source(cstConfig)).actionGet();
+            return null;
         });
     }
 
@@ -92,11 +87,11 @@ public class ElasticSearchEngine implements Closeable {
                 .setSize(Integer.MAX_VALUE)
                 .execute().actionGet();
     }
-    
+
     /**
      * Search for documents, and return their types and Ids.
      * @param query The query to execute.
-     * @return A map whose keys are types of found document and value is the list 
+     * @return A map whose keys are types of found document and value is the list
      * of matching documents for a given type. Never null, but can be empty.
      */
     public HashMap<String, HashSet<String> > searchByClass(final QueryBuilder query) {
@@ -121,7 +116,7 @@ public class ElasticSearchEngine implements Closeable {
 
         return result;
     }
-    
+
     @Override
     public void close(){
         node.close();
