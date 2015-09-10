@@ -3,10 +3,8 @@ package fr.sirs.theme.ui;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
-import fr.sirs.SIRS;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
@@ -16,62 +14,34 @@ import fr.sirs.core.model.GeometryType;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PositionableVegetation;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.ZoneVegetation;
-import static fr.sirs.theme.ui.FXPositionableMode.computeLinearFromGeo;
-import fr.sirs.util.SirsStringConverter;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.layout.BorderPane;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.primitive.jts.JTSLineIterator;
 import org.geotoolkit.display2d.style.j2d.PathWalker;
-import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
-import org.geotoolkit.referencing.LinearReferencing;
 
 /**
  * Edition des bornes d'un {@link Positionable}.
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXPositionableAreaMode extends BorderPane implements FXPositionableMode {
+public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
 
     private static final String MODE = "AREA";
 
-    private final ObjectProperty<PositionableVegetation> posProperty = new SimpleObjectProperty<>();
-    private final BooleanProperty disableProperty = new SimpleBooleanProperty(true);
-    private LinearReferencing.SegmentInfo[] tronconSegments;
-
-    @FXML private ComboBox<SystemeReperage> uiSRs;
-    @FXML private ComboBox<BorneDigue> uiBorneStart;
-    @FXML private ComboBox<BorneDigue> uiBorneEnd;
-    @FXML private RadioButton uiAvalStart;
-    @FXML private RadioButton uiAvalEnd;
-    @FXML private RadioButton uiAmontStart;
-    @FXML private RadioButton uiAmontEnd;
-    @FXML private Spinner<Double> uiDistanceStart;
-    @FXML private Spinner<Double> uiDistanceEnd;
     //area
     @FXML private Spinner<Double> uiStartNear;
     @FXML private Spinner<Double> uiStartFar;
@@ -85,92 +55,25 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
     @FXML private Label lblEndFar;
 
     private final BooleanProperty pctProp = new SimpleBooleanProperty(false);
-    private boolean reseting = false;
 
     public FXPositionableAreaMode() {
-        SIRS.loadFXML(this, Positionable.class);
-
-        final SirsStringConverter sirsStringConverter = new SirsStringConverter();
-        uiSRs.setConverter(sirsStringConverter);
-        uiBorneStart.setConverter(sirsStringConverter);
-        uiBorneStart.setEditable(true);
-        uiBorneEnd.setConverter(sirsStringConverter);
-        uiBorneEnd.setEditable(true);
-
-        ComboBoxCompletion.autocomplete(uiBorneStart);
-        ComboBoxCompletion.autocomplete(uiBorneEnd);
-
-        uiSRs.disableProperty().bind(disableProperty);
-        uiBorneStart.disableProperty().bind(disableProperty);
-        uiBorneEnd.disableProperty().bind(disableProperty);
-        uiAvalStart.disableProperty().bind(disableProperty);
-        uiAmontStart.disableProperty().bind(disableProperty);
-        uiAvalEnd.disableProperty().bind(disableProperty);
-        uiAmontEnd.disableProperty().bind(disableProperty);
-        uiDistanceStart.disableProperty().bind(disableProperty);
-        uiDistanceEnd.disableProperty().bind(disableProperty);
+        super();
+        
         uiStartNear.disableProperty().bind(disableProperty);
         uiStartFar.disableProperty().bind(disableProperty);
         uiEndNear.disableProperty().bind(disableProperty);
         uiEndFar.disableProperty().bind(disableProperty);
-        uiDistanceStart.setEditable(true);
-        uiDistanceEnd.setEditable(true);
         uiStartNear.setEditable(true);
         uiStartFar.setEditable(true);
         uiEndNear.setEditable(true);
         uiEndFar.setEditable(true);
 
-        final ToggleGroup groupStart = new ToggleGroup();
-        uiAmontStart.setToggleGroup(groupStart);
-        uiAvalStart.setToggleGroup(groupStart);
-        uiAvalStart.setSelected(true);
-
-        final ToggleGroup groupEnd = new ToggleGroup();
-        uiAmontEnd.setToggleGroup(groupEnd);
-        uiAvalEnd.setToggleGroup(groupEnd);
-        uiAvalEnd.setSelected(true);
-        
-        uiDistanceStart.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
-        uiDistanceEnd.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
         uiStartNear.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
         uiStartFar.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
         uiEndNear.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
         uiEndFar.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1));
 
-
-        final ChangeListener<Geometry> geomListener = new ChangeListener<Geometry>() {
-            @Override
-            public void changed(ObservableValue<? extends Geometry> observable, Geometry oldValue, Geometry newValue) {
-                if(reseting) return;
-                if(newValue==null){
-                    throw new IllegalArgumentException("New geometry is null");
-                }
-                updateFields();
-            }
-        };
-
-        posProperty.addListener(new ChangeListener<Positionable>() {
-            @Override
-            public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
-                if(oldValue!=null){
-                    oldValue.geometryProperty().removeListener(geomListener);
-                }
-                if(newValue!=null){
-                    newValue.geometryProperty().addListener(geomListener);
-                    updateFields();
-                }
-            }
-        });
-
-        uiSRs.getSelectionModel().selectedItemProperty().addListener(this::srsChange);
-        
         final ChangeListener chgListener = (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> coordChange();
-        groupStart.selectedToggleProperty().addListener(chgListener);
-        groupEnd.selectedToggleProperty().addListener(chgListener);
-        uiBorneStart.valueProperty().addListener(chgListener);
-        uiBorneEnd.valueProperty().addListener(chgListener);
-        uiDistanceStart.valueProperty().addListener(chgListener);
-        uiDistanceEnd.valueProperty().addListener(chgListener);
         uiStartNear.valueProperty().addListener(chgListener);
         uiStartFar.valueProperty().addListener(chgListener);
         uiEndNear.valueProperty().addListener(chgListener);
@@ -196,30 +99,10 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
     }
 
     @Override
-    public String getTitle() {
-        return "Borne";
-    }
-
-    @Override
-    public Node getFXNode() {
-        return this;
-    }
-
-    @Override
-    public ObjectProperty positionableProperty() {
-        return posProperty;
-    }
-
-    @Override
-    public BooleanProperty disablingProperty() {
-        return disableProperty;
-    }
-
-    @Override
     public void updateFields(){
-        reseting = true;
+        setReseting(true);
 
-        final PositionableVegetation pos = posProperty.get();
+        final PositionableVegetation pos = (PositionableVegetation) positionableProperty().get();
         final String mode = pos.getGeometryMode();
 
         final TronconDigue t = FXPositionableMode.getTronconFromPositionable(pos);
@@ -235,6 +118,12 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
         }
         uiSRs.setValue(defaultSR);
 
+        /*
+        Init list of bornes and SRs : must be done all the time to allow the user
+        to change/choose the positionable SR and bornes among list elements.
+        */
+        final Map<String, BorneDigue> borneMap = initSRBorneLists(t, defaultSR);
+
         if(MODE.equals(mode)){
             //on assigne les valeurs sans changement
             uiAmontStart.setSelected(pos.getBorne_debut_aval());
@@ -248,23 +137,6 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
             uiStartFar.getValueFactory().setValue(pos.getDistanceDebutMax());
             uiEndNear.getValueFactory().setValue(pos.getDistanceFinMin());
             uiEndFar.getValueFactory().setValue(pos.getDistanceFinMax());
-
-
-            uiSRs.setItems(FXCollections.observableList(srs));
-            uiSRs.getSelectionModel().select(defaultSR);
-
-            // Init list of bornes
-            final Map<String,BorneDigue> borneMap = new HashMap<>();
-            final ObservableList<BorneDigue> bornes = FXCollections.observableArrayList();
-            if (defaultSR != null) {
-                final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-                for(SystemeReperageBorne srb : defaultSR.systemeReperageBornes){
-                    borneMap.put(srb.getBorneId(), borneRepo.get(srb.getBorneId()));
-                }
-                bornes.addAll(borneMap.values());
-            }
-            uiBorneStart.setItems(bornes);
-            uiBorneEnd.setItems(bornes);
 
             uiBorneStart.valueProperty().set(borneMap.get(pos.borneDebutIdProperty().get()));
             uiBorneEnd.valueProperty().set(borneMap.get(pos.borneFinIdProperty().get()));
@@ -309,14 +181,14 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
         pctProp.unbind();
         pctProp.bind(pos.geometryTypeProperty().isNotEqualTo(GeometryType.PONCTUAL));
 
-        reseting = false;
+        setReseting(false);
     }
 
     @Override
     public void buildGeometry(){
 
         //sauvegarde des propriétés
-        final ZoneVegetation positionable = (ZoneVegetation) posProperty.get();
+        final ZoneVegetation positionable = (ZoneVegetation) positionableProperty().get();
 
         final SystemeReperage sr = uiSRs.getValue();
         final BorneDigue startBorne = uiBorneStart.getValue();
@@ -409,106 +281,9 @@ public class FXPositionableAreaMode extends BorderPane implements FXPositionable
         //sauvegarde de la geometrie
         positionable.geometryModeProperty().set(MODE);
         positionable.geometryProperty().set(geometry);
+        positionable.setPositionDebut(TronconUtils.getPointFromGeometry(positionable.getGeometry(), getSourceLinear(sr), Injector.getSession().getProjection(), false));
+        positionable.setPositionFin(TronconUtils.getPointFromGeometry(positionable.getGeometry(), getSourceLinear(sr), Injector.getSession().getProjection(), true));
     }
-
-    private void coordChange(){
-        if(reseting) return;
-        reseting = true;
-        buildGeometry();
-        reseting = false;
-    }
-
-    private void srsChange(ObservableValue<? extends SystemeReperage> observable,
-            SystemeReperage oldValue, SystemeReperage newSR) {
-        if(reseting) return;
-
-        reseting = true;
-
-        final Positionable positionable = posProperty.get();
-
-        // Mise à jour de la liste des bornes
-        final ArrayList<BorneDigue> bornes = new ArrayList<>();
-        final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-        BorneDigue defaultBorneStart = null;
-        BorneDigue defaultBorneEnd = null;
-        for (final SystemeReperageBorne srb : newSR.systemeReperageBornes) {
-            final BorneDigue bd = borneRepo.get(srb.getBorneId());
-            if (bd != null) {
-                bornes.add(bd);
-                if(bd.getId().equals(positionable.getBorneDebutId())){
-                    defaultBorneStart = bd;
-                }
-                if(bd.getId().equals(positionable.getBorneFinId())){
-                    defaultBorneEnd = bd;
-                }
-            }
-        }
-        
-        uiBorneStart.setItems(FXCollections.observableList(bornes));
-        uiBorneEnd.setItems(FXCollections.observableList(bornes));
-
-
-        //calcul de la position relative dans le nouveau SR
-        final Point ptStart = computeGeoFromLinear(uiDistanceStart.getValue(), uiBorneStart.getValue(), uiAvalStart.isSelected());
-        final Point ptEnd   = computeGeoFromLinear(uiDistanceEnd.getValue(), uiBorneEnd.getValue(), uiAvalEnd.isSelected());
-        final LinearReferencing.SegmentInfo[] segments = getSourceLinear(newSR);
-        Map.Entry<BorneDigue, Double> relStart = computeLinearFromGeo(segments, newSR, ptStart);
-        Map.Entry<BorneDigue, Double> relEnd = computeLinearFromGeo(segments, newSR, ptEnd);
-
-        uiAvalStart.setSelected(relStart.getValue() < 0);
-        uiDistanceStart.getValueFactory().setValue(StrictMath.abs(relStart.getValue()));
-        uiBorneStart.getSelectionModel().select(relStart.getKey());
-
-        uiAvalEnd.setSelected(relEnd.getValue() < 0);
-        uiDistanceEnd.getValueFactory().setValue(StrictMath.abs(relEnd.getValue()));
-        uiBorneEnd.getSelectionModel().select(relEnd.getKey());
-
-
-        buildGeometry();
-        reseting = false;
-    }
-
-
-    /**
-     * Return the Linear geometry on which the input {@link SystemeReperage} is based on.
-     * @param source The SR to get linear for. If null, we'll try to get tronçon
-     * geometry of the currently edited {@link Positionable}.
-     * @return The linear associated, or null if we cannot get it.
-     */
-    private LinearReferencing.SegmentInfo[] getSourceLinear(final SystemeReperage source) {
-        if (tronconSegments == null) {
-            final Positionable positionable = posProperty.get();
-            final TronconDigue t = FXPositionableMode.getTronconFromPositionable(positionable);
-            tronconSegments = LinearReferencingUtilities.getSourceLinear(t, source);
-        }
-        return tronconSegments;
-    }
-
-    /**
-     * Compute current positionable point using linear referencing information
-     * defined in the form. Returned point is expressed with Database CRS.
-     *
-     * @return The point computed from starting borne. If we cannot, we return null.
-     */
-    private Point computeGeoFromLinear(Number distance,
-            BorneDigue borneProperty, boolean amont) {
-
-        final Positionable positionable = posProperty.get();
-        final TronconDigue t = FXPositionableMode.getTronconFromPositionable(positionable);
-
-        if (distance != null && borneProperty != null && t != null) {
-            //calcul à partir des bornes
-            final Point bornePoint = borneProperty.getGeometry();
-            double dist = distance.doubleValue();
-            if (amont) {
-                dist *= -1;
-            }
-            return LinearReferencingUtilities.computeCoordinate(t.getGeometry(), bornePoint, dist, 0);
-        } else {
-            return null;
-        }
-    }
-
 
     /**
      * Utilisé dans le plugin vegetation.
