@@ -1,13 +1,17 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.SIRS;
+import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.AvecCommentaire;
 import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Photo;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.List;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
@@ -103,10 +107,10 @@ public class FXCommentPhotoView extends SplitPane {
         
         uiPhotoView.setImage(null);
         
-        final Photo selected;
+        final AbstractPhoto selected;
         final Object value = valueProperty.get();
         if (value instanceof AvecPhotos) {
-            final List<Photo> photos = ((AvecPhotos)value).getPhotos();
+            final List<AbstractPhoto> photos = ((AvecPhotos)value).getPhotos();
             final int imageIndex = uiPhotoScroll.valueProperty().intValue();
             if (photos == null || photos.isEmpty() || imageIndex > photos.size()) {
                 selected = null;
@@ -114,8 +118,8 @@ public class FXCommentPhotoView extends SplitPane {
                 selected = photos.get(imageIndex);
             }
             
-        } else if (value instanceof Photo) {
-            selected = (Photo)value;
+        } else if (value instanceof AbstractPhoto) {
+            selected = (AbstractPhoto)value;
         } else {
             selected = null;
         }
@@ -131,13 +135,28 @@ public class FXCommentPhotoView extends SplitPane {
                 uiPhotoView.setImage(new Image(imagePath.toUri().toURL().toExternalForm()));
                 uiPhotoLibelle.setText("");
                 // Do not bind directly date as string because it can return ugly "null" text.
-                uiPhotoDate.textProperty().bind(
-                        Bindings.createStringBinding(() -> {
-                            String result =  selected.dateProperty().asString().get();
-                            if (result == null || result.equals("null")) 
-                                result = "";
-                            return result;
-                        }, selected.dateProperty()));
+                try {
+                    // Try to find a dateProperty() method in AbstractPhoto subclasses, otherwise use directly
+                    // the getDate() value, but will not be bind.
+                    final Method methodDateProperty = selected.getClass().getMethod("dateProperty");
+                    final Object returnObj = methodDateProperty.invoke(selected);
+                    if (returnObj instanceof ObjectProperty) {
+                        final ObjectProperty<LocalDate> dateProperty = (ObjectProperty<LocalDate>) returnObj;
+                        uiPhotoDate.textProperty().bind(
+                                Bindings.createStringBinding(() -> {
+                                    String result = dateProperty.asString().get();
+                                    if (result == null || result.equals("null"))
+                                        result = "";
+                                    return result;
+                                }, dateProperty));
+                    } else {
+                        uiPhotoDate.setText(selected.getDate() == null || selected.getDate().toString().equals("null") ?
+                                "" : selected.getDate().toString());
+                    }
+                } catch (ReflectiveOperationException e) {
+                    uiPhotoDate.setText(selected.getDate() == null || selected.getDate().toString().equals("null") ?
+                            "" : selected.getDate().toString());
+                }
             } catch (IllegalStateException e) {
                 uiPhotoLibelle.setText(e.getLocalizedMessage());
             } catch (IllegalArgumentException | MalformedURLException e) {
