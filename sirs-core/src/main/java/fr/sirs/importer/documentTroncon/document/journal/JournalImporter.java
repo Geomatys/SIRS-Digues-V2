@@ -17,7 +17,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class JournalImporter extends GenericImporter {
+class JournalImporter extends DocumentImporter {
 
     private Map<Integer, String> journalName = null;
     
@@ -52,7 +52,7 @@ class JournalImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         journalName = new HashMap<>();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             

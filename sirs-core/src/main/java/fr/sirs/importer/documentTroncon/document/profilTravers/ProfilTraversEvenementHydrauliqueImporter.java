@@ -22,7 +22,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
+class ProfilTraversEvenementHydrauliqueImporter extends DocumentImporter {
 
     private Map<Integer, List<ParametreHydrauliqueProfilTravers>> evenementHydrauByLeveId = null;
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
@@ -73,7 +73,7 @@ class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
         
         final Map<Integer, EvenementHydraulique> evenementHydrauliques = evenementHydrauliqueImporter.getEvenements();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
             final ParametreHydrauliqueProfilTravers profilTraversEvenementHydraulique = createAnonymValidElement(ParametreHydrauliqueProfilTravers.class);

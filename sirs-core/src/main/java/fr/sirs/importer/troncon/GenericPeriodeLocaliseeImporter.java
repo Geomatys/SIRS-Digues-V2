@@ -15,7 +15,7 @@ import org.ektorp.CouchDbConnector;
  * @author Samuel Andrés (Geomatys)
  * @param <T>
  */
-public abstract class GenericPeriodeLocaliseeImporter<T extends PeriodeLocaliseeTroncon> extends GenericImporter {
+public abstract class GenericPeriodeLocaliseeImporter<T extends PeriodeLocaliseeTroncon> extends DocumentImporter {
     
     protected Map<Integer, T> objets = null;
     protected TronconGestionDigueImporter tronconGestionDigueImporter;

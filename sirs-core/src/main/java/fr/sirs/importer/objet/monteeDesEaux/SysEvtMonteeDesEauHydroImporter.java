@@ -97,7 +97,7 @@ class SysEvtMonteeDesEauHydroImporter extends GenericMonteeDesEauxImporter {
     }
 
     @Override
-    public MonteeEaux importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();

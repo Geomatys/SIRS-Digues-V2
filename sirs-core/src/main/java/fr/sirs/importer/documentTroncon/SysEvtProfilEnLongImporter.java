@@ -2,9 +2,6 @@ package fr.sirs.importer.documentTroncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
@@ -13,24 +10,18 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.SYS_EVT_PROFIL_EN_LONG;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.documentTroncon.document.profilLong.ProfilEnLongImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
+import fr.sirs.importer.v2.CorruptionLevel;
+import fr.sirs.importer.v2.ErrorReport;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 
 /**
  *
@@ -39,18 +30,18 @@ import org.opengis.util.FactoryException;
 class SysEvtProfilEnLongImporter extends GenericPositionDocumentImporter<ProfilLong> {
 
     private final ProfilEnLongImporter profilLongImporter;
-    
-    SysEvtProfilEnLongImporter(final Database accessDatabase, 
-            final CouchDbConnector couchDbConnector, 
+
+    SysEvtProfilEnLongImporter(final Database accessDatabase,
+            final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
-            final BorneDigueImporter borneDigueImporter, 
+            final BorneDigueImporter borneDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final ProfilEnLongImporter profilLongImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 borneDigueImporter, systemeReperageImporter);
         this.profilLongImporter = profilLongImporter;
     }
-    
+
     private enum Columns {
         ID_DOC,
 //        id_nom_element, // Redondant avec ID_DOC
@@ -61,7 +52,7 @@ class SysEvtProfilEnLongImporter extends GenericPositionDocumentImporter<ProfilL
 //        LIBELLE_SYSTEME_REP, // Redondant avec l'importaton des SR
 //        NOM_BORNE_DEBUT, // Redondant avec l'importation des bornes
 //        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
-//        NOM_PROFIL_EN_TRAVERS, 
+//        NOM_PROFIL_EN_TRAVERS,
 //        LIBELLE_MARCHE,
 //        INTITULE_ARTICLE,
 //        TITRE_RAPPORT_ETUDE,
@@ -120,16 +111,16 @@ class SysEvtProfilEnLongImporter extends GenericPositionDocumentImporter<ProfilL
 
 //    @Override
 //    protected void preCompute() throws IOException {
-//        
+//
 //        positions = new HashMap<>();
 //        positionsByTronconId = new HashMap<>();
-//        
-//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+//
+//        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
 //        while (it.hasNext()){
 //            final Row row = it.next();
 //            final ProfilLong documentTroncon = createAnonymValidElement(ProfilLong.class);
 //            positions.put(row.getInt(Columns.ID_DOC.toString()), documentTroncon);
-//            
+//
 //            final Integer tronconId = row.getInt(Columns.ID_TRONCON_GESTION.toString());
 //            if(positionsByTronconId.get(tronconId)==null)
 //                positionsByTronconId.put(tronconId, new ArrayList<>());
@@ -139,8 +130,8 @@ class SysEvtProfilEnLongImporter extends GenericPositionDocumentImporter<ProfilL
 //
 //    @Override
 //    protected void compute() throws IOException, AccessDbImporterException {
-//        
-//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+//
+//        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
 //        while (it.hasNext()){
 //            final Row row = it.next();
 //            final ProfilLong docTroncon = importRow(row);
@@ -155,13 +146,13 @@ class SysEvtProfilEnLongImporter extends GenericPositionDocumentImporter<ProfilL
 //                positionsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
 //            }
 //            listByTronconId.add(docTroncon);
-//            
+//
 //        }
 //        computed=true;
 //    }
 
     @Override
-    ProfilLong importRow(Row row) throws IOException, AccessDbImporterException {
+    public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -174,9 +165,9 @@ class SysEvtProfilEnLongImporter extends GenericPositionDocumentImporter<ProfilL
         } else{
             profilLong = createAnonymValidElement(ProfilLong.class);
         }
-        
+
         profilLong.setLinearId(troncon.getId());
-        
+
         if (row.getDouble(Columns.PR_DEBUT_CALCULE.toString()) != null) {
             profilLong.setPrDebut(row.getDouble(Columns.PR_DEBUT_CALCULE.toString()).floatValue());
         }
@@ -185,34 +176,10 @@ class SysEvtProfilEnLongImporter extends GenericPositionDocumentImporter<ProfilL
             profilLong.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
-        final GeometryFactory geometryFactory = new GeometryFactory();
-        final MathTransform lambertToRGF;
         try {
-            lambertToRGF = CRS.findMathTransform(DbImporter.IMPORT_CRS, getOutputCrs(), true);
-
-            try {
-
-                if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                    profilLong.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(Columns.X_DEBUT.toString()),
-                            row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
-                }
-            } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtProfilEnLongImporter.class.getName()).log(Level.WARNING, null, ex);
-            }
-
-            try {
-
-                if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                    profilLong.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(Columns.X_FIN.toString()),
-                            row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
-                }
-            } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtProfilEnLongImporter.class.getName()).log(Level.WARNING, null, ex);
-            }
-        } catch (FactoryException ex) {
-            Logger.getLogger(SysEvtProfilEnLongImporter.class.getName()).log(Level.WARNING, null, ex);
+            context.setGeoPositions(row, profilLong);
+        } catch (TransformException ex) {
+            context.reportError(new ErrorReport(ex, row, getTableName(), null, profilLong, null, "Cannnot set geographic position.", CorruptionLevel.FIELD));
         }
 
         profilLong.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
@@ -220,26 +187,26 @@ class SysEvtProfilEnLongImporter extends GenericPositionDocumentImporter<ProfilL
         /*
          1- La base du Rhône indique que tous les ID_PROFIL_EN_LONG de la table
          DOCUMENT sont absent de SYS_EVT_PROFIL_EN_LONG.
-         2- Elle permet également de se rendre compte que tous les 
+         2- Elle permet également de se rendre compte que tous les
          ID_PROFIL_EN_LONG de la table DOCUMENT sont nuls.
-         3- Ainsi que du fait que les ID_PROFIL_EN_LONG de la table 
+         3- Ainsi que du fait que les ID_PROFIL_EN_LONG de la table
          PROFIL_EN_LONG sont égaux aux ID_DOC des tables DOCUMENT et
          SYS_EVT_PROFIL_EN_LONG
-        
+
         =========
-        
+
         Cela provien en fait de ce que les profils en long sont une espèce d'hybride
         entre un document et une position de document associée à un seul document.
-        
+
         On les considèrera donc comme des positions de documents "étendues" par des attributs de documents "non localisés".
-        
+
          */
 //        if (row.getInt(Columns.ID_DOC.toString()) != null) {
 //            if (profilsLong.get(row.getInt(Columns.ID_DOC.toString())) != null) {
 //                docTroncon.setSirsdocument(profilsLong.get(row.getInt(Columns.ID_DOC.toString())).getId());
 //            }
 //        }
-        
+
 
         if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
             profilLong.setSystemeRepId(systemesReperage.get(row.getInt(Columns.ID_SYSTEME_REP.toString())).getId());
@@ -267,7 +234,7 @@ class SysEvtProfilEnLongImporter extends GenericPositionDocumentImporter<ProfilL
 
         profilLong.setDesignation(String.valueOf(row.getInt(Columns.ID_DOC.toString())));
         profilLong.setGeometry(buildGeometry(troncon.getGeometry(), profilLong, tronconGestionDigueImporter.getBorneDigueRepository()));
-        
+
         return profilLong;
     }
 }

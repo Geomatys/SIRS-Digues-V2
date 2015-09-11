@@ -64,7 +64,7 @@ public class ElementReseauGardienImporter extends GenericEntityLinker {
         final Map<Integer, ObjetReseau> reseaux = elementReseauImporter.getById();
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             
@@ -95,7 +95,7 @@ public class ElementReseauGardienImporter extends GenericEntityLinker {
             }
         }
         
-        couchDbConnector.executeBulk(reseaux.values());
-        couchDbConnector.executeBulk(intervenants.values());
+        context.outputDb.executeBulk(reseaux.values());
+        context.outputDb.executeBulk(intervenants.values());
     }
 }

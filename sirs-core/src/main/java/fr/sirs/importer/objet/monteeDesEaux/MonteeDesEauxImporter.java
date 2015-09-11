@@ -97,7 +97,7 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
         objetsByTronconId = new HashMap<>();
 
         Map<Integer, ObjetReseau> reseaux = elementReseauImporter.getById();
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final MonteeEaux objet = importRow(row);
@@ -124,7 +124,7 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
             }
             listByTronconId.add(objet);
         }
-        couchDbConnector.executeBulk(objets.values());
+        context.outputDb.executeBulk(objets.values());
         
         ////////////////////////////////////////////////////////////////////////
         // Mise à jour des événements hydrauliques
@@ -144,11 +144,11 @@ public class MonteeDesEauxImporter extends GenericMonteeDesEauxImporter {
                 }
             }
         }
-        couchDbConnector.executeBulk(evenementsToUpdate);
+        context.outputDb.executeBulk(evenementsToUpdate);
     }
 
     @Override
-    public MonteeEaux importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
         return sysEvtMonteeDesEauHydroImporter.importRow(row);
     }
 }

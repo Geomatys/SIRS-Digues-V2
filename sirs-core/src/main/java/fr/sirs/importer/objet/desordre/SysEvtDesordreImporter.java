@@ -1,13 +1,6 @@
 package fr.sirs.importer.objet.desordre;
 
-import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.TypeCoteImporter;
-import fr.sirs.importer.objet.SourceInfoImporter;
-import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Desordre;
@@ -20,50 +13,24 @@ import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
+import fr.sirs.importer.v2.CorruptionLevel;
+import fr.sirs.importer.v2.ErrorReport;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.ektorp.CouchDbConnector;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
 class SysEvtDesordreImporter extends GenericDesordreImporter {
-    
+
     private final TypeDesordreImporter typeDesordreImporter;
     private final DesordreObservationImporter desordreObservationImporter;
-
-    SysEvtDesordreImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector,
-            final TronconGestionDigueImporter tronconGestionDigueImporter, 
-            final SystemeReperageImporter systemeReperageImporter, 
-            final BorneDigueImporter borneDigueImporter, 
-            final DesordreObservationImporter desordreObservationImporter,
-            final SourceInfoImporter typeSourceImporter,
-            final TypePositionImporter typePositionImporter,
-            final TypeCoteImporter typeCoteImporter,
-            final TypeDesordreImporter typeDesordreImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
-                systemeReperageImporter, borneDigueImporter,
-                typeSourceImporter, typeCoteImporter, typePositionImporter);
-        this.typeDesordreImporter = typeDesordreImporter;
-        this.desordreObservationImporter = desordreObservationImporter;
-    }
 
     private enum Columns {
 
@@ -89,15 +56,6 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         ID_SOURCE,
         DATE_DEBUT_VAL,
         DATE_FIN_VAL,
-        PR_DEBUT_CALCULE,
-        PR_FIN_CALCULE,
-        ID_SYSTEME_REP,
-        ID_BORNEREF_DEBUT,
-        AMONT_AVAL_DEBUT,
-        DIST_BORNEREF_DEBUT,
-        ID_BORNEREF_FIN,
-        AMONT_AVAL_FIN,
-        DIST_BORNEREF_FIN,
         LIEU_DIT_DESORDRE,
         DESCRIPTION_DESORDRE,
         //            ID_AUTO
@@ -109,7 +67,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         Y_DEBUT,
         X_FIN,
         Y_FIN,
-//     COMMENTAIRE, // obsolète ? voir champ DESCRIPTION_DESORDRE 
+//     COMMENTAIRE, // obsolète ? voir champ DESCRIPTION_DESORDRE
     };
 
     @Override
@@ -118,7 +76,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
     }
 
     @Override
-    public Desordre importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -132,7 +90,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         final Map<Integer, List<Observation>> observations = desordreObservationImporter.getObservationsByDesordreId();
 
         final Desordre desordre = createAnonymValidElement(Desordre.class);
-        
+
         desordre.setLinearId(troncon.getId());
         desordre.setDesignation(String.valueOf(row.getInt(Columns.ID_DESORDRE.toString())));
 
@@ -175,11 +133,11 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
-            desordre.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+            desordre.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            desordre.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            desordre.setPositionId(typePositionImporter.getImportedId(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {
@@ -189,7 +147,7 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
             desordre.setDate_debut(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter, desordre));
         }
-        
+
         if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
             desordre.setDate_fin(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter, desordre));
         }
@@ -198,42 +156,18 @@ class SysEvtDesordreImporter extends GenericDesordreImporter {
             desordre.setCommentaire(row.getString(Columns.DESCRIPTION_DESORDRE.toString()));
         }
 
-        GeometryFactory geometryFactory = new GeometryFactory();
-        final MathTransform lambertToRGF;
         try {
-            lambertToRGF = CRS.findMathTransform(DbImporter.IMPORT_CRS, getOutputCrs(), true);
-
-            try {
-
-                if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                    desordre.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(Columns.X_DEBUT.toString()),
-                            row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
-                }
-            } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.WARNING, null, ex);
-            }
-
-            try {
-
-                if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                    desordre.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(Columns.X_FIN.toString()),
-                            row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
-                }
-            } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.WARNING, null, ex);
-            }
-        } catch (FactoryException ex) {
-            Logger.getLogger(SysEvtDesordreImporter.class.getName()).log(Level.WARNING, null, ex);
+            context.setGeoPositions(row, desordre);
+        } catch (TransformException ex) {
+            context.reportError(new ErrorReport(ex, row, getTableName(), null, desordre, null, "Cannnot set geographic position.", CorruptionLevel.FIELD));
         }
 
         if (observations.get(row.getInt(Columns.ID_DESORDRE.toString())) != null) {
             desordre.setObservations(observations.get(row.getInt(Columns.ID_DESORDRE.toString())));
         }
-        
+
         desordre.setGeometry(buildGeometry(troncon.getGeometry(), desordre, tronconGestionDigueImporter.getBorneDigueRepository()));
-        
+
         return desordre;
     }
 

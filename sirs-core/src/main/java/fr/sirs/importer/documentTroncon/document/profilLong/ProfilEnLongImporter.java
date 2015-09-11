@@ -32,7 +32,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ProfilEnLongImporter extends GenericImporter {
+public class ProfilEnLongImporter extends DocumentImporter {
     
     private final TypeSystemeReleveProfilImporter typeSystemeReleveProfilImporter;
     private final TypePositionProfilLongImporter typePositionProfilLongImporter;
@@ -117,7 +117,7 @@ public class ProfilEnLongImporter extends GenericImporter {
         final Map<Integer, List<PrZProfilLong>> pointsByLeveDZ = profilLongPointDZImporter.getLeveePointByProfilId();
         final Map<Integer, List<ParametreHydrauliqueProfilLong>> evenementsHydrauliques = profilLongEvenementHydrauliqueImporter.getEvenementHydrauliqueByProfilId();
     
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
             final ProfilLong profil = createAnonymValidElement(ProfilLong.class);

@@ -62,7 +62,7 @@ public class JournalArticleImporter extends GenericDocumentImporter<ArticleJourn
         
         final Map<Integer, String> journaux = journalImporter.getJournalNames();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final ArticleJournal articleJournal = createAnonymValidElement(ArticleJournal.class);
@@ -91,6 +91,6 @@ public class JournalArticleImporter extends GenericDocumentImporter<ArticleJourn
             
             related.put(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()), articleJournal);
         }
-        couchDbConnector.executeBulk(related.values());
+        context.outputDb.executeBulk(related.values());
     }
 }

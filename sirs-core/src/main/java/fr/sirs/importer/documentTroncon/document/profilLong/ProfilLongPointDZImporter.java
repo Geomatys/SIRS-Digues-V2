@@ -19,7 +19,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class ProfilLongPointDZImporter extends GenericImporter {
+class ProfilLongPointDZImporter extends DocumentImporter {
 
     private Map<Integer, PrZProfilLong> points = null;
     private Map<Integer, List<PrZProfilLong>> pointsByProfil = null;
@@ -66,7 +66,7 @@ class ProfilLongPointDZImporter extends GenericImporter {
         points = new HashMap<>();
         pointsByProfil = new HashMap<>();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
             final PrZProfilLong levePoint = createAnonymValidElement(PrZProfilLong.class);

@@ -2,9 +2,6 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.ElementCreator;
@@ -25,19 +22,14 @@ import fr.sirs.importer.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
+import fr.sirs.importer.v2.CorruptionLevel;
+import fr.sirs.importer.v2.ErrorReport;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 
 /**
  *
@@ -76,7 +68,7 @@ class SysEvtStationDePompageImporter extends GenericReseauImporter<StationPompag
         //        LIBELLE_SYSTEME_REP, // Redondant avec l'importation des SR
         //        NOM_BORNE_DEBUT, // Redondant avec l'importation des bornes
         //        NOM_BORNE_FIN, // Redondant avec l'importation des bornes
-        //        LIBELLE_ECOULEMENT, 
+        //        LIBELLE_ECOULEMENT,
         //        LIBELLE_IMPLANTATION,
         //        LIBELLE_UTILISATION_CONDUITE,
         //        LIBELLE_TYPE_CONDUITE_FERMEE,
@@ -148,7 +140,7 @@ class SysEvtStationDePompageImporter extends GenericReseauImporter<StationPompag
     }
 
     @Override
-    public StationPompage importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -169,7 +161,7 @@ class SysEvtStationDePompageImporter extends GenericReseauImporter<StationPompag
         }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
-            stationPompage.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+            stationPompage.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
@@ -188,34 +180,10 @@ class SysEvtStationDePompageImporter extends GenericReseauImporter<StationPompag
             stationPompage.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
-        GeometryFactory geometryFactory = new GeometryFactory();
-        final MathTransform lambertToRGF;
         try {
-            lambertToRGF = CRS.findMathTransform(DbImporter.IMPORT_CRS, getOutputCrs(), true);
-
-            try {
-
-                if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                    stationPompage.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(Columns.X_DEBUT.toString()),
-                            row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
-                }
-            } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtStationDePompageImporter.class.getName()).log(Level.WARNING, null, ex);
-            }
-
-            try {
-
-                if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                    stationPompage.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(Columns.X_FIN.toString()),
-                            row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
-                }
-            } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtStationDePompageImporter.class.getName()).log(Level.WARNING, null, ex);
-            }
-        } catch (FactoryException ex) {
-            Logger.getLogger(SysEvtStationDePompageImporter.class.getName()).log(Level.WARNING, null, ex);
+            context.setGeoPositions(row, stationPompage);
+        } catch (TransformException ex) {
+            context.reportError(new ErrorReport(ex, row, getTableName(), null, stationPompage, null, "Cannnot set geographic position.", CorruptionLevel.FIELD));
         }
 
         if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
@@ -249,7 +217,7 @@ class SysEvtStationDePompageImporter extends GenericReseauImporter<StationPompag
         stationPompage.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            stationPompage.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            stationPompage.setPositionId(typePositionImporter.getImportedId(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_ELEMENT_RESEAU.toString()) != null) {

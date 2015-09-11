@@ -158,7 +158,7 @@ public class PositionDocumentImporter extends GenericPositionDocumentImporter<Ab
         positions = new HashMap<>();
         positionsByTronconId = new HashMap<>();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
             final AbstractPositionDocument position = importRow(row);
@@ -178,11 +178,11 @@ public class PositionDocumentImporter extends GenericPositionDocumentImporter<Ab
                 listByTronconId.add(position);
             }
         }
-        couchDbConnector.executeBulk(positions.values());
+        context.outputDb.executeBulk(positions.values());
     }
 
     @Override
-    AbstractPositionDocument importRow(Row row) throws IOException, AccessDbImporterException {
+    public  importRow(Row row) throws IOException, AccessDbImporterException {
         
         final Map<Integer, Class> classesDocument = typeDocumentImporter.getClasseDocument();
         

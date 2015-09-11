@@ -20,7 +20,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class ElementReseauPompeImporter extends GenericImporter {
+class ElementReseauPompeImporter extends DocumentImporter {
 
     private Map<Integer, Pompe> pompes = null;
     private Map<Integer, List<Pompe>> pompesByElementReseau = null;
@@ -85,7 +85,7 @@ class ElementReseauPompeImporter extends GenericImporter {
         pompes = new HashMap<>();
         pompesByElementReseau = new HashMap<>();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final Pompe pompe = createAnonymValidElement(Pompe.class);

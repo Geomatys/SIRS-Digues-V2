@@ -26,7 +26,7 @@ import org.ektorp.CouchDbConnector;
  * @author Samuel Andrés (Geomatys)
  */
 public class EvenementHydrauliqueImporter 
-extends GenericImporter 
+extends DocumentImporter 
 implements DocumentsUpdatable {
 
     private Map<Integer, EvenementHydraulique> evenements = null;
@@ -48,7 +48,7 @@ implements DocumentsUpdatable {
     @Override
     public void update() throws IOException, AccessDbImporterException {
         if(evenements==null) compute();
-        couchDbConnector.executeBulk(evenements.values());
+        context.outputDb.executeBulk(evenements.values());
     }
     
     private enum Columns{
@@ -88,7 +88,7 @@ implements DocumentsUpdatable {
         final Map<Integer, RefFrequenceEvenementHydraulique> frequences = typeFrequenceEvenementHydrauliqueImporter.getTypeReferences();
         final Map<Integer, List<Meteo>> meteos = meteoImporter.getMeteoByEvenementHydrauliqueId();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
             final EvenementHydraulique evenement = createAnonymValidElement(EvenementHydraulique.class);
@@ -133,7 +133,7 @@ implements DocumentsUpdatable {
             
             evenements.put(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString()), evenement);
         }
-        couchDbConnector.executeBulk(evenements.values());
+        context.outputDb.executeBulk(evenements.values());
         
         // Indexation par couchDBId
         for(final EvenementHydraulique evenement : evenements.values()){

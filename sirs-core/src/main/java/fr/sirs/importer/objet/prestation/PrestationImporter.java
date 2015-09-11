@@ -6,7 +6,6 @@ import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
@@ -27,27 +26,27 @@ import org.ektorp.CouchDbConnector;
  * @author Samuel Andrés (Geomatys)
  */
 public class PrestationImporter extends GenericPrestationImporter {
-    
+
     private final TypePrestationImporter typePrestationImporter;
     private final SysEvtPrestationImporter sysEvtPrestationImporter;
 
     public PrestationImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
+            final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
-            final SystemeReperageImporter systemeReperageImporter, 
-            final BorneDigueImporter borneDigueImporter, 
+            final SystemeReperageImporter systemeReperageImporter,
+            final BorneDigueImporter borneDigueImporter,
             final MarcheImporter marcheImporter,
             final SourceInfoImporter typeSourceImporter,
             final TypeCoteImporter typeCoteImporter,
             final TypePositionImporter typePositionImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
-                systemeReperageImporter, borneDigueImporter, marcheImporter, 
+                systemeReperageImporter, borneDigueImporter, marcheImporter,
                 typeSourceImporter, typePositionImporter, typeCoteImporter);
-        this.typePrestationImporter = new TypePrestationImporter(accessDatabase, 
+        this.typePrestationImporter = new TypePrestationImporter(accessDatabase,
                 couchDbConnector);
         this.sysEvtPrestationImporter = new SysEvtPrestationImporter(
-                accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
-                systemeReperageImporter, borneDigueImporter, marcheImporter, 
+                accessDatabase, couchDbConnector, tronconGestionDigueImporter,
+                systemeReperageImporter, borneDigueImporter, marcheImporter,
                 typePositionImporter, typeCoteImporter, typePrestationImporter);
     }
 
@@ -99,24 +98,20 @@ public class PrestationImporter extends GenericPrestationImporter {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-        
+
         objets = new HashMap<>();
         objetsByTronconId = new HashMap<>();
-        
+
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
-        
-        
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+
+
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final Prestation objet = importRow(row);
-            
+
             if(objet!=null){
-            
-                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    objet.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
-                }
-                
+
                 {
                     final boolean realisation = row.getBoolean(Columns.REALISATION_INTERNE.toString());
                     objet.setRealisationInterne(realisation);
@@ -131,14 +126,14 @@ public class PrestationImporter extends GenericPrestationImporter {
                 }
 
                 if(row.getInt(Columns.ID_SOURCE.toString())!=null){
-                    final RefSource typeSource = typesSource.get(row.getInt(Columns.ID_SOURCE.toString()));
+                    final RefSource typeSource = sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString()));
                     if(typeSource!=null){
                         if(objet.getSourceId()==null){
                             objet.setSourceId(typeSource.getId());
                         }
                     }
                 }
-            
+
                 // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
                 objets.put(row.getInt(Columns.ID_PRESTATION.toString()), objet);
 
@@ -151,11 +146,11 @@ public class PrestationImporter extends GenericPrestationImporter {
                 listByTronconId.add(objet);
             }
         }
-        couchDbConnector.executeBulk(objets.values());
+        context.outputDb.executeBulk(objets.values());
     }
-    
+
     @Override
-    public Prestation importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
         return sysEvtPrestationImporter.importRow(row);
     }
 }

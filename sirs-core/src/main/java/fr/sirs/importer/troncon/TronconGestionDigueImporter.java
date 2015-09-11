@@ -35,7 +35,7 @@ import org.ektorp.CouchDbConnector;
  * @author Samuel Andrés (Geomatys)
  */
 public class TronconGestionDigueImporter 
-extends GenericImporter 
+extends DocumentImporter 
 implements DocumentsUpdatable {
 
     private Map<Integer, TronconDigue> tronconsDigue = null;
@@ -79,7 +79,7 @@ implements DocumentsUpdatable {
     @Override
     public void update() throws IOException, AccessDbImporterException {
         if(tronconsDigue==null) compute();
-        couchDbConnector.executeBulk(tronconsDigue.values());
+        context.outputDb.executeBulk(tronconsDigue.values());
     }
     
     private enum Columns {
@@ -136,7 +136,7 @@ implements DocumentsUpdatable {
         final Map<Integer, Digue> digues = digueImporter.getDigues();
 //        final Map<Integer, List<PeriodeCommune>> communes = tronconGestionDigueCommuneImporter.getCommunesByTronconId();
 
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final TronconDigue tronconDigue = createAnonymValidElement(TronconDigue.class);
@@ -200,13 +200,13 @@ implements DocumentsUpdatable {
                 }
             } else {
                 final Digue d = createAnonymValidElement(Digue.class);
-                couchDbConnector.create(d);
+                context.outputDb.create(d);
                 tronconDigue.setDigueId(d.getId());
             }
             
             // Set the geometry
             tronconDigue.setGeometry(tronconDigueGeoms.get(row.getInt(Columns.ID_TRONCON_GESTION.toString())));
         }
-        couchDbConnector.executeBulk(tronconsDigue.values());
+        context.outputDb.executeBulk(tronconsDigue.values());
     }
 }

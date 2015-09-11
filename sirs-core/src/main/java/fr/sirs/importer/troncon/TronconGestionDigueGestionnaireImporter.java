@@ -22,7 +22,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TronconGestionDigueGestionnaireImporter extends GenericImporter {
+class TronconGestionDigueGestionnaireImporter extends DocumentImporter {
 
     private Map<Integer, List<GestionTroncon>> gestionsByTronconId = null;
     private final OrganismeImporter organismeImporter;
@@ -74,7 +74,7 @@ class TronconGestionDigueGestionnaireImporter extends GenericImporter {
 
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final GestionTroncon gestion = createAnonymValidElement(GestionTroncon.class);

@@ -175,7 +175,7 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
     }
 
     @Override
-    public PiedDigue importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -196,7 +196,7 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
         }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
-            piedDigue.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+            piedDigue.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
@@ -241,15 +241,15 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
         piedDigue.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
         if (row.getInt(Columns.ID_TYPE_MATERIAU.toString()) != null) {
-            piedDigue.setMateriauId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());
+            piedDigue.setMateriauId(typeMateriauImporter.getImportedId(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_NATURE.toString()) != null) {
-            piedDigue.setNatureId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
+            piedDigue.setNatureId(typeNatureImporter.getImportedId(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_FONCTION.toString()) != null) {
-            piedDigue.setFonctionId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
+            piedDigue.setFonctionId(typeFonctionImporter.getImportedId(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
@@ -286,7 +286,7 @@ class SysEvtPiedDeDigueImporter extends GenericStructureImporter<PiedDigue> {
             Logger.getLogger(SysEvtPiedDeDigueImporter.class.getName()).log(Level.WARNING, null, ex);
         }
 
-        piedDigue.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
+        
         piedDigue.setGeometry(buildGeometry(troncon.getGeometry(), piedDigue, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return piedDigue;

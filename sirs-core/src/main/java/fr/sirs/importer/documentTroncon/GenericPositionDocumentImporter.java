@@ -18,7 +18,7 @@ import org.ektorp.CouchDbConnector;
  * @author Samuel Andrés (Geomatys)
  * @param <T>
  */
-public abstract class GenericPositionDocumentImporter<T extends AbstractPositionDocument> extends GenericImporter {
+public abstract class GenericPositionDocumentImporter<T extends AbstractPositionDocument> extends DocumentImporter {
     
     protected Map<Integer, T> positions = null;
     protected Map<Integer, List<T>> positionsByTronconId = null;
@@ -81,7 +81,7 @@ public abstract class GenericPositionDocumentImporter<T extends AbstractPosition
      * @throws IOException 
      * @throws AccessDbImporterException
      */
-    abstract T importRow(final Row row) 
+    abstract public  importRow(final Row row) 
             throws IOException, AccessDbImporterException;
     
     @Override
@@ -90,6 +90,6 @@ public abstract class GenericPositionDocumentImporter<T extends AbstractPosition
     }
     
     public void update() throws IOException, AccessDbImporterException{
-        couchDbConnector.executeBulk(getPositions().values());
+        context.outputDb.executeBulk(getPositions().values());
     }
 }

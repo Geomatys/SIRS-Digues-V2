@@ -57,7 +57,7 @@ class TypeElementStructureImporter extends GenericTypeInternalImporter<Class> {
     @Override
     protected void compute() throws IOException {
         types = new HashMap<>();
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
 
         while (it.hasNext()) {
             final Row row = it.next();

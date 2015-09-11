@@ -30,7 +30,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ProfilEnTraversDescriptionImporter extends GenericImporter {
+public class ProfilEnTraversDescriptionImporter extends DocumentImporter {
 
     private Map<Integer, LeveProfilTravers> leves = null;
     private Map<Integer, List<LeveProfilTravers>> levesByProfil = null;
@@ -133,7 +133,7 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
         final Map<Integer, List<XYZLeveProfilTravers>> pointsByLeveXYZ = profilTraversPointXYZImporter.getLeveePointByLeveId();
         final Map<Integer, List<DZLeveProfilTravers>> pointsByLeveDZ = profilTraversPointDZImporter.getLeveePointByLeveId();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
             final LeveProfilTravers leve = createAnonymValidElement(LeveProfilTravers.class);
@@ -202,6 +202,6 @@ public class ProfilEnTraversDescriptionImporter extends GenericImporter {
             }
             listIdsByProfil.add(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
         }
-        couchDbConnector.executeBulk(leves.values());
+        context.outputDb.executeBulk(leves.values());
     }
 }

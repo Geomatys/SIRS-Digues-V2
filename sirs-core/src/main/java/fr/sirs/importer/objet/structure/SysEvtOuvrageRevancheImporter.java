@@ -162,7 +162,7 @@ class SysEvtOuvrageRevancheImporter extends GenericStructureImporter<OuvrageReva
     }
 
     @Override
-    public OuvrageRevanche importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -183,7 +183,7 @@ class SysEvtOuvrageRevancheImporter extends GenericStructureImporter<OuvrageReva
         }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
-            ouvrage.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+            ouvrage.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
@@ -259,26 +259,26 @@ class SysEvtOuvrageRevancheImporter extends GenericStructureImporter<OuvrageReva
         ouvrage.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
         if (row.getInt(Columns.ID_TYPE_NATURE_HAUT.toString()) != null) {
-            ouvrage.setNatureHautId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE_HAUT.toString())).getId());
+            ouvrage.setNatureHautId(typeNatureImporter.getImportedId(row.getInt(Columns.ID_TYPE_NATURE_HAUT.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_MATERIAU_HAUT.toString()) != null) {
-            ouvrage.setMateriauHautId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU_HAUT.toString())).getId());
+            ouvrage.setMateriauHautId(typeMateriauImporter.getImportedId(row.getInt(Columns.ID_TYPE_MATERIAU_HAUT.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_MATERIAU_BAS.toString()) != null) {
-            ouvrage.setMateriauBasId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU_BAS.toString())).getId());
+            ouvrage.setMateriauBasId(typeMateriauImporter.getImportedId(row.getInt(Columns.ID_TYPE_MATERIAU_BAS.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_NATURE_BAS.toString()) != null) {
-            ouvrage.setNatureBasId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE_BAS.toString())).getId());
+            ouvrage.setNatureBasId(typeNatureImporter.getImportedId(row.getInt(Columns.ID_TYPE_NATURE_BAS.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            ouvrage.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            ouvrage.setPositionId(typePositionImporter.getImportedId(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
-        ouvrage.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
+        
         ouvrage.setGeometry(buildGeometry(troncon.getGeometry(), ouvrage, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return ouvrage;

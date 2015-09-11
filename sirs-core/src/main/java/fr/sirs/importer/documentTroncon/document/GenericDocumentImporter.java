@@ -11,7 +11,7 @@ import org.ektorp.CouchDbConnector;
  * @author Samuel Andrés (Geomatys)
  * @param <T>
  */
-public abstract class GenericDocumentImporter<T extends Object> extends GenericImporter implements DocumentsUpdatable {
+public abstract class GenericDocumentImporter<T extends Object> extends DocumentImporter implements DocumentsUpdatable {
 
     protected Map<Integer, T> related = null;
     
@@ -35,6 +35,6 @@ public abstract class GenericDocumentImporter<T extends Object> extends GenericI
     @Override
     public void update() throws IOException, AccessDbImporterException {
         if(related==null) compute();
-        couchDbConnector.executeBulk(related.values());
+        context.outputDb.executeBulk(related.values());
     }
 }

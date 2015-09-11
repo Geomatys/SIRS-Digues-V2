@@ -68,7 +68,7 @@ public class MarcheMaitreOeuvreImporter extends GenericEntityLinker {
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         final Map<Integer, RefFonctionMaitreOeuvre> fonctionsMo = typeFonctionMoImporter.getTypeReferences();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             
@@ -93,7 +93,7 @@ public class MarcheMaitreOeuvreImporter extends GenericEntityLinker {
             }
         }
         
-        couchDbConnector.executeBulk(marches.values());
+        context.outputDb.executeBulk(marches.values());
         
     }
 }

@@ -1,39 +1,31 @@
 package fr.sirs.importer.intervenant;
 
 import fr.sirs.importer.*;
-import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
-import static fr.sirs.importer.DbImporter.TableName.ORGANISME_DISPOSE_INTERVENANT;
+import fr.sirs.core.model.Organisme;
+import fr.sirs.importer.v2.DocumentUpdater;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import org.ektorp.CouchDbConnector;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class OrganismeDisposeIntervenantImporter extends GenericImporter {
+public class OrganismeDisposeIntervenantImporter extends DocumentUpdater<Organisme> {
 
-    private Map<Integer, List<ContactOrganisme>> contactOrganismesByOrganismeId = null;
-    private IntervenantImporter intervenantImporter;
+    private static final String TABLE_NAME = "ORGANISME_DISPOSE_INTERVENANT";
 
-    private OrganismeDisposeIntervenantImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector) {
-        super(accessDatabase, couchDbConnector);
-    }
+    private GenericImporter<Contact> contactImporter;
 
-    public OrganismeDisposeIntervenantImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
-            final IntervenantImporter intervenantImporter) {
-        this(accessDatabase, couchDbConnector);
-        this.intervenantImporter = intervenantImporter;
+    @Override
+    public String getRowIdFieldName() {
+        return Columns.ID_ORGANISME.name();
     }
 
     private enum Columns {
@@ -44,9 +36,9 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
         DATE_DERNIERE_MAJ,
     };
 
-    public Map<Integer, List<ContactOrganisme>> getContactOrganismeByOrganismeId() throws IOException {
-        if (contactOrganismesByOrganismeId == null) compute();
-        return contactOrganismesByOrganismeId;
+    @Override
+    protected Class<Organisme> getDocumentClass() {
+        return Organisme.class;
     }
 
     @Override
@@ -60,44 +52,47 @@ public class OrganismeDisposeIntervenantImporter extends GenericImporter {
 
     @Override
     public String getTableName() {
-        return ORGANISME_DISPOSE_INTERVENANT.toString();
+        return TABLE_NAME;
     }
 
     @Override
-    protected void compute() throws IOException {
-        contactOrganismesByOrganismeId = new HashMap<>();
-        
-        final Map<Integer, Contact> organismes = intervenantImporter.getIntervenants();
-        
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final ContactOrganisme contactOrganisme = createAnonymValidElement(ContactOrganisme.class);
+    protected void postCompute() throws AccessDbImporterException {
+        super.postCompute();
+        contactImporter = null;
+    }
 
-            contactOrganisme.setContactId(organismes.get(row.getInt(Columns.ID_INTERVENANT.toString())).getId());
-            
-            if (row.getDate(Columns.DATE_DEBUT_INTERV_ORG.toString()) != null) {
-                contactOrganisme.setDateDebutIntervenant(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DEBUT_INTERV_ORG.toString()), dateTimeFormatter));
-            }
-            
-            if (row.getDate(Columns.DATE_FIN_INTERV_ORG.toString()) != null) {
-                contactOrganisme.setDateFinIntervenant(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN_INTERV_ORG.toString()), dateTimeFormatter));
-            }
-            
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                contactOrganisme.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
-            }
-            
-            // Table de jointure, donc pas d'ID propre. On choisit arbitrairement l'ID de l'intervenant comme pseudo-id.
-            contactOrganisme.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERVENANT.toString())));
-            
-            List<ContactOrganisme> listByIntervenantId = contactOrganismesByOrganismeId.get(row.getInt(Columns.ID_ORGANISME.toString()));
-            if (listByIntervenantId == null) {
-                listByIntervenantId = new ArrayList<>();
-            }
-            listByIntervenantId.add(contactOrganisme);
-            contactOrganismesByOrganismeId.put(row.getInt(Columns.ID_ORGANISME.toString()), listByIntervenantId);
+    @Override
+    protected void preCompute() throws AccessDbImporterException {
+        super.preCompute();
+        contactImporter = context.importers.get(Contact.class);
+    }
+
+
+    @Override
+    public Organisme importRow(Row row, Organisme output) throws IOException, AccessDbImporterException {
+        final ContactOrganisme contactOrganisme = createAnonymValidElement(ContactOrganisme.class);
+
+        contactOrganisme.setContactId(contactImporter.getImportedId(row.getInt(Columns.ID_INTERVENANT.toString())));
+
+        final Date dateDebut = row.getDate(Columns.DATE_DEBUT_INTERV_ORG.toString());
+        if (dateDebut != null) {
+            contactOrganisme.setDateDebutIntervenant(context.convertData(dateDebut, LocalDate.class));
         }
-        
+
+        final Date dateFin = row.getDate(Columns.DATE_FIN_INTERV_ORG.toString());
+        if (dateFin != null) {
+            contactOrganisme.setDateFinIntervenant(context.convertData(dateFin, LocalDate.class));
+        }
+
+        final Date dateMaj = row.getDate(Columns.DATE_DERNIERE_MAJ.toString());
+        if (dateMaj != null) {
+            contactOrganisme.setDateMaj(DbImporter.parseLocalDate(dateMaj, dateTimeFormatter));
+        }
+
+        // Table de jointure, donc pas d'ID propre. On choisit arbitrairement l'ID de l'intervenant comme pseudo-id.
+        contactOrganisme.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERVENANT.toString())));
+        output.getContactOrganisme().add(contactOrganisme);
+
+        return output;
     }
 }

@@ -156,7 +156,7 @@ class SysEvtCheminAccesImporter extends GenericReseauImporter<VoieAcces> {
     }
 
     @Override
-    public VoieAcces importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -180,7 +180,7 @@ class SysEvtCheminAccesImporter extends GenericReseauImporter<VoieAcces> {
         }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
-            voie.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+            voie.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
@@ -272,7 +272,7 @@ class SysEvtCheminAccesImporter extends GenericReseauImporter<VoieAcces> {
         }
 
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            voie.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            voie.setPositionId(typePositionImporter.getImportedId(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
         if (row.getDouble(Columns.LARGEUR.toString()) != null) {
@@ -280,7 +280,7 @@ class SysEvtCheminAccesImporter extends GenericReseauImporter<VoieAcces> {
         }
 
         if (row.getInt(Columns.ID_TYPE_NATURE.toString()) != null) {
-            voie.setMateriauId(typesMateriau.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
+            voie.setMateriauId(typeMateriauImporter.getImportedId(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
         }
 
         voie.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));

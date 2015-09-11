@@ -31,7 +31,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class ProfilLongPointXYZImporter extends GenericImporter {
+class ProfilLongPointXYZImporter extends DocumentImporter {
 
     private Map<Integer, XYZProfilLong> points = null;
     private Map<Integer, List<XYZProfilLong>> pointsByProfil = null;
@@ -79,7 +79,7 @@ class ProfilLongPointXYZImporter extends GenericImporter {
         points = new HashMap<>();
         pointsByProfil = new HashMap<>();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
             final XYZProfilLong levePoint = createAnonymValidElement(XYZProfilLong.class);

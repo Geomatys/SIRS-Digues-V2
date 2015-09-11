@@ -1,6 +1,5 @@
 package fr.sirs.importer.objet.ligneEau;
 
-import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -16,21 +15,15 @@ import fr.sirs.core.model.RefReferenceHauteur;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import static fr.sirs.importer.DbImporter.cleanNullString;
-import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
-import fr.sirs.importer.objet.TypeRefHeauImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.ektorp.CouchDbConnector;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.referencing.CRS;
 import org.opengis.geometry.MismatchedDimensionException;
@@ -46,22 +39,6 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
 
     private final LigneEauMesuresPrzImporter ligneEauMesuresPrzImporter;
     private final LigneEauMesuresXyzImporter ligneEauMesuresXyzImporter;
-
-    SysEvtLigneEauImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector,
-            final TronconGestionDigueImporter tronconGestionDigueImporter,
-            final SystemeReperageImporter systemeReperageImporter,
-            final BorneDigueImporter borneDigueImporter,
-            final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
-            final LigneEauMesuresPrzImporter ligneEauMesuresPrzImporter,
-            final LigneEauMesuresXyzImporter ligneEauMesuresXyzImporter,
-            final TypeRefHeauImporter typeRefHeauImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
-                systemeReperageImporter, borneDigueImporter,
-                evenementHydrauliqueImporter, typeRefHeauImporter);
-        this.ligneEauMesuresPrzImporter = ligneEauMesuresPrzImporter;
-        this.ligneEauMesuresXyzImporter = ligneEauMesuresXyzImporter;
-    }
 
     private enum Columns {
 
@@ -112,7 +89,7 @@ class SysEvtLigneEauImporter extends GenericLigneEauImporter {
     }
 
     @Override
-    public LigneEau importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();

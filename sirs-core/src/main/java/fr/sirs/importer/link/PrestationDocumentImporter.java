@@ -74,7 +74,7 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
         final Map<String, RapportEtude> rapportsEtude = rapportEtudeByCouchDbId();
         final Map<String, DocumentGrandeEchelle> documentsGrandeEchelle = documentGrandeEchelleByCouchDbId();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             
@@ -96,8 +96,8 @@ public class PrestationDocumentImporter extends GenericEntityLinker {
             }
         }
         
-        couchDbConnector.executeBulk(prestations.values());
-        couchDbConnector.executeBulk(rapportsEtude.values());
+        context.outputDb.executeBulk(prestations.values());
+        context.outputDb.executeBulk(rapportsEtude.values());
     }
     
     private Map<String, RapportEtude> rapportEtudeByCouchDbId() 

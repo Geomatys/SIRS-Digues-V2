@@ -128,7 +128,7 @@ public class PhotoLocaliseeEnPrImporter extends PhotoImporter {
         final Map<Integer, RefCote> cotes = typeCoteImporter.getTypeReferences();
         final Map<Entry<Integer, Integer>, DbImporter.TableName> types = typeDonneesSousGroupeImporter.getTypes();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final TronconDigue troncon = troncons.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));

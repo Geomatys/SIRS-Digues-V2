@@ -2,9 +2,6 @@ package fr.sirs.importer.troncon;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Contact;
@@ -18,37 +15,32 @@ import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.SystemeReperageImporter;
+import fr.sirs.importer.v2.CorruptionLevel;
+import fr.sirs.importer.v2.ErrorReport;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
 public class GardienTronconGestionImporter extends GenericPeriodeLocaliseeImporter<GardeTroncon> {
-    
+
     private final IntervenantImporter intervenantImporter;
 
     public GardienTronconGestionImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
+            final CouchDbConnector couchDbConnector,
             final TronconGestionDigueImporter tronconGestionDigueImporter,
             final SystemeReperageImporter systemeReperageImporter,
             final BorneDigueImporter borneDigueImporter,
             final IntervenantImporter intervenantImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter, 
+        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter);
         this.intervenantImporter = intervenantImporter;
     }
@@ -96,17 +88,17 @@ public class GardienTronconGestionImporter extends GenericPeriodeLocaliseeImport
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
         final Map<Integer, SystemeReperage> systemesReperage = systemeReperageImporter.getSystemeRepLineaire();
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
-        
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final GardeTroncon garde = createAnonymValidElement(GardeTroncon.class);
-        
+
             final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
             garde.setLinearId(troncon.getId());
-            
+
             garde.setDesignation(String.valueOf(row.getInt(Columns.ID_GARDIEN_TRONCON_GESTION.toString())));
-            
+
             if (row.getDate(Columns.DATE_DEBUT.toString()) != null) {
                 garde.setDate_debut(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DEBUT.toString()), dateTimeFormatter));
             }
@@ -148,37 +140,13 @@ public class GardienTronconGestionImporter extends GenericPeriodeLocaliseeImport
             if (row.getDouble(Columns.DIST_BORNEREF_FIN.toString()) != null) {
                 garde.setBorne_fin_distance(row.getDouble(Columns.DIST_BORNEREF_FIN.toString()).floatValue());
             }
-            
-            GeometryFactory geometryFactory = new GeometryFactory();
-            final MathTransform lambertToRGF;
+
             try {
-                lambertToRGF = CRS.findMathTransform(DbImporter.IMPORT_CRS, getOutputCrs(), true);
-
-                try {
-
-                    if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                        garde.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X_DEBUT.toString()),
-                                row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
-                    }
-                } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(ProprietaireTronconGestionImporter.class.getName()).log(Level.WARNING, null, ex);
-                }
-
-                try {
-
-                    if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                        garde.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X_FIN.toString()),
-                                row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
-                    }
-                } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(ProprietaireTronconGestionImporter.class.getName()).log(Level.WARNING, null, ex);
-                }
-            } catch (FactoryException ex) {
-                Logger.getLogger(ProprietaireTronconGestionImporter.class.getName()).log(Level.WARNING, null, ex);
+                context.setGeoPositions(row, garde);
+            } catch (TransformException ex) {
+                context.reportError(new ErrorReport(ex, row, getTableName(), null, garde, null, "Cannnot set geographic position.", CorruptionLevel.FIELD));
             }
-            
+
             garde.setGeometry(buildGeometry(troncon.getGeometry(), garde, tronconGestionDigueImporter.getBorneDigueRepository()));
 
             // Set the references.
@@ -188,9 +156,9 @@ public class GardienTronconGestionImporter extends GenericPeriodeLocaliseeImport
             } else {
                 throw new AccessDbImporterException("Le contact " + intervenant + " n'a pas encore d'identifiant CouchDb !");
             }
-            
+
             objets.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), garde);
         }
-        couchDbConnector.executeBulk(objets.values());
+        context.outputDb.executeBulk(objets.values());
     }
 }

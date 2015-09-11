@@ -61,15 +61,15 @@ public class MarcheImporter extends GenericDocumentImporter<Marche> {
     protected void compute() throws IOException, AccessDbImporterException {
         related = new HashMap<>();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             related.put(row.getInt(Columns.ID_MARCHE.toString()), importRow(row));
         }
-        couchDbConnector.executeBulk(related.values());
+        context.outputDb.executeBulk(related.values());
     }
     
-    public Marche importRow(final Row row) throws IOException{
+    public public  importRow(final Row row) throws IOException{
         
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         

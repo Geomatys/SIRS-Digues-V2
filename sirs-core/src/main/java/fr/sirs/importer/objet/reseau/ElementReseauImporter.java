@@ -327,7 +327,7 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
         final Map<Integer, RefPosition> typesPosition = typePositionImporter.getTypeReferences();
 
         // Vérification de la cohérence des structures au sens strict.
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
 
@@ -339,11 +339,11 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
                     final OuvrageFranchissement pointAcces = (OuvrageFranchissement) objet;
 
                     if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-                        pointAcces.setPositionBasId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+                        pointAcces.setPositionBasId(typePositionImporter.getImportedId(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
                     }
 
                     if (row.getInt(Columns.ID_TYPE_POSITION_HAUTE.toString()) != null) {
-                        pointAcces.setPositionHautId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION_HAUTE.toString())).getId());
+                        pointAcces.setPositionHautId(typePositionImporter.getImportedId(row.getInt(Columns.ID_TYPE_POSITION_HAUTE.toString())).getId());
                     }
 
                     if (row.getInt(Columns.ID_TYPE_ORIENTATION_OUVRAGE_FRANCHISSEMENT.toString()) != null) {
@@ -419,11 +419,11 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
                 listByTronconId.add(objet);
             }
         }
-        couchDbConnector.executeBulk(objets.values());
+        context.outputDb.executeBulk(objets.values());
     }
 
     @Override
-    public ObjetReseau importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
         final Class typeStructure = typeElementReseauImporter.getTypeReferences().get(row.getInt(Columns.ID_TYPE_ELEMENT_RESEAU.toString()));
         if (typeStructure == OuvrageHydrauliqueAssocie.class) {
             return sysEvtAutreOuvrageHydrauliqueImporter.importRow(row);

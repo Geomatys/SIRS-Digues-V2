@@ -164,7 +164,7 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
     }
 
     @Override
-    public SommetRisberme importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -185,7 +185,7 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
         }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
-            sommetRisberme.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+            sommetRisberme.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
@@ -263,22 +263,22 @@ class SysEvtSommetRisbermeImporter extends GenericStructureImporter<SommetRisber
         sommetRisberme.setNumCouche(row.getInt(Columns.N_COUCHE.toString()));
 
         if (row.getInt(Columns.ID_TYPE_MATERIAU.toString()) != null) {
-            sommetRisberme.setMateriauId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());
+            sommetRisberme.setMateriauId(typeMateriauImporter.getImportedId(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_NATURE.toString()) != null) {
-            sommetRisberme.setNatureId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
+            sommetRisberme.setNatureId(typeNatureImporter.getImportedId(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_FONCTION.toString()) != null) {
-            sommetRisberme.setFonctionId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
+            sommetRisberme.setFonctionId(typeFonctionImporter.getImportedId(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
         }
 
         if (row.getDouble(Columns.EPAISSEUR.toString()) != null) {
             sommetRisberme.setEpaisseur(row.getDouble(Columns.EPAISSEUR.toString()).floatValue());
         }
         
-        sommetRisberme.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
+        
         sommetRisberme.setGeometry(buildGeometry(troncon.getGeometry(), sommetRisberme, tronconGestionDigueImporter.getBorneDigueRepository()));
 
         return sommetRisberme;

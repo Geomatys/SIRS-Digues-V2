@@ -52,7 +52,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TypeDonneesSousGroupeImporter extends GenericImporter {
+public class TypeDonneesSousGroupeImporter extends DocumentImporter {
     
     private Map<Entry<Integer, Integer>, DbImporter.TableName> types = null;
     private Map<Entry<Integer, Integer>, Class<? extends Element>> classes = null;
@@ -92,7 +92,7 @@ public class TypeDonneesSousGroupeImporter extends GenericImporter {
         types = new HashMap<>();
         classes = new HashMap<>();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final Entry<Integer, Integer> entry = new AbstractMap.SimpleEntry<>(

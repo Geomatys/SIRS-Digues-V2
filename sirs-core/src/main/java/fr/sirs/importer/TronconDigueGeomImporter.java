@@ -29,7 +29,7 @@ import org.opengis.util.FactoryException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TronconDigueGeomImporter extends GenericImporter {
+public class TronconDigueGeomImporter extends DocumentImporter {
     
     private Map<Integer, Geometry> tronconDigueGeom = null;
 
@@ -77,7 +77,7 @@ public class TronconDigueGeomImporter extends GenericImporter {
     protected void compute() throws IOException {
         tronconDigueGeom = new HashMap<>();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             try {
                 final Row row = it.next();

@@ -56,7 +56,7 @@ public class ElementReseauOuvrageTelNrjImporter extends GenericObjetLinker {
         
         final Map<Integer, ObjetReseau> reseaux = reseauImpoter.getById();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final OuvrageTelecomEnergie ouvrage = (OuvrageTelecomEnergie) reseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU_OUVRAGE_TEL_NRJ.toString()));

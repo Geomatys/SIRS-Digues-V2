@@ -9,7 +9,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public abstract class TypeDocumentImporter extends GenericImporter {
+public abstract class TypeDocumentImporter extends DocumentImporter {
     
     protected Map<Integer, Class> classesDocument = null;
     

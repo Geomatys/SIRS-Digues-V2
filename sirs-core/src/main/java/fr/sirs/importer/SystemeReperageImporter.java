@@ -18,7 +18,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class SystemeReperageImporter extends GenericImporter implements DocumentsUpdatable {
+public class SystemeReperageImporter extends DocumentImporter implements DocumentsUpdatable {
 
     private Map<Integer, SystemeReperage> systemesReperage = null;
     private Map<Integer, List<SystemeReperage>> systemesReperageByTronconId = null;
@@ -47,7 +47,7 @@ public class SystemeReperageImporter extends GenericImporter implements Document
                 sr.setLinearId(tronconGestionDigueImporter.getTronconsDigues().get(internalTronconId).getId());
             }
         }
-        couchDbConnector.executeBulk(systemesReperage.values());
+        context.outputDb.executeBulk(systemesReperage.values());
     }
     
     private enum Columns {
@@ -88,7 +88,7 @@ public class SystemeReperageImporter extends GenericImporter implements Document
         systemesReperage = new HashMap<>();
         systemesReperageByTronconId = new HashMap<>();
 
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         final List<SystemeReperage> systemes = new ArrayList<>();
         
         while (it.hasNext()) {
@@ -117,6 +117,6 @@ public class SystemeReperageImporter extends GenericImporter implements Document
             // Register the systemeReperage to retrieve a CouchDb ID.
             systemes.add(systemeReperage);
         }
-        couchDbConnector.executeBulk(systemes);
+        context.outputDb.executeBulk(systemes);
     }
 }

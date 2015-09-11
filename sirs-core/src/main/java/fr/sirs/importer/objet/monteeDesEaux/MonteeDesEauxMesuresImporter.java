@@ -27,7 +27,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class MonteeDesEauxMesuresImporter extends GenericImporter {
+class MonteeDesEauxMesuresImporter extends DocumentImporter {
 
     private Map<Integer, List<MesureMonteeEaux>> mesuresByMonteeDesEaux = null;
     
@@ -94,7 +94,7 @@ class MonteeDesEauxMesuresImporter extends GenericImporter {
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
         final Map<Integer, RefSource> typesSource = sourceInfoImporter.getTypeReferences();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final MesureMonteeEaux mesure = createAnonymValidElement(MesureMonteeEaux.class);
@@ -120,7 +120,7 @@ class MonteeDesEauxMesuresImporter extends GenericImporter {
             }
             
             if(row.getInt(Columns.ID_SOURCE.toString())!=null){
-                mesure.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+                mesure.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
             }
             
             if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

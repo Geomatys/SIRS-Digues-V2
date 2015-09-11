@@ -2,13 +2,9 @@ package fr.sirs.importer.documentTroncon.document.profilTravers;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.XYZLeveProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.PROFIL_EN_TRAVERS_XYZ;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
@@ -17,39 +13,33 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
 import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-class ProfilTraversPointXYZImporter extends GenericImporter {
+class ProfilTraversPointXYZImporter extends DocumentImporter {
 
     private Map<Integer, XYZLeveProfilTravers> points = null;
     private Map<Integer, List<XYZLeveProfilTravers>> pointsByLeve = null;
-    
+
     ProfilTraversPointXYZImporter(final Database accessDatabase, final CouchDbConnector couchDbConnector) {
         super(accessDatabase, couchDbConnector);
     }
-    
+
     public Map<Integer, XYZLeveProfilTravers> getLeveePoints() throws IOException, AccessDbImporterException{
         if(points==null) compute();
         return points;
     }
-    
+
     public Map<Integer, List<XYZLeveProfilTravers>> getLeveePointByLeveId() throws IOException, AccessDbImporterException{
         if(pointsByLeve==null) compute();
         return pointsByLeve;
     }
-    
+
     private enum Columns {
         ID_PROFIL_EN_TRAVERS_LEVE,
         ID_POINT,
@@ -58,7 +48,7 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
         Z,
 //        DATE_DERNIERE_MAJ // Pas dans le nouveau modèle
     }
-    
+
     @Override
     protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
@@ -77,31 +67,26 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
     protected void compute() throws IOException, AccessDbImporterException {
         points = new HashMap<>();
         pointsByLeve = new HashMap<>();
-        
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
-        while(it.hasNext()){
+
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
+        while (it.hasNext()) {
             final Row row = it.next();
             final XYZLeveProfilTravers levePoint = createAnonymValidElement(XYZLeveProfilTravers.class);
 
-            GeometryFactory geometryFactory = new GeometryFactory();
-            final MathTransform lambertToRGF;
-            try {
-                lambertToRGF = CRS.findMathTransform(DbImporter.IMPORT_CRS, getOutputCrs(), true);
+            final Double pointX = row.getDouble(Columns.X.toString());
+            final Double pointY = row.getDouble(Columns.Y.toString());
+            if (pointX != null && pointY != null) {
+
+                final double[] point = new double[]{pointX, pointY};
 
                 try {
+                    context.geoTransform.transform(point, 0, point, 0, 1);
+                    levePoint.setX(point[0]);
+                    levePoint.setY(point[1]);
 
-                    if (row.getDouble(Columns.X.toString()) != null && row.getDouble(Columns.Y.toString()) != null) {
-                        Point point = (Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                                row.getDouble(Columns.X.toString()),
-                                row.getDouble(Columns.Y.toString()))), lambertToRGF);
-                        levePoint.setX(point.getX());
-                        levePoint.setY(point.getY());
-                    }
                 } catch (MismatchedDimensionException | TransformException ex) {
-                    Logger.getLogger(this.getClass().getName()).log(Level.WARNING, null, ex);
+                    context.reportError(getTableName(), row, ex, "Cannot affect a point due to bad transformation");
                 }
-            } catch (FactoryException ex) {
-                Logger.getLogger(this.getClass().getName()).log(Level.WARNING, null, ex);
             }
 
             if (row.getDouble(Columns.Z.toString()) != null) {
@@ -109,9 +94,9 @@ class ProfilTraversPointXYZImporter extends GenericImporter {
             }
 
             levePoint.setDesignation(String.valueOf(row.getInt(Columns.ID_POINT.toString())));
-            
+
             points.put(row.getInt(Columns.ID_POINT.toString()), levePoint);
-            
+
             List<XYZLeveProfilTravers> listByLeve = pointsByLeve.get(row.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.toString()));
             if (listByLeve == null) {
                 listByLeve = new ArrayList<>();

@@ -59,7 +59,7 @@ public class LaisseCrueJournalImporter extends GenericEntityLinker {
         final Map<Integer, LaisseCrue> laisseCrues = laisseCrueImporter.getById();
         final Map<Integer, ArticleJournal> articles = journalArticleImporter.getRelated();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             
@@ -71,6 +71,6 @@ public class LaisseCrueJournalImporter extends GenericEntityLinker {
             }
         }
         
-        couchDbConnector.executeBulk(laisseCrues.values());
+        context.outputDb.executeBulk(laisseCrues.values());
     }
 }

@@ -1,77 +1,127 @@
 package fr.sirs.importer;
 
-import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
-import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import static fr.sirs.importer.DbImporter.TableName.BORNE_DIGUE;
+import fr.sirs.importer.v2.CorruptionLevel;
+import fr.sirs.importer.v2.DocumentImporter;
+import fr.sirs.importer.v2.ErrorReport;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.ektorp.CouchDbConnector;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.operation.MathTransform;
+import org.geotoolkit.display2d.GO2Utilities;
 import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class BorneDigueImporter extends GenericImporter {
+public class BorneDigueImporter extends DocumentImporter<BorneDigue> {
 
-    private Map<Integer, BorneDigue> bornesDigue = null;
+    // TODO : delete
     private Map<Integer, List<BorneDigue>> bornesDigueByTronconId = null;
 
-    BorneDigueImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector) {
-        super(accessDatabase, couchDbConnector);
-    }
-    
+
     private enum Columns {
-        ID_BORNE, 
-        ID_TRONCON_GESTION, 
+        ID_BORNE,
+        ID_TRONCON_GESTION,
         NOM_BORNE,
-        X_POINT, 
-        Y_POINT, 
-        Z_POINT, 
-        DATE_DEBUT_VAL, 
+        X_POINT,
+        Y_POINT,
+        Z_POINT,
+        DATE_DEBUT_VAL,
         DATE_FIN_VAL,
-        FICTIVE, 
-//        X_POINT_ORIGINE, 
+        FICTIVE,
+//        X_POINT_ORIGINE,
 //        Y_POINT_ORIGINE,
-        COMMENTAIRE_BORNE, 
+        COMMENTAIRE_BORNE,
         DATE_DERNIERE_MAJ
     };
 
-    /**
-     * 
-     * @return A map containing all the BorneDigue instances referenced by their
-     * internal database identifier.
-     * @throws IOException 
-     */
-    public Map<Integer, BorneDigue> getBorneDigue() throws IOException {
-        if (bornesDigue == null) compute();
-        return bornesDigue;
+    @Override
+    protected Class getDocumentClass() {
+        return BorneDigue.class;
     }
-    
+
+    @Override
+    public BorneDigue importRow(Row row, BorneDigue output) throws IOException, AccessDbImporterException {
+        output.setLibelle(row.getString(Columns.NOM_BORNE.toString()));
+        output.setCommentaire(row.getString(Columns.COMMENTAIRE_BORNE.toString()));
+
+        final Date dateMaj = row.getDate(Columns.DATE_DERNIERE_MAJ.toString());
+        if (dateMaj != null) {
+            output.setDateMaj(context.convertData(dateMaj, LocalDate.class));
+        }
+
+        final Date dateDebut = row.getDate(Columns.DATE_DEBUT_VAL.toString());
+        if (dateDebut != null) {
+            output.setDate_debut(context.convertData(dateDebut, LocalDate.class));
+        }
+
+        final Date dateFin = row.getDate(Columns.DATE_FIN_VAL.toString());
+        if (dateFin != null) {
+            output.setDate_fin(context.convertData(dateFin, LocalDate.class));
+        }
+
+        output.setFictive(row.getBoolean(Columns.FICTIVE.toString()));
+
+        try {
+            final Double pointZ = row.getDouble(Columns.Z_POINT.toString());
+            final Point point;
+            if (pointZ != null) {
+                final double[] coord = new double[]{
+                    row.getDouble(Columns.X_POINT.toString()),
+                    row.getDouble(Columns.Y_POINT.toString()),
+                    pointZ
+                };
+                context.geoTransform.transform(coord, 0, coord, 0, 1);
+                point = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(coord[0], coord[1], coord[2]));
+            } else {
+
+                final double[] coord = new double[]{
+                    row.getDouble(Columns.X_POINT.toString()),
+                    row.getDouble(Columns.Y_POINT.toString())
+                };
+                context.geoTransform.transform(coord, 0, coord, 0, 1);
+                point = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(coord[0], coord[1]));
+            }
+            output.setGeometry(point);
+        } catch (TransformException ex) {
+            context.reportError(new ErrorReport(ex, row, getTableName(), null, output, "geometry", "Cannot set position of a borne.", CorruptionLevel.FIELD));
+        }
+
+        output.setDesignation(String.valueOf(row.getInt(Columns.ID_BORNE.toString())));
+
+        // Set the list ByTronconId
+        List<BorneDigue> listByTronconId = bornesDigueByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
+        if (listByTronconId == null) {
+            listByTronconId = new ArrayList<>();
+            bornesDigueByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+        }
+
+        listByTronconId.add(output);
+        bornesDigueByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
+
+        return output;
+    }
+
+    @Override
+    public String getRowIdFieldName() {
+        return Columns.ID_BORNE.name();
+    }
+
     /**
-     * 
-     * @return A map containing the BorneDigue lists referenced by the internal 
+     *
+     * @return A map containing the BorneDigue lists referenced by the internal
      * database TronconDigue idenfifier.
-     * @throws IOException 
+     * @throws IOException
      */
-    public Map<Integer, List<BorneDigue>> getBorneDigueByTronconId() throws IOException{
+    public Map<Integer, List<BorneDigue>> getBorneDigueByTronconId() throws IOException, AccessDbImporterException {
         if(bornesDigueByTronconId==null) compute();
         return bornesDigueByTronconId;
     }
@@ -87,65 +137,5 @@ public class BorneDigueImporter extends GenericImporter {
     @Override
     public String getTableName() {
         return BORNE_DIGUE.toString();
-    }
-    
-    @Override
-    protected void compute() throws IOException{
-        bornesDigue = new HashMap<>();
-        bornesDigueByTronconId = new HashMap<>();
-        
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final BorneDigue borne = createAnonymValidElement(BorneDigue.class);
-
-            borne.setLibelle(row.getString(Columns.NOM_BORNE.toString()));
-            borne.setCommentaire(row.getString(Columns.COMMENTAIRE_BORNE.toString()));
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                borne.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
-            }
-            if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
-                borne.setDate_debut(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DEBUT_VAL.toString()), dateTimeFormatter));
-            }
-            if (row.getDate(Columns.DATE_FIN_VAL.toString()) != null) {
-                borne.setDate_fin(DbImporter.parseLocalDate(row.getDate(Columns.DATE_FIN_VAL.toString()), dateTimeFormatter));
-            }
-            borne.setFictive(row.getBoolean(Columns.FICTIVE.toString()));
-            GeometryFactory geometryFactory = new GeometryFactory();
-
-            try {
-                final MathTransform lambertToRGF = CRS.findMathTransform(DbImporter.IMPORT_CRS, getOutputCrs(), true);
-
-                final Point point;
-                if (row.getDouble(Columns.Z_POINT.toString()) != null) {
-                    point = (Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(Columns.X_POINT.toString()),
-                            row.getDouble(Columns.Y_POINT.toString()),
-                            row.getDouble(Columns.Z_POINT.toString()))), lambertToRGF);
-                } else {
-                    point = (Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(Columns.X_POINT.toString()),
-                            row.getDouble(Columns.Y_POINT.toString()))), lambertToRGF);
-                }
-                borne.setGeometry(point);
-            } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(BorneDigueImporter.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-            borne.setDesignation(String.valueOf(row.getInt(Columns.ID_BORNE.toString())));
-            
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            bornesDigue.put(row.getInt(Columns.ID_BORNE.toString()), borne);
-
-            // Set the list ByTronconId
-            List<BorneDigue> listByTronconId = bornesDigueByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-            if (listByTronconId == null) {
-                listByTronconId = new ArrayList<>();
-                bornesDigueByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-            }
-            listByTronconId.add(borne);
-            bornesDigueByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-        }
-        couchDbConnector.executeBulk(bornesDigue.values());
     }
 }

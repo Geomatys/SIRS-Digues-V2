@@ -2,9 +2,6 @@ package fr.sirs.importer.objet.structure;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
@@ -27,19 +24,14 @@ import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
+import fr.sirs.importer.v2.CorruptionLevel;
+import fr.sirs.importer.v2.ErrorReport;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 
 /**
  *
@@ -163,7 +155,7 @@ class SysEvtFondationImporter extends GenericStructureImporter<Fondation> {
     }
 
     @Override
-    public Fondation importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -175,11 +167,11 @@ class SysEvtFondationImporter extends GenericStructureImporter<Fondation> {
         final Map<Integer, RefFonction> typesFonction = typeFonctionImporter.getTypeReferences();
 
         final Fondation fondation = createAnonymValidElement(Fondation.class);
-        
+
         fondation.setLinearId(troncon.getId());
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
-            fondation.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+            fondation.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
@@ -198,34 +190,11 @@ class SysEvtFondationImporter extends GenericStructureImporter<Fondation> {
             fondation.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
-        GeometryFactory geometryFactory = new GeometryFactory();
-        final MathTransform lambertToRGF;
+
         try {
-            lambertToRGF = CRS.findMathTransform(DbImporter.IMPORT_CRS, getOutputCrs(), true);
-
-            try {
-
-                if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                    fondation.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(Columns.X_DEBUT.toString()),
-                            row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
-                }
-            } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtFondationImporter.class.getName()).log(Level.WARNING, null, ex);
-            }
-
-            try {
-
-                if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                    fondation.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(Columns.X_FIN.toString()),
-                            row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
-                }
-            } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtFondationImporter.class.getName()).log(Level.WARNING, null, ex);
-            }
-        } catch (FactoryException ex) {
-            Logger.getLogger(SysEvtFondationImporter.class.getName()).log(Level.WARNING, null, ex);
+            context.setGeoPositions(row, fondation);
+        } catch (TransformException ex) {
+            context.reportError(new ErrorReport(ex, row, getTableName(), null, fondation, null, "Cannnot set geographic position.", CorruptionLevel.FIELD));
         }
 
         if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
@@ -257,24 +226,24 @@ class SysEvtFondationImporter extends GenericStructureImporter<Fondation> {
         fondation.setNumCouche(row.getInt(Columns.N_COUCHE.toString()));
 
         if (row.getInt(Columns.ID_TYPE_MATERIAU.toString()) != null) {
-            fondation.setMateriauId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());
+            fondation.setMateriauId(typeMateriauImporter.getImportedId(row.getInt(Columns.ID_TYPE_MATERIAU.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_NATURE.toString()) != null) {
-            fondation.setNatureId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
+            fondation.setNatureId(typeNatureImporter.getImportedId(row.getInt(Columns.ID_TYPE_NATURE.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_FONCTION.toString()) != null) {
-            fondation.setFonctionId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
+            fondation.setFonctionId(typeFonctionImporter.getImportedId(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
         }
 
         if (row.getDouble(Columns.EPAISSEUR.toString()) != null) {
             fondation.setEpaisseur(row.getDouble(Columns.EPAISSEUR.toString()).floatValue());
         }
 
-        fondation.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
-        fondation.setGeometry(buildGeometry(troncon.getGeometry(), fondation, tronconGestionDigueImporter.getBorneDigueRepository()));
         
+        fondation.setGeometry(buildGeometry(troncon.getGeometry(), fondation, tronconGestionDigueImporter.getBorneDigueRepository()));
+
         return fondation;
     }
 

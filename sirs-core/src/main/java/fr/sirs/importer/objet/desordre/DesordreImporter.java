@@ -1,24 +1,14 @@
 package fr.sirs.importer.objet.desordre;
 
-import fr.sirs.importer.objet.TypePositionImporter;
-import fr.sirs.importer.TypeCoteImporter;
-import fr.sirs.importer.objet.SourceInfoImporter;
-import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.BorneDigueImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.Desordre;
-import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -30,29 +20,6 @@ public class DesordreImporter extends GenericDesordreImporter {
     private final SysEvtDesordreImporter sysEvtDesordreImporter;
     private final DesordreObservationImporter desordreObservationImporter;
 
-    public DesordreImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector,
-            final TronconGestionDigueImporter tronconGestionDigueImporter,
-            final SystemeReperageImporter systemeReperageImporter,
-            final BorneDigueImporter borneDigueImporter,
-            final IntervenantImporter intervenantImporter,
-            final SourceInfoImporter typeSourceImporter,
-            final TypePositionImporter typePositionImporter,
-            final TypeCoteImporter typeCoteImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
-                systemeReperageImporter, borneDigueImporter, typeSourceImporter,
-                typeCoteImporter, typePositionImporter);
-        typeDesordreImporter = new TypeDesordreImporter(accessDatabase,
-                couchDbConnector);
-        desordreObservationImporter = new DesordreObservationImporter(
-                accessDatabase, couchDbConnector, intervenantImporter);
-        sysEvtDesordreImporter = new SysEvtDesordreImporter(accessDatabase,
-                couchDbConnector, tronconGestionDigueImporter,
-                systemeReperageImporter, borneDigueImporter,
-                desordreObservationImporter, typeSourceImporter,
-                typePositionImporter, typeCoteImporter, typeDesordreImporter);
-    }
-    
     public DesordreObservationImporter getDesordreObservationImporter(){
         return desordreObservationImporter;
     }
@@ -100,15 +67,13 @@ public class DesordreImporter extends GenericDesordreImporter {
 
         objets = new HashMap<>();
         objetsByTronconId = new HashMap<>();
-        
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final Desordre objet = importRow(row);
 
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                objet.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
-            }
+
 
             // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
             objets.put(row.getInt(Columns.ID_DESORDRE.toString()), objet);
@@ -122,11 +87,11 @@ public class DesordreImporter extends GenericDesordreImporter {
             listByTronconId.add(objet);
         }
 
-        couchDbConnector.executeBulk(objets.values());
+        context.outputDb.executeBulk(objets.values());
     }
 
     @Override
-    public Desordre importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
         return sysEvtDesordreImporter.importRow(row);
     }
 

@@ -21,7 +21,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class MeteoImporter extends GenericImporter {
+public class MeteoImporter extends DocumentImporter {
 
     private Map<Integer, List<Meteo>> meteos = null;
     private final TypeOrientationVentImporter typeOrientationVentImporter;
@@ -63,7 +63,7 @@ public class MeteoImporter extends GenericImporter {
         
         final Map<Integer, RefOrientationVent> typesOrientationVent = typeOrientationVentImporter.getTypeReferences();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
             final Meteo meteo = createAnonymValidElement(Meteo.class);
@@ -103,7 +103,7 @@ public class MeteoImporter extends GenericImporter {
             }
             listByTronconId.add(meteo);
         }
-        couchDbConnector.executeBulk(meteos.values());
+        context.outputDb.executeBulk(meteos.values());
     }
     
     public Map<Integer, List<Meteo>> getMeteoByEvenementHydrauliqueId() throws IOException, AccessDbImporterException{

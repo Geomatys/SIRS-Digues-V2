@@ -143,7 +143,7 @@ class SysEvtOuvertureBatardableImporter extends GenericReseauImporter<OuvertureB
     }
 
     @Override
-    public OuvertureBatardable importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -164,7 +164,7 @@ class SysEvtOuvertureBatardableImporter extends GenericReseauImporter<OuvertureB
         }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
-            ouverture.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+            ouverture.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {

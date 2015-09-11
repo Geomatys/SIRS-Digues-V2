@@ -125,7 +125,7 @@ class SysEvtRapportEtudesImporter extends GenericPositionDocumentImporter<Positi
 //        positions = new HashMap<>();
 //        positionsByTronconId = new HashMap<>();
 //        
-//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+//        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
 //        while (it.hasNext()){
 //            final Row row = it.next();
 //            final PositionDocument documentTroncon = createAnonymValidElement(PositionDocument.class);
@@ -141,7 +141,7 @@ class SysEvtRapportEtudesImporter extends GenericPositionDocumentImporter<Positi
 //    @Override
 //    protected void compute() throws IOException, AccessDbImporterException {
 //        
-//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+//        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
 //        while (it.hasNext()){
 //            final Row row = it.next();
 //            final PositionDocument docTroncon = importRow(row);
@@ -161,7 +161,7 @@ class SysEvtRapportEtudesImporter extends GenericPositionDocumentImporter<Positi
 //    }
 
     @Override
-    PositionDocument importRow(Row row) throws IOException, AccessDbImporterException {
+    public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();

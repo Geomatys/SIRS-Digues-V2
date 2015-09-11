@@ -59,7 +59,7 @@ public class DesordreEvenementHydrauImporter extends GenericEntityLinker {
         final Map<Integer, Desordre> desordres = desordreImporter.getById();
         final Map<Integer, EvenementHydraulique> evenements = evenementHydrauliqueImporter.getEvenements();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             
@@ -71,6 +71,6 @@ public class DesordreEvenementHydrauImporter extends GenericEntityLinker {
             }
         }
         
-        couchDbConnector.executeBulk(desordres.values());
+        context.outputDb.executeBulk(desordres.values());
     }
 }

@@ -2,9 +2,6 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
@@ -26,19 +23,14 @@ import fr.sirs.importer.TypeCoteImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
+import fr.sirs.importer.v2.CorruptionLevel;
+import fr.sirs.importer.v2.ErrorReport;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 
 /**
  *
@@ -150,9 +142,9 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
     public String getTableName() {
         return SYS_EVT_RESEAU_TELECOMMUNICATION.toString();
     }
-    
+
     @Override
-    public ReseauTelecomEnergie importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -166,7 +158,7 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
         final Map<Integer, RefReseauTelecomEnergie> typesReseau = typeReseauTelecomImporter.getTypeReferences();
 
         final ReseauTelecomEnergie reseau = createAnonymValidElement(ReseauTelecomEnergie.class);
-        
+
         reseau.setLinearId(troncon.getId());
 
         reseau.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
@@ -176,7 +168,7 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
         }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
-            reseau.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+            reseau.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
@@ -195,34 +187,10 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
             reseau.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
-        GeometryFactory geometryFactory = new GeometryFactory();
-        final MathTransform lambertToRGF;
         try {
-            lambertToRGF = CRS.findMathTransform(DbImporter.IMPORT_CRS, getOutputCrs(), true);
-
-            try {
-
-                if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                    reseau.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(Columns.X_DEBUT.toString()),
-                            row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
-                }
-            } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtReseauTelecommunicationImporter.class.getName()).log(Level.WARNING, null, ex);
-            }
-
-            try {
-
-                if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                    reseau.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(Columns.X_FIN.toString()),
-                            row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
-                }
-            } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtReseauTelecommunicationImporter.class.getName()).log(Level.WARNING, null, ex);
-            }
-        } catch (FactoryException ex) {
-            Logger.getLogger(SysEvtReseauTelecommunicationImporter.class.getName()).log(Level.WARNING, null, ex);
+            context.setGeoPositions(row, reseau);
+        } catch (TransformException ex) {
+            context.reportError(new ErrorReport(ex, row, getTableName(), null, reseau, null, "Cannnot set geographic position.", CorruptionLevel.FIELD));
         }
 
         if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
@@ -266,7 +234,7 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
         }
 
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            reseau.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            reseau.setPositionId(typePositionImporter.getImportedId(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
         if (row.getDouble(Columns.HAUTEUR.toString()) != null) {
@@ -275,7 +243,7 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
 
         reseau.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
         reseau.setGeometry(buildGeometry(troncon.getGeometry(), reseau, tronconGestionDigueImporter.getBorneDigueRepository()));
-        
+
         return reseau;
     }
 

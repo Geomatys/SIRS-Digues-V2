@@ -23,8 +23,8 @@ public class DesordreJournalImporter extends GenericEntityLinker {
 
     private final DesordreImporter desordreImporter;
     private final JournalArticleImporter journalArticleImporter;
-    
-    public DesordreJournalImporter(final Database accessDatabase, 
+
+    public DesordreJournalImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final DesordreImporter desordreImporter,
             final JournalArticleImporter journalArticleImporter) {
@@ -38,7 +38,7 @@ public class DesordreJournalImporter extends GenericEntityLinker {
         ID_DESORDRE,
 //        DATE_DERNIERE_MAJ
     };
-    
+
     @Override
     protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
@@ -55,22 +55,24 @@ public class DesordreJournalImporter extends GenericEntityLinker {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
+
+        // TODO : move in desordre importer
         
         final Map<Integer, Desordre> desordres = desordreImporter.getById();
         final Map<Integer, ArticleJournal> articles = journalArticleImporter.getRelated();
-        
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
-            
+
             final Desordre desordre = desordres.get(row.getInt(Columns.ID_DESORDRE.toString()));
             final ArticleJournal article = articles.get(row.getInt(Columns.ID_ARTICLE_JOURNAL.toString()));
-            
+
             if(desordre!=null && article!=null){
                 desordre.getArticleIds().add(article.getId());
             }
         }
-        
-        couchDbConnector.executeBulk(desordres.values());
+
+        context.outputDb.executeBulk(desordres.values());
     }
 }

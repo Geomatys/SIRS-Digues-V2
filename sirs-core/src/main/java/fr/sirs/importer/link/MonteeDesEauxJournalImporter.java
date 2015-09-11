@@ -59,7 +59,7 @@ public class MonteeDesEauxJournalImporter extends GenericEntityLinker {
         final Map<Integer, MonteeEaux> montees = monteeDesEauxImporter.getById();
         final Map<Integer, ArticleJournal> articles = journalArticleImporter.getRelated();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             
@@ -71,6 +71,6 @@ public class MonteeDesEauxJournalImporter extends GenericEntityLinker {
             }
         }
         
-        couchDbConnector.executeBulk(montees.values());
+        context.outputDb.executeBulk(montees.values());
     }
 }

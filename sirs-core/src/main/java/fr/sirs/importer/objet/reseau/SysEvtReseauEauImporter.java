@@ -2,9 +2,6 @@ package fr.sirs.importer.objet.reseau;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
@@ -25,19 +22,14 @@ import fr.sirs.importer.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
+import fr.sirs.importer.v2.CorruptionLevel;
+import fr.sirs.importer.v2.ErrorReport;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ektorp.CouchDbConnector;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 
 /**
  *
@@ -148,7 +140,7 @@ class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydrauliqueCie
     }
 
     @Override
-    public ReseauHydrauliqueCielOuvert importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -161,7 +153,7 @@ class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydrauliqueCie
         final Map<Integer, RefReseauHydroCielOuvert> typesReseauHydroCielOuvert = typeReseauEauImporter.getTypeReferences();
 
         final ReseauHydrauliqueCielOuvert reseauEau = createAnonymValidElement(ReseauHydrauliqueCielOuvert.class);
-        
+
         reseauEau.setLinearId(troncon.getId());
 
         reseauEau.setLibelle(cleanNullString(row.getString(Columns.NOM.toString())));
@@ -171,7 +163,7 @@ class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydrauliqueCie
         }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
-            reseauEau.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+            reseauEau.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
@@ -190,34 +182,10 @@ class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydrauliqueCie
             reseauEau.setPrFin(row.getDouble(Columns.PR_FIN_CALCULE.toString()).floatValue());
         }
 
-        GeometryFactory geometryFactory = new GeometryFactory();
-        final MathTransform lambertToRGF;
         try {
-            lambertToRGF = CRS.findMathTransform(DbImporter.IMPORT_CRS, getOutputCrs(), true);
-
-            try {
-
-                if (row.getDouble(Columns.X_DEBUT.toString()) != null && row.getDouble(Columns.Y_DEBUT.toString()) != null) {
-                    reseauEau.setPositionDebut((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(Columns.X_DEBUT.toString()),
-                            row.getDouble(Columns.Y_DEBUT.toString()))), lambertToRGF));
-                }
-            } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtReseauEauImporter.class.getName()).log(Level.WARNING, null, ex);
-            }
-
-            try {
-
-                if (row.getDouble(Columns.X_FIN.toString()) != null && row.getDouble(Columns.Y_FIN.toString()) != null) {
-                    reseauEau.setPositionFin((Point) JTS.transform(geometryFactory.createPoint(new Coordinate(
-                            row.getDouble(Columns.X_FIN.toString()),
-                            row.getDouble(Columns.Y_FIN.toString()))), lambertToRGF));
-                }
-            } catch (MismatchedDimensionException | TransformException ex) {
-                Logger.getLogger(SysEvtReseauEauImporter.class.getName()).log(Level.WARNING, null, ex);
-            }
-        } catch (FactoryException ex) {
-            Logger.getLogger(SysEvtReseauEauImporter.class.getName()).log(Level.WARNING, null, ex);
+            context.setGeoPositions(row, reseauEau);
+        } catch (TransformException ex) {
+            context.reportError(new ErrorReport(ex, row, getTableName(), null, reseauEau, null, "Cannnot set geographic position.", CorruptionLevel.FIELD));
         }
 
         if (row.getInt(Columns.ID_SYSTEME_REP.toString()) != null) {
@@ -249,7 +217,7 @@ class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydrauliqueCie
         reseauEau.setCommentaire(row.getString(Columns.COMMENTAIRE.toString()));
 
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            reseauEau.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            reseauEau.setPositionId(typePositionImporter.getImportedId(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_RESEAU_EAU.toString()) != null) {
@@ -258,7 +226,7 @@ class SysEvtReseauEauImporter extends GenericReseauImporter<ReseauHydrauliqueCie
 
         reseauEau.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_RESEAU.toString())));
         reseauEau.setGeometry(buildGeometry(troncon.getGeometry(), reseauEau, tronconGestionDigueImporter.getBorneDigueRepository()));
-        
+
         return reseauEau;
     }
 

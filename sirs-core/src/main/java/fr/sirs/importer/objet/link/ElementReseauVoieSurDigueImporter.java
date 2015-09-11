@@ -61,7 +61,7 @@ public class ElementReseauVoieSurDigueImporter extends GenericObjetLinker {
         
         final Map<Integer, ObjetReseau> reseaux = reseauImpoter.getById();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             

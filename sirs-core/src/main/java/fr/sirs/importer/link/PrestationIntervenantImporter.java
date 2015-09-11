@@ -59,7 +59,7 @@ public class PrestationIntervenantImporter extends GenericEntityLinker {
         final Map<Integer, Prestation> prestations = prestationImporter.getById();
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             
@@ -70,6 +70,6 @@ public class PrestationIntervenantImporter extends GenericEntityLinker {
                 prestation.getIntervenantsIds().add(intervenant.getId());
             }
         }
-        couchDbConnector.executeBulk(prestations.values());
+        context.outputDb.executeBulk(prestations.values());
     }
 }

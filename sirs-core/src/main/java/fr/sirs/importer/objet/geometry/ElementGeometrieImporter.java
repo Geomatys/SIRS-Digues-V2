@@ -1,24 +1,17 @@
 package fr.sirs.importer.objet.geometry;
 
-import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.SirsCore;
-import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.BorneDigueImporter;
-import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.SystemeReperageImporter;
+import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.LargeurFrancBord;
+import fr.sirs.importer.AccessDbImporterException;
+import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.core.model.ObjetPhotographiable;
-import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.objet.SourceInfoImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
+import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.v2.CorruptionLevel;
+import fr.sirs.importer.v2.ErrorReport;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -26,37 +19,43 @@ import org.ektorp.CouchDbConnector;
  */
 public class ElementGeometrieImporter extends GenericGeometrieImporter<ObjetPhotographiable> {
 
-    private final TypeElementGeometryImporter typeElementGeometryImporter;
-    
-    private final TypeLargeurFrancBordImporter typeLargeurFrancBordImporter;
-    private final SysEvtLargeurFrancBordImporter largeurFrancBordImporter;
-    private final TypeProfilFrancBordImporter typeProfilFrontFrancBordImporter;
+    @Override
+    protected Class<ObjetPhotographiable> getDocumentClass() {
+        return ObjetPhotographiable.class;
+    }
 
-    public ElementGeometrieImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
-            final TronconGestionDigueImporter tronconGestionDigueImporter,
-            final SystemeReperageImporter systemeReperageImporter, 
-            final BorneDigueImporter borneDigueImporter, 
-            final SourceInfoImporter typeSourceImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
-                systemeReperageImporter, borneDigueImporter, typeSourceImporter);
-        typeElementGeometryImporter = new TypeElementGeometryImporter(
-                accessDatabase);
-        typeLargeurFrancBordImporter = new TypeLargeurFrancBordImporter(
-                accessDatabase, couchDbConnector);
-        largeurFrancBordImporter = new SysEvtLargeurFrancBordImporter(accessDatabase,
-                couchDbConnector, tronconGestionDigueImporter,
-                systemeReperageImporter, borneDigueImporter, typeSourceImporter,
-                typeLargeurFrancBordImporter);
-        typeProfilFrontFrancBordImporter = new TypeProfilFrancBordImporter(
-                accessDatabase, couchDbConnector);
+    @Override
+    protected ObjetPhotographiable getOrCreateElement(Row input) {
+        final Class<? extends ObjetPhotographiable> classe;
+                // La colonne NOM_TABLE_EVT étant vide dans la table de l'Isère,
+        // on gère la correspondance en dur en espérant que toutes les
+        //bases font le même lien !
+//                final DbImporter.TableName table = valueOf(row.getString(TypeElementGeometryColumns.NOM_TABLE_EVT.toString()));
+        final int table = (int) input.getInt(Columns.ID_TYPE_ELEMENT_GEOMETRIE.name());
+        switch (table) {
+            case 1:
+                classe = LargeurFrancBord.class;
+                break;
+//                    case 2:
+//                        classe = ProfilFrontFrancBord.class;
+//                        break;
+//                    case 3:
+//                        classe = Distance.class;
+//                        break;
+            default:
+                classe = null;
+        }
+
+        if (classe != null) {
+            return ElementCreator.createAnonymValidElement(classe);
+        } else {
+            throw new IllegalStateException("No element type available for " + Columns.ID_TYPE_ELEMENT_GEOMETRIE.name() + " " + table);
+        }
     }
 
     private enum Columns {
-        ID_ELEMENT_GEOMETRIE,
         ID_TYPE_ELEMENT_GEOMETRIE,
 //        ID_SOURCE,
-        ID_TRONCON_GESTION,
 //        DATE_DEBUT_VAL,
 //        DATE_FIN_VAL,
 //        PR_DEBUT_CALCULE,
@@ -76,7 +75,6 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<ObjetPhot
 //        ID_TYPE_LARGEUR_FB,
 //        ID_TYPE_PROFIL_FB,
 //        ID_TYPE_DIST_DIGUE_BERGE,
-        DATE_DERNIERE_MAJ
     };
 
     @Override
@@ -92,49 +90,15 @@ public class ElementGeometrieImporter extends GenericGeometrieImporter<ObjetPhot
     public String getTableName() {
         return ELEMENT_GEOMETRIE.toString();
     }
-    
-    @Override
-    protected void compute() throws IOException, AccessDbImporterException {    
-        objets = new HashMap<>();
-        objetsByTronconId = new HashMap<>();
-        
-        // Vérification de la cohérence des structures au sens strict.
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
 
-            final ObjetPhotographiable objet = importRow(row);
-            
-            if(objet!=null){
-                
-                if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                    objet.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
-                }
-            
-                // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-                objets.put(row.getInt(Columns.ID_ELEMENT_GEOMETRIE.toString()), objet);
-
-                // Set the list ByTronconId
-                List<ObjetPhotographiable> listByTronconId = objetsByTronconId.get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
-                if (listByTronconId == null) {
-                    listByTronconId = new ArrayList<>();
-                    objetsByTronconId.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), listByTronconId);
-                }
-                listByTronconId.add(objet);
-            }
-        }
-        couchDbConnector.executeBulk(objets.values());
-    }
-    
-    
     @Override
-    public ObjetPhotographiable importRow(Row row) throws IOException, AccessDbImporterException {
-        final Class typeStructure = this.typeElementGeometryImporter.getTypeReferences().get(row.getInt(Columns.ID_TYPE_ELEMENT_GEOMETRIE.toString()));
-        if(typeStructure==LargeurFrancBord.class){
-            return largeurFrancBordImporter.importRow(row);
-        } else{
-            SirsCore.LOGGER.log(Level.FINE, typeStructure+" : Type de géométrie incohérent.");
-            return null;
+    public ObjetPhotographiable importRow(Row row, ObjetPhotographiable output) throws IOException, AccessDbImporterException {
+        final GenericImporter<ObjetPhotographiable> importer = context.importers.get(output.getClass());
+        if (importer != null) {
+            return importer.importRow(row, output);
+        } else {
+            context.reportError(new ErrorReport(null, row, getTableName(), null, output, null, "No importer found for row object.", CorruptionLevel.ROW));
+            throw new AccessDbImporterException("No importer found for row object.");
         }
     }
 }

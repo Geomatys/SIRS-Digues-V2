@@ -123,7 +123,7 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
     }
     
     @Override
-    public Prestation importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
         
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -150,7 +150,7 @@ class SysEvtPrestationImporter extends GenericPrestationImporter {
         }
         
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            prestation.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            prestation.setPositionId(typePositionImporter.getImportedId(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
         
         if (row.getInt(Columns.ID_TYPE_COTE.toString()) != null) {

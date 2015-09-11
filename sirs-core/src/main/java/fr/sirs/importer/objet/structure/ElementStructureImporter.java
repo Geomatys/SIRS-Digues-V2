@@ -230,7 +230,7 @@ public class ElementStructureImporter extends GenericStructureImporter<ObjetStru
         objetsByTronconId = new HashMap<>();
 
         // Vérification de la cohérence des structures au sens strict.
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
 
@@ -253,11 +253,11 @@ public class ElementStructureImporter extends GenericStructureImporter<ObjetStru
                 listByTronconId.add(objet);
             }
         }
-        couchDbConnector.executeBulk(objets.values());
+        context.outputDb.executeBulk(objets.values());
     }
 
     @Override
-    public ObjetStructure importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final Class typeStructure = typeElementStructureImporter.getTypeReferences().get(row.getInt(Columns.ID_TYPE_ELEMENT_STRUCTURE.toString()));
         if (typeStructure == Crete.class) {

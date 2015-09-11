@@ -3,7 +3,6 @@ package fr.sirs.importer.objet.link;
 import fr.sirs.core.SirsCore;
 import java.util.logging.Level;
 
-import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.importer.AccessDbImporterException;
@@ -27,27 +26,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.ektorp.CouchDbConnector;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
 public class DesordreElementReseauImporter extends GenericObjetLinker {
-    
+
     private final ElementReseauImporter elementReseauImporter;
     private final DesordreImporter desordreImporter;
     private final TypeElementReseauImporter typeElementReseauImporter;
 
-    public DesordreElementReseauImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector, 
-            final ElementReseauImporter elementReseauImporter,
-            final DesordreImporter desordreImporter) {
-        super(accessDatabase, couchDbConnector);
-        this.elementReseauImporter = elementReseauImporter;
-        this.desordreImporter = desordreImporter;
-        typeElementReseauImporter = elementReseauImporter.getTypeElementReseauImporter();
-    }
 
     private enum Columns {
         ID_DESORDRE,
@@ -63,26 +52,26 @@ public class DesordreElementReseauImporter extends GenericObjetLinker {
 
     @Override
     protected void compute() throws IOException, AccessDbImporterException {
-        
+
         final Map<Integer, ObjetReseau> elementsReseaux = elementReseauImporter.getById();
         final Map<Integer, Desordre> desordres = desordreImporter.getById();
         final Map<Integer, Class> classesElementReseaux = typeElementReseauImporter.getTypeReferences();
-        
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
 //            final ObjetReferenceObjet elementReseauDesordre = new ObjetReferenceObjet();
-            
+
             final Objet elementReseau = elementsReseaux.get(row.getInt(Columns.ID_ELEMENT_RESEAU.toString()));
             final Class classeElementReseau = classesElementReseaux.get(row.getInt(Columns.ID_TYPE_ELEMENT_RESEAU.toString()));
             final Desordre desordre = desordres.get(row.getInt(Columns.ID_DESORDRE.toString()));
-            
+
             if(elementReseau!=null && desordre!=null){
-                
+
                 if (elementReseau.getClass().equals(classeElementReseau)) {
                     if (elementReseau instanceof VoieDigue) {
                         desordre.getVoieDigueIds().add(elementReseau.getId());
-                    } 
+                    }
                     else if (elementReseau instanceof OuvrageParticulier){
                         desordre.getOuvrageParticulierIds().add(elementReseau.getId());
                     }
@@ -112,7 +101,7 @@ public class DesordreElementReseauImporter extends GenericObjetLinker {
                 else {
                     throw new AccessDbImporterException("Bad referenced type. Incoherent data.");
                 }
-                
+
                 associations.add(new AbstractMap.SimpleEntry<>(elementReseau, desordre));
             }
         }

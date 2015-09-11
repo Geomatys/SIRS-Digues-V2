@@ -125,7 +125,7 @@ class SysEvtDocumentAGrandeEchelleImporter extends GenericPositionDocumentImport
 //        positions = new HashMap<>();
 //        positionsByTronconId = new HashMap<>();
 //        
-//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+//        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
 //        while (it.hasNext()){
 //            final Row row = it.next();
 //            final PositionDocument documentTroncon = createAnonymValidElement(PositionDocument.class);
@@ -143,7 +143,7 @@ class SysEvtDocumentAGrandeEchelleImporter extends GenericPositionDocumentImport
 //        if(computed) return;
 //        
 //        
-//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+//        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
 //        while (it.hasNext()){
 //            final Row row = it.next();
 //            final PositionDocument docTroncon = importRow(row);
@@ -164,7 +164,7 @@ class SysEvtDocumentAGrandeEchelleImporter extends GenericPositionDocumentImport
 //    }
 
     @Override
-    PositionDocument importRow(Row row) throws IOException, AccessDbImporterException {
+    public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();

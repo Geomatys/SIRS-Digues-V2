@@ -160,7 +160,7 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
     }
 
     @Override
-    public ReseauHydrauliqueFerme importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -186,7 +186,7 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
         }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
-            conduiteFermee.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+            conduiteFermee.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
@@ -294,7 +294,7 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
         }
 
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            conduiteFermee.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            conduiteFermee.setPositionId(typePositionImporter.getImportedId(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
         if (row.getDouble(Columns.DIAMETRE.toString()) != null) {

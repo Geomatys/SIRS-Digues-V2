@@ -82,7 +82,7 @@ class TronconGestionDigueCommuneImporter extends GenericPeriodeLocaliseeImporter
 //        
 //        final Map<Integer, Commune> communes = communeImporter.getCommunes();
 //        
-//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+//        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
 //        while (it.hasNext()) {
 //            final Row row = it.next();
 //            final PeriodeCommune periode = createAnonymValidElement(PeriodeCommune.class);

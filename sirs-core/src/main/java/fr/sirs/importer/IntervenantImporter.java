@@ -1,30 +1,30 @@
 package fr.sirs.importer;
 
-import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
-import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import static fr.sirs.importer.DbImporter.TableName.INTERVENANT;
 import static fr.sirs.importer.DbImporter.cleanNullString;
+import fr.sirs.importer.v2.DocumentImporter;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import org.ektorp.CouchDbConnector;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class IntervenantImporter extends GenericImporter {
+public class IntervenantImporter extends DocumentImporter<Contact> {
 
-    private Map<Integer, Contact> intervenants = null;
+    @Override
+    protected Class<Contact> getDocumentClass() {
+        return Contact.class;
+    }
 
-    IntervenantImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector) {
-        super(accessDatabase, couchDbConnector);
+    @Override
+    public String getRowIdFieldName() {
+        return Columns.ID_INTERVENANT.name();
     }
 
     private enum Columns {
@@ -47,11 +47,6 @@ public class IntervenantImporter extends GenericImporter {
         DATE_DERNIERE_MAJ
     };
 
-    public Map<Integer, Contact> getIntervenants() throws IOException {
-        if (intervenants == null) compute();
-        return intervenants;
-    }
-
     @Override
     protected List<String> getUsedColumns() {
         final List<String> columns = new ArrayList<>();
@@ -67,47 +62,35 @@ public class IntervenantImporter extends GenericImporter {
     }
 
     @Override
-    protected void compute() throws IOException {
-        intervenants = new HashMap<>();
+    public Contact importRow(Row row, Contact intervenant) throws IOException, AccessDbImporterException {
+        intervenant.setNom(row.getString(Columns.NOM_INTERVENANT.toString()));
 
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
-        while (it.hasNext()) {
-            final Row row = it.next();
-            final Contact intervenant = createAnonymValidElement(Contact.class);
+        intervenant.setPrenom(row.getString(Columns.PRENOM_INTERVENANT.toString()));
 
-            intervenant.setNom(row.getString(Columns.NOM_INTERVENANT.toString()));
+        intervenant.setAdresse(cleanNullString(row.getString(Columns.ADRESSE_PERSO_INTERV.toString()))
+                + cleanNullString(row.getString(Columns.ADRESSE_L1_PERSO_INTERV.toString()))
+                + cleanNullString(row.getString(Columns.ADRESSE_L2_PERSO_INTERV.toString()))
+                + cleanNullString(row.getString(Columns.ADRESSE_L3_PERSO_INTERV.toString())));
 
-            intervenant.setPrenom(row.getString(Columns.PRENOM_INTERVENANT.toString()));
+        intervenant.setCodePostal(cleanNullString(String.valueOf(row.getInt(Columns.ADRESSE_CODE_POSTAL_PERSO_INTERV.toString()))));
 
-            intervenant.setAdresse(cleanNullString(row.getString(Columns.ADRESSE_PERSO_INTERV.toString()))
-                    + cleanNullString(row.getString(Columns.ADRESSE_L1_PERSO_INTERV.toString()))
-                    + cleanNullString(row.getString(Columns.ADRESSE_L2_PERSO_INTERV.toString()))
-                    + cleanNullString(row.getString(Columns.ADRESSE_L3_PERSO_INTERV.toString())));
+        intervenant.setCommune(row.getString(Columns.ADRESSE_NOM_COMMUNE_PERSO_INTERV.toString()));
 
-            intervenant.setCodePostal(cleanNullString(String.valueOf(row.getInt(Columns.ADRESSE_CODE_POSTAL_PERSO_INTERV.toString()))));
+        intervenant.setTelephone(row.getString(Columns.TEL_PERSO_INTERV.toString()));
 
-            intervenant.setCommune(row.getString(Columns.ADRESSE_NOM_COMMUNE_PERSO_INTERV.toString()));
+        intervenant.setEmail(row.getString(Columns.MAIL_INTERV.toString()));
 
-            intervenant.setTelephone(row.getString(Columns.TEL_PERSO_INTERV.toString()));
+        intervenant.setFax(row.getString(Columns.FAX_PERSO_INTERV.toString()));
 
-            intervenant.setEmail(row.getString(Columns.MAIL_INTERV.toString()));
+        intervenant.setService(row.getString(Columns.SERVICE_INTERV.toString()));
 
-            intervenant.setFax(row.getString(Columns.FAX_PERSO_INTERV.toString()));
+        intervenant.setFonction(row.getString(Columns.FONCTION_INTERV.toString()));
+        final Date dateMaj = row.getDate(Columns.DATE_DERNIERE_MAJ.toString());
 
-            intervenant.setService(row.getString(Columns.SERVICE_INTERV.toString()));
-
-            intervenant.setFonction(row.getString(Columns.FONCTION_INTERV.toString()));
-
-            if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {
-                intervenant.setDateMaj(DbImporter.parseLocalDate(row.getDate(Columns.DATE_DERNIERE_MAJ.toString()), dateTimeFormatter));
-            }
-
-            intervenant.setDesignation(String.valueOf(row.getInt(Columns.ID_INTERVENANT.toString())));
-
-            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
-            intervenants.put(row.getInt(Columns.ID_INTERVENANT.toString()), intervenant);
-
+        if (dateMaj != null) {
+            intervenant.setDateMaj(context.convertData(dateMaj, LocalDate.class));
         }
-        couchDbConnector.executeBulk(intervenants.values());
+
+        return intervenant;
     }
 }

@@ -72,7 +72,7 @@ public class ElementReseauProprietaireImporter extends GenericEntityLinker {
         final Map<Integer, Contact> intervenants = intervenantImporter.getIntervenants();
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             
@@ -95,9 +95,9 @@ public class ElementReseauProprietaireImporter extends GenericEntityLinker {
             }
         }
         
-        couchDbConnector.executeBulk(reseaux.values());
-        couchDbConnector.executeBulk(intervenants.values());
-        couchDbConnector.executeBulk(organismes.values());
+        context.outputDb.executeBulk(reseaux.values());
+        context.outputDb.executeBulk(intervenants.values());
+        context.outputDb.executeBulk(organismes.values());
     }
     
     

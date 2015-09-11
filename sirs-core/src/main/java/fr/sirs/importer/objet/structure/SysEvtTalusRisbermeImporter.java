@@ -164,7 +164,7 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
     }
 
     @Override
-    public TalusRisberme importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -185,7 +185,7 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
         }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
-            talusRisberme.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+            talusRisberme.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
@@ -263,8 +263,8 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
         talusRisberme.setNumCouche(row.getInt(Columns.N_COUCHE.toString()));
 
         if (row.getInt(Columns.ID_TYPE_FONCTION.toString()) != null) {
-            talusRisberme.setFonctionHautId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
-            talusRisberme.setFonctionBasId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
+            talusRisberme.setFonctionHautId(typeFonctionImporter.getImportedId(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
+            talusRisberme.setFonctionBasId(typeFonctionImporter.getImportedId(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
         }
 
         if (row.getDouble(Columns.EPAISSEUR.toString()) != null) {
@@ -272,19 +272,19 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
         }
 
         if (row.getInt(Columns.ID_TYPE_NATURE_HAUT.toString()) != null) {
-            talusRisberme.setNatureHautId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE_HAUT.toString())).getId());
+            talusRisberme.setNatureHautId(typeNatureImporter.getImportedId(row.getInt(Columns.ID_TYPE_NATURE_HAUT.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_MATERIAU_HAUT.toString()) != null) {
-            talusRisberme.setMateriauHautId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU_HAUT.toString())).getId());
+            talusRisberme.setMateriauHautId(typeMateriauImporter.getImportedId(row.getInt(Columns.ID_TYPE_MATERIAU_HAUT.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_MATERIAU_BAS.toString()) != null) {
-            talusRisberme.setMateriauBasId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU_BAS.toString())).getId());
+            talusRisberme.setMateriauBasId(typeMateriauImporter.getImportedId(row.getInt(Columns.ID_TYPE_MATERIAU_BAS.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_NATURE_BAS.toString()) != null) {
-            talusRisberme.setNatureBasId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE_BAS.toString())).getId());
+            talusRisberme.setNatureBasId(typeNatureImporter.getImportedId(row.getInt(Columns.ID_TYPE_NATURE_BAS.toString())).getId());
         }
 
         if (row.getDouble(Columns.LONG_RAMP_HAUT.toString()) != null) {
@@ -299,7 +299,7 @@ class SysEvtTalusRisbermeImporter extends GenericStructureImporter<TalusRisberme
             talusRisberme.setPenteInterieure(row.getDouble(Columns.PENTE_INTERIEURE.toString()).floatValue());
         }
         
-        talusRisberme.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
+        
         talusRisberme.setGeometry(buildGeometry(troncon.getGeometry(), talusRisberme, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return talusRisberme;

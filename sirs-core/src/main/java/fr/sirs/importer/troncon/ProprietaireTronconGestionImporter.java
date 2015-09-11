@@ -111,7 +111,7 @@ public class ProprietaireTronconGestionImporter extends GenericPeriodeLocaliseeI
         final Map<Integer, Organisme> organismes = organismeImporter.getOrganismes();
         final Map<Integer, RefProprietaire> typesProprietaires = typeProprietaireImporter.getTypeReferences();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final ProprieteTroncon propriete = createAnonymValidElement(ProprieteTroncon.class);
@@ -219,6 +219,6 @@ public class ProprietaireTronconGestionImporter extends GenericPeriodeLocaliseeI
             
             objets.put(row.getInt(Columns.ID_TRONCON_GESTION.toString()), propriete);
         }
-        couchDbConnector.executeBulk(objets.values());
+        context.outputDb.executeBulk(objets.values());
     }
 }

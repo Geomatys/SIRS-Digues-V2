@@ -1,10 +1,8 @@
 package fr.sirs.importer.objet.ligneEau;
 
-import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.MesureLigneEauXYZ;
-import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.GenericImporter;
 import java.io.IOException;
@@ -13,20 +11,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.ektorp.CouchDbConnector;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-class LigneEauMesuresXyzImporter extends GenericImporter {
+class LigneEauMesuresXyzImporter extends DocumentImporter {
 
     private Map<Integer, List<MesureLigneEauXYZ>> mesuresByLigneEau = null;
-
-    LigneEauMesuresXyzImporter(final Database accessDatabase,
-            final CouchDbConnector couchDbConnector) {
-        super(accessDatabase, couchDbConnector);
-    }
 
     private enum Columns {
         ID_LIGNE_EAU,
@@ -68,27 +60,27 @@ class LigneEauMesuresXyzImporter extends GenericImporter {
     @Override
     protected void compute() throws IOException {
         mesuresByLigneEau = new HashMap<>();
-        
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final MesureLigneEauXYZ mesure = createAnonymValidElement(MesureLigneEauXYZ.class);
-            
+
             if (row.getDouble(Columns.HAUTEUR_EAU.toString()) != null) {
                 mesure.setZ(row.getDouble(Columns.HAUTEUR_EAU.toString()).floatValue());
             }
-            
+
             if (row.getDouble(Columns.X.toString()) != null) {
                 mesure.setX(row.getDouble(Columns.X.toString()).floatValue());
             }
-            
+
             if (row.getDouble(Columns.Y.toString()) != null) {
                 mesure.setY(row.getDouble(Columns.Y.toString()).floatValue());
             }
 
             // Pas d'ID : on met arbitrairement celui de la ligne d'eau comme pseudo id.
             mesure.setDesignation(String.valueOf(row.getInt(Columns.ID_LIGNE_EAU.toString())));
-            
+
             // Set the list ByLigneEauId
             List<MesureLigneEauXYZ> listByEltReseauId = mesuresByLigneEau.get(row.getInt(Columns.ID_LIGNE_EAU.toString()));
             if (listByEltReseauId == null) {

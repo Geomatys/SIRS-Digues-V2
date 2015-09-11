@@ -1,12 +1,10 @@
 package fr.sirs.importer.objet.geometry;
 
-import com.healthmarketscience.jackcess.Database;
 import fr.sirs.core.model.Objet;
-import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.SystemeReperageImporter;
+import fr.sirs.core.model.RefLargeurFrancBord;
+import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.objet.*;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
-import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -15,14 +13,28 @@ import org.ektorp.CouchDbConnector;
  */
 abstract class GenericGeometrieImporter<T extends Objet> extends GenericObjetImporter<T> {
 
-    GenericGeometrieImporter(final Database accessDatabase, 
-            final CouchDbConnector couchDbConnector, 
-            final TronconGestionDigueImporter tronconGestionDigueImporter,
-            final SystemeReperageImporter systemeReperageImporter, 
-            final BorneDigueImporter borneDigueImporter, 
-            final SourceInfoImporter typeSourceImporter) {
-        super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
-                systemeReperageImporter, borneDigueImporter,
-                typeSourceImporter, null, null, null, null, null);
+    protected GenericImporter<RefLargeurFrancBord> typeLargeurFrancBordImporter;
+
+    private enum Columns {
+        ID_ELEMENT_GEOMETRIE
     }
+
+    @Override
+    public String getRowIdFieldName() {
+        return Columns.ID_ELEMENT_GEOMETRIE.name();
+    }
+
+    @Override
+    protected void postCompute() {
+        super.postCompute();
+        typeLargeurFrancBordImporter = null;
+    }
+
+    @Override
+    protected void preCompute() throws AccessDbImporterException {
+        super.preCompute();
+        typeLargeurFrancBordImporter = context.importers.get(RefLargeurFrancBord.class);
+    }
+
+
 }

@@ -51,7 +51,7 @@ public class DesordrePrestationImporter extends GenericObjetLinker {
         final Map<Integer, Prestation> prestations = prestationImporter.getById();
         final Map<Integer, Desordre> desordres = desordreImporter.getById();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             

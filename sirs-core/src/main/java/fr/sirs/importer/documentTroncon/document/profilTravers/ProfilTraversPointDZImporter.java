@@ -19,7 +19,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class ProfilTraversPointDZImporter extends GenericImporter {
+class ProfilTraversPointDZImporter extends DocumentImporter {
 
     private Map<Integer, DZLeveProfilTravers> points = null;
     private Map<Integer, List<DZLeveProfilTravers>> pointsByProfil = null;
@@ -65,7 +65,7 @@ class ProfilTraversPointDZImporter extends GenericImporter {
         points = new HashMap<>();
         pointsByProfil = new HashMap<>();
         
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
             final DZLeveProfilTravers levePoint = createAnonymValidElement(DZLeveProfilTravers.class);

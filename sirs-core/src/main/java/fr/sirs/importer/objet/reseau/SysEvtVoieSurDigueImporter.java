@@ -163,7 +163,7 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
         this.objets = new HashMap<>();
         this.objetsByTronconId = new HashMap<>();
 
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final VoieDigue voie = importRow(row);
@@ -182,7 +182,7 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
     }
 
     @Override
-    public VoieDigue importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -211,7 +211,7 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
         }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
-            voie.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+            voie.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
@@ -303,7 +303,7 @@ class SysEvtVoieSurDigueImporter extends GenericReseauImporter<VoieDigue> {
         }
 
         if (row.getInt(Columns.ID_TYPE_POSITION.toString()) != null) {
-            voie.setPositionId(typesPosition.get(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
+            voie.setPositionId(typePositionImporter.getImportedId(row.getInt(Columns.ID_TYPE_POSITION.toString())).getId());
         }
 
         if (row.getDouble(Columns.LARGEUR.toString()) != null) {

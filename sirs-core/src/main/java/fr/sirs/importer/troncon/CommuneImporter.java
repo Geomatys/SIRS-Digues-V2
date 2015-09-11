@@ -12,7 +12,7 @@ import org.ektorp.CouchDbConnector;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class CommuneImporter extends GenericImporter {
+class CommuneImporter extends DocumentImporter {
 
 //    private Map<Integer, Commune> communes = null;
 
@@ -51,7 +51,7 @@ class CommuneImporter extends GenericImporter {
     protected void compute() throws IOException {
 //        communes = new HashMap<>();
 //        
-//        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+//        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
 //        while (it.hasNext()) {
 //            final Row row = it.next();
 //            final Commune commune = createAnonymValidElement(Commune.class);
@@ -69,6 +69,6 @@ class CommuneImporter extends GenericImporter {
 //            // Don't set the old ID, but save it into the dedicated map in order to keep the reference.
 //            communes.put(row.getInt(Columns.ID_COMMUNE.toString()), commune);
 //        }
-//        couchDbConnector.executeBulk(communes.values());
+//        context.outputDb.executeBulk(communes.values());
     }
 }

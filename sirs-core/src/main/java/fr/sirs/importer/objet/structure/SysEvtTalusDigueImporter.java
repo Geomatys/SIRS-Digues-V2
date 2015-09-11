@@ -164,7 +164,7 @@ class SysEvtTalusDigueImporter extends GenericStructureImporter<TalusDigue> {
     }
 
     @Override
-    public TalusDigue importRow(Row row) throws IOException, AccessDbImporterException {
+    public public  importRow(Row row) throws IOException, AccessDbImporterException {
 
         final TronconDigue troncon = tronconGestionDigueImporter.getTronconsDigues().get(row.getInt(Columns.ID_TRONCON_GESTION.toString()));
         final Map<Integer, BorneDigue> bornes = borneDigueImporter.getBorneDigue();
@@ -185,7 +185,7 @@ class SysEvtTalusDigueImporter extends GenericStructureImporter<TalusDigue> {
         }
 
         if (row.getInt(Columns.ID_SOURCE.toString()) != null) {
-            talus.setSourceId(typesSource.get(row.getInt(Columns.ID_SOURCE.toString())).getId());
+            talus.setSourceId(sourceInfoImporter.getImportedId(row.getInt(Columns.ID_SOURCE.toString())).getId());
         }
 
         if (row.getDate(Columns.DATE_DEBUT_VAL.toString()) != null) {
@@ -269,24 +269,24 @@ class SysEvtTalusDigueImporter extends GenericStructureImporter<TalusDigue> {
         }
 
         if (row.getInt(Columns.ID_TYPE_FONCTION.toString()) != null) {
-            talus.setFonctionHautId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
-            talus.setFonctionBasId(typesFonction.get(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
+            talus.setFonctionHautId(typeFonctionImporter.getImportedId(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
+            talus.setFonctionBasId(typeFonctionImporter.getImportedId(row.getInt(Columns.ID_TYPE_FONCTION.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_NATURE_HAUT.toString()) != null) {
-            talus.setNatureHautId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE_HAUT.toString())).getId());
+            talus.setNatureHautId(typeNatureImporter.getImportedId(row.getInt(Columns.ID_TYPE_NATURE_HAUT.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_MATERIAU_HAUT.toString()) != null) {
-            talus.setMateriauHautId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU_HAUT.toString())).getId());
+            talus.setMateriauHautId(typeMateriauImporter.getImportedId(row.getInt(Columns.ID_TYPE_MATERIAU_HAUT.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_MATERIAU_BAS.toString()) != null) {
-            talus.setMateriauBasId(typesMateriau.get(row.getInt(Columns.ID_TYPE_MATERIAU_BAS.toString())).getId());
+            talus.setMateriauBasId(typeMateriauImporter.getImportedId(row.getInt(Columns.ID_TYPE_MATERIAU_BAS.toString())).getId());
         }
 
         if (row.getInt(Columns.ID_TYPE_NATURE_BAS.toString()) != null) {
-            talus.setNatureBasId(typesNature.get(row.getInt(Columns.ID_TYPE_NATURE_BAS.toString())).getId());
+            talus.setNatureBasId(typeNatureImporter.getImportedId(row.getInt(Columns.ID_TYPE_NATURE_BAS.toString())).getId());
         }
 
         if (row.getDouble(Columns.LONG_RAMP_HAUT.toString()) != null) {
@@ -301,7 +301,7 @@ class SysEvtTalusDigueImporter extends GenericStructureImporter<TalusDigue> {
             talus.setPenteInterieure(row.getDouble(Columns.PENTE_INTERIEURE.toString()).floatValue());
         }
         
-        talus.setDesignation(String.valueOf(row.getInt(Columns.ID_ELEMENT_STRUCTURE.toString())));
+        
         talus.setGeometry(buildGeometry(troncon.getGeometry(), talus, tronconGestionDigueImporter.getBorneDigueRepository()));
         
         return talus;

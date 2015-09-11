@@ -101,7 +101,7 @@ public class DocumentAGrandeEchelleImporter extends GenericDocumentImporter<Docu
         final Map<Integer, RefDocumentGrandeEchelle> types = typeDocumentAGrandeEchelleImporter.getTypeReferences();
         final Map<Integer, Class> typesDocument = typeDocumentImporter.getClasseDocument();
         
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()){
             final Row row = it.next();
             final DocumentGrandeEchelle documentGrandeEchelle = createAnonymValidElement(DocumentGrandeEchelle.class);
@@ -131,6 +131,6 @@ public class DocumentAGrandeEchelleImporter extends GenericDocumentImporter<Docu
                 related.put(row.getInt(Columns.ID_DOC.toString()), documentGrandeEchelle);
             }
         }
-        couchDbConnector.executeBulk(related.values());
+        context.outputDb.executeBulk(related.values());
     }
 }

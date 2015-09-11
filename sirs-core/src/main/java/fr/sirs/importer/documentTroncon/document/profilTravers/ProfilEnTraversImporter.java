@@ -74,7 +74,7 @@ public class ProfilEnTraversImporter extends GenericDocumentImporter<ProfilTrave
         final Map<Integer, List<ParametreHydrauliqueProfilTravers>> params = 
                 profilTraversDescriptionImporter.getParametreHydrauliqueProfilTraversByProfilId();
     
-        final Iterator<Row> it = accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while(it.hasNext()){
             final Row row = it.next();
             final ProfilTravers profil = createAnonymValidElement(ProfilTravers.class);
@@ -98,6 +98,6 @@ public class ProfilEnTraversImporter extends GenericDocumentImporter<ProfilTrave
             
             related.put(row.getInt(Columns.ID_PROFIL_EN_TRAVERS.toString()), profil);
         }
-        couchDbConnector.executeBulk(related.values());
+        context.outputDb.executeBulk(related.values());
     }
 }

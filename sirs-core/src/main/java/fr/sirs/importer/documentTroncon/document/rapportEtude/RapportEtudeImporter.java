@@ -64,7 +64,7 @@ public class RapportEtudeImporter extends GenericDocumentImporter<RapportEtude> 
         
         final Map<Integer, RefRapportEtude> typesRapport = typeRapportEtudeImporter.getTypeReferences();
 
-        final Iterator<Row> it = this.accessDatabase.getTable(getTableName()).iterator();
+        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
         while (it.hasNext()) {
             final Row row = it.next();
             final RapportEtude rapport = createAnonymValidElement(RapportEtude.class);
@@ -92,6 +92,6 @@ public class RapportEtudeImporter extends GenericDocumentImporter<RapportEtude> 
             
             related.put(row.getInt(Columns.ID_RAPPORT_ETUDE.toString()), rapport);
         }
-        couchDbConnector.executeBulk(related.values());
+        context.outputDb.executeBulk(related.values());
     }
 }
