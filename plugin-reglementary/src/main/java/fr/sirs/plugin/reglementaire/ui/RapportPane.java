@@ -34,7 +34,7 @@ public class RapportPane extends GridPane implements Initializable {
         ArgumentChecks.ensureNonNull("rapport", rapport);
         this.rapport = rapport;
         
-        SIRS.loadFXML(this, RapportPane.class);
+        SIRS.loadFXML(this);
         Injector.injectDependencies(this);
 
         uiTitre.setText(rapport.getLibelle());

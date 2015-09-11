@@ -160,7 +160,7 @@ public class RapportsPane extends BorderPane implements Initializable {
     private Session session;
 
     public RapportsPane() {
-        SIRS.loadFXML(this, RapportsPane.class);
+        SIRS.loadFXML(this);
         Injector.injectDependencies(this);
     }
 
