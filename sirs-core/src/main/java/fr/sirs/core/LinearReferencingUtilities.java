@@ -1,8 +1,5 @@
 package fr.sirs.core;
 
-import fr.sirs.core.component.BorneDigueRepository;
-import fr.sirs.core.model.BorneDigue;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
@@ -12,16 +9,19 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.BorneDigueRepository;
+import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
-
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.primitive.jts.JTSLineIterator;
 import org.geotoolkit.display2d.style.j2d.PathWalker;
@@ -367,6 +367,71 @@ public final class LinearReferencingUtilities extends LinearReferencing {
     }
 
     /**
+     * Pour un point sur le linéaire donné par une borne, sa distance à cette
+     * borne et leur position relative, retourne le segment sur lequel se trouve
+     * ce point, accompagné de la distance entre le début du segment et le point.
+     *
+     * @param tronconGeom
+     * @param borneId
+     * @param borneAval
+     * @param borneDistance
+     * @param repo
+     * @return
+     */
+    public static Entry<LineString, Double> buildSegmentFromBorne(final Geometry tronconGeom, final String borneId, final boolean borneAval, final double borneDistance, AbstractSIRSRepository<BorneDigue> repo) {
+
+        final LineString tronconLineString = asLineString(tronconGeom);
+        final SegmentInfo[] segments = buildSegments(tronconLineString);
+
+        //reconstruction a partir de bornes et de distances
+        final BorneDigue borne = (borneId != null) ? repo.get(borneId) : null;
+        if (borne == null) {
+            //aucune borne définie, on ne peut pas calculer la géométrie
+            return null;
+        }
+
+        double distanceDebut = borneDistance;
+        //on considére que les troncons sont numérisé dans le sens amont vers aval.
+        if (borneAval) {
+            distanceDebut *= -1.0;
+        }
+
+        //calcul de la distance des bornes. Il peut y avoir qu'une seule borne définie dans le cas d'un ponctuel.
+        final Point tronconStart = GO2Utilities.JTS_FACTORY.createPoint(tronconLineString.getCoordinates()[0]);
+
+        // Distance entre la borne et le début du tronçon.
+        final double distanceBorneTronconStart = computeRelative(segments, new Point[]{tronconStart}, borne.getGeometry()).getValue();
+
+        // La distance au début du troncon se calcule par ajout de la distance entre la borne et le début du troncon à la distance du point à la borne
+        distanceDebut += distanceBorneTronconStart;
+
+        final Entry<SegmentInfo, Double> segmentAndDistance = getSegmentAndDistance(segments, distanceDebut);
+
+        return new HashMap.SimpleEntry<>(segmentAndDistance.getKey().geometry, segmentAndDistance.getValue());
+    }
+
+    /**
+     * Find nearest segment to given distance.
+     *
+     * @param segments
+     * @param distance
+     * @return SegmentInfo
+     */
+    public static Entry<SegmentInfo, Double> getSegmentAndDistance(SegmentInfo[] segments, double distance){
+        SegmentInfo segment = segments[0];
+        double distanceToSegmentStart=0.;
+        for(int i=1;i<segments.length;i++){
+            if(segments[i].startDistance < distance){
+                segment = segments[i];
+                distanceToSegmentStart=distance-segments[i].startDistance;
+            }else{
+                break;
+            }
+        }
+        return new HashMap.SimpleEntry<>(segment, distanceToSegmentStart);
+    }
+
+    /**
      * Create a JTS geometry for the input {@link Positionable}. Generated
      * geometry is a line string along an input geometry, whose beginning and
      * end are defined by given geographic begin and end position.
@@ -437,6 +502,31 @@ public final class LinearReferencingUtilities extends LinearReferencing {
         if (structureCoords.size() == 1) {
             //point unique, on le duplique pour obtenir on moins un segment
             structureCoords.add(new Coordinate(structureCoords.get(0)));
+        }
+
+        final LineString geom = GO2Utilities.JTS_FACTORY.createLineString(structureCoords.toArray(new Coordinate[structureCoords.size()]));
+        JTS.setCRS(geom, InjectorCore.getBean(SessionCore.class).getProjection());
+
+        return geom;
+    }
+
+
+    /**
+     * Create a line string which begins on input line, from a certain distance
+     * after its beginning to another further away.
+     *
+     * @param linear The input {@link LineString} we want to extract a piece
+     * from.
+     * @param indexDebut the coordinate index to start (included)
+     * @param indexFin the coordinate index to end (included). Must be greater than indexDebut.
+     *
+     * @return A line string, never null.
+     */
+    public static LineString cut(final LineString linear, int indexDebut, double indexFin) {
+
+        final List<Coordinate> structureCoords = new ArrayList<>();
+        for (int i=0; i<=(indexFin-indexDebut); i++){
+            structureCoords.set(i, linear.getCoordinateN(indexDebut+i));
         }
 
         final LineString geom = GO2Utilities.JTS_FACTORY.createLineString(structureCoords.toArray(new Coordinate[structureCoords.size()]));

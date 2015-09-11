@@ -3,11 +3,12 @@ package fr.sirs.theme.ui;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.core.LinearReferencingUtilities;
+import static fr.sirs.core.LinearReferencingUtilities.buildSegmentFromBorne;
 import fr.sirs.core.TronconUtils;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.GeometryType;
@@ -21,6 +22,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -32,6 +34,7 @@ import javafx.scene.control.SpinnerValueFactory;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.primitive.jts.JTSLineIterator;
 import org.geotoolkit.display2d.style.j2d.PathWalker;
+import static org.geotoolkit.referencing.LinearReferencing.asLineString;
 
 /**
  * Edition des bornes d'un {@link Positionable}.
@@ -88,6 +91,7 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
         uiEndNear.visibleProperty().bind(pctProp);
         uiEndFar.visibleProperty().bind(pctProp);
         lblStartFar.visibleProperty().bind(pctProp);
+        uiStartFar.visibleProperty().bind(pctProp);
         lblEndNear.visibleProperty().bind(pctProp);
         lblEndFar.visibleProperty().bind(pctProp);
         lblFin.managedProperty().bind(pctProp);
@@ -98,6 +102,7 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
         uiEndNear.managedProperty().bind(pctProp);
         uiEndFar.managedProperty().bind(pctProp);
         lblStartFar.managedProperty().bind(pctProp);
+        uiStartFar.managedProperty().bind(pctProp);
         lblEndNear.managedProperty().bind(pctProp);
         lblEndFar.managedProperty().bind(pctProp);
 
@@ -217,8 +222,6 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
 
         //on recalculate la geometrie linear
         final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
-        final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-        final LineString linear = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), positionable, borneRepo);
 
         
         //on calcule le ratio on fonction de la rive et du coté
@@ -253,38 +256,79 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
 
         //on extrude avec la distance
         Geometry geometry;
-        if(ratio==0){
-            //des 2 cotés
-            ratio = 1;
-            final Polygon left = extrude(linear,
-                positionable.getDistanceDebutMin() * ratio,
-                positionable.getDistanceDebutMax() * ratio,
-                positionable.getDistanceFinMin() * ratio,
-                positionable.getDistanceFinMax() * ratio);
-            ratio = -1;
-            final Polygon right = extrude(linear,
-                positionable.getDistanceDebutMin() * ratio,
-                positionable.getDistanceDebutMax() * ratio,
-                positionable.getDistanceFinMin() * ratio,
-                positionable.getDistanceFinMax() * ratio);
-            geometry = GO2Utilities.JTS_FACTORY.createMultiPolygon(new Polygon[]{left,right});
-            geometry.setSRID(linear.getSRID());
-            geometry.setUserData(linear.getUserData());
+        final LineString linear;
 
-        }else{
-            //1 coté
-            geometry = extrude(linear,
-                positionable.getDistanceDebutMin() * ratio,
-                positionable.getDistanceDebutMax() * ratio,
-                positionable.getDistanceFinMin() * ratio,
-                positionable.getDistanceFinMax() * ratio);
-        }
-
-        //si c'est un ponctuel on prend le centre
         if(GeometryType.PONCTUAL.equals(positionable.getGeometryType())){
-            geometry = geometry.getCentroid();
-            geometry.setSRID(linear.getSRID());
-            geometry.setUserData(linear.getUserData());
+            /*
+            Pour un point, il faut récupérer à partir de la géométrie du tronçon
+            le segment sur lequel se trouve le point, car pour mesurer la
+            direction du décalage perpendiculaire au tronçon, un point seul ne
+            suffit pas.
+            */
+            final Entry<LineString, Double> pointAndSegment = buildSegmentFromBorne(asLineString(troncon.getGeometry()),
+                    positionable.getBorneDebutId(),
+                    positionable.getBorne_debut_aval(),
+                    positionable.getBorne_debut_distance(),
+                    Injector.getSession().getRepositoryForClass(BorneDigue.class));
+            linear = pointAndSegment.getKey();
+            if(ratio==0) ratio=1;// On ne met pas un arbre des deux côtés.
+//            if(ratio==0){
+//                //des 2 cotés
+//                ratio = 1;
+//                final Point left = toPoint(linear,
+//                    positionable.getDistanceDebutMin() * ratio,
+//                    positionable.getDistanceDebutMax() * ratio,
+//                    positionable.getDistanceFinMin() * ratio,
+//                    positionable.getDistanceFinMax() * ratio);
+//                ratio = -1;
+//                final Point right = toPoint(linear,
+//                    positionable.getDistanceDebutMin() * ratio,
+//                    positionable.getDistanceDebutMax() * ratio,
+//                    positionable.getDistanceFinMin() * ratio,
+//                    positionable.getDistanceFinMax() * ratio);
+//                geometry = GO2Utilities.JTS_FACTORY.createMultiPoint(new Point[]{left,right});
+//                geometry.setSRID(linear.getSRID());
+//                geometry.setUserData(linear.getUserData());
+//
+//            }else{
+                //1 coté
+                geometry = toPoint(linear,
+                    positionable.getDistanceDebutMin() * ratio,
+                    pointAndSegment.getValue());
+//            }
+        }
+        else {
+            /*
+            Si on n'a pas à faire à un ponctuel, on peut utiliser la géométrie
+            de la structure plutôt que celle du tronçon.
+            */
+            linear = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), positionable, Injector.getSession().getRepositoryForClass(BorneDigue.class));
+            if(ratio==0){
+                //des 2 cotés
+                ratio = 1;
+                final Polygon left = toPolygon(linear,
+                    positionable.getDistanceDebutMin() * ratio,
+                    positionable.getDistanceDebutMax() * ratio,
+                    positionable.getDistanceFinMin() * ratio,
+                    positionable.getDistanceFinMax() * ratio);
+                ratio = -1;
+                final Polygon right = toPolygon(linear,
+                    positionable.getDistanceDebutMin() * ratio,
+                    positionable.getDistanceDebutMax() * ratio,
+                    positionable.getDistanceFinMin() * ratio,
+                    positionable.getDistanceFinMax() * ratio);
+                geometry = GO2Utilities.JTS_FACTORY.createMultiPolygon(new Polygon[]{left,right});
+                geometry.setSRID(linear.getSRID());
+                geometry.setUserData(linear.getUserData());
+
+            }else{
+                //1 coté
+                geometry = toPolygon(linear,
+                    positionable.getDistanceDebutMin() * ratio,
+                    positionable.getDistanceDebutMax() * ratio,
+                    positionable.getDistanceFinMin() * ratio,
+                    positionable.getDistanceFinMax() * ratio);
+            }
         }
 
 
@@ -296,10 +340,38 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
     }
 
     /**
+     * Builds an area from a linear.
+     *
+     *        ||
+     *        ||
+     *        ||
+     *        ||----------->   --------------(startFar)
+     *        ||---->          --------------(startNear)
+     *        ||     *******
+     *        ||     *\\\\\*
+     *        ||     *\\\\\*
+     *        \\    *\\\\\\\*
+     *         \\    *\\\\\\\*
+     *          \\    *\\\\\\\*     (SURFACE)
+     *           \\   *\\\\\\\\\*
+     *            ||   *\\\\\\\\\*
+     *            ||   *\\\\\\\\\*
+     *            ||  *\\\\\\\\\\\*
+     *            ||  *\\\\\\\\\\\*
+     *            ||  *************
+     *            ||->                  --------(endNear)
+     *            ||-------------->     --------(endFar)
+     *            ||
+     *            ||
+     *
+     *
+     *
+     *
+     *
      * Utilisé dans le plugin vegetation.
      *
      */
-    private static Polygon extrude(LineString linear, final double startNear,
+    private static Polygon toPolygon(LineString linear, final double startNear,
             final double startFar, final double endNear, final double endFar) {
 
         final PathIterator ite = new JTSLineIterator(linear, null);
@@ -348,7 +420,7 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
             coords.add(new Coordinate(c1));
         }
 
-        //on ferme le polygon
+        //on ferme le polygone
         coords.add(new Coordinate(coords.get(0)));
         while(coords.size()<4){
             coords.add(new Coordinate(coords.get(0)));
@@ -357,6 +429,75 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
         final Polygon polygon = GO2Utilities.JTS_FACTORY.createPolygon(coords.toArray(new Coordinate[0]));
         polygon.setSRID(linear.getSRID());
         polygon.setUserData(linear.getUserData());
+        return polygon;
+    }
+
+    /**
+     * Calcule les coordonnées d'un point à partir d'un segment de référence,
+     * d'une distance au point de départ du segment et d'une distance au segment
+     * lui-même.
+     *
+     *
+     *                         X Point computed
+     *                         |
+     *                         | perpendicular distance
+     *        linear distance  |
+     *     x---------------------------------------------x
+     *     start             linear (segment)           end
+     *
+     * @param segment Te reference segment
+     * @param perpendicularDistance
+     * @param linearDistance
+     * @return
+     */
+    private static Point toPoint(final LineString segment, final double perpendicularDistance, final double linearDistance) {
+
+
+        final Coordinate debutSegment = segment.getCoordinateN(0);
+        final Coordinate finSegment = segment.getCoordinateN(1);
+        final double segmentLength = segment.getLength();
+
+
+        /*
+        Calcul des coordonnées du point intermédiaire. Ce point est situé sur le
+        segment à la distance "linearDistance" du début.
+        */
+        final Coordinate intermediaire = new Coordinate((finSegment.x-debutSegment.x)*linearDistance/segmentLength+debutSegment.x, (finSegment.y-debutSegment.y)*linearDistance/segmentLength+debutSegment.y);
+
+        /*
+        Il faut maintenant insérer le nouveau point dans la géométrie du segment.
+        */
+        final LineString nouvelleGeom = GO2Utilities.JTS_FACTORY.createLineString(new Coordinate[]{debutSegment, intermediaire, finSegment});
+
+        /*
+        La suite calcule les coordonnées du point définitif à la distance
+        "perpendicularDistance" du segment.
+         */
+        final PathIterator ite = new JTSLineIterator(nouvelleGeom, null);
+        final PathWalker walker = new PathWalker(ite);
+        final Point2D.Double pt = new Point2D.Double();
+        final Coordinate coord = new Coordinate(0,0);
+
+        /*
+        On va jusqu'au point intermédiaire, on récupère la position et la
+        direction perpendiculaire.
+        */
+        final float d = walker.getSegmentLengthRemaining();
+        walker.walk(d+0.0001f); // Pourquoi 0.0001 ?
+        walker.getPosition(pt);
+        double angle = Math.PI/2 + walker.getRotation();
+
+        double distNear = perpendicularDistance + perpendicularDistance*(d/segmentLength);
+
+        coord.x = pt.x + Math.cos(angle)*distNear;
+        coord.y = pt.y + Math.sin(angle)*distNear;
+
+        /**
+         * Les quatre points retournés par "toPolygon()" sont identiques. On prend le premier.
+         */
+        final Point polygon = GO2Utilities.JTS_FACTORY.createPoint(coord);
+        polygon.setSRID(segment.getSRID());
+        polygon.setUserData(segment.getUserData());
         return polygon;
     }
 }
