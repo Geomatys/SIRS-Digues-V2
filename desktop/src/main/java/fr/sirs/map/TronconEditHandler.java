@@ -137,6 +137,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
     protected String layerName;
     protected MutableStyle style;
     protected String typeName;
+    protected boolean maleGender;
     protected Class<? extends TronconDigue> tronconClass;
     
     
@@ -149,6 +150,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
         this.typeName = "tronçon";
+        this.maleGender = true;
     }
     
     
@@ -166,8 +168,9 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             // IL FAUT ÉGALEMENT VÉRIFIER LES AUTRE OBJETS "CONTENUS" : POSITIONS DE DOCUMENTS, PHOTOS, PROPRIETAIRES ET GARDIENS
 
             if (newValue != null && !TronconUtils.getPositionableList(newValue).isEmpty()) {
+                final String s = maleGender ?  "ce " :  "cette ";
                 final Alert alert = new Alert(Alert.AlertType.WARNING,
-                        "Attention, ce " + typeName + " contient des données. Toute modification du tracé risque de changer leur position.", ButtonType.CANCEL, ButtonType.OK); // TODO GENDER
+                        "Attention, " + s + typeName + " contient des données. Toute modification du tracé risque de changer leur position.", ButtonType.CANCEL, ButtonType.OK);
                 alert.setResizable(true);
                 final Optional<ButtonType> result = alert.showAndWait();
                 if (result.isPresent() && ButtonType.OK.equals(result.get())) {
@@ -272,7 +275,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
      * @param tronconClass
      * @return Return the new troncon, or null if user has cancelled dialog.
      */
-    public static TronconDigue showTronconDialog(String typeName, Class<? extends TronconDigue> tronconClass) {
+    public static TronconDigue showTronconDialog(String typeName, Class<? extends TronconDigue> tronconClass, boolean maleGender) {
         final Session session = Injector.getBean(Session.class);
         final List<Preview> digues = session.getPreviews().getByClass(Digue.class);
         final ComboBox<Preview> diguesChoice = new ComboBox<>(FXCollections.observableList(digues));
@@ -289,7 +292,11 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
 
         final Stage dialog = new Stage();
         dialog.getIcons().add(SIRS.ICON);
-        dialog.setTitle("Nouveau " + typeName); // TODO GENDER
+        if (maleGender) {
+            dialog.setTitle("Nouveau " + typeName);
+        } else {
+            dialog.setTitle("Nouvelle " + typeName);
+        }
         dialog.setResizable(true);
         dialog.initModality(Modality.WINDOW_MODAL);
         dialog.initOwner(session.getFrame().getScene().getWindow());
@@ -305,7 +312,11 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         bp.setPadding(new Insets(10, 10, 10, 10));
         bp.setHgap(10);
         bp.setVgap(10);
-        bp.add(new Label("Nom du " + typeName), 0, 0); // TODO GENDER
+        if (maleGender) {
+            bp.add(new Label("Nom du " + typeName), 0, 0);
+        } else {
+            bp.add(new Label("Nom de la " + typeName), 0, 0);
+        }
         bp.add(nameField, 0, 1);
         bp.add(new Label("Rattacher à la digue"), 0, 2);
         bp.add(diguesChoice, 0, 3);
@@ -483,9 +494,10 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                     // -commencer un nouveau troncon
                     popup.getItems().clear();
 
-                    final MenuItem createItem = new MenuItem("Créer un nouveau " + typeName); // TODO GENDER
+                    final String title = maleGender ? "Créer un nouveau " + typeName : "Créer une nouvelle " + typeName;
+                    final MenuItem createItem = new MenuItem(title);
                     createItem.setOnAction((ActionEvent event) -> {
-                        final TronconDigue tmpTroncon = showTronconDialog(typeName, tronconClass);
+                        final TronconDigue tmpTroncon = showTronconDialog(typeName, tronconClass, maleGender);
                         if (tmpTroncon == null) {
                             return;
                         }
@@ -553,6 +565,8 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                         });
                         popup.getItems().add(item);
                     }
+                    
+                    final String prefix = maleGender ? "le " : "la ";
 
                     if (editGeometry.geometry != null) {
                         // Si le tronçon est vide, on peut inverser son tracé
@@ -561,7 +575,8 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                             if (!popup.getItems().isEmpty()) {
                                 popup.getItems().add(new SeparatorMenuItem());
                             }
-                            final MenuItem invert = new MenuItem("Inverser le tracé du " + typeName); // TODO GENDER
+                            final String title    = maleGender ? "Inverser le tracé du " + typeName : "Inverser le tracé de la " + typeName; 
+                            final MenuItem invert = new MenuItem(title);
                             invert.setOnAction((ActionEvent ae) -> {
                                 // HACK : On est forcé de sauvegarder le tronçon pour mettre à jour le SR élémentaire.
                                 tronconProperty.get().setGeometry(editGeometry.geometry.get().reverse());
@@ -592,7 +607,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
 
                         //action : annuler edition
                         final String cancelTitle = (!editGeometry.geometry.get().equals(tronconProperty.get().getGeometry()))?
-                                "Annuler les modifications" : "Désélectionner le " + typeName; // TODO GENDER
+                                "Annuler les modifications" : "Désélectionner "+ prefix + typeName;
 
                         final MenuItem cancelItem = new MenuItem(cancelTitle);
                         cancelItem.setOnAction((ActionEvent event) -> {
@@ -608,7 +623,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
 
                     final MenuItem deleteItem = new MenuItem("Supprimer " + typeName, new ImageView(GeotkFX.ICON_DELETE));
                     deleteItem.setOnAction((ActionEvent event) -> {
-                        final Alert alert = new Alert(CONFIRMATION, "Voulez-vous vraiment supprimer le " + typeName + " ainsi que les systèmes de repérage et tous les positionnables qui le réfèrent ?", YES, NO); // TODO GENDER
+                        final Alert alert = new Alert(CONFIRMATION, "Voulez-vous vraiment supprimer " + prefix + typeName + " ainsi que les systèmes de repérage et tous les positionnables qui le réfèrent ?", YES, NO);
                         final Optional<ButtonType> result = alert.showAndWait();
                         if(result.isPresent() && result.get()==YES){
                             final Map<Class, List<Positionable>> positionablesByClass = new HashMap<>();

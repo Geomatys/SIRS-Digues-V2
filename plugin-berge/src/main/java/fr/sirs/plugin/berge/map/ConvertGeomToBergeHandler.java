@@ -18,5 +18,6 @@ public class ConvertGeomToBergeHandler extends ConvertGeomToTronconHandler {
     protected void init() {
         this.typeClass = Berge.class;
         this.typeName = "berge";
+        this.maleGender = false;
     }
 }

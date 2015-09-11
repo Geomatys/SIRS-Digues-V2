@@ -95,11 +95,12 @@ public class TronconCutHandler extends AbstractNavigationHandler {
     // overriden variable by init();
     protected String layerName;
     protected String typeName;
+    protected boolean maleGender;
     
     protected void init() {
-        this.layerName = CorePlugin.TRONCON_LAYER_NAME;
-        this.typeName = "tronçon";
-        
+        this.layerName  = CorePlugin.TRONCON_LAYER_NAME;
+        this.typeName   = "tronçon";
+        this.maleGender = true;
     }
 
     public TronconCutHandler(final FXMap map) {
@@ -146,9 +147,10 @@ public class TronconCutHandler extends AbstractNavigationHandler {
                 break;
             }
         }
+        final String prefix = maleGender ? "du " : "de la ";
         if (i >= nbSegments) {
             final Alert choice = new Alert(Alert.AlertType.INFORMATION,
-                    "Êtes-vous sûr ? Tous les morceaux du " + typeName + " sont marqués \"à conserver\". Aucune opération ne sera effectuée.", // TODO GENDER
+                    "Êtes-vous sûr ? Tous les morceaux " + prefix + typeName + " sont marqués \"à conserver\". Aucune opération ne sera effectuée.",
                     ButtonType.NO, ButtonType.YES);
             choice.setResizable(true);
             final Optional result = choice.showAndWait();
@@ -159,7 +161,8 @@ public class TronconCutHandler extends AbstractNavigationHandler {
         } else {
             // finish button is bound to troncon property state to avoid null value here.
             final TronconDigue troncon = editPane.tronconProperty().get();
-            final Alert confirmCut = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment découper le " + typeName + " ? Si oui, vos modifications seront enregistrées.", ButtonType.YES, ButtonType.NO); // TODO GENDER
+            final String s = maleGender ? "le ":  "la ";
+            final Alert confirmCut = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment découper " + s + typeName + " ? Si oui, vos modifications seront enregistrées.", ButtonType.YES, ButtonType.NO);
             confirmCut.setResizable(true);
             confirmCut.showAndWait();
             final ButtonType result = confirmCut.getResult();
@@ -188,7 +191,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
                 // TODO : show a popup on success.
                 submitted.setOnSucceeded(event -> {
                     final Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                            "Le découpage du " + typeName + " \"" + troncon.getLibelle() + "\" s'est terminé avec succcès.", // TODO GENDER
+                            "Le découpage " + prefix + typeName + " \"" + troncon.getLibelle() + "\" s'est terminé avec succcès.", 
                             ButtonType.OK);
                     alert.setResizable(true);
                     alert.showAndWait();

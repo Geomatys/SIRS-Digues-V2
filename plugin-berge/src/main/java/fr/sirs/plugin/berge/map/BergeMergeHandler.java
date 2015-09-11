@@ -18,5 +18,6 @@ public class BergeMergeHandler extends TronconMergeHandler {
     protected void init() {
         this.layerName = PluginBerge.LAYER_NAME;
         this.typeName = "berge";
+        this.maleGender = false;
     }
 }

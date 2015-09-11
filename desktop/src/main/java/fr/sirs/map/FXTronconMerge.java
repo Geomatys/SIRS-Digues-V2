@@ -45,13 +45,19 @@ public class FXTronconMerge extends VBox {
     private final MergeTask task = new MergeTask();
     private final FXMap map;
     private final String typeName;
+    private final boolean maleGender;
     
-    public FXTronconMerge(final FXMap map, final String typeName) {
+    public FXTronconMerge(final FXMap map, final String typeName, final boolean maleGender) {
         SIRS.loadFXML(this);
         
         this.typeName = typeName;
+        this.maleGender = maleGender;
         
-        infoLabel.setText("Nom du " + typeName + " résultant de la fusion :"); // TODO GENDER
+        if (maleGender) {
+            infoLabel.setText("Nom du " + typeName + " résultant de la fusion :");
+        } else {
+            infoLabel.setText("Nom de la " + typeName + " résultante de la fusion :");
+        }
         nameLabel.setText("Les " + typeName + "s avant fusion seront archivés.");
         final TableColumn<TronconDigue,String> col = new TableColumn<>("Nom");
         col.setEditable(false);
@@ -108,7 +114,11 @@ public class FXTronconMerge extends VBox {
                     
                     final TronconDigue current = troncons.get(i);
                     updateProgress(i, troncons.size());
-                    updateMessage("Ajout du " + typeName + " "+current.getLibelle()); // TODO GENDER
+                    if (maleGender) {
+                        updateMessage("Ajout du " + typeName + " "+current.getLibelle());
+                    } else {
+                        updateMessage("Ajout de la " + typeName + " "+current.getLibelle());
+                    }
                     
                     TronconUtils.mergeTroncon(merge, current, session);
                     sb.append(" + ").append(current.getLibelle());

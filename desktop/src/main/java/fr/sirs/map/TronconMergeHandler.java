@@ -57,11 +57,12 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
     // overriden variable by init();
     protected String layerName;
     protected String typeName;
+    protected boolean maleGender;
     
     protected void init() {
         this.layerName = CorePlugin.TRONCON_LAYER_NAME;
         this.typeName = "tronçon";
-        
+        this.maleGender = true;
     }
     
     public TronconMergeHandler(final FXMap map) {
@@ -69,7 +70,7 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
         init();
         
         session = Injector.getSession();
-        editPane = new FXTronconMerge(map, typeName);
+        editPane = new FXTronconMerge(map, typeName, maleGender);
         
         editPane.getTroncons().addListener(this::tronconChanged);        
     }

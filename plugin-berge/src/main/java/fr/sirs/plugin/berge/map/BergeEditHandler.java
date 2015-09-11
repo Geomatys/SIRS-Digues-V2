@@ -29,6 +29,7 @@ public class BergeEditHandler extends TronconEditHandler {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
         this.typeName = "berge";
+        this.maleGender = false;
     }
     
 }

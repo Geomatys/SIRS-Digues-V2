@@ -61,10 +61,12 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
      // overriden variable by init();
     protected String typeName;
     protected Class typeClass;
+    protected boolean maleGender;
     
     protected void init() {
-        this.typeName = "tronçon";
-        this.typeClass = TronconDigue.class;
+        this.typeName   = "tronçon";
+        this.typeClass  = TronconDigue.class;
+        this.maleGender = true;
     }    
     
     public ConvertGeomToTronconHandler(final FXMap map) {
@@ -119,7 +121,7 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
                     }
                     
                     if(geom !=null) {
-                        final TronconDigue troncon = showTronconDialog(typeName, typeClass);
+                        final TronconDigue troncon = showTronconDialog(typeName, typeClass, maleGender);
                         if (troncon == null) return;
                         try{
                             final Session session = Injector.getSession();
