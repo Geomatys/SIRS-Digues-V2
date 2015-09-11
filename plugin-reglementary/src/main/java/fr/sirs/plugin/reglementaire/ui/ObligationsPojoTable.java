@@ -54,11 +54,12 @@ public final class ObligationsPojoTable extends PojoTable {
         uiPlanificationBtn.getStyleClass().add(BUTTON_STYLE);
         uiPlanificationBtn.setTooltip(new Tooltip("Planification automatique"));
         uiPlanificationBtn.setOnMouseClicked(event -> showPlanificationTable(tabPane));
-        searchEditionToolbar.getChildren().add(2, uiPlanificationBtn);
+        searchEditionToolbar.getChildren().add(1, uiPlanificationBtn);
 
         if (getFilterUI() instanceof VBox) {
             final VBox vbox = (VBox) getFilterUI();
             vbox.getChildren().add(vbox.getChildren().size() - 1, uiHideRealizedCheckBox);
+            uiHideRealizedCheckBox.setStyle("-fx-text-fill: #FFF");
         }
     }
 
