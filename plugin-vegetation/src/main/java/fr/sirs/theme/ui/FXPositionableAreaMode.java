@@ -59,6 +59,9 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
 
     private final BooleanProperty pctProp = new SimpleBooleanProperty(false);
 
+
+    final ChangeListener<String> typeCoteChangeListener = (ObservableValue<? extends String> observable, String oldValue, String newValue) -> buildGeometry();
+
     public FXPositionableAreaMode() {
         super();
         
@@ -106,6 +109,18 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
         lblEndNear.managedProperty().bind(pctProp);
         lblEndFar.managedProperty().bind(pctProp);
 
+        positionableProperty().addListener(new ChangeListener<Positionable>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
+                if(newValue instanceof ZoneVegetation){
+                    ((ZoneVegetation) newValue).typeCoteIdProperty().addListener(typeCoteChangeListener);
+                }
+                if(oldValue instanceof ZoneVegetation){
+                    ((ZoneVegetation) newValue).typeCoteIdProperty().removeListener(typeCoteChangeListener);
+                }
+            }
+        });
     }
 
     @Override
@@ -202,8 +217,12 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
     @Override
     public void buildGeometry(){
 
+
         //sauvegarde des propriétés
         final ZoneVegetation positionable = (ZoneVegetation) positionableProperty().get();
+
+        // On ne met la géométrie à jour depuis ce panneau que si on est dans son mode.
+        if(!MODE.equals(positionable.getGeometryMode())) return;
 
         final SystemeReperage sr = uiSRs.getValue();
         final BorneDigue startBorne = uiBorneStart.getValue();
@@ -271,31 +290,10 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
                     positionable.getBorne_debut_distance(),
                     Injector.getSession().getRepositoryForClass(BorneDigue.class));
             linear = pointAndSegment.getKey();
-            if(ratio==0) ratio=1;// On ne met pas un arbre des deux côtés.
-//            if(ratio==0){
-//                //des 2 cotés
-//                ratio = 1;
-//                final Point left = toPoint(linear,
-//                    positionable.getDistanceDebutMin() * ratio,
-//                    positionable.getDistanceDebutMax() * ratio,
-//                    positionable.getDistanceFinMin() * ratio,
-//                    positionable.getDistanceFinMax() * ratio);
-//                ratio = -1;
-//                final Point right = toPoint(linear,
-//                    positionable.getDistanceDebutMin() * ratio,
-//                    positionable.getDistanceDebutMax() * ratio,
-//                    positionable.getDistanceFinMin() * ratio,
-//                    positionable.getDistanceFinMax() * ratio);
-//                geometry = GO2Utilities.JTS_FACTORY.createMultiPoint(new Point[]{left,right});
-//                geometry.setSRID(linear.getSRID());
-//                geometry.setUserData(linear.getUserData());
-//
-//            }else{
-                //1 coté
-                geometry = toPoint(linear,
-                    positionable.getDistanceDebutMin() * ratio,
-                    pointAndSegment.getValue());
-//            }
+            if(ratio==0.) ratio=1.;// On ne met pas un arbre des deux côtés.
+            geometry = toPoint(linear,
+                positionable.getDistanceDebutMin() * ratio,
+                pointAndSegment.getValue());
         }
         else {
             /*
@@ -452,28 +450,12 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
      */
     private static Point toPoint(final LineString segment, final double perpendicularDistance, final double linearDistance) {
 
-
-        final Coordinate debutSegment = segment.getCoordinateN(0);
-        final Coordinate finSegment = segment.getCoordinateN(1);
         final double segmentLength = segment.getLength();
-
-
-        /*
-        Calcul des coordonnées du point intermédiaire. Ce point est situé sur le
-        segment à la distance "linearDistance" du début.
-        */
-        final Coordinate intermediaire = new Coordinate((finSegment.x-debutSegment.x)*linearDistance/segmentLength+debutSegment.x, (finSegment.y-debutSegment.y)*linearDistance/segmentLength+debutSegment.y);
-
-        /*
-        Il faut maintenant insérer le nouveau point dans la géométrie du segment.
-        */
-        final LineString nouvelleGeom = GO2Utilities.JTS_FACTORY.createLineString(new Coordinate[]{debutSegment, intermediaire, finSegment});
-
         /*
         La suite calcule les coordonnées du point définitif à la distance
         "perpendicularDistance" du segment.
          */
-        final PathIterator ite = new JTSLineIterator(nouvelleGeom, null);
+        final PathIterator ite = new JTSLineIterator(segment, null);
         final PathWalker walker = new PathWalker(ite);
         final Point2D.Double pt = new Point2D.Double();
         final Coordinate coord = new Coordinate(0,0);
@@ -482,15 +464,19 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
         On va jusqu'au point intermédiaire, on récupère la position et la
         direction perpendiculaire.
         */
-        final float d = walker.getSegmentLengthRemaining();
-        walker.walk(d+0.0001f); // Pourquoi 0.0001 ?
+//        final float d = walker.getSegmentLengthRemaining();
+        final double distanceToWalk;
+        // On sécurise la distance à parcourir pour que celle-ci soit bien incluse dans le segment.
+        if(linearDistance>segmentLength) distanceToWalk=segmentLength;
+        else if(linearDistance<0.) distanceToWalk=0.;
+        else distanceToWalk = linearDistance;
+
+        walker.walk((float) distanceToWalk);
         walker.getPosition(pt);
         double angle = Math.PI/2 + walker.getRotation();
 
-        double distNear = perpendicularDistance + perpendicularDistance*(d/segmentLength);
-
-        coord.x = pt.x + Math.cos(angle)*distNear;
-        coord.y = pt.y + Math.sin(angle)*distNear;
+        coord.x = pt.x + Math.cos(angle)*perpendicularDistance;
+        coord.y = pt.y + Math.sin(angle)*perpendicularDistance;
 
         /**
          * Les quatre points retournés par "toPolygon()" sont identiques. On prend le premier.
