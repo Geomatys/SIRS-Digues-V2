@@ -1,5 +1,6 @@
 package fr.sirs.theme.ui;
 
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
@@ -58,8 +59,8 @@ public class FXUtilisateurPane extends AbstractFXElementPane<Utilisateur> {
     }
 
     public FXUtilisateurPane(final Utilisateur utilisateur, final boolean administrable) throws NoSuchAlgorithmException {
-
         SIRS.loadFXML(this, Utilisateur.class);
+        Injector.injectDependencies(this);
 
         elementProperty().addListener(this::initFields);
 
