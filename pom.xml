@@ -255,6 +255,7 @@
            <module>plugin-document</module>
            <module>plugin-aot-cot</module>
            <module>plugin-berge</module>
+           <module>plugin-lit</module>
            <module>plugin-dependance</module>
         </modules>
      </profile>
