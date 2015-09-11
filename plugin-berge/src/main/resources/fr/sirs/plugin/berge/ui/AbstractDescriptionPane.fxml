@@ -39,4 +39,7 @@
          </BorderPane.margin>
       </GridPane>
    </top>
+   <center>
+      <BorderPane fx:id="uiCenter" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="200.0" minWidth="200.0" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+   </center>
 </fx:root>

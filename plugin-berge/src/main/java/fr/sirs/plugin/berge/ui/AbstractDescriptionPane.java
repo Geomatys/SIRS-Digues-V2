@@ -23,6 +23,8 @@ public class AbstractDescriptionPane extends BorderPane {
     @FXML
     private ComboBox<Berge> bergeBox;
     
+    @FXML
+    private BorderPane uiCenter;
     
     public AbstractDescriptionPane() {
        this(null);
@@ -47,12 +49,12 @@ public class AbstractDescriptionPane extends BorderPane {
                     i++;
                 }
                 final FXBergeThemePane tab = new FXBergeThemePane(bergeBox, themes);
-                this.setCenter(tab);
+                uiCenter.setCenter(tab);
             } else {
                 final TabContent tc = contents.get(0);
                 final AbstractTheme.ThemeManager themeManager = AbstractTheme.generateThemeManager(tc.tableName, tc.tableClass);
                 final FXBergeThemePane tab = new FXBergeThemePane(bergeBox, themeManager);
-                this.setCenter(tab);
+                uiCenter.setCenter(tab);
             }
         }
      }
