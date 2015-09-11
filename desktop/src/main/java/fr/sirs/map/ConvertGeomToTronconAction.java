@@ -26,7 +26,7 @@ public class ConvertGeomToTronconAction extends FXMapAction {
         map.getHandlerProperty().addListener(new ChangeListener<FXCanvasHandler>() {
             @Override
             public void changed(ObservableValue<? extends FXCanvasHandler> observable, FXCanvasHandler oldValue, FXCanvasHandler newValue) {
-                selectedProperty().set(newValue instanceof ConvertGeomToTronconHandler);
+                selectedProperty().set(ConvertGeomToTronconHandler.class.equals(newValue.getClass()));
             }
         });
     }

@@ -31,7 +31,7 @@ public class TronconCutAction extends FXMapAction {
         map.getHandlerProperty().addListener(new ChangeListener<FXCanvasHandler>() {
             @Override
             public void changed(ObservableValue<? extends FXCanvasHandler> observable, FXCanvasHandler oldValue, FXCanvasHandler newValue) {
-                selectedProperty().set(newValue instanceof TronconCutHandler);
+                selectedProperty().set(TronconCutHandler.class.equals(newValue.getClass()));
             }
         });
     }

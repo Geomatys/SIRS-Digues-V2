@@ -31,14 +31,14 @@ public class PointCalculatorAction extends FXMapAction {
         map.getHandlerProperty().addListener(new ChangeListener<FXCanvasHandler>() {
             @Override
             public void changed(ObservableValue<? extends FXCanvasHandler> observable, FXCanvasHandler oldValue, FXCanvasHandler newValue) {
-                selectedProperty().set(newValue instanceof PointCalculatorHandler);
+                selectedProperty().set(PointCalculatorHandler.class.equals(newValue.getClass()));
             }
         });
     }
 
     @Override
     public void accept(ActionEvent event) {
-        if (map != null && !(map.getHandler() instanceof PointCalculatorHandler)) {
+        if (map != null && !(PointCalculatorHandler.class.equals(map.getHandler().getClass()))) {
             map.setHandler(new PointCalculatorHandler());
         }
     }

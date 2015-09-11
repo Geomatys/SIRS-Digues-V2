@@ -31,7 +31,7 @@ public class TronconMergeAction extends FXMapAction {
         map.getHandlerProperty().addListener(new ChangeListener<FXCanvasHandler>() {
             @Override
             public void changed(ObservableValue<? extends FXCanvasHandler> observable, FXCanvasHandler oldValue, FXCanvasHandler newValue) {
-                selectedProperty().set(newValue instanceof TronconMergeHandler);
+                selectedProperty().set(TronconMergeHandler.class.equals(newValue.getClass()));
             }
         });
     }
