@@ -3,9 +3,12 @@ package fr.sirs.plugin.reglementaire.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.RefEcheanceRappelObligationReglementaireRepository;
+import fr.sirs.core.component.RefEtapeObligationReglementaireRepository;
+import fr.sirs.core.component.RefTypeObligationReglementaireRepository;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefEcheanceRappelObligationReglementaire;
+import fr.sirs.core.model.RefEtapeObligationReglementaire;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
 import fr.sirs.plugin.reglementaire.DocumentsTheme;
 import fr.sirs.ui.calendar.CalendarEvent;
@@ -112,6 +115,8 @@ public final class ObligationsCalendarView extends CalendarView {
 
         if (obligations != null && !obligations.isEmpty()) {
             final RefEcheanceRappelObligationReglementaireRepository rerorr = Injector.getBean(RefEcheanceRappelObligationReglementaireRepository.class);
+            final RefEtapeObligationReglementaireRepository reorr = Injector.getBean(RefEtapeObligationReglementaireRepository.class);
+            final RefTypeObligationReglementaireRepository rtorr = Injector.getBean(RefTypeObligationReglementaireRepository.class);
 
             for (final ObligationReglementaire obligation : obligations) {
                 final LocalDate eventDate = obligation.getDateRealisation() != null ? obligation.getDateRealisation() :
@@ -119,9 +124,9 @@ public final class ObligationsCalendarView extends CalendarView {
                 if (eventDate != null) {
                     final StringBuilder sb = new StringBuilder();
                     Image image = ICON_DOC;
+                    // Type d'obligation
                     if (obligation.getTypeId() != null) {
-                        final RefTypeObligationReglementaire oblType =
-                                Injector.getSession().getRepositoryForClass(RefTypeObligationReglementaire.class).get(obligation.getTypeId());
+                        final RefTypeObligationReglementaire oblType = rtorr.get(obligation.getTypeId());
                         if (oblType != null) {
                             final String oblTypeAbreg = oblType.getAbrege();
                             sb.append(oblTypeAbreg);
@@ -130,6 +135,7 @@ public final class ObligationsCalendarView extends CalendarView {
                             }
                         }
                     }
+                    // Nom du SE
                     if (obligation.getSystemeEndiguementId() != null) {
                         final Preview previewSE = Injector.getSession().getPreviews().get(obligation.getSystemeEndiguementId());
                         if (previewSE != null) {
@@ -139,6 +145,25 @@ public final class ObligationsCalendarView extends CalendarView {
                             sb.append(previewSE.getLibelle());
                         }
                     }
+                    // Année de l'obligation
+                    if (obligation.getAnnee() != 0) {
+                        if (!sb.toString().isEmpty()) {
+                            sb.append(" - ");
+                        }
+                        sb.append(obligation.getAnnee());
+                    }
+                    // Etape de l'obligation
+                    if (obligation.getEtapeId() != null) {
+                        final RefEtapeObligationReglementaire oblEtape = reorr.get(obligation.getEtapeId());
+                        if (oblEtape != null) {
+                            if (!sb.toString().isEmpty()) {
+                                sb.append(" - ");
+                            }
+                            sb.append(oblEtape.getLibelle());
+                        }
+                    }
+
+                    // Création de l'évènement sur le calendrier pour cette obligation
                     getCalendarEvents().add(new CalendarEvent(obligation, eventDate, sb.toString(), image));
 
                     // Si l'obligation a une date de rappel d'échéance de configurée, on ajoute une alerte à cette date
