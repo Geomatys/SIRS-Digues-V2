@@ -3,7 +3,7 @@ package fr.sirs.core.component;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.SirsCoreRuntimeExecption;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Positionable;
@@ -80,7 +80,7 @@ public class AbstractTronconDigueRepository<T extends TronconDigue> extends Abst
         if(session!=null){
             return session.getElementCreator().createElement(type);
         } else {
-            throw new SirsCoreRuntimeExecption("Pas de session courante");
+            throw new SirsCoreRuntimeException("Pas de session courante");
         }
     }
 

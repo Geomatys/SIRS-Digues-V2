@@ -4,7 +4,7 @@ import fr.sirs.CorePlugin;
 import static fr.sirs.CorePlugin.createTronconSelectionStyle;
 import fr.sirs.Plugin;
 import fr.sirs.StructBeanSupplier;
-import fr.sirs.core.SirsCoreRuntimeExecption;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.Berge;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.sql.BergeSqlHelper;
@@ -99,7 +99,7 @@ public class PluginBerge extends Plugin {
             bergeContainer.items().addAll(layers);
             return Collections.singletonList(bergeContainer);
         } catch (Exception e) {
-            throw new SirsCoreRuntimeExecption(e);
+            throw new SirsCoreRuntimeException(e);
         }
     }
 
