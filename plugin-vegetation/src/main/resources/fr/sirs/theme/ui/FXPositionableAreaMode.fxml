@@ -63,7 +63,7 @@
             </HBox>
             <Spinner fx:id="uiDistanceEnd" GridPane.columnIndex="5" GridPane.rowIndex="3" />
             <Label text="Eloignement des points par rapport à l'axe du tronçon (m)" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
-            <Label text="Début, point proche" GridPane.rowIndex="5" />
+            <Label fx:id="lblStartNear" text="Début, point proche" GridPane.rowIndex="5" />
             <Spinner fx:id="uiStartNear" layoutX="302.0" layoutY="118.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="5" />
             <Label fx:id="lblStartFar" text="Point éloigné" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
             <Spinner fx:id="uiStartFar" layoutX="423.0" layoutY="82.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" GridPane.columnIndex="5" GridPane.rowIndex="5" />

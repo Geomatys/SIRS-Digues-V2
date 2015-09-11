@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -53,9 +54,12 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
 
     // Libellés à cacher si c'est un ponctuel
     @FXML private Label lblFin;
+    @FXML private Label lblStartNear;
     @FXML private Label lblStartFar;
     @FXML private Label lblEndNear;
     @FXML private Label lblEndFar;
+
+    private final String originalLblStartNear;
 
     private final BooleanProperty pctProp = new SimpleBooleanProperty(false);
 
@@ -108,6 +112,18 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
         uiStartFar.managedProperty().bind(pctProp);
         lblEndNear.managedProperty().bind(pctProp);
         lblEndFar.managedProperty().bind(pctProp);
+
+        originalLblStartNear = lblStartNear.getText();
+        lblStartNear.textProperty().bind(new StringBinding() {
+            {bind(pctProp);}
+            @Override
+            protected String computeValue() {
+                if(pctProp.get()){
+                    return originalLblStartNear;
+                }
+                else return "Point unique";
+            }
+        });
 
         positionableProperty().addListener(new ChangeListener<Positionable>() {
 
