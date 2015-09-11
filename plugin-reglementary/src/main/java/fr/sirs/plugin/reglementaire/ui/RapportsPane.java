@@ -172,7 +172,9 @@ public class RapportsPane extends BorderPane implements Initializable {
         uiTable = new RapportsTable();
         uiTablePane.setCenter(uiTable);
         uiPrDebut = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE,0.0));
+        uiPrDebut.setEditable(true);
         uiPrFin = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE,0.0));
+        uiPrFin.setEditable(true);
         uiGrid.add(uiPrDebut, 1, 3);
         uiGrid.add(uiPrFin, 3, 3);
 
