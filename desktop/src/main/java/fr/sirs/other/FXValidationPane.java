@@ -162,7 +162,7 @@ public class FXValidationPane extends BorderPane {
 
         setCenter(table);
 
-        table.setItems(FXCollections.observableArrayList(repository.getValidation()));
+        table.setItems(FXCollections.observableArrayList(repository.getAllByValidationState(false)));
 
         choiceBox.setConverter(new StringConverter<Choice>() {
 
@@ -183,7 +183,7 @@ public class FXValidationPane extends BorderPane {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         });
-        choiceBox.setValue(Choice.ALL);
+        choiceBox.setValue(Choice.INVALID);
         choiceBox.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Choice> observable, Choice oldValue, Choice newValue) -> {
                 fillTable();
         });

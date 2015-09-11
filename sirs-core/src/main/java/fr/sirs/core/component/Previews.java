@@ -142,12 +142,30 @@ public class Previews extends CouchDbRepositorySupport<Preview> {
 
     public List<Preview> getValidation() {
         final ViewQuery viewQuery = createQuery(VALIDATION).includeDocs(false);
-        return db.queryView(viewQuery, Preview.class);
+        final List<Preview> previews = db.queryView(viewQuery, Preview.class);
+        filterExistClass(previews);
+        return previews;
     }
 
     public List<Preview> getAllByValidationState(final boolean valid) {
         final ViewQuery viewQuery = createQuery(VALIDATION).includeDocs(false).key(valid);
-        return db.queryView(viewQuery, Preview.class);
+        final List<Preview> previews = db.queryView(viewQuery, Preview.class);
+        filterExistClass(previews);
+        return previews;
+    }
+
+    private void filterExistClass(final List<Preview> previews) {
+        for (int length=previews.size()-1, i=length; i>=0; i--) {
+            final Preview preview = previews.get(i);
+            try {
+                Class.forName(preview.getElementClass(), true, Thread.currentThread().getContextClassLoader());
+            } catch (ClassNotFoundException ex) {
+                // La classe de cet objet n'existe pas dans le classpath, c'est donc un objet que l'on
+                // a créé via un plugin, puis le plugin a été désinstallé mais l'objet est resté dans la
+                // base. On le retire donc de la liste des objets à valider.
+                previews.remove(preview);
+            }
+        }
     }
 
     /*
