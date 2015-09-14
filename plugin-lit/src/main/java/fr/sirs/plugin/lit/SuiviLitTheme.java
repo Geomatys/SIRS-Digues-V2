@@ -9,9 +9,10 @@ import javafx.scene.layout.BorderPane;
  *
  * @author Cédric Briançon (Geomatys)
  */
-public final class ButtonExampleTheme extends AbstractPluginsButtonTheme {
-    public ButtonExampleTheme() {
-        super("Bouton exemple", "Bouton exemple", null);
+public final class SuiviLitTheme extends AbstractPluginsButtonTheme {
+    
+    public SuiviLitTheme() {
+        super("Suivi des lits", "Suivi des lits", null);
     }
 
     @Override

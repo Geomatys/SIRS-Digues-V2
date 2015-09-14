@@ -17,7 +17,8 @@ public class PluginLit extends Plugin {
     public PluginLit() {
         name = NAME;
         loadingMessage.set("module lit");
-        themes.add(new ButtonExampleTheme());
+        themes.add(new SuiviLitTheme());
+        themes.add(new StructureDescriptionTheme());
     }
 
     @Override
