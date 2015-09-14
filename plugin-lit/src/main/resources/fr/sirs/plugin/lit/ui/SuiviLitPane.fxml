@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<fx:root dividerPositions="0.36716791979949875" focusTraversable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="600.0" prefWidth="800.0" type="SplitPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <items>
+        <BorderPane SplitPane.resizableWithParent="false">
+            <top>
+                <GridPane styleClass="buttonbar" BorderPane.alignment="CENTER">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" />
+                  <ColumnConstraints hgrow="NEVER" />
+                  <ColumnConstraints hgrow="NEVER" />
+                        <ColumnConstraints hgrow="NEVER" />
+                  <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints vgrow="NEVER" />
+                    </rowConstraints>
+                    <children>
+                        <Label layoutX="10.0" layoutY="14.0" maxWidth="1.7976931348623157E308" styleClass="label-header" text="Lits" GridPane.halignment="CENTER" GridPane.hgrow="NEVER">
+                     <padding>
+                        <Insets left="5.0" right="5.0" />
+                     </padding>
+                        </Label>
+                  <MenuButton fx:id="uiAdd" mnemonicParsing="false" GridPane.columnIndex="1">
+                     <styleClass>
+                        <String fx:value="btn-without-style" />
+                        <String fx:value="label-header" />
+                     </styleClass>
+                  </MenuButton>
+                  <Button fx:id="uiDelete" mnemonicParsing="false" GridPane.columnIndex="2">
+                     <styleClass>
+                        <String fx:value="btn-without-style" />
+                        <String fx:value="label-header" />
+                     </styleClass>
+                  </Button>
+                        <Button fx:id="uiSearch" mnemonicParsing="false" onAction="#openSearchPopup" GridPane.columnIndex="3" GridPane.hgrow="NEVER">
+                     <styleClass>
+                        <String fx:value="btn-without-style" />
+                        <String fx:value="label-header" />
+                     </styleClass></Button>
+                  <ToggleButton fx:id="uiArchived" mnemonicParsing="false" GridPane.columnIndex="4">
+                     <styleClass>
+                        <String fx:value="btn-without-style" />
+                        <String fx:value="label-header" />
+                     </styleClass>
+                  </ToggleButton>
+                    </children>
+                </GridPane>
+            </top>
+            <center>
+                <ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                    <content>
+                        <TreeView fx:id="uiTree" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" showRoot="false" BorderPane.alignment="CENTER" />
+                    </content>
+                </ScrollPane>
+            </center>
+        </BorderPane>
+        <BorderPane fx:id="uiRight" />
+    </items>
+</fx:root>

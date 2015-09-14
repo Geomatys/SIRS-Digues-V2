@@ -1,5 +1,6 @@
 package fr.sirs.plugin.lit;
 
+import fr.sirs.plugin.lit.ui.SuiviLitPane;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import javafx.scene.Parent;
 import javafx.scene.layout.BorderPane;
@@ -17,8 +18,6 @@ public final class SuiviLitTheme extends AbstractPluginsButtonTheme {
 
     @Override
     public Parent createPane() {
-        final BorderPane borderPane = new BorderPane();
-
-        return borderPane;
+        return new SuiviLitPane();
     }
 }
