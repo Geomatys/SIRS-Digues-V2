@@ -4,22 +4,13 @@
   <eClassifiers xsi:type="ecore:EClass" name="ObligationReglementaire">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateEcheance" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-      <eAnnotations source="localDate"/>
-    </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateRealisation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-      <eAnnotations source="localDate"/>
-    </eStructuralFeatures>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="systemeEndiguementId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//SystemeEndiguement"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeId" eType="#//RefTypeObligationReglementaire"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="echeanceId" eType="#//RefEcheanceRappelObligationReglementaire"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="annee" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="etapeId" eType="#//RefEtapeObligationReglementaire"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="planifId" eType="#//PlanificationObligationReglementaire"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeObligationReglementaire" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
@@ -88,5 +79,22 @@
   <eClassifiers xsi:type="ecore:EEnum" name="SectionTypeObligationReglementaire">
     <eLiterals name="TABLE"/>
     <eLiterals name="FORM"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EtapeObligationReglementaire">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="obligationReglementaireId"
+        eType="#//ObligationReglementaire"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateRealisation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateEcheance" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="etapeId" eType="#//RefEtapeObligationReglementaire"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="planifId" eType="#//PlanificationObligationReglementaire"/>
   </eClassifiers>
 </ecore:EPackage>
