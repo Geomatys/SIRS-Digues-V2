@@ -13,6 +13,13 @@ public class StructureDescriptionTheme extends AbstractPluginsButtonTheme {
     
     public StructureDescriptionTheme() {
         super("Description du lit", "Descriptions du lit", null);
+        getSubThemes().add(new OuvragesLitTheme());
+        getSubThemes().add(new IleBancTheme());
+        getSubThemes().add(new ReseauxVoirieTheme());
+        getSubThemes().add(new ReseauxOuvrageTheme());
+        getSubThemes().add(new DesordresTheme());
+        getSubThemes().add(new PrestationsTheme());
+        getSubThemes().add(new DocumentTheme());
     }
 
     @Override
