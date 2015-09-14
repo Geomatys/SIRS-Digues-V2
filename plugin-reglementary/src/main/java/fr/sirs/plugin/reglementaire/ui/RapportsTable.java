@@ -6,7 +6,6 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.RapportModeleObligationReglementaire;
 import fr.sirs.theme.ui.PojoTable;
 import javafx.collections.FXCollections;
-import javafx.scene.control.TableColumn;
 
 /**
  *
@@ -27,12 +26,6 @@ public class RapportsTable extends PojoTable {
         ficheModeVisibleProperty().set(false);
         filterVisibleProperty().set(false);
         openEditorOnNewProperty().set(false);
-        
-        for(TableColumn col : getColumns()){
-            if("Désignation".equalsIgnoreCase(col.getText())){
-                col.setVisible(false);
-            }
-        }
     }
 
     @Override

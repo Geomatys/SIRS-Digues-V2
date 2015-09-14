@@ -6,6 +6,7 @@ import fr.sirs.core.model.PhotoChoiceObligationReglementaire;
 import fr.sirs.core.model.RapportSectionObligationReglementaire;
 import fr.sirs.core.model.SectionTypeObligationReglementaire;
 import fr.sirs.theme.ui.PojoTable;
+import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 
 /**
@@ -27,9 +28,11 @@ public class RapportSectionTable extends PojoTable {
         filterVisibleProperty().set(false);
         openEditorOnNewProperty().set(false);
 
-        for(TableColumn col : getColumns()){
-            if("Désignation".equalsIgnoreCase(col.getText())){
-                col.setVisible(false);
+        final ObservableList<TableColumn<Element, ?>> cols = getColumns();
+        for (TableColumn<Element, ?> col : cols) {
+            if (col instanceof EditColumn) {
+                cols.remove(col);
+                break;
             }
         }
     }
