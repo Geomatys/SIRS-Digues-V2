@@ -26,12 +26,12 @@ import java.util.List;
  * @author Alexis Manin     (Geomatys)
  * @author Cédric Briançon  (Geomatys)
  */
-//@Views({
-//        @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.ObligationReglementaire') {emit(doc._id, doc._id)}}"),
-//        @View(name = ObligationReglementaireRepository2.OBLIGATIONS_FOR_PLANIF, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.ObligationReglementaire') {emit(doc.planifId, doc._id)}}")
-//})
-//@Component("fr.sirs.core.component.ObligationReglementaireRepository2")
-public class ObligationReglementaireRepository2 extends
+@Views({
+        @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.ObligationReglementaire') {emit(doc._id, doc._id)}}"),
+        @View(name = ObligationReglementaireRepository.OBLIGATIONS_FOR_PLANIF, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.ObligationReglementaire') {emit(doc.planifId, doc._id)}}")
+})
+@Component("fr.sirs.core.component.ObligationReglementaireRepository")
+public class ObligationReglementaireRepository extends
         AbstractSIRSRepository
                 <ObligationReglementaire> {
 
@@ -41,7 +41,7 @@ public class ObligationReglementaireRepository2 extends
     public static final String OBLIGATIONS_FOR_PLANIF = "obligationsForPlanif";
 
     @Autowired
-    public ObligationReglementaireRepository2(CouchDbConnector db) {
+    public ObligationReglementaireRepository(CouchDbConnector db) {
         super(ObligationReglementaire.class, db);
         initStandardDesignDocument();
     }

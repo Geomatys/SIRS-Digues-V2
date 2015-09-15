@@ -20,6 +20,11 @@ public class FXObligationReglementairePane extends FXObligationReglementairePane
     private FXObligationReglementairePane() {
         super();
 
+        ui_planifId.setVisible(false);
+        ui_planifId.setManaged(false);
+        ui_planifId_link.setVisible(false);
+        ui_planifId_link.setManaged(false);
+
         ui_class.setEditable(false);
         ui_class.setDisable(true);
     }

@@ -23,7 +23,6 @@ import fr.sirs.core.component.AbstractTronconDigueRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.EtapeObligationReglementaireRepository;
 import fr.sirs.core.component.ObligationReglementaireRepository;
-import fr.sirs.core.component.ObligationReglementaireRepository2;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;

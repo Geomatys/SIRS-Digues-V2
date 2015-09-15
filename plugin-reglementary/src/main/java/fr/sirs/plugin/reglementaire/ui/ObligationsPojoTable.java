@@ -3,8 +3,10 @@ package fr.sirs.plugin.reglementaire.ui;
 import fr.sirs.Injector;
 import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.theme.ui.PojoTable;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.TableColumn;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
@@ -25,6 +27,14 @@ public final class ObligationsPojoTable extends PojoTable {
      */
     public ObligationsPojoTable() {
         super(Injector.getBean(ObligationReglementaireRepository.class), "Liste des obligations réglementaires");
+
+        final ObservableList<TableColumn<Element, ?>> cols = getColumns();
+        for (final TableColumn col : cols) {
+            if ("planifId".equals(col.getText())) {
+                cols.remove(col);
+                break;
+            }
+        }
 
         getUiTable().getColumns().add(5, new SEClassTableColumn());
     }
