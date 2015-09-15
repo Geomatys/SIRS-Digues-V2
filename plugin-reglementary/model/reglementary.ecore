@@ -30,7 +30,13 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="frequenceId" eType="#//RefFrequenceObligationReglementaire"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="etapeId" eType="#//EtapeObligationReglementaire"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="systemeEndiguementId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//SystemeEndiguement"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateDebut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeObligationId" eType="#//RefTypeObligationReglementaire"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeEtapeId" eType="#//RefEtapeObligationReglementaire"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="echeanceId" eType="#//RefEcheanceRappelObligationReglementaire"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefEcheanceRappelObligationReglementaire"
       eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
