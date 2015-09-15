@@ -132,7 +132,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheComplexeDrainant"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurComplexeDrainant"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat" defaultValueLiteral="0.0"/>
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble" defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionComplexeDrainantId"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureComplexeDrainantId"
@@ -147,7 +147,7 @@
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="palplancheFondation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheFondation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurFondation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurFondation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionFondationId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureFondationId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
@@ -162,7 +162,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheStructureElargieGauche"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurStructureElargieGauche"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat" defaultValueLiteral="0.0"/>
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble" defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionStructureElargieGaucheId"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureStructureElargieGaucheId"
@@ -180,7 +180,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheStructureElargieDroite"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurStructureElargieDroite"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat" defaultValueLiteral="0.0"/>
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble" defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionStructureElargieDroiteId"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureStructureElargieDroiteId"
@@ -194,7 +194,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheStructureCentrale"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurStructureCentrale"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat" defaultValueLiteral="0.0"/>
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble" defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionStructureCentraleId"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureStructureCentraleId"
@@ -206,7 +206,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="structureStructureCentraleId"
         eType="#//RefStructureLit"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheTeteAmont" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurTeteAmont" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurTeteAmont" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionTeteAmontId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureTeteAmontId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
@@ -214,7 +214,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceTeteAmontId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSource"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="structureTeteAmontId" eType="#//RefStructureLit"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheTeteAval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurTeteAval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurTeteAval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionTeteAvalId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureTeteAvalId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
@@ -222,7 +222,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceTeteAvalId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSource"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeurStructure" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheAutre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurAutre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurAutre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionAutreId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureAutreId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
@@ -256,8 +256,8 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PlageDepotLit" eSuperTypes="#//ObjetLit">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteurMurette" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteurMurette" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureHautId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
@@ -297,4 +297,12 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObjetLit" abstract="true" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetPhotographiable"/>
+  <eClassifiers xsi:type="ecore:EClass" name="IleBanc" eSuperTypes="#//ObjetLit">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="rattacheBerge" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="vegetalise" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  </eClassifiers>
 </ecore:EPackage>
