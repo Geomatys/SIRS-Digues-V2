@@ -21,13 +21,16 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.AbstractTronconDigueRepository;
 import fr.sirs.core.component.DigueRepository;
+import fr.sirs.core.component.EtapeObligationReglementaireRepository;
 import fr.sirs.core.component.ObligationReglementaireRepository;
+import fr.sirs.core.component.ObligationReglementaireRepository2;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.EtapeObligationReglementaire;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObjetPhotographiable;
@@ -367,14 +370,20 @@ public class RapportsPane extends BorderPane implements Initializable {
                         Platform.runLater(()->uiProgressLabel.setText("Ajout de l'événement dans le calendrier"));
                         //on crée une obligation à la date d'aujourdhui
                         final ObligationReglementaireRepository rep = (ObligationReglementaireRepository)session.getRepositoryForClass(ObligationReglementaire.class);
+                        final EtapeObligationReglementaireRepository eorr = Injector.getBean(EtapeObligationReglementaireRepository.class);
                         final ObligationReglementaire obligation = rep.create();
                         final LocalDate date = LocalDate.now();
                         obligation.setAnnee(date.getYear());
-                        obligation.setDateRealisation(date);
+                        //obligation.setDateRealisation(date);
                         obligation.setLibelle(titre);
                         if(sysEndi!=null) obligation.setSystemeEndiguementId(sysEndi.getElementId());
                         if(type!=null) obligation.setTypeId(type.getElementId());
                         rep.add(obligation);
+
+                        final EtapeObligationReglementaire etape = eorr.create();
+                        etape.setDateRealisation(date);
+                        etape.setObligationReglementaireId(obligation.getId());
+                        eorr.add(etape);
                     }
 
                     Platform.runLater(()->uiProgressLabel.setText("Génération terminée"));

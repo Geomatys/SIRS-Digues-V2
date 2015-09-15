@@ -6,9 +6,7 @@ import fr.sirs.core.SessionCore;
 
 import fr.sirs.core.model.PlanificationObligationReglementaire;
 import fr.sirs.plugin.reglementaire.PluginReglementary;
-import fr.sirs.ui.AlertItem;
 import fr.sirs.ui.AlertManager;
-import javafx.collections.ObservableSet;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
@@ -28,12 +26,12 @@ import java.util.List;
  * @author Alexis Manin     (Geomatys)
  * @author Cédric Briançon  (Geomatys)
  */
-@Views({
-        @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.ObligationReglementaire') {emit(doc._id, doc._id)}}"),
-        @View(name = ObligationReglementaireRepository.OBLIGATIONS_FOR_PLANIF, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.ObligationReglementaire') {emit(doc.planifId, doc._id)}}")
-})
-@Component("fr.sirs.core.component.ObligationReglementaireRepository")
-public class ObligationReglementaireRepository extends
+//@Views({
+//        @View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.ObligationReglementaire') {emit(doc._id, doc._id)}}"),
+//        @View(name = ObligationReglementaireRepository2.OBLIGATIONS_FOR_PLANIF, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.ObligationReglementaire') {emit(doc.planifId, doc._id)}}")
+//})
+//@Component("fr.sirs.core.component.ObligationReglementaireRepository2")
+public class ObligationReglementaireRepository2 extends
         AbstractSIRSRepository
                 <ObligationReglementaire> {
 
@@ -43,7 +41,7 @@ public class ObligationReglementaireRepository extends
     public static final String OBLIGATIONS_FOR_PLANIF = "obligationsForPlanif";
 
     @Autowired
-    public ObligationReglementaireRepository (CouchDbConnector db) {
+    public ObligationReglementaireRepository2(CouchDbConnector db) {
         super(ObligationReglementaire.class, db);
         initStandardDesignDocument();
     }

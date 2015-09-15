@@ -2,10 +2,15 @@ package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.component.EtapeObligationReglementaireRepository;
 import fr.sirs.core.component.ObligationReglementaireRepository;
+import fr.sirs.core.component.ObligationReglementaireRepository2;
+import fr.sirs.core.component.PlanificationObligationReglementaireRepository;
 import fr.sirs.core.component.RefEcheanceRappelObligationReglementaireRepository;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.EtapeObligationReglementaire;
 import fr.sirs.core.model.ObligationReglementaire;
+import fr.sirs.core.model.PlanificationObligationReglementaire;
 import fr.sirs.core.model.RefEcheanceRappelObligationReglementaire;
 import fr.sirs.ui.calendar.CalendarEvent;
 import javafx.collections.FXCollections;
@@ -51,9 +56,9 @@ public final class ObligationsCalendarEventStage extends Stage {
      * Prépare une popup pour afficher les choix possibles au clic sur un évènement du calendrier.
      *
      * @param calendarEvent Evènement du calendrier concerné
-     * @param obligations Liste des obligations.
+     * @param etapes Liste des étapes d'obligations.
      */
-    public ObligationsCalendarEventStage(final CalendarEvent calendarEvent, final ObservableList<ObligationReglementaire> obligations) {
+    public ObligationsCalendarEventStage(final CalendarEvent calendarEvent, final ObservableList<EtapeObligationReglementaire> etapes) {
         super();
 
         setTitle(calendarEvent.getTitle());
@@ -67,7 +72,7 @@ public final class ObligationsCalendarEventStage extends Stage {
         buttonDelete.setMaxWidth(Double.MAX_VALUE);
         buttonDelete.setAlignment(Pos.CENTER_LEFT);
         buttonDelete.getStyleClass().add(CSS_CALENDAR_EVENT_POPUP_BUTTON);
-        buttonDelete.setOnAction(event -> delete(calendarEvent, obligations));
+        buttonDelete.setOnAction(event -> delete(calendarEvent, etapes));
         mainBox.getChildren().add(buttonDelete);
 
         final Button buttonReport = new Button();
@@ -105,9 +110,9 @@ public final class ObligationsCalendarEventStage extends Stage {
      * Supprime un évènement du calendrier ou une alerte de rappel.
      *
      * @param calendarEvent Evènement du calendrier concerné.
-     * @param obligations Liste des obligations.
+     * @param etapes Liste des obligations.
      */
-    private void delete(final CalendarEvent calendarEvent, final ObservableList<ObligationReglementaire> obligations) {
+    private void delete(final CalendarEvent calendarEvent, final ObservableList<EtapeObligationReglementaire> etapes) {
         final Alert alertDelConfirm = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression de l'alerte ?",
                 ButtonType.NO, ButtonType.YES);
         alertDelConfirm.setResizable(true);
@@ -115,20 +120,22 @@ public final class ObligationsCalendarEventStage extends Stage {
         final ButtonType res = alertDelConfirm.showAndWait().get();
         if(ButtonType.YES != res) return;
 
-        final ObligationReglementaireRepository orr = Injector.getBean(ObligationReglementaireRepository.class);
+        final EtapeObligationReglementaireRepository eorr = Injector.getBean(EtapeObligationReglementaireRepository.class);
 
         final Element parent = calendarEvent.getParent();
-        if (parent instanceof ObligationReglementaire) {
-            final ObligationReglementaire obligation = (ObligationReglementaire) parent;
+        if (parent instanceof EtapeObligationReglementaire) {
+            final EtapeObligationReglementaire etape = (EtapeObligationReglementaire) parent;
             if (!calendarEvent.isAlert()) {
                 // Une obligation a été fournie et ce n'est pas une alerte de rappel, donc on peut supprimer directement l'obligation.
-                orr.remove(obligation);
-                obligations.remove(obligation);
+                eorr.remove(etape);
+                etapes.remove(etape);
             } else {
                 // Une obligation a été fournie et c'est une alerte de rappel, donc on doit mettre à jour la date de
                 // rappel de l'échéance car ce n'est plus valide.
-                obligation.setEcheanceId(null);
-                orr.update(obligation);
+                if (etape.getEcheanceId() != null) {
+                    etape.setEcheanceId(null);
+                    eorr.update(etape);
+                }
             }
         }
 
@@ -154,11 +161,11 @@ public final class ObligationsCalendarEventStage extends Stage {
         lbl.setMaxHeight(Double.MAX_VALUE);
         hbox.getChildren().add(lbl);
         final DatePicker dp = new DatePicker();
-        final ObligationReglementaire obligation = (ObligationReglementaire) event.getParent();
-        if (obligation.getDateRealisation() != null) {
-            dp.setValue(obligation.getDateRealisation());
+        final EtapeObligationReglementaire etape = (EtapeObligationReglementaire) event.getParent();
+        if (etape.getDateRealisation() != null) {
+            dp.setValue(etape.getDateRealisation());
         } else {
-            dp.setValue(obligation.getDateEcheance());
+            dp.setValue(etape.getDateEcheance());
         }
         hbox.getChildren().add(dp);
         vbox.getChildren().add(hbox);
@@ -170,12 +177,12 @@ public final class ObligationsCalendarEventStage extends Stage {
         okButton.setMaxWidth(Region.USE_PREF_SIZE);
         okButton.setTextAlignment(TextAlignment.CENTER);
         okButton.setOnAction(e -> {
-            if (obligation.getDateRealisation() != null) {
-                obligation.setDateRealisation(dp.getValue());
+            if (etape.getDateRealisation() != null) {
+                etape.setDateRealisation(dp.getValue());
             } else {
-                obligation.setDateEcheance(dp.getValue());
+                etape.setDateEcheance(dp.getValue());
             }
-            Injector.getBean(ObligationReglementaireRepository.class).update(obligation);
+            Injector.getBean(EtapeObligationReglementaireRepository.class).update(etape);
             hide();
         });
         borderPane.setCenter(okButton);
@@ -206,16 +213,17 @@ public final class ObligationsCalendarEventStage extends Stage {
         hbox.getChildren().add(lbl);
 
         // Récupération de l'obligation
-        if (!(event.getParent() instanceof ObligationReglementaire)) {
+        if (!(event.getParent() instanceof EtapeObligationReglementaire)) {
             return;
         }
-        final ObligationReglementaire obligation = (ObligationReglementaire) event.getParent();
+        final EtapeObligationReglementaire etape = (EtapeObligationReglementaire) event.getParent();
 
         // Génération de la liste déroulante des échéances possibles, avec l'ancienne valeur sélectionnée
-        final RefEcheanceRappelObligationReglementaireRepository reorr = Injector.getBean(RefEcheanceRappelObligationReglementaireRepository.class);
+        final RefEcheanceRappelObligationReglementaireRepository rerorr = Injector.getBean(RefEcheanceRappelObligationReglementaireRepository.class);
+        final EtapeObligationReglementaireRepository eorr = Injector.getBean(EtapeObligationReglementaireRepository.class);
         final ComboBox<RefEcheanceRappelObligationReglementaire> comboEcheanceBox = new ComboBox<>();
-        SIRS.initCombo(comboEcheanceBox, FXCollections.observableArrayList(reorr.getAll()),
-                obligation.getEcheanceId() == null ? null : reorr.get(obligation.getEcheanceId()));
+        SIRS.initCombo(comboEcheanceBox, FXCollections.observableArrayList(rerorr.getAll()),
+                etape.getEcheanceId() == null ? null : rerorr.get(etape.getEcheanceId()));
         hbox.getChildren().add(comboEcheanceBox);
         vbox.getChildren().add(hbox);
 
@@ -226,9 +234,11 @@ public final class ObligationsCalendarEventStage extends Stage {
         okButton.setMaxWidth(Region.USE_PREF_SIZE);
         okButton.setTextAlignment(TextAlignment.CENTER);
         okButton.setOnAction(e -> {
-            obligation.setEcheanceId(comboEcheanceBox.getValue().getId());
-            Injector.getBean(ObligationReglementaireRepository.class).update(obligation);
-            hide();
+            if (etape.getEcheanceId() != null) {
+                etape.setEcheanceId(comboEcheanceBox.getValue().getId());
+                eorr.update(etape);
+                hide();
+            }
         });
         borderPane.setCenter(okButton);
         vbox.getChildren().add(borderPane);

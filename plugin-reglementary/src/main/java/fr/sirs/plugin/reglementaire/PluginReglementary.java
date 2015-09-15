@@ -3,7 +3,9 @@ package fr.sirs.plugin.reglementaire;
 import fr.sirs.Injector;
 import fr.sirs.Plugin;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.EtapeObligationReglementaireRepository;
 import fr.sirs.core.component.ObligationReglementaireRepository;
+import fr.sirs.core.model.EtapeObligationReglementaire;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefEcheanceRappelObligationReglementaire;
@@ -65,37 +67,34 @@ public class PluginReglementary extends Plugin {
     }
 
     /**
-     * Récupère les alertes à afficher pour l'utilisateur, selon les dates fournies dans les obligations réglementaires
-     * et leurs échéances de rappel.
+     * Récupère les alertes à afficher pour l'utilisateur, selon les dates fournies dans les étapes d'obligations
+     * réglementaires et leurs échéances de rappel.
      */
     public static void showAlerts() {
         final Set<AlertItem> alerts = new HashSet<>();
 
-        final ObligationReglementaireRepository orr = Injector.getBean(ObligationReglementaireRepository.class);
-        final List<ObligationReglementaire> obligations = orr.getAll();
-        if (obligations.isEmpty()) {
+        final EtapeObligationReglementaireRepository eorr = Injector.getBean(EtapeObligationReglementaireRepository.class);
+        final List<EtapeObligationReglementaire> etapes = eorr.getAll();
+        if (etapes.isEmpty()) {
             AlertManager.getInstance().addAlerts(alerts);
             return;
         }
 
+        final ObligationReglementaireRepository orr = Injector.getBean(ObligationReglementaireRepository.class);
         final AbstractSIRSRepository<RefEcheanceRappelObligationReglementaire> repoEcheanceRappel =
                 Injector.getSession().getRepositoryForClass(RefEcheanceRappelObligationReglementaire.class);
         final AbstractSIRSRepository<RefTypeObligationReglementaire> repoTypeObl =
                 Injector.getSession().getRepositoryForClass(RefTypeObligationReglementaire.class);
         final LocalDate now = LocalDate.now();
 
-        for (final ObligationReglementaire obligation : obligations) {
-            if (obligation.getEcheanceId() == null) {
-                continue;
-            }
-
-            final LocalDate oblDate = obligation.getDateRealisation() != null ? obligation.getDateRealisation() :
-                    obligation.getDateEcheance();
+        for (final EtapeObligationReglementaire etape : etapes) {
+            final LocalDate oblDate = etape.getDateRealisation() != null ? etape.getDateRealisation() :
+                    etape.getDateEcheance();
             if (oblDate == null) {
                 continue;
             }
 
-            final RefEcheanceRappelObligationReglementaire echeance = repoEcheanceRappel.get(obligation.getEcheanceId());
+            final RefEcheanceRappelObligationReglementaire echeance = repoEcheanceRappel.get(etape.getEcheanceId());
 
             // Compare la date actuelle avec la date d'échéance de l'obligation et le temps avant la date d'échéance
             // pour afficher l'alerte. Exemple : une obligation au 1er juillet avec un rappel 3 mois avant,
@@ -103,6 +102,7 @@ public class PluginReglementary extends Plugin {
             if (oblDate.minusMonths(echeance.getNbMois()).compareTo(now) <= 0 && oblDate.compareTo(now) >= 0) {
                 // Construction du texte à afficher sur le calendrier
                 final StringBuilder sb = new StringBuilder();
+                final ObligationReglementaire obligation = orr.get(etape.getObligationReglementaireId());
                 if (obligation.getTypeId() != null) {
                     sb.append(repoTypeObl.get(obligation.getTypeId()).getAbrege()).append(" - ");
                 }

@@ -2,9 +2,11 @@ package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.component.RefEcheanceRappelObligationReglementaireRepository;
 import fr.sirs.core.component.RefEtapeObligationReglementaireRepository;
 import fr.sirs.core.component.RefTypeObligationReglementaireRepository;
+import fr.sirs.core.model.EtapeObligationReglementaire;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefEcheanceRappelObligationReglementaire;
@@ -39,9 +41,9 @@ public final class ObligationsCalendarView extends CalendarView {
     private static final Image ICON_WORK = new Image(DocumentsTheme.class.getResourceAsStream("images/roadworks.png"));
 
     /**
-     * Propriété pointant sur la liste des obligations réglementaires filtrées pour le calendrier.
+     * Propriété pointant sur la liste des étape d'obligations réglementaires filtrées pour le calendrier.
      */
-    private final ObservableList<ObligationReglementaire> obligations;
+    private final ObservableList<EtapeObligationReglementaire> etapes;
 
     /**
      * En cas de changements sur une propriété d'un objet, mets à jour la vue du calendrier.
@@ -49,18 +51,18 @@ public final class ObligationsCalendarView extends CalendarView {
     private final ChangeListener propChangeListener = (observable, oldValue, newValue) -> update();
 
     /**
-     * Ecouteur sur les changements de la liste des obligations. En cas d'ajout ou de retrait dans cette liste,
+     * Ecouteur sur les changements de la liste des étapes d'obligations. En cas d'ajout ou de retrait dans cette liste,
      * ajoute ou retire des écouteurs sur les futures changements de ces obligations, de manière à pouvoir mettre
      * à jour les vues les présentant.
      */
-    private final ListChangeListener<ObligationReglementaire> listChangeListener = c -> {
+    private final ListChangeListener<EtapeObligationReglementaire> listChangeListener = c -> {
         update();
         while(c.next()) {
-            for (final ObligationReglementaire obl : c.getRemoved()) {
+            for (final EtapeObligationReglementaire obl : c.getRemoved()) {
                 removePropertyListener(obl);
             }
 
-            for (final ObligationReglementaire obl : c.getAddedSubList()) {
+            for (final EtapeObligationReglementaire obl : c.getAddedSubList()) {
                 attachPropertyListener(obl);
             }
         }
@@ -69,42 +71,36 @@ public final class ObligationsCalendarView extends CalendarView {
     /**
      * Vue calendrier pour les obligations réglementaires, permettant d'afficher les évènements.
      *
-     * @param obligations propriété pointant sur la liste des obligations réglementaires filtrées pour le calendrier.
+     * @param etapes propriété pointant sur la liste des obligations réglementaires filtrées pour le calendrier.
      */
-    public ObligationsCalendarView(final ObservableList<ObligationReglementaire> obligations) {
+    public ObligationsCalendarView(final ObservableList<EtapeObligationReglementaire> etapes) {
         super();
-        this.obligations = obligations;
-        obligations.addListener(listChangeListener);
+        this.etapes = etapes;
+        etapes.addListener(listChangeListener);
         update();
-        for (final ObligationReglementaire obl : obligations) {
-            attachPropertyListener(obl);
+        for (final EtapeObligationReglementaire etape : etapes) {
+            attachPropertyListener(etape);
         }
     }
 
     /**
-     * Attache un écouteur de changements sur l'obligation reglémentaire.
+     * Attache un écouteur de changements sur l'étape d'obligation reglémentaire.
      *
-     * @param obligation L'obligation réglementaire.
+     * @param etape L'étape d'obligation réglementaire.
      */
-    private void attachPropertyListener(final ObligationReglementaire obligation) {
-        obligation.dateEcheanceProperty().addListener(propChangeListener);
-        obligation.dateRealisationProperty().addListener(propChangeListener);
-        obligation.typeIdProperty().addListener(propChangeListener);
-        obligation.systemeEndiguementIdProperty().addListener(propChangeListener);
-        obligation.echeanceIdProperty().addListener(propChangeListener);
+    private void attachPropertyListener(final EtapeObligationReglementaire etape) {
+        etape.dateEcheanceProperty().addListener(propChangeListener);
+        etape.dateRealisationProperty().addListener(propChangeListener);
     }
 
     /**
-     * Retire un écouteur de changements sur l'obligation reglémentaire.
+     * Retire un écouteur de changements sur l'étape d'obligation reglémentaire.
      *
-     * @param obligation L'obligation réglementaire.
+     * @param etape L'étape d'obligation réglementaire.
      */
-    private void removePropertyListener(final ObligationReglementaire obligation) {
-        obligation.dateEcheanceProperty().removeListener(propChangeListener);
-        obligation.dateRealisationProperty().removeListener(propChangeListener);
-        obligation.typeIdProperty().removeListener(propChangeListener);
-        obligation.systemeEndiguementIdProperty().removeListener(propChangeListener);
-        obligation.echeanceIdProperty().removeListener(propChangeListener);
+    private void removePropertyListener(final EtapeObligationReglementaire etape) {
+        etape.dateEcheanceProperty().removeListener(propChangeListener);
+        etape.dateRealisationProperty().removeListener(propChangeListener);
     }
 
     /**
@@ -113,14 +109,22 @@ public final class ObligationsCalendarView extends CalendarView {
     private void update() {
         getCalendarEvents().clear();
 
-        if (obligations != null && !obligations.isEmpty()) {
+        if (etapes != null && !etapes.isEmpty()) {
+            final ObligationReglementaireRepository orr = Injector.getBean(ObligationReglementaireRepository.class);
             final RefEcheanceRappelObligationReglementaireRepository rerorr = Injector.getBean(RefEcheanceRappelObligationReglementaireRepository.class);
             final RefEtapeObligationReglementaireRepository reorr = Injector.getBean(RefEtapeObligationReglementaireRepository.class);
             final RefTypeObligationReglementaireRepository rtorr = Injector.getBean(RefTypeObligationReglementaireRepository.class);
 
-            for (final ObligationReglementaire obligation : obligations) {
-                final LocalDate eventDate = obligation.getDateRealisation() != null ? obligation.getDateRealisation() :
-                        obligation.getDateEcheance();
+            for (final EtapeObligationReglementaire etape : etapes) {
+                if (etape.getObligationReglementaireId() == null) {
+                    continue;
+                }
+                final ObligationReglementaire obligation = orr.get(etape.getObligationReglementaireId());
+                if (obligation == null) {
+                    continue;
+                }
+                final LocalDate eventDate = etape.getDateRealisation() != null ? etape.getDateRealisation() :
+                        etape.getDateEcheance();
                 if (eventDate != null) {
                     final StringBuilder sb = new StringBuilder();
                     Image image = ICON_DOC;
@@ -153,8 +157,8 @@ public final class ObligationsCalendarView extends CalendarView {
                         sb.append(obligation.getAnnee());
                     }
                     // Etape de l'obligation
-                    if (obligation.getEtapeId() != null) {
-                        final RefEtapeObligationReglementaire oblEtape = reorr.get(obligation.getEtapeId());
+                    if (etape.getTypeEtapeId() != null) {
+                        final RefEtapeObligationReglementaire oblEtape = reorr.get(etape.getTypeEtapeId());
                         if (oblEtape != null) {
                             if (!sb.toString().isEmpty()) {
                                 sb.append(" - ");
@@ -164,15 +168,15 @@ public final class ObligationsCalendarView extends CalendarView {
                     }
 
                     // Création de l'évènement sur le calendrier pour cette obligation
-                    getCalendarEvents().add(new CalendarEvent(obligation, eventDate, sb.toString(), image));
+                    getCalendarEvents().add(new CalendarEvent(etape, eventDate, sb.toString(), image));
 
                     // Si l'obligation a une date de rappel d'échéance de configurée, on ajoute une alerte à cette date
-                    if (obligation.getEcheanceId() != null) {
+                    if (etape.getEcheanceId() != null) {
                         LocalDate firstDateRappel = LocalDate.from(eventDate);
-                        final RefEcheanceRappelObligationReglementaire period = rerorr.get(obligation.getEcheanceId());
+                        final RefEcheanceRappelObligationReglementaire period = rerorr.get(etape.getEcheanceId());
                         firstDateRappel = firstDateRappel.minusMonths(period.getNbMois());
                         sb.append(" - ").append(period.getLibelle());
-                        getCalendarEvents().add(new CalendarEvent(obligation, true, firstDateRappel, sb.toString(), ICON_ALERT));
+                        getCalendarEvents().add(new CalendarEvent(etape, true, firstDateRappel, sb.toString(), ICON_ALERT));
                     }
                 }
             }
@@ -187,7 +191,7 @@ public final class ObligationsCalendarView extends CalendarView {
      */
     @Override
     public void showCalendarPopupForEvent(final CalendarEvent calendarEvent, final Node parent) {
-        final ObligationsCalendarEventStage stage = new ObligationsCalendarEventStage(calendarEvent, obligations);
+        final ObligationsCalendarEventStage stage = new ObligationsCalendarEventStage(calendarEvent, etapes);
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setIconified(false);
         stage.setMaximized(false);
