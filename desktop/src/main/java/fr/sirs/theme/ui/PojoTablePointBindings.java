@@ -183,6 +183,15 @@ public class PojoTablePointBindings {
                 } else if (posInfo.getTronconSegments(false)==null){
                     SIRS.LOGGER.log(Level.INFO, "Le linéaire de référence n'est pas disponible ({0}).", posInfo);
                     return point.getD();
+                }
+                /*
+                Si on est déjà dans le même système de repérage, on se
+                contente de renvoyer la valeur telle quelle sans la
+                recalculer (ni provoquer au passage des erreurs dues aux
+                approximations).
+                */
+                else if(pointImporter.getSystemeRepDzId().equals(posInfo.getTroncon().getSystemeRepDefautId())){
+                    return point.getD();
                 } else {
                     try{
                         return TronconUtils.switchSRForPR(posInfo.getTronconSegments(false),
