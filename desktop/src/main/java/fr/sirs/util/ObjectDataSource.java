@@ -99,12 +99,12 @@ public class ObjectDataSource<T> implements JRDataSource {
                 } catch(DocumentNotFoundException e){
                     SIRS.LOGGER.log(Level.FINEST, e.getMessage());
                 }
-                if(previewLabel!=null && previewLabel.getDesignation()!=null && !"".equals(previewLabel.getDesignation())){
+                if(previewLabel!=null){
                     if(stringConverter!=null){
                         propertyValueToPrint = stringConverter.toString(previewLabel);
-                    }else{
+                    } else if(previewLabel.getDesignation()!=null && !"".equals(previewLabel.getDesignation())){
                         propertyValueToPrint = previewLabel.getDesignation();
-                    }
+                    } else propertyValueToPrint = propertyValue;
                 }
                 else{
                     propertyValueToPrint = propertyValue;

@@ -5,13 +5,12 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS_ABREGE;
 import fr.sirs.Session;
-import fr.sirs.core.model.Contact;
-import fr.sirs.core.model.Organisme;
-import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.Role;
@@ -20,6 +19,7 @@ import static fr.sirs.core.model.Role.EXTERN;
 import static fr.sirs.core.model.Role.GUEST;
 import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.model.SQLQuery;
+import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.index.ElementHit;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
@@ -102,10 +102,12 @@ public class SirsStringConverter extends StringConverter {
         // Whatever object we've got, if we can append a libelle, we do.
         if (item instanceof AvecLibelle) {
             final AvecLibelle libelle = (AvecLibelle) item;
-            if (text.length() > 0
-                    && libelle.getLibelle() != null
+            if (libelle.getLibelle() != null
                     && !libelle.getLibelle().isEmpty()) {
-                text.append(" : ").append(libelle.getLibelle());
+                if (text.length() > 0) {
+                    text.append(" : ");
+                }
+                text.append(libelle.getLibelle());
             }
         }
 
