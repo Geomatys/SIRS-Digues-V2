@@ -8,6 +8,8 @@ import fr.sirs.core.SessionCore;
 import fr.sirs.core.model.EtapeObligationReglementaire;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.PlanificationObligationReglementaire;
+import fr.sirs.plugin.reglementaire.PluginReglementary;
+import fr.sirs.ui.AlertManager;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
@@ -43,6 +45,44 @@ public class EtapeObligationReglementaireRepository extends AbstractSIRSReposito
     @Override
     public EtapeObligationReglementaire create() {
         return InjectorCore.getBean(SessionCore.class).getElementCreator().createElement(EtapeObligationReglementaire.class);
+    }
+
+    /**
+     * Ajoute l'étape d'obligation réglementaire et répercute le changement sur l'affichage des alertes.
+     *
+     * @param entity L'étape d'obligation réglementaire à ajouter.
+     */
+    @Override
+    public void add(EtapeObligationReglementaire entity) {
+        super.add(entity);
+
+        PluginReglementary.showAlerts();
+    }
+
+    /**
+     * Mets à jour l'étape d'obligation réglementaire et répercute le changement sur l'affichage des alertes.
+     *
+     * @param entity L'étape d'obligation réglementaire à mettre à jour.
+     */
+    @Override
+    public void update(EtapeObligationReglementaire entity) {
+        super.update(entity);
+
+        AlertManager.getInstance().removeAlertsForParent(entity);
+        PluginReglementary.showAlerts();
+    }
+
+    /**
+     * A la suppression d'une étape d'obligation réglementaire, supprimes les rappels sur cette étape également
+     * et répercute le changement sur l'affichage des alertes
+     *
+     * @param entity L'obligation réglementaire à supprimer.
+     */
+    @Override
+    public void remove(EtapeObligationReglementaire entity) {
+        super.remove(entity);
+
+        AlertManager.getInstance().removeAlertsForParent(entity);
     }
 
     /**

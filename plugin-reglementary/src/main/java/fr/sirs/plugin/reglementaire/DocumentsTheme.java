@@ -4,14 +4,15 @@ import fr.sirs.SIRS;
 import fr.sirs.core.component.DocumentChangeEmiter;
 import fr.sirs.core.component.DocumentListener;
 import fr.sirs.core.component.EtapeObligationReglementaireRepository;
+import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.EtapeObligationReglementaire;
+import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.plugin.reglementaire.ui.EtapesPojoTable;
 import fr.sirs.plugin.reglementaire.ui.ObligationsCalendarView;
 import fr.sirs.plugin.reglementaire.ui.ObligationsPojoTable;
 import fr.sirs.ui.calendar.CalendarView;
 import fr.sirs.Injector;
-import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import fr.sirs.util.SimpleFXEditMode;
 import javafx.application.Platform;
@@ -60,7 +61,14 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
         final SimpleFXEditMode editModeOR = new SimpleFXEditMode();
         final HBox topORPane = new HBox(separatorOR, editModeOR);
         HBox.setHgrow(separatorOR, Priority.ALWAYS);
+        final ObligationReglementaireRepository orrRepo = Injector.getBean(ObligationReglementaireRepository.class);
+        final ObservableList<ObligationReglementaire> allObls = FXCollections.observableList(orrRepo.getAll());
+        // Ajoute un listener sur tous les ajouts/suppression d'étapes d'obligations pour mettre à jour la liste et donc la table.
+        final ListDocumentListener<ObligationReglementaire> oblListener =
+                new ListDocumentListener<>(ObligationReglementaire.class, allObls);
+        Injector.getBean(DocumentChangeEmiter.class).addListener(oblListener);
         final ObligationsPojoTable obligationsPojoTable = new ObligationsPojoTable();
+        obligationsPojoTable.setTableItems(() -> (ObservableList) allObls);
         obligationsPojoTable.editableProperty().bind(editModeOR.editionState());
         obligationsTab.setContent(new BorderPane(obligationsPojoTable, topORPane, null, null, null));
 
@@ -76,7 +84,8 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
         final EtapeObligationReglementaireRepository eorrRepo = Injector.getBean(EtapeObligationReglementaireRepository.class);
         final ObservableList<EtapeObligationReglementaire> allEtapes = FXCollections.observableList(eorrRepo.getAll());
         // Ajoute un listener sur tous les ajouts/suppression d'étapes d'obligations pour mettre à jour la liste et donc la table.
-        final EtapeDocumentListener etapeListener = new EtapeDocumentListener(allEtapes);
+        final ListDocumentListener<EtapeObligationReglementaire> etapeListener =
+                new ListDocumentListener<>(EtapeObligationReglementaire.class, allEtapes);
         Injector.getBean(DocumentChangeEmiter.class).addListener(etapeListener);
         final EtapesPojoTable etapesPojoTable = new EtapesPojoTable(tabPane);
         etapesPojoTable.setTableItems(() -> (ObservableList) allEtapes);
@@ -104,11 +113,13 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
      * Ecouteur d'ajouts et suppressions d'étapes d'obligations réglementaires sur la base, pour mettre à jour les vues
      * montrant ces objets.
      */
-    private class EtapeDocumentListener implements DocumentListener {
-        private final ObservableList<EtapeObligationReglementaire> list;
+    private class ListDocumentListener<T extends Element> implements DocumentListener {
+        private final ObservableList<T> list;
+        private final Class<T> clazz;
 
-        public EtapeDocumentListener(final ObservableList<EtapeObligationReglementaire> list) {
+        public ListDocumentListener(final Class<T> clazz, final ObservableList<T> list) {
             this.list = list;
+            this.clazz = clazz;
         }
 
         /**
@@ -118,7 +129,7 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
          */
         @Override
         public void documentCreated(Map<Class, List<Element>> added) {
-            final List addedObl = added.get(EtapeObligationReglementaire.class);
+            final List addedObl = added.get(clazz);
             if (addedObl == null || addedObl.isEmpty()) {
                 return;
             }
@@ -144,7 +155,7 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
          */
         @Override
         public void documentDeleted(Map<Class, List<Element>> deletedObject) {
-            final List deletedObj = deletedObject.get(EtapeObligationReglementaire.class);
+            final List deletedObj = deletedObject.get(clazz);
             if (deletedObj == null || deletedObj.isEmpty()) {
                 return;
             }

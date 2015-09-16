@@ -52,45 +52,6 @@ public class ObligationReglementaireRepository extends
     }
 
     /**
-     * Ajoute l'obligation réglementaire et répercute le changement sur l'affichage des alertes.
-     *
-     * @param entity L'obligation réglementaire à ajouter.
-     */
-    @Override
-    public void add(ObligationReglementaire entity) {
-        super.add(entity);
-
-        PluginReglementary.showAlerts();
-    }
-
-    /**
-     * Mets à jour l'obligation réglementaire et répercute le changement sur l'affichage des alertes.
-     *
-     * @param entity L'obligation réglementaire à mettre à jour.
-     */
-    @Override
-    public void update(ObligationReglementaire entity) {
-        super.update(entity);
-
-        AlertManager.getInstance().removeAlertsForParent(entity);
-        PluginReglementary.showAlerts();
-    }
-
-    /**
-     * A la suppression d'une obligation réglementaire, supprimes les rappels sur cette obligation également
-     * et répercute le changement sur l'affichage des alertes
-     *
-     * @param entity L'obligation réglementaire à supprimer.
-     */
-    @Override
-    public void remove(ObligationReglementaire entity) {
-        super.remove(entity);
-
-        AlertManager.getInstance().removeAlertsForParent(entity);
-    }
-
-
-    /**
      * Récupère l'ensemble des obligations pour la planification fournie en paramètre.
      *
      * @param planif Planification pour laquelle on souhaite récupérer les obligations associées.

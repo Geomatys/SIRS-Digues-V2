@@ -111,7 +111,7 @@ public class PluginReglementary extends Plugin {
                     sb.append(previewSE.getLibelle()).append(" - ");
                 }
                 sb.append(obligation.getAnnee());
-                alerts.add(new AlertItem(sb.toString(), oblDate, obligation));
+                alerts.add(new AlertItem(sb.toString(), oblDate, etape));
             }
         }
 

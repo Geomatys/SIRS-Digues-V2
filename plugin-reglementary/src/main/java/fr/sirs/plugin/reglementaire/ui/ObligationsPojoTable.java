@@ -22,15 +22,17 @@ public final class ObligationsPojoTable extends PojoTable {
      */
     private static final String CLASS_PROP_NAME = "Classe";
 
+    private static final String PLANIF_PROP_NAME = "Planification";
+
     /**
      * Création de la table présentant les obligations réglementaires.
      */
     public ObligationsPojoTable() {
-        super(Injector.getBean(ObligationReglementaireRepository.class), "Liste des obligations réglementaires");
+        super(ObligationReglementaire.class, "Liste des obligations réglementaires");
 
         final ObservableList<TableColumn<Element, ?>> cols = getColumns();
         for (final TableColumn col : cols) {
-            if ("planifId".equals(col.getText())) {
+            if (PLANIF_PROP_NAME.equals(col.getText())) {
                 cols.remove(col);
                 break;
             }
