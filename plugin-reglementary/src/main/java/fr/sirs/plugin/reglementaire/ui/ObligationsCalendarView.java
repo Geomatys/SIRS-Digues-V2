@@ -91,6 +91,8 @@ public final class ObligationsCalendarView extends CalendarView {
     private void attachPropertyListener(final EtapeObligationReglementaire etape) {
         etape.dateEcheanceProperty().addListener(propChangeListener);
         etape.dateRealisationProperty().addListener(propChangeListener);
+        etape.echeanceIdProperty().addListener(propChangeListener);
+        etape.typeEtapeIdProperty().addListener(propChangeListener);
     }
 
     /**
@@ -101,6 +103,8 @@ public final class ObligationsCalendarView extends CalendarView {
     private void removePropertyListener(final EtapeObligationReglementaire etape) {
         etape.dateEcheanceProperty().removeListener(propChangeListener);
         etape.dateRealisationProperty().removeListener(propChangeListener);
+        etape.echeanceIdProperty().removeListener(propChangeListener);
+        etape.typeEtapeIdProperty().removeListener(propChangeListener);
     }
 
     /**
