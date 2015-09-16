@@ -94,6 +94,10 @@ public class PluginReglementary extends Plugin {
                 continue;
             }
 
+            if (etape.getEcheanceId() == null) {
+                continue;
+            }
+
             final RefEcheanceRappelObligationReglementaire echeance = repoEcheanceRappel.get(etape.getEcheanceId());
 
             // Compare la date actuelle avec la date d'échéance de l'obligation et le temps avant la date d'échéance
@@ -102,6 +106,9 @@ public class PluginReglementary extends Plugin {
             if (oblDate.minusMonths(echeance.getNbMois()).compareTo(now) <= 0 && oblDate.compareTo(now) >= 0) {
                 // Construction du texte à afficher sur le calendrier
                 final StringBuilder sb = new StringBuilder();
+                if (etape.getObligationReglementaireId() == null) {
+                    continue;
+                }
                 final ObligationReglementaire obligation = orr.get(etape.getObligationReglementaireId());
                 if (obligation.getTypeId() != null) {
                     sb.append(repoTypeObl.get(obligation.getTypeId()).getAbrege()).append(" - ");
