@@ -29,7 +29,7 @@
                          </Label>
                      </children>
                   </AnchorPane>
-                   <HBox styleClass="buttonbarfull">
+                   <HBox style="-fx-background-radius: 5 0 0 0;" styleClass="buttonbarfull">
                       <children>
                          <Button fx:id="uiAdd" mnemonicParsing="false" styleClass="buttonbar-button" />
                          <Button fx:id="uiDuplicate" mnemonicParsing="false" styleClass="buttonbar-button" />
@@ -43,6 +43,9 @@
                       </padding>
                    </HBox>
                </children>
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
             </HBox>
          </top>
        </BorderPane>
