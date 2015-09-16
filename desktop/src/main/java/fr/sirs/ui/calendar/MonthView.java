@@ -4,18 +4,26 @@ import javafx.beans.Observable;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 
 import java.text.DateFormat;
@@ -267,6 +275,16 @@ final class MonthView extends DatePane {
                     if (calendar.get(Calendar.MONTH) == month) {
                         gridBtn.getStyleClass().add(CSS_CALENDAR_DAY_HAS_EVENTS);
                     }
+                    final ScrollPane scrollEventsPane = new ScrollPane();
+                    scrollEventsPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+                    scrollEventsPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+                    scrollEventsPane.setFitToWidth(true);
+                    scrollEventsPane.setFitToHeight(true);
+                    final VBox eventsBox = new VBox();
+                    eventsBox.setBorder(Border.EMPTY);
+                    eventsBox.getStyleClass().add(CSS_CALENDAR_DAY_HAS_EVENTS);
+                    eventsBox.setFillWidth(true);
+
                     for (int j=0; j<eventsForDate.size(); j++) {
                         final CalendarEvent calendarEvent = eventsForDate.get(j);
                         final Button control = new Button();
@@ -280,10 +298,14 @@ final class MonthView extends DatePane {
                         control.setTextAlignment(TextAlignment.LEFT);
                         control.setTooltip(new Tooltip(calendarEvent.getTitle()));
                         control.setOnMouseClicked(event -> calendarView.showCalendarPopupForEvent(calendarEvent, control));
-                        control.setBackground(Background.EMPTY);
+                        control.getStyleClass().add(CSS_CALENDAR_DAY_HAS_EVENTS);
                         control.setBorder(Border.EMPTY);
-                        gridBtn.add(control, 0, j+1, GridPane.REMAINING, 1);
+                        eventsBox.getChildren().add(control);
                     }
+                    scrollEventsPane.setContent(eventsBox);
+                    scrollEventsPane.getStyleClass().add(CSS_CALENDAR_DAY_HAS_EVENTS);
+                    scrollEventsPane.setBorder(Border.EMPTY);
+                    gridBtn.add(scrollEventsPane, 0, 1, GridPane.REMAINING, 1);
                 } else {
                     gridBtn.getStyleClass().remove(CSS_CALENDAR_DAY_HAS_EVENTS);
                 }
