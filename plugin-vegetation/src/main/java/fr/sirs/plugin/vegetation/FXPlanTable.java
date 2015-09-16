@@ -7,7 +7,6 @@ import fr.sirs.Session;
 import fr.sirs.core.component.AbstractZoneVegetationRepository;
 import fr.sirs.core.component.ParcelleVegetationRepository;
 import fr.sirs.core.model.InvasiveVegetation;
-import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.PlanVegetation;
@@ -25,9 +24,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.logging.Level;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -39,12 +37,12 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Border;
@@ -55,6 +53,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.elasticsearch.common.base.Objects;
 
 /**
@@ -225,62 +226,16 @@ public class FXPlanTable extends BorderPane{
             toParcelle.setBackground(Background.EMPTY);
             toParcelle.setBorder(Border.EMPTY);
             toParcelle.setPadding(Insets.EMPTY);
-            final HBox hBox = new HBox(toParcelle, new ImageView(SIRS.ICON_INFO_CIRCLE_BLACK_16));
-            hBox.setAlignment(Pos.CENTER);
-            hBox.setSpacing(.5);
+            final Button infoButton = new Button(null, new ImageView(SIRS.ICON_INFO_CIRCLE_BLACK_16));
+            infoButton.setOnAction(e -> new InfoStage(parcelle).showAndWait());
+            infoButton.setBackground(Background.EMPTY);
+            infoButton.setBorder(Border.EMPTY);
+            infoButton.setPadding(Insets.EMPTY);
+            final HBox infoParcelleBox = new HBox(toParcelle, infoButton);
+            infoParcelleBox.setAlignment(Pos.CENTER);
+            infoParcelleBox.setSpacing(.5);
 
-            final Label info = new Label(cvt.toString(parcelle), hBox);
-
-            final Runnable runnable = () -> {
-                final List<? extends ZoneVegetation> zones = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), session);
-                if(zones.isEmpty()){
-                    info.setTooltip(new Tooltip("Aucune zone de végétation sur cette parcelle."));
-                }
-                else{
-                    final StringBuilder infoSb = new StringBuilder("Peuplement de la parcelle :\n");
-
-                    // Mémos pour vérifier qu'on n'indique pas deux fois les mêmes combinaisons de parcelle - type de végétation
-                    final Map<Class, Boolean> memo1 = new HashMap<>();
-                    final Map<Map.Entry<Class, String>, Boolean> memo2 = new HashMap<>();
-
-                    for(final ZoneVegetation zone : zones){
-                        final LabelMapper labelMapper = LabelMapper.get(zone.getClass());
-
-                        if(zone instanceof PeuplementVegetation || zone instanceof InvasiveVegetation){
-                            final String typeId = (zone instanceof PeuplementVegetation) ? ((PeuplementVegetation)zone).getTypePeuplementId() : ((InvasiveVegetation)zone).getTypeInvasive();
-
-                            if(typeId!=null){
-                                final Map.Entry<Class, String> key = new HashMap.SimpleEntry<>(zone.getClass(), typeId);
-                                if(memo2.get(key)==null){
-                                    final Preview preview = session.getPreviews().get(typeId);
-                                    if(preview!=null){
-                                        infoSb.append("\t- ").append(labelMapper.mapClassName()).append(" (").append(cvt.toString(preview)).append(")\n");
-                                    }
-                                    memo2.put(key, true);
-                                }
-                            }
-                            else{
-                                final Class key = zone.getClass();
-                                if(memo1.get(key)==null){
-                                    infoSb.append("\t- ").append(labelMapper.mapClassName()).append('\n');
-                                    memo1.put(key, true);
-                                }
-                            }
-                        }
-                        else{
-                            final Class key = zone.getClass();
-                            if(memo1.get(key)==null){
-                                infoSb.append("\t- ").append(labelMapper.mapClassName()).append('\n');
-                                memo1.put(key, true);
-                            }
-                        }
-                    }
-                    info.setTooltip(new Tooltip(infoSb.toString()));
-                }
-            };
-            session.getTaskManager().submit("Analyse de la végétation de la parcelle "+parcelle.getDesignation(), runnable);
-
-            gridCenter.add(info, colIndex, rowIndex);
+            gridCenter.add(new Label(cvt.toString(parcelle), infoParcelleBox), colIndex, rowIndex);
 
             /*==================================================================
             Colonnes des planifications.
@@ -386,13 +341,6 @@ public class FXPlanTable extends BorderPane{
          * l'année correspondante.
          */
         private final CostGroup estGroup;
-
-        /**
-         * Dans le cadre de la planification, cette propriété doit être reliée
-         * au mode de calcul des planifications de la parcelle : automatique ou
-         * manuel.
-         */
-        private final BooleanProperty autoProperty = new SimpleBooleanProperty();
 
         /**
          * Le planifGroup sert à la cellule dans le cadre de la planification.
@@ -622,6 +570,73 @@ public class FXPlanTable extends BorderPane{
             }
             final NumberFormat numberFormat = new DecimalFormat("0.00");
             label.setText(numberFormat.format(cout));
+        }
+
+    }
+
+    /**
+     * Legend display.
+     */
+    private static class InfoStage extends Stage {
+
+        private InfoStage(final ParcelleVegetation parcelle){
+            super(StageStyle.UNDECORATED);
+            final GridPane grid = new GridPane();
+            grid.setPadding(new Insets(10, 10, 10, 10));
+            grid.setHgap(10);
+            grid.setVgap(10);
+
+            final SirsStringConverter cvt = new SirsStringConverter();
+            final Label lgdTitle = new Label("Peuplement détaillé de la parcelle "+cvt.toString(parcelle)+" :");
+            lgdTitle.setStyle("-fx-font-weight: bold; -fx-underline: true;");
+            grid.add(lgdTitle, 0, 0, 2, 1);
+
+            final List<? extends ZoneVegetation> zones = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), Injector.getSession());
+
+            int i=1;
+            for(final ZoneVegetation zone : zones){
+                final StringBuilder label = new StringBuilder(cvt.toString(zone));
+                if(zone instanceof PeuplementVegetation){
+                    final String typeId = ((PeuplementVegetation)zone).getTypePeuplementId();
+                    if(typeId!=null){
+                        try{
+                            final Preview preview = Injector.getSession().getPreviews().get(typeId);
+                            final String typeLabel = cvt.toString(preview);
+                            if(typeLabel!=null && !typeLabel.isEmpty()){
+                                label.append(" (").append(typeLabel).append(") ");
+                            }
+                        }
+                        catch(Exception e){
+                            SIRS.LOGGER.log(Level.WARNING, e.getMessage());
+                        }
+                    }
+                }
+                else if(zone instanceof InvasiveVegetation){
+                    final String typeId = ((InvasiveVegetation)zone).getTypeInvasive();
+                    if(typeId!=null){
+                        try{
+                            final Preview preview = Injector.getSession().getPreviews().get(typeId);
+                            final String typeLabel = cvt.toString(preview);
+                            if(typeLabel!=null && !typeLabel.isEmpty()){
+                                label.append(" (").append(typeLabel).append(") ");
+                            }
+                        }
+                        catch(Exception e){
+                            SIRS.LOGGER.log(Level.WARNING, e.getMessage());
+                        }
+                    }
+                }
+                grid.add(new Label(label.toString()), 0, i);
+                i++;
+            }
+
+            final Button ok = new Button("Fermer");
+            ok.setOnAction(ev -> hide());
+            grid.add(ok, 0, i);
+            GridPane.setHalignment(ok, HPos.CENTER);
+
+            setScene(new Scene(grid));
+            initModality(Modality.APPLICATION_MODAL);
         }
 
     }
