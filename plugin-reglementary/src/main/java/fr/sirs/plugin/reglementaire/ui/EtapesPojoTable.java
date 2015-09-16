@@ -2,24 +2,32 @@ package fr.sirs.plugin.reglementaire.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.component.EtapeObligationReglementaireRepository;
 import fr.sirs.core.model.EtapeObligationReglementaire;
 import fr.sirs.core.model.PlanificationObligationReglementaire;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SimpleFXEditMode;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.util.Callback;
 import org.geotoolkit.filter.DefaultPropertyIsNull;
 import org.geotoolkit.filter.DefaultPropertyName;
 import org.geotoolkit.filter.binarylogic.DefaultAnd;
+import org.geotoolkit.gui.javafx.util.ButtonTableCell;
+import org.geotoolkit.internal.GeotkFX;
 import org.opengis.filter.Filter;
 
 /**
@@ -31,6 +39,8 @@ public class EtapesPojoTable extends PojoTable {
 
     public EtapesPojoTable(final TabPane tabPane) {
         super(EtapeObligationReglementaire.class, "Etapes d'obligations réglementaires");
+        // Ajout de la colonne de duplication
+        getColumns().add(2, new DuplicateEtapeColumn());
 
         final Button uiPlanificationBtn = new Button(null, new ImageView(SIRS.ICON_CLOCK_WHITE));
         uiPlanificationBtn.getStyleClass().add(BUTTON_STYLE);
@@ -86,5 +96,44 @@ public class EtapesPojoTable extends PojoTable {
         planTab.setContent(new BorderPane(pojoTable, topPane, null, null, null));
         tabPane.getTabs().add(planTab);
         tabPane.getSelectionModel().select(planTab);
+    }
+
+    public static class DuplicateEtapeColumn extends TableColumn {
+
+        public DuplicateEtapeColumn() {
+            super("Dupliquer");
+            setSortable(false);
+            setResizable(false);
+            setPrefWidth(24);
+            setMinWidth(24);
+            setMaxWidth(24);
+            setGraphic(new ImageView(GeotkFX.ICON_DUPLICATE));
+
+            setCellValueFactory(new Callback<TableColumn.CellDataFeatures, ObservableValue>() {
+
+                @Override
+                public ObservableValue call(TableColumn.CellDataFeatures param) {
+                    return new SimpleObjectProperty(param.getValue());
+                }
+            });
+
+            setCellFactory(new Callback<TableColumn, TableCell>() {
+
+                @Override
+                public TableCell call(TableColumn param) {
+                    return new ButtonTableCell(
+                            false, new ImageView(GeotkFX.ICON_DUPLICATE),
+                            (Object t) -> t!=null, (Object t) -> {
+                        if (t instanceof EtapeObligationReglementaire) {
+                            final EtapeObligationReglementaire initialEtape = (EtapeObligationReglementaire)t;
+                            final EtapeObligationReglementaire newEtape = initialEtape.copy();
+                            final EtapeObligationReglementaireRepository eorr = Injector.getBean(EtapeObligationReglementaireRepository.class);
+                            eorr.add(newEtape);
+                        }
+                        return t;
+                    });
+                }
+            });
+        }
     }
 }

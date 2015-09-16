@@ -6,10 +6,17 @@ import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.theme.ui.PojoTable;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.image.ImageView;
+import javafx.util.Callback;
+import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
+import org.geotoolkit.internal.GeotkFX;
 
 /**
  * Table présentant les obligations réglementaires.
@@ -29,6 +36,9 @@ public final class ObligationsPojoTable extends PojoTable {
      */
     public ObligationsPojoTable() {
         super(ObligationReglementaire.class, "Liste des obligations réglementaires");
+
+        // Ajout de la colonne de duplication
+        getColumns().add(2, new DuplicateObligationColumn());
 
         final ObservableList<TableColumn<Element, ?>> cols = getColumns();
         for (final TableColumn col : cols) {
@@ -81,6 +91,45 @@ public final class ObligationsPojoTable extends PojoTable {
                 textProperty().unbind();
                 setText(null);
             }
+        }
+    }
+
+    public static class DuplicateObligationColumn extends TableColumn {
+
+        public DuplicateObligationColumn() {
+            super("Dupliquer");
+            setSortable(false);
+            setResizable(false);
+            setPrefWidth(24);
+            setMinWidth(24);
+            setMaxWidth(24);
+            setGraphic(new ImageView(GeotkFX.ICON_DUPLICATE));
+
+            setCellValueFactory(new Callback<CellDataFeatures, ObservableValue>() {
+
+                @Override
+                public ObservableValue call(TableColumn.CellDataFeatures param) {
+                    return new SimpleObjectProperty(param.getValue());
+                }
+            });
+
+            setCellFactory(new Callback<TableColumn, TableCell>() {
+
+                @Override
+                public TableCell call(TableColumn param) {
+                    return new ButtonTableCell(
+                            false, new ImageView(GeotkFX.ICON_DUPLICATE),
+                            (Object t) -> t != null, (Object t) -> {
+                        if (t instanceof ObligationReglementaire) {
+                            final ObligationReglementaire initialObligation = (ObligationReglementaire) t;
+                            final ObligationReglementaire newObligation = initialObligation.copy();
+                            final ObligationReglementaireRepository orr = Injector.getBean(ObligationReglementaireRepository.class);
+                            orr.add(newObligation);
+                        }
+                        return t;
+                    });
+                }
+            });
         }
     }
 }
