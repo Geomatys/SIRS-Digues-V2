@@ -39,7 +39,6 @@ import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -376,24 +375,51 @@ public class Session extends SessionCore {
     }
 
     public FXFreeTab getOrCreateThemeTab(final Theme theme) {
-        try {
-            return openThemes.getOrCreate(theme, new Callable<FXFreeTab>() {
-                @Override
-                public FXFreeTab call() throws Exception {
-                    Parent parent = theme.createPane();
-                    if (parent == null) {
-                        return null;
-                    } else {
-                        final FXFreeTab tab = new FXFreeTab(theme.getName());
-                        tab.setContent(parent);
-                        tab.setOnClosed(event -> openThemes.remove(theme));
-                        tab.selectedProperty().addListener(theme.getSelectedPropertyListener());
-                        return tab;
+        if(theme.isCached()){
+            try {
+                return openThemes.getOrCreate(theme, new Callable<FXFreeTab>() {
+                    @Override
+                    public FXFreeTab call() throws Exception {
+                        final Parent parent = theme.createPane();
+                        if (parent == null) {
+                            return null;
+                        } else {
+                            final FXFreeTab tab = new FXFreeTab(theme.getName());
+                            tab.setContent(parent);
+                            tab.setOnClosed(event -> openThemes.remove(theme));
+                            tab.selectedProperty().addListener(theme.getSelectedPropertyListener());
+                            return tab;
+                        }
                     }
-                }
-            });
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+                });
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        /*
+        Certains thèmes doivent pouvoir être ouverts depuis plusieus origines et
+        ne doivent donc pas être mis en cache.
+
+        Par exemple, pour le plugin AOT/COT, le thème de consultation d'une
+        convention pour un élément dépend de l'élément courant. Si on est sur un
+        élément "A" lié à une convention "1", le panneau de thème liste la
+        convention "1". Mais si on ne ferme pas le panneau de thème et qu'on
+        souhaite ensuite consulter les conventions d'un élément "B" lié à une
+        autre convention "2", le fait de refaire appel au thème, s'il est mis en
+        cache, ne fait que donner le focus au panneau précédant listant la
+        convention "1". En supprimant le cache, on ouvre une nouvelle fenêtre
+        avec la convention "2".
+         */
+        else {
+            final Parent parent = theme.createPane();
+            if(parent==null)
+                return null;
+            else {
+                final FXFreeTab tab = new FXFreeTab(theme.getName());
+                tab.setContent(parent);
+                tab.selectedProperty().addListener(theme.getSelectedPropertyListener());
+                return tab;
+            }
         }
     }
 

@@ -79,6 +79,13 @@ public abstract class Theme {
      * @return Composant d'interface, jamais nulle.
      */
     public abstract Parent createPane();
+
+    /**
+     * Indicates if the theme pane must be cached or reloaded.
+     * 
+     * @return true if the pane must be cached.
+     */
+    public boolean isCached(){return true;}
     
     
     /**

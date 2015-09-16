@@ -30,6 +30,13 @@ public final class ConsultationAotCotTheme extends AbstractPluginsButtonTheme {
     public void setObjetToConsultFromMap(final Objet objet){
         toConsultFromMap = objet;
     }
+
+    /**
+     * AOT/COT consultation must not be cached.
+     * @return
+     */
+    @Override
+    public boolean isCached(){return false;}
     
     @Override
     public Parent createPane() {
