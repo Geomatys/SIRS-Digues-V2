@@ -226,6 +226,11 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
                     final Preview tmpPreview = getPreview((String) item);
                     if (tmpPreview != null) {
                         text = tmpPreview.libelleProperty();
+                        if (text.get() == null) {
+                            // Si l'objet pointé n'a pas de libellé, une valeur par défaut est nécessaire
+                            // afin de montrer qu'une liaison existe réellement.
+                            text.setValue("Objet sans libellé");
+                        }
                         CACHED_VALUES.put(item, text);
                     }
                 } catch (DocumentNotFoundException ex) {
