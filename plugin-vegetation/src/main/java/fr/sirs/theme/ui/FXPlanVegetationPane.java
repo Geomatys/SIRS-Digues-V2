@@ -301,7 +301,7 @@ public class FXPlanVegetationPane extends BorderPane {
                     return ((ParamFrequenceTraitementVegetation) param.getValue()).typeProperty();
                 });
                 classColumn.setCellFactory( param -> new FXListTableCell<>(vegetationClasses, converter));
-                getTable().getColumns().add(2, (TableColumn) classColumn);
+                getTable().getColumns().add(3, (TableColumn) classColumn);
         }
     }
 }
