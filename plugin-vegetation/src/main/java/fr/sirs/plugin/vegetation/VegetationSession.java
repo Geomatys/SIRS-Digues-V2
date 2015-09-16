@@ -171,6 +171,7 @@ public final class VegetationSession {
      * Le cout d'exploitation d'une liste de parcelles pour une année est donné
      * par la somme des couts des traitements de la parcelle dont la date
      * correspond à l'année indiquée.
+     * @param year
      * @param parcelles
      * @return
      */

@@ -17,6 +17,7 @@ import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
 import static fr.sirs.plugin.vegetation.PluginVegetation.zoneVegetationClasses;
+import fr.sirs.plugin.vegetation.VegetationSession;
 import fr.sirs.util.SirsStringConverter;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ public class FXPlanVegetationPane extends BorderPane {
     @FXML private Spinner uiPlanDebut;
     @FXML private Spinner uiPlanFin;
     @FXML private VBox uiVBox;
+    @FXML private Button uiActive;
     
     private final PojoTable uiFrequenceTable;
     
@@ -95,6 +97,8 @@ public class FXPlanVegetationPane extends BorderPane {
                 if(newValue.compareTo((Integer) uiPlanFin.getValue())>=0) uiPlanFin.increment();
             }
         });
+
+        uiActive.setOnAction(event -> VegetationSession.INSTANCE.planProperty().set(plan));
         
         uiSave.setOnAction((ActionEvent event) -> {
 
