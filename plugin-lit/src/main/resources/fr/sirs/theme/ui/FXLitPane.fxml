@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import fr.sirs.theme.ui.*?>
+<?import org.geotoolkit.gui.javafx.util.*?>
+<?import jidefx.scene.control.field.*?>
+<?import jfxtras.scene.control.*?>
+<?import javafx.scene.web.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<fx:root fx:id="uiBorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+  <center>
+    <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <tabs>
+
+<!-- ATTRIBUTE TAB-->
+        <Tab text="Informations">
+   <content>
+             <ScrollPane>
+               <content>
+             <VBox fx:id="contentBox" spacing="30.0" BorderPane.alignment="CENTER">
+               <children>
+   
+   
+   <!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
+   
+   
+               <!-- Lit -->
+               <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+                 <columnConstraints>
+                   <ColumnConstraints hgrow="NEVER" />
+                   <ColumnConstraints hgrow="ALWAYS" />
+                 </columnConstraints>
+                 <!--rowConstraints>
+                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                 </rowConstraints-->
+                 <children>
+                      <!-- EString -->                 
+                      <Label text="%libelle" GridPane.rowIndex="0" />
+                      <TextField fx:id="ui_libelle" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+   
+                 </children>
+                 <padding>
+                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                 </padding>
+                                 <rowConstraints>
+                                    <RowConstraints />
+                                 </rowConstraints>
+               </GridPane>
+               <HTMLEditor fx:id="ui_commentaire" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contentediTable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" maxHeight="-Infinity" prefHeight="200.0" styleClass="gray-light" />
+   
+               </children>
+               <padding>
+                 <Insets bottom="10.0" left="50.0" right="50.0" top="30.0" />
+               </padding>
+             </VBox>
+               </content>
+             </ScrollPane>
+   </content>
+        </Tab>
+
+<!-- REFERENCE TABS -->
+
+      </tabs>
+    </TabPane>
+  </center>
+
+</fx:root>
