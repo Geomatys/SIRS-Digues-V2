@@ -15,6 +15,10 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.ZoneVegetation;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.EXPLOITATION;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.PLANIFICATION;
+import static fr.sirs.plugin.vegetation.VegetationSession.NON_PLANIFIE_FUTUR;
+import static fr.sirs.plugin.vegetation.VegetationSession.NON_PLANIFIE_NON_TRAITE;
+import static fr.sirs.plugin.vegetation.VegetationSession.PLANIFIE_FUTUR;
+import static fr.sirs.plugin.vegetation.VegetationSession.PLANIFIE_NON_TRAITE;
 import static fr.sirs.plugin.vegetation.VegetationSession.estimatedPlanificationCost;
 import static fr.sirs.plugin.vegetation.VegetationSession.exploitationCost;
 import static fr.sirs.plugin.vegetation.VegetationSession.getParcelleEtat;
@@ -203,7 +207,8 @@ public class FXPlanTable extends BorderPane{
             // Clause de filtrage : on saute la ligne si une condition de filtrage est vérifiée pour l'année de filtrage
             if(filteredStates!=null && !filteredStates.isEmpty() && filterIndex>=0 && filterIndex<parcelle.getPlanifications().size()){
                 final String parcelleEtat = getParcelleEtat(parcelle, parcelle.getPlanifications().get(filterIndex), filterIndex+plan.getAnneeDebut());
-                if(filteredStates.contains(parcelleEtat)) continue;
+                final String internalEtat = NON_PLANIFIE_FUTUR.equals(parcelleEtat) ? NON_PLANIFIE_NON_TRAITE : (PLANIFIE_FUTUR.equals(parcelleEtat) ? PLANIFIE_NON_TRAITE : parcelleEtat);
+                if(filteredStates.contains(internalEtat)) continue;
             }
 
             gridCenter.getRowConstraints().add(new RowConstraints(30, 30, 30, Priority.NEVER, VPos.CENTER, true));
