@@ -269,4 +269,11 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="regimeId" eType="#//RefZoneAtterrissementLit"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefZoneAtterrissementLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DesordreLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//Desordre">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeDesordreLitId" eType="#//RefTypeDesordreLit"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeDesordreLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
 </ecore:EPackage>
