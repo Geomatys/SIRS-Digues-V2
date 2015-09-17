@@ -7,7 +7,6 @@ import fr.sirs.Plugin;
 import fr.sirs.Plugins;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.h2.H2Helper;
@@ -137,6 +136,7 @@ public class FXSearchPane extends BorderPane {
     @FXML private Button uiViewModel;
     @FXML private Button uiCarto;
     @FXML private Button uiCancel;
+    @FXML private Label uiNbResults;
     
     // 1- Recherche simple
     @FXML private ToggleButton uiToggleSimple;
@@ -201,6 +201,7 @@ public class FXSearchPane extends BorderPane {
             if (newValue == null) {
                 group.selectToggle(oldValue);
             }
+            uiNbResults.setText("");
         });
         
         final List<Class<? extends Element>> modelClasses = Session.getElements();
@@ -698,6 +699,7 @@ public class FXSearchPane extends BorderPane {
 
         final ObjectTable table = new ObjectTable(ElementHit.class, "Résultats");
         table.setTableItems(results);
+        uiNbResults.setText(results.size()+" résultat(s).");
 
         final ScrollPane scroll = new ScrollPane(table);
         scroll.setFitToHeight(true);
@@ -715,7 +717,8 @@ public class FXSearchPane extends BorderPane {
             });
 
         final ObjectTable table = new ObjectTable(Preview.class, "Résultats");
-        table.setTableItems(FXCollections.observableArrayList(validitySummaries));
+        table.setTableItems(FXCollections.observableList(validitySummaries));
+        uiNbResults.setText(validitySummaries.size()+" résultat(s).");
 
         final ScrollPane scroll = new ScrollPane(table);
         scroll.setFitToHeight(true);
@@ -727,12 +730,14 @@ public class FXSearchPane extends BorderPane {
         final FeatureMapLayer layer = searchSQLLayer(query);
         if (layer == null || layer.getCollection().isEmpty()) {
             setCenter(new Label("Pas de résultat pour votre recherche."));
+            uiNbResults.setText("0 résultat.");
         } else {
             final CustomizedFeatureTable table = new CustomizedFeatureTable(MODEL_PACKAGE+".", Locale.getDefault(), Thread.currentThread().getContextClassLoader());
             table.setLoadAll(true);
             table.init(layer);
             setCenter(table);
             Injector.getSession().getPrintManager().prepareToPrint(FeatureStoreUtilities.collection(layer.getCollection().getFeatureType(), layer.getCollection()));
+            uiNbResults.setText(layer.getCollection().size()+" résultat(s).");
         }
     }
     

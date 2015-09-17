@@ -9,17 +9,6 @@
 <fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <top>
       <BorderPane BorderPane.alignment="CENTER">
-         <top>
-            <HBox alignment="CENTER" style="-fx-background-color: rgb(74,123,165);" BorderPane.alignment="CENTER">
-               <children>
-                  <ToggleButton fx:id="uiToggleSimple" mnemonicParsing="false" styleClass="state-button-left" text="Recherche simple" />
-                  <ToggleButton fx:id="uiToggleSQL" mnemonicParsing="false" styleClass="state-button-right" text="Requête SQL" />
-               </children>
-               <padding>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-               </padding>
-            </HBox>
-         </top>
          <center>
             <VBox BorderPane.alignment="CENTER">
                <children>
@@ -219,6 +208,7 @@
                     </columnConstraints>
                     <rowConstraints>
                       <RowConstraints vgrow="NEVER" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
                     </rowConstraints>
                      <children>
                         <Button mnemonicParsing="false" onAction="#search" style="-fx-border-color: white; -fx-border-radius: 5;" text="EXECUTER" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
@@ -250,6 +240,29 @@
                </padding>
             </HBox>
          </bottom>
+         <top>
+            <VBox style="-fx-background-color: rgb(74,123,165);" BorderPane.alignment="CENTER">
+               <children>
+                  <HBox alignment="CENTER" style="-fx-background-color: rgb(74,123,165);">
+                     <children>
+                        <ToggleButton fx:id="uiToggleSimple" mnemonicParsing="false" styleClass="state-button-left" text="Recherche simple" />
+                        <ToggleButton fx:id="uiToggleSQL" mnemonicParsing="false" styleClass="state-button-right" text="Requête SQL" />
+                     </children>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </HBox>
+                  <HBox alignment="CENTER">
+                     <children>
+                        <Label fx:id="uiNbResults" alignment="CENTER" styleClass="label-header" />
+                     </children>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" />
+                     </padding>
+                  </HBox>
+               </children>
+            </VBox>
+         </top>
       </BorderPane>
    </top>
 </fx:root>
