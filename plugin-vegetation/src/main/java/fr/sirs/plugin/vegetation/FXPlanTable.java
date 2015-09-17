@@ -589,7 +589,7 @@ public class FXPlanTable extends BorderPane{
             final SirsStringConverter cvt = new SirsStringConverter();
             final Label lgdTitle = new Label("Peuplement détaillé de la parcelle "+cvt.toString(parcelle)+" :");
             lgdTitle.setStyle("-fx-font-weight: bold; -fx-underline: true;");
-            grid.add(lgdTitle, 0, 0, 2, 1);
+            grid.add(lgdTitle, 0, 0);
 
             final List<? extends ZoneVegetation> zones = AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(parcelle.getId(), Injector.getSession());
 
