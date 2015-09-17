@@ -775,6 +775,10 @@ public class PojoTable extends BorderPane {
         return uiFilter.visibleProperty();
     }
 
+    public ObjectProperty<Supplier<ObservableList<Element>>> dataSupplierProperty(){
+        return dataSupplierProperty;
+    }
+
     public VBox getFilterUI(){
         return filterContent;
     }
@@ -946,8 +950,8 @@ public class PojoTable extends BorderPane {
         dataSupplierProperty.set(producer);
     }
 
-    private void updateTableItems(
-            final ObservableValue<? extends Supplier<ObservableList<Element>> > obs,
+    protected final void updateTableItems(
+            final ObservableValue<? extends Supplier<ObservableList<Element>>> obs,
             final Supplier<ObservableList<Element>> oldSupplier,
             final Supplier<ObservableList<Element>> newSupplier) {
 

@@ -4,6 +4,7 @@ import fr.sirs.core.model.Element;
 import java.util.function.Supplier;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.WeakListChangeListener;
 
 /**
  *
@@ -33,9 +34,9 @@ public class ListeningPojoTable<T> extends PojoTable {
 
     private Supplier<ObservableList<Element>> producer;
     private ObservableList<T> observableListToListen;
-    private final ListChangeListener<T> listener = (ListChangeListener.Change<? extends T> c) -> {
+    private final WeakListChangeListener<T> listener = new WeakListChangeListener<>((ListChangeListener.Change<? extends T> c) -> {
                 if(producer!=null) setTableItems(producer);
-        }; 
+        });
     
     public ListeningPojoTable(Class pojoClass, String title) {
         super(pojoClass, title);
@@ -49,9 +50,20 @@ public class ListeningPojoTable<T> extends PojoTable {
     
     @Override
     public void setTableItems(Supplier<ObservableList<Element>> producer) {
+        
+        super.setTableItems(producer);
+        /*
+        La méthode setTableItems à changé dans PojoTable et ne déclenche la
+        mise à jour de la table que via un écouteur, si le supplier a changé.
+        Or ici le supplier ne change pratiquement pas dans le processus de mise 
+        à jour : seules changent
+        */
+        if(producer!=null && producer==this.producer){
+            updateTableItems(dataSupplierProperty(), this.producer, producer);
+        }
+        
         // The producer has to be memorized to be used by the listener later.
         this.producer = producer;
-        super.setTableItems(producer);
     }
     
 }
