@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import fr.sirs.core.model.RefRevetement;
 import static fr.sirs.importer.DbImporter.TableName.TYPE_REVETEMENT;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ class TypeRevetementImporter extends GenericTypeReferenceImporter<RefRevetement>
     }
 
     @Override
-    protected Class<RefRevetement> getOutputClass() {
+    protected Class<RefRevetement> getDocumentClass() {
 	return RefRevetement.class;
     }
 }

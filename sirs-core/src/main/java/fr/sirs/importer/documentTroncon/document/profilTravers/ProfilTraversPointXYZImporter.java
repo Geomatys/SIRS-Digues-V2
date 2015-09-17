@@ -6,7 +6,7 @@ import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.XYZLeveProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.PROFIL_EN_TRAVERS_XYZ;
-import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.v2.AbstractImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;

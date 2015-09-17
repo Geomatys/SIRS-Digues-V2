@@ -10,9 +10,9 @@ import fr.sirs.core.model.BorneDigue;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.RefConduiteFermee;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.BorneDigueImporter;
+import fr.sirs.importer.v2.linear.BorneDigueImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.SystemeReperageImporter;
+import fr.sirs.importer.v2.linear.SystemeReperageImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefEcoulement;
 import fr.sirs.core.model.RefImplantation;
@@ -24,10 +24,10 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.cleanNullString;
-import fr.sirs.importer.TypeCoteImporter;
+import fr.sirs.importer.v2.references.TypeCoteImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
+import fr.sirs.importer.v2.linear.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +51,7 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
     private final EcoulementImporter typeEcoulementImporter;
     private final ImplantationImporter typeImplantationImporter;
     private final TypeConduiteFermeeImporter typeConduiteFermeeImporter;
-    private final UtilisationConduiteImporter typeUtilisationConduiteImporter;
+    private final TypeUtilisationConduiteImporter typeUtilisationConduiteImporter;
 
     SysEvtConduiteFermeeImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
@@ -64,7 +64,7 @@ class SysEvtConduiteFermeeImporter extends GenericReseauImporter<ReseauHydrauliq
             final EcoulementImporter typeEcoulementImporter,
             final ImplantationImporter typeImplantationImporter,
             final TypeConduiteFermeeImporter typeConduiteFermeeImporter,
-            final UtilisationConduiteImporter typeUtilisationConduiteImporter) {
+            final TypeUtilisationConduiteImporter typeUtilisationConduiteImporter) {
         super(accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter,
                 typeSourceImporter, typeCoteImporter,

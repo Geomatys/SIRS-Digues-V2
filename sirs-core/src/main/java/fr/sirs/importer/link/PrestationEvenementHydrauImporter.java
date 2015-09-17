@@ -6,7 +6,7 @@ import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
+import fr.sirs.importer.v2.event.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.prestation.PrestationImporter;
 import java.io.IOException;
 import java.util.ArrayList;

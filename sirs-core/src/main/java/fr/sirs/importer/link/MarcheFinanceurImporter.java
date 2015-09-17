@@ -6,7 +6,7 @@ import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.OrganismeImporter;
+import fr.sirs.importer.v2.contact.OrganismeImporter;
 import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
 import java.io.IOException;
 import java.util.ArrayList;

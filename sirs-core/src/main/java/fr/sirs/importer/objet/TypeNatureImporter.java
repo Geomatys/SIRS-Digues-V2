@@ -2,7 +2,7 @@ package fr.sirs.importer.objet;
 
 import fr.sirs.core.model.RefNature;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ public class TypeNatureImporter extends GenericTypeReferenceImporter<RefNature> 
     }
 
     @Override
-    protected Class<RefNature> getOutputClass() {
+    protected Class<RefNature> getDocumentClass() {
 	return RefNature.class;
     }
 

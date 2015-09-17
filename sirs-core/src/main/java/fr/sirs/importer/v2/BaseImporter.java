@@ -56,7 +56,7 @@ public class BaseImporter {
 //        }
     }
 
-    public public  importRow(final Row row) throws Exception {
+    public Object importRow(final Row row) throws Exception {
         Object target = binding.newInstance();
 
         for (final Map.Entry<String, String> entry : attributes.entrySet()) {

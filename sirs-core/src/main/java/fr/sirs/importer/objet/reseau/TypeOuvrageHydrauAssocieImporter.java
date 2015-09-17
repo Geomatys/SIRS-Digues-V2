@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import fr.sirs.core.model.RefOuvrageHydrauliqueAssocie;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ class TypeOuvrageHydrauAssocieImporter extends GenericTypeReferenceImporter<RefO
     }
 
     @Override
-    protected Class<RefOuvrageHydrauliqueAssocie> getOutputClass() {
+    protected Class<RefOuvrageHydrauliqueAssocie> getDocumentClass() {
 	return RefOuvrageHydrauliqueAssocie.class;
     }
 }

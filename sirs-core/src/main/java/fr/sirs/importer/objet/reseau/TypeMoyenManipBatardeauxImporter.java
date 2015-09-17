@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import fr.sirs.core.model.RefMoyenManipBatardeaux;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ class TypeMoyenManipBatardeauxImporter extends GenericTypeReferenceImporter<RefM
     }
 
     @Override
-    protected Class<RefMoyenManipBatardeaux> getOutputClass() {
+    protected Class<RefMoyenManipBatardeaux> getDocumentClass() {
 	return RefMoyenManipBatardeaux.class;
     }
 }

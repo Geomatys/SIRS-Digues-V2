@@ -1,7 +1,16 @@
 package fr.sirs.importer;
 
+import fr.sirs.importer.v2.AbstractImporter;
+import fr.sirs.importer.v2.linear.DigueImporter;
+import fr.sirs.importer.v2.contact.OrganismeImporter;
+import fr.sirs.importer.v2.contact.IntervenantImporter;
+import fr.sirs.importer.v2.references.TypeCoteImporter;
+import fr.sirs.importer.v2.linear.SystemeReperageBorneImporter;
+import fr.sirs.importer.v2.linear.SystemeReperageImporter;
+import fr.sirs.importer.v2.linear.BorneDigueImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import com.healthmarketscience.jackcess.Index;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractTronconDigueRepository;
 import fr.sirs.core.component.BorneDigueRepository;
@@ -12,8 +21,8 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.documentTroncon.CoreTypeDocumentImporter;
 import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
-import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
-import fr.sirs.importer.intervenant.OrganismeDisposeIntervenantImporter;
+import fr.sirs.importer.v2.event.EvenementHydrauliqueImporter;
+import fr.sirs.importer.intervenant.OrganismeContactModifier;
 import fr.sirs.importer.link.DesordreEvenementHydrauImporter;
 import fr.sirs.importer.link.DesordreJournalImporter;
 import fr.sirs.importer.link.ElementReseauGardienImporter;
@@ -33,17 +42,12 @@ import fr.sirs.importer.link.photo.PhotoLocaliseeEnPrImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnXyImporter;
 import fr.sirs.importer.objet.ObjetManager;
 import fr.sirs.importer.system.TypeDonneesSousGroupeImporter;
-import fr.sirs.importer.troncon.GardienTronconGestionImporter;
-import fr.sirs.importer.troncon.ProprietaireTronconGestionImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
+import fr.sirs.importer.v2.linear.management.GardienTronconGestionImporter;
+import fr.sirs.importer.v2.linear.management.ProprietaireTronconGestionImporter;
+import fr.sirs.importer.v2.linear.TronconGestionDigueImporter;
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -80,53 +84,12 @@ public class DbImporter {
         return (NULL_STRING_VALUE.equals(string) || string==null) ? "" : string;
     }
 
-    public static LocalDateTime parseLocalDateTime(final Date date, final DateTimeFormatter dateTimeFormatter){
-        try{
-            return LocalDateTime.parse(date.toString(), dateTimeFormatter);
-        }
-        catch(DateTimeParseException ex){
-            SirsCore.LOGGER.log(Level.FINE, null, ex);
-        }
-        return null;
-    }
-
-    public static LocalDateTime parseLocalDateTime(final Date date, final DateTimeFormatter dateTimeFormatter, final Element element){
-        try{
-            return LocalDateTime.parse(date.toString(), dateTimeFormatter);
-        }
-        catch(DateTimeParseException ex){
-            SirsCore.LOGGER.log(Level.FINE, "Date error for element "+element.getClass().getSimpleName()+" "+element.getDesignation(), ex);
-        }
-        return null;
-    }
-
-    public static LocalDate parseLocalDate(final Date date, final DateTimeFormatter dateTimeFormatter){
-        try{
-            return LocalDate.parse(date.toString(), dateTimeFormatter);
-        }
-        catch(DateTimeParseException ex){
-            SirsCore.LOGGER.log(Level.FINE, null, ex);
-        }
-        return null;
-    }
-
-    public static LocalDate parseLocalDate(final Date date, final DateTimeFormatter dateTimeFormatter, final Element element){
-        try{
-            return LocalDate.parse(date.toString(), dateTimeFormatter);
-        }
-        catch(DateTimeParseException ex){
-            SirsCore.LOGGER.log(Level.FINE, "Date error for element "+element.getClass().getSimpleName()+" "+element.getDesignation(), ex);
-        }
-        return null;
-    }
-
     private final ApplicationContext context;
     private final Map<Class<? extends Element>, CouchDbRepositorySupport> repositories = new HashMap<>();
 
     private Database accessDatabase;
     private Database accessCartoDatabase;
 
-    private TronconDigueGeomImporter tronconDigueGeomImporter;
     private SystemeReperageImporter systemeReperageImporter;
     private OrganismeImporter organismeImporter;
     private IntervenantImporter intervenantImporter;
@@ -140,7 +103,7 @@ public class DbImporter {
     private CoreTypeDocumentImporter typeDocumentImporter;
     private PositionDocumentImporter positionDocumentImporter;
     private EvenementHydrauliqueImporter evenementHydrauliqueImporter;
-    private OrganismeDisposeIntervenantImporter organismeDisposeIntervenantImporter;
+    private OrganismeContactModifier organismeDisposeIntervenantImporter;
     private TypeCoteImporter typeCoteImporter;
     private TypeDonneesSousGroupeImporter typeDonneesSousGroupeImporter;
 
@@ -504,7 +467,7 @@ public class DbImporter {
     }
 
     final CouchDbConnector couchDbConnector;
-    
+
     public DbImporter(final ApplicationContext applicationContext) throws IOException {
         ArgumentChecks.ensureNonNull("Application context", applicationContext);
         context = applicationContext;
@@ -515,13 +478,13 @@ public class DbImporter {
 
     public void setDatabase(final Database accessDatabase,
             final Database accessCartoDatabase, CoordinateReferenceSystem crs) throws IOException{
-        GenericImporter.outputCrs = crs;
+        AbstractImporter.outputCrs = crs;
         this.accessDatabase=accessDatabase;
         this.accessCartoDatabase=accessCartoDatabase;
 
         intervenantImporter = new IntervenantImporter(accessDatabase,
                 couchDbConnector);
-        organismeDisposeIntervenantImporter = new OrganismeDisposeIntervenantImporter(
+        organismeDisposeIntervenantImporter = new OrganismeContactModifier(
                 accessDatabase, couchDbConnector, intervenantImporter);
         organismeImporter = new OrganismeImporter(accessDatabase,
                 couchDbConnector, organismeDisposeIntervenantImporter);
@@ -554,7 +517,7 @@ public class DbImporter {
                 accessDatabase, couchDbConnector, tronconGestionDigueImporter,
                 systemeReperageImporter, borneDigueImporter, intervenantImporter,
                 organismeImporter);
-        typeDocumentImporter = new CoreTypeDocumentImporter(accessDatabase, 
+        typeDocumentImporter = new CoreTypeDocumentImporter(accessDatabase,
                 couchDbConnector);
         positionDocumentImporter = new PositionDocumentImporter(accessDatabase,
                 couchDbConnector, tronconGestionDigueImporter, borneDigueImporter,
@@ -653,11 +616,11 @@ public class DbImporter {
     public Database getCartoDatabase() {
         return this.accessCartoDatabase;
     }
-    
+
     public CouchDbConnector getConnector(){
         return couchDbConnector;
     }
-    
+
     public OrganismeImporter getOrganismeImporter(){
         return organismeImporter;
     }
@@ -665,19 +628,19 @@ public class DbImporter {
     public IntervenantImporter getIntervenantImporter(){
         return intervenantImporter;
     }
-    
+
     public TronconGestionDigueImporter getTronconGestionDigueImporter(){
         return tronconGestionDigueImporter;
     }
-    
+
     public BorneDigueImporter getBorneDigueImporter(){
         return borneDigueImporter;
     }
-    
+
     public SystemeReperageImporter getSystemeReperageImporter(){
         return systemeReperageImporter;
     }
-    
+
     public PositionDocumentImporter getPositionDocumentImporter() {
         return positionDocumentImporter;
     }
@@ -685,7 +648,7 @@ public class DbImporter {
     public CoreTypeDocumentImporter getTypeDocumentImporter() {
         return typeDocumentImporter;
     }
-    
+
     public ObjetManager getObjetManager(){
         return objetManager;
     }
@@ -705,7 +668,7 @@ public class DbImporter {
                     crs = geomDesc.getType().getCoordinateReferenceSystem();
                     if(crs!=null) break;
                 }
-                
+
             }
         } catch (DataStoreException ex) {
             Logger.getLogger(DbImporter.class.getName()).log(Level.SEVERE, null, ex);
@@ -755,8 +718,8 @@ public class DbImporter {
         evenementHydrauliqueImporter.update();
         objetManager.update();
         positionDocumentImporter.update();
-        
-        
+
+
         // Importation des plugins
         final Iterator<PluginImporter> pluginImporterIt = ServiceLoader.load(PluginImporter.class).iterator();
         while(pluginImporterIt.hasNext()){
@@ -781,10 +744,10 @@ public class DbImporter {
             });
 //            SirsCore.LOGGER.log(Level.FINE, "++++++++++++++++++++");
 //
-//            SirsCore.LOGGER.log(Level.FINE, importer.getDatabase().getTable(TableName.TRONCON_GESTION_DIGUE_SYNDICAT.toString()).getPrimaryKeyIndex().getName());
-//            for(final Index index :importer.getDatabase().getTable(TableName.ELEMENT_STRUCTURE.toString()).getIndexes()){
-//                System.out.println(index);
-//            }
+            SirsCore.LOGGER.log(Level.FINE, importer.getDatabase().getTable(TableName.CARTO_TRONCON_GESTION_DIGUE.toString()).getPrimaryKeyIndex().getName());
+            for(final Index index :importer.getDatabase().getTable(TableName.ELEMENT_STRUCTURE.toString()).getIndexes()){
+                System.out.println(index);
+            }
 //            for(final Row row : importer.getDatabase().getTable(TableName.CARTO_TRONCON_GESTION_DIGUE.toString())){
 //                System.out.println(index);
 //                SirsCore.LOGGER.log(Level.FINE, row.toString());

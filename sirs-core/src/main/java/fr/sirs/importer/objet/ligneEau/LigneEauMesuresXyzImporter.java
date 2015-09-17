@@ -4,7 +4,7 @@ import com.healthmarketscience.jackcess.Row;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
 import fr.sirs.core.model.MesureLigneEauXYZ;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.v2.AbstractImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;

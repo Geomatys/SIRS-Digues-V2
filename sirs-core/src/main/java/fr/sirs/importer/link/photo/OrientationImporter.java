@@ -2,7 +2,7 @@ package fr.sirs.importer.link.photo;
 
 import fr.sirs.core.model.RefOrientationPhoto;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -17,7 +17,7 @@ public class OrientationImporter extends GenericTypeReferenceImporter<RefOrienta
     }
 
     @Override
-    protected Class<RefOrientationPhoto> getOutputClass() {
+    protected Class<RefOrientationPhoto> getDocumentClass() {
 	return RefOrientationPhoto.class;
     }
 

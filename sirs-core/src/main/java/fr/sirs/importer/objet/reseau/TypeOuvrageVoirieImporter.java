@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import fr.sirs.core.model.RefOuvrageVoirie;
 import static fr.sirs.importer.DbImporter.TableName.TYPE_OUVRAGE_VOIRIE;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ class TypeOuvrageVoirieImporter extends GenericTypeReferenceImporter<RefOuvrageV
     }
 
     @Override
-    protected Class<RefOuvrageVoirie> getOutputClass() {
+    protected Class<RefOuvrageVoirie> getDocumentClass() {
 	return RefOuvrageVoirie.class;
     }
 }

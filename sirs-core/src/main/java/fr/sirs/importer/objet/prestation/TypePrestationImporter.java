@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.prestation;
 
 import fr.sirs.core.model.RefPrestation;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ public class TypePrestationImporter extends GenericTypeReferenceImporter<RefPres
     }
 
     @Override
-    protected Class<RefPrestation> getOutputClass() {
+    protected Class<RefPrestation> getDocumentClass() {
 	return RefPrestation.class;
     }
 }

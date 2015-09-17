@@ -92,6 +92,7 @@ import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.IdentifiedObjects;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
@@ -101,6 +102,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public class FXLauncherPane extends BorderPane {
 
+    private static final String IMPORTER_CONTEXT = "classpath:/fr/sirs/spring/importer-context.xml";
     private static final Logger LOGGER = Logging.getLogger("fr.sirs");
 
     /**
@@ -573,11 +575,16 @@ public class FXLauncherPane extends BorderPane {
                 final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
                 createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());
 
+
                 try(final Database mainDb = DatabaseBuilder.open(mainDbFile);
-                    final Database cartoDb = DatabaseBuilder.open(cartoDbFile)){
-                    final DbImporter importer = new DbImporter(appCtx);
-                    importer.setDatabase(mainDb, cartoDb, uiImportCRS.crsProperty().get());
-                    importer.importation(cartoDbFile);
+                    final Database cartoDb = DatabaseBuilder.open(cartoDbFile)) {
+
+                    // Open spring context for import.
+                    try (final ClassPathXmlApplicationContext importCtx = new ClassPathXmlApplicationContext(new String[]{IMPORTER_CONTEXT}, appCtx)) {
+                        final DbImporter importer = new DbImporter(appCtx);
+                        importer.setDatabase(mainDb, cartoDb, uiImportCRS.crsProperty().get());
+                        importer.importation(cartoDbFile);
+                    }
                 }
 
                 // Opérations ultérieures à l'importation à réaliser par les plugins.

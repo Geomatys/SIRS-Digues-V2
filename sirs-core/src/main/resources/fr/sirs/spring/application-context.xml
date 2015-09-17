@@ -7,6 +7,9 @@
 
   <import resource="classpath:/fr/sirs/spring/couchdb-context.xml" />
   
-  <context:component-scan base-package="fr.sirs" />
+  <context:component-scan base-package="fr.sirs" >
+      <!-- Don't load importers in classic application context. -->
+      <context:exclude-filter type="regex" expression="fr\.sirs\.importer\..*"/> 
+  </context:component-scan>
   
 </beans>

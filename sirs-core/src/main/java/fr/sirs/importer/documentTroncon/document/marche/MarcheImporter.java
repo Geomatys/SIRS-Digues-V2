@@ -1,5 +1,6 @@
 package fr.sirs.importer.documentTroncon.document.marche;
 
+import fr.sirs.importer.v2.contact.OrganismeImporter;
 import fr.sirs.importer.*;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;

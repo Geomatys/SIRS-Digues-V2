@@ -2,7 +2,7 @@ package fr.sirs.importer.documentTroncon.document.rapportEtude;
 
 import fr.sirs.core.model.RefRapportEtude;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ class TypeRapportEtudeImporter extends GenericTypeReferenceImporter<RefRapportEt
     }
 
     @Override
-    protected Class<RefRapportEtude> getOutputClass() {
+    protected Class<RefRapportEtude> getDocumentClass() {
 	return RefRapportEtude.class;
     }
 }

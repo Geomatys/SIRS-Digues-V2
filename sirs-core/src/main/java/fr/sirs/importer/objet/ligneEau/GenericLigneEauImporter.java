@@ -1,7 +1,7 @@
 package fr.sirs.importer.objet.ligneEau;
 
 import fr.sirs.core.model.LigneEau;
-import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
+import fr.sirs.importer.v2.event.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.*;
 
 /**

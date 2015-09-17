@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.desordre;
 
 import fr.sirs.core.model.RefUrgence;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ class TypeUrgenceImporter extends GenericTypeReferenceImporter<RefUrgence> {
     }
 
     @Override
-    protected Class<RefUrgence> getOutputClass() {
+    protected Class<RefUrgence> getDocumentClass() {
 	return RefUrgence.class;
     }
 }

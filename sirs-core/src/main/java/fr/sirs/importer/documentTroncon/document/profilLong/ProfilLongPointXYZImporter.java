@@ -10,7 +10,7 @@ import fr.sirs.core.model.XYZProfilLong;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.PROFIL_EN_LONG_XYZ;
-import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.v2.AbstractImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;

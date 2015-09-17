@@ -2,20 +2,25 @@ package fr.sirs.importer.v2;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
+import com.healthmarketscience.jackcess.Table;
 import com.vividsolutions.jts.geom.Coordinate;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.Positionable;
-import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.v2.mapper.Mapper;
+import fr.sirs.importer.v2.mapper.MapperSpi;
 import java.net.MalformedURLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import javafx.collections.FXCollections;
@@ -77,15 +82,18 @@ public class ImportContext {
      */
     public final MathTransform geoTransform;
 
-    public final ConcurrentHashMap<Class, GenericImporter> importers = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<Class, AbstractImporter> importers = new ConcurrentHashMap<>();
     public final ConcurrentHashMap<Class, HashSet<DocumentModifier>> modifiers = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<Class, HashSet<Updater>> updaters = new ConcurrentHashMap<>();
+
+    public final ConcurrentHashMap<Class, HashSet<MapperSpi>> mappers = new ConcurrentHashMap<>();
 
     /**
      * recommended limit size for bulk updates.
      * /!\ This flag is NOT used by {@link #executeBulk(java.util.Collection) }.
      * It's only an informative attribute which should be used by importers when computing.
      */
-    public int bulkLimit = 10000;
+    public int bulkLimit = 1000;
 
     /**
      * List errors which occured while importing database. Errors can be
@@ -328,5 +336,36 @@ public class ImportContext {
     Object getBoundTarget(Row currentRow) throws IllegalStateException {
 
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public <T> Set<Mapper<T>> getCompatibleMappers(final Table source, final Class<T> destination) {
+        final HashSet<Mapper<T>> result = new HashSet<>();
+        for (final Map.Entry<Class, HashSet<MapperSpi>> entry : mappers.entrySet()) {
+            if (entry.getKey().isAssignableFrom(destination)) {
+                for (final MapperSpi spi : entry.getValue()) {
+                    Optional<Mapper> mapper = spi.configureInput(source);
+                    if (mapper.isPresent()) {
+                        result.add(mapper.get());
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Return all importers which work on objects inheriting given class.
+     * @param sourceClass Pojo type to retrieve importers for.
+     * @return List of found importers, or an empty list if we cannot find any importer for given object type.
+     */
+    public List<AbstractImporter> getImporters(final Class sourceClass) {
+        final ArrayList<AbstractImporter> result = new ArrayList<>();
+
+        for (final Map.Entry<Class, AbstractImporter> entry : importers.entrySet()) {
+            if (sourceClass.isAssignableFrom(entry.getKey())) {
+                result.add(entry.getValue());
+            }
+        }
+        return result;
     }
 }

@@ -2,7 +2,7 @@ package fr.sirs.importer.objet;
 
 import fr.sirs.core.model.RefReferenceHauteur;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ public class TypeRefHeauImporter extends GenericTypeReferenceImporter<RefReferen
     }
 
     @Override
-    protected Class<RefReferenceHauteur> getOutputClass() {
+    protected Class<RefReferenceHauteur> getDocumentClass() {
 	return RefReferenceHauteur.class;
     }
 

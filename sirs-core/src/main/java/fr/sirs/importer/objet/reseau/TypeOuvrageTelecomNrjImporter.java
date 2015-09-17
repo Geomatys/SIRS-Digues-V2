@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import fr.sirs.core.model.RefOuvrageTelecomEnergie;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ class TypeOuvrageTelecomNrjImporter extends GenericTypeReferenceImporter<RefOuvr
     }
 
     @Override
-    protected Class<RefOuvrageTelecomEnergie> getOutputClass() {
+    protected Class<RefOuvrageTelecomEnergie> getDocumentClass() {
 	return RefOuvrageTelecomEnergie.class;
     }
 }

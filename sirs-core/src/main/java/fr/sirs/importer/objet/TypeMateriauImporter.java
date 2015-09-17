@@ -2,7 +2,7 @@ package fr.sirs.importer.objet;
 
 import fr.sirs.core.model.RefMateriau;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ public class TypeMateriauImporter extends GenericTypeReferenceImporter<RefMateri
     }
 
     @Override
-    protected Class<RefMateriau> getOutputClass() {
+    protected Class<RefMateriau> getDocumentClass() {
 	return RefMateriau.class;
     }
 

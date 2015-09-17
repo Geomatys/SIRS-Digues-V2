@@ -6,7 +6,7 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
+import fr.sirs.importer.v2.event.EvenementHydrauliqueImporter;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
 import java.io.IOException;
 import java.util.ArrayList;

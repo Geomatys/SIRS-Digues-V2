@@ -28,10 +28,10 @@ public abstract class DocumentModifier<T extends Element> {
 
     @PostConstruct
     private void register() {
-        HashSet<DocumentModifier> modifiers = context.modifiers.get(getOutputClass());
+        HashSet<DocumentModifier> modifiers = context.modifiers.get(getDocumentClass());
         if (modifiers == null) {
             modifiers = new HashSet<>();
-            context.modifiers.put(getOutputClass(), modifiers);
+            context.modifiers.put(getDocumentClass(), modifiers);
         }
         modifiers.add(this);
     }
@@ -39,7 +39,7 @@ public abstract class DocumentModifier<T extends Element> {
     /**
      * @return type for the object to create at import.
      */
-    protected abstract Class<T> getOutputClass();
+    protected abstract Class<T> getDocumentClass();
 
     /**
      *

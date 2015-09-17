@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.desordre;
 
 import fr.sirs.core.model.RefTypeDesordre;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ class TypeDesordreImporter extends GenericTypeReferenceImporter<RefTypeDesordre>
     }
 
     @Override
-    protected Class<RefTypeDesordre> getOutputClass() {
+    protected Class<RefTypeDesordre> getDocumentClass() {
 	return RefTypeDesordre.class;
     }
 }

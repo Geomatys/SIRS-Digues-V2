@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import fr.sirs.core.model.RefConduiteFermee;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ class TypeConduiteFermeeImporter extends GenericTypeReferenceImporter<RefConduit
     }
 
     @Override
-    protected Class<RefConduiteFermee> getOutputClass() {
+    protected Class<RefConduiteFermee> getDocumentClass() {
 	return RefConduiteFermee.class;
     }
 }

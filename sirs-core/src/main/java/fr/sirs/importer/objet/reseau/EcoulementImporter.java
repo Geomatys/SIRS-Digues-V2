@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import fr.sirs.core.model.RefEcoulement;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ class EcoulementImporter extends GenericTypeReferenceImporter<RefEcoulement> {
     }
 
     @Override
-    protected Class<RefEcoulement> getOutputClass() {
+    protected Class<RefEcoulement> getDocumentClass() {
 	return RefEcoulement.class;RefEcoulement.class;
     }
 }

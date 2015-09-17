@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import fr.sirs.core.model.RefUsageVoie;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ class TypeUsageVoieImporter extends GenericTypeReferenceImporter<RefUsageVoie> {
     }
 
     @Override
-    protected Class<RefUsageVoie> getOutputClass() {
+    protected Class<RefUsageVoie> getDocumentClass() {
 	return RefUsageVoie.class;
     }
 }

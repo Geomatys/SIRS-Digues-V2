@@ -1,5 +1,7 @@
 package fr.sirs.importer.documentTroncon.document.profilLong;
 
+import fr.sirs.importer.v2.references.TypeOrigineProfilLongImporter;
+import fr.sirs.importer.v2.references.TypePositionProfilLongImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
@@ -15,11 +17,11 @@ import fr.sirs.core.model.XYZProfilLong;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericImporter;
-import fr.sirs.importer.OrganismeImporter;
-import fr.sirs.importer.SystemeReperageImporter;
-import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
-import fr.sirs.importer.documentTroncon.document.TypeSystemeReleveProfilImporter;
+import fr.sirs.importer.v2.AbstractImporter;
+import fr.sirs.importer.v2.contact.OrganismeImporter;
+import fr.sirs.importer.v2.linear.SystemeReperageImporter;
+import fr.sirs.importer.v2.event.EvenementHydrauliqueImporter;
+import fr.sirs.importer.v2.references.TypeSystemeReleveProfilImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;

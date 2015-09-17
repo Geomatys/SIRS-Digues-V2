@@ -1,5 +1,6 @@
 package fr.sirs.importer.link;
 
+import fr.sirs.importer.v2.references.TypeFonctionMoImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
@@ -10,7 +11,7 @@ import fr.sirs.core.model.RefFonctionMaitreOeuvre;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.OrganismeImporter;
+import fr.sirs.importer.v2.contact.OrganismeImporter;
 import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
 import java.io.IOException;
 import java.util.ArrayList;

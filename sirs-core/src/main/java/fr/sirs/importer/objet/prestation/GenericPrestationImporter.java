@@ -1,13 +1,13 @@
 package fr.sirs.importer.objet.prestation;
 
-import fr.sirs.importer.TypeCoteImporter;
+import fr.sirs.importer.v2.references.TypeCoteImporter;
 import com.healthmarketscience.jackcess.Database;
 import fr.sirs.core.model.Prestation;
-import fr.sirs.importer.BorneDigueImporter;
-import fr.sirs.importer.SystemeReperageImporter;
+import fr.sirs.importer.v2.linear.BorneDigueImporter;
+import fr.sirs.importer.v2.linear.SystemeReperageImporter;
 import fr.sirs.importer.objet.*;
 import fr.sirs.importer.documentTroncon.document.marche.MarcheImporter;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
+import fr.sirs.importer.v2.linear.TronconGestionDigueImporter;
 import org.ektorp.CouchDbConnector;
 
 /**

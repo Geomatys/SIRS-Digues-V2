@@ -1,9 +1,10 @@
 package fr.sirs.importer.documentTroncon.document;
 
+import fr.sirs.importer.v2.references.TypeSystemeReleveProfilImporter;
 import com.healthmarketscience.jackcess.Database;
-import fr.sirs.importer.IntervenantImporter;
-import fr.sirs.importer.OrganismeImporter;
-import fr.sirs.importer.SystemeReperageImporter;
+import fr.sirs.importer.v2.contact.IntervenantImporter;
+import fr.sirs.importer.v2.contact.OrganismeImporter;
+import fr.sirs.importer.v2.linear.SystemeReperageImporter;
 import fr.sirs.importer.documentTroncon.CoreTypeDocumentImporter;
 import fr.sirs.importer.documentTroncon.document.documentAGrandeEchelle.DocumentAGrandeEchelleImporter;
 import fr.sirs.importer.documentTroncon.document.journal.JournalArticleImporter;
@@ -12,7 +13,7 @@ import fr.sirs.importer.documentTroncon.document.profilLong.ProfilEnLongImporter
 import fr.sirs.importer.documentTroncon.document.profilTravers.ProfilEnTraversDescriptionImporter;
 import fr.sirs.importer.documentTroncon.document.profilTravers.ProfilEnTraversImporter;
 import fr.sirs.importer.documentTroncon.document.rapportEtude.RapportEtudeImporter;
-import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
+import fr.sirs.importer.v2.event.EvenementHydrauliqueImporter;
 import java.util.ArrayList;
 import java.util.List;
 import org.ektorp.CouchDbConnector;

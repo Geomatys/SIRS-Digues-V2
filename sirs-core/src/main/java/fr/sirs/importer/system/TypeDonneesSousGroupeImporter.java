@@ -37,7 +37,7 @@ import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.v2.AbstractImporter;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;

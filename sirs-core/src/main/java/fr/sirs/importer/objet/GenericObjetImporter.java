@@ -2,7 +2,6 @@ package fr.sirs.importer.objet;
 
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.LinearReferencingUtilities;
-import fr.sirs.core.SessionCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Objet;
@@ -13,15 +12,14 @@ import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.importer.AbstractPositionableImporter;
+import fr.sirs.importer.v2.AbstractPositionableImporter;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.GenericImporter;
+import fr.sirs.importer.v2.AbstractImporter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -38,19 +36,16 @@ public abstract class GenericObjetImporter<T extends Objet> extends AbstractPosi
         COMMENTAIRE
     }
 
-    @Autowired
-    protected SessionCore session;
-
     protected Map<Integer, List<T>> objetsByTronconId = null;
 
-    protected GenericImporter<TronconDigue> tronconGestionDigueImporter;
+    protected AbstractImporter<TronconDigue> tronconGestionDigueImporter;
 
-    protected GenericImporter<RefSource> sourceInfoImporter;
-    protected GenericImporter<RefCote> typeCoteImporter;
-    protected GenericImporter<RefPosition> typePositionImporter;
-    protected GenericImporter<RefMateriau> typeMateriauImporter;
-    protected GenericImporter<RefNature> typeNatureImporter;
-    protected GenericImporter<RefFonction> typeFonctionImporter;
+    protected AbstractImporter<RefSource> sourceInfoImporter;
+    protected AbstractImporter<RefCote> typeCoteImporter;
+    protected AbstractImporter<RefPosition> typePositionImporter;
+    protected AbstractImporter<RefMateriau> typeMateriauImporter;
+    protected AbstractImporter<RefNature> typeNatureImporter;
+    protected AbstractImporter<RefFonction> typeFonctionImporter;
 
     protected AbstractSIRSRepository<TronconDigue> tronconRepo;
     protected AbstractSIRSRepository<BorneDigue> borneRepo;

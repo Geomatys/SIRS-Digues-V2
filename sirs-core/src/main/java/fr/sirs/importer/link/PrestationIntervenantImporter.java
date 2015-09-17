@@ -6,7 +6,7 @@ import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.IntervenantImporter;
+import fr.sirs.importer.v2.contact.IntervenantImporter;
 import fr.sirs.importer.objet.prestation.PrestationImporter;
 import java.io.IOException;
 import java.util.ArrayList;

@@ -9,7 +9,7 @@ import fr.sirs.core.model.Organisme;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.OrganismeImporter;
+import fr.sirs.importer.v2.contact.OrganismeImporter;
 import fr.sirs.importer.objet.reseau.ElementReseauImporter;
 import java.io.IOException;
 import java.util.ArrayList;

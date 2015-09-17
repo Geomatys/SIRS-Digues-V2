@@ -2,7 +2,7 @@ package fr.sirs.importer.objet;
 
 import fr.sirs.core.model.RefPosition;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ public class TypePositionImporter extends GenericTypeReferenceImporter<RefPositi
     }
 
     @Override
-    protected Class<RefPosition> getOutputClass() {
+    protected Class<RefPosition> getDocumentClass() {
 	return RefPosition.class;
     }
 }

@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import fr.sirs.core.model.RefTypeGlissiere;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -16,7 +16,7 @@ class TypeGlissiereImporter extends GenericTypeReferenceImporter<RefTypeGlissier
     }
 
     @Override
-    protected Class<RefTypeGlissiere> getOutputClass() {
+    protected Class<RefTypeGlissiere> getDocumentClass() {
 	return RefTypeGlissiere.class;
     }
 }

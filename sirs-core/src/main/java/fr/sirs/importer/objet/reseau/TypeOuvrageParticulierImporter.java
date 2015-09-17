@@ -2,7 +2,7 @@ package fr.sirs.importer.objet.reseau;
 
 import fr.sirs.core.model.RefOuvrageParticulier;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.GenericTypeReferenceImporter;
+import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 
 /**
  *
@@ -19,7 +19,7 @@ class TypeOuvrageParticulierImporter extends GenericTypeReferenceImporter<RefOuv
     }
 
     @Override
-    protected Class<RefOuvrageParticulier> getOutputClass() {
+    protected Class<RefOuvrageParticulier> getDocumentClass() {
 	return RefOuvrageParticulier.class;
     }
 }

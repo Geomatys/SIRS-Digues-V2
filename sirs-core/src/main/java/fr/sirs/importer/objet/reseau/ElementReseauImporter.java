@@ -39,7 +39,7 @@ import fr.sirs.importer.objet.TypeMateriauImporter;
 import fr.sirs.importer.objet.TypeNatureImporter;
 import fr.sirs.importer.objet.TypePositionImporter;
 import static fr.sirs.importer.objet.reseau.TypeOuvrageParticulierImporter.ECHELLE_LIMNIMETRIQUE;
-import fr.sirs.importer.troncon.TronconGestionDigueImporter;
+import fr.sirs.importer.v2.linear.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,7 +63,7 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
     private final EcoulementImporter typeEcoulementImporter;
     private final ImplantationImporter typeImplantationImporter;
     private final TypeConduiteFermeeImporter typeConduiteFermeeImporter;
-    private final UtilisationConduiteImporter typeUtilisationConduiteImporter;
+    private final TypeUtilisationConduiteImporter typeUtilisationConduiteImporter;
     private final SysEvtConduiteFermeeImporter sysEvtConduiteFermeeImporter;
     private final ElementReseauPompeImporter pompeImporter;
     private final SysEvtStationDePompageImporter sysEvtStationDePompageImporter;
@@ -121,7 +121,7 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
                 couchDbConnector);
         typeConduiteFermeeImporter = new TypeConduiteFermeeImporter(
                 accessDatabase, couchDbConnector);
-        typeUtilisationConduiteImporter = new UtilisationConduiteImporter(
+        typeUtilisationConduiteImporter = new TypeUtilisationConduiteImporter(
                 accessDatabase, couchDbConnector);
         sysEvtConduiteFermeeImporter = new SysEvtConduiteFermeeImporter(accessDatabase,
                 couchDbConnector, tronconGestionDigueImporter,

@@ -1,5 +1,6 @@
 package fr.sirs.importer.documentTroncon.document.documentAGrandeEchelle;
 
+import fr.sirs.importer.v2.references.TypeDocumentAGrandeEchelleImporter;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.DocumentGrandeEchelle;
