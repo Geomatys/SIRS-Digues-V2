@@ -2548,7 +2548,7 @@
             </children>
             <styles xmi:type="notation:ConnectorStyle" xmi:id="_dKkiYXvGEeSMvKjasgWS-Q" routing="Rectilinear" jumpLinkStatus="Above"/>
             <styles xmi:type="notation:FontStyle" xmi:id="_dKkiYnvGEeSMvKjasgWS-Q" fontColor="7490599" fontName="Lucida Grande" fontHeight="8"/>
-            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_dKkiY3vGEeSMvKjasgWS-Q" points="[11, 16, -104, -2]$[101, 16, -14, -2]"/>
+            <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_dKkiY3vGEeSMvKjasgWS-Q" points="[10, 52, -118, 34]$[115, 52, -13, 34]"/>
             <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_dKkianvGEeSMvKjasgWS-Q" id="(0.9457831325301205,0.19631901840490798)"/>
             <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_dKkia3vGEeSMvKjasgWS-Q" id="(0.08633093525179857,0.13385826771653545)"/>
           </edges>

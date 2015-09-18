@@ -2,15 +2,16 @@ package fr.sirs.query;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.SQLQueries;
 import fr.sirs.core.model.SQLQuery;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -33,6 +34,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 
 /**
@@ -242,11 +244,23 @@ public class FXAdminQueryPane extends BorderPane {
      */
     private void transferFromListToList(final ListView source, final ListView destination) {
         // Get list selection
-        ObservableList<SQLQuery> selectedItems = source.getSelectionModel().getSelectedItems();
+        final ObservableList<SQLQuery> selectedItems = source.getSelectionModel().getSelectedItems();
+
+        // On copie la liste pour éviter toute interaction malencontreuse lors du retrait de la liste d'origine (puisque sa liste d'items sélectionnés va évoluer).
+        final List<SQLQuery> copy = new ArrayList<>(selectedItems);
+
         // add it in destination 
-        destination.getItems().addAll(selectedItems);
+        destination.getItems().addAll(copy);
+
         // remove from source list
-        source.getItems().removeAll(selectedItems);
+//        source.getItems().removeAll(copy); // Ne fonctionne pas car de la copie local -> BD, l'identifiant peut valoir null or c'est avec l'id que sont construites hashCode() et equals()
+        // On vérifie donc dans la liste la présence des éléments au sens de la référence.
+        source.getItems().removeIf(query -> {
+            for(final SQLQuery q : copy){
+                if(q==query) return true;
+            }
+            return false;
+        });
     }
     
     /**
