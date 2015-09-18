@@ -276,7 +276,6 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                 //creation des filtres
                 Predicate<TronconDigue> filter = searchedPredicate;
                 if(!uiArchived.isSelected()) {
-//                    System.out.println("uiArchived n'est pas sélectionné !");
                     filter = filter.and(nonArchivedPredicate);
                 }
 
@@ -340,19 +339,16 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
         }
     }
 
-    private static TreeItem toNode(Digue digue, Set<TronconDigue> troncons, Set<TronconDigue> tronconsFound, Predicate<TronconDigue> filter){
+    private static TreeItem toNode(final Digue digue, final Set<TronconDigue> troncons,
+            final Set<TronconDigue> tronconsFound, final Predicate<TronconDigue> filter){
         final TreeItem digueItem = new TreeItem(digue);
         for(final TronconDigue td : troncons){
             if(td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
             tronconsFound.add(td);
             if(filter==null || filter.test(td)){
-//                System.out.println("Ajout du troncon "+td.getLibelle());
                 final TreeItem tronconItem = new TreeItem(td);
                 digueItem.getChildren().add(tronconItem);
             }
-//            else {
-//                System.out.println("bloqué"+td);
-//            }
         }
         return digueItem;
     }
@@ -476,7 +472,7 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                 }
             } else if (obj instanceof TronconDigue) {
                 this.setText(((TronconDigue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
-                setContextMenu(null);
+//                setContextMenu(null);
             } else if (obj instanceof Theme) {
                 setText(((Theme) obj).getName());
             } else if( obj instanceof String){
