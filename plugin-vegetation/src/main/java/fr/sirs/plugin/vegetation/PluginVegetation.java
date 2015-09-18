@@ -224,14 +224,14 @@ public class PluginVegetation extends Plugin {
                 layer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
                 final Color color;
                 switch(id){
-                    case "RefTypePeuplementVegetation:1" : color = new Color(  0, 200,   0); break;
-                    case "RefTypePeuplementVegetation:2" : color = new Color(200, 200,   0); break;
-                    case "RefTypePeuplementVegetation:3" : color = new Color(  0, 200, 200); break;
-                    case "RefTypePeuplementVegetation:4" : color = new Color(200, 200, 100); break;
-                    case "RefTypePeuplementVegetation:5" : color = new Color(  0, 150,   0); break;
-                    case "RefTypePeuplementVegetation:6" : color = new Color(150, 200,   0); break;
-                    case "RefTypePeuplementVegetation:7" : color = new Color(100, 250, 100); break;
-                    case "RefTypePeuplementVegetation:99": color = new Color(200, 200, 200); break;
+                    case "RefTypePeuplementVegetation:1" : color = new Color(  0, 200, 100); break;
+                    case "RefTypePeuplementVegetation:2" : color = new Color(100, 200, 150); break;
+                    case "RefTypePeuplementVegetation:3" : color = new Color(  0, 200, 250); break;
+                    case "RefTypePeuplementVegetation:4" : color = new Color(100, 200, 200); break;
+                    case "RefTypePeuplementVegetation:5" : color = new Color(  0, 150, 150); break;
+                    case "RefTypePeuplementVegetation:6" : color = new Color(50, 200, 150); break;
+                    case "RefTypePeuplementVegetation:7" : color = new Color(0, 250, 200); break;
+                    case "RefTypePeuplementVegetation:99": color = new Color(100, 200, 250); break;
                     default : color = RandomStyleBuilder.randomColor();
                 }
 
@@ -261,16 +261,16 @@ public class PluginVegetation extends Plugin {
                 layer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
                 final Color color;
                 switch(id){
-                    case "RefTypeInvasiveVegetation:1" : color = new Color(  0, 200,   0); break;
-                    case "RefTypeInvasiveVegetation:2" : color = new Color(200, 200,   0); break;
-                    case "RefTypeInvasiveVegetation:3" : color = new Color(  0, 200, 200); break;
-                    case "RefTypeInvasiveVegetation:4" : color = new Color(200, 200, 100); break;
-                    case "RefTypeInvasiveVegetation:5" : color = new Color(  0, 150,   0); break;
-                    case "RefTypeInvasiveVegetation:6" : color = new Color(150, 200,   0); break;
-                    case "RefTypeInvasiveVegetation:7" : color = new Color(100, 250, 100); break;
-                    case "RefTypeInvasiveVegetation:8" : color = new Color( 50, 250, 100); break;
-                    case "RefTypeInvasiveVegetation:9" : color = new Color(100, 250,  50); break;
-                    case "RefTypeInvasiveVegetation:99": color = new Color(200, 200, 200); break;
+                    case "RefTypeInvasiveVegetation:1" : color = new Color(100, 200,  0); break;
+                    case "RefTypeInvasiveVegetation:2" : color = new Color(250, 200,  0); break;
+                    case "RefTypeInvasiveVegetation:3" : color = new Color(100, 200, 100); break;
+                    case "RefTypeInvasiveVegetation:4" : color = new Color(250, 200, 50); break;
+                    case "RefTypeInvasiveVegetation:5" : color = new Color(100, 150,  0); break;
+                    case "RefTypeInvasiveVegetation:6" : color = new Color(200, 200,  0); break;
+                    case "RefTypeInvasiveVegetation:7" : color = new Color(150, 250, 50); break;
+                    case "RefTypeInvasiveVegetation:8" : color = new Color(100, 250, 50); break;
+                    case "RefTypeInvasiveVegetation:9" : color = new Color(150, 250, 0); break;
+                    case "RefTypeInvasiveVegetation:99": color = new Color(250, 200, 100); break;
                     default : color = RandomStyleBuilder.randomColor();
                 }
 
