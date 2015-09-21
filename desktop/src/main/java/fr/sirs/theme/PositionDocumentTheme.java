@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import javafx.collections.FXCollections;
+import javafx.collections.transformation.FilteredList;
 
 
 /**
@@ -56,7 +57,10 @@ public class PositionDocumentTheme extends TronconTheme {
                 title, 
                 themeClass,               
             (String linearId) -> {
-                return FXCollections.observableList(((AbstractPositionableRepository<T>) Injector.getSession().getRepositoryForClass(themeClass)).getByLinearId(linearId)).filtered(new DocumentPredicate(documentClass));
+
+                final FilteredList filtered = FXCollections.observableList(((AbstractPositionableRepository<T>) Injector.getSession().getRepositoryForClass(themeClass)).getByLinearId(linearId)).filtered(new DocumentPredicate(documentClass));
+                // Copy the result in a new observable list to not return a FilteredList in which it is impossible to add new elements.
+                return FXCollections.observableArrayList(filtered);
             },
             (T c) -> Injector.getSession().getRepositoryForClass(themeClass).remove(c));
     }
