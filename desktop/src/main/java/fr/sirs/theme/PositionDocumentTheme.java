@@ -1,14 +1,14 @@
 package fr.sirs.theme;
 
 import fr.sirs.Injector;
-import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.ArticleJournal;
 import fr.sirs.core.model.DocumentGrandeEchelle;
+import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.PositionProfilTravers;
-import fr.sirs.core.model.Marche;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProfilLong;
@@ -16,9 +16,7 @@ import fr.sirs.core.model.RapportEtude;
 import fr.sirs.core.model.SIRSDocument;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.function.Predicate;
 import javafx.collections.FXCollections;
 
@@ -50,11 +48,9 @@ public class PositionDocumentTheme extends TronconTheme {
         if(specifiedTitle != null) {
             title = specifiedTitle;
         } else if(documentClass != null) {
-            final ResourceBundle bundle = ResourceBundle.getBundle(documentClass.getCanonicalName(), Locale.getDefault(),
-                    Thread.currentThread().getContextClassLoader());
-            title = "Thème " + bundle.getString(SIRS.BUNDLE_KEY_CLASS);
+            title = LabelMapper.get(documentClass).mapClassName(true)+" (localisations)";
         } else{
-            title = "Thème Sans document associé";
+            title = "Localisations sans document associé";
         }
         return new ThemeManager<>(title, 
                 title, 

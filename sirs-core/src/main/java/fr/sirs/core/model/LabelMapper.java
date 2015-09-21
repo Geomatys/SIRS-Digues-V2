@@ -56,6 +56,10 @@ public class LabelMapper {
         return get(modelClass).mapPropertyName(property);
     }
 
+    /**
+     *
+     * @return The bundle propety mapping the class name (singular).
+     */
     public String mapClassName() {
         String name = null;
         try{
@@ -64,5 +68,29 @@ public class LabelMapper {
             //not important
         }
         return name!=null ? name : modelClass.getSimpleName();
+    }
+
+    /**
+     *
+     * @return The bundle property mapping the class name (plural).
+     */
+    public String mapClassNamePlural() {
+        String name = null;
+        try{
+            name = bundle.getString("classPlural");
+        }catch(MissingResourceException ex){
+            //not important
+        }
+        return name!=null ? name : modelClass.getSimpleName();
+    }
+
+    /**
+     *
+     * @param plural must be true to return the plural class name; false otherwise.
+     * @return The bundle property mapping the class name.
+     */
+    public String mapClassName(final boolean plural){
+        if(plural) return mapClassNamePlural();
+        else return mapClassName();
     }
 }
