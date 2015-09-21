@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import fr.sirs.theme.ui.*?>
+<?import fr.sirs.util.FXFileTextField?>
+<?import fr.sirs.util.FXComponentField?>
+<?import org.geotoolkit.gui.javafx.util.*?>
+<?import jidefx.scene.control.field.*?>
+<?import jfxtras.scene.control.*?>
+<?import javafx.scene.web.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+
+
+<fx:root fx:id="uiBorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+  <center>
+    <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <tabs>
+
+<!-- ATTRIBUTE TAB-->
+        <Tab text="Informations">
+          <ScrollPane>
+            <content>
+          <VBox spacing="30.0" BorderPane.alignment="CENTER">
+            <children>
+
+  <FXValidityPeriodPane fx:id="uiValidityPeriod"/>
+            <HBox fx:id="ui_parent_box" spacing="20.0" alignment="CENTER_LEFT" styleClass="gray-light">
+              <children>
+                <Label fx:id="linearId" text="%linearId" maxHeight="-Infinity" maxWidth="-Infinity"/>
+                <ComboBox fx:id="ui_linearId"/>
+                <Button fx:id="ui_linearId_link"/>
+              </children>
+              <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+              </padding>
+            </HBox>
+
+<!-- POSITIONEMENT -->
+    <FXPositionablePane fx:id="uiPositionable" />  
+
+<!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
+
+
+            <!-- EpiBerge -->
+            <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="NEVER" />
+                <ColumnConstraints hgrow="ALWAYS" />
+              </columnConstraints>
+              <!--rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints-->
+              <children>
+                   <!-- EDouble -->                 
+                   <Label text="%longueurTotale" GridPane.rowIndex="0" />
+                   <Spinner fx:id="ui_longueurTotale" GridPane.columnIndex="1" GridPane.rowIndex="0"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   
+                   <!-- EString -->                 
+                   <Label text="%orientation" GridPane.rowIndex="1" />
+                   <TextField fx:id="ui_orientation" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   
+                   <!-- EDouble -->                 
+                   <Label text="%coteAltimetriqueFondation" GridPane.rowIndex="2" />
+                   <Spinner fx:id="ui_coteAltimetriqueFondation" GridPane.columnIndex="1" GridPane.rowIndex="2"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   
+                   <!-- Ancrage -->
+                   <Separator GridPane.rowIndex="3" GridPane.columnSpan="3" />
+                   <Label text="Ancrage" GridPane.rowIndex="4" >
+                       <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
+                  </Label>
+                   <!-- EDouble -->                 
+                   <Label text="%coteAltimetriqueAncrage" GridPane.rowIndex="5" />
+                   <Spinner fx:id="ui_coteAltimetriqueAncrage" GridPane.columnIndex="1" GridPane.rowIndex="5"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   
+                   <Label text="%natureAncrageAmontId" GridPane.rowIndex="6" />
+                   <ComboBox fx:id="ui_natureAncrageAmontId" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                   <Button fx:id="ui_natureAncrageAmontId_link" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                   
+                   <Label text="%materiauAncrageAmontId" GridPane.rowIndex="7" />
+                   <ComboBox fx:id="ui_materiauAncrageAmontId" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                   <Button fx:id="ui_materiauAncrageAmontId_link" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                   
+                   <!-- EDouble -->                 
+                   <Label text="%longueurAncrageAmont" GridPane.rowIndex="8" />
+                   <Spinner fx:id="ui_longueurAncrageAmont" GridPane.columnIndex="1" GridPane.rowIndex="8"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   
+                   <Label text="%natureAncrageAvalId" GridPane.rowIndex="9" />
+                   <ComboBox fx:id="ui_natureAncrageAvalId" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                   <Button fx:id="ui_natureAncrageAvalId_link" GridPane.columnIndex="2" GridPane.rowIndex="9" />
+                   
+                   <Label text="%materiauAncrageAvalId" GridPane.rowIndex="10" />
+                   <ComboBox fx:id="ui_materiauAncrageAvalId" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+                   <Button fx:id="ui_materiauAncrageAvalId_link" GridPane.columnIndex="2" GridPane.rowIndex="10" />
+                   
+                   <!-- EDouble -->                 
+                   <Label text="%longueurAncrageAval" GridPane.rowIndex="11" />
+                   <Spinner fx:id="ui_longueurAncrageAval" GridPane.columnIndex="1" GridPane.rowIndex="11"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   
+                   <!-- Corps -->
+                   <Separator GridPane.rowIndex="12" GridPane.columnSpan="3" />
+                   <Label text="Corps" GridPane.rowIndex="13" >
+                       <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
+                  </Label>
+                   <Label text="%natureCorpsId" GridPane.rowIndex="14" />
+                   <ComboBox fx:id="ui_natureCorpsId" GridPane.columnIndex="1" GridPane.rowIndex="14" />
+                   <Button fx:id="ui_natureCorpsId_link" GridPane.columnIndex="2" GridPane.rowIndex="14" />
+                   
+                   <Label text="%materiauCorpsId" GridPane.rowIndex="15" />
+                   <ComboBox fx:id="ui_materiauCorpsId" GridPane.columnIndex="1" GridPane.rowIndex="15" />
+                   <Button fx:id="ui_materiauCorpsId_link" GridPane.columnIndex="2" GridPane.rowIndex="15" />
+                   
+                   <!-- EDouble -->                 
+                   <Label text="%longueurCorps" GridPane.rowIndex="16" />
+                   <Spinner fx:id="ui_longueurCorps" GridPane.columnIndex="1" GridPane.rowIndex="16"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   
+                   <!-- EDouble -->                 
+                   <Label text="%penteCorps" GridPane.rowIndex="17" />
+                   <Spinner fx:id="ui_penteCorps" GridPane.columnIndex="1" GridPane.rowIndex="17"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   
+                   <!-- Tete -->
+                   <Separator GridPane.rowIndex="18" GridPane.columnSpan="3" />
+                   <Label text="Tête" GridPane.rowIndex="19" >
+                       <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
+                  </Label>
+                   <Label text="%natureTeteId" GridPane.rowIndex="20" />
+                   <ComboBox fx:id="ui_natureTeteId" GridPane.columnIndex="1" GridPane.rowIndex="20" />
+                   <Button fx:id="ui_natureTeteId_link" GridPane.columnIndex="2" GridPane.rowIndex="20" />
+                   
+                   <Label text="%materiauTeteId" GridPane.rowIndex="21" />
+                   <ComboBox fx:id="ui_materiauTeteId" GridPane.columnIndex="1" GridPane.rowIndex="21" />
+                   <Button fx:id="ui_materiauTeteId_link" GridPane.columnIndex="2" GridPane.rowIndex="21" />
+                   
+                   <!-- EDouble -->                 
+                   <Label text="%longueurTete" GridPane.rowIndex="22" />
+                   <Spinner fx:id="ui_longueurTete" GridPane.columnIndex="1" GridPane.rowIndex="22"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+
+              </children>
+              <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+              </padding>
+            </GridPane>
+            <HTMLEditor fx:id="ui_commentaire" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contentediTable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" maxHeight="-Infinity"  prefHeight="200.0" styleClass="gray-light" />
+
+            </children>
+            <padding>
+              <Insets bottom="10.0" left="50.0" right="50.0" top="30.0" />
+            </padding>
+          </VBox>
+            </content>
+          </ScrollPane>
+        </Tab>
+
+<!-- REFERENCE TABS -->
+        <Tab fx:id="ui_photos" text="%photos"/>
+
+      </tabs>
+    </TabPane>
+  </center>
+
+</fx:root>
+
