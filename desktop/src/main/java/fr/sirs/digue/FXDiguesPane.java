@@ -18,6 +18,8 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.ui.AbstractFXElementPane;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -471,8 +473,10 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                     setContextMenu(addMenu);
                 }
             } else if (obj instanceof TronconDigue) {
-                this.setText(((TronconDigue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
-//                setContextMenu(null);
+                addMenu.getItems().clear();
+                final byte ptext[] = ((TronconDigue) obj).getLibelle().getBytes(ISO_8859_1);
+                this.setText(new String(ptext, UTF_8) + " (" + getTreeItem().getChildren().size() + ") ");
+                setContextMenu(addMenu);
             } else if (obj instanceof Theme) {
                 setText(((Theme) obj).getName());
             } else if( obj instanceof String){
