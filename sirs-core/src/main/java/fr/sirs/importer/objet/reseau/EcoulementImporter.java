@@ -16,7 +16,7 @@ class EcoulementImporter extends GenericTypeReferenceImporter<RefEcoulement> {
     }
 
     @Override
-    protected Class<RefEcoulement> getDocumentClass() {
+    protected Class<RefEcoulement> getElementClass() {
 	return RefEcoulement.class;RefEcoulement.class;
     }
 }

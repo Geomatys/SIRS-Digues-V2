@@ -44,7 +44,7 @@ public class SystemeReperageImporter extends AbstractImporter<SystemeReperage> {
     }
 
     @Override
-    protected Class<SystemeReperage> getDocumentClass() {
+    protected Class<SystemeReperage> getElementClass() {
         return SystemeReperage.class;
     }
 

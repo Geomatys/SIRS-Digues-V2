@@ -11,7 +11,7 @@ import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
 public class SourceInfoImporter extends GenericTypeReferenceImporter<RefSource> {
 
     @Override
-    protected Class<RefSource> getDocumentClass() {
+    protected Class<RefSource> getElementClass() {
 	return RefSource.class;
     }
 

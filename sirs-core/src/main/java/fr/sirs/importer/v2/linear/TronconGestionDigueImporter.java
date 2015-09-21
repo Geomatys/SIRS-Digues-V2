@@ -57,7 +57,7 @@ public class TronconGestionDigueImporter extends AbstractImporter<TronconDigue> 
     };
 
     @Override
-    protected Class<TronconDigue> getDocumentClass() {
+    protected Class<TronconDigue> getElementClass() {
         return TronconDigue.class;
     }
 

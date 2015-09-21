@@ -16,7 +16,7 @@ class TypeRevetementImporter extends GenericTypeReferenceImporter<RefRevetement>
     }
 
     @Override
-    protected Class<RefRevetement> getDocumentClass() {
+    protected Class<RefRevetement> getElementClass() {
 	return RefRevetement.class;
     }
 }

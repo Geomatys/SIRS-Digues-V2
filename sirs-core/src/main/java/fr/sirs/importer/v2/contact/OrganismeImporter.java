@@ -36,7 +36,7 @@ public class OrganismeImporter extends AbstractImporter<Organisme> {
     };
 
     @Override
-    protected Class<Organisme> getDocumentClass() {
+    protected Class<Organisme> getElementClass() {
         return Organisme.class;
     }
 

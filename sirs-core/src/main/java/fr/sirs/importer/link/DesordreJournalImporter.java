@@ -7,7 +7,7 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.objet.desordre.DesordreImporter;
-import fr.sirs.importer.documentTroncon.document.journal.JournalArticleImporter;
+import fr.sirs.importer.documentTroncon.document.journal.ArticleJournalImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,12 +22,12 @@ import org.ektorp.CouchDbConnector;
 public class DesordreJournalImporter extends GenericEntityLinker {
 
     private final DesordreImporter desordreImporter;
-    private final JournalArticleImporter journalArticleImporter;
+    private final ArticleJournalImporter journalArticleImporter;
 
     public DesordreJournalImporter(final Database accessDatabase,
             final CouchDbConnector couchDbConnector,
             final DesordreImporter desordreImporter,
-            final JournalArticleImporter journalArticleImporter) {
+            final ArticleJournalImporter journalArticleImporter) {
         super(accessDatabase, couchDbConnector);
         this.desordreImporter = desordreImporter;
         this.journalArticleImporter = journalArticleImporter;

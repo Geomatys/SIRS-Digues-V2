@@ -16,7 +16,7 @@ public class TypePositionImporter extends GenericTypeReferenceImporter<RefPositi
     }
 
     @Override
-    protected Class<RefPosition> getDocumentClass() {
+    protected Class<RefPosition> getElementClass() {
 	return RefPosition.class;
     }
 }

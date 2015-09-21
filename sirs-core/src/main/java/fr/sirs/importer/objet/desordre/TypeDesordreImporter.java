@@ -16,7 +16,7 @@ class TypeDesordreImporter extends GenericTypeReferenceImporter<RefTypeDesordre>
     }
 
     @Override
-    protected Class<RefTypeDesordre> getDocumentClass() {
+    protected Class<RefTypeDesordre> getElementClass() {
 	return RefTypeDesordre.class;
     }
 }

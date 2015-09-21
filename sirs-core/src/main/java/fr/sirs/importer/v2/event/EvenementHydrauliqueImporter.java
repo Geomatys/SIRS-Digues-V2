@@ -7,7 +7,6 @@ import fr.sirs.core.model.RefFrequenceEvenementHydraulique;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.v2.AbstractImporter;
-import fr.sirs.importer.v2.AbstractImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +45,7 @@ public class EvenementHydrauliqueImporter extends AbstractImporter<EvenementHydr
     }
 
     @Override
-    protected Class<EvenementHydraulique> getDocumentClass() {
+    protected Class<EvenementHydraulique> getElementClass() {
         return EvenementHydraulique.class;
     }
 

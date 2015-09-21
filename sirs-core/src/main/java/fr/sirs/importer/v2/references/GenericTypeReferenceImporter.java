@@ -81,7 +81,7 @@ public abstract class GenericTypeReferenceImporter<T extends ReferenceType> exte
         super.preCompute();
 
         try {
-            final Class<T> outputClass = getDocumentClass();
+            final Class<T> outputClass = getElementClass();
             setId = outputClass.getMethod("setId", outputClass);
             setId.setAccessible(true);
             setAbrege = outputClass.getMethod("setAbrege", outputClass);

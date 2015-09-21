@@ -12,7 +12,7 @@ import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.objet.prestation.PrestationImporter;
 import fr.sirs.importer.documentTroncon.PositionDocumentImporter;
 import fr.sirs.importer.documentTroncon.document.documentAGrandeEchelle.DocumentAGrandeEchelleImporter;
-import fr.sirs.importer.documentTroncon.document.rapportEtude.RapportEtudeImporter;
+import fr.sirs.importer.v2.document.RapportEtudeImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;

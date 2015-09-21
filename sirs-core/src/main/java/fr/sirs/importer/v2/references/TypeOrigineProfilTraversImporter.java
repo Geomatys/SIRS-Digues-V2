@@ -16,7 +16,7 @@ class TypeOrigineProfilTraversImporter extends GenericTypeReferenceImporter<RefO
     }
 
     @Override
-    protected Class<RefOrigineProfilTravers> getDocumentClass() {
+    protected Class<RefOrigineProfilTravers> getElementClass() {
 	return RefOrigineProfilTravers.class;
     }
 }

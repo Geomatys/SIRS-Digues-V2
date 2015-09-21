@@ -19,7 +19,7 @@ import java.util.List;
 public class IntervenantImporter extends AbstractImporter<Contact> {
 
     @Override
-    protected Class<Contact> getDocumentClass() {
+    protected Class<Contact> getElementClass() {
         return Contact.class;
     }
 

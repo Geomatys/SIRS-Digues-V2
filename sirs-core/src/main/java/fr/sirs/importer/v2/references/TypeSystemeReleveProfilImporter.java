@@ -16,7 +16,7 @@ public class TypeSystemeReleveProfilImporter extends GenericTypeReferenceImporte
     }
 
     @Override
-    protected Class<RefSystemeReleveProfil> getDocumentClass() {
+    protected Class<RefSystemeReleveProfil> getElementClass() {
 	return RefSystemeReleveProfil.class;
     }
 }

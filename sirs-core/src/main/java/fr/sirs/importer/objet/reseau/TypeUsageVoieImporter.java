@@ -16,7 +16,7 @@ class TypeUsageVoieImporter extends GenericTypeReferenceImporter<RefUsageVoie> {
     }
 
     @Override
-    protected Class<RefUsageVoie> getDocumentClass() {
+    protected Class<RefUsageVoie> getElementClass() {
 	return RefUsageVoie.class;
     }
 }

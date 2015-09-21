@@ -15,7 +15,7 @@ public class TypeCoteImporter extends GenericTypeReferenceImporter<RefCote> {
     }
 
     @Override
-    protected Class<RefCote> getDocumentClass() {
+    protected Class<RefCote> getElementClass() {
         return RefCote.class;
     }
 }

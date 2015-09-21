@@ -21,7 +21,7 @@ public class ElementGeometrieImporter extends GenericObjetImporter<ObjetPhotogra
     }
 
     @Override
-    protected Class<ObjetPhotographiable> getDocumentClass() {
+    protected Class<ObjetPhotographiable> getElementClass() {
         return ObjetPhotographiable.class;
     }
 

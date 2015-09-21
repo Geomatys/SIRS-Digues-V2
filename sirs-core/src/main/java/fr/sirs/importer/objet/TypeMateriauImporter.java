@@ -16,7 +16,7 @@ public class TypeMateriauImporter extends GenericTypeReferenceImporter<RefMateri
     }
 
     @Override
-    protected Class<RefMateriau> getDocumentClass() {
+    protected Class<RefMateriau> getElementClass() {
 	return RefMateriau.class;
     }
 

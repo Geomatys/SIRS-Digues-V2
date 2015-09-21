@@ -15,7 +15,7 @@ import java.util.List;
 class SysEvtCreteImporter extends GenericStructureImporter<Crete> {
 
     @Override
-    protected Class<Crete> getDocumentClass() {
+    protected Class<Crete> getElementClass() {
         return Crete.class;
     }
 

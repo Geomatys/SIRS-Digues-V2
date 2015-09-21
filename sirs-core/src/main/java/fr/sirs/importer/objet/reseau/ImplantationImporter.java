@@ -16,7 +16,7 @@ class ImplantationImporter extends GenericTypeReferenceImporter<RefImplantation>
     }
 
     @Override
-    protected Class<RefImplantation> getDocumentClass() {
+    protected Class<RefImplantation> getElementClass() {
 	return RefImplantation.class;
     }
 

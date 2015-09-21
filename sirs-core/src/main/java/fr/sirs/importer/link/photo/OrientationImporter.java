@@ -17,7 +17,7 @@ public class OrientationImporter extends GenericTypeReferenceImporter<RefOrienta
     }
 
     @Override
-    protected Class<RefOrientationPhoto> getDocumentClass() {
+    protected Class<RefOrientationPhoto> getElementClass() {
 	return RefOrientationPhoto.class;
     }
 

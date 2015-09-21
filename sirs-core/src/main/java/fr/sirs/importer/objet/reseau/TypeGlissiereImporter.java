@@ -16,7 +16,7 @@ class TypeGlissiereImporter extends GenericTypeReferenceImporter<RefTypeGlissier
     }
 
     @Override
-    protected Class<RefTypeGlissiere> getDocumentClass() {
+    protected Class<RefTypeGlissiere> getElementClass() {
 	return RefTypeGlissiere.class;
     }
 }

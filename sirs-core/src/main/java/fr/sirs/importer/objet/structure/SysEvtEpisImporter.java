@@ -15,7 +15,7 @@ import java.util.List;
 class SysEvtEpisImporter extends GenericStructureImporter<Epi> {
 
     @Override
-    protected Class<Epi> getDocumentClass() {
+    protected Class<Epi> getElementClass() {
         return Epi.class;
     }
 

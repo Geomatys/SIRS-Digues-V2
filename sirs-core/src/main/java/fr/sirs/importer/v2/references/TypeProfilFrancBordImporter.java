@@ -16,7 +16,7 @@ class TypeProfilFrancBordImporter extends GenericTypeReferenceImporter<RefProfil
     }
 
     @Override
-    protected Class<RefProfilFrancBord> getDocumentClass() {
+    protected Class<RefProfilFrancBord> getElementClass() {
 	return RefProfilFrancBord.class;
     }
 

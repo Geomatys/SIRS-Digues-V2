@@ -7,7 +7,7 @@ import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.objet.laisseCrue.LaisseCrueImporter;
-import fr.sirs.importer.documentTroncon.document.journal.JournalArticleImporter;
+import fr.sirs.importer.documentTroncon.document.journal.ArticleJournalImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,12 +22,12 @@ import org.ektorp.CouchDbConnector;
 public class LaisseCrueJournalImporter extends GenericEntityLinker {
 
     private final LaisseCrueImporter laisseCrueImporter;
-    private final JournalArticleImporter journalArticleImporter;
+    private final ArticleJournalImporter journalArticleImporter;
     
     public LaisseCrueJournalImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
             final LaisseCrueImporter laisseCrueImporter,
-            final JournalArticleImporter journalArticleImporter) {
+            final ArticleJournalImporter journalArticleImporter) {
         super(accessDatabase, couchDbConnector);
         this.laisseCrueImporter = laisseCrueImporter;
         this.journalArticleImporter = journalArticleImporter;

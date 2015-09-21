@@ -16,7 +16,7 @@ class TypeRiveImporter extends GenericTypeReferenceImporter<RefRive> {
     }
 
     @Override
-    protected Class<RefRive> getDocumentClass() {
+    protected Class<RefRive> getElementClass() {
 	return RefRive.class;
     }
 }

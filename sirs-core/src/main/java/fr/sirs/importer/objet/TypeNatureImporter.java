@@ -16,7 +16,7 @@ public class TypeNatureImporter extends GenericTypeReferenceImporter<RefNature> 
     }
 
     @Override
-    protected Class<RefNature> getDocumentClass() {
+    protected Class<RefNature> getElementClass() {
 	return RefNature.class;
     }
 

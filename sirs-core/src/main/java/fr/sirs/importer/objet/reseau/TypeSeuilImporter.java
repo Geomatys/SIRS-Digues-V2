@@ -16,7 +16,7 @@ class TypeSeuilImporter extends GenericTypeReferenceImporter<RefSeuil> {
     }
 
     @Override
-    protected Class<RefSeuil> getDocumentClass() {
+    protected Class<RefSeuil> getElementClass() {
 	return RefSeuil.class;
     }
 }

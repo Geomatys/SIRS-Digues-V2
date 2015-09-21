@@ -27,6 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  * An importer is suposed to retrive data from one and only one table of the
  * given database.
  *
+ * TODO : replace {@link #getRowIdFieldName() } by a complex key object. Current
+ * state prevent to import correctly data from join table, because returned key
+ * is not unique, and indexing it result in data loss.
+ *
  * @author Samuel Andrés (Geomatys)
  * @param <T> Type of computed output.
  */
@@ -36,7 +40,6 @@ public abstract class AbstractImporter<T extends Element> {
     protected SessionCore session;
 
     /**
-     *
      * Debug purpose. List all columns present in input table, with a flag
      * specifiying if it is usable (needed for the mapping and not empty) for
      * import.

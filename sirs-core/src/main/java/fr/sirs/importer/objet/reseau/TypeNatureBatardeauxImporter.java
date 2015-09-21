@@ -16,7 +16,7 @@ class TypeNatureBatardeauxImporter extends GenericTypeReferenceImporter<RefNatur
     }
 
     @Override
-    protected Class<RefNatureBatardeaux> getDocumentClass() {
+    protected Class<RefNatureBatardeaux> getElementClass() {
 	return RefNatureBatardeaux.class;
     }
 }

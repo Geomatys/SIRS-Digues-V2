@@ -16,7 +16,7 @@ public class TypeFonctionImporter extends GenericTypeReferenceImporter<RefFoncti
     }
 
     @Override
-    protected Class<RefFonction> getDocumentClass() {
+    protected Class<RefFonction> getElementClass() {
 	return RefFonction.class;
     }
 }

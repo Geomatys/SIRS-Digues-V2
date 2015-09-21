@@ -16,7 +16,7 @@ class TypeProfilTraversImporter extends GenericTypeReferenceImporter<RefTypeProf
     }
 
     @Override
-    protected Class<RefTypeProfilTravers> getDocumentClass() {
+    protected Class<RefTypeProfilTravers> getElementClass() {
 	return RefTypeProfilTravers.class;
     }
 }

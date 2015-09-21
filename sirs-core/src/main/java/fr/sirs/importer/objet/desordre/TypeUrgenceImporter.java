@@ -16,7 +16,7 @@ class TypeUrgenceImporter extends GenericTypeReferenceImporter<RefUrgence> {
     }
 
     @Override
-    protected Class<RefUrgence> getDocumentClass() {
+    protected Class<RefUrgence> getElementClass() {
 	return RefUrgence.class;
     }
 }

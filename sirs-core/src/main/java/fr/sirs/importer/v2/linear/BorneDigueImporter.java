@@ -45,7 +45,7 @@ public class BorneDigueImporter extends AbstractImporter<BorneDigue> {
     };
 
     @Override
-    protected Class getDocumentClass() {
+    protected Class getElementClass() {
         return BorneDigue.class;
     }
 

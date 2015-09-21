@@ -11,7 +11,7 @@ import fr.sirs.importer.v2.AbstractImporter;
 public class DigueImporter extends AbstractImporter<Digue> {
 
     @Override
-    protected Class getDocumentClass() {
+    protected Class getElementClass() {
         return Digue.class;
     }
 

@@ -7,7 +7,7 @@ import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.objet.monteeDesEaux.MonteeDesEauxImporter;
-import fr.sirs.importer.documentTroncon.document.journal.JournalArticleImporter;
+import fr.sirs.importer.documentTroncon.document.journal.ArticleJournalImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,12 +22,12 @@ import org.ektorp.CouchDbConnector;
 public class MonteeDesEauxJournalImporter extends GenericEntityLinker {
 
     private final MonteeDesEauxImporter monteeDesEauxImporter;
-    private final JournalArticleImporter journalArticleImporter;
+    private final ArticleJournalImporter journalArticleImporter;
     
     public MonteeDesEauxJournalImporter(final Database accessDatabase, 
             final CouchDbConnector couchDbConnector,
             final MonteeDesEauxImporter monteeDesEauxImporter,
-            final JournalArticleImporter journalArticleImporter) {
+            final ArticleJournalImporter journalArticleImporter) {
         super(accessDatabase, couchDbConnector);
         this.monteeDesEauxImporter = monteeDesEauxImporter;
         this.journalArticleImporter = journalArticleImporter;

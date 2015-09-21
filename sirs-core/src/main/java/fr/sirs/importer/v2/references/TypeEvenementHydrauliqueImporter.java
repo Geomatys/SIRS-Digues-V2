@@ -16,7 +16,7 @@ class TypeEvenementHydrauliqueImporter extends GenericTypeReferenceImporter<RefE
     }
 
     @Override
-    protected Class<RefEvenementHydraulique> getDocumentClass() {
+    protected Class<RefEvenementHydraulique> getElementClass() {
 	return RefEvenementHydraulique.class;
     }
 }
