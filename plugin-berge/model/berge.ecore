@@ -38,10 +38,29 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="riveId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefRive"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureSolId" eType="#//RefNatureSolBerge"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="EpiBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetStructure">
+  <eClassifiers xsi:type="ecore:EClass" name="EpiBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetPhotographiable">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefPosition"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurTotale" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteAltimetriqueFondation"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteAltimetriqueAncrage"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="natureAncrageAmontId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauAncrageAmontId"
+        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurAncrageAmont" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="natureAncrageAvalId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauAncrageAvalId"
+        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurAncrageAval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="natureCorpsId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauCorpsId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurCorps" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="penteCorps" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="natureTeteId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauTeteId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurTete" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="orientation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TalusRisbermeBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetStructure">
     <eAnnotations source="couchDBDocument"/>
