@@ -14,7 +14,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="FondationBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetStructure">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
@@ -28,15 +28,15 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SommetRisbermeBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetStructure">
+  <eClassifiers xsi:type="ecore:EClass" name="SommetBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetPhotographiable">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="presenceRipisylve" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="riveId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefRive"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="natureSolId" eType="#//RefNatureSolBerge"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EpiBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetStructure">
     <eAnnotations source="couchDBDocument"/>
@@ -46,13 +46,13 @@
   <eClassifiers xsi:type="ecore:EClass" name="TalusRisbermeBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetStructure">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurSommet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurSommet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="penteInterieure" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="penteInterieure" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurRampantHaut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurRampantHaut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurRampantBas" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurRampantBas" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionHautId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
@@ -62,17 +62,14 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauHautId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauBasId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="TalusDigueBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetStructure">
+  <eClassifiers xsi:type="ecore:EClass" name="TalusBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetPhotographiable">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurSommet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="penteInterieure" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="penteInterieure" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurRampantHaut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurRampantHaut" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurRampantBas" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurRampantBas" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionHautId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionBasId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureHautId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
@@ -80,10 +77,12 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauHautId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauBasId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="riveId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefRive"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="CreteBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetStructure">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
@@ -91,8 +90,8 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageRevancheBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetStructure">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteurMurette" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteurMurette" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureHautId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
@@ -101,5 +100,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauBasId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvertureBatardableIds"
         upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvertureBatardable"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefNatureSolBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
 </ecore:EPackage>

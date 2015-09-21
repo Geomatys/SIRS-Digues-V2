@@ -1,1 +1,11 @@
 fr.sirs.core.model.Berge
+fr.sirs.core.model.CreteBerge
+fr.sirs.core.model.EpiBerge
+fr.sirs.core.model.FondationBerge
+fr.sirs.core.model.OuvrageRevancheBerge
+fr.sirs.core.model.PiedBerge
+fr.sirs.core.model.SommetBerge
+fr.sirs.core.model.TalusBerge
+fr.sirs.core.model.TalusRisbermeBerge
+fr.sirs.core.model.TraitBerge
+fr.sirs.core.model.RefNatureSolBerge
