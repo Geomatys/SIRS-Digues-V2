@@ -23,10 +23,13 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PiedBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetStructure">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="riveId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefRive"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeurSabot" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SommetBerge" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetPhotographiable">
     <eAnnotations source="couchDBDocument"/>
