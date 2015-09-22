@@ -1,12 +1,9 @@
-package fr.sirs.other;
+package fr.sirs.theme.ui;
 
-import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.theme.ui.AbstractFXElementPane;
-import fr.sirs.theme.ui.PojoTable;
 import java.time.LocalDate;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -24,10 +21,6 @@ import javafx.scene.layout.GridPane;
  * @author Alexis Manin (Geomatys)
  */
 public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
-    
-    @FXML private FXEditMode uiMode;
-    @FXML private TextField uiPseudoId;
-    @FXML private DatePicker date_maj;
 
     @FXML private GridPane uiDescriptionGrid;
     @FXML private GridPane uiAdresseGrid;
@@ -49,10 +42,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
 
     public FXOrganismePane(Organisme organisme) {
         SIRS.loadFXML(this);
-        date_maj.setDisable(true);
 
-        uiMode.requireEditionForElement(organisme);
-        disableFieldsProperty().bind(uiMode.editionState().not());
         for (final Node child : uiDescriptionGrid.getChildren()) {
             if (!(child instanceof Label)) {
                 child.disableProperty().bind(disableFieldsProperty());
@@ -66,17 +56,14 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         
         contactOrganismeTable = new PojoTable(ContactOrganisme.class, "Contacts rattachés");
         contactOrganismeTable.parentElementProperty().bind(elementProperty);
-        contactOrganismeTable.editableProperty().bind(uiMode.editionState());
         uiContactOrganismesTab.setContent(contactOrganismeTable);
-        
-        uiPseudoId.disableProperty().bind(disableFieldsProperty());
         
         elementProperty.addListener(this::initPane);
         setElement(organisme);
     }
     
     private void initPane(ObservableValue<? extends Organisme> observable, Organisme oldValue, Organisme newValue) {
-        date_maj.valueProperty().unbind();
+
         if (oldValue != null) {
             uiRaisonSocialeTextField.textProperty().unbindBidirectional(oldValue.nomProperty());
             uiStatutJuridiqueTextField.textProperty().unbindBidirectional(oldValue.statutJuridiqueProperty());
@@ -85,20 +72,14 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
             uiAdresseTextField.textProperty().unbindBidirectional(oldValue.adresseProperty());
             uiCodePostalTextField.textProperty().unbindBidirectional(oldValue.codePostalProperty());
             uiCommuneTextField.textProperty().unbindBidirectional(oldValue.communeProperty());
-            uiPseudoId.textProperty().unbindBidirectional(oldValue.designationProperty());
         }
         
         final Organisme organisme;
         if (newValue == null) {
             organisme = Injector.getSession().getRepositoryForClass(Organisme.class).create();
-            uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDate.now()); Injector.getSession().getRepositoryForClass(Organisme.class).add(organisme);});
         } else {
             organisme = newValue;
-            uiMode.setSaveAction(()->{organisme.setDateMaj(LocalDate.now()); Injector.getSession().getRepositoryForClass(Organisme.class).update(organisme);});
         }
-        
-        date_maj.valueProperty().bind(organisme.dateMajProperty());
-        uiPseudoId.textProperty().bindBidirectional(organisme.designationProperty());
         
         uiRaisonSocialeTextField.textProperty().bindBidirectional(organisme.nomProperty());
         uiStatutJuridiqueTextField.textProperty().bindBidirectional(organisme.statutJuridiqueProperty());

@@ -1,7 +1,6 @@
 
-package fr.sirs.other;
+package fr.sirs.theme.ui;
 
-import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
@@ -10,8 +9,6 @@ import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.theme.ui.AbstractFXElementPane;
-import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.ReferenceTableCell;
 import java.time.LocalDate;
@@ -20,14 +17,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
-
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextField;
@@ -39,10 +34,6 @@ import org.geotoolkit.internal.GeotkFX;
  * @author Johann Sorel (Geomatys)
  */
 public class FXContactPane extends AbstractFXElementPane<Contact> {
-
-    @FXML private FXEditMode uiMode;
-    @FXML private TextField uiDesignation;
-    @FXML private DatePicker date_maj;
 
     @FXML private TextField uiNom;
     @FXML private TextField uiPrenom;
@@ -76,13 +67,10 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
      */
     public FXContactPane(Contact contact) {
         SIRS.loadFXML(this);
-        date_maj.setDisable(true);
 
         this.contactRepository = session.getRepositoryForClass(Contact.class);
         this.orgRepository = session.getRepositoryForClass(Organisme.class);
 
-        uiMode.requireEditionForElement(contact);
-        disableFieldsProperty().bind(uiMode.editionState().not());
         uiNom.disableProperty().bind(disableFieldsProperty());
         uiPrenom.disableProperty().bind(disableFieldsProperty());
         uiService.disableProperty().bind(disableFieldsProperty());
@@ -94,14 +82,11 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         uiAdresse.disableProperty().bind(disableFieldsProperty());
         uiCodePostal.disableProperty().bind(disableFieldsProperty());
         uiCommune.disableProperty().bind(disableFieldsProperty());
-        uiDesignation.disableProperty().bind(disableFieldsProperty());
 
         organismeTable = new ContactOrganismeTable();
         uiOrganismeTab.setContent(organismeTable);
         // /!\ If you remove "and" condition, you must add null check in below ContactOrganismeTable.
         organismeTable.editableProperty().bind(disableFieldsProperty().not().and(elementProperty.isNotNull()));
-
-        uiMode.setSaveAction(this::save);
 
         orgsOfContact.addListener(new ListChangeListener() {
             @Override
@@ -124,27 +109,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         setElement(contact);
     }
 
-    private void save(){
-        try {
-            if (elementProperty.get() != null) {
-                contactRepository.update(elementProperty.get());
-            }
-            for (final Element org : orgsOfContact) {
-                orgRepository.update((Organisme) org.getParent());
-            }
-            modifiedOrgs.clear();
-            final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
-            growlInfo.showAndFade();
-        } catch (Exception e) {
-            final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant l'enregistrement.");
-            growlError.showAndFade();
-            GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
-            SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
-        }
-    }
-
     private void initFields(ObservableValue<? extends Contact> observable, Contact oldValue, Contact newValue) {
-        date_maj.valueProperty().unbind();
 
         if (oldValue != null) {
             uiNom.textProperty().unbindBidirectional(oldValue.nomProperty());
@@ -158,17 +123,13 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
             uiAdresse.textProperty().unbindBidirectional(oldValue.adresseProperty());
             uiCodePostal.textProperty().unbindBidirectional(oldValue.codePostalProperty());
             uiCommune.textProperty().unbindBidirectional(oldValue.communeProperty());
-            uiDesignation.textProperty().unbindBidirectional(oldValue.designationProperty());
         }
 
         if (newValue == null) return;
 
-        date_maj.valueProperty().bind(newValue.dateMajProperty());
-
         orgsOfContact.clear();
         modifiedOrgs.clear();
 
-        uiDesignation.textProperty().bindBidirectional(newValue.designationProperty());
         uiNom.textProperty().bindBidirectional(newValue.nomProperty());
         uiPrenom.textProperty().bindBidirectional(newValue.prenomProperty());
         uiService.textProperty().bindBidirectional(newValue.serviceProperty());
@@ -193,7 +154,17 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
 
     @Override
     public void preSave() {
-        // nothing to do, all is done by JavaFX bindings.
+        try {
+            for (final Element org : orgsOfContact) {
+                orgRepository.update((Organisme) org.getParent());
+            }
+            modifiedOrgs.clear();
+        } catch (Exception e) {
+            final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant la mise à jour des organismes.");
+            growlError.showAndFade();
+            GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
+            SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
+        }
     }
 
     /**
