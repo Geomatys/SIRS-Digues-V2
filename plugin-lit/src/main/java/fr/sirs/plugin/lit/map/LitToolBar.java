@@ -1,7 +1,6 @@
 
 package fr.sirs.plugin.lit.map;
 
-import fr.sirs.map.FXOpenElementEditorAction;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
@@ -38,11 +37,9 @@ public class LitToolBar extends ToolBar {
         final ToggleButton butEditConvert = new ConvertGeomToLitAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
         butEditConvert.getStyleClass().add(CENTER);
         final Button importBornes = new FXImportBornesLitAction(map).createButton(ActionUtils.ActionTextBehavior.HIDE);
-        importBornes.getStyleClass().add(CENTER);
-        final ToggleButton butInfo = new FXOpenElementEditorAction(map, "informations sur l'élément", "Ouvre la fiche du tronçon de lit.").createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
-        butInfo.getStyleClass().add(RIGHT);
+        importBornes.getStyleClass().add(RIGHT);
         
-        getItems().add(new HBox(butEditLit, butCut, butMerge, butEditSr, butCalc, butEditConvert, importBornes, butInfo));
+        getItems().add(new HBox(butEditLit, butCut, butMerge, butEditSr, butCalc, butEditConvert, importBornes));
 
     }
     
