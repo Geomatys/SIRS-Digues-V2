@@ -12,6 +12,7 @@ import fr.sirs.plugin.vegetation.map.EditVegetationTool;
 import java.util.Iterator;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -24,12 +25,16 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import org.geotoolkit.font.FontAwesomeIcons;
+import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
 import org.geotoolkit.gui.javafx.render2d.edition.FXToolBox;
@@ -42,15 +47,20 @@ import org.geotoolkit.map.MapBuilder;
  */
 public class VegetationToolBar extends ToolBar {
 
+    private static final String LEFT = "buttongroup-left";
+    private static final String CENTER = "buttongroup-center";
+    private static final String RIGHT = "buttongroup-right";
+    
     private Stage dialog = null;
     private Stage dialogRecherche = null;
 
     public VegetationToolBar() {
+        getStylesheets().add("/org/geotoolkit/gui/javafx/buttonbar.css");
         getItems().add(new Label("Végétation"));
 
-        final ToggleButton buttonParcelle = new ToggleButton(null, new ImageView(GeotkFX.ICON_EDIT));
-        getItems().add(buttonParcelle);
-
+        final Button buttonParcelle = new Button(null, new ImageView(GeotkFX.ICON_EDIT));
+        buttonParcelle.setTooltip(new Tooltip("Outil d'édition de végétation"));
+        buttonParcelle.getStyleClass().add(LEFT);
         buttonParcelle.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -63,10 +73,13 @@ public class VegetationToolBar extends ToolBar {
             }
         });
 
-        final Button recherche = new Button("Recherche");
+        final Button recherche = new Button(null, new ImageView(SwingFXUtils.toFXImage(IconBuilder.createImage(
+                FontAwesomeIcons.ICON_GEARS_ALIAS,16,FontAwesomeIcons.DEFAULT_COLOR),null)));
+        recherche.setTooltip(new Tooltip("Analyze de la végétation"));
         recherche.setOnAction(this::showSearchDialog);
-        getItems().add(recherche);
+        recherche.getStyleClass().add(RIGHT);
 
+        getItems().add(new HBox(buttonParcelle,recherche));
     }
 
     private boolean checkPlan(){
