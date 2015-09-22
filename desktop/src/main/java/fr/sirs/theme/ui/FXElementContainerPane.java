@@ -2,21 +2,20 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.FXEditMode;
-import fr.sirs.Session;
-import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import static fr.sirs.core.model.Role.ADMIN;
+import fr.sirs.SIRS;
+import static fr.sirs.SIRS.createFXPaneForElement;
+import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.core.model.AvecGeometrie;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Positionable;
+import static fr.sirs.core.model.Role.ADMIN;
 import fr.sirs.map.FXMapTab;
-import java.lang.reflect.Constructor;
-import java.util.logging.Level;
-
 import fr.sirs.ui.Growl;
+import java.util.logging.Level;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -161,11 +160,8 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
                 specificThemePane.setElement(newValue);
             } else {
                 try {
-                    // Choose the pane adapted to the specific structure.
-                    final String className = "fr.sirs.theme.ui.FX" + newValue.getClass().getSimpleName() + "Pane";
-                    final Class controllerClass = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
-                    final Constructor cstr = controllerClass.getConstructor(newValue.getClass());
-                    SIRS.fxRunAndWait( ()-> {specificThemePane = (FXElementPane) cstr.newInstance(newValue);});
+                    final FXElementPane pane = createFXPaneForElement(newValue);
+                    SIRS.fxRunAndWait( ()-> specificThemePane = pane);
                     specificThemePane.disableFieldsProperty().bind(disableFieldsProperty());
                     if (specificThemePane instanceof FXUtilisateurPane) {
                         ((FXUtilisateurPane) specificThemePane).setAdministrable(ADMIN.equals(session.getRole()));

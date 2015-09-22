@@ -10,12 +10,15 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementContainerPane;
+import fr.sirs.theme.ui.FXElementPane;
 import fr.sirs.theme.ui.FXTronconDiguePane;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.SirsPreferences;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -387,12 +390,33 @@ public final class SIRS extends SirsCore {
     }
 
     /**
+     * 
+     * @param element
+     * @return
+     * @throws ClassNotFoundException
+     * @throws NoSuchMethodException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     */
+    public static FXElementPane createFXPaneForElement(final Element element)
+            throws ClassNotFoundException, NoSuchMethodException, InstantiationException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        // Choose the pane adapted to the specific structure.
+        final String className = "fr.sirs.theme.ui.FX" + element.getClass().getSimpleName() + "Pane";
+        final Class controllerClass = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+        final Constructor cstr = controllerClass.getConstructor(element.getClass());
+        return (FXElementPane) cstr.newInstance(element);
+    }
+
+    /**
      * initialize ComboBox items using input list. We also activate completion.
      * @param comboBox The combo box to set value on.
      * @param items The items we want into the ComboBox.
      * @param current the element to select by default.
      */
-    public static void initCombo(ComboBox comboBox, final ObservableList items, final Object current) {
+    public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current) {
         comboBox.setConverter(new SirsStringConverter());
         comboBox.setEditable(true);
         comboBox.setItems(items);
