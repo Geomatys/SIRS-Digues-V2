@@ -12,7 +12,8 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" styleClass="blue-dark" stylesheets="@../theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<!--    APPAREMMENT CE FXML N'EST PAS UTILISÉ !-->
+<!-- fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" styleClass="blue-dark" stylesheets="@../theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <top>
       <BorderPane styleClass="info-block" BorderPane.alignment="CENTER">
          <right>
@@ -84,4 +85,4 @@
          </rowConstraints>
       </GridPane>
    </center>
-</fx:root>
+</fx:root-->
