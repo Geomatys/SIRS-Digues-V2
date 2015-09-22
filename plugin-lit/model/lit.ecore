@@ -246,7 +246,9 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOccupationId" eType="#//RefOccupationLit"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="riveId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefRive"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefOccupationLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RefOccupationLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PenteLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//Objet">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="penteMoyenne" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
@@ -259,7 +261,9 @@
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="regimeId" eType="#//RefRegimeLit"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefRegimeLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RefRegimeLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DomanialiteLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//Objet">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="prive" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
@@ -268,7 +272,9 @@
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="regimeId" eType="#//RefZoneAtterrissementLit"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefZoneAtterrissementLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RefZoneAtterrissementLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DesordreLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//Desordre">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeDesordreLitId" eType="#//RefTypeDesordreLit"/>
