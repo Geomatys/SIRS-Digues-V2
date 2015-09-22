@@ -255,11 +255,6 @@ public class Launcher extends Application {
             updateMessage("Initialisation de la base EPSG");
             SirsCore.initEpsgDB();
 
-            final ClassLoader scl = ClassLoader.getSystemClassLoader();
-            if (scl instanceof PluginLoader) {
-                updateMessage("Chargement des plugins");
-                ((PluginLoader) scl).loadPlugins();
-            }
             updateMessage("Lancement de l'application");
             return true;
         }

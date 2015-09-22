@@ -7,6 +7,7 @@ import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Utilisateur;
+import fr.sirs.core.plugins.PluginLoader;
 import fr.sirs.util.SirsStringConverter;
 import java.io.IOException;
 import java.util.List;
@@ -245,6 +246,12 @@ public class Loader extends Application {
             try {
                 updateMessage("Recherche des plugins");
                 int inc = 0;
+
+                final ClassLoader scl = ClassLoader.getSystemClassLoader();
+                if (scl instanceof PluginLoader) {
+                    ((PluginLoader) scl).loadPlugins();
+                }
+
                 final Plugin[] plugins = Plugins.getPlugins();
                 final int total = 8 + plugins.length;
 
