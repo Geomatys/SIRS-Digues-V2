@@ -21,3 +21,4 @@ fr.sirs.core.model.DesordreLit
 fr.sirs.core.model.RefTypeDesordreLit
 fr.sirs.core.model.RefTypeOuvrageRegulationLit
 fr.sirs.core.model.OuvrageRegulationLit
+fr.sirs.core.model.RefTypeOuvrageLit
