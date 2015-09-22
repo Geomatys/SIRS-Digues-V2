@@ -3,13 +3,13 @@ package fr.sirs.importer.v2.document.profil;
 import fr.sirs.core.model.ParametreHydrauliqueProfilLong;
 import fr.sirs.core.model.ProfilLong;
 import static fr.sirs.importer.DbImporter.TableName.PROFIL_EN_LONG_EVT_HYDRAU;
-import fr.sirs.importer.v2.AbstractUpdater;
+import fr.sirs.importer.v2.SimpleUpdater;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
-public class ParametrePLongImporter extends AbstractUpdater<ParametreHydrauliqueProfilLong, ProfilLong> {
+public class ParametrePLongImporter extends SimpleUpdater<ParametreHydrauliqueProfilLong, ProfilLong> {
 
     private enum Columns {
         ID_PROFIL_EN_LONG,

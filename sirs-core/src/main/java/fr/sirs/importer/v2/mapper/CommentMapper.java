@@ -14,7 +14,7 @@ import java.util.Optional;
  */
 public class CommentMapper extends AbstractMapper<AvecCommentaire> {
 
-    private static final String DESORDRE_FIELD = "DESCRIPTION_DESORDRE";
+    private static final String STRUCTURE_FIELD = "DESCRIPTION_";
     private static final String DEFAULT_FIELD = "COMMENTAIRE";
 
     private final String fieldName;
@@ -36,19 +36,13 @@ public class CommentMapper extends AbstractMapper<AvecCommentaire> {
 
         @Override
         public Optional<Mapper<AvecCommentaire>> configureInput(Table inputType) {
-
-            if (inputType.getColumn(DESORDRE_FIELD) != null) {
-                return Optional.of(new CommentMapper(inputType, DESORDRE_FIELD));
-            } else if (inputType.getColumn(DEFAULT_FIELD) != null) {
-                return Optional.of(new CommentMapper(inputType, DEFAULT_FIELD));
-            } else {
-                for (final Column c : inputType.getColumns()) {
-                    if (c.getName().toUpperCase().startsWith(DEFAULT_FIELD)) {
-                        return Optional.of(new CommentMapper(inputType, c.getName()));
-                    }
+            for (final Column c : inputType.getColumns()) {
+                if (c.getName().toUpperCase().startsWith(STRUCTURE_FIELD)
+                        || c.getName().toUpperCase().startsWith(DEFAULT_FIELD)) {
+                    return Optional.of(new CommentMapper(inputType, c.getName()));
                 }
-                return Optional.empty();
             }
+            return Optional.empty();
         }
 
         @Override

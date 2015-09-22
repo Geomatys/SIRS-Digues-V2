@@ -28,7 +28,7 @@ public abstract class AbstractMapper<T> implements Mapper<T> {
     @Autowired
     protected ImportContext context;
 
-    public AbstractMapper(final Table table) {
+    protected AbstractMapper(final Table table) {
         ArgumentChecks.ensureNonNull("Input table to work with", table);
         InjectorCore.injectDependencies(this);
         this.table = table;

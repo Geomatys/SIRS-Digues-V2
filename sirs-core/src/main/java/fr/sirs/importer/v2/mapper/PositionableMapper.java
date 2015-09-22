@@ -63,7 +63,7 @@ public class PositionableMapper extends AbstractMapper<Positionable> {
 
         // LINEAR POSITIONING
         // START
-        // We're forced to get a double as idd, because of input database definition.
+        // We're forced to get a double as id, because of input database definition.
         final Double startId = row.getDouble(Columns.ID_BORNEREF_DEBUT.toString());
         if (startId != null) {
             final String bId = borneImporter.getImportedId(startId.intValue());
@@ -82,6 +82,8 @@ public class PositionableMapper extends AbstractMapper<Positionable> {
         if (startPr != null) {
             output.setPrDebut(startPr.floatValue());
         }
+
+        output.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
 
         // END
         final Double endId = row.getDouble(Columns.ID_BORNEREF_FIN.toString());
@@ -103,14 +105,14 @@ public class PositionableMapper extends AbstractMapper<Positionable> {
             output.setPrFin(endPr.floatValue());
         }
 
+        output.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
+
         // SR
         final Integer srid = row.getInt(Columns.ID_SYSTEME_REP.toString());
         if (srid != null) {
             output.setSystemeRepId(srImporter.getImportedId(srid));
         }
 
-        output.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
-        output.setBorne_fin_aval(row.getBoolean(Columns.AMONT_AVAL_FIN.toString()));
     }
 
     @Override

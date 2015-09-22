@@ -11,14 +11,14 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.v2.AbstractImporter;
 import fr.sirs.importer.v2.AbstractLinker;
-import fr.sirs.importer.v2.AbstractUpdater;
+import fr.sirs.importer.v2.SimpleUpdater;
 import java.io.IOException;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
-public class ParametrePTraversImporter extends AbstractUpdater<ParametreHydrauliqueProfilTravers, ProfilTravers> {
+public class ParametrePTraversImporter extends SimpleUpdater<ParametreHydrauliqueProfilTravers, ProfilTravers> {
 
     private AbstractImporter<LeveProfilTravers> leveImporter;
     private Table leveTable;
@@ -78,7 +78,7 @@ public class ParametrePTraversImporter extends AbstractUpdater<ParametreHydrauli
 
 
     @Override
-    protected ProfilTravers getDocument(Row input) {
+    protected ProfilTravers getDocument(final int rowId, Row input, ParametreHydrauliqueProfilTravers output) {
         Integer leveId = input.getInt(getDocumentIdField());
         if (leveId == null) {
             throw new IllegalStateException("Input has no valid ID in " + getDocumentIdField());

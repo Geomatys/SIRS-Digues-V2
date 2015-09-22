@@ -37,7 +37,7 @@ import fr.sirs.importer.link.MonteeDesEauxJournalImporter;
 import fr.sirs.importer.link.PrestationDocumentImporter;
 import fr.sirs.importer.link.PrestationEvenementHydrauImporter;
 import fr.sirs.importer.link.PrestationIntervenantImporter;
-import fr.sirs.importer.link.photo.OrientationImporter;
+import fr.sirs.importer.v2.references.TypeOrientationImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnPrImporter;
 import fr.sirs.importer.link.photo.PhotoLocaliseeEnXyImporter;
 import fr.sirs.importer.objet.ObjetManager;
@@ -107,7 +107,7 @@ public class DbImporter {
     private TypeCoteImporter typeCoteImporter;
     private TypeDonneesSousGroupeImporter typeDonneesSousGroupeImporter;
 
-    private OrientationImporter orientationImporter;
+    private TypeOrientationImporter orientationImporter;
     private DesordreEvenementHydrauImporter desordreEvenementHydrauImporter;
     private PrestationEvenementHydrauImporter prestationEvenementHydrauImporter;
     private DesordreJournalImporter desordreJournalImporter;
@@ -527,7 +527,7 @@ public class DbImporter {
                 systemeReperageImporter, borneDigueImporter, organismeImporter,
                 intervenantImporter, positionDocumentImporter.getDocumentManager().getMarcheImporter(), evenementHydrauliqueImporter, typeCoteImporter);
 
-        orientationImporter = new OrientationImporter(
+        orientationImporter = new TypeOrientationImporter(
                 accessDatabase, couchDbConnector);
 
         // Linkers

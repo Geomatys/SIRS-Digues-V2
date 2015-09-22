@@ -5,9 +5,9 @@ import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
-import fr.sirs.core.model.Identifiable;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.v2.mapper.Mapper;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * is not unique, and indexing it result in data loss.
  *
  * @author Samuel Andrés (Geomatys)
+ * @author Alexis Manin (Geomatys)
  * @param <T> Type of computed output.
  */
 public abstract class AbstractImporter<T extends Element> {
@@ -66,47 +67,6 @@ public abstract class AbstractImporter<T extends Element> {
         this.getUsedColumns().stream().forEach((column) -> {
             this.columnDataFlags.put(column, Boolean.FALSE);
         });
-
-        /*
-         * DEBUG
-         */
-//        SirsCore.LOGGER.log(Level.FINE, "=================================================");
-//        SirsCore.LOGGER.log(Level.FINE, "======== IMPORTER CHECK for table : " + getTableName() + "====");
-//        try {
-//            // Detect the empty fields.
-//            final List<String> emptyFields = this.getEmptyUsedFields();
-//            if (!emptyFields.isEmpty()) {
-//                SirsCore.LOGGER.log(Level.FINE, "Empty used fields for table " + getTableName() + " : ");
-//                emptyFields.stream().forEach((field) -> {
-//                    SirsCore.LOGGER.log(Level.FINE, field);
-//                });
-//            }
-//
-//            // Detect the coluns used by the importer that do not exist in the table.
-//            final List<String> erroneousFields = this.getErroneousUsedFields();
-//            if (!erroneousFields.isEmpty()) {
-//                SirsCore.LOGGER.log(Level.FINE, "Erroneous fields for table " + getTableName() + " : ");
-//                erroneousFields.stream().forEach((field) -> {
-//                    SirsCore.LOGGER.log(Level.FINE, field);
-//                });
-//            }
-//
-//            // Detect the coluns forgotten by the importer but containing data;
-//            final List<String> forgottenFields = this.getForgottenFields();
-//            if (!forgottenFields.isEmpty()) {
-//                SirsCore.LOGGER.log(Level.FINE, "Forgotten fields for table " + getTableName() + " : ");
-//                forgottenFields.stream().forEach((field) -> {
-//                    SirsCore.LOGGER.log(Level.FINE, field);
-//                });
-//            }
-//
-//        } catch (IOException ex) {
-//            Logger.getLogger(GenericImporter.class.getName()).log(Level.FINE, null, ex);
-//        }
-//        SirsCore.LOGGER.log(Level.FINE, "*************************************************\n");
-        /*
-         * END DEBUG
-         */
     }
 
     @PostConstruct
@@ -168,8 +128,8 @@ public abstract class AbstractImporter<T extends Element> {
 
         final Table table = context.inputDb.getTable(getTableName());
 
-            mappers.clear();
-            mappers.addAll(context.getCompatibleMappers(table, getElementClass()));
+        mappers.clear();
+        mappers.addAll(context.getCompatibleMappers(table, getElementClass()));
 
         // In case we want to boost import with multi-threading.
         importedRows = new ConcurrentHashMap<>();
@@ -179,12 +139,11 @@ public abstract class AbstractImporter<T extends Element> {
          */
         try {
             final Iterator<Row> it = table.iterator();
-            final AtomicInteger bulkCount = new AtomicInteger();
             while (it.hasNext()) {
                 final ConcurrentHashMap<Integer, T> imports = new ConcurrentHashMap<>();
+                final HashSet<Element> dataToPost = new HashSet<>();
 
-                bulkCount.set(context.bulkLimit);
-                while (it.hasNext() && bulkCount.get() > 0) {
+                while (it.hasNext() && imports.size() < context.bulkLimit) {
                     final Row row = it.next();
                     final Integer rowId = row.getInt(getRowIdFieldName());
                     if (rowId == null) {
@@ -198,21 +157,31 @@ public abstract class AbstractImporter<T extends Element> {
                     }
                     output.setDesignation(rowId.toString());
                     output = importRow(row, output);
+
+                    final Element toPost = prepareToPost(rowId, row, output);
+                    if (toPost == null)
+                        continue;
+
+                    dataToPost.add(toPost);
                     imports.put(rowId, output);
-                    bulkCount.decrementAndGet();
                 }
 
-                Map<String, Object> bulkResult = context.executeBulk(imports.values());
+
+                afterPost(
+                        context.executeBulk(dataToPost),
+                        imports
+                );
 
                 /*
                  * We keep a binding between all original rows and output objects using
                  * their Ids. We check that bulk has succeeded for an object before creating
                  * the binding.
+                 *
+                 * IMPORTANT : NOT PUT IN AFTERPOST METHOD, TO ENSURE IMPLEMENTATIONS WILL DO IT.
                  */
                 for (final Map.Entry<Integer, T> entry : imports.entrySet()) {
-                    final Identifiable i = entry.getValue();
-                    final String id = i.getId();
-                    if (id != null && bulkResult.containsKey(id)) {
+                    final String id = entry.getValue().getId();
+                    if (id != null) {
                         importedRows.put(entry.getKey(), id);
                     }
                 }
@@ -233,8 +202,10 @@ public abstract class AbstractImporter<T extends Element> {
      * find it.
      */
     public final String getImportedId(final Integer rowId) throws IOException, AccessDbImporterException {
-        if (importedRows == null) {
-            compute();
+        synchronized (this) {
+            if (importedRows == null) {
+                compute();
+            }
         }
         return importedRows.get(rowId);
     }
@@ -267,6 +238,30 @@ public abstract class AbstractImporter<T extends Element> {
 
         return output;
     }
+
+    /**
+     * Once current row has been imported and resulting object has been modified,
+     * this method is called to get the real object to send into CouchDB (Ex :
+     * imported object was a sub-structure of the document to update).
+     * @param rowId Id of the imported row.
+     * @param row Row which has been imported
+     * @param output The object which has been filled with current row.
+     * @return Pojo which must be sent as a complete document into CouchDB.
+     */
+    protected Element prepareToPost(int rowId, Row row, T output) {
+        return output;
+    }
+
+    /**
+     * Allow an operation after a bulk update has been performed.
+     * @param posted The items (keys are their ids) successfully sent into CouchDb.
+     * @param imports The items (keys are originating row ids) which have been imported from ms-access for this bulk.
+     */
+    protected void afterPost(final Map<String, Element> posted, Map<Integer, T> imports) {}
+
+    /*
+     * DEBUG UTILITIES
+     */
 
     /**
      *
@@ -375,5 +370,42 @@ public abstract class AbstractImporter<T extends Element> {
         }
 
         return forgottenFields;
+    }
+
+    private void checkTable() {
+        SirsCore.LOGGER.log(Level.FINE, "=================================================");
+        SirsCore.LOGGER.log(Level.FINE, "======== IMPORTER CHECK for table : " + getTableName() + "====");
+        try {
+            // Detect the empty fields.
+            final List<String> emptyFields = this.getEmptyUsedFields();
+            if (!emptyFields.isEmpty()) {
+                SirsCore.LOGGER.log(Level.FINE, "Empty used fields for table " + getTableName() + " : ");
+                emptyFields.stream().forEach((field) -> {
+                    SirsCore.LOGGER.log(Level.FINE, field);
+                });
+            }
+
+            // Detect the coluns used by the importer that do not exist in the table.
+            final List<String> erroneousFields = this.getErroneousUsedFields();
+            if (!erroneousFields.isEmpty()) {
+                SirsCore.LOGGER.log(Level.FINE, "Erroneous fields for table " + getTableName() + " : ");
+                erroneousFields.stream().forEach((field) -> {
+                    SirsCore.LOGGER.log(Level.FINE, field);
+                });
+            }
+
+            // Detect the coluns forgotten by the importer but containing data;
+            final List<String> forgottenFields = this.getForgottenFields();
+            if (!forgottenFields.isEmpty()) {
+                SirsCore.LOGGER.log(Level.FINE, "Forgotten fields for table " + getTableName() + " : ");
+                forgottenFields.stream().forEach((field) -> {
+                    SirsCore.LOGGER.log(Level.FINE, field);
+                });
+            }
+
+        } catch (IOException ex) {
+            SirsCore.LOGGER.log(Level.FINE, "An error occurred while analyzing table "+getTableName(), ex);
+        }
+        SirsCore.LOGGER.log(Level.FINE, "*************************************************\n");
     }
 }

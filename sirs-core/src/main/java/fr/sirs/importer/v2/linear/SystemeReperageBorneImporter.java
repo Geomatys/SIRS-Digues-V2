@@ -7,7 +7,7 @@ import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.v2.AbstractImporter;
 import static fr.sirs.importer.DbImporter.TableName.BORNE_PAR_SYSTEME_REP;
-import fr.sirs.importer.v2.AbstractUpdater;
+import fr.sirs.importer.v2.SimpleUpdater;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class SystemeReperageBorneImporter extends AbstractUpdater<SystemeReperageBorne, SystemeReperage> {
+public class SystemeReperageBorneImporter extends SimpleUpdater<SystemeReperageBorne, SystemeReperage> {
 
     private enum Columns {
         ID_BORNE,

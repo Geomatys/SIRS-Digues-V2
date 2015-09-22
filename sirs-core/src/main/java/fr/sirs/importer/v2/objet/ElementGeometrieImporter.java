@@ -5,7 +5,7 @@ import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.LargeurFrancBord;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.core.model.ObjetPhotographiable;
-import fr.sirs.importer.objet.GenericObjetImporter;
+import fr.sirs.importer.v2.AbstractImporter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ElementGeometrieImporter extends GenericObjetImporter<ObjetPhotographiable> {
+public class ElementGeometrieImporter extends AbstractImporter<ObjetPhotographiable> {
 
     @Override
     public String getRowIdFieldName() {

@@ -7,7 +7,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.v2.AbstractImporter;
-import fr.sirs.importer.v2.AbstractUpdater;
+import fr.sirs.importer.v2.SimpleUpdater;
 import fr.sirs.importer.v2.mapper.Mapper;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import java.util.Set;
  *
  * @author Samuel Andrés (Geomatys)
  */
-class TronconGestionDigueGestionnaireImporter extends AbstractUpdater<GestionTroncon, TronconDigue> {
+class TronconGestionDigueGestionnaireImporter extends SimpleUpdater<GestionTroncon, TronconDigue> {
 
     private AbstractImporter<Organisme> organismeImporter;
 

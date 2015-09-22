@@ -8,13 +8,13 @@ package fr.sirs.importer.v2.document.profil;
 import fr.sirs.core.model.XYZProfilLong;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.v2.AbstractUpdater;
+import fr.sirs.importer.v2.SimpleUpdater;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
-public class XYZProfilLongImporter extends AbstractUpdater<XYZProfilLong, ProfilLong> {
+public class XYZProfilLongImporter extends SimpleUpdater<XYZProfilLong, ProfilLong> {
 
     private enum Columns {
         ID_PROFIL_EN_LONG,

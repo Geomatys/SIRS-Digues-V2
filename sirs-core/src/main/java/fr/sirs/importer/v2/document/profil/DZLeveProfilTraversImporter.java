@@ -8,13 +8,13 @@ package fr.sirs.importer.v2.document.profil;
 import fr.sirs.core.model.DZLeveProfilTravers;
 import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.v2.AbstractUpdater;
+import fr.sirs.importer.v2.SimpleUpdater;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
-public class DZLeveProfilTraversImporter extends AbstractUpdater<DZLeveProfilTravers, LeveProfilTravers> {
+public class DZLeveProfilTraversImporter extends SimpleUpdater<DZLeveProfilTravers, LeveProfilTravers> {
 
     private enum Columns {
         ID_PROFIL_EN_TRAVERS_LEVE,

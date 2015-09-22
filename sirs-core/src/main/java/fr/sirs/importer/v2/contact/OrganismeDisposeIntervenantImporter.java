@@ -6,7 +6,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Organisme;
-import fr.sirs.importer.v2.AbstractUpdater;
+import fr.sirs.importer.v2.SimpleUpdater;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.List;
  * @author Alexis Manin (Geometys)
  * @author Samuel Andrés (Geomatys)
  */
-public class OrganismeDisposeIntervenantImporter extends AbstractUpdater<ContactOrganisme, Organisme> {
+public class OrganismeDisposeIntervenantImporter extends SimpleUpdater<ContactOrganisme, Organisme> {
 
     private static final String TABLE_NAME = "ORGANISME_DISPOSE_INTERVENANT";
 

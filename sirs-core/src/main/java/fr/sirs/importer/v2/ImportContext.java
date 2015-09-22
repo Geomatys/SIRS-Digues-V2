@@ -5,10 +5,12 @@ import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import com.vividsolutions.jts.geom.Coordinate;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.importer.v2.mapper.Mapper;
 import fr.sirs.importer.v2.mapper.MapperSpi;
+import java.beans.PropertyDescriptor;
 import java.net.MalformedURLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -214,7 +217,7 @@ public class ImportContext {
      * @param toUpdate collection of elements to insert or update.
      * @return successfully inserted / updated documents and their ids.
      */
-    public Map<String, Object> executeBulk(Collection toUpdate) {
+    public Map<String, Element> executeBulk(Collection<Element> toUpdate) {
         ArgumentChecks.ensureNonNull("Objects to update.", toUpdate);
         if (toUpdate.isEmpty())
             return new HashMap<>();
@@ -226,7 +229,7 @@ public class ImportContext {
 
         // Try to perform bulk, then analyze result to find errors.
         List<DocumentOperationResult> bulkResult = outputDb.executeBulk(new HashSet(toUpdate));
-        HashMap<String, Object> ids = buildIdMap(toUpdate);
+        HashMap<String, Element> ids = buildIdMap(toUpdate);
         if (bulkResult != null && !bulkResult.isEmpty()) {
             for (final DocumentOperationResult opResult : bulkResult) {
                 final ErrorReport report = new ErrorReport();
@@ -237,7 +240,7 @@ public class ImportContext {
                     report.target = ids.get(id);
                     ids.remove(id); // Remove, because we must not send ids of failed updates.
                 }
-                ImportContext.this.reportError(report);
+                reportError(report);
             }
         }
 
@@ -314,13 +317,13 @@ public class ImportContext {
      * @return A map containing all identifiable objects of input collection.
      * Never null, but can be empty.
      */
-    public static HashMap<String, Object> buildIdMap(final Collection toAnalyze) {
-        final HashMap<String, Object> result = new HashMap<>();
-        for (final Object o : toAnalyze) {
+    public static <T> HashMap<String, T> buildIdMap(final Collection<T> toAnalyze) {
+        final HashMap<String, T> result = new HashMap<>();
+        for (final T o : toAnalyze) {
             if (o instanceof Identifiable) {
                 final Identifiable i = (Identifiable) o;
                 if (i.getId() != null) {
-                    result.put(i.getId(), i);
+                    result.put(i.getId(), o);
                 }
             }
         }
@@ -367,5 +370,20 @@ public class ImportContext {
             }
         }
         return result;
+    }
+
+    /**
+     * Return an operator able to read data from a specific column of a row to put it in a specific property of a specific class.
+     *
+     * TODO : IMPLEMENT MECHANISM (including a registry).
+     *
+     * @param <T> Type of object to affect.
+     * @param outputClass Class of the object which will be modified by the returned consumer.
+     * @param outputProperty The property to set in output object.
+     * @param columnName Name of the column to read from input row.
+     * @return Adequat operator, or an empty optional if we cannot find any.
+     */
+    public <T> Optional<BiConsumer<Row, T>> getConsumer(final Class<T> outputClass, final PropertyDescriptor outputProperty, final String columnName) {
+        return Optional.empty();
     }
 }

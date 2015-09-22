@@ -7,7 +7,7 @@ import fr.sirs.core.model.RefOrientationVent;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.v2.AbstractImporter;
-import fr.sirs.importer.v2.AbstractUpdater;
+import fr.sirs.importer.v2.SimpleUpdater;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class MeteoImporter extends AbstractUpdater<Meteo, EvenementHydraulique> {
+public class MeteoImporter extends SimpleUpdater<Meteo, EvenementHydraulique> {
 
     private AbstractImporter<RefOrientationVent> typeOrientationVentImporter;
 

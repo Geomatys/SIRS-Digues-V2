@@ -1,5 +1,11 @@
 package fr.sirs.importer.objet;
 
+import fr.sirs.importer.v2.references.TypeSourceImporter;
+import fr.sirs.importer.v2.references.TypePositionImporter;
+import fr.sirs.importer.v2.references.TypeNatureImporter;
+import fr.sirs.importer.v2.references.TypeMateriauImporter;
+import fr.sirs.importer.v2.references.TypeFonctionImporter;
+import fr.sirs.importer.v2.references.TypeRefHeauImporter;
 import fr.sirs.importer.v2.references.TypeCoteImporter;
 import com.healthmarketscience.jackcess.Database;
 import fr.sirs.core.model.Objet;
@@ -40,7 +46,7 @@ import org.ektorp.CouchDbConnector;
  */
 public class ObjetManager {
     
-    private final SourceInfoImporter sourceInfoImporter;
+    private final TypeSourceImporter sourceInfoImporter;
     private final TypePositionImporter typePositionImporter;
     private final TypeMateriauImporter typeMateriauImporter;
     private final TypeNatureImporter typeNatureImporter;
@@ -78,7 +84,7 @@ public class ObjetManager {
             final EvenementHydrauliqueImporter evenementHydrauliqueImporter,
             final TypeCoteImporter typeCoteImporter){
         
-        sourceInfoImporter = new SourceInfoImporter(accessDatabase, couchDbConnector);
+        sourceInfoImporter = new TypeSourceImporter(accessDatabase, couchDbConnector);
         typePositionImporter = new TypePositionImporter(accessDatabase, couchDbConnector);
         typeMateriauImporter = new TypeMateriauImporter(accessDatabase, couchDbConnector);
         typeNatureImporter = new TypeNatureImporter(accessDatabase, couchDbConnector);
