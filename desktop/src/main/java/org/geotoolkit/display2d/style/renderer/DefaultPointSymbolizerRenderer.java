@@ -18,6 +18,7 @@ package org.geotoolkit.display2d.style.renderer;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
 import java.awt.Shape;
@@ -42,8 +43,6 @@ import org.geotoolkit.geometry.jts.JTS;
 import org.opengis.referencing.operation.TransformException;
 
 /**
- * TODO : REMOVE WITH NEXT GEOTK UPGRADE GEOTK-4.0.0-MC0068+
- *
  * @author Johann Sorel (Geomatys)
  * @module pending
  */
@@ -406,12 +405,14 @@ public class DefaultPointSymbolizerRenderer extends AbstractSymbolizerRenderer<C
                         }
                     }else{
                         if(maskArea==null) maskArea = JTS.shapeToGeometry(mask,GO2Utilities.JTS_FACTORY);
+                        if(maskArea instanceof LinearRing) maskArea = GO2Utilities.JTS_FACTORY.createPolygon((LinearRing)maskArea);
                         final Rectangle2D rect = new Rectangle2D.Double(x, y, img.getWidth(), img.getHeight());
                         final AffineTransform trs = new AffineTransform();
                         trs.translate(-rect.getWidth()/2.0, -rect.getHeight()/2.0);
                         trs.rotate(imgRot);
                         trs.translate(+rect.getWidth()/2.0, +rect.getHeight()/2.0);
-                        final Geometry rotatedImg = JTS.shapeToGeometry(rect, GO2Utilities.JTS_FACTORY);
+                        Geometry rotatedImg = JTS.shapeToGeometry(rect, GO2Utilities.JTS_FACTORY);
+                        if(rotatedImg instanceof LinearRing) rotatedImg = GO2Utilities.JTS_FACTORY.createPolygon((LinearRing)rotatedImg);
                         if(VisitFilter.INTERSECTS.equals(filter)){
                             if(maskArea.intersects(rotatedImg)){
                                 return true;
