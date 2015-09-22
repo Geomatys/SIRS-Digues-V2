@@ -10,9 +10,13 @@ import fr.sirs.plugin.vegetation.map.CreateParcelleTool;
 import fr.sirs.plugin.vegetation.map.CreatePeuplementTool;
 import fr.sirs.plugin.vegetation.map.EditVegetationTool;
 import java.util.Iterator;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -128,7 +132,8 @@ public class VegetationToolBar extends ToolBar {
             toolbox.getTools().add(ite.next());
         }
 
-        final BorderPane pane = new BorderPane(toolbox);
+        final FXBordeRPane pane = new FXBordeRPane(toolbox);
+
         pane.setPadding(new Insets(10, 10, 10, 10));
 
         final Scene scene = new Scene(pane);
@@ -136,12 +141,45 @@ public class VegetationToolBar extends ToolBar {
         dialog.setOnCloseRequest((WindowEvent evt) -> dialog = null);
         dialog.setScene(scene);
         dialog.setResizable(true);
-        dialog.setWidth(350);
-        dialog.setHeight(450);
+
+        //resize pane if too small
+        pane.boundsInLocalProperty().addListener(new ChangeListener<Bounds>() {
+            @Override
+            public void changed(ObservableValue<? extends Bounds> observable, Bounds oldValue, Bounds newValue) {
+                final double minWidth = pane.computeMinWidth(dialog.getHeight()) +30;
+                final double minHeight = pane.computeMinHeight(dialog.getWidth()) +30;
+                if(dialog.getHeight()<minHeight){
+                    dialog.setHeight(minHeight);
+                }
+                if(dialog.getWidth()<minWidth){
+                    dialog.setWidth(minWidth);
+                }
+            }
+        });
+
         dialog.show();
 
     }
 
+    private static class FXBordeRPane extends BorderPane{
+
+        public FXBordeRPane() {
+        }
+
+        public FXBordeRPane(Node center) {
+            super(center);
+        }
+        
+        @Override
+        public  double computeMinWidth(double height) {
+            return super.computeMinWidth(height);
+        }
+
+        @Override
+        public double computeMinHeight(double width) {
+            return super.computeMinHeight(width);
+        }
+    }
 
 
 }

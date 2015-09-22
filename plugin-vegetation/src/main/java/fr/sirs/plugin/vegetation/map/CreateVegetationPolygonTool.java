@@ -13,6 +13,7 @@ import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
+import fr.sirs.theme.ui.FXPositionableExplicitMode;
 import fr.sirs.util.SirsStringConverter;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -236,6 +237,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
                     //on sauvegarde
                     vegetation.setExplicitGeometry(geometry);
                     vegetation.setGeometry(geometry);
+                    vegetation.setGeometryMode(FXPositionableExplicitMode.MODE);
                     vegetation.setValid(true);
                     vegetation.setForeignParentId(parcelle.getDocumentId());                    
                     final AbstractSIRSRepository vegetationRepo = session.getRepositoryForClass(vegetationClass);

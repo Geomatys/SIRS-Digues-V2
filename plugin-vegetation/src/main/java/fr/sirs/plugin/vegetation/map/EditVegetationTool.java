@@ -14,13 +14,18 @@ import fr.sirs.theme.ui.FXPositionableExplicitMode;
 import fr.sirs.util.ResourceInternationalString;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Side;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -34,7 +39,6 @@ import org.geotoolkit.display2d.canvas.RenderingContext2D;
 import org.geotoolkit.display2d.primitive.ProjectedCoverage;
 import org.geotoolkit.display2d.primitive.ProjectedFeature;
 import org.geotoolkit.display2d.primitive.SearchAreaJ2D;
-import org.geotoolkit.feature.Feature;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
@@ -44,7 +48,6 @@ import org.geotoolkit.gui.javafx.render2d.edition.AbstractEditionToolSpi;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
-import org.geotoolkit.map.FeatureMapLayer;
 
 /**
  * Outil d'édition de vegetation existante.
@@ -126,7 +129,10 @@ public class EditVegetationTool extends AbstractEditionTool{
 
     private void reset(){
         pressed = null;
-        selection.geometry.unbind();        
+        selection.geometry.unbind();
+        if(form.positionableProperty().get()!=null){
+            selection.geometry.unbindBidirectional(form.positionableProperty().get().geometryProperty());
+        }
         selection.reset();
         modified = false;
         decoration.getGeometries().clear();
@@ -178,8 +184,11 @@ public class EditVegetationTool extends AbstractEditionTool{
 
     private class MouseListen extends FXPanMouseListen {
 
+        private final ContextMenu menu = new ContextMenu();
+
         public MouseListen() {
             super(EditVegetationTool.this);
+            menu.setAutoHide(true);
         }
 
         @Override
@@ -190,6 +199,7 @@ public class EditVegetationTool extends AbstractEditionTool{
 
         @Override
         public void mouseClicked(MouseEvent e) {
+            menu.hide();
 
             final MouseButton button = e.getButton();
 
@@ -237,6 +247,20 @@ public class EditVegetationTool extends AbstractEditionTool{
                     helper.grabGeometryNode(e.getX(), e.getY(), selection);
                     refreshDecoration();
                 }
+            }else if(button == MouseButton.SECONDARY){
+
+                if(selection.geometry.get()==null) return;
+                if(selection.numSubGeom < 0) return;
+                if(selection.selectedNode[0] < 0) return;
+
+                final MenuItem item = new MenuItem("Supprimer le noeud sélectionné");
+                item.setOnAction((ActionEvent event) -> {
+                    selection.deleteSelectedNode();
+                    refreshDecoration();
+                    modified = true;
+                 });
+                menu.getItems().setAll(item);
+                menu.show(getMap(), e.getScreenX(), e.getScreenY());
             }
         }
 

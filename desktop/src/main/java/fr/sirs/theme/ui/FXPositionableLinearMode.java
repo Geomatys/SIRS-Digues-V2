@@ -9,7 +9,7 @@ import fr.sirs.core.model.Positionable;
  */
 public class FXPositionableLinearMode extends FXPositionableAbstractLinearMode {
 
-    private static final String MODE = "LINEAR";
+    public static final String MODE = "LINEAR";
 
     public FXPositionableLinearMode() {
         super();

@@ -15,6 +15,7 @@ import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.plugin.vegetation.PluginVegetation.initPlanifs;
 import fr.sirs.plugin.vegetation.VegetationSession;
+import fr.sirs.theme.ui.FXPositionableLinearMode;
 import fr.sirs.util.ResourceInternationalString;
 import fr.sirs.util.SirsStringConverter;
 import java.awt.geom.Rectangle2D;
@@ -115,6 +116,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
                 parcelle.setValid(true);
                 parcelle.setPlanId(plan.getId());
                 parcelle.setModeAuto(true);
+                parcelle.setGeometryMode(FXPositionableLinearMode.MODE);
                 
                 //calcule de la geometrie
                 parcelle.setGeometry(LinearReferencingUtilities.buildGeometry(

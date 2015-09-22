@@ -13,6 +13,7 @@ import fr.sirs.core.model.GeometryType;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
+import fr.sirs.theme.ui.FXPositionableExplicitMode;
 import fr.sirs.util.ResourceInternationalString;
 import fr.sirs.util.SirsStringConverter;
 import java.awt.geom.Rectangle2D;
@@ -224,6 +225,7 @@ public class CreateArbreTool extends AbstractEditionTool{
                 arbre.setExplicitGeometry(pt);
                 arbre.setGeometry(pt);
                 arbre.setGeometryType(GeometryType.PONCTUAL);
+                arbre.setGeometryMode(FXPositionableExplicitMode.MODE);
                 arbre.setValid(true);
                 arbre.setForeignParentId(parcelle.getDocumentId());
 

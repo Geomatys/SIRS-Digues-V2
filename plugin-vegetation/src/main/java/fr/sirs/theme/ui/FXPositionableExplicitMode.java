@@ -130,7 +130,8 @@ public class FXPositionableExplicitMode extends BorderPane implements FXPosition
             uiText.getStyleClass().remove("unvalid");
             uiText.getStyleClass().add("valid");
 
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
+            //JTS raise many other kind of exceptions, not on ParseException
             uiText.getStyleClass().remove("valid");
             uiText.getStyleClass().add("unvalid");
         }
