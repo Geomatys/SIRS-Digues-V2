@@ -184,16 +184,12 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PlageDepotLit" eSuperTypes="#//ObjetLit">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteurMurette" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefCote"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="natureHautId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="natureBasId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauHautId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauBasId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvertureBatardableIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvertureBatardable"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteFond" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
+        defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteAlerte" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
+        defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrages" upperBound="-1"
+        eType="#//OuvrageRegulationLit" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Lit">
     <eAnnotations source="couchDBDocument"/>
@@ -280,6 +276,26 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeDesordreLitId" eType="#//RefTypeDesordreLit"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeDesordreLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
+    <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OuvrageRegulationLit">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeId" eType="#//RefTypeOuvrageRegulationLit"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="surface" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
+        defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
+        defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
+        defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="volumeMax" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
+        defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="pente" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
+        defaultValueLiteral="0.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeOuvrageRegulationLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
 </ecore:EPackage>

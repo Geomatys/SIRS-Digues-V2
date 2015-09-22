@@ -19,3 +19,5 @@ fr.sirs.core.model.ZoneAtterrissementLit
 fr.sirs.core.model.RefZoneAtterrissementLit
 fr.sirs.core.model.DesordreLit
 fr.sirs.core.model.RefTypeDesordreLit
+fr.sirs.core.model.RefTypeOuvrageRegulationLit
+fr.sirs.core.model.OuvrageRegulationLit

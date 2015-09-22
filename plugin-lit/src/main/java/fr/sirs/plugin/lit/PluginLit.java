@@ -7,6 +7,7 @@ import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TronconLit;
+import fr.sirs.core.model.sql.LitSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.lit.map.LitToolBar;
@@ -73,8 +74,7 @@ public class PluginLit extends Plugin {
 
     @Override
     public SQLHelper getSQLHelper() {
-        // TODO: renvoyer le SQLHelper du plugin pour l'export RDBMS !
-        return null;
+        return LitSqlHelper.getInstance();
     }
     
     @Override
