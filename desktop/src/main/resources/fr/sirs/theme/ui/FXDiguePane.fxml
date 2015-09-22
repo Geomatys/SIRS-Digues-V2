@@ -13,47 +13,6 @@
 <?import javafx.scene.text.*?>
 
 <fx:root fx:id="uiBorderPane" prefHeight="756.0" prefWidth="1024.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-    <top>
-        <BorderPane styleClass="info-block" VBox.vgrow="NEVER">
-            <center>
-                <GridPane hgap="8.0" vgap="15.0" BorderPane.alignment="CENTER">
-                    <children>
-                        <Label minWidth="-Infinity" styleClass="label-header" text="Informations sur la digue" textFill="WHITE" GridPane.columnSpan="2">
-                            <font>
-                                <Font name="System Bold" size="14.0" />
-                            </font>
-                        </Label>
-                        <Label minWidth="-Infinity" text="Mise à jour :" textFill="WHITE" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                        <TextField fx:id="libelle" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label text="Nom :" textFill="WHITE" GridPane.rowIndex="1" />
-                        <DatePicker fx:id="date_maj" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                        <Label text="Désignation :" textFill="WHITE" GridPane.rowIndex="2" />
-                        <TextField fx:id="uiDesignation" GridPane.columnIndex="1" GridPane.rowIndex="2" /> 
-                    </children>
-                    <columnConstraints>
-                        <ColumnConstraints hgrow="NEVER" />
-                        <ColumnConstraints hgrow="NEVER" />
-                        <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
-                        <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
-                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints halignment="LEFT" hgrow="NEVER" />
-                        <ColumnConstraints />
-                    </columnConstraints>
-                    <padding>
-                        <Insets bottom="15.0" left="15.0" right="15.0" top="10.0" />
-                    </padding>
-                    <rowConstraints>
-                        <RowConstraints vgrow="NEVER" />
-                        <RowConstraints vgrow="NEVER" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-                    </rowConstraints>
-                </GridPane>
-            </center>
-            <right>
-                <FXEditMode fx:id="uiMode" BorderPane.alignment="CENTER" />
-            </right>
-        </BorderPane>
-    </top>
     <center>
         <VBox fx:id="centerContent" BorderPane.alignment="CENTER">
             <children>
@@ -66,15 +25,18 @@
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <children>
-                        <Label minWidth="-Infinity" text="Commentaire" GridPane.valignment="TOP">
+                        <Label text="Nom :" />
+                        <TextField fx:id="libelle" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" />
+                        
+                        <Label minWidth="-Infinity" text="Commentaire" GridPane.valignment="TOP" GridPane.rowIndex="1" >
                             <padding>
                                 <Insets top="10.0" />
                             </padding>
                         </Label>
-                        <HTMLEditor fx:id="uiComment" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="200.0" GridPane.columnIndex="1" />
+                        <HTMLEditor fx:id="uiComment" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                     
-                        <Label text="%systemeEndiguementId" GridPane.rowIndex="1" />
-                        <ComboBox fx:id="uiSystemeEndiguementId" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label text="%systemeEndiguementId" GridPane.rowIndex="2" />
+                        <ComboBox fx:id="uiSystemeEndiguementId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                     
                     </children>
                     <padding>

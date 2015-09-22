@@ -7,14 +7,12 @@ import fr.sirs.core.component.AbstractPositionDocumentRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.Contact;
-import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.other.FXContactPane;
 import fr.sirs.other.FXOrganismePane;
 import fr.sirs.theme.ui.AbstractFXElementPane;
-import fr.sirs.theme.ui.FXDiguePane;
 import fr.sirs.theme.ui.FXElementContainerPane;
 import fr.sirs.theme.ui.FXTronconDiguePane;
 import fr.sirs.util.SirsStringConverter;
@@ -389,9 +387,8 @@ public final class SIRS extends SirsCore {
             content = new FXOrganismePane((Organisme) pojo);
         } else if (pojo instanceof TronconDigue) {
             content = new FXTronconDiguePane((TronconDigue) pojo);
-        } else if (pojo instanceof Digue) {
-            content = new FXDiguePane((Digue) pojo);
-        } else {
+        }
+        else {
             content = new FXElementContainerPane((Element) pojo);
         }
         return content;
