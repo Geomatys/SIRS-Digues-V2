@@ -43,6 +43,8 @@ import org.geotoolkit.geometry.jts.JTS;
 import org.opengis.referencing.operation.TransformException;
 
 /**
+ * TODO : REMOVE WITH NEXT GEOTK UPGRADE GEOTK-4.0.0-MC0068+
+ * 
  * @author Johann Sorel (Geomatys)
  * @module pending
  */
