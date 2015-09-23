@@ -362,7 +362,7 @@ public class FXMapPane extends BorderPane {
      * @return The Map layer in which are contained elements of input type, or null.
      */
     private MapLayer getMapLayerForElement(Element element) {
-        if (element instanceof TronconDigue) {
+        if (element.getClass().equals(TronconDigue.class)) {
             return getMapLayerForElement(CorePlugin.TRONCON_LAYER_NAME);
         } else if (element instanceof BorneDigue) {
             return getMapLayerForElement(CorePlugin.BORNE_LAYER_NAME);
@@ -391,7 +391,7 @@ public class FXMapPane extends BorderPane {
             }
         } else {
             final LabelMapper mapper = LabelMapper.get(element.getClass());
-            return getMapLayerForElement(mapper.mapClassName());
+            return getMapLayerForElement(mapper.mapClassNamePlural());
         }
     }
     

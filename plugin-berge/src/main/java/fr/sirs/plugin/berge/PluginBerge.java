@@ -7,6 +7,7 @@ import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.Berge;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.sql.BergeSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.map.FXMapPane;
@@ -83,6 +84,7 @@ public class PluginBerge extends Plugin {
         return Collections.singletonList(new BergeToolBar(mapPane.getUiMap()));
     }
 
+    //doit avoir la meme valeur que dans le fichier Berge.properties classPlural
     public static String LAYER_NAME = "Berges";
     
     @Override

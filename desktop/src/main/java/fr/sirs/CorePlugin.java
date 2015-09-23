@@ -256,7 +256,7 @@ public class CorePlugin extends Plugin {
             final Map<String,String> nameMap = new HashMap<>();
             for(Class elementClass : suppliers.keySet()) {
                 final LabelMapper mapper = LabelMapper.get(elementClass);
-                nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
+                nameMap.put(elementClass.getSimpleName(), mapper.mapClassNamePlural());
             }
             final Map<Class<? extends AbstractPositionDocument>, List<Class>> mapDesTypesDeDocs = new HashMap<>();
             final List<Class> positionDocumentList = new ArrayList<>();
