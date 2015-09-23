@@ -1,11 +1,9 @@
 package fr.sirs.theme.ui;
 
-import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
-import fr.sirs.Session;
 import fr.sirs.SIRS;
+import fr.sirs.Session;
 import fr.sirs.core.component.Previews;
-import fr.sirs.map.FXMapTab;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
@@ -19,9 +17,6 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.digue.FXSystemeReperagePane;
 import java.util.List;
-import java.util.logging.Level;
-
-import fr.sirs.ui.Growl;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -33,7 +28,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -44,7 +38,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
-import org.geotoolkit.internal.GeotkFX;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -55,12 +48,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
 
     @Autowired private Session session;
     private final Previews previewRepository;
-
-    // En-tete
-    @FXML private FXEditMode uiMode;
-    //@FXML private TextField uiName;
-    @FXML private TextField uiPseudoId;
-    @FXML private DatePicker date_maj;
 
     // Onglet "Information"
     @FXML FXValidityPeriodPane uiValidityPeriod;
@@ -93,12 +80,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         //mode edition
         previewRepository = Injector.getBean(Session.class).getPreviews();
         elementProperty().addListener(this::initFields);
-
-        date_maj.setDisable(true);
-        
-        uiMode.requireEditionForElement(troncon);
-        uiMode.setSaveAction(this::save);
-        disableFieldsProperty().bind(uiMode.editionState().not());
 
         uiValidityPeriod.disableFieldsProperty().bind(disableFieldsProperty());
         uiValidityPeriod.targetProperty().bind(elementProperty());
@@ -209,28 +190,27 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         uiSRList.setItems(FXCollections.observableArrayList(srs));
     }
 
-    @FXML
-    private void showOnMap() {
-        final FXMapTab tab = session.getFrame().getMapTab();
-
-        tab.getMap().focusOnElement(elementProperty.get());
-        tab.show();
-    }
-
-    private void save(){
-        try {
-            preSave();
-            srController.save();
-            session.getRepositoryForClass(TronconDigue.class).update(getTroncon());
-            final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
-            growlInfo.showAndFade();
-        } catch (Exception e) {
-            final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant l'enregistrement.");
-            growlError.showAndFade();
-            GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
-            SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
-        }
-    }
+//    @FXML
+//    private void showOnMap() {
+//        final FXMapTab tab = session.getFrame().getMapTab();
+//
+//        tab.getMap().focusOnElement(elementProperty.get());
+//        tab.show();
+//    }
+//
+//    private void save(){
+//        try {
+//            preSave();
+//            session.getRepositoryForClass(TronconDigue.class).update(getTroncon());
+//            final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
+//            growlInfo.showAndFade();
+//        } catch (Exception e) {
+//            final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant l'enregistrement.");
+//            growlError.showAndFade();
+//            GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
+//            SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
+//        }
+//    }
 
     private void initFields(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newElement) {
 
@@ -238,17 +218,10 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         if (oldValue != null) {
         // Propriétés de TronconDigue
             ui_libelle.textProperty().unbindBidirectional(oldValue.libelleProperty());
-            uiPseudoId.textProperty().unbindBidirectional(oldValue.designationProperty());
         }
 
         if (newElement != null) {
-            //this.uiName.textProperty().bindBidirectional(newElement.libelleProperty());
-            uiMode.authorIDProperty().bind(newElement.authorProperty());
             Injector.getSession().getPrintManager().prepareToPrint(newElement);
-
-            uiPseudoId.textProperty().bindBidirectional(newElement.designationProperty());
-
-            date_maj.valueProperty().bind(newElement.dateMajProperty());
 
             ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
             // * commentaire
@@ -320,6 +293,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         } else if (cbValue == null) {
             element.setSystemeRepDefautId(null);
         }
+        srController.save();
     }
 
     private final class GestionsTable extends PojoTable{

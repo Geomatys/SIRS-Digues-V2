@@ -7,11 +7,8 @@ import fr.sirs.core.component.AbstractPositionDocumentRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementContainerPane;
-import fr.sirs.theme.ui.FXElementPane;
-import fr.sirs.theme.ui.FXTronconDiguePane;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.SirsPreferences;
 import java.awt.Color;
@@ -379,14 +376,7 @@ public final class SIRS extends SirsCore {
      * trouvé. L'éditeur aura déjà été initialisé avec l'objet en paramètre.
      */
     public static AbstractFXElementPane generateEditionPane(final Element pojo) {
-        final AbstractFXElementPane content;
-        if (pojo instanceof TronconDigue) {
-            content = new FXTronconDiguePane((TronconDigue) pojo);
-        }
-        else {
-            content = new FXElementContainerPane((Element) pojo);
-        }
-        return content;
+        return new FXElementContainerPane((Element) pojo);
     }
 
     /**
@@ -400,14 +390,14 @@ public final class SIRS extends SirsCore {
      * @throws IllegalArgumentException
      * @throws InvocationTargetException
      */
-    public static FXElementPane createFXPaneForElement(final Element element)
+    public static AbstractFXElementPane createFXPaneForElement(final Element element)
             throws ClassNotFoundException, NoSuchMethodException, InstantiationException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         // Choose the pane adapted to the specific structure.
         final String className = "fr.sirs.theme.ui.FX" + element.getClass().getSimpleName() + "Pane";
         final Class controllerClass = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
         final Constructor cstr = controllerClass.getConstructor(element.getClass());
-        return (FXElementPane) cstr.newInstance(element);
+        return (AbstractFXElementPane) cstr.newInstance(element);
     }
 
     /**

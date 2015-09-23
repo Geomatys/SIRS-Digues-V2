@@ -3,9 +3,12 @@ package fr.sirs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.Element;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.theme.Theme;
+import fr.sirs.util.FXFreeTab;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -136,6 +139,40 @@ public abstract class Plugin {
      * @return 
      */
     public abstract SQLHelper getSQLHelper();
+
+    /**
+     * This method declares the plugin is able to display the type of TronconDigue
+     * given as a parameter, using openTronconPane() method.
+     *
+     * @param tronconType
+     * @return
+     */
+    public boolean handleTronconType(final Class<? extends Element> tronconType){
+        return false;
+    }
+    
+    /**
+     * This method opens a pane for the TronconDigue given as a parameter. It 
+     * garantees to open the right pane if and only if the method 
+     * handleTronconType() had returned "true" for the runtime type of the 
+     * troncon.
+     * 
+     * Note if handleTronconType had returned "false", this method result is
+     * undefined. The default implementation returns null, but other 
+     * redefinitions could return a pane without error but which doesn't exactly
+     * match the runtime type of the given TronconDigue.
+     * 
+     * For instance, it may be possible to open a Berge (which inherits 
+     * TronconDigue) using openTronconPane() of the CorePlugin, which is 
+     * designed for TronconDigue. To avoid this "inconsistent" case, 
+     * handleTronconType() of the CorePlugin must return false for Berge class.
+     * 
+     * @param element
+     * @return 
+     */
+    public FXFreeTab openTronconPane(final TronconDigue element){
+        return null;
+    }
     
     /**
      * Cherche une configuration valide pour le plugin courant. Par défaut, la

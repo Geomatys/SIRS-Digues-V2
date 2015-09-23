@@ -11,7 +11,6 @@ import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
-import fr.sirs.digue.DiguesTab;
 import fr.sirs.other.FXDesignationPane;
 import fr.sirs.other.FXReferencePane;
 import fr.sirs.other.FXValidationPane;
@@ -455,80 +454,85 @@ public class Session extends SessionCore {
         }
     }
 
-    public FXFreeTab getOrCreateElementTab(final Element element) {
-        if (element instanceof TronconDigue) {
-            final DiguesTab diguesTab = getFrame().getDiguesTab();
-            diguesTab.getDiguesController().displayElement(element);
-            diguesTab.setOnSelectionChanged((Event event) -> {
-                if (diguesTab.isSelected()) {
-                    printManager.prepareToPrint(element);
+    /**
+     * 
+     * @param element
+     * @return
+     */
+    public FXFreeTab generateTabForPane(final Element element){
+        final FXFreeTab tab = new FXFreeTab();
+
+        final ProgressIndicator wait = new ProgressIndicator();
+        wait.setMaxSize(200, 200);
+        wait.setProgress(-1);
+        final BorderPane content = new BorderPane(wait);
+
+        new Thread(){
+            @Override
+            public void run() {
+                Node edit = (Node) SIRS.generateEditionPane(element);
+                if (edit == null) {
+                    edit = new BorderPane(new Label("Pas d'éditeur pour le type : " + element.getClass().getSimpleName()));
+                }
+                final Node n = edit;
+                FadeTransition ft = new FadeTransition(Duration.millis(1000), n);
+                ft.setFromValue(0.0);
+                ft.setToValue(1.0);
+                Platform.runLater(()->{content.setCenter(n);ft.play();});
+            }
+        }.start();
+
+
+        tab.setContent(content);
+        if(element instanceof PositionDocument){
+            final PositionDocument positionDocument = (PositionDocument) element;
+            positionDocument.sirsdocumentProperty().addListener(new ChangeListener<String>() {
+
+                @Override
+                public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                    tab.setTextAbrege(generateElementTitle(element));
                 }
             });
-            return diguesTab;
-        } else {
-            try {
-                return openEditors.getOrCreate(element, new Callable<FXFreeTab>() {
-                    @Override
-                    public FXFreeTab call() throws Exception {
-                        final FXFreeTab tab = new FXFreeTab();
+        }
+        element.designationProperty().addListener(new ChangeListener<String>() {
 
-                        final ProgressIndicator wait = new ProgressIndicator();
-                        wait.setMaxSize(200, 200);
-                        wait.setProgress(-1);
-                        final BorderPane content = new BorderPane(wait);
-
-                        new Thread(){
-                            public void run() {
-                                Node edit = (Node) SIRS.generateEditionPane(element);
-                                if (edit == null) {
-                                    edit = new BorderPane(new Label("Pas d'éditeur pour le type : " + element.getClass().getSimpleName()));
-                                }
-                                final Node n = edit;
-                                FadeTransition ft = new FadeTransition(Duration.millis(1000), n);
-                                ft.setFromValue(0.0);
-                                ft.setToValue(1.0);
-                                Platform.runLater(()->{content.setCenter(n);ft.play();});
-                            }
-                        }.start();
-                        
-
-                        tab.setContent(content);
-                        if(element instanceof PositionDocument){
-                            final PositionDocument positionDocument = (PositionDocument) element;
-                            positionDocument.sirsdocumentProperty().addListener(new ChangeListener<String>() {
-
-                                @Override
-                                public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                                    tab.setTextAbrege(generateElementTitle(element));
-                                }
-                            });
-                        }
-                        element.designationProperty().addListener(new ChangeListener<String>() {
-
-                            @Override
-                            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                                tab.setTextAbrege(generateElementTitle(element));
-                            }
-                        });
-                        tab.setTextAbrege(generateElementTitle(element));
-                        tab.setOnSelectionChanged((Event event) -> {
-                            if (tab.isSelected()) {
-                                printManager.prepareToPrint(element);
-                            }
-                        });
-
-                        // Remove from cache when tab is closed.
-                        tab.setOnClosed(event -> openEditors.remove(element));
-                        return tab;
-                    }
-                });
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                tab.setTextAbrege(generateElementTitle(element));
             }
+        });
+        tab.setTextAbrege(generateElementTitle(element));
+        tab.setOnSelectionChanged((Event event) -> {
+            if (tab.isSelected()) {
+                printManager.prepareToPrint(element);
+            }
+        });
+
+        // Remove from cache when tab is closed.
+        tab.setOnClosed(event -> openEditors.remove(element));
+        return tab;
+    }
+
+    public FXFreeTab getOrCreateElementTab(final Element element) {
+
+        // Si on a affaire à un tronçon, on essaye de l'ouvrir de manière spécifique.
+        if (element instanceof TronconDigue) {
+            for(final Plugin plugin : Plugins.getPlugins()){
+                if(plugin.handleTronconType(element.getClass())){
+                    return plugin.openTronconPane((TronconDigue) element);
+                }
+            }
+        }
+
+        // Si on a affaire à un élément qui n'est pas un tronçon, ou bien d'un type de tronçon qu'aucun plugin n'ouvre de manière particulière, on ouvre l'élément de manière standard.
+        try {
+            return openEditors.getOrCreate(element, () -> generateTabForPane(element));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public String generateElementTitle(final Element element) {
+    public static String generateElementTitle(final Element element) {
         String title="";
 
         final String libelle = new SirsStringConverter().toString(element);

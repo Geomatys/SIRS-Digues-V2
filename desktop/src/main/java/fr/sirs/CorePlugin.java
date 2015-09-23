@@ -54,11 +54,13 @@ import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.core.model.sql.CoreSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
+import fr.sirs.digue.DiguesTab;
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DocumentTheme;
 import fr.sirs.theme.EvenementsHydrauliquesTheme;
 import fr.sirs.theme.PositionDocumentTheme;
 import fr.sirs.theme.TronconTheme;
+import fr.sirs.util.FXFreeTab;
 import java.awt.Color;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
@@ -73,6 +75,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javax.measure.unit.NonSI;
@@ -419,6 +422,23 @@ public class CorePlugin extends Plugin {
     @Override
     public SQLHelper getSQLHelper() {
         return CoreSqlHelper.getInstance();
+    }
+
+    @Override
+    public boolean handleTronconType(final Class<? extends Element> tronconType){
+        return TronconDigue.class.equals(tronconType);
+    }
+
+    @Override
+    public FXFreeTab openTronconPane(final TronconDigue element){
+        final DiguesTab diguesTab = Injector.getSession().getFrame().getDiguesTab();
+        diguesTab.getDiguesController().displayElement(element);
+        diguesTab.setOnSelectionChanged((Event event) -> {
+            if (diguesTab.isSelected()) {
+                Injector.getSession().getPrintManager().prepareToPrint(element);
+            }
+        });
+        return diguesTab;
     }
 
     private static class DocumentFilter<T> implements Filter{

@@ -74,6 +74,7 @@ public class PluginBerge extends Plugin {
 
     @Override
     public SQLHelper getSQLHelper() {
+        handleTronconType(Berge.class);
         return BergeSqlHelper.getInstance();
     }
     
