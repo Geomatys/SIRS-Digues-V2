@@ -2,6 +2,7 @@ package fr.sirs.plugin.berge;
 
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import javafx.scene.Parent;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 
 /**
@@ -11,7 +12,7 @@ import javafx.scene.layout.BorderPane;
  */
 public final class StructuresDescriptionTheme extends AbstractPluginsButtonTheme {
     public StructuresDescriptionTheme() {
-        super("Description des berges", "Description des berges", null);
+        super("Description des berges", "Description des berges", new Image("fr/sirs/plugin/berge/berge-description.png"));
         getSubThemes().add(new StructureElementTheme());
         getSubThemes().add(new ReseauxVoirieTheme());
         getSubThemes().add(new ReseauxOuvrageTheme());

@@ -5,6 +5,7 @@ import fr.sirs.theme.Theme;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import java.util.List;
 import javafx.scene.Parent;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 
 /**
@@ -14,7 +15,7 @@ import javafx.scene.layout.BorderPane;
  */
 public final class SuiviBergeTheme extends AbstractPluginsButtonTheme {
     public SuiviBergeTheme() {
-        super("Suivi des berges", "Suivi des berges", null);
+        super("Suivi des berges", "Suivi des berges", new Image("fr/sirs/plugin/berge/berge-suivi.png"));
     }
 
     @Override
