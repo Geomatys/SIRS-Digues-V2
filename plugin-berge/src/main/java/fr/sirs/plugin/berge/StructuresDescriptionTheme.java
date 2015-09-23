@@ -5,13 +5,13 @@ import javafx.scene.Parent;
 import javafx.scene.layout.BorderPane;
 
 /**
- * Panneau regroupant les fonctionnalités de description des ouvrages.
+ * Panneau regroupant les fonctionnalités de description des berges.
  *
  * @author Cédric Briançon (Geomatys)
  */
 public final class StructuresDescriptionTheme extends AbstractPluginsButtonTheme {
     public StructuresDescriptionTheme() {
-        super("Description des ouvrages", "Description des ouvrages", null);
+        super("Description des berges", "Description des berges", null);
         getSubThemes().add(new StructureElementTheme());
         getSubThemes().add(new ReseauxVoirieTheme());
         getSubThemes().add(new ReseauxOuvrageTheme());
