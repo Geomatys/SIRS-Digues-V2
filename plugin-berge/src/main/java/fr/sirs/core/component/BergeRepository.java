@@ -19,7 +19,6 @@ public class BergeRepository extends AbstractTronconDigueRepository<Berge> {
     @Autowired
     private BergeRepository ( CouchDbConnector db) {
        super(db, Berge.class);
-       initStandardDesignDocument();
    }
 }
 

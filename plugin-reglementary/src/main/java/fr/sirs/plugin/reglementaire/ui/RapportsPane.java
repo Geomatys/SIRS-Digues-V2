@@ -26,6 +26,7 @@ import fr.sirs.core.component.ObligationReglementaireRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
+import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
@@ -227,7 +228,8 @@ public class RapportsPane extends BorderPane implements Initializable {
         }else{
             final SystemeEndiguementRepository sdRepo = (SystemeEndiguementRepository) session.getRepositoryForClass(SystemeEndiguement.class);
             final DigueRepository digueRepo = (DigueRepository) session.getRepositoryForClass(Digue.class);
-            final AbstractTronconDigueRepository tronconRepo = (AbstractTronconDigueRepository) session.getRepositoryForClass(TronconDigue.class);
+
+            final TronconDigueRepository tronconRepo = Injector.getBean(TronconDigueRepository.class);
             final SystemeEndiguement sd = sdRepo.get(newValue.getElementId());
             final Set<TronconDigue> troncons = new HashSet<>();
             final List<Digue> digues = digueRepo.getBySystemeEndiguement(sd);
