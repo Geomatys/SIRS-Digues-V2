@@ -1,7 +1,7 @@
 
 package fr.sirs.theme.ui;
 
-import fr.sirs.core.model.Photo;
+import fr.sirs.core.model.PhotoDependance;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -10,15 +10,15 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.HBox;
+import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
+import static javafx.scene.layout.Region.USE_PREF_SIZE;
 import javafx.scene.layout.StackPane;
 
 /**
  *
- * @author Olivier Nouguier (Geomatys)
- * @author Alexis Manin (Geomatys)
  * @author Samuel Andrés (Geomatys)
  */
-public class FXPhotoPane extends FXPhotoPaneStub {
+public class FXPhotoDependancePane extends FXPhotoDependancePaneStub {
 
     // Propriétés de Positionable
     @FXML FXPositionablePane uiPositionable;
@@ -30,7 +30,7 @@ public class FXPhotoPane extends FXPhotoPaneStub {
     /**
      * Constructor. Initialize part of the UI which will not require update when element edited change.
      */
-    private FXPhotoPane() {
+    private FXPhotoDependancePane() {
         super();
         ui_scroll_pane.setMinWidth(USE_PREF_SIZE);
         ui_scroll_pane.setPrefWidth(USE_COMPUTED_SIZE);
@@ -69,7 +69,7 @@ public class FXPhotoPane extends FXPhotoPaneStub {
         });
     }
 
-    public FXPhotoPane(final Photo photo) {
+    public FXPhotoDependancePane(final PhotoDependance photo) {
         this();
         this.elementProperty().set(photo);
     }
