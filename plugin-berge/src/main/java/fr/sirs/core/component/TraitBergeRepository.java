@@ -40,14 +40,14 @@ AbstractSIRSRepository
         return InjectorCore.getBean(SessionCore.class).getElementCreator().createElement(TraitBerge.class);
     }
 
-    public List<TraitBerge> getByPlanId(final String planId) {
+    public List<TraitBerge> getByBergeId(final String planId) {
         ArgumentChecks.ensureNonNull("Berge id", planId);
         return this.queryView(BY_BERGE_ID, planId);
     }
 
-    public List<TraitBerge> getByPlan(final Berge berge) {
+    public List<TraitBerge> getByBerge(final Berge berge) {
         ArgumentChecks.ensureNonNull("Berge", berge);
-        return getByPlanId(berge.getId());
+        return getByBergeId(berge.getId());
     }
 }
 

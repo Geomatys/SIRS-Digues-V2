@@ -45,6 +45,8 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
     protected final ListeningPojoTable borneIdsTable;
     @FXML protected Tab ui_gestions;
     protected final PojoTable gestionsTable;
+    @FXML protected Tab ui_traits;
+    protected final PojoTable traitsTable;
 
     /**
      * Constructor. Initialize part of the UI which will not require update when 
@@ -78,6 +80,10 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
         gestionsTable.editableProperty().bind(disableFieldsProperty().not());
         ui_gestions.setContent(gestionsTable);
         ui_gestions.setClosable(false);
+        traitsTable = new TraitTable();
+        traitsTable.editableProperty().bind(disableFieldsProperty().not());
+        ui_traits.setContent(traitsTable);
+        ui_traits.setClosable(false);
 
     }
     
@@ -121,6 +127,9 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
         borneIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getBorneIds(), borneIdsRepo));
         gestionsTable.setParentElement(newElement);
         gestionsTable.setTableItems(()-> (ObservableList) newElement.getGestions());
+        traitsTable.setParentElement(newElement);
+        final TraitBergeRepository traitrepo = (TraitBergeRepository)session.getRepositoryForClass(TraitBerge.class);
+        traitsTable.setTableItems(()-> (ObservableList) traitrepo.getByBergeId(newElement.getId()));
         borneIdsTable.setObservableListToListen(newElement.getBorneIds());
     }
     @Override
@@ -158,4 +167,15 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
         element.setBorneIds(currentBorneDigueIdsList);
         
     }
+
+    private static final class TraitTable extends PojoTable{
+
+        public TraitTable() {
+            super(TraitBerge.class, null);
+            createNewProperty.set(false);
+            uiAdd.setVisible(false);
+        }
+
+    }
+
 }

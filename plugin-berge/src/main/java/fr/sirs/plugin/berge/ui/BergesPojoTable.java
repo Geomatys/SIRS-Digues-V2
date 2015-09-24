@@ -41,6 +41,7 @@ public class BergesPojoTable extends PojoTable {
         }
 
         createNewProperty().set(false);
+        uiAdd.visibleProperty().set(false);
     }
     
     @Override

@@ -73,6 +73,7 @@
 <!-- REFERENCE TABS -->
         <Tab fx:id="ui_borneIds" text="%borneIds"/>
         <Tab fx:id="ui_gestions" text="%gestions"/>
+        <Tab fx:id="ui_traits" text="%traits"/>
 
       </tabs>
     </TabPane>
