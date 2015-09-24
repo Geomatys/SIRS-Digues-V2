@@ -771,9 +771,9 @@
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_70TUYGBKEeWUf8Y0-oZVcg" name="[0..1] berge" sourceNode="_7zNIMGBKEeWUf8Y0-oZVcg" targetNode="_c9l5cC7HEeWv4JwE7hUOUQ">
-        <target xmi:type="ecore:EReference" href="berge.ecore#//TraitBerge/berge"/>
-        <semanticElements xmi:type="ecore:EReference" href="berge.ecore#//TraitBerge/berge"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_70TUYGBKEeWUf8Y0-oZVcg" name="[0..1] bergeId" sourceNode="_7zNIMGBKEeWUf8Y0-oZVcg" targetNode="_c9l5cC7HEeWv4JwE7hUOUQ">
+        <target xmi:type="ecore:EReference" href="berge.ecore#//TraitBerge/bergeId"/>
+        <semanticElements xmi:type="ecore:EReference" href="berge.ecore#//TraitBerge/bergeId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_70UigGBKEeWUf8Y0-oZVcg" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_70UigWBKEeWUf8Y0-oZVcg"/>
