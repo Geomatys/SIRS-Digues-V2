@@ -94,6 +94,10 @@ public abstract class AbstractTheme extends Theme {
     }
     
     public static <T extends Positionable> ThemeManager<T> generateThemeManager(String tableTitle, final Class<T> themeClass){
+        return generateThemeManager(null, tableTitle, themeClass);
+    }
+
+    public static <T extends Positionable> ThemeManager<T> generateThemeManager(String tabName, String tableTitle, final Class<T> themeClass){
         final ResourceBundle bundle = ResourceBundle.getBundle(themeClass.getCanonicalName(), Locale.getDefault(),
                 Thread.currentThread().getContextClassLoader());
         final Function<String, ObservableList<T>> extractor = (String linearId) -> {
@@ -105,7 +109,12 @@ public abstract class AbstractTheme extends Theme {
         if (tableTitle == null) {
             tableTitle = "Thème "+bundle.getString(BUNDLE_KEY_CLASS);
         }
-        return new ThemeManager<>(bundle.getString(BUNDLE_KEY_CLASS),
+
+        if(tabName==null){
+            tabName = bundle.getString(BUNDLE_KEY_CLASS);
+        }
+
+        return new ThemeManager<>(tabName,
                 tableTitle,
                 themeClass, extractor, deletor);
     }

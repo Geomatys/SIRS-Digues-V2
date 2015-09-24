@@ -43,7 +43,7 @@ public class AbstractDescriptionPane extends BorderPane {
                     if (!AvecForeignParent.class.isAssignableFrom(tc.tableClass)) {
                         themeManager = PositionDocumentTheme.generateThemeManager(tc.tableName, PositionDocument.class, tc.tableClass);
                     } else {
-                        themeManager = AbstractTheme.generateThemeManager(tc.tableName, tc.tableClass);
+                        themeManager = AbstractTheme.generateThemeManager(tc.tabName, tc.tableName, tc.tableClass);
                     }
                     themes[i] = themeManager;
                     i++;
