@@ -18,6 +18,8 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.ui.AbstractFXElementPane;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import java.time.LocalDate;
@@ -474,9 +476,16 @@ public class FXDiguesPane extends SplitPane implements DocumentListener {
                 }
             } else if (obj instanceof TronconDigue) {
                 addMenu.getItems().clear();
-                final byte ptext[] = ((TronconDigue) obj).getLibelle().getBytes(ISO_8859_1);
-                this.setText(new String(ptext, UTF_8) + " (" + getTreeItem().getChildren().size() + ") ");
-                setContextMenu(addMenu);
+                if(StandardCharsets.UTF_8.equals(Charset.defaultCharset())){
+                    // Cas spécifique pour l'affichage de ce libellé sous Linux
+                    this.setText(((TronconDigue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
+                }
+                else{
+                    // Cas spécifique pour l'affichage de ce libellé sous Windows
+                    final byte ptext[] = ((TronconDigue) obj).getLibelle().getBytes(ISO_8859_1);
+                    this.setText(new String(ptext, UTF_8) + " (" + getTreeItem().getChildren().size() + ") ");
+                }
+                setContextMenu(null);
             } else if (obj instanceof Theme) {
                 setText(((Theme) obj).getName());
             } else if( obj instanceof String){
