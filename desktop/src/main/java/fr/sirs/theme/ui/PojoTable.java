@@ -184,7 +184,14 @@ public class PojoTable extends BorderPane {
     protected final BooleanProperty searchableProperty = new SimpleBooleanProperty(true);
     /** Ouvrir l'editeur sur creation d'un nouvel objet */
     protected final BooleanProperty openEditorOnNewProperty = new SimpleBooleanProperty(true);
-    /** Créer un nouvel objet à l'ajout */
+    /**
+     * Créer un nouvel objet à l'ajout.
+     * 
+     * Si cette propriété contient "vrai", l'action sur le bouton d'ajout sera
+     * de créer de nouvelles instances ajoutées dans le tableau. Si elle 
+     * contient "faux", l'action sur le bouton d'ajout sera de proposer l'ajout
+     * de liens vers des objets préexistants.
+     */
     protected final BooleanProperty createNewProperty = new SimpleBooleanProperty(true);
     /** Importer des points. Default : false */
     protected final BooleanProperty importPointProperty = new SimpleBooleanProperty(false);
@@ -442,8 +449,6 @@ public class PojoTable extends BorderPane {
                 }
             }
         });
-        uiAdd.visibleProperty().bind(createNewProperty);
-        uiAdd.managedProperty().bind(createNewProperty);
         uiAdd.disableProperty().bind(editableProperty.not());
 
         uiDelete.getStyleClass().add(BUTTON_STYLE);
