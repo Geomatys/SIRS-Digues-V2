@@ -20,6 +20,7 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecForeignParent;
+import fr.sirs.core.model.AvecGeometrie;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.LigneEau;
@@ -32,6 +33,7 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.map.ExportTask;
+import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.ColumnOrder;
 import fr.sirs.theme.ui.PojoTablePointBindings.DXYZBinding;
 import fr.sirs.theme.ui.PojoTablePointBindings.PRXYZBinding;
@@ -80,6 +82,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -107,6 +110,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -132,6 +136,8 @@ import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.feature.FeatureTypeBuilder;
+import org.geotoolkit.font.FontAwesomeIcons;
+import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.filter.FXFilterBuilder;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXBooleanCell;
@@ -157,6 +163,7 @@ import org.opengis.filter.Filter;
 public class PojoTable extends BorderPane {
 
     protected static final String BUTTON_STYLE = "buttonbar-button";
+    private static final Image ICON_SHOWONMAP = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GLOBE, 16, FontAwesomeIcons.DEFAULT_COLOR),null);
 
     public static final String[] COLUMNS_TO_IGNORE = new String[] {
         AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD,
@@ -341,6 +348,11 @@ public class PojoTable extends BorderPane {
 
         uiTable.getColumns().add(deleteColumn);
         uiTable.getColumns().add((TableColumn) editCol);
+
+        if(AvecGeometrie.class.isAssignableFrom(pojoClass)){
+            uiTable.getColumns().add(new ShowOnMapColumn());
+        }
+
         try {
             //contruction des colonnes editable
             final HashMap<String, PropertyDescriptor> properties = SIRS.listSimpleProperties(this.pojoClass);
@@ -1523,6 +1535,35 @@ public class PojoTable extends BorderPane {
                             } else {
                                 return t;
                             }
+                        });
+            });
+        }
+    }
+
+    /**
+     * A column allowing to show the {@link Element} of a row on the map
+     */
+    public class ShowOnMapColumn extends TableColumn<Element,Element>{
+
+        public ShowOnMapColumn() {
+            super("Afficher sur la carte");
+            setSortable(false);
+            setResizable(false);
+            setPrefWidth(24);
+            setMinWidth(24);
+            setMaxWidth(24);
+            setGraphic(new ImageView(ICON_SHOWONMAP));
+
+            setCellValueFactory((TableColumn.CellDataFeatures<Element, Element> param) -> new SimpleObjectProperty<>(param.getValue()));
+            setCellFactory((TableColumn<Element, Element> param) -> {
+                return new ButtonTableCell<>(false,
+                        new ImageView(ICON_SHOWONMAP),
+                        (Element t) -> t!=null,
+                        (Element t) -> {
+                            final FXMapTab tab = session.getFrame().getMapTab();
+                            tab.getMap().focusOnElement(t);
+                            tab.show();
+                            return t;
                         });
             });
         }
