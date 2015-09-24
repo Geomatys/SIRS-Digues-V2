@@ -39,6 +39,8 @@ public class BergesPojoTable extends PojoTable {
             hbox.getChildren().add(uiKeywordSearch);
             vbox.getChildren().add(vbox.getChildren().size() - 1, hbox);
         }
+
+        createNewProperty().set(false);
     }
     
     @Override

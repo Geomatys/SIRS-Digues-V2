@@ -442,6 +442,8 @@ public class PojoTable extends BorderPane {
                 }
             }
         });
+        uiAdd.visibleProperty().bind(createNewProperty);
+        uiAdd.managedProperty().bind(createNewProperty);
         uiAdd.disableProperty().bind(editableProperty.not());
 
         uiDelete.getStyleClass().add(BUTTON_STYLE);
