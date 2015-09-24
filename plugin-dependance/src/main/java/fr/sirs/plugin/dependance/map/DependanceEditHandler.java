@@ -3,8 +3,10 @@ package fr.sirs.plugin.dependance.map;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.AireStockageDependanceRepository;
 import fr.sirs.core.component.AutreDependanceRepository;
@@ -16,18 +18,27 @@ import fr.sirs.core.model.AutreDependance;
 import fr.sirs.core.model.CheminAccesDependance;
 import fr.sirs.core.model.OuvrageVoirieDependance;
 import fr.sirs.plugin.dependance.PluginDependance;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
 import javafx.geometry.Side;
 import javafx.scene.Cursor;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display.VisitFilter;
 import org.geotoolkit.display2d.canvas.AbstractGraphicVisitor;
@@ -95,6 +106,12 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
      * Vrai si une dépendance vient d'être créée.
      */
     private boolean newDependance = false;
+
+    /**
+     * Définit le type de géométries à dessiner, pour les dépendances de types "ouvrages de voirie" ou "autres"
+     * pour lesquelles plusieurs choix sont possibles.
+     */
+    private Class newGeomType = Point.class;
 
     /**
      * Vrai si la {@linkplain #coords liste des coordonnées} de la {@linkplain #editGeometry géométrie}
@@ -209,45 +226,74 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                             }
                         }
 
-                        final boolean isPolygonGeom = AireStockageDependance.class.isAssignableFrom(clazz) ||
-                                AutreDependance.class.isAssignableFrom(clazz);
+                        // La classe d'objet à dessiner est un polygone pour une aire de stockage, une ligne pour un chemin d'accès
+                        // sinon c'est le choix fait par l'utilisateur dans le panneau de création de dépendance.
+                        final Class geomClass = AireStockageDependance.class.isAssignableFrom(clazz) ? Polygon.class :
+                                                CheminAccesDependance.class.isAssignableFrom(clazz) ? LineString.class : newGeomType;
 
                         // On vient de créer la dépendance, le clic gauche va permettre d'ajouter des points.
-
-                        if(justCreated){
-                            justCreated = false;
-                            //we must modify the second point since two point where added at the start
-                            coords.remove(2);
-                            coords.remove(1);
+                        if (Point.class.isAssignableFrom(geomClass)) {
+                            coords.clear();
                             coords.add(helper.toCoord(x,y));
-                            coords.add(helper.toCoord(x,y));
-
-                        }else if(coords.isEmpty()){
-                            justCreated = true;
-                            //this is the first point of the geometry we create
-                            //add 3 points that will be used when moving the mouse around
-                            coords.add(helper.toCoord(x,y));
-                            coords.add(helper.toCoord(x,y));
-                            coords.add(helper.toCoord(x,y));
-                        }else{
-                            // On ajoute le point en plus.
-                            justCreated = false;
-                            coords.add(helper.toCoord(x,y));
+                        } else {
+                            if (justCreated) {
+                                justCreated = false;
+                                //we must modify the second point since two point where added at the start
+                                if (Polygon.class.isAssignableFrom(geomClass)) {
+                                    coords.remove(2);
+                                }
+                                coords.remove(1);
+                                coords.add(helper.toCoord(x, y));
+                                if (Polygon.class.isAssignableFrom(geomClass)) {
+                                    coords.add(helper.toCoord(x, y));
+                                }
+                            } else if (coords.isEmpty()) {
+                                justCreated = true;
+                                //this is the first point of the geometry we create
+                                //add 3 points that will be used when moving the mouse around for polygons,
+                                //for lines just add 2 points.
+                                coords.add(helper.toCoord(x, y));
+                                coords.add(helper.toCoord(x, y));
+                                if (Polygon.class.isAssignableFrom(geomClass)) {
+                                    coords.add(helper.toCoord(x, y));
+                                }
+                            } else {
+                                // On ajoute le point en plus.
+                                justCreated = false;
+                                coords.add(helper.toCoord(x, y));
+                            }
                         }
 
                         // Création de la géométrie à éditer à partir des coordonnées
-                        if (isPolygonGeom) {
+                        if (Polygon.class.isAssignableFrom(geomClass)) {
                             editGeometry.geometry.set(EditionHelper.createPolygon(coords));
-                        } else {
+                        } else if (LineString.class.isAssignableFrom(geomClass)) {
                             editGeometry.geometry.set(EditionHelper.createLine(coords));
+                        } else {
+                            editGeometry.geometry.set(EditionHelper.createPoint(coords.get(0)));
                         }
                         JTS.setCRS(editGeometry.geometry.get(), map.getCanvas().getObjectiveCRS2D());
                         decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
+
+
+                        if (Point.class.isAssignableFrom(geomClass)) {
+                            // Pour un nouveau point ajouté, on termine l'édition directement.
+                            dependance.setGeometry(editGeometry.geometry.get());
+                            final AbstractSIRSRepository repodep = Injector.getSession().getRepositoryForClass(dependance.getClass());
+
+                            if (dependance.getDocumentId() != null) {
+                                repodep.update(dependance);
+                            } else {
+                                repodep.add(dependance);
+                            }
+                            // On quitte le mode d'édition.
+                            reset();
+                        }
                     } else {
                         // On réédite une géométrie existante, le double clic gauche va nous permettre d'ajouter un nouveau
-                        // point à la géométrie.
-                        if (e.getClickCount() >= 2) {
-                            final Geometry tempEditGeom = editGeometry.geometry.get();
+                        // point à la géométrie, si ce n'est pas un point.
+                        final Geometry tempEditGeom = editGeometry.geometry.get();
+                        if (!Point.class.isAssignableFrom(tempEditGeom.getClass()) && e.getClickCount() >= 2) {
                             final Geometry result;
                             if (tempEditGeom instanceof Polygon) {
                                 result = helper.insertNode((Polygon)editGeometry.geometry.get(), x, y);
@@ -261,35 +307,70 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                 }
             } else if (MouseButton.SECONDARY.equals(e.getButton())) {
                 if (dependance == null) {
-                    // La dépendance n'existe pas, on en créé une nouvelle après avoir choisi le type.
-                    final ChoiceDialog<String> dialog = new ChoiceDialog<>("Aires de stockage", "Aires de stockage", "Autres", "Chemins d'accès", "Ouvrages de voirie");
-                    dialog.setTitle("Création de dépendance");
-                    dialog.setContentText("Choisir un type de dépendance");
-                    Optional<String> result = dialog.showAndWait();
-                    result.ifPresent(type -> {
-                        final Class clazz;
-                        switch (type) {
-                            case "Aires de stockage": clazz = AireStockageDependance.class; break;
-                            case "Autres": clazz = AutreDependance.class; break;
-                            case "Chemins d'accès": clazz = CheminAccesDependance.class; break;
-                            case "Ouvrages de voirie": clazz = OuvrageVoirieDependance.class; break;
-                            default: clazz = AireStockageDependance.class;
-                        }
+                    // La dépendance n'existe pas, on en créé une nouvelle après avoir choisi son type et le type de géométrie
+                    // à dessiner
+                    final Stage stage = new Stage();
+                    stage.getIcons().add(SIRS.ICON);
+                    stage.setTitle("Création de dépendance");
+                    stage.initModality(Modality.WINDOW_MODAL);
+                    stage.setAlwaysOnTop(true);
+                    final GridPane gridPane = new GridPane();
+                    gridPane.setVgap(10);
+                    gridPane.setHgap(5);
+                    gridPane.setPadding(new Insets(10));
+                    gridPane.add(new Label("Choisir un type de dépendance"), 0, 0);
+                    final ComboBox<String> dependanceTypeBox = new ComboBox<>();
+                    dependanceTypeBox.setItems(FXCollections.observableArrayList("Ouvrages de voirie", "Chemins d'accès", "Aires de stockage", "Autres"));
+                    dependanceTypeBox.getSelectionModel().selectFirst();
+                    gridPane.add(dependanceTypeBox, 1, 0);
 
-                        if (AireStockageDependance.class.isAssignableFrom(clazz)) {
-                            helper = new EditionHelper(map, aireLayer);
-                        } else if (AutreDependance.class.isAssignableFrom(clazz)) {
-                            helper = new EditionHelper(map, autreLayer);
-                        } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
-                            helper = new EditionHelper(map, cheminLayer);
-                        } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
-                            helper = new EditionHelper(map, ouvrageLayer);
-                        }
+                    final ComboBox<String> geomTypeBox = new ComboBox<>();
+                    geomTypeBox.setItems(FXCollections.observableArrayList("Ponctuel", "Linéaire", "Surfacique"));
+                    geomTypeBox.getSelectionModel().selectFirst();
+                    geomTypeBox.visibleProperty().bind(dependanceTypeBox.getSelectionModel().selectedItemProperty().isEqualTo("Ouvrages de voirie")
+                            .or(dependanceTypeBox.getSelectionModel().selectedItemProperty().isEqualTo("Autres")));
+                    final Label geomChoiceLbl = new Label("Choisir une forme géométrique");
+                    geomChoiceLbl.visibleProperty().bind(geomTypeBox.visibleProperty());
+                    gridPane.add(geomChoiceLbl, 0, 1);
+                    gridPane.add(geomTypeBox, 1, 1);
 
-                        final AbstractSIRSRepository<AbstractDependance> repodep = Injector.getSession().getRepositoryForClass(clazz);
-                        dependance = repodep.create();
-                        newDependance = true;
-                    });
+                    final Button validateBtn = new Button("Valider");
+                    validateBtn.setOnAction(event -> stage.close());
+                    gridPane.add(validateBtn, 2, 3);
+
+                    final Scene sceneChoices = new Scene(gridPane);
+                    stage.setScene(sceneChoices);
+                    stage.showAndWait();
+
+                    final Class clazz;
+                    switch (dependanceTypeBox.getSelectionModel().getSelectedItem()) {
+                        case "Aires de stockage": clazz = AireStockageDependance.class; break;
+                        case "Autres": clazz = AutreDependance.class; break;
+                        case "Chemins d'accès": clazz = CheminAccesDependance.class; break;
+                        case "Ouvrages de voirie": clazz = OuvrageVoirieDependance.class; break;
+                        default: clazz = AireStockageDependance.class;
+                    }
+
+                    if (AireStockageDependance.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, aireLayer);
+                    } else if (AutreDependance.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, autreLayer);
+                    } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, cheminLayer);
+                    } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, ouvrageLayer);
+                    }
+
+                    final AbstractSIRSRepository<AbstractDependance> repodep = Injector.getSession().getRepositoryForClass(clazz);
+                    dependance = repodep.create();
+                    newDependance = true;
+
+                    switch (geomTypeBox.getSelectionModel().getSelectedItem()) {
+                        case "Ponctuel" : newGeomType = Point.class; break;
+                        case "Linéaire" : newGeomType = LineString.class; break;
+                        case "Surfacique" : newGeomType = Polygon.class; break;
+                        default: newGeomType = Point.class;
+                    }
                 } else {
                     // popup :
                     // -suppression d'un noeud
