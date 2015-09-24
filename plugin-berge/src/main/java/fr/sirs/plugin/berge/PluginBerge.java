@@ -8,6 +8,7 @@ import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.Berge;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.TraitBerge;
 import fr.sirs.core.model.sql.BergeSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.map.FXMapPane;
@@ -85,21 +86,26 @@ public class PluginBerge extends Plugin {
     }
 
     //doit avoir la meme valeur que dans le fichier Berge.properties classPlural
-    public static String LAYER_NAME = "Berges";
+    public static final String LAYER_NAME = "Berges";
+    public static final String LAYER_TRAIT_NAME = "Traits de berge";
     
     @Override
     public List<MapItem> getMapItems() {
         try {
-        final Function<Class<? extends Element>, StructBeanSupplier> getDefaultSupplierForClass = (Class<? extends Element> c) ->{
-            return new StructBeanSupplier(c, () -> getSession().getRepositoryForClass(c).getAll());
-        };
-            //troncons
-            final BeanStore tronconStore = new BeanStore(getDefaultSupplierForClass.apply(Berge.class));
-            List<MapLayer> layers = CorePlugin.buildLayers(tronconStore, LAYER_NAME, createBergeStyle(), createTronconSelectionStyle(false),true);
-
-            MapItem bergeContainer = MapBuilder.createItem();
+            final MapItem bergeContainer = MapBuilder.createItem();
             bergeContainer.setName("Module berges");
-            bergeContainer.items().addAll(layers);
+            
+            final BeanStore bergeStore = new BeanStore(new StructBeanSupplier(Berge.class,
+                    () -> getSession().getRepositoryForClass(Berge.class).getAll()));
+            final BeanStore traitStore = new BeanStore(new StructBeanSupplier(TraitBerge.class,
+                    () -> getSession().getRepositoryForClass(TraitBerge.class).getAll()));
+
+            bergeContainer.items().addAll(CorePlugin.buildLayers(bergeStore, LAYER_NAME,
+                    createBergeStyle(), createTronconSelectionStyle(false),true));
+            bergeContainer.items().addAll(CorePlugin.buildLayers(traitStore, LAYER_TRAIT_NAME,
+                    createTraitBergeStyle(), createTronconSelectionStyle(false),true));
+
+
             return Collections.singletonList(bergeContainer);
         } catch (Exception e) {
             throw new SirsCoreRuntimeException(e);
@@ -107,22 +113,26 @@ public class PluginBerge extends Plugin {
     }
 
     public static MutableStyle createBergeStyle() throws CQLException, URISyntaxException{
-        final Stroke stroke1 = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,FF.literal(9),
+        final Stroke stroke1 = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,FF.literal(4),
                 STROKE_JOIN_BEVEL, STROKE_CAP_SQUARE, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);
 
-        final Stroke stroke2 = SF.stroke(SF.literal(new Color(0.8f, 0.8f,0.8f)),LITERAL_ONE_FLOAT,FF.literal(7),
+        final Stroke stroke2 = SF.stroke(SF.literal(new Color(0,200,255)),LITERAL_ONE_FLOAT,FF.literal(2.5),
                 STROKE_JOIN_BEVEL, STROKE_CAP_SQUARE, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke2,LITERAL_ONE_FLOAT);
 
-        final Stroke stroke3 = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,FF.literal(1),
-                STROKE_JOIN_BEVEL, STROKE_CAP_SQUARE, null,LITERAL_ZERO_FLOAT);
-        final LineSymbolizer line3 = SF.lineSymbolizer("symbol",
-                (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke3,LITERAL_ONE_FLOAT);
+        return SF.style(line1,line2);
+    }
 
-        return SF.style(line1,line2,line3);
+    public static MutableStyle createTraitBergeStyle() throws CQLException, URISyntaxException{
+        final Stroke stroke1 = SF.stroke(SF.literal(new Color(0,200,255)),LITERAL_ONE_FLOAT,FF.literal(1.5),
+                STROKE_JOIN_BEVEL, STROKE_CAP_SQUARE, null,LITERAL_ZERO_FLOAT);
+        final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
+                (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);
+
+        return SF.style(line1);
     }
 
 }
