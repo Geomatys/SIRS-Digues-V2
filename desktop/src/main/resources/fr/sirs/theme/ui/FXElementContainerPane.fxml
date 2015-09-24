@@ -53,7 +53,7 @@
                      </padding>
                   </DatePicker>
                   <Label text="Désignation : " textFill="WHITE" GridPane.rowIndex="1" />
-                  <TextField fx:id="uiPseudoId" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                  <TextField fx:id="uiDesignation" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1">
                      <GridPane.margin>
                         <Insets left="10.0" />
                      </GridPane.margin></TextField>

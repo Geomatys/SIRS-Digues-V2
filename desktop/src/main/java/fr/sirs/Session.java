@@ -466,24 +466,20 @@ public class Session extends SessionCore {
         wait.setMaxSize(200, 200);
         wait.setProgress(-1);
         final BorderPane content = new BorderPane(wait);
-
-        new Thread(){
-            @Override
-            public void run() {
-                Node edit = (Node) SIRS.generateEditionPane(element);
-                if (edit == null) {
-                    edit = new BorderPane(new Label("Pas d'éditeur pour le type : " + element.getClass().getSimpleName()));
-                }
-                final Node n = edit;
-                FadeTransition ft = new FadeTransition(Duration.millis(1000), n);
-                ft.setFromValue(0.0);
-                ft.setToValue(1.0);
-                Platform.runLater(()->{content.setCenter(n);ft.play();});
-            }
-        }.start();
-
-
         tab.setContent(content);
+
+        Injector.getSession().getTaskManager().submit(() -> {
+            Node edit = (Node) SIRS.generateEditionPane(element);
+            if (edit == null) {
+                edit = new BorderPane(new Label("Pas d'éditeur pour le type : " + element.getClass().getSimpleName()));
+            }
+            final Node n = edit;
+            FadeTransition ft = new FadeTransition(Duration.millis(1000), n);
+            ft.setFromValue(0.0);
+            ft.setToValue(1.0);
+            Platform.runLater(()->{content.setCenter(n);ft.play();});
+        });
+
         if(element instanceof PositionDocument){
             final PositionDocument positionDocument = (PositionDocument) element;
             positionDocument.sirsdocumentProperty().addListener(new ChangeListener<String>() {

@@ -39,7 +39,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
 
     @FXML private Label uiHeaderLabel;
     @FXML private Label uiDateMajLabel;
-    @FXML private TextField uiPseudoId;
+    @FXML private TextField uiDesignation;
     @FXML private DatePicker date_maj;
     @FXML private FXEditMode uiMode;
     @FXML private Button uiShowOnMapButton;
@@ -54,7 +54,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
         uiMode.requireEditionForElement(element);
         disableFieldsProperty().bind(uiMode.editionState().not());
 
-        uiPseudoId.disableProperty().bind(disableFieldsProperty());
+        uiDesignation.disableProperty().bind(disableFieldsProperty());
 
         elementProperty.addListener(this::initPane);
 
@@ -121,7 +121,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
 
         if (oldValue != null) {
             //unbind all bidirectionnal
-            uiPseudoId.textProperty().unbindBidirectional(oldValue.designationProperty());
+            uiDesignation.textProperty().unbindBidirectional(oldValue.designationProperty());
         }
 
         if (newValue == null) {
@@ -153,15 +153,14 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
             uiMode.authorIDProperty().bind(newValue.authorProperty());
             Injector.getSession().getPrintManager().prepareToPrint(newValue);
 
-            uiPseudoId.textProperty().bindBidirectional(newValue.designationProperty());
+            uiDesignation.textProperty().bindBidirectional(newValue.designationProperty());
 
             // If we previously edited same type of element, we recycle edition panel.
             if (specificThemePane != null && oldValue != null && oldValue.getClass().equals(newValue.getClass())) {
                 specificThemePane.setElement(newValue);
             } else {
                 try {
-                    final FXElementPane pane = createFXPaneForElement(newValue);
-                    SIRS.fxRunAndWait( ()-> specificThemePane = pane);
+                    SIRS.fxRunAndWait( ()-> specificThemePane = createFXPaneForElement(newValue));
                     specificThemePane.disableFieldsProperty().bind(disableFieldsProperty());
                     if (specificThemePane instanceof FXUtilisateurPane) {
                         ((FXUtilisateurPane) specificThemePane).setAdministrable(ADMIN.equals(session.getRole()));
