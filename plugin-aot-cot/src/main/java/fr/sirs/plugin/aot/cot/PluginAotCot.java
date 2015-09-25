@@ -12,9 +12,9 @@ import fr.sirs.StructBeanSupplier;
 import static fr.sirs.core.ModuleDescription.getLayerDescription;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.PositionConventionRepository;
+import fr.sirs.core.model.AotCotAssociable;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.PositionConvention;
 import fr.sirs.core.model.sql.AotCotSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
@@ -35,10 +35,10 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
+import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.QueryBuilder;
-import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -156,11 +156,11 @@ public class PluginAotCot extends Plugin {
     }
 
     @Override
-    public List<MenuItem> getMapActions(Object obj) {
+    public List<MenuItem> getMapActions(final Object obj) {
         final List<MenuItem> lst = new ArrayList<>();
         
-        if(obj instanceof Objet) {
-            lst.add(new ViewFormObjetItem((Objet) obj));
+        if(obj instanceof AotCotAssociable) {
+            lst.add(new ViewFormObjetItem((AotCotAssociable) obj));
         }
         return lst;
     }
@@ -172,7 +172,7 @@ public class PluginAotCot extends Plugin {
     
     private class ViewFormObjetItem extends MenuItem {
 
-        public ViewFormObjetItem(Objet candidate) {
+        public ViewFormObjetItem(final AotCotAssociable candidate) {
             setText("Consulter les conventions de "+getSession().generateElementTitle(candidate));
             setOnAction((ActionEvent event) -> {
                 consultationAotCotTheme.setObjetToConsultFromMap(candidate);
@@ -181,7 +181,7 @@ public class PluginAotCot extends Plugin {
         }
     }
     
-    public static PojoTable getConventionsForObjet(final Objet objet){
+    public static PojoTable getConventionsForObjet(final AotCotAssociable objet){
         final PositionConventionRepository positionRepo = (PositionConventionRepository) Injector.getSession().getRepositoryForClass(PositionConvention.class);
         final AbstractSIRSRepository<Convention> conventionRepo = Injector.getSession().getRepositoryForClass(Convention.class);
                 

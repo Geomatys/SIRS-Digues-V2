@@ -1,6 +1,7 @@
 package fr.sirs.plugin.aot.cot;
 
 import fr.sirs.Injector;
+import fr.sirs.core.model.AotCotAssociable;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import static fr.sirs.plugin.aot.cot.PluginAotCot.getConventionsForObjet;
@@ -25,9 +26,9 @@ public final class ConsultationAotCotTheme extends AbstractPluginsButtonTheme {
         super("Consulation AOT/COT", "Consultation AOT/COT", BUTTON_IMAGE);
     }
     
-    private Objet toConsultFromMap = null;
+    private AotCotAssociable toConsultFromMap = null;
 
-    public void setObjetToConsultFromMap(final Objet objet){
+    public void setObjetToConsultFromMap(final AotCotAssociable objet){
         toConsultFromMap = objet;
     }
 
@@ -53,9 +54,9 @@ public final class ConsultationAotCotTheme extends AbstractPluginsButtonTheme {
         else{
             final List<? extends Element> elements = Injector.getSession().getPrintManager().getElementsToPrint();
 
-            if(elements!=null && elements.size()==1 && elements.get(0) instanceof Objet){
+            if(elements!=null && elements.size()==1 && elements.get(0) instanceof AotCotAssociable){
                 borderPane = new BorderPane();
-                borderPane.setCenter(getConventionsForObjet((Objet) elements.get(0)));
+                borderPane.setCenter(getConventionsForObjet((AotCotAssociable) elements.get(0)));
             } else {
                 final String msg;
                 borderPane = null;

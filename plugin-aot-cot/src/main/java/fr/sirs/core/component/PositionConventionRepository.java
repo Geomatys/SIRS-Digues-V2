@@ -3,7 +3,7 @@ package fr.sirs.core.component;
 
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
-import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.AotCotAssociable;
 import fr.sirs.core.model.PositionConvention;
 import java.util.List;
 import org.apache.sis.util.ArgumentChecks;
@@ -37,7 +37,7 @@ AbstractPositionDocumentRepository
        initStandardDesignDocument();
    }
     
-    public List<PositionConvention> getByObjet(final Objet objet) {
+    public List<PositionConvention> getByObjet(final AotCotAssociable objet) {
         ArgumentChecks.ensureNonNull("objet", objet);
         return this.queryView(BY_OBJET_ID, objet.getId());
     }
