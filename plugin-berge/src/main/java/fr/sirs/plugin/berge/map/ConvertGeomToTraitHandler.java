@@ -14,15 +14,12 @@ import fr.sirs.plugin.berge.PluginBerge;
 import java.awt.geom.Rectangle2D;
 import java.time.LocalDate;
 import java.util.logging.Level;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -90,7 +87,7 @@ public class ConvertGeomToTraitHandler extends AbstractNavigationHandler {
         dialog.initStyle(StageStyle.UTILITY);
         dialog.setResizable(true);
         dialog.setWidth(360);
-        dialog.setHeight(270);
+        dialog.setHeight(300);
         dialog.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {

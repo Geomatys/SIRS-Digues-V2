@@ -32,6 +32,7 @@ public class FXTraitBerge extends GridPane{
     private static final String MESSAGE_BERGE = "Sélectionner une berge sur la carte.";
     private static final String MESSAGE_TRAIT = "Sélectionner un trait de berge sur la carte ou cliquer sur nouveau.";
     private static final String MESSAGE_TRAIT_IMPORT = "Sélectionner une géometrie à convertir en trait de berge sur la carte.";
+    private static final String MESSAGE_TRAIT_CREATE = "Cliquer sur la carte pour créer la géométrie, double-click pour terminer la creation.";
 
     @FXML private Label uiLblBerge;
     @FXML private Label uiLblTrait;
@@ -72,13 +73,26 @@ public class FXTraitBerge extends GridPane{
             public void changed(ObservableValue<? extends TraitBerge> observable, TraitBerge oldValue, TraitBerge newValue) {
                 if(newValue!=null){
                     uiLblTrait.setText(new SirsStringConverter().toString(newValue));
+                    uiDateDebut.setValue(newValue.getDate_debut());
+                    uiDateFin.setValue(newValue.getDate_fin());
                 }else{
                     uiLblTrait.setText(importProperty.get() ? MESSAGE_TRAIT_IMPORT :MESSAGE_TRAIT );
                 }
             }
         });
 
-        uiBtnNew.disableProperty().bind(bergeProperty.isNull().or(traitProperty.isNotNull()));
+        uiBtnNew.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(newValue){
+                    uiLblTrait.setText(MESSAGE_TRAIT_CREATE);
+                }else{
+                    uiLblTrait.setText(MESSAGE_TRAIT);
+                }
+            }
+        });
+
+        uiBtnNew.disableProperty().bind(bergeProperty.isNull().or(traitProperty.isNotNull()).or(uiBtnNew.selectedProperty()));
         uiBtnNew.visibleProperty().bind(importProperty.not());
 
         uiDateDebut.disableProperty().bind(traitProperty.isNull());
@@ -102,6 +116,10 @@ public class FXTraitBerge extends GridPane{
 
     public ObjectProperty<FXMap> mapProperty(){
         return mapProperty;
+    }
+
+    public BooleanProperty newProperty(){
+        return uiBtnNew.selectedProperty();
     }
 
     @FXML

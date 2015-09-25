@@ -40,8 +40,10 @@ public class BergeToolBar extends ToolBar {
         importBornes.getStyleClass().add(CENTER);
 
         final ToggleButton butEditTrait = new TraitBergeEditAction(map).createToggleButton(ActionUtils.ActionTextBehavior.HIDE);
+        butEditTrait.setMaxHeight(Double.MAX_VALUE);
         butEditTrait.getStyleClass().add(CENTER);
         final Button importTrait = new ConvertGeomToTraitAction(map).createButton(ActionUtils.ActionTextBehavior.HIDE);
+        importTrait.setMaxHeight(Double.MAX_VALUE);
         importTrait.getStyleClass().add(RIGHT);
         
         getItems().add(new HBox(butEditBerge, butCut, butMerge, butEditSr, butCalc, butEditConvert, importBornes, butEditTrait, importTrait));

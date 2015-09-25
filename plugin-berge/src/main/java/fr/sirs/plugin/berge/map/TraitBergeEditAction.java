@@ -9,7 +9,6 @@ import javafx.scene.image.Image;
 import org.geotoolkit.gui.javafx.render2d.FXCanvasHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXMapAction;
-import org.geotoolkit.internal.GeotkFX;
 
 /**
  *

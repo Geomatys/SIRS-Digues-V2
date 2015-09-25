@@ -3,59 +3,74 @@ package fr.sirs.plugin.berge.map;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.LinearReferencingUtilities;
+import fr.sirs.core.component.TraitBergeRepository;
+import fr.sirs.core.model.Berge;
 import fr.sirs.core.model.TraitBerge;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugin.berge.PluginBerge;
-import java.beans.PropertyChangeEvent;
-import java.net.URISyntaxException;
-import java.util.Collections;
+import java.awt.geom.Rectangle2D;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
+import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import org.geotoolkit.cql.CQLException;
-import org.geotoolkit.display2d.GO2Utilities;
-import org.geotoolkit.display2d.container.ContextContainer2D;
-import org.geotoolkit.filter.identity.DefaultFeatureId;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
+import org.geotoolkit.data.bean.BeanFeature;
+import org.geotoolkit.display.VisitFilter;
+import org.geotoolkit.display2d.GraphicVisitor;
+import org.geotoolkit.display2d.canvas.AbstractGraphicVisitor;
+import org.geotoolkit.display2d.canvas.RenderingContext2D;
+import org.geotoolkit.display2d.primitive.ProjectedCoverage;
+import org.geotoolkit.display2d.primitive.ProjectedFeature;
+import org.geotoolkit.display2d.primitive.SearchAreaJ2D;
+import org.geotoolkit.feature.Feature;
+import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
+import org.geotoolkit.gui.javafx.render2d.navigation.AbstractMouseHandler;
+import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
 import org.geotoolkit.map.FeatureMapLayer;
-import org.geotoolkit.map.ItemListener;
 import org.geotoolkit.map.MapContext;
-import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.style.MutableStyle;
-import org.geotoolkit.util.collection.CollectionChangeEvent;
-import org.opengis.filter.Id;
+import org.geotoolkit.referencing.CRS;
+import org.opengis.referencing.operation.TransformException;
+import org.opengis.util.FactoryException;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  */
-public class TraitBergeEditHandler extends AbstractNavigationHandler implements ItemListener {
+public class TraitBergeEditHandler extends AbstractNavigationHandler {
 
     private static final int CROSS_SIZE = 5;
 
-    private final MouseListen mouseInputListener;
-    private final FXGeometryLayer geomlayer= new FXGeometryLayer(){
+    private final MainMouseListen mouseInputListener = new MainMouseListen();
+    private final FXGeometryLayer decoration= new FXGeometryLayer(){
         @Override
         protected Node createVerticeNode(Coordinate c, boolean selected){
             final Line h = new Line(c.x-CROSS_SIZE, c.y, c.x+CROSS_SIZE, c.y);
@@ -66,230 +81,412 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler implements 
         }
     };
 
-    //edition variables
-    private FeatureMapLayer traitbergeLayer;
-    private final ObjectProperty<TraitBerge> traitbergeProperty = new SimpleObjectProperty<>();
-    private EditionHelper helper;
-    private final EditionHelper.EditionGeometry editGeometry = new EditionHelper.EditionGeometry();
-    private final Session session;
+    private final TraitBergeRepository traitRepo = (TraitBergeRepository)Injector.getSession().getRepositoryForClass(TraitBerge.class);
+    private final FXTraitBerge pane = new FXTraitBerge();
+    private final Stage dialog = new Stage();
 
-    private Id selectionFilter;
+    private FeatureMapLayer bergeLayer = null;
+    private FeatureMapLayer traitLayer = null;
 
-    // overriden variable by init();
-    protected String layerName;
-    protected MutableStyle style;
-    protected String typeName;
-    protected boolean maleGender;
-
-
-    protected void init() {
-        this.layerName = PluginBerge.LAYER_TRAIT_NAME;
-        try {
-            this.style = PluginBerge.createBergeStyle();
-        } catch (URISyntaxException | CQLException ex) {
-            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-        }
-        this.typeName = "berge";
-        this.maleGender = false;
-    }
-
-
-    /**
-     * Constructor called directly by sub-classes
-     * @param map
-     */
     public TraitBergeEditHandler(final FXMap map) {
-        super();
-        init();
-        mouseInputListener = new MouseListen(typeName);
 
-        session = Injector.getSession();
-        traitbergeProperty.addListener((ObservableValue<? extends TraitBerge> observable, TraitBerge oldValue, TraitBerge newValue) -> {
-
-            editGeometry.reset();
-            if (traitbergeProperty.get() != null) {
-                editGeometry.geometry.set((Geometry) traitbergeProperty.get().getGeometry().clone());
-            }
-            updateGeometry();
-
-            if (newValue != null) {
-                selectionFilter = GO2Utilities.FILTER_FACTORY.id(
-                        Collections.singleton(new DefaultFeatureId(newValue.getId())));
-            } else {
-                selectionFilter = null;
-            }
-            if (Platform.isFxApplicationThread()) {
-                traitbergeLayer.setSelectionFilter(selectionFilter);
-            } else {
-                Platform.runLater(() -> traitbergeLayer.setSelectionFilter(selectionFilter));
+        pane.importProperty().set(false);
+        dialog.setScene(new Scene(pane));
+        dialog.setAlwaysOnTop(true);
+        dialog.initModality(Modality.NONE);
+        dialog.initStyle(StageStyle.UTILITY);
+        dialog.setResizable(true);
+        dialog.setWidth(360);
+        dialog.setHeight(300);
+        dialog.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                map.setHandler(new FXPanHandler(true));
             }
         });
+
     }
 
     /**
      * {@inheritDoc }
      */
     @Override
-    public void install(final FXMap component) {
-        super.install(component);
-        component.addEventHandler(MouseEvent.ANY, mouseInputListener);
-        component.addEventHandler(ScrollEvent.ANY, mouseInputListener);
+    public void install(final FXMap map) {
+        super.install(map);
+        map.addEventHandler(MouseEvent.ANY, mouseInputListener);
+        map.addEventHandler(ScrollEvent.ANY, mouseInputListener);
         map.setCursor(Cursor.CROSSHAIR);
-        map.addDecoration(0,geomlayer);
+        map.addDecoration(0,decoration);
 
-        //recuperation du layer de trait de berge
-        traitbergeLayer = null;
-        traitbergeProperty.set(null);
-        final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
-        final MapContext context = cc.getContext();
+        //on rend les couches berge selectionnables
+        final MapContext context = map.getContainer().getContext();
         for(MapLayer layer : context.layers()){
             layer.setSelectable(false);
-            if(layer.getName().equalsIgnoreCase(layerName)){
-                traitbergeLayer = (FeatureMapLayer) layer;
-                //TODO : activate back graduation after Geotk milestone MC0044
-                traitbergeLayer.setSelectionStyle(style);
-                updateGeometry();
-
-                layer.setSelectable(true);
-                traitbergeLayer.addItemListener(this);
+            if(layer.getName().equalsIgnoreCase(PluginBerge.LAYER_BERGE_NAME)){
+                bergeLayer = (FeatureMapLayer) layer;
+                bergeLayer.setSelectable(true);
+            }else if(layer.getName().equalsIgnoreCase(PluginBerge.LAYER_TRAIT_NAME)){
+                traitLayer = (FeatureMapLayer) layer;
+                traitLayer.setSelectable(true);
             }
         }
 
-        helper = new EditionHelper(map, traitbergeLayer);
-        helper.setMousePointerSize(6);
+        pane.mapProperty().set(map);
+        dialog.show();
     }
 
     /**
      * {@inheritDoc }
-     * @param component
-     * @return
      */
     @Override
     public boolean uninstall(final FXMap component) {
-        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition ? Les modifications non sauvegardées seront perdues.",
-                        ButtonType.YES,ButtonType.NO);
-        if (traitbergeProperty.get()==null ||
-                ButtonType.YES.equals(alert.showAndWait().get())) {
-            super.uninstall(component);
-            component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
-            component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
-            component.removeDecoration(geomlayer);
-            if (traitbergeLayer != null) {
-                traitbergeLayer.setSelectionStyle(style);
-                traitbergeLayer.removeItemListener(this);
-                traitbergeLayer.setSelectionFilter(null);
-                selectionFilter = null;
-            }
-            return true;
-        }
-
-        return false;
+        super.uninstall(component);
+        component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
+        component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
+        component.removeDecoration(decoration);
+        dialog.hide();
+        return true;
     }
 
-    private void updateGeometry(){
-        if(editGeometry.geometry==null){
-            geomlayer.getGeometries().clear();
-        }else{
-            geomlayer.getGeometries().setAll(editGeometry.geometry.get());
-        }
-    }
-
-    @Override
-    public void itemChange(CollectionChangeEvent<MapItem> event) {
-        // nothing to do;
-    }
-
-    /**
-     * We force focus on currently edited {@link TronconDigue}.
-     * @param evt
-     */
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if (evt == null) return;
-        if (MapLayer.SELECTION_FILTER_PROPERTY.equals(evt.getPropertyName())) {
-            if (selectionFilter != null && !selectionFilter.equals(evt.getNewValue())) {
-                traitbergeLayer.setSelectionFilter(selectionFilter);
-            }
-        }
-    }
-
-    private class MouseListen extends FXPanMouseListen {
+    private class MainMouseListen extends FXPanMouseListen {
 
         private final ContextMenu popup = new ContextMenu();
-        private double startX;
-        private double startY;
-        private double diffX;
-        private double diffY;
-        private final String typeName;
+        private FXPanMouseListen subHandle = null;
 
-
-        public MouseListen(String typeName) {
+        public MainMouseListen() {
             super(TraitBergeEditHandler.this);
             popup.setAutoHide(true);
-            this.typeName = typeName;
-        }
-
-        @Override
-        public void mouseClicked(final MouseEvent e) {
-            if(traitbergeLayer==null) return;
-
-            startX = getMouseX(e);
-            startY = getMouseY(e);
-            mousebutton = e.getButton();
-
-            if (traitbergeProperty.get() == null) {
-                //actions en l'absence de troncon
-
-                if (mousebutton == MouseButton.PRIMARY) {
-
-                } else if (mousebutton == MouseButton.SECONDARY) {
-
-                }
-
-            } else {
-
-            }
         }
 
         @Override
         public void mousePressed(final MouseEvent e) {
-            super.mousePressed(e);
-            if(traitbergeProperty==null) return;
+            if(subHandle!=null){
+                subHandle.handle(e);
+                return;
+            }
 
-            startX = getMouseX(e);
-            startY = getMouseY(e);
-            mousebutton = e.getButton();
+            final MouseButton button = e.getButton();
+            if(button==MouseButton.PRIMARY){
+                if(pane.bergeProperty().get()==null){
+                    //on recupere une berge
+                    final GraphicVisitor visitor = new PickVisitor();
+                    final Rectangle2D rect = new Rectangle2D.Double(getMouseX(e)-3, getMouseY(e)-3, 6, 6);
+                    map.getCanvas().getGraphicsIn(rect, visitor, VisitFilter.INTERSECTS);
+                }else{
+                    //mode edition de geometry
+                    if(pane.newProperty().get()){
+                        //creation d'une geometry
+                        final TraitBerge trait = traitRepo.create();
+                        trait.setBergeId(pane.bergeProperty().get().getDocumentId());
+                        trait.setDate_debut(LocalDate.now());
+                        pane.traitProperty().set(trait);
 
-            if(editGeometry.geometry.get()!=null && mousebutton == MouseButton.PRIMARY){
-                //selection d'un noeud
-                helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
+                        final CreateMouseListen handler = new CreateMouseListen();
+                        handler.selection.geometry.bindBidirectional(pane.traitProperty().get().geometryProperty());
+                        subHandle = handler;
+                        handler.refreshDecoration();
+
+                    }else {
+                        if(pane.traitProperty().get()==null){
+                            //on recupere un trait existant
+                            final GraphicVisitor visitor = new PickVisitor();
+                            final Rectangle2D rect = new Rectangle2D.Double(getMouseX(e)-3, getMouseY(e)-3, 6, 6);
+                            map.getCanvas().getGraphicsIn(rect, visitor, VisitFilter.INTERSECTS);
+                        }
+                    }
+                }
             }
         }
 
         @Override
-        public void mouseDragged(MouseEvent me) {
-            //do not use getX/getY to calculate difference
-            //JavaFX Bug : https://javafx-jira.kenai.com/browse/RT-34608
+        public void mouseClicked(MouseEvent e) {
+            if(subHandle!=null) subHandle.mouseClicked(e);
+            else super.mouseClicked(e);
+        }
 
-            //calcul du deplacement
-            diffX = getMouseX(me)-startX;
-            diffY = getMouseY(me)-startY;
-            startX = getMouseX(me);
-            startY = getMouseY(me);
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            if(subHandle!=null) subHandle.mouseDragged(e);
+            else super.mouseDragged(e);
+        }
 
-            if(editGeometry.selectedNode[0] != -1){
-                //deplacement d'un noeud
-                editGeometry.moveSelectedNode(helper.toCoord(startX,startY));
-                updateGeometry();
-            }else if(editGeometry.numSubGeom != -1){
-                //deplacement de la geometry
-                helper.moveGeometry(editGeometry.geometry.get(), diffX, diffY);
-                updateGeometry();
-            } else {
-                super.mouseDragged(me);
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            if(subHandle!=null) subHandle.mouseEntered(e);
+            else super.mouseEntered(e);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            if(subHandle!=null) subHandle.mouseExited(e);
+            else super.mouseExited(e);
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            if(subHandle!=null) subHandle.mouseMoved(e);
+            else super.mouseMoved(e);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            if(subHandle!=null) subHandle.mouseReleased(e);
+            else super.mouseReleased(e);
+        }
+
+        @Override
+        public void mouseWheelMoved(ScrollEvent e) {
+            if(subHandle!=null) subHandle.mouseWheelMoved(e);
+            else super.mouseWheelMoved(e);
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            if(subHandle!=null) subHandle.keyPressed(e);
+            else super.keyPressed(e);
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            if(subHandle!=null) subHandle.keyReleased(e);
+            else super.keyReleased(e);
+        }
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+            if(subHandle!=null) subHandle.keyTyped(e);
+            else super.keyTyped(e);
+        }
+        
+    }
+
+    private final class PickVisitor extends AbstractGraphicVisitor{
+
+        @Override
+        public void visit(ProjectedFeature feature, RenderingContext2D context, SearchAreaJ2D area) {
+            final Feature f = feature.getCandidate();
+            final Object bean = feature.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
+
+            if(pane.bergeProperty().get()==null){
+                //on selectionne uniquement un object de type berge.
+                if(bean instanceof Berge){
+                    pane.bergeProperty().set((Berge)bean);
+                }
+            }else if(pane.importProperty().get()){
+                //on selectionne n'importe quelle geometry pour en faire un trait de berge.
+                Geometry geom = (Geometry) f.getDefaultGeometryProperty().getValue();
+                if (geom != null) {
+                    geom = LinearReferencingUtilities.asLineString(geom);
+                }
+
+                if(geom !=null) {
+                    try{
+                        final Session session = Injector.getSession();
+                        //convertion from data crs to base crs
+                        geom = JTS.transform(geom, CRS.findMathTransform(
+                                f.getDefaultGeometryProperty().getType().getCoordinateReferenceSystem(),
+                                session.getProjection(), true));
+                        JTS.setCRS(geom, session.getProjection());
+
+
+                        final TraitBerge trait = traitRepo.create();
+                        trait.setBergeId(pane.bergeProperty().get().getDocumentId());
+                        trait.setDate_debut(LocalDate.now());
+                        trait.setGeometry(geom);
+                        pane.traitProperty().set(trait);
+
+                        //save trait de berge
+                        traitRepo.add(trait);
+
+                        map.getCanvas().repaint();
+                    }catch(TransformException | FactoryException ex){
+                        SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
+                    }
+                }
+            }else if(pane.traitProperty().get()==null){
+                //on selectionne uniquement un object de type trait de berge.
+                if(bean instanceof TraitBerge){
+                    pane.traitProperty().set((TraitBerge)bean);
+                    //edition d'une geometry existante
+                    final EditMouseListen handler = new EditMouseListen();
+                    handler.selection.geometry.bindBidirectional(pane.traitProperty().get().geometryProperty());
+                    mouseInputListener.subHandle = handler;
+                    handler.refreshDecoration();
+                }
             }
         }
+
+        @Override
+        public boolean isStopRequested() {
+            return pane.traitProperty().get()!=null;
+        }
+
+        @Override
+        public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
     }
+
+    private class EditMouseListen extends FXPanMouseListen {
+
+        private final EditionHelper helper;
+        private final EditionHelper.EditionGeometry selection = new EditionHelper.EditionGeometry();
+        private boolean modified = false;
+        private MouseButton pressed = null;
+
+        public EditMouseListen() {
+            super(TraitBergeEditHandler.this);
+            this.helper = new EditionHelper(map, traitLayer);
+        }
+
+        private void refreshDecoration(){
+            decoration.getGeometries().setAll(selection.geometry.get());
+            decoration.setNodeSelection(selection);
+        }
+
+        @Override
+        public void mouseClicked(final MouseEvent e) {
+
+            final MouseButton button = e.getButton();
+
+            if(button == MouseButton.PRIMARY){
+                if(selection.geometry.get() == null){
+                    //nothing
+                }else if(e.getClickCount() >= 2){
+                    //double click = add a node
+                    final Geometry result;
+                    if(selection.geometry.get() instanceof LineString){
+                        result = helper.insertNode((LineString)selection.geometry.get(), e.getX(), e.getY());
+                    }else if(selection.geometry.get() instanceof Polygon){
+                        result = helper.insertNode((Polygon)selection.geometry.get(), e.getX(), e.getY());
+                    }else if(selection.geometry.get() instanceof GeometryCollection){
+                        result = helper.insertNode((GeometryCollection)selection.geometry.get(), e.getX(), e.getY());
+                    }else{
+                        result = selection.geometry.get();
+                    }
+                    modified = modified || result != selection.geometry.get();
+                    selection.geometry.set( result );
+                    decoration.getGeometries().setAll(selection.geometry.get());
+                }else if(e.getClickCount() == 1){
+                    //single click with a geometry = select a node
+                    helper.grabGeometryNode(e.getX(), e.getY(), selection);
+                    decoration.setNodeSelection(selection);
+                }
+            }else if(button == MouseButton.SECONDARY){
+                //nothing
+            }
+
+        }
+
+        @Override
+        public void mousePressed(final MouseEvent e) {
+            pressed = e.getButton();
+
+            if(pressed == MouseButton.PRIMARY){
+                if(selection.geometry.get() == null){
+                    //nothing
+                }else if(e.getClickCount() == 1){
+                    //single click with a geometry = select a node
+                    helper.grabGeometryNode(e.getX(), e.getY(), selection);
+                    decoration.setNodeSelection(selection);
+                }
+            }
+
+            super.mousePressed(e);
+        }
+
+        @Override
+        public void mouseDragged(final MouseEvent e) {
+
+            if(pressed == MouseButton.PRIMARY && selection != null){
+                //dragging node
+                selection.moveSelectedNode(helper.toCoord(e.getX(), e.getY()));
+                refreshDecoration();
+                modified = true;
+                return;
+            }
+
+            super.mouseDragged(e);
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            if(KeyCode.DELETE == e.getCode() && selection != null){
+                //delete node
+                selection.deleteSelectedNode();
+                refreshDecoration();
+                modified = true;
+            }
+        }
+
+    }
+
+
+    private class CreateMouseListen extends FXPanMouseListen {
+
+        private final EditionHelper helper;
+        private final EditionHelper.EditionGeometry selection = new EditionHelper.EditionGeometry();
+        private final List<Coordinate> coords = new ArrayList<>();
+        private boolean end = false;
+
+        public CreateMouseListen() {
+            super(TraitBergeEditHandler.this);
+            this.helper = new EditionHelper(map, traitLayer);
+        }
+
+        private void refreshDecoration(){
+            decoration.getGeometries().setAll(selection.geometry.get());
+            decoration.setNodeSelection(selection);
+        }
+
+        @Override
+        public void mouseClicked(final MouseEvent e) {
+            if(end) return;
+
+            final double x = getMouseX(e);
+            final double y = getMouseY(e);
+            mousebutton = e.getButton();
+
+            if(mousebutton == MouseButton.PRIMARY){
+                coords.add(helper.toCoord(x,y));
+                if(coords.size() == 1){
+                    //this is the first point of the geometry we create
+                    //add another point that will be used when moving the mouse around
+                    coords.add(helper.toCoord(x,y));
+                }
+                final LineString geometry = EditionHelper.createLine(coords);
+                JTS.setCRS(geometry, map.getCanvas().getObjectiveCRS2D());
+                selection.geometry.set(geometry);
+                refreshDecoration();
+
+                if(e.getClickCount()>=2){
+                    end = true;
+                }
+
+            }else if(mousebutton == MouseButton.SECONDARY){
+                //nothing
+            }
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent me) {
+            if(end) return;
+
+            if(coords.size() > 1){
+                final double x = getMouseX(me);
+                final double y = getMouseY(me);
+                coords.remove(coords.size()-1);
+                coords.add(helper.toCoord(x,y));
+                final LineString geometry = EditionHelper.createLine(coords);
+                JTS.setCRS(geometry, map.getCanvas().getObjectiveCRS2D());
+                selection.geometry.set(geometry);
+                refreshDecoration();
+                return;
+            }
+
+            super.mouseMoved(me);
+        }
+
+    }
+
 
 }
 

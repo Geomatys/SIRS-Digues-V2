@@ -173,6 +173,7 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
         public TraitTable() {
             super(TraitBerge.class, null);
             createNewProperty.set(false);
+            detaillableProperty.set(false);
             uiAdd.setVisible(false);
         }
 
