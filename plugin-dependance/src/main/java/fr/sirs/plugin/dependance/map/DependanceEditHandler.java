@@ -127,6 +127,12 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
         this();
         this.dependance = dependance;
         newDependance = true;
+
+        if (dependance.getGeometry() != null) {
+            editGeometry.geometry.set((Geometry)dependance.getGeometry().clone());
+            decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
+            newDependance = false;
+        }
     }
 
     /**
@@ -151,6 +157,14 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
      */
     @Override
     public boolean uninstall(FXMap component) {
+        if (editGeometry.geometry.get() == null) {
+            super.uninstall(component);
+            component.removeDecoration(decorationLayer);
+            component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
+            component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
+            return true;
+        }
+
         final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition ? Les modifications non sauvegardées seront perdues.",
                 ButtonType.YES,ButtonType.NO);
         if (ButtonType.YES.equals(alert.showAndWait().get())) {
@@ -379,6 +393,17 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     // -supprimer dépendance
                     popup.getItems().clear();
 
+                    final Class clazz = dependance.getClass();
+                    if (AireStockageDependance.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, aireLayer);
+                    } else if (AutreDependance.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, autreLayer);
+                    } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, cheminLayer);
+                    } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, ouvrageLayer);
+                    }
+
                     //action : suppression d'un noeud
                     helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
                     if (editGeometry.selectedNode[0] >= 0) {
@@ -447,6 +472,21 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
 
             if(dependance != null && !newDependance && pressed == MouseButton.PRIMARY){
                 // On va sélectionner un noeud sur lequel l'utilisateur a cliqué, s'il y en a un.
+
+                // Le helper peut être null si on a choisi d'activer ce handler pour une dépendance existante,
+                // sans passer par le clic droit pour choisir un type de dépendance.
+                final Class clazz = dependance.getClass();
+                if (helper == null) {
+                    if (AireStockageDependance.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, aireLayer);
+                    } else if (AutreDependance.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, autreLayer);
+                    } else if (CheminAccesDependance.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, cheminLayer);
+                    } else if (OuvrageVoirieDependance.class.isAssignableFrom(clazz)) {
+                        helper = new EditionHelper(map, ouvrageLayer);
+                    }
+                }
                 helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
                 decorationLayer.setNodeSelection(editGeometry);
             }

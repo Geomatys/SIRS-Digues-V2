@@ -7,6 +7,7 @@ import fr.sirs.core.model.AbstractDependance;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.plugin.dependance.map.DependanceEditHandler;
 import fr.sirs.ui.Growl;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -16,6 +17,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -29,10 +31,13 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.data.shapefile.ShapefileFeatureStore;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.geometry.jts.JTSEnvelope2D;
 import org.geotoolkit.gui.javafx.layer.FXFeatureTable;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
+import org.opengis.geometry.Envelope;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 import org.opengis.util.GenericName;
@@ -40,6 +45,7 @@ import org.opengis.util.GenericName;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 
@@ -52,6 +58,15 @@ import java.util.logging.Level;
 public class FXPositionDependancePane extends BorderPane {
     private final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty(true);
 
+    @FXML
+    private Label uiGeometryPresentLbl;
+
+    @FXML
+    private Button uiDrawOnMapBtn;
+
+    @FXML
+    private Button uiImportGeometryBtn;
+
     /**
      * La dépendance à éditer.
      */
@@ -59,6 +74,28 @@ public class FXPositionDependancePane extends BorderPane {
 
     public FXPositionDependancePane() {
         SIRS.loadFXML(this);
+
+        uiGeometryPresentLbl.setText("Pas de géométrie");
+        uiDrawOnMapBtn.setText("Tracer sur la carte");
+        uiImportGeometryBtn.setText("Importer une géométrie");
+
+        dependance.addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) {
+                uiGeometryPresentLbl.setText("Pas de géométrie");
+                uiDrawOnMapBtn.setText("Tracer sur la carte");
+                uiImportGeometryBtn.setText("Importer une géométrie");
+            } else {
+                uiGeometryPresentLbl.setText(newValue.getGeometry() == null ? "Pas de géométrie" : "Géométrie présente");
+                uiDrawOnMapBtn.setText(newValue.getGeometry() == null ? "Tracer sur la carte" : "Modifier le tracé");
+                uiImportGeometryBtn.setText(newValue.getGeometry() == null ? "Importer une géométrie" : "Réimporter une géométrie");
+
+                newValue.geometryProperty().addListener((observable1, oldValue1, newValue1) -> {
+                    uiGeometryPresentLbl.setText(newValue1 == null ? "Pas de géométrie" : "Géométrie présente");
+                    uiDrawOnMapBtn.setText(newValue.getGeometry() == null ? "Tracer sur la carte" : "Modifier le tracé");
+                    uiImportGeometryBtn.setText(newValue.getGeometry() == null ? "Importer une géométrie" : "Réimporter une géométrie");
+                });
+            }
+        });
     }
 
     public AbstractDependance getDependance() {
@@ -73,6 +110,19 @@ public class FXPositionDependancePane extends BorderPane {
     public void drawOnMap() {
         final FXMapTab tab = Injector.getSession().getFrame().getMapTab();
         tab.show();
+
+        if (dependance.get().getGeometry() != null) {
+            final JTSEnvelope2D env = JTS.toEnvelope(dependance.get().getGeometry());
+            final Envelope selectionEnvelope = SIRS.pseudoBuffer(env);
+            Platform.runLater(() -> {
+                try {
+                    tab.getMap().getUiMap().getCanvas().setVisibleArea(selectionEnvelope);
+                } catch (Exception e) {
+                    GeotkFX.newExceptionDialog("Impossible de zoomer sur l'étendue de la géométrie", e);
+                    SIRS.LOGGER.log(Level.INFO, e.getLocalizedMessage(), e);
+                }
+            });
+        }
         tab.getMap().getUiMap().setHandler(new DependanceEditHandler(dependance.get()));
     }
 
