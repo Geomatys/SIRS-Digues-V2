@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
@@ -86,7 +87,13 @@ public class TemplatePane extends GridPane implements Initializable {
 
         final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.APPLY.equals(opt.get())){
-            return rpane.getTemplate();
+            final TemplateOdt template = rpane.getTemplate();
+            if(template.getOdt()==null){
+                final Alert alert = new Alert(Alert.AlertType.WARNING, "Le modèle ajouté en base semble vide.\nIl ne pourra pas être utilisé avant d'avoir été rempli par un modèle odt.", ButtonType.OK);
+                alert.setResizable(true);
+                alert.showAndWait();
+            }
+            return template;
         }
         return null;
     }

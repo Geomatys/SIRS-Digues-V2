@@ -279,6 +279,8 @@ public class ODTUtils {
             final TemplateOdt template = repo.get(templateId);
             if(template==null){
                 throw new Exception("Template manquant pour l'identifiant : "+templateId);
+            } else if(template.getOdt()==null){
+                throw new IllegalStateException("Template vide de données.");
             }
             final DocumentTemplateFactory documentTemplateFactory = new DocumentTemplateFactory();
             templateDoc = documentTemplateFactory.getTemplate(new ByteArrayInputStream(template.getOdt()));

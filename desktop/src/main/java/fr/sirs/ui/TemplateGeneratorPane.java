@@ -72,7 +72,7 @@ public class TemplateGeneratorPane extends VBox{
         setPadding(new Insets(0, 10, 0, 10));
         setSpacing(10);
 
-        final Label title = new Label("Création d'un template");
+        final Label title = new Label("Générateur de modèles .odt");
         title.getStyleClass().add(CSS_POJOTABLE_HEADER);
         title.setAlignment(Pos.CENTER);
         final BorderPane titlePane = new BorderPane(title);

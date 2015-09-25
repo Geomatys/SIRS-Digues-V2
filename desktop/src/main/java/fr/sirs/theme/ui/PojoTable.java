@@ -71,6 +71,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -647,6 +648,10 @@ public class PojoTable extends BorderPane {
 
     public final ObservableList<Element> getSelectedItems(){
         return uiTable.getSelectionModel().getSelectedItems();
+    }
+
+    public final ReadOnlyObjectProperty<? extends Element> selectedItemProperty(){
+        return getTable().getSelectionModel().selectedItemProperty();
     }
 
     protected final TableView<Element> getTable() {
