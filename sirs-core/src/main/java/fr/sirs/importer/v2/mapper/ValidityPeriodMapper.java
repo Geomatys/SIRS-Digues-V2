@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -47,6 +48,7 @@ public class ValidityPeriodMapper extends AbstractMapper<AvecBornesTemporelles> 
         }
     }
 
+    @Component
     public static class Spi implements MapperSpi<AvecBornesTemporelles> {
 
         @Override

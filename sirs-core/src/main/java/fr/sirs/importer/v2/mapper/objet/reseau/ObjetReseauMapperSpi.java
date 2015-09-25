@@ -1,5 +1,7 @@
 package fr.sirs.importer.v2.mapper.objet.reseau;
 
+import org.springframework.stereotype.Component;
+
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.importer.v2.mapper.GenericMapperSpi;
 import java.beans.IntrospectionException;
@@ -10,7 +12,9 @@ import java.util.Map;
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class ObjetReseauMapperSpi extends GenericMapperSpi<ObjetReseau> {
+
     enum Columns {
 //        ID_ELEMENT_RESEAU,
         //        id_nom_element,
@@ -36,18 +40,17 @@ public class ObjetReseauMapperSpi extends GenericMapperSpi<ObjetReseau> {
         //        LIBELLE_TYPE_RESEAU_EAU,
         //        LIBELLE_TYPE_REVETEMENT,
         //        LIBELLE_TYPE_USAGE_VOIE,
+
         NOM,
-//                ID_TYPE_ELEMENT_RESEAU,
+        //                ID_TYPE_ELEMENT_RESEAU,
         ID_TYPE_COTE,
         ID_SOURCE,
         N_SECTEUR,
-
         ID_ECOULEMENT,
         ID_IMPLANTATION,
         ID_UTILISATION_CONDUITE,
         ID_TYPE_CONDUITE_FERMEE,
         AUTORISE,
-
         ID_TYPE_OUVR_HYDRAU_ASSOCIE,
         ID_TYPE_RESEAU_COMMUNICATION,
         ID_OUVRAGE_COMM_NRJ,
@@ -62,13 +65,13 @@ public class ObjetReseauMapperSpi extends GenericMapperSpi<ObjetReseau> {
         DIAMETRE,
         ID_TYPE_RESEAU_EAU,
         ID_TYPE_NATURE,
-//        LIBELLE_TYPE_NATURE,
-//        ID_TYPE_NATURE_HAUT,
-//        LIBELLE_TYPE_NATURE_HAUT,
-//        ID_TYPE_NATURE_BAS,
-//        LIBELLE_TYPE_NATURE_BAS,
+        //        LIBELLE_TYPE_NATURE,
+        //        ID_TYPE_NATURE_HAUT,
+        //        LIBELLE_TYPE_NATURE_HAUT,
+        //        ID_TYPE_NATURE_BAS,
+        //        LIBELLE_TYPE_NATURE_BAS,
         ID_TYPE_REVETEMENT_HAUT,
-//        LIBELLE_TYPE_REVETEMENT_HAUT,
+        //        LIBELLE_TYPE_REVETEMENT_HAUT,
         ID_TYPE_REVETEMENT_BAS,
 //        LIBELLE_TYPE_REVETEMENT_BAS,
 //        ID_AUTO

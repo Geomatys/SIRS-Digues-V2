@@ -27,6 +27,7 @@ public class LaisseCrueMapper extends AbstractObjetMapper<LaisseCrue> {
 
     private enum Columns {
 //        ID_LAISSE_CRUE,
+
         ID_SOURCE,
         ID_EVENEMENT_HYDRAU,
         ID_TYPE_REF_HEAU,

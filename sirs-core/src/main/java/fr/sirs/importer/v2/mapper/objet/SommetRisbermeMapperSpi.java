@@ -1,5 +1,7 @@
 package fr.sirs.importer.v2.mapper.objet;
 
+import org.springframework.stereotype.Component;
+
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.importer.v2.mapper.GenericMapperSpi;
 import java.beans.IntrospectionException;
@@ -10,6 +12,7 @@ import java.util.Map;
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class SommetRisbermeMapperSpi extends GenericMapperSpi<SommetRisberme> {
 
     private final HashMap<String, String> bindings;

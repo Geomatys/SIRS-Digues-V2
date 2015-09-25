@@ -10,9 +10,10 @@ import java.util.Map;
  *
  * @author Alexis Manin (Geomatys)
  */
-public class DesordreMapperSpi  extends GenericMapperSpi<Desordre> {
-    
+public class DesordreMapperSpi extends GenericMapperSpi<Desordre> {
+
     private enum Columns {
+
         //            id_nom_element,// Aucun intéret
         //            ID_SOUS_GROUPE_DONNEES,// Aucun intéret
         //            LIBELLE_SOUS_GROUPE_DONNEES,// Aucun intéret

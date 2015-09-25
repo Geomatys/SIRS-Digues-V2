@@ -15,6 +15,7 @@ import fr.sirs.importer.v2.mapper.MapperSpi;
 import java.io.IOException;
 import java.util.Optional;
 import org.opengis.referencing.operation.TransformException;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -49,6 +50,7 @@ public class PointXYZMapper extends AbstractMapper<PointXYZ> {
         }
     }
 
+    @Component
     public static class Spi implements MapperSpi<PointXYZ> {
 
         @Override

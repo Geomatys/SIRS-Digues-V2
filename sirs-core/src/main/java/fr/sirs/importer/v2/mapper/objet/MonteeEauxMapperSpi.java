@@ -5,6 +5,8 @@
  */
 package fr.sirs.importer.v2.mapper.objet;
 
+import org.springframework.stereotype.Component;
+
 import fr.sirs.core.model.MonteeEaux;
 import fr.sirs.importer.v2.mapper.GenericMapperSpi;
 import java.beans.IntrospectionException;
@@ -15,9 +17,11 @@ import java.util.Map;
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class MonteeEauxMapperSpi extends GenericMapperSpi<MonteeEaux> {
 
     private enum Columns {
+
         ID_EVENEMENT_HYDRAU,
         ID_ECHELLE_LIMNI
     };

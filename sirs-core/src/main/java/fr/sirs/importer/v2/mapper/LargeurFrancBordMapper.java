@@ -13,6 +13,7 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.importer.AccessDbImporterException;
 import java.io.IOException;
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -58,6 +59,7 @@ public class LargeurFrancBordMapper extends AbstractMapper<LargeurFrancBord> {
         }
     }
 
+    @Component
     public static class Spi implements MapperSpi<LargeurFrancBord> {
 
         @Override

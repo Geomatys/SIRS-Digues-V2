@@ -1,5 +1,7 @@
 package fr.sirs.importer.v2.mapper.objet.reseau;
 
+import org.springframework.stereotype.Component;
+
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.importer.v2.mapper.GenericMapperSpi;
 import java.beans.IntrospectionException;
@@ -10,6 +12,7 @@ import java.util.Map;
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class OuvrageHydroAssocieMapperSpi extends GenericMapperSpi<OuvrageHydrauliqueAssocie> {
 
     private final HashMap<String, String> bindings = new HashMap<>();

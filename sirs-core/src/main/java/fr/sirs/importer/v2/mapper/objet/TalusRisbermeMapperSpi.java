@@ -1,5 +1,7 @@
 package fr.sirs.importer.v2.mapper.objet;
 
+import org.springframework.stereotype.Component;
+
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.importer.v2.mapper.GenericMapperSpi;
@@ -14,6 +16,7 @@ import java.util.function.BiConsumer;
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class TalusRisbermeMapperSpi extends GenericMapperSpi<TalusRisberme> {
 
     private final HashMap<String, String> bindings;
@@ -47,6 +50,6 @@ public class TalusRisbermeMapperSpi extends GenericMapperSpi<TalusRisberme> {
 
     @Override
     protected Collection<BiConsumer<Row, TalusRisberme>> getExtraBindings() {
-        return Collections.singleton((input, output)-> output.setFonctionHautId(output.getFonctionBasId()));
+        return Collections.singleton((input, output) -> output.setFonctionHautId(output.getFonctionBasId()));
     }
 }

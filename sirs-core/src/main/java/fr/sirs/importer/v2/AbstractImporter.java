@@ -120,7 +120,7 @@ public abstract class AbstractImporter<T extends Element> {
      * @throws java.io.IOException
      * @throws fr.sirs.importer.AccessDbImporterException
      */
-    protected synchronized void compute() throws IOException, AccessDbImporterException {
+    public synchronized void compute() throws IOException, AccessDbImporterException {
         if (importedRows != null)
             return;
 

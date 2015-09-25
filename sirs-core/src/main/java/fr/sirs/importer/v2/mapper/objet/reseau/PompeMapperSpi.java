@@ -1,5 +1,7 @@
 package fr.sirs.importer.v2.mapper.objet.reseau;
 
+import org.springframework.stereotype.Component;
+
 import fr.sirs.core.model.Pompe;
 import fr.sirs.importer.v2.mapper.GenericMapperSpi;
 import java.beans.IntrospectionException;
@@ -10,9 +12,11 @@ import java.util.Map;
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class PompeMapperSpi extends GenericMapperSpi<Pompe> {
 
     private enum Columns {
+
         NOM_POMPE,
         PUISSANCE_POMPE,
         DEBIT_POMPE,

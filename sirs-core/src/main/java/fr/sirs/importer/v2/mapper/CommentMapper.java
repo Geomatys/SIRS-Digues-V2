@@ -7,6 +7,7 @@ import fr.sirs.core.model.AvecCommentaire;
 import fr.sirs.importer.AccessDbImporterException;
 import java.io.IOException;
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -32,6 +33,7 @@ public class CommentMapper extends AbstractMapper<AvecCommentaire> {
         }
     }
 
+    @Component
     public static class Spi implements MapperSpi<AvecCommentaire> {
 
         @Override

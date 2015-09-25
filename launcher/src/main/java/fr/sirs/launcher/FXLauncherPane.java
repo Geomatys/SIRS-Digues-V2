@@ -23,6 +23,7 @@ import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.plugins.PluginLoader;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
+import fr.sirs.importer.v2.ImportContext;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
 import fr.sirs.maj.PluginsDownloadManager;
@@ -82,7 +83,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
+import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.logging.Logging;
+import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.ReplicationStatus;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
@@ -91,6 +94,7 @@ import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.IdentifiedObjects;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.util.FactoryException;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -575,16 +579,19 @@ public class FXLauncherPane extends BorderPane {
                 final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
                 createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());
 
-
                 try(final Database mainDb = DatabaseBuilder.open(mainDbFile);
                     final Database cartoDb = DatabaseBuilder.open(cartoDbFile)) {
+
+                    final ImportContext context = new ImportContext(mainDb, cartoDb, appCtx.getBean(CouchDbConnector.class), uiImportCRS.crsProperty().get());
+                    appCtx.getBeanFactory().registerSingleton(ImportContext.class.getCanonicalName(), context);
 
                     // Open spring context for import.
                     try (final ClassPathXmlApplicationContext importCtx = new ClassPathXmlApplicationContext(new String[]{IMPORTER_CONTEXT}, appCtx)) {
                         final DbImporter importer = new DbImporter(appCtx);
-                        importer.setDatabase(mainDb, cartoDb, uiImportCRS.crsProperty().get());
-                        importer.importation(cartoDbFile);
+                        importer.importation();
                     }
+
+                    appCtx.getBeanFactory().destroyBean(ImportContext.class.getCanonicalName(), context);
                 }
 
                 // Opérations ultérieures à l'importation à réaliser par les plugins.
@@ -603,7 +610,7 @@ public class FXLauncherPane extends BorderPane {
                     updateLocalDbList();
                 });
 
-            } catch (IOException | AccessDbImporterException ex) {
+            } catch (DataStoreException | FactoryException | IOException | AccessDbImporterException ex) {
                 LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 GeotkFX.newExceptionDialog("Une erreur est survenue pendant la création de la base de données.", ex).showAndWait();
             } catch (DbAccessException ex) {

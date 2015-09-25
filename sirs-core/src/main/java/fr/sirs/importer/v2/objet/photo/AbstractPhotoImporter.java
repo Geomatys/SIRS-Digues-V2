@@ -36,7 +36,7 @@ public class AbstractPhotoImporter extends AbstractUpdater<Photo, Element> {
     private PhotoHolderRegistry registry;
 
     @Override
-    protected synchronized void compute() throws IOException, AccessDbImporterException {
+    public synchronized void compute() throws IOException, AccessDbImporterException {
         /*
          * HACK : As API is designed to map a table to a single object type, we have
          * to call compute method multiple times, changing table name each time.

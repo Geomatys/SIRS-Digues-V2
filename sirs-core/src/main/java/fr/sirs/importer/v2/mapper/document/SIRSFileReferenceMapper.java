@@ -14,6 +14,7 @@ import fr.sirs.importer.v2.mapper.Mapper;
 import fr.sirs.importer.v2.mapper.MapperSpi;
 import java.io.IOException;
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -35,6 +36,7 @@ public class SIRSFileReferenceMapper extends AbstractMapper<SIRSFileReference> {
         }
     }
 
+    @Component
     public static class SIRSReferenceMapperSpi implements MapperSpi<SIRSFileReference> {
 
         @Override

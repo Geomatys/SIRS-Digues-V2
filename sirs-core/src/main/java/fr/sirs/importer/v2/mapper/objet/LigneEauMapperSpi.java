@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class LigneEauMapperSpi extends GenericMapperSpi<LigneEau> {
 
     private enum Columns {
+
         ID_EVENEMENT_HYDRAU,
         ID_TYPE_REF_HEAU,
         ID_SYSTEME_REP_PRZ,

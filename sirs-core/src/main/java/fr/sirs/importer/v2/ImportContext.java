@@ -52,6 +52,8 @@ import org.opengis.util.GenericName;
  */
 public class ImportContext {
 
+    public static final String NULL_STRING = "null";
+
     public final String startXName = "X_DEBUT";
     public final String startYName = "Y_DEBUT";
     public final String endXName = "X_FIN";
@@ -117,7 +119,7 @@ public class ImportContext {
         this.outputCRS = outputCRS;
 
         CoordinateReferenceSystem crs = null;
-        try (final FeatureStore store = new GeoDBStore("test", inputCartoDb.getFile().toURI().toURL())) {
+        try (final FeatureStore store = new GeoDBStore("no namespace", inputCartoDb.getFile().toURI().toURL())) {
             for (final GenericName name : store.getNames()) {
                 GeometryDescriptor geomDesc = store.getFeatureType(name).getGeometryDescriptor();
                 if (geomDesc != null) {

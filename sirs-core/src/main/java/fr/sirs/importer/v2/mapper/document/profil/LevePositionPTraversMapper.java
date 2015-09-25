@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.sirs.importer.v2.mapper.document.profil;
 
 import com.healthmarketscience.jackcess.Row;
@@ -16,6 +11,7 @@ import fr.sirs.importer.v2.mapper.Mapper;
 import fr.sirs.importer.v2.mapper.MapperSpi;
 import java.io.IOException;
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -83,6 +79,7 @@ public class LevePositionPTraversMapper extends AbstractMapper<LevePositionProfi
         }
     }
 
+    @Component
     public static class Spi implements MapperSpi<LevePositionProfilTravers> {
 
         @Override

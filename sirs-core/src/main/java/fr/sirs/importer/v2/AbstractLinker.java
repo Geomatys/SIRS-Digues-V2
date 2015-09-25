@@ -22,15 +22,18 @@ public abstract class AbstractLinker<T extends Element, U extends Element> exten
      */
     private final HashMap<Integer, HashSet<Integer>> holder2targetIds = new HashMap<>();
 
+    /**
+     * {@inheritDoc }
+     */
     @Override
-    public void link(Integer accessContainerId, U container) throws AccessDbImporterException {
-        final HashSet<Integer> targetIds = holder2targetIds.get(accessContainerId);
+    public void link(Integer accessHolderId, U holder) throws AccessDbImporterException {
+        final HashSet<Integer> targetIds = holder2targetIds.get(accessHolderId);
         if (targetIds == null) return;
         for (final Integer leveId : targetIds) {
             try {
-                bind(container, getImportedId(leveId));
+                bind(holder, getImportedId(leveId));
             } catch (IOException ex) {
-                throw new AccessDbImporterException("Cannot link leves to their profile.", ex);
+                throw new AccessDbImporterException("Cannot create a link.", ex);
             }
         }
     }

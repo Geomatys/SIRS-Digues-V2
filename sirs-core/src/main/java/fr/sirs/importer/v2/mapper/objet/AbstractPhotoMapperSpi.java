@@ -1,5 +1,7 @@
 package fr.sirs.importer.v2.mapper.objet;
 
+import org.springframework.stereotype.Component;
+
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.importer.v2.mapper.GenericMapperSpi;
 import java.beans.IntrospectionException;
@@ -10,9 +12,11 @@ import java.util.Map;
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class AbstractPhotoMapperSpi extends GenericMapperSpi<AbstractPhoto> {
 
     private final HashMap<String, String> bindings;
+
     public AbstractPhotoMapperSpi() throws IntrospectionException {
         super(AbstractPhoto.class);
 

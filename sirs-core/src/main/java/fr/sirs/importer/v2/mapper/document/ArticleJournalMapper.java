@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -59,6 +60,7 @@ public class ArticleJournalMapper extends AbstractMapper<ArticleJournal> {
         }
     }
 
+    @Component
     public static class Spi implements MapperSpi<ArticleJournal> {
 
         @Override

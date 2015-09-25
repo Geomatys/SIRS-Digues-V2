@@ -14,6 +14,7 @@ import fr.sirs.importer.v2.mapper.Mapper;
 import fr.sirs.importer.v2.mapper.MapperSpi;
 import java.io.IOException;
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -41,6 +42,7 @@ public class PointDZMapper extends AbstractMapper<PointDZ> {
         }
     }
 
+    @Component
     public static class Spi implements MapperSpi<PointDZ> {
 
         @Override

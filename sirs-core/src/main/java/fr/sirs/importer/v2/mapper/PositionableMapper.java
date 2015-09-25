@@ -17,6 +17,7 @@ import fr.sirs.importer.v2.ErrorReport;
 import java.io.IOException;
 import java.util.Optional;
 import org.opengis.referencing.operation.TransformException;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -121,6 +122,7 @@ public class PositionableMapper extends AbstractMapper<Positionable> {
         srImporter = null;
     }
 
+    @Component
     public static class Spi implements MapperSpi<Positionable> {
 
         @Override

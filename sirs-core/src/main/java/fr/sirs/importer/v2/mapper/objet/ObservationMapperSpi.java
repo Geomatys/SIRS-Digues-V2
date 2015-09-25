@@ -10,9 +10,10 @@ import java.util.Map;
  *
  * @author Alexis Manin (Geomatys)
  */
-public class ObservationMapperSpi  extends GenericMapperSpi<Observation> {
+public class ObservationMapperSpi extends GenericMapperSpi<Observation> {
 
     private enum Columns {
+
         ID_OBSERVATION,
         ID_DESORDRE,
         ID_TYPE_URGENCE,

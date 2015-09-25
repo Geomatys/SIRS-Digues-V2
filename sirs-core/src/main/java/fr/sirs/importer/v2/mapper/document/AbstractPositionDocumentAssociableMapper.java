@@ -19,6 +19,7 @@ import fr.sirs.importer.v2.mapper.MapperSpi;
 import java.io.IOException;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -72,6 +73,7 @@ public class AbstractPositionDocumentAssociableMapper extends AbstractMapper<Abs
         }
     }
 
+    @Component
     public static class Spi implements MapperSpi<AbstractPositionDocumentAssociable> {
 
         @Override

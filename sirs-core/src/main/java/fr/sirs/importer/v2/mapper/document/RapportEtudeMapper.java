@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -66,6 +67,7 @@ public class RapportEtudeMapper extends AbstractMapper<RapportEtude>{
         }
     }
 
+    @Component
     public static class Spi implements MapperSpi<RapportEtude> {
 
         @Override

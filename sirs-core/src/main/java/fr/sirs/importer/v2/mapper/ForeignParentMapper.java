@@ -13,6 +13,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.v2.AbstractImporter;
 import java.io.IOException;
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -44,6 +45,7 @@ public class ForeignParentMapper extends AbstractMapper<AvecForeignParent> {
         throw new AccessDbImporterException("Input row does not reference any valid " + TRONCON_ID_COLUMN);
     }
 
+    @Component
     public static class Spi implements MapperSpi<AvecForeignParent> {
 
         @Override

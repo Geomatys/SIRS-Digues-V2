@@ -156,7 +156,7 @@ public class PhotoMapperSpi implements MapperSpi<Photo> {
                 }
 
                 output.setBorne_debut_aval(input.getBoolean(PhotoColumns.AMONT_AVAL.toString()));
-                
+
                 // SR
                 final Integer srid = input.getInt(PhotoColumns.ID_SYSTEME_REP.toString());
                 if (srid != null) {

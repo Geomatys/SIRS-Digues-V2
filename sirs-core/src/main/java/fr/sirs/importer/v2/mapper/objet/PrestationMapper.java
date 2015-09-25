@@ -24,6 +24,7 @@ public class PrestationMapper extends AbstractObjetMapper<Prestation> {
     private final AbstractImporter<RefCote> typeCoteImporter;
 
     private enum Columns {
+
         ID_MARCHE,
         REALISATION_INTERNE,
         ID_TYPE_PRESTATION,
@@ -64,7 +65,7 @@ public class PrestationMapper extends AbstractObjetMapper<Prestation> {
             output.setPositionId(RefPositionImporter.getImportedId(typePositionId));
         }
 
-        final  Integer typeSourceId = input.getInt(Columns.ID_SOURCE.name());
+        final Integer typeSourceId = input.getInt(Columns.ID_SOURCE.name());
         if (typeSourceId != null) {
             output.setSourceId(RefSourceImporter.getImportedId(typeSourceId));
         }

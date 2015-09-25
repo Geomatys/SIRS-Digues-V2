@@ -7,6 +7,7 @@ import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.importer.AccessDbImporterException;
 import java.io.IOException;
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -34,6 +35,7 @@ public class LibelleMapper extends AbstractMapper<AvecLibelle> {
     @Override
     public void close() throws IOException {}
 
+    @Component
     public static class Spi implements MapperSpi<AvecLibelle> {
 
         @Override

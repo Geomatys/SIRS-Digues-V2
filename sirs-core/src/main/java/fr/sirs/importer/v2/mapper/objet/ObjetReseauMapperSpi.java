@@ -1,5 +1,7 @@
 package fr.sirs.importer.v2.mapper.objet;
 
+import org.springframework.stereotype.Component;
+
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.importer.v2.mapper.GenericMapperSpi;
 import java.beans.IntrospectionException;
@@ -10,7 +12,9 @@ import java.util.Map;
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class ObjetReseauMapperSpi extends GenericMapperSpi<ObjetReseau> {
+
     private enum Columns {
 //        ID_ELEMENT_RESEAU,
         //        id_nom_element,
@@ -36,8 +40,9 @@ public class ObjetReseauMapperSpi extends GenericMapperSpi<ObjetReseau> {
         //        LIBELLE_TYPE_RESEAU_EAU,
         //        LIBELLE_TYPE_REVETEMENT,
         //        LIBELLE_TYPE_USAGE_VOIE,
+
         NOM,
-//                ID_TYPE_ELEMENT_RESEAU,
+        //                ID_TYPE_ELEMENT_RESEAU,
         ID_TYPE_COTE,
         ID_SOURCE,
         //        N_SECTEUR,

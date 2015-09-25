@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -33,6 +34,7 @@ public class DateMajMapper extends AbstractMapper<AvecDateMaj> {
         }
     }
 
+    @Component
     public static class Spi implements MapperSpi<AvecDateMaj> {
 
         @Override

@@ -187,7 +187,7 @@ public abstract class GenericMapperSpi<T> implements MapperSpi<T> {
             writeMethod.setAccessible(true);
             return (input, output) -> {
                 final Object inputValue = input.get(columnName);
-                if (inputValue != null) {
+                if (inputValue != null && !ImportContext.NULL_STRING.equals(inputValue)) {
                     try {
                         writeMethod.invoke(output, inputValue);
                     } catch (IllegalAccessException | InvocationTargetException ex) {

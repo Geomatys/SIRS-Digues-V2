@@ -16,6 +16,7 @@ import fr.sirs.importer.v2.mapper.Mapper;
 import fr.sirs.importer.v2.mapper.MapperSpi;
 import java.io.IOException;
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -55,6 +56,7 @@ public class DocumentGrandeEchelleMapper extends AbstractMapper<DocumentGrandeEc
         }
     }
 
+    @Component
     public static class Spi implements MapperSpi<DocumentGrandeEchelle> {
 
         @Override

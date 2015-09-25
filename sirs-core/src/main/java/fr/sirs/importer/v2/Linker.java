@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.sirs.importer.v2;
 
 import fr.sirs.core.model.Element;
@@ -24,9 +19,9 @@ public interface Linker<U extends Element> {
 
     /**
      *
-     * @param accessContainerId Id of the target object in source MS-access database.
-     * @param container the target object which will be modified to hold link.
+     * @param accessHolderId Id of the holder object in source MS-access database.
+     * @param holder the object (holder) which will be modified to contain link.
      */
-    void link(final Integer accessContainerId, final U container) throws AccessDbImporterException;
+    void link(final Integer accessHolderId, final U holder) throws AccessDbImporterException;
 
 }
