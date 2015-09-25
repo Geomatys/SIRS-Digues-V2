@@ -4,6 +4,17 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.LabelMapper;
+import java.awt.Color;
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.io.IOException;
+import java.text.Collator;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -23,18 +34,6 @@ import javafx.util.StringConverter;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.odftoolkit.simple.TextDocument;
-
-import java.awt.Color;
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.io.File;
-import java.io.IOException;
-import java.text.Collator;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
 
 
 /**
@@ -171,6 +170,11 @@ public class TemplateGeneratorPane extends VBox{
      */
     private void generate() throws IOException {
         final FileChooser chooser = new FileChooser();
+        final FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Open Document Format", "*.odt");
+        chooser.getExtensionFilters().add(filter);
+        chooser.setSelectedExtensionFilter(filter);
+        chooser.setInitialFileName("template.odt");
+
         final File outputFile = chooser.showSaveDialog(null);
         if(outputFile==null) return;
 

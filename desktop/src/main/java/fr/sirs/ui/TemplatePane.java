@@ -73,7 +73,7 @@ public class TemplatePane extends GridPane implements Initializable {
     }
 
     public static TemplateOdt showCreateDialog(){
-        final TemplatePane rpane = new TemplatePane(new TemplateOdt());
+        final TemplatePane rpane = new TemplatePane(Injector.getSession().getElementCreator().createElement(TemplateOdt.class));
         rpane.template.setValid(true);
 
         final Dialog dialog = new Dialog();
