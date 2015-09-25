@@ -3,7 +3,6 @@
 <?import fr.sirs.theme.ui.*?>
 <?import org.geotoolkit.gui.javafx.util.*?>
 <?import jidefx.scene.control.field.*?>
-<?import jfxtras.scene.control.*?>
 <?import javafx.scene.web.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
@@ -12,96 +11,114 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-
-
 <fx:root fx:id="uiBorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-  <center>
-    <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-      <tabs>
+    <center>
+        <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+            <tabs>
 
-<!-- ATTRIBUTE TAB-->
-        <Tab text="Informations">
-          <ScrollPane>
-            <content>
-          <VBox spacing="30.0" BorderPane.alignment="CENTER">
-            <children>
+                <!-- ATTRIBUTE TAB-->
+                <Tab text="Informations">
+                    <content>
+                        <ScrollPane fitToHeight="true" fitToWidth="true">
+                            <content>
+                                <BorderPane fx:id="ui_centerPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                                    <center>
+                                        <VBox fx:id="ui_mainBox" spacing="30.0" BorderPane.alignment="CENTER">
+                                            <children>
+         
+                                                <FXValidityPeriodPane fx:id="uiValidityPeriod" />
+         
+                                                <!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
+         
+         
+                                                <!-- TronconLit -->
+                                                <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+                                                    <columnConstraints>
+                                                        <ColumnConstraints hgrow="NEVER" />
+                                                        <ColumnConstraints hgrow="ALWAYS" />
+                                          <ColumnConstraints />
+                                                    </columnConstraints>
+                                                    <!--rowConstraints>
+                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                    </rowConstraints-->
+                                                    <children>
+                                                        <Label text="%litId" GridPane.rowIndex="0" />
+                                                        <ComboBox fx:id="ui_litId" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                                        <Button fx:id="ui_litId_link" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+         
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                                    </padding>
+                                       <rowConstraints>
+                                          <RowConstraints />
+                                       </rowConstraints>
+                                                </GridPane>
+         
+                                                <!-- TronconDigue -->
+                                                <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+                                                    <columnConstraints>
+                                                        <ColumnConstraints hgrow="NEVER" />
+                                                        <ColumnConstraints hgrow="ALWAYS" />
+                                          <ColumnConstraints />
+                                                    </columnConstraints>
+                                                    <!--rowConstraints>
+                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                    </rowConstraints-->
+                                                    <children>
+                                                        <!-- EString -->                 
+                                                        <Label text="%libelle" GridPane.rowIndex="0" />
+                                                        <TextField fx:id="ui_libelle" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                                        <Label text="%digueId" GridPane.rowIndex="1" />
+                                                        <ComboBox fx:id="ui_digueId" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                        <Button fx:id="ui_digueId_link" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                        <Label text="%typeRiveId" GridPane.rowIndex="2" />
+                                                        <ComboBox fx:id="ui_typeRiveId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                        <Button fx:id="ui_typeRiveId_link" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                                        <Label text="%typeTronconId" GridPane.rowIndex="3" />
+                                                        <ComboBox fx:id="ui_typeTronconId" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                                        <Button fx:id="ui_typeTronconId_link" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                                        <Label text="%systemeRepDefautId" GridPane.rowIndex="4" />
+                                                        <ComboBox fx:id="ui_systemeRepDefautId" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                                        <Button fx:id="ui_systemeRepDefautId_link" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+         
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                                    </padding>
+                                       <rowConstraints>
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                       </rowConstraints>
+                                                </GridPane>
+                                                <HTMLEditor fx:id="ui_commentaire" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contentediTable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" maxHeight="-Infinity" prefHeight="200.0" styleClass="gray-light" />
+         
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="10.0" left="50.0" right="50.0" top="30.0" />
+                                            </padding>
+                                        </VBox>
+                                    </center>
+                                    <left>
+                                        <ListView fx:id="ui_LeftList" minHeight="100.0" minWidth="100.0" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                                    </left>
+                                </BorderPane>
+                            </content>
+                        </ScrollPane>
+                    </content>
+                </Tab>
 
-  <FXValidityPeriodPane fx:id="uiValidityPeriod"/>
+                <!-- REFERENCE TABS -->
+                <Tab fx:id="ui_borneIds" text="%borneIds" />
+                <Tab fx:id="ui_gestions" text="%gestions" />
 
-<!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
-
-
-            <!-- TronconLit -->
-            <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
-              <columnConstraints>
-                <ColumnConstraints hgrow="NEVER" />
-                <ColumnConstraints hgrow="ALWAYS" />
-              </columnConstraints>
-              <!--rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints-->
-              <children>
-                   <Label text="%litId" GridPane.rowIndex="0" />
-                   <ComboBox fx:id="ui_litId" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                   <Button fx:id="ui_litId_link" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-
-              </children>
-              <padding>
-                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-              </padding>
-            </GridPane>
-
-            <!-- TronconDigue -->
-            <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
-              <columnConstraints>
-                <ColumnConstraints hgrow="NEVER" />
-                <ColumnConstraints hgrow="ALWAYS" />
-              </columnConstraints>
-              <!--rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints-->
-              <children>
-                   <!-- EString -->                 
-                   <Label text="%libelle" GridPane.rowIndex="0" />
-                   <TextField fx:id="ui_libelle" GridPane.columnIndex="1" GridPane.rowIndex="0"  />
-                   <Label text="%digueId" GridPane.rowIndex="1" />
-                   <ComboBox fx:id="ui_digueId" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                   <Button fx:id="ui_digueId_link" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                   <Label text="%typeRiveId" GridPane.rowIndex="2" />
-                   <ComboBox fx:id="ui_typeRiveId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                   <Button fx:id="ui_typeRiveId_link" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                   <Label text="%typeTronconId" GridPane.rowIndex="3" />
-                   <ComboBox fx:id="ui_typeTronconId" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                   <Button fx:id="ui_typeTronconId_link" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                   <Label text="%systemeRepDefautId" GridPane.rowIndex="4" />
-                   <ComboBox fx:id="ui_systemeRepDefautId" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                   <Button fx:id="ui_systemeRepDefautId_link" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-
-              </children>
-              <padding>
-                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-              </padding>
-            </GridPane>
-            <HTMLEditor fx:id="ui_commentaire" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contentediTable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" maxHeight="-Infinity"  prefHeight="200.0" styleClass="gray-light" />
-
-            </children>
-            <padding>
-              <Insets bottom="10.0" left="50.0" right="50.0" top="30.0" />
-            </padding>
-          </VBox>
-            </content>
-          </ScrollPane>
-        </Tab>
-
-<!-- REFERENCE TABS -->
-        <Tab fx:id="ui_borneIds" text="%borneIds"/>
-        <Tab fx:id="ui_gestions" text="%gestions"/>
-
-      </tabs>
-    </TabPane>
-  </center>
+            </tabs>
+        </TabPane>
+    </center>
 
 </fx:root>
-

@@ -104,7 +104,7 @@ public class FXLitPane extends AbstractFXElementPane<Lit> {
     private class TronconLitPojoTable extends PojoTable {
     
         public TronconLitPojoTable() {
-            super(TronconLit.class, "Toonçon du lit");
+            super(TronconLit.class, "Tronçon du lit");
         }
 
         @Override

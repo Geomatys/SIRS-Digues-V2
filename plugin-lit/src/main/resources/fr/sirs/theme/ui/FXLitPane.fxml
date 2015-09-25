@@ -20,7 +20,7 @@
 <!-- ATTRIBUTE TAB-->
         <Tab text="Informations">
    <content>
-             <ScrollPane>
+             <ScrollPane fitToHeight="true" fitToWidth="true">
                <content>
              <VBox fx:id="contentBox" spacing="30.0" BorderPane.alignment="CENTER">
                <children>

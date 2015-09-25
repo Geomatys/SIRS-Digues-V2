@@ -6,6 +6,9 @@ import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
+import fr.sirs.theme.AbstractTheme;
+import fr.sirs.theme.AbstractTheme.ThemeManager;
+import fr.sirs.theme.TronconTheme;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -17,6 +20,10 @@ import javafx.event.ActionEvent;
 import javafx.scene.image.ImageView;
 import java.util.List;
 import java.util.ArrayList;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 
 /**
  *
@@ -50,6 +57,10 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
     @FXML protected Tab ui_borneIds;
     protected final ListeningPojoTable borneIdsTable;
     @FXML protected Tab ui_gestions;
+    @FXML protected ListView ui_LeftList;
+    @FXML protected VBox ui_mainBox;
+    @FXML protected BorderPane ui_centerPane;
+    
     protected final PojoTable gestionsTable;
 
     /**
@@ -146,7 +157,70 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         borneIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getBorneIds(), borneIdsRepo));
         gestionsTable.setParentElement(newElement);
         gestionsTable.setTableItems(()-> (ObservableList) newElement.getGestions());
+        
+        final List<String> items = new ArrayList<>();
+        items.add("Description générale");
+        items.add("Ouvrages associés");
+        items.add("Type d'occupation riveraine");
+        items.add("Pente moyenne");
+        items.add("Largeur moyenne");
+        items.add("Type d'écoulement");
+        items.add("Domanialité");
+        items.add("Zone d'atterrissement");
+        ui_LeftList.setItems(FXCollections.observableList(items));
+        ui_LeftList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                if (newValue.equals("Description générale")) {
+                    ui_centerPane.setCenter(ui_mainBox);
+                } else if (newValue.equals("Ouvrages associés")) {
+                    ThemeManager manager = AbstractTheme.generateThemeManager("Tableau des ouvrages associés", OuvrageAssocieLit.class);
+                    final LitThemePojoTable table = new LitThemePojoTable(manager);
+                    table.setDeletor(manager.getDeletor());
+                    table.setForeignParentId(newElement.getId());
+                    ui_centerPane.setCenter(table);
+                } else if (newValue.equals("Type d'occupation riveraine")) {
+                    ThemeManager manager = AbstractTheme.generateThemeManager("Tableau des occupations riveraines", OccupationRiveraineLit.class);
+                    final LitThemePojoTable table = new LitThemePojoTable(manager);
+                    table.setDeletor(manager.getDeletor());
+                    table.setForeignParentId(newElement.getId());
+                    ui_centerPane.setCenter(table);
+                } else if (newValue.equals("Pente moyenne")) {
+                    ThemeManager manager = AbstractTheme.generateThemeManager("Tableau des pentes", PenteLit.class);
+                    final LitThemePojoTable table = new LitThemePojoTable(manager);
+                    table.setDeletor(manager.getDeletor());
+                    table.setForeignParentId(newElement.getId());
+                    ui_centerPane.setCenter(table);
+                } else if (newValue.equals("Largeur moyenne")) {
+                    ThemeManager manager = AbstractTheme.generateThemeManager("Tableau des largeurs", LargeurLit.class);
+                    final LitThemePojoTable table = new LitThemePojoTable(manager);
+                    table.setDeletor(manager.getDeletor());
+                    table.setForeignParentId(newElement.getId());
+                    ui_centerPane.setCenter(table);
+                } else if (newValue.equals("Type d'écoulement")) {
+                    ThemeManager manager = AbstractTheme.generateThemeManager("Tableau des régimes d'écoulement", RegimeEcoulementLit.class);
+                    final LitThemePojoTable table = new LitThemePojoTable(manager);
+                    table.setDeletor(manager.getDeletor());
+                    table.setForeignParentId(newElement.getId());
+                    ui_centerPane.setCenter(table);
+                } else if (newValue.equals("Domanialité")) {
+                    ThemeManager manager = AbstractTheme.generateThemeManager("Tableau des domanialité", DomanialiteLit.class);
+                    final LitThemePojoTable table = new LitThemePojoTable(manager);
+                    table.setDeletor(manager.getDeletor());
+                    table.setForeignParentId(newElement.getId());
+                    ui_centerPane.setCenter(table);
+                } else if (newValue.equals("Zone d'atterrissement")) {
+                    ThemeManager manager = AbstractTheme.generateThemeManager("Tableau des zones d'atterrissement", ZoneAtterrissementLit.class);
+                    final LitThemePojoTable table = new LitThemePojoTable(manager);
+                    table.setDeletor(manager.getDeletor());
+                    table.setForeignParentId(newElement.getId());
+                    ui_centerPane.setCenter(table);
+                }
+            }
+        });
     }
+    
     @Override
     public void preSave() {
         final Session session = Injector.getBean(Session.class);
@@ -205,5 +279,36 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         }
         element.setBorneIds(currentBorneDigueIdsList);
         
+    }
+    
+    protected class LitThemePojoTable<T extends AvecForeignParent> extends ForeignParentPojoTable<T>{
+
+        private final TronconTheme.ThemeManager<T> group;
+
+        public LitThemePojoTable(TronconTheme.ThemeManager<T> group) {
+            super(group.getDataClass(), group.getTableTitle());
+            foreignParentIdProperty.addListener(this::updateTable);
+            this.group = group;
+        }
+
+        private void updateTable(ObservableValue<? extends String> observable, String oldValue, String newValue){
+            if(newValue==null || group==null) {
+                setTableItems(FXCollections::emptyObservableList);
+            } else {
+                //JavaFX bug : sortable is not possible on filtered list
+                // http://stackoverflow.com/questions/17958337/javafx-tableview-with-filteredlist-jdk-8-does-not-sort-by-column
+                // https://javafx-jira.kenai.com/browse/RT-32091
+//                setTableItems(() -> {
+//                    final SortedList<T> sortedList = new SortedList<>(group.getExtractor().apply(newValue));
+//                    sortedList.comparatorProperty().bind(getUiTable().comparatorProperty());
+//                    return sortedList;
+//                });
+                setTableItems(() -> (ObservableList) group.getExtractor().apply(newValue));
+            }
+        }
+        
+        public BooleanProperty getEditableProperty() {
+            return editableProperty;
+        }
     }
 }
