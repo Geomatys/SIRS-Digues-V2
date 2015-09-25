@@ -21,11 +21,11 @@ import javafx.scene.layout.StackPane;
 public class FXPhotoPane extends FXPhotoPaneStub {
 
     // Propriétés de Positionable
-    @FXML FXPositionablePane uiPositionable;
+    @FXML protected FXPositionablePane uiPositionable;
 
-    @FXML ScrollPane ui_scroll_pane;
-    @FXML StackPane ui_photo_stack;
-    @FXML HBox ui_hbox_container;
+    @FXML protected ScrollPane ui_scroll_pane;
+    @FXML protected StackPane ui_photo_stack;
+    @FXML protected HBox ui_hbox_container;
 
     /**
      * Constructor. Initialize part of the UI which will not require update when element edited change.
