@@ -1244,11 +1244,6 @@
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefTypeDocument" eSuperTypes="#//ReferenceType">
-    <eAnnotations source="couchDBDocument">
-      <details key="document" value="true"/>
-    </eAnnotations>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefSource" eSuperTypes="#//ReferenceType">
     <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>

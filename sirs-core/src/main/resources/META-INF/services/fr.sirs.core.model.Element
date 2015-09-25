@@ -94,7 +94,6 @@ fr.sirs.core.model.RefSeuil
 fr.sirs.core.model.RefSource
 fr.sirs.core.model.RefSystemeReleveProfil
 fr.sirs.core.model.RefTypeDesordre
-fr.sirs.core.model.RefTypeDocument
 fr.sirs.core.model.RefTypeGlissiere
 fr.sirs.core.model.RefTypeProfilTravers
 fr.sirs.core.model.RefTypeTroncon
