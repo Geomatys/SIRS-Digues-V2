@@ -31,7 +31,7 @@ public class PluginLoader extends URLClassLoader {
         super(new URL[0], parent);
     }
     
-    public void loadPlugins() throws IOException, IllegalStateException {
+    public synchronized void loadPlugins() throws IOException, IllegalStateException {
         if (Files.isDirectory(SirsCore.PLUGINS_PATH)) {
             Files.walk(SirsCore.PLUGINS_PATH, FileVisitOption.FOLLOW_LINKS).filter(PluginLoader::isJar).map(PluginLoader::toURL).forEach(this::addURL);
         }

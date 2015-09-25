@@ -11,7 +11,6 @@ import fr.sirs.Plugins;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.binaryMD5;
 import static fr.sirs.SIRS.hexaMD5;
-
 import fr.sirs.Session;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.authentication.AuthenticationWallet;
@@ -21,6 +20,7 @@ import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Utilisateur;
+import fr.sirs.core.plugins.PluginLoader;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.maj.PluginInstaller;
@@ -552,7 +552,18 @@ public class FXLauncherPane extends BorderPane {
         final String epsgCode = epsg;
 
         uiImportButton.setDisable(true);
-        new Thread(() -> {
+        TaskManager.INSTANCE.submit("Import d'une base de données : "+dbName, () -> {
+            final ClassLoader scl = ClassLoader.getSystemClassLoader();
+            if (scl instanceof PluginLoader) {
+                try {
+                    ((PluginLoader) scl).loadPlugins();
+                } catch (Exception ex) {
+                    LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+                    GeotkFX.newExceptionDialog("Une erreur est survenue pendant le chargement de plugins.", ex).showAndWait();
+                    return;
+                }
+            }
+
             try (ConfigurableApplicationContext appCtx = localRegistry.connectToSirsDatabase(dbName, true, false, false)) {
                 final File mainDbFile = new File(uiImportDBData.getText());
                 final File cartoDbFile = new File(uiImportDBCarto.getText());
@@ -599,7 +610,7 @@ public class FXLauncherPane extends BorderPane {
             } finally {
                 Platform.runLater(() -> uiImportButton.setDisable(false));
             }
-        }).start();
+        });
     }
 
     @FXML
