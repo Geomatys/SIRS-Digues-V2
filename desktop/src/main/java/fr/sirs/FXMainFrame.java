@@ -18,7 +18,6 @@ import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
-import javafx.scene.web.WebView;
 import javafx.stage.Popup;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Role;
@@ -260,7 +259,15 @@ public class FXMainFrame extends BorderPane {
     private enum Choice{REFERENCE, MODEL};
     private MenuItem toMenuItem(final Class clazz, final Choice typeOfSummary){
         final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
-        final MenuItem item = new MenuItem(bdl.getString(BUNDLE_KEY_CLASS));
+        final MenuItem item;
+        if(typeOfSummary==Choice.REFERENCE){
+            item = new MenuItem(clazz.getSimpleName()+" ("+bdl.getString(BUNDLE_KEY_CLASS)+")");
+        }
+        else{
+            item = new MenuItem(bdl.getString(BUNDLE_KEY_CLASS));
+        }
+
+         
         final EventHandler<ActionEvent> handler;
         
         if(typeOfSummary==Choice.REFERENCE){

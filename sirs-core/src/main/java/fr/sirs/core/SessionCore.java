@@ -4,15 +4,8 @@ import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.PositionProfilTraversRepository;
-import org.geotoolkit.gui.javafx.util.TaskManager;
-
-import java.util.Comparator;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
-import fr.sirs.core.component.ReferenceUsageRepository;
 import fr.sirs.core.component.Previews;
+import fr.sirs.core.component.ReferenceUsageRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.AvecPhotos;
@@ -20,7 +13,6 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.GardeTroncon;
-import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObjetPhotographiable;
@@ -28,19 +20,22 @@ import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.ReferenceType;
-import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProprieteTroncon;
+import fr.sirs.core.model.ReferenceType;
+import fr.sirs.core.model.Role;
+import fr.sirs.core.model.Utilisateur;
 import fr.sirs.index.ElementHit;
 import fr.sirs.util.ClosingDaemon;
 import fr.sirs.util.StreamingIterable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -57,10 +52,10 @@ import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.sis.util.collection.Cache;
-
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentOperationResult;
 import org.ektorp.http.StdHttpClient;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.IdentifiedObjects;
 import org.geotoolkit.util.collection.CloseableIterator;
@@ -68,6 +63,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -443,6 +439,12 @@ public class SessionCore implements ApplicationContextAware {
                 return bdl1.getString(BUNDLE_KEY_CLASS).compareTo(bdl2.getString(BUNDLE_KEY_CLASS));
             }
         };
+    private static final Comparator<Class<? extends Element>> CLASS_NAME_COMPARATOR = new Comparator<Class<? extends Element>>() {
+            @Override
+            public int compare(Class<? extends Element> o1, Class<? extends Element> o2) {
+                return o1.getSimpleName().compareTo(o2.getSimpleName());
+            }
+        };
     public Comparator<Class<? extends Element>> getBundleClassNameComparator(){return BUNDLE_CLASS_NAME_COMPARATOR;}
 
     static{
@@ -457,7 +459,7 @@ public class SessionCore implements ApplicationContextAware {
             if(ReferenceType.class.isAssignableFrom(c)) references.add(c);
         }
         Collections.sort(elements, BUNDLE_CLASS_NAME_COMPARATOR);
-        Collections.sort(references, BUNDLE_CLASS_NAME_COMPARATOR);
+        Collections.sort(references, CLASS_NAME_COMPARATOR);
         ELEMENTS = Collections.unmodifiableList(elements);
         REFERENCES = Collections.unmodifiableList(references);
     }
