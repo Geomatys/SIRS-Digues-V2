@@ -366,32 +366,28 @@ public class FXMapPane extends BorderPane {
             return getMapLayerForElement(CorePlugin.TRONCON_LAYER_NAME);
         } else if (element instanceof BorneDigue) {
             return getMapLayerForElement(CorePlugin.BORNE_LAYER_NAME);
-        } else if (element instanceof AbstractPositionDocument) {
+        } else if (element instanceof AbstractPositionDocumentAssociable) {
             final Previews previews = Injector.getSession().getPreviews();
-            if(element instanceof AbstractPositionDocumentAssociable){
-                if(element instanceof PositionProfilTravers){
-                    return getMapLayerForElement(LabelMapper.get(PositionProfilTravers.class).mapClassName());
-                } else {
-                    final String documentId = ((AbstractPositionDocumentAssociable)element).getSirsdocument(); // IL est nécessaire qu'un document soit associé pour déterminer le type de la couche.
-                    final Preview previewLabel = previews.get(documentId);
-                    Class documentClass = null; 
-                    try {
-                        documentClass = Class.forName(previewLabel.getElementClass(), true, Thread.currentThread().getContextClassLoader());
-                    } catch (ClassNotFoundException ex) {
-                        SIRS.LOGGER.log(Level.WARNING, null, ex);
-                    }
+            final String documentId = ((AbstractPositionDocumentAssociable) element).getSirsdocument(); // IL est nécessaire qu'un document soit associé pour déterminer le type de la couche.
+            final Preview previewLabel = previews.get(documentId);
+            Class documentClass = null;
+            try {
+                documentClass = Class.forName(previewLabel.getElementClass(), true, Thread.currentThread().getContextClassLoader());
+            } catch (ClassNotFoundException ex) {
+                SIRS.LOGGER.log(Level.WARNING, null, ex);
+            }
 
-                    final LabelMapper mapper = LabelMapper.get(documentClass);
-                    return getMapLayerForElement(mapper.mapClassName());
-                }
-            }
-            else{// Les profils en long ne sont associés à aucun document
-                final LabelMapper mapper = LabelMapper.get(element.getClass());
-                return getMapLayerForElement(mapper.mapClassName());
-            }
+            final LabelMapper mapper = LabelMapper.get(documentClass);
+            return getMapLayerForElement(mapper.mapClassName());
+
         } else {
             final LabelMapper mapper = LabelMapper.get(element.getClass());
-            return getMapLayerForElement(mapper.mapClassNamePlural());
+            final MapLayer foundLayer = getMapLayerForElement(mapper.mapClassName());
+            if (foundLayer == null) {
+                return getMapLayerForElement(mapper.mapClassNamePlural());
+            } else {
+                return foundLayer;
+            }
         }
     }
     
