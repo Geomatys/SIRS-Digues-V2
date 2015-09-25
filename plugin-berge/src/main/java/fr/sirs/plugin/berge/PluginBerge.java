@@ -86,7 +86,7 @@ public class PluginBerge extends Plugin {
     }
 
     //doit avoir la meme valeur que dans le fichier Berge.properties classPlural
-    public static final String LAYER_NAME = "Berges";
+    public static final String LAYER_BERGE_NAME = "Berges";
     public static final String LAYER_TRAIT_NAME = "Traits de berge";
     
     @Override
@@ -100,7 +100,7 @@ public class PluginBerge extends Plugin {
             final BeanStore traitStore = new BeanStore(new StructBeanSupplier(TraitBerge.class,
                     () -> getSession().getRepositoryForClass(TraitBerge.class).getAll()));
 
-            bergeContainer.items().addAll(CorePlugin.buildLayers(bergeStore, LAYER_NAME,
+            bergeContainer.items().addAll(CorePlugin.buildLayers(bergeStore, LAYER_BERGE_NAME,
                     createBergeStyle(), createTronconSelectionStyle(false),true));
             bergeContainer.items().addAll(CorePlugin.buildLayers(traitStore, LAYER_TRAIT_NAME,
                     createTraitBergeStyle(), createTronconSelectionStyle(false),true));

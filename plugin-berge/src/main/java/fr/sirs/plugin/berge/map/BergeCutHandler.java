@@ -16,7 +16,7 @@ public class BergeCutHandler extends TronconCutHandler {
     }
     
     protected void init() {
-        this.layerName = PluginBerge.LAYER_NAME;
+        this.layerName = PluginBerge.LAYER_BERGE_NAME;
         this.typeName = "berge";
         this.maleGender = false;
     }

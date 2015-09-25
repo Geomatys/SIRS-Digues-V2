@@ -12,7 +12,7 @@ import fr.sirs.plugin.berge.PluginBerge;
 public class BergePointCalculatorHandler extends PointCalculatorHandler {
     
     protected void init() {
-        this.layerName = PluginBerge.LAYER_NAME;
+        this.layerName = PluginBerge.LAYER_BERGE_NAME;
         this.typeClass = Berge.class;
     }
 }

@@ -129,7 +129,7 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
         gestionsTable.setTableItems(()-> (ObservableList) newElement.getGestions());
         traitsTable.setParentElement(newElement);
         final TraitBergeRepository traitrepo = (TraitBergeRepository)session.getRepositoryForClass(TraitBerge.class);
-        traitsTable.setTableItems(()-> (ObservableList) traitrepo.getByBergeId(newElement.getId()));
+        traitsTable.setTableItems(()-> FXCollections.observableArrayList(traitrepo.getByBergeId(newElement.getId())));
         borneIdsTable.setObservableListToListen(newElement.getBorneIds());
     }
     @Override

@@ -147,7 +147,7 @@ public class BergeEditHandler extends AbstractNavigationHandler implements ItemL
 
 
     protected void init() {
-        this.layerName = PluginBerge.LAYER_NAME;
+        this.layerName = PluginBerge.LAYER_BERGE_NAME;
         this.tronconClass = Berge.class;
         try {
             this.style = PluginBerge.createBergeStyle();
