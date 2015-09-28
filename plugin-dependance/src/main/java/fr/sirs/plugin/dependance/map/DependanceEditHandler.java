@@ -405,15 +405,17 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
                     }
 
                     //action : suppression d'un noeud
-                    helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
-                    if (editGeometry.selectedNode[0] >= 0) {
-                        final MenuItem item = new MenuItem("Supprimer noeud");
-                        item.setOnAction((ActionEvent event) -> {
-                            editGeometry.deleteSelectedNode();
-                            decorationLayer.setNodeSelection(null);
-                            decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
-                        });
-                        popup.getItems().add(item);
+                    if(editGeometry.geometry.get()!=null){
+                        helper.grabGeometryNode(e.getX(), e.getY(), editGeometry);
+                        if (editGeometry.selectedNode[0] >= 0) {
+                            final MenuItem item = new MenuItem("Supprimer noeud");
+                            item.setOnAction((ActionEvent event) -> {
+                                editGeometry.deleteSelectedNode();
+                                decorationLayer.setNodeSelection(null);
+                                decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
+                            });
+                            popup.getItems().add(item);
+                        }
                     }
 
                     // action : sauvegarde

@@ -1,9 +1,15 @@
 package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.model.AbstractDependance;
+import fr.sirs.core.model.AireStockageDependance;
+import fr.sirs.core.model.CheminAccesDependance;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.plugin.dependance.map.DependanceEditHandler;
 import fr.sirs.ui.Growl;
@@ -134,6 +140,7 @@ public class FXPositionDependancePane extends BorderPane {
         final FileChooser fileChooser = new FileChooser();
         // Demande du fichier SHP à considérer
         final File shpFile = fileChooser.showOpenDialog(null);
+        if(shpFile==null) return;
         final FXFeatureTable shpTable = new FXFeatureTable();
         shpTable.setLoadAll(true);
 
@@ -170,6 +177,26 @@ public class FXPositionDependancePane extends BorderPane {
                     final Feature feature = it.next();
                     Geometry geom = (Geometry) feature.getDefaultGeometryProperty().getValue();
                     geom = JTS.transform(geom, Injector.getSession().getProjection());
+
+                    //check the geometry type
+                    AbstractDependance absDep = dependance.get();
+                    if(absDep instanceof AireStockageDependance){
+                        //doit etre un polygon
+                        if(!(geom instanceof Polygon || geom instanceof MultiPolygon)){
+                            final Growl successGrowl = new Growl(Growl.Type.ERROR, "Mauvais import, la géométrie doit etre un polygone.");
+                            successGrowl.showAndFade();
+                            return;
+                        }
+
+                    }else if(absDep instanceof CheminAccesDependance){
+                        //doit etre un linestring
+                        if(!(geom instanceof LineString || geom instanceof MultiLineString)){
+                            final Growl successGrowl = new Growl(Growl.Type.ERROR, "Mauvais import, la géométrie doit etre une polyligne.");
+                            successGrowl.showAndFade();
+                            return;
+                        }
+                    }
+
                     dependance.get().setGeometry(geom);
 
                     final Growl successGrowl = new Growl(Growl.Type.INFO, "Géométrie importée avec succès");
