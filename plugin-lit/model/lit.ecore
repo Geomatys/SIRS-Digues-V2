@@ -45,6 +45,30 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="surfaceRempartEntretien"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionStructureId" eType="#//RefPositionStructureSeuilLit"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="voieAccesIds" upperBound="-1"
+        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//VoieAcces"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageFranchissementIds"
+        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageFranchissement"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="voieDigueIds" upperBound="-1"
+        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//VoieDigue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageVoirieIds" upperBound="-1"
+        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageVoirie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="stationPompageIds" upperBound="-1"
+        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//StationPompage"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueFermeIds"
+        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//ReseauHydrauliqueFerme"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueCielOuvertIds"
+        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//ReseauHydrauliqueCielOuvert"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageHydrauliqueAssocieIds"
+        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageHydrauliqueAssocie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageTelecomEnergieIds"
+        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageTelecomEnergie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauTelecomEnergieIds"
+        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//ReseauTelecomEnergie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageParticulierIds"
+        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageParticulier"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="echelleLimnimetriqueIds"
+        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//EchelleLimnimetrique"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PlageDepotLit" eSuperTypes="#//ObjetLit">
     <eAnnotations source="couchDBDocument"/>

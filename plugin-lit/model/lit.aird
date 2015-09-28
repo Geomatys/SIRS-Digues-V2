@@ -4,6 +4,7 @@
   <models xmi:type="ecore:EPackage" href="platform:/resource/sirs-core/model/sirs.ecore#/"/>
   <models xmi:type="ecore:EPackage" href="platform:/resource/sirs-core/model/jts.ecore#/"/>
   <models xmi:type="ecore:EPackage" href="http://www.eclipse.org/emf/2002/Ecore#/"/>
+  <models xmi:type="ecore:EPackage" href="lit.ecore~#/"/>
   <ownedViews xmi:type="viewpoint:DRepresentationContainer" xmi:id="_7JafMFq2EeWHCvsSOn9R3Q" initialized="true">
     <ownedRepresentations xmi:type="diagram:DSemanticDiagram" xmi:id="_7ViPoFq2EeWHCvsSOn9R3Q" name="core class diagram">
       <ownedAnnotationEntries xmi:type="description:AnnotationEntry" xmi:id="_7Vi2sFq2EeWHCvsSOn9R3Q" source="GMF_DIAGRAMS">
@@ -1103,7 +1104,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Etu_sGXcEeWBRprgZ1aIFA" name="surfaceRempartEntretien : EDouble = 0.0" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@64330482{platform:/resource/plugin-lit/model/lit.ecore#//SeuilLit/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Etu_sGXcEeWBRprgZ1aIFA" name="surfaceRempartEntretien : EDouble = 0.0" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="lit.ecore#//SeuilLit/surfaceRempartEntretien"/>
           <semanticElements xmi:type="ecore:EAttribute" href="lit.ecore#//SeuilLit/surfaceRempartEntretien"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_Hpp-QGXcEeWBRprgZ1aIFA" labelAlignment="LEFT">
