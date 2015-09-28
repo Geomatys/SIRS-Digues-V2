@@ -113,9 +113,41 @@
                     </content>
                 </Tab>
 
-                <!-- REFERENCE TABS -->
-                <Tab fx:id="ui_borneIds" text="%borneIds" />
-                <Tab fx:id="ui_gestions" text="%gestions" />
+                <Tab text="Systèmes de repérage">
+                     <content>
+                        <SplitPane dividerPositions="0.5" prefHeight="200.0" prefWidth="200.0">
+                           <items>
+                              <BorderPane maxWidth="300.0">
+                                 <center>
+                                    <ListView fx:id="uiSRList" BorderPane.alignment="CENTER" />
+                                 </center>
+                                 <top>
+                                    <GridPane styleClass="buttonbar" BorderPane.alignment="CENTER">
+                                      <columnConstraints>
+                                        <ColumnConstraints hgrow="ALWAYS" />
+                                        <ColumnConstraints hgrow="NEVER" />
+                                          <ColumnConstraints hgrow="SOMETIMES" />
+                                      </columnConstraints>
+                                      <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                      </rowConstraints>
+                                       <children>
+                                          <Label styleClass="label-header" text="Système de repérage">
+                                             <GridPane.margin>
+                                                <Insets left="10.0" />
+                                             </GridPane.margin>
+                                          </Label>
+                                          <Button fx:id="uiSRAdd" mnemonicParsing="false" onAction="#srAdd" styleClass="btn-without-style" GridPane.columnIndex="1" />
+                                          <Button fx:id="uiSRDelete" mnemonicParsing="false" onAction="#srDelete" styleClass="btn-without-style" GridPane.columnIndex="2" />
+                                       </children>
+                                    </GridPane>
+                                 </top>
+                              </BorderPane>
+                              <BorderPane fx:id="uiSrTab" />
+                           </items>
+                        </SplitPane>
+                     </content>
+                </Tab>
 
             </tabs>
         </TabPane>

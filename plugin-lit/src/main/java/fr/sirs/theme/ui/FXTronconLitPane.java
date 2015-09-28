@@ -9,6 +9,7 @@ import fr.sirs.core.model.*;
 import fr.sirs.theme.AbstractTheme;
 import fr.sirs.theme.AbstractTheme.ThemeManager;
 import fr.sirs.theme.TronconTheme;
+import fr.sirs.digue.FXSystemeReperagePane;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -24,6 +25,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.util.Callback;
 
 /**
  *
@@ -54,14 +56,19 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
     @FXML protected Button ui_typeTronconId_link;
     @FXML protected ComboBox ui_systemeRepDefautId;
     @FXML protected Button ui_systemeRepDefautId_link;
-    @FXML protected Tab ui_borneIds;
-    protected final ListeningPojoTable borneIdsTable;
-    @FXML protected Tab ui_gestions;
+    
+    
+    // Onglet "SR"
+    @FXML private ListView<SystemeReperage> uiSRList;
+    @FXML private Button uiSRDelete;
+    @FXML private Button uiSRAdd;
+    @FXML private BorderPane uiSrTab;
+    private final FXSystemeReperagePane srController = new FXSystemeReperagePane();
+    
     @FXML protected ListView ui_LeftList;
     @FXML protected VBox ui_mainBox;
     @FXML protected BorderPane ui_centerPane;
     
-    protected final PojoTable gestionsTable;
 
     /**
      * Constructor. Initialize part of the UI which will not require update when 
@@ -96,21 +103,48 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         ui_systemeRepDefautId_link.disableProperty().bind(ui_systemeRepDefautId.getSelectionModel().selectedItemProperty().isNull());
         ui_systemeRepDefautId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
         ui_systemeRepDefautId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_systemeRepDefautId.getSelectionModel().getSelectedItem()));       
-        borneIdsTable = new ListeningPojoTable(BorneDigue.class, null);
-        borneIdsTable.editableProperty().bind(disableFieldsProperty().not());
-        borneIdsTable.createNewProperty().set(false);
-        ui_borneIds.setContent(borneIdsTable);
-        ui_borneIds.setClosable(false);
-        gestionsTable = new PojoTable(GestionTroncon.class, null);
-        gestionsTable.editableProperty().bind(disableFieldsProperty().not());
-        ui_gestions.setContent(gestionsTable);
-        ui_gestions.setClosable(false);
+        
+        srController.editableProperty().bind(disableFieldsProperty().not());
+        uiSRAdd.disableProperty().set(true);
+        uiSRAdd.setVisible(false);
+        uiSRDelete.disableProperty().set(true);
+        uiSRDelete.setVisible(false);
+        
+        uiSrTab.setCenter(srController);
+        uiSRDelete.setGraphic(new ImageView(SIRS.ICON_TRASH_WHITE));
+        uiSRAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
+
+        uiSRList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        uiSRList.setCellFactory(new Callback<ListView<SystemeReperage>, ListCell<SystemeReperage>>() {
+            @Override
+            public ListCell<SystemeReperage> call(ListView<SystemeReperage> param) {
+                return new ListCell(){
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setGraphic(null);
+                        if(!empty && item!=null){
+                            setText(((SystemeReperage)item).getLibelle());
+                        }else{
+                            setText("");
+                        }
+                    }
+                };
+            }
+        });
+
+        uiSRList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<SystemeReperage>() {
+            @Override
+            public void changed(ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) {
+                srController.getSystemeReperageProperty().set(newValue);
+            }
+        });
+        
     }
     
     public FXTronconLitPane(final TronconLit tronconLit){
         this();
         this.elementProperty().set(tronconLit);
-        borneIdsTable.setObservableListToListen(elementProperty.get().getBorneIds());
     }     
 
     /**
@@ -149,14 +183,14 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         SIRS.initCombo(ui_typeTronconId, FXCollections.observableList(
             previewRepository.getByClass(RefTypeTroncon.class)), 
             newElement.getTypeTronconId() == null? null : previewRepository.get(newElement.getTypeTronconId()));
-        SIRS.initCombo(ui_systemeRepDefautId, FXCollections.observableList(
-            previewRepository.getByClass(SystemeReperage.class)), 
-            newElement.getSystemeRepDefautId() == null? null : previewRepository.get(newElement.getSystemeRepDefautId()));
-        borneIdsTable.setParentElement(null);
-        final AbstractSIRSRepository<BorneDigue> borneIdsRepo = session.getRepositoryForClass(BorneDigue.class);
-        borneIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getBorneIds(), borneIdsRepo));
-        gestionsTable.setParentElement(newElement);
-        gestionsTable.setTableItems(()-> (ObservableList) newElement.getGestions());
+                
+        final SystemeReperageRepository srRepo = Injector.getBean(SystemeReperageRepository.class);
+        final SystemeReperage defaultSR = newElement.getSystemeRepDefautId() == null? null : srRepo.get(newElement.getSystemeRepDefautId());;
+        final ObservableList<SystemeReperage> srList = FXCollections.observableArrayList(srRepo.getByLinear(newElement));
+
+        SIRS.initCombo(ui_systemeRepDefautId, srList, defaultSR);
+        
+        uiSRList.setItems(srList);
         
         final List<String> items = new ArrayList<>();
         items.add("Description générale");
@@ -221,6 +255,46 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         });
     }
     
+    @FXML
+    private void srAdd(ActionEvent event) {
+        final Session session = Injector.getBean(Session.class);
+        final SystemeReperageRepository repo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
+
+        final TronconDigue troncon = elementProperty.get();
+        final SystemeReperage sr = Injector.getSession().getElementCreator().createElement(SystemeReperage.class);
+        sr.setLibelle("Nouveau SR");
+        sr.setLinearId(troncon.getId());
+        repo.add(sr, troncon);
+
+        //maj de la liste
+        final List<SystemeReperage> srs = repo.getByLinear(troncon);
+        uiSRList.setItems(FXCollections.observableArrayList(srs));
+    }
+
+    @FXML
+    private void srDelete(ActionEvent event) {
+        final Session session = Injector.getBean(Session.class);
+        final SystemeReperage sr = uiSRList.getSelectionModel().getSelectedItem();
+        if(sr==null) return;
+
+        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression ?",
+                ButtonType.NO, ButtonType.YES);
+        alert.setResizable(true);
+
+        final ButtonType res = alert.showAndWait().get();
+        if(ButtonType.YES != res) return;
+
+        final TronconDigue troncon = elementProperty.get();
+
+        //suppression du SR
+        final SystemeReperageRepository repo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
+        repo.remove(sr, troncon);
+
+        //maj de la liste
+        final List<SystemeReperage> srs = repo.getByLinear(troncon);
+        uiSRList.setItems(FXCollections.observableArrayList(srs));
+    }
+    
     @Override
     public void preSave() {
         final Session session = Injector.getBean(Session.class);
@@ -271,14 +345,6 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         } else if (cbValue == null) {
             element.setSystemeRepDefautId(null);
         }
-        // Manage opposite references for BorneDigue...
-        final List<String> currentBorneDigueIdsList = new ArrayList<>();
-        for(final Element elt : borneIdsTable.getAllValues()){
-            final BorneDigue borneDigue = (BorneDigue) elt;
-            currentBorneDigueIdsList.add(borneDigue.getId());
-        }
-        element.setBorneIds(currentBorneDigueIdsList);
-        
     }
     
     protected class LitThemePojoTable<T extends AvecForeignParent> extends ForeignParentPojoTable<T>{
