@@ -1,7 +1,7 @@
 
 package fr.sirs.plugin.lit;
 
-import fr.sirs.core.model.Desordre;
+import fr.sirs.core.model.DesordreLit;
 import fr.sirs.plugin.lit.ui.AbstractDescriptionPane;
 import fr.sirs.plugin.lit.util.TabContent;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class DesordresTheme extends AbstractDescriptionTheme {
     @Override
     public Parent createPane() {
         List<TabContent> content = new ArrayList<>();
-        content.add(new TabContent("", "Tableau des désordres", Desordre.class));
+        content.add(new TabContent("", "Tableau des désordres", DesordreLit.class));
         final BorderPane borderPane = new AbstractDescriptionPane(content);
         return borderPane;
     }
