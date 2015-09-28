@@ -69,6 +69,12 @@
         upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageParticulier"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="echelleLimnimetriqueIds"
         upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//EchelleLimnimetrique"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="desordreIds" upperBound="-1"
+        eType="#//DesordreLit" eOpposite="#//DesordreLit/seuilIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="bergeIds" upperBound="-1"
+        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//TronconDigue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="digueIds" upperBound="-1"
+        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Digue"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PlageDepotLit" eSuperTypes="#//ObjetLit">
     <eAnnotations source="couchDBDocument"/>
@@ -144,6 +150,8 @@
   <eClassifiers xsi:type="ecore:EClass" name="DesordreLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//Desordre">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeDesordreLitId" eType="#//RefTypeDesordreLit"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="seuilIds" upperBound="-1"
+        eType="#//SeuilLit" eOpposite="#//SeuilLit/desordreIds"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeDesordreLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
@@ -171,17 +179,11 @@
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeOuvrageLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefFonctionSeuilLit">
+  <eClassifiers xsi:type="ecore:EClass" name="RefFonctionSeuilLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefTypeInspectionSeuilLit">
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeInspectionSeuilLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PlanSeuilLit">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="chemin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -189,28 +191,16 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefPositionAxeSeuilLit">
+  <eClassifiers xsi:type="ecore:EClass" name="RefPositionAxeSeuilLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefGeometrieCreteSeuilLit">
+  <eClassifiers xsi:type="ecore:EClass" name="RefGeometrieCreteSeuilLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefProfilCoursierSeuilLit">
+  <eClassifiers xsi:type="ecore:EClass" name="RefProfilCoursierSeuilLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefPositionStructureSeuilLit">
+  <eClassifiers xsi:type="ecore:EClass" name="RefPositionStructureSeuilLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
 </ecore:EPackage>
