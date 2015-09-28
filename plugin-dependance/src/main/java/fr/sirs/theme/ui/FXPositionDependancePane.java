@@ -9,9 +9,12 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.model.AbstractDependance;
 import fr.sirs.core.model.AireStockageDependance;
+import fr.sirs.core.model.AvecGeometrie;
 import fr.sirs.core.model.CheminAccesDependance;
+import fr.sirs.core.model.DesordreDependance;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.plugin.dependance.map.DependanceEditHandler;
+import fr.sirs.plugin.dependance.map.DesordreEditHandler;
 import fr.sirs.ui.Growl;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -39,7 +42,6 @@ import org.geotoolkit.feature.Feature;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.geometry.jts.JTSEnvelope2D;
 import org.geotoolkit.gui.javafx.layer.FXFeatureTable;
-import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -51,7 +53,6 @@ import org.opengis.util.GenericName;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 
@@ -61,7 +62,7 @@ import java.util.logging.Level;
  *
  * @author Cédric Briançon (Geomatys)
  */
-public class FXPositionDependancePane extends BorderPane {
+public class FXPositionDependancePane<T extends AvecGeometrie> extends BorderPane {
     private final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty(true);
 
     @FXML
@@ -76,7 +77,7 @@ public class FXPositionDependancePane extends BorderPane {
     /**
      * La dépendance à éditer.
      */
-    private final ObjectProperty<AbstractDependance> dependance = new SimpleObjectProperty<>();
+    private final ObjectProperty<T> dependance = new SimpleObjectProperty<>();
 
     public FXPositionDependancePane() {
         SIRS.loadFXML(this);
@@ -104,11 +105,11 @@ public class FXPositionDependancePane extends BorderPane {
         });
     }
 
-    public AbstractDependance getDependance() {
+    public AvecGeometrie getDependance() {
         return dependance.get();
     }
 
-    public ObjectProperty<AbstractDependance> dependanceProperty() {
+    public ObjectProperty<T> dependanceProperty() {
         return dependance;
     }
 
@@ -129,7 +130,11 @@ public class FXPositionDependancePane extends BorderPane {
                 }
             });
         }
-        tab.getMap().getUiMap().setHandler(new DependanceEditHandler(dependance.get()));
+        if(dependance.get() instanceof AbstractDependance){
+            tab.getMap().getUiMap().setHandler(new DependanceEditHandler((AbstractDependance) dependance.get()));
+        }else if(dependance.get() instanceof DesordreDependance){
+            tab.getMap().getUiMap().setHandler(new DesordreEditHandler((DesordreDependance) dependance.get()));
+        }
     }
 
     /**
@@ -179,7 +184,7 @@ public class FXPositionDependancePane extends BorderPane {
                     geom = JTS.transform(geom, Injector.getSession().getProjection());
 
                     //check the geometry type
-                    AbstractDependance absDep = dependance.get();
+                    AvecGeometrie absDep = dependance.get();
                     if(absDep instanceof AireStockageDependance){
                         //doit etre un polygon
                         if(!(geom instanceof Polygon || geom instanceof MultiPolygon)){
