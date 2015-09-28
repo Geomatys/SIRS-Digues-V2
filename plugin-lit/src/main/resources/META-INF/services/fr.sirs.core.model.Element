@@ -1,9 +1,6 @@
 fr.sirs.core.model.Lit
 fr.sirs.core.model.TronconLit
 fr.sirs.core.model.SeuilLit
-fr.sirs.core.model.RefStructureLit
-fr.sirs.core.model.RefTypeFondationLit
-fr.sirs.core.model.RefTechniqueVegetaleLit
 fr.sirs.core.model.IleBancLit
 fr.sirs.core.model.PlageDepotLit
 fr.sirs.core.model.AutreOuvrageLit
@@ -22,3 +19,10 @@ fr.sirs.core.model.RefTypeDesordreLit
 fr.sirs.core.model.RefTypeOuvrageRegulationLit
 fr.sirs.core.model.OuvrageRegulationLit
 fr.sirs.core.model.RefTypeOuvrageLit
+fr.sirs.core.model.PlanSeuilLit
+fr.sirs.core.model.RefTypeInspectionSeuilLit
+fr.sirs.core.model.RefFonctionSeuilLit
+fr.sirs.core.model.RefPositionAxeSeuilLit
+fr.sirs.core.model.RefGeometrieCreteSeuilLit
+fr.sirs.core.model.RefProfilCoursierSeuilLit
+fr.sirs.core.model.RefPositionStructureSeuilLit

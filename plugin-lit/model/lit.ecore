@@ -12,175 +12,39 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SeuilLit" eSuperTypes="#//ObjetLit">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="passeSportEauVive" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="passePoisson" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commune" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="anneeConstruction" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="derniersTravaux" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-      <eAnnotations source="localDate"/>
-    </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="derniereInspectionSurAbords"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionSeuilId" eType="#//RefFonctionSeuilLit"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateDerniereInspection"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
       <eAnnotations source="localDate"/>
     </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="derniereInspectionSurFondations"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-      <eAnnotations source="localDate"/>
-    </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="derniereInspectionSurStructuresCentrales"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-      <eAnnotations source="localDate"/>
-    </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="derniereInspectionSurStructuresElargies"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-      <eAnnotations source="localDate"/>
-    </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="derniereInspectionSurTechniquesVegetales"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
-      <eAnnotations source="localDate"/>
-    </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fondation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="complexeDrainant" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coucheTransition" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="techniqueVegetale" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="pente" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="surfaceRampant" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="surfaceEntretien" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="riveId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefRive"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="descriptionAcces" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteurChute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeInspectionId" eType="#//RefTypeInspectionSeuilLit"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauPrincipalA" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauPrincipalB" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="plans" upperBound="-1"
+        eType="#//PlanSeuilLit" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="positionSeuilId" eType="#//RefPositionAxeSeuilLit"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="geometrieCreteId" eType="#//RefGeometrieCreteSeuilLit"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="profilCoursierId" eType="#//RefProfilCoursierSeuilLit"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="penteRampant" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurTotale" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurCoursier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeurOuvrage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvertureBatardableIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvertureBatardable"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="desordreId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//Desordre"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nombreBarbacanes" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheComplexeDrainant"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurComplexeDrainant"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble" defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionComplexeDrainantId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="natureComplexeDrainantId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauComplexeDrainantId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="sourceComplexeDrainantId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSource"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeFondationId" eType="#//RefTypeFondationLit"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteurFondation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coucheTransitionFondation"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="palplancheFondation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheFondation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurFondation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeurEnCrete" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteurChute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCouche" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
         defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionFondationId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="natureFondationId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauFondationId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="sourceFondationId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSource"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="techniqueVegetaleGaucheId"
-        eType="#//RefTechniqueVegetaleLit"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurStructureElargieGauche"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSource"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="passeSportEauVive" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="passePoisson" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="surfaceRempartEntretien"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeurStructureElargieGauche"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheStructureElargieGauche"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurStructureElargieGauche"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble" defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionStructureElargieGaucheId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="natureStructureElargieGaucheId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauStructureElargieGaucheId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="sourceStructureElargieGaucheId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSource"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="techniqueVegetaleDroiteId"
-        eType="#//RefTechniqueVegetaleLit"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurStructureElargieDroite"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeurStructureElargieDroite"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheStructureElargieDroite"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurStructureElargieDroite"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble" defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionStructureElargieDroiteId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="natureStructureElargieDroiteId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauStructureElargieDroiteId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="sourceStructureElargieDroiteId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSource"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurStructureCentrale"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheStructureCentrale"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurStructureCentrale"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble" defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionStructureCentraleId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="natureStructureCentraleId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauStructureCentraleId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="sourceStructureCentraleId"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSource"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="structureStructureCentraleId"
-        eType="#//RefStructureLit"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheTeteAmont" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurTeteAmont" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionTeteAmontId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="natureTeteAmontId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauTeteAmontId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="sourceTeteAmontId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSource"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="structureTeteAmontId" eType="#//RefStructureLit"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheTeteAval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurTeteAval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionTeteAvalId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="natureTeteAvalId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauTeteAvalId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="sourceTeteAvalId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSource"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeurStructure" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numCoucheAutre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="epaisseurAutre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"
-        defaultValueLiteral="0.0"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionAutreId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefFonction"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="natureAutreId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefNature"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="materiauAutreId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="sourceAutreId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSource"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="structureTeteAvalId" eType="#//RefStructureLit"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="voieAccesIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//VoieAcces"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageFranchissementIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageFranchissement"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="voieDigueIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//VoieDigue"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageVoirieIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageVoirie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="stationPompageIds" upperBound="-1"
-        eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//StationPompage"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueFermeIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//ReseauHydrauliqueFerme"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauHydrauliqueCielOuvertIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//ReseauHydrauliqueCielOuvert"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageHydrauliqueAssocieIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageHydrauliqueAssocie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageTelecomEnergieIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageTelecomEnergie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="reseauTelecomEnergieIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//ReseauTelecomEnergie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageParticulierIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//OuvrageParticulier"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="echelleLimnimetriqueIds"
-        upperBound="-1" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//EchelleLimnimetrique"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="positionStructureId" eType="#//RefPositionStructureSeuilLit"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PlageDepotLit" eSuperTypes="#//ObjetLit">
     <eAnnotations source="couchDBDocument"/>
@@ -201,24 +65,6 @@
     </eStructuralFeatures>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefStructureLit">
-    <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefTypeFondationLit">
-    <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefTechniqueVegetaleLit">
-    <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObjetLit" abstract="true" eSuperTypes="../../sirs-core/model/sirs.ecore#//ObjetPhotographiable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="proprietes" upperBound="-1"
@@ -300,5 +146,47 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeOuvrageLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefFonctionSeuilLit">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefTypeInspectionSeuilLit">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PlanSeuilLit">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="chemin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefPositionAxeSeuilLit">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefGeometrieCreteSeuilLit">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefProfilCoursierSeuilLit">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RefPositionStructureSeuilLit">
+    <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
 </ecore:EPackage>
