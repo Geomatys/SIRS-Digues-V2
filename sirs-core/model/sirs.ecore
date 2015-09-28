@@ -1448,5 +1448,6 @@
       <eParameters name="geometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
     </eOperations>
     <eOperations name="getGeometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
+    <eOperations name="geometryProperty" eType="ecore:EDataType jts.ecore#//ObjectProperty"/>
   </eClassifiers>
 </ecore:EPackage>

@@ -4,4 +4,5 @@
   <eClassifiers xsi:type="ecore:EDataType" name="Geometry" instanceTypeName="Geometry"/>
   <eClassifiers xsi:type="ecore:EDataType" name="Point" instanceTypeName="Point"/>
   <eClassifiers xsi:type="ecore:EEnum" name="TypeRive"/>
+  <eClassifiers xsi:type="ecore:EDataType" name="ObjectProperty" instanceTypeName="Geometry"/>
 </ecore:EPackage>
