@@ -10,7 +10,10 @@ import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.map.TronconEditHandler.showTronconDialog;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.Preview;
 import java.awt.geom.Rectangle2D;
+import java.util.List;
 import java.util.logging.Level;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
@@ -62,11 +65,17 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
     protected String typeName;
     protected Class typeClass;
     protected boolean maleGender;
+    protected Class parentClass;
+    protected boolean showRive;
+    protected String parentLabel;
     
     protected void init() {
-        this.typeName   = "tronçon";
-        this.typeClass  = TronconDigue.class;
-        this.maleGender = true;
+        this.typeName    = "tronçon";
+        this.typeClass   = TronconDigue.class;
+        this.maleGender  = true;
+        this.parentClass = Digue.class;
+        this.showRive = true;
+        this.parentLabel = "à la digue";
     }    
     
     public ConvertGeomToTronconHandler(final FXMap map) {
@@ -121,10 +130,11 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
                     }
                     
                     if(geom !=null) {
-                        final TronconDigue troncon = showTronconDialog(typeName, typeClass, maleGender);
+                        final Session session = Injector.getBean(Session.class);
+                        final List<Preview> parents = session.getPreviews().getByClass(Digue.class);
+                        final TronconDigue troncon = showTronconDialog(typeName, typeClass, maleGender, parents, showRive, parentLabel);
                         if (troncon == null) return;
                         try{
-                            final Session session = Injector.getSession();
                             //convertion from data crs to base crs
                             geom = JTS.transform(geom, CRS.findMathTransform(
                                     f.getDefaultGeometryProperty().getType().getCoordinateReferenceSystem(), 

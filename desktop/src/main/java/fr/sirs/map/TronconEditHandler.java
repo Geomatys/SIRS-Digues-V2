@@ -139,6 +139,9 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
     protected String typeName;
     protected boolean maleGender;
     protected Class<? extends TronconDigue> tronconClass;
+    protected Class parentClass;
+    protected String parentLabel;
+    protected boolean showRive;
     
     
     protected void init() {
@@ -151,6 +154,9 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         }
         this.typeName = "tronçon";
         this.maleGender = true;
+        this.parentClass = Digue.class;
+        this.showRive = true;
+        this.parentLabel = "à la digue";
     }
     
     
@@ -275,10 +281,11 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
      * @param tronconClass
      * @return Return the new troncon, or null if user has cancelled dialog.
      */
-    public static TronconDigue showTronconDialog(String typeName, Class<? extends TronconDigue> tronconClass, boolean maleGender) {
+    public static TronconDigue showTronconDialog(String typeName, Class<? extends TronconDigue> tronconClass, boolean maleGender, final List<Preview> parents,
+            boolean showRive, String parentLabel) {
         final Session session = Injector.getBean(Session.class);
-        final List<Preview> digues = session.getPreviews().getByClass(Digue.class);
-        final ComboBox<Preview> diguesChoice = new ComboBox<>(FXCollections.observableList(digues));
+        
+        final ComboBox<Preview> diguesChoice = new ComboBox<>(FXCollections.observableList(parents));
         final ComboBox<RefRive> rives = new ComboBox<>(
                 FXCollections.observableList(session.getRepositoryForClass(RefRive.class).getAll()));
 
@@ -318,10 +325,12 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             bp.add(new Label("Nom de la " + typeName), 0, 0);
         }
         bp.add(nameField, 0, 1);
-        bp.add(new Label("Rattacher à la digue"), 0, 2);
+        bp.add(new Label("Rattacher " + parentLabel), 0, 2);
         bp.add(diguesChoice, 0, 3);
-        bp.add(new Label("Sur la rive"), 0, 4);
-        bp.add(rives, 0, 5);
+        if (showRive) {
+            bp.add(new Label("Sur la rive"), 0, 4);
+            bp.add(rives, 0, 5);
+        }
 
         final Button finishBtn = new Button("Terminer");
         // Do not allow creation of a troncon without a name.
@@ -497,7 +506,8 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                     final String title = maleGender ? "Créer un nouveau " + typeName : "Créer une nouvelle " + typeName;
                     final MenuItem createItem = new MenuItem(title);
                     createItem.setOnAction((ActionEvent event) -> {
-                        final TronconDigue tmpTroncon = showTronconDialog(typeName, tronconClass, maleGender);
+                        final List<Preview> parents = session.getPreviews().getByClass(parentClass);
+                        final TronconDigue tmpTroncon = showTronconDialog(typeName, tronconClass, maleGender, parents, showRive, parentLabel);
                         if (tmpTroncon == null) {
                             return;
                         }
