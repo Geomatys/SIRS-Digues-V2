@@ -4,7 +4,7 @@ package fr.sirs.plugin.lit.ui;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.core.model.AvecForeignParent;
-import fr.sirs.core.model.Lit;
+import fr.sirs.core.model.TronconLit;
 import fr.sirs.theme.AbstractTheme;
 import fr.sirs.theme.TronconTheme;
 import fr.sirs.theme.ui.ForeignParentPojoTable;
@@ -37,7 +37,7 @@ public class FXLitThemePane extends BorderPane {
 
     public StringProperty linearIdProperty(){return linearIdProperty;}
 
-    public FXLitThemePane(ComboBox<Lit> uiLinearChoice, TronconTheme.ThemeManager ... groups) {
+    public FXLitThemePane(ComboBox<TronconLit> uiLinearChoice, TronconTheme.ThemeManager ... groups) {
 
         if (groups.length==1) {
             setCenter(createContent(groups[0]));
@@ -52,11 +52,11 @@ public class FXLitThemePane extends BorderPane {
             setCenter(pane);
         }
 
-        final List<Lit> linearPreviews = session.getRepositoryForClass(Lit.class).getAll();
+        final List<TronconLit> linearPreviews = session.getRepositoryForClass(TronconLit.class).getAll();
         uiLinearChoice.setItems(FXCollections.observableList(linearPreviews));
         uiLinearChoice.setConverter(new SirsStringConverter());
 
-        uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Lit> observable, Lit oldValue, Lit newValue) -> {
+        uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends TronconLit> observable, TronconLit oldValue, TronconLit newValue) -> {
             linearIdProperty.set(newValue.getId());
         });
 

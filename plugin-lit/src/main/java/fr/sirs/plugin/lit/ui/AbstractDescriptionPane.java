@@ -3,15 +3,15 @@ package fr.sirs.plugin.lit.ui;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.model.AvecForeignParent;
-import fr.sirs.core.model.Lit;
 import fr.sirs.core.model.PositionDocument;
-import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.layout.BorderPane;
+import fr.sirs.core.model.TronconLit;
 import fr.sirs.plugin.lit.util.TabContent;
 import fr.sirs.theme.AbstractTheme;
 import fr.sirs.theme.PositionDocumentTheme;
 import java.util.List;
+import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
+import javafx.scene.layout.BorderPane;
 
 /**
  *
@@ -20,7 +20,7 @@ import java.util.List;
 public class AbstractDescriptionPane extends BorderPane {
 
     @FXML
-    private ComboBox<Lit> bergeBox;
+    private ComboBox<TronconLit> bergeBox;
     
     @FXML
     private BorderPane uiCenter;
