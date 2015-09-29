@@ -39,7 +39,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Digue">
+  <eClassifiers xsi:type="ecore:EClass" name="Digue" eSuperTypes="#//TronconLitAssociable">
     <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
@@ -1450,4 +1450,6 @@
     <eOperations name="getGeometry" eType="ecore:EDataType jts.ecore#//Geometry"/>
     <eOperations name="geometryProperty" eType="ecore:EDataType jts.ecore#//ObjectProperty"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TronconLitAssociable" abstract="true"
+      interface="true"/>
 </ecore:EPackage>

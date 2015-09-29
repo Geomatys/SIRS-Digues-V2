@@ -329,7 +329,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_CJmEgGKmEeWv85koLx_QcQ" name="date_debut : EDate" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@20688376{platform:/resource/plugin-berge/model/berge.ecore#//TraitBerge/date_debut}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_CJmEgGKmEeWv85koLx_QcQ" name="date_debut : EDate" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="berge.ecore#//TraitBerge/date_debut"/>
           <semanticElements xmi:type="ecore:EAttribute" href="berge.ecore#//TraitBerge/date_debut"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_De_xMGKmEeWv85koLx_QcQ" labelAlignment="LEFT">
@@ -340,7 +340,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_CJn5sGKmEeWv85koLx_QcQ" name="date_fin : EDate" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@16a5b2ce{platform:/resource/plugin-berge/model/berge.ecore#//TraitBerge/date_fin}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_CJn5sGKmEeWv85koLx_QcQ" name="date_fin : EDate" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="berge.ecore#//TraitBerge/date_fin"/>
           <semanticElements xmi:type="ecore:EAttribute" href="berge.ecore#//TraitBerge/date_fin"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_FGqSkGKmEeWv85koLx_QcQ" labelAlignment="LEFT">
@@ -351,7 +351,7 @@
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_KUUqQGKmEeWv85koLx_QcQ" name="commentaire : EString" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@719aa862{platform:/resource/plugin-berge/model/berge.ecore#//TraitBerge/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_KUUqQGKmEeWv85koLx_QcQ" name="commentaire : EString" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="berge.ecore#//TraitBerge/commentaire"/>
           <semanticElements xmi:type="ecore:EAttribute" href="berge.ecore#//TraitBerge/commentaire"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_M65q8GKmEeWv85koLx_QcQ" labelAlignment="LEFT">

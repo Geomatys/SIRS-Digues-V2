@@ -133,6 +133,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageAssocieLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//Objet">
     <eAnnotations source="couchDBDocument"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//TronconLitAssociable"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OccupationRiveraineLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//Objet">
     <eAnnotations source="couchDBDocument"/>
