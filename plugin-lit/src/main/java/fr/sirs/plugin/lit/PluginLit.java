@@ -2,15 +2,18 @@ package fr.sirs.plugin.lit;
 
 import fr.sirs.CorePlugin;
 import static fr.sirs.CorePlugin.createTronconSelectionStyle;
+import fr.sirs.Injector;
 import fr.sirs.Plugin;
 import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.TronconLit;
 import fr.sirs.core.model.sql.LitSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.lit.map.LitToolBar;
+import fr.sirs.util.FXFreeTab;
 import java.awt.Color;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -48,11 +51,13 @@ public class PluginLit extends Plugin {
 
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
+    private final SuiviLitTheme suiviTheme;
     
     public PluginLit() {
         name = NAME;
         loadingMessage.set("module lit");
-        themes.add(new SuiviLitTheme());
+        suiviTheme = new SuiviLitTheme();
+        themes.add(suiviTheme);
         themes.add(new StructureDescriptionTheme());
     }
 
@@ -80,6 +85,16 @@ public class PluginLit extends Plugin {
     @Override
     public List<ToolBar> getMapToolBars(final FXMapPane mapPane) {
         return Collections.singletonList(new LitToolBar(mapPane.getUiMap()));
+    }
+
+    @Override
+    public boolean handleTronconType(final Class<? extends Element> tronconType){
+        return TronconLit.class.equals(tronconType);
+    }
+
+    @Override
+    public FXFreeTab openTronconPane(final TronconDigue element){
+        return Injector.getSession().getOrCreateThemeTab(suiviTheme);
     }
     
     public static String LAYER_NAME = "lits";
