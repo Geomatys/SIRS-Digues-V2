@@ -16,8 +16,12 @@ fr.sirs.core.model.ZoneAtterrissementLit
 fr.sirs.core.model.RefZoneAtterrissementLit
 fr.sirs.core.model.DesordreLit
 fr.sirs.core.model.RefTypeDesordreLit
+fr.sirs.core.model.OuvrageFreineurLit
+fr.sirs.core.model.BarrageLit
+fr.sirs.core.model.AutreOuvrageRegulationLit
+fr.sirs.core.model.RefTypeOuvrageFreineurLit
+fr.sirs.core.model.RefTypeBarrageLit
 fr.sirs.core.model.RefTypeOuvrageRegulationLit
-fr.sirs.core.model.OuvrageRegulationLit
 fr.sirs.core.model.RefTypeOuvrageLit
 fr.sirs.core.model.PlanSeuilLit
 fr.sirs.core.model.RefTypeInspectionSeuilLit

@@ -155,8 +155,16 @@
           </ScrollPane>
         </Tab>
 
-<!-- REFERENCE TABS -->
-        <Tab fx:id="ui_ouvrages" text="%ouvrages"/>
+        <!-- REFERENCE TABS -->
+        <Tab fx:id="ui_ouvrages" text="Ouvrages de régulation">
+            <TabPane>
+                <tabs>
+                    <Tab fx:id="ui_ouvragesFreineurs" text="%ouvragesFreineurs"/>
+                    <Tab fx:id="ui_barrages" text="%barrages"/>
+                    <Tab fx:id="ui_autreOuvrages" text="%autreOuvrages"/>
+                </tabs>
+            </TabPane>
+        </Tab>
         <Tab fx:id="ui_photos" text="%photos"/>
         <Tab fx:id="ui_proprietes" text="%proprietes"/>
         <Tab fx:id="ui_gestions" text="%gestions"/>
