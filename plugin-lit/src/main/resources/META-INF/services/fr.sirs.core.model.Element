@@ -34,3 +34,4 @@ fr.sirs.core.model.RefFermeturePlageDepotLit
 fr.sirs.core.model.RefOuverturePlageDepotLit
 fr.sirs.core.model.RefElementAssociePlageDepotLit
 fr.sirs.core.model.RefElementAssocieFermeturePlageDepotLit
+fr.sirs.core.model.RefDomanialiteLit
