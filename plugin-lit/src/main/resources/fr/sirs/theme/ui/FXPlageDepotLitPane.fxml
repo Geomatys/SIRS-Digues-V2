@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import fr.sirs.theme.ui.*?>
+<?import fr.sirs.util.FXFileTextField?>
+<?import fr.sirs.util.FXComponentField?>
+<?import org.geotoolkit.gui.javafx.util.*?>
+<?import jidefx.scene.control.field.*?>
+<?import jfxtras.scene.control.*?>
+<?import javafx.scene.web.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+
+
+<fx:root fx:id="uiBorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+  <center>
+    <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <tabs>
+
+<!-- ATTRIBUTE TAB-->
+        <Tab text="Informations">
+          <ScrollPane>
+            <content>
+          <VBox spacing="30.0" BorderPane.alignment="CENTER">
+            <children>
+
+  <FXValidityPeriodPane fx:id="uiValidityPeriod"/>
+            <HBox fx:id="ui_parent_box" spacing="20.0" alignment="CENTER_LEFT" styleClass="gray-light">
+              <children>
+                <Label fx:id="linearId" text="%linearId" maxHeight="-Infinity" maxWidth="-Infinity"/>
+                <ComboBox fx:id="ui_linearId"/>
+                <Button fx:id="ui_linearId_link"/>
+              </children>
+              <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+              </padding>
+            </HBox>
+
+<!-- POSITIONEMENT -->
+    <FXPositionablePane fx:id="uiPositionable" />  
+
+<!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
+
+
+            <!-- PlageDepotLit -->
+            <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="NEVER" />
+                <ColumnConstraints hgrow="ALWAYS" />
+              </columnConstraints>
+              <!--rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints-->
+              <children>
+                   <!-- Generalites -->
+                   <Label text="Informations générales" GridPane.rowIndex="0" >
+                       <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
+                  </Label>
+                   <!-- EString -->                 
+                   <Label text="%libelle" GridPane.rowIndex="1" />
+                   <TextField fx:id="ui_libelle" GridPane.columnIndex="1" GridPane.rowIndex="1"  />
+                   <!-- EString -->                 
+                   <Label text="%commune" GridPane.rowIndex="2" />
+                   <TextField fx:id="ui_commune" GridPane.columnIndex="1" GridPane.rowIndex="2"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- EDouble -->                 
+                   <Label text="%coteFond" GridPane.rowIndex="3" />
+                   <Spinner fx:id="ui_coteFond" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- EDouble -->                 
+                   <Label text="%coteAlerte" GridPane.rowIndex="4" />
+                   <Spinner fx:id="ui_coteAlerte" GridPane.columnIndex="1" GridPane.rowIndex="4"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- EString -->                 
+                   <Label text="%chemin" GridPane.rowIndex="5" />
+                   <FXFileTextField fx:id="ui_chemin" GridPane.columnIndex="1" GridPane.rowIndex="5"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   
+                   
+                   
+                   <!-- Description -->
+                   <Separator GridPane.rowIndex="6" GridPane.columnSpan="3" />
+                   <Label text="Plage de dépôts" GridPane.rowIndex="7" >
+                       <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
+                  </Label>
+                  
+                  <!-- EDouble -->                 
+                   <Label text="%volumeStockage" GridPane.rowIndex="8" />
+                   <Spinner fx:id="ui_volumeStockage" GridPane.columnIndex="1" GridPane.rowIndex="8"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- EDouble -->                 
+                   <Label text="%longueur" GridPane.rowIndex="9" />
+                   <Spinner fx:id="ui_longueur" GridPane.columnIndex="1" GridPane.rowIndex="9"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- EDouble -->                 
+                   <Label text="%largeurMax" GridPane.rowIndex="10" />
+                   <Spinner fx:id="ui_largeurMax" GridPane.columnIndex="1" GridPane.rowIndex="10"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- EDouble -->                 
+                   <Label text="%penteAVide" GridPane.rowIndex="11" />
+                   <Spinner fx:id="ui_penteAVide" GridPane.columnIndex="1" GridPane.rowIndex="11"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- EBoolean -->                 
+                   <Label text="%elementAssocie" GridPane.rowIndex="12" />
+                   <CheckBox fx:id="ui_elementAssocie" GridPane.columnIndex="1" GridPane.rowIndex="12"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   
+                   <Label text="%typeElementAssocieId" GridPane.rowIndex="13" />
+                   <ComboBox fx:id="ui_typeElementAssocieId" GridPane.columnIndex="1" GridPane.rowIndex="13" />
+                   <Button fx:id="ui_typeElementAssocieId_link" GridPane.columnIndex="2" GridPane.rowIndex="13" />
+                   
+                   
+                   <!-- Description -->
+                   <Separator GridPane.rowIndex="14" GridPane.columnSpan="3" />
+                   <Label text="Fermeture de plage de dépôts" GridPane.rowIndex="15" >
+                       <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
+                  </Label>
+                  <Label text="%typeFermetureId" GridPane.rowIndex="16" />
+                   <ComboBox fx:id="ui_typeFermetureId" GridPane.columnIndex="1" GridPane.rowIndex="16" />
+                   <Button fx:id="ui_typeFermetureId_link" GridPane.columnIndex="2" GridPane.rowIndex="16" />
+                   <!-- EDouble -->                 
+                   <Label text="%hauteur" GridPane.rowIndex="17" />
+                   <Spinner fx:id="ui_hauteur" GridPane.columnIndex="1" GridPane.rowIndex="17"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <!-- EDouble -->                 
+                   <Label text="%largeurEnCrete" GridPane.rowIndex="18" />
+                   <Spinner fx:id="ui_largeurEnCrete" GridPane.columnIndex="1" GridPane.rowIndex="18"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   
+                   <Label text="%typeOuvertureLit" GridPane.rowIndex="19" />
+                   <ComboBox fx:id="ui_typeOuvertureLit" GridPane.columnIndex="1" GridPane.rowIndex="19" />
+                   <Button fx:id="ui_typeOuvertureLit_link" GridPane.columnIndex="2" GridPane.rowIndex="19" />
+                   
+                   <!-- EBoolean -->                 
+                   <Label text="%elementAssocieFermeture" GridPane.rowIndex="20" />
+                   <CheckBox fx:id="ui_elementAssocieFermeture" GridPane.columnIndex="1" GridPane.rowIndex="20"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   
+                   <Label text="%typeElementAssocieFermetureId" GridPane.rowIndex="21" />
+                   <ComboBox fx:id="ui_typeElementAssocieFermetureId" GridPane.columnIndex="1" GridPane.rowIndex="21" />
+                   <Button fx:id="ui_typeElementAssocieFermetureId_link" GridPane.columnIndex="2" GridPane.rowIndex="21" />
+
+              </children>
+              <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+              </padding>
+            </GridPane>
+            <HTMLEditor fx:id="ui_commentaire" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contentediTable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" maxHeight="-Infinity"  prefHeight="200.0" styleClass="gray-light" />
+
+            </children>
+            <padding>
+              <Insets bottom="10.0" left="50.0" right="50.0" top="30.0" />
+            </padding>
+          </VBox>
+            </content>
+          </ScrollPane>
+        </Tab>
+
+<!-- REFERENCE TABS -->
+        <Tab fx:id="ui_ouvrages" text="%ouvrages"/>
+        <Tab fx:id="ui_photos" text="%photos"/>
+        <Tab fx:id="ui_proprietes" text="%proprietes"/>
+        <Tab fx:id="ui_gestions" text="%gestions"/>
+
+      </tabs>
+    </TabPane>
+  </center>
+
+</fx:root>
+
