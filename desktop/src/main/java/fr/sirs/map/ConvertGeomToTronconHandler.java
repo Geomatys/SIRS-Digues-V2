@@ -7,13 +7,11 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
-import fr.sirs.core.model.TronconDigue;
-import static fr.sirs.map.TronconEditHandler.showTronconDialog;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.TronconDigue;
+import static fr.sirs.map.TronconEditHandler.showTronconDialog;
 import java.awt.geom.Rectangle2D;
-import java.util.List;
 import java.util.logging.Level;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
@@ -131,8 +129,7 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
                     
                     if(geom !=null) {
                         final Session session = Injector.getBean(Session.class);
-                        final List<Preview> parents = session.getPreviews().getByClass(Digue.class);
-                        final TronconDigue troncon = showTronconDialog(typeName, typeClass, maleGender, parents, showRive, parentLabel);
+                        final TronconDigue troncon = showTronconDialog(typeName, typeClass, maleGender, Digue.class, showRive, parentLabel);
                         if (troncon == null) return;
                         try{
                             //convertion from data crs to base crs

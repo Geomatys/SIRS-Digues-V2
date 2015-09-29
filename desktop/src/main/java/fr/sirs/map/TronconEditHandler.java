@@ -21,8 +21,11 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.StreamingIterable;
+import fr.sirs.util.property.Reference;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -97,8 +100,8 @@ import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.referencing.CRS;
-import org.geotoolkit.util.collection.CloseableIterator;
 import org.geotoolkit.style.MutableStyle;
+import org.geotoolkit.util.collection.CloseableIterator;
 import org.geotoolkit.util.collection.CollectionChangeEvent;
 import org.opengis.filter.Id;
 import org.opengis.referencing.operation.TransformException;
@@ -279,20 +282,25 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
      * left null.
      * @param typeName
      * @param tronconClass
+     * @param maleGender
+     * @param parentClass
+     * @param showRive
+     * @param parentLabel
      * @return Return the new troncon, or null if user has cancelled dialog.
      */
-    public static TronconDigue showTronconDialog(String typeName, Class<? extends TronconDigue> tronconClass, boolean maleGender, final List<Preview> parents,
-            boolean showRive, String parentLabel) {
+    public static TronconDigue showTronconDialog(final String typeName,
+            final Class<? extends TronconDigue> tronconClass,
+            final boolean maleGender, final Class parentClass,
+            final boolean showRive, final String parentLabel) {
         final Session session = Injector.getBean(Session.class);
         
-        final ComboBox<Preview> diguesChoice = new ComboBox<>(FXCollections.observableList(parents));
-        final ComboBox<RefRive> rives = new ComboBox<>(
-                FXCollections.observableList(session.getRepositoryForClass(RefRive.class).getAll()));
+        final ComboBox<Preview> parentChoice = new ComboBox<>(FXCollections.observableList(session.getPreviews().getByClass(parentClass)));
+        final ComboBox<RefRive> rives = new ComboBox<>(FXCollections.observableList(session.getRepositoryForClass(RefRive.class).getAll()));
 
         final SirsStringConverter strConverter = new SirsStringConverter();
-        diguesChoice.setConverter(strConverter);
-        diguesChoice.setEditable(true);
-        ComboBoxCompletion.autocomplete(diguesChoice);
+        parentChoice.setConverter(strConverter);
+        parentChoice.setEditable(true);
+        ComboBoxCompletion.autocomplete(parentChoice);
         rives.setConverter(strConverter);
 
         final TextField nameField = new TextField();
@@ -326,7 +334,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         }
         bp.add(nameField, 0, 1);
         bp.add(new Label("Rattacher " + parentLabel), 0, 2);
-        bp.add(diguesChoice, 0, 3);
+        bp.add(parentChoice, 0, 3);
         if (showRive) {
             bp.add(new Label("Sur la rive"), 0, 4);
             bp.add(rives, 0, 5);
@@ -390,9 +398,16 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         } else {
             final TronconDigue tmpTroncon = Injector.getSession().getElementCreator().createElement(tronconClass);
             tmpTroncon.setLibelle(tronconName);
-            final Preview digue = diguesChoice.getValue();
-            if (digue != null) {
-                tmpTroncon.setDigueId(digue.getElementId());
+            final Preview parentPreview = parentChoice.getValue();
+            if (parentPreview != null) {
+                try {
+                    final Method parentMethod = findParentMethod(tronconClass, parentClass);
+                    if(parentMethod!=null){
+                        parentMethod.invoke(tmpTroncon, parentPreview.getElementId());
+                    }
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException ex) {
+                    SIRS.LOGGER.log(Level.WARNING, null, ex);
+                } 
             }
             final RefRive rive = rives.getValue();
             if (rive != null) {
@@ -400,6 +415,24 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             }
             return tmpTroncon;
         }
+    }
+
+    /**
+     * Tries to found a method of the childClass which references the parentClass.
+     * @param childClass
+     * @param parentClass
+     * @return
+     * @throws java.lang.NoSuchMethodException
+     */
+    public static Method findParentMethod(final Class childClass, final Class parentClass) throws NoSuchMethodException{
+        for(final Method method : childClass.getMethods()){
+            final Reference ref = method.getAnnotation(Reference.class);
+            if(ref!=null && ref.ref()!=null && ref.ref().equals(parentClass)) {
+                // Les annotations Reference portent sur les accesseurs il faut retrouver le modifieur correspondant.
+                return childClass.getMethod(method.getName().replaceFirst("get", "set"), String.class);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -506,8 +539,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                     final String title = maleGender ? "Créer un nouveau " + typeName : "Créer une nouvelle " + typeName;
                     final MenuItem createItem = new MenuItem(title);
                     createItem.setOnAction((ActionEvent event) -> {
-                        final List<Preview> parents = session.getPreviews().getByClass(parentClass);
-                        final TronconDigue tmpTroncon = showTronconDialog(typeName, tronconClass, maleGender, parents, showRive, parentLabel);
+                        final TronconDigue tmpTroncon = showTronconDialog(typeName, tronconClass, maleGender, parentClass, showRive, parentLabel);
                         if (tmpTroncon == null) {
                             return;
                         }
