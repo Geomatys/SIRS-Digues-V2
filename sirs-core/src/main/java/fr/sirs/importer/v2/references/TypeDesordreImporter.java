@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefTypeDesordre;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeDesordreImporter extends GenericTypeReferenceImporter<RefTypeDesordre> {
 
     @Override
@@ -17,6 +18,6 @@ class TypeDesordreImporter extends GenericTypeReferenceImporter<RefTypeDesordre>
 
     @Override
     protected Class<RefTypeDesordre> getElementClass() {
-	return RefTypeDesordre.class;
+        return RefTypeDesordre.class;
     }
 }

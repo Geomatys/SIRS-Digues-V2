@@ -4,16 +4,17 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
+import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.importer.v2.AbstractImporter;
 import fr.sirs.importer.v2.ImportContext;
+import fr.sirs.util.ImportParameters;
 import java.io.File;
 import java.io.IOException;
-import org.apache.sis.util.ArgumentChecks;
+import org.apache.sis.metadata.iso.citation.Citations;
+import org.apache.sis.referencing.IdentifiedObjects;
 import org.ektorp.CouchDbConnector;
-import org.geotoolkit.factory.Hints;
-import org.geotoolkit.lang.Setup;
-import org.geotoolkit.referencing.CRS;
-import org.springframework.context.ApplicationContext;
+import org.opengis.metadata.Identifier;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -28,8 +29,6 @@ public class DbImporter {
     public static final String cleanNullString(String string) {
         return (NULL_STRING_VALUE.equals(string) || string == null) ? "" : string;
     }
-
-    private final ApplicationContext context;
 
     public enum TableName {
 
@@ -370,46 +369,40 @@ public class DbImporter {
 //     Selections
     }
 
-    public DbImporter(final ApplicationContext applicationContext) throws IOException {
-        ArgumentChecks.ensureNonNull("Application context", applicationContext);
-        context = applicationContext;
-    }
+    public static void importation(
+            final File mainAccessDbFile,
+            final File cartoAccessDbFile,
+            final String outputDbName,
+            final CoordinateReferenceSystem outputCRS,
+            final String newUserLogin,
+            final String newUserPwd)
+            throws IOException, AccessDbImporterException {
 
-    public void importation() throws IOException, AccessDbImporterException {
-
-        ImportContext importCtx = context.getBean(ImportContext.class);
-        for (final AbstractImporter importer : importCtx.importers.values()) {
-            importer.compute();
-        }
-    }
-
-    //TODO remove when import finished
-    public static void main(String[] args) throws Exception {
-        //Geotoolkit startup
-        Setup.initialize(null);
-        //work in lazy mode, do your best for lenient datum shift
-        Hints.putSystemDefault(Hints.LENIENT_DATUM_SHIFT, Boolean.TRUE);
-
-        try (final ConfigurableApplicationContext appCtx = new DatabaseRegistry().connectToSirsDatabase("import_test", true, false, false)) {
-            final File mainDbFile = new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_ad_isere_donnees.mdb");
-            final File cartoDbFile = new File("/home/samuel/Bureau/symadrem/data/SIRSDigues_ad_isere_carto.mdb");
-
+        try (final ConfigurableApplicationContext appCtx = new DatabaseRegistry().connectToSirsDatabase(outputDbName, true, false, false)) {
             SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
-            sirsDBInfoRepository.setSRID("EPSG:2154");
+            final Identifier crsId = IdentifiedObjects.getIdentifier(outputCRS, Citations.EPSG);
+            sirsDBInfoRepository.setSRID(crsId.getCodeSpace()+':'+crsId.getCode());
 
-            try (final Database mainDb = DatabaseBuilder.open(mainDbFile);
-                    final Database cartoDb = DatabaseBuilder.open(cartoDbFile)) {
+            if (newUserLogin != null) {
+                final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
+                createDefaultUsers(utilisateurRepository, newUserLogin, newUserPwd);
+            }
 
-                final ImportContext context = new ImportContext(mainDb, cartoDb, appCtx.getBean(CouchDbConnector.class), CRS.decode("EPSG:2154"));
-                appCtx.getBeanFactory().registerSingleton(ImportContext.class.getCanonicalName(), context);
+            try (final Database mainDb = DatabaseBuilder.open(mainAccessDbFile);
+                    final Database cartoDb = DatabaseBuilder.open(cartoAccessDbFile)) {
+
+                final ImportParameters params = new ImportParameters(mainDb, cartoDb, appCtx.getBean(CouchDbConnector.class), outputCRS);
+                appCtx.getBeanFactory().registerSingleton(ImportParameters.class.getCanonicalName(), params);
 
                 // Open spring context for import.
                 try (final ClassPathXmlApplicationContext importCtx = new ClassPathXmlApplicationContext(new String[]{"classpath:/fr/sirs/spring/importer-context.xml"}, appCtx)) {
-                    final DbImporter importer = new DbImporter(appCtx);
-                    importer.importation();
+                    final ImportContext context = importCtx.getBean(ImportContext.class);
+                    for (final AbstractImporter importer : context.importers.values()) {
+                        importer.compute();
+                    }
+                } finally {
+                    appCtx.getBeanFactory().destroyBean(params);
                 }
-
-                appCtx.getBeanFactory().destroyBean(ImportContext.class.getCanonicalName(), context);
             }
         }
     }

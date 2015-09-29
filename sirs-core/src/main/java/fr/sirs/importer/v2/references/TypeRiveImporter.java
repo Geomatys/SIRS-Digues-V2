@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefRive;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeRiveImporter extends GenericTypeReferenceImporter<RefRive> {
 
     @Override
@@ -17,6 +18,6 @@ class TypeRiveImporter extends GenericTypeReferenceImporter<RefRive> {
 
     @Override
     protected Class<RefRive> getElementClass() {
-	return RefRive.class;
+        return RefRive.class;
     }
 }

@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefNature;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 public class TypeNatureImporter extends GenericTypeReferenceImporter<RefNature> {
 
     @Override
@@ -17,7 +18,7 @@ public class TypeNatureImporter extends GenericTypeReferenceImporter<RefNature> 
 
     @Override
     protected Class<RefNature> getElementClass() {
-	return RefNature.class;
+        return RefNature.class;
     }
 
 }

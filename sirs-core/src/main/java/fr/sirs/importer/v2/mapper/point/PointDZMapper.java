@@ -9,6 +9,7 @@ import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import fr.sirs.core.model.PointDZ;
 import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.v2.ImportContext;
 import fr.sirs.importer.v2.mapper.AbstractMapper;
 import fr.sirs.importer.v2.mapper.Mapper;
 import fr.sirs.importer.v2.mapper.MapperSpi;
@@ -48,7 +49,7 @@ public class PointDZMapper extends AbstractMapper<PointDZ> {
         @Override
         public Optional<Mapper<PointDZ>> configureInput(Table inputType) throws IllegalStateException {
             for (final Columns c : Columns.values()) {
-                if (inputType.getColumn(c.name()) != null) {
+                if (ImportContext.columnExists(inputType, c.name())) {
                     return Optional.of(new PointDZMapper(inputType, c.name()));
                 }
             }

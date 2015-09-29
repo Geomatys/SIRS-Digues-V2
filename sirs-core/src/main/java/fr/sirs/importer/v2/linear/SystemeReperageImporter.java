@@ -4,7 +4,6 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.v2.AbstractImporter;
 import static fr.sirs.importer.DbImporter.TableName.SYSTEME_REP_LINEAIRE;
 import fr.sirs.importer.v2.AbstractImporter;
 import java.io.IOException;
@@ -12,11 +11,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 public class SystemeReperageImporter extends AbstractImporter<SystemeReperage> {
 
     private AbstractImporter<TronconDigue> tronconGestionDigueImporter;

@@ -9,6 +9,7 @@ import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import fr.sirs.core.model.SIRSReference;
 import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.v2.ImportContext;
 import fr.sirs.importer.v2.mapper.AbstractMapper;
 import fr.sirs.importer.v2.mapper.Mapper;
 import fr.sirs.importer.v2.mapper.MapperSpi;
@@ -41,7 +42,7 @@ public class SIRSReferenceMapper extends AbstractMapper<SIRSReference> {
 
         @Override
         public Optional<Mapper<SIRSReference>> configureInput(Table inputType) throws IllegalStateException {
-            if (inputType.getColumn(COLUMN_NAME) != null) {
+            if (ImportContext.columnExists(inputType, COLUMN_NAME)) {
                 return Optional.of(new SIRSReferenceMapper(inputType));
             }
             return Optional.empty();

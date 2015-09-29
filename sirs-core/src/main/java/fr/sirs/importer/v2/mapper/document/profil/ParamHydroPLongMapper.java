@@ -11,6 +11,7 @@ import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.ParametreHydrauliqueProfilLong;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.v2.AbstractImporter;
+import fr.sirs.importer.v2.ImportContext;
 import fr.sirs.importer.v2.mapper.AbstractMapper;
 import fr.sirs.importer.v2.mapper.Mapper;
 import fr.sirs.importer.v2.mapper.MapperSpi;
@@ -67,7 +68,7 @@ public class ParamHydroPLongMapper extends AbstractMapper<ParametreHydrauliquePr
         @Override
         public Optional<Mapper<ParametreHydrauliqueProfilLong>> configureInput(Table inputType) throws IllegalStateException {
             for (final Columns c : Columns.values()) {
-                if (inputType.getColumn(c.name()) == null) {
+                if (!ImportContext.columnExists(inputType, c.name())) {
                     return Optional.empty();
                 }
             }

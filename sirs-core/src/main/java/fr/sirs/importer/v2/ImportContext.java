@@ -10,10 +10,12 @@ import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.importer.v2.mapper.Mapper;
 import fr.sirs.importer.v2.mapper.MapperSpi;
+import fr.sirs.util.ImportParameters;
 import java.beans.PropertyDescriptor;
 import java.net.MalformedURLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -28,12 +30,12 @@ import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javax.annotation.PostConstruct;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.ObjectConverters;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentOperationResult;
-import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.esrigeodb.GeoDBStore;
 import org.geotoolkit.feature.type.GeometryDescriptor;
@@ -43,6 +45,11 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 import org.opengis.util.GenericName;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
 /**
  * Contains main properties and data needed for an import from an access
@@ -50,7 +57,12 @@ import org.opengis.util.GenericName;
  *
  * @author Alexis Manin (Geomatys)
  */
-public class ImportContext {
+@Component
+public class ImportContext implements ApplicationContextAware {
+
+    public static final String MAIN_DB_QUALIFIER = "main-access-db";
+    public static final String CARTO_DB_QUALIFIER = "carto-access-db";
+    public static final String OUTPUT_CRS_QUALIFIER = "output-crs";
 
     public static final String NULL_STRING = "null";
 
@@ -67,6 +79,7 @@ public class ImportContext {
      * Input database containing projection and geometric information.
      */
     public final Database inputCartoDb;
+
     /**
      * Source database projection.
      */
@@ -76,6 +89,7 @@ public class ImportContext {
      * Target database.
      */
     public final CouchDbConnector outputDb;
+
     /**
      * Target database projection.
      */
@@ -89,7 +103,7 @@ public class ImportContext {
 
     public final ConcurrentHashMap<Class, AbstractImporter> importers = new ConcurrentHashMap<>();
     public final ConcurrentHashMap<Class, HashSet<DocumentModifier>> modifiers = new ConcurrentHashMap<>();
-    public final ConcurrentHashMap<Class, HashSet<Updater>> updaters = new ConcurrentHashMap<>();
+    //public final ConcurrentHashMap<Class, HashSet<Updater>> updaters = new ConcurrentHashMap<>();
 
     public final ConcurrentHashMap<Class, HashSet<MapperSpi>> mappers = new ConcurrentHashMap<>();
 
@@ -100,6 +114,8 @@ public class ImportContext {
      */
     public int bulkLimit = 1000;
 
+    private static ApplicationContext appCtx;
+
     /**
      * List errors which occured while importing database. Errors can be
      * registered using {@link #reportError(fr.sirs.importer.v2.ErrorReport)
@@ -107,19 +123,17 @@ public class ImportContext {
      */
     public final ObservableList<ErrorReport> errors = FXCollections.observableArrayList();
 
-    public ImportContext(final Database inputDb, final Database inputCartoDb, final CouchDbConnector outputDb, final CoordinateReferenceSystem outputCRS) throws FactoryException, MalformedURLException, DataStoreException {
-        ArgumentChecks.ensureNonNull("Input database which contains properties", inputDb);
-        ArgumentChecks.ensureNonNull("Input database which contains geometries", inputCartoDb);
-        ArgumentChecks.ensureNonNull("Output database connection", outputDb);
-        ArgumentChecks.ensureNonNull("Output projection", outputCRS);
+    @Autowired
+    public ImportContext(final ImportParameters parameters)
+            throws FactoryException, MalformedURLException, DataStoreException {
 
-        this.inputDb = inputDb;
-        this.inputCartoDb = inputCartoDb;
-        this.outputDb = outputDb;
-        this.outputCRS = outputCRS;
+        this.inputDb = parameters.inputDb;
+        this.inputCartoDb = parameters.inputCartoDb;
+        this.outputDb = parameters.outputDb;
+        this.outputCRS = parameters.outputCRS;
 
         CoordinateReferenceSystem crs = null;
-        try (final FeatureStore store = new GeoDBStore("no namespace", inputCartoDb.getFile().toURI().toURL())) {
+        try (final GeoDBStore store = new GeoDBStore("no namespace", inputCartoDb.getFile().toURI().toURL())) {
             for (final GenericName name : store.getNames()) {
                 GeometryDescriptor geomDesc = store.getFeatureType(name).getGeometryDescriptor();
                 if (geomDesc != null) {
@@ -137,6 +151,56 @@ public class ImportContext {
         }
 
         geoTransform = CRS.findMathTransform(inputCRS, outputCRS, true);
+    }
+
+    @PostConstruct
+    private void registerComponent() {
+        if (appCtx == null) {
+            throw new IllegalStateException("Application context has not been registered yet !");
+        }
+
+        final Collection<AbstractImporter> importerList = appCtx.getBeansOfType(AbstractImporter.class).values();
+        final Collection<MapperSpi> mapperList = appCtx.getBeansOfType(MapperSpi.class).values();
+        final Collection<DocumentModifier> modifierList = appCtx.getBeansOfType(DocumentModifier.class).values();
+
+        /*
+         * Register importers. Should get one per output type.
+         */
+        for (final AbstractImporter importer : importerList) {
+            AbstractImporter deleted = importers.put(importer.getElementClass(), importer);
+            if (deleted != null) {
+                final StringBuilder builder = new StringBuilder("Two importers declared for type ")
+                        .append(importer.getElementClass().getCanonicalName())
+                        .append(" :\n")
+                        .append(deleted.getClass().getCanonicalName())
+                        .append('\n')
+                        .append(importer.getClass().getCanonicalName());
+                throw new IllegalStateException(builder.toString());
+            }
+        }
+
+        /*
+         * Register mappers
+         */
+        for (final MapperSpi spi : mapperList) {
+            HashSet<MapperSpi> mapperSet = mappers.get(spi.getOutputClass());
+            if (mapperSet == null) {
+                mapperSet = new HashSet<>();
+                mappers.put(spi.getOutputClass(), mapperSet);
+            }
+            mapperSet.add(spi);
+        }
+
+        for (final DocumentModifier modifier : modifierList) {
+            HashSet<DocumentModifier> modifierSet = modifiers.get(modifier.getDocumentClass());
+            if (modifierSet == null) {
+                modifierSet = new HashSet<>();
+                modifiers.put(modifier.getDocumentClass(), modifierSet);
+            }
+            modifierSet.add(modifier);
+        }
+
+        // TODO : linkers
     }
 
     public <T> T convertData(final Object input, final Class<T> outputClass) {
@@ -259,7 +323,7 @@ public class ImportContext {
      * @return The converted date, or null if no input was given.
      */
     public static LocalDate toLocalDate(final Date date) {
-        return date == null ? null : LocalDate.from(date.toInstant());
+        return date == null ? null : LocalDate.from(date.toInstant().atZone(ZoneId.of("UTC")));
     }
 
     /**
@@ -332,6 +396,15 @@ public class ImportContext {
         return result;
     }
 
+    public static boolean columnExists(final Table table, final String columnName) {
+        try {
+            table.getColumn(columnName);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Retrieve object imported from given row, then return it.
      * @param currentRow The row which has been used for import of searched object.
@@ -387,5 +460,14 @@ public class ImportContext {
      */
     public <T> Optional<BiConsumer<Row, T>> getConsumer(final Class<T> outputClass, final PropertyDescriptor outputProperty, final String columnName) {
         return Optional.empty();
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        appCtx = applicationContext;
+    }
+
+    public static ApplicationContext getApplicationContext() {
+        return appCtx;
     }
 }

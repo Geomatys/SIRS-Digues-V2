@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.PostConstruct;
 
 /**
  *
@@ -21,17 +22,14 @@ import java.util.List;
  */
 public abstract class GenericTypeReferenceImporter<T extends ReferenceType> extends AbstractImporter<T> {
 
-    private static final String ID_PREFIX = "ID_";
-    private static final String LIBELLE_PREFIX = "LIBELLE_";
-    private static final String ABREGE_PREFIX = "ABREGE_";
+    private static final String ID_PREFIX = "ID";
+    private static final String LIBELLE_PREFIX = "LIBELLE";
+    private static final String ABREGE_PREFIX = "ABREGE";
     private static final String DATE_COLUMN = "DATE_DERNIERE_MAJ";
 
     /**
-     * Name of the columns to import. Their order is important for import process :
-     * 0 : id
-     * 1 : libelle
-     * 2 : abrege
-     * 3 : date.
+     * Name of the columns to import. Their order is important for import
+     * process : 0 : id 1 : libelle 2 : abrege 3 : date.
      */
     private final String[] columns;
 
@@ -40,7 +38,11 @@ public abstract class GenericTypeReferenceImporter<T extends ReferenceType> exte
 
     public GenericTypeReferenceImporter() {
         super();
+        columns = new String[4];
+    }
 
+    @PostConstruct
+    private void indexColumns() {
         final Table table;
         try {
             table = context.inputDb.getTable(getTableName());
@@ -48,10 +50,12 @@ public abstract class GenericTypeReferenceImporter<T extends ReferenceType> exte
             throw new SirsCoreRuntimeException("Cannot create any importer for a reference type !");
         }
 
-        columns = new String[4];
+        String name;
+        String start;
         for (final Column col : table.getColumns()) {
-            String name = col.getName();
-            switch (name) {
+            name = col.getName();
+            start = name.substring(0, name.indexOf('_')).toUpperCase();
+            switch (start) {
                 case ID_PREFIX:
                     columns[0] = name;
                     break;
@@ -82,9 +86,12 @@ public abstract class GenericTypeReferenceImporter<T extends ReferenceType> exte
 
         try {
             final Class<T> outputClass = getElementClass();
-            setId = outputClass.getMethod("setId", outputClass);
+            setId = outputClass.getMethod("setId", String.class);
             setId.setAccessible(true);
-            setAbrege = outputClass.getMethod("setAbrege", outputClass);
+            // Some reference table don't have an "Abrege" column.
+            if (columns[2] != null) {
+                setAbrege = outputClass.getMethod("setAbrege", String.class);
+            }
             setId.setAccessible(true);
         } catch (Exception e) {
             throw new AccessDbImporterException("A required method cannot be found / accessed.", e);
@@ -106,7 +113,8 @@ public abstract class GenericTypeReferenceImporter<T extends ReferenceType> exte
         try {
             setId.invoke(output, output.getClass().getSimpleName() + ":" + refId);
             output.setLibelle(row.getString(columns[1]));
-            setAbrege.invoke(output, row.getString(columns[2]));
+            if (setAbrege != null)
+                setAbrege.invoke(output, row.getString(columns[2]));
         } catch (Exception e) {
             throw new SirsCoreRuntimeException("Cannot set reference attributes !", e);
         }
@@ -116,11 +124,6 @@ public abstract class GenericTypeReferenceImporter<T extends ReferenceType> exte
             output.setDateMaj(context.convertData(dateMaj, LocalDate.class));
         }
 
-        output.setDesignation(refId.toString());
         return output;
     }
-
-
-
-
 }

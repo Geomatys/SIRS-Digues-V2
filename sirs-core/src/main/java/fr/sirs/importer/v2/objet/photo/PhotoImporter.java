@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
  * @author Alexis Manin (Geomatys)
  */
 @Component
-public class AbstractPhotoImporter extends AbstractUpdater<Photo, Element> {
+public class PhotoImporter extends AbstractUpdater<Photo, Element> {
 
     private final String[] tableNames = new String[]{
         PHOTO_LOCALISEE_EN_PR.name(), PHOTO_LOCALISEE_EN_XY.name()

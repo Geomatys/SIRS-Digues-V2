@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefEvenementHydraulique;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeEvenementHydrauliqueImporter extends GenericTypeReferenceImporter<RefEvenementHydraulique> {
 
     @Override
@@ -17,6 +18,6 @@ class TypeEvenementHydrauliqueImporter extends GenericTypeReferenceImporter<RefE
 
     @Override
     protected Class<RefEvenementHydraulique> getElementClass() {
-	return RefEvenementHydraulique.class;
+        return RefEvenementHydraulique.class;
     }
 }

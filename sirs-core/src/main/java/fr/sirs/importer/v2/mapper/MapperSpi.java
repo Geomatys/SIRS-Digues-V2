@@ -1,6 +1,7 @@
 package fr.sirs.importer.v2.mapper;
 
 import com.healthmarketscience.jackcess.Table;
+import fr.sirs.importer.v2.ImportContext;
 import java.util.Optional;
 
 /**
@@ -53,7 +54,7 @@ public interface MapperSpi<T> {
      */
     public static boolean checkColumns(final Table source, final String[] expected) {
         for (final String str : expected) {
-            if (source.getColumn(str) == null) {
+            if (!ImportContext.columnExists(source, str)) {
                 return false;
             }
         }

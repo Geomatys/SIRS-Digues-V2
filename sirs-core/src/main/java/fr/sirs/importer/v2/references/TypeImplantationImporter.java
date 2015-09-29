@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefImplantation;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeImplantationImporter extends GenericTypeReferenceImporter<RefImplantation> {
 
     @Override
@@ -17,8 +18,7 @@ class TypeImplantationImporter extends GenericTypeReferenceImporter<RefImplantat
 
     @Override
     protected Class<RefImplantation> getElementClass() {
-	return RefImplantation.class;
+        return RefImplantation.class;
     }
-
 
 }

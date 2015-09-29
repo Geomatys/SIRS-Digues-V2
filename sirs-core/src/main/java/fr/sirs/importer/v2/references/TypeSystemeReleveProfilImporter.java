@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefSystemeReleveProfil;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 public class TypeSystemeReleveProfilImporter extends GenericTypeReferenceImporter<RefSystemeReleveProfil> {
 
     @Override
@@ -17,6 +18,6 @@ public class TypeSystemeReleveProfilImporter extends GenericTypeReferenceImporte
 
     @Override
     protected Class<RefSystemeReleveProfil> getElementClass() {
-	return RefSystemeReleveProfil.class;
+        return RefSystemeReleveProfil.class;
     }
 }

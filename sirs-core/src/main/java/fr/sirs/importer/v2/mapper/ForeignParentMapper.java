@@ -11,6 +11,7 @@ import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.v2.AbstractImporter;
+import fr.sirs.importer.v2.ImportContext;
 import java.io.IOException;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
@@ -50,7 +51,7 @@ public class ForeignParentMapper extends AbstractMapper<AvecForeignParent> {
 
         @Override
         public Optional<Mapper<AvecForeignParent>> configureInput(Table inputType) throws IllegalStateException {
-            if (inputType.getColumn(TRONCON_ID_COLUMN) != null) {
+            if (ImportContext.columnExists(inputType, TRONCON_ID_COLUMN)) {
                 return Optional.of(new ForeignParentMapper(inputType));
             }
             return Optional.empty();

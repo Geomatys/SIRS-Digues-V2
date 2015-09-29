@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefPosition;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 public class TypePositionImporter extends GenericTypeReferenceImporter<RefPosition> {
 
     @Override
@@ -17,6 +18,6 @@ public class TypePositionImporter extends GenericTypeReferenceImporter<RefPositi
 
     @Override
     protected Class<RefPosition> getElementClass() {
-	return RefPosition.class;
+        return RefPosition.class;
     }
 }

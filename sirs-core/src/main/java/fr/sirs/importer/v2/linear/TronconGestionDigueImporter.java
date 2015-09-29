@@ -12,23 +12,22 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.importer.v2.AbstractImporter;
-import fr.sirs.importer.v2.AbstractImporter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.geotoolkit.data.shapefile.shp.ShapeHandler;
 import org.geotoolkit.data.shapefile.shp.ShapeType;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.referencing.LinearReferencing;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 public class TronconGestionDigueImporter extends AbstractImporter<TronconDigue> {
 
     private static final String GEOM_TABLE = "CARTO_TRONCON_GESTION_DIGUE";
@@ -46,14 +45,11 @@ public class TronconGestionDigueImporter extends AbstractImporter<TronconDigue> 
 //        ID_ORG_GESTIONNAIRE, //Dans les gestions ?
         ID_DIGUE,
         ID_TYPE_RIVE,
-        DATE_DEBUT_VAL_TRONCON,
-        DATE_FIN_VAL_TRONCON,
         NOM_TRONCON_GESTION,
         COMMENTAIRE_TRONCON,
 //        DATE_DEBUT_VAL_GESTIONNAIRE_D, //Dans les gestions ?
 //        DATE_FIN_VAL_GESTIONNAIRE_D, //Dans les gestions ?
-        ID_SYSTEME_REP_DEFAUT,
-        DATE_DERNIERE_MAJ
+        ID_SYSTEME_REP_DEFAUT
     };
 
     @Override
@@ -110,21 +106,6 @@ public class TronconGestionDigueImporter extends AbstractImporter<TronconDigue> 
         tronconDigue.setLibelle(row.getString(Columns.NOM_TRONCON_GESTION.toString()));
         tronconDigue.setCommentaire(row.getString(Columns.COMMENTAIRE_TRONCON.toString()));
 
-        final Date DATE_DERNIERE_MAJ = row.getDate(Columns.DATE_DERNIERE_MAJ.toString());
-        if (DATE_DERNIERE_MAJ != null) {
-            tronconDigue.setDateMaj(context.convertData(DATE_DERNIERE_MAJ, LocalDate.class));
-        }
-
-        final Date DATE_DEBUT_VAL_TRONCON = row.getDate(Columns.DATE_DEBUT_VAL_TRONCON.toString());
-        if (DATE_DEBUT_VAL_TRONCON != null) {
-            tronconDigue.setDate_debut(context.convertData(DATE_DEBUT_VAL_TRONCON, LocalDate.class));
-        }
-
-        final Date DATE_FIN_VAL_TRONCON = row.getDate(Columns.DATE_FIN_VAL_TRONCON.toString());
-        if (DATE_FIN_VAL_TRONCON != null) {
-            tronconDigue.setDate_fin(context.convertData(DATE_FIN_VAL_TRONCON, LocalDate.class));
-        }
-
         final Integer riveId = row.getInt(Columns.ID_TYPE_RIVE.toString());
         if (riveId != null) {
             tronconDigue.setTypeRiveId(typeRiveImporter.getImportedId(riveId));
@@ -144,6 +125,13 @@ public class TronconGestionDigueImporter extends AbstractImporter<TronconDigue> 
 
         return tronconDigue;
     }
+
+    @Override
+    public synchronized void compute() throws IOException, AccessDbImporterException {
+        super.compute();
+        new TronconDigueUpdater().compute();
+    }
+
 
     /**
      * Search for the last valid geometry which has been submitted for a given {@link TronconDigue}

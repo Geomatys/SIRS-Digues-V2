@@ -13,11 +13,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 public class SystemeReperageBorneImporter extends SimpleUpdater<SystemeReperageBorne, SystemeReperage> {
 
     private enum Columns {

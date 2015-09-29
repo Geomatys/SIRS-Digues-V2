@@ -2,14 +2,14 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefOrientationPhoto;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 public class TypeOrientationImporter extends GenericTypeReferenceImporter<RefOrientationPhoto> {
-
 
     @Override
     public String getTableName() {
@@ -18,7 +18,7 @@ public class TypeOrientationImporter extends GenericTypeReferenceImporter<RefOri
 
     @Override
     protected Class<RefOrientationPhoto> getElementClass() {
-	return RefOrientationPhoto.class;
+        return RefOrientationPhoto.class;
     }
 
 }

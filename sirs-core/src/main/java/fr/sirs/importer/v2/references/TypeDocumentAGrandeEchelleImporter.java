@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefDocumentGrandeEchelle;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeDocumentAGrandeEchelleImporter extends GenericTypeReferenceImporter<RefDocumentGrandeEchelle> {
 
     @Override
@@ -17,6 +18,6 @@ class TypeDocumentAGrandeEchelleImporter extends GenericTypeReferenceImporter<Re
 
     @Override
     protected Class<RefDocumentGrandeEchelle> getElementClass() {
-	return RefDocumentGrandeEchelle.class;
+        return RefDocumentGrandeEchelle.class;
     }
 }

@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefOuvrageParticulier;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeOuvrageParticulierImporter extends GenericTypeReferenceImporter<RefOuvrageParticulier> {
 
     // Identifiant des échelles limnimetriques
@@ -20,6 +21,6 @@ class TypeOuvrageParticulierImporter extends GenericTypeReferenceImporter<RefOuv
 
     @Override
     protected Class<RefOuvrageParticulier> getElementClass() {
-	return RefOuvrageParticulier.class;
+        return RefOuvrageParticulier.class;
     }
 }

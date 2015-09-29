@@ -6,7 +6,6 @@
 package fr.sirs.importer.v2.mapper;
 
 import com.healthmarketscience.jackcess.Table;
-import fr.sirs.core.InjectorCore;
 import fr.sirs.importer.v2.ImportContext;
 import java.io.IOException;
 import org.apache.sis.util.ArgumentChecks;
@@ -30,7 +29,7 @@ public abstract class AbstractMapper<T> implements Mapper<T> {
 
     protected AbstractMapper(final Table table) {
         ArgumentChecks.ensureNonNull("Input table to work with", table);
-        InjectorCore.injectDependencies(this);
+        ImportContext.getApplicationContext().getAutowireCapableBeanFactory().autowireBean(this);
         this.table = table;
         this.tableName = table.getName();
     }

@@ -61,6 +61,10 @@ public class TronconDigueUpdater implements ExtraOperator {
         return TronconDigue.class;
     }
 
+    public TronconDigueUpdater() {
+        ImportContext.getApplicationContext().getAutowireCapableBeanFactory().autowireBean(this);
+    }
+
     public String getTableName() {
         return DbImporter.TableName.TRONCON_GESTION_DIGUE.name();
     }
@@ -130,8 +134,8 @@ public class TronconDigueUpdater implements ExtraOperator {
         final String elementId;
         try {
             elementId = masterImporter.getImportedId(rowId);
-        } catch (Exception ex) {
-            throw new IllegalStateException("No imported object found for row " + rowId + " from table " + getTableName(), ex);
+        } catch (IOException | AccessDbImporterException ex) {
+            throw new IllegalStateException("Import of table "+masterImporter.getTableName()+" failed.", ex);
         }
 
         return masterRepository.get(elementId);

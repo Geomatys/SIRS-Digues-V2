@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefReferenceHauteur;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 public class TypeRefHeauImporter extends GenericTypeReferenceImporter<RefReferenceHauteur> {
 
     @Override
@@ -17,7 +18,7 @@ public class TypeRefHeauImporter extends GenericTypeReferenceImporter<RefReferen
 
     @Override
     protected Class<RefReferenceHauteur> getElementClass() {
-	return RefReferenceHauteur.class;
+        return RefReferenceHauteur.class;
     }
 
 }

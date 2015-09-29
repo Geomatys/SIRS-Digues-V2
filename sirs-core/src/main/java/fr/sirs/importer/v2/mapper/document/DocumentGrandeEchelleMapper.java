@@ -11,6 +11,7 @@ import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.RefDocumentGrandeEchelle;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.v2.AbstractImporter;
+import fr.sirs.importer.v2.ImportContext;
 import fr.sirs.importer.v2.mapper.AbstractMapper;
 import fr.sirs.importer.v2.mapper.Mapper;
 import fr.sirs.importer.v2.mapper.MapperSpi;
@@ -62,7 +63,7 @@ public class DocumentGrandeEchelleMapper extends AbstractMapper<DocumentGrandeEc
         @Override
         public Optional<Mapper<DocumentGrandeEchelle>> configureInput(Table inputType) throws IllegalStateException {
             for (final Columns c : Columns.values()) {
-                if (inputType.getColumn(c.name()) == null) {
+                if (!ImportContext.columnExists(inputType, c.name())) {
                     return Optional.empty();
                 }
             }

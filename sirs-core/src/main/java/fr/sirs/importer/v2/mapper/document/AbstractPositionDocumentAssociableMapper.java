@@ -12,6 +12,7 @@ import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.v2.AbstractImporter;
+import fr.sirs.importer.v2.ImportContext;
 import fr.sirs.importer.v2.document.DocTypeRegistry;
 import fr.sirs.importer.v2.mapper.AbstractMapper;
 import fr.sirs.importer.v2.mapper.Mapper;
@@ -78,7 +79,7 @@ public class AbstractPositionDocumentAssociableMapper extends AbstractMapper<Abs
 
         @Override
         public Optional<Mapper<AbstractPositionDocumentAssociable>> configureInput(Table inputType) throws IllegalStateException {
-            if (inputType.getColumn(Columns.ID_DOC.name()) != null && inputType.getColumn(Columns.ID_TYPE_DOCUMENT.name()) != null) {
+            if (ImportContext.columnExists(inputType, Columns.ID_DOC.name()) && ImportContext.columnExists(inputType, Columns.ID_TYPE_DOCUMENT.name())) {
                 return Optional.of(new AbstractPositionDocumentAssociableMapper(inputType));
             }
             return Optional.empty();

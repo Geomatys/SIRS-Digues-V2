@@ -3,7 +3,6 @@ package fr.sirs.importer.v2;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
-import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Element;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
-import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -41,13 +39,6 @@ public abstract class AbstractImporter<T extends Element> {
     protected SessionCore session;
 
     /**
-     * Debug purpose. List all columns present in input table, with a flag
-     * specifiying if it is usable (needed for the mapping and not empty) for
-     * import.
-     */
-    private Map<String, Boolean> columnDataFlags;
-
-    /**
      * Map which binds imported row ids to the ids of their version in output
      * database. If computing has not been performed yet, its value is null.
      */
@@ -58,21 +49,7 @@ public abstract class AbstractImporter<T extends Element> {
     @Autowired
     protected ImportContext context;
 
-    public AbstractImporter() {
-        InjectorCore.injectDependencies(this);
-
-        this.columnDataFlags = new HashMap<>();
-
-        // Set the data flags to false for all the columns used by the importer.
-        this.getUsedColumns().stream().forEach((column) -> {
-            this.columnDataFlags.put(column, Boolean.FALSE);
-        });
-    }
-
-    @PostConstruct
-    protected void register() {
-        context.importers.put(getElementClass(), this);
-    }
+    protected AbstractImporter() {}
 
     /**
      * @return type for the object to create and fill.
@@ -124,6 +101,10 @@ public abstract class AbstractImporter<T extends Element> {
         if (importedRows != null)
             return;
 
+        //DEBUG
+        SirsCore.LOGGER.info("IMPORT OF " + getTableName());
+        SirsCore.LOGGER.info("PRIMARY KEY " + getRowIdFieldName());
+
         preCompute();
 
         final Table table = context.inputDb.getTable(getTableName());
@@ -145,7 +126,15 @@ public abstract class AbstractImporter<T extends Element> {
 
                 while (it.hasNext() && imports.size() < context.bulkLimit) {
                     final Row row = it.next();
-                    final Integer rowId = row.getInt(getRowIdFieldName());
+
+                    // DEBUG
+                    final Integer rowId;
+                    try {
+                        rowId = row.getInt(getRowIdFieldName());
+                    } catch (ClassCastException e) {
+                        SirsCore.LOGGER.warning("CAST ERROR --> "+getRowIdFieldName());
+                        throw e;
+                    }
                     if (rowId == null) {
                         context.reportError(new ErrorReport(null, row, getTableName(), getRowIdFieldName(), null, null, "Cannot import row due to bad ID.", CorruptionLevel.ROW));
                         continue;
@@ -207,7 +196,11 @@ public abstract class AbstractImporter<T extends Element> {
                 compute();
             }
         }
-        return importedRows.get(rowId);
+        final String result = importedRows.get(rowId);
+        if (result == null) {
+            throw new IllegalStateException("No imported object found for row " + rowId + " from table " + getTableName());
+        }
+        return result;
     }
 
     /**
@@ -310,6 +303,19 @@ public abstract class AbstractImporter<T extends Element> {
      * @throws IOException
      */
     private List<String> getEmptyUsedFields() throws IOException {
+        /*
+         * Debug purpose. List all columns present in input table, with a flag
+         * specifiying if it is usable (needed for the mapping and not empty) for
+         * import.
+         */
+        final HashMap<String, Boolean> columnDataFlags = new HashMap<>();
+        final List<String> usedColumns = getUsedColumns();
+
+        // Set the data flags to false for all the columns used by the importer.
+        usedColumns.stream().forEach((column) -> {
+            columnDataFlags.put(column, Boolean.FALSE);
+        });
+
         final List<String> emptyFields = new ArrayList<>();
         final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
 
@@ -318,23 +324,23 @@ public abstract class AbstractImporter<T extends Element> {
             final Row row = it.next();
 
             // For eache table column
-            this.getUsedColumns().stream().forEach((column) -> {
+            usedColumns.stream().forEach((column) -> {
 
                 // Look for data in the cell if the data flag of the column is
                 // false. If there is data, set the flag to true.
-                if (!this.columnDataFlags.get(column) && row.get(column) != null)
-                    this.columnDataFlags.put(column, Boolean.TRUE);
+                if (!columnDataFlags.get(column) && row.get(column) != null)
+                    columnDataFlags.put(column, Boolean.TRUE);
             });
 
             // If all the columns contains data, do not continue to look for data
             // in the following rows and break the loop.
-            if (!this.columnDataFlags.containsValue(Boolean.FALSE))
+            if (!columnDataFlags.containsValue(Boolean.FALSE))
                 break;
         }
 
         // List the column names detected to not contain data.
-        this.getUsedColumns().stream().forEach((column) -> {
-            if (!this.columnDataFlags.get(column))
+        usedColumns.stream().forEach((column) -> {
+            if (!columnDataFlags.get(column))
                 emptyFields.add(column);
         });
         return emptyFields;

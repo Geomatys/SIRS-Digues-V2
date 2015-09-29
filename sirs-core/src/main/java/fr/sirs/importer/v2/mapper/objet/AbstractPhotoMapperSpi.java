@@ -22,7 +22,6 @@ public class AbstractPhotoMapperSpi extends GenericMapperSpi<AbstractPhoto> {
 
         bindings = new HashMap<>(4);
         bindings.put(PhotoColumns.REF_PHOTO.name(), "libelle");
-        bindings.put(PhotoColumns.NOM_FICHIER_PHOTO.name(), "chemin");
         bindings.put(PhotoColumns.ID_INTERV_PHOTOGRAPH.name(), "photographeId");
         bindings.put(PhotoColumns.DATE_PHOTO.name(), "date");
     }

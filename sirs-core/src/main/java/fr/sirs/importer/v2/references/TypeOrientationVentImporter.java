@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefOrientationVent;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 public class TypeOrientationVentImporter extends GenericTypeReferenceImporter<RefOrientationVent> {
 
     @Override
@@ -17,6 +18,6 @@ public class TypeOrientationVentImporter extends GenericTypeReferenceImporter<Re
 
     @Override
     protected Class<RefOrientationVent> getElementClass() {
-	return RefOrientationVent.class;
+        return RefOrientationVent.class;
     }
 }

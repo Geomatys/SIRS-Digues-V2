@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefEcoulement;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeEcoulementImporter extends GenericTypeReferenceImporter<RefEcoulement> {
 
     @Override
@@ -17,6 +18,6 @@ class TypeEcoulementImporter extends GenericTypeReferenceImporter<RefEcoulement>
 
     @Override
     protected Class<RefEcoulement> getElementClass() {
-	return RefEcoulement.class;
+        return RefEcoulement.class;
     }
 }

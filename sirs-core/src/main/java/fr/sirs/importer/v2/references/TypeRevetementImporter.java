@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefRevetement;
 import static fr.sirs.importer.DbImporter.TableName.TYPE_REVETEMENT;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeRevetementImporter extends GenericTypeReferenceImporter<RefRevetement> {
 
     @Override
@@ -17,6 +18,6 @@ class TypeRevetementImporter extends GenericTypeReferenceImporter<RefRevetement>
 
     @Override
     protected Class<RefRevetement> getElementClass() {
-	return RefRevetement.class;
+        return RefRevetement.class;
     }
 }

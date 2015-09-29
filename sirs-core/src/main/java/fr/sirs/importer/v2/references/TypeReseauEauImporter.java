@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefReseauHydroCielOuvert;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeReseauEauImporter extends GenericTypeReferenceImporter<RefReseauHydroCielOuvert> {
 
     @Override
@@ -17,6 +18,6 @@ class TypeReseauEauImporter extends GenericTypeReferenceImporter<RefReseauHydroC
 
     @Override
     protected Class<RefReseauHydroCielOuvert> getElementClass() {
-	return RefReseauHydroCielOuvert.class;
+        return RefReseauHydroCielOuvert.class;
     }
 }

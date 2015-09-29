@@ -14,6 +14,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.v2.AbstractImporter;
 import fr.sirs.importer.v2.CorruptionLevel;
 import fr.sirs.importer.v2.ErrorReport;
+import fr.sirs.importer.v2.ImportContext;
 import java.io.IOException;
 import java.util.Optional;
 import org.opengis.referencing.operation.TransformException;
@@ -131,7 +132,7 @@ public class PositionableMapper extends AbstractMapper<Positionable> {
             if (inputType.getColumnCount() < expected.length)
                 return Optional.empty();
             for (final Columns c : expected) {
-                if (inputType.getColumn(c.name()) == null)
+                if (!ImportContext.columnExists(inputType, c.name()))
                     return Optional.empty();
             }
 

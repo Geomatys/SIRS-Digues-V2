@@ -20,7 +20,7 @@ public class OuvrageRevancheMapperSpi extends GenericMapperSpi<OuvrageRevanche> 
     public OuvrageRevancheMapperSpi() throws IntrospectionException {
         super(OuvrageRevanche.class);
 
-        bindings = new HashMap<>(9);
+        bindings = new HashMap<>(8);
         bindings.put(StructureColumns.ID_SOURCE.name(), "sourceId");
         bindings.put(StructureColumns.ID_TYPE_COTE.name(), "coteId");
 
@@ -31,8 +31,6 @@ public class OuvrageRevancheMapperSpi extends GenericMapperSpi<OuvrageRevanche> 
         bindings.put(StructureColumns.ID_TYPE_NATURE_BAS.name(), "natureBasId");
 
         bindings.put(StructureColumns.ID_TYPE_POSITION.name(), "positionId");
-        bindings.put(StructureColumns.EPAISSEUR.name(), "epaisseur");
-        bindings.put(StructureColumns.N_COUCHE.name(), "numCouche");
     }
 
     @Override

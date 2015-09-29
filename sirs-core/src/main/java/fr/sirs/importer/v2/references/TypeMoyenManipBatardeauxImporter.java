@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefMoyenManipBatardeaux;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeMoyenManipBatardeauxImporter extends GenericTypeReferenceImporter<RefMoyenManipBatardeaux> {
 
     @Override
@@ -17,6 +18,6 @@ class TypeMoyenManipBatardeauxImporter extends GenericTypeReferenceImporter<RefM
 
     @Override
     protected Class<RefMoyenManipBatardeaux> getElementClass() {
-	return RefMoyenManipBatardeaux.class;
+        return RefMoyenManipBatardeaux.class;
     }
 }

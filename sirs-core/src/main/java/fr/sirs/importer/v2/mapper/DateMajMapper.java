@@ -5,6 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.v2.ImportContext;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
@@ -40,7 +41,7 @@ public class DateMajMapper extends AbstractMapper<AvecDateMaj> {
         @Override
         public Optional<Mapper<AvecDateMaj>> configureInput(Table inputType) {
             String fieldName = null;
-            if (inputType.getColumn(DEFAULT_FIELD) != null) {
+            if (ImportContext.columnExists(inputType, DEFAULT_FIELD)) {
                 fieldName = DEFAULT_FIELD;
             } else {
                 for (final Column c : inputType.getColumns()) {

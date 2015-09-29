@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefUsageVoie;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeUsageVoieImporter extends GenericTypeReferenceImporter<RefUsageVoie> {
 
     @Override
@@ -17,6 +18,6 @@ class TypeUsageVoieImporter extends GenericTypeReferenceImporter<RefUsageVoie> {
 
     @Override
     protected Class<RefUsageVoie> getElementClass() {
-	return RefUsageVoie.class;
+        return RefUsageVoie.class;
     }
 }

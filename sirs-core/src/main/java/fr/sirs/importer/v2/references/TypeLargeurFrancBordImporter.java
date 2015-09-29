@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefLargeurFrancBord;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeLargeurFrancBordImporter extends GenericTypeReferenceImporter<RefLargeurFrancBord> {
 
     @Override
@@ -17,6 +18,6 @@ class TypeLargeurFrancBordImporter extends GenericTypeReferenceImporter<RefLarge
 
     @Override
     protected Class<RefLargeurFrancBord> getElementClass() {
-	return RefLargeurFrancBord.class;
+        return RefLargeurFrancBord.class;
     }
 }

@@ -37,8 +37,7 @@ public class TalusRisbermeMapperSpi extends GenericMapperSpi<TalusRisberme> {
         bindings.put(StructureColumns.LONG_RAMP_BAS.name(), "longueurRampantBas");
 
         bindings.put(StructureColumns.ID_TYPE_FONCTION.name(), "fonctionBasId");
-        bindings.put(StructureColumns.ID_TYPE_POSITION.name(), "positionId");
-        bindings.put(StructureColumns.EPAISSEUR.name(), "epaisseur");
+        bindings.put(StructureColumns.EPAISSEUR.name(), "epaisseurSommet");
         bindings.put(StructureColumns.N_COUCHE.name(), "numCouche");
         bindings.put(StructureColumns.PENTE_INTERIEURE.name(), "penteInterieure");
     }

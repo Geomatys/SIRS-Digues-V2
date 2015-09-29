@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefUtilisationConduite;
 import static fr.sirs.importer.DbImporter.TableName.UTILISATION_CONDUITE;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeUtilisationConduiteImporter extends GenericTypeReferenceImporter<RefUtilisationConduite> {
 
     @Override
@@ -17,6 +18,6 @@ class TypeUtilisationConduiteImporter extends GenericTypeReferenceImporter<RefUt
 
     @Override
     protected Class<RefUtilisationConduite> getElementClass() {
-	return RefUtilisationConduite.class;
+        return RefUtilisationConduite.class;
     }
 }

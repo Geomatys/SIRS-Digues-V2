@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefConduiteFermee;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeConduiteFermeeImporter extends GenericTypeReferenceImporter<RefConduiteFermee> {
 
     @Override
@@ -17,6 +18,6 @@ class TypeConduiteFermeeImporter extends GenericTypeReferenceImporter<RefConduit
 
     @Override
     protected Class<RefConduiteFermee> getElementClass() {
-	return RefConduiteFermee.class;
+        return RefConduiteFermee.class;
     }
 }

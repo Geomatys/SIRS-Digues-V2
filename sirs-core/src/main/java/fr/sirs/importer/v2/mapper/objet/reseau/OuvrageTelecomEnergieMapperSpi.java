@@ -15,10 +15,12 @@ import java.util.Map;
 @Component
 public class OuvrageTelecomEnergieMapperSpi extends GenericMapperSpi<OuvrageTelecomEnergie> {
 
-    private final HashMap<String, String> bindings = new HashMap<>();
+    private final HashMap<String, String> bindings;
 
     public OuvrageTelecomEnergieMapperSpi() throws IntrospectionException {
         super(OuvrageTelecomEnergie.class);
+
+        bindings = new HashMap<>(2);
         bindings.put(ObjetReseauMapperSpi.Columns.ID_TYPE_POSITION.name(), "positionId");
         bindings.put(ObjetReseauMapperSpi.Columns.ID_OUVRAGE_COMM_NRJ.name(), "typeOuvrageTelecomEnergieId");
     }

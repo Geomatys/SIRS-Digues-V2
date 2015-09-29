@@ -11,6 +11,7 @@ import fr.sirs.core.model.LargeurFrancBord;
 import fr.sirs.core.model.RefLargeurFrancBord;
 import fr.sirs.core.model.RefSource;
 import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.v2.ImportContext;
 import java.io.IOException;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
@@ -64,8 +65,8 @@ public class LargeurFrancBordMapper extends AbstractMapper<LargeurFrancBord> {
 
         @Override
         public Optional<Mapper<LargeurFrancBord>> configureInput(Table inputType) throws IllegalStateException {
-            if (inputType.getColumn(Columns.ID_TYPE_LARGEUR_FB.name()) == null
-                    || inputType.getColumn(Columns.ID_SOURCE.name()) == null) {
+            if (!ImportContext.columnExists(inputType, Columns.ID_TYPE_LARGEUR_FB.name())
+                    || !ImportContext.columnExists(inputType, Columns.ID_SOURCE.name())) {
                 return Optional.empty();
             }
             return Optional.of(new LargeurFrancBordMapper(inputType));

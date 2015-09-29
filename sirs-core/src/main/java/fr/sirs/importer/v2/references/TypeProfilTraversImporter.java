@@ -2,12 +2,13 @@ package fr.sirs.importer.v2.references;
 
 import fr.sirs.core.model.RefTypeProfilTravers;
 import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.v2.references.GenericTypeReferenceImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TypeProfilTraversImporter extends GenericTypeReferenceImporter<RefTypeProfilTravers> {
 
     @Override
@@ -17,6 +18,6 @@ class TypeProfilTraversImporter extends GenericTypeReferenceImporter<RefTypeProf
 
     @Override
     protected Class<RefTypeProfilTravers> getElementClass() {
-	return RefTypeProfilTravers.class;
+        return RefTypeProfilTravers.class;
     }
 }
