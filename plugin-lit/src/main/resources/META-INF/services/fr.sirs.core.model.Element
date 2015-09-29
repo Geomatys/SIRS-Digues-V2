@@ -26,3 +26,7 @@ fr.sirs.core.model.RefPositionAxeSeuilLit
 fr.sirs.core.model.RefGeometrieCreteSeuilLit
 fr.sirs.core.model.RefProfilCoursierSeuilLit
 fr.sirs.core.model.RefPositionStructureSeuilLit
+fr.sirs.core.model.RefFermeturePlageDepotLit
+fr.sirs.core.model.RefOuverturePlageDepotLit
+fr.sirs.core.model.RefElementAssociePlageDepotLit
+fr.sirs.core.model.RefElementAssocieFermeturePlageDepotLit
