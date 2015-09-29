@@ -2008,9 +2008,9 @@
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
       </ownedDiagramElements>
-      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_gvyv8FuOEeWNZepRBiwRMg" name="[0..1] regimeId" sourceNode="_gvU14FuOEeWNZepRBiwRMg" targetNode="_gvYgQFuOEeWNZepRBiwRMg">
-        <target xmi:type="ecore:EReference" href="lit.ecore#//ZoneAtterrissementLit/regimeId"/>
-        <semanticElements xmi:type="ecore:EReference" href="lit.ecore#//ZoneAtterrissementLit/regimeId"/>
+      <ownedDiagramElements xmi:type="diagram:DEdge" xmi:id="_gvyv8FuOEeWNZepRBiwRMg" name="[0..1] typeId" sourceNode="_gvU14FuOEeWNZepRBiwRMg" targetNode="_gvYgQFuOEeWNZepRBiwRMg">
+        <target xmi:type="ecore:EReference" href="lit.ecore#//ZoneAtterrissementLit/typeId"/>
+        <semanticElements xmi:type="ecore:EReference" href="lit.ecore#//ZoneAtterrissementLit/typeId"/>
         <ownedStyle xmi:type="diagram:EdgeStyle" xmi:id="_gvyv8VuOEeWNZepRBiwRMg" routingStyle="manhattan">
           <description xmi:type="style:EdgeStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@edgeMappings[name='EC_EReference']/@style"/>
           <strokeColor xmi:type="viewpoint:RGBValues" xmi:id="_gvyv8luOEeWNZepRBiwRMg"/>
