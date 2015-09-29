@@ -156,7 +156,7 @@
         </Tab>
 
         <!-- REFERENCE TABS -->
-        <Tab fx:id="ui_ouvrages" text="Ouvrages de régulation">
+        <Tab text="Ouvrages de régulation">
             <TabPane>
                 <tabs>
                     <Tab fx:id="ui_ouvragesFreineurs" text="%ouvragesFreineurs"/>

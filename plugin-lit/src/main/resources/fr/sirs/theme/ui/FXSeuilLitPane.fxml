@@ -194,18 +194,28 @@
 
 <!-- REFERENCE TABS -->
         <Tab fx:id="ui_plans" text="%plans"/>
-        <Tab fx:id="ui_voieAccesIds" text="%voieAccesIds"/>
-        <Tab fx:id="ui_ouvrageFranchissementIds" text="%ouvrageFranchissementIds"/>
-        <Tab fx:id="ui_voieDigueIds" text="%voieDigueIds"/>
-        <Tab fx:id="ui_ouvrageVoirieIds" text="%ouvrageVoirieIds"/>
-        <Tab fx:id="ui_stationPompageIds" text="%stationPompageIds"/>
-        <Tab fx:id="ui_reseauHydrauliqueFermeIds" text="%reseauHydrauliqueFermeIds"/>
-        <Tab fx:id="ui_reseauHydrauliqueCielOuvertIds" text="%reseauHydrauliqueCielOuvertIds"/>
-        <Tab fx:id="ui_ouvrageHydrauliqueAssocieIds" text="%ouvrageHydrauliqueAssocieIds"/>
-        <Tab fx:id="ui_ouvrageTelecomEnergieIds" text="%ouvrageTelecomEnergieIds"/>
-        <Tab fx:id="ui_reseauTelecomEnergieIds" text="%reseauTelecomEnergieIds"/>
-        <Tab fx:id="ui_ouvrageParticulierIds" text="%ouvrageParticulierIds"/>
-        <Tab fx:id="ui_echelleLimnimetriqueIds" text="%echelleLimnimetriqueIds"/>
+        
+        
+        <Tab text="Réseaux associés">
+            <TabPane>
+                <tabs>
+                    <Tab fx:id="ui_voieAccesIds" text="%voieAccesIds"/>
+                    <Tab fx:id="ui_ouvrageFranchissementIds" text="%ouvrageFranchissementIds"/>
+                    <Tab fx:id="ui_voieDigueIds" text="%voieDigueIds"/>
+                    <Tab fx:id="ui_ouvrageVoirieIds" text="%ouvrageVoirieIds"/>
+                    <Tab fx:id="ui_stationPompageIds" text="%stationPompageIds"/>
+                    <Tab fx:id="ui_reseauHydrauliqueFermeIds" text="%reseauHydrauliqueFermeIds"/>
+                    <Tab fx:id="ui_reseauHydrauliqueCielOuvertIds" text="%reseauHydrauliqueCielOuvertIds"/>
+                    <Tab fx:id="ui_ouvrageHydrauliqueAssocieIds" text="%ouvrageHydrauliqueAssocieIds"/>
+                    <Tab fx:id="ui_ouvrageTelecomEnergieIds" text="%ouvrageTelecomEnergieIds"/>
+                    <Tab fx:id="ui_reseauTelecomEnergieIds" text="%reseauTelecomEnergieIds"/>
+                    <Tab fx:id="ui_ouvrageParticulierIds" text="%ouvrageParticulierIds"/>
+                    <Tab fx:id="ui_echelleLimnimetriqueIds" text="%echelleLimnimetriqueIds"/>
+                </tabs>
+            </TabPane>
+        </Tab>
+        
+        
         <Tab fx:id="ui_desordreIds" text="%desordreIds"/>
         <Tab fx:id="ui_bergeIds" text="%bergeIds"/>
         <Tab fx:id="ui_digueIds" text="%digueIds"/>
