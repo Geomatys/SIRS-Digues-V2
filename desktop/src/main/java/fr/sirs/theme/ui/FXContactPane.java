@@ -135,7 +135,7 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         uiService.textProperty().bindBidirectional(newValue.serviceProperty());
         uiFonction.textProperty().bindBidirectional(newValue.fonctionProperty());
         uiTelephone.textProperty().bindBidirectional(newValue.telephoneProperty());
-        uiTelephone.textProperty().bindBidirectional(newValue.mobileProperty());
+        uiMobile.textProperty().bindBidirectional(newValue.mobileProperty());
         uiFax.textProperty().bindBidirectional(newValue.faxProperty());
         uiEmail.textProperty().bindBidirectional(newValue.emailProperty());
         uiAdresse.textProperty().bindBidirectional(newValue.adresseProperty());

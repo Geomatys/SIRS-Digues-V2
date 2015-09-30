@@ -35,38 +35,38 @@
                                           <Font name="System Bold" size="13.0" />
                                        </font>
                                     </Label>
+                                    <Label text="Nom" GridPane.rowIndex="1" />
+                                    <TextField fx:id="uiNom" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                     <Label text="Prénom" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1">
                                        <GridPane.margin>
                                           <Insets />
                                        </GridPane.margin>
                                     </Label>
-                                    <TextField fx:id="uiNom" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                     <TextField fx:id="uiPrenom" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                                    <Label text="Nom" GridPane.rowIndex="1" />
                                     <Label text="Service" GridPane.rowIndex="2" />
                                     <TextField fx:id="uiService" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                    <TextField fx:id="uiFonction" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                                     <Label text="Fonction" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="2">
                                        <GridPane.margin>
                                           <Insets />
                                        </GridPane.margin>
                                     </Label>
+                                    <TextField fx:id="uiFonction" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                                     <Label text="Téléphone" GridPane.rowIndex="3" />
                                     <TextField fx:id="uiTelephone" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                    <TextField fx:id="uiFax" GridPane.columnIndex="3" GridPane.rowIndex="4" />
-                                    <Label text="Fax" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="4">
-                                       <GridPane.margin>
-                                          <Insets />
-                                       </GridPane.margin>
-                                    </Label>
-                                    <TextField fx:id="uiEmail" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                    <Label text="Portable" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                    <TextField fx:id="uiMobile" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                                     <Label text="E-mail" GridPane.halignment="LEFT" GridPane.rowIndex="4">
                                        <GridPane.margin>
                                           <Insets />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Portable" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                    <TextField fx:id="uiMobile" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                    <TextField fx:id="uiEmail" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                    <Label text="Fax" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="4">
+                                       <GridPane.margin>
+                                          <Insets />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <TextField fx:id="uiFax" GridPane.columnIndex="3" GridPane.rowIndex="4" />
                                  </children>
                                  <columnConstraints>
                                     <ColumnConstraints hgrow="NEVER" />
@@ -94,21 +94,21 @@
                            <children>
                               <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
                                  <children>
-                                    <TextField fx:id="uiAdresse" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
-                                    <Label text="Adresse" GridPane.rowIndex="1" />
-                                    <Label text="Code postal" GridPane.rowIndex="2" />
-                                    <TextField fx:id="uiCodePostal" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                    <TextField fx:id="uiCommune" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                                    <Label text="Commune" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="2">
-                                       <GridPane.margin>
-                                          <Insets />
-                                       </GridPane.margin>
-                                    </Label>
                                     <Label text="Adresse personnelle" GridPane.columnSpan="2">
                                        <font>
                                           <Font name="System Bold" size="13.0" />
                                        </font>
                                     </Label>
+                                    <Label text="Adresse" GridPane.rowIndex="1" />
+                                    <TextField fx:id="uiAdresse" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+                                    <Label text="Code postal" GridPane.rowIndex="2" />
+                                    <TextField fx:id="uiCodePostal" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <Label text="Commune" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="2">
+                                       <GridPane.margin>
+                                          <Insets />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <TextField fx:id="uiCommune" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                                  </children>
                                  <columnConstraints>
                                     <ColumnConstraints hgrow="NEVER" />
