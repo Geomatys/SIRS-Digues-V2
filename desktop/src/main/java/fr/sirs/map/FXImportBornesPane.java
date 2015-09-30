@@ -21,6 +21,7 @@ import java.util.EventObject;
 import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
+import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -69,13 +70,13 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.util.GenericName;
 
 /**
- * Un panneau permettant d'ouvrir un fichier Shapefile (.shp) pour en extraire 
+ * Un panneau permettant d'ouvrir un fichier Shapefile (.shp) pour en extraire
  * des points puis les convertir en bornes.
- * 
+ *
  * TODO : Etendre la gestion aux format CSV (Ré-activation du choix du CRS, etc.)
- * 
+ *
  * TODO : Fermer Feature store / nettoyer les ressources quand on ferme la fenêtre.
- * 
+ *
  * @author Alexis Manin (Geomatys)
  * @author Johann Sorel (Geomatys)
  */
@@ -94,18 +95,18 @@ public class FXImportBornesPane extends BorderPane {
     @FXML private ComboBox<PropertyType> uiCodeBox;
     @FXML private ComboBox<Preview> uiTronconBox;
     @FXML private GridPane uiPaneConfig;
-    @FXML private GridPane uiPaneImport;    
+    @FXML private GridPane uiPaneImport;
     @FXML private Button uiImportButton;
 
     private FeatureMapLayer loadedData;
     private FeatureCollection selection;
-    
+
     private final String typeName;
     private final Class<? extends TronconDigue> typeClass;
 
     public FXImportBornesPane(final String typeName, final Class typeClass) {
         SIRS.loadFXML(this);
-        
+
         this.typeName  = typeName;
         this.typeClass = typeClass;
 
@@ -131,15 +132,17 @@ public class FXImportBornesPane extends BorderPane {
 
         uiTable.setEditable(false);
         uiTable.setLoadAll(true);
-        
+
         uiImportButton.setTooltip(new Tooltip("Importer la séléction"));
         uiImportButton.setDisable(true);
-        
+
         uiTronconBox.setItems(FXCollections.observableList(
                 Injector.getSession().getPreviews().getByClass(typeClass)));
         uiTronconBox.setConverter(stringConverter);
         uiTronconBox.valueProperty().addListener(this::updateSrList);
 
+        uiSRBox.disableProperty().bind(uiTronconBox.valueProperty().isNull());
+        uiPRBox.disableProperty().bind(uiSRBox.valueProperty().isNull());
     }
 
     private void updateSrList(ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue){
@@ -150,6 +153,7 @@ public class FXImportBornesPane extends BorderPane {
             final TronconDigue troncon = session.getRepositoryForClass(typeClass).get(newValue.getElementId());
             final List<SystemeReperage> srs = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).getByLinear(troncon);
             uiSRBox.setItems(FXCollections.observableArrayList(srs));
+            uiSRBox.getItems().add(null);
             uiSRBox.getSelectionModel().selectFirst();
 
             final String defaultSRID = troncon.getSystemeRepDefautId();
@@ -205,82 +209,89 @@ public class FXImportBornesPane extends BorderPane {
                 if (names == null || names.isEmpty()) {
                     throw new IllegalArgumentException("Aucune donnée vectorielle trouvée dans le fichier.");
                 }
-                
+
                 // On s'assure que le fichier en entrée contient des points.
                 final GenericName n = names.iterator().next();
                 GeometryDescriptor geometryDescriptor = store.getFeatureType(n).getGeometryDescriptor();
                 if (geometryDescriptor == null || !Geometry.class.isAssignableFrom(geometryDescriptor.getType().getBinding())) {
                     throw new IllegalArgumentException("Aucune donnée vectorielle trouvée dans le fichier.");
                 }
-                
+
                 return session.getFeatureCollection(QueryBuilder.all(names.iterator().next()));
             }
         };
 
-        final FeatureCollection col;
-        try {
-            col = TaskManager.INSTANCE.submit(openTask).get();
-        } catch (Exception e) {
-            GeotkFX.newExceptionDialog("Impossible d'ouvrir le fichier séléctionné.", e).show();
-            return;
-        }
-        FeatureType fType = col.getFeatureType();
-        loadedData = MapBuilder.createFeatureLayer(col, RandomStyleBuilder.createDefaultVectorStyle(fType));
-        uiTable.init(loadedData);
+        setDisable(true);
+        openTask.setOnCancelled((cancelledEvent) -> setDisable(false));
 
-        //liste des propriétés
-        final ObservableList<PropertyType> properties = FXCollections.observableArrayList(fType.getProperties(true));
-        uiAttX.setItems(properties);
-        uiAttY.setItems(properties);
-        
-        final ObservableList stringProperties = properties.filtered((PropertyType p) -> {
-            return (p instanceof AttributeType) && 
-                    CharSequence.class.isAssignableFrom(
-                            ((AttributeType)p).getValueClass());
-        });
-        final ObservableList numberProperties = properties.filtered((PropertyType p) -> {
-            return (p instanceof AttributeType) &&
-                    Number.class.isAssignableFrom(
-                            ((AttributeType)p).getValueClass());
-        });
-        uiLibelleBox.setItems(stringProperties);
-        uiCodeBox.setItems(stringProperties);
-        uiPRBox.setItems(numberProperties);
-        
-        if (!properties.isEmpty()) {
-            uiAttX.getSelectionModel().clearAndSelect(0);
-            uiAttY.getSelectionModel().clearAndSelect(0);
-        }
+        openTask.setOnFailed((failureEvent) -> Platform.runLater(() -> {
+            setDisable(false);
+            GeotkFX.newExceptionDialog("Impossible d'ouvrir le fichier séléctionné.", openTask.getException()).show();
+        }));
 
-        //on ecoute la selection
-        loadedData.addLayerListener(new LayerListener() {
-            @Override
-            public void styleChange(MapLayer source, EventObject event) {
+        openTask.setOnSucceeded((successEvent) -> Platform.runLater(() -> {
+            setDisable(false);
+            final FeatureCollection col = openTask.getValue();
+            FeatureType fType = col.getFeatureType();
+            loadedData = MapBuilder.createFeatureLayer(col, RandomStyleBuilder.createDefaultVectorStyle(fType));
+            uiTable.init(loadedData);
+
+            //liste des propriétés
+            final ObservableList<PropertyType> properties = FXCollections.observableArrayList(fType.getProperties(true));
+            uiAttX.setItems(properties);
+            uiAttY.setItems(properties);
+
+            final ObservableList stringProperties = properties.filtered((PropertyType p) -> {
+                return (p instanceof AttributeType)
+                        && CharSequence.class.isAssignableFrom(
+                                ((AttributeType) p).getValueClass());
+            });
+            final ObservableList numberProperties = properties.filtered((PropertyType p) -> {
+                return (p instanceof AttributeType)
+                        && Number.class.isAssignableFrom(
+                                ((AttributeType) p).getValueClass());
+            });
+            uiLibelleBox.setItems(stringProperties);
+            uiCodeBox.setItems(stringProperties);
+            uiPRBox.setItems(numberProperties);
+
+            if (!properties.isEmpty()) {
+                uiAttX.getSelectionModel().clearAndSelect(0);
+                uiAttY.getSelectionModel().clearAndSelect(0);
             }
 
-            @Override
-            public void itemChange(CollectionChangeEvent<MapItem> event) {
-            }
-
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if (!FeatureMapLayer.SELECTION_FILTER_PROPERTY.equals(evt.getPropertyName())) {
-                    return;
+            //on ecoute la selection
+            loadedData.addLayerListener(new LayerListener() {
+                @Override
+                public void styleChange(MapLayer source, EventObject event) {
                 }
 
-                final Id filter = loadedData.getSelectionFilter();
-                try {
-                    selection = loadedData.getCollection().subCollection(QueryBuilder.filtered(fType.getName(), filter));
-                    if (selection == null || selection.isEmpty()) {
+                @Override
+                public void itemChange(CollectionChangeEvent<MapItem> event) {
+                }
+
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if (!FeatureMapLayer.SELECTION_FILTER_PROPERTY.equals(evt.getPropertyName())) {
+                        return;
+                    }
+
+                    final Id filter = loadedData.getSelectionFilter();
+                    try {
+                        selection = loadedData.getCollection().subCollection(QueryBuilder.filtered(fType.getName(), filter));
+                    if (selection == null || selection.isEmpty() || uiTronconBox.getValue() == null) {
                         uiImportButton.setDisable(true);
                     } else {
-                        uiImportButton.setDisable(false);
+                            uiImportButton.setDisable(false);
+                        }
+                    } catch (DataStoreException ex) {
+                        GeotkFX.newExceptionDialog("Une erreur est survenue lors de la mise à jour de la sélection.", ex).show();
                     }
-                } catch (DataStoreException ex) {
-                    GeotkFX.newExceptionDialog("Une erreur est survenue lors de la mise à jour de la sélection.", ex).show();
                 }
-            }
-        });
+            });
+        }));
+
+        TaskManager.INSTANCE.submit(openTask);
     }
 
     @FXML
@@ -312,7 +323,7 @@ public class FXImportBornesPane extends BorderPane {
         } else {
             codeProperty = null;
         }
-        
+
         Object selectedLibelle = uiLibelleBox.getSelectionModel().getSelectedItem();
         final String libelleProperty;
         if (selectedLibelle instanceof PropertyType) {
@@ -328,12 +339,25 @@ public class FXImportBornesPane extends BorderPane {
         } else {
             prProperty = null;
         }
-        
+
         final SystemeReperage sr = uiSRBox.getValue();
+        if (sr != null && prProperty == null) {
+            final Alert alert = new Alert(
+                    Alert.AlertType.WARNING,
+                    "Vous allez affecter les bornes importées à un système de repérage sans leur associer de PR. Êtes-vous sûr ?",
+                    ButtonType.NO, ButtonType.YES);
+            alert.setResizable(true);
+
+            // Prevent import if no PR property is chosen, and user did not click on yes button (cancelled or quit alert).
+            if (!ButtonType.YES.equals(alert.showAndWait().orElse(null))) {
+                return;
+            }
+        }
 
         final Task importTask = new Task() {
             @Override
             protected Object call() throws Exception {
+                updateTitle("Import de bornes");
                 final fr.sirs.Session session = Injector.getSession();
 
                 final TronconDigue troncon;
@@ -357,7 +381,7 @@ Injector.getSession().getProjection(),
                     final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
                     while (it.hasNext()) {
                         Feature current = it.next();
-                        // We can cast here because we checked property type at loading. 
+                        // We can cast here because we checked property type at loading.
                         Geometry value = (Geometry) current.getDefaultGeometryProperty().getValue();
 //                // TODO : use following code for CSV files.
 //            final String attX = String.valueOf(feature.getPropertyValue(uiAttX.getValue().getName().tip().toString()));
@@ -404,24 +428,30 @@ Injector.getSession().getProjection(),
 
                 //sauvegarde du SR
                 if(sr!=null){
-                    ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).update(sr, troncon);
+                    session.getApplicationContext().getBean(SystemeReperageRepository.class).update(sr, troncon);
                 }
 
                 return mustUpdateTroncon;
             }
         };
-        try {
+
+        importTask.setOnSucceeded((successEvent) -> Platform.runLater(() -> {
             final Alert alert;
-            if (Boolean.TRUE.equals(TaskManager.INSTANCE.submit(importTask).get())) {
+            if (Boolean.TRUE.equals(TaskManager.INSTANCE.submit(importTask).getValue())) {
                 alert = new Alert(Alert.AlertType.INFORMATION, "L'import est terminé.", ButtonType.OK);
             } else {
                 alert = new Alert(Alert.AlertType.WARNING, "Aucune borne n'a pu être importée.", ButtonType.OK);
             }
             alert.setResizable(true);
             alert.showAndWait();
-        } catch (Exception ex) {
-            GeotkFX.newExceptionDialog("Une erreur s'est produite pendant l'import des bornes.", ex).show();
-        }
+        }));
+
+        importTask.setOnFailed((successEvent) -> Platform.runLater(() -> {
+            GeotkFX.newExceptionDialog("Une erreur s'est produite pendant l'import des bornes.", importTask.getException()).show();
+        }));
+
+        TaskManager.INSTANCE.submit(importTask);
+        getScene().getWindow().hide();
     }
 
     private static File getPreviousPath() {
