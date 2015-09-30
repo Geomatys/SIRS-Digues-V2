@@ -18,10 +18,10 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.ReferenceTableCell;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Set;
 import java.util.function.Function;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -94,7 +94,7 @@ public class FXSystemeReperagePane extends BorderPane {
     @FXML private ToggleButton uiCreateBorne;
     @FXML private Button uiProject;
     @FXML private Label typeNameLabel;
-    
+
 
     private final ObjectProperty<TronconDigue> tronconProp = new SimpleObjectProperty<>();
     private final ObjectProperty<Mode> mode = new SimpleObjectProperty<>(Mode.NONE);
@@ -103,7 +103,7 @@ public class FXSystemeReperagePane extends BorderPane {
 
     public FXSystemeReperagePane(FXMap map, final String typeName) {
         SIRS.loadFXML(this);
-        
+
         typeNameLabel.setText(StringUtilities.firstToUpper(typeName)+ " :");
         this.map = map;
         session = Injector.getSession();
@@ -233,19 +233,25 @@ public class FXSystemeReperagePane extends BorderPane {
      * @return A list view of all bornes bound to currently selected troncon, or
      * null if no troncon is selected.
      */
-    private ListView<BorneDigue> buildBorneList() {
+    private ListView<BorneDigue> buildBorneList(final Set<String> toExclude) {
         final TronconDigue troncon = tronconProperty().get();
         if (troncon == null) return null;
 
-        final SortedSet<BorneDigue> bornes = new TreeSet<>((BorneDigue b1, BorneDigue b2) -> {
+        final AbstractSIRSRepository<BorneDigue> repo = session.getRepositoryForClass(BorneDigue.class);
+        final ObservableList<String> borneIds;
+        if (toExclude != null && !toExclude.isEmpty()) {
+            borneIds = FXCollections.observableArrayList(troncon.getBorneIds());
+            borneIds.removeIf((borneId) -> toExclude.contains(borneId));
+        } else {
+            borneIds = troncon.getBorneIds();
+        }
+        final List<BorneDigue> bornes = repo.get(borneIds);
+        bornes.sort((BorneDigue b1, BorneDigue b2) -> {
             if (b1.getLibelle() == null) {
                 return 1;
             }
             return b1.getLibelle().compareToIgnoreCase(b2.getLibelle());
         });
-
-        final AbstractSIRSRepository<BorneDigue> repo = session.getRepositoryForClass(BorneDigue.class);
-        bornes.addAll(repo.get(troncon.getBorneIds()));
 
         final ListView<BorneDigue> bornesView = new ListView<>();
         bornesView.setItems(FXCollections.observableArrayList(bornes));
@@ -260,7 +266,12 @@ public class FXSystemeReperagePane extends BorderPane {
         final SystemeReperage csr = systemeReperageProperty().get();
         if(csr==null || troncon==null) return;
 
-        final ListView<BorneDigue> bornesView = buildBorneList();
+        // Do not show bornes already present in selected SR.
+        final HashSet<String> borneIdsAlreadyInSR = new HashSet<>();
+        for (final SystemeReperageBorne srb : csr.systemeReperageBornes) {
+            borneIdsAlreadyInSR.add(srb.getBorneId());
+        }
+        final ListView<BorneDigue> bornesView = buildBorneList(borneIdsAlreadyInSR);
 
         final Dialog dialog = new Dialog();
         final DialogPane pane = new DialogPane();
@@ -430,7 +441,7 @@ public class FXSystemeReperagePane extends BorderPane {
      */
     @FXML
     private void deleteBornes(ActionEvent e) {
-        final ListView<BorneDigue> borneList = buildBorneList();
+        final ListView<BorneDigue> borneList = buildBorneList(null);
         if (borneList == null) return;
 
         final Stage stage = new Stage();
