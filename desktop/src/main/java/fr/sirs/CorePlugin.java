@@ -13,6 +13,7 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Deversoir;
+import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.EchelleLimnimetrique;
 import fr.sirs.core.model.Element;
@@ -425,12 +426,13 @@ public class CorePlugin extends Plugin {
     }
 
     @Override
-    public boolean handleTronconType(final Class<? extends Element> tronconType){
-        return TronconDigue.class.equals(tronconType);
+    public boolean handleTronconType(final Class<? extends Element> element){
+        return TronconDigue.class.equals(element)
+                || Digue.class.equals(element);
     }
 
     @Override
-    public FXFreeTab openTronconPane(final TronconDigue element){
+    public FXFreeTab openTronconPane(final Element element){
         final DiguesTab diguesTab = Injector.getSession().getFrame().getDiguesTab();
         diguesTab.getDiguesController().displayElement(element);
         diguesTab.setOnSelectionChanged((Event event) -> {

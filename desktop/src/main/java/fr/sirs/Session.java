@@ -9,7 +9,6 @@ import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.ReferenceType;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.other.FXDesignationPane;
 import fr.sirs.other.FXReferencePane;
@@ -511,12 +510,10 @@ public class Session extends SessionCore {
 
     public FXFreeTab getOrCreateElementTab(final Element element) {
 
-        // Si on a affaire à un tronçon, on essaye de l'ouvrir de manière spécifique.
-        if (element instanceof TronconDigue) {
-            for(final Plugin plugin : Plugins.getPlugins()){
-                if(plugin.handleTronconType(element.getClass())){
-                    return plugin.openTronconPane((TronconDigue) element);
-                }
+        // On commence par regarder si un plugin spécifie une ouverture particulière.
+        for(final Plugin plugin : Plugins.getPlugins()){
+            if(plugin.handleTronconType(element.getClass())){
+                return plugin.openTronconPane(element);
             }
         }
 

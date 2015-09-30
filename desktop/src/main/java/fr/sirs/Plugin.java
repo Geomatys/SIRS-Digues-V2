@@ -4,7 +4,6 @@ package fr.sirs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.theme.Theme;
@@ -170,7 +169,7 @@ public abstract class Plugin {
      * @param element
      * @return 
      */
-    public FXFreeTab openTronconPane(final TronconDigue element){
+    public FXFreeTab openTronconPane(final Element element){
         return null;
     }
     

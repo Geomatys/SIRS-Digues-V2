@@ -23,7 +23,7 @@
                         <RowConstraints vgrow="NEVER" />
                     </rowConstraints>
                     <children>
-                        <Label layoutX="10.0" layoutY="14.0" maxWidth="1.7976931348623157E308" styleClass="label-header" text="Lits" GridPane.halignment="CENTER" GridPane.hgrow="NEVER">
+                        <Label fx:id="uiTitle" layoutX="10.0" layoutY="14.0" maxWidth="1.7976931348623157E308" styleClass="label-header" GridPane.halignment="CENTER" GridPane.hgrow="NEVER">
                      <padding>
                         <Insets left="5.0" right="5.0" />
                      </padding>

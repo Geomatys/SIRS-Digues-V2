@@ -7,7 +7,7 @@ import fr.sirs.Plugin;
 import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.Lit;
 import fr.sirs.core.model.TronconLit;
 import fr.sirs.core.model.sql.LitSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
@@ -88,13 +88,16 @@ public class PluginLit extends Plugin {
     }
 
     @Override
-    public boolean handleTronconType(final Class<? extends Element> tronconType){
-        return TronconLit.class.equals(tronconType);
+    public boolean handleTronconType(final Class<? extends Element> element){
+        return TronconLit.class.equals(element)
+                || Lit.class.equals(element);
     }
 
     @Override
-    public FXFreeTab openTronconPane(final TronconDigue element){
-        return Injector.getSession().getOrCreateThemeTab(suiviTheme);
+    public FXFreeTab openTronconPane(final Element element){
+        final FXFreeTab tab = Injector.getSession().getOrCreateThemeTab(suiviTheme);
+        suiviTheme.display(element);
+        return tab;
     }
     
     public static String LAYER_NAME = "lits";

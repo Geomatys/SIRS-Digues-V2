@@ -1,30 +1,53 @@
 
 package fr.sirs.theme.ui;
 
-import fr.sirs.Session;
-import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import fr.sirs.core.component.*;
-import fr.sirs.core.model.*;
+import fr.sirs.SIRS;
+import fr.sirs.Session;
+import fr.sirs.core.component.Previews;
+import fr.sirs.core.component.SystemeReperageRepository;
+import fr.sirs.core.model.AvecForeignParent;
+import fr.sirs.core.model.DomanialiteLit;
+import fr.sirs.core.model.Element;
+import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.LargeurLit;
+import fr.sirs.core.model.Lit;
+import fr.sirs.core.model.OccupationRiveraineLit;
+import fr.sirs.core.model.OuvrageAssocieLit;
+import fr.sirs.core.model.PenteLit;
+import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.RefRive;
+import fr.sirs.core.model.RefTypeTroncon;
+import fr.sirs.core.model.RegimeEcoulementLit;
+import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.TronconLit;
+import fr.sirs.core.model.ZoneAtterrissementLit;
+import fr.sirs.digue.FXSystemeReperagePane;
 import fr.sirs.theme.AbstractTheme;
 import fr.sirs.theme.AbstractTheme.ThemeManager;
 import fr.sirs.theme.TronconTheme;
-import fr.sirs.digue.FXSystemeReperagePane;
-
+import java.util.ArrayList;
+import java.util.List;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.web.HTMLEditor;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
-import java.util.List;
-import java.util.ArrayList;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
 
 /**
@@ -39,17 +62,12 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
     
     @FXML private FXValidityPeriodPane uiValidityPeriod;
 
-    // Propriétés de TronconLit
-    @FXML protected ComboBox ui_litId;
-    @FXML protected Button ui_litId_link;
-
-    // Propriétés de AvecGeometrie
 
     // Propriétés de TronconDigue
     @FXML protected TextField ui_libelle;
     @FXML protected HTMLEditor ui_commentaire;
-    @FXML protected ComboBox ui_digueId;
-    @FXML protected Button ui_digueId_link;
+    @FXML protected ComboBox ui_litId;
+    @FXML protected Button ui_litId_link;
     @FXML protected ComboBox ui_typeRiveId;
     @FXML protected Button ui_typeRiveId_link;
     @FXML protected ComboBox ui_typeTronconId;
@@ -90,11 +108,7 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         ui_litId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
         ui_litId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_litId.getSelectionModel().getSelectedItem()));       
         ui_libelle.disableProperty().bind(disableFieldsProperty());
-        ui_commentaire.disableProperty().bind(disableFieldsProperty());
-        ui_digueId.disableProperty().bind(disableFieldsProperty());
-        ui_digueId_link.disableProperty().bind(ui_digueId.getSelectionModel().selectedItemProperty().isNull());
-        ui_digueId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
-        ui_digueId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_digueId.getSelectionModel().getSelectedItem()));       
+        ui_commentaire.disableProperty().bind(disableFieldsProperty());      
         ui_typeRiveId.disableProperty().bind(disableFieldsProperty());
         ui_typeRiveId_link.setVisible(false);
         ui_typeTronconId.disableProperty().bind(disableFieldsProperty());
@@ -174,9 +188,6 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
         // * commentaire
         ui_commentaire.setHtmlText(newElement.getCommentaire());
-        SIRS.initCombo(ui_digueId, FXCollections.observableList(
-            previewRepository.getByClass(Digue.class)), 
-            newElement.getDigueId() == null? null : previewRepository.get(newElement.getDigueId()));
         SIRS.initCombo(ui_typeRiveId, FXCollections.observableList(
             previewRepository.getByClass(RefRive.class)), 
             newElement.getTypeRiveId() == null? null : previewRepository.get(newElement.getTypeRiveId()));
@@ -312,14 +323,6 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
             element.setLitId(((Element)cbValue).getId());
         } else if (cbValue == null) {
             element.setLitId(null);
-        }
-        cbValue = ui_digueId.getValue();
-        if (cbValue instanceof Preview) {
-            element.setDigueId(((Preview)cbValue).getElementId());
-        } else if (cbValue instanceof Element) {
-            element.setDigueId(((Element)cbValue).getId());
-        } else if (cbValue == null) {
-            element.setDigueId(null);
         }
         cbValue = ui_typeRiveId.getValue();
         if (cbValue instanceof Preview) {
