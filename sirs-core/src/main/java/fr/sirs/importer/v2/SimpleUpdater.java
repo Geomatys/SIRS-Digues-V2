@@ -61,8 +61,8 @@ public abstract class SimpleUpdater<T extends Element, U extends Element> extend
     }
 
     @Override
-    protected U getDocument(final int rowId, final Row input, T output) {
-        final Integer accessDocId = input.getInt(getDocumentIdField());
+    protected U getDocument(final Object rowId, final Row input, T output) {
+        final Object accessDocId = input.get(getDocumentIdField());
         if (accessDocId == null) {
             throw new IllegalStateException("Input has no valid ID in " + getDocumentIdField());
         }

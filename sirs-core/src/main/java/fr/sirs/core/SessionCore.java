@@ -5,6 +5,7 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.PositionProfilTraversRepository;
 import fr.sirs.core.component.Previews;
+import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.component.ReferenceUsageRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AvecForeignParent;
@@ -618,5 +619,25 @@ public class SessionCore implements ApplicationContextAware {
         }
 
         return result;
+    }
+
+    /**
+     * Create an user in CouchDB database.
+     * @param login Login to set to thee user.
+     * @param password Password of the user. It will be hashed before being sent.
+     * @param role Role to give to the user
+     * @throws IllegalArgumentException If an user with the same login already exists.
+     */
+    public void createUser(final String login, final String password, final Role role) {
+        UtilisateurRepository repo = applicationContext.getBean(UtilisateurRepository.class);
+        if (repo.getByLogin(login).isEmpty()) {
+            final Utilisateur user = ElementCreator.createAnonymValidElement(Utilisateur.class);
+            user.setLogin(login);
+            user.setPassword(SirsCore.hexaMD5(password));
+            user.setRole(role);
+            repo.add(user);
+        } else {
+            throw new IllegalArgumentException("An user already exists for login " + login);
+        }
     }
 }

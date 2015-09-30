@@ -11,11 +11,13 @@ import fr.sirs.importer.v2.AbstractImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 public class ProprietaireTronconGestionImporter extends GenericPeriodeLocaliseeImporter<ProprieteTroncon> {
 
     private AbstractImporter<Contact> intervenantImporter;
@@ -29,7 +31,7 @@ public class ProprietaireTronconGestionImporter extends GenericPeriodeLocaliseeI
 
     @Override
     public String getRowIdFieldName() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return Columns.ID_PROPRIETAIRE_TRONCON_GESTION.name();
     }
 
     private enum Columns {
@@ -78,12 +80,12 @@ public class ProprietaireTronconGestionImporter extends GenericPeriodeLocaliseeI
         propriete.setLinearId(troncon);
 
         propriete.setDesignation(String.valueOf(row.getInt(Columns.ID_PROPRIETAIRE_TRONCON_GESTION.toString())));
-        
+
         if (row.getInt(Columns.ID_TYPE_PROPRIETAIRE.toString()) != null) {
             propriete.setTypeProprietaireId(typeProprietaireImporter.getImportedId(row.getInt(Columns.ID_TYPE_PROPRIETAIRE.toString())));
         }
 
-        final Integer intervenantId = row.getInt(Columns.ID_INTERVENANT.toString());
+        final Object intervenantId = row.get(Columns.ID_INTERVENANT.toString());
         if (intervenantId != null) {
             final String intervenant = intervenantImporter.getImportedId(intervenantId);
             if (intervenant != null) {
@@ -92,7 +94,7 @@ public class ProprietaireTronconGestionImporter extends GenericPeriodeLocaliseeI
                 throw new AccessDbImporterException("Le contact " + intervenant + " n'a pas encore d'identifiant CouchDb !");
             }
         } else {
-            final Integer organismeId = row.getInt(Columns.ID_ORGANISME.toString());
+            final Object organismeId = row.get(Columns.ID_ORGANISME.toString());
             if (organismeId != null) {
                 final String organisme = organismeImporter.getImportedId(organismeId);
                 if (organisme != null) {

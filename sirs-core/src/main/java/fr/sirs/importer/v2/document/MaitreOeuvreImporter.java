@@ -4,11 +4,13 @@ import fr.sirs.core.model.MaitreOeuvreMarche;
 import fr.sirs.core.model.Marche;
 import static fr.sirs.importer.DbImporter.TableName.MARCHE_MAITRE_OEUVRE;
 import fr.sirs.importer.v2.SimpleUpdater;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class MaitreOeuvreImporter extends SimpleUpdater<MaitreOeuvreMarche, Marche> {
 
     private enum Columns {

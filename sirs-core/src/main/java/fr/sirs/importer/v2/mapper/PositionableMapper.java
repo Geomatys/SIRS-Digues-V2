@@ -65,10 +65,17 @@ public class PositionableMapper extends AbstractMapper<Positionable> {
 
         // LINEAR POSITIONING
         // START
-        // We're forced to get a double as id, because of input database definition.
-        final Double startId = row.getDouble(Columns.ID_BORNEREF_DEBUT.toString());
-        if (startId != null) {
-            final String bId = borneImporter.getImportedId(startId.intValue());
+        /* Invalid values appears in databases, so we have to control borne id validity (id > 0)
+         * WORSE ! Borne ids are defined with integers in BORNE_DIGUE table, but other tables as
+         * ELEMENT_RESEAU use a double field as foreign key, what force us to convert read data.
+         */
+        Object startId = row.get(Columns.ID_BORNEREF_DEBUT.toString());
+        boolean isNumber = startId instanceof Number;
+        if (isNumber) {
+            startId = ((Number)startId).intValue();
+        }
+        if (startId != null && (!isNumber || ((Number)startId).intValue() > 0)) {
+            final String bId = borneImporter.getImportedId(startId);
             if (bId != null) {
                 output.setBorneDebutId(bId);
             } else {
@@ -88,9 +95,17 @@ public class PositionableMapper extends AbstractMapper<Positionable> {
         output.setBorne_debut_aval(row.getBoolean(Columns.AMONT_AVAL_DEBUT.toString()));
 
         // END
-        final Double endId = row.getDouble(Columns.ID_BORNEREF_FIN.toString());
-        if (endId != null) {
-            final String bId = borneImporter.getImportedId(endId.intValue());
+        /* Invalid values appears in databases, so we have to control borne id validity (id > 0)
+         * WORSE ! Borne ids are defined with integers in BORNE_DIGUE table, but other tables as
+         * ELEMENT_RESEAU use a double field as foreign key, what force us to convert read data.
+         */
+        Object endId = row.get(Columns.ID_BORNEREF_FIN.toString());
+        isNumber = endId instanceof Number;
+        if (isNumber) {
+            endId = ((Number)endId).intValue();
+        }
+        if (endId != null && (!isNumber || ((Number)endId).intValue() > 0)) {
+            final String bId = borneImporter.getImportedId(endId);
             if (bId != null) {
                 output.setBorneFinId(bId);
             } else {

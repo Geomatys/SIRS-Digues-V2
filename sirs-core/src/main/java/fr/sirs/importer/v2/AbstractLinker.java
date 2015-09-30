@@ -1,11 +1,15 @@
 package fr.sirs.importer.v2;
 
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.importer.AccessDbImporterException;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * An importer which can be called to link content it imported to link it to the specified target.
@@ -14,27 +18,40 @@ import java.util.HashSet;
  * @param <T> Type of object to import (target of the link).
  * @param <U> object type for the link holder.
  */
-public abstract class AbstractLinker<T extends Element, U extends Element> extends AbstractImporter<T> implements Linker<U> {
+public abstract class AbstractLinker<T extends Element, U extends Element> extends AbstractImporter<T> implements Linker<T, U> {
+
+    /**
+     * Temporarily keeps target objects to link. Will be replaced with target IDs after they've been posted.
+     */
+    private final HashMap<Object, HashSet<T>> buffer = new HashMap<>();
 
     /**
      * Contains relation between row Ids and the value of their foreign key pointing to link holder.
      * Key is the id of the "link holder", and value is the list of "targets" bound to it.
      */
-    private final HashMap<Integer, HashSet<Integer>> holder2targetIds = new HashMap<>();
+    private final HashMap<Object, HashSet<String>> holder2targetIds = new HashMap<>();
 
-    /**
-     * {@inheritDoc }
-     */
-    @Override
-    public void link(Integer accessHolderId, U holder) throws AccessDbImporterException {
-        final HashSet<Integer> targetIds = holder2targetIds.get(accessHolderId);
-        if (targetIds == null) return;
-        for (final Integer leveId : targetIds) {
-            try {
-                bind(holder, getImportedId(leveId));
-            } catch (IOException ex) {
-                throw new AccessDbImporterException("Cannot create a link.", ex);
+    public void link() throws IOException, AccessDbImporterException {
+
+        final AbstractImporter<U> holderImporter = context.importers.get(getHolderClass());
+        final AbstractSIRSRepository<U> holderRepo = session.getRepositoryForClass(getHolderClass());
+
+        Iterator<Map.Entry<Object, HashSet<String>>> it = holder2targetIds.entrySet().iterator();
+
+        int linkCount;
+        while ((linkCount = holder2targetIds.size()) > 0) {
+            final int bulkSize = StrictMath.min(linkCount, context.bulkLimit);
+            final HashSet<U> holders = new HashSet<>(bulkSize);
+            while (it.hasNext() && holders.size() < bulkSize) {
+                Map.Entry<Object, HashSet<String>> next = it.next();
+                final U holder = holderRepo.get(holderImporter.getImportedId(next.getKey()));
+                bind(holder, next.getValue());
+                holders.add(holder);
+
+                it.remove();
             }
+
+            context.executeBulk((Collection<Element>) holders);
         }
     }
 
@@ -42,10 +59,10 @@ public abstract class AbstractLinker<T extends Element, U extends Element> exten
      * Create link to input id into given object.
      *
      * @param holder The object which will hold (contain) the link.
-     * @param targetId Id (in CouchDB database) of the link target.
+     * @param targetIds Ids (in CouchDB database) of the link targets.
      * @throws AccessDbImporterException If an error occurs while crating the link.
      */
-    public abstract void bind(final U holder, final String targetId) throws AccessDbImporterException;
+    public abstract void bind(final U holder, final Collection<String> targetIds) throws AccessDbImporterException;
 
     /**
      *
@@ -54,20 +71,44 @@ public abstract class AbstractLinker<T extends Element, U extends Element> exten
     public abstract String getHolderColumn();
 
     @Override
-    public T importRow(Row row, T output) throws IOException, AccessDbImporterException {
-        output = super.importRow(row, output);
-        final String holderColumn = getHolderColumn();
-        final Integer profilId = row.getInt(holderColumn);
-        if (profilId == null) {
-            throw new AccessDbImporterException("Empty foreign key : "+holderColumn);
-        }
-        HashSet<Integer> value = holder2targetIds.get(profilId);
-        if (value == null) {
-            value = new HashSet();
-            holder2targetIds.put(profilId, value);
-        }
-        value.add(row.getInt(getRowIdFieldName()));
+    public Class<T> getTargetClass() {
+        return getElementClass();
+    }
 
-        return output;
+    @Override
+    protected void afterPost(Map<String, Element> posted, Map<Object, T> imports) {
+        super.afterPost(posted, imports);
+        Iterator<Map.Entry<Object, HashSet<T>>> it = buffer.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Object, HashSet<T>> entry = it.next();
+            HashSet<String> value = holder2targetIds.get(entry.getKey());
+            if (value == null) {
+                value = new HashSet<>();
+                holder2targetIds.put(entry.getKey(), value);
+            }
+            for (final T target : entry.getValue()) {
+                value.add(target.getId());
+            }
+            // clear checked buffer entry.
+            it.remove();
+        }
+    }
+
+    @Override
+    protected Element prepareToPost(Object rowId, Row row, T output) {
+        final String holderColumn = getHolderColumn();
+        final Object profilId = row.get(holderColumn);
+        if (profilId == null) {
+            context.reportError(getTableName(), row, new IllegalArgumentException("Empty foreign key : "+holderColumn));
+            //throw new AccessDbImporterException("Empty foreign key : "+holderColumn);
+        } else {
+            HashSet<T> value = buffer.get(profilId);
+            if (value == null) {
+                value = new HashSet<>();
+                buffer.put(profilId, value);
+            }
+            value.add(output);
+        }
+        return super.prepareToPost(rowId, row, output);
     }
 }

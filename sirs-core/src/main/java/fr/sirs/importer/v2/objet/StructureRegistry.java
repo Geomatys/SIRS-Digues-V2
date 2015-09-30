@@ -13,9 +13,9 @@ import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.TYPE_ELEMENT_STRUCTURE;
 import static fr.sirs.importer.DbImporter.TableName.valueOf;
-import fr.sirs.importer.v2.ErrorReport;
 import fr.sirs.importer.v2.ImportContext;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class StructureRegistry {
         NOM_TABLE_EVT
     };
 
-    private final HashMap<Integer, Class<Objet>> types = new HashMap<>(8);
+    private final HashMap<Object, Class<Objet>> types = new HashMap<>(8);
 
     @Autowired
     private StructureRegistry(ImportContext context) throws IOException {
@@ -95,12 +95,12 @@ public class StructureRegistry {
                 }
 
                 if (clazz == null) {
-                    context.reportError(new ErrorReport(null, row, TYPE_ELEMENT_STRUCTURE.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized element type", null));
+                    //context.reportError(new ErrorReport(null, row, TYPE_ELEMENT_STRUCTURE.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized structure type", null));
                 } else {
-                    types.put(row.getInt(Columns.ID_TYPE_ELEMENT_STRUCTURE.name()), clazz);
+                    types.put(row.get(Columns.ID_TYPE_ELEMENT_STRUCTURE.name()), clazz);
                 }
             } catch (IllegalArgumentException e) {
-                context.reportError(new ErrorReport(null, row, TYPE_ELEMENT_STRUCTURE.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized element type", null));
+                //context.reportError(new ErrorReport(null, row, TYPE_ELEMENT_STRUCTURE.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized structure type", null));
             }
         }
     }
@@ -110,15 +110,19 @@ public class StructureRegistry {
      * @return document class associated to given document type ID, or null, if
      * given Id is unknown.
      */
-    public Class<Objet> getElementType(final Integer typeId) {
+    public Class<Objet> getElementType(final Object typeId) {
         return types.get(typeId);
     }
 
     public Class<Objet> getElementType(final Row input) {
-        Integer typeId = input.getInt(Columns.ID_TYPE_ELEMENT_STRUCTURE.name());
+        final Object typeId = input.get(Columns.ID_TYPE_ELEMENT_STRUCTURE.name());
         if (typeId != null) {
             return getElementType(typeId);
         }
         return null;
+    }
+
+    public Collection<Class<Objet>> allTypes() {
+        return types.values();
     }
 }

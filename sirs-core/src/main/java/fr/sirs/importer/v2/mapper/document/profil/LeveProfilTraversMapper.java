@@ -58,7 +58,7 @@ public class LeveProfilTraversMapper extends AbstractMapper<LeveProfilTravers> {
     @Override
     public void map(Row input, LeveProfilTravers output) throws IllegalStateException, IOException, AccessDbImporterException {
 
-//        Integer profilId = input.getInt(Columns.ID_PROFIL_EN_TRAVERS.name());
+//        final Object profilId = input.get(Columns.ID_PROFIL_EN_TRAVERS.name());
 //        if (profilId == null) {
 //            throw new AccessDbImporterException("No ID set for foreign key "+Columns.ID_PROFIL_EN_TRAVERS.name() + "in table "+table.getName());
 //        }
@@ -76,7 +76,7 @@ public class LeveProfilTraversMapper extends AbstractMapper<LeveProfilTravers> {
             output.setReferenceCalque(calque);
         }
 
-        final Integer orgId = input.getInt(Columns.ID_ORG_CREATEUR.name());
+        final Object orgId = input.get(Columns.ID_ORG_CREATEUR.name());
         if (orgId != null) {
             final String newOrgId = orgImporter.getImportedId(orgId);
             if (newOrgId == null) {
@@ -85,7 +85,7 @@ public class LeveProfilTraversMapper extends AbstractMapper<LeveProfilTravers> {
             output.setOrganismeCreateurId(newOrgId);
         }
 
-        final Integer typeSysId = input.getInt(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.name());
+        final Object typeSysId = input.get(Columns.ID_TYPE_SYSTEME_RELEVE_PROFIL.name());
         if (typeSysId != null) {
             final String newId = TypeSystemeImporter.getImportedId(typeSysId);
             if (newId == null) {
@@ -94,7 +94,7 @@ public class LeveProfilTraversMapper extends AbstractMapper<LeveProfilTravers> {
             output.setTypeSystemesReleveId(newId);
         }
 
-        final Integer typeProfilId = input.getInt(Columns.ID_TYPE_PROFIL_EN_TRAVERS.name());
+        final Object typeProfilId = input.get(Columns.ID_TYPE_PROFIL_EN_TRAVERS.name());
         if (typeProfilId != null) {
             final String newId = TypeProfilImporter.getImportedId(typeProfilId);
             if (newId == null) {
@@ -103,7 +103,7 @@ public class LeveProfilTraversMapper extends AbstractMapper<LeveProfilTravers> {
             output.setTypeProfilId(newId);
         }
 
-        final Integer originId = input.getInt(Columns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.name());
+        final Object originId = input.get(Columns.ID_TYPE_ORIGINE_PROFIL_EN_TRAVERS.name());
         if (originId != null) {
             final String newId = TypeOriginImporter.getImportedId(originId);
             if (newId == null) {

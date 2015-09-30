@@ -4,11 +4,13 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Observation;
 import static fr.sirs.importer.DbImporter.TableName.DESORDRE_OBSERVATION;
 import fr.sirs.importer.v2.SimpleUpdater;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class ObservationImporter extends SimpleUpdater<Observation, Desordre> {
     private enum Columns {
         ID_OBSERVATION,
@@ -17,7 +19,7 @@ public class ObservationImporter extends SimpleUpdater<Observation, Desordre> {
 
     @Override
     public String getDocumentIdField() {
-        return Columns.ID_OBSERVATION.name();
+        return Columns.ID_DESORDRE.name();
     }
 
     @Override

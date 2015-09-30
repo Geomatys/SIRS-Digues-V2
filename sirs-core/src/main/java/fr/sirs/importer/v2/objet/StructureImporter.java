@@ -5,13 +5,19 @@ import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Objet;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.v2.AbstractImporter;
+import fr.sirs.importer.v2.CorruptionLevel;
+import fr.sirs.importer.v2.ErrorReport;
+import fr.sirs.importer.v2.MultipleSubTypes;
+import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
-public class StructureImporter extends AbstractImporter<Objet> {
+@Component
+public class StructureImporter extends AbstractImporter<Objet> implements MultipleSubTypes<Objet> {
 
     private enum Columns {
         ID_ELEMENT_STRUCTURE,
@@ -37,18 +43,19 @@ public class StructureImporter extends AbstractImporter<Objet> {
     }
 
     @Override
-    protected Objet getOrCreateElement(Row input) {
-        Integer type = input.getInt(Columns.ID_TYPE_ELEMENT_STRUCTURE.toString());
+    protected Objet createElement(Row input) {
+        final Object type = input.get(Columns.ID_TYPE_ELEMENT_STRUCTURE.toString());
         if (type == null) {
-            throw new IllegalArgumentException("No valid element type in row "+input.getInt(getRowIdFieldName())+ " of table "+getTableName());
+            context.reportError(new ErrorReport(null, input, getTableName(), Columns.ID_TYPE_ELEMENT_STRUCTURE.name(), null, null, "No structure type defined", CorruptionLevel.ROW));
         }
 
         // Find what type of element must be imported.
         Class<Objet> clazz = registry.getElementType(type);
-        if (clazz == null) {
-            throw new IllegalArgumentException("No valid element type in row "+input.getInt(getRowIdFieldName())+ " of table "+getTableName());
-        }
+        return clazz == null ? null : ElementCreator.createAnonymValidElement(clazz);
+    }
 
-        return ElementCreator.createAnonymValidElement(clazz);
+    @Override
+    public Collection<Class<Objet>> getSubTypes() {
+        return registry.allTypes();
     }
 }

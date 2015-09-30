@@ -13,11 +13,13 @@ import fr.sirs.importer.v2.AbstractImporter;
 import fr.sirs.importer.v2.AbstractLinker;
 import fr.sirs.importer.v2.SimpleUpdater;
 import java.io.IOException;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class ParametrePTraversImporter extends SimpleUpdater<ParametreHydrauliqueProfilTravers, ProfilTravers> {
 
     private AbstractImporter<LeveProfilTravers> leveImporter;
@@ -78,8 +80,8 @@ public class ParametrePTraversImporter extends SimpleUpdater<ParametreHydrauliqu
 
 
     @Override
-    protected ProfilTravers getDocument(final int rowId, Row input, ParametreHydrauliqueProfilTravers output) {
-        Integer leveId = input.getInt(getDocumentIdField());
+    protected ProfilTravers getDocument(final Object rowId, Row input, ParametreHydrauliqueProfilTravers output) {
+        final Object leveId = input.get(getDocumentIdField());
         if (leveId == null) {
             throw new IllegalStateException("Input has no valid ID in " + getDocumentIdField());
         }

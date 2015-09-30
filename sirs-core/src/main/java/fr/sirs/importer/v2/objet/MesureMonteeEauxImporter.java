@@ -9,11 +9,13 @@ import fr.sirs.core.model.MesureMonteeEaux;
 import fr.sirs.core.model.MonteeEaux;
 import static fr.sirs.importer.DbImporter.TableName.MONTEE_DES_EAUX_MESURES;
 import fr.sirs.importer.v2.SimpleUpdater;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class MesureMonteeEauxImporter extends SimpleUpdater<MesureMonteeEaux, MonteeEaux> {
 
     @Override

@@ -33,9 +33,7 @@ import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.TYPE_DONNEES_SOUS_GROUPE;
-import static fr.sirs.importer.DbImporter.TableName.TYPE_ELEMENT_RESEAU;
 import static fr.sirs.importer.DbImporter.TableName.valueOf;
-import fr.sirs.importer.v2.ErrorReport;
 import fr.sirs.importer.v2.ImportContext;
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -64,7 +62,7 @@ public class PhotoHolderRegistry {
 //        DATE_DERNIERE_MAJ
     }
 
-    private final HashMap<Map.Entry<Integer, Integer>, Class<Element>> types = new HashMap<>();
+    private final HashMap<Map.Entry<Object, Object>, Class<Element>> types = new HashMap<>();
 
     @Autowired
     private PhotoHolderRegistry(ImportContext context) throws IOException {
@@ -77,15 +75,15 @@ public class PhotoHolderRegistry {
                 final Class clazz = getClazz(table);
 
                 if (clazz == null) {
-                    context.reportError(new ErrorReport(null, row, TYPE_ELEMENT_RESEAU.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized element type", null));
+                    // context.reportError(new ErrorReport(null, row, TYPE_ELEMENT_RESEAU.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized element type", null));
                 } else {
-                    final Integer type = row.getInt(Columns.ID_GROUPE_DONNEES.name());
-                    final Integer subType = row.getInt(Columns.ID_SOUS_GROUPE_DONNEES.name());
+                    final Object type = row.get(Columns.ID_GROUPE_DONNEES.name());
+                    final Object subType = row.get(Columns.ID_SOUS_GROUPE_DONNEES.name());
 
                     types.put(new AbstractMap.SimpleImmutableEntry<>(type, subType), clazz);
                 }
             } catch (IllegalArgumentException e) {
-                context.reportError(new ErrorReport(null, row, TYPE_ELEMENT_RESEAU.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized element type", null));
+                // context.reportError(new ErrorReport(null, row, TYPE_ELEMENT_RESEAU.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized element type", null));
             }
         }
     }
@@ -95,13 +93,13 @@ public class PhotoHolderRegistry {
      * @return document class associated to given document type ID, or null, if
      * given Id is unknown.
      */
-    public Class<Element> getElementType(final Integer typeId, final Integer subTypeId) {
+    public Class<Element> getElementType(final Object typeId, final Object subTypeId) {
         return types.get(new AbstractMap.SimpleImmutableEntry<>(typeId, subTypeId));
     }
 
     public Class<Element> getElementType(final Row input) {
-        final Integer type = input.getInt(Columns.ID_GROUPE_DONNEES.name());
-        final Integer subType = input.getInt(Columns.ID_SOUS_GROUPE_DONNEES.name());
+        final Object type = input.get(Columns.ID_GROUPE_DONNEES.name());
+        final Object subType = input.get(Columns.ID_SOUS_GROUPE_DONNEES.name());
         if (type != null && subType != null) {
             return getElementType(type, subType);
         }

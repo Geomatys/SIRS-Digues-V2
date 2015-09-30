@@ -13,11 +13,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 class TronconGestionDigueGestionnaireImporter extends SimpleUpdater<GestionTroncon, TronconDigue> {
 
     private AbstractImporter<Organisme> organismeImporter;
@@ -49,7 +51,7 @@ class TronconGestionDigueGestionnaireImporter extends SimpleUpdater<GestionTronc
 
     @Override
     public Class<TronconDigue> getDocumentClass() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return TronconDigue.class;
     }
 
     @Override

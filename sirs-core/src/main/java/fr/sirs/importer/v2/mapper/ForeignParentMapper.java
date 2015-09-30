@@ -35,7 +35,7 @@ public class ForeignParentMapper extends AbstractMapper<AvecForeignParent> {
 
     @Override
     public void map(Row input, AvecForeignParent output) throws IllegalStateException, IOException, AccessDbImporterException {
-        Integer tdId = input.getInt(TRONCON_ID_COLUMN);
+        final Object tdId = input.get(TRONCON_ID_COLUMN);
         if (tdId != null) {
             final String importedId = tdImporter.getImportedId(tdId);
             if (importedId != null) {

@@ -49,12 +49,12 @@ public class LargeurFrancBordMapper extends AbstractMapper<LargeurFrancBord> {
 
     @Override
     public void map(Row input, LargeurFrancBord output) throws IllegalStateException, IOException, AccessDbImporterException {
-        final Integer sourceId = input.getInt(Columns.ID_SOURCE.toString());
+        final Object sourceId = input.get(Columns.ID_SOURCE.toString());
         if (sourceId != null) {
             output.setSourceId(context.importers.get(RefSource.class).getImportedId(sourceId));
         }
 
-        final Integer typeLargeurId = input.getInt(Columns.ID_TYPE_LARGEUR_FB.toString());
+        final Object typeLargeurId = input.get(Columns.ID_TYPE_LARGEUR_FB.toString());
         if (typeLargeurId != null) {
             output.setTypeLargeurFrancBord(context.importers.get(RefLargeurFrancBord.class).getImportedId(typeLargeurId));
         }

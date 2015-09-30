@@ -35,7 +35,7 @@ public class SIRSFileReferenceMapper extends AbstractMapper<SIRSFileReference> {
 
     @Override
     public void map(Row input, SIRSFileReference output) throws IllegalStateException, IOException, AccessDbImporterException {
-        String ref = input.getString(DEFAULT_COLUMN_NAME);
+        String ref = input.getString(columnName);
         if (ref != null) {
             output.setChemin(ref);
         }

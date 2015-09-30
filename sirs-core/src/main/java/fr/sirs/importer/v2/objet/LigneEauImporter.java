@@ -10,11 +10,14 @@ import fr.sirs.core.model.LigneEau;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.v2.AbstractLinker;
+import java.util.Collection;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class LigneEauImporter extends AbstractLinker<LigneEau, EvenementHydraulique> {
 
     @Override
@@ -33,8 +36,8 @@ public class LigneEauImporter extends AbstractLinker<LigneEau, EvenementHydrauli
     }
 
     @Override
-    public void bind(EvenementHydraulique holder, String targetId) throws AccessDbImporterException {
-        holder.getLigneEauIds().add(targetId);
+    public void bind(EvenementHydraulique holder, Collection<String> targetIds) throws AccessDbImporterException {
+        holder.getLigneEauIds().addAll(targetIds);
     }
 
     @Override

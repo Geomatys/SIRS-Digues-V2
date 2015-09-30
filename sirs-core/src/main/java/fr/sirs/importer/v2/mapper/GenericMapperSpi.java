@@ -26,6 +26,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import org.apache.sis.util.ArgumentChecks;
+import org.apache.sis.util.Numbers;
 import org.apache.sis.util.UnconvertibleObjectException;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -43,7 +44,7 @@ public abstract class GenericMapperSpi<T> implements MapperSpi<T> {
     /**
      * Operators used by mappers to import data. Build at {@link PostConstruct} phase.
      */
-    private final HashMap<String, BiConsumer<Row, T>> consumers = new HashMap<>();
+    private HashMap<String, BiConsumer<Row, T>> consumers;
 
     public GenericMapperSpi(final Class outputClass) throws IntrospectionException {
         ArgumentChecks.ensureNonNull("Output class", outputClass);
@@ -63,29 +64,40 @@ public abstract class GenericMapperSpi<T> implements MapperSpi<T> {
      * @throws IllegalArgumentException If given output class is incompatible
      * with input bindings.
      */
-    @PostConstruct
-    private HashMap<String, BiConsumer<Row, T>> createBindings() throws IntrospectionException {
-        BeanInfo beanInfo = Introspector.getBeanInfo(outputClass);
+    private void createBindings() {
+        final BeanInfo beanInfo;
+        try {
+            beanInfo = Introspector.getBeanInfo(outputClass);
+        } catch (IntrospectionException ex) {
+            throw new IllegalArgumentException("Mapper target class cannot be analyzed : "+outputClass.getCanonicalName());
+        }
 
-        final HashMap<String, BiConsumer<Row, T>> result = new HashMap<>();
         final HashMap<String, PropertyDescriptor> properties = mapByName(beanInfo.getPropertyDescriptors());
         final Map<String, String> bindings = getBindings();
+        consumers = new HashMap<>(bindings.size());
         for (final Map.Entry<String, String> binding : bindings.entrySet()) {
             final String propName = binding.getValue();
             PropertyDescriptor found = properties.get(propName);
             if (found == null) {
                 throw new IllegalArgumentException("No property " + propName + " found in class " + outputClass.getCanonicalName());
             } else {
-                result.put(binding.getKey(), createConsumer(binding.getKey(), found));
+                consumers.put(binding.getKey(), createConsumer(binding.getKey(), found));
             }
         }
-        return result;
+    }
+
+    public HashMap<String, BiConsumer<Row, T>> getConsumers() {
+        if (consumers == null) {
+            createBindings();
+        }
+        return consumers;
     }
 
     @Override
     public Optional<Mapper<T>> configureInput(Table inputType) throws IllegalStateException {
         final Set<String> keySet = getBindings().keySet();
         if (MapperSpi.checkColumns(inputType, keySet.toArray(new String[keySet.size()]))) {
+            getConsumers();
             return Optional.of(new GenericMapper(inputType));
         }
         return Optional.empty();
@@ -128,14 +140,14 @@ public abstract class GenericMapperSpi<T> implements MapperSpi<T> {
         }
         // Check if we've got a real data or a link.
         final Reference ref = readMethod.getAnnotation(Reference.class);
-        final Class refClass;
+        final Class<?> refClass;
         if (ref != null) {
             refClass = ref.ref();
         } else {
             refClass = null;
         }
 
-        final Class targetClass = targetProperty.getPropertyType();
+        final Class<?> targetClass = targetProperty.getPropertyType();
 
         /* We create a converter to transform object returned from ms-access into
          * one of the same type as output property. If we've found out that target
@@ -148,19 +160,13 @@ public abstract class GenericMapperSpi<T> implements MapperSpi<T> {
             final AbstractImporter tmpImporter = context.importers.get(refClass);
             converter = (input) -> {
                 try {
-                    if (input instanceof Integer) {
-                        return tmpImporter.getImportedId((Integer) input);
-                    } else if (input instanceof Number) {
-                        return tmpImporter.getImportedId(((Number) input).intValue());
-                    } else {
-                        throw new IllegalArgumentException("Input row ID have to be a string !");
-                    }
+                    return tmpImporter.getImportedId(input);
                 } catch (IOException | AccessDbImporterException e) {
                     throw new UnconvertibleObjectException("Cannot find object referenced by given key " + input);
                 }
             };
         } else {
-            converter = (input) -> context.convertData(input, targetProperty.getPropertyType());
+            converter = (input) -> context.convertData(input, Numbers.primitiveToWrapper(targetProperty.getPropertyType()));
         }
 
         /**
@@ -189,7 +195,7 @@ public abstract class GenericMapperSpi<T> implements MapperSpi<T> {
                 final Object inputValue = input.get(columnName);
                 if (inputValue != null && !ImportContext.NULL_STRING.equals(inputValue)) {
                     try {
-                        writeMethod.invoke(output, inputValue);
+                        writeMethod.invoke(output, converter.apply(inputValue));
                     } catch (IllegalAccessException | InvocationTargetException ex) {
                         throw new SirsCoreRuntimeException("Invalid reflection statement !", ex);
                     }
@@ -214,19 +220,20 @@ public abstract class GenericMapperSpi<T> implements MapperSpi<T> {
 
         @Override
         public void map(Row input, T output) throws IllegalStateException, IOException, AccessDbImporterException {
-            for(final Map.Entry<String, BiConsumer<Row, T>> consumer : consumers.entrySet()) {
+            final Set<Map.Entry<String, BiConsumer<Row, T>>> consumerSet = getConsumers().entrySet();
+            for(final Map.Entry<String, BiConsumer<Row, T>> consumer : consumerSet) {
                 try {
                     consumer.getValue().accept(input, output);
-                } catch (IllegalArgumentException e) {
-                    context.reportError(new ErrorReport(e, input, tableName, consumer.getKey(), output, getBindings().get(consumer.getKey()), null, CorruptionLevel.FIELD));
+                } catch (IllegalArgumentException | IllegalStateException e) {
+                    context.reportError(new ErrorReport(e, input, tableName, consumer.getKey(), output, getBindings().get(consumer.getKey()), "Cannot map a field.", CorruptionLevel.FIELD));
                 }
             }
 
             for(final BiConsumer<Row, T> consumer : getExtraBindings()) {
                 try {
                     consumer.accept(input, output);
-                } catch (IllegalArgumentException e) {
-                    context.reportError(new ErrorReport(e, input, tableName, null, output, null, null, CorruptionLevel.FIELD));
+                } catch (IllegalArgumentException | IllegalStateException e) {
+                    context.reportError(new ErrorReport(e, input, tableName, null, output, null, "Cannot bind some row data", CorruptionLevel.FIELD));
                 }
             }
         }

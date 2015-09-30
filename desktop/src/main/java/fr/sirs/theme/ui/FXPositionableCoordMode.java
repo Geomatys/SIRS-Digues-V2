@@ -54,7 +54,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
     private static final String MODE = "COORD";
 
     private final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
-    
+
     private final ObjectProperty<Positionable> posProperty = new SimpleObjectProperty<>();
     private final BooleanProperty disableProperty = new SimpleBooleanProperty(true);
 
@@ -86,7 +86,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
         uiCRSs.getSelectionModel().clearAndSelect(1);
         uiCRSs.disableProperty().bind(disableProperty);
         uiCRSs.setConverter(new SirsStringConverter());
-        
+
         uiLongitudeStart.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
         uiLatitudeStart.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
         uiLongitudeEnd.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
@@ -142,7 +142,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
     public String getID() {
         return MODE;
     }
-    
+
     @Override
     public String getTitle() {
         return "Coordonnée";
@@ -212,7 +212,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
         }else if(pos.getGeometry()!=null){
             //on refait les points a partir de la géométrie
             final TronconDigue t = FXPositionableMode.getTronconFromPositionable(pos);
-            final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t, Injector.getSession());
+            final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
             final Point geoPointStart = ps.getGeoPointStart();
             final Point geoPointEnd = ps.getGeoPointEnd();
 
@@ -284,7 +284,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
 
     private void coordChange(){
         if(reseting) return;
-        
+
         reseting = true;
         buildGeometry();
         reseting = false;
@@ -299,7 +299,7 @@ public class FXPositionableCoordMode extends BorderPane implements FXPositionabl
      * @param oldValue Previous value into {@link #uiCRSs}
      * @param newValue Current value into {@link #uiCRSs}
      */
-    private void crsChange(ObservableValue<? extends CoordinateReferenceSystem> observable, 
+    private void crsChange(ObservableValue<? extends CoordinateReferenceSystem> observable,
             CoordinateReferenceSystem oldValue, CoordinateReferenceSystem newValue) {
         if(reseting) return;
 

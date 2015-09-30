@@ -106,17 +106,17 @@ public class TronconGestionDigueImporter extends AbstractImporter<TronconDigue> 
         tronconDigue.setLibelle(row.getString(Columns.NOM_TRONCON_GESTION.toString()));
         tronconDigue.setCommentaire(row.getString(Columns.COMMENTAIRE_TRONCON.toString()));
 
-        final Integer riveId = row.getInt(Columns.ID_TYPE_RIVE.toString());
+        final Object riveId = row.get(Columns.ID_TYPE_RIVE.toString());
         if (riveId != null) {
             tronconDigue.setTypeRiveId(typeRiveImporter.getImportedId(riveId));
         }
 
-        Integer digueId = row.getInt(Columns.ID_DIGUE.toString());
+        final Object digueId = row.get(Columns.ID_DIGUE.toString());
         if (digueId != null) {
             tronconDigue.setDigueId(digueImporter.getImportedId(digueId));
         }
 
-        final Integer tronconId = row.getInt(getRowIdFieldName());
+        final Object tronconId = row.get(getRowIdFieldName());
         if (tronconId == null) {
             throw new AccessDbImporterException("No id set in current row !");
         }
@@ -126,40 +126,35 @@ public class TronconGestionDigueImporter extends AbstractImporter<TronconDigue> 
         return tronconDigue;
     }
 
-    @Override
-    public synchronized void compute() throws IOException, AccessDbImporterException {
-        super.compute();
-        new TronconDigueUpdater().compute();
-    }
-
-
     /**
      * Search for the last valid geometry which has been submitted for a given {@link TronconDigue}
      *
      * @param tronconId Id of the source {@link TronconDigue } we want a geometry for.
      * @return A line string registered for the given object, or null if we cannot find any.
      */
-    private LineString computeGeometry(final int tronconId) throws IOException {
+    private LineString computeGeometry(final Object tronconId) throws IOException {
         // Only take the last submitted geometry for the object.
         geometryCursor.afterLast();
-        while (geometryCursor.findNextRow(idColumn, tronconId)) {
-            final Row currentRow = geometryCursor.getCurrentRow();
-            final byte[] bytes = currentRow.getBytes(GEOM_COLUMN);
-            try {
-                if (bytes == null || bytes.length <= 0) {
-                    continue;
+        while (geometryCursor.moveToPreviousRow()) {
+            if (geometryCursor.currentRowMatches(idColumn, tronconId)) {
+                final Row currentRow = geometryCursor.getCurrentRow();
+                final byte[] bytes = currentRow.getBytes(GEOM_COLUMN);
+                try {
+                    if (bytes == null || bytes.length <= 0) {
+                        continue;
+                    }
+                    final ByteBuffer bb = ByteBuffer.wrap(bytes);
+                    bb.order(ByteOrder.LITTLE_ENDIAN);
+                    final int id = bb.getInt();
+                    final ShapeType shapeType = ShapeType.forID(id);
+                    final ShapeHandler handler = shapeType.getShapeHandler(false);
+                    final Geometry tmpGeometry = JTS.transform((Geometry) handler.read(bb, shapeType), context.geoTransform);
+                    final LineString geom = LinearReferencing.asLineString(tmpGeometry);
+                    if (geom != null)
+                        return geom;
+                } catch (Exception e) {
+                    context.reportError(GEOM_TABLE, currentRow, e, "A geometry cannot be read.");
                 }
-                final ByteBuffer bb = ByteBuffer.wrap(bytes);
-                bb.order(ByteOrder.LITTLE_ENDIAN);
-                final int id = bb.getInt();
-                final ShapeType shapeType = ShapeType.forID(id);
-                final ShapeHandler handler = shapeType.getShapeHandler(false);
-                final Geometry tmpGeometry = JTS.transform((Geometry) handler.read(bb, shapeType), context.geoTransform);
-                final LineString geom = LinearReferencing.asLineString(tmpGeometry);
-                if (geom != null)
-                    return geom;
-            } catch (Exception e) {
-                context.reportError(GEOM_TABLE, currentRow, e, "A geometry cannot be read.");
             }
         }
         return null;

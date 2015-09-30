@@ -2,15 +2,22 @@ package fr.sirs.importer.v2;
 
 import fr.sirs.core.model.Element;
 import fr.sirs.importer.AccessDbImporterException;
+import java.io.IOException;
 
 /**
  * A class whose aim is to update an already existing document by putting id of
  * another already existing document into it.
  *
- * @author Alexis Manin (Geomatys)
+ * @author Alexis Manin (Geomatys
+ * @param <T> Target element type --> type pointed by the link.
  * @param <U> Type of object which will contain the reference.
  */
-public interface Linker<U extends Element> {
+public interface Linker<T extends Element, U extends Element> {
+
+    /**
+     * @return Type of the object which will pointed by the link.
+     */
+    Class<T> getTargetClass();
 
     /**
      * @return Type of the object which will contain the link.
@@ -18,10 +25,8 @@ public interface Linker<U extends Element> {
     Class<U> getHolderClass();
 
     /**
-     *
-     * @param accessHolderId Id of the holder object in source MS-access database.
-     * @param holder the object (holder) which will be modified to contain link.
+     * Bind target objects to link holders.
      */
-    void link(final Integer accessHolderId, final U holder) throws AccessDbImporterException;
+    void link() throws IOException, AccessDbImporterException;
 
 }

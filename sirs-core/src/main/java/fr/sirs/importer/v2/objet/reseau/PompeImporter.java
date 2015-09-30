@@ -4,11 +4,13 @@ import fr.sirs.core.model.Pompe;
 import fr.sirs.core.model.StationPompage;
 import static fr.sirs.importer.DbImporter.TableName.ELEMENT_RESEAU_POMPE;
 import fr.sirs.importer.v2.SimpleUpdater;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class PompeImporter extends SimpleUpdater<Pompe, StationPompage> {
 
     private enum Columns {

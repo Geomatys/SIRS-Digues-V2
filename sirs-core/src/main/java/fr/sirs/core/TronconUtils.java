@@ -262,10 +262,10 @@ public class TronconUtils {
             } else {
                 final PosInfo info;
                 if (cutTronconSegments == null) {
-                    info = new PosInfo(position, tronconCp, session);
+                    info = new PosInfo(position, tronconCp);
                     cutTronconSegments = info.getTronconSegments(true);
                 } else {
-                    info = new PosInfo(position, tronconCp, cutTronconSegments, session);
+                    info = new PosInfo(position, tronconCp, cutTronconSegments);
                 }
                 final PosSR posSr = info.getForSR(sr);
 
@@ -841,7 +841,7 @@ public class TronconUtils {
          * The borne must be contained in the current positionable target.
          * We also need the linear on which the object is projected.
          */
-        final PosInfo objInfo = new PosInfo(targetPos, session);
+        final PosInfo objInfo = new PosInfo(targetPos);
         LinearReferencing.SegmentInfo[] linearSegments = objInfo.getTronconSegments(false);
         ArgumentChecks.ensureNonNull("Linear for position projection.", linearSegments);
 
@@ -998,21 +998,19 @@ public class TronconUtils {
         private Geometry linear;
         private SegmentInfo[] linearSegments;
 
-        public PosInfo(Positionable pos, SessionCore session) {
-            this(pos,null,session);
+        public PosInfo(Positionable pos) {
+            this(pos,null);
         }
 
-        public PosInfo(Positionable pos, TronconDigue troncon, SessionCore session) {
-            this.pos = pos;
-            this.troncon = troncon;
-            this.session = session;
+        public PosInfo(Positionable pos, TronconDigue troncon) {
+            this(pos, troncon, null);
         }
 
-        public PosInfo(Positionable pos, TronconDigue troncon, SegmentInfo[] linear, SessionCore session) {
+        public PosInfo(Positionable pos, TronconDigue troncon, SegmentInfo[] linear) {
             this.pos = pos;
             this.troncon = troncon;
             this.linearSegments = linear;
-            this.session = session;
+            this.session = InjectorCore.getBean(SessionCore.class);
         }
 
         /**
@@ -1021,21 +1019,32 @@ public class TronconUtils {
          */
         public TronconDigue getTroncon() {
             if (troncon == null && pos != null) {
-                if (pos.getParent() != null) {
+                String tdId = null;
+                if (pos instanceof AvecForeignParent) {
+                    tdId = ((AvecForeignParent) pos).getForeignParentId();
+                } else {
                     Element tmp = pos.getParent();
-                    while (tmp != null && !(tmp instanceof TronconDigue)) {
+                    while (tmp != null) {
+                        if (tmp instanceof TronconDigue) {
+                            troncon = (TronconDigue) tmp;
+                            break;
+                        } else if (tmp instanceof AvecForeignParent) {
+                            tdId = ((AvecForeignParent) tmp).getForeignParentId();
+                            break;
+                        }
                         tmp = tmp.getParent();
                     }
-                    troncon = (TronconDigue) tmp;
                 }
-                // Maybe we have an incomplete version of the document, so we try by querying repository.
-                if (troncon == null) {
+
+                // Source linear was not contained in the document, but we've found its ID. We can try to query it using its repository.
+                if (troncon == null && tdId != null) {
                     try {
-                        troncon = session.getRepositoryForClass(TronconDigue.class).get(pos.getDocumentId());
+                        troncon = session.getRepositoryForClass(TronconDigue.class).get(tdId);
                     } catch (Exception e) {
                         troncon = null;
                     }
                 }
+
                 // Last chance, we must try to get it from SR
                 if (troncon == null && pos.getSystemeRepId() != null) {
                     SystemeReperage sr = session.getRepositoryForClass(SystemeReperage.class).get(pos.getSystemeRepId());
@@ -1244,6 +1253,15 @@ public class TronconUtils {
             possr.distanceEndBorne = Math.abs(possr.distanceEndBorne);
 
             return possr;
+        }
+
+        public Geometry getGeometry() {
+            Geometry geometry = pos.getGeometry();
+            if (geometry == null) {
+                geometry = buildGeometry(getTronconLinear(), pos, session.getRepositoryForClass(BorneDigue.class));
+                pos.setGeometry(geometry);
+            }
+            return geometry;
         }
     }
 

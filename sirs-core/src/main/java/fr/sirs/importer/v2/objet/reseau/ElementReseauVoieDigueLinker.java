@@ -16,6 +16,7 @@ import java.util.Iterator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static fr.sirs.importer.DbImporter.TableName.ELEMENT_RESEAU_VOIE_SUR_DIGUE;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -23,6 +24,7 @@ import static fr.sirs.importer.DbImporter.TableName.ELEMENT_RESEAU_VOIE_SUR_DIGU
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public abstract class ElementReseauVoieDigueLinker {
 
     private enum Columns {

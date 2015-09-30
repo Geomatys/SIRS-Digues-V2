@@ -45,27 +45,27 @@ public class PrestationMapper extends AbstractObjetMapper<Prestation> {
 
     @Override
     public void map(Row input, Prestation output) throws IllegalStateException, IOException, AccessDbImporterException {
-        final Integer marcheId = input.getInt(Columns.ID_MARCHE.name());
+        final Object marcheId = input.get(Columns.ID_MARCHE.name());
         if (marcheId != null) {
             output.setMarcheId(marcheImporter.getImportedId(marcheId));
         }
 
-        final Integer typePrestationId = input.getInt(Columns.ID_TYPE_PRESTATION.name());
+        final Object typePrestationId = input.get(Columns.ID_TYPE_PRESTATION.name());
         if (typePrestationId != null) {
             output.setTypePrestationId(typePrestationImporter.getImportedId(typePrestationId));
         }
 
-        final Integer typeCoteId = input.getInt(Columns.ID_TYPE_COTE.name());
+        final Object typeCoteId = input.get(Columns.ID_TYPE_COTE.name());
         if (typeCoteId != null) {
             output.setCoteId(typeCoteImporter.getImportedId(typeCoteId));
         }
 
-        final Integer typePositionId = input.getInt(Columns.ID_TYPE_POSITION.name());
+        final Object typePositionId = input.get(Columns.ID_TYPE_POSITION.name());
         if (typePositionId != null) {
             output.setPositionId(RefPositionImporter.getImportedId(typePositionId));
         }
 
-        final Integer typeSourceId = input.getInt(Columns.ID_SOURCE.name());
+        final Object typeSourceId = input.get(Columns.ID_SOURCE.name());
         if (typeSourceId != null) {
             output.setSourceId(RefSourceImporter.getImportedId(typeSourceId));
         }

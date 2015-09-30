@@ -9,11 +9,13 @@ import fr.sirs.core.model.PrZProfilLong;
 import fr.sirs.core.model.ProfilLong;
 import static fr.sirs.importer.DbImporter.TableName.PROFIL_EN_LONG_DZ;
 import fr.sirs.importer.v2.SimpleUpdater;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class PrZImporter extends SimpleUpdater<PrZProfilLong, ProfilLong> {
 
     private enum Columns {

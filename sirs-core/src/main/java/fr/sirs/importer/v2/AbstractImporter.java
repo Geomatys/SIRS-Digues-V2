@@ -24,10 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * An importer is suposed to retrive data from one and only one table of the
  * given database.
- *
- * TODO : replace {@link #getRowIdFieldName() } by a complex key object. Current
- * state prevent to import correctly data from join table, because returned key
- * is not unique, and indexing it result in data loss.
+ * Note : Type of computed output is not necessarily a CouchDB document. To allow
+ * user to post its data in this case, implementations of this class can wrap their
+ * output in a postable document by overriding method {@link #prepareToPost(java.lang.Object, com.healthmarketscience.jackcess.Row, fr.sirs.core.model.Element) }.
  *
  * @author Samuel Andrés (Geomatys)
  * @author Alexis Manin (Geomatys)
@@ -38,16 +37,19 @@ public abstract class AbstractImporter<T extends Element> {
     @Autowired
     protected SessionCore session;
 
+    @Autowired
+    protected ImportContext context;
+
     /**
      * Map which binds imported row ids to the ids of their version in output
      * database. If computing has not been performed yet, its value is null.
      */
-    protected Map<Integer, String> importedRows;
+    private Map<Object, String> importedRows;
 
-    protected final HashSet<Mapper<T>> mappers = new HashSet();
+    protected final HashSet<Mapper<T>> mappers = new HashSet<>();
+    protected final HashSet<ElementModifier<T>> modifiers = new HashSet<>();
 
-    @Autowired
-    protected ImportContext context;
+    protected Table table;
 
     protected AbstractImporter() {}
 
@@ -81,6 +83,7 @@ public abstract class AbstractImporter<T extends Element> {
     /**
      * A method which can be overrided to provide a specific treatment before
      * table import.
+     * @throws fr.sirs.importer.AccessDbImporterException If an unrecoverable error occurs.
      */
     protected void preCompute() throws AccessDbImporterException {}
 
@@ -89,6 +92,7 @@ public abstract class AbstractImporter<T extends Element> {
      */
     protected void postCompute() {
         mappers.clear();
+        modifiers.clear();
     }
 
     /**
@@ -102,15 +106,17 @@ public abstract class AbstractImporter<T extends Element> {
             return;
 
         //DEBUG
-        SirsCore.LOGGER.info("IMPORT OF " + getTableName());
-        SirsCore.LOGGER.info("PRIMARY KEY " + getRowIdFieldName());
+        SirsCore.LOGGER.info("\nIMPORT OF " + getTableName() + " by " + getClass().getCanonicalName() + ". PRIMARY KEY : " + getRowIdFieldName());
 
         preCompute();
 
-        final Table table = context.inputDb.getTable(getTableName());
+        table = context.inputDb.getTable(getTableName());
 
         mappers.clear();
         mappers.addAll(context.getCompatibleMappers(table, getElementClass()));
+
+        modifiers.clear();
+        modifiers.addAll(context.getCompatibleModifiers(table, getElementClass()));
 
         // In case we want to boost import with multi-threading.
         importedRows = new ConcurrentHashMap<>();
@@ -120,41 +126,49 @@ public abstract class AbstractImporter<T extends Element> {
          */
         try {
             final Iterator<Row> it = table.iterator();
-            while (it.hasNext()) {
-                final ConcurrentHashMap<Integer, T> imports = new ConcurrentHashMap<>();
-                final HashSet<Element> dataToPost = new HashSet<>();
+            int rowCount = table.getRowCount();
+            while (rowCount > 0) {
+                int bulkCount = Math.min(context.bulkLimit, rowCount);
+                rowCount -= bulkCount;
+                final HashMap<Object, T> imports = new HashMap<>(bulkCount);
+                final HashSet<Element> dataToPost = new HashSet<>(bulkCount);
 
                 while (it.hasNext() && imports.size() < context.bulkLimit) {
                     final Row row = it.next();
 
-                    // DEBUG
-                    final Integer rowId;
-                    try {
-                        rowId = row.getInt(getRowIdFieldName());
-                    } catch (ClassCastException e) {
-                        SirsCore.LOGGER.warning("CAST ERROR --> "+getRowIdFieldName());
-                        throw e;
-                    }
+                    final Object rowId = row.get(getRowIdFieldName());
+
                     if (rowId == null) {
-                        context.reportError(new ErrorReport(null, row, getTableName(), getRowIdFieldName(), null, null, "Cannot import row due to bad ID.", CorruptionLevel.ROW));
-                        continue;
+                        context.reportError(new ErrorReport(null, row, getTableName(), getRowIdFieldName(), null, null, "Imported row is not linkable due to null ID.", CorruptionLevel.RELATION));
                     }
+
                     // TODO : error management and report
-                    T output = getOrCreateElement(row);
+                    T output = createElement(row);
                     if (output == null) {
                         continue;
                     }
-                    output.setDesignation(rowId.toString());
+
+                    if (rowId != null) {
+                        output.setDesignation(rowId.toString());
+                    }
                     output = importRow(row, output);
 
                     final Element toPost = prepareToPost(rowId, row, output);
-                    if (toPost == null)
+                    if (toPost == null) {
                         continue;
+                    }
+
+                    // Once we prepared our element for posting, we can apply final modifications which might need all object context.
+                    for (final ElementModifier mod : modifiers) {
+                        mod.modify(output);
+                    }
 
                     dataToPost.add(toPost);
-                    imports.put(rowId, output);
-                }
 
+                    if (rowId != null) {
+                        imports.put(rowId, output);
+                    }
+                }
 
                 afterPost(
                         context.executeBulk(dataToPost),
@@ -168,7 +182,7 @@ public abstract class AbstractImporter<T extends Element> {
                  *
                  * IMPORTANT : NOT PUT IN AFTERPOST METHOD, TO ENSURE IMPLEMENTATIONS WILL DO IT.
                  */
-                for (final Map.Entry<Integer, T> entry : imports.entrySet()) {
+                for (final Map.Entry<Object, T> entry : imports.entrySet()) {
                     final String id = entry.getValue().getId();
                     if (id != null) {
                         importedRows.put(entry.getKey(), id);
@@ -177,6 +191,7 @@ public abstract class AbstractImporter<T extends Element> {
             }
         } finally {
             postCompute();
+            table = null;
         }
     }
 
@@ -189,8 +204,11 @@ public abstract class AbstractImporter<T extends Element> {
      * @param rowId Id of the object to return.
      * @return Id of the wanted object in output database, or null if we cannot
      * find it.
+     * @throws java.io.IOException If an error occurs while importing data.
+     * @throws fr.sirs.importer.AccessDbImporterException If an error occurs while importing data.
+     * @throws IllegalStateException If no document has been imported for given row id.
      */
-    public final String getImportedId(final Integer rowId) throws IOException, AccessDbImporterException {
+    public final String getImportedId(final Object rowId) throws IOException, AccessDbImporterException {
         synchronized (this) {
             if (importedRows == null) {
                 compute();
@@ -209,7 +227,7 @@ public abstract class AbstractImporter<T extends Element> {
      * @param input The row to import.
      * @return The object to import row into. If null, we skip row import.
      */
-    protected T getOrCreateElement(final Row input) {
+    protected T createElement(final Row input) {
         return ElementCreator.createAnonymValidElement(getElementClass());
     }
 
@@ -241,7 +259,7 @@ public abstract class AbstractImporter<T extends Element> {
      * @param output The object which has been filled with current row.
      * @return Pojo which must be sent as a complete document into CouchDB.
      */
-    protected Element prepareToPost(int rowId, Row row, T output) {
+    protected Element prepareToPost(Object rowId, Row row, T output) {
         return output;
     }
 
@@ -250,7 +268,7 @@ public abstract class AbstractImporter<T extends Element> {
      * @param posted The items (keys are their ids) successfully sent into CouchDb.
      * @param imports The items (keys are originating row ids) which have been imported from ms-access for this bulk.
      */
-    protected void afterPost(final Map<String, Element> posted, Map<Integer, T> imports) {}
+    protected void afterPost(final Map<String, Element> posted, Map<Object, T> imports) {}
 
     /*
      * DEBUG UTILITIES
@@ -277,12 +295,12 @@ public abstract class AbstractImporter<T extends Element> {
      */
     private List<String> getErroneousUsedFields() throws IOException {
         final List<String> erroneousUsedColumn = new ArrayList<>();
-        final Table table = context.inputDb.getTable(getTableName());
+        final Table tmpTable = context.inputDb.getTable(getTableName());
 
         // Check all used columns
         this.getUsedColumns().stream().forEach((usedColumnName) -> {
             boolean isPresent = false;
-            for (final Column column : table.getColumns()) {
+            for (final Column column : tmpTable.getColumns()) {
 
                 if (column.getName().equals(usedColumnName)) {
                     isPresent = true;

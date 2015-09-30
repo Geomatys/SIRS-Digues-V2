@@ -10,11 +10,13 @@ import fr.sirs.importer.v2.AbstractImporter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 public class EvenementHydrauliqueImporter extends AbstractImporter<EvenementHydraulique> {
 
     private AbstractImporter<RefEvenementHydraulique> typeEvenementHydrauliqueImporter;

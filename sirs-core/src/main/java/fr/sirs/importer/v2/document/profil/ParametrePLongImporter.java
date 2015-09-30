@@ -4,11 +4,13 @@ import fr.sirs.core.model.ParametreHydrauliqueProfilLong;
 import fr.sirs.core.model.ProfilLong;
 import static fr.sirs.importer.DbImporter.TableName.PROFIL_EN_LONG_EVT_HYDRAU;
 import fr.sirs.importer.v2.SimpleUpdater;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class ParametrePLongImporter extends SimpleUpdater<ParametreHydrauliqueProfilLong, ProfilLong> {
 
     private enum Columns {

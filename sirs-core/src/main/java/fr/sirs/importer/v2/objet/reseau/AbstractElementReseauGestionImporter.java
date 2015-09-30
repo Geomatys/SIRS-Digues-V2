@@ -38,22 +38,22 @@ public abstract class AbstractElementReseauGestionImporter<T extends PeriodeObje
     }
 
     @Override
-    protected ObjetReseau getDocument(int rowId, Row input, T output) {
-        final Integer reseauId;
+    protected ObjetReseau getDocument(Object rowId, Row input, T output) {
+        Integer reseauId = null;
         try {
             reseauId = input.getInt(Columns.ID_ELEMENT_RESEAU.name());
-            String importedId = reseauImporter.getImportedId(reseauId);
-            if (importedId == null) {
-                throw new IllegalArgumentException("No document found for "+Columns.ID_ELEMENT_RESEAU.name()+" "+reseauId);
-            }
+            final String importedId = reseauImporter.getImportedId(reseauId);
             final Element element = session.getElement(importedId).orElse(null);
             if (element instanceof ObjetReseau) {
                 return (ObjetReseau) element;
             } else {
-                throw new IllegalArgumentException("No document found for "+Columns.ID_ELEMENT_RESEAU.name()+" "+reseauId);
+                throw new IllegalArgumentException("No document found for " + Columns.ID_ELEMENT_RESEAU.name() + " " + reseauId);
             }
         } catch (IOException | AccessDbImporterException ex) {
-            throw new IllegalStateException("No document found for "+Columns.ID_ELEMENT_RESEAU.name(), ex);
+            throw new IllegalStateException("No document found for " + Columns.ID_ELEMENT_RESEAU.name(), ex);
+        } catch (IllegalStateException e) {
+            context.reportError(getTableName(), input, new IllegalArgumentException("No document found for " + Columns.ID_ELEMENT_RESEAU.name() + " " + reseauId));
+            return null;
         }
     }
 }

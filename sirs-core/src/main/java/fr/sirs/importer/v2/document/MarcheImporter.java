@@ -1,42 +1,33 @@
 package fr.sirs.importer.v2.document;
 
-import com.healthmarketscience.jackcess.Row;
-import fr.sirs.core.model.DocumentGrandeEchelle;
+import fr.sirs.core.model.Marche;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.v2.AbstractImporter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
-public class MarcheImporter extends AbstractImporter<DocumentGrandeEchelle> {
+@Component
+public class MarcheImporter extends AbstractImporter<Marche> {
 
     @Autowired
     DocTypeRegistry registry;
 
     @Override
-    protected Class<DocumentGrandeEchelle> getElementClass() {
-        return DocumentGrandeEchelle.class;
+    protected Class<Marche> getElementClass() {
+        return Marche.class;
     }
 
     @Override
     public String getTableName() {
-        return DbImporter.TableName.DOCUMENT.name();
+        return DbImporter.TableName.MARCHE.name();
     }
 
     @Override
     public String getRowIdFieldName() {
-        return "ID_DOC";
-    }
-
-    @Override
-    protected DocumentGrandeEchelle getOrCreateElement(Row input) {
-        final Class docType = registry.getDocType(input);
-        if (docType != null && DocumentGrandeEchelle.class.isAssignableFrom(docType)) {
-            return super.getOrCreateElement(input);
-        } else {
-            return null;
-        }
+        return "ID_MARCHE";
     }
 }

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class JournalRegistry {
 
-    private final HashMap<Integer, String> journaux = new HashMap<>();
+    private final HashMap<Object, String> journaux = new HashMap<>();
 
     @Autowired
     private JournalRegistry(final ImportContext context) throws IOException {
@@ -23,7 +23,7 @@ public class JournalRegistry {
         // TODO : error report on null value.
         while (iterator.hasNext()) {
             final Row row = iterator.next();
-            final Integer jId = row.getInt("ID_JOURNAL");
+            final Object jId = row.get("ID_JOURNAL");
             if (jId != null) {
                 final String jLabel = row.getString("NOM_JOURNAL");
                 if (jLabel != null) {
@@ -32,8 +32,8 @@ public class JournalRegistry {
             }
         }
     }
-    
-    public String getTitle(final Integer journalId) {
+
+    public String getTitle(final Object journalId) {
         return journaux.get(journalId);
     }
 }

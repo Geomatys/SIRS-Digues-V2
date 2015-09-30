@@ -41,7 +41,7 @@ public class ParamHydroPTraversMapper extends AbstractMapper<ParametreHydrauliqu
 
     @Override
     public void map(Row input, ParametreHydrauliqueProfilTravers output) throws IllegalStateException, IOException, AccessDbImporterException {
-        final Integer idHydro = input.getInt(Columns.ID_EVENEMENT_HYDRAU.toString());
+        final Object idHydro = input.get(Columns.ID_EVENEMENT_HYDRAU.toString());
         if (idHydro != null) {
             output.setEvenementHydroliqueId(hydroImporter.getImportedId(idHydro));
         }

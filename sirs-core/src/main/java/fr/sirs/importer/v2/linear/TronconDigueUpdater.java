@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Update CouchDB {@link TronconDigue} by adding id of their default
@@ -32,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class TronconDigueUpdater implements ExtraOperator {
 
     /**
@@ -61,10 +63,6 @@ public class TronconDigueUpdater implements ExtraOperator {
         return TronconDigue.class;
     }
 
-    public TronconDigueUpdater() {
-        ImportContext.getApplicationContext().getAutowireCapableBeanFactory().autowireBean(this);
-    }
-
     public String getTableName() {
         return DbImporter.TableName.TRONCON_GESTION_DIGUE.name();
     }
@@ -74,7 +72,7 @@ public class TronconDigueUpdater implements ExtraOperator {
     }
 
     protected void preCompute() throws AccessDbImporterException {
-        srImporter = context.importers.get(BorneDigue.class);
+        srImporter = context.importers.get(SystemeReperage.class);
         borneImporter = context.importers.get(BorneDigue.class);
 
         try {
@@ -111,7 +109,7 @@ public class TronconDigueUpdater implements ExtraOperator {
             output.setSystemeRepDefautId(srImporter.getImportedId(srid));
         }
 
-        final Integer tronconId = row.getInt(getRowIdFieldName());
+        final Object tronconId = row.get(getRowIdFieldName());
         if (tronconId == null) {
             throw new AccessDbImporterException("Troncon to update has no Id in origin database !");
         }
@@ -126,7 +124,7 @@ public class TronconDigueUpdater implements ExtraOperator {
     }
 
     private TronconDigue getElement(final Row input) {
-        final Integer rowId = input.getInt(masterImporter.getRowIdFieldName());
+        final Object rowId = input.get(masterImporter.getRowIdFieldName());
         if (rowId == null) {
             throw new IllegalStateException("Input has no valid ID.");
         }

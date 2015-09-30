@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @param <T> Target element type --> type pointed by the link.
  * @param <U> Holder element type. Type containing the link.
  */
-public abstract class JoinTableLinker<T extends Element, U extends Element> {
+public abstract class JoinTableLinker<T extends Element, U extends Element> implements Linker<T, U> {
 
     @Autowired
     protected ImportContext context;
@@ -83,6 +83,7 @@ public abstract class JoinTableLinker<T extends Element, U extends Element> {
     /**
      * @return Type of the object from which we'll pick the ID to refer to.
      */
+    @Override
     public final Class<T> getTargetClass() {
         return targetType;
     }
@@ -99,6 +100,7 @@ public abstract class JoinTableLinker<T extends Element, U extends Element> {
      * @return Type of the object which will contain ID of the object to point
      * to.
      */
+    @Override
     public final Class<U> getHolderClass() {
         return holderType;
     }
@@ -110,7 +112,7 @@ public abstract class JoinTableLinker<T extends Element, U extends Element> {
         return holderColumn;
     }
 
-    public void compute() throws AccessDbImporterException, IOException {
+    public void link() throws AccessDbImporterException, IOException {
         Iterator<Row> iterator = context.inputDb.getTable(tableName).iterator();
 
         final AbstractImporter<T> targetImporter = context.importers.get(targetType);
@@ -131,8 +133,8 @@ public abstract class JoinTableLinker<T extends Element, U extends Element> {
         final AbstractSIRSRepository<T> targetRepo;
         if (bidirectionalAffector != null) {
             targetRepo = session.getRepositoryForClass(targetType);
-            if (holderRepo == null) {
-                throw new AccessDbImporterException("No repository available to get/update objects of type " + holderType.getCanonicalName());
+            if (targetRepo == null) {
+                throw new AccessDbImporterException("No repository available to get/update objects of type " + targetType.getCanonicalName());
             }
         } else {
             targetRepo = null;
@@ -150,13 +152,17 @@ public abstract class JoinTableLinker<T extends Element, U extends Element> {
                 current = iterator.next();
 
                 // Those fields should be SQL join table keys, so they should never be null.
-                holderId = holderImporter.getImportedId(current.getInt(holderColumn));
-                targetId = targetImporter.getImportedId(current.getInt(targetColumn));
-                if (holderId == null) {
-                    context.reportError(new ErrorReport(null, current, tableName, holderColumn, null, null, "No imported object found for input Id.", CorruptionLevel.ROW));
+                try {
+                    holderId = holderImporter.getImportedId(current.get(holderColumn));
+                } catch (IllegalStateException e) {
+                    context.reportError(new ErrorReport(e, current, tableName, holderColumn, null, null, "No imported object found for input Id.", CorruptionLevel.ROW));
                     continue;
-                } else if (targetId == null) {
-                    context.reportError(new ErrorReport(null, current, tableName, targetColumn, null, null, "No imported object found for input Id.", CorruptionLevel.ROW));
+                }
+
+                try {
+                    targetId = targetImporter.getImportedId(current.get(targetColumn));
+                } catch (IllegalStateException e) {
+                    context.reportError(new ErrorReport(e, current, tableName, targetColumn, null, null, "No imported object found for input Id.", CorruptionLevel.ROW));
                     continue;
                 }
 

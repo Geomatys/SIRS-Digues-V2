@@ -9,11 +9,13 @@ import fr.sirs.core.model.LigneEau;
 import fr.sirs.core.model.MesureLigneEauXYZ;
 import static fr.sirs.importer.DbImporter.TableName.LIGNE_EAU_MESURES_XYZ;
 import fr.sirs.importer.v2.SimpleUpdater;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class MesureLigneEauXYZImporter extends SimpleUpdater<MesureLigneEauXYZ, LigneEau> {
 
     @Override

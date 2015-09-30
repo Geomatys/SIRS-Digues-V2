@@ -8,11 +8,13 @@ import fr.sirs.core.model.ObjetPhotographiable;
 import fr.sirs.importer.v2.AbstractImporter;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 public class ElementGeometrieImporter extends AbstractImporter<ObjetPhotographiable> {
 
     @Override
@@ -26,7 +28,7 @@ public class ElementGeometrieImporter extends AbstractImporter<ObjetPhotographia
     }
 
     @Override
-    protected ObjetPhotographiable getOrCreateElement(Row input) {
+    protected ObjetPhotographiable createElement(Row input) {
         final Class<? extends ObjetPhotographiable> classe;
                 // La colonne NOM_TABLE_EVT étant vide dans la table de l'Isère,
         // on gère la correspondance en dur en espérant que toutes les

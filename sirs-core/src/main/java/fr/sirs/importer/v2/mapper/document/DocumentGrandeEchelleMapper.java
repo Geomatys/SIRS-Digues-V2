@@ -47,7 +47,7 @@ public class DocumentGrandeEchelleMapper extends AbstractMapper<DocumentGrandeEc
             output.setReference_calque(ref);
         }
 
-        Integer typeId = input.getInt(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.name());
+        final Object typeId = input.get(Columns.ID_TYPE_DOCUMENT_A_GRANDE_ECHELLE.name());
         if (typeId != null) {
             String importedId = typeImporter.getImportedId(typeId);
             if (importedId == null) {

@@ -7,12 +7,11 @@ import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProfilTravers;
-import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.v2.AbstractImporter;
 import fr.sirs.importer.v2.document.DocTypeRegistry;
-import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Import all types of positioned documents referenced in DOCUMENT table. This
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Alexis Manin (Geomatys)
  * @author Samuel Andres (Geomatys)
  */
+@Component
 public class AbstractPositionDocumentImporter extends AbstractImporter<AbstractPositionDocument> {
 
     @Autowired
@@ -82,12 +82,7 @@ public class AbstractPositionDocumentImporter extends AbstractImporter<AbstractP
     }
 
     @Override
-    public AbstractPositionDocument importRow(Row row, AbstractPositionDocument output) throws IOException, AccessDbImporterException {
-        return super.importRow(row, output);
-    }
-
-    @Override
-    protected AbstractPositionDocument getOrCreateElement(Row input) {
+    protected AbstractPositionDocument createElement(Row input) {
         Integer docType = input.getInt(Columns.ID_TYPE_DOCUMENT.toString());
         if (docType == null) {
             throw new IllegalArgumentException("No valid document type in row "+input.getInt(getRowIdFieldName())+ " of table "+getTableName());

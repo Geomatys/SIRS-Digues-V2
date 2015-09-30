@@ -18,6 +18,7 @@ import java.util.Iterator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static fr.sirs.importer.DbImporter.TableName.ELEMENT_RESEAU_POINT_ACCES;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -25,6 +26,7 @@ import static fr.sirs.importer.DbImporter.TableName.ELEMENT_RESEAU_POINT_ACCES;
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public abstract class ElementReseauAccesLinker {
 
     private enum Columns {
@@ -71,7 +73,7 @@ public abstract class ElementReseauAccesLinker {
 
                 // Those fields should be SQL join table keys, so they should never be null.
                 ouvrageId = reseauImporter.getImportedId(current.getInt(Columns.ID_ELEMENT_RESEAU.name()));
-                reseauId = reseauImporter.getImportedId(current.getInt(Columns.ID_ELEMENT_RESEAU.name()));
+                reseauId = reseauImporter.getImportedId(current.getInt(Columns.ID_ELEMENT_RESEAU_POINT_ACCES.name()));
                 elementType = registry.getElementType(current);
                 if (ouvrageId == null) {
                     context.reportError(new ErrorReport(null, current, ELEMENT_RESEAU_POINT_ACCES.name(), Columns.ID_ELEMENT_RESEAU.name(), null, null, "No imported object found for input Id.", CorruptionLevel.ROW));

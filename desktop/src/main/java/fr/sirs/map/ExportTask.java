@@ -151,7 +151,7 @@ public class ExportTask extends Task<Boolean> {
 
             if(baseBean instanceof Positionable){
                 final Positionable pos = (Positionable) baseBean;
-                final TronconUtils.PosInfo info = new TronconUtils.PosInfo(pos,Injector.getSession());
+                final TronconUtils.PosInfo info = new TronconUtils.PosInfo(pos);
 
                 try{
                     //on calcul les informations au besoin

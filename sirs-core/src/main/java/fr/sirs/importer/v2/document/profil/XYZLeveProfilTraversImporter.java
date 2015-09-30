@@ -9,11 +9,13 @@ import fr.sirs.core.model.XYZLeveProfilTravers;
 import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.v2.SimpleUpdater;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class XYZLeveProfilTraversImporter extends SimpleUpdater<XYZLeveProfilTravers, LeveProfilTravers> {
 
     private enum Columns {

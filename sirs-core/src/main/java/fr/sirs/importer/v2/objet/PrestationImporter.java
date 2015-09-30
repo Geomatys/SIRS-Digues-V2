@@ -8,11 +8,13 @@ package fr.sirs.importer.v2.objet;
 import fr.sirs.core.model.Prestation;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.v2.AbstractImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class PrestationImporter extends AbstractImporter<Prestation> {
 
     @Override

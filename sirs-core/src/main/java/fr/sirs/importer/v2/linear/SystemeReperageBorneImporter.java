@@ -88,4 +88,18 @@ public class SystemeReperageBorneImporter extends SimpleUpdater<SystemeReperageB
     public String getTableName() {
         return BORNE_PAR_SYSTEME_REP.toString();
     }
+
+    @Override
+    protected void preCompute() throws AccessDbImporterException {
+        super.preCompute();
+        borneDigueImporter = context.importers.get(BorneDigue.class);
+    }
+
+    @Override
+    protected void postCompute() {
+        super.postCompute();
+        borneDigueImporter = null;
+    }
+
+
 }

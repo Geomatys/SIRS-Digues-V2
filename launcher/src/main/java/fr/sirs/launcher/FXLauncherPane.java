@@ -1,7 +1,5 @@
 package fr.sirs.launcher;
 
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.sun.javafx.PlatformUtil;
 import fr.sirs.AbstractRestartableStage;
 import fr.sirs.Loader;
@@ -17,13 +15,11 @@ import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.UtilisateurRepository;
-import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.plugins.PluginLoader;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
-import fr.sirs.importer.v2.ImportContext;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
 import fr.sirs.maj.PluginsDownloadManager;
@@ -93,7 +89,6 @@ import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.IdentifiedObjects;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
@@ -480,13 +475,12 @@ public class FXLauncherPane extends BorderPane {
 
         final String epsgCode = epsg;
         uiCreateButton.setDisable(true);
-        new Thread(() -> {
+        TaskManager.INSTANCE.submit("Création d'une base de données vide", () -> {
             try (ConfigurableApplicationContext applicationContext = localRegistry.connectToSirsDatabase(dbName, true, false, false)) {
                 SirsDBInfoRepository sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
                 sirsDBInfoRepository.setSRID(epsgCode);
-                final UtilisateurRepository utilisateurRepository = applicationContext.getBean(UtilisateurRepository.class);
 
-                createDefaultUsers(utilisateurRepository, uiCreateLogin.getText(), uiCreatePassword.getText());
+                applicationContext.getBean(Session.class).createUser(uiCreateLogin.getText(), uiCreatePassword.getText(), Role.ADMIN);
 
                 //aller au panneau principal
                 Platform.runLater(() -> {
@@ -508,16 +502,7 @@ public class FXLauncherPane extends BorderPane {
                     uiCreateButton.setDisable(false);
                 });
             }
-        }).start();
-    }
-
-    private void createDefaultUsers(final UtilisateurRepository utilisateurRepository, final String adminLogin, final String adminPassword) {
-
-        final Utilisateur administrateur = ElementCreator.createAnonymValidElement(Utilisateur.class);
-        administrateur.setLogin(adminLogin);
-        administrateur.setPassword(hexaMD5(adminPassword));
-        administrateur.setRole(Role.ADMIN);
-        utilisateurRepository.add(administrateur);
+        });
     }
 
     @FXML
@@ -555,7 +540,9 @@ public class FXLauncherPane extends BorderPane {
         final String epsgCode = epsg;
 
         uiImportButton.setDisable(true);
-        TaskManager.INSTANCE.submit("Import d'une base de données : "+dbName, () -> {
+        new Thread(() -> {
+            final File mainDbFile = new File(uiImportDBData.getText());
+            final File cartoDbFile = new File(uiImportDBCarto.getText());
             final ClassLoader scl = ClassLoader.getSystemClassLoader();
             if (scl instanceof PluginLoader) {
                 try {
@@ -566,38 +553,22 @@ public class FXLauncherPane extends BorderPane {
                     return;
                 }
             }
+            if (!mainDbFile.isFile()) {
+                throw new IllegalArgumentException("Le fichier de base de donnée suivant est illisible : " + mainDbFile.getAbsolutePath());
+            }
+
+            if (!cartoDbFile.isFile()) {
+                throw new IllegalArgumentException("Le fichier de base de donnée suivant est illisible : " + cartoDbFile.getAbsolutePath());
+            }
 
             try (ConfigurableApplicationContext appCtx = localRegistry.connectToSirsDatabase(dbName, true, false, false)) {
-                final File mainDbFile = new File(uiImportDBData.getText());
-                final File cartoDbFile = new File(uiImportDBCarto.getText());
-                SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
-                sirsDBInfoRepository.setSRID(epsgCode);
-
-                final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
-                createDefaultUsers(utilisateurRepository, uiImportLogin.getText(), uiImportPassword.getText());
-
-                try(final Database mainDb = DatabaseBuilder.open(mainDbFile);
-                    final Database cartoDb = DatabaseBuilder.open(cartoDbFile)) {
-
-                    appCtx.getBeanFactory().registerSingleton(ImportContext.MAIN_DB_QUALIFIER, mainDb);
-                    appCtx.getBeanFactory().registerSingleton(ImportContext.CARTO_DB_QUALIFIER, cartoDb);
-                    appCtx.getBeanFactory().registerSingleton(ImportContext.OUTPUT_CRS_QUALIFIER, uiImportCRS.crsProperty().get());
-
-                    // Open spring context for import.
-                    try (final ClassPathXmlApplicationContext importCtx = new ClassPathXmlApplicationContext(new String[]{IMPORTER_CONTEXT}, appCtx)) {
-                        importCtx.getBean(DbImporter.class).importation();
-                    }
-
-                } finally {
-                    appCtx.getBeanFactory().destroyBean(ImportContext.MAIN_DB_QUALIFIER);
-                    appCtx.getBeanFactory().destroyBean(ImportContext.CARTO_DB_QUALIFIER);
-                    appCtx.getBeanFactory().destroyBean(ImportContext.OUTPUT_CRS_QUALIFIER);
-                }
+                final DbImporter importer = new DbImporter(appCtx);
+                importer.importation(mainDbFile, cartoDbFile, uiImportCRS.crsProperty().get(), uiImportLogin.getText(), uiImportPassword.getText());
 
                 // Opérations ultérieures à l'importation à réaliser par les plugins.
                 // Should initialize most of couchdb views
-                for(final Plugin p : Plugins.getPlugins()) {
-                    try{
+                for (final Plugin p : Plugins.getPlugins()) {
+                    try {
                         p.afterImport();
                     } catch (Exception ex) {
                         LOGGER.log(Level.WARNING, ex.getMessage(), ex);
@@ -615,9 +586,9 @@ public class FXLauncherPane extends BorderPane {
                 GeotkFX.newExceptionDialog("Une erreur est survenue pendant la création de la base de données.", ex).showAndWait();
             } catch (DbAccessException ex) {
                 LOGGER.log(Level.WARNING, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
-                GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
-                        "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
-                        "puis relancer l'application.", ex).showAndWait();
+                GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. "
+                        + "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, "
+                        + "puis relancer l'application.", ex).showAndWait();
             } catch (RuntimeException ex) {
                 LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 GeotkFX.newExceptionDialog("Une erreur est survenue pendant l'import de la base.", ex).showAndWait();
@@ -1085,12 +1056,3 @@ public class FXLauncherPane extends BorderPane {
         }
 
         @Override
-        public void restart() {
-            try {
-                restartCore();
-            } catch (URISyntaxException | IOException ex) {
-                LOGGER.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
-            }
-        }
-    }
-}

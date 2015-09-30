@@ -22,6 +22,7 @@ import java.util.Iterator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static fr.sirs.importer.DbImporter.TableName.DESORDRE_ELEMENT_RESEAU;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -29,7 +30,8 @@ import static fr.sirs.importer.DbImporter.TableName.DESORDRE_ELEMENT_RESEAU;
  *
  * @author Alexis Manin (Geomatys)
  */
-public abstract class ElementReseauDesordreLinker {
+@Component
+public class ElementReseauDesordreLinker {
 
     private enum Columns {
         ID_DESORDRE,

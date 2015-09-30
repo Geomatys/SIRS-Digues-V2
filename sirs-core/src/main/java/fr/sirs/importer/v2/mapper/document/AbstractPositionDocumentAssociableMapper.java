@@ -44,13 +44,13 @@ public class AbstractPositionDocumentAssociableMapper extends AbstractMapper<Abs
     @Override
     public void map(Row input, AbstractPositionDocumentAssociable output) throws IllegalStateException, IOException, AccessDbImporterException {
         if (output instanceof PositionProfilTravers) {
-            Integer ptId = input.getInt(Columns.ID_PROFIL_EN_TRAVERS.name());
+            final Object ptId = input.get(Columns.ID_PROFIL_EN_TRAVERS.name());
             if (ptId != null) {
                 String importedId = context.importers.get(ProfilTravers.class).getImportedId(ptId);
                 output.setDocumentId(importedId);
             }
         } else if (output instanceof AbstractPositionDocumentAssociable) {
-            Integer docId = input.getInt(Columns.ID_DOC.name());
+            final Object docId = input.get(Columns.ID_DOC.name());
             if (docId != null) {
                 final Integer typeDoc = input.getInt(Columns.ID_TYPE_DOCUMENT.name());
                 if (typeDoc == null) {

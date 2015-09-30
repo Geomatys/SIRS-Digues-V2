@@ -68,7 +68,7 @@ public class ProfilLongMapper extends AbstractMapper<ProfilLong> {
             output.setDateLeve(context.convertData(date, LocalDate.class));
         }
 
-        final Integer orgId = input.getInt(Columns.ID_ORG_CREATEUR.toString());
+        final Object orgId = input.get(Columns.ID_ORG_CREATEUR.toString());
         if (orgId != null) {
             final String newOrgId = orgImporter.getImportedId(orgId);
             if (newOrgId == null) {

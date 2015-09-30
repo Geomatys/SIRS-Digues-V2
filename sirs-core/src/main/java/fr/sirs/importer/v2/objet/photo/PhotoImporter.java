@@ -74,14 +74,18 @@ public class PhotoImporter extends AbstractUpdater<Photo, Element> {
     }
 
     @Override
-    protected Element getDocument(int rowId, Row input, Photo output) {
+    protected Element getDocument(Object rowId, Row input, Photo output) {
         final Class clazz = registry.getElementType(input);
+        if (clazz == null) {
+            return null;
+        }
+
         final AbstractImporter masterImporter = context.importers.get(clazz);
         if (masterImporter == null) {
             throw new IllegalStateException("Cannot find any importer for type : " + clazz);
         }
 
-        final Integer accessDocId = input.getInt(PhotoColumns.ID_ELEMENT_SOUS_GROUPE.name());
+        final Object accessDocId = input.get(PhotoColumns.ID_ELEMENT_SOUS_GROUPE.name());
         if (accessDocId == null) {
             throw new IllegalStateException("Input has no valid ID in " + PhotoColumns.ID_ELEMENT_SOUS_GROUPE.name());
         }
@@ -92,26 +96,28 @@ public class PhotoImporter extends AbstractUpdater<Photo, Element> {
             try {
                 importedId = obsImporter.getImportedId(accessDocId);
             } catch (Exception ex) {
-                throw new IllegalStateException("No document found for observation " + accessDocId, ex);
+                //throw new IllegalStateException("No document found for observation " + accessDocId, ex);
+                context.reportError(getTableName(), input, new IllegalStateException("No document found for observation " + accessDocId, ex), null);
+                return null;
             }
             Optional<? extends Element> element = session.getElement(session.getPreviews().get(importedId));
             if (element.isPresent()) {
-                final Element desordre = element.get();
-                Element child = desordre.getChildById(importedId);
-                if (child instanceof AvecPhotos) {
-                    ((AvecPhotos) child).getPhotos().add(output);
+                final Element observation = element.get();
+                if (observation instanceof AvecPhotos) {
+                    ((AvecPhotos) observation).getPhotos().add(output);
                 }
-                return desordre;
+                return observation.getCouchDBDocument();
             } else {
-                // TODO : report error
-                throw new IllegalStateException("No document found for observation " + importedId);
+                context.reportError(getTableName(), input, new IllegalStateException("Observation imported from row " + accessDocId + " cannot be found (document id : " + importedId+")"));
+                return null;
             }
         } else {
             try {
                 final String docId = masterImporter.getImportedId(accessDocId);
                 return (Element) session.getRepositoryForClass(clazz).get(docId);
             } catch (Exception ex) {
-                throw new IllegalStateException("No imported object found for row " + rowId + " from table " + getTableName(), ex);
+                context.reportError(getTableName(), input, new IllegalStateException("No imported object found for row " + accessDocId, ex), null);
+                return null;
             }
         }
     }

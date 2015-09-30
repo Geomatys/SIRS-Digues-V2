@@ -1,17 +1,32 @@
 package fr.sirs.importer.v2.objet.reseau;
 
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.ObjetReseau;
+import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.v2.AbstractImporter;
+import fr.sirs.importer.v2.CorruptionLevel;
+import fr.sirs.importer.v2.ElementModifier;
+import fr.sirs.importer.v2.ErrorReport;
+import fr.sirs.importer.v2.MultipleSubTypes;
+import fr.sirs.importer.v2.mapper.Mapper;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
-public class ElementReseauImporter extends AbstractImporter<ObjetReseau> {
+@Component
+public class ElementReseauImporter extends AbstractImporter<ObjetReseau> implements MultipleSubTypes<ObjetReseau> {
+
+    private HashMap<Class, Collection<Mapper>> additionalMappers;
+    private HashMap<Class, Collection<ElementModifier>> additionalModifiers;
 
     private enum Columns {
         ID_ELEMENT_RESEAU,
@@ -78,6 +93,11 @@ public class ElementReseauImporter extends AbstractImporter<ObjetReseau> {
     private ReseauRegistry registry;
 
     @Override
+    public Collection<Class<ObjetReseau>> getSubTypes() {
+        return registry.allTypes();
+    }
+
+    @Override
     protected Class<ObjetReseau> getElementClass() {
         return ObjetReseau.class;
     }
@@ -93,18 +113,70 @@ public class ElementReseauImporter extends AbstractImporter<ObjetReseau> {
     }
 
     @Override
-    protected ObjetReseau getOrCreateElement(Row input) {
-        Integer type = input.getInt(Columns.ID_TYPE_ELEMENT_RESEAU.toString());
+    protected ObjetReseau createElement(Row input) {
+        final Object type = input.get(Columns.ID_TYPE_ELEMENT_RESEAU.toString());
         if (type == null) {
-            throw new IllegalArgumentException("No valid element type in row "+input.getInt(getRowIdFieldName())+ " of table "+getTableName());
+            context.reportError(new ErrorReport(null, input, getTableName(), Columns.ID_TYPE_ELEMENT_RESEAU.name(), null, null, "No wire type defined", CorruptionLevel.ROW));
         }
 
         // Find what type of element must be imported.
-        Class<ObjetReseau> clazz = registry.getElementType(type);
+        Class<ObjetReseau> clazz = registry.getElementType(input);
         if (clazz == null) {
-            throw new IllegalArgumentException("No valid element type in row "+input.getInt(getRowIdFieldName())+ " of table "+getTableName());
+            return null;
+        }
+
+        Collection<Mapper> tmpMappers = additionalMappers.get(clazz);
+        if (tmpMappers == null) {
+            tmpMappers = context.getCompatibleMappers(table, (Class) clazz);
+            tmpMappers.removeAll(mappers);
+            additionalMappers.put(clazz, tmpMappers);
+        }
+
+        Collection<ElementModifier> tmpModifiers = additionalModifiers.get(clazz);
+        if (tmpModifiers == null) {
+            tmpModifiers = context.getCompatibleModifiers(table, (Class) clazz);
+            tmpModifiers.removeAll(modifiers);
+            additionalModifiers.put(clazz, tmpModifiers);
         }
 
         return ElementCreator.createAnonymValidElement(clazz);
     }
+
+    @Override
+    public ObjetReseau importRow(Row row, ObjetReseau output) throws IOException, AccessDbImporterException {
+        output = super.importRow(row, output);
+        for (final Mapper m : additionalMappers.get(output.getClass())) {
+            m.map(row, output);
+        }
+        return output;
+    }
+
+    @Override
+    protected Element prepareToPost(Object rowId, Row row, ObjetReseau output) {
+        final Element e = super.prepareToPost(rowId, row, output);
+        final Collection<ElementModifier> tmpModifiers = additionalModifiers.get(e.getClass());
+        if (tmpModifiers != null) {
+            for (final ElementModifier mod : tmpModifiers) {
+                mod.modify(e);
+            }
+        }
+        return e;
+    }
+
+
+    @Override
+    protected void postCompute() {
+        super.postCompute();
+        additionalMappers = null;
+        additionalModifiers = null;
+    }
+
+    @Override
+    protected void preCompute() throws AccessDbImporterException {
+        super.preCompute();
+        additionalMappers = new HashMap<>();
+        additionalModifiers = new HashMap<>();
+    }
+
+
 }

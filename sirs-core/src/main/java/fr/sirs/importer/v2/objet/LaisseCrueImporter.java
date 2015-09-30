@@ -10,11 +10,14 @@ import fr.sirs.core.model.LaisseCrue;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.v2.AbstractLinker;
+import java.util.Collection;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class LaisseCrueImporter extends AbstractLinker<LaisseCrue, EvenementHydraulique> {
 
     @Override
@@ -33,8 +36,8 @@ public class LaisseCrueImporter extends AbstractLinker<LaisseCrue, EvenementHydr
     }
 
     @Override
-    public void bind(EvenementHydraulique holder, String targetId) throws AccessDbImporterException {
-        holder.getLaisseCrueIds().add(targetId);
+    public void bind(EvenementHydraulique holder, Collection<String> targetIds) throws AccessDbImporterException {
+        holder.getLaisseCrueIds().addAll(targetIds);
     }
 
     @Override

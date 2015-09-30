@@ -18,6 +18,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -53,6 +55,8 @@ import org.opengis.util.FactoryException;
 
 
 public class SirsCore {
+
+    public static final String PASSWORD_ENCRYPT_ALGO="MD5";
 
     public static final String INFO_DOCUMENT_ID = "$sirs";
     public static final Logger LOGGER = Logging.getLogger("fr.sirs");
@@ -337,6 +341,27 @@ public class SirsCore {
                 infoStage.showAndWait();
             else
                 infoStage.show();
+        }
+    }
+
+        public static String hexaMD5(final String toEncrypt){
+        StringBuilder sb = new StringBuilder();
+        try {
+            byte[] encrypted = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO).digest(toEncrypt.getBytes());
+            for (byte b : encrypted) {
+                sb.append(String.format("%02X", b));
+            }
+        } catch (NoSuchAlgorithmException ex) {
+            throw new SirsCoreRuntimeException("Cannot hash input password !", ex);
+        }
+        return sb.toString();
+    }
+
+    public static String binaryMD5(final String toEncrypt){
+        try {
+            return new String(MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO).digest(toEncrypt.getBytes()));
+        } catch (NoSuchAlgorithmException ex) {
+            throw new SirsCoreRuntimeException("Cannot hash input password !", ex);
         }
     }
 

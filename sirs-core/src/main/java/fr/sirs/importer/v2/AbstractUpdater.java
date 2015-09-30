@@ -32,19 +32,20 @@ public abstract class AbstractUpdater<T extends Element, U extends Element> exte
      * @param output The object in which row has been imported.
      * @return A couchDB document which will contain output element created from row.
      */
-    protected abstract U getDocument(final int rowId, final Row input, T output);
+    protected abstract U getDocument(final Object rowId, final Row input, T output);
 
     @Override
-    protected void afterPost(Map<String, Element> posted, Map<Integer, T> imports) {
+    protected void afterPost(Map<String, Element> posted, Map<Object, T> imports) {
         super.afterPost(posted, imports);
         // TODO : keep reference of posted document ids ?
     }
 
     @Override
-    protected U prepareToPost(int rowId, Row row, T output) {
+    protected U prepareToPost(Object rowId, Row row, T output) {
         // Once a new element is computed, we add it in its parent.
-        final U document = getDocument(rowId, row, null);
-        put(document, output);
+        final U document = getDocument(rowId, row, output);
+        if (document != null)
+            put(document, output);
         return document;
     }
 }

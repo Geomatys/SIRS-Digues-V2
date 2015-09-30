@@ -3,11 +3,13 @@ package fr.sirs.importer.v2.objet.reseau;
 import fr.sirs.core.model.GestionObjet;
 import fr.sirs.core.model.ObjetReseau;
 import static fr.sirs.importer.DbImporter.TableName.ELEMENT_RESEAU_GESTIONNAIRE;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class ElementReseauGestionImporter extends AbstractElementReseauGestionImporter<GestionObjet> {
 
     private enum Columns {

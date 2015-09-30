@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -102,10 +103,12 @@ public class ImportContext implements ApplicationContextAware {
     public final MathTransform geoTransform;
 
     public final ConcurrentHashMap<Class, AbstractImporter> importers = new ConcurrentHashMap<>();
-    public final ConcurrentHashMap<Class, HashSet<DocumentModifier>> modifiers = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<Class, HashSet<ElementModifier>> modifiers = new ConcurrentHashMap<>();
     //public final ConcurrentHashMap<Class, HashSet<Updater>> updaters = new ConcurrentHashMap<>();
 
     public final ConcurrentHashMap<Class, HashSet<MapperSpi>> mappers = new ConcurrentHashMap<>();
+
+    public final ArrayList<Linker> linkers = new ArrayList<>();
 
     /**
      * recommended limit size for bulk updates.
@@ -161,21 +164,19 @@ public class ImportContext implements ApplicationContextAware {
 
         final Collection<AbstractImporter> importerList = appCtx.getBeansOfType(AbstractImporter.class).values();
         final Collection<MapperSpi> mapperList = appCtx.getBeansOfType(MapperSpi.class).values();
-        final Collection<DocumentModifier> modifierList = appCtx.getBeansOfType(DocumentModifier.class).values();
+        final Collection<ElementModifier> modifierList = appCtx.getBeansOfType(ElementModifier.class).values();
+        linkers.addAll(appCtx.getBeansOfType(Linker.class).values());
 
         /*
          * Register importers. Should get one per output type.
          */
         for (final AbstractImporter importer : importerList) {
-            AbstractImporter deleted = importers.put(importer.getElementClass(), importer);
-            if (deleted != null) {
-                final StringBuilder builder = new StringBuilder("Two importers declared for type ")
-                        .append(importer.getElementClass().getCanonicalName())
-                        .append(" :\n")
-                        .append(deleted.getClass().getCanonicalName())
-                        .append('\n')
-                        .append(importer.getClass().getCanonicalName());
-                throw new IllegalStateException(builder.toString());
+            registerImporter(importer.getElementClass(), importer);
+            if (importer instanceof MultipleSubTypes) {
+                Collection<Class> subTypes = ((MultipleSubTypes)importer).getSubTypes();
+                for (final Class subtype : subTypes) {
+                    registerImporter(subtype, importer);
+                }
             }
         }
 
@@ -191,16 +192,27 @@ public class ImportContext implements ApplicationContextAware {
             mapperSet.add(spi);
         }
 
-        for (final DocumentModifier modifier : modifierList) {
-            HashSet<DocumentModifier> modifierSet = modifiers.get(modifier.getDocumentClass());
+        for (final ElementModifier modifier : modifierList) {
+            HashSet<ElementModifier> modifierSet = modifiers.get(modifier.getDocumentClass());
             if (modifierSet == null) {
                 modifierSet = new HashSet<>();
                 modifiers.put(modifier.getDocumentClass(), modifierSet);
             }
             modifierSet.add(modifier);
         }
+    }
 
-        // TODO : linkers
+    private final void registerImporter(final Class key, final AbstractImporter importer) {
+        AbstractImporter deleted = importers.put(key, importer);
+        if (deleted != null) {
+            final StringBuilder builder = new StringBuilder("Two importers declared for type ")
+                    .append(key.getCanonicalName())
+                    .append(" :\n")
+                    .append(deleted.getClass().getCanonicalName())
+                    .append('\n')
+                    .append(importer.getClass().getCanonicalName());
+            throw new IllegalStateException(builder.toString());
+        }
     }
 
     public <T> T convertData(final Object input, final Class<T> outputClass) {
@@ -213,6 +225,7 @@ public class ImportContext implements ApplicationContextAware {
                 return (T) toLocalDateTime((Date) input);
             }
         }
+
         return ObjectConverters.convert(input, outputClass);
     }
 
@@ -239,14 +252,14 @@ public class ImportContext implements ApplicationContextAware {
             toSet.setPositionFin(GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(points[2], points[3])));
 
         } else if (hasGeoStart) {
-            final double[] points = new double[]{endX, endY};
+            final double[] points = new double[]{startX, startY};
             geoTransform.transform(points, 0, points, 0, 1);
-            toSet.setPositionFin(GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(points[0], points[1])));
+            toSet.setPositionDebut(GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(points[0], points[1])));
 
         } else if (hasGeoEnd) {
             final double[] points = new double[]{endX, endY};
             geoTransform.transform(points, 0, points, 0, 1);
-            toSet.setPositionDebut(GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(points[0], points[1])));
+            toSet.setPositionFin(GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(points[0], points[1])));
         }
     }
 
@@ -268,11 +281,11 @@ public class ImportContext implements ApplicationContextAware {
     public void reportError(final ErrorReport report) {
         ArgumentChecks.ensureNonNull("Error report", report);
         errors.add(report);
-        if (report.error == null) {
-            SirsCore.LOGGER.log(Level.FINE, "New error submitted !");
-        } else {
-            SirsCore.LOGGER.log(Level.FINE, "New error submitted !", report.error);
-        }
+        logError(report);
+    }
+
+    private void logError(final ErrorReport report) {
+        SirsCore.LOGGER.log(Level.WARNING, new ErrorMessenger(report));
     }
 
     /**
@@ -294,7 +307,7 @@ public class ImportContext implements ApplicationContextAware {
         }
 
         // Try to perform bulk, then analyze result to find errors.
-        List<DocumentOperationResult> bulkResult = outputDb.executeBulk(new HashSet(toUpdate));
+        List<DocumentOperationResult> bulkResult = outputDb.executeBulk(toUpdate);
         HashMap<String, Element> ids = buildIdMap(toUpdate);
         if (bulkResult != null && !bulkResult.isEmpty()) {
             for (final DocumentOperationResult opResult : bulkResult) {
@@ -431,6 +444,16 @@ public class ImportContext implements ApplicationContextAware {
         return result;
     }
 
+    public <T extends Element> Set<ElementModifier<T>> getCompatibleModifiers(final Table source, final Class<T> destination) {
+        final HashSet<ElementModifier<T>> result = new HashSet<>();
+        for (final Map.Entry<Class, HashSet<ElementModifier>> entry : modifiers.entrySet()) {
+            if (entry.getKey().isAssignableFrom(destination)) {
+                result.addAll((Collection)entry.getValue());
+            }
+        }
+        return result;
+    }
+
     /**
      * Return all importers which work on objects inheriting given class.
      * @param sourceClass Pojo type to retrieve importers for.
@@ -469,5 +492,48 @@ public class ImportContext implements ApplicationContextAware {
 
     public static ApplicationContext getApplicationContext() {
         return appCtx;
+    }
+
+    private static class ErrorMessenger implements Supplier<String> {
+
+        final ErrorReport report;
+
+        public ErrorMessenger(ErrorReport report) {
+            this.report = report;
+        }
+
+        @Override
+        public String get() {
+            return new StringBuilder("\n------- ERROR -------\n")
+                    .append(valueOrUndefined(report.customErrorMsg))
+                    .append('\n')
+                    .append("Caused by : ")
+                    .append(valueOrUndefined(report.error))
+                    .append('\n')
+                    .append("Corruption level : ")
+                    .append(valueOrUndefined(report.corruptionLevel))
+                    .append('\n')
+                    .append("Table : ")
+                    .append(valueOrUndefined(report.sourceTableName))
+                    .append('\n')
+                    .append("Column : ")
+                    .append(valueOrUndefined(report.sourceColumnName))
+                    .append('\n')
+                    .append("Input row : ")
+                    .append(valueOrUndefined(report.sourceData))
+                    .append('\n')
+                    .append("Output document : ")
+                    .append(valueOrUndefined(report.target))
+                    .append('\n')
+                    .append("Target field : ")
+                    .append(valueOrUndefined(report.targetFieldName))
+                    .append('\n')
+                    .toString();
+        }
+
+        private static Object valueOrUndefined(final Object input) {
+            return input == null? "Undefined" : input;
+        }
+
     }
 }

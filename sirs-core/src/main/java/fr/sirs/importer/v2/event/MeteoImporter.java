@@ -11,11 +11,13 @@ import fr.sirs.importer.v2.SimpleUpdater;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 public class MeteoImporter extends SimpleUpdater<Meteo, EvenementHydraulique> {
 
     private AbstractImporter<RefOrientationVent> typeOrientationVentImporter;

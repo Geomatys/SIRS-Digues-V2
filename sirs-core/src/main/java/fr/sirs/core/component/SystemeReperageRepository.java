@@ -268,7 +268,7 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
             if (oldSR.getId().equals(p.getSystemeRepId())) {
                 if (newSR != null) {
                     // We must update linear information.
-                    final TronconUtils.PosInfo pInfo = new TronconUtils.PosInfo(p, troncon, tronconSegments, session);
+                    final TronconUtils.PosInfo pInfo = new TronconUtils.PosInfo(p, troncon, tronconSegments);
                     TronconUtils.PosSR forSR = pInfo.getForSR(newSR);
                     p.setSystemeRepId(newSR.getId());
                     p.setBorneDebutId(forSR.borneStartId);
@@ -285,7 +285,7 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
                      * attributes.
                      */
                     if (p.getPositionDebut() == null && p.getPositionFin() == null) {
-                        final TronconUtils.PosInfo pInfo = new TronconUtils.PosInfo(p, troncon, tronconSegments, session);
+                        final TronconUtils.PosInfo pInfo = new TronconUtils.PosInfo(p, troncon, tronconSegments);
                         p.setPositionDebut(pInfo.getGeoPointStart());
                         p.setPositionFin(pInfo.getGeoPointEnd());
                     }

@@ -16,6 +16,7 @@ import java.util.Iterator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static fr.sirs.importer.DbImporter.TableName.PRESTATION_DOCUMENT;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -23,7 +24,8 @@ import static fr.sirs.importer.DbImporter.TableName.PRESTATION_DOCUMENT;
  *
  * @author Alexis Manin (Geomatys)
  */
-public abstract class PrestationDocumentLinker {
+@Component
+public class PrestationDocumentLinker {
 
     private enum Columns {
 

@@ -7,7 +7,6 @@ import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.valueOf;
-import fr.sirs.importer.v2.ErrorReport;
 import fr.sirs.importer.v2.ImportContext;
 import java.io.IOException;
 import java.util.HashMap;
@@ -24,7 +23,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DocTypeRegistry {
 
-    private final HashMap<Integer, Class> docTypes = new HashMap<>(4);
+    private final HashMap<Object, Class> docTypes = new HashMap<>(4);
 
     private enum Columns {
 
@@ -72,12 +71,12 @@ public class DocTypeRegistry {
                 }
 
                 if (clazz == null) {
-                    context.reportError(new ErrorReport(null, row, DbImporter.TableName.TYPE_DOCUMENT.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized document type", null));
+                    //context.reportError(new ErrorReport(null, row, DbImporter.TableName.TYPE_DOCUMENT.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized document type", null));
                 } else {
-                    docTypes.put(row.getInt(Columns.ID_TYPE_DOCUMENT.name()), clazz);
+                    docTypes.put(row.get(Columns.ID_TYPE_DOCUMENT.name()), clazz);
                 }
             } catch (IllegalArgumentException e) {
-                context.reportError(new ErrorReport(null, row, DbImporter.TableName.TYPE_DOCUMENT.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized document type", null));
+                //context.reportError(new ErrorReport(null, row, DbImporter.TableName.TYPE_DOCUMENT.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized document type", null));
             }
         }
     }
@@ -87,12 +86,12 @@ public class DocTypeRegistry {
      * @return document class associated to given document type ID, or null, if
      * given Id is unknown.
      */
-    public Class getDocType(final Integer typeId) {
+    public Class getDocType(final Object typeId) {
         return docTypes.get(typeId);
     }
 
     public Class getDocType(final Row input) {
-        Integer docTypeId = input.getInt(Columns.ID_TYPE_DOCUMENT.toString());
+        final Object docTypeId = input.get(Columns.ID_TYPE_DOCUMENT.toString());
         if (docTypeId != null) {
             return getDocType(docTypeId);
         }

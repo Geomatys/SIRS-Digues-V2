@@ -1115,6 +1115,7 @@
     <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefPrestation" eSuperTypes="#//ReferenceType">
     <eAnnotations source="couchDBDocument">
@@ -1278,6 +1279,7 @@
     <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefDevers" eSuperTypes="#//ReferenceType">
     <eAnnotations source="couchDBDocument">
@@ -1289,6 +1291,7 @@
     <eAnnotations source="couchDBDocument">
       <details key="document" value="true"/>
     </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeTroncon" eSuperTypes="#//ReferenceType">
     <eAnnotations source="couchDBDocument">

@@ -41,7 +41,7 @@ public class ArticleJournalMapper extends AbstractMapper<ArticleJournal> {
 
     @Override
     public void map(Row input, ArticleJournal output) throws IllegalStateException, IOException, AccessDbImporterException {
-        final Integer jId = input.getInt(Columns.ID_JOURNAL.toString());
+        final Object jId = input.get(Columns.ID_JOURNAL.toString());
         if (jId != null) {
             String title = registry.getTitle(jId);
             if (title != null) {

@@ -46,7 +46,7 @@ public class LaisseCrueMapper extends AbstractObjetMapper<LaisseCrue> {
 
     @Override
     public void map(Row input, LaisseCrue output) throws IllegalStateException, IOException, AccessDbImporterException {
-        final Integer hydroId = input.getInt(Columns.ID_EVENEMENT_HYDRAU.name());
+        final Object hydroId = input.get(Columns.ID_EVENEMENT_HYDRAU.name());
         if (hydroId != null) {
             output.setEvenementHydrauliqueId(hydroImporter.getImportedId(hydroId));
         }
@@ -56,17 +56,17 @@ public class LaisseCrueMapper extends AbstractObjetMapper<LaisseCrue> {
             output.setReferenceHauteurId(typeHauteurImporter.getImportedId(typeHauteur));
         }
 
-        Integer contactId = input.getInt(Columns.ID_INTERV_OBSERVATEUR.name());
+        final Object contactId = input.get(Columns.ID_INTERV_OBSERVATEUR.name());
         if (contactId != null) {
             output.setObservateurId(contactImporter.getImportedId(contactId));
         }
 
-        Integer typePositionId = input.getInt(Columns.POSITION.name());
+        final Object typePositionId = input.get(Columns.POSITION.name());
         if (typePositionId != null) {
             output.setPositionLaisse(RefPositionImporter.getImportedId(typePositionId));
         }
 
-        Integer typeSourceId = input.getInt(Columns.ID_SOURCE.name());
+        final Object typeSourceId = input.get(Columns.ID_SOURCE.name());
         if (typeSourceId != null) {
             output.setSourceId(RefSourceImporter.getImportedId(typeSourceId));
         }

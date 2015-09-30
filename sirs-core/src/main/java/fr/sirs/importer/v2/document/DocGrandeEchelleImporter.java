@@ -5,11 +5,13 @@ import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.v2.AbstractImporter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class DocGrandeEchelleImporter extends AbstractImporter<DocumentGrandeEchelle> {
 
     @Autowired
@@ -31,10 +33,10 @@ public class DocGrandeEchelleImporter extends AbstractImporter<DocumentGrandeEch
     }
 
     @Override
-    protected DocumentGrandeEchelle getOrCreateElement(Row input) {
+    protected DocumentGrandeEchelle createElement(Row input) {
         final Class docType = registry.getDocType(input);
         if (docType != null && DocumentGrandeEchelle.class.isAssignableFrom(docType)) {
-            return super.getOrCreateElement(input);
+            return super.createElement(input);
         } else {
             return null;
         }

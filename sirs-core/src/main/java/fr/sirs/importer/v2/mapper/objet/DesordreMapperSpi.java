@@ -56,5 +56,4 @@ public class DesordreMapperSpi extends GenericMapperSpi<Desordre> {
     public Map<String, String> getBindings() {
         return bindings;
     }
-
 }

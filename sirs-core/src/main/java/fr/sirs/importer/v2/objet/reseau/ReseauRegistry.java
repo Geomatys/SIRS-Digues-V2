@@ -17,9 +17,9 @@ import fr.sirs.core.model.VoieDigue;
 import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.TYPE_ELEMENT_RESEAU;
 import static fr.sirs.importer.DbImporter.TableName.valueOf;
-import fr.sirs.importer.v2.ErrorReport;
 import fr.sirs.importer.v2.ImportContext;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class ReseauRegistry {
         NOM_TABLE_EVT
     };
 
-    private final HashMap<Integer, Class<ObjetReseau>> types = new HashMap<>(4);
+    private final HashMap<Object, Class<ObjetReseau>> types = new HashMap<>(4);
 
     @Autowired
     private ReseauRegistry(ImportContext context) throws IOException {
@@ -90,12 +90,12 @@ public class ReseauRegistry {
                 }
 
                 if (clazz == null) {
-                    context.reportError(new ErrorReport(null, row, TYPE_ELEMENT_RESEAU.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized element type", null));
+                    //context.reportError(new ErrorReport(null, row, TYPE_ELEMENT_RESEAU.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized wire type", null));
                 } else {
-                    types.put(row.getInt(Columns.ID_TYPE_ELEMENT_RESEAU.name()), clazz);
+                    types.put(row.get(Columns.ID_TYPE_ELEMENT_RESEAU.name()), clazz);
                 }
             } catch (IllegalArgumentException e) {
-                context.reportError(new ErrorReport(null, row, TYPE_ELEMENT_RESEAU.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized element type", null));
+                //context.reportError(new ErrorReport(null, row, TYPE_ELEMENT_RESEAU.name(), Columns.NOM_TABLE_EVT.name(), null, null, "Unrecognized wire type", null));
             }
         }
     }
@@ -105,15 +105,19 @@ public class ReseauRegistry {
      * @return document class associated to given document type ID, or null, if
      * given Id is unknown.
      */
-    public Class<ObjetReseau> getElementType(final Integer typeId) {
+    public Class<ObjetReseau> getElementType(final Object typeId) {
         return types.get(typeId);
     }
 
     public Class<ObjetReseau> getElementType(final Row input) {
-        Integer typeId = input.getInt(Columns.ID_TYPE_ELEMENT_RESEAU.name());
+        final Object typeId = input.get(Columns.ID_TYPE_ELEMENT_RESEAU.name());
         if (typeId != null) {
             return getElementType(typeId);
         }
         return null;
+    }
+
+    public Collection<Class<ObjetReseau>> allTypes() {
+        return types.values();
     }
 }

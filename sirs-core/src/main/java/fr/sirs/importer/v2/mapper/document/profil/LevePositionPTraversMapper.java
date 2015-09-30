@@ -39,7 +39,7 @@ public class LevePositionPTraversMapper extends AbstractMapper<LevePositionProfi
 
     @Override
     public void map(Row input, LevePositionProfilTravers output) throws IllegalStateException, IOException, AccessDbImporterException {
-        Integer leveId = input.getInt(Columns.ID_PROFIL_EN_TRAVERS_LEVE.name());
+        final Object leveId = input.get(Columns.ID_PROFIL_EN_TRAVERS_LEVE.name());
         if (leveId == null) {
             throw new AccessDbImporterException("No ID set for foreign key "+Columns.ID_PROFIL_EN_TRAVERS_LEVE.name() + "in table "+table.getName());
         }

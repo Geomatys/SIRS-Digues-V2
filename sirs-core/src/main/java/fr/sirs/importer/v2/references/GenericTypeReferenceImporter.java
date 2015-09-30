@@ -1,8 +1,10 @@
 package fr.sirs.importer.v2.references;
 
 import com.healthmarketscience.jackcess.Column;
+import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.importer.AccessDbImporterException;
@@ -13,6 +15,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import javax.annotation.PostConstruct;
 
 /**
@@ -47,17 +50,32 @@ public abstract class GenericTypeReferenceImporter<T extends ReferenceType> exte
         try {
             table = context.inputDb.getTable(getTableName());
         } catch (IOException ex) {
-            throw new SirsCoreRuntimeException("Cannot create any importer for a reference type !");
+            throw new SirsCoreRuntimeException("Cannot create any importer for a reference type !", ex);
+        }
+
+        try {
+            List<? extends Index.Column> primaryKey = table.getPrimaryKeyIndex().getColumns();
+            if (!primaryKey.isEmpty()) {
+                columns[0] = primaryKey.get(0).getName();
+            }
+        } catch (IllegalArgumentException e) {
+            SirsCore.LOGGER.log(Level.FINE, "No primary key defined for reference table " + table.getName(), e);
         }
 
         String name;
         String start;
+        String fallbackId = null;
         for (final Column col : table.getColumns()) {
             name = col.getName();
             start = name.substring(0, name.indexOf('_')).toUpperCase();
             switch (start) {
                 case ID_PREFIX:
-                    columns[0] = name;
+                    if (columns[0] != null)
+                        break;
+                    if (name.equals(ID_PREFIX+'_'+getTableName()))
+                        columns[0] = name;
+                    else
+                        fallbackId = name;
                     break;
                 case LIBELLE_PREFIX:
                     columns[1] = name;
@@ -66,6 +84,13 @@ public abstract class GenericTypeReferenceImporter<T extends ReferenceType> exte
                     columns[2] = name;
                     break;
             }
+        }
+
+        if (columns[0] == null) {
+            if (fallbackId != null)
+                columns[0] = fallbackId;
+            else
+                throw new IllegalStateException("Not any id column found for table "+getTableName());
         }
         columns[3] = DATE_COLUMN;
     }
@@ -108,7 +133,7 @@ public abstract class GenericTypeReferenceImporter<T extends ReferenceType> exte
 
     @Override
     public T importRow(Row row, T output) throws IOException, AccessDbImporterException {
-        final Integer refId = row.getInt(columns[0]);
+        final Object refId = row.get(columns[0]);
 
         try {
             setId.invoke(output, output.getClass().getSimpleName() + ":" + refId);

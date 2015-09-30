@@ -21,8 +21,6 @@ import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.List;
@@ -200,8 +198,6 @@ public final class SIRS extends SirsCore {
     public static final String PREVIEW_BUNDLE_KEY_LIBELLE = "libelle";
     public static final String PREVIEW_BUNDLE_KEY_DESIGNATION = "designation";
     public static final String PREVIEW_BUNDLE_KEY_AUTHOR = "author";
-
-    public static final String PASSWORD_ENCRYPT_ALGO="MD5";
 
     // Méthodes utilisées pour les références
     public static final String REFERENCE_GET_ID = "getId";
@@ -408,29 +404,6 @@ public final class SIRS extends SirsCore {
         comboBox.getSelectionModel().select(current);
         ComboBoxCompletion.autocomplete(comboBox);
     }
-
-    public static String hexaMD5(final String toEncrypt){
-        StringBuilder sb = new StringBuilder();
-        try {
-            byte[] encrypted = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO).digest(toEncrypt.getBytes());
-            for (byte b : encrypted) {
-                sb.append(String.format("%02X", b));
-            }
-        } catch (NoSuchAlgorithmException ex) {
-            SIRS.LOGGER.log(Level.SEVERE, null, ex);
-        }
-        return sb.toString();
-    }
-
-    public static String binaryMD5(final String toEncrypt){
-        try {
-            return new String(MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO).digest(toEncrypt.getBytes()));
-        } catch (NoSuchAlgorithmException ex) {
-            SIRS.LOGGER.log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
-
 
     /**
      * Convert byte number given in parameter in a human readable string. It tries

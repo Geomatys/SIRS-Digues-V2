@@ -9,11 +9,13 @@ import fr.sirs.core.model.XYZProfilLong;
 import fr.sirs.core.model.ProfilLong;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.v2.SimpleUpdater;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class XYZProfilLongImporter extends SimpleUpdater<XYZProfilLong, ProfilLong> {
 
     private enum Columns {

@@ -16,17 +16,17 @@ import java.util.logging.Level;
 import javafx.beans.binding.DoubleBinding;
 
 /**
- * 
+ *
  * Utilitary bindings for pojotable autocomputable colums (to import points).
  *
  * @author Samuel Andrés (Geomatys)
  */
 public class PojoTablePointBindings {
-    
+
     /**
      * An abstract binding to compute something aboute a point.
-     * 
-     * @param <T> 
+     *
+     * @param <T>
      */
     public static abstract class PointBinding<T extends PointZ> extends DoubleBinding {
 
@@ -39,12 +39,12 @@ public class PojoTablePointBindings {
 
     /**
      * A binding to compute the point distance from an origin point.
-     * 
-     * Both points are XYZ points. 
-     * 
+     *
+     * Both points are XYZ points.
+     *
      * Attepted return:
-     * The distance is computed using the euclidian distance. 
-     * 
+     * The distance is computed using the euclidian distance.
+     *
      * Other possible return:
      * If the binding is unable to compute the distance, then it returns 0..
      */
@@ -74,15 +74,15 @@ public class PojoTablePointBindings {
 
     /**
      * A binding to compute the point "distance" (PR) on a "Positionable" entity.
-     * 
-     * The point is an XYZ point. 
-     * 
+     *
+     * The point is an XYZ point.
+     *
      * Attempted return:
      * The PR is computed using the default SR of the linear entity (tronçon)
-     * the positionable is associated on. The positionable entity needs to be 
-     * associated on a linear entity (tronçon) having a geometry and, this last 
+     * the positionable is associated on. The positionable entity needs to be
+     * associated on a linear entity (tronçon) having a geometry and, this last
      * one must have a default SR to compute the PR of the point.
-     * 
+     *
      * Other possible returns:
      * If the binding cannot compute the PR, it returns 0..
      */
@@ -92,7 +92,7 @@ public class PojoTablePointBindings {
 
         public PRXYZBinding(final PointXYZ pointLeve, final Positionable positionable){
             super(pointLeve);
-            posInfo = new TronconUtils.PosInfo(positionable, Injector.getSession());
+            posInfo = new TronconUtils.PosInfo(positionable);
             super.bind(pointLeve.xProperty(), pointLeve.yProperty());
         }
 
@@ -133,23 +133,23 @@ public class PojoTablePointBindings {
     /**
      * A binding to compute the point "distance" (PR) on a "Positionable" entity
      * which is a PrZPointImporter.
-     * 
+     *
      * The point is a PointDZ, which have a "distance" (PR).
-     * 
+     *
      * A PrZPointImporter is a kind of objects able to specify the SR in wich
-     * the original "distance" (PR) of the point is given. 
-     * 
+     * the original "distance" (PR) of the point is given.
+     *
      * Attempted return:
      * The PR is computed using the default SR of the linear entity (tronçon)
-     * the positionable is associated on. The positionable entity needs to be 
-     * associated on a linear entity (tronçon) having a geometry and, this last 
+     * the positionable is associated on. The positionable entity needs to be
+     * associated on a linear entity (tronçon) having a geometry and, this last
      * one must have a default SR to compute the PR of the point.
-     * 
+     *
      * Other possible returns:
      * If the point is null (must never happen), it returns 0..
-     * Otherwise, if the binding cannot compute the PR in the new SR, it 
+     * Otherwise, if the binding cannot compute the PR in the new SR, it
      * returns the PR in the old SR.
-     * 
+     *
      * @param <P>
      */
     public static class PRZBinding<P extends Positionable & PrZPointImporter> extends PointBinding<PointDZ> {
@@ -161,7 +161,7 @@ public class PojoTablePointBindings {
             super(point);
             if(pointImporter instanceof Positionable){
                 this.pointImporter = pointImporter;
-                posInfo = new TronconUtils.PosInfo(pointImporter, Injector.getSession());
+                posInfo = new TronconUtils.PosInfo(pointImporter);
                 super.bind(point.dProperty(), pointImporter.systemeRepDzIdProperty());
             }
             else throw new UnsupportedOperationException(pointImporter.toString()+"("+pointImporter.getClass().getName()+") must be "+Positionable.class.getName());
@@ -211,5 +211,5 @@ public class PojoTablePointBindings {
             }
         }
     }
-    
+
 }

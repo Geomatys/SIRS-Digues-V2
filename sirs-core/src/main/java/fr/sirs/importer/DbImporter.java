@@ -2,16 +2,20 @@ package fr.sirs.importer;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
-import fr.sirs.core.component.DatabaseRegistry;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.component.SirsDBInfoRepository;
-import fr.sirs.core.component.UtilisateurRepository;
+import fr.sirs.core.model.Role;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.v2.AbstractImporter;
 import fr.sirs.importer.v2.ImportContext;
+import fr.sirs.importer.v2.Linker;
+import fr.sirs.importer.v2.linear.TronconDigueUpdater;
 import fr.sirs.util.ImportParameters;
 import java.io.File;
 import java.io.IOException;
 import org.apache.sis.metadata.iso.citation.Citations;
 import org.apache.sis.referencing.IdentifiedObjects;
+import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 import org.opengis.metadata.Identifier;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -29,6 +33,8 @@ public class DbImporter {
     public static final String cleanNullString(String string) {
         return (NULL_STRING_VALUE.equals(string) || string == null) ? "" : string;
     }
+
+    private final ConfigurableApplicationContext databaseContext;
 
     public enum TableName {
 
@@ -369,40 +375,59 @@ public class DbImporter {
 //     Selections
     }
 
-    public static void importation(
+    /**
+     * Prepare to import data in database pointed by given application context.
+     *
+     * @param dbContext The context of the database to fill. Cannot be null.
+     */
+    public DbImporter(final ConfigurableApplicationContext dbContext) {
+        ArgumentChecks.ensureNonNull("Output database context", dbContext);
+        databaseContext = dbContext;
+    }
+
+    public void importation(
             final File mainAccessDbFile,
             final File cartoAccessDbFile,
-            final String outputDbName,
             final CoordinateReferenceSystem outputCRS,
-            final String newUserLogin,
-            final String newUserPwd)
+            final String newAdminLogin,
+            final String newAdminPwd)
             throws IOException, AccessDbImporterException {
 
-        try (final ConfigurableApplicationContext appCtx = new DatabaseRegistry().connectToSirsDatabase(outputDbName, true, false, false)) {
-            SirsDBInfoRepository sirsDBInfoRepository = appCtx.getBean(SirsDBInfoRepository.class);
-            final Identifier crsId = IdentifiedObjects.getIdentifier(outputCRS, Citations.EPSG);
-            sirsDBInfoRepository.setSRID(crsId.getCodeSpace()+':'+crsId.getCode());
+        SirsDBInfoRepository sirsDBInfoRepository = databaseContext.getBean(SirsDBInfoRepository.class);
+        final Identifier crsId = IdentifiedObjects.getIdentifier(outputCRS, Citations.EPSG);
+        sirsDBInfoRepository.setSRID(crsId.getCodeSpace() + ':' + crsId.getCode());
 
-            if (newUserLogin != null) {
-                final UtilisateurRepository utilisateurRepository = appCtx.getBean(UtilisateurRepository.class);
-                createDefaultUsers(utilisateurRepository, newUserLogin, newUserPwd);
-            }
+        if (newAdminLogin != null) {
+            databaseContext.getBean(SessionCore.class).createUser(newAdminLogin, newAdminPwd, Role.ADMIN);
+        }
 
-            try (final Database mainDb = DatabaseBuilder.open(mainAccessDbFile);
-                    final Database cartoDb = DatabaseBuilder.open(cartoAccessDbFile)) {
+        try (final Database mainDb = DatabaseBuilder.open(mainAccessDbFile);
+                final Database cartoDb = DatabaseBuilder.open(cartoAccessDbFile)) {
 
-                final ImportParameters params = new ImportParameters(mainDb, cartoDb, appCtx.getBean(CouchDbConnector.class), outputCRS);
-                appCtx.getBeanFactory().registerSingleton(ImportParameters.class.getCanonicalName(), params);
+            final ImportParameters params = new ImportParameters(mainDb, cartoDb, databaseContext.getBean(CouchDbConnector.class), outputCRS);
+            databaseContext.getBeanFactory().registerSingleton(ImportParameters.class.getCanonicalName(), params);
 
-                // Open spring context for import.
-                try (final ClassPathXmlApplicationContext importCtx = new ClassPathXmlApplicationContext(new String[]{"classpath:/fr/sirs/spring/importer-context.xml"}, appCtx)) {
-                    final ImportContext context = importCtx.getBean(ImportContext.class);
-                    for (final AbstractImporter importer : context.importers.values()) {
-                        importer.compute();
-                    }
-                } finally {
-                    appCtx.getBeanFactory().destroyBean(params);
+            // Open spring context for import.
+            try (final ClassPathXmlApplicationContext importCtx = new ClassPathXmlApplicationContext(new String[]{"classpath:/fr/sirs/spring/importer-context.xml"}, databaseContext)) {
+                final ImportContext context = importCtx.getBean(ImportContext.class);
+
+                /*
+                 * We have to import entire linear referencing environment first
+                 * if we want to be able to compute object geometries before they're
+                 * posted.
+                 */
+                context.importers.get(TronconDigue.class).compute();
+                importCtx.getBean(TronconDigueUpdater.class).compute();
+
+                for (final AbstractImporter importer : context.importers.values()) {
+                    importer.compute();
                 }
+
+                for (final Linker l : context.linkers) {
+                    l.link();
+                }
+            } finally {
+                databaseContext.getBeanFactory().destroyBean(params);
             }
         }
     }

@@ -5,11 +5,14 @@ import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.v2.AbstractLinker;
+import java.util.Collection;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class LeveProfilTraversImporter extends AbstractLinker<LeveProfilTravers, ProfilTravers> {
 
     @Override
@@ -18,8 +21,8 @@ public class LeveProfilTraversImporter extends AbstractLinker<LeveProfilTravers,
     }
 
     @Override
-    public void bind(ProfilTravers holder, String targetId) throws AccessDbImporterException {
-        holder.getLeveIds().add(targetId);
+    public void bind(ProfilTravers holder, Collection<String> targetIds) throws AccessDbImporterException {
+        holder.getLeveIds().addAll(targetIds);
     }
 
     @Override

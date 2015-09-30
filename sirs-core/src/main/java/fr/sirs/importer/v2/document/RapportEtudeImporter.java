@@ -3,11 +3,13 @@ package fr.sirs.importer.v2.document;
 import fr.sirs.core.model.RapportEtude;
 import static fr.sirs.importer.DbImporter.TableName.RAPPORT_ETUDE;
 import fr.sirs.importer.v2.AbstractImporter;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
+@Component
 public class RapportEtudeImporter extends AbstractImporter<RapportEtude> {
 
     private enum Columns {

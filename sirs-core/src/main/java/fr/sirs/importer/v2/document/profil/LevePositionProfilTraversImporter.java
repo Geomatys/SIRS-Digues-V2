@@ -5,16 +5,19 @@ import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.PROFIL_EN_TRAVERS_TRONCON;
 import fr.sirs.importer.v2.AbstractLinker;
+import java.util.Collection;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class LevePositionProfilTraversImporter extends AbstractLinker<LevePositionProfilTravers, PositionProfilTravers> {
 
     @Override
-    public void bind(PositionProfilTravers holder, String targetId) throws AccessDbImporterException {
-        holder.getLevePositionIds().add(targetId);
+    public void bind(PositionProfilTravers holder, Collection<String> targetIds) throws AccessDbImporterException {
+        holder.getLevePositionIds().addAll(targetIds);
     }
 
     @Override

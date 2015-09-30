@@ -4,11 +4,13 @@ import fr.sirs.core.model.LigneEau;
 import fr.sirs.core.model.MesureLigneEauPrZ;
 import static fr.sirs.importer.DbImporter.TableName.LIGNE_EAU_MESURES_PRZ;
 import fr.sirs.importer.v2.SimpleUpdater;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class MesureLigneEauPrZImporter extends SimpleUpdater<MesureLigneEauPrZ, LigneEau> {
 
     @Override

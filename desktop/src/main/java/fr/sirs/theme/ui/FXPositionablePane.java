@@ -133,7 +133,7 @@ public class FXPositionablePane extends BorderPane {
                 }
             }
         });
-        
+
 
         // Update SR-PR information
         final ChangeListener<Geometry> geomListener = new ChangeListener<Geometry>() {
@@ -216,7 +216,7 @@ public class FXPositionablePane extends BorderPane {
 
         if(sr!=null && pos.getGeometry()!=null){
             final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr);
-            final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(pos, troncon, segments, Injector.getSession());
+            final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(pos, troncon, segments);
 
             final Point startPoint = posInfo.getGeoPointStart();
             final Point endPoint = posInfo.getGeoPointEnd();
@@ -264,7 +264,7 @@ public class FXPositionablePane extends BorderPane {
     public void preSave() {
 
     }
-    
+
     /**
      * TODO : check null pointer and computing
      *
@@ -294,7 +294,7 @@ public class FXPositionablePane extends BorderPane {
         }
 
         final LinearReferencing.SegmentInfo[] defaultSegments = getSourceLinear(defaultSr);
-        final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(pos, troncon, defaultSegments, Injector.getSession());
+        final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(pos, troncon, defaultSegments);
 
         Point startPoint = posInfo.getGeoPointStart();
         Point endPoint = posInfo.getGeoPointEnd();
