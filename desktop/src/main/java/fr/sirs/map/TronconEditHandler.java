@@ -13,7 +13,6 @@ import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefRive;
@@ -28,7 +27,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,13 +67,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display.VisitFilter;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -135,7 +131,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
     private final Session session;
 
     private Id selectionFilter;
-    
+
     // overriden variable by init();
     protected String layerName;
     protected MutableStyle style;
@@ -145,8 +141,8 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
     protected Class parentClass;
     protected String parentLabel;
     protected boolean showRive;
-    
-    
+
+
     protected void init() {
         this.layerName = CorePlugin.TRONCON_LAYER_NAME;
         this.tronconClass = TronconDigue.class;
@@ -161,17 +157,17 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         this.showRive = true;
         this.parentLabel = "à la digue";
     }
-    
-    
+
+
     /**
      * Constructor called directly by sub-classes
-     * @param map 
+     * @param map
      */
     public TronconEditHandler(final FXMap map) {
         super();
         init();
         mouseInputListener = new MouseListen(typeName, tronconClass);
-        
+
         session = Injector.getSession();
         tronconProperty.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
             // IL FAUT ÉGALEMENT VÉRIFIER LES AUTRE OBJETS "CONTENUS" : POSITIONS DE DOCUMENTS, PHOTOS, PROPRIETAIRES ET GARDIENS
@@ -231,7 +227,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                 //TODO : activate back graduation after Geotk milestone MC0044
                 tronconLayer.setSelectionStyle(style);
                 updateGeometry();
-                
+
                 layer.setSelectable(true);
                 tronconLayer.addItemListener(this);
             }
@@ -293,7 +289,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             final boolean maleGender, final Class parentClass,
             final boolean showRive, final String parentLabel) {
         final Session session = Injector.getBean(Session.class);
-        
+
         final ComboBox<Preview> parentChoice = new ComboBox<>(FXCollections.observableList(session.getPreviews().getByClass(parentClass)));
         final ComboBox<RefRive> rives = new ComboBox<>(FXCollections.observableList(session.getRepositoryForClass(RefRive.class).getAll()));
 
@@ -362,33 +358,6 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         final BorderPane main = new BorderPane(bp);
         main.setBottom(babar);
 
-        // Find all registered implementations of linear objects.
-        Collection<AbstractSIRSRepository> tdRepositories = session.getRepositoriesForClass(tronconClass);
-        final SimpleObjectProperty<AbstractSIRSRepository> chosenType = new SimpleObjectProperty<>();
-        if (tdRepositories.size() > 1) {
-            final ComboBox typeBox = new ComboBox();
-            typeBox.setItems(FXCollections.observableArrayList(tdRepositories));
-            typeBox.setConverter(new StringConverter<AbstractSIRSRepository>() {
-                @Override
-                public String toString(AbstractSIRSRepository object) {
-                    return LabelMapper.get(object.getModelClass()).mapClassName();
-                }
-
-                @Override
-                public AbstractSIRSRepository fromString(String string) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-            });
-
-            HBox top = new HBox(new Label("Type de " + typeName + " : "), typeBox);
-            main.setTop(top);
-            chosenType.bind(typeBox.valueProperty());
-        } else if (tdRepositories.size() == 1) {
-            chosenType.set(tdRepositories.iterator().next());
-        } else {
-            throw new IllegalStateException("Aucun type de " + typeName + " disponible !");
-        }
-
         dialog.setScene(new Scene(main));
         dialog.showAndWait();
 
@@ -407,7 +376,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                     }
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException ex) {
                     SIRS.LOGGER.log(Level.WARNING, null, ex);
-                } 
+                }
             }
             final RefRive rive = rives.getValue();
             if (rive != null) {
@@ -461,10 +430,10 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         private double startY;
         private double diffX;
         private double diffY;
-        
+
         private final String typeName;
         private final Class tronconClass;
-        
+
 
         public MouseListen(String typeName, Class<? extends TronconDigue> tronconClass) {
             super(TronconEditHandler.this);
@@ -607,7 +576,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                         });
                         popup.getItems().add(item);
                     }
-                    
+
                     final String prefix = maleGender ? "le " : "la ";
 
                     if (editGeometry.geometry != null) {
@@ -617,7 +586,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                             if (!popup.getItems().isEmpty()) {
                                 popup.getItems().add(new SeparatorMenuItem());
                             }
-                            final String title    = maleGender ? "Inverser le tracé du " + typeName : "Inverser le tracé de la " + typeName; 
+                            final String title    = maleGender ? "Inverser le tracé du " + typeName : "Inverser le tracé de la " + typeName;
                             final MenuItem invert = new MenuItem(title);
                             invert.setOnAction((ActionEvent ae) -> {
                                 // HACK : On est forcé de sauvegarder le tronçon pour mettre à jour le SR élémentaire.
