@@ -39,7 +39,7 @@
                                     <TextField fx:id="uiStatutJuridiqueTextField" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                                     <Label text="Raison sociale" GridPane.rowIndex="1" />
                                     <Label text="Téléphone" GridPane.rowIndex="3" />
-                                    <TextField fx:id="faxOrgTextField" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                    <TextField fx:id="uifaxOrgTextField" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                                     <TextField fx:id="uiTelTextField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                     <Label text="Fax" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="3">
                                        <GridPane.margin>

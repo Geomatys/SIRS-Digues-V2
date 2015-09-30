@@ -27,6 +27,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
     
     @FXML private TextField uiRaisonSocialeTextField;
     @FXML private TextField uiStatutJuridiqueTextField;
+    @FXML private TextField uifaxOrgTextField;
     @FXML private TextField uiTelTextField;
     @FXML private TextField uiEmailTextField;
     @FXML private TextField uiAdresseTextField;
@@ -67,6 +68,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         if (oldValue != null) {
             uiRaisonSocialeTextField.textProperty().unbindBidirectional(oldValue.nomProperty());
             uiStatutJuridiqueTextField.textProperty().unbindBidirectional(oldValue.statutJuridiqueProperty());
+            uifaxOrgTextField.textProperty().unbindBidirectional(oldValue.faxProperty());
             uiTelTextField.textProperty().unbindBidirectional(oldValue.telephoneProperty());
             uiEmailTextField.textProperty().unbindBidirectional(oldValue.emailProperty());
             uiAdresseTextField.textProperty().unbindBidirectional(oldValue.adresseProperty());
@@ -83,6 +85,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         
         uiRaisonSocialeTextField.textProperty().bindBidirectional(organisme.nomProperty());
         uiStatutJuridiqueTextField.textProperty().bindBidirectional(organisme.statutJuridiqueProperty());
+        uifaxOrgTextField.textProperty().bindBidirectional(organisme.faxProperty());
         uiTelTextField.textProperty().bindBidirectional(organisme.telephoneProperty());
         uiEmailTextField.textProperty().bindBidirectional(organisme.emailProperty());
         uiAdresseTextField.textProperty().bindBidirectional(organisme.adresseProperty());
