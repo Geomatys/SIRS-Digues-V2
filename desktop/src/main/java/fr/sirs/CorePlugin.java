@@ -301,11 +301,11 @@ public class CorePlugin extends Plugin {
             //troncons
             final BeanStore tronconStore = new BeanStore(suppliers.get(TronconDigue.class));
             sirsGroup.items().addAll(buildLayers(tronconStore,TRONCON_LAYER_NAME,createTronconStyle(),createTronconSelectionStyle(false),true));
-            
+
             //bornes
             final BeanStore borneStore = new BeanStore(suppliers.get(BorneDigue.class));
             sirsGroup.items().addAll(buildLayers(borneStore,BORNE_LAYER_NAME,createBorneStyle(),createBorneSelectionStyle(),true));
-            
+
             //structures
             final BeanStore structStore = new BeanStore(
                     suppliers.get(Crete.class),
@@ -322,7 +322,7 @@ public class CorePlugin extends Plugin {
             structLayer.items().addAll( buildLayers(structStore, nameMap, colors, createDefaultSelectionStyle(),false));
             structLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(structLayer);
-            
+
             // Franc-bords
             final BeanStore fbStore = new BeanStore(
                     suppliers.get(LargeurFrancBord.class));
@@ -331,7 +331,7 @@ public class CorePlugin extends Plugin {
             fbLayer.items().addAll( buildLayers(fbStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             fbLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(fbLayer);
-            
+
             // Réseaux de voirie
             final BeanStore rvStore = new BeanStore(
                     suppliers.get(VoieAcces.class),
@@ -344,7 +344,7 @@ public class CorePlugin extends Plugin {
             rvLayer.items().addAll( buildLayers(rvStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             rvLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(rvLayer);
-            
+
             // Réseaux et ouvrages
             final BeanStore roStore = new BeanStore(
                     suppliers.get(StationPompage.class),
@@ -360,7 +360,7 @@ public class CorePlugin extends Plugin {
             roLayer.items().addAll( buildLayers(roStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             roLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(roLayer);
-            
+
             // Désordres
             final BeanStore desordreStore = new BeanStore(suppliers.get(Desordre.class));
             final MapItem desordresLayer = MapBuilder.createItem();
@@ -368,7 +368,7 @@ public class CorePlugin extends Plugin {
             desordresLayer.items().addAll( buildLayers(desordreStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             desordresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(desordresLayer);
-            
+
             // Prestations
             final BeanStore prestaStore = new BeanStore(suppliers.get(Prestation.class));
             final MapItem prestaLayer = MapBuilder.createItem();
@@ -376,7 +376,7 @@ public class CorePlugin extends Plugin {
             prestaLayer.items().addAll( buildLayers(prestaStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             prestaLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(prestaLayer);
-                        
+
             // Mesures d'évènements
             final BeanStore mesuresStore = new BeanStore(
                     suppliers.get(LaisseCrue.class),
@@ -387,7 +387,7 @@ public class CorePlugin extends Plugin {
             mesuresLayer.items().addAll( buildLayers(mesuresStore, nameMap, colors, createDefaultSelectionStyle(),false) );
             mesuresLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(mesuresLayer);
-                        
+
             // Positionnement des documents
             final BeanStore documentsStore = new BeanStore(
                     suppliers.get(PositionDocument.class),
@@ -398,7 +398,7 @@ public class CorePlugin extends Plugin {
             documentsLayer.items().addAll(buildLayers(documentsStore, mapDesTypesDeDocs, nameMap, colors, createDefaultSelectionStyle(),false) );
             documentsLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(documentsLayer);
-            
+
             // Proprietes et gardes
             final BeanStore periodesLocaliseesTroncon = new BeanStore(
                     suppliers.get(ProprieteTroncon.class),
@@ -408,7 +408,7 @@ public class CorePlugin extends Plugin {
             periodesLocaliseesLayer.items().addAll(buildLayers(periodesLocaliseesTroncon, nameMap, colors, createDefaultSelectionStyle(), false));
             periodesLocaliseesLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             sirsGroup.items().add(periodesLocaliseesLayer);
-            
+
             // Emprises communales
             //final BeanStore communesStore = new BeanStore(suppliers.get(CommuneTroncon.class));
 
@@ -679,7 +679,7 @@ public class CorePlugin extends Plugin {
     }
 
     public static MutableStyle createTronconSelectionStyle(boolean graduation) throws URISyntaxException{
-        final Stroke stroke1 = SF.stroke(SF.literal(Color.GREEN),LITERAL_ONE_FLOAT,FF.literal(7),
+        final Stroke stroke1 = SF.stroke(SF.literal(Color.GREEN),LITERAL_ONE_FLOAT,FF.literal(13),
                 STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);
@@ -812,7 +812,7 @@ public class CorePlugin extends Plugin {
 
     public static MutableStyle createDefaultSelectionStyle(){
         // Stroke to use for lines and point perimeter
-        final Stroke stroke = SF.stroke(SF.literal(Color.GREEN),LITERAL_ONE_FLOAT,FF.literal(7),
+        final Stroke stroke = SF.stroke(SF.literal(Color.GREEN),LITERAL_ONE_FLOAT,FF.literal(13),
                 STROKE_JOIN_BEVEL, STROKE_CAP_BUTT, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke,LITERAL_ONE_FLOAT);
