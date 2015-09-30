@@ -194,9 +194,9 @@ public class PojoTable extends BorderPane {
     protected final BooleanProperty openEditorOnNewProperty = new SimpleBooleanProperty(true);
     /**
      * Créer un nouvel objet à l'ajout.
-     * 
+     *
      * Si cette propriété contient "vrai", l'action sur le bouton d'ajout sera
-     * de créer de nouvelles instances ajoutées dans le tableau. Si elle 
+     * de créer de nouvelles instances ajoutées dans le tableau. Si elle
      * contient "faux", l'action sur le bouton d'ajout sera de proposer l'ajout
      * de liens vers des objets préexistants.
      */
@@ -422,7 +422,6 @@ public class PojoTable extends BorderPane {
         uiSearch.getStyleClass().add(BUTTON_STYLE);
         uiSearch.setOnAction((ActionEvent event) -> {searchText();});
         uiSearch.getStyleClass().add("label-header");
-        uiSearch.setTooltip(new Tooltip("Rechercher un terme dans la table"));
         uiSearch.disableProperty().bind(searchableProperty.not());
 
         final Label uiTitle = new Label(title==null? labelMapper.mapClassName() : title);
@@ -512,20 +511,17 @@ public class PojoTable extends BorderPane {
         uiCurrent.setOnAction(this::goTo);
 
         uiPrevious.getStyleClass().add(BUTTON_STYLE);
-        uiPrevious.setTooltip(new Tooltip("Fiche précédente."));
         uiPrevious.setOnAction((ActionEvent event) -> {
             uiTable.getSelectionModel().selectPrevious();
         });
 
         uiNext.getStyleClass().add(BUTTON_STYLE);
-        uiNext.setTooltip(new Tooltip("Fiche suivante."));
         uiNext.setOnAction((ActionEvent event) -> {
             uiTable.getSelectionModel().selectNext();
         });
         navigationToolbar.visibleProperty().bind(uiFicheMode.selectedProperty());
 
         uiFicheMode.getStyleClass().add(BUTTON_STYLE);
-        uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
 
         // Update counter when we change selected element.
         final ChangeListener<Number> selectedIndexListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
@@ -548,7 +544,6 @@ public class PojoTable extends BorderPane {
         uiImport.disableProperty().bind(editableProperty.not());
         uiImport.visibleProperty().bind(importPointProperty);
         uiImport.managedProperty().bind(importPointProperty);
-        uiImport.setTooltip(new Tooltip("Importer des points"));
         uiImport.setOnAction(event -> {
             final FXAbstractImportPointLeve importCoord;
             if(PointXYZ.class.isAssignableFrom(pojoClass)) importCoord = new FXImportXYZ(PojoTable.this);
@@ -566,7 +561,6 @@ public class PojoTable extends BorderPane {
         });
 
         uiExport.getStyleClass().add(BUTTON_STYLE);
-        uiExport.setTooltip(new Tooltip("Sauvegarder en CSV"));
         uiExport.disableProperty().bind(Bindings.isNull(uiTable.getSelectionModel().selectedItemProperty()));
         uiExport.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -639,6 +633,28 @@ public class PojoTable extends BorderPane {
         topPane = new BorderPane(notifier, titleAndFilterBox, searchEditionToolbar, filterContent, navigationToolbar);
         setTop(topPane);
 
+        /*
+         * TOOLTIPS
+         */
+        uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches"));
+        uiSearch.setTooltip(new Tooltip("Rechercher un terme dans la table"));
+        uiImport.setTooltip(new Tooltip("Importer des points"));
+        uiExport.setTooltip(new Tooltip("Sauvegarder en CSV"));
+        uiPrevious.setTooltip(new Tooltip("Fiche précédente"));
+        uiNext.setTooltip(new Tooltip("Fiche suivante"));
+        uiRefresh.setTooltip(new Tooltip("Recharger la table"));
+        uiAdd.setTooltip(new Tooltip(createNewProperty.get()? "Créer un nouvel élément" : "Ajouter un élément existant"));
+        createNewProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            if (newValue) {
+                uiAdd.setTooltip(new Tooltip("Créer un nouvel élément"));
+            } else {
+                uiAdd.setTooltip(new Tooltip("Ajouter un élément existant"));
+            }
+        });
+        uiCurrent.setTooltip(new Tooltip("Aller au numéro..."));
+        uiDelete.setTooltip(new Tooltip("Supprimer les éléments sélectionnés"));
+        uiFilter.setTooltip(new Tooltip("Filtrer les données"));
+        
         updateView();
     }
 
@@ -1501,7 +1517,7 @@ public class PojoTable extends BorderPane {
         transition.setFromValue(0);
         transition.setToValue(1);
         transition.play();
-        }
+    }
 
     /**
      * A column allowing to delete the {@link Element} of a row. Two modes possible :
@@ -1519,10 +1535,12 @@ public class PojoTable extends BorderPane {
             setMaxWidth(24);
             setGraphic(new ImageView(GeotkFX.ICON_DELETE));
 
+            final Tooltip deleteTooltip = new Tooltip("Supprimer l'élement");
+            final Tooltip unlinkTooltip = new Tooltip("Dissocier l'élement");
             setCellValueFactory((TableColumn.CellDataFeatures<Element, Element> param) -> new SimpleObjectProperty<>(param.getValue()));
             setCellFactory((TableColumn<Element, Element> param) -> {
                 final boolean realDelete = createNewProperty.get();
-                return new ButtonTableCell<>(false,
+                final ButtonTableCell<Element, Element> button = new ButtonTableCell<>(false,
                         realDelete ? new ImageView(GeotkFX.ICON_DELETE) : new ImageView(GeotkFX.ICON_UNLINK),
                         (Element t) -> t!=null,
                         (Element t) -> {
@@ -1541,6 +1559,13 @@ public class PojoTable extends BorderPane {
                                 return t;
                             }
                         });
+
+                if (realDelete) {
+                    button.setTooltip(deleteTooltip);
+                } else {
+                    button.setTooltip(unlinkTooltip);
+                }
+                return button;
             });
         }
     }
@@ -1559,9 +1584,10 @@ public class PojoTable extends BorderPane {
             setMaxWidth(24);
             setGraphic(new ImageView(ICON_SHOWONMAP));
 
+            final Tooltip tooltip = new Tooltip("Voir l'élément sur la carte");
             setCellValueFactory((TableColumn.CellDataFeatures<Element, Element> param) -> new SimpleObjectProperty<>(param.getValue()));
             setCellFactory((TableColumn<Element, Element> param) -> {
-                return new ButtonTableCell<>(false,
+                final ButtonTableCell<Element, Element> button = new ButtonTableCell<>(false,
                         new ImageView(ICON_SHOWONMAP),
                         (Element t) -> t!=null,
                         (Element t) -> {
@@ -1570,6 +1596,8 @@ public class PojoTable extends BorderPane {
                             tab.show();
                             return t;
                         });
+                button.setTooltip(tooltip);
+                return button;
             });
         }
     }
@@ -1585,6 +1613,8 @@ public class PojoTable extends BorderPane {
             setMaxWidth(24);
             setGraphic(new ImageView(SIRS.ICON_EDIT_BLACK));
 
+            final Tooltip tooltip = new Tooltip("Ouvrir la fiche de l'élément");
+
             setCellValueFactory(new Callback<TableColumn.CellDataFeatures, ObservableValue>() {
 
                 @Override
@@ -1597,12 +1627,14 @@ public class PojoTable extends BorderPane {
 
                 @Override
                 public TableCell call(TableColumn param) {
-                    return new ButtonTableCell(
+                    ButtonTableCell button = new ButtonTableCell(
                             false, new ImageView(SIRS.ICON_EDIT_BLACK),
                             (Object t) -> t!=null, (Object t) -> {
                                 editFct.accept(t);
                                 return t;
                             });
+                    button.setTooltip(tooltip);
+                    return button;
                 }
             });
         }
