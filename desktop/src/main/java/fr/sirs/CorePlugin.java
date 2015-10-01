@@ -1,10 +1,13 @@
 package fr.sirs;
 
 import com.vividsolutions.jts.geom.Geometry;
+import static fr.sirs.SIRS.CRS_WGS84;
 import static fr.sirs.SIRS.DATE_DEBUT_FIELD;
 import static fr.sirs.SIRS.DATE_FIN_FIELD;
+import static fr.sirs.SIRS.DEFAULT_TRONCON_GEOM_WGS84;
 import static fr.sirs.SIRS.SIRSDOCUMENT_REFERENCE;
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
+import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
@@ -48,6 +51,7 @@ import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.SIRSDocument;
 import fr.sirs.core.model.SommetRisberme;
 import fr.sirs.core.model.StationPompage;
+import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TalusDigue;
 import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.core.model.TronconDigue;
@@ -93,10 +97,12 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
 import org.geotoolkit.filter.DefaultLiteral;
+import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
+import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.style.MutableFeatureTypeStyle;
 import org.geotoolkit.style.MutableRule;
 import org.geotoolkit.style.MutableStyle;
@@ -119,6 +125,8 @@ import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.FilterVisitor;
 import org.opengis.filter.expression.Expression;
+import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.operation.TransformException;
 import org.opengis.style.Fill;
 import org.opengis.style.Graphic;
 import org.opengis.style.GraphicStroke;
@@ -128,6 +136,7 @@ import org.opengis.style.Mark;
 import org.opengis.style.PointSymbolizer;
 import org.opengis.style.Stroke;
 import org.opengis.style.TextSymbolizer;
+import org.opengis.util.FactoryException;
 import org.opengis.util.GenericName;
 
 /**
@@ -428,7 +437,8 @@ public class CorePlugin extends Plugin {
     @Override
     public boolean handleTronconType(final Class<? extends Element> element){
         return TronconDigue.class.equals(element)
-                || Digue.class.equals(element);
+                || Digue.class.equals(element)
+                || SystemeEndiguement.class.equals(element);
     }
 
     @Override
@@ -918,6 +928,24 @@ public class CorePlugin extends Plugin {
                 getSession().showEditionTab(candidate);
             });
         }
+    }
+
+    
+    public static void initTronconDigue(final TronconDigue troncon, final Session session){
+        
+        try {
+            //on crée un géométrie au centre de la france
+            final Geometry geom = JTS.transform(DEFAULT_TRONCON_GEOM_WGS84,
+                    CRS.findMathTransform(CRS_WGS84, session.getProjection(), true));
+            troncon.setGeometry(geom);
+        } catch (FactoryException | TransformException | MismatchedDimensionException ex) {
+            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
+            troncon.setGeometry((Geometry) DEFAULT_TRONCON_GEOM_WGS84.clone());
+        }
+
+        session.getRepositoryForClass((Class) troncon.getClass()).update(troncon);
+        //mise en place du SR élémentaire
+        TronconUtils.updateSRElementaire(troncon, session);
     }
 
 }

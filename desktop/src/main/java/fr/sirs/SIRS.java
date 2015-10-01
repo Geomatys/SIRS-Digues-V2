@@ -1,6 +1,9 @@
 package fr.sirs;
 
 import com.sun.javafx.PlatformUtil;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractPositionDocumentRepository;
@@ -48,6 +51,7 @@ import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
+import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -59,6 +63,16 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 public final class SIRS extends SirsCore {
 
     public static final CoordinateReferenceSystem CRS_WGS84 = CommonCRS.WGS84.normalizedGeographic();
+
+    /** Cette géométrie sert de base pour tous les nouveaux troncons */
+    public static final Geometry DEFAULT_TRONCON_GEOM_WGS84;
+    static {
+        DEFAULT_TRONCON_GEOM_WGS84 = new GeometryFactory().createLineString(new Coordinate[]{
+            new Coordinate(0, 48),
+            new Coordinate(5, 48)
+        });
+        JTS.setCRS(DEFAULT_TRONCON_GEOM_WGS84, CRS_WGS84);
+    }
 
     public static final Image ICON = new Image(SirsCore.class.getResource("/fr/sirs/icon.png").toString());
 

@@ -1,9 +1,8 @@
 package fr.sirs.digue;
 
-import com.vividsolutions.jts.geom.Geometry;
+import static fr.sirs.CorePlugin.initTronconDigue;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractTronconDigueRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.TronconDigueRepository;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
@@ -33,13 +31,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.ImageView;
-import org.apache.sis.referencing.CommonCRS;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.FactoryException;
 
 public class FXDiguesPane extends FXAbstractTronconTreePane {
 
@@ -238,24 +230,12 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
             this.setOnAction((ActionEvent t) -> {
                 final TronconDigue troncon = session.getElementCreator().createElement(TronconDigue.class);
                 troncon.setLibelle("Tronçon vide");
-                if(parent!=null){
-                    final Digue digue = (Digue) parent.getValue();
+                final Digue digue = parent==null ? null : (Digue) parent.getValue();
+                if(digue!=null){
                     troncon.setDigueId(digue.getId());
                 }
-
-                try {
-                    //on crée un géométrie au centre de la france
-                    final Geometry geom = JTS.transform(TRONCON_GEOM_WGS84,
-                            CRS.findMathTransform(CommonCRS.WGS84.normalizedGeographic(),session.getProjection(),true));
-                    troncon.setGeometry(geom);
-                } catch (FactoryException | TransformException | MismatchedDimensionException ex) {
-                    SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
-                    troncon.setGeometry((Geometry) TRONCON_GEOM_WGS84.clone());
-                }
-
                 session.getRepositoryForClass(TronconDigue.class).add(troncon);
-                //mise en place du SR élémentaire
-                TronconUtils.updateSRElementaire(troncon, session);
+                initTronconDigue(troncon, session);
             });
         }
     }

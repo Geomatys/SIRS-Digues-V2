@@ -1,8 +1,5 @@
 package fr.sirs.digue;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
@@ -35,8 +32,6 @@ import javafx.scene.control.TreeView;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Popup;
-import org.apache.sis.referencing.CommonCRS;
-import org.geotoolkit.geometry.jts.JTS;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -44,17 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Samuel Andrés
  */
 public abstract class FXAbstractTronconTreePane extends SplitPane implements DocumentListener {
-
-
-    /** Cette géométrie sert de base pour tous les nouveaux troncons */
-    public static final Geometry TRONCON_GEOM_WGS84;
-    static {
-        TRONCON_GEOM_WGS84 = new GeometryFactory().createLineString(new Coordinate[]{
-            new Coordinate(0, 48),
-            new Coordinate(5, 48)
-        });
-        JTS.setCRS(TRONCON_GEOM_WGS84, CommonCRS.WGS84.normalizedGeographic());
-    }
     
     @FXML protected Label uiTitle;
     @FXML protected TreeView uiTree;

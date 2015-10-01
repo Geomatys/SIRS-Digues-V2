@@ -1,22 +1,19 @@
 
 package fr.sirs.theme.ui;
 
-import fr.sirs.Session;
-import fr.sirs.SIRS;
+import static fr.sirs.CorePlugin.initTronconDigue;
 import fr.sirs.Injector;
-import fr.sirs.core.component.*;
-import fr.sirs.core.model.*;
-import fr.sirs.plugin.lit.ui.FXLitThemePane;
-import fr.sirs.theme.AbstractTheme;
-import fr.sirs.theme.TronconTheme;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.StringProperty;
-
+import fr.sirs.SIRS;
+import fr.sirs.Session;
+import fr.sirs.core.component.Previews;
+import fr.sirs.core.component.TronconLitRepository;
+import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.Lit;
+import fr.sirs.core.model.TronconLit;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.HTMLEditor;
 
@@ -109,11 +106,12 @@ public class FXLitPane extends AbstractFXElementPane<Lit> {
 
         @Override
         protected TronconLit createPojo() {
-            TronconLit createdPojo = (TronconLit) super.createPojo();
-            if (elementProperty.get() != null) {
-                ((TronconLit)createdPojo).setLitId(elementProperty.get().getId());
+            TronconLit result = (TronconLit) super.createPojo();
+            if (elementProperty().get() != null) {
+                ((TronconLit) result).setLitId(elementProperty().get().getId());
             }
-            return createdPojo;
+            initTronconDigue(result, session);
+            return result;
         }
     }
 }

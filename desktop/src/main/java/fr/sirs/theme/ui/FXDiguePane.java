@@ -1,5 +1,6 @@
 package fr.sirs.theme.ui;
 
+import static fr.sirs.CorePlugin.initTronconDigue;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractTronconDigueRepository;
@@ -60,11 +61,12 @@ public class FXDiguePane extends FXDiguePaneStub {
 
         @Override
         protected TronconDigue createPojo() {
-            final TronconDigue createdPojo = (TronconDigue) super.createPojo();
-            if (elementProperty.get() != null) {
-                ((TronconDigue)createdPojo).setDigueId(elementProperty.get().getId());
+            final TronconDigue result = (TronconDigue) super.createPojo();
+            if(elementProperty().get()!=null){
+                result.setDigueId(elementProperty().get().getId());
             }
-            return createdPojo;
+            initTronconDigue(result, session);
+            return result;
         }
     }
 }
