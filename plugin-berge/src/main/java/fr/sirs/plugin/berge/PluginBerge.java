@@ -1,13 +1,24 @@
 package fr.sirs.plugin.berge;
 
 import fr.sirs.CorePlugin;
+import static fr.sirs.CorePlugin.buildLayers;
+import static fr.sirs.CorePlugin.createDefaultSelectionStyle;
 import static fr.sirs.CorePlugin.createTronconSelectionStyle;
 import fr.sirs.Plugin;
+import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.Berge;
+import fr.sirs.core.model.CreteBerge;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.EpiBerge;
+import fr.sirs.core.model.FondationBerge;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.OuvrageRevancheBerge;
+import fr.sirs.core.model.PiedBerge;
+import fr.sirs.core.model.SommetBerge;
+import fr.sirs.core.model.TalusBerge;
+import fr.sirs.core.model.TalusRisbermeBerge;
 import fr.sirs.core.model.TraitBerge;
 import fr.sirs.core.model.sql.BergeSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
@@ -16,17 +27,19 @@ import fr.sirs.plugin.berge.map.BergeToolBar;
 import java.awt.Color;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javax.measure.unit.NonSI;
 import org.geotoolkit.cql.CQLException;
+import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
-import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.style.MutableStyle;
 import org.geotoolkit.style.MutableStyleFactory;
 import static org.geotoolkit.style.StyleConstants.DEFAULT_DESCRIPTION;
@@ -88,25 +101,80 @@ public class PluginBerge extends Plugin {
     //doit avoir la meme valeur que dans le fichier Berge.properties classPlural
     public static final String LAYER_BERGE_NAME = "Berges";
     public static final String LAYER_TRAIT_NAME = "Traits de berge";
-    
+
+    final Color[] colors = new Color[]{
+                Color.BLACK,
+                Color.BLUE,
+                Color.CYAN,
+                Color.RED,
+                Color.DARK_GRAY,
+                Color.GREEN,
+                Color.MAGENTA,
+                Color.ORANGE,
+                Color.PINK,
+                Color.RED
+            };
+
+    private final HashMap<Class, BeanFeatureSupplier> suppliers = new HashMap<>();
+
+    private synchronized void loadDataSuppliers() {
+        suppliers.clear();
+
+        final Function<Class<? extends Element>, StructBeanSupplier> getDefaultSupplierForClass = (Class<? extends Element> c) ->{
+            return new StructBeanSupplier(c, () -> getSession().getRepositoryForClass(c).getAllStreaming());
+        };
+
+        suppliers.put(Berge.class, getDefaultSupplierForClass.apply(Berge.class));
+        suppliers.put(TraitBerge.class, getDefaultSupplierForClass.apply(TraitBerge.class));
+
+        //
+        suppliers.put(PiedBerge.class, getDefaultSupplierForClass.apply(PiedBerge.class));
+        suppliers.put(SommetBerge.class, getDefaultSupplierForClass.apply(SommetBerge.class));
+        suppliers.put(EpiBerge.class, getDefaultSupplierForClass.apply(EpiBerge.class));
+        suppliers.put(FondationBerge.class, getDefaultSupplierForClass.apply(FondationBerge.class));
+        suppliers.put(TalusRisbermeBerge.class, getDefaultSupplierForClass.apply(TalusRisbermeBerge.class));
+        suppliers.put(TalusBerge.class, getDefaultSupplierForClass.apply(TalusBerge.class));
+        suppliers.put(OuvrageRevancheBerge.class, getDefaultSupplierForClass.apply(OuvrageRevancheBerge.class));
+        suppliers.put(CreteBerge.class, getDefaultSupplierForClass.apply(CreteBerge.class));
+    }
+
+
     @Override
     public List<MapItem> getMapItems() {
+        loadDataSuppliers();
         try {
-            final MapItem bergeContainer = MapBuilder.createItem();
-            bergeContainer.setName("Module berges");
+            final MapItem container = MapBuilder.createItem();
+            container.setName("Module berges");
             
-            final BeanStore bergeStore = new BeanStore(new StructBeanSupplier(Berge.class,
-                    () -> getSession().getRepositoryForClass(Berge.class).getAll()));
-            final BeanStore traitStore = new BeanStore(new StructBeanSupplier(TraitBerge.class,
-                    () -> getSession().getRepositoryForClass(TraitBerge.class).getAll()));
+            final BeanStore bergeStore = new BeanStore(suppliers.get(Berge.class));
+            final BeanStore traitStore = new BeanStore(suppliers.get(TraitBerge.class));
 
-            bergeContainer.items().addAll(CorePlugin.buildLayers(bergeStore, LAYER_BERGE_NAME,
+            container.items().addAll(CorePlugin.buildLayers(bergeStore, LAYER_BERGE_NAME,
                     createBergeStyle(), createTronconSelectionStyle(false),true));
-            bergeContainer.items().addAll(CorePlugin.buildLayers(traitStore, LAYER_TRAIT_NAME,
+            container.items().addAll(CorePlugin.buildLayers(traitStore, LAYER_TRAIT_NAME,
                     createTraitBergeStyle(), createTronconSelectionStyle(false),true));
 
+            final Map<String, String> nameMap = new HashMap<>();
+            for(Class elementClass : suppliers.keySet()) {
+                final LabelMapper mapper = LabelMapper.get(elementClass);
+                nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
+            }
 
-            return Collections.singletonList(bergeContainer);
+            final MapItem structLayer = MapBuilder.createItem();
+            structLayer.setName("Autre (lit)");
+            final BeanStore otherStore = new BeanStore(suppliers.get(PiedBerge.class),
+                    suppliers.get(SommetBerge.class),
+                    suppliers.get(EpiBerge.class),
+                    suppliers.get(FondationBerge.class),
+                    suppliers.get(TalusRisbermeBerge.class),
+                    suppliers.get(TalusBerge.class),
+                    suppliers.get(OuvrageRevancheBerge.class),
+                    suppliers.get(CreteBerge.class));
+            structLayer.items().addAll(buildLayers(otherStore, nameMap, colors, createDefaultSelectionStyle(), false));
+            structLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+            container.items().add(structLayer);
+
+            return Collections.singletonList(container);
         } catch (Exception e) {
             throw new SirsCoreRuntimeException(e);
         }

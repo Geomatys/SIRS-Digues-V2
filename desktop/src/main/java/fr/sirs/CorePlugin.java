@@ -527,7 +527,7 @@ public class CorePlugin extends Plugin {
         return layers;
     }
 
-    private List<MapLayer> buildLayers(BeanStore store, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
+    public static List<MapLayer> buildLayers(BeanStore store, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);
         int i=0;
@@ -571,7 +571,7 @@ public class CorePlugin extends Plugin {
      * @return
      * @throws DataStoreException
      */
-    private List<MapLayer> buildLayers(BeanStore store, Map<Class<? extends AbstractPositionDocument>, List<Class>> documentClasses, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
+    public static List<MapLayer> buildLayers(BeanStore store, Map<Class<? extends AbstractPositionDocument>, List<Class>> documentClasses, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
         final List<MapLayer> layers = new ArrayList<>();
         final org.geotoolkit.data.session.Session symSession = store.createSession(false);
         int i=0;
