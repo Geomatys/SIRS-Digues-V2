@@ -7,9 +7,12 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.DocumentListener;
+import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Element;
 import fr.sirs.theme.ui.AbstractFXElementPane;
+import java.time.LocalDate;
 import java.util.Set;
+import java.util.function.Predicate;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -67,6 +70,10 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
     protected final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH_WHITE);
     protected final ProgressIndicator searchRunning = new ProgressIndicator();
     protected final StringProperty currentSearch = new SimpleStringProperty("");
+    
+    protected final Predicate<AvecBornesTemporelles> nonArchivedPredicate = (AvecBornesTemporelles t) -> {
+        return (t.getDate_fin()==null || t.getDate_fin().isAfter(LocalDate.now()));
+    };
 
     public FXAbstractTronconTreePane(final String title) {
         SIRS.loadFXML(this, FXAbstractTronconTreePane.class, null);

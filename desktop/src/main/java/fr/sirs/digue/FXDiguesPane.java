@@ -17,7 +17,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,10 +47,6 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
         TronconDigue.class.getCanonicalName(),
         Digue.class.getCanonicalName(),
         SystemeEndiguement.class.getCanonicalName()
-    };
-
-    private final Predicate<TronconDigue> nonArchivedPredicate = (TronconDigue t) -> {
-        return (t.getDate_fin()==null || t.getDate_fin().isAfter(LocalDate.now()));
     };
 
     private final Predicate<TronconDigue> searchedPredicate = (TronconDigue t) -> {

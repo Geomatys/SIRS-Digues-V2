@@ -12,7 +12,6 @@ import fr.sirs.core.model.TronconLit;
 import fr.sirs.digue.FXAbstractTronconTreePane;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.Theme;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,10 +45,6 @@ public class SuiviLitPane extends FXAbstractTronconTreePane {
     private static final String[] SEARCH_CLASSES = new String[]{
         TronconLit.class.getCanonicalName(),
         Lit.class.getCanonicalName()
-    };
-
-    private final Predicate<TronconLit> nonArchivedPredicate = (TronconLit t) -> {
-        return (t.getDate_fin()==null || t.getDate_fin().isAfter(LocalDate.now()));
     };
 
     private final Predicate<TronconLit> searchedPredicate = (TronconLit t) -> {
