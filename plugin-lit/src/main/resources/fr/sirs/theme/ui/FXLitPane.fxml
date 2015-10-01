@@ -19,8 +19,8 @@
 
 <!-- ATTRIBUTE TAB-->
         <Tab text="Informations">
-   <content>
-             <ScrollPane fitToHeight="true" fitToWidth="true">
+            <content>
+             <ScrollPane fitToWidth="true">
                <content>
              <VBox fx:id="contentBox" spacing="30.0" BorderPane.alignment="CENTER">
                <children>
@@ -61,7 +61,7 @@
              </VBox>
                </content>
              </ScrollPane>
-   </content>
+            </content>
         </Tab>
 
 <!-- REFERENCE TABS -->

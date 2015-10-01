@@ -36,7 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
- * @author Samuel Andrés
+ * @author Samuel Andrés (Geomatys)
  */
 public abstract class FXAbstractTronconTreePane extends SplitPane implements DocumentListener {
     

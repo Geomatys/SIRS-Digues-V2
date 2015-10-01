@@ -3,7 +3,7 @@ package fr.sirs.theme.ui;
 import static fr.sirs.CorePlugin.initTronconDigue;
 import fr.sirs.Injector;
 import fr.sirs.Session;
-import fr.sirs.core.component.AbstractTronconDigueRepository;
+import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.TronconDigue;
 import javafx.beans.value.ObservableValue;
@@ -47,9 +47,8 @@ public class FXDiguePane extends FXDiguePaneStub {
     @Override
     public void initFields(ObservableValue<? extends Digue> observable, Digue oldValue, Digue newValue) {
         super.initFields(observable, oldValue, newValue);
-        
         if (newValue != null) {
-            table.setTableItems(()->FXCollections.observableArrayList(((AbstractTronconDigueRepository) session.getRepositoryForClass(TronconDigue.class)).getByDigue(newValue)));
+            table.setTableItems(()->FXCollections.observableArrayList(((TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class)).getByDigue(newValue)));
         }
     }
     
@@ -65,7 +64,7 @@ public class FXDiguePane extends FXDiguePaneStub {
             if(elementProperty().get()!=null){
                 result.setDigueId(elementProperty().get().getId());
             }
-            initTronconDigue(result, session);
+            initTronconDigue(result, Injector.getSession());
             return result;
         }
     }
