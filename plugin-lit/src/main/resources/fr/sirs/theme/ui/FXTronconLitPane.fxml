@@ -59,7 +59,6 @@
                                                         <Button fx:id="ui_typeTronconId_link" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                                                         <Label text="%systemeRepDefautId" GridPane.rowIndex="4" />
                                                         <ComboBox fx:id="ui_systemeRepDefautId" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                                                        <Button fx:id="ui_systemeRepDefautId_link" GridPane.columnIndex="2" GridPane.rowIndex="4" />
          
                                                     </children>
                                                     <padding>

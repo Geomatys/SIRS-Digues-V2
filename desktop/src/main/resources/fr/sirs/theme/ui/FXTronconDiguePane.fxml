@@ -49,6 +49,7 @@
                    <TextField fx:id="ui_libelle" GridPane.columnIndex="1" GridPane.rowIndex="0"  />
                    <Label text="%digueId" GridPane.rowIndex="1" />
                    <ComboBox fx:id="ui_digueId" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                   <Button fx:id="ui_digueId_link" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                    <Label text="%typeRiveId" GridPane.rowIndex="2" />
                    <ComboBox fx:id="ui_typeRiveId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                    <Label text="%typeTronconId" GridPane.rowIndex="3" />

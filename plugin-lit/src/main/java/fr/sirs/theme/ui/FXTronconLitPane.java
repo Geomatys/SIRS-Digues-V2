@@ -73,7 +73,7 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
     @FXML protected ComboBox ui_typeTronconId;
     @FXML protected Button ui_typeTronconId_link;
     @FXML protected ComboBox ui_systemeRepDefautId;
-    @FXML protected Button ui_systemeRepDefautId_link;
+//    @FXML protected Button ui_systemeRepDefautId_link;
     
     
     // Onglet "SR"
@@ -114,9 +114,9 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         ui_typeTronconId.disableProperty().bind(disableFieldsProperty());
         ui_typeTronconId_link.setVisible(false);
         ui_systemeRepDefautId.disableProperty().bind(disableFieldsProperty());
-        ui_systemeRepDefautId_link.disableProperty().bind(ui_systemeRepDefautId.getSelectionModel().selectedItemProperty().isNull());
-        ui_systemeRepDefautId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
-        ui_systemeRepDefautId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_systemeRepDefautId.getSelectionModel().getSelectedItem()));       
+//        ui_systemeRepDefautId_link.disableProperty().bind(ui_systemeRepDefautId.getSelectionModel().selectedItemProperty().isNull());
+//        ui_systemeRepDefautId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
+//        ui_systemeRepDefautId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_systemeRepDefautId.getSelectionModel().getSelectedItem()));
         
         srController.editableProperty().bind(disableFieldsProperty().not());
         uiSRAdd.disableProperty().set(true);

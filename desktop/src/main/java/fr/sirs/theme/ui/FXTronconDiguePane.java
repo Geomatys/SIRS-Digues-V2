@@ -54,6 +54,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     @FXML TextField ui_libelle;
     @FXML HTMLEditor ui_commentaire;
     @FXML ComboBox ui_digueId;
+    @FXML protected Button ui_digueId_link;
     @FXML ComboBox ui_typeRiveId;
     @FXML ComboBox ui_typeTronconId;
     @FXML ComboBox ui_systemeRepDefautId;
@@ -90,6 +91,10 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         ui_libelle.disableProperty().bind(disableFieldsProperty());
         ui_commentaire.disableProperty().bind(disableFieldsProperty());
         ui_digueId.disableProperty().bind(disableFieldsProperty());
+        ui_digueId_link.disableProperty().bind(ui_digueId.getSelectionModel().selectedItemProperty().isNull());
+        ui_digueId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
+        ui_digueId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_digueId.getSelectionModel().getSelectedItem()));
+
         ui_typeRiveId.disableProperty().bind(disableFieldsProperty());
         ui_typeTronconId.disableProperty().bind(disableFieldsProperty());
         ui_systemeRepDefautId.disableProperty().bind(disableFieldsProperty());
