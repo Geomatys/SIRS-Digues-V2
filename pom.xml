@@ -111,6 +111,14 @@
         <artifactId>pdfbox</artifactId>
         <version>1.8.9</version>
       </dependency>
+      
+      <!-- HACK : due to an incompatibility of RichText 0.6 with jre 8u60, we force richtext version here. -->
+      <dependency>
+      <groupId>org.fxmisc.richtext</groupId>
+        <artifactId>richtextfx</artifactId>
+        <version>0.6.9</version>
+      </dependency>
+      
     </dependencies>
   </dependencyManagement>
 
