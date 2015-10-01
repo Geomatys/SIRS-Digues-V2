@@ -203,7 +203,7 @@ public class H2Helper {
                     int currentProgress = 0;
                     updateMessage("Insertion des éléments");
                     while (iterator.hasNext()) {
-                        if (currentThread.isInterrupted()) {
+                        if (currentThread.isInterrupted() || isCancelled()) {
                             return false;
                         }
 
