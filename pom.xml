@@ -265,6 +265,7 @@
            <module>plugin-berge</module>
            <module>plugin-lit</module>
            <module>plugin-dependance</module>
+           <module>plugin-carto</module>
         </modules>
      </profile>
   </profiles>
