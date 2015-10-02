@@ -133,7 +133,7 @@ public class ModuleDescription {
                 final GenericName typeName = c.getFeatureType().getName();
                 try {
                     BeanFeatureSupplier beanSupplier = tmpStore.getBeanSupplier(typeName);
-                    beanSupplier.getBeanClass();
+                    currentLayer.filterValue.set(beanSupplier.getBeanClass().getCanonicalName());
                 } catch (DataStoreException ex) {
                     SirsCore.LOGGER.log(Level.WARNING, "Cannot analyze bean feature type "+typeName.toString(), ex);
                 }
