@@ -92,7 +92,7 @@ public class PluginBerge extends Plugin {
         handleTronconType(Berge.class);
         return BergeSqlHelper.getInstance();
     }
-    
+
     @Override
     public List<ToolBar> getMapToolBars(final FXMapPane mapPane) {
         return Collections.singletonList(new BergeToolBar(mapPane.getUiMap()));
@@ -145,7 +145,7 @@ public class PluginBerge extends Plugin {
         try {
             final MapItem container = MapBuilder.createItem();
             container.setName("Module berges");
-            
+
             final BeanStore bergeStore = new BeanStore(suppliers.get(Berge.class));
             final BeanStore traitStore = new BeanStore(suppliers.get(TraitBerge.class));
 
@@ -161,7 +161,7 @@ public class PluginBerge extends Plugin {
             }
 
             final MapItem structLayer = MapBuilder.createItem();
-            structLayer.setName("Autre (lit)");
+            structLayer.setName("Autre (berge)");
             final BeanStore otherStore = new BeanStore(suppliers.get(PiedBerge.class),
                     suppliers.get(SommetBerge.class),
                     suppliers.get(EpiBerge.class),
@@ -181,21 +181,26 @@ public class PluginBerge extends Plugin {
     }
 
     public static MutableStyle createBergeStyle() throws CQLException, URISyntaxException{
-        final Stroke stroke1 = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,FF.literal(4),
+        final Stroke stroke1 = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,FF.literal(9),
                 STROKE_JOIN_BEVEL, STROKE_CAP_SQUARE, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);
 
-        final Stroke stroke2 = SF.stroke(SF.literal(new Color(0,200,255)),LITERAL_ONE_FLOAT,FF.literal(2.5),
+        final Stroke stroke2 = SF.stroke(SF.literal(new Color(230, 179, 77)),LITERAL_ONE_FLOAT,FF.literal(7),
                 STROKE_JOIN_BEVEL, STROKE_CAP_SQUARE, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke2,LITERAL_ONE_FLOAT);
 
-        return SF.style(line1,line2);
+        final Stroke stroke3 = SF.stroke(SF.literal(Color.BLACK),LITERAL_ONE_FLOAT,FF.literal(1),
+                STROKE_JOIN_BEVEL, STROKE_CAP_SQUARE, null,LITERAL_ZERO_FLOAT);
+        final LineSymbolizer line3 = SF.lineSymbolizer("symbol",
+                (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke3,LITERAL_ONE_FLOAT);
+
+        return SF.style(line1,line2,line3);
     }
 
     public static MutableStyle createTraitBergeStyle() throws CQLException, URISyntaxException{
-        final Stroke stroke1 = SF.stroke(SF.literal(new Color(0,200,255)),LITERAL_ONE_FLOAT,FF.literal(1.5),
+        final Stroke stroke1 = SF.stroke(SF.literal(new Color(255,204,128)),LITERAL_ONE_FLOAT,FF.literal(1.5),
                 STROKE_JOIN_BEVEL, STROKE_CAP_SQUARE, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);

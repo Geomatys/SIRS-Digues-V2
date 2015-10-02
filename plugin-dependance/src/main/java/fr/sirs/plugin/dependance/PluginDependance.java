@@ -14,6 +14,7 @@ import fr.sirs.core.model.AireStockageDependance;
 import fr.sirs.core.model.AutreDependance;
 import fr.sirs.core.model.CheminAccesDependance;
 import fr.sirs.core.model.DesordreDependance;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.OuvrageVoirieDependance;
 import fr.sirs.core.model.sql.DependanceSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
@@ -39,11 +40,6 @@ import java.util.logging.Level;
  * @author Cédric Briançon (Geomatys)
  */
 public class PluginDependance extends Plugin {
-    public static final String AIRE_STOCKAGE_LAYER_NAME = "Aire de stockage (dépendance)";
-    public static final String AUTRE_LAYER_NAME = "Autre (dépendance)";
-    public static final String CHEMIN_ACCES_LAYER_NAME = "Chemin d'accès (dépendance)";
-    public static final String OUVRAGE_VOIRIE_LAYER_NAME = "Ouvrage de voirie (dépendance)";
-    public static final String DESORDRE_LAYER_NAME = "Désordre (dépendance)";
     private static final String NAME = "plugin-dependance";
     private static final String TITLE = "Module dépendance";
 
@@ -97,7 +93,7 @@ public class PluginDependance extends Plugin {
             final BeanStore ouvrageStore = new BeanStore(ouvrageSupplier);
             ouvrageLayer = MapBuilder.createFeatureLayer(ouvrageStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(ouvrageStore.getNames().iterator().next())));
-            ouvrageLayer.setName(OUVRAGE_VOIRIE_LAYER_NAME);
+            ouvrageLayer.setName(LabelMapper.get(OuvrageVoirieDependance.class).mapClassName());
             ouvrageLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             depGroup.items().add(0, ouvrageLayer);
         } catch(Exception ex) {
@@ -109,7 +105,7 @@ public class PluginDependance extends Plugin {
             final BeanStore cheminStore = new BeanStore(cheminSupplier);
             cheminLayer = MapBuilder.createFeatureLayer(cheminStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(cheminStore.getNames().iterator().next())));
-            cheminLayer.setName(CHEMIN_ACCES_LAYER_NAME);
+            cheminLayer.setName(LabelMapper.get(CheminAccesDependance.class).mapClassName());
             cheminLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             depGroup.items().add(1, cheminLayer);
         } catch(Exception ex) {
@@ -121,7 +117,7 @@ public class PluginDependance extends Plugin {
             final BeanStore autreStore = new BeanStore(autreSupplier);
             autreLayer = MapBuilder.createFeatureLayer(autreStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(autreStore.getNames().iterator().next())));
-            autreLayer.setName(AUTRE_LAYER_NAME);
+            autreLayer.setName(LabelMapper.get(AutreDependance.class).mapClassName());
             autreLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             depGroup.items().add(2, autreLayer);
         } catch(Exception ex) {
@@ -133,7 +129,7 @@ public class PluginDependance extends Plugin {
             final BeanStore aireStore = new BeanStore(aireSupplier);
             aireLayer = MapBuilder.createFeatureLayer(aireStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(aireStore.getNames().iterator().next())));
-            aireLayer.setName(AIRE_STOCKAGE_LAYER_NAME);
+            aireLayer.setName(LabelMapper.get(AireStockageDependance.class).mapClassName());
             aireLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
             depGroup.items().add(3, aireLayer);
         } catch(Exception ex) {
@@ -143,21 +139,17 @@ public class PluginDependance extends Plugin {
         items.add(depGroup);
 
         final DesordreDependanceRepository desordreRepo = Injector.getBean(DesordreDependanceRepository.class);
-        final MapItem desordreGroup = MapBuilder.createItem();
-        desordreGroup.setName("Désordres");
-        desordreGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
         try {
             final StructBeanSupplier desSupplier = new StructBeanSupplier(DesordreDependance.class, desordreRepo::getAll);
             final BeanStore desStore = new BeanStore(desSupplier);
             desordreLayer = MapBuilder.createFeatureLayer(desStore.createSession(true)
                     .getFeatureCollection(QueryBuilder.all(desStore.getNames().iterator().next())));
-            desordreLayer.setName(DESORDRE_LAYER_NAME);
+            desordreLayer.setName(LabelMapper.get(DesordreDependance.class).mapClassName());
             desordreLayer.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-            desordreGroup.items().add(desordreLayer);
+            depGroup.items().add(desordreLayer);
         } catch(Exception ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
-        items.add(desordreGroup);
 
         return items;
     }

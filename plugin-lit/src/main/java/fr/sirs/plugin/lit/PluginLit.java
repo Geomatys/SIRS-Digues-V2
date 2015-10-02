@@ -73,7 +73,7 @@ public class PluginLit extends Plugin {
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
     private static final MutableStyleFactory SF = GO2Utilities.STYLE_FACTORY;
     private final SuiviLitTheme suiviTheme;
-    
+
     public PluginLit() {
         name = NAME;
         loadingMessage.set("module lit");
@@ -102,7 +102,7 @@ public class PluginLit extends Plugin {
     public SQLHelper getSQLHelper() {
         return LitSqlHelper.getInstance();
     }
-    
+
     @Override
     public List<ToolBar> getMapToolBars(final FXMapPane mapPane) {
         return Collections.singletonList(new LitToolBar(mapPane.getUiMap()));
@@ -120,7 +120,7 @@ public class PluginLit extends Plugin {
         suiviTheme.display(element);
         return tab;
     }
-    
+
     public static String LAYER_NAME = LabelMapper.get(TronconLit.class).mapClassNamePlural();
 
     final Color[] colors = new Color[]{
@@ -153,7 +153,7 @@ public class PluginLit extends Plugin {
         suppliers.put(AutreOuvrageLit.class, getDefaultSupplierForClass.apply(AutreOuvrageLit.class));
 
         suppliers.put(IleBancLit.class, getDefaultSupplierForClass.apply(IleBancLit.class));
-        
+
         suppliers.put(DesordreLit.class, getDefaultSupplierForClass.apply(DesordreLit.class));
 
         suppliers.put(OuvrageAssocieLit.class, getDefaultSupplierForClass.apply(OuvrageAssocieLit.class));
@@ -245,7 +245,7 @@ public class PluginLit extends Plugin {
         final LineSymbolizer line1 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);
 
-        final Stroke stroke2 = SF.stroke(SF.literal(new Color(0, 255, 200)),LITERAL_ONE_FLOAT,FF.literal(7),
+        final Stroke stroke2 = SF.stroke(SF.literal(new Color(204, 230, 255)),LITERAL_ONE_FLOAT,FF.literal(7),
                 STROKE_JOIN_BEVEL, STROKE_CAP_SQUARE, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke2,LITERAL_ONE_FLOAT);
