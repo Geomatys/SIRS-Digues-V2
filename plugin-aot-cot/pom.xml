@@ -15,7 +15,7 @@
     <parent>
         <groupId>fr.sirs</groupId>
         <artifactId>sirs</artifactId>
-        <version>0.x-SNAPSHOT</version>
+        <version>0.15</version>
     </parent>
 
     <properties>
@@ -27,7 +27,7 @@
             <groupId>fr.sirs</groupId>
             <artifactId>desktop</artifactId>
             <!-- SIRS application version is defined at archetype generation goal -->
-            <version>0.x-SNAPSHOT</version>
+            <version>0.15</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -42,7 +42,7 @@
                         <groupId>fr.sirs</groupId>
                         <artifactId>desktop</artifactId>
             <!-- SIRS application version is defined at archetype generation goal -->
-                        <version>0.x-SNAPSHOT</version>
+                        <version>0.15</version>
                     </dependency>
                 </dependencies>
                 <executions>
