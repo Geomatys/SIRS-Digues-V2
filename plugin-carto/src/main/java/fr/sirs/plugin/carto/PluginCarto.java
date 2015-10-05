@@ -1,23 +1,21 @@
-package fr.sirs.plugins;
+package fr.sirs.plugin.carto;
 
 import fr.sirs.Plugin;
 import fr.sirs.core.model.sql.SQLHelper;
 import javafx.scene.image.Image;
 
 /**
- * Minimal example of a plugin.
  *
- * @author Alexis Manin (Geomatys)
- * @author Cédric Briançon (Geomatys)
+ * @author Johann Sorel (Geomatys)
  */
-public class PluginExample extends Plugin {
-    private static final String NAME = "plugin-example";
-    private static final String TITLE = "Module exemple";
+public class PluginCarto extends Plugin {
+    private static final String NAME = "plugin-carto";
+    private static final String TITLE = "Module cartographie";
 
-    public PluginExample() {
+    public PluginCarto() {
         name = NAME;
-        loadingMessage.set("Chargement du module d'exemple");
-        themes.add(new ButtonExampleTheme());
+        loadingMessage.set("Chargement du module de cartographie");
+        themes.add(new GestionServerTheme());
     }
 
     @Override

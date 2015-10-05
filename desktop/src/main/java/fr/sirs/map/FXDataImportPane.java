@@ -48,7 +48,7 @@ import org.opengis.parameter.ParameterValueGroup;
  */
 public class FXDataImportPane extends BorderPane {
 
-    private static final String[] COVERAGE_STORES = new String[]{"coverage-file", "wms", "osmtms"};
+    private static final String[] COVERAGE_STORES = new String[]{"coverage-file", "wms", "osmtms","hexagon"};
 
     private static final String[] FEATURE_STORES = new String[]{"shapefile", "csv", "dwg", "dxf"};
     @FXML

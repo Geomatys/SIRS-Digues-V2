@@ -1,4 +1,4 @@
-package fr.sirs.plugins;
+package fr.sirs.plugin.carto;
 
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import javafx.scene.Parent;
@@ -9,9 +9,9 @@ import javafx.scene.layout.BorderPane;
  *
  * @author Cédric Briançon (Geomatys)
  */
-public final class ButtonExampleTheme extends AbstractPluginsButtonTheme {
-    public ButtonExampleTheme() {
-        super("Bouton exemple", "Bouton exemple", null);
+public final class GestionServerTheme extends AbstractPluginsButtonTheme {
+    public GestionServerTheme() {
+        super("Gestion des serveurs de carte", "Gestion des serveurs de carte", null);
     }
 
     @Override
