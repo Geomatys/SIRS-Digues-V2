@@ -395,6 +395,7 @@ public class PojoTable extends BorderPane {
                 uiPositionVisibility.managedProperty().bind(uiPositionVisibility.visibleProperty());
                 uiPositionVisibility.getStyleClass().add(BUTTON_STYLE);
                 uiPositionVisibility.setSelected(true);
+                uiPositionVisibility.setSelected(false);
                 searchEditionToolbar.getChildren().add(uiPositionVisibility);
             }
 
@@ -654,7 +655,7 @@ public class PojoTable extends BorderPane {
         uiCurrent.setTooltip(new Tooltip("Aller au numéro..."));
         uiDelete.setTooltip(new Tooltip("Supprimer les éléments sélectionnés"));
         uiFilter.setTooltip(new Tooltip("Filtrer les données"));
-        
+
         updateView();
     }
 
