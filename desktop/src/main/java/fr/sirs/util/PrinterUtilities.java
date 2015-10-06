@@ -374,7 +374,7 @@ JasperViewer.viewReport(jp1,false);
      * @return
      * @throws Exception 
      */
-    public static InputStream streamFromText(String inputText) throws Exception {
+    public static InputStream streamFromText(final String inputText) throws Exception {
         final URI resultURI = imageUriFromText(inputText);
         try {
             return new FileInputStream(new File(resultURI));
@@ -384,7 +384,7 @@ JasperViewer.viewReport(jp1,false);
         } 
     }
 
-    public static URI imageUriFromText(String inputText) throws Exception {
+    public static URI imageUriFromText(final String inputText) throws Exception {
         final String rootPath = SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT);
         final URI resultURI;
         if (rootPath == null) {
@@ -392,7 +392,6 @@ JasperViewer.viewReport(jp1,false);
         } else {
             resultURI = SIRS.getDocumentAbsolutePath(inputText == null? "" : inputText).toUri();
         }
-
         return resultURI;
     }
     

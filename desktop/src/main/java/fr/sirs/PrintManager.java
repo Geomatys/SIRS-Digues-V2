@@ -11,7 +11,6 @@ import static fr.sirs.SIRS.DesordreFields.OUVRAGE_HYDRAULIQUE_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.OUVRAGE_PARTICULIER_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.OUVRAGE_TELECOM_ENERGIE_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.OUVRAGE_VOIRIE_REFERENCE;
-import static fr.sirs.SIRS.DesordreFields.PHOTOS_OBSERVATION_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.PRESTATION_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.RESEAU_HYDRAULIQUE_FERME_REFERENCE;
@@ -115,7 +114,15 @@ public class PrintManager {
             Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, e);
         }
     }
-    
+
+    /**
+     * Génère un rapport PDF des désordres requis.
+     *
+     * @param desordres
+     * @param printPhoto
+     * @param printReseauOuvrage
+     * @param printVoirie
+     */
     public final void printDesordres(final List<Desordre> desordres, final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie) {
         
             final List avoidDesordreFields = new ArrayList<>();

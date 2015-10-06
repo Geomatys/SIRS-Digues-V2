@@ -303,15 +303,23 @@ public final class SIRS extends SirsCore {
                     + "depuis les préférences de l'application (Fichier > Preferences).", e);
         }
 
-        /* HACK : change all separators, because when we use 2 different system
-         * separator in the same time, it produces invalid paths. We also check
-         * if path starts with file separator, because unix consider it as system
-         * root, and will not resolve image path as relative if we keep it.
+        /* 
+        HACK 1 : change all separators, because when we use 2 different system
+        separator in the same time, it produces invalid paths. We also check
+        if path starts with file separator, because unix consider it as system
+        root, and will not resolve image path as relative if we keep it.
+
+        HACK 2 : De nombreux chemins du SIRS V1 commencent par un "\" et ne
+        peuvent ainsi pas rigoureusement être considérés comme des chemins
+        relatifs. Il faut donc commencer par supprimer ce "\" en début de chaîne
+        lorsqu'il est présent.
          */
         if (PlatformUtil.isWindows()) {
-            return docRoot.resolve(relativeReference.replaceAll("/+", "\\\\"));
+            return docRoot.resolve(relativeReference.replaceAll("/", File.separator) // On remplace les séparateurs issus d'un autre système.
+                    .replaceFirst("^"+File.separator+"+", "")); // On enlève tout séparateur en début de chaîne qui tendrait à signifier que le chemin n'est pas relatif.
         } else {
-            return docRoot.resolve(relativeReference.replaceFirst("^/+", "").replaceAll("(\\\\[^\\s])+", File.separator));
+            return docRoot.resolve(relativeReference.replaceAll("\\\\+", File.separator) // On remplace les séparateurs issus d'un autre système.
+                    .replaceFirst("^"+File.separator+"+", "")); // On enlève tout séparateur en début de chaîne qui tendrait à signifier que le chemin n'est pas relatif.
         }
     }
 

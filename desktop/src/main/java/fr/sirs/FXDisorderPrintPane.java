@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -199,7 +198,7 @@ public class FXDisorderPrintPane extends BorderPane {
                     Injector.getSession().getPrintManager().printDesordres(desordres, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionVoirie.isSelected());
                 }
             } catch (Exception ex) {
-                Logger.getLogger(FXDisorderPrintPane.class.getName()).log(Level.SEVERE, null, ex);
+                SIRS.LOGGER.log(Level.WARNING, null, ex);
             }
         }));
     }
