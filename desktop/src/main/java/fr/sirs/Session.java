@@ -44,11 +44,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.web.WebView;
 import javafx.util.Duration;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
@@ -270,23 +268,6 @@ public class Session extends SessionCore {
         }
     }
 
-    public FXFreeTab getOrCreateUserGuideTab() {
-        if (userGuideTab == null) {
-            userGuideTab = new FXFreeTab("Guide utilisateur");
-            final WebView webView = new WebView();
-            webView.setMaxWidth(Double.MAX_VALUE);
-            webView.setMaxHeight(Double.MAX_VALUE);
-            webView.getEngine().load("http://sirs-digues.info/documents/");
-            final ScrollPane scroll = new ScrollPane(webView);
-            scroll.setHmax(Double.MAX_VALUE);
-            scroll.setVmax(Double.MAX_VALUE);
-            scroll.setFitToHeight(true);
-            scroll.setFitToWidth(true);
-            userGuideTab.setContent(scroll);
-        }
-        return userGuideTab;
-    }
-
     public FXFreeTab getOrCreatePrintTab(final PrintTab printTab, final String title){
 
         try {
@@ -454,7 +435,7 @@ public class Session extends SessionCore {
     }
 
     /**
-     * 
+     *
      * @param element
      * @return
      */

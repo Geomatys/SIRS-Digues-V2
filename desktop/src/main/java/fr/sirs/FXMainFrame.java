@@ -1,6 +1,7 @@
 package fr.sirs;
 
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
+import fr.sirs.core.SirsCore;
 
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
@@ -31,6 +32,8 @@ import static fr.sirs.ui.AlertItem.AlertItemLevel.INFORMATION;
 import fr.sirs.util.FXPreferenceEditor;
 import org.geotoolkit.gui.javafx.util.ProgressMonitor;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
@@ -62,6 +65,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
+import org.geotoolkit.internal.GeotkFX;
 
 /**
  *
@@ -71,7 +75,7 @@ public class FXMainFrame extends BorderPane {
 
     public static final Image ICON_ALL  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TABLE,16,FontAwesomeIcons.DEFAULT_COLOR),null);
     public static final Image ICON_ALERT  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_BELL,16,FontAwesomeIcons.DEFAULT_COLOR),null);
-    
+
     private static final String BUNDLE_KEY_ADMINISTATION = "administration";
     private static final String BUNDLE_KEY_USERS = "users";
     private static final String BUNDLE_KEY_VALIDATION = "validation";
@@ -109,11 +113,11 @@ public class FXMainFrame extends BorderPane {
 
     public FXMainFrame() {
         SIRS.loadFXML(this, FXMainFrame.class);
-        
+
         final ToolBar pm = new ToolBar(new ProgressMonitor(TaskManager.INSTANCE));
         pm.prefHeightProperty().bind(uiMenu.heightProperty());
         ((HBox) uiMenu.getParent()).getChildren().add(pm);
-        
+
         // Load themes
         final Theme[] themes = Plugins.getThemes();
         for(final Theme theme : themes){
@@ -158,7 +162,7 @@ public class FXMainFrame extends BorderPane {
                 uiDesignation.getItems().add(toMenuItem(elementClass, Choice.MODEL));
             }
         }
-        
+
         uiAdmin.getItems().addAll(uiUserAdmin, uiValidation, uiReference, uiDesignation);
         uiAdmin.visibleProperty().bind(Bindings.createBooleanBinding(() -> {
             Utilisateur user = session.utilisateurProperty().get();
@@ -197,12 +201,12 @@ public class FXMainFrame extends BorderPane {
         final VBox vbox = new VBox();
         vbox.getStylesheets().add(SIRS.CSS_PATH);
         vbox.getStyleClass().add(CSS_POPUP_ALERTS);
-        
+
         final DateTimeFormatter dfFormat = DateTimeFormatter.ofPattern("d MMMM uuuu");
         for (final AlertItem alert : alerts) {
             final Label label = new Label(alert.getTitle());
             label.getStyleClass().add(CSS_POPUP_RAPPEL_TITLE);
-            
+
             final VBox alertBox = new VBox(label, new Label("Echéance " + alert.getDate().format(dfFormat)));
             alertBox.getStyleClass().add(CSS_POPUP_ALERT);
             if(alert.getLevel()== HIGH)
@@ -230,7 +234,7 @@ public class FXMainFrame extends BorderPane {
             alertPopup.show(uiAlertsBtn, popupPos.getX() - alertPopup.getWidth() - 5, popupPos.getY() - alertPopup.getHeight());
         }
     }
-    
+
     public TabPane getUiTabs() {
         return uiTabs;
     }
@@ -241,14 +245,14 @@ public class FXMainFrame extends BorderPane {
         }
         return mapTab;
     }
-    
+
     public synchronized DiguesTab getDiguesTab() {
         if(diguesTab==null){
             diguesTab = new DiguesTab(uiTabs);
         }
         return diguesTab;
     }
-        
+
     public final synchronized void addTab(Tab tab){
         if (!uiTabs.equals(tab.getTabPane())) {
             uiTabs.getTabs().add(tab);
@@ -267,9 +271,9 @@ public class FXMainFrame extends BorderPane {
             item = new MenuItem(bdl.getString(BUNDLE_KEY_CLASS));
         }
 
-         
+
         final EventHandler<ActionEvent> handler;
-        
+
         if(typeOfSummary==Choice.REFERENCE){
             handler = (ActionEvent event) -> {
                 addTab(Injector.getSession().getOrCreateReferenceTypeTab(clazz));
@@ -280,21 +284,21 @@ public class FXMainFrame extends BorderPane {
                 addTab(Injector.getSession().getOrCreateDesignationTab(clazz));
             };
         }
-        
+
         item.setOnAction(handler);
         return item;
     }
-    
+
     /**
      * Property contenant le plugin actif.
-     * 
-     * @return 
+     *
+     * @return
      */
     public ObjectProperty<Plugin> activePluginProperty(){
         return activePlugin;
     }
 
-    @FXML 
+    @FXML
     private void clearCache(){
         session.clearCache();
         final Collection<AbstractSIRSRepository> repos = session.getModelRepositories();
@@ -396,7 +400,7 @@ public class FXMainFrame extends BorderPane {
 
         return item;
     }
-  
+
     @FXML
     void openMap(ActionEvent event) {
         getMapTab().show();
@@ -408,9 +412,9 @@ public class FXMainFrame extends BorderPane {
     }
 
     /**
-     * Get or create search tab. If it has been previously closed, we reset it, 
+     * Get or create search tab. If it has been previously closed, we reset it,
      * so user won't be bothered with an old request.
-     * @param event 
+     * @param event
      */
     @FXML
     private void openSearchTab(ActionEvent event) {
@@ -422,18 +426,18 @@ public class FXMainFrame extends BorderPane {
         }
         uiTabs.getSelectionModel().select(searchTab);
     }
-    
+
     @FXML
     void openCompte(ActionEvent event){
         if (session.getUtilisateur()!=null) {
             addTab(session.getOrCreateElementTab(session.getUtilisateur()));
         }
     }
-    
+
     @FXML
     void openPref(ActionEvent event) {
         if (prefEditor == null) {
-            prefEditor = new FXPreferenceEditor();            
+            prefEditor = new FXPreferenceEditor();
         }
         prefEditor.show();
     }
@@ -442,8 +446,8 @@ public class FXMainFrame extends BorderPane {
     void exit(ActionEvent event) {
         System.exit(0);
     }
-    
-    @FXML 
+
+    @FXML
     void deconnect(ActionEvent event) throws IOException{
         if (SIRS.getLauncher() != null) {
             SIRS.getLauncher().restart();
@@ -452,8 +456,8 @@ public class FXMainFrame extends BorderPane {
             SIRS.LOADER.showSplashStage();
         }
     }
-    
-    @FXML 
+
+    @FXML
     void changeUser(ActionEvent event) throws IOException{
         this.getScene().getWindow().hide();
         session.setUtilisateur(null);
@@ -461,12 +465,12 @@ public class FXMainFrame extends BorderPane {
         session.getTaskManager().reset();
         SIRS.LOADER.showSplashStage();
     }
-    
-    @FXML 
+
+    @FXML
     private void checkReferences(){
         Injector.getSession().getTaskManager().submit(Injector.getSession().getReferenceChecker());
     }
-    
+
     @FXML
     private void print() throws Exception {
 
@@ -482,8 +486,8 @@ public class FXMainFrame extends BorderPane {
         };
         t.start();
     }
-    
-    @FXML 
+
+    @FXML
     private void disorderPrint(){
         addTab(session.getOrCreatePrintTab(Session.PrintTab.DESORDRE, "Fiches détaillées de désordres"));
     }
@@ -495,7 +499,12 @@ public class FXMainFrame extends BorderPane {
 
     @FXML
     public void showUserGuide() {
-        addTab(session.getOrCreateUserGuideTab());
+        try {
+            SIRS.browseURL(new URL("http://sirs-digues.info/documents/"), "Guide utilisateur");
+        } catch (MalformedURLException ex) {
+            SirsCore.LOGGER.log(Level.WARNING, null, ex);
+            GeotkFX.newExceptionDialog("L'URL demandée est invalide.", ex).show();
+        }
     }
 
     @FXML
@@ -508,7 +517,7 @@ public class FXMainFrame extends BorderPane {
         infoStage.setResizable(false);
         infoStage.show();
     }
-    
+
     private class DisplayTheme implements EventHandler<ActionEvent> {
 
         private final Theme theme;
