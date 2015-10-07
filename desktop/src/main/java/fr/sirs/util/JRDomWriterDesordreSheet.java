@@ -2,7 +2,6 @@
 package fr.sirs.util;
 
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Observation;
@@ -77,8 +76,6 @@ import java.util.ResourceBundle;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -88,7 +85,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.aspectj.asm.IProgramElement;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -418,7 +414,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         ----------------------------------------------------------------------*/
         if(desordre.getObservations()!=null && !desordre.getObservations().isEmpty()){
             currentY+=2;
-            writeSectionTitle("Observations", 15, 2, 10, 9);
+            writeSectionTitle("Observations", 15, 1, 10, 9);
             currentY+=2;
             writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 30);
             currentY+=2;
@@ -429,7 +425,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         ----------------------------------------------------------------------*/
         if(desordre.getPrestationIds()!=null && !desordre.getPrestationIds().isEmpty()){
             currentY+=2;
-            writeSectionTitle("Prestations", 15, 2, 10, 9);
+            writeSectionTitle("Prestations", 15, 1, 10, 9);
             currentY+=2;
             writeTable(Prestation.class, prestationFields, true, PRESTATION_TABLE_DATA_SOURCE, PRESTATION_DATASET, 30);
             currentY+=2;
@@ -466,7 +462,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
                 + desordre.getReseauHydrauliqueFermeIds().size();
         if(printReseauOuvrage && nbReseauOuvrage>0){
             currentY+=2;
-            writeSectionTitle("Réseaux et ouvrages", 15, 2, 10, 9);
+            writeSectionTitle("Réseaux et ouvrages", 15, 1, 10, 9);
             currentY+=2;
             writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET, 30);
             currentY+=2;
@@ -479,7 +475,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
                 + desordre.getVoieDigueIds().size();
         if(printReseauOuvrage && nbVoirie>0){
             currentY+=2;
-            writeSectionTitle("Voiries", 15, 2, 10, 9);
+            writeSectionTitle("Voiries", 15, 1, 10, 9);
             currentY+=2;
             writeTable(ObjetReseau.class, reseauFields, true, VOIRIE_TABLE_DATA_SOURCE, VOIRIE_DATASET, 30);
             currentY+=2;
