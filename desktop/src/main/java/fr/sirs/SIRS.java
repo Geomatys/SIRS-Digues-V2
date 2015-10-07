@@ -316,7 +316,7 @@ public final class SIRS extends SirsCore {
          */
         if (PlatformUtil.isWindows()) {
             return docRoot.resolve(relativeReference.replaceAll("/", File.separator) // On remplace les séparateurs issus d'un autre système.
-                    .replaceFirst("^"+File.separator+"+", "")); // On enlève tout séparateur en début de chaîne qui tendrait à signifier que le chemin n'est pas relatif.
+                    .replaceFirst("^\\\\+", "")); // On enlève tout séparateur en début de chaîne qui tendrait à signifier que le chemin n'est pas relatif.
         } else {
             return docRoot.resolve(relativeReference.replaceAll("\\\\+", File.separator) // On remplace les séparateurs issus d'un autre système.
                     .replaceFirst("^"+File.separator+"+", "")); // On enlève tout séparateur en début de chaîne qui tendrait à signifier que le chemin n'est pas relatif.
