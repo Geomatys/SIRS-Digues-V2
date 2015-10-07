@@ -77,7 +77,7 @@
                    <Spinner fx:id="ui_coteAlerte" GridPane.columnIndex="1" GridPane.rowIndex="4"  maxHeight="-Infinity" maxWidth="-Infinity"/>
                    <!-- EString -->                 
                    <Label text="%chemin" GridPane.rowIndex="5" />
-                   <FXFileTextField fx:id="ui_chemin" GridPane.columnIndex="1" GridPane.rowIndex="5"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <FXFileTextField fx:id="ui_chemin" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                    
                    
                    

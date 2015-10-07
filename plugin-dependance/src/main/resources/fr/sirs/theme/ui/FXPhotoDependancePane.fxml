@@ -58,7 +58,7 @@
                                <DatePicker fx:id="ui_date" GridPane.columnIndex="1" GridPane.rowIndex="0"  maxHeight="-Infinity" maxWidth="-Infinity"/>
                                <!-- EString -->                 
                                <Label text="%chemin" GridPane.rowIndex="1" />
-                               <FXFileTextField fx:id="ui_chemin" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                               <FXFileTextField fx:id="ui_chemin" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                <!-- EString -->                 
                                <Label text="%libelle" GridPane.rowIndex="2" />
                                <TextField fx:id="ui_libelle" GridPane.columnIndex="1" GridPane.rowIndex="2"  />
