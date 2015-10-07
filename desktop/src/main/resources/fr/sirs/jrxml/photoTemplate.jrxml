@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="photoTemplate" language="groovy" pageWidth="555" pageHeight="200" orientation="Landscape" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="5" bottomMargin="5" uuid="8cb172c0-6a4e-4f32-bb30-7d696ad09a1f">
 	<property name="ireport.zoom" value="1.948717100000002"/>
-	<property name="ireport.x" value="119"/>
+	<property name="ireport.x" value="248"/>
 	<property name="ireport.y" value="0"/>
 	<field name="designation" class="java.lang.String"/>
 	<field name="libelle" class="java.lang.String"/>
@@ -21,7 +21,7 @@
 			<frame>
 				<reportElement mode="Opaque" x="0" y="0" width="555" height="15" backcolor="#CB5C5C" uuid="a640d553-688a-47bd-ad31-e7e71552595b"/>
 				<staticText>
-					<reportElement x="10" y="2" width="545" height="11" uuid="09d19c03-ec69-4ad7-bdd8-dbb4315e574e"/>
+					<reportElement x="10" y="1" width="545" height="13" uuid="09d19c03-ec69-4ad7-bdd8-dbb4315e574e"/>
 					<textElement>
 						<font size="9" isBold="true" isItalic="true" isUnderline="true"/>
 					</textElement>
@@ -48,7 +48,7 @@
 			<textField>
 				<reportElement x="332" y="82" width="174" height="12" uuid="6a5dcd94-1371-4e02-a641-770c9eb2e020"/>
 				<textElement>
-					<font size="8"/>
+					<font size="6"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{chemin}==null?"Non renseigné":$F{chemin}]]></textFieldExpression>
 			</textField>

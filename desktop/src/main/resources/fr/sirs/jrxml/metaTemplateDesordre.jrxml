@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="jasper_report_template" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="10e7ad18-cce4-4b7d-832d-94e5135fe8c0">
 	<property name="ireport.zoom" value="1.6105100000000014"/>
-	<property name="ireport.x" value="119"/>
+	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="83"/>
 	<style name="table">
 		<box>
@@ -29,8 +29,8 @@
 	</style>
 	<subDataset name="Observation Dataset" uuid="f87f5cd0-3234-40c4-9ea3-250724f36d5e"/>
 	<subDataset name="Prestation Dataset" uuid="df00eaba-db68-4b08-8235-09c8aa0b6e8c"/>
-	<subDataset name="ReseauOuvrage Dataset"/>
-	<subDataset name="Voirie Dataset"/>
+	<subDataset name="ReseauOuvrage Dataset" uuid="ac0fddac-67df-47b9-83cb-4b6fb7d9d014"/>
+	<subDataset name="Voirie Dataset" uuid="dafa0e8d-c219-44fe-9097-387a54fe781d"/>
 	<parameter name="logo" class="java.lang.Object"/>
 	<parameter name="OBSERVATION_TABLE_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
 	<parameter name="PRESTATION_TABLE_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
@@ -64,7 +64,7 @@
 			<frame>
 				<reportElement mode="Opaque" x="0" y="0" width="555" height="15" backcolor="#CB5C5C" uuid="e9515967-8551-4baf-9ece-675713572d85"/>
 				<staticText>
-					<reportElement x="10" y="2" width="545" height="11" uuid="f2e8836c-b61f-4ad0-aac7-590cd453e6e5"/>
+					<reportElement x="10" y="1" width="545" height="13" uuid="f2e8836c-b61f-4ad0-aac7-590cd453e6e5"/>
 					<textElement>
 						<font size="9" isBold="true" isItalic="true" isUnderline="true"/>
 					</textElement>
@@ -188,7 +188,7 @@
 			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="0" y="90" width="555" height="15" backcolor="#CB5C5C" uuid="62e862ef-7bf7-4e55-82f0-e1ecb659c0f1"/>
 				<staticText>
-					<reportElement x="10" y="2" width="545" height="11" uuid="cd0f4df6-f9f6-40c0-884e-053ad25fcb32"/>
+					<reportElement x="10" y="1" width="545" height="13" uuid="cd0f4df6-f9f6-40c0-884e-053ad25fcb32"/>
 					<textElement>
 						<font size="9" isBold="true" isItalic="true" isUnderline="true"/>
 					</textElement>
