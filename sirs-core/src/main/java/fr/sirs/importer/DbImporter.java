@@ -426,6 +426,8 @@ public class DbImporter {
                 for (final Linker l : context.linkers) {
                     l.link();
                 }
+
+                context.outputDb.compact();
             } finally {
                 databaseContext.getBeanFactory().destroyBean(params);
             }
