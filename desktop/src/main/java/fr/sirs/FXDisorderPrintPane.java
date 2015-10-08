@@ -3,12 +3,10 @@ package fr.sirs;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
-import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Observation;
-import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.RefUrgence;
 import fr.sirs.core.model.SystemeReperage;
@@ -29,7 +27,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableCell;
@@ -50,7 +47,7 @@ public class FXDisorderPrintPane extends BorderPane {
     
     @FXML private Tab uiTronconChoice;
     @FXML private Tab uiDisorderTypeChoice;
-    @FXML private Tab uiOptionChoice;
+    @FXML private Tab uiUrgenceTypeChoice;
     
     @FXML private CheckBox uiOptionPhoto;
     @FXML private CheckBox uiOptionReseauOuvrage;
@@ -66,12 +63,13 @@ public class FXDisorderPrintPane extends BorderPane {
     @FXML private DatePicker uiOptionDebutArchive;
     @FXML private DatePicker uiOptionFinArchive;
 
-    @FXML private ComboBox<Preview> uiUrgenceOption;
+//    @FXML private ComboBox<Preview> uiUrgenceOption;
 
     private final Map<String, ObjectProperty<Number>[]> prsByTronconId = new HashMap<>();
     private final TronconChoicePojoTable tronconsTable = new TronconChoicePojoTable();
-    private final DisorderTypeChoicePojoTable disordreTypesTable = new DisorderTypeChoicePojoTable();
-    protected final Previews previewRepository;
+    private final TypeChoicePojoTable disordreTypesTable = new TypeChoicePojoTable(RefTypeDesordre.class, "Types de désordres");
+    private final TypeChoicePojoTable urgenceTypesTable = new TypeChoicePojoTable(RefUrgence.class, "Types d'urgences");
+//    protected final Previews previewRepository;
     
     public FXDisorderPrintPane(){
         SIRS.loadFXML(this, FXDisorderPrintPane.class);
@@ -79,6 +77,8 @@ public class FXDisorderPrintPane extends BorderPane {
         uiTronconChoice.setContent(tronconsTable);
         disordreTypesTable.setTableItems(()-> (ObservableList) FXCollections.observableList(Injector.getSession().getRepositoryForClass(RefTypeDesordre.class).getAll()));
         uiDisorderTypeChoice.setContent(disordreTypesTable);
+        urgenceTypesTable.setTableItems(()-> (ObservableList) FXCollections.observableList(Injector.getSession().getRepositoryForClass(RefUrgence.class).getAll()));
+        uiUrgenceTypeChoice.setContent(urgenceTypesTable);
         
         uiOptionNonArchive.disableProperty().bind(uiOptionArchive.selectedProperty());
         uiOptionArchive.disableProperty().bind(uiOptionNonArchive.selectedProperty());
@@ -96,10 +96,10 @@ public class FXDisorderPrintPane extends BorderPane {
         uiOptionDebutArchive.disableProperty().bind(uiOptionNonArchive.selectedProperty());
         uiOptionFinArchive.disableProperty().bind(uiOptionNonArchive.selectedProperty());
 
-        previewRepository = Injector.getSession().getPreviews();
-        final List<Preview> urgences = previewRepository.getByClass(RefUrgence.class);
-        urgences.add(null);
-        SIRS.initCombo(uiUrgenceOption, FXCollections.observableList(urgences), null);
+//        previewRepository = Injector.getSession().getPreviews();
+//        final List<Preview> urgences = previewRepository.getByClass(RefUrgence.class);
+//        urgences.add(null);
+//        SIRS.initCombo(uiUrgenceOption, FXCollections.observableList(urgences), null);
     }
     
     @FXML private void cancel(){
@@ -121,6 +121,10 @@ public class FXDisorderPrintPane extends BorderPane {
             final List<String> typeDesordresIds = new ArrayList<>();
             for(final Element element : disordreTypesTable.getSelectedItems()){
                 typeDesordresIds.add(element.getId());
+            }
+            final List<String> typeUrgencesIds = new ArrayList<>();
+            for(final Element element : urgenceTypesTable.getSelectedItems()){
+                typeUrgencesIds.add(element.getId());
             }
             
             long minTimeSelected = Long.MIN_VALUE;
@@ -151,7 +155,7 @@ public class FXDisorderPrintPane extends BorderPane {
             // Intervalle d'archivage du désordre
             final NumberRange<Long> archiveRange = NumberRange.create(minTimeSelected, true, maxTimeSelected, true);
 
-            final Preview urgenceRequise = uiUrgenceOption.getSelectionModel().getSelectedItem();
+//            final Preview urgenceRequise = uiUrgenceOption.getSelectionModel().getSelectedItem();
 
             // On retire les désordres de la liste dans les cas suivants :
             desordres.removeIf((Desordre desordre) -> {
@@ -262,7 +266,10 @@ public class FXDisorderPrintPane extends BorderPane {
 
                         // 4- Si on a décidé de ne générer la fiche que pour un niveau d'urgence particulier;
                         final boolean urgenceOption;
-                        if(urgenceRequise==null || urgenceRequise.getElementId()==null){
+
+
+
+                        if(typeUrgencesIds==null || typeUrgencesIds.isEmpty()){
                             urgenceOption = false;
                         }else{
                             // Recherche de la dernière observation.
@@ -278,7 +285,7 @@ public class FXDisorderPrintPane extends BorderPane {
                             }
 
                             if(derniereObservation!=null){
-                                urgenceOption = !urgenceRequise.getElementId().equals(derniereObservation.getUrgenceId());
+                                urgenceOption = !typeUrgencesIds.contains(derniereObservation.getUrgenceId());
                             }
                             else urgenceOption=false;
                         }
@@ -321,10 +328,10 @@ public class FXDisorderPrintPane extends BorderPane {
         }
     }
     
-    private class DisorderTypeChoicePojoTable extends PojoTable {
+    private class TypeChoicePojoTable extends PojoTable {
         
-        public DisorderTypeChoicePojoTable() {
-            super(RefTypeDesordre.class, "Types de désordres");
+        public TypeChoicePojoTable(final Class clazz, final String title) {
+            super(clazz, title);
             getColumns().remove(editCol);
             editableProperty.set(false);
         }
