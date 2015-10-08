@@ -101,7 +101,7 @@ public class Session extends SessionCore {
     private final Cache<Class<? extends Element>, FXFreeTab> openDesignationPanes = new Cache<>(12, 0, false);
     public enum AdminTab{VALIDATION, USERS}
     private final Cache<AdminTab, FXFreeTab> openAdminTabs = new Cache<>(2, 0, false);
-    public enum PrintTab{DESORDRE, TEMPLATE}
+    public enum PrintTab{DESORDRE, RESEAU_FERME, TEMPLATE}
     private final Cache<PrintTab, FXFreeTab> openPrintTabs = new Cache<>(2, 0, false);
     private static FXFreeTab userGuideTab = null;
 
@@ -275,6 +275,12 @@ public class Session extends SessionCore {
                 return openPrintTabs.getOrCreate(PrintTab.DESORDRE, () -> {
                     final FXFreeTab tab = new FXFreeTab(title);
                     tab.setContent(new FXDisorderPrintPane());
+                    return tab;
+                });
+            } else if(PrintTab.RESEAU_FERME.equals(printTab)) {
+                return openPrintTabs.getOrCreate(PrintTab.RESEAU_FERME, () -> {
+                    final FXFreeTab tab = new FXFreeTab(title);
+                    tab.setContent(new FXReseauFermePrintPane());
                     return tab;
                 });
             } else {

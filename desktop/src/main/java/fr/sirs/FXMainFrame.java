@@ -2,35 +2,19 @@ package fr.sirs;
 
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.core.SirsCore;
-
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
-import fr.sirs.ui.AlertItem;
-import fr.sirs.ui.AlertManager;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
-import javafx.geometry.Point2D;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBase;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
-import javafx.scene.control.OverrunStyle;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.TextAlignment;
-import javafx.stage.Popup;
-import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.Role;
+import fr.sirs.core.model.Utilisateur;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.map.FXMapTab;
-import fr.sirs.theme.Theme;
-import fr.sirs.core.model.Utilisateur;
 import fr.sirs.query.FXSearchPane;
+import fr.sirs.theme.Theme;
+import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
+import fr.sirs.ui.AlertItem;
 import static fr.sirs.ui.AlertItem.AlertItemLevel.HIGH;
 import static fr.sirs.ui.AlertItem.AlertItemLevel.INFORMATION;
+import fr.sirs.ui.AlertManager;
 import fr.sirs.util.FXPreferenceEditor;
-import org.geotoolkit.gui.javafx.util.ProgressMonitor;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -45,26 +29,41 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBase;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
+import org.geotoolkit.gui.javafx.util.ProgressMonitor;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 
 /**
@@ -490,6 +489,11 @@ public class FXMainFrame extends BorderPane {
     @FXML
     private void disorderPrint(){
         addTab(session.getOrCreatePrintTab(Session.PrintTab.DESORDRE, "Fiches détaillées de désordres"));
+    }
+
+    @FXML
+    private void reseauFermePrint(){
+        addTab(session.getOrCreatePrintTab(Session.PrintTab.RESEAU_FERME, "Fiches détaillées de réseaux hydrauliques fermés"));
     }
 
     @FXML
