@@ -1,6 +1,7 @@
-package fr.sirs.importer.v2.mapper;
+package fr.sirs.importer.v2.mapper.linear;
 
 import fr.sirs.core.model.SystemeReperage;
+import fr.sirs.importer.v2.mapper.GenericMapperSpi;
 import java.beans.IntrospectionException;
 import java.util.HashMap;
 import java.util.Map;

@@ -37,7 +37,7 @@ public class ReseauRegistry {
         NOM_TABLE_EVT
     };
 
-    private final HashMap<Object, Class<ObjetReseau>> types = new HashMap<>(4);
+    private final HashMap<Object, Class<? extends ObjetReseau>> types = new HashMap<>(4);
 
     @Autowired
     private ReseauRegistry(ImportContext context) throws IOException {
@@ -105,11 +105,11 @@ public class ReseauRegistry {
      * @return document class associated to given document type ID, or null, if
      * given Id is unknown.
      */
-    public Class<ObjetReseau> getElementType(final Object typeId) {
+    public Class<? extends ObjetReseau> getElementType(final Object typeId) {
         return types.get(typeId);
     }
 
-    public Class<ObjetReseau> getElementType(final Row input) {
+    public Class<? extends ObjetReseau> getElementType(final Row input) {
         final Object typeId = input.get(Columns.ID_TYPE_ELEMENT_RESEAU.name());
         if (typeId != null) {
             return getElementType(typeId);
@@ -117,7 +117,7 @@ public class ReseauRegistry {
         return null;
     }
 
-    public Collection<Class<ObjetReseau>> allTypes() {
+    public Collection<Class<? extends ObjetReseau>> allTypes() {
         return types.values();
     }
 }

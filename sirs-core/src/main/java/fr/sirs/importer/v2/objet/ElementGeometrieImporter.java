@@ -6,7 +6,10 @@ import fr.sirs.core.model.LargeurFrancBord;
 import static fr.sirs.importer.DbImporter.TableName.*;
 import fr.sirs.core.model.ObjetPhotographiable;
 import fr.sirs.importer.v2.AbstractImporter;
+import fr.sirs.importer.v2.MultipleSubTypes;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +18,7 @@ import org.springframework.stereotype.Component;
  * @author Samuel Andrés (Geomatys)
  */
 @Component
-public class ElementGeometrieImporter extends AbstractImporter<ObjetPhotographiable> {
+public class ElementGeometrieImporter extends AbstractImporter<ObjetPhotographiable> implements MultipleSubTypes<ObjetPhotographiable> {
 
     @Override
     public String getRowIdFieldName() {
@@ -54,6 +57,11 @@ public class ElementGeometrieImporter extends AbstractImporter<ObjetPhotographia
         } else {
             throw new IllegalStateException("No element type available for " + Columns.ID_TYPE_ELEMENT_GEOMETRIE.name() + " " + table);
         }
+    }
+
+    @Override
+    public Collection<Class<? extends ObjetPhotographiable>> getSubTypes() {
+        return (Collection) Collections.singleton( LargeurFrancBord.class);
     }
 
     private enum Columns {

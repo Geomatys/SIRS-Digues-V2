@@ -9,5 +9,5 @@ import java.util.Collection;
  */
 public interface MultipleSubTypes<T> {
 
-    Collection<Class<T>> getSubTypes();
+    Collection<Class<? extends T>> getSubTypes();
 }

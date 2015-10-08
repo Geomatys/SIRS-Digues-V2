@@ -11,6 +11,8 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.v2.AbstractImporter;
 import fr.sirs.importer.v2.AbstractLinker;
+import fr.sirs.importer.v2.CorruptionLevel;
+import fr.sirs.importer.v2.ErrorReport;
 import fr.sirs.importer.v2.SimpleUpdater;
 import java.io.IOException;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,7 @@ public class ParametrePTraversImporter extends SimpleUpdater<ParametreHydrauliqu
     private Column profilColumn;
 
     private enum Columns {
+
         ID_PROFIL_EN_TRAVERS_LEVE,
         ID_EVENEMENT_HYDRAU
     }
@@ -67,41 +70,43 @@ public class ParametrePTraversImporter extends SimpleUpdater<ParametreHydrauliqu
         super.preCompute();
         leveImporter = context.importers.get(LeveProfilTravers.class);
         if (leveImporter == null) {
-            throw new AccessDbImporterException("No importer found for "+LeveProfilTravers.class);
+            throw new AccessDbImporterException("No importer found for " + LeveProfilTravers.class);
         }
         try {
             leveTable = context.inputDb.getTable(leveImporter.getTableName());
         } catch (IOException ex) {
-            throw new AccessDbImporterException("Cannot access table "+leveImporter.getTableName(), ex);
+            throw new AccessDbImporterException("Cannot access table " + leveImporter.getTableName(), ex);
         }
         leveColumn = leveTable.getColumn((leveImporter).getRowIdFieldName());
-        profilColumn = leveTable.getColumn(((AbstractLinker)leveImporter).getHolderColumn());
+        profilColumn = leveTable.getColumn(((AbstractLinker) leveImporter).getHolderColumn());
     }
-
 
     @Override
     protected ProfilTravers getDocument(final Object rowId, Row input, ParametreHydrauliqueProfilTravers output) {
         final Object leveId = input.get(getDocumentIdField());
         if (leveId == null) {
-            throw new IllegalStateException("Input has no valid ID in " + getDocumentIdField());
+            context.reportError(new ErrorReport(null, input, getTableName(), getDocumentIdField(), output, null, "Cannot import a profile parameter due to null foreign key.", CorruptionLevel.ROW));
+            return null;
         }
 
-        final Cursor cursor = leveTable.getDefaultCursor();
+        ProfilTravers result = null;
         try {
-            while (cursor.findNextRow(leveColumn, leveId)) {
+            final Cursor cursor = leveTable.getDefaultCursor();
+            if (cursor.findFirstRow(leveColumn, leveId)) {
                 final Integer profilId = cursor.getCurrentRow().getInt(profilColumn.getName());
                 if (profilId == null) {
-                    throw new IllegalStateException("No valid profil found for leve " + leveId);
-                }
-                try {
-                    return masterRepository.get(masterImporter.getImportedId(profilId));
-                } catch (Exception ex) {
-                    throw new IllegalStateException("No valid profil found for id " + profilId);
+                    context.reportError(new ErrorReport(null, cursor.getCurrentRow(), leveTable.getName(), leveColumn.getName(), output, null, "Cannot import a profile parameter due to null foreign key.", CorruptionLevel.ROW));
+                } else {
+                    try {
+                        result = masterRepository.get(masterImporter.getImportedId(profilId));
+                    } catch (Exception ex) {
+                        context.reportError(new ErrorReport(null, cursor.getCurrentRow(), leveTable.getName(), leveColumn.getName(), output, null, "No valid profile found for id " + profilId, CorruptionLevel.ROW));
+                    }
                 }
             }
         } catch (IOException ex) {
             throw new IllegalStateException("Cannot access table " + leveImporter.getTableName(), ex);
         }
-        throw new IllegalStateException("No valid profil found.");
+        return result;
     }
 }

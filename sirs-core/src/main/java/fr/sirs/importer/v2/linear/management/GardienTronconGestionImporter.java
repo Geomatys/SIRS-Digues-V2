@@ -24,7 +24,7 @@ public class GardienTronconGestionImporter extends GenericPeriodeLocaliseeImport
         ID_GARDIEN_TRONCON_GESTION,
         ID_INTERVENANT,
         ID_TRONCON_GESTION
-    };
+    }
 
     @Override
     protected Class<GardeTroncon> getElementClass() {

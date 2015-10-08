@@ -34,7 +34,14 @@ public abstract class AbstractLinker<T extends Element, U extends Element> exten
     public void link() throws IOException, AccessDbImporterException {
 
         final AbstractImporter<U> holderImporter = context.importers.get(getHolderClass());
+        if (holderImporter == null) {
+            throw new AccessDbImporterException("No importer found for type "+getHolderClass());
+        }
+
         final AbstractSIRSRepository<U> holderRepo = session.getRepositoryForClass(getHolderClass());
+        if (holderRepo == null) {
+            throw new AccessDbImporterException("No repository found for type "+getHolderClass());
+        }
 
         Iterator<Map.Entry<Object, HashSet<String>>> it = holder2targetIds.entrySet().iterator();
 
@@ -97,15 +104,15 @@ public abstract class AbstractLinker<T extends Element, U extends Element> exten
     @Override
     protected Element prepareToPost(Object rowId, Row row, T output) {
         final String holderColumn = getHolderColumn();
-        final Object profilId = row.get(holderColumn);
-        if (profilId == null) {
+        final Object holderId = row.get(holderColumn);
+        if (holderId == null) {
             context.reportError(getTableName(), row, new IllegalArgumentException("Empty foreign key : "+holderColumn));
             //throw new AccessDbImporterException("Empty foreign key : "+holderColumn);
         } else {
-            HashSet<T> value = buffer.get(profilId);
+            HashSet<T> value = buffer.get(holderId);
             if (value == null) {
                 value = new HashSet<>();
-                buffer.put(profilId, value);
+                buffer.put(holderId, value);
             }
             value.add(output);
         }

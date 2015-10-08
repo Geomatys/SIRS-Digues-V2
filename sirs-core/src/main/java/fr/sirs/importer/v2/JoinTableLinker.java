@@ -153,14 +153,24 @@ public abstract class JoinTableLinker<T extends Element, U extends Element> impl
 
                 // Those fields should be SQL join table keys, so they should never be null.
                 try {
-                    holderId = holderImporter.getImportedId(current.get(holderColumn));
+                    final Object holderRowId = current.get(holderColumn);
+                    if (holderRowId == null) {
+                        context.reportError(new ErrorReport(null, current, tableName, holderColumn, null, null, "Missing foreign key", CorruptionLevel.ROW));
+                        continue;
+                    }
+                    holderId = holderImporter.getImportedId(holderRowId);
                 } catch (IllegalStateException e) {
                     context.reportError(new ErrorReport(e, current, tableName, holderColumn, null, null, "No imported object found for input Id.", CorruptionLevel.ROW));
                     continue;
                 }
 
                 try {
-                    targetId = targetImporter.getImportedId(current.get(targetColumn));
+                    final Object targetRowId = current.get(targetColumn);
+                    if (targetRowId == null) {
+                        context.reportError(new ErrorReport(null, current, tableName, targetColumn, null, null, "Missing foreign key", CorruptionLevel.ROW));
+                        continue;
+                    }
+                    targetId = targetImporter.getImportedId(targetRowId);
                 } catch (IllegalStateException e) {
                     context.reportError(new ErrorReport(e, current, tableName, targetColumn, null, null, "No imported object found for input Id.", CorruptionLevel.ROW));
                     continue;

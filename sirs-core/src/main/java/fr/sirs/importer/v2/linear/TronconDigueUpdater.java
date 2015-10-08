@@ -29,8 +29,6 @@ import org.springframework.stereotype.Component;
  * Update CouchDB {@link TronconDigue} by adding id of their default
  * {@link SystemeReperage}, as the list of their bound {@link BorneDigue}
  *
- * TODO : register
- *
  * @author Alexis Manin (Geomatys)
  */
 @Component

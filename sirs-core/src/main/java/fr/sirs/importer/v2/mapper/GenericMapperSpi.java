@@ -37,7 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class GenericMapperSpi<T> implements MapperSpi<T> {
 
     @Autowired
-    ImportContext context;
+    protected ImportContext context;
 
     protected final Class<T> outputClass;
 

@@ -9,7 +9,10 @@ import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.importer.v2.AbstractImporter;
+import fr.sirs.importer.v2.MultipleSubTypes;
 import fr.sirs.importer.v2.document.DocTypeRegistry;
+import java.util.ArrayList;
+import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,10 +25,19 @@ import org.springframework.stereotype.Component;
  * @author Samuel Andres (Geomatys)
  */
 @Component
-public class AbstractPositionDocumentImporter extends AbstractImporter<AbstractPositionDocument> {
+public class AbstractPositionDocumentImporter extends AbstractImporter<AbstractPositionDocument> implements MultipleSubTypes<AbstractPositionDocument> {
 
     @Autowired
     protected DocTypeRegistry docTypes;
+
+    @Override
+    public Collection<Class<? extends AbstractPositionDocument>> getSubTypes() {
+        final ArrayList<Class<? extends AbstractPositionDocument>> list = new ArrayList<>();
+        list.add(PositionDocument.class);
+        list.add(PositionProfilTravers.class);
+
+        return list;
+    }
 
     private enum Columns {
         ID_DOC,
@@ -85,13 +97,13 @@ public class AbstractPositionDocumentImporter extends AbstractImporter<AbstractP
     protected AbstractPositionDocument createElement(Row input) {
         Integer docType = input.getInt(Columns.ID_TYPE_DOCUMENT.toString());
         if (docType == null) {
-            throw new IllegalArgumentException("No valid document type in row "+input.getInt(getRowIdFieldName())+ " of table "+getTableName());
+            return null;
         }
 
         // Find what type of element must be imported.
         Class docClass = docTypes.getDocType(docType);
         if (docClass == null) {
-            throw new IllegalArgumentException("No valid document type in row "+input.getInt(getRowIdFieldName())+ " of table "+getTableName());
+            return null;
         } else if (ProfilTravers.class.isAssignableFrom(docClass)) {
             docClass = PositionProfilTravers.class;
         } else if (!ProfilLong.class.isAssignableFrom(docClass)) {

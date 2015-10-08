@@ -50,12 +50,12 @@ public class StructureImporter extends AbstractImporter<Objet> implements Multip
         }
 
         // Find what type of element must be imported.
-        Class<Objet> clazz = registry.getElementType(type);
+        Class<? extends Objet> clazz = registry.getElementType(type);
         return clazz == null ? null : ElementCreator.createAnonymValidElement(clazz);
     }
 
     @Override
-    public Collection<Class<Objet>> getSubTypes() {
+    public Collection<Class<? extends Objet>> getSubTypes() {
         return registry.allTypes();
     }
 }

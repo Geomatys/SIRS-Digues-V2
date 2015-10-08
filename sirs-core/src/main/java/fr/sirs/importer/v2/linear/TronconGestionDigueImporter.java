@@ -6,8 +6,6 @@ import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
-import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.RefRive;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
 import static fr.sirs.importer.DbImporter.TableName.*;
@@ -15,8 +13,6 @@ import fr.sirs.importer.v2.AbstractImporter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.List;
 import org.geotoolkit.data.shapefile.shp.ShapeHandler;
 import org.geotoolkit.data.shapefile.shp.ShapeType;
 import org.geotoolkit.geometry.jts.JTS;
@@ -33,22 +29,11 @@ public class TronconGestionDigueImporter extends AbstractImporter<TronconDigue> 
     private static final String GEOM_TABLE = "CARTO_TRONCON_GESTION_DIGUE";
     private static final String GEOM_COLUMN = "SHAPE";
 
-    private AbstractImporter<RefRive> typeRiveImporter;
-    //private final TronconGestionDigueGestionnaireImporter tronconGestionDigueGestionnaireImporter;
-    private AbstractImporter<Digue> digueImporter;
-
     private Column idColumn;
     private Cursor geometryCursor;
 
     enum Columns {
         ID_TRONCON_GESTION,
-//        ID_ORG_GESTIONNAIRE, //Dans les gestions ?
-        ID_DIGUE,
-        ID_TYPE_RIVE,
-        NOM_TRONCON_GESTION,
-        COMMENTAIRE_TRONCON,
-//        DATE_DEBUT_VAL_GESTIONNAIRE_D, //Dans les gestions ?
-//        DATE_FIN_VAL_GESTIONNAIRE_D, //Dans les gestions ?
         ID_SYSTEME_REP_DEFAUT
     };
 
@@ -63,33 +48,14 @@ public class TronconGestionDigueImporter extends AbstractImporter<TronconDigue> 
     }
 
     @Override
-    protected List<String> getUsedColumns() {
-        final List<String> columns = new ArrayList<>();
-        for (Columns c : Columns.values()) {
-            columns.add(c.toString());
-        }
-        return columns;
-    }
-
-    @Override
     public String getTableName() {
         return TRONCON_GESTION_DIGUE.toString();
     }
 
     @Override
-    protected void postCompute() {
-        super.postCompute();
-        typeRiveImporter = null;
-        digueImporter = null;
-        geometryCursor = null;
-        idColumn = null;
-    }
-
-    @Override
     protected void preCompute() throws AccessDbImporterException {
         super.preCompute();
-        typeRiveImporter = context.importers.get(RefRive.class);
-        digueImporter = context.importers.get(Digue.class);
+
         try {
             final Table t = context.inputCartoDb.getTable(GEOM_TABLE);
             geometryCursor = t.getDefaultCursor();
@@ -102,19 +68,6 @@ public class TronconGestionDigueImporter extends AbstractImporter<TronconDigue> 
     @Override
     public TronconDigue importRow(Row row, TronconDigue tronconDigue) throws IOException, AccessDbImporterException {
         tronconDigue = super.importRow(row, tronconDigue);
-
-        tronconDigue.setLibelle(row.getString(Columns.NOM_TRONCON_GESTION.toString()));
-        tronconDigue.setCommentaire(row.getString(Columns.COMMENTAIRE_TRONCON.toString()));
-
-        final Object riveId = row.get(Columns.ID_TYPE_RIVE.toString());
-        if (riveId != null) {
-            tronconDigue.setTypeRiveId(typeRiveImporter.getImportedId(riveId));
-        }
-
-        final Object digueId = row.get(Columns.ID_DIGUE.toString());
-        if (digueId != null) {
-            tronconDigue.setDigueId(digueImporter.getImportedId(digueId));
-        }
 
         final Object tronconId = row.get(getRowIdFieldName());
         if (tronconId == null) {
@@ -132,7 +85,7 @@ public class TronconGestionDigueImporter extends AbstractImporter<TronconDigue> 
      * @param tronconId Id of the source {@link TronconDigue } we want a geometry for.
      * @return A line string registered for the given object, or null if we cannot find any.
      */
-    private LineString computeGeometry(final Object tronconId) throws IOException {
+    private synchronized LineString computeGeometry(final Object tronconId) throws IOException {
         // Only take the last submitted geometry for the object.
         geometryCursor.afterLast();
         while (geometryCursor.moveToPreviousRow()) {

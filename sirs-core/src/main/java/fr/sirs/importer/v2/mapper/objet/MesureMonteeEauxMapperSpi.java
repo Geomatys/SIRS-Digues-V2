@@ -25,11 +25,12 @@ public class MesureMonteeEauxMapperSpi extends GenericMapperSpi<MesureMonteeEaux
         ID_SOURCE
     };
 
-    private final HashMap<String, String> bindings = new HashMap<>();
+    private final HashMap<String, String> bindings;
 
     public MesureMonteeEauxMapperSpi() throws IntrospectionException {
         super(MesureMonteeEaux.class);
 
+        bindings = new HashMap<>(6);
         bindings.put(Columns.DATE.name(), "date");
         bindings.put(Columns.ID_TYPE_REF_HEAU.name(), "referenceHauteurId");
         bindings.put(Columns.HAUTEUR_EAU.name(), "hauteur");

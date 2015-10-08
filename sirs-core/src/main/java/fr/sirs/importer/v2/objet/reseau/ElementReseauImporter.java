@@ -93,7 +93,7 @@ public class ElementReseauImporter extends AbstractImporter<ObjetReseau> impleme
     private ReseauRegistry registry;
 
     @Override
-    public Collection<Class<ObjetReseau>> getSubTypes() {
+    public Collection<Class<? extends ObjetReseau>> getSubTypes() {
         return registry.allTypes();
     }
 
@@ -120,7 +120,7 @@ public class ElementReseauImporter extends AbstractImporter<ObjetReseau> impleme
         }
 
         // Find what type of element must be imported.
-        Class<ObjetReseau> clazz = registry.getElementType(input);
+        Class<? extends ObjetReseau> clazz = registry.getElementType(input);
         if (clazz == null) {
             return null;
         }

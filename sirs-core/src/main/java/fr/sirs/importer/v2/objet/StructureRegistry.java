@@ -35,7 +35,7 @@ public class StructureRegistry {
         NOM_TABLE_EVT
     };
 
-    private final HashMap<Object, Class<Objet>> types = new HashMap<>(8);
+    private final HashMap<Object, Class<? extends Objet>> types = new HashMap<>(8);
 
     @Autowired
     private StructureRegistry(ImportContext context) throws IOException {
@@ -110,11 +110,11 @@ public class StructureRegistry {
      * @return document class associated to given document type ID, or null, if
      * given Id is unknown.
      */
-    public Class<Objet> getElementType(final Object typeId) {
+    public Class<? extends Objet> getElementType(final Object typeId) {
         return types.get(typeId);
     }
 
-    public Class<Objet> getElementType(final Row input) {
+    public Class<? extends Objet> getElementType(final Row input) {
         final Object typeId = input.get(Columns.ID_TYPE_ELEMENT_STRUCTURE.name());
         if (typeId != null) {
             return getElementType(typeId);
@@ -122,7 +122,7 @@ public class StructureRegistry {
         return null;
     }
 
-    public Collection<Class<Objet>> allTypes() {
+    public Collection<Class<? extends Objet>> allTypes() {
         return types.values();
     }
 }

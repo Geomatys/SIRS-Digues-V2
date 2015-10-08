@@ -64,14 +64,16 @@ public abstract class SimpleUpdater<T extends Element, U extends Element> extend
     protected U getDocument(final Object rowId, final Row input, T output) {
         final Object accessDocId = input.get(getDocumentIdField());
         if (accessDocId == null) {
-            throw new IllegalStateException("Input has no valid ID in " + getDocumentIdField());
+            context.reportError(new ErrorReport(null, input, getTableName(), getDocumentIdField(), output, null, "Cannot import a document due to bad foreign key.", CorruptionLevel.ROW));
+            return null;
         }
 
         try {
             final String docId = masterImporter.getImportedId(accessDocId);
             return masterRepository.get(docId);
         } catch (Exception ex) {
-            throw new IllegalStateException("No imported object found for row " + input.getInt(getRowIdFieldName()) + " from table " + getTableName(), ex);
+            context.reportError(new ErrorReport(null, input, masterImporter.getTableName(), getDocumentIdField(), output, null, "No imported object found for row " + accessDocId + " from table " + masterImporter.getTableName(), CorruptionLevel.ROW));
+            return null;
         }
     }
 }
