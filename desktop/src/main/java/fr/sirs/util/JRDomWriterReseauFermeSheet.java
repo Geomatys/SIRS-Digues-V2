@@ -138,7 +138,6 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
     
     private final boolean printPhoto;
     private final boolean printReseauOuvrage;
-    private final boolean printVoirie;
     
     private JRDomWriterReseauFermeSheet(){
         super();
@@ -154,7 +153,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
         avoidDesordreFields = null;
         observationFields = null;
         reseauFields = null;
-        printPhoto = printReseauOuvrage = printVoirie = true;
+        printPhoto = printReseauOuvrage = true;
     }
     
     public JRDomWriterReseauFermeSheet(final InputStream stream, 
@@ -162,8 +161,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
             final List<String> observationFields,
             final List<String> reseauFields,
             final boolean printPhoto, 
-            final boolean printReseauOuvrage, 
-            final boolean printVoirie) throws ParserConfigurationException, SAXException, IOException {
+            final boolean printReseauOuvrage) throws ParserConfigurationException, SAXException, IOException {
         super(stream);
         title = (Element) root.getElementsByTagName(TAG_TITLE).item(0);
         pageHeader = (Element) root.getElementsByTagName(TAG_PAGE_HEADER).item(0);
@@ -179,7 +177,6 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
         this.reseauFields = reseauFields;
         this.printPhoto = printPhoto;
         this.printReseauOuvrage = printReseauOuvrage;
-        this.printVoirie = printVoirie;
     }
     
     /**
@@ -200,11 +197,11 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
     
     /**
      * <p>This method writes a Jasper Reports template mapping the parameter class.</p>
-     * @param desordre
+     * @param reseau
      * @throws TransformerException
      * @throws IOException
      */
-    public void write(final ReseauHydrauliqueFerme desordre) throws TransformerException, IOException, Exception {
+    public void write(final ReseauHydrauliqueFerme reseau) throws TransformerException, IOException, Exception {
         
         // Remove elements before inserting fields.-----------------------------
         root.removeChild(this.title);
@@ -213,7 +210,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
         root.removeChild(this.detail);
         
         // Modifies the template, based on the given class.---------------------
-        writeObject(desordre);
+        writeObject(reseau);
         
         // Serializes the document.---------------------------------------------
         //DomUtilities.write(this.document, this.output);
@@ -390,8 +387,6 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
      */
     private void writeDetail(final ReseauHydrauliqueFerme candidate) {
         
-        final Class classToMap = candidate.getClass();
-        
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         currentY = Integer.valueOf(band.getAttribute(ATT_HEIGHT));
         
@@ -418,6 +413,9 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
                 if(obsPhotos!=null && !obsPhotos.isEmpty()){
                     photos.addAll(obsPhotos);
                 }
+            }
+            if(candidate.getPhotos()!=null && !candidate.getPhotos().isEmpty()){
+                photos.addAll(candidate.getPhotos());
             }
             if(!photos.isEmpty()){
                 currentY+=2;
@@ -450,7 +448,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         final Element frame = document.createElement(TAG_FRAME);
         final Element frameReportElement = document.createElement(TAG_REPORT_ELEMENT);
-        frameReportElement.setAttribute(ATT_BACKCOLOR, "#CB5C5C");
+        frameReportElement.setAttribute(ATT_BACKCOLOR, "#F1CF40");
         frameReportElement.setAttribute(ATT_HEIGHT, String.valueOf(height));
         frameReportElement.setAttribute(ATT_MODE, JRUtils.Mode.OPAQUE.toString());
         frameReportElement.setAttribute(ATT_POSITION_TYPE, JRUtils.PositionType.FLOAT.toString());

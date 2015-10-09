@@ -58,7 +58,7 @@
 	<detail>
 		<band height="276" splitType="Stretch">
 			<frame>
-				<reportElement mode="Opaque" x="0" y="0" width="555" height="15" backcolor="#B9EBEC" uuid="e9515967-8551-4baf-9ece-675713572d85"/>
+				<reportElement mode="Opaque" x="0" y="0" width="555" height="15" backcolor="#F1CF40" uuid="e9515967-8551-4baf-9ece-675713572d85"/>
 				<staticText>
 					<reportElement x="10" y="1" width="545" height="13" uuid="f2e8836c-b61f-4ad0-aac7-590cd453e6e5"/>
 					<textElement>
@@ -182,7 +182,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="104" width="555" height="15" backcolor="#B9EBEC" uuid="62e862ef-7bf7-4e55-82f0-e1ecb659c0f1"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="104" width="555" height="15" backcolor="#F1CF40" uuid="62e862ef-7bf7-4e55-82f0-e1ecb659c0f1"/>
 				<staticText>
 					<reportElement x="10" y="1" width="545" height="13" uuid="cd0f4df6-f9f6-40c0-884e-053ad25fcb32"/>
 					<textElement>
@@ -484,7 +484,7 @@
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font fontName="Serif" size="8" isBold="true"/>
 					</textElement>
-					<text><![CDATA[Diamètre]]></text>
+					<text><![CDATA[Diamètre (mm)]]></text>
 				</staticText>
                                 <staticText>
                                         <reportElement positionType="Float" x="350" y="0" width="100" height="12" uuid="9e5c7d83-7fab-4c84-8fc1-f4cfb7989622"/>

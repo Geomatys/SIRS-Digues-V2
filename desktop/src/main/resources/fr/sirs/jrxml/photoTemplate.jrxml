@@ -19,7 +19,7 @@
 	<title>
 		<band height="15" splitType="Stretch">
 			<frame>
-				<reportElement mode="Opaque" x="0" y="0" width="555" height="15" backcolor="#CB5C5C" uuid="a640d553-688a-47bd-ad31-e7e71552595b"/>
+				<reportElement mode="Opaque" x="0" y="0" width="555" height="15" backcolor="#F1CF40" uuid="a640d553-688a-47bd-ad31-e7e71552595b"/>
 				<staticText>
 					<reportElement x="10" y="1" width="545" height="13" uuid="09d19c03-ec69-4ad7-bdd8-dbb4315e574e"/>
 					<textElement>

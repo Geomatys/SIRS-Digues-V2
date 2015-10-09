@@ -26,7 +26,6 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
     
     @FXML private CheckBox uiOptionPhoto;
     @FXML private CheckBox uiOptionReseauOuvrage;
-    @FXML private CheckBox uiOptionVoirie;
 
     private final TypeChoicePojoTable conduiteTypesTable = new TypeChoicePojoTable(RefConduiteFermee.class, "Types de conduites fermées");
     private final TypeChoicePojoTable urgenceTypesTable = new TypeChoicePojoTable(RefUrgence.class, "Types d'urgences");
@@ -60,7 +59,7 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
             
             try {
                 if(!reseauxFermes.isEmpty()){
-                    Injector.getSession().getPrintManager().printReseaux(reseauxFermes, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionVoirie.isSelected());
+                    Injector.getSession().getPrintManager().printReseaux(reseauxFermes, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected());
                 }
             } catch (Exception ex) {
                 SIRS.LOGGER.log(Level.WARNING, null, ex);

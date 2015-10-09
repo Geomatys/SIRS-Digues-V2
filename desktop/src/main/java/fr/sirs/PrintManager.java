@@ -39,7 +39,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.feature.Feature;
@@ -82,7 +81,7 @@ public class PrintManager {
             final File fileToPrint = PrinterUtilities.print(null, featuresToPrint);
             if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception ex) {
-            Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, ex);
+           SIRS.LOGGER.log(Level.WARNING, null, ex);
         }
     }
     
@@ -112,7 +111,7 @@ public class PrintManager {
             final File fileToPrint = PrinterUtilities.print(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), elementsToPrint);
             if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception e) {
-            Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, e);
+            SIRS.LOGGER.log(Level.WARNING, null, e);
         }
     }
 
@@ -193,7 +192,7 @@ public class PrintManager {
                     desordres, printPhoto, printReseauOuvrage, printVoirie);
             if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception ex) {
-            Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, ex);
+            SIRS.LOGGER.log(Level.WARNING, null, ex);
         }
     }
 
@@ -203,9 +202,8 @@ public class PrintManager {
      * @param reseauxFermes
      * @param printPhoto
      * @param printReseauOuvrage
-     * @param printVoirie
      */
-    public final void printReseaux(final List<ReseauHydrauliqueFerme> reseauxFermes, final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie) {
+    public final void printReseaux(final List<ReseauHydrauliqueFerme> reseauxFermes, final boolean printPhoto, final boolean printReseauOuvrage) {
 
             final List avoidDesordreFields = new ArrayList<>();
             avoidDesordreFields.add(GEOMETRY_FIELD);
@@ -259,10 +257,10 @@ public class PrintManager {
                     reseauFields,
                     Injector.getSession().getPreviews(),
                     new SirsStringConverter(),
-                    reseauxFermes, printPhoto, printReseauOuvrage, printVoirie);
+                    reseauxFermes, printPhoto, printReseauOuvrage);
             if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception ex) {
-            Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, ex);
+            SIRS.LOGGER.log(Level.WARNING, null, ex);
         }
     }
     

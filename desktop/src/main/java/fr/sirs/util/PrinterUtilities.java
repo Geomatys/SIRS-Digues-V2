@@ -91,7 +91,7 @@ public class PrinterUtilities {
             final Previews previewLabelRepository,
             final StringConverter stringConverter,
             final List<ReseauHydrauliqueFerme> reseaux,
-            final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie) throws Exception {
+            final boolean printPhoto, final boolean printReseauOuvrage) throws Exception {
 
         JasperPrint firstPrint = null;
         final List<JasperPrint> followingPrints = new ArrayList<>();
@@ -104,7 +104,7 @@ public class PrinterUtilities {
             final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(
                     PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_RESEAU_FERME),
                     avoidDesordreFields, avoidObservationFields,
-                    reseauFields, printPhoto, printReseauOuvrage, printVoirie);
+                    reseauFields, printPhoto, printReseauOuvrage);
             templateWriter.setFieldsInterline(2);
             templateWriter.setOutput(templateFile);
             templateWriter.write(reseau);
@@ -116,13 +116,16 @@ public class PrinterUtilities {
             final Map<String, Object> parameters = new HashMap<>();
             parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
 
-            parameters.put(OBSERVATION_TABLE_DATA_SOURCE, new ObjectDataSource<>(reseau.observations, previewLabelRepository, stringConverter));
+            parameters.put(OBSERVATION_TABLE_DATA_SOURCE, new ObjectDataSource<>(reseau.getObservations(), previewLabelRepository, stringConverter));
 
             final List<Photo> photos = new ArrayList<>();
-            for(final ObservationReseauHydrauliqueFerme observation : reseau.observations){
-                if(observation.photos!=null && !observation.photos.isEmpty()){
-                    photos.addAll(observation.photos);
+            for(final ObservationReseauHydrauliqueFerme observation : reseau.getObservations()){
+                if(observation.getPhotos()!=null && !observation.getPhotos().isEmpty()){
+                    photos.addAll(observation.getPhotos());
                 }
+            }
+            if(reseau.getPhotos()!=null && !reseau.getPhotos().isEmpty()){
+                photos.addAll(reseau.getPhotos());
             }
 
             if(printPhoto) {
