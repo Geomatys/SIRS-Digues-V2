@@ -1,6 +1,7 @@
 package fr.sirs;
 
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
 import fr.sirs.core.model.RefConduiteFermee;
 import fr.sirs.core.model.RefUrgence;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
@@ -70,15 +71,59 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
     private class LocalPredicate implements Predicate<ReseauHydrauliqueFerme>{
 
         final List<String> typeConduitesIds = new ArrayList<>();
+        final List<String> typeUrgencesIds = new ArrayList<>();
 
         LocalPredicate(){
             for(final Element element : conduiteTypesTable.getSelectedItems()){
                 typeConduitesIds.add(element.getId());
             }
+            for(final Element element : urgenceTypesTable.getSelectedItems()){
+                typeUrgencesIds.add(element.getId());
+            }
         }
 
         @Override
         public boolean test(final ReseauHydrauliqueFerme reseauFerme) {
+
+            /*
+            On retire les réseaux dont la dernière urgence ne figure pas
+            dans les urgence choisies.
+             */
+            final boolean urgenceOption;
+
+            /*
+            Si aucune urgence n'a été choisie on ne retire aucun réseau.
+            */
+            if(typeUrgencesIds.isEmpty()){
+                urgenceOption = false;
+            }
+            else{
+                // Recherche de la dernière observation.
+                final List<ObservationReseauHydrauliqueFerme> observations = reseauFerme.getObservations();
+                ObservationReseauHydrauliqueFerme derniereObservation = null;
+                for(final ObservationReseauHydrauliqueFerme obs : observations){
+                    if(obs.getDate()!=null){
+                        if(derniereObservation==null) derniereObservation = obs;
+                        else{
+                            if(obs.getDate().isAfter(derniereObservation.getDate())) derniereObservation = obs;
+                        }
+                    }
+                }
+
+                /*
+                Si le désordre a une "dernière observation", on regarde si
+                son degré d'urgence figure dans les urgences choisies.
+                */
+                if(derniereObservation!=null){
+                    urgenceOption = !typeUrgencesIds.contains(derniereObservation.getUrgenceId());
+                }
+                /*
+                Si on n'a pas pu déterminer de "dernière observation" :
+                On garde le désordre (mais c'est discutable).
+                */
+                else urgenceOption=false;
+            }
+
 
             /*
             On retire le réseau s'il est d'un type qui n'est pas sélectionné
@@ -91,7 +136,7 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
             else typeSelected = (reseauFerme.getTypeConduiteFermeeId()==null
                     || !typeConduitesIds.contains(reseauFerme.getTypeConduiteFermeeId()));
 
-            return typeSelected;
+            return typeSelected || urgenceOption;
         }
     }
     

@@ -245,17 +245,6 @@ public class PrintManager {
             observationFields.add("evolution");
             observationFields.add("suite");
 
-            final List<String> prestationFields = new ArrayList<>();
-            prestationFields.add("designation");
-            prestationFields.add("libelle");
-            prestationFields.add("typePrestationId");
-            prestationFields.add("coutMetre");
-            prestationFields.add("marcheId");
-            prestationFields.add("realisationInterne");
-            prestationFields.add("date_debut");
-            prestationFields.add("date_fin");
-            prestationFields.add("commentaire");
-
             final List<String> reseauFields = new ArrayList<>();
             reseauFields.add("designation");
             reseauFields.add("libelle");
@@ -267,7 +256,6 @@ public class PrintManager {
             final File fileToPrint = PrinterUtilities.printReseauFerme(
                     avoidDesordreFields,
                     observationFields,
-                    prestationFields,
                     reseauFields,
                     Injector.getSession().getPreviews(),
                     new SirsStringConverter(),

@@ -86,7 +86,6 @@ public class PrinterUtilities {
 
     public static File printReseauFerme(final List<String> avoidDesordreFields,
             final List<String> avoidObservationFields,
-            final List<String> avoidPrestationFields,
             final List<String> reseauFields,
             final Previews previewLabelRepository,
             final StringConverter stringConverter,
@@ -101,9 +100,9 @@ public class PrinterUtilities {
             final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
             templateFile.deleteOnExit();
 
-            final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(
-                    PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE),
-                    avoidDesordreFields, avoidObservationFields, avoidPrestationFields,
+            final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(
+                    PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_RESEAU_FERME),
+                    avoidDesordreFields, avoidObservationFields,
                     reseauFields, printPhoto, printReseauOuvrage, printVoirie);
             templateWriter.setFieldsInterline(2);
             templateWriter.setOutput(templateFile);
