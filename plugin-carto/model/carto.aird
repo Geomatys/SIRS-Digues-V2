@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<viewpoint:DAnalysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:description="http://www.eclipse.org/sirius/description/1.1.0" xmlns:description_1="http://www.eclipse.org/sirius/diagram/description/1.1.0" xmlns:diagram="http://www.eclipse.org/sirius/diagram/1.1.0" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:style="http://www.eclipse.org/sirius/diagram/description/style/1.1.0" xmlns:viewpoint="http://www.eclipse.org/sirius/1.1.0" xsi:schemaLocation="http://www.eclipse.org/sirius/description/1.1.0 http://www.eclipse.org/sirius/1.1.0#//description http://www.eclipse.org/sirius/diagram/description/1.1.0 http://www.eclipse.org/sirius/diagram/1.1.0#//description http://www.eclipse.org/sirius/diagram/description/style/1.1.0 http://www.eclipse.org/sirius/diagram/1.1.0#//description/style" xmi:id="_hZDSIG6DEeWuFvN7xc1Jlg" selectedViews="_jBnLYG6DEeWuFvN7xc1Jlg _jEQ2wG6DEeWuFvN7xc1Jlg _jEfgQG6DEeWuFvN7xc1Jlg _jGQa0G6DEeWuFvN7xc1Jlg" version="8.1.1">
+  <models xmi:type="ecore:EPackage" href="carto.ecore#/"/>
+  <ownedViews xmi:type="viewpoint:DRepresentationContainer" xmi:id="_jBnLYG6DEeWuFvN7xc1Jlg" initialized="true">
+    <ownedRepresentations xmi:type="diagram:DSemanticDiagram" xmi:id="_lyA2cG6DEeWuFvN7xc1Jlg" name="carto diagram">
+      <ownedAnnotationEntries xmi:type="description:AnnotationEntry" xmi:id="_lyCEkG6DEeWuFvN7xc1Jlg" source="GMF_DIAGRAMS">
+        <data xmi:type="notation:Diagram" xmi:id="_lyCEkW6DEeWuFvN7xc1Jlg" type="Sirius" element="_lyA2cG6DEeWuFvN7xc1Jlg" measurementUnit="Pixel">
+          <children xmi:type="notation:Node" xmi:id="_vtHNoG6DEeWuFvN7xc1Jlg" type="2003" element="_vsoFcG6DEeWuFvN7xc1Jlg">
+            <children xmi:type="notation:Node" xmi:id="_vtIbwG6DEeWuFvN7xc1Jlg" type="5007"/>
+            <children xmi:type="notation:Node" xmi:id="_vtIbwW6DEeWuFvN7xc1Jlg" type="7004">
+              <children xmi:type="notation:Node" xmi:id="_y_BDQG6DEeWuFvN7xc1Jlg" type="3010" element="_y-xLoG6DEeWuFvN7xc1Jlg">
+                <layoutConstraint xmi:type="notation:Location" xmi:id="_y_BDQW6DEeWuFvN7xc1Jlg"/>
+              </children>
+              <children xmi:type="notation:Node" xmi:id="_19lGIG6DEeWuFvN7xc1Jlg" type="3010" element="_19g0sG6DEeWuFvN7xc1Jlg">
+                <layoutConstraint xmi:type="notation:Location" xmi:id="_19lGIW6DEeWuFvN7xc1Jlg"/>
+              </children>
+              <children xmi:type="notation:Node" xmi:id="_4L2UgG6DEeWuFvN7xc1Jlg" type="3010" element="_4LzRMG6DEeWuFvN7xc1Jlg">
+                <layoutConstraint xmi:type="notation:Location" xmi:id="_4L2UgW6DEeWuFvN7xc1Jlg"/>
+              </children>
+              <children xmi:type="notation:Node" xmi:id="_6Ef4MG6DEeWuFvN7xc1Jlg" type="3010" element="_6EbmwG6DEeWuFvN7xc1Jlg">
+                <layoutConstraint xmi:type="notation:Location" xmi:id="_6Ef4MW6DEeWuFvN7xc1Jlg"/>
+              </children>
+              <children xmi:type="notation:Node" xmi:id="_-ZDdoG6DEeWuFvN7xc1Jlg" type="3010" element="_-ZAaUG6DEeWuFvN7xc1Jlg">
+                <layoutConstraint xmi:type="notation:Location" xmi:id="_-ZDdoW6DEeWuFvN7xc1Jlg"/>
+              </children>
+              <children xmi:type="notation:Node" xmi:id="_EunRgG6EEeWuFvN7xc1Jlg" type="3010" element="_EukOMG6EEeWuFvN7xc1Jlg">
+                <layoutConstraint xmi:type="notation:Location" xmi:id="_EunRgW6EEeWuFvN7xc1Jlg"/>
+              </children>
+              <children xmi:type="notation:Node" xmi:id="_F82mQG6EEeWuFvN7xc1Jlg" type="3010" element="_F8y74G6EEeWuFvN7xc1Jlg">
+                <layoutConstraint xmi:type="notation:Location" xmi:id="_F82mQW6EEeWuFvN7xc1Jlg"/>
+              </children>
+              <children xmi:type="notation:Node" xmi:id="_Kn1HoG6EEeWuFvN7xc1Jlg" type="3010" element="_KnxdQG6EEeWuFvN7xc1Jlg">
+                <layoutConstraint xmi:type="notation:Location" xmi:id="_Kn1HoW6EEeWuFvN7xc1Jlg"/>
+              </children>
+              <styles xmi:type="notation:SortingStyle" xmi:id="_vtIbwm6DEeWuFvN7xc1Jlg"/>
+              <styles xmi:type="notation:FilteringStyle" xmi:id="_vtIbw26DEeWuFvN7xc1Jlg"/>
+            </children>
+            <styles xmi:type="notation:ShapeStyle" xmi:id="_vtHNoW6DEeWuFvN7xc1Jlg" fontName="Ubuntu" fontHeight="8"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_vtHNom6DEeWuFvN7xc1Jlg" x="415" y="235" width="147" height="174"/>
+          </children>
+          <styles xmi:type="notation:DiagramStyle" xmi:id="_lyCEkm6DEeWuFvN7xc1Jlg"/>
+        </data>
+      </ownedAnnotationEntries>
+      <ownedAnnotationEntries xmi:type="description:AnnotationEntry" xmi:id="_y-yZwG6DEeWuFvN7xc1Jlg" source="DANNOTATION_CUSTOMIZATION_KEY">
+        <data xmi:type="diagram:ComputedStyleDescriptionRegistry" xmi:id="_y-yZwW6DEeWuFvN7xc1Jlg"/>
+      </ownedAnnotationEntries>
+      <ownedDiagramElements xmi:type="diagram:DNodeList" xmi:id="_vsoFcG6DEeWuFvN7xc1Jlg" name="BookMark" tooltipText="" width="12" height="10">
+        <target xmi:type="ecore:EClass" href="carto.ecore#//BookMark"/>
+        <semanticElements xmi:type="ecore:EClass" href="carto.ecore#//BookMark"/>
+        <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
+        <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
+        <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
+        <ownedStyle xmi:type="diagram:FlatContainerStyle" xmi:id="_LN5CEG6EEeWuFvN7xc1Jlg" backgroundStyle="Liquid">
+          <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_LN5CEW6EEeWuFvN7xc1Jlg"/>
+          <description xmi:type="style:FlatContainerStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@style"/>
+          <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_LN5CEm6EEeWuFvN7xc1Jlg"/>
+          <backgroundColor xmi:type="viewpoint:RGBValues" xmi:id="_LN5CE26EEeWuFvN7xc1Jlg" red="255" green="255" blue="255"/>
+          <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_LN5CFG6EEeWuFvN7xc1Jlg" red="255" green="252" blue="216"/>
+        </ownedStyle>
+        <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_y-xLoG6DEeWuFvN7xc1Jlg" name="description : EString" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@23bc195{platform:/resource/plugin-carto/model/carto.ecore#//BookMark/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+          <target xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/description"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/description"/>
+          <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_1IkwwG6DEeWuFvN7xc1Jlg" labelAlignment="LEFT">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_1IkwwW6DEeWuFvN7xc1Jlg"/>
+            <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
+            <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_1Ikwwm6DEeWuFvN7xc1Jlg"/>
+            <color xmi:type="viewpoint:RGBValues" xmi:id="_1Ikww26DEeWuFvN7xc1Jlg"/>
+          </ownedStyle>
+          <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
+        </ownedElements>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_19g0sG6DEeWuFvN7xc1Jlg" name="titre : EString" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/titre"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/titre"/>
+          <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_19hbwG6DEeWuFvN7xc1Jlg" labelAlignment="LEFT">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_19hbwW6DEeWuFvN7xc1Jlg"/>
+            <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
+            <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_19hbwm6DEeWuFvN7xc1Jlg"/>
+            <color xmi:type="viewpoint:RGBValues" xmi:id="_19hbw26DEeWuFvN7xc1Jlg"/>
+          </ownedStyle>
+          <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
+        </ownedElements>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_4LzRMG6DEeWuFvN7xc1Jlg" name="parametres : EString" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/parametres"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/parametres"/>
+          <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_4Lz4QG6DEeWuFvN7xc1Jlg" labelAlignment="LEFT">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_4Lz4QW6DEeWuFvN7xc1Jlg"/>
+            <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
+            <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_4Lz4Qm6DEeWuFvN7xc1Jlg"/>
+            <color xmi:type="viewpoint:RGBValues" xmi:id="_4Lz4Q26DEeWuFvN7xc1Jlg"/>
+          </ownedStyle>
+          <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
+        </ownedElements>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_6EbmwG6DEeWuFvN7xc1Jlg" name="identifiant : EString" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/identifiant"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/identifiant"/>
+          <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_6EcN0G6DEeWuFvN7xc1Jlg" labelAlignment="LEFT">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_6EcN0W6DEeWuFvN7xc1Jlg"/>
+            <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
+            <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_6EcN0m6DEeWuFvN7xc1Jlg"/>
+            <color xmi:type="viewpoint:RGBValues" xmi:id="_6EcN026DEeWuFvN7xc1Jlg"/>
+          </ownedStyle>
+          <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
+        </ownedElements>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_-ZAaUG6DEeWuFvN7xc1Jlg" name="motDePasse : EString" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/motDePasse"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/motDePasse"/>
+          <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_-ZBBYG6DEeWuFvN7xc1Jlg" labelAlignment="LEFT">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_-ZBBYW6DEeWuFvN7xc1Jlg"/>
+            <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
+            <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_-ZBBYm6DEeWuFvN7xc1Jlg"/>
+            <color xmi:type="viewpoint:RGBValues" xmi:id="_-ZBBY26DEeWuFvN7xc1Jlg"/>
+          </ownedStyle>
+          <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
+        </ownedElements>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_EukOMG6EEeWuFvN7xc1Jlg" name="designation : EString" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/designation"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/designation"/>
+          <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_EukOMW6EEeWuFvN7xc1Jlg" labelAlignment="LEFT">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_EukOMm6EEeWuFvN7xc1Jlg"/>
+            <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
+            <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_EukOM26EEeWuFvN7xc1Jlg"/>
+            <color xmi:type="viewpoint:RGBValues" xmi:id="_EukONG6EEeWuFvN7xc1Jlg"/>
+          </ownedStyle>
+          <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
+        </ownedElements>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_F8y74G6EEeWuFvN7xc1Jlg" name="author : EString" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/author"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/author"/>
+          <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_F8zi8G6EEeWuFvN7xc1Jlg" labelAlignment="LEFT">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_F8zi8W6EEeWuFvN7xc1Jlg"/>
+            <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
+            <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_F8zi8m6EEeWuFvN7xc1Jlg"/>
+            <color xmi:type="viewpoint:RGBValues" xmi:id="_F8zi826EEeWuFvN7xc1Jlg"/>
+          </ownedStyle>
+          <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
+        </ownedElements>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_KnxdQG6EEeWuFvN7xc1Jlg" name="valid : EBoolean = false" tooltipText="">
+          <target xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/valid"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/valid"/>
+          <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_KnyEUG6EEeWuFvN7xc1Jlg" labelAlignment="LEFT">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_KnyEUW6EEeWuFvN7xc1Jlg"/>
+            <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
+            <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_KnyEUm6EEeWuFvN7xc1Jlg"/>
+            <color xmi:type="viewpoint:RGBValues" xmi:id="_KnyEU26EEeWuFvN7xc1Jlg"/>
+          </ownedStyle>
+          <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
+        </ownedElements>
+      </ownedDiagramElements>
+      <description xmi:type="description_1:DiagramDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']"/>
+      <filterVariableHistory xmi:type="diagram:FilterVariableHistory" xmi:id="_lyA2dW6DEeWuFvN7xc1Jlg"/>
+      <activatedLayers xmi:type="description_1:Layer" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer"/>
+      <activatedLayers xmi:type="description_1:AdditionalLayer" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@additionalLayers[name='Package']"/>
+      <activatedLayers xmi:type="description_1:AdditionalLayer" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@additionalLayers[name='Validation']"/>
+      <activatedLayers xmi:type="description_1:AdditionalLayer" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Archetype']/@ownedRepresentationExtensions[name='Entities%20With%20Archetypes']/@layers[name='Archetypes']"/>
+      <target xmi:type="ecore:EPackage" href="carto.ecore#/"/>
+    </ownedRepresentations>
+    <viewpoint xmi:type="description:Viewpoint" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']"/>
+  </ownedViews>
+  <ownedViews xmi:type="viewpoint:DRepresentationContainer" xmi:id="_jEQ2wG6DEeWuFvN7xc1Jlg" initialized="true">
+    <viewpoint xmi:type="description:Viewpoint" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Review']"/>
+  </ownedViews>
+  <ownedViews xmi:type="viewpoint:DRepresentationContainer" xmi:id="_jEfgQG6DEeWuFvN7xc1Jlg" initialized="true">
+    <viewpoint xmi:type="description:Viewpoint" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Archetype']"/>
+  </ownedViews>
+  <ownedViews xmi:type="viewpoint:DRepresentationContainer" xmi:id="_jGQa0G6DEeWuFvN7xc1Jlg" initialized="true">
+    <viewpoint xmi:type="description:Viewpoint" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Generation']"/>
+  </ownedViews>
+</viewpoint:DAnalysis>
