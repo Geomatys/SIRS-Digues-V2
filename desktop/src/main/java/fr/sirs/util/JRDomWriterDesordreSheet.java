@@ -492,7 +492,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriter {
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         final Element frame = document.createElement(TAG_FRAME);
         final Element frameReportElement = document.createElement(TAG_REPORT_ELEMENT);
-        frameReportElement.setAttribute(ATT_BACKCOLOR, "#CB5C5C");
+        frameReportElement.setAttribute(ATT_BACKCOLOR, "#F1CF40");
         frameReportElement.setAttribute(ATT_HEIGHT, String.valueOf(height));
         frameReportElement.setAttribute(ATT_MODE, JRUtils.Mode.OPAQUE.toString());
         frameReportElement.setAttribute(ATT_POSITION_TYPE, JRUtils.PositionType.FLOAT.toString());
