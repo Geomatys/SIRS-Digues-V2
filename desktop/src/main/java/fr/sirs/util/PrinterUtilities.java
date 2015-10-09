@@ -8,6 +8,7 @@ import fr.sirs.core.model.EchelleLimnimetrique;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Observation;
+import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.OuvrageParticulier;
 import fr.sirs.core.model.OuvrageTelecomEnergie;
@@ -89,12 +90,12 @@ public class PrinterUtilities {
             final List<String> reseauFields,
             final Previews previewLabelRepository,
             final StringConverter stringConverter,
-            final List<ReseauHydrauliqueFerme> desordres,
+            final List<ReseauHydrauliqueFerme> reseaux,
             final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie) throws Exception {
 
         JasperPrint firstPrint = null;
         final List<JasperPrint> followingPrints = new ArrayList<>();
-        for(final ReseauHydrauliqueFerme desordre : desordres){
+        for(final ReseauHydrauliqueFerme reseau : reseaux){
 
             // Creates the Jasper Reports specific template from the generic template.
             final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
@@ -106,64 +107,43 @@ public class PrinterUtilities {
                     reseauFields, printPhoto, printReseauOuvrage, printVoirie);
             templateWriter.setFieldsInterline(2);
             templateWriter.setOutput(templateFile);
-//            templateWriter.write(desordre);
+            templateWriter.write(reseau);
 
             final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
 
-            final JRDataSource source = new ObjectDataSource(Collections.singletonList(desordre), previewLabelRepository, stringConverter);
+            final JRDataSource source = new ObjectDataSource(Collections.singletonList(reseau), previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
             parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
 
-//            parameters.put(OBSERVATION_TABLE_DATA_SOURCE, new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
-//
-//            parameters.put(PRESTATION_TABLE_DATA_SOURCE, new ObjectDataSource<>(Injector.getSession().getRepositoryForClass(Prestation.class).get(desordre.getPrestationIds()), previewLabelRepository, stringConverter));
-//
-//            final List<Photo> photos = new ArrayList<>();
-//            for(final Observation observation : desordre.observations){
-//                if(observation.photos!=null && !observation.photos.isEmpty()){
-//                    photos.addAll(observation.photos);
-//                }
-//            }
+            parameters.put(OBSERVATION_TABLE_DATA_SOURCE, new ObjectDataSource<>(reseau.observations, previewLabelRepository, stringConverter));
 
-//            if(printPhoto) {
-//                parameters.put(PHOTO_DATA_SOURCE, new ObjectDataSource<>(photos, previewLabelRepository, stringConverter));
-//            }
-//
-//            if(printReseauOuvrage) {
-//                final List<ObjetReseau> reseauOuvrageList = new ArrayList<>();
-//                final List<List<? extends ObjetReseau>> retrievedLists = new ArrayList();
-//                retrievedLists.add(Injector.getSession().getRepositoryForClass(EchelleLimnimetrique.class).get(desordre.getEchelleLimnimetriqueIds()));
-//                retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageParticulier.class).get(desordre.getOuvrageParticulierIds()));
-//                retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauTelecomEnergie.class).get(desordre.getReseauTelecomEnergieIds()));
-//                retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageTelecomEnergie.class).get(desordre.getOuvrageTelecomEnergieIds()));
-//                retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageHydrauliqueAssocie.class).get(desordre.getOuvrageHydrauliqueAssocieIds()));
-//                retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueCielOuvert.class).get(desordre.getReseauHydrauliqueCielOuvertIds()));
-//                retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).get(desordre.getReseauHydrauliqueFermeIds()));
-//
-//                for(final List candidate : retrievedLists){
-//                    if(candidate!=null && !candidate.isEmpty()){
-//                        reseauOuvrageList.addAll(candidate);
-//                    }
-//                }
-//
-//                parameters.put(RESEAU_OUVRAGE_TABLE_DATA_SOURCE, new ObjectDataSource<>(reseauOuvrageList, previewLabelRepository, stringConverter));
-//            }
+            final List<Photo> photos = new ArrayList<>();
+            for(final ObservationReseauHydrauliqueFerme observation : reseau.observations){
+                if(observation.photos!=null && !observation.photos.isEmpty()){
+                    photos.addAll(observation.photos);
+                }
+            }
 
-//            if(printVoirie) {
-//                final List<ObjetReseau> voirieList = new ArrayList<>();
-//                final List<List<? extends ObjetReseau>> retrievedLists = new ArrayList();
-//                retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageVoirie.class).get(desordre.getOuvrageVoirieIds()));
-//                retrievedLists.add(Injector.getSession().getRepositoryForClass(VoieDigue.class).get(desordre.getVoieDigueIds()));
-//
-//                for(final List candidate : retrievedLists){
-//                    if(candidate!=null && !candidate.isEmpty()){
-//                        voirieList.addAll(candidate);
-//                    }
-//                }
-//
-//                parameters.put(VOIRIE_TABLE_DATA_SOURCE, new ObjectDataSource<>(voirieList, previewLabelRepository, stringConverter));
-//            }
+            if(printPhoto) {
+                parameters.put(PHOTO_DATA_SOURCE, new ObjectDataSource<>(photos, previewLabelRepository, stringConverter));
+            }
+
+            if(printReseauOuvrage) {
+                final List<ObjetReseau> reseauOuvrageList = new ArrayList<>();
+                final List<List<? extends ObjetReseau>> retrievedLists = new ArrayList();
+                retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageHydrauliqueAssocie.class).get(reseau.getOuvrageHydrauliqueAssocieIds()));
+                retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueCielOuvert.class).get(reseau.getReseauHydrauliqueCielOuvertIds()));
+                retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).get(reseau.getStationPompageIds()));
+
+                for(final List candidate : retrievedLists){
+                    if(candidate!=null && !candidate.isEmpty()){
+                        reseauOuvrageList.addAll(candidate);
+                    }
+                }
+
+                parameters.put(RESEAU_OUVRAGE_TABLE_DATA_SOURCE, new ObjectDataSource<>(reseauOuvrageList, previewLabelRepository, stringConverter));
+            }
 
             final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS));
             parameters.put(PHOTOS_SUBREPORT, photosReport);
@@ -180,7 +160,7 @@ public class PrinterUtilities {
         }
 
         // Generate the report -------------------------------------------------
-        final File fout = File.createTempFile("DESORDRE_OBSERVATION", PDF_EXTENSION);
+        final File fout = File.createTempFile("RESEAU_HYDRAULIQUE_FERME_OBSERVATION", PDF_EXTENSION);
         try (final FileOutputStream outStream = new FileOutputStream(fout)) {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
             JasperReportService.generate(firstPrint, output);

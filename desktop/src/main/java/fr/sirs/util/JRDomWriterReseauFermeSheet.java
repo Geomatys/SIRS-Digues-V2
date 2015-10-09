@@ -125,13 +125,9 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
     
     public static final String OBSERVATION_DATASET = "Observation Dataset";
     public static final String OBSERVATION_TABLE_DATA_SOURCE = "OBSERVATION_TABLE_DATA_SOURCE";
-    public static final String PRESTATION_DATASET = "Prestation Dataset";
-    public static final String PRESTATION_TABLE_DATA_SOURCE = "PRESTATION_TABLE_DATA_SOURCE";
     
     public static final String RESEAU_OUVRAGE_DATASET = "ReseauOuvrage Dataset";
     public static final String RESEAU_OUVRAGE_TABLE_DATA_SOURCE = "RESEAU_OUVRAGE_TABLE_DATA_SOURCE";
-    public static final String VOIRIE_DATASET = "Voirie Dataset";
-    public static final String VOIRIE_TABLE_DATA_SOURCE = "VOIRIE_TABLE_DATA_SOURCE";
     
     public static final String PHOTO_DATA_SOURCE = "PHOTO_DATA_SOURCE";
     public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
@@ -236,15 +232,13 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
      * @param avoidFields field names to avoid.
      * @throws Exception 
      */
-    private void writeObject(final ReseauHydrauliqueFerme desordre) {
+    private void writeObject(final ReseauHydrauliqueFerme candidate) {
         
         writeSubDataset(ObservationReseauHydrauliqueFerme.class, observationFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(0));
-        writeSubDataset(ObjetReseau.class, reseauFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(2));
-        writeSubDataset(ObjetReseau.class, reseauFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(3));
-        
+        writeSubDataset(ObjetReseau.class, reseauFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(1));
         
         // Sets the initial fields used by the template.------------------------
-        final Method[] methods = desordre.getClass().getMethods();
+        final Method[] methods = candidate.getClass().getMethods();
         for (final Method method : methods){
             if(PrinterUtilities.isSetter(method)){
                 final String fieldName = getFieldNameFromSetter(method);
@@ -255,14 +249,14 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
         }
         
         // Modifies the title block.--------------------------------------------
-        writeTitle(desordre.getClass());
+        writeTitle(candidate.getClass());
         
         // Writes the headers.--------------------------------------------------
         writePageHeader();
         writeColumnHeader();
         
         // Builds the body of the Jasper Reports template.----------------------
-        writeDetail(desordre);
+        writeDetail(candidate);
     }
     
     
@@ -394,12 +388,9 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
      * @param classToMap
      * @throws Exception 
      */
-    private void writeDetail(final ReseauHydrauliqueFerme desordre) {
+    private void writeDetail(final ReseauHydrauliqueFerme candidate) {
         
-        final Class classToMap = desordre.getClass();
-        
-        final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName(), Locale.getDefault(),
-                Thread.currentThread().getContextClassLoader());
+        final Class classToMap = candidate.getClass();
         
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         currentY = Integer.valueOf(band.getAttribute(ATT_HEIGHT));
@@ -407,7 +398,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
         /*----------------------------------------------------------------------
         TABLEAU DES OBSERVATIONS
         ----------------------------------------------------------------------*/
-        if(desordre.getObservations()!=null && !desordre.getObservations().isEmpty()){
+        if(candidate.getObservations()!=null && !candidate.getObservations().isEmpty()){
             currentY+=2;
             writeSectionTitle("Observations", 15, 1, 10, 9);
             currentY+=2;
@@ -422,7 +413,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
             
             // On sait que les photos qui seront fournies par le datasource seront les photos des observations du désordre courant
             final List<Photo> photos = new ArrayList<>();
-            for(final ObservationReseauHydrauliqueFerme observation : desordre.getObservations()){
+            for(final ObservationReseauHydrauliqueFerme observation : candidate.getObservations()){
                 final List<Photo> obsPhotos = observation.getPhotos();
                 if(obsPhotos!=null && !obsPhotos.isEmpty()){
                     photos.addAll(obsPhotos);
@@ -437,9 +428,9 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriter {
         /*----------------------------------------------------------------------
         TABLEAU DES OUVRAGES ET RÉSEAUX
         ----------------------------------------------------------------------*/
-        final int nbReseauOuvrage = desordre.getOuvrageHydrauliqueAssocieIds().size()
-                + desordre.getReseauHydrauliqueCielOuvertIds().size()
-                + desordre.getStationPompageIds().size();
+        final int nbReseauOuvrage = candidate.getOuvrageHydrauliqueAssocieIds().size()
+                + candidate.getReseauHydrauliqueCielOuvertIds().size()
+                + candidate.getStationPompageIds().size();
         if(printReseauOuvrage && nbReseauOuvrage>0){
             currentY+=2;
             writeSectionTitle("Réseaux et ouvrages", 15, 1, 10, 9);
