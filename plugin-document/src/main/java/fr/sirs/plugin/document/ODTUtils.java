@@ -113,7 +113,7 @@ public class ODTUtils {
     
     private static final String TAB = "        ";
     
-    private static final Logger LOGGER = Logging.getLogger(ODTUtils.class);
+    private static final Logger LOGGER = Logging.getLogger("fr.sirs");
     
     public static void writeSummary(final FileTreeItem item, File file) throws Exception {
         final TextDocument doc = TextDocument.newTextDocument();

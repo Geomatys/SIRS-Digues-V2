@@ -67,7 +67,7 @@ public class ModelParagraphePane extends BorderPane {
     public static final String GENERATE_TAB   = "Générer un tableau";
     public static final String GENERATE_SHEET = "Générer des fiches";
     
-    private static final Logger LOGGER = Logging.getLogger(ModelParagraphePane.class);
+    private static final Logger LOGGER = Logging.getLogger("fr.sirs");
     
     public ModelParagraphePane(final Pane parent, final RapportModeleDocument model, final RapportSectionDocument section, final int index) {
         SIRS.loadFXML(this);

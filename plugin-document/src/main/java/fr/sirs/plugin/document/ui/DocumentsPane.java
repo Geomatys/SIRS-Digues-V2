@@ -133,7 +133,7 @@ public class DocumentsPane extends GridPane {
     public static final String DG = "dg";
     
     
-    private static final Logger LOGGER = Logging.getLogger(DocumentsPane.class);
+    private static final Logger LOGGER = Logging.getLogger("fr.sirs");
     
     private final FileTreeItem root;
     

@@ -43,7 +43,7 @@ public class GenerationPane extends GridPane {
     @FXML
     public Label uiProgressLabel;
     
-    private static final Logger LOGGER = Logging.getLogger(GenerationPane.class);
+    private static final Logger LOGGER = Logging.getLogger("fr.sirs");
     
     public GenerationPane() {
         SIRS.loadFXML(this);

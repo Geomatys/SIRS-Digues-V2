@@ -46,7 +46,7 @@ import org.geotoolkit.util.FileUtilities;
  */
 public class PropertiesFileUtilities {
     
-    private static final Logger LOGGER = Logging.getLogger(PropertiesFileUtilities.class);
+    private static final Logger LOGGER = Logging.getLogger("fr.sirs");
     
     /**
      * Extract a property in the sirs.properties file coupled to the specified file.

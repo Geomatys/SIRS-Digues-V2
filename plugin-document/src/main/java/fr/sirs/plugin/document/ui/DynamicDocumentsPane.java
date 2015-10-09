@@ -91,8 +91,6 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
     @FXML private Button uiDeleteBtn;
     
     @FXML private Button uiNewModelBtn;
-
-    private static final Logger LOGGER = Logging.getLogger(DocumentsPane.class);
     
     private final FileTreeItem root;
     
