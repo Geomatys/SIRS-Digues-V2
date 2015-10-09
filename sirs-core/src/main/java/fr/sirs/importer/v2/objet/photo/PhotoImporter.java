@@ -15,7 +15,7 @@ import fr.sirs.importer.v2.ErrorReport;
 import fr.sirs.importer.v2.mapper.objet.PhotoColumns;
 import fr.sirs.importer.v2.AbstractUpdater;
 import java.io.IOException;
-import java.util.Optional;
+import org.apache.sis.util.collection.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +25,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PhotoImporter extends AbstractUpdater<Photo, Element> {
+
+    private Cache<String, AvecPhotos> observationCache = new Cache<>(100, 13, true);
 
     private final String[] tableNames = new String[]{
         PHOTO_LOCALISEE_EN_PR.name(), PHOTO_LOCALISEE_EN_XY.name()
@@ -100,21 +102,22 @@ public class PhotoImporter extends AbstractUpdater<Photo, Element> {
                 context.reportError(getTableName(), input, new IllegalStateException("No document found for observation " + accessDocId, ex), null);
                 return null;
             }
-            Optional<? extends Element> element = session.getElement(session.getPreviews().get(importedId));
-            if (element.isPresent()) {
-                final Element observation = element.get();
-                if (observation instanceof AvecPhotos) {
-                    ((AvecPhotos) observation).getPhotos().add(output);
-                }
-                return observation.getCouchDBDocument();
-            } else {
+
+            // Querying previews can be an heavy operation if we multiply calls to it, so whenever we get a disorder in memory, we cache it
+            // with all its observations.
+            AvecPhotos element = getOrCacheObservations(importedId);
+            if (element == null) {
                 context.reportError(getTableName(), input, new IllegalStateException("Observation imported from row " + accessDocId + " cannot be found (document id : " + importedId+")"));
                 return null;
             }
+
+            element.getPhotos().add(output);
+            return ((Element) element).getCouchDBDocument();
+
         } else {
             try {
                 final String docId = masterImporter.getImportedId(accessDocId);
-                return (Element) session.getRepositoryForClass(clazz).get(docId);
+                return (Element) observationCache.getOrCreate(docId, () -> (AvecPhotos) session.getRepositoryForClass(clazz).get(docId));
             } catch (Exception ex) {
                 context.reportError(getTableName(), input, new IllegalStateException("No imported object found for row " + accessDocId, ex), null);
                 return null;
@@ -125,5 +128,46 @@ public class PhotoImporter extends AbstractUpdater<Photo, Element> {
     @Override
     public String getTableName() {
         return selectedTable;
+    }
+
+    @Override
+    protected void postCompute() {
+        observationCache = null;
+    }
+
+    /**
+     * Search in cache if wanted observation has already been loaded. If not, we
+     * load it from database. As it forces us to make multiple queries, we try
+     * to retrieve wanted element from memory by scanning all cached object
+     * (searching in their children) first.
+     *
+     * @param observationId Id of the observation to retrieve.
+     * @return The queried observation, or null if we cannot find any with the
+     * given ID.
+     */
+    private AvecPhotos getOrCacheObservations(final String observationId) {
+        try {
+            return observationCache.getOrCreate(observationId, () -> {
+                // scan
+                for (final Object o : observationCache.values()) {
+                    if (o instanceof Element) {
+                        Element child = ((Element) o).getCouchDBDocument().getChildById(observationId);
+                        if (child instanceof AvecPhotos) {
+                            return (AvecPhotos) child;
+                        }
+                    }
+                }
+
+                // Query database
+                Element element = session.getElement(session.getPreviews().get(observationId)).orElse(null);
+                if (element instanceof AvecPhotos) {
+                    return (AvecPhotos) element;
+                }
+
+                return null;
+            });
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

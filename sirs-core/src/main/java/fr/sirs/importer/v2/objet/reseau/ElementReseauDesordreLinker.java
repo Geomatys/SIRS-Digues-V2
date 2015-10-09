@@ -5,6 +5,7 @@ import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Desordre;
+import fr.sirs.core.model.EchelleLimnimetrique;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
@@ -107,9 +108,11 @@ public class ElementReseauDesordreLinker {
     private boolean link(final ObjetReseau elementReseau, final Desordre desordre) {
         if (elementReseau instanceof VoieDigue) {
             desordre.getVoieDigueIds().add(elementReseau.getId());
+        } else if (elementReseau instanceof EchelleLimnimetrique) {
+            desordre.getEchelleLimnimetriqueIds().add(elementReseau.getId());
         } else if (elementReseau instanceof OuvrageParticulier) {
             desordre.getOuvrageParticulierIds().add(elementReseau.getId());
-        } else if (elementReseau instanceof OuvrageHydrauliqueAssocie) {
+        }else if (elementReseau instanceof OuvrageHydrauliqueAssocie) {
             desordre.getOuvrageHydrauliqueAssocieIds().add(elementReseau.getId());
         } else if (elementReseau instanceof OuvrageTelecomEnergie) {
             desordre.getOuvrageTelecomEnergieIds().add(elementReseau.getId());

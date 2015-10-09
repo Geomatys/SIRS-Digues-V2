@@ -22,7 +22,7 @@ import java.util.logging.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An importer is suposed to retrive data from one and only one table of the
+ * An importer is suposed to retrieve data from one and only one table of the
  * given database.
  * Note : Type of computed output is not necessarily a CouchDB document. To allow
  * user to post its data in this case, implementations of this class can wrap their

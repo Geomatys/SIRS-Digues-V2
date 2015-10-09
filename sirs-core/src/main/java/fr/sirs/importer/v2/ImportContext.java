@@ -177,7 +177,7 @@ public class ImportContext implements ApplicationContextAware {
                 for (final Class subtype : subTypes) {
                     registerImporter(subtype, importer);
                 }
-            } 
+            }
         }
 
         /*

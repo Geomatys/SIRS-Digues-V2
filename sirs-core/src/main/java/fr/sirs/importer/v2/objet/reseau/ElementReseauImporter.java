@@ -28,7 +28,7 @@ public class ElementReseauImporter extends AbstractImporter<ObjetReseau> impleme
     private HashMap<Class, Collection<Mapper>> additionalMappers;
     private HashMap<Class, Collection<ElementModifier>> additionalModifiers;
 
-    private enum Columns {
+    enum Columns {
         ID_ELEMENT_RESEAU,
         //        id_nom_element,
         //        ID_SOUS_GROUPE_DONNEES,
@@ -54,7 +54,8 @@ public class ElementReseauImporter extends AbstractImporter<ObjetReseau> impleme
         //        LIBELLE_TYPE_REVETEMENT,
         //        LIBELLE_TYPE_USAGE_VOIE,
         NOM,
-                ID_TYPE_ELEMENT_RESEAU,
+        ID_TYPE_ELEMENT_RESEAU,
+        ID_TYPE_OUVRAGE_PARTICULIER,
         ID_TYPE_COTE,
         ID_SOURCE,
         //        N_SECTEUR,

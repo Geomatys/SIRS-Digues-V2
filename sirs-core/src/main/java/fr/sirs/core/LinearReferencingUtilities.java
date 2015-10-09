@@ -106,7 +106,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
 
     /**
      * Builds a geometry for a target positionable that has prDebut, prFin and an SRId.
-     * 
+     *
      * The result geometry is built using the geometry of a reference positionable.
      *
      * @param refPositionable The reference positionable (must have a geometry).
@@ -124,11 +124,11 @@ public final class LinearReferencingUtilities extends LinearReferencing {
 
         /*
          Situation exemple.
-        
-         À partir d'une géométrie de référence (issue du positionable de 
+
+         À partir d'une géométrie de référence (issue du positionable de
          référence), on souhaite construire une nouvelle géométrie délimitée par
          deux PRs.
-        
+
         *
         *    segment 1   |          segment 2        |  3   | segment 4 |segment 5
         * ===============|===========================|======|===========|=========
@@ -194,7 +194,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
 
             /*
              Si on a trouvé les segments sur lesquels se trouvent les points de
-             début et de fin de la géométrie à construire, on peut sortir de la 
+             début et de fin de la géométrie à construire, on peut sortir de la
              boucle.
              */
             if (segmentFin != null && segmentDebut != null) {
@@ -214,8 +214,8 @@ public final class LinearReferencingUtilities extends LinearReferencing {
         /*
          À la fin de la boucle, on doit avoir les valeurs suivantes pour
          distanceAlongLinear0 et distanceAlongLinear1 :
-        
-        * 
+
+        *
         *    segment 1   |          segment 2        |  3   | segment 4 |segment 5
         * ===============|====X======================|======|======X====|=========
         *                  prDebut                               prFin
@@ -223,16 +223,16 @@ public final class LinearReferencingUtilities extends LinearReferencing {
         * ------------------------------------------------->| distanceAlongLinear1
         *
          ________________________________________________________________________
-        
+
          On doit également a voir les valeurs suivantes pour les PRs de début
          et de fin des segments de début et de fin :
-        
+
          segmentDebut : segment2
          segmentFin   : segment4
-        
-        
+
+
         *
-        *                |        segmentDebut       |      | segmentFin| 
+        *                |        segmentDebut       |      | segmentFin|
         * ===============|===========================|======|===========|=========
         *                |                           |      |           |
         *                |                           |      |           |
@@ -240,32 +240,32 @@ public final class LinearReferencingUtilities extends LinearReferencing {
         *                |                           |      x prDebutSegmentFin
         *                |                           |
         *                |                           x prFinSegmentDebut
-        *                x prDebutSegmentDebut  
+        *                x prDebutSegmentDebut
         *
          ________________________________________________________________________
-        
+
          Il faut maintenant mettre à jour les distancesAlongLinear de manière
         à les ajuster aux points des pr de début et de fin du positionable pour
         lequel on veut construire la géométrie.
-        
+
         *
         *    segment 1   |          segment 2        |  3   | segment 4 |segment 5
         * ===============|====X======================|======|======X====|=========
         *                  prDebut                               prFin
         * ------------------->| distanceAlongLinear0
         * -------------------------------------------------------->| distanceAlongLinear1
-        * 
-        
+        *
+
         */
-        
-        
-        
+
+
+
         distanceAlongLinear0 += (prDebut - prDebutSegmentDebut) / (prFinSegmentDebut - prDebutSegmentDebut);
         distanceAlongLinear1 += (prFin - prDebutSegmentFin) / (prFinSegmentFin - prDebutSegmentFin);
 
         /*
         Enfin, on découpe la géométrie du positionable de référence pour obtenir la nouvelle géométrie.
-        
+
         *
         *    segment 1   |          segment 2        |  3   | segment 4 |segment 5
         * ===============|====X======================|======|======X====|=========
@@ -276,7 +276,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
         *                     |                                    |
         *                     |                                    |
         * géométrie résultat: x======================|======|======x
-        
+
         */
         return cut(refPositionableLineString, distanceAlongLinear0, distanceAlongLinear1);
 
@@ -297,21 +297,41 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      * @return A line string for the given structure. Never null.
      */
     public static LineString buildGeometry(Geometry tronconGeom, Positionable structure, AbstractSIRSRepository<BorneDigue> repo) {
+        final LineString tronconLineString = asLineString(tronconGeom);
+        return buildGeometry(tronconLineString, buildSegments(tronconLineString), structure, repo);
+    }
+
+    /**
+     *
+     * Create a JTS geometry for the input {@link Positionable}. Generated
+     * geometry is a line string along an input geometry, whose beginning and
+     * end are defined by geographic begin and end position in the
+     * {@link Positionable}. If no valid point can be found, we will use its
+     * start and end {@link BorneDigue}.
+     *
+     * @param refLinear The source linear object to follow when creating the new
+     * one.
+     * @param segments soure linear object described as a list of segments.
+     * @param structure The positionable object to compute geometry for.
+     * @param repo A repository to access bornes along source linear object.
+     * @return A line string for the given structure. Never null.
+     */
+    public static LineString buildGeometry(LineString refLinear, SegmentInfo[] segments, Positionable structure, AbstractSIRSRepository<BorneDigue> repo) {
 
         final Point positionDebut = structure.getPositionDebut();
         final Point positionFin = structure.getPositionFin();
 
         if (positionDebut != null || positionFin != null) {
-            return buildGeometryFromGeo(tronconGeom, positionDebut, positionFin);
+            return buildGeometryFromGeo(refLinear, segments, positionDebut, positionFin);
         } else {
-            return buildGeometryFromBorne(tronconGeom, structure, repo);
+            return buildGeometryFromBorne(refLinear, segments, structure, repo);
         }
     }
 
     /**
      * Create a JTS geometry for the input {@link Positionable}. Generated
      * geometry is a line string along an input geometry, whose beginning and
-     * end are defined by given borne.
+     * end are defined by given bornes.
      *
      * @param tronconGeom The source geometry to follow when creating the new
      * one.
@@ -320,10 +340,23 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      * @return A line string for the given structure. Never null.
      */
     public static LineString buildGeometryFromBorne(Geometry tronconGeom, Positionable structure, AbstractSIRSRepository<BorneDigue> repo) {
-
         final LineString tronconLineString = asLineString(tronconGeom);
-        final SegmentInfo[] segments = buildSegments(tronconLineString);
+        return buildGeometryFromBorne(tronconLineString, buildSegments(tronconLineString), structure, repo);
+    }
 
+    /**
+     *
+     * Create a JTS geometry for the input {@link Positionable}. Generated
+     * geometry is a line string along an input geometry, whose beginning and
+     * end are defined by given bornes.
+     *
+     * @param refLinear
+     * @param segments
+     * @param structure
+     * @param repo
+     * @return
+     */
+    public static LineString buildGeometryFromBorne(LineString refLinear, SegmentInfo[] segments, Positionable structure, AbstractSIRSRepository<BorneDigue> repo) {
         //reconstruction a partir de bornes et de distances
         final BorneDigue borneDebut = (structure.getBorneDebutId() != null) ? repo.get(structure.getBorneDebutId()) : null;
         final BorneDigue borneFin = (structure.getBorneFinId() != null) ? repo.get(structure.getBorneFinId()) : null;
@@ -343,7 +376,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
         }
 
         //calcul de la distance des bornes. Il peut y avoir qu'une seule borne définie dans le cas d'un ponctuel.
-        final Point tronconStart = GO2Utilities.JTS_FACTORY.createPoint(tronconLineString.getCoordinates()[0]);
+        final Point tronconStart = GO2Utilities.JTS_FACTORY.createPoint(refLinear.getCoordinates()[0]);
         if (borneDebut != null) {
             final Point borneDebutGeom = borneDebut.getGeometry();
             final double borneDebutDistance = computeRelative(segments, new Point[]{tronconStart}, borneDebutGeom).getValue();
@@ -363,7 +396,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
             distanceFin = distanceDebut;
         }
 
-        return cut(tronconLineString, StrictMath.min(distanceDebut, distanceFin), StrictMath.max(distanceDebut, distanceFin));
+        return cut(refLinear, StrictMath.min(distanceDebut, distanceFin), StrictMath.max(distanceDebut, distanceFin));
     }
 
     /**
@@ -443,10 +476,20 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      * @return A line string for the given structure. Never null.
      */
     public static LineString buildGeometryFromGeo(Geometry tronconGeom, Point positionDebut, Point positionFin) {
+        final LineString linear = asLineString(tronconGeom);
+        return buildGeometryFromGeo(linear, buildSegments(linear), positionDebut, positionFin);
+    }
 
-        final LineString tronconLineString = asLineString(tronconGeom);
-        final SegmentInfo[] segments = buildSegments(tronconLineString);
-        
+    /**
+     *
+     * @param referenceLinear The source geometry to follow when creating the new
+     * one.
+     * @param segments Input reference linear represented as a succession of segments.
+     * @param positionDebut Start point of the geometry to compute.
+     * @param positionFin End point of the geometry to compute.
+     * @return A line along given linear structure, between start and end point.
+     */
+    public static LineString buildGeometryFromGeo(final LineString referenceLinear, final SegmentInfo[] segments, Point positionDebut, Point positionFin) {
         ProjectedPoint refDebut = null, refFin = null;
         if (positionDebut != null) {
             refDebut = projectReference(segments, positionDebut);
@@ -460,7 +503,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
             refFin = refDebut;
         }
 
-        return cut(tronconLineString, refDebut.distanceAlongLinear, refFin.distanceAlongLinear);
+        return cut(referenceLinear, refDebut.distanceAlongLinear, refFin.distanceAlongLinear);
     }
 
     /**
@@ -549,7 +592,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
             throw new RuntimeException("Cannot project point on linear."); // TODO : better exception
         }        // We'll try to find bornes on the nearest possible segment.
         if (projectedPoint.segmentIndex < 0) {
-            throw new RuntimeException("Cannot project point on linear."); // TODO : better exception       
+            throw new RuntimeException("Cannot project point on linear."); // TODO : better exception
         }
         for (final Point borne : possibleBornes) {
             ProjectedPoint projBorne = projectReference(sourceLinear, borne);

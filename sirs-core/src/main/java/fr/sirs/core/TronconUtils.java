@@ -995,7 +995,7 @@ public class TronconUtils {
         private final Positionable pos;
         private final SessionCore session;
         private TronconDigue troncon;
-        private Geometry linear;
+        private LineString linear;
         private SegmentInfo[] linearSegments;
 
         public PosInfo(Positionable pos) {
@@ -1006,20 +1006,26 @@ public class TronconUtils {
             this(pos, troncon, null);
         }
 
+        public PosInfo(Positionable pos, Geometry linearGeom, SegmentInfo[] segments) {
+            this(pos, null, linearGeom, segments);
+        }
+
         public PosInfo(Positionable pos, TronconDigue troncon, SegmentInfo[] linear) {
+            this(pos, troncon, null, linear);
+        }
+
+        public PosInfo(Positionable pos, TronconDigue troncon, Geometry geom, SegmentInfo[] segments) {
+            ArgumentChecks.ensureNonNull("Input positionable object", pos);
             this.pos = pos;
             this.troncon = troncon;
-            this.linearSegments = linear;
+            this.linear = geom != null ? asLineString(geom) : null;
+            this.linearSegments = segments;
             this.session = InjectorCore.getBean(SessionCore.class);
         }
 
-        /**
-         * Try to retrieve {@link TronconDigue} on which thee current Positionable is defined.
-         * @return Troncon of the object, or null if we cannot retrieve it (no valid SR).
-         */
-        public TronconDigue getTroncon() {
-            if (troncon == null && pos != null) {
-                String tdId = null;
+        public String getTronconId() {
+            String tdId = null;
+            if (troncon == null) {
                 if (pos instanceof AvecForeignParent) {
                     tdId = ((AvecForeignParent) pos).getForeignParentId();
                 } else {
@@ -1036,21 +1042,34 @@ public class TronconUtils {
                     }
                 }
 
-                // Source linear was not contained in the document, but we've found its ID. We can try to query it using its repository.
-                if (troncon == null && tdId != null) {
-                    try {
-                        troncon = session.getRepositoryForClass(TronconDigue.class).get(tdId);
-                    } catch (Exception e) {
-                        troncon = null;
-                    }
-                }
-
                 // Last chance, we must try to get it from SR
-                if (troncon == null && pos.getSystemeRepId() != null) {
+                if (troncon == null && tdId == null && pos.getSystemeRepId() != null) {
                     SystemeReperage sr = session.getRepositoryForClass(SystemeReperage.class).get(pos.getSystemeRepId());
-                    if (sr.getLinearId() != null) {
-                        troncon = session.getRepositoryForClass(TronconDigue.class).get(sr.getLinearId());
-                    }
+                    tdId = sr.getLinearId();
+                }
+            }
+
+            if (troncon != null)
+                return troncon.getId();
+            else
+                return tdId;
+        }
+
+        /**
+         * Try to retrieve {@link TronconDigue} on which thee current Positionable is defined.
+         * @return Troncon of the object, or null if we cannot retrieve it (no valid SR).
+         */
+        public TronconDigue getTroncon() {
+            if (troncon != null) {
+                return troncon;
+            }
+
+            final String tronconId = getTronconId();
+            if (troncon == null && tronconId != null) {
+                try {
+                    troncon = session.getRepositoryForClass(TronconDigue.class).get(tronconId);
+                } catch (Exception e) {
+                    troncon = null;
                 }
             }
 
@@ -1062,13 +1081,17 @@ public class TronconUtils {
          * the positionable.
          * @return
          */
-        public Geometry getTronconLinear(){
+        public LineString getTronconLinear() {
             if(linear==null) {
                 if (getTroncon() != null) {
-                    linear = getTroncon().getGeometry();
+                    linear = asLineString(getTroncon().getGeometry());
                 }
             }
             return linear;
+        }
+
+        public void setTronconLinear(final LineString newLinear) {
+            linear = newLinear;
         }
 
         /**
@@ -1084,6 +1107,10 @@ public class TronconUtils {
                         linearSegments = buildSegments(tmpLinear);
             }
             return linearSegments;
+        }
+
+        public void setTronconSegments(final SegmentInfo[] newSegments) {
+            linearSegments = newSegments;
         }
 
         /**
@@ -1255,10 +1282,13 @@ public class TronconUtils {
             return possr;
         }
 
+        /**
+         * @return geometry of the input positionable. If it has no geometry, it's computed and affected to the positionable object.
+         */
         public Geometry getGeometry() {
             Geometry geometry = pos.getGeometry();
             if (geometry == null) {
-                geometry = buildGeometry(getTronconLinear(), pos, session.getRepositoryForClass(BorneDigue.class));
+                geometry = buildGeometry(getTronconLinear(), getTronconSegments(false), pos, session.getRepositoryForClass(BorneDigue.class));
                 pos.setGeometry(geometry);
             }
             return geometry;

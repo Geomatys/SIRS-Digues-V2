@@ -1,6 +1,7 @@
 package fr.sirs.importer.v2.objet.reseau;
 
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.core.model.EchelleLimnimetrique;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.OuvertureBatardable;
 import fr.sirs.core.model.OuvrageFranchissement;
@@ -101,20 +102,28 @@ public class ReseauRegistry {
     }
 
     /**
-     * @param typeId An id found in {@link Columns#ID_TYPE_DOCUMENT} column.
-     * @return document class associated to given document type ID, or null, if
+     * Search for the document type to use for import of given row.
+     * @param input The row to analyze
+     * @return document class associated to given document type ID, or null if
      * given Id is unknown.
      */
-    public Class<? extends ObjetReseau> getElementType(final Object typeId) {
-        return types.get(typeId);
-    }
-
     public Class<? extends ObjetReseau> getElementType(final Row input) {
         final Object typeId = input.get(Columns.ID_TYPE_ELEMENT_RESEAU.name());
+
+        Class<? extends ObjetReseau> result = null;
         if (typeId != null) {
-            return getElementType(typeId);
+            result = types.get(typeId);
         }
-        return null;
+
+        // Hack : If we've got an {@link OuvrageParticulier}, it can be an {@link EchelleLimnimetrique} in some cases.
+        if (OuvrageParticulier.class.isAssignableFrom(result)) {
+            final Object typeOuvrage = input.get(ElementReseauImporter.Columns.ID_TYPE_OUVRAGE_PARTICULIER.name());
+            if ((typeOuvrage instanceof Number && ((Number)typeOuvrage).intValue() == 5)
+                    || (typeOuvrage instanceof String && "5".equals(typeOuvrage))) {
+                result = EchelleLimnimetrique.class;
+            }
+        }
+        return result;
     }
 
     public Collection<Class<? extends ObjetReseau>> allTypes() {
