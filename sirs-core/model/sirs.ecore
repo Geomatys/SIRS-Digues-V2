@@ -551,7 +551,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureBatardeauxId" eType="#//RefNatureBatardeaux"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="moyenManipBatardeauxId"
         eType="#//RefMoyenManipBatardeaux"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="intervenantManupulateurId"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="intervenantManipulateurId"
         eType="#//Contact"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="organismeManipulateurId"
         eType="#//Organisme"/>
@@ -653,6 +653,8 @@
         upperBound="-1" eType="#//ReseauHydrauliqueCielOuvert" eOpposite="#//ReseauHydrauliqueCielOuvert/reseauHydrauliqueFermeIds"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageHydrauliqueAssocieIds"
         upperBound="-1" eType="#//OuvrageHydrauliqueAssocie" eOpposite="#//OuvrageHydrauliqueAssocie/reseauHydrauliqueFermeIds"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
+        eType="#//ObservationReseauHydrauliqueFerme" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageHydrauliqueAssocie" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -668,7 +670,7 @@
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeReseauTelecomEnergieId"
         eType="#//RefReseauTelecomEnergie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="implantaitonId" eType="#//RefImplantation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="implantationId" eType="#//RefImplantation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageTelecomEnergieIds"
         upperBound="-1" eType="#//OuvrageTelecomEnergie" eOpposite="#//OuvrageTelecomEnergie/reseauTelecomEnergieIds"/>
@@ -960,7 +962,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="coteEau" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
         defaultValueLiteral="0.0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commentaire" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydroliqueId"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="evenementHydrauliqueId"
         eType="#//EvenementHydraulique"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -1452,4 +1454,22 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TronconLitAssociable" abstract="true"
       interface="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauHydrauliqueFerme">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nombreDesordres" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="evolution" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="suite" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="observateurId" eType="#//Contact"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
+      <eAnnotations source="localDate"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="urgenceId" eType="#//RefUrgence"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
+        eType="#//Photo" containment="true"/>
+  </eClassifiers>
 </ecore:EPackage>

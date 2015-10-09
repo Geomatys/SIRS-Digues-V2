@@ -8,10 +8,6 @@ import com.vividsolutions.jts.geom.Point;
 import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import fr.sirs.core.model.BorneDigue;
 import static fr.sirs.core.model.ElementCreator.createAnonymValidElement;
-import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.BorneDigueImporter;
-import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.RefCote;
 import fr.sirs.core.model.RefImplantation;
 import fr.sirs.core.model.RefPosition;
@@ -20,11 +16,15 @@ import fr.sirs.core.model.RefSource;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.SYS_EVT_RESEAU_TELECOMMUNICATION;
 import static fr.sirs.importer.DbImporter.cleanNullString;
+import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TypeCoteImporter;
-import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
+import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -255,7 +255,7 @@ class SysEvtReseauTelecommunicationImporter extends GenericReseauImporter<Reseau
 
         if (row.getInt(Columns.ID_IMPLANTATION.toString()) != null) {
             if (implantations.get(row.getInt(Columns.ID_IMPLANTATION.toString())) != null) {
-                reseau.setImplantaitonId(implantations.get(row.getInt(Columns.ID_IMPLANTATION.toString())).getId());
+                reseau.setImplantationId(implantations.get(row.getInt(Columns.ID_IMPLANTATION.toString())).getId());
             }
         }
 

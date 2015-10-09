@@ -32,10 +32,13 @@ import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.referencing.LinearReferencing;
 
 /**
+ * Classe abstraite de factorisation des fonctionnalités communes aux panneaux
+ * d'impression permettant de choisir des tronçons et des PRs pour restreindre 
+ * les objets à inclure dans le document à imprimer.
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class TronconChoicePrintPane extends BorderPane {
+public abstract class TronconChoicePrintPane extends BorderPane {
 
     @FXML protected Tab uiTronconChoice;
     protected final Map<String, ObjectProperty<Number>[]> prsByTronconId = new HashMap<>();
@@ -73,7 +76,6 @@ public class TronconChoicePrintPane extends BorderPane {
 
     private class SelectPRColumn extends TableColumn {
 
-
         public SelectPRColumn(final String text, final ExtremiteTroncon extremite){
             super(text);
 
@@ -88,20 +90,24 @@ public class TronconChoicePrintPane extends BorderPane {
                     return tableCell;
                 }
             });
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TronconDigue, Number>, ObservableValue<Number>>() {
 
+            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TronconDigue, Number>, ObservableValue<Number>>() {
 
                 @Override
                 public ObservableValue<Number> call(TableColumn.CellDataFeatures<TronconDigue, Number> param) {
 
                     if(param!=null && param.getValue()!=null){
                         final TronconDigue troncon = param.getValue();
+
                         if(troncon.getSystemeRepDefautId()!=null
                                 && troncon.getGeometry()!=null
                                 && troncon.getId()!=null){
+
                             final int index = extremite==ExtremiteTroncon.FIN ? 1:0; // Si on est à la fin du tronçon le pr se trouve à l'index 1 du tableau, sinon, par défaut on se place au début et on met l'index à 0
                             final ObjectProperty<Number> prProperty;
+
                             if(prsByTronconId.get(troncon.getId())==null) prsByTronconId.put(troncon.getId(), new ObjectProperty[2]);
+
                             if(prsByTronconId.get(troncon.getId())[index]==null){
                                 prProperty = new SimpleObjectProperty<>();
                                 final SystemeReperage sr = Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(troncon.getSystemeRepDefautId());
@@ -121,7 +127,8 @@ public class TronconChoicePrintPane extends BorderPane {
                                 prProperty.set(TronconUtils.computePR(tronconSegments, sr, point, Injector.getSession().getRepositoryForClass(BorneDigue.class)));
                                 prsByTronconId.get(troncon.getId())[index] = prProperty;
                             }
-                            else prProperty = prsByTronconId.get(troncon.getId())[index];
+                            else
+                                prProperty = prsByTronconId.get(troncon.getId())[index];
 
                             return prProperty;
                         }
@@ -142,7 +149,7 @@ public class TronconChoicePrintPane extends BorderPane {
     }
 
 
-    final class LocationPredicate<T extends Positionable & AvecForeignParent> implements Predicate<T>{
+    final protected class LocationPredicate<T extends Positionable & AvecForeignParent> implements Predicate<T>{
 
         final List<String> tronconIds = new ArrayList<>();
 
@@ -153,11 +160,11 @@ public class TronconChoicePrintPane extends BorderPane {
         }
 
         @Override
-        public boolean test(T desordre) {
+        public boolean test(final T candidate) {
 
             final boolean conditionSurTronconEtType;
-            if(!tronconIds.isEmpty() && desordre.getForeignParentId()!=null){
-                final String linearId = desordre.getForeignParentId();
+            if(!tronconIds.isEmpty() && candidate.getForeignParentId()!=null){
+                final String linearId = candidate.getForeignParentId();
 
                 /*
                 Sous-condition de retrait 1 : si le désordre est
@@ -167,14 +174,14 @@ public class TronconChoicePrintPane extends BorderPane {
                 final boolean linearSelected = !tronconIds.contains(linearId);
 
                 /*
-                Sous-condition de retrait 3 : si le désordre a des PRs de
+                Sous-condition de retrait 2 : si le désordre a des PRs de
                 début et de fin et si le tronçon a des PRs de début et
                 de fin (i.e. s'il a un SR par défaut qui a permi de les
                 calculer), alors on vérifie :
                 */
                 final boolean prOutOfRange;
-                if(desordre.getPrDebut()!=Float.NaN
-                        && desordre.getPrFin()!=Float.NaN
+                if(candidate.getPrDebut()!=Float.NaN
+                        && candidate.getPrFin()!=Float.NaN
                         && prsByTronconId.get(linearId)!=null
                         && prsByTronconId.get(linearId)!=null
                         && prsByTronconId.get(linearId)[0]!=null
@@ -182,12 +189,12 @@ public class TronconChoicePrintPane extends BorderPane {
                         && prsByTronconId.get(linearId)[0].get()!=null
                         && prsByTronconId.get(linearId)[1].get()!=null){
                     final float prInf, prSup;
-                    if(desordre.getPrDebut() < desordre.getPrFin()) {
-                        prInf=desordre.getPrDebut();
-                        prSup=desordre.getPrFin();
+                    if(candidate.getPrDebut() < candidate.getPrFin()) {
+                        prInf=candidate.getPrDebut();
+                        prSup=candidate.getPrFin();
                     } else {
-                        prInf=desordre.getPrFin();
-                        prSup=desordre.getPrDebut();
+                        prInf=candidate.getPrFin();
+                        prSup=candidate.getPrDebut();
                     }
                     prOutOfRange = (prInf < prsByTronconId.get(linearId)[0].get().floatValue()) // Si le désordre s'achève avant le début de la zone du tronçon que l'on souhaite.
                     || (prSup > prsByTronconId.get(linearId)[1].get().floatValue()); // Si le désordre débute après la fin de la zone du tronçon que l'on souhaite.

@@ -4,10 +4,6 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Contact;
-import fr.sirs.importer.AccessDbImporterException;
-import fr.sirs.importer.BorneDigueImporter;
-import static fr.sirs.importer.DbImporter.TableName.*;
-import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.OuvertureBatardable;
@@ -24,20 +20,24 @@ import fr.sirs.core.model.RefOuvrageParticulier;
 import fr.sirs.core.model.RefPosition;
 import fr.sirs.core.model.RefSeuil;
 import fr.sirs.core.model.RefTypeGlissiere;
-import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
+import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauTelecomEnergie;
 import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
+import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.BorneDigueImporter;
 import fr.sirs.importer.DbImporter;
+import static fr.sirs.importer.DbImporter.TableName.ELEMENT_RESEAU;
 import fr.sirs.importer.IntervenantImporter;
 import fr.sirs.importer.OrganismeImporter;
+import fr.sirs.importer.SystemeReperageImporter;
 import fr.sirs.importer.TypeCoteImporter;
-import fr.sirs.importer.objet.TypeNatureImporter;
-import fr.sirs.importer.objet.TypePositionImporter;
 import fr.sirs.importer.objet.SourceInfoImporter;
 import fr.sirs.importer.objet.TypeMateriauImporter;
+import fr.sirs.importer.objet.TypeNatureImporter;
+import fr.sirs.importer.objet.TypePositionImporter;
 import static fr.sirs.importer.objet.reseau.TypeOuvrageParticulierImporter.ECHELLE_LIMNIMETRIQUE;
 import fr.sirs.importer.troncon.TronconGestionDigueImporter;
 import java.io.IOException;
@@ -399,7 +399,7 @@ public class ElementReseauImporter extends GenericReseauImporter<ObjetReseau> {
                     }
 
                     if (row.getInt(Columns.ID_INTERV_MANIP_BATARDEAUX.toString()) != null) {
-                        ouverture.setIntervenantManupulateurId(contacts.get(row.getInt(Columns.ID_INTERV_MANIP_BATARDEAUX.toString())).getId());
+                        ouverture.setIntervenantManipulateurId(contacts.get(row.getInt(Columns.ID_INTERV_MANIP_BATARDEAUX.toString())).getId());
                     }
                     
                     if (row.getDate(Columns.DATE_DERNIERE_MAJ.toString()) != null) {

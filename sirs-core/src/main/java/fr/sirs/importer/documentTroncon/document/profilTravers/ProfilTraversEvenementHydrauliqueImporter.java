@@ -7,7 +7,7 @@ import fr.sirs.core.model.EvenementHydraulique;
 import fr.sirs.core.model.ParametreHydrauliqueProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
-import static fr.sirs.importer.DbImporter.TableName.*;
+import static fr.sirs.importer.DbImporter.TableName.PROFIL_EN_TRAVERS_EVT_HYDRAU;
 import fr.sirs.importer.GenericImporter;
 import fr.sirs.importer.evenementHydraulique.EvenementHydrauliqueImporter;
 import java.io.IOException;
@@ -79,7 +79,7 @@ class ProfilTraversEvenementHydrauliqueImporter extends GenericImporter {
             final ParametreHydrauliqueProfilTravers profilTraversEvenementHydraulique = createAnonymValidElement(ParametreHydrauliqueProfilTravers.class);
             
             if(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())!=null){
-                profilTraversEvenementHydraulique.setEvenementHydroliqueId(evenementHydrauliques.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
+                profilTraversEvenementHydraulique.setEvenementHydrauliqueId(evenementHydrauliques.get(row.getInt(Columns.ID_EVENEMENT_HYDRAU.toString())).getId());
             }
             
             if(row.getDouble(Columns.DEBIT_DE_POINTE_M3S.toString())!=null){
