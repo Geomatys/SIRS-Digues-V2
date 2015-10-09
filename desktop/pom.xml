@@ -89,11 +89,6 @@
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
-      <artifactId>geotk-client-wms</artifactId>
-      <version>${geotoolkit.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-client-osmtms</artifactId>
       <version>${geotoolkit.version}</version>
     </dependency>
@@ -103,11 +98,6 @@
       <version>${geotoolkit.version}</version>
     </dependency>
     <!-- Moved out of Geotk, it does not follow the same versioning. -->
-    <dependency>
-      <groupId>org.geotoolkit</groupId>
-      <artifactId>geotk-feature-dwg</artifactId>
-      <version>${geotoolkit.dwg.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-feature-esri-geodb</artifactId>

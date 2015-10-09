@@ -94,7 +94,8 @@ public class FXDataImportPane extends BorderPane {
         coverageStores = FXCollections.observableArrayList();
         for (final String factoryName : COVERAGE_STORES) {
             try {
-                coverageStores.add(CoverageStoreFinder.getFactoryById(factoryName));
+                final CoverageStoreFactory factory = CoverageStoreFinder.getFactoryById(factoryName);
+                if(factory!=null) coverageStores.add(factory);
             } catch (Exception e) {
                 SIRS.LOGGER.log(Level.FINE, "No factory available for name : "+factoryName, e);
             }
@@ -103,7 +104,8 @@ public class FXDataImportPane extends BorderPane {
         featureStores = FXCollections.observableArrayList();
         for (final String factoryName : FEATURE_STORES) {
             try {
-                featureStores.add(FeatureStoreFinder.getFactoryById(factoryName));
+                final FeatureStoreFactory factory = FeatureStoreFinder.getFactoryById(factoryName);
+                if(factory!=null) featureStores.add(factory);
             } catch (Exception e) {
                 SIRS.LOGGER.log(Level.FINE, "No factory available for name : "+factoryName, e);
             }
