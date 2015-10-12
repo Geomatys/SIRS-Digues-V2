@@ -105,7 +105,6 @@ public class PrinterUtilities {
                     PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_RESEAU_FERME),
                     avoidDesordreFields, avoidObservationFields,
                     reseauFields, printPhoto, printReseauOuvrage);
-            templateWriter.setFieldsInterline(2);
             templateWriter.setOutput(templateFile);
             templateWriter.write(reseau);
 
@@ -198,7 +197,6 @@ public class PrinterUtilities {
                     PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE), 
                     avoidDesordreFields, avoidObservationFields, avoidPrestationFields, 
                     reseauFields, printPhoto, printReseauOuvrage, printVoirie);
-            templateWriter.setFieldsInterline(2);
             templateWriter.setOutput(templateFile);
             templateWriter.write(desordre);
 

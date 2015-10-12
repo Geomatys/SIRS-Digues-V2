@@ -1,9 +1,7 @@
 package fr.sirs.util;
 
-import fr.sirs.SIRS;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Level;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -18,8 +16,7 @@ import org.xml.sax.SAXException;
 public class AbstractJDomWriter {
     
     protected final Document document;
-    protected final Element root; 
-    
+    protected final Element root;
     
     protected static final String NULL_REPLACEMENT = "Non renseigné";
     protected static final String TRUE_REPLACEMENT = "Oui";
@@ -34,7 +31,8 @@ public class AbstractJDomWriter {
         
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setCoalescing(false);
-        factory.setNamespaceAware(true); 
+        factory.setNamespaceAware(true);
+        
         final DocumentBuilder constructeur = factory.newDocumentBuilder();
         
         document = constructeur.parse(stream);

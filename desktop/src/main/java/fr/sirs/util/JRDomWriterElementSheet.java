@@ -3,7 +3,6 @@ package fr.sirs.util;
 
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import static fr.sirs.util.JRUtils.ATT_BACKCOLOR;
-import static fr.sirs.util.JRUtils.ATT_CLASS;
 import static fr.sirs.util.JRUtils.ATT_FONT_NAME;
 import static fr.sirs.util.JRUtils.ATT_HEIGHT;
 import static fr.sirs.util.JRUtils.ATT_IS_BOLD;
@@ -12,7 +11,6 @@ import static fr.sirs.util.JRUtils.ATT_LINE_COLOR;
 import static fr.sirs.util.JRUtils.ATT_LINE_WIDTH;
 import static fr.sirs.util.JRUtils.ATT_MARKUP;
 import static fr.sirs.util.JRUtils.ATT_MODE;
-import static fr.sirs.util.JRUtils.ATT_NAME;
 import static fr.sirs.util.JRUtils.ATT_POSITION_TYPE;
 import static fr.sirs.util.JRUtils.ATT_TEXT_ALIGNMENT;
 import static fr.sirs.util.JRUtils.ATT_VERTICAL_ALIGNMENT;
@@ -26,15 +24,10 @@ import fr.sirs.util.JRUtils.PositionType;
 import static fr.sirs.util.JRUtils.TAG_BAND;
 import static fr.sirs.util.JRUtils.TAG_BOTTOM_PEN;
 import static fr.sirs.util.JRUtils.TAG_BOX;
-import static fr.sirs.util.JRUtils.TAG_COLUMN_FOOTER;
 import static fr.sirs.util.JRUtils.TAG_COLUMN_HEADER;
 import static fr.sirs.util.JRUtils.TAG_DETAIL;
-import static fr.sirs.util.JRUtils.TAG_FIELD;
-import static fr.sirs.util.JRUtils.TAG_FIELD_DESCRIPTION;
 import static fr.sirs.util.JRUtils.TAG_FONT;
 import static fr.sirs.util.JRUtils.TAG_FRAME;
-import static fr.sirs.util.JRUtils.TAG_LAST_PAGE_FOOTER;
-import static fr.sirs.util.JRUtils.TAG_PAGE_FOOTER;
 import static fr.sirs.util.JRUtils.TAG_PAGE_HEADER;
 import static fr.sirs.util.JRUtils.TAG_REPORT_ELEMENT;
 import static fr.sirs.util.JRUtils.TAG_STATIC_TEXT;
@@ -44,15 +37,12 @@ import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD;
 import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD_EXPRESSION;
 import static fr.sirs.util.JRUtils.TAG_TITLE;
 import fr.sirs.util.JRUtils.TextAlignment;
-import static fr.sirs.util.JRUtils.getCanonicalName;
 import static fr.sirs.util.PrinterUtilities.getFieldNameFromSetter;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -71,17 +61,13 @@ import org.xml.sax.SAXException;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class JRDomWriterElementSheet extends AbstractJDomWriter {
+public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
     
     // Template elements.
     private final Element title;
     private final Element pageHeader;
     private final Element columnHeader;
     private final Element detail;
-    private final Element columnFooter;
-    private final Element pageFooter;
-    private final Element lastPageFooter;
-    private File output;
     
     // Dynamic template parameters.
     private int fields_interline;
@@ -108,9 +94,6 @@ public class JRDomWriterElementSheet extends AbstractJDomWriter {
         this.pageHeader = null;
         this.columnHeader = null;
         this.detail = null;
-        this.columnFooter = null;
-        this.pageFooter = null;
-        this.lastPageFooter = null;
         
         this.fields_interline = 8;
     }
@@ -121,9 +104,6 @@ public class JRDomWriterElementSheet extends AbstractJDomWriter {
         pageHeader = (Element) root.getElementsByTagName(TAG_PAGE_HEADER).item(0);
         columnHeader = (Element) root.getElementsByTagName(TAG_COLUMN_HEADER).item(0);
         detail = (Element) this.root.getElementsByTagName(TAG_DETAIL).item(0);
-        columnFooter = (Element) root.getElementsByTagName(TAG_COLUMN_FOOTER).item(0);
-        pageFooter = (Element) root.getElementsByTagName(TAG_PAGE_FOOTER).item(0);
-        lastPageFooter = (Element) root.getElementsByTagName(TAG_LAST_PAGE_FOOTER).item(0);
         
         fields_interline = 8;
     }
@@ -137,14 +117,6 @@ public class JRDomWriterElementSheet extends AbstractJDomWriter {
     }
     
     /**
-     * <p>This method sets the output to write the modified DOM in.</p>
-     * @param output 
-     */
-    public void setOutput(final File output) {
-        this.output = output;
-    } 
-    
-    /**
      * <p>This method writes a Jasper Reports template mapping the parameter class.</p>
      * @param classToMap
      * @param avoidFields field names to avoid.
@@ -154,18 +126,18 @@ public class JRDomWriterElementSheet extends AbstractJDomWriter {
     public void write(final Class classToMap, final List<String> avoidFields) throws TransformerException, IOException, Exception {
         
         // Remove elements before inserting fields.-----------------------------
-        this.root.removeChild(this.title);
-        this.root.removeChild(this.pageHeader);
-        this.root.removeChild(this.columnHeader);
-        this.root.removeChild(this.detail);
+        root.removeChild(title);
+        root.removeChild(pageHeader);
+        root.removeChild(columnHeader);
+        root.removeChild(detail);
         
         // Modifies the template, based on the given class.---------------------
         this.writeObject(classToMap, avoidFields);
         
         // Serializes the document.---------------------------------------------
         //DomUtilities.write(this.document, this.output);
-        final Source source = new DOMSource(this.document);
-        final Result result = new StreamResult(this.output);
+        final Source source = new DOMSource(document);
+        final Result result = new StreamResult(output);
         final TransformerFactory factory = TransformerFactory.newInstance();
         final Transformer trs = factory.newTransformer();
         trs.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -179,7 +151,7 @@ public class JRDomWriterElementSheet extends AbstractJDomWriter {
      * @param avoidFields field names to avoid.
      * @throws Exception 
      */
-    private void writeObject(final Class classToMap, List<String> avoidFields) {
+    private void writeObject(final Class classToMap, final List<String> avoidFields) {
         
         // Sets the initial fields used by the template.------------------------
         final Method[] methods = classToMap.getMethods();
@@ -201,32 +173,6 @@ public class JRDomWriterElementSheet extends AbstractJDomWriter {
         
         // Builds the body of the Jasper Reports template.----------------------
         writeDetail(classToMap, avoidFields);
-    }
-        
-    /**
-     * <p>This method writes the fiels user by the Jasper Reports template.</p>
-     * @param method must be a setter method starting by "set"
-     */
-    private void writeField(final Method method) {
-        
-        // Builds the name of the field.----------------------------------------
-        final String fieldName = method.getName().substring(3, 4).toLowerCase() 
-                        + method.getName().substring(4);
-        
-        // Creates the field element.-------------------------------------------
-        final Element field = document.createElement(TAG_FIELD);
-        field.setAttribute(ATT_NAME, fieldName);
-        
-        final Optional<String> canonicalName = getCanonicalName(method.getParameterTypes()[0]);
-        if(canonicalName.isPresent()) field.setAttribute(ATT_CLASS, canonicalName.get());
-        
-        final Element fieldDescription = document.createElement(TAG_FIELD_DESCRIPTION);
-        final CDATASection description = document.createCDATASection("Mettre ici une description du champ.");
-        
-        // Builds the DOM tree.-------------------------------------------------
-        fieldDescription.appendChild(description);
-        field.appendChild(fieldDescription);
-        this.root.appendChild(field);
     }
     
     /**
