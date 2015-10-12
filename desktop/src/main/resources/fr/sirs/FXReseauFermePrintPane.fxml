@@ -110,7 +110,6 @@
                                                 </Label>
                                                 <CheckBox fx:id="uiOptionPhoto" mnemonicParsing="false" text="%photoOption" />
                                                 <CheckBox fx:id="uiOptionReseauOuvrage" mnemonicParsing="false" text="%reseauOuvrageOption" />
-                                                <CheckBox fx:id="uiOptionVoirie" mnemonicParsing="false" text="%voirieOption" />
                                              </children>
                                              <padding>
                                                 <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
