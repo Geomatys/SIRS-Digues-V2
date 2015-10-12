@@ -129,8 +129,8 @@
                    <Label text="%hauteurChute" GridPane.rowIndex="18" />
                    <Spinner fx:id="ui_hauteurChute" GridPane.columnIndex="1" GridPane.rowIndex="18"  maxHeight="-Infinity" maxWidth="-Infinity"/>
                    <!-- EDouble -->                 
-                   <Label text="%surfaceRempartEntretien" GridPane.rowIndex="19" />
-                   <Spinner fx:id="ui_surfaceRempartEntretien" GridPane.columnIndex="1" GridPane.rowIndex="19"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <Label text="%surfaceRempantEntretien" GridPane.rowIndex="19" />
+                   <Spinner fx:id="ui_surfaceRempantEntretien" GridPane.columnIndex="1" GridPane.rowIndex="19"  maxHeight="-Infinity" maxWidth="-Infinity"/>
                    
                    <!-- Structure -->
                    <Separator GridPane.rowIndex="20" GridPane.columnSpan="3" />
