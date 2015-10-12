@@ -17,7 +17,7 @@ class TypeOrientationOuvrageFranchissementImporter extends GenericTypeReferenceI
     }
 
     @Override
-    protected Class<RefOrientationOuvrage> getElementClass() {
+    public Class<RefOrientationOuvrage> getElementClass() {
         return RefOrientationOuvrage.class;
     }
 }

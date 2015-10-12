@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class TypeSourceImporter extends GenericTypeReferenceImporter<RefSource> {
 
     @Override
-    protected Class<RefSource> getElementClass() {
+    public Class<RefSource> getElementClass() {
         return RefSource.class;
     }
 

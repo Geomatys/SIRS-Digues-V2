@@ -39,7 +39,7 @@ public class XYZLeveProfilTraversImporter extends SimpleUpdater<XYZLeveProfilTra
     }
 
     @Override
-    protected Class<XYZLeveProfilTravers> getElementClass() {
+    public Class<XYZLeveProfilTravers> getElementClass() {
         return XYZLeveProfilTravers.class;
     }
 

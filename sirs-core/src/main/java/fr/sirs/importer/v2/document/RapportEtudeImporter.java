@@ -21,7 +21,7 @@ public class RapportEtudeImporter extends AbstractImporter<RapportEtude> {
     };
 
     @Override
-    protected Class<RapportEtude> getElementClass() {
+    public Class<RapportEtude> getElementClass() {
         return RapportEtude.class;
     }
 

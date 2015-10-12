@@ -39,7 +39,7 @@ public class XYZProfilLongImporter extends SimpleUpdater<XYZProfilLong, ProfilLo
     }
 
     @Override
-    protected Class<XYZProfilLong> getElementClass() {
+    public Class<XYZProfilLong> getElementClass() {
         return XYZProfilLong.class;
     }
 

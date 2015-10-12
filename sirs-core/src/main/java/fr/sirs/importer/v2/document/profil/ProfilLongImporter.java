@@ -23,7 +23,7 @@ public class ProfilLongImporter extends AbstractUpdater<ProfilLong, ProfilLong> 
     private AbstractSIRSRepository<ProfilLong> profilRepo;
 
     @Override
-    protected Class<ProfilLong> getElementClass() {
+    public Class<ProfilLong> getElementClass() {
         return ProfilLong.class;
     }
 

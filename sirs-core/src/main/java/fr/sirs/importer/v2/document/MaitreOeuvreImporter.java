@@ -35,7 +35,7 @@ public class MaitreOeuvreImporter extends SimpleUpdater<MaitreOeuvreMarche, Marc
     }
 
     @Override
-    protected Class<MaitreOeuvreMarche> getElementClass() {
+    public Class<MaitreOeuvreMarche> getElementClass() {
         return MaitreOeuvreMarche.class;
     }
 

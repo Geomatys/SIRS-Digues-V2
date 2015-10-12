@@ -18,7 +18,7 @@ public class SystemeReperageImporter extends AbstractImporter<SystemeReperage> {
     }
 
     @Override
-    protected Class<SystemeReperage> getElementClass() {
+    public Class<SystemeReperage> getElementClass() {
         return SystemeReperage.class;
     }
 

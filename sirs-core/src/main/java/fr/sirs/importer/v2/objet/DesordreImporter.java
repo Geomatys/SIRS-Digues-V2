@@ -17,7 +17,7 @@ public class DesordreImporter extends AbstractImporter<Desordre> {
     }
 
     @Override
-    protected Class<Desordre> getElementClass() {
+    public Class<Desordre> getElementClass() {
         return Desordre.class;
     }
 

@@ -17,7 +17,7 @@ class TypeLargeurFrancBordImporter extends GenericTypeReferenceImporter<RefLarge
     }
 
     @Override
-    protected Class<RefLargeurFrancBord> getElementClass() {
+    public Class<RefLargeurFrancBord> getElementClass() {
         return RefLargeurFrancBord.class;
     }
 }

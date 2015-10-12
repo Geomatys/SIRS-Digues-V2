@@ -116,7 +116,7 @@ public class ReseauRegistry {
         }
 
         // Hack : If we've got an {@link OuvrageParticulier}, it can be an {@link EchelleLimnimetrique} in some cases.
-        if (OuvrageParticulier.class.isAssignableFrom(result)) {
+        if (result != null && OuvrageParticulier.class.isAssignableFrom(result)) {
             final Object typeOuvrage = input.get(ElementReseauImporter.Columns.ID_TYPE_OUVRAGE_PARTICULIER.name());
             if ((typeOuvrage instanceof Number && ((Number)typeOuvrage).intValue() == 5)
                     || (typeOuvrage instanceof String && "5".equals(typeOuvrage))) {

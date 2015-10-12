@@ -13,6 +13,8 @@ import fr.sirs.importer.v2.linear.TronconDigueUpdater;
 import fr.sirs.util.ImportParameters;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import javafx.concurrent.Task;
 import org.apache.sis.metadata.iso.citation.Citations;
 import org.apache.sis.referencing.IdentifiedObjects;
 import org.apache.sis.util.ArgumentChecks;
@@ -385,7 +387,7 @@ public class DbImporter {
         databaseContext = dbContext;
     }
 
-    public void importation(
+    public Task<Boolean> importation(
             final File mainAccessDbFile,
             final File cartoAccessDbFile,
             final CoordinateReferenceSystem outputCRS,
@@ -393,44 +395,57 @@ public class DbImporter {
             final String newAdminPwd)
             throws IOException, AccessDbImporterException {
 
-        SirsDBInfoRepository sirsDBInfoRepository = databaseContext.getBean(SirsDBInfoRepository.class);
-        final Identifier crsId = IdentifiedObjects.getIdentifier(outputCRS, Citations.EPSG);
-        sirsDBInfoRepository.setSRID(crsId.getCodeSpace() + ':' + crsId.getCode());
+        return new Task() {
 
-        if (newAdminLogin != null) {
-            databaseContext.getBean(SessionCore.class).createUser(newAdminLogin, newAdminPwd, Role.ADMIN);
-        }
+            @Override
+            protected Object call() throws Exception {
+                updateTitle("Import de base de donnée");
+                SirsDBInfoRepository sirsDBInfoRepository = databaseContext.getBean(SirsDBInfoRepository.class);
+                final Identifier crsId = IdentifiedObjects.getIdentifier(outputCRS, Citations.EPSG);
+                sirsDBInfoRepository.setSRID(crsId.getCodeSpace() + ':' + crsId.getCode());
 
-        try (final Database mainDb = DatabaseBuilder.open(mainAccessDbFile);
-                final Database cartoDb = DatabaseBuilder.open(cartoAccessDbFile)) {
-
-            final ImportParameters params = new ImportParameters(mainDb, cartoDb, databaseContext.getBean(CouchDbConnector.class), outputCRS);
-            databaseContext.getBeanFactory().registerSingleton(ImportParameters.class.getCanonicalName(), params);
-
-            // Open spring context for import.
-            try (final ClassPathXmlApplicationContext importCtx = new ClassPathXmlApplicationContext(new String[]{"classpath:/fr/sirs/spring/importer-context.xml"}, databaseContext)) {
-                final ImportContext context = importCtx.getBean(ImportContext.class);
-
-                /*
-                 * We have to import entire linear referencing environment first
-                 * if we want to be able to compute object geometries before they're
-                 * posted.
-                 */
-                context.importers.get(TronconDigue.class).compute();
-                importCtx.getBean(TronconDigueUpdater.class).compute();
-
-                for (final AbstractImporter importer : context.importers.values()) {
-                    importer.compute();
+                if (newAdminLogin != null) {
+                    databaseContext.getBean(SessionCore.class).createUser(newAdminLogin, newAdminPwd, Role.ADMIN);
                 }
 
-                for (final Linker l : context.linkers) {
-                    l.link();
-                }
+                try (final Database mainDb = DatabaseBuilder.open(mainAccessDbFile);
+                        final Database cartoDb = DatabaseBuilder.open(cartoAccessDbFile)) {
 
-                context.outputDb.compact();
-            } finally {
-                databaseContext.getBeanFactory().destroyBean(params);
+                    final ImportParameters params = new ImportParameters(mainDb, cartoDb, databaseContext.getBean(CouchDbConnector.class), outputCRS);
+                    databaseContext.getBeanFactory().registerSingleton(ImportParameters.class.getCanonicalName(), params);
+
+                    // Open spring context for import.
+                    try (final ClassPathXmlApplicationContext importCtx = new ClassPathXmlApplicationContext(new String[]{"classpath:/fr/sirs/spring/importer-context.xml"}, databaseContext)) {
+                        final ImportContext context = importCtx.getBean(ImportContext.class);
+
+                        /*
+                         * We have to import entire linear referencing environment first
+                         * if we want to be able to compute object geometries before they're
+                         * posted.
+                         */
+                        context.importers.get(TronconDigue.class).compute();
+                        importCtx.getBean(TronconDigueUpdater.class).compute();
+
+                        final Collection<AbstractImporter> importers = context.importers.values();
+
+                        final long totalWork = importers.size() + context.linkers.size();
+                        for (final AbstractImporter importer : importers) {
+                            importer.compute();
+                            updateProgress(context.importCount.get(), totalWork);
+                        }
+
+                        for (final Linker l : context.linkers) {
+                            l.link();
+                            updateProgress(context.importCount.get()+context.linkCount.get(), totalWork);
+                        }
+
+                        context.outputDb.compact();
+                        return true;
+                    } finally {
+                        databaseContext.getBeanFactory().destroyBean(params);
+                    }
+                }
             }
-        }
+        };
     }
 }

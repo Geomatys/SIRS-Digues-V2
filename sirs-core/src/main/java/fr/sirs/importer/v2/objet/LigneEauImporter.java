@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 public class LigneEauImporter extends AbstractLinker<LigneEau, EvenementHydraulique> {
 
     @Override
-    protected Class<LigneEau> getElementClass() {
+    public Class<LigneEau> getElementClass() {
         return LigneEau.class;
     }
 

@@ -17,7 +17,7 @@ class TypeUtilisationConduiteImporter extends GenericTypeReferenceImporter<RefUt
     }
 
     @Override
-    protected Class<RefUtilisationConduite> getElementClass() {
+    public Class<RefUtilisationConduite> getElementClass() {
         return RefUtilisationConduite.class;
     }
 }

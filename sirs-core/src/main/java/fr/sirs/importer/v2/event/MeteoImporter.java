@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class MeteoImporter extends SimpleUpdater<Meteo, EvenementHydraulique> {
 
     @Override
-    protected Class<Meteo> getElementClass() {
+    public Class<Meteo> getElementClass() {
         return Meteo.class;
     }
 

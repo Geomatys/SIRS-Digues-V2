@@ -19,7 +19,7 @@ public class MesureLigneEauPrZImporter extends SimpleUpdater<MesureLigneEauPrZ, 
     }
 
     @Override
-    protected Class<MesureLigneEauPrZ> getElementClass() {
+    public Class<MesureLigneEauPrZ> getElementClass() {
         return MesureLigneEauPrZ.class;
     }
 

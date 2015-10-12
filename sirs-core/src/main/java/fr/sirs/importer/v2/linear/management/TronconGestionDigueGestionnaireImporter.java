@@ -30,7 +30,7 @@ class TronconGestionDigueGestionnaireImporter extends SimpleUpdater<GestionTronc
     };
 
     @Override
-    protected Class<GestionTroncon> getElementClass() {
+    public Class<GestionTroncon> getElementClass() {
         return GestionTroncon.class;
     }
 

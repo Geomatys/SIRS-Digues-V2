@@ -17,7 +17,7 @@ public class TypeOrientationVentImporter extends GenericTypeReferenceImporter<Re
     }
 
     @Override
-    protected Class<RefOrientationVent> getElementClass() {
+    public Class<RefOrientationVent> getElementClass() {
         return RefOrientationVent.class;
     }
 }

@@ -99,7 +99,7 @@ public class ElementReseauImporter extends AbstractImporter<ObjetReseau> impleme
     }
 
     @Override
-    protected Class<ObjetReseau> getElementClass() {
+    public Class<ObjetReseau> getElementClass() {
         return ObjetReseau.class;
     }
 

@@ -32,7 +32,17 @@ import org.springframework.stereotype.Component;
  * @author Alexis Manin (Geomatys)
  */
 @Component
-public class ElementReseauDesordreLinker {
+public class ElementReseauDesordreLinker implements Linker<ObjetReseau, Desordre> {
+
+    @Override
+    public Class<ObjetReseau> getTargetClass() {
+        return ObjetReseau.class;
+    }
+
+    @Override
+    public Class<Desordre> getHolderClass() {
+        return Desordre.class;
+    }
 
     private enum Columns {
         ID_DESORDRE,
@@ -48,7 +58,7 @@ public class ElementReseauDesordreLinker {
     @Autowired
     ReseauRegistry registry;
 
-    public void compute() throws AccessDbImporterException, IOException {
+    public void link() throws AccessDbImporterException, IOException {
         Iterator<Row> iterator = context.inputDb.getTable(DESORDRE_ELEMENT_RESEAU.name()).iterator();
 
         final AbstractImporter<ObjetReseau> reseauImporter = context.importers.get(ObjetReseau.class);
@@ -102,6 +112,7 @@ public class ElementReseauDesordreLinker {
 
             context.executeBulk(toUpdate);
             toUpdate.clear();
+            context.linkCount.incrementAndGet();
         }
     }
 

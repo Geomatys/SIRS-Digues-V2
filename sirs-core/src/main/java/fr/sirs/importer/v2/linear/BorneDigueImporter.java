@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.importer.AccessDbImporterException;
+import fr.sirs.importer.DbImporter;
 import static fr.sirs.importer.DbImporter.TableName.BORNE_DIGUE;
 import fr.sirs.importer.v2.CorruptionLevel;
 import fr.sirs.importer.v2.AbstractImporter;
@@ -23,8 +24,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class BorneDigueImporter extends AbstractImporter<BorneDigue> {
 
-    // TODO : package-private
-    public enum Columns {
+    enum Columns {
         ID_BORNE,
         ID_TRONCON_GESTION,
         NOM_BORNE,
@@ -37,14 +37,14 @@ public class BorneDigueImporter extends AbstractImporter<BorneDigue> {
     };
 
     @Override
-    protected Class getElementClass() {
+    public Class<BorneDigue> getElementClass() {
         return BorneDigue.class;
     }
 
     @Override
     public BorneDigue importRow(Row row, BorneDigue output) throws IOException, AccessDbImporterException {
         output = super.importRow(row, output);
-        output.setLibelle(row.getString(Columns.NOM_BORNE.toString()));
+        output.setLibelle(DbImporter.cleanNullString(row.getString(Columns.NOM_BORNE.toString())));
 
         output.setFictive(row.getBoolean(Columns.FICTIVE.toString()));
 

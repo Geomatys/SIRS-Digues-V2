@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class IntervenantImporter extends AbstractImporter<Contact> {
 
     @Override
-    protected Class<Contact> getElementClass() {
+    public Class<Contact> getElementClass() {
         return Contact.class;
     }
 

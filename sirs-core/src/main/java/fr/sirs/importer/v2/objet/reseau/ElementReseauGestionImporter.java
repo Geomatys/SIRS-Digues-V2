@@ -22,7 +22,7 @@ public class ElementReseauGestionImporter extends AbstractElementReseauGestionIm
     }
 
     @Override
-    protected Class<GestionObjet> getElementClass() {
+    public Class<GestionObjet> getElementClass() {
         return GestionObjet.class;
     }
 

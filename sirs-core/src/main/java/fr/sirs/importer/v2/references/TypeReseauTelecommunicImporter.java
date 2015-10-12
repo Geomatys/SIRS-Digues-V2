@@ -17,7 +17,7 @@ class TypeReseauTelecommunicImporter extends GenericTypeReferenceImporter<RefRes
     }
 
     @Override
-    protected Class<RefReseauTelecomEnergie> getElementClass() {
+    public Class<RefReseauTelecomEnergie> getElementClass() {
         return RefReseauTelecomEnergie.class;
     }
 }

@@ -20,7 +20,7 @@ class TypeOuvrageParticulierImporter extends GenericTypeReferenceImporter<RefOuv
     }
 
     @Override
-    protected Class<RefOuvrageParticulier> getElementClass() {
+    public Class<RefOuvrageParticulier> getElementClass() {
         return RefOuvrageParticulier.class;
     }
 }

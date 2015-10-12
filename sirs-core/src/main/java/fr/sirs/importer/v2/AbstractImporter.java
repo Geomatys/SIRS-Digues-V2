@@ -23,10 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An importer is suposed to retrieve data from one and only one table of the
- * given database.
- * Note : Type of computed output is not necessarily a CouchDB document. To allow
- * user to post its data in this case, implementations of this class can wrap their
- * output in a postable document by overriding method {@link #prepareToPost(java.lang.Object, com.healthmarketscience.jackcess.Row, fr.sirs.core.model.Element) }.
+ * given database. Note : Type of computed output is not necessarily a CouchDB
+ * document. To allow user to post its data in this case, implementations of
+ * this class can wrap their output in a postable document by overriding method {@link #prepareToPost(java.lang.Object, com.healthmarketscience.jackcess.Row, fr.sirs.core.model.Element)
+ * }.
  *
  * @author Samuel Andrés (Geomatys)
  * @author Alexis Manin (Geomatys)
@@ -51,12 +51,13 @@ public abstract class AbstractImporter<T extends Element> {
 
     protected Table table;
 
-    protected AbstractImporter() {}
+    protected AbstractImporter() {
+    }
 
     /**
      * @return type for the object to create and fill.
      */
-    protected abstract Class<T> getElementClass();
+    public abstract Class<T> getElementClass();
 
     /**
      *
@@ -83,12 +84,16 @@ public abstract class AbstractImporter<T extends Element> {
     /**
      * A method which can be overrided to provide a specific treatment before
      * table import.
-     * @throws fr.sirs.importer.AccessDbImporterException If an unrecoverable error occurs.
+     *
+     * @throws fr.sirs.importer.AccessDbImporterException If an unrecoverable
+     * error occurs.
      */
-    protected void preCompute() throws AccessDbImporterException {}
+    protected void preCompute() throws AccessDbImporterException {
+    }
 
     /**
-     * A method which can be overrided to provide a specific treatment after table import.
+     * A method which can be overrided to provide a specific treatment after
+     * table import.
      */
     protected void postCompute() {
         mappers.clear();
@@ -108,8 +113,6 @@ public abstract class AbstractImporter<T extends Element> {
         //DEBUG
         SirsCore.LOGGER.info("\nIMPORT OF " + getTableName() + " by " + getClass().getCanonicalName() + ". PRIMARY KEY : " + getRowIdFieldName());
 
-        preCompute();
-
         table = context.inputDb.getTable(getTableName());
 
         mappers.clear();
@@ -120,6 +123,8 @@ public abstract class AbstractImporter<T extends Element> {
 
         // In case we want to boost import with multi-threading.
         importedRows = new ConcurrentHashMap<>();
+
+        preCompute();
 
         /*
          * Import entire table  content. We split import in packets to avoid memory overload.
@@ -142,7 +147,6 @@ public abstract class AbstractImporter<T extends Element> {
                         context.reportError(new ErrorReport(null, row, getTableName(), getRowIdFieldName(), null, null, "Imported row is not linkable due to null ID.", CorruptionLevel.RELATION));
                     }
 
-                    // TODO : error management and report
                     T output = createElement(row);
                     if (output == null) {
                         continue;
@@ -180,7 +184,7 @@ public abstract class AbstractImporter<T extends Element> {
                  * their Ids. We check that bulk has succeeded for an object before creating
                  * the binding.
                  *
-                 * IMPORTANT : NOT PUT IN AFTERPOST METHOD, TO ENSURE IMPLEMENTATIONS WILL DO IT.
+                 * IMPORTANT : DO NOT PUT IN AFTERPOST METHOD, TO ENSURE IMPLEMENTATIONS WILL DO IT.
                  */
                 for (final Map.Entry<Object, T> entry : imports.entrySet()) {
                     final String id = entry.getValue().getId();
@@ -192,6 +196,7 @@ public abstract class AbstractImporter<T extends Element> {
         } finally {
             postCompute();
             table = null;
+            context.importCount.incrementAndGet();
         }
     }
 
@@ -205,15 +210,14 @@ public abstract class AbstractImporter<T extends Element> {
      * @return Id of the wanted object in output database, or null if we cannot
      * find it.
      * @throws java.io.IOException If an error occurs while importing data.
-     * @throws fr.sirs.importer.AccessDbImporterException If an error occurs while importing data.
-     * @throws IllegalStateException If no document has been imported for given row id.
+     * @throws fr.sirs.importer.AccessDbImporterException If an error occurs
+     * while importing data.
+     * @throws IllegalStateException If no document has been imported for given
+     * row id.
      */
     public final String getImportedId(final Object rowId) throws IOException, AccessDbImporterException {
-        synchronized (this) {
-            if (importedRows == null) {
-                compute();
-            }
-        }
+        compute();
+
         final String result = importedRows.get(rowId);
         if (result == null) {
             throw new IllegalStateException("No imported object found for row " + rowId + " from table " + getTableName());
@@ -241,7 +245,7 @@ public abstract class AbstractImporter<T extends Element> {
      * @throws IOException
      * @throws AccessDbImporterException
      */
-    public T importRow(final Row row, final T output)
+    protected T importRow(final Row row, final T output)
             throws IOException, AccessDbImporterException {
         for (final Mapper m : mappers) {
             m.map(row, output);
@@ -251,9 +255,11 @@ public abstract class AbstractImporter<T extends Element> {
     }
 
     /**
-     * Once current row has been imported and resulting object has been modified,
-     * this method is called to get the real object to send into CouchDB (Ex :
-     * imported object was a sub-structure of the document to update).
+     * Once current row has been imported and resulting object has been
+     * modified, this method is called to get the real object to send into
+     * CouchDB (Ex : imported object was a sub-structure of the document to
+     * update).
+     *
      * @param rowId Id of the imported row.
      * @param row Row which has been imported
      * @param output The object which has been filled with current row.
@@ -265,15 +271,18 @@ public abstract class AbstractImporter<T extends Element> {
 
     /**
      * Allow an operation after a bulk update has been performed.
-     * @param posted The items (keys are their ids) successfully sent into CouchDb.
-     * @param imports The items (keys are originating row ids) which have been imported from ms-access for this bulk.
+     *
+     * @param posted The items (keys are their ids) successfully sent into
+     * CouchDb.
+     * @param imports The items (keys are originating row ids) which have been
+     * imported from ms-access for this bulk.
      */
-    protected void afterPost(final Map<String, Element> posted, Map<Object, T> imports) {}
+    protected void afterPost(final Map<String, Element> posted, Map<Object, T> imports) {
+    }
 
     /*
      * DEBUG UTILITIES
      */
-
     /**
      *
      * @return the list of Access database table names.
@@ -428,7 +437,7 @@ public abstract class AbstractImporter<T extends Element> {
             }
 
         } catch (IOException ex) {
-            SirsCore.LOGGER.log(Level.FINE, "An error occurred while analyzing table "+getTableName(), ex);
+            SirsCore.LOGGER.log(Level.FINE, "An error occurred while analyzing table " + getTableName(), ex);
         }
         SirsCore.LOGGER.log(Level.FINE, "*************************************************\n");
     }

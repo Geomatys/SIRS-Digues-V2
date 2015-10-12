@@ -17,7 +17,7 @@ public class MarcheImporter extends AbstractImporter<Marche> {
     DocTypeRegistry registry;
 
     @Override
-    protected Class<Marche> getElementClass() {
+    public Class<Marche> getElementClass() {
         return Marche.class;
     }
 

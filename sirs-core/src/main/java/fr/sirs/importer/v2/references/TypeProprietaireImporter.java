@@ -17,7 +17,7 @@ class TypeProprietaireImporter extends GenericTypeReferenceImporter<RefProprieta
     }
 
     @Override
-    protected Class<RefProprietaire> getElementClass() {
+    public Class<RefProprietaire> getElementClass() {
         return RefProprietaire.class;
     }
 }

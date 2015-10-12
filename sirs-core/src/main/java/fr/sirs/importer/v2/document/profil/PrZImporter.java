@@ -39,7 +39,7 @@ public class PrZImporter extends SimpleUpdater<PrZProfilLong, ProfilLong> {
     }
 
     @Override
-    protected Class<PrZProfilLong> getElementClass() {
+    public Class<PrZProfilLong> getElementClass() {
         return PrZProfilLong.class;
     }
 

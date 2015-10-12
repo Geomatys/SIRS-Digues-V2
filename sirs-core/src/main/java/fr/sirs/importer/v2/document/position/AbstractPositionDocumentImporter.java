@@ -89,7 +89,7 @@ public class AbstractPositionDocumentImporter extends AbstractImporter<AbstractP
     }
 
     @Override
-    protected Class<AbstractPositionDocument> getElementClass() {
+    public Class<AbstractPositionDocument> getElementClass() {
         return AbstractPositionDocument.class;
     }
 

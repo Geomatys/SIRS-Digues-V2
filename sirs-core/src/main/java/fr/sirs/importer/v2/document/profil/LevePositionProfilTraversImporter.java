@@ -36,7 +36,7 @@ public class LevePositionProfilTraversImporter extends AbstractLinker<LevePositi
     }
 
     @Override
-    protected Class<LevePositionProfilTravers> getElementClass() {
+    public Class<LevePositionProfilTravers> getElementClass() {
         return LevePositionProfilTravers.class;
     }
 

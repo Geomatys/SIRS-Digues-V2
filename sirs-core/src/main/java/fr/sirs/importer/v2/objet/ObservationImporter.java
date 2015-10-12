@@ -33,7 +33,7 @@ public class ObservationImporter extends SimpleUpdater<Observation, Desordre> {
     }
 
     @Override
-    protected Class<Observation> getElementClass() {
+    public Class<Observation> getElementClass() {
         return Observation.class;
     }
 

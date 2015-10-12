@@ -23,7 +23,7 @@ public class ElementReseauGardienImporter extends AbstractElementReseauGestionIm
     }
 
     @Override
-    protected Class<GardeObjet> getElementClass() {
+    public Class<GardeObjet> getElementClass() {
         return GardeObjet.class;
     }
 

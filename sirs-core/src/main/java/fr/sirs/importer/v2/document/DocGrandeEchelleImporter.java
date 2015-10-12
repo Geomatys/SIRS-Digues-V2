@@ -18,7 +18,7 @@ public class DocGrandeEchelleImporter extends AbstractImporter<DocumentGrandeEch
     DocTypeRegistry registry;
 
     @Override
-    protected Class<DocumentGrandeEchelle> getElementClass() {
+    public Class<DocumentGrandeEchelle> getElementClass() {
         return DocumentGrandeEchelle.class;
     }
 

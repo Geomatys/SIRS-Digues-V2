@@ -189,6 +189,7 @@ public abstract class JoinTableLinker<T extends Element, U extends Element> impl
 
             context.executeBulk(toUpdate);
             toUpdate.clear();
+            context.linkCount.incrementAndGet();
         }
     }
 

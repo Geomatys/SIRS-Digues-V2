@@ -36,7 +36,7 @@ public class ParametrePTraversImporter extends SimpleUpdater<ParametreHydrauliqu
     }
 
     @Override
-    protected Class<ParametreHydrauliqueProfilTravers> getElementClass() {
+    public Class<ParametreHydrauliqueProfilTravers> getElementClass() {
         return ParametreHydrauliqueProfilTravers.class;
     }
 

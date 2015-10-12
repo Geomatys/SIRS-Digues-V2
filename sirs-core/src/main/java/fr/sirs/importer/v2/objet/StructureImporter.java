@@ -28,7 +28,7 @@ public class StructureImporter extends AbstractImporter<Objet> implements Multip
     private StructureRegistry registry;
 
     @Override
-    protected Class<Objet> getElementClass() {
+    public Class<Objet> getElementClass() {
         return Objet.class;
     }
 

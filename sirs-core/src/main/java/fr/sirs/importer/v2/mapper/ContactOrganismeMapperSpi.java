@@ -4,11 +4,13 @@ import fr.sirs.core.model.ContactOrganisme;
 import java.beans.IntrospectionException;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class ContactOrganismeMapperSpi extends GenericMapperSpi<ContactOrganisme> {
 
     private final HashMap<String, String> bindings;

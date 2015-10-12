@@ -23,7 +23,7 @@ public class ElementReseauProprieteImporter extends AbstractElementReseauGestion
     }
 
     @Override
-    protected Class<ProprieteObjet> getElementClass() {
+    public Class<ProprieteObjet> getElementClass() {
         return ProprieteObjet.class;
     }
 

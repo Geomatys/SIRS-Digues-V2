@@ -39,7 +39,7 @@ public class OrganismeDisposeIntervenantImporter extends SimpleUpdater<ContactOr
     };
 
     @Override
-    protected Class<ContactOrganisme> getElementClass() {
+    public Class<ContactOrganisme> getElementClass() {
         return ContactOrganisme.class;
     }
 

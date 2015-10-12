@@ -25,7 +25,7 @@ public class ProprietaireTronconGestionImporter extends GenericPeriodeLocaliseeI
     private AbstractImporter<RefProprietaire> typeProprietaireImporter;
 
     @Override
-    protected Class<ProprieteTroncon> getElementClass() {
+    public Class<ProprieteTroncon> getElementClass() {
         return ProprieteTroncon.class;
     }
 

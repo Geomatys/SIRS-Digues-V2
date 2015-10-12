@@ -17,7 +17,7 @@ class TypeReseauEauImporter extends GenericTypeReferenceImporter<RefReseauHydroC
     }
 
     @Override
-    protected Class<RefReseauHydroCielOuvert> getElementClass() {
+    public Class<RefReseauHydroCielOuvert> getElementClass() {
         return RefReseauHydroCielOuvert.class;
     }
 }

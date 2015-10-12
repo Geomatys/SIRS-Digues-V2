@@ -59,6 +59,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
@@ -539,10 +540,23 @@ public class FXLauncherPane extends BorderPane {
         }
         final String epsgCode = epsg;
 
+        final File mainDbFile = new File(uiImportDBData.getText());
+        final File cartoDbFile = new File(uiImportDBCarto.getText());
+
+        if (!mainDbFile.isFile()) {
+            final Alert alert = new Alert(AlertType.ERROR, "Le fichier de base de donnée suivant est illisible : " + mainDbFile.getAbsolutePath(), ButtonType.OK);
+            alert.setResizable(true);
+            alert.show();
+        }
+
+        if (!cartoDbFile.isFile()) {
+            final Alert alert = new Alert(AlertType.ERROR, "Le fichier de base de donnée suivant est illisible : " + cartoDbFile.getAbsolutePath(), ButtonType.OK);
+            alert.setResizable(true);
+            alert.show();
+        }
+
         uiImportButton.setDisable(true);
-        new Thread(() -> {
-            final File mainDbFile = new File(uiImportDBData.getText());
-            final File cartoDbFile = new File(uiImportDBCarto.getText());
+        TaskManager.INSTANCE.submit(() -> {
             final ClassLoader scl = ClassLoader.getSystemClassLoader();
             if (scl instanceof PluginLoader) {
                 try {
@@ -553,18 +567,13 @@ public class FXLauncherPane extends BorderPane {
                     return;
                 }
             }
-            if (!mainDbFile.isFile()) {
-                throw new IllegalArgumentException("Le fichier de base de donnée suivant est illisible : " + mainDbFile.getAbsolutePath());
-            }
-
-            if (!cartoDbFile.isFile()) {
-                throw new IllegalArgumentException("Le fichier de base de donnée suivant est illisible : " + cartoDbFile.getAbsolutePath());
-            }
-
             try (ConfigurableApplicationContext appCtx = localRegistry.connectToSirsDatabase(dbName, true, false, false)) {
                 final DbImporter importer = new DbImporter(appCtx);
-                importer.importation(mainDbFile, cartoDbFile, uiImportCRS.crsProperty().get(), uiImportLogin.getText(), uiImportPassword.getText());
+                Task<Boolean> importTask = TaskManager.INSTANCE.submit(importer.importation(
+                        mainDbFile, cartoDbFile, uiImportCRS.crsProperty().get(), uiImportLogin.getText(), uiImportPassword.getText()));
+                uiProgressImport.progressProperty().bind(importTask.progressProperty());
 
+                importTask.get();
                 // Opérations ultérieures à l'importation à réaliser par les plugins.
                 // Should initialize most of couchdb views
                 for (final Plugin p : Plugins.getPlugins()) {
@@ -589,7 +598,7 @@ public class FXLauncherPane extends BorderPane {
                 GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. "
                         + "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, "
                         + "puis relancer l'application.", ex).showAndWait();
-            } catch (RuntimeException ex) {
+            } catch (Exception ex) {
                 LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 GeotkFX.newExceptionDialog("Une erreur est survenue pendant l'import de la base.", ex).showAndWait();
             } finally {
@@ -1046,13 +1055,3 @@ public class FXLauncherPane extends BorderPane {
                         .replaceAll("\\s+", "_")
                         .replaceAll("[^\\w\\d_\\-\\$+\\(\\)]", "")
                         .toLowerCase()
-                );
-            }
-    }
-
-    private final class RestartableStage extends AbstractRestartableStage {
-        public RestartableStage(Stage stage) {
-            super(stage);
-        }
-
-        @Override

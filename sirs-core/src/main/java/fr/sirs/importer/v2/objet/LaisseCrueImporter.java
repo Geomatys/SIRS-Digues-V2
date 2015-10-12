@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 public class LaisseCrueImporter extends AbstractLinker<LaisseCrue, EvenementHydraulique> {
 
     @Override
-    protected Class<LaisseCrue> getElementClass() {
+    public Class<LaisseCrue> getElementClass() {
         return LaisseCrue.class;
     }
 

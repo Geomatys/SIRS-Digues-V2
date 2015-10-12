@@ -19,7 +19,7 @@ public class ParametrePLongImporter extends SimpleUpdater<ParametreHydrauliquePr
     }
 
     @Override
-    protected Class<ParametreHydrauliqueProfilLong> getElementClass() {
+    public Class<ParametreHydrauliqueProfilLong> getElementClass() {
         return ParametreHydrauliqueProfilLong.class;
     }
 

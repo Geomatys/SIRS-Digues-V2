@@ -17,7 +17,7 @@ class TypeImplantationImporter extends GenericTypeReferenceImporter<RefImplantat
     }
 
     @Override
-    protected Class<RefImplantation> getElementClass() {
+    public Class<RefImplantation> getElementClass() {
         return RefImplantation.class;
     }
 

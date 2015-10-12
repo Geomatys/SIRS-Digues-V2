@@ -17,7 +17,7 @@ class TypeMoyenManipBatardeauxImporter extends GenericTypeReferenceImporter<RefM
     }
 
     @Override
-    protected Class<RefMoyenManipBatardeaux> getElementClass() {
+    public Class<RefMoyenManipBatardeaux> getElementClass() {
         return RefMoyenManipBatardeaux.class;
     }
 }

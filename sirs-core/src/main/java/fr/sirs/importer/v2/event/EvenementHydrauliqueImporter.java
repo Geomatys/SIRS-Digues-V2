@@ -18,7 +18,7 @@ public class EvenementHydrauliqueImporter extends AbstractImporter<EvenementHydr
     }
 
     @Override
-    protected Class<EvenementHydraulique> getElementClass() {
+    public Class<EvenementHydraulique> getElementClass() {
         return EvenementHydraulique.class;
     }
 

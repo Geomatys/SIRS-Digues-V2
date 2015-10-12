@@ -4,6 +4,7 @@ import fr.sirs.importer.v2.*;
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.DocumentGrandeEchelle;
 import fr.sirs.core.model.Element;
@@ -25,7 +26,17 @@ import org.springframework.stereotype.Component;
  * @author Alexis Manin (Geomatys)
  */
 @Component
-public class PrestationDocumentLinker {
+public class PrestationDocumentLinker implements Linker<AbstractPositionDocument, Prestation> {
+
+    @Override
+    public Class<Prestation> getHolderClass() {
+        return Prestation.class;
+    }
+
+    @Override
+    public Class<AbstractPositionDocument> getTargetClass() {
+        return AbstractPositionDocument.class;
+    }
 
     private enum Columns {
 
@@ -39,7 +50,7 @@ public class PrestationDocumentLinker {
     @Autowired
     protected SessionCore session;
 
-    public void compute() throws AccessDbImporterException, IOException {
+    public void link() throws AccessDbImporterException, IOException {
         Iterator<Row> iterator = context.inputDb.getTable(PRESTATION_DOCUMENT.name()).iterator();
 
         final AbstractImporter<Prestation> prestationImporter = context.importers.get(Prestation.class);
@@ -47,7 +58,7 @@ public class PrestationDocumentLinker {
             throw new AccessDbImporterException("No importer found for type " + Prestation.class.getCanonicalName());
         }
 
-        final AbstractImporter<AbstractPositionDocumentAssociable> docImporter = context.importers.get(AbstractPositionDocumentAssociable.class);
+        final AbstractImporter<AbstractPositionDocument> docImporter = context.importers.get(AbstractPositionDocument.class);
         if (docImporter == null) {
             throw new AccessDbImporterException("No importer found for type " + AbstractPositionDocumentAssociable.class.getCanonicalName());
         }
@@ -84,16 +95,17 @@ public class PrestationDocumentLinker {
                 posDoc = session.getElement(docId).orElse(null);
 
                 if (posDoc instanceof AbstractPositionDocumentAssociable) {
-                    link(prestation, (AbstractPositionDocumentAssociable) posDoc, toUpdate);
+                    linkDocument(prestation, (AbstractPositionDocumentAssociable) posDoc, toUpdate);
                 }
             }
 
             context.executeBulk(toUpdate);
             toUpdate.clear();
+            context.linkCount.incrementAndGet();
         }
     }
 
-    private void link(final Prestation p, final AbstractPositionDocumentAssociable doc, final HashSet<Element> updates) {
+    private void linkDocument(final Prestation p, final AbstractPositionDocumentAssociable doc, final HashSet<Element> updates) {
         final String realDocId = doc.getSirsdocument();
         if (realDocId == null) {
             return;
@@ -101,7 +113,6 @@ public class PrestationDocumentLinker {
 
         final Element realDoc = session.getElement(realDocId).orElse(null);
         if (realDoc instanceof DocumentGrandeEchelle) {
-            final DocumentGrandeEchelle documentGrandeEchelle = (DocumentGrandeEchelle) realDoc;
             p.getDocumentGrandeEchelleIds().add(realDocId);
             updates.add(p);
         } else if (realDoc instanceof RapportEtude) {

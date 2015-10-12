@@ -17,7 +17,7 @@ class TypeConduiteFermeeImporter extends GenericTypeReferenceImporter<RefConduit
     }
 
     @Override
-    protected Class<RefConduiteFermee> getElementClass() {
+    public Class<RefConduiteFermee> getElementClass() {
         return RefConduiteFermee.class;
     }
 }

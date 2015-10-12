@@ -17,7 +17,7 @@ class TypeRapportEtudeImporter extends GenericTypeReferenceImporter<RefRapportEt
     }
 
     @Override
-    protected Class<RefRapportEtude> getElementClass() {
+    public Class<RefRapportEtude> getElementClass() {
         return RefRapportEtude.class;
     }
 }

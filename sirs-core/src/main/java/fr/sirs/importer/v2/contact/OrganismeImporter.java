@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class OrganismeImporter extends AbstractImporter<Organisme> {
 
     @Override
-    protected Class<Organisme> getElementClass() {
+    public Class<Organisme> getElementClass() {
         return Organisme.class;
     }
 

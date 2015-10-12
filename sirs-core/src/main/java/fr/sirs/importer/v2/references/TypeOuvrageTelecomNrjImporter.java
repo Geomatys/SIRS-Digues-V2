@@ -17,7 +17,7 @@ class TypeOuvrageTelecomNrjImporter extends GenericTypeReferenceImporter<RefOuvr
     }
 
     @Override
-    protected Class<RefOuvrageTelecomEnergie> getElementClass() {
+    public Class<RefOuvrageTelecomEnergie> getElementClass() {
         return RefOuvrageTelecomEnergie.class;
     }
 }

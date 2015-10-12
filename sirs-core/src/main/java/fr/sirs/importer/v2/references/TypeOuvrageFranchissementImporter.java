@@ -17,7 +17,7 @@ class TypeOuvrageFranchissementImporter extends GenericTypeReferenceImporter<Ref
     }
 
     @Override
-    protected Class<RefOuvrageFranchissement> getElementClass() {
+    public Class<RefOuvrageFranchissement> getElementClass() {
         return RefOuvrageFranchissement.class;
     }
 

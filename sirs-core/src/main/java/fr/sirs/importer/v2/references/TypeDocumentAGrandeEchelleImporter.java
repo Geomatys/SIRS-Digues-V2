@@ -17,7 +17,7 @@ class TypeDocumentAGrandeEchelleImporter extends GenericTypeReferenceImporter<Re
     }
 
     @Override
-    protected Class<RefDocumentGrandeEchelle> getElementClass() {
+    public Class<RefDocumentGrandeEchelle> getElementClass() {
         return RefDocumentGrandeEchelle.class;
     }
 }

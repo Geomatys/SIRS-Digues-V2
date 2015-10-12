@@ -17,7 +17,7 @@ class TypeOuvrageVoirieImporter extends GenericTypeReferenceImporter<RefOuvrageV
     }
 
     @Override
-    protected Class<RefOuvrageVoirie> getElementClass() {
+    public Class<RefOuvrageVoirie> getElementClass() {
         return RefOuvrageVoirie.class;
     }
 }

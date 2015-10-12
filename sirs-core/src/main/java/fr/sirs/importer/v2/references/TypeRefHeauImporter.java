@@ -17,7 +17,7 @@ public class TypeRefHeauImporter extends GenericTypeReferenceImporter<RefReferen
     }
 
     @Override
-    protected Class<RefReferenceHauteur> getElementClass() {
+    public Class<RefReferenceHauteur> getElementClass() {
         return RefReferenceHauteur.class;
     }
 

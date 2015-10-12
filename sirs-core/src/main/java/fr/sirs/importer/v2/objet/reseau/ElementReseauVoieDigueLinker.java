@@ -25,10 +25,19 @@ import org.springframework.stereotype.Component;
  * @author Alexis Manin (Geomatys)
  */
 @Component
-public abstract class ElementReseauVoieDigueLinker {
+public class ElementReseauVoieDigueLinker implements Linker<VoieDigue, ObjetReseau> {
+
+    @Override
+    public Class<VoieDigue> getTargetClass() {
+        return VoieDigue.class;
+    }
+
+    @Override
+    public Class<ObjetReseau> getHolderClass() {
+        return ObjetReseau.class;
+    }
 
     private enum Columns {
-
         ID_ELEMENT_RESEAU,
         ID_ELEMENT_RESEAU_VOIE_SUR_DIGUE
     }
@@ -39,10 +48,7 @@ public abstract class ElementReseauVoieDigueLinker {
     @Autowired
     protected SessionCore session;
 
-    @Autowired
-    ReseauRegistry registry;
-
-    public void compute() throws AccessDbImporterException, IOException {
+    public void link() throws AccessDbImporterException, IOException {
         Iterator<Row> iterator = context.inputDb.getTable(ELEMENT_RESEAU_VOIE_SUR_DIGUE.name()).iterator();
 
         final AbstractImporter<VoieDigue> voieDigueImporter = context.importers.get(VoieDigue.class);
@@ -65,7 +71,7 @@ public abstract class ElementReseauVoieDigueLinker {
         String voieDigueId, reseauId;
         VoieDigue voieDigue;
         Class elementType;
-        ObjetReseau objetReseau;
+        Element objetReseau;
         AbstractSIRSRepository<ObjetReseau> reseauRepo;
         Row current;
         while (iterator.hasNext()) {
@@ -75,30 +81,29 @@ public abstract class ElementReseauVoieDigueLinker {
                 current = iterator.next();
 
                 // Those fields should be SQL join table keys, so they should never be null.
-                voieDigueId = voieDigueImporter.getImportedId(current.getInt(Columns.ID_ELEMENT_RESEAU.name()));
+                voieDigueId = voieDigueImporter.getImportedId(current.getInt(Columns.ID_ELEMENT_RESEAU_VOIE_SUR_DIGUE.name()));
                 reseauId = reseauImporter.getImportedId(current.getInt(Columns.ID_ELEMENT_RESEAU.name()));
-                elementType = registry.getElementType(current);
                 if (voieDigueId == null) {
-                    context.reportError(new ErrorReport(null, current, ELEMENT_RESEAU_VOIE_SUR_DIGUE.name(), Columns.ID_ELEMENT_RESEAU.name(), null, null, "No imported object found for input Id.", CorruptionLevel.ROW));
+                    context.reportError(new ErrorReport(null, current, ELEMENT_RESEAU_VOIE_SUR_DIGUE.name(), Columns.ID_ELEMENT_RESEAU_VOIE_SUR_DIGUE.name(), null, null, "No imported object found for input Id.", CorruptionLevel.ROW));
                     continue;
                 } else if (reseauId == null) {
-                    context.reportError(new ErrorReport(null, current, ELEMENT_RESEAU_VOIE_SUR_DIGUE.name(), Columns.ID_ELEMENT_RESEAU_VOIE_SUR_DIGUE.name(), null, null, "No imported object found for input Id.", CorruptionLevel.ROW));
+                    context.reportError(new ErrorReport(null, current, ELEMENT_RESEAU_VOIE_SUR_DIGUE.name(), Columns.ID_ELEMENT_RESEAU.name(), null, null, "No imported object found for input Id.", CorruptionLevel.ROW));
                     continue;
                 }
 
                 voieDigue = voieDigueRepo.get(voieDigueId);
-                reseauRepo = session.getRepositoryForClass(elementType);
-                objetReseau = reseauRepo.get(reseauId);
+                objetReseau = session.getElement(reseauId).orElse(null);
 
                 link(voieDigue, objetReseau, toUpdate);
             }
 
             context.executeBulk(toUpdate);
             toUpdate.clear();
+            context.linkCount.incrementAndGet();
         }
     }
 
-    private void link(final VoieDigue voie, final ObjetReseau elementReseau, final HashSet<Element> updates) {
+    private void link(final VoieDigue voie, final Element elementReseau, final HashSet<Element> updates) {
         if (elementReseau instanceof ReseauHydrauliqueFerme) {
             final ReseauHydrauliqueFerme reseauFerme = (ReseauHydrauliqueFerme) elementReseau;
             reseauFerme.getReseauHydrauliqueCielOuvertIds().add(voie.getId());

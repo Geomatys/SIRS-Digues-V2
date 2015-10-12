@@ -34,7 +34,7 @@ public class PompeImporter extends SimpleUpdater<Pompe, StationPompage> {
     }
 
     @Override
-    protected Class<Pompe> getElementClass() {
+    public Class<Pompe> getElementClass() {
         return Pompe.class;
     }
 

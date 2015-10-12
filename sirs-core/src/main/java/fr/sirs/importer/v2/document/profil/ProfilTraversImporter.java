@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class ProfilTraversImporter extends AbstractImporter<ProfilTravers> {
 
     @Override
-    protected Class<ProfilTravers> getElementClass() {
+    public Class<ProfilTravers> getElementClass() {
         return ProfilTravers.class;
     }
 

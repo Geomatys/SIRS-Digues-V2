@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class ArticleJournalImporter extends AbstractImporter<ArticleJournal> {
 
     @Override
-    protected Class<ArticleJournal> getElementClass() {
+    public Class<ArticleJournal> getElementClass() {
         return ArticleJournal.class;
     }
 

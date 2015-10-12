@@ -47,9 +47,11 @@ public class PhotoImporter extends AbstractUpdater<Photo, Element> {
             for (final String tableName : tableNames) {
                 selectedTable = tableName;
                 super.compute();
+                context.importCount.decrementAndGet();
             }
         } finally {
             selectedTable = tableNames[0];
+            context.importCount.incrementAndGet();
         }
     }
 
@@ -66,7 +68,7 @@ public class PhotoImporter extends AbstractUpdater<Photo, Element> {
     }
 
     @Override
-    protected Class<Photo> getElementClass() {
+    public Class<Photo> getElementClass() {
         return Photo.class;
     }
 

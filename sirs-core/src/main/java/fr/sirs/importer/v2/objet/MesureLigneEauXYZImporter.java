@@ -24,7 +24,7 @@ public class MesureLigneEauXYZImporter extends SimpleUpdater<MesureLigneEauXYZ, 
     }
 
     @Override
-    protected Class<MesureLigneEauXYZ> getElementClass() {
+    public Class<MesureLigneEauXYZ> getElementClass() {
         return MesureLigneEauXYZ.class;
     }
 

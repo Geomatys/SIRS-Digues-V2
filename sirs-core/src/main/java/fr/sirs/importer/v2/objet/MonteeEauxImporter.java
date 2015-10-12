@@ -26,7 +26,7 @@ public class MonteeEauxImporter extends AbstractLinker<MonteeEaux, EvenementHydr
     }
 
     @Override
-    protected Class<MonteeEaux> getElementClass() {
+    public Class<MonteeEaux> getElementClass() {
         return MonteeEaux.class;
     }
 

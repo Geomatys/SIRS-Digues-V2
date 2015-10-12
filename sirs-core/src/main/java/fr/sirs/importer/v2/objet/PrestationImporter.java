@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class PrestationImporter extends AbstractImporter<Prestation> {
 
     @Override
-    protected Class<Prestation> getElementClass() {
+    public Class<Prestation> getElementClass() {
         return Prestation.class;
     }
 

@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -115,14 +116,23 @@ public class ImportContext implements ApplicationContextAware {
      * /!\ This flag is NOT used by {@link #executeBulk(java.util.Collection) }.
      * It's only an informative attribute which should be used by importers when computing.
      */
-    public int bulkLimit = 1000;
+    public int bulkLimit = 500;
 
     private static ApplicationContext appCtx;
 
     /**
+     * Number of importers which already computed data.
+     */
+    public final AtomicLong importCount = new AtomicLong(0);
+
+    /**
+     * Number of linkers which have already done their job.
+     */
+    public final AtomicLong linkCount = new AtomicLong(0);
+
+    /**
      * List errors which occured while importing database. Errors can be
-     * registered using {@link #reportError(fr.sirs.importer.v2.ErrorReport)
-     * }.
+     * registered using {@link #reportError(fr.sirs.importer.v2.ErrorReport)}.
      */
     public final ObservableList<ErrorReport> errors = FXCollections.observableArrayList();
 
@@ -202,7 +212,7 @@ public class ImportContext implements ApplicationContextAware {
         }
     }
 
-    private final void registerImporter(final Class key, final AbstractImporter importer) {
+    private void registerImporter(final Class key, final AbstractImporter importer) {
         AbstractImporter deleted = importers.put(key, importer);
         if (deleted != null) {
             final StringBuilder builder = new StringBuilder("Two importers declared for type ")

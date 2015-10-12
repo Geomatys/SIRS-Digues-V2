@@ -39,7 +39,7 @@ public class DZLeveProfilTraversImporter extends SimpleUpdater<DZLeveProfilTrave
     }
 
     @Override
-    protected Class<DZLeveProfilTravers> getElementClass() {
+    public Class<DZLeveProfilTravers> getElementClass() {
         return DZLeveProfilTravers.class;
     }
 

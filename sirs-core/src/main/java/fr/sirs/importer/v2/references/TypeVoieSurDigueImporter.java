@@ -17,7 +17,7 @@ class TypeVoieSurDigueImporter extends GenericTypeReferenceImporter<RefVoieDigue
     }
 
     @Override
-    protected Class<RefVoieDigue> getElementClass() {
+    public Class<RefVoieDigue> getElementClass() {
         return RefVoieDigue.class;
     }
 }

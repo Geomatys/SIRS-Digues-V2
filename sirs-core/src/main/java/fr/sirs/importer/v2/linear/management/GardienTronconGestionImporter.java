@@ -27,7 +27,7 @@ public class GardienTronconGestionImporter extends GenericPeriodeLocaliseeImport
     }
 
     @Override
-    protected Class<GardeTroncon> getElementClass() {
+    public Class<GardeTroncon> getElementClass() {
         return GardeTroncon.class;
     }
 

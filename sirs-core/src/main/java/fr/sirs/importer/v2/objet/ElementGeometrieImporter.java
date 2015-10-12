@@ -26,7 +26,7 @@ public class ElementGeometrieImporter extends AbstractImporter<ObjetPhotographia
     }
 
     @Override
-    protected Class<ObjetPhotographiable> getElementClass() {
+    public Class<ObjetPhotographiable> getElementClass() {
         return ObjetPhotographiable.class;
     }
 
@@ -55,7 +55,7 @@ public class ElementGeometrieImporter extends AbstractImporter<ObjetPhotographia
         if (classe != null) {
             return ElementCreator.createAnonymValidElement(classe);
         } else {
-            throw new IllegalStateException("No element type available for " + Columns.ID_TYPE_ELEMENT_GEOMETRIE.name() + " " + table);
+            return null;
         }
     }
 

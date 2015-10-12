@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class DigueImporter extends AbstractImporter<Digue> {
 
     @Override
-    protected Class getElementClass() {
+    public Class<Digue> getElementClass() {
         return Digue.class;
     }
 

@@ -57,7 +57,7 @@ public class TronconDigueUpdater implements ExtraOperator {
 
     private boolean finished = false;
 
-    protected Class<TronconDigue> getElementClass() {
+    public Class<TronconDigue> getElementClass() {
         return TronconDigue.class;
     }
 

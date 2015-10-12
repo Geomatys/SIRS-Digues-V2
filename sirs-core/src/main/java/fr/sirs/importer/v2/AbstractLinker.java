@@ -60,6 +60,7 @@ public abstract class AbstractLinker<T extends Element, U extends Element> exten
 
             context.executeBulk((Collection<Element>) holders);
         }
+        context.linkCount.incrementAndGet();
     }
 
     /**

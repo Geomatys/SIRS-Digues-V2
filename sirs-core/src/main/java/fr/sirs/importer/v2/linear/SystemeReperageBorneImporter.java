@@ -29,7 +29,7 @@ public class SystemeReperageBorneImporter extends SimpleUpdater<SystemeReperageB
     }
 
     @Override
-    protected Class<SystemeReperageBorne> getElementClass() {
+    public Class<SystemeReperageBorne> getElementClass() {
         return SystemeReperageBorne.class;
     }
 

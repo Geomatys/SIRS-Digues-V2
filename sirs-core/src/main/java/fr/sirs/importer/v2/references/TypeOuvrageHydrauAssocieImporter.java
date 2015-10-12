@@ -17,7 +17,7 @@ class TypeOuvrageHydrauAssocieImporter extends GenericTypeReferenceImporter<RefO
     }
 
     @Override
-    protected Class<RefOuvrageHydrauliqueAssocie> getElementClass() {
+    public Class<RefOuvrageHydrauliqueAssocie> getElementClass() {
         return RefOuvrageHydrauliqueAssocie.class;
     }
 }

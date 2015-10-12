@@ -1,6 +1,8 @@
 package fr.sirs.importer.v2.document;
 
 import com.healthmarketscience.jackcess.Row;
+import fr.sirs.importer.v2.CorruptionLevel;
+import fr.sirs.importer.v2.ErrorReport;
 import fr.sirs.importer.v2.ImportContext;
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,7 +22,6 @@ public class JournalRegistry {
     @Autowired
     private JournalRegistry(final ImportContext context) throws IOException {
         Iterator<Row> iterator = context.inputDb.getTable("JOURNAL").iterator();
-        // TODO : error report on null value.
         while (iterator.hasNext()) {
             final Row row = iterator.next();
             final Object jId = row.get("ID_JOURNAL");
@@ -29,6 +30,8 @@ public class JournalRegistry {
                 if (jLabel != null) {
                     journaux.put(jId, jLabel);
                 }
+            } else {
+                context.reportError(new ErrorReport(null, row, "JOURNAL", "ID_JOURNAL", null, null, "No ID for input row.", CorruptionLevel.ROW));
             }
         }
     }

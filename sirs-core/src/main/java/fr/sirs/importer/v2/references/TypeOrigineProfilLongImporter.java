@@ -17,7 +17,7 @@ class TypeOrigineProfilLongImporter extends GenericTypeReferenceImporter<RefOrig
     }
 
     @Override
-    protected Class<RefOrigineProfilLong> getElementClass() {
+    public Class<RefOrigineProfilLong> getElementClass() {
         return RefOrigineProfilLong.class;
     }
 }

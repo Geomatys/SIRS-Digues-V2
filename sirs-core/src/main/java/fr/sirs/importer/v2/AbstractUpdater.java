@@ -2,7 +2,6 @@ package fr.sirs.importer.v2;
 
 import com.healthmarketscience.jackcess.Row;
 import fr.sirs.core.model.Element;
-import java.util.Map;
 
 /**
  * An importer designed for document update. The aim is to create and fill an
@@ -33,12 +32,6 @@ public abstract class AbstractUpdater<T extends Element, U extends Element> exte
      * @return A couchDB document which will contain output element created from row.
      */
     protected abstract U getDocument(final Object rowId, final Row input, T output);
-
-    @Override
-    protected void afterPost(Map<String, Element> posted, Map<Object, T> imports) {
-        super.afterPost(posted, imports);
-        // TODO : keep reference of posted document ids ?
-    }
 
     @Override
     protected U prepareToPost(Object rowId, Row row, T output) {

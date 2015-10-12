@@ -17,7 +17,7 @@ class TypePositionProfilLongImporter extends GenericTypeReferenceImporter<RefPos
     }
 
     @Override
-    protected Class<RefPositionProfilLongSurDigue> getElementClass() {
+    public Class<RefPositionProfilLongSurDigue> getElementClass() {
         return RefPositionProfilLongSurDigue.class;
     }
 }

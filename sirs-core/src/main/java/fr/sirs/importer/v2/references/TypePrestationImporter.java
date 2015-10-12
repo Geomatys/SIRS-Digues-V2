@@ -17,7 +17,7 @@ public class TypePrestationImporter extends GenericTypeReferenceImporter<RefPres
     }
 
     @Override
-    protected Class<RefPrestation> getElementClass() {
+    public Class<RefPrestation> getElementClass() {
         return RefPrestation.class;
     }
 }

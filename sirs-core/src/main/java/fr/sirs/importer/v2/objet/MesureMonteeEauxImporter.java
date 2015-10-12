@@ -34,7 +34,7 @@ public class MesureMonteeEauxImporter extends SimpleUpdater<MesureMonteeEaux, Mo
     }
 
     @Override
-    protected Class<MesureMonteeEaux> getElementClass() {
+    public Class<MesureMonteeEaux> getElementClass() {
         return MesureMonteeEaux.class;
     }
 
