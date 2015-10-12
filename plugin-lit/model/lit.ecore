@@ -42,7 +42,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefSource"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="passeSportEauVive" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="passePoisson" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="surfaceRempartEntretien"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="surfaceRempantEntretien"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionStructureId" eType="#//RefPositionStructureSeuilLit"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="voieAccesIds" upperBound="-1"

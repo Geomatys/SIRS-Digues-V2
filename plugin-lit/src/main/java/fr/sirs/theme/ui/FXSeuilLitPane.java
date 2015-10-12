@@ -134,9 +134,9 @@ public class FXSeuilLitPane extends FXSeuilLitPaneStub {
         ui_epaisseur.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE));
         ui_passeSportEauVive.disableProperty().bind(disableFieldsProperty());
         ui_passePoisson.disableProperty().bind(disableFieldsProperty());
-        ui_surfaceRempartEntretien.disableProperty().bind(disableFieldsProperty());
-        ui_surfaceRempartEntretien.setEditable(true);
-        ui_surfaceRempartEntretien.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE));
+        ui_surfaceRempantEntretien.disableProperty().bind(disableFieldsProperty());
+        ui_surfaceRempantEntretien.setEditable(true);
+        ui_surfaceRempantEntretien.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE));
         ui_fonctionSeuilId.disableProperty().bind(disableFieldsProperty());
         ui_fonctionSeuilId_link.setVisible(false);
         ui_typeInspectionId.disableProperty().bind(disableFieldsProperty());
@@ -301,7 +301,7 @@ public class FXSeuilLitPane extends FXSeuilLitPaneStub {
             ui_epaisseur.getValueFactory().valueProperty().unbindBidirectional(oldElement.epaisseurProperty());
             ui_passeSportEauVive.selectedProperty().unbindBidirectional(oldElement.passeSportEauViveProperty());
             ui_passePoisson.selectedProperty().unbindBidirectional(oldElement.passePoissonProperty());
-            ui_surfaceRempartEntretien.getValueFactory().valueProperty().unbindBidirectional(oldElement.surfaceRempartEntretienProperty());
+            ui_surfaceRempantEntretien.getValueFactory().valueProperty().unbindBidirectional(oldElement.surfaceRempantEntretienProperty());
         // Propriétés de AvecGeometrie
         // Propriétés de AotCotAssociable
         // Propriétés de Objet
@@ -341,8 +341,8 @@ public class FXSeuilLitPane extends FXSeuilLitPaneStub {
         ui_passeSportEauVive.selectedProperty().bindBidirectional(newElement.passeSportEauViveProperty());
         // * passePoisson
         ui_passePoisson.selectedProperty().bindBidirectional(newElement.passePoissonProperty());
-        // * surfaceRempartEntretien
-        ui_surfaceRempartEntretien.getValueFactory().valueProperty().bindBidirectional(newElement.surfaceRempartEntretienProperty());
+        // * surfaceRempantEntretien
+        ui_surfaceRempantEntretien.getValueFactory().valueProperty().bindBidirectional(newElement.surfaceRempantEntretienProperty());
         SIRS.initCombo(ui_fonctionSeuilId, FXCollections.observableList(
             previewRepository.getByClass(RefFonctionSeuilLit.class)),
             newElement.getFonctionSeuilId() == null? null : previewRepository.get(newElement.getFonctionSeuilId()));
