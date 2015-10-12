@@ -28,6 +28,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.sis.storage.DataStore;
 import org.apache.sis.storage.DataStoreException;
+import org.geotoolkit.coverage.amended.AmendedCoverageStore;
 import org.geotoolkit.data.FeatureStoreFactory;
 import org.geotoolkit.data.FeatureStoreFinder;
 import org.geotoolkit.gui.javafx.chooser.FXLayerChooser;
@@ -171,7 +172,8 @@ public class FXDataImportPane extends BorderPane {
         final Task submit = TaskManager.INSTANCE.submit("Connexion à une source de données", () -> {
             final DataStore store;
             if (selectedItem instanceof CoverageStoreFactory) {
-                store = ((CoverageStoreFactory) selectedItem).open(parameters);
+                final CoverageStoreFactory f = (CoverageStoreFactory) selectedItem;
+                store = new AmendedCoverageStore(f.open(parameters));
             } else if (selectedItem instanceof FeatureStoreFactory) {
                 store = ((FeatureStoreFactory) selectedItem).open(parameters);
             } else {

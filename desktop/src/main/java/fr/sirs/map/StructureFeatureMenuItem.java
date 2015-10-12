@@ -18,6 +18,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.geotoolkit.data.FeatureStore;
+import org.geotoolkit.data.bean.BeanStore;
+import org.geotoolkit.data.query.Selector;
+import org.geotoolkit.data.query.Source;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.contexttree.TreeMenuItem;
@@ -28,14 +32,14 @@ import org.geotoolkit.map.FeatureMapLayer;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class StructureMenuItem extends TreeMenuItem {
+public class StructureFeatureMenuItem extends TreeMenuItem {
 
     private static final Image ICON = SwingFXUtils.toFXImage(
             IconBuilder.createImage(FontAwesomeIcons.ICON_COG, 16, FontAwesomeIcons.DEFAULT_COLOR), null);
 
     private WeakReference<TreeItem> itemRef;
 
-    public StructureMenuItem() {
+    public StructureFeatureMenuItem() {
 
         menuItem = new FeatureStructureMenuItem();
         menuItem.setGraphic(new ImageView(ICON));
@@ -45,6 +49,16 @@ public class StructureMenuItem extends TreeMenuItem {
     public MenuItem init(List<? extends TreeItem> selection) {
         boolean valid = uniqueAndType(selection,FeatureMapLayer.class);
         if(valid && selection.get(0).getParent()!=null){
+            //test if it's not a application layer
+            final TreeItem treeItem = selection.get(0);
+            final FeatureMapLayer layer = (FeatureMapLayer) treeItem.getValue();
+            final Source source = layer.getCollection().getSource();
+            if(source instanceof Selector){
+                final Selector selector = (Selector) source;
+                final FeatureStore fs = selector.getSession().getFeatureStore();
+                if(fs instanceof BeanStore) return null;
+            }
+
             itemRef = new WeakReference<>(selection.get(0));
             return menuItem;
         }
@@ -73,7 +87,6 @@ public class StructureMenuItem extends TreeMenuItem {
                     dialog.setTitle("Géoréférencement");
                     dialog.setResizable(true);
                     dialog.initModality(Modality.NONE);
-                    dialog.initOwner(null);
 
                     final Button cancelBtn = new Button("Fermer");
                     cancelBtn.setCancelButton(true);
@@ -86,6 +99,7 @@ public class StructureMenuItem extends TreeMenuItem {
                     dialogContent.setCenter(pane);
                     dialogContent.setBottom(bbar);
                     dialog.setScene(new Scene(dialogContent));
+                    dialog.sizeToScene();
 
                     cancelBtn.setOnAction((ActionEvent e) -> {
                         dialog.close();
