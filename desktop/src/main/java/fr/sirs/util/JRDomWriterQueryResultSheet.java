@@ -179,7 +179,7 @@ public class JRDomWriterQueryResultSheet extends AbstractJDomWriter {
      * @throws TransformerException
      * @throws IOException
      */
-    public void write(final FeatureType featureType, final List<String> avoidFields) throws TransformerException, IOException, Exception {
+    public void write(final FeatureType featureType, final List<String> avoidFields) throws TransformerException, IOException {
         
         columnWidth = (PAGE_WIDTH - 40)/featureType.getProperties(true).size();
                 

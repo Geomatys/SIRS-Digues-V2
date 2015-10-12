@@ -123,7 +123,7 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
      * @throws TransformerException
      * @throws IOException
      */
-    public void write(final Class classToMap, final List<String> avoidFields) throws TransformerException, IOException, Exception {
+    public void write(final Class classToMap, final List<String> avoidFields) throws TransformerException, IOException {
         
         // Remove elements before inserting fields.-----------------------------
         root.removeChild(title);

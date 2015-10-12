@@ -29,6 +29,7 @@ import fr.sirs.util.property.SirsPreferences;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
@@ -40,8 +41,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import javafx.util.StringConverter;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JREmptyDataSource;
+import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRPrintPage;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -53,6 +57,7 @@ import org.geotoolkit.display2d.service.OutputDef;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.report.CollectionDataSource;
 import org.geotoolkit.report.JasperReportService;
+import org.xml.sax.SAXException;
 
 /**
  * <p>This class provides utilities for two purposes:</p>
@@ -78,12 +83,13 @@ public class PrinterUtilities {
         falseGetter.add("getConflicts");
         falseGetter.add("getDocumentId");
     }
+    
+    private static final String TEMPLATE_PHOTOS = "/fr/sirs/jrxml/photoTemplate.jrxml";
 
     ////////////////////////////////////////////////////////////////////////////
     // FICHES DÉTAILLÉES DE DESORDRES
     ////////////////////////////////////////////////////////////////////////////
     private static final String META_TEMPLATE_RESEAU_FERME = "/fr/sirs/jrxml/metaTemplateReseauFerme.jrxml";
-//    private static final String TEMPLATE_PHOTOS = "/fr/sirs/jrxml/photoTemplate.jrxml";
 
     public static File printReseauFerme(final List<String> avoidDesordreFields,
             final List<String> avoidObservationFields,
@@ -174,7 +180,6 @@ public class PrinterUtilities {
     // FICHES DÉTAILLÉES DE DESORDRES
     ////////////////////////////////////////////////////////////////////////////
     private static final String META_TEMPLATE_DESORDRE = "/fr/sirs/jrxml/metaTemplateDesordre.jrxml";
-    private static final String TEMPLATE_PHOTOS = "/fr/sirs/jrxml/photoTemplate.jrxml";
     
     public static File printDisorders(final List<String> avoidDesordreFields, 
             final List<String> avoidObservationFields, 
@@ -183,7 +188,8 @@ public class PrinterUtilities {
             final Previews previewLabelRepository, 
             final StringConverter stringConverter, 
             final List<Desordre> desordres, 
-            final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie) throws Exception {
+            final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie)
+        throws ParserConfigurationException, SAXException, JRException, TransformerException, IOException {
         
         JasperPrint firstPrint = null;
         final List<JasperPrint> followingPrints = new ArrayList<>();
@@ -284,8 +290,20 @@ public class PrinterUtilities {
     // FICHES DE RESULTATS DE REQUETES
     ////////////////////////////////////////////////////////////////////////////
     private static final String META_TEMPLATE_QUERY = "/fr/sirs/jrxml/metaTemplateQuery.jrxml";
-    
-    public static File print(List<String> avoidFields, final FeatureCollection featureCollection) throws Exception {
+
+    /**
+     *
+     * @param avoidFields
+     * @param featureCollection
+     * @return
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws JRException
+     * @throws TransformerException
+     */
+    public static File print(List<String> avoidFields, final FeatureCollection featureCollection)
+        throws IOException, ParserConfigurationException, SAXException, JRException, TransformerException {
         
         if(avoidFields==null) avoidFields=new ArrayList<>();
         
@@ -337,10 +355,15 @@ public class PrinterUtilities {
      * @param previewLabelRepository
      * @param stringConverter
      * @return 
-     * @throws Exception 
+     * @throws java.io.IOException
+     * @throws javax.xml.parsers.ParserConfigurationException
+     * @throws org.xml.sax.SAXException
+     * @throws net.sf.jasperreports.engine.JRException
+     * @throws javax.xml.transform.TransformerException
      */
     public static File print(final List<String> avoidFields, 
-            final Previews previewLabelRepository, final StringConverter stringConverter, final List<? extends Element> elements) throws Exception {
+            final Previews previewLabelRepository, final StringConverter stringConverter, final List<? extends Element> elements)
+            throws IOException, ParserConfigurationException, SAXException, JRException, TransformerException {
         
         // Creates the Jasper Reports specific template from the generic template.
         final File templateFile = File.createTempFile(elements.get(0).getClass().getSimpleName(), JRXML_EXTENSION);

@@ -26,16 +26,23 @@ public class AbstractJDomWriter {
         document=null;
         root=null;
     }
-    
-    public AbstractJDomWriter(final InputStream stream) throws ParserConfigurationException, SAXException, IOException{
+
+    /**
+     *
+     * @param stream
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public AbstractJDomWriter(final InputStream stream) throws ParserConfigurationException, SAXException, IOException {
         
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setCoalescing(false);
         factory.setNamespaceAware(true);
         
-        final DocumentBuilder constructeur = factory.newDocumentBuilder();
+        final DocumentBuilder builder = factory.newDocumentBuilder();
         
-        document = constructeur.parse(stream);
+        document = builder.parse(stream);
         stream.close();
         root = document.getDocumentElement();
     }

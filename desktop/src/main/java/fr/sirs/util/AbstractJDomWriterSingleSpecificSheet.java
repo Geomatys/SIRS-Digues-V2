@@ -115,11 +115,11 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
     /**
      * <p>This method writes a Jasper Reports template mapping the parameter class.</p>
+     * 
      * @param candidate
      * @throws TransformerException
-     * @throws IOException
      */
-    public void write(final T candidate) throws TransformerException, IOException, Exception {
+    public void write(final T candidate) throws TransformerException {
 
         // Remove elements before inserting fields.-----------------------------
         root.removeChild(title);
