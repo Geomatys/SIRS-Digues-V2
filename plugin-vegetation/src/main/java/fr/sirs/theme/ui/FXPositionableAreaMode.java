@@ -34,7 +34,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.primitive.jts.JTSLineIterator;
-import org.geotoolkit.display2d.style.j2d.PathWalker;
+import org.geotoolkit.displayt2d.style.j2d.DoublePathWalker;
 import static org.geotoolkit.referencing.LinearReferencing.asLineString;
 
 /**
@@ -389,7 +389,7 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
             final double startFar, final double endNear, final double endFar) {
 
         final PathIterator ite = new JTSLineIterator(linear, null);
-        final PathWalker walker = new PathWalker(ite);
+        final DoublePathWalker walker = new DoublePathWalker(ite);
         final Point2D.Double pt = new Point2D.Double();
         final double totalLength = linear.getLength();
         final Coordinate c0 = new Coordinate(0,0);
@@ -415,7 +415,7 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
 
         
         while(!walker.isFinished()){
-            final float d = walker.getSegmentLengthRemaining();
+            final double d = walker.getSegmentLengthRemaining();
             distance += d;
             walker.walk(d+0.0001f);
             walker.getPosition(pt);
@@ -472,7 +472,7 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
         "perpendicularDistance" du segment.
          */
         final PathIterator ite = new JTSLineIterator(segment, null);
-        final PathWalker walker = new PathWalker(ite);
+        final DoublePathWalker walker = new DoublePathWalker(ite);
         final Point2D.Double pt = new Point2D.Double();
         final Coordinate coord = new Coordinate(0,0);
 
@@ -487,7 +487,7 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
         else if(linearDistance<0.) distanceToWalk=0.;
         else distanceToWalk = linearDistance;
 
-        walker.walk((float) distanceToWalk);
+        walker.walk(distanceToWalk);
         walker.getPosition(pt);
         double angle = Math.PI/2 + walker.getRotation();
 

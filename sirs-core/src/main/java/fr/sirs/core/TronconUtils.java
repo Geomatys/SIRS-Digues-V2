@@ -959,18 +959,34 @@ public class TronconUtils {
         return LinearReferencingUtilities.computeCoordinate(tronconSegments, bornePoint, dist, 0);
     }
 
+    /**
+     * Calcule un point à partir d'une géométrie.
+     *
+     * Si la géométrie n'est pas de type LineString, on commence par la projeter
+     * sur linearSegments de manière à obtenir une géométrie de type LineString.
+     *
+     * Puis on décide du point à retourner : le premier point du premier segment
+     * (si on veut le début) ou le second point du dernier segment (si on veut
+     * la fin).
+     *
+     * @param geometry
+     * @param linearSegments
+     * @param crs
+     * @param endPoint
+     * @return
+     */
     public static Point getPointFromGeometry(final Geometry geometry, final SegmentInfo[] linearSegments, final CoordinateReferenceSystem crs, final boolean endPoint){
-            Geometry geom = geometry;
-            if(!(geom instanceof LineString)){
-                geom = LinearReferencing.project(linearSegments, geom);
-            }
-            final Coordinate[] coords = geom.getCoordinates();
-            // Which point : first or last ?
-            final int index = endPoint ? coords.length-1 : 0;
-            final Point point = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(coords[index]));
-            JTS.setCRS(point, crs);
-            return point;
+        Geometry geom = geometry;
+        if(!(geom instanceof LineString)){
+            geom = LinearReferencing.project(linearSegments, geom);
         }
+        final Coordinate[] coords = geom.getCoordinates();
+        // Which point : first or last ?
+        final int index = endPoint ? coords.length-1 : 0;
+        final Point point = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(coords[index]));
+        JTS.setCRS(point, crs);
+        return point;
+    }
 
     /**
      * Utility object for manipulation of spatial information of a {@link Positionable} object.

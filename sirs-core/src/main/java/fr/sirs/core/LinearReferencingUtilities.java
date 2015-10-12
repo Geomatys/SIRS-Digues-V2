@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.primitive.jts.JTSLineIterator;
-import org.geotoolkit.display2d.style.j2d.PathWalker;
+import org.geotoolkit.displayt2d.style.j2d.DoublePathWalker;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.math.XMath;
 import org.geotoolkit.referencing.LinearReferencing;
@@ -475,7 +475,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      * the new geometry.
      * @return A line string, never null.
      */
-    public static LineString cut(LineString linear, double distanceDebut, double distanceFin) {
+    public static LineString cut(final LineString linear, double distanceDebut, double distanceFin) {
         //on s"assure de ne pas sortir du troncon
         final double tronconLength = linear.getLength();
         distanceDebut = XMath.clamp(Math.min(distanceDebut, distanceFin), 0, tronconLength);
@@ -483,16 +483,16 @@ public final class LinearReferencingUtilities extends LinearReferencing {
 
         //create du tracé de la structure le long du troncon
         final PathIterator ite = new JTSLineIterator(linear, null);
-        final PathWalker walker = new PathWalker(ite);
-        walker.walk((float) distanceDebut);
-        float remain = (float) (distanceFin - distanceDebut);
+        final DoublePathWalker walker = new DoublePathWalker(ite);
+        walker.walk(distanceDebut);
+        double remain = distanceFin - distanceDebut;
 
         final List<Coordinate> structureCoords = new ArrayList<>();
         Point2D point = walker.getPosition(null);
         structureCoords.add(new Coordinate(point.getX(), point.getY()));
 
         while (!walker.isFinished() && remain > 0) {
-            final float advance = Math.min(walker.getSegmentLengthRemaining(), remain);
+            final double advance = Math.min(walker.getSegmentLengthRemaining(), remain);
             remain -= advance;
             walker.walk(advance);
             point = walker.getPosition(point);
