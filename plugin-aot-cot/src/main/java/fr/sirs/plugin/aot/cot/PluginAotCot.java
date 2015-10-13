@@ -11,9 +11,9 @@ import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
 import static fr.sirs.core.ModuleDescription.getLayerDescription;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.ConventionRepository;
 import fr.sirs.core.component.PositionConventionRepository;
 import fr.sirs.core.model.AotCotAssociable;
-import fr.sirs.core.model.AssociationConvention;
 import fr.sirs.core.model.Convention;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
@@ -183,11 +183,35 @@ public class PluginAotCot extends Plugin {
             });
         }
     }
+
+    /**
+     * Crée un tableau des conventions liées à un objet (Objet, AotCotAssociable 
+     * ou PositionConvention).
+     *
+     * @param candidate
+     * @return
+     */
+    public static PojoTable getConventionTableForObjet(final Element candidate){
+
+        final List<Convention> conventionsLiees = Injector.getSession().getRepositoryForClass(Convention.class).get(getConventionIdsForObjet(candidate));
+
+        final PojoTable table = new PojoTable(Convention.class, "Conventions de l'objet "+new SirsStringConverter().toString(candidate));
+        table.setTableItems(() -> (ObservableList) FXCollections.observableList(conventionsLiees));
+        table.editableProperty().set(false);
+        table.fichableProperty().set(false);
+        return table;
+    }
     
-    public static PojoTable getConventionsForObjet(final Element candidate){
+    /**
+     * Renvoie les identifiants des conventions liées à un objet (Objet, 
+     * AotCotAssociable ou PositionConvention).
+     * 
+     * @param candidate
+     * @return 
+     */
+    public static List<String> getConventionIdsForObjet(final Element candidate){
 
         final List<String> conventionLieesIds = new ArrayList<>();
-        final AbstractSIRSRepository<Convention> conventionRepo = Injector.getSession().getRepositoryForClass(Convention.class);
 
         if(candidate instanceof Objet){
             final List<PositionConvention> positionsLiees = ((PositionConventionRepository) Injector.getSession().getRepositoryForClass(PositionConvention.class)).getByObjet((Objet) candidate);
@@ -201,26 +225,12 @@ public class PluginAotCot extends Plugin {
                 conventionLieesIds.add(((PositionConvention) candidate).getSirsdocument());
             }
         } else if (candidate instanceof AotCotAssociable) {
-            final List<Convention> conventions = conventionRepo.getAll();
+            final List<Convention> conventions = ((ConventionRepository) Injector.getSession().getRepositoryForClass(Convention.class)).getByObjet((AotCotAssociable) candidate);
             for(final Convention convention : conventions){
-                final List<AssociationConvention> associations = convention.getAssociations();
-                if(associations!=null && !associations.isEmpty()){
-                    for(final AssociationConvention association : associations){
-                        if(association.getObjetId()!=null && association.getObjetId().equals(candidate.getId())){
-                            conventionLieesIds.add(convention.getId()); break;
-                        }
-                    }
-                }
+                conventionLieesIds.add(convention.getId());
             }
         }
-
-        final List<Convention> conventionsLiees = conventionRepo.get(conventionLieesIds);
-
-        final PojoTable table = new PojoTable(Convention.class, "Conventions de l'objet METTRE ICI LA DÉSIGNATION");
-        table.setTableItems(() -> (ObservableList) FXCollections.observableList(conventionsLiees));
-        table.editableProperty().set(false);
-        table.fichableProperty().set(false);
-        return table;
+        return conventionLieesIds;
     }
     
     /**

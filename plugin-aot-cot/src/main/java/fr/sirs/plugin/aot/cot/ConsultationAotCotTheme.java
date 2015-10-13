@@ -5,7 +5,7 @@ import fr.sirs.core.model.AotCotAssociable;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.PositionConvention;
-import static fr.sirs.plugin.aot.cot.PluginAotCot.getConventionsForObjet;
+import static fr.sirs.plugin.aot.cot.PluginAotCot.getConventionTableForObjet;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import java.util.List;
 import javafx.scene.Parent;
@@ -47,7 +47,7 @@ public final class ConsultationAotCotTheme extends AbstractPluginsButtonTheme {
         // On commence par vérifier qu'aucun objet n'est sélectionné par la carte pour traitement par ce thème.
         if(toConsultFromMap!=null){
             borderPane = new BorderPane();
-            borderPane.setCenter(getConventionsForObjet(toConsultFromMap));
+            borderPane.setCenter(getConventionTableForObjet(toConsultFromMap));
             // Réinitialisation de l'objet courant à consulter.
             toConsultFromMap=null;
         }
@@ -61,7 +61,7 @@ public final class ConsultationAotCotTheme extends AbstractPluginsButtonTheme {
                     || elements.get(0) instanceof Objet
                     || elements.get(0) instanceof PositionConvention)){
                 borderPane = new BorderPane();
-                borderPane.setCenter(getConventionsForObjet(elements.get(0)));
+                borderPane.setCenter(getConventionTableForObjet(elements.get(0)));
             } else {
                 final String msg;
                 borderPane = null;
