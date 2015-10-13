@@ -61,6 +61,8 @@
                         <jvmArg>-Djava.net.useSystemProxies=true</jvmArg>
                         <!-- We define a custom system class loader which will scan and load available modules. -->
                         <jvmArg>-Djava.system.class.loader=fr.sirs.core.plugins.PluginLoader</jvmArg>
+                        <!-- Force encoding to ensure IO with CouchDB won't encounter any deformation, whatever the OS. -->
+                        <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
                     </jvmArgs>
                 </configuration>
             </plugin>
