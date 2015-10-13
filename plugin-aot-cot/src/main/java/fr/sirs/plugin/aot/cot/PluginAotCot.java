@@ -13,8 +13,11 @@ import static fr.sirs.core.ModuleDescription.getLayerDescription;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.PositionConventionRepository;
 import fr.sirs.core.model.AotCotAssociable;
+import fr.sirs.core.model.AssociationConvention;
 import fr.sirs.core.model.Convention;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.PositionConvention;
 import fr.sirs.core.model.sql.AotCotSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
@@ -156,11 +159,11 @@ public class PluginAotCot extends Plugin {
     }
 
     @Override
-    public List<MenuItem> getMapActions(final Object obj) {
+    public List<MenuItem> getMapActions(final Object candidate) {
         final List<MenuItem> lst = new ArrayList<>();
         
-        if(obj instanceof AotCotAssociable) {
-            lst.add(new ViewFormObjetItem((AotCotAssociable) obj));
+        if(candidate instanceof AotCotAssociable || candidate instanceof Objet || candidate instanceof PositionConvention) {
+            lst.add(new ViewFormObjetItem((Element) candidate));
         }
         return lst;
     }
@@ -172,8 +175,8 @@ public class PluginAotCot extends Plugin {
     
     private class ViewFormObjetItem extends MenuItem {
 
-        public ViewFormObjetItem(final AotCotAssociable candidate) {
-            setText("Consulter les conventions de "+getSession().generateElementTitle(candidate));
+        public ViewFormObjetItem(final Element candidate) {
+            setText("Consulter les conventions de "+Session.generateElementTitle(candidate));
             setOnAction((ActionEvent event) -> {
                 consultationAotCotTheme.setObjetToConsultFromMap(candidate);
                 getSession().getFrame().addTab(getSession().getOrCreateThemeTab(consultationAotCotTheme));
@@ -181,19 +184,39 @@ public class PluginAotCot extends Plugin {
         }
     }
     
-    public static PojoTable getConventionsForObjet(final AotCotAssociable objet){
-        final PositionConventionRepository positionRepo = (PositionConventionRepository) Injector.getSession().getRepositoryForClass(PositionConvention.class);
-        final AbstractSIRSRepository<Convention> conventionRepo = Injector.getSession().getRepositoryForClass(Convention.class);
-                
-        final List<PositionConvention> positionsLiees = positionRepo.getByObjet(objet);
+    public static PojoTable getConventionsForObjet(final Element candidate){
+
         final List<String> conventionLieesIds = new ArrayList<>();
-        for(final PositionConvention positionLiee : positionsLiees){
-            if(positionLiee.getSirsdocument()!=null) conventionLieesIds.add(positionLiee.getSirsdocument());
+        final AbstractSIRSRepository<Convention> conventionRepo = Injector.getSession().getRepositoryForClass(Convention.class);
+
+        if(candidate instanceof Objet){
+            final List<PositionConvention> positionsLiees = ((PositionConventionRepository) Injector.getSession().getRepositoryForClass(PositionConvention.class)).getByObjet((Objet) candidate);
+            for(final PositionConvention positionLiee : positionsLiees){
+                if(positionLiee.getSirsdocument()!=null) {
+                    conventionLieesIds.add(positionLiee.getSirsdocument());
+                }
+            }
+        } else if (candidate instanceof PositionConvention) {
+            if(((PositionConvention) candidate).getSirsdocument()!=null) {
+                conventionLieesIds.add(((PositionConvention) candidate).getSirsdocument());
+            }
+        } else if (candidate instanceof AotCotAssociable) {
+            final List<Convention> conventions = conventionRepo.getAll();
+            for(final Convention convention : conventions){
+                final List<AssociationConvention> associations = convention.getAssociations();
+                if(associations!=null && !associations.isEmpty()){
+                    for(final AssociationConvention association : associations){
+                        if(association.getObjetId()!=null && association.getObjetId().equals(candidate.getId())){
+                            conventionLieesIds.add(convention.getId()); break;
+                        }
+                    }
+                }
+            }
         }
-        
+
         final List<Convention> conventionsLiees = conventionRepo.get(conventionLieesIds);
 
-        final PojoTable table = new PojoTable(Convention.class, "Conventions de l'objet "+objet.getDesignation());
+        final PojoTable table = new PojoTable(Convention.class, "Conventions de l'objet METTRE ICI LA DÉSIGNATION");
         table.setTableItems(() -> (ObservableList) FXCollections.observableList(conventionsLiees));
         table.editableProperty().set(false);
         table.fichableProperty().set(false);

@@ -6,9 +6,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.component.AbstractPositionDocumentRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.Element;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementContainerPane;
@@ -26,7 +24,6 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.NumberFormat;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -362,33 +359,6 @@ public final class SIRS extends SirsCore {
             }
             return resultList;
         }
-    }
-
-    /**
-     * Return the AbstractPositionDocumentAssociable linked to one document
-     * specified by the given id.
-     *
-     * @param documentId
-     * @return
-     * @deprecated use instead AbstractPositionDocumentRepository.getPositionDocumentByDocumentId(documentId, sessionCore)
-     */
-    @Deprecated
-    public static ObservableList<? extends AbstractPositionDocumentAssociable> getPositionDocumentByDocumentId(final String documentId){
-        ObservableList<? extends AbstractPositionDocumentAssociable> result = null;
-        final Collection<AbstractSIRSRepository> candidateRepos = Injector.getSession().getRepositoriesForClass(AbstractPositionDocumentAssociable.class);
-        for(AbstractSIRSRepository candidateRepo : candidateRepos){
-            if(candidateRepo instanceof AbstractPositionDocumentRepository){
-                result = FXCollections.observableList(((AbstractPositionDocumentRepository) candidateRepo).getByDocumentId(documentId));
-                if(!result.isEmpty()) return result; // Si la liste n'est pas vide c'est qu'on a trouvé le bon repo et on sort donc de la boucle en renvoyant la liste.
-            }
-        }
-        /*
-        Si aucun repo n'a été trouvé (ce qui est normalement impossible étant
-        donné le modèle, on renvoie null. Si des repos ont été trouvés mais qu'
-        on arrive tout de même à ce point c'est qu'ils ont tous renvoyé une
-        liste vide. Parmi elles, la dernière est renvoyée.
-        */
-        return result;
     }
 
     /**
