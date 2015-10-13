@@ -614,8 +614,7 @@ public class FXSystemeReperagePane extends BorderPane {
             }else{
                 mode.set(Mode.EDIT_BORNE);
             }
-            final ObservableList bornes = FXCollections.observableList(sr.getSystemeReperageBornes());
-            uiBorneTable.setItems(bornes);
+            uiBorneTable.setItems(sr.getSystemeReperageBornes());
             sortBorneTable();
         }
     }
