@@ -97,20 +97,24 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
     
     private static final String SECTION_TITLE_BACKGROUND_COLOR = "#F1CF40";
 
+    private final List<String> avoidFields;
+
     public AbstractJDomWriterSingleSpecificSheet() {
         super();
         this.title = null;
         this.pageHeader = null;
         this.columnHeader = null;
         this.detail = null;
+        avoidFields = null;
     }
 
-    public AbstractJDomWriterSingleSpecificSheet(final InputStream stream) throws ParserConfigurationException, SAXException, IOException{
+    public AbstractJDomWriterSingleSpecificSheet(final InputStream stream, final List<String> avoidFields) throws ParserConfigurationException, SAXException, IOException{
         super(stream);
         title = (Element) root.getElementsByTagName(TAG_TITLE).item(0);
         pageHeader = (Element) root.getElementsByTagName(TAG_PAGE_HEADER).item(0);
         columnHeader = (Element) root.getElementsByTagName(TAG_COLUMN_HEADER).item(0);
         detail = (Element) root.getElementsByTagName(TAG_DETAIL).item(0);
+        this.avoidFields = avoidFields;
     }
 
     /**
@@ -139,6 +143,18 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         trs.setOutputProperty(OutputKeys.INDENT, "yes");
         trs.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         trs.transform(source, result);
+    }
+
+    protected void writeFields(final Class<T> clazz){
+        final Method[] methods = clazz.getMethods();
+        for (final Method method : methods){
+            if(PrinterUtilities.isSetter(method)){
+                final String fieldName = getFieldNameFromSetter(method);
+                if (avoidFields==null || !avoidFields.contains(fieldName)) {
+                    writeField(method);
+                }
+            }
+        }
     }
 
     /**

@@ -19,14 +19,10 @@ import static fr.sirs.util.JRUtils.TAG_SUBREPORT;
 import static fr.sirs.util.JRUtils.TAG_SUBREPORT_EXPRESSION;
 import static fr.sirs.util.JRUtils.TAG_SUB_DATASET;
 import static fr.sirs.util.JRUtils.URI_JRXML;
-import static fr.sirs.util.PrinterUtilities.getFieldNameFromSetter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Element;
@@ -51,7 +47,6 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
     public static final String PHOTO_DATA_SOURCE = "PHOTO_DATA_SOURCE";
     public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
     
-    private final List<String> avoidDesordreFields;
     private final List<String> observationFields;
     private final List<String> prestationFields;
     private final List<String> reseauFields;
@@ -63,7 +58,6 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
     private JRDomWriterDesordreSheet(){
         super();
         
-        avoidDesordreFields = null;
         observationFields = null;
         prestationFields = null;
         reseauFields = null;
@@ -71,16 +65,15 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
     }
     
     public JRDomWriterDesordreSheet(final InputStream stream, 
-            final List<String> avoidDesordreFields,
+            final List<String> avoidFields,
             final List<String> observationFields,
             final List<String> prestationFields,
             final List<String> reseauFields,
             final boolean printPhoto, 
             final boolean printReseauOuvrage, 
             final boolean printVoirie) throws ParserConfigurationException, SAXException, IOException {
-        super(stream);
+        super(stream, avoidFields);
         
-        this.avoidDesordreFields = avoidDesordreFields;
         this.observationFields = observationFields;
         this.prestationFields = prestationFields;
         this.reseauFields = reseauFields;
@@ -103,16 +96,8 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         
         
         // Sets the initial fields used by the template.------------------------
-        final Method[] methods = desordre.getClass().getMethods();
-        for (final Method method : methods){
-            if(PrinterUtilities.isSetter(method)){
-                final String fieldName = getFieldNameFromSetter(method);
-                if (avoidDesordreFields==null || !avoidDesordreFields.contains(fieldName)) {
-                    writeField(method);
-                }
-            }
-        }
-        
+        writeFields(Desordre.class);
+
         // Modifies the title block.--------------------------------------------
         writeTitle(Desordre.class);
         
@@ -130,11 +115,6 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
      * @throws Exception 
      */
     private void writeDetail(final Desordre desordre) {
-        
-        final Class classToMap = desordre.getClass();
-        
-        final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName(), Locale.getDefault(),
-                Thread.currentThread().getContextClassLoader());
         
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         currentY = Integer.valueOf(band.getAttribute(ATT_HEIGHT));

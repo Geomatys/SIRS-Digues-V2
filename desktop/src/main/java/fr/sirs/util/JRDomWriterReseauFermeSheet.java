@@ -19,10 +19,8 @@ import static fr.sirs.util.JRUtils.TAG_SUBREPORT;
 import static fr.sirs.util.JRUtils.TAG_SUBREPORT_EXPRESSION;
 import static fr.sirs.util.JRUtils.TAG_SUB_DATASET;
 import static fr.sirs.util.JRUtils.URI_JRXML;
-import static fr.sirs.util.PrinterUtilities.getFieldNameFromSetter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
@@ -45,7 +43,6 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
     public static final String PHOTO_DATA_SOURCE = "PHOTO_DATA_SOURCE";
     public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
     
-    private final List<String> avoidDesordreFields;
     private final List<String> observationFields;
     private final List<String> reseauFields;
     
@@ -55,21 +52,19 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
     private JRDomWriterReseauFermeSheet(){
         super();
         
-        avoidDesordreFields = null;
         observationFields = null;
         reseauFields = null;
         printPhoto = printReseauOuvrage = true;
     }
     
     public JRDomWriterReseauFermeSheet(final InputStream stream, 
-            final List<String> avoidDesordreFields,
+            final List<String> avoidFields,
             final List<String> observationFields,
             final List<String> reseauFields,
             final boolean printPhoto, 
             final boolean printReseauOuvrage) throws ParserConfigurationException, SAXException, IOException {
-        super(stream);
+        super(stream, avoidFields);
         
-        this.avoidDesordreFields = avoidDesordreFields;
         this.observationFields = observationFields;
         this.reseauFields = reseauFields;
         this.printPhoto = printPhoto;
@@ -87,15 +82,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         writeSubDataset(ObjetReseau.class, reseauFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(1));
         
         // Sets the initial fields used by the template.------------------------
-        final Method[] methods = candidate.getClass().getMethods();
-        for (final Method method : methods){
-            if(PrinterUtilities.isSetter(method)){
-                final String fieldName = getFieldNameFromSetter(method);
-                if (avoidDesordreFields==null || !avoidDesordreFields.contains(fieldName)) {
-                    writeField(method);
-                }
-            }
-        }
+        writeFields(ReseauHydrauliqueFerme.class);
         
         // Modifies the title block.--------------------------------------------
         writeTitle(ReseauHydrauliqueFerme.class);

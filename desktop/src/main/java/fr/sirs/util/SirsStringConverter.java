@@ -49,6 +49,16 @@ public class SirsStringConverter extends StringConverter {
         return toString(item, true);
     }
 
+    private static String getDesignation(Object item){
+        if (item instanceof Element) {
+            return getDesignation((Element)item);
+        }  else if (item instanceof Preview) {
+            return getDesignation((Preview) item);
+        }  else if (item instanceof SQLQuery) {
+            return ((SQLQuery)item).getLibelle();
+        } else return "";
+    }
+
     public String toString(Object item, final boolean prefixed) {
         if(item instanceof SystemeReperageBorne){
             final SystemeReperageBorne srb = (SystemeReperageBorne) item;
@@ -58,13 +68,7 @@ public class SirsStringConverter extends StringConverter {
 
         StringBuilder text = new StringBuilder();
         // Start title with element designation
-        if (item instanceof Element) {
-            if(prefixed) text.append(getDesignation((Element)item));
-        }  else if (item instanceof Preview) {
-            if(prefixed) text.append(getDesignation((Preview) item));
-        }  else if (item instanceof SQLQuery) {
-            text.append(((SQLQuery)item).getLibelle());
-        }
+        if(prefixed) text.append(getDesignation(item));
 
         // Search for a name or label associated to input object
         if (item instanceof Contact) {
@@ -115,6 +119,10 @@ public class SirsStringConverter extends StringConverter {
                 text.append(libelle.getLibelle());
             }
         }
+
+        // Si on a un résultat vide, on retourne la désignation, même si on a
+        // demandé un résultat non préfixé.
+        if(!prefixed && text.length()==0) text.append(getDesignation(item));
 
         final String result = text.toString();
         if (result != null && !result.isEmpty()) {

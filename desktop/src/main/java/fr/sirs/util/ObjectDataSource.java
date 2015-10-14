@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
@@ -73,12 +72,12 @@ public class ObjectDataSource<T> implements JRDataSource {
                     final Object propertyValueToPrint = parsePropertyValue(propertyValue, clazz);
                     return ObjectConverters.convert(propertyValueToPrint, clazz);
                 } catch (UnconvertibleObjectException e) {
-                    Logging.recoverableException(CollectionDataSource.class, "getFieldValue", e);
+                    Logging.recoverableException(SIRS.LOGGER, CollectionDataSource.class, "getFieldValue", e);
                     // TODO - do we really want to ignore?
                 }
             }
         } catch (SecurityException | IllegalArgumentException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ex) {
-            Logger.getLogger(ObjectDataSource.class.getName()).log(Level.SEVERE, null, ex);
+            SIRS.LOGGER.log(Level.WARNING, null, ex);
         } 
 
         //No field that match this name, looks like the feature type
@@ -96,7 +95,7 @@ public class ObjectDataSource<T> implements JRDataSource {
                 try{
                     previewLabel = previewRepository.get((String) propertyValue);
                 } catch(DocumentNotFoundException e){
-                    SIRS.LOGGER.log(Level.FINEST, e.getMessage());
+                    SIRS.LOGGER.log(Level.WARNING, e.getMessage());
                 }
                 if(previewLabel!=null){
                     if(stringConverter!=null){
@@ -117,7 +116,7 @@ public class ObjectDataSource<T> implements JRDataSource {
         } else if(List.class.isAssignableFrom(clazz)) {
             propertyValueToPrint = new PrintableArrayList(true);
             for(final Object o : (List) propertyValue){
-                ((List)propertyValueToPrint).add(parsePropertyValue(o, o.getClass()));
+                ((List)propertyValueToPrint).add(parsePropertyValue(o, o.getClass())); // On autorise obligatoirement le préfixage des éléments des listes sinon on n'a plus rien à afficher.
             }
         } else {
             propertyValueToPrint = propertyValue;
@@ -152,11 +151,11 @@ public class ObjectDataSource<T> implements JRDataSource {
         
         @Override
         public String toString(){
-            Iterator<E> it = iterator();
+            final Iterator<E> it = iterator();
             if (! it.hasNext())
                 return "";
 
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
             
             int order = 0;
             for (;;) {

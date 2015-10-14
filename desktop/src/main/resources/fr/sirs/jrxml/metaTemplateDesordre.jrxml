@@ -159,7 +159,7 @@
 				</staticText>
 				<textField isStretchWithOverflow="true">
 					<reportElement positionType="Float" x="150" y="0" width="405" height="12" uuid="6d4e5282-40d5-422c-9283-86b8e423382e"/>
-					<textElement textAlignment="Justified" verticalAlignment="Middle">
+					<textElement markup="html" textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{commentaire}==null ? "Non renseigné" : $F{commentaire}]]></textFieldExpression>

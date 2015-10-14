@@ -1,6 +1,8 @@
 
 package fr.sirs.util;
 
+import static fr.sirs.SIRS.BORNE_DEBUT_AVAL;
+import static fr.sirs.SIRS.BORNE_FIN_AVAL;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import static fr.sirs.util.JRUtils.ATT_BACKCOLOR;
 import static fr.sirs.util.JRUtils.ATT_FONT_NAME;
@@ -12,6 +14,7 @@ import static fr.sirs.util.JRUtils.ATT_LINE_WIDTH;
 import static fr.sirs.util.JRUtils.ATT_MARKUP;
 import static fr.sirs.util.JRUtils.ATT_MODE;
 import static fr.sirs.util.JRUtils.ATT_POSITION_TYPE;
+import static fr.sirs.util.JRUtils.ATT_SIZE;
 import static fr.sirs.util.JRUtils.ATT_TEXT_ALIGNMENT;
 import static fr.sirs.util.JRUtils.ATT_VERTICAL_ALIGNMENT;
 import static fr.sirs.util.JRUtils.ATT_WIDTH;
@@ -75,7 +78,8 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
     // Static template parameters.
     private static final String FIELDS_VERTICAL_ALIGNMENT = "Middle";
     private static final String FIELDS_FONT_NAME = "Serif";
-    private static final int FIELDS_HEIGHT = 16;
+    private static final int FIELDS_FONT_SIZE = 9;
+    private static final int FIELDS_HEIGHT = 12;
     //private static final String DATE_PATTERN = "dd/MM/yyyy à hh:mm:ss";
     private static final int INDENT_LABEL = 10;
     private static final int LABEL_WIDTH = 140;
@@ -329,6 +333,7 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
         final Element staticTextFont = this.document.createElement(TAG_FONT);
         staticTextFont.setAttribute(ATT_IS_BOLD, "true");
         staticTextFont.setAttribute(ATT_FONT_NAME, FIELDS_FONT_NAME);
+        staticTextFont.setAttribute(ATT_SIZE, String.valueOf(FIELDS_FONT_SIZE));
         
         final Element text = this.document.createElement(TAG_TEXT);
         
@@ -381,6 +386,7 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
         
         final Element textFieldFont = document.createElement(TAG_FONT);
         textFieldFont.setAttribute(ATT_FONT_NAME, FIELDS_FONT_NAME);
+        textFieldFont.setAttribute(ATT_SIZE, String.valueOf(FIELDS_FONT_SIZE));
         
         final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);
         
@@ -391,7 +397,12 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
         //else $F{permit_quantity}.equals(null) ? $F{fst_insp_qpqlml_quantity} : $F{permit_quantity}
         
         if(fieldClass==Boolean.class || (fieldClass!=null && BOOLEAN_PRIMITIVE_NAME.equals(fieldClass.getName()))){
-            valueField = document.createCDATASection("$F{"+field+"}==null ? \""+NULL_REPLACEMENT+"\" : ($F{"+field+"} ? \""+TRUE_REPLACEMENT+"\" : \""+FALSE_REPLACEMENT+"\")");
+            if(BORNE_DEBUT_AVAL.equals(field) || BORNE_FIN_AVAL.equals(field)){
+                valueField = document.createCDATASection("$F{"+field+"}==null ? \""+NULL_REPLACEMENT+"\" : ($F{"+field+"} ? \"Amont\" : \"Aval\")");
+            }
+            else{
+                valueField = document.createCDATASection("$F{"+field+"}==null ? \""+NULL_REPLACEMENT+"\" : ($F{"+field+"} ? \""+TRUE_REPLACEMENT+"\" : \""+FALSE_REPLACEMENT+"\")");
+            }
         }
         else{
             valueField = document.createCDATASection("$F{"+field+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+field+"}");

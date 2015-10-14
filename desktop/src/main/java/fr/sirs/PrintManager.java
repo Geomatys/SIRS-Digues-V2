@@ -18,6 +18,7 @@ import static fr.sirs.SIRS.DesordreFields.RESEAU_TELECOM_ENERGIE_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.VOIE_DIGUE_REFERENCE;
 import static fr.sirs.SIRS.FOREIGN_PARENT_ID_FIELD;
 import static fr.sirs.SIRS.GEOMETRY_FIELD;
+import static fr.sirs.SIRS.GEOMETRY_MODE;
 import static fr.sirs.SIRS.ID_FIELD;
 import static fr.sirs.SIRS.LATITUDE_MAX_FIELD;
 import static fr.sirs.SIRS.LATITUDE_MIN_FIELD;
@@ -100,6 +101,7 @@ public class PrintManager {
         avoidFields.add(POSITION_FIN_FIELD);
         avoidFields.add(PARENT_FIELD);
         avoidFields.add(COUCH_DB_DOCUMENT_FIELD);
+        avoidFields.add(GEOMETRY_MODE);
         
         for(final Element element : elementsToPrint){
             if(element instanceof TronconDigue){

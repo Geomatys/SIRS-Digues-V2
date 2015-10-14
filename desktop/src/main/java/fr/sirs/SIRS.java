@@ -125,6 +125,8 @@ public final class SIRS extends SirsCore {
     public static final String DATE_DEBUT_FIELD = "date_debut";
     public static final String DATE_FIN_FIELD = "date_fin";
     public static final String DATE_MAJ_FIELD = "dateMaj";
+    public static final String BORNE_DEBUT_AVAL = "borne_debut_aval";
+    public static final String BORNE_FIN_AVAL = "borne_fin_aval";
 
     public static final String COMMENTAIRE_FIELD = "commentaire";
     public static final String GEOMETRY_FIELD = "geometry";
@@ -139,6 +141,7 @@ public final class SIRS extends SirsCore {
     public static final String REVISION_FIELD = "revision";
     public static final String PARENT_FIELD = "parent";
     public static final String COUCH_DB_DOCUMENT_FIELD = "couchDBDocument";
+    public static final String GEOMETRY_MODE = "geometryMode";
 
     public static final String LINEAR_ID_FIELD = "linearId";
     public static final String FOREIGN_PARENT_ID_FIELD = "foreignParentId";
