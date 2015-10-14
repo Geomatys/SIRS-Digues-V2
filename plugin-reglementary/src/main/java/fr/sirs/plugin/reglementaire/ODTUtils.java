@@ -6,7 +6,6 @@ import fr.sirs.SIRS;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.util.SirsStringConverter;
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import java.awt.image.BufferedImage;
@@ -17,7 +16,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +49,7 @@ import org.odftoolkit.simple.text.Paragraph;
 
 /**
  * Classe utilitaire d'écriture de fichier ODT.
- * 
+ *
  * @author Johann Sorel (Geomatys)
  */
 public final class ODTUtils extends Static{
@@ -105,7 +106,7 @@ public final class ODTUtils extends Static{
      * @throws TemplateModelException
      * @throws DocumentTemplateException
      */
-    public static void generateReport(File templateFile, Object candidate, File outputFile)
+    public static void generateReport(File templateFile, Object candidate, Path outputFile)
             throws IOException, TemplateModelException, DocumentTemplateException, IllegalAccessException,
             IntrospectionException, InvocationTargetException {
         final DocumentTemplateFactory documentTemplateFactory = new DocumentTemplateFactory();
@@ -125,7 +126,7 @@ public final class ODTUtils extends Static{
      * @throws TemplateModelException
      * @throws DocumentTemplateException
      */
-    public static void generateReport(DocumentTemplate template, Object candidate, File outputFile)
+    public static void generateReport(DocumentTemplate template, Object candidate, Path outputFile)
             throws IOException, TemplateModelException, DocumentTemplateException, IntrospectionException,
             InvocationTargetException, IllegalAccessException {
         if(!(candidate instanceof Map || candidate instanceof TemplateModel)){
@@ -149,7 +150,7 @@ public final class ODTUtils extends Static{
             candidate = properties;
             //candidate = BeansWrapper.getDefaultInstance().wrap(candidate);
         }
-        template.createDocument(candidate, new FileOutputStream(outputFile));
+        template.createDocument(candidate, Files.newOutputStream(outputFile, StandardOpenOption.CREATE_NEW));
     }
 
     /**
@@ -162,7 +163,7 @@ public final class ODTUtils extends Static{
      * Supporte aussi les objets de type :
      * - File
      * - TextDocument
-     * 
+     *
      * @param outputFile fichier ODT de sortie
      * @param candidates
      */
@@ -318,7 +319,7 @@ public final class ODTUtils extends Static{
 
     /**
      * Create a page configuration.
-     * 
+     *
      * @param doc
      * @param landscape
      * @param margin ine millimeter

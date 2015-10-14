@@ -6,7 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root id="BorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root id="BorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <children>
    </children>
    <center>
@@ -41,6 +41,8 @@
                   <RowConstraints vgrow="NEVER" />
                   <RowConstraints vgrow="NEVER" />
                   <RowConstraints vgrow="NEVER" />
+                  <RowConstraints vgrow="NEVER" />
+                  <RowConstraints vgrow="NEVER" />
                   <RowConstraints vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
@@ -49,15 +51,18 @@
                   <Label text="Tronçons :" GridPane.rowIndex="2" />
                   <Label text="PR début :" GridPane.rowIndex="3" />
                   <Label text="Titre du document :" GridPane.rowIndex="4" />
-                  <CheckBox fx:id="uiCrerEntreeCalendrier" mnemonicParsing="false" text="Créer une entrée dans le calendrier, Type :" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+                  <CheckBox fx:id="uiCreateObligation" mnemonicParsing="false" text="Créer une obligation règlementaire et sa première étape à la date actuelle" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" />
                   <TextField fx:id="uiTitre" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4" />
                   <Label text="PR de fin :" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                   <ListView fx:id="uiTroncons" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
                   <Label text="au :" GridPane.columnIndex="2" />
                   <DatePicker fx:id="uiPeriodeDebut" GridPane.columnIndex="1" />
                   <DatePicker fx:id="uiPeriodeFin" GridPane.columnIndex="3" />
-                  <ComboBox fx:id="uiType" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+                  <ComboBox fx:id="uiTypeEtape" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.rowIndex="7" />
                   <ComboBox fx:id="uiSystemEndiguement" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+                  <ComboBox fx:id="uiTypeObligation" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.rowIndex="6" />
+                  <Label text="Type de l'obigation" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                  <Label text="Type de l'étape" GridPane.columnIndex="1" GridPane.rowIndex="7" />
                </children>
                <GridPane.margin>
                   <Insets />
