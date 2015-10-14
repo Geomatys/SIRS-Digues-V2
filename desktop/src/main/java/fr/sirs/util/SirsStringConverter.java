@@ -46,6 +46,10 @@ public class SirsStringConverter extends StringConverter {
      */
     @Override
     public String toString(Object item) {
+        return toString(item, true);
+    }
+
+    public String toString(Object item, final boolean prefixed) {
         if(item instanceof SystemeReperageBorne){
             final SystemeReperageBorne srb = (SystemeReperageBorne) item;
             final Session session = Injector.getBean(Session.class);
@@ -55,9 +59,9 @@ public class SirsStringConverter extends StringConverter {
         StringBuilder text = new StringBuilder();
         // Start title with element designation
         if (item instanceof Element) {
-            text.append(getDesignation((Element)item));
+            if(prefixed) text.append(getDesignation((Element)item));
         }  else if (item instanceof Preview) {
-            text.append(getDesignation((Preview) item));
+            if(prefixed) text.append(getDesignation((Preview) item));
         }  else if (item instanceof SQLQuery) {
             text.append(((SQLQuery)item).getLibelle());
         }
@@ -66,15 +70,18 @@ public class SirsStringConverter extends StringConverter {
         if (item instanceof Contact) {
             final Contact c = (Contact) item;
             if (c.getNom() != null && !c.getNom().isEmpty()) {
-                text.append(" : ").append(c.getNom());
+                if (text.length() > 0) text.append(" : ");
+                text.append(c.getNom());
             }
             if (c.getPrenom() != null && !c.getPrenom().isEmpty()) {
-                text.append(' ').append(c.getPrenom());
+                if (text.length() > 0) text.append(' ');
+                text.append(c.getPrenom());
             }
         } else if (item instanceof Organisme) {
             final Organisme o = (Organisme)item;
             if (o.getNom() != null && !o.getNom().isEmpty()) {
-                text.append(" : ").append(o.getNom());
+                if (text.length() > 0) text.append(" : ");
+                text.append(o.getNom());
             }
         } else if (item instanceof ElementHit) {
             text.append(((ElementHit) item).getLibelle());
@@ -104,9 +111,7 @@ public class SirsStringConverter extends StringConverter {
             final AvecLibelle libelle = (AvecLibelle) item;
             if (libelle.getLibelle() != null
                     && !libelle.getLibelle().isEmpty()) {
-                if (text.length() > 0) {
-                    text.append(" : ");
-                }
+                if (text.length() > 0) text.append(" : ");
                 text.append(libelle.getLibelle());
             }
         }

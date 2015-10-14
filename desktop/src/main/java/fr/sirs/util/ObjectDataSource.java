@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.util.StringConverter;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
@@ -31,7 +30,7 @@ public class ObjectDataSource<T> implements JRDataSource {
     private final Iterator<T> iterator;
     private T currentObject;
     private final Previews previewRepository;
-    private final StringConverter stringConverter;
+    private final SirsStringConverter stringConverter;
     
     public ObjectDataSource(final Iterable<T> iterable){
         this(iterable, null);
@@ -41,7 +40,7 @@ public class ObjectDataSource<T> implements JRDataSource {
         this(iterable, previewLabelRepository, null);
     }
     
-    public ObjectDataSource(final Iterable<T> iterable, final Previews previewLabelRepository, final StringConverter stringConverter){
+    public ObjectDataSource(final Iterable<T> iterable, final Previews previewLabelRepository, final SirsStringConverter stringConverter){
         ArgumentChecks.ensureNonNull("iterable", iterable);
         iterator = iterable.iterator();
         this.previewRepository = previewLabelRepository;
@@ -101,7 +100,7 @@ public class ObjectDataSource<T> implements JRDataSource {
                 }
                 if(previewLabel!=null){
                     if(stringConverter!=null){
-                        propertyValueToPrint = stringConverter.toString(previewLabel);
+                        propertyValueToPrint = stringConverter.toString(previewLabel, false);
                     } else if(previewLabel.getDesignation()!=null && !"".equals(previewLabel.getDesignation())){
                         propertyValueToPrint = previewLabel.getDesignation();
                     } else propertyValueToPrint = propertyValue;
@@ -114,7 +113,7 @@ public class ObjectDataSource<T> implements JRDataSource {
                 propertyValueToPrint = propertyValue;
             }
         } else if(Element.class.isAssignableFrom(clazz) && stringConverter!=null){
-            propertyValueToPrint = stringConverter.toString(propertyValue);
+            propertyValueToPrint = stringConverter.toString(propertyValue, false);
         } else if(List.class.isAssignableFrom(clazz)) {
             propertyValueToPrint = new PrintableArrayList(true);
             for(final Object o : (List) propertyValue){

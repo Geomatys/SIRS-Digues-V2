@@ -40,7 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import javafx.util.StringConverter;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import net.sf.jasperreports.engine.JRDataSource;
@@ -95,7 +94,7 @@ public class PrinterUtilities {
             final List<String> avoidObservationFields,
             final List<String> reseauFields,
             final Previews previewLabelRepository,
-            final StringConverter stringConverter,
+            final SirsStringConverter stringConverter,
             final List<ReseauHydrauliqueFerme> reseaux,
             final boolean printPhoto, final boolean printReseauOuvrage) throws Exception {
 
@@ -186,7 +185,7 @@ public class PrinterUtilities {
             final List<String> avoidPrestationFields, 
             final List<String> reseauFields,
             final Previews previewLabelRepository, 
-            final StringConverter stringConverter, 
+            final SirsStringConverter stringConverter,
             final List<Desordre> desordres, 
             final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie)
         throws ParserConfigurationException, SAXException, JRException, TransformerException, IOException {
@@ -362,7 +361,7 @@ public class PrinterUtilities {
      * @throws javax.xml.transform.TransformerException
      */
     public static File print(final List<String> avoidFields, 
-            final Previews previewLabelRepository, final StringConverter stringConverter, final List<? extends Element> elements)
+            final Previews previewLabelRepository, final SirsStringConverter stringConverter, final List<? extends Element> elements)
             throws IOException, ParserConfigurationException, SAXException, JRException, TransformerException {
         
         // Creates the Jasper Reports specific template from the generic template.
