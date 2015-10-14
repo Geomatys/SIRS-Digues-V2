@@ -101,7 +101,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public class FXLauncherPane extends BorderPane {
 
-    private static final Logger LOGGER = Logging.getLogger(FXLauncherPane.class);
+    private static final Logger LOGGER = Logging.getLogger("fr.sirs");
 
     /**
      * Si le serveur de plugins ne pointe pas sur une liste valide de

@@ -221,7 +221,7 @@ public class SirsFilterToSQL implements FilterToSQL {
                     try {
                         encoding = ObjectConverters.convert(o, String.class);
                     } catch (UnconvertibleObjectException e) {
-                        Logging.recoverableException(SirsFilterToSQL.class, "writeValue", e);
+                        Logging.recoverableException(Logging.getLogger("fr.sirs"),SirsFilterToSQL.class, "writeValue", e);
                     }
                     if (encoding == null) {
                         // could not convert back to string, use original value
@@ -242,7 +242,7 @@ public class SirsFilterToSQL implements FilterToSQL {
             try {
                 encoded = ObjectConverters.convert(candidate, String.class);
             } catch (UnconvertibleObjectException e) {
-                Logging.recoverableException(SirsFilterToSQL.class, "writeValue", e);
+                Logging.recoverableException(Logging.getLogger("fr.sirs"),SirsFilterToSQL.class, "writeValue", e);
             }
             if (encoded == null) {
                 // could not convert back to string, use original value

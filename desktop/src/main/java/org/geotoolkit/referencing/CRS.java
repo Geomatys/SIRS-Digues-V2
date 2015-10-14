@@ -1303,6 +1303,6 @@ compare:    for (final SingleCRS component : actualComponents) {
      * should propagate the exception).
      */
     static void unexpectedException(final String methodName, final Exception exception) {
-        Logging.unexpectedException(CRS.class, methodName, exception);
+        Logging.unexpectedException(Logging.getLogger("org.geotoolkit"),CRS.class, methodName, exception);
     }
 }

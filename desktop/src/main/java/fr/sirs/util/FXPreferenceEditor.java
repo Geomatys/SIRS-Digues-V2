@@ -167,7 +167,7 @@ public class FXPreferenceEditor extends Stage {
             final Alert alert = new Alert(Alert.AlertType.ERROR, "Les préférences ne peuvent être sauvegardées. Code d'erreur : " + errorCode, ButtonType.CLOSE);
             alert.setResizable(true);
             alert.showAndWait();
-            Logging.getLogger(SirsPreferences.class).log(Level.SEVERE, errorCode + " : Preferences cannot be saved.", ex);
+            Logging.getLogger("fr.sirs").log(Level.SEVERE, errorCode + " : Preferences cannot be saved.", ex);
         }
     }
 
