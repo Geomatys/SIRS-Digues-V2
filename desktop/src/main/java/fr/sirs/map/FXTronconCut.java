@@ -42,7 +42,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.gui.javafx.util.FXStringCell2;
+import org.geotoolkit.gui.javafx.util.FXStringCell;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.util.StringUtilities;
@@ -52,7 +52,7 @@ import org.geotoolkit.util.StringUtilities;
  * @author Johann Sorel (Geomatys)
  */
 public class FXTronconCut extends VBox {
-        
+
     public static final Color[] PALETTE = new Color[] {
         Color.BLUE,
         Color.CYAN,
@@ -60,7 +60,7 @@ public class FXTronconCut extends VBox {
         Color.RED,
         Color.GREEN
     };
-    
+
     @FXML private TextField uiTronconLabel;
     @FXML private TableView<CutPoint> uiCutTable;
     @FXML private TableView<Segment> uiSegmentTable;
@@ -70,32 +70,32 @@ public class FXTronconCut extends VBox {
     private final ObjectProperty<TronconDigue> tronconProp = new SimpleObjectProperty<>();
     private final ObservableList<CutPoint> cutPoints = FXCollections.observableArrayList();
     private final ObservableList<Segment> segments = FXCollections.observableArrayList();
-    
+
     public FXTronconCut(final String typeName) {
         SIRS.loadFXML(this);
-        
+
         TronconTypeNameLabel.setText(StringUtilities.firstToUpper(typeName) + " :");
         uiTronconLabel.textProperty().bind(Bindings.createStringBinding(()->tronconProp.get()==null?"":tronconProp.get().getLibelle(),tronconProp));
-        
+
         uiCutTable.setItems(cutPoints);
         uiCutTable.getColumns().add(new DeleteColumn());
         uiCutTable.getColumns().add(new DistanceColumn());
-        
+
         uiSegmentTable.setItems(segments);
         uiSegmentTable.setEditable(true);
         uiSegmentTable.getColumns().add(new ColorColumn());
         uiSegmentTable.getColumns().add(new TypeColumn());
-        
+
         final TableColumn<Segment, String> nameColumn = new TableColumn<>("nom");
         nameColumn.setCellValueFactory((TableColumn.CellDataFeatures<Segment, String> param) -> param.getValue().nameProperty);
-        nameColumn.setCellFactory((TableColumn<Segment, String> param) -> new FXStringCell2());
+        nameColumn.setCellFactory((TableColumn<Segment, String> param) -> new FXStringCell());
         nameColumn.setEditable(true);
-        
+
         uiSegmentTable.getColumns().add(nameColumn);
-        
+
         // Recalcul des segments lors d'un changement de point de coupe
         cutPoints.addListener(this::cutPointChanged);
-        
+
         // On vide le panneau lorsqu'on change de tronçon.
         tronconProp.addListener((ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue) -> {
             cutPoints.clear();
@@ -108,7 +108,7 @@ public class FXTronconCut extends VBox {
     public ObservableList<CutPoint> getCutpoints() {
         return cutPoints;
     }
-    
+
     public ObservableList<Segment> getSegments() {
         return segments;
     }
@@ -116,14 +116,14 @@ public class FXTronconCut extends VBox {
     public ObjectProperty<TronconDigue> tronconProperty() {
         return tronconProp;
     }
-    
+
     public boolean isCutMode(){
         return uiAddCut.isSelected();
     }
-    
+
     private void cutPointChanged(ListChangeListener.Change c) {
         segments.clear();
-        
+
         final TronconDigue troncon = tronconProp.get();
         if (troncon == null) return;
 
@@ -173,14 +173,14 @@ public class FXTronconCut extends VBox {
         }
         segments.setAll(tmpSegments);
     }
-    
+
     /*
      * UTILITY CLASSES
      */
-    
+
     public static final class CutPoint implements Comparable<CutPoint>{
         public final DoubleProperty distance = new SimpleDoubleProperty(0);
-        
+
         @Override
         public int compareTo(CutPoint o) {
             return Double.compare(distance.get(),o.distance.get());
@@ -194,20 +194,20 @@ public class FXTronconCut extends VBox {
             return false;
         }
     }
-    
+
     public static final class Segment{
         public ObjectProperty<Color> colorProp = new SimpleObjectProperty<>(Color.BLACK);
         public ObjectProperty<SegmentType> typeProp = new SimpleObjectProperty<>(SegmentType.CONSERVER);
         public ObjectProperty<LineString> geometryProp = new SimpleObjectProperty<>();
         public final StringProperty nameProperty = new SimpleStringProperty();
     }
-    
+
     public static enum SegmentType{
         CONSERVER,
         SECTIONNER,
         ARCHIVER
     }
-    
+
     private class DeleteColumn extends SimpleButtonColumn {
 
         public DeleteColumn() {
@@ -218,7 +218,7 @@ public class FXTronconCut extends VBox {
                             return new SimpleObjectProperty<>(param.getValue());
                         }
                     },
-                    (Object t) -> true, 
+                    (Object t) -> true,
                     new Function() {
 
                         public Object apply(Object t) {
@@ -234,20 +234,20 @@ public class FXTronconCut extends VBox {
                     },
                     null
             );
-        }  
+        }
     }
-    
+
     private class DistanceColumn extends TableColumn<CutPoint, Number>{
 
         public DistanceColumn() {
-            super();            
+            super();
             setSortable(false);
             setEditable(true);
             setCellValueFactory((CellDataFeatures<CutPoint, Number> param) -> param.getValue().distance);
         }
-        
+
     }
-    
+
     private class ColorColumn extends TableColumn<Segment,Color>{
 
         public ColorColumn() {
@@ -258,7 +258,7 @@ public class FXTronconCut extends VBox {
             setMinWidth(24);
             setMaxWidth(24);
             setGraphic(new ImageView(GeotkFX.ICON_STYLE));
-            
+
             setCellValueFactory((CellDataFeatures<Segment, Color> param) -> param.getValue().colorProp);
             setCellFactory(new Callback<TableColumn<Segment, Color>, TableCell<FXTronconCut.Segment, Color>>() {
 
@@ -279,14 +279,14 @@ public class FXTronconCut extends VBox {
             });
         }
     }
-    
+
     private class TypeColumn extends TableColumn<Segment,Segment>{
 
         public TypeColumn() {
             setSortable(false);
             setEditable(true);
             setCellValueFactory((CellDataFeatures<Segment, Segment> param) -> new SimpleObjectProperty(param.getValue()));
-            
+
             setCellFactory(new Callback<TableColumn<Segment, Segment>, TableCell<FXTronconCut.Segment, FXTronconCut.Segment>>() {
 
                 @Override
@@ -294,11 +294,11 @@ public class FXTronconCut extends VBox {
                     return new EnumTableCell();
                 }
             });
-            
+
         }
-        
+
     }
-    
+
     private static class EnumTableCell extends FXTableCell<Segment, Segment>{
 
         private final ChoiceBox<SegmentType> choiceBox = new ChoiceBox<>();
@@ -306,7 +306,7 @@ public class FXTronconCut extends VBox {
         public EnumTableCell() {
             final ObservableList<SegmentType> lst = FXCollections.observableArrayList(SegmentType.values());
             choiceBox.setItems(lst);
-            
+
             choiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<SegmentType>() {
                 @Override
                 public void changed(ObservableValue<? extends SegmentType> observable, SegmentType oldValue, SegmentType newValue) {
@@ -317,11 +317,11 @@ public class FXTronconCut extends VBox {
                 }
             });
         }
-        
+
         @Override
         protected void updateItem(Segment item, boolean empty) {
             super.updateItem(item, empty);
-                        
+
             setText(null);
             setGraphic(null);
             if(item !=null && !empty){
@@ -357,7 +357,7 @@ public class FXTronconCut extends VBox {
             setText(getItem().typeProp.get().name());
             setGraphic(null);
         }
-        
+
     }
-    
+
 }

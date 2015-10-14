@@ -91,12 +91,12 @@ public class TronconCutHandler extends AbstractNavigationHandler {
     private final FXTronconCut editPane;
     private final FeatureType featureType;
     private final Session session;
-    
+
     // overriden variable by init();
     protected String layerName;
     protected String typeName;
     protected boolean maleGender;
-    
+
     protected void init() {
         this.layerName  = CorePlugin.TRONCON_LAYER_NAME;
         this.typeName   = "tronçon";
@@ -191,7 +191,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
                 // TODO : show a popup on success.
                 submitted.setOnSucceeded(event -> {
                     final Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                            "Le découpage " + prefix + typeName + " \"" + troncon.getLibelle() + "\" s'est terminé avec succcès.", 
+                            "Le découpage " + prefix + typeName + " \"" + troncon.getLibelle() + "\" s'est terminé avec succcès.",
                             ButtonType.OK);
                     alert.setResizable(true);
                     alert.showAndWait();
@@ -428,7 +428,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
                 updateProgress(i, n);
 
                 final FXTronconCut.Segment segment = segments.get(i);
-                final String segmentName = segment.nameProperty.get()==null || segment.nameProperty.get().equals("") ? toCut.getLibelle() + "[" + i + "]" : segment.nameProperty.get();
+                final String segmentName = segment.nameProperty.get()==null || segment.nameProperty.get().isEmpty() ? toCut.getLibelle() + "[" + i + "]" : segment.nameProperty.get();
                 final TronconDigue cut = TronconUtils.cutTroncon(toCut, segment.geometryProp.get(), segmentName, session);
 
                 final FXTronconCut.SegmentType type = segment.typeProp.get();

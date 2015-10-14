@@ -119,11 +119,10 @@ public class TronconUtils {
         while (borneIt.hasNext()) {
             final BorneDigue borne = borneIt.next();
             final ProjectedPoint proj = projectReference(sourceTronconSegments, borne.getGeometry());
-            if (proj.distanceAlongLinear < startDistance || proj.distanceAlongLinear > endDistance) {
-                borneIt.remove();
-            } else {
+            if (proj.distanceAlongLinear >= startDistance && proj.distanceAlongLinear <= endDistance) {
                 keptBornes.add(borne.getId());
             }
+            tronconCp.getBorneIds().setAll(keptBornes);
         }
 
         //======================================================================

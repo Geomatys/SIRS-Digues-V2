@@ -10,29 +10,20 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.TronconUtils;
-import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefRive;
-import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
-import fr.sirs.util.StreamingIterable;
 import fr.sirs.util.property.Reference;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import javafx.application.Platform;
@@ -97,7 +88,6 @@ import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.style.MutableStyle;
-import org.geotoolkit.util.collection.CloseableIterator;
 import org.geotoolkit.util.collection.CollectionChangeEvent;
 import org.opengis.filter.Id;
 import org.opengis.referencing.operation.TransformException;
@@ -289,15 +279,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             final boolean maleGender, final Class parentClass,
             final boolean showRive, final String parentLabel) {
         final Session session = Injector.getBean(Session.class);
-
-        final ComboBox<Preview> parentChoice = new ComboBox<>(FXCollections.observableList(session.getPreviews().getByClass(parentClass)));
-        final ComboBox<RefRive> rives = new ComboBox<>(FXCollections.observableList(session.getRepositoryForClass(RefRive.class).getAll()));
-
         final SirsStringConverter strConverter = new SirsStringConverter();
-        parentChoice.setConverter(strConverter);
-        parentChoice.setEditable(true);
-        ComboBoxCompletion.autocomplete(parentChoice);
-        rives.setConverter(strConverter);
 
         final TextField nameField = new TextField();
 
@@ -329,11 +311,28 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             bp.add(new Label("Nom de la " + typeName), 0, 0);
         }
         bp.add(nameField, 0, 1);
-        bp.add(new Label("Rattacher " + parentLabel), 0, 2);
-        bp.add(parentChoice, 0, 3);
+
+        final ComboBox<Preview> parentChoice;
+        if (parentClass != null) {
+            parentChoice = new ComboBox<>(FXCollections.observableList(session.getPreviews().getByClass(parentClass)));
+            parentChoice.setConverter(strConverter);
+            parentChoice.setEditable(true);
+            ComboBoxCompletion.autocomplete(parentChoice);
+
+            bp.add(new Label("Rattacher " + (parentLabel == null ? "" : parentLabel)), 0, 2);
+            bp.add(parentChoice, 0, 3);
+        } else {
+            parentChoice = null;
+        }
+
+        final ComboBox<RefRive> rives;
         if (showRive) {
+            rives = new ComboBox<>(FXCollections.observableList(session.getRepositoryForClass(RefRive.class).getAll()));
+            rives.setConverter(strConverter);
             bp.add(new Label("Sur la rive"), 0, 4);
             bp.add(rives, 0, 5);
+        } else {
+            rives = null;
         }
 
         final Button finishBtn = new Button("Terminer");
@@ -367,7 +366,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         } else {
             final TronconDigue tmpTroncon = Injector.getSession().getElementCreator().createElement(tronconClass);
             tmpTroncon.setLibelle(tronconName);
-            final Preview parentPreview = parentChoice.getValue();
+            final Preview parentPreview = parentChoice == null? null : parentChoice.getValue();
             if (parentPreview != null) {
                 try {
                     final Method parentMethod = findParentMethod(tronconClass, parentClass);
@@ -378,7 +377,8 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                     SIRS.LOGGER.log(Level.WARNING, null, ex);
                 }
             }
-            final RefRive rive = rives.getValue();
+
+            final RefRive rive = rives == null? null : rives.getValue();
             if (rive != null) {
                 tmpTroncon.setTypeRiveId(rive.getId());
             }
@@ -636,31 +636,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                     deleteItem.setOnAction((ActionEvent event) -> {
                         final Alert alert = new Alert(CONFIRMATION, "Voulez-vous vraiment supprimer " + prefix + typeName + " ainsi que les systèmes de repérage et tous les positionnables qui le réfèrent ?", YES, NO);
                         final Optional<ButtonType> result = alert.showAndWait();
-                        if(result.isPresent() && result.get()==YES){
-                            final Map<Class, List<Positionable>> positionablesByClass = new HashMap<>();
-
-                            final List<Positionable> positionableList = TronconUtils.getPositionableList(tronconProperty.get());
-                            for(final Positionable positionable : positionableList){
-                                final Class positionableClass = positionable.getClass();
-                                if(positionablesByClass.get(positionableClass)==null)
-                                    positionablesByClass.put(positionableClass, new ArrayList<>());
-                                positionablesByClass.get(positionableClass).add(positionable);
-                            }
-
-                            for(final Class positionableClass : positionablesByClass.keySet()){
-                                if(positionablesByClass.get(positionableClass)!=null){
-                                    final AbstractSIRSRepository repo = session.getRepositoryForClass(positionableClass);
-                                    repo.executeBulkDelete(positionablesByClass.get(positionableClass));
-                                }
-                            }
-
-                            final SystemeReperageRepository srRepo = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class));
-                            final StreamingIterable<SystemeReperage> srs = srRepo.getByLinearStreaming(tronconProperty.get());
-                            try (final CloseableIterator<SystemeReperage> it = srs.iterator()) {
-                                while (it.hasNext()) {
-                                    srRepo.remove(it.next(), tronconProperty.get());
-                                }
-                            }
+                        if (result.isPresent() && result.get()==YES) {
                             session.getRepositoryForClass(tronconClass).remove(tronconProperty.get());
                             tronconProperty.set(null);
                         }
