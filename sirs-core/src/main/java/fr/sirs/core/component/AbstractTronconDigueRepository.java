@@ -5,15 +5,22 @@ import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.DocumentOperationResult;
+import org.ektorp.ViewQuery;
+import org.ektorp.ViewResult;
 import org.ektorp.support.View;
+import org.ektorp.support.Views;
 
 /**
  * Outil gérant les échanges avec la bdd CouchDB pour tous les objets tronçons.
@@ -43,14 +50,18 @@ import org.ektorp.support.View;
  *
  * @author Samuel Andrés (Geomatys)
  * @author Alexis Manin (Geomatys)
- * 
+ *
  * @param <T> The model class managed by the repository.
  */
-@View(name = AbstractTronconDigueRepository.BY_DIGUE_ID, map = "function(doc) {if(doc['@class'] && doc.digueId) {emit(doc.digueId, doc._id)}}")
+@Views({
+@View(name = AbstractTronconDigueRepository.BY_DIGUE_ID, map = "function(doc) {if(doc['@class'] && doc.digueId) {emit(doc.digueId, doc._id)}}"),
+@View(name = AbstractTronconDigueRepository.BY_BORNE_ID, map = "function(doc) {if(Array.isArray(doc.borneIds)) {for (var i = 0 ; i < doc.borneIds.length ; i++) emit(doc.borneIds[i], doc._id)}}")
+})
 public class AbstractTronconDigueRepository<T extends TronconDigue> extends AbstractSIRSRepository<T> {
 
     public static final String STREAM_LIGHT = "streamLight";
     public static final String BY_DIGUE_ID = "byDigueId";
+    public static final String BY_BORNE_ID = "byBorneId";
 
     protected AbstractTronconDigueRepository(CouchDbConnector db, Class<T> typeClass) {
         super(typeClass, db);
@@ -95,16 +106,56 @@ public class AbstractTronconDigueRepository<T extends TronconDigue> extends Abst
         for(SystemeReperage sr : srs) {
             srrepo.remove(sr, entity);
         }
+
+        final SessionCore session = InjectorCore.getBean(SessionCore.class);
         List<Positionable> boundPositions = TronconUtils.getPositionableList(entity);
         for (Positionable p : boundPositions) {
-            try {
-                AbstractSIRSRepository repo = InjectorCore.getBean(SessionCore.class).getRepositoryForClass(p.getClass());
-                repo.remove(p);
-            } catch (Exception e) {
-                SirsCore.LOGGER.log(Level.WARNING, "An element bound to the troncon cannot be deleted : "+ p.getId(), e);
+            if (p.getDocumentId().equals(p.getId())) {
+                try {
+                    AbstractSIRSRepository repo = session.getRepositoryForClass(p.getClass());
+                    repo.remove(p);
+                } catch (Exception e) {
+                    SirsCore.LOGGER.log(Level.WARNING, "An element bound to the troncon cannot be deleted : " + p.getId(), e);
+                }
             }
         }
-        // TODO : Set an end date to bornes which are not used anymore.
+
+        // Supprime toutes les bornes utilisées uniquement par ce troncon.
+        final HashSet<String> bornesToDelete = new HashSet<>(entity.getBorneIds());
+        ViewQuery usedBornes = createQuery(BY_BORNE_ID).includeDocs(false).keys(bornesToDelete);
+        ViewResult queryResult = db.queryView(usedBornes);
+        queryResult.forEach(row -> {
+            if (!row.getId().equals(entity.getId())) {
+                bornesToDelete.remove(row.getKey());
+            }
+        });
+
+        if (bornesToDelete.isEmpty())
+            return;
+
+        // On peut faire un bulk delete, tous les SR et objets sur le tronçon ont disparu. Il n'y a plus de risque de corruption d'un positionnement.
+        final AbstractSIRSRepository<BorneDigue> borneRepo = session.getRepositoryForClass(BorneDigue.class);
+        final List<BorneDigue> tmpBornes = borneRepo.get(bornesToDelete);
+        final List<DocumentOperationResult> bulkResult = borneRepo.executeBulkDelete(tmpBornes);
+        // Si une erreur s'est produite lors de la suppression, on liste les opérations échouées, et on renvoie une alerte à l'utilisateur.
+        if (bulkResult != null && !bulkResult.isEmpty()) {
+
+            // TODO : système de message pour communiquer entre core & desktop ?
+            SirsCore.LOGGER.warning(() -> {
+                final HashMap<String, BorneDigue> borneMap = new HashMap<>(tmpBornes.size());
+                for (final BorneDigue tmpBorne : tmpBornes) {
+                    borneMap.put(tmpBorne.getId(), tmpBorne);
+                }
+
+                final StringBuilder msgBuilder = new StringBuilder("Les bornes suivantes n'ont pas pu être supprimées :");
+                for (final DocumentOperationResult r : bulkResult) {
+                    BorneDigue bd = borneMap.get(r.getId());
+                    msgBuilder.append('\n').append(bd.getLibelle()).append("\nErreur : ").append(r.getError()).append("\nCause : ").append(r.getReason());
+                }
+
+                return msgBuilder.toString();
+            });
+        }
     }
 
     @Override

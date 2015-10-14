@@ -128,7 +128,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         return get(Arrays.asList(ids));
     }
 
-    public List<T> get(final List<String> ids) {
+    public List<T> get(final Collection<String> ids) {
         final ArrayList result = new ArrayList();
 
         final List<String> toGet = new ArrayList<>(ids);
