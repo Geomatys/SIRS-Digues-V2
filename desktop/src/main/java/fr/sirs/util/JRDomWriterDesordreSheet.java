@@ -55,8 +55,8 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
     private final boolean printReseauOuvrage;
     private final boolean printVoirie;
     
-    private JRDomWriterDesordreSheet(){
-        super();
+    private JRDomWriterDesordreSheet(final Class<Desordre> classToMap){
+        super(classToMap);
         
         observationFields = null;
         prestationFields = null;
@@ -64,7 +64,8 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         printPhoto = printReseauOuvrage = printVoirie = true;
     }
     
-    public JRDomWriterDesordreSheet(final InputStream stream, 
+    public JRDomWriterDesordreSheet(final Class<Desordre> classToMap,
+            final InputStream stream,
             final List<String> avoidFields,
             final List<String> observationFields,
             final List<String> prestationFields,
@@ -72,7 +73,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
             final boolean printPhoto, 
             final boolean printReseauOuvrage, 
             final boolean printVoirie) throws ParserConfigurationException, SAXException, IOException {
-        super(stream, avoidFields);
+        super(classToMap, stream, avoidFields);
         
         this.observationFields = observationFields;
         this.prestationFields = prestationFields;
@@ -96,10 +97,10 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         
         
         // Sets the initial fields used by the template.------------------------
-        writeFields(Desordre.class);
+        writeFields();
 
         // Modifies the title block.--------------------------------------------
-        writeTitle(Desordre.class);
+        writeTitle();
         
         // Writes the headers.--------------------------------------------------
         writePageHeader();

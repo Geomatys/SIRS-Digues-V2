@@ -49,21 +49,22 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
     private final boolean printPhoto;
     private final boolean printReseauOuvrage;
     
-    private JRDomWriterReseauFermeSheet(){
-        super();
+    private JRDomWriterReseauFermeSheet(final Class<ReseauHydrauliqueFerme> classToMap){
+        super(classToMap);
         
         observationFields = null;
         reseauFields = null;
         printPhoto = printReseauOuvrage = true;
     }
     
-    public JRDomWriterReseauFermeSheet(final InputStream stream, 
+    public JRDomWriterReseauFermeSheet(final Class<ReseauHydrauliqueFerme> classToMap,
+            final InputStream stream,
             final List<String> avoidFields,
             final List<String> observationFields,
             final List<String> reseauFields,
             final boolean printPhoto, 
             final boolean printReseauOuvrage) throws ParserConfigurationException, SAXException, IOException {
-        super(stream, avoidFields);
+        super(classToMap, stream, avoidFields);
         
         this.observationFields = observationFields;
         this.reseauFields = reseauFields;
@@ -82,10 +83,10 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         writeSubDataset(ObjetReseau.class, reseauFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(1));
         
         // Sets the initial fields used by the template.------------------------
-        writeFields(ReseauHydrauliqueFerme.class);
+        writeFields();
         
         // Modifies the title block.--------------------------------------------
-        writeTitle(ReseauHydrauliqueFerme.class);
+        writeTitle();
         
         // Writes the headers.--------------------------------------------------
         writePageHeader();

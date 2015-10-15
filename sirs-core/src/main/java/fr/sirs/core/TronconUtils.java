@@ -204,7 +204,7 @@ public class TronconUtils {
             Les opérations de vividsolutions "intersects", "contains" et "intersection"
             ne donnent pas les mêmes résultats selon qu'un point est représenté par
             une géométrie de type "POINT(x y)" ou par une géométrie de type "LINESTRING(x y, x y)"
-            c'est-à-dire une ligne formée de deux points de même coordonnées.
+            c'est-à-dire une ligne formée de deux points de mêmes coordonnées.
 
             Dans les lignes suivantes la géométrie interpObjGeom est destinée
             à représenter temporairement sous forme de géométrie "POINT" les

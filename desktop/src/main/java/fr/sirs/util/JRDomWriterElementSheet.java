@@ -3,7 +3,6 @@ package fr.sirs.util;
 
 import static fr.sirs.SIRS.BORNE_DEBUT_AVAL;
 import static fr.sirs.SIRS.BORNE_FIN_AVAL;
-import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import static fr.sirs.util.JRUtils.ATT_BACKCOLOR;
 import static fr.sirs.util.JRUtils.ATT_FONT_NAME;
 import static fr.sirs.util.JRUtils.ATT_HEIGHT;
@@ -27,23 +26,22 @@ import fr.sirs.util.JRUtils.PositionType;
 import static fr.sirs.util.JRUtils.TAG_BAND;
 import static fr.sirs.util.JRUtils.TAG_BOTTOM_PEN;
 import static fr.sirs.util.JRUtils.TAG_BOX;
-import static fr.sirs.util.JRUtils.TAG_COLUMN_HEADER;
-import static fr.sirs.util.JRUtils.TAG_DETAIL;
 import static fr.sirs.util.JRUtils.TAG_FONT;
 import static fr.sirs.util.JRUtils.TAG_FRAME;
-import static fr.sirs.util.JRUtils.TAG_PAGE_HEADER;
 import static fr.sirs.util.JRUtils.TAG_REPORT_ELEMENT;
 import static fr.sirs.util.JRUtils.TAG_STATIC_TEXT;
 import static fr.sirs.util.JRUtils.TAG_TEXT;
 import static fr.sirs.util.JRUtils.TAG_TEXT_ELEMENT;
 import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD;
 import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD_EXPRESSION;
-import static fr.sirs.util.JRUtils.TAG_TITLE;
 import fr.sirs.util.JRUtils.TextAlignment;
 import static fr.sirs.util.PrinterUtilities.getFieldNameFromSetter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -66,11 +64,6 @@ import org.xml.sax.SAXException;
  */
 public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
     
-    // Template elements.
-    private final Element title;
-    private final Element pageHeader;
-    private final Element columnHeader;
-    private final Element detail;
     
     // Dynamic template parameters.
     private int fields_interline;
@@ -78,8 +71,8 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
     // Static template parameters.
     private static final String FIELDS_VERTICAL_ALIGNMENT = "Middle";
     private static final String FIELDS_FONT_NAME = "Serif";
-    private static final int FIELDS_FONT_SIZE = 9;
-    private static final int FIELDS_HEIGHT = 12;
+    private static final int FIELDS_FONT_SIZE = 8;
+    private static final int FIELDS_HEIGHT = 10;
     //private static final String DATE_PATTERN = "dd/MM/yyyy à hh:mm:ss";
     private static final int INDENT_LABEL = 10;
     private static final int LABEL_WIDTH = 140;
@@ -94,22 +87,12 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
     
     private JRDomWriterElementSheet(){
         super();
-        this.title = null; 
-        this.pageHeader = null;
-        this.columnHeader = null;
-        this.detail = null;
-        
-        this.fields_interline = 8;
+        fields_interline = 4;
     }
     
     public JRDomWriterElementSheet(final InputStream stream) throws ParserConfigurationException, SAXException, IOException {
         super(stream);
-        title = (Element) root.getElementsByTagName(TAG_TITLE).item(0);
-        pageHeader = (Element) root.getElementsByTagName(TAG_PAGE_HEADER).item(0);
-        columnHeader = (Element) root.getElementsByTagName(TAG_COLUMN_HEADER).item(0);
-        detail = (Element) this.root.getElementsByTagName(TAG_DETAIL).item(0);
-        
-        fields_interline = 8;
+        fields_interline = 4;
     }
     
     /**
@@ -169,7 +152,7 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
         }
         
         // Modifies the title block.--------------------------------------------
-        writeTitle(classToMap);
+        writeTitle("Fiche synoptique de ", classToMap);
         
         // Writes the headers.--------------------------------------------------
         writePageHeader();
@@ -177,42 +160,6 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
         
         // Builds the body of the Jasper Reports template.----------------------
         writeDetail(classToMap, avoidFields);
-    }
-    
-    /**
-     * <p>This method writes the title of the template.</p>
-     * @param classToMap 
-     */
-    private void writeTitle(final Class classToMap) {
-        
-        // Looks for the title content.-----------------------------------------
-        final Element band = (Element) this.title.getElementsByTagName(TAG_BAND).item(0);
-        final Element staticText = (Element) band.getElementsByTagName(TAG_STATIC_TEXT).item(0);
-        final Element text = (Element) staticText.getElementsByTagName(TAG_TEXT).item(0);
-        
-        // Sets the title.------------------------------------------------------
-        final String className;
-        final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName(), Locale.getDefault(),
-                Thread.currentThread().getContextClassLoader());
-        if(resourceBundle!=null){
-            className = (resourceBundle.containsKey(BUNDLE_KEY_CLASS)) ?
-                    resourceBundle.getString(BUNDLE_KEY_CLASS) : classToMap.getSimpleName();
-        }
-        else{
-            className = classToMap.getSimpleName();
-        }
-        ((CDATASection) text.getChildNodes().item(0)).setData("Fiche synoptique de " + className);
-        
-        // Builds the DOM tree.-------------------------------------------------
-        this.root.appendChild(this.title);
-    }
-    
-    private void writePageHeader(){
-        this.root.appendChild(this.pageHeader);
-    }
-    
-    private void writeColumnHeader(){
-        this.root.appendChild(this.columnHeader);
     }
     
     /**
@@ -227,27 +174,66 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
         
         // Loops over the method looking for setters (based on the field names).
         final Method[] methods = classToMap.getMethods();
-        int i = 0;
-        for (final Method method : methods){
+        final Collection<Method> setters = new ArrayList<>();
+
+        for(final Method method : methods){
             if(PrinterUtilities.isSetter(method)){
-                
-                // Retrives the field name from the setter name.----------------
-                final String fieldName = getFieldNameFromSetter(method);
-                final Class fieldClass = method.getParameterTypes()[0];
-                
-                // Provides a multiplied height for comment and description fields.
-                final Markup markup;
-                if (fieldName.contains("escript") || fieldName.contains("omment")){
-                    markup = Markup.HTML;
-                } else {
-                    markup = Markup.NONE;
+                setters.add(method);
+            }
+        }
+
+        final Collection<Method> orderedSetters = new ArrayList<>();
+        final Collection<String> prioritaryMethodNames = new ArrayList<>();
+        prioritaryMethodNames.add("setDesignation");
+        prioritaryMethodNames.add("setLinearId");
+        prioritaryMethodNames.add("setSystemeRepId");
+        prioritaryMethodNames.add("setPRDebut");
+        prioritaryMethodNames.add("setBorneDebutId");
+        prioritaryMethodNames.add("setBorne_debut_aval");
+        prioritaryMethodNames.add("setBorne_debut_distance");
+        prioritaryMethodNames.add("setPRFin");
+        prioritaryMethodNames.add("setBorneFinId");
+        prioritaryMethodNames.add("setBorne_fin_aval");
+        prioritaryMethodNames.add("setBorne_fin_distance");
+        prioritaryMethodNames.add("setDate_debut");
+        prioritaryMethodNames.add("setDate_fin");
+        prioritaryMethodNames.add("setLibelle");
+        prioritaryMethodNames.add("setNom");
+        prioritaryMethodNames.add("setCommentaire");
+        prioritaryMethodNames.add("setDescription");
+
+        for(final String prioritaryName : prioritaryMethodNames){
+            final Iterator<Method> it = setters.iterator();
+            while(it.hasNext()){
+                final Method current = it.next();
+                if(current.getName().equals(prioritaryName)){
+                    it.remove();
+                    orderedSetters.add(current);
                 }
+            }
+        }
+
+        orderedSetters.addAll(setters);
+
+        int i = 0;
+        for (final Method method : orderedSetters){
                 
-                // Writes the field.--------------------------------------------
-                if(avoidFields==null || !avoidFields.contains(fieldName)){
-                    writeDetailField(fieldName, fieldClass, i, markup, resourceBundle);
-                    i++;
-                }
+            // Retrives the field name from the setter name.----------------
+            final String fieldName = getFieldNameFromSetter(method);
+            final Class fieldClass = method.getParameterTypes()[0];
+
+            // Provides a multiplied height for comment and description fields.
+            final Markup markup;
+            if (fieldName.contains("escript") || fieldName.contains("omment")){
+                markup = Markup.HTML;
+            } else {
+                markup = Markup.NONE;
+            }
+
+            // Writes the field.--------------------------------------------
+            if(avoidFields==null || !avoidFields.contains(fieldName)){
+                writeDetailField(fieldName, fieldClass, i, markup, resourceBundle);
+                i++;
             }
         }
         
@@ -370,7 +356,7 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
         textField.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, "true");
 //        if(fieldClass!=LocalDateTime.class)
 //            textField.setAttribute(ATT_IS_BLANK_WHEN_NULL, "true");
-        
+
         final Element textFieldReportElement = document.createElement(TAG_REPORT_ELEMENT);
         textFieldReportElement.setAttribute(ATT_X, String.valueOf(INDENT_LABEL+LABEL_WIDTH));
         textFieldReportElement.setAttribute(ATT_Y, String.valueOf(0));

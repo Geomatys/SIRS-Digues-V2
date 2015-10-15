@@ -1,6 +1,5 @@
 package fr.sirs.util;
 
-import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import static fr.sirs.util.AbstractJDomWriter.NULL_REPLACEMENT;
 import static fr.sirs.util.JRUtils.ATT_BACKCOLOR;
 import static fr.sirs.util.JRUtils.ATT_CLASS;
@@ -28,13 +27,11 @@ import static fr.sirs.util.JRUtils.TAG_COLUMN_HEADER;
 import static fr.sirs.util.JRUtils.TAG_COMPONENT_ELEMENT;
 import static fr.sirs.util.JRUtils.TAG_DATASET_RUN;
 import static fr.sirs.util.JRUtils.TAG_DATA_SOURCE_EXPRESSION;
-import static fr.sirs.util.JRUtils.TAG_DETAIL;
 import static fr.sirs.util.JRUtils.TAG_DETAIL_CELL;
 import static fr.sirs.util.JRUtils.TAG_FIELD;
 import static fr.sirs.util.JRUtils.TAG_FIELD_DESCRIPTION;
 import static fr.sirs.util.JRUtils.TAG_FONT;
 import static fr.sirs.util.JRUtils.TAG_FRAME;
-import static fr.sirs.util.JRUtils.TAG_PAGE_HEADER;
 import static fr.sirs.util.JRUtils.TAG_REPORT_ELEMENT;
 import static fr.sirs.util.JRUtils.TAG_STATIC_TEXT;
 import static fr.sirs.util.JRUtils.TAG_TABLE;
@@ -44,7 +41,6 @@ import static fr.sirs.util.JRUtils.TAG_TEXT;
 import static fr.sirs.util.JRUtils.TAG_TEXT_ELEMENT;
 import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD;
 import static fr.sirs.util.JRUtils.TAG_TEXT_FIELD_EXPRESSION;
-import static fr.sirs.util.JRUtils.TAG_TITLE;
 import static fr.sirs.util.JRUtils.URI_JRXML;
 import static fr.sirs.util.JRUtils.URI_JRXML_COMPONENTS;
 import static fr.sirs.util.JRUtils.getCanonicalName;
@@ -55,7 +51,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -84,12 +79,6 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
     protected int currentY = 0;
 
-    // Template elements.
-    protected final Element title;
-    protected final Element pageHeader;
-    protected final Element columnHeader;
-    protected final Element detail;
-
     // Static template parameters.
     protected static final int PAGE_WIDTH = 595;
     protected static final int LEFT_MARGIN = 20;
@@ -97,24 +86,21 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
     
     private static final String SECTION_TITLE_BACKGROUND_COLOR = "#F1CF40";
 
+    protected final Class<T> classToMap;
     private final List<String> avoidFields;
 
-    public AbstractJDomWriterSingleSpecificSheet() {
+    public AbstractJDomWriterSingleSpecificSheet(final Class<T> classToMap) {
         super();
-        this.title = null;
-        this.pageHeader = null;
-        this.columnHeader = null;
-        this.detail = null;
         avoidFields = null;
+        this.classToMap = classToMap;
     }
 
-    public AbstractJDomWriterSingleSpecificSheet(final InputStream stream, final List<String> avoidFields) throws ParserConfigurationException, SAXException, IOException{
+    public AbstractJDomWriterSingleSpecificSheet(final Class<T> classToMap, 
+            final InputStream stream, final List<String> avoidFields)
+            throws ParserConfigurationException, SAXException, IOException{
         super(stream);
-        title = (Element) root.getElementsByTagName(TAG_TITLE).item(0);
-        pageHeader = (Element) root.getElementsByTagName(TAG_PAGE_HEADER).item(0);
-        columnHeader = (Element) root.getElementsByTagName(TAG_COLUMN_HEADER).item(0);
-        detail = (Element) root.getElementsByTagName(TAG_DETAIL).item(0);
         this.avoidFields = avoidFields;
+        this.classToMap = classToMap;
     }
 
     /**
@@ -145,8 +131,11 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         trs.transform(source, result);
     }
 
-    protected void writeFields(final Class<T> clazz){
-        final Method[] methods = clazz.getMethods();
+    /**
+     * 
+     */
+    protected void writeFields(){
+        final Method[] methods = classToMap.getMethods();
         for (final Method method : methods){
             if(PrinterUtilities.isSetter(method)){
                 final String fieldName = getFieldNameFromSetter(method);
@@ -219,38 +208,9 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
     /**
      * <p>This method writes the title of the template.</p>
-     * @param classToMap
      */
-    protected void writeTitle(final Class<T> classToMap) {
-
-        // Looks for the title content.-----------------------------------------
-        final Element band = (Element) title.getElementsByTagName(TAG_BAND).item(0);
-        final Element staticText = (Element) band.getElementsByTagName(TAG_STATIC_TEXT).item(0);
-        final Element text = (Element) staticText.getElementsByTagName(TAG_TEXT).item(0);
-
-        // Sets the title.------------------------------------------------------
-        final String className;
-        final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName(), Locale.getDefault(),
-                Thread.currentThread().getContextClassLoader());
-        if(resourceBundle!=null){
-            className = (resourceBundle.containsKey(BUNDLE_KEY_CLASS)) ?
-                    resourceBundle.getString(BUNDLE_KEY_CLASS) : classToMap.getSimpleName();
-        }
-        else{
-            className = classToMap.getSimpleName();
-        }
-        ((CDATASection) text.getChildNodes().item(0)).setData("Fiche détaillée de " + className);
-
-        // Builds the DOM tree.-------------------------------------------------
-        root.appendChild(title);
-    }
-
-    protected void writePageHeader(){
-        root.appendChild(pageHeader);
-    }
-
-    protected void writeColumnHeader(){
-        root.appendChild(columnHeader);
+    protected void writeTitle() {
+        writeTitle("Fiche détaillée de ", classToMap);
     }
 
     protected void writeSectionTitle(final String sectionTitle, final int height, final int margin, final int indent, final int textSize){

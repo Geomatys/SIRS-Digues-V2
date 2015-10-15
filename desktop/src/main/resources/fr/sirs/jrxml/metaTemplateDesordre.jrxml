@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="jasper_report_template" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="10e7ad18-cce4-4b7d-832d-94e5135fe8c0">
 	<property name="ireport.zoom" value="1.6105100000000014"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="38"/>
 	<property name="ireport.y" value="0"/>
 	<style name="table">
 		<box>
@@ -51,6 +51,13 @@
 				<reportElement x="0" y="0" width="135" height="59" uuid="bd3c6ab1-f29e-4734-bab3-a0956e74e525"/>
 				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
 			</image>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="153" y="39" width="371" height="12" uuid="72c5d883-8679-49c5-80f1-61b3453b6f82"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Serif" size="8" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["(Générée le "+java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEE dd MMM yyyy", java.util.Locale.FRANCE))+")"]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<pageHeader>
@@ -159,7 +166,7 @@
 				</staticText>
 				<textField isStretchWithOverflow="true">
 					<reportElement positionType="Float" x="150" y="0" width="405" height="12" uuid="6d4e5282-40d5-422c-9283-86b8e423382e"/>
-					<textElement markup="html" textAlignment="Justified" verticalAlignment="Middle">
+					<textElement textAlignment="Justified" verticalAlignment="Middle" markup="html">
 						<font fontName="Serif" size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{commentaire}==null ? "Non renseigné" : $F{commentaire}]]></textFieldExpression>
@@ -308,13 +315,13 @@
 				<box>
 					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
 				</box>
-                                <staticText>
-                                        <reportElement positionType="Float" x="150" y="0" width="100" height="12" uuid="4d154de6-156c-4ad5-bacb-e4203e816aab"/>
-                                        <textElement textAlignment="Left" verticalAlignment="Middle">
-                                                <font fontName="Serif" size="8" isBold="true"/>
-                                        </textElement>
-                                        <text><![CDATA[X fin]]></text>
-                                </staticText>
+				<staticText>
+					<reportElement positionType="Float" x="150" y="0" width="100" height="12" uuid="4d154de6-156c-4ad5-bacb-e4203e816aab"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[X fin]]></text>
+				</staticText>
 				<textField isStretchWithOverflow="true">
 					<reportElement positionType="Float" x="250" y="0" width="100" height="12" uuid="3c66c3a1-0077-4434-b690-0ed0104abd7f"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
@@ -348,13 +355,13 @@
 				<box>
 					<bottomPen lineWidth="0.25" lineColor="#CCCCCC"/>
 				</box>
-                                <staticText>
-                                        <reportElement positionType="Float" x="10" y="0" width="100" height="12" uuid="0696493d-99fc-413a-a5f6-2e67e21ff935"/>
-                                        <textElement textAlignment="Left" verticalAlignment="Middle">
-                                                <font fontName="Serif" size="8" isBold="true"/>
-                                        </textElement>
-                                        <text><![CDATA[Borne début]]></text>
-                                </staticText>
+				<staticText>
+					<reportElement positionType="Float" x="10" y="0" width="100" height="12" uuid="0696493d-99fc-413a-a5f6-2e67e21ff935"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Borne début]]></text>
+				</staticText>
 				<textField isStretchWithOverflow="true">
 					<reportElement positionType="Float" x="110" y="0" width="100" height="12" uuid="85f7f084-05ec-4e25-ae2e-c76f46689324"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">

@@ -37,12 +37,17 @@ import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
 import java.awt.Desktop;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import net.sf.jasperreports.engine.JRException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.feature.Feature;
+import org.xml.sax.SAXException;
 
 /**
  *
@@ -81,7 +86,7 @@ public class PrintManager {
         try {
             final File fileToPrint = PrinterUtilities.print(null, featuresToPrint);
             if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
-        } catch (Exception ex) {
+        } catch (IOException | ParserConfigurationException | SAXException | JRException | TransformerException ex) {
            SIRS.LOGGER.log(Level.WARNING, null, ex);
         }
     }
@@ -112,7 +117,7 @@ public class PrintManager {
         try {
             final File fileToPrint = PrinterUtilities.print(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), elementsToPrint);
             if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
-        } catch (Exception e) {
+        } catch (IOException | ParserConfigurationException | SAXException | JRException | TransformerException e) {
             SIRS.LOGGER.log(Level.WARNING, null, e);
         }
     }

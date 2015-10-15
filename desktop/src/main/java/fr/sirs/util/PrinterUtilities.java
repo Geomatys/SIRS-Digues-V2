@@ -107,6 +107,7 @@ public class PrinterUtilities {
             templateFile.deleteOnExit();
 
             final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(
+                    ReseauHydrauliqueFerme.class,
                     PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_RESEAU_FERME),
                     avoidDesordreFields, avoidObservationFields,
                     reseauFields, printPhoto, printReseauOuvrage);
@@ -199,6 +200,7 @@ public class PrinterUtilities {
             templateFile.deleteOnExit();
 
             final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(
+                    Desordre.class,
                     PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE), 
                     avoidDesordreFields, avoidObservationFields, avoidPrestationFields, 
                     reseauFields, printPhoto, printReseauOuvrage, printVoirie);
