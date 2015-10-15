@@ -15,7 +15,8 @@ public class PluginCarto extends Plugin {
     public PluginCarto() {
         name = NAME;
         loadingMessage.set("Chargement du module de cartographie");
-        themes.add(new GestionServerTheme());
+        themes.add(new AddLayerTheme());
+        themes.add(new BookMarkTheme());
     }
 
     @Override
