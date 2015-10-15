@@ -20,6 +20,8 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import org.apache.sis.util.ArgumentChecks;
 import org.springframework.stereotype.Component;
 
@@ -30,11 +32,13 @@ import org.springframework.stereotype.Component;
  * @author Alexis Manin (Geomatys)
  */
 @Component
-public abstract class AbstractElementReseauLinker implements Linker<ObjetReseau, ObjetReseau> {
+public abstract class AbstractElementReseauLinker implements Linker<ObjetReseau, ObjetReseau>, WorkMeasurable {
 
     private final String tableName;
     private final String firstColumn;
     private final String secondColumn;
+
+    private final SimpleIntegerProperty count = new SimpleIntegerProperty(0);
 
     protected AbstractElementReseauLinker(final String tableName, final String firstColumn, final String secondColumn) {
         ArgumentChecks.ensureNonNull("Table name", tableName);
@@ -118,7 +122,17 @@ public abstract class AbstractElementReseauLinker implements Linker<ObjetReseau,
             context.executeBulk(toUpdate.values());
             toUpdate.clear();
         }
-        context.linkCount.incrementAndGet();
+        count.set(1);
+    }
+
+    @Override
+    public int getTotalWork() {
+        return 1;
+    }
+
+    @Override
+    public IntegerProperty getWorkDone() {
+        return count;
     }
 
     /**

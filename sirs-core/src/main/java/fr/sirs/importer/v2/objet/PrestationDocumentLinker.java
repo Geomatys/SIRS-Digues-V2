@@ -12,11 +12,13 @@ import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.RapportEtude;
 import fr.sirs.importer.AccessDbImporterException;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Iterator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static fr.sirs.importer.DbImporter.TableName.PRESTATION_DOCUMENT;
+import java.util.HashMap;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,17 +28,7 @@ import org.springframework.stereotype.Component;
  * @author Alexis Manin (Geomatys)
  */
 @Component
-public class PrestationDocumentLinker implements Linker<AbstractPositionDocument, Prestation> {
-
-    @Override
-    public Class<Prestation> getHolderClass() {
-        return Prestation.class;
-    }
-
-    @Override
-    public Class<AbstractPositionDocument> getTargetClass() {
-        return AbstractPositionDocument.class;
-    }
+public class PrestationDocumentLinker implements Linker<AbstractPositionDocument, Prestation>, WorkMeasurable {
 
     private enum Columns {
 
@@ -49,6 +41,18 @@ public class PrestationDocumentLinker implements Linker<AbstractPositionDocument
 
     @Autowired
     protected SessionCore session;
+
+    private final SimpleIntegerProperty count = new SimpleIntegerProperty(0);
+
+    @Override
+    public Class<Prestation> getHolderClass() {
+        return Prestation.class;
+    }
+
+    @Override
+    public Class<AbstractPositionDocument> getTargetClass() {
+        return AbstractPositionDocument.class;
+    }
 
     public void link() throws AccessDbImporterException, IOException {
         Iterator<Row> iterator = context.inputDb.getTable(PRESTATION_DOCUMENT.name()).iterator();
@@ -68,7 +72,7 @@ public class PrestationDocumentLinker implements Linker<AbstractPositionDocument
             throw new AccessDbImporterException("No repository available to get/update objects of type " + Prestation.class.getCanonicalName());
         }
 
-        final HashSet<Element> toUpdate = new HashSet<>();
+        final HashMap<String, Element> toUpdate = new HashMap<>();
 
         String prestationId, docId;
         Prestation prestation;
@@ -92,20 +96,30 @@ public class PrestationDocumentLinker implements Linker<AbstractPositionDocument
                 }
 
                 prestation = prestationRepo.get(prestationId);
-                posDoc = session.getElement(docId).orElse(null);
+                posDoc = toUpdate.getOrDefault(docId, session.getElement(docId).orElse(null));
 
                 if (posDoc instanceof AbstractPositionDocumentAssociable) {
                     linkDocument(prestation, (AbstractPositionDocumentAssociable) posDoc, toUpdate);
                 }
             }
 
-            context.executeBulk(toUpdate);
+            context.executeBulk(toUpdate.values());
             toUpdate.clear();
-            context.linkCount.incrementAndGet();
         }
+        count.set(1);
     }
 
-    private void linkDocument(final Prestation p, final AbstractPositionDocumentAssociable doc, final HashSet<Element> updates) {
+    @Override
+    public int getTotalWork() {
+        return 1;
+    }
+
+    @Override
+    public IntegerProperty getWorkDone() {
+        return count;
+    }
+
+    private void linkDocument(final Prestation p, final AbstractPositionDocumentAssociable doc, final HashMap<String, Element> updates) {
         final String realDocId = doc.getSirsdocument();
         if (realDocId == null) {
             return;
@@ -114,13 +128,13 @@ public class PrestationDocumentLinker implements Linker<AbstractPositionDocument
         final Element realDoc = session.getElement(realDocId).orElse(null);
         if (realDoc instanceof DocumentGrandeEchelle) {
             p.getDocumentGrandeEchelleIds().add(realDocId);
-            updates.add(p);
+            updates.put(p.getId(), p);
         } else if (realDoc instanceof RapportEtude) {
             final RapportEtude rapport = (RapportEtude) realDoc;
             rapport.getPrestationIds().add(p.getId());
             p.getRapportEtudeIds().add(rapport.getId());
-            updates.add(p);
-            updates.add(rapport);
+            updates.put(p.getId(), p);
+            updates.put(rapport.getId(), rapport);
         }
     }
 }

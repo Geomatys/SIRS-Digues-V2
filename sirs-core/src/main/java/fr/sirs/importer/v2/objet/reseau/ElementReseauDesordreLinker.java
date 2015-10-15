@@ -23,6 +23,8 @@ import java.util.Iterator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static fr.sirs.importer.DbImporter.TableName.DESORDRE_ELEMENT_RESEAU;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,7 +34,7 @@ import org.springframework.stereotype.Component;
  * @author Alexis Manin (Geomatys)
  */
 @Component
-public class ElementReseauDesordreLinker implements Linker<ObjetReseau, Desordre> {
+public class ElementReseauDesordreLinker implements Linker<ObjetReseau, Desordre>, WorkMeasurable {
 
     @Override
     public Class<ObjetReseau> getTargetClass() {
@@ -57,6 +59,8 @@ public class ElementReseauDesordreLinker implements Linker<ObjetReseau, Desordre
 
     @Autowired
     ReseauRegistry registry;
+    
+    private final SimpleIntegerProperty count = new SimpleIntegerProperty(0);
 
     public void link() throws AccessDbImporterException, IOException {
         Iterator<Row> iterator = context.inputDb.getTable(DESORDRE_ELEMENT_RESEAU.name()).iterator();
@@ -112,8 +116,18 @@ public class ElementReseauDesordreLinker implements Linker<ObjetReseau, Desordre
 
             context.executeBulk(toUpdate);
             toUpdate.clear();
-            context.linkCount.incrementAndGet();
         }
+        count.set(1);
+    }
+
+    @Override
+    public int getTotalWork() {
+        return 1;
+    }
+
+    @Override
+    public IntegerProperty getWorkDone() {
+        return count;
     }
 
     private boolean link(final ObjetReseau elementReseau, final Desordre desordre) {

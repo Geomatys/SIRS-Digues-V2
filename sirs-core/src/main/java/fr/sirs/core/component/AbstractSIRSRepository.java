@@ -2,6 +2,7 @@ package fr.sirs.core.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import fr.sirs.core.CacheRules;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.AvecDateMaj;
@@ -67,7 +68,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public abstract class AbstractSIRSRepository<T extends Identifiable> extends CouchDbRepositorySupport<T> {
 
-    protected final Cache<String, T> cache = new Cache(20, 0, SirsCore.cacheDocuments.get());
+    protected final Cache<String, T> cache;
 
     @Autowired
     protected GlobalRepository globalRepo;
@@ -76,6 +77,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
     protected AbstractSIRSRepository(Class<T> type, CouchDbConnector db) {
         super(type, db);
+        cache = new Cache(20, 0, CacheRules.cacheElementsOfType(getModelClass()));
     }
 
     @PostConstruct

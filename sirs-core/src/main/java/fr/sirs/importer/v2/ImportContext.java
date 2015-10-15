@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,6 +31,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import javafx.beans.binding.NumberBinding;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javax.annotation.PostConstruct;
@@ -121,14 +125,12 @@ public class ImportContext implements ApplicationContextAware {
     private static ApplicationContext appCtx;
 
     /**
-     * Number of importers which already computed data.
-     */
-    public final AtomicLong importCount = new AtomicLong(0);
-
-    /**
      * Number of linkers which have already done their job.
      */
     public final AtomicLong linkCount = new AtomicLong(0);
+
+    private final SimpleIntegerProperty workProperty = new SimpleIntegerProperty(-1);
+    private int totalWork;
 
     /**
      * List errors which occured while importing database. Errors can be
@@ -175,6 +177,7 @@ public class ImportContext implements ApplicationContextAware {
         final Collection<AbstractImporter> importerList = appCtx.getBeansOfType(AbstractImporter.class).values();
         final Collection<MapperSpi> mapperList = appCtx.getBeansOfType(MapperSpi.class).values();
         final Collection<ElementModifier> modifierList = appCtx.getBeansOfType(ElementModifier.class).values();
+        final Collection<WorkMeasurable> workMeasurableList = appCtx.getBeansOfType(WorkMeasurable.class).values();
         linkers.addAll(appCtx.getBeansOfType(Linker.class).values());
 
         /*
@@ -210,6 +213,21 @@ public class ImportContext implements ApplicationContextAware {
             }
             modifierSet.add(modifier);
         }
+
+        final Iterator<WorkMeasurable> workIt = workMeasurableList.iterator();
+        if (workIt.hasNext()) {
+            WorkMeasurable next = workIt.next();
+            totalWork = next.getTotalWork();
+            NumberBinding bind = next.getWorkDone().add(0);
+            while (workIt.hasNext()) {
+                next = workIt.next();
+                bind = bind.add(next.getWorkDone());
+                totalWork += next.getTotalWork();
+            }
+            workProperty.bind(bind);
+        } else {
+            totalWork = -1;
+        }
     }
 
     private void registerImporter(final Class key, final AbstractImporter importer) {
@@ -223,6 +241,14 @@ public class ImportContext implements ApplicationContextAware {
                     .append(importer.getClass().getCanonicalName());
             throw new IllegalStateException(builder.toString());
         }
+    }
+
+    public ReadOnlyIntegerProperty getWorkDone() {
+        return workProperty;
+    }
+
+    public int getTotalWork() {
+        return totalWork;
     }
 
     public <T> T convertData(final Object input, final Class<T> outputClass) {

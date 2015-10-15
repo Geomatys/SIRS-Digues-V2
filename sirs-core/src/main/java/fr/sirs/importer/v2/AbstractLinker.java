@@ -60,8 +60,14 @@ public abstract class AbstractLinker<T extends Element, U extends Element> exten
 
             context.executeBulk((Collection<Element>) holders);
         }
-        context.linkCount.incrementAndGet();
+        count.set(2);
     }
+
+    @Override
+    public int getTotalWork() {
+        return 2;
+    }
+
 
     /**
      * Create link to input id into given object.

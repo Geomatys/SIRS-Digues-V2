@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.function.BiConsumer;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import org.apache.sis.util.ArgumentChecks;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -30,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @param <T> Target element type --> type pointed by the link.
  * @param <U> Holder element type. Type containing the link.
  */
-public abstract class JoinTableLinker<T extends Element, U extends Element> implements Linker<T, U> {
+public abstract class JoinTableLinker<T extends Element, U extends Element> implements Linker<T, U>, WorkMeasurable {
 
     @Autowired
     protected ImportContext context;
@@ -47,6 +49,8 @@ public abstract class JoinTableLinker<T extends Element, U extends Element> impl
     private final BiConsumer<String, U> linkAffector;
 
     private final BiConsumer<String, T> bidirectionalAffector;
+
+    private final SimpleIntegerProperty count = new SimpleIntegerProperty(0);
 
     protected JoinTableLinker(final String tableName, final Class<T> targetType, final Class<U> holderType, final String targetColumn, final String holderColumn) {
         this(tableName, targetType, holderType, targetColumn, holderColumn, false);
@@ -78,6 +82,16 @@ public abstract class JoinTableLinker<T extends Element, U extends Element> impl
 
     public final String getTableName() {
         return tableName;
+    }
+
+    @Override
+    public int getTotalWork() {
+        return 1;
+    }
+
+    @Override
+    public IntegerProperty getWorkDone() {
+        return count;
     }
 
     /**
@@ -189,8 +203,8 @@ public abstract class JoinTableLinker<T extends Element, U extends Element> impl
 
             context.executeBulk(toUpdate);
             toUpdate.clear();
-            context.linkCount.incrementAndGet();
         }
+        count.set(1);
     }
 
     private <A> BiConsumer<String, A> getLinkAffector(final Class targetType, final Class<A> holderType) throws IntrospectionException {

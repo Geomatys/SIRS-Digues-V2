@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -32,7 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Alexis Manin (Geomatys)
  * @param <T> Type of computed output.
  */
-public abstract class AbstractImporter<T extends Element> {
+public abstract class AbstractImporter<T extends Element> implements WorkMeasurable {
 
     @Autowired
     protected SessionCore session;
@@ -48,6 +50,8 @@ public abstract class AbstractImporter<T extends Element> {
 
     protected final HashSet<Mapper<T>> mappers = new HashSet<>();
     protected final HashSet<ElementModifier<T>> modifiers = new HashSet<>();
+
+    protected final SimpleIntegerProperty count = new SimpleIntegerProperty(0);
 
     protected Table table;
 
@@ -196,9 +200,20 @@ public abstract class AbstractImporter<T extends Element> {
         } finally {
             postCompute();
             table = null;
-            context.importCount.incrementAndGet();
+            count.set(1);
         }
     }
+
+    @Override
+    public int getTotalWork() {
+        return 1;
+    }
+
+    @Override
+    public IntegerProperty getWorkDone() {
+        return count;
+    }
+
 
     /**
      * Retrieve ID of the object in output database which corresponds to the

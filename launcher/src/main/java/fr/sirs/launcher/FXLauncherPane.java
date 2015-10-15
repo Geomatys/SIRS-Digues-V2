@@ -558,7 +558,6 @@ public class FXLauncherPane extends BorderPane {
 
         uiImportButton.setDisable(true);
         TaskManager.INSTANCE.submit(() -> {
-            SirsCore.cacheDocuments.set(true);
             final ClassLoader scl = ClassLoader.getSystemClassLoader();
             if (scl instanceof PluginLoader) {
                 try {
@@ -1048,13 +1047,3 @@ public class FXLauncherPane extends BorderPane {
      * See {@link https://wiki.apache.org/couchdb/HTTP_database_API#Naming_and_Addressing}
      */
     private static class DatabaseNameFormatter implements ChangeListener<String> {
-        @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                if (newValue == null) return;
-                final String nfdText = Normalizer.normalize(newValue, Normalizer.Form.NFD);
-                ((WritableValue) observable).setValue(nfdText
-                        .replaceFirst("^[^A-Za-z]+", "")
-                        .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
-                        .replaceAll("\\s+", "_")
-                        .replaceAll("[^\\w\\d_\\-\\$+\\(\\)]", "")
-                        .toLowerCase()

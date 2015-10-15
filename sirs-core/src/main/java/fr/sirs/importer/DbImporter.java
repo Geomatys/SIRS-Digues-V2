@@ -14,6 +14,7 @@ import fr.sirs.util.ImportParameters;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import org.apache.sis.metadata.iso.citation.Citations;
 import org.apache.sis.referencing.IdentifiedObjects;
@@ -418,6 +419,11 @@ public class DbImporter {
                     try (final ClassPathXmlApplicationContext importCtx = new ClassPathXmlApplicationContext(new String[]{"classpath:/fr/sirs/spring/importer-context.xml"}, databaseContext)) {
                         final ImportContext context = importCtx.getBean(ImportContext.class);
 
+                        context.getWorkDone().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+                            if (newValue.intValue() > oldValue.intValue())
+                            updateProgress(newValue.intValue(), context.getTotalWork());
+                        });
+
                         /*
                          * We have to import entire linear referencing environment first
                          * if we want to be able to compute object geometries before they're
@@ -431,12 +437,10 @@ public class DbImporter {
                         final long totalWork = importers.size() + context.linkers.size();
                         for (final AbstractImporter importer : importers) {
                             importer.compute();
-                            updateProgress(context.importCount.get(), totalWork);
                         }
 
                         for (final Linker l : context.linkers) {
                             l.link();
-                            updateProgress(context.importCount.get()+context.linkCount.get(), totalWork);
                         }
 
                         context.outputDb.compact();

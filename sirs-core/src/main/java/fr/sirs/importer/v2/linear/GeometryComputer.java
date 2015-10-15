@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class GeometryComputer implements ElementModifier<Positionable> {
 
-    private Cache<String, Map.Entry<LineString, SegmentInfo[]>> linearGeometries = new Cache<>(12, 12, true);
+    private final Cache<String, Map.Entry<LineString, SegmentInfo[]>> linearGeometries = new Cache<>(12, 12, true);
 
     @Override
     public Class<Positionable> getDocumentClass() {
