@@ -5,6 +5,7 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.BookMark;
+import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXBookMarkPane;
 import java.util.List;
 import javafx.beans.value.ObservableValue;
@@ -75,8 +76,8 @@ public class FXBookMarks extends GridPane {
     private void selectionChanged(ObservableValue<? extends BookMark> observable, BookMark oldValue, BookMark newValue){
         uiConfig.setCenter(null);
         if(newValue!=null){
-            final FXBookMarkPane pane = new FXBookMarkPane(newValue);
-            uiConfig.setCenter(pane);
+            final AbstractFXElementPane editPane = SIRS.generateEditionPane(newValue);
+            uiConfig.setCenter(editPane);
         }
     }
 

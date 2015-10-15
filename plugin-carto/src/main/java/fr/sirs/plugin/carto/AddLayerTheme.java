@@ -27,7 +27,7 @@ import org.geotoolkit.map.MapLayer;
  * @author Johann Sorel (Geomatys)
  */
 public final class AddLayerTheme extends AbstractPluginsButtonTheme {
-    public static final Image ICON_ADD = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,28,new Color(74, 123, 165)),null);
+    public static final Image ICON_ADD = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,58,new Color(15, 112, 183)),null);
 
     public AddLayerTheme() {
         super("Ajout de donnée", "Ajout de donnée", ICON_ADD);
