@@ -67,7 +67,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public abstract class AbstractSIRSRepository<T extends Identifiable> extends CouchDbRepositorySupport<T> {
 
-    protected final Cache<String, T> cache = new Cache(20, 0, false);
+    protected final Cache<String, T> cache = new Cache(20, 0, SirsCore.cacheDocuments.get());
 
     @Autowired
     protected GlobalRepository globalRepo;

@@ -12,6 +12,8 @@ import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.v2.AbstractImporter;
+import fr.sirs.importer.v2.CorruptionLevel;
+import fr.sirs.importer.v2.ErrorReport;
 import fr.sirs.importer.v2.ImportContext;
 import fr.sirs.importer.v2.document.DocTypeRegistry;
 import fr.sirs.importer.v2.mapper.AbstractMapper;
@@ -32,7 +34,6 @@ public class AbstractPositionDocumentAssociableMapper extends AbstractMapper<Abs
     private DocTypeRegistry registry;
 
     private enum Columns {
-        ID_DOC,
         ID_PROFIL_EN_TRAVERS,
         ID_TYPE_DOCUMENT
     }
@@ -50,25 +51,27 @@ public class AbstractPositionDocumentAssociableMapper extends AbstractMapper<Abs
                 output.setDocumentId(importedId);
             }
         } else if (output instanceof AbstractPositionDocumentAssociable) {
-            final Object docId = input.get(Columns.ID_DOC.name());
-            if (docId != null) {
-                final Integer typeDoc = input.getInt(Columns.ID_TYPE_DOCUMENT.name());
-                if (typeDoc == null) {
-                    throw new AccessDbImporterException("No valid document type associated.");
-                }
-                Class docType = registry.getDocType(typeDoc);
-                if (docType == null) {
-                    throw new AccessDbImporterException("No mapping found for document type " + typeDoc);
-                }
-
+            final Object typeDoc = input.get(Columns.ID_TYPE_DOCUMENT.name());
+            if (typeDoc == null) {
+                context.reportError(new ErrorReport(null, input, tableName, Columns.ID_TYPE_DOCUMENT.name(), output, "documentId", "No valid document type associated.", CorruptionLevel.RELATION));
+            }
+            Class docType = registry.getDocType(typeDoc);
+            if (docType != null) {
                 final AbstractImporter importer = context.importers.get(docType);
-                if (importer == null) {
-                    throw new AccessDbImporterException("No importer found for document type " + docType);
-                }
+                if (importer != null) {
 
-                final String importedId = importer.getImportedId(docId);
-                if (importedId != null) {
-                    output.setDocumentId(importedId);
+                    try {
+                        final Object docId = input.get(importer.getRowIdFieldName());
+                        if (docId != null) {
+                            final String importedId = importer.getImportedId(docId);
+                            if (importedId != null) {
+                                output.setDocumentId(importedId);
+                            }
+                        }
+
+                    } catch (Exception e) {
+                        context.reportError(table.getName(), input, e);
+                    }
                 }
             }
         }
@@ -79,7 +82,7 @@ public class AbstractPositionDocumentAssociableMapper extends AbstractMapper<Abs
 
         @Override
         public Optional<Mapper<AbstractPositionDocumentAssociable>> configureInput(Table inputType) throws IllegalStateException {
-            if (ImportContext.columnExists(inputType, Columns.ID_DOC.name()) && ImportContext.columnExists(inputType, Columns.ID_TYPE_DOCUMENT.name())) {
+            if (ImportContext.columnExists(inputType, Columns.ID_TYPE_DOCUMENT.name())) {
                 return Optional.of(new AbstractPositionDocumentAssociableMapper(inputType));
             }
             return Optional.empty();
