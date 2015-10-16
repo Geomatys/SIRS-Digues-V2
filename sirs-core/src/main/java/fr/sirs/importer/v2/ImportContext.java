@@ -12,7 +12,16 @@ import fr.sirs.importer.v2.mapper.Mapper;
 import fr.sirs.importer.v2.mapper.MapperSpi;
 import fr.sirs.util.ImportParameters;
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -27,7 +36,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -37,6 +45,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.ObjectConverters;
@@ -109,25 +118,19 @@ public class ImportContext implements ApplicationContextAware {
 
     public final ConcurrentHashMap<Class, AbstractImporter> importers = new ConcurrentHashMap<>();
     public final ConcurrentHashMap<Class, HashSet<ElementModifier>> modifiers = new ConcurrentHashMap<>();
-    //public final ConcurrentHashMap<Class, HashSet<Updater>> updaters = new ConcurrentHashMap<>();
 
     public final ConcurrentHashMap<Class, HashSet<MapperSpi>> mappers = new ConcurrentHashMap<>();
 
     public final ArrayList<Linker> linkers = new ArrayList<>();
 
     /**
-     * recommended limit size for bulk updates.
-     * /!\ This flag is NOT used by {@link #executeBulk(java.util.Collection) }.
-     * It's only an informative attribute which should be used by importers when computing.
+     * recommended limit size for bulk updates. /!\ This flag is NOT used by {@link #executeBulk(java.util.Collection)
+     * }. It's only an informative attribute which should be used by importers
+     * when computing.
      */
     public int bulkLimit = 500;
 
     private static ApplicationContext appCtx;
-
-    /**
-     * Number of linkers which have already done their job.
-     */
-    public final AtomicLong linkCount = new AtomicLong(0);
 
     private final SimpleIntegerProperty workProperty = new SimpleIntegerProperty(-1);
     private int totalWork;
@@ -135,8 +138,13 @@ public class ImportContext implements ApplicationContextAware {
     /**
      * List errors which occured while importing database. Errors can be
      * registered using {@link #reportError(fr.sirs.importer.v2.ErrorReport)}.
+     * This list is only a buffer, and will be emptied regularly to avoid memory overload.
      */
-    public final ObservableList<ErrorReport> errors = FXCollections.observableArrayList();
+    public final ObservableList<ErrorReport> errorBuffer = FXCollections.observableArrayList();
+    private final int errorBufferLimit = 20;
+
+    private final Path errorOutput;
+    private boolean flushErrors = true;
 
     @Autowired
     public ImportContext(final ImportParameters parameters)
@@ -166,6 +174,9 @@ public class ImportContext implements ApplicationContextAware {
         }
 
         geoTransform = CRS.findMathTransform(inputCRS, outputCRS, true);
+
+        final long time = System.currentTimeMillis();
+        errorOutput = SirsCore.IMPORT_ERROR_DIR.resolve(outputDb.getDatabaseName() + "_at_" + time);
     }
 
     @PostConstruct
@@ -186,7 +197,7 @@ public class ImportContext implements ApplicationContextAware {
         for (final AbstractImporter importer : importerList) {
             registerImporter(importer.getElementClass(), importer);
             if (importer instanceof MultipleSubTypes) {
-                Collection<Class> subTypes = ((MultipleSubTypes)importer).getSubTypes();
+                Collection<Class> subTypes = ((MultipleSubTypes) importer).getSubTypes();
                 for (final Class subtype : subTypes) {
                     registerImporter(subtype, importer);
                 }
@@ -240,6 +251,17 @@ public class ImportContext implements ApplicationContextAware {
                     .append('\n')
                     .append(importer.getClass().getCanonicalName());
             throw new IllegalStateException(builder.toString());
+        }
+    }
+
+    @PreDestroy
+    private void destroy() {
+        if (errorBuffer.isEmpty())
+            return;
+        try {
+            serialize(errorBuffer.toArray(new ErrorReport[errorBuffer.size()]));
+        } catch (IOException ex) {
+            SirsCore.LOGGER.log(Level.WARNING, "Cannot flush errors !", ex);
         }
     }
 
@@ -314,10 +336,24 @@ public class ImportContext implements ApplicationContextAware {
      *
      * @param report Error report to submit.
      */
-    public void reportError(final ErrorReport report) {
+    public synchronized void reportError(final ErrorReport report) {
         ArgumentChecks.ensureNonNull("Error report", report);
-        errors.add(report);
         logError(report);
+        if (errorBufferLimit < errorBuffer.size()) {
+            if (flushErrors) {
+                try {
+                    serialize(errorBuffer.toArray(new ErrorReport[errorBuffer.size()]));
+                } catch (IOException ex) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Errors cannot be written on disk. Serialization deactivated.", ex);
+                    flushErrors = false;
+                }
+            }
+
+            errorBuffer.clear();
+        }
+
+        errorBuffer.add(report);
+
     }
 
     private void logError(final ErrorReport report) {
@@ -382,7 +418,7 @@ public class ImportContext implements ApplicationContextAware {
      * @return The converted date and time, or null if no input was given.
      */
     public static LocalDateTime toLocalDateTime(final Date date) {
-        return date == null ? null : LocalDateTime.from(date.toInstant());
+        return date == null ? null : LocalDateTime.from(date.toInstant().atZone(ZoneId.of("UTC")));
     }
 
     /**
@@ -456,9 +492,12 @@ public class ImportContext implements ApplicationContextAware {
 
     /**
      * Retrieve object imported from given row, then return it.
-     * @param currentRow The row which has been used for import of searched object.
+     *
+     * @param currentRow The row which has been used for import of searched
+     * object.
      * @return Object created after input row import. Never null.
-     * @throws IllegalStateException if we cannot find any imported document for given row.
+     * @throws IllegalStateException if we cannot find any imported document for
+     * given row.
      */
     Object getBoundTarget(Row currentRow) throws IllegalStateException {
 
@@ -484,7 +523,7 @@ public class ImportContext implements ApplicationContextAware {
         final HashSet<ElementModifier<T>> result = new HashSet<>();
         for (final Map.Entry<Class, HashSet<ElementModifier>> entry : modifiers.entrySet()) {
             if (entry.getKey().isAssignableFrom(destination)) {
-                result.addAll((Collection)entry.getValue());
+                result.addAll((Collection) entry.getValue());
             }
         }
         return result;
@@ -492,8 +531,10 @@ public class ImportContext implements ApplicationContextAware {
 
     /**
      * Return all importers which work on objects inheriting given class.
+     *
      * @param sourceClass Pojo type to retrieve importers for.
-     * @return List of found importers, or an empty list if we cannot find any importer for given object type.
+     * @return List of found importers, or an empty list if we cannot find any
+     * importer for given object type.
      */
     public List<AbstractImporter> getImporters(final Class sourceClass) {
         final ArrayList<AbstractImporter> result = new ArrayList<>();
@@ -507,12 +548,14 @@ public class ImportContext implements ApplicationContextAware {
     }
 
     /**
-     * Return an operator able to read data from a specific column of a row to put it in a specific property of a specific class.
+     * Return an operator able to read data from a specific column of a row to
+     * put it in a specific property of a specific class.
      *
      * TODO : IMPLEMENT MECHANISM (including a registry).
      *
      * @param <T> Type of object to affect.
-     * @param outputClass Class of the object which will be modified by the returned consumer.
+     * @param outputClass Class of the object which will be modified by the
+     * returned consumer.
      * @param outputProperty The property to set in output object.
      * @param columnName Name of the column to read from input row.
      * @return Adequat operator, or an empty optional if we cannot find any.
@@ -568,8 +611,64 @@ public class ImportContext implements ApplicationContextAware {
         }
 
         private static Object valueOrUndefined(final Object input) {
-            return input == null? "Undefined" : input;
+            return input == null ? "Undefined" : input;
         }
 
+    }
+
+    /**
+     * Serialize input error reports in the file parameterized for current import.
+     * @param reports All reports to flush.
+     * @throws IOException If an error happens when creating or while writing into output file.
+     */
+    private synchronized void serialize(ErrorReport... reports) throws IOException {
+        if (!Files.isRegularFile(errorOutput)) {
+            Files.createDirectories(errorOutput.getParent());
+            Files.createFile(errorOutput);
+        }
+
+        try (
+                final OutputStream fileOutput = Files.newOutputStream(errorOutput, StandardOpenOption.APPEND);
+                final ObjectOutputStream out = new ObjectOutputStream(fileOutput)) {
+            for (final ErrorReport report : reports) {
+                try {
+                    out.writeObject(report);
+                } catch (NotSerializableException e) {
+                    report.setSerializable();
+                    out.writeObject(out);
+                }
+            }
+        }
+    }
+
+    /**
+     * Read all error reports found in given file.
+     * @param reportFile File to read.
+     * @return a list of all found error reports. Never null, but can be empty.
+     * @throws IOException If an error occurs while reading input file.
+     * @throws IllegalArgumentException If input file is not readable.
+     */
+    public static ArrayList<ErrorReport> deserialize(final Path reportFile) throws IOException {
+        if (!Files.isRegularFile(reportFile)) {
+            throw new IllegalArgumentException("Input file is invalid !");
+        }
+        try (
+                final InputStream fileInput = Files.newInputStream(reportFile);
+                final ObjectInputStream in = new ObjectInputStream(fileInput)) {
+            final ArrayList<ErrorReport> reports = new ArrayList<>();
+            while (in.available() > 0) {
+                try {
+                    Object readObject = in.readObject();
+                    if (readObject instanceof ErrorReport) {
+                        reports.add((ErrorReport) readObject);
+                    } else {
+                        SirsCore.LOGGER.warning("Unknown object in error report file !\n"+readObject);
+                    }
+                } catch (ClassNotFoundException ex) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Unknown object in error report file !", ex);
+                }
+            }
+            return reports;
+        }
     }
 }

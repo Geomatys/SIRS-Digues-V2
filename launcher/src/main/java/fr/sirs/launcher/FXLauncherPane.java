@@ -10,7 +10,7 @@ import fr.sirs.SIRS;
 import static fr.sirs.SIRS.binaryMD5;
 import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
-import fr.sirs.core.SirsCore;
+import fr.sirs.core.CacheRules;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.core.component.DatabaseRegistry;
@@ -558,6 +558,7 @@ public class FXLauncherPane extends BorderPane {
 
         uiImportButton.setDisable(true);
         TaskManager.INSTANCE.submit(() -> {
+            CacheRules.cacheAllDocs.set(true);
             final ClassLoader scl = ClassLoader.getSystemClassLoader();
             if (scl instanceof PluginLoader) {
                 try {
@@ -603,7 +604,7 @@ public class FXLauncherPane extends BorderPane {
                 LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 GeotkFX.newExceptionDialog("Une erreur est survenue pendant l'import de la base.", ex).showAndWait();
             } finally {
-                SirsCore.cacheDocuments.set(false);
+                CacheRules.cacheAllDocs.set(false);
                 Platform.runLater(() -> uiImportButton.setDisable(false));
             }
         });

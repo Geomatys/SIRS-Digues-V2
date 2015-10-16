@@ -1,6 +1,7 @@
 
 package fr.sirs;
 
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.DocumentListener;
 import fr.sirs.core.model.Element;
 import java.beans.IntrospectionException;
@@ -19,17 +20,19 @@ import org.opengis.filter.identity.FeatureId;
 /**
  * A data supplier for {@link BeanStore}. It listens on application {@link DocumentChangeEmiter} to be notified when data is updated.
  *
- * TODO : Optimization : the change emitter fire too many events, which will cause CPU overload at update.
- *
  * @author Johann Sorel (Geomatys)
  */
 public class StructBeanSupplier extends BeanFeatureSupplier implements DocumentListener {
-    
+
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
 
     public StructBeanSupplier(Class clazz, final Supplier<Iterable> callable) {
         super(clazz, "id", hasField(clazz,"geometry")?"geometry":null, CorePlugin.MAP_PROPERTY_PREDICATE, null, Injector.getSession().getProjection(), callable::get);
-        Injector.getDocumentChangeEmiter().addListener(this);
+        try {
+            Injector.getDocumentChangeEmiter().addListener(this);
+        } catch (Exception e) {
+            SirsCore.LOGGER.warning("Feature store supplier for class "+ clazz.getCanonicalName() +" cannot listen on database changes.");
+        }
     }
 
     private static boolean hasField(Class clazz, String field){

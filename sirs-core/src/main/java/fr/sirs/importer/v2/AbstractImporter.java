@@ -11,6 +11,7 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.v2.mapper.Mapper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,15 +49,17 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
      */
     private Map<Object, String> importedRows;
 
-    protected final HashSet<Mapper<T>> mappers = new HashSet<>();
-    protected final HashSet<ElementModifier<T>> modifiers = new HashSet<>();
+    private HashSet<Mapper<T>> mappers = new HashSet<>();
+    private HashSet<ElementModifier<T>> modifiers = new HashSet<>();
+
+    private HashMap<Class, Collection<Mapper>> additionalMappers;
+    private HashMap<Class, Collection<ElementModifier>> additionalModifiers;
 
     protected final SimpleIntegerProperty count = new SimpleIntegerProperty(0);
 
     protected Table table;
 
-    protected AbstractImporter() {
-    }
+    protected AbstractImporter() {}
 
     /**
      * @return type for the object to create and fill.
@@ -92,17 +95,13 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
      * @throws fr.sirs.importer.AccessDbImporterException If an unrecoverable
      * error occurs.
      */
-    protected void preCompute() throws AccessDbImporterException {
-    }
+    protected void preCompute() throws AccessDbImporterException {}
 
     /**
      * A method which can be overrided to provide a specific treatment after
      * table import.
      */
-    protected void postCompute() {
-        mappers.clear();
-        modifiers.clear();
-    }
+    protected void postCompute() {}
 
     /**
      * Compute the maps referencing the retrieved objects.
@@ -118,13 +117,10 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
         SirsCore.LOGGER.info("\nIMPORT OF " + getTableName() + " by " + getClass().getCanonicalName() + ". PRIMARY KEY : " + getRowIdFieldName());
 
         table = context.inputDb.getTable(getTableName());
-
-        mappers.clear();
-        mappers.addAll(context.getCompatibleMappers(table, getElementClass()));
-
-        modifiers.clear();
-        modifiers.addAll(context.getCompatibleModifiers(table, getElementClass()));
-
+        mappers = new HashSet(context.getCompatibleMappers(table, getElementClass()));
+        modifiers = new HashSet(context.getCompatibleModifiers(table, getElementClass()));
+        additionalMappers = new HashMap<>();
+        additionalModifiers = new HashMap<>();
         // In case we want to boost import with multi-threading.
         importedRows = new ConcurrentHashMap<>();
 
@@ -171,6 +167,21 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
                         mod.modify(output);
                     }
 
+                    // Needed for importers implementing MultipleSubTypes interface.
+                    final Class clazz = output.getClass();
+                    if (!getElementClass().equals(clazz)) {
+                        Collection<ElementModifier> tmpModifiers = additionalModifiers.get(clazz);
+                        if (tmpModifiers == null) {
+                            tmpModifiers = context.getCompatibleModifiers(table, (Class) clazz);
+                            tmpModifiers.removeAll(modifiers);
+                            additionalModifiers.put(clazz, tmpModifiers);
+                        }
+
+                        for (final ElementModifier mod : tmpModifiers) {
+                            mod.modify(output);
+                        }
+                    }
+
                     dataToPost.add(toPost);
 
                     if (rowId != null) {
@@ -198,8 +209,12 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
                 }
             }
         } finally {
-            postCompute();
             table = null;
+            mappers = null;
+            modifiers = null;
+            additionalMappers = null;
+            additionalModifiers = null;
+            postCompute();
             count.set(1);
         }
     }
@@ -264,6 +279,21 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
             throws IOException, AccessDbImporterException {
         for (final Mapper m : mappers) {
             m.map(row, output);
+        }
+
+        // Needed for importers implementing MultipleSubTypes interface.
+        final Class clazz = output.getClass();
+        if (!getElementClass().equals(clazz)) {
+            Collection<Mapper> tmpMappers = additionalMappers.get(clazz);
+            if (tmpMappers == null) {
+                tmpMappers = context.getCompatibleMappers(table, (Class) clazz);
+                tmpMappers.removeAll(mappers);
+                additionalMappers.put(clazz, tmpMappers);
+            }
+
+            for (final Mapper m : tmpMappers) {
+                m.map(row, output);
+            }
         }
 
         return output;

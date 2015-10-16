@@ -489,19 +489,42 @@ public class SessionCore implements ApplicationContextAware {
                 }
             } else {
                 String documentId = e.getDocumentId();
+                Identifiable parent;
                 if (documentId != null && !documentId.isEmpty()) {
-                    Preview label = previews.get(documentId);
+                    parent = getFromCaches(documentId);
+                } else {
+                    parent = null;
+                }
+
+                if (parent == null) {
+                    Preview label = previews.get(e.getId());
                     AbstractSIRSRepository targetRepo = getRepositoryForType(label.getDocClass());
                     if (targetRepo != null) {
-                        Identifiable parent = targetRepo.get(documentId);
-                        if (parent instanceof Element) {
-                            return Optional.ofNullable(((Element) parent).getChildById(e.getId()));
-                        }
+                        parent = targetRepo.get(documentId);
                     }
+                }
+
+                if (parent instanceof Element) {
+                    return Optional.ofNullable(((Element) parent).getChildById(e.getId()));
                 }
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * Search in repository caches for document with given Id.
+     * @param docId Id of the document to retrieve.
+     * @return Found cached doc, or null if we find nothing in caches.
+     */
+    private Element getFromCaches(final String docId) {
+        for (final AbstractSIRSRepository repo : repositories.values()) {
+            Identifiable fromCache = repo.getFromCache(docId);
+            if (fromCache instanceof Element) {
+                return (Element) fromCache;
+            }
+        }
+        return null;
     }
 
     /**
@@ -517,7 +540,12 @@ public class SessionCore implements ApplicationContextAware {
         }
 
         if (toGetElementFor instanceof String) {
-            toGetElementFor = previews.get((String)toGetElementFor);
+            final Element fromCaches = getFromCaches((String)toGetElementFor);
+            if (fromCaches != null) {
+                return Optional.of(fromCaches);
+            } else {
+                toGetElementFor = previews.get((String)toGetElementFor);
+            }
         }
 
         if (toGetElementFor instanceof Preview) {

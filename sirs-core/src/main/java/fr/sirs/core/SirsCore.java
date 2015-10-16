@@ -25,7 +25,6 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.concurrent.Task;
@@ -57,7 +56,6 @@ import org.opengis.util.FactoryException;
 
 public class SirsCore {
 
-    public static AtomicBoolean cacheDocuments = new AtomicBoolean(false);
     public static final String PASSWORD_ENCRYPT_ALGO="MD5";
 
     public static final String INFO_DOCUMENT_ID = "$sirs";
@@ -98,6 +96,8 @@ public class SirsCore {
     public static final Path ELASTIC_SEARCH_PATH = CONFIGURATION_PATH.resolve("elasticSearch");
 
     public static final Path LOCAL_QUERIES_PATH = CONFIGURATION_PATH.resolve("queries.properties");
+
+    public static final Path IMPORT_ERROR_DIR = CONFIGURATION_PATH.resolve("importErrors");
 
     /**
      * User directory root folder.

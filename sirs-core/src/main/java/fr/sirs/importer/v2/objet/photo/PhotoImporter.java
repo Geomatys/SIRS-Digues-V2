@@ -159,7 +159,7 @@ public class PhotoImporter extends AbstractUpdater<Photo, Element> {
                 }
 
                 // Query database
-                Element element = session.getElement(session.getPreviews().get(observationId)).orElse(null);
+                final Element element = session.getElement(observationId).orElse(null);
                 if (element instanceof AvecPhotos) {
                     return (AvecPhotos) element;
                 }

@@ -5,11 +5,13 @@ import fr.sirs.importer.v2.mapper.GenericMapperSpi;
 import java.beans.IntrospectionException;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
 public class ObservationMapperSpi extends GenericMapperSpi<Observation> {
 
     private enum Columns {

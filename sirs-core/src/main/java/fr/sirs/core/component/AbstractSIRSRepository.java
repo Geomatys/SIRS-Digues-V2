@@ -77,7 +77,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
     protected AbstractSIRSRepository(Class<T> type, CouchDbConnector db) {
         super(type, db);
-        cache = new Cache(20, 0, CacheRules.cacheElementsOfType(getModelClass()));
+        cache = new Cache(20, 0, CacheRules.cacheElementsOfType(type));
     }
 
     @PostConstruct
@@ -306,6 +306,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * @return The object to load. By default, the one in parameter.
      */
     protected T onLoad(final T loaded) {
+        CacheRules.incrementLoaded(type);
         return loaded;
     }
 
@@ -340,6 +341,10 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
                 return newOne;
             }
         }
+    }
+
+    public T getFromCache(final String docId) {
+        return cache.get(docId);
     }
 
     /**
