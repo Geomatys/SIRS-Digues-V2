@@ -187,11 +187,11 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
         prioritaryMethodNames.add("setDesignation");
         prioritaryMethodNames.add("setLinearId");
         prioritaryMethodNames.add("setSystemeRepId");
-        prioritaryMethodNames.add("setPRDebut");
+        prioritaryMethodNames.add("setPrDebut");
         prioritaryMethodNames.add("setBorneDebutId");
         prioritaryMethodNames.add("setBorne_debut_aval");
         prioritaryMethodNames.add("setBorne_debut_distance");
-        prioritaryMethodNames.add("setPRFin");
+        prioritaryMethodNames.add("setPrFin");
         prioritaryMethodNames.add("setBorneFinId");
         prioritaryMethodNames.add("setBorne_fin_aval");
         prioritaryMethodNames.add("setBorne_fin_distance");
