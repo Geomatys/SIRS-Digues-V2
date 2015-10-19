@@ -1,26 +1,33 @@
 
 package fr.sirs.theme.ui;
 
-import fr.sirs.Session;
-import fr.sirs.SIRS;
 import fr.sirs.Injector;
-import fr.sirs.core.component.*;
-import fr.sirs.core.model.*;
+import fr.sirs.SIRS;
+import fr.sirs.Session;
+import fr.sirs.core.component.Previews;
+import fr.sirs.core.model.BookMark;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.ui.Growl;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.apache.sis.storage.DataStoreException;
@@ -113,6 +120,7 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
             ui_parametres.textProperty().unbindBidirectional(oldElement.parametresProperty());
             ui_identifiant.textProperty().unbindBidirectional(oldElement.identifiantProperty());
             ui_motDePasse.textProperty().unbindBidirectional(oldElement.motDePasseProperty());
+            ui_service.valueProperty().unbindBidirectional(oldElement.typeServiceProperty());
         }
 
         final Session session = Injector.getBean(Session.class);        
@@ -131,6 +139,8 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
         ui_identifiant.textProperty().bindBidirectional(newElement.identifiantProperty());
         // * motDePasse
         ui_motDePasse.textProperty().bindBidirectional(newElement.motDePasseProperty());
+
+        ui_service.valueProperty().bindBidirectional(newElement.typeServiceProperty());
     }
     @Override
     public void preSave() {

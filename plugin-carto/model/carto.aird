@@ -32,11 +32,14 @@
               <children xmi:type="notation:Node" xmi:id="_Kn1HoG6EEeWuFvN7xc1Jlg" type="3010" element="_KnxdQG6EEeWuFvN7xc1Jlg">
                 <layoutConstraint xmi:type="notation:Location" xmi:id="_Kn1HoW6EEeWuFvN7xc1Jlg"/>
               </children>
+              <children xmi:type="notation:Node" xmi:id="_JhXigHZeEeWdX7SJYZGXog" type="3010" element="_Jgzh0HZeEeWdX7SJYZGXog">
+                <layoutConstraint xmi:type="notation:Location" xmi:id="_JhXigXZeEeWdX7SJYZGXog"/>
+              </children>
               <styles xmi:type="notation:SortingStyle" xmi:id="_vtIbwm6DEeWuFvN7xc1Jlg"/>
               <styles xmi:type="notation:FilteringStyle" xmi:id="_vtIbw26DEeWuFvN7xc1Jlg"/>
             </children>
             <styles xmi:type="notation:ShapeStyle" xmi:id="_vtHNoW6DEeWuFvN7xc1Jlg" fontName="Ubuntu" fontHeight="8"/>
-            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_vtHNom6DEeWuFvN7xc1Jlg" x="415" y="235" width="147" height="174"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_vtHNom6DEeWuFvN7xc1Jlg" x="415" y="235" width="147" height="183"/>
           </children>
           <styles xmi:type="notation:DiagramStyle" xmi:id="_lyCEkm6DEeWuFvN7xc1Jlg"/>
         </data>
@@ -50,15 +53,15 @@
         <arrangeConstraints>KEEP_LOCATION</arrangeConstraints>
         <arrangeConstraints>KEEP_SIZE</arrangeConstraints>
         <arrangeConstraints>KEEP_RATIO</arrangeConstraints>
-        <ownedStyle xmi:type="diagram:FlatContainerStyle" xmi:id="_LN5CEG6EEeWuFvN7xc1Jlg" backgroundStyle="Liquid">
-          <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_LN5CEW6EEeWuFvN7xc1Jlg"/>
+        <ownedStyle xmi:type="diagram:FlatContainerStyle" xmi:id="_Q_A_0HZeEeWdX7SJYZGXog" backgroundStyle="Liquid">
+          <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Q_Bm4HZeEeWdX7SJYZGXog"/>
           <description xmi:type="style:FlatContainerStyleDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@style"/>
-          <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_LN5CEm6EEeWuFvN7xc1Jlg"/>
-          <backgroundColor xmi:type="viewpoint:RGBValues" xmi:id="_LN5CE26EEeWuFvN7xc1Jlg" red="255" green="255" blue="255"/>
-          <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_LN5CFG6EEeWuFvN7xc1Jlg" red="255" green="252" blue="216"/>
+          <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_Q_Bm4XZeEeWdX7SJYZGXog"/>
+          <backgroundColor xmi:type="viewpoint:RGBValues" xmi:id="_Q_Bm4nZeEeWdX7SJYZGXog" red="255" green="255" blue="255"/>
+          <foregroundColor xmi:type="viewpoint:RGBValues" xmi:id="_Q_Bm43ZeEeWdX7SJYZGXog" red="255" green="252" blue="216"/>
         </ownedStyle>
         <actualMapping xmi:type="description_1:ContainerMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']"/>
-        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_y-xLoG6DEeWuFvN7xc1Jlg" name="description : EString" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@23bc195{platform:/resource/plugin-carto/model/carto.ecore#//BookMark/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_y-xLoG6DEeWuFvN7xc1Jlg" name="description : EString" tooltipText="">
           <target xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/description"/>
           <semanticElements xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/description"/>
           <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_1IkwwG6DEeWuFvN7xc1Jlg" labelAlignment="LEFT">
@@ -143,6 +146,17 @@
             <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
             <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_KnyEUm6EEeWuFvN7xc1Jlg"/>
             <color xmi:type="viewpoint:RGBValues" xmi:id="_KnyEU26EEeWuFvN7xc1Jlg"/>
+          </ownedStyle>
+          <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
+        </ownedElements>
+        <ownedElements xmi:type="diagram:DNodeListElement" xmi:id="_Jgzh0HZeEeWdX7SJYZGXog" name="typeService : EString" tooltipText="&#xA;ERROR : The required feature 'eAttributeType' of 'org.eclipse.emf.ecore.impl.EAttributeImpl@3acd599d{platform:/resource/plugin-carto/model/carto.ecore#//BookMark/newAttribute}' must be set&#xA;ERROR : The typed element must have a type">
+          <target xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/typeService"/>
+          <semanticElements xmi:type="ecore:EAttribute" href="carto.ecore#//BookMark/typeService"/>
+          <ownedStyle xmi:type="diagram:BundledImage" xmi:id="_Q_FRQHZeEeWdX7SJYZGXog" labelAlignment="LEFT">
+            <labelColor xmi:type="viewpoint:RGBValues" xmi:id="_Q_FRQXZeEeWdX7SJYZGXog"/>
+            <description xmi:type="style:BundledImageDescription" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']/@style"/>
+            <borderColor xmi:type="viewpoint:RGBValues" xmi:id="_Q_FRQnZeEeWdX7SJYZGXog"/>
+            <color xmi:type="viewpoint:RGBValues" xmi:id="_Q_F4UHZeEeWdX7SJYZGXog"/>
           </ownedStyle>
           <actualMapping xmi:type="description_1:NodeMapping" href="platform:/plugin/org.eclipse.emf.ecoretools.design/description/ecore.odesign#//@ownedViewpoints[name='Design']/@ownedRepresentations[name='Entities']/@defaultLayer/@containerMappings[name='EC%20EClass']/@subNodeMappings[name='EC%20EAttribute']"/>
         </ownedElements>
