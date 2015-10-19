@@ -450,6 +450,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionId" eType="#//RefFonction"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="natureId" eType="#//RefNature"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauId" eType="#//RefMateriau"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeurMoyenne" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvrageRevanche" eSuperTypes="#//ObjetStructure">
     <eAnnotations source="couchDBDocument"/>
