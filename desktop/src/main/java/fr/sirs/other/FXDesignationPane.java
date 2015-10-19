@@ -7,6 +7,7 @@ import static fr.sirs.SIRS.PREVIEW_BUNDLE_KEY_LIBELLE;
 import fr.sirs.Session;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Preview;
+import fr.sirs.util.FXPreviewToElementDesignationTableColumn;
 import fr.sirs.util.FXPreviewToElementTableColumn;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,7 @@ public class FXDesignationPane extends BorderPane {
 
     private List<Preview> previews;
     
-    private enum Choice {DOUBLON, ALL};
+    private enum Choice {DOUBLON, ALL, EMPTY};
 
     public FXDesignationPane(final Class type) {
         final ResourceBundle previewBundle = ResourceBundle.getBundle(Preview.class.getName(),
@@ -49,20 +50,16 @@ public class FXDesignationPane extends BorderPane {
         previews = repository.getByClass(type);
 
         table = new TableView<>(FXCollections.observableArrayList(previews));
-        table.setEditable(false);
+        table.setEditable(true);
 
         table.getColumns().add(new FXPreviewToElementTableColumn());
-
-        final TableColumn<Preview, String> designationColumn = new TableColumn<>(previewBundle.getString(PREVIEW_BUNDLE_KEY_DESIGNATION));
-        designationColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
-                return new SimpleObjectProperty<>(param.getValue().getDesignation());
-        });
-        table.getColumns().add(designationColumn);
+        table.getColumns().add(new FXPreviewToElementDesignationTableColumn(previewBundle.getString(PREVIEW_BUNDLE_KEY_DESIGNATION)));
         
         final TableColumn<Preview, String> labelColumn = new TableColumn<>(previewBundle.getString(PREVIEW_BUNDLE_KEY_LIBELLE));
         labelColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                 return new SimpleObjectProperty(param.getValue().getLibelle());
         });
+        labelColumn.setEditable(false);
         table.getColumns().add(labelColumn);
         setCenter(table);
 
@@ -74,6 +71,9 @@ public class FXDesignationPane extends BorderPane {
                 switch (object) {
                     case DOUBLON:
                         result = "Doublons";
+                        break;
+                    case EMPTY:
+                        result = "Sans désignation";
                         break;
                     case ALL:
                     default:
@@ -110,11 +110,27 @@ public class FXDesignationPane extends BorderPane {
             case DOUBLON:
                 referenceUsages = doublons();
                 break;
+            case EMPTY:
+                referenceUsages = empty();
+                break;
             case ALL:
             default:
                 referenceUsages = previews;
         }
         table.setItems(FXCollections.observableArrayList(referenceUsages));
+    }
+
+    private List<Preview> empty() {
+
+        // Maintenant on sait quels sont les id doublons
+        final List<Preview> referenceUsages = new ArrayList<>();
+
+        for (final Preview preview : previews) {
+            if (preview.getDesignation() == null || "".equals(preview.getDesignation()) || " ".equals(preview.getDesignation())){
+                referenceUsages.add(preview);
+            }
+        }
+        return referenceUsages;
     }
 
     private List<Preview> doublons() {

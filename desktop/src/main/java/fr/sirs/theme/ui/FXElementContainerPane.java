@@ -72,7 +72,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
 
             Element elementDocument = elementProperty.get().getCouchDBDocument();
             if (elementDocument == null) {
-                final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Un objet ne peut être sauvegardé sans tronçon valide.", ButtonType.OK);
+                final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Un élément ne peut être sauvegardé sans document valide.", ButtonType.OK);
                 alert.setResizable(true);
                 alert.show();
                 return;
