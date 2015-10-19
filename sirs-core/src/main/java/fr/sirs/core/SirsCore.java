@@ -56,6 +56,12 @@ import org.opengis.util.FactoryException;
 
 public class SirsCore {
 
+    /**
+     * An useful variable which specify how many meters an object length should be
+     * to be considered as a linear object.
+     */
+    public static final double LINE_MIN_LENGTH = 1.0;
+
     public static final String PASSWORD_ENCRYPT_ALGO="MD5";
 
     public static final String INFO_DOCUMENT_ID = "$sirs";

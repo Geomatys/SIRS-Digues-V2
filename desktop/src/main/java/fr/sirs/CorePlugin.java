@@ -6,6 +6,7 @@ import static fr.sirs.SIRS.DATE_DEBUT_FIELD;
 import static fr.sirs.SIRS.DATE_FIN_FIELD;
 import static fr.sirs.SIRS.DEFAULT_TRONCON_GEOM_WGS84;
 import static fr.sirs.SIRS.SIRSDOCUMENT_REFERENCE;
+import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.TronconDigueRepository;
@@ -898,15 +899,15 @@ public class CorePlugin extends Plugin {
         ruleLongObjects.setFilter(
                 FF.greater(
                         FF.function("length", FF.property("geometry")),
-                        FF.literal(2.0)
+                        FF.literal(SirsCore.LINE_MIN_LENGTH)
                 )
         );
 
         final MutableRule ruleSmallObjects = SF.rule(pointSymbolizer);
         ruleSmallObjects.setFilter(
-                FF.less(
+                FF.lessOrEqual(
                         FF.function("length", FF.property("geometry")),
-                        FF.literal(2.0)
+                        FF.literal(SirsCore.LINE_MIN_LENGTH)
                 )
         );
 
@@ -930,9 +931,9 @@ public class CorePlugin extends Plugin {
         }
     }
 
-    
+
     public static void initTronconDigue(final TronconDigue troncon, final Session session){
-        
+
         try {
             //on crée un géométrie au centre de la france
             final Geometry geom = JTS.transform(DEFAULT_TRONCON_GEOM_WGS84,
