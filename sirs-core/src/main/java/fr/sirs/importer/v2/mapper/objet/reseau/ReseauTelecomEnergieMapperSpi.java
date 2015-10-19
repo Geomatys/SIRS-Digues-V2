@@ -20,7 +20,7 @@ public class ReseauTelecomEnergieMapperSpi extends GenericMapperSpi<ReseauTeleco
     public ReseauTelecomEnergieMapperSpi() throws IntrospectionException {
         super(ReseauTelecomEnergie.class);
         bindings.put(ObjetReseauMapperSpi.Columns.ID_TYPE_POSITION.name(), "positionId");
-        bindings.put(ObjetReseauMapperSpi.Columns.ID_IMPLANTATION.name(), "implantaitonId");
+        bindings.put(ObjetReseauMapperSpi.Columns.ID_IMPLANTATION.name(), "implantationId");
         bindings.put(ObjetReseauMapperSpi.Columns.ID_TYPE_RESEAU_COMMUNICATION.name(), "typeReseauTelecomEnergieId");
         bindings.put(ObjetReseauMapperSpi.Columns.HAUTEUR.name(), "hauteur");
     }

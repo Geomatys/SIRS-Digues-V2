@@ -1,3 +1,4 @@
+
 package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -98,7 +99,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         uiAmontEnd.setToggleGroup(groupEnd);
         uiAvalEnd.setToggleGroup(groupEnd);
         uiAvalEnd.setSelected(true);
-        
+
         uiDistanceStart.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
         uiDistanceEnd.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
 
@@ -128,7 +129,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         });
 
         uiSRs.getSelectionModel().selectedItemProperty().addListener(this::srsChange);
-        
+
         final ChangeListener chgListener = (ObservableValue observable, Object oldValue, Object newValue) -> coordChange();
         groupStart.selectedToggleProperty().addListener(chgListener);
         groupEnd.selectedToggleProperty().addListener(chgListener);
@@ -202,7 +203,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
 
         }else if(pos.getGeometry()!=null){
             //on calcule les valeurs en fonction des points de debut et fin
-            final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t, Injector.getSession());
+            final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
             final TronconUtils.PosSR rp = ps.getForSR(defaultSR);
 
             uiAvalStart.setSelected(!rp.startAval);
@@ -270,7 +271,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
 
         //sauvegarde des propriétés
         final Positionable positionable = posProperty.get();
-        
+
         // On ne met la géométrie à jour depuis ce panneau que si on est dans son mode.
         if(!getID().equals(positionable.getGeometryMode())) return;
 
@@ -289,7 +290,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
         final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
         final LineString geometry = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), positionable, borneRepo);
-        
+
         //sauvegarde de la geometrie
         positionable.geometryModeProperty().set(getID());
         positionable.geometryProperty().set(geometry);
@@ -329,7 +330,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
 //                }
             }
         }
-        
+
         uiBorneStart.setItems(FXCollections.observableList(bornes));
         uiBorneEnd.setItems(FXCollections.observableList(bornes));
 

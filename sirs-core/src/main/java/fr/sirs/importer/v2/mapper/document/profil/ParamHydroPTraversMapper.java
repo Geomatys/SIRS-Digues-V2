@@ -43,7 +43,7 @@ public class ParamHydroPTraversMapper extends AbstractMapper<ParametreHydrauliqu
     public void map(Row input, ParametreHydrauliqueProfilTravers output) throws IllegalStateException, IOException, AccessDbImporterException {
         final Object idHydro = input.get(Columns.ID_EVENEMENT_HYDRAU.toString());
         if (idHydro != null) {
-            output.setEvenementHydroliqueId(hydroImporter.getImportedId(idHydro));
+            output.setEvenementHydrauliqueId(hydroImporter.getImportedId(idHydro));
         }
 
         final Double debit = input.getDouble(Columns.DEBIT_DE_POINTE_M3S.toString());

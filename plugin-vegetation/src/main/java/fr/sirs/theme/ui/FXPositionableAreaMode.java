@@ -68,7 +68,7 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
 
     public FXPositionableAreaMode() {
         super();
-        
+
         uiStartNear.disableProperty().bind(disableProperty);
         uiStartFar.disableProperty().bind(disableProperty);
         uiEndNear.disableProperty().bind(disableProperty);
@@ -189,7 +189,7 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
 
         }else if(pos.getGeometry()!=null){
             //on calcule les valeurs en fonction des points de debut et fin
-            final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t, Injector.getSession());
+            final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
             final TronconUtils.PosSR rp = ps.getForSR(defaultSR);
 
             uiAvalStart.setSelected(!rp.startAval);
@@ -258,7 +258,7 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
         //on recalculate la geometrie linear
         final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
 
-        
+
         //on calcule le ratio on fonction de la rive et du coté
         final String typeRiveId = troncon.getTypeRiveId();
         final String typeCoteId = positionable.getTypeCoteId();
@@ -413,7 +413,7 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
         coords.add(0,new Coordinate(c0));
         coords.add(new Coordinate(c1));
 
-        
+
         while(!walker.isFinished()){
             final double d = walker.getSegmentLengthRemaining();
             distance += d;
@@ -439,7 +439,7 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
         while(coords.size()<4){
             coords.add(new Coordinate(coords.get(0)));
         }
-        
+
         final Polygon polygon = GO2Utilities.JTS_FACTORY.createPolygon(coords.toArray(new Coordinate[0]));
         polygon.setSRID(linear.getSRID());
         polygon.setUserData(linear.getUserData());
