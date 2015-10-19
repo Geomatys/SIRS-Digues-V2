@@ -16,7 +16,7 @@ import javafx.scene.image.Image;
 public final class VegetationTraitementTheme extends AbstractPluginsButtonTheme {
 
     public VegetationTraitementTheme() {
-        super("Végétation et traitements", "Végétation et traitements", new Image("fr/sirs/plugin/vegetation/vegetation-description.png"));
+        super("Description de la végétation", "Description de la végétation", new Image("fr/sirs/plugin/vegetation/vegetation-description.png"));
     }
 
     @Override
