@@ -83,7 +83,7 @@ public class EtapesPojoTable extends PojoTable {
      //     * @param tabPane Le conteneur d'onglet dans lequel ajouter ce nouvel onglet.
      //     */
     private void showPlanificationTable(final TabPane tabPane) {
-        final FXFreeTab planTab = new FXFreeTab("Panification");
+        final FXFreeTab planTab = new FXFreeTab("Planification");
         // Gestion du bouton consultation / édition pour la pojo table
         final Separator separator = new Separator();
         separator.setVisible(false);

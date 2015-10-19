@@ -2,6 +2,7 @@ package fr.sirs.plugin.dependance;
 
 import fr.sirs.Injector;
 import fr.sirs.core.model.DesordreDependance;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SimpleFXEditMode;
@@ -22,7 +23,7 @@ public final class DesordresDependanceTheme extends AbstractPluginsButtonTheme {
             DesordresDependanceTheme.class.getResourceAsStream("images/desordre.png"));
 
     public DesordresDependanceTheme() {
-        super("Désordres", "Désordres", BUTTON_IMAGE);
+        super(LabelMapper.get(DesordreDependance.class).mapClassName(), "Gestion des désordres sur dépendances.", BUTTON_IMAGE);
     }
 
     /**
