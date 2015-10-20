@@ -1,5 +1,8 @@
 package fr.sirs.theme.ui;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
@@ -15,6 +18,7 @@ import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
 import fr.sirs.util.SirsStringConverter;
 import java.lang.reflect.Modifier;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -26,6 +30,8 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.stage.Modality;
 import javafx.util.Callback;
+import javax.measure.unit.SI;
+import org.geotoolkit.display.MeasureUtilities;
 
 /**
  *
@@ -44,8 +50,9 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
                 if(pojo instanceof ZoneVegetation) ((AbstractSIRSRepository) Injector.getSession().getRepositoryForClass(pojo.getClass())).remove(pojo);
             }
         });
-        getTable().getColumns().add(2, (TableColumn) new VegetationClassColumm());
-        getTable().getColumns().add(3, (TableColumn) new VegetationTypeColumm());
+        getTable().getColumns().add(3, (TableColumn) new VegetationClassColumm());
+        getTable().getColumns().add(4, (TableColumn) new VegetationTypeColumm());
+        getTable().getColumns().add(5, (TableColumn) new VegetationAreaColumm());
     }
     
     @Override
@@ -179,6 +186,57 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
             }
         }
     }
+
+    private static class VegetationAreaColumm extends TableColumn<ZoneVegetation, Geometry>{
+
+        private VegetationAreaColumm(){
+            super("Surface (m²)");
+            setEditable(false);
+            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ZoneVegetation, Geometry>, ObservableValue<Geometry>>() {
+
+                @Override
+                public ObservableValue<Geometry> call(TableColumn.CellDataFeatures<ZoneVegetation, Geometry> param) {
+                    if(param!=null){
+                        final ZoneVegetation zone = param.getValue();
+                        if(zone!=null) return zone.geometryProperty();
+                        else return null;
+                    }
+                    else return null;
+                }
+            });
+            setCellFactory((TableColumn<ZoneVegetation, Geometry> param) -> new VegetationAreaCell());
+        }
+    }
+
+    private static class VegetationAreaCell extends TableCell<ZoneVegetation, Geometry> {
+        @Override
+        public void updateItem(final Geometry item, final boolean empty){
+            super.updateItem(item, empty);
+            if(item==null || empty){
+                setText("");
+            }
+            else{
+                setText(getGeometryInfo(item));
+            }
+        }
+    }
+
+    /**
+     * Calcul de la surface en m².
+     * @param geometry
+     * @return
+     */
+    private static String getGeometryInfo(final Geometry geometry) {
+        if (geometry != null && (geometry instanceof Polygon || geometry instanceof MultiPolygon)) {
+            final String surface = NumberFormat.getNumberInstance().format(
+                    MeasureUtilities.calculateArea(geometry, Injector.getSession().getProjection(), SI.SQUARE_METRE));
+            return surface;
+        }
+        else {
+            return "";
+        }
+    }
+
 
     /**
      * Window allowing to define the type of ZoneVegetation at creation stage.
