@@ -33,6 +33,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import static javafx.scene.layout.Region.USE_PREF_SIZE;
 import javafx.scene.layout.VBox;
 import org.geotoolkit.data.bean.BeanFeature;
@@ -102,6 +103,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
     private final Label lblFirstPoint = new Label();
     private final Label lblLastPoint = new Label();
     private final Button end = new Button("Enregistrer");
+    private final Button cancel = new Button("Annuler");
 
     private FeatureMapLayer tronconLayer = null;
     private FeatureMapLayer borneLayer = null;
@@ -143,6 +145,13 @@ public class CreateParcelleTool extends AbstractEditionTool{
                 reset();
             }
         });
+        cancel.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                reset();
+                map.setHandler(new FXPanHandler(true));
+            }
+        });
 
         final Label lbl1 = new Label("Tronçon :");
         final Label lbl2 = new Label("Borne de début :");
@@ -154,6 +163,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
         lblFirstPoint.getStyleClass().add("label-text");
         lblLastPoint.getStyleClass().add("label-text");
         end.getStyleClass().add("btn-single");
+        cancel.getStyleClass().add("btn-single");
         wizard.getStyleClass().add("blue-light");
 
         final VBox vbox = new VBox(15,
@@ -163,7 +173,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
                 lblFirstPoint,
                 lbl3,
                 lblLastPoint,
-                end);
+                new HBox(30, end,cancel));
         vbox.setMaxSize(USE_PREF_SIZE,USE_PREF_SIZE);
         wizard.setCenter(vbox);
     }

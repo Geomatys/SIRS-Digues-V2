@@ -20,13 +20,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import static javafx.scene.layout.Region.USE_PREF_SIZE;
 import javafx.scene.layout.VBox;
 import org.geotoolkit.data.bean.BeanFeature;
@@ -43,6 +49,7 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.AbstractEditionTool;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
+import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
 import org.geotoolkit.internal.Loggers;
 import org.geotoolkit.map.FeatureMapLayer;
@@ -71,6 +78,9 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     protected ParcelleVegetation parcelle = null;
     private final Label lblParcelle = new Label();
     private final Label lblGeom = new Label();
+    
+    private final Button end = new Button("Enregistrer");
+    private final Button cancel = new Button("Annuler");
 
     private FeatureMapLayer parcelleLayer = null;
 
@@ -80,12 +90,37 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     private Polygon geometry = null;
     private final List<Coordinate> coords = new ArrayList<>();
     private boolean justCreated = false;
+    private final BooleanProperty ended = new SimpleBooleanProperty(false);
     
 
     public CreateVegetationPolygonTool(FXMap map, Spi spi, Class<T> clazz) {
         super(spi);
         vegetationClass = clazz;
         wizard.getStylesheets().add(CSS_PATH);
+
+        end.disableProperty().bind(ended.not());
+        end.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                //on sauvegarde
+                vegetation.setGeometryMode(FXPositionableExplicitMode.MODE);
+                vegetation.setValid(true);
+                vegetation.setForeignParentId(parcelle.getDocumentId());
+                final AbstractSIRSRepository vegetationRepo = session.getRepositoryForClass(vegetationClass);
+                vegetationRepo.add(vegetation);
+                startGeometry();
+            }
+        });
+        cancel.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                reset();
+                map.setHandler(new FXPanHandler(true));
+            }
+        });
+        end.getStyleClass().add("btn-single");
+        cancel.getStyleClass().add("btn-single");
+        
 
         session = Injector.getSession();
         parcelleRepo = session.getRepositoryForClass(ParcelleVegetation.class);
@@ -104,7 +139,8 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
                 lbl1,
                 lblParcelle,
                 lbl2,
-                lblGeom);
+                lblGeom,
+                new HBox(30, end,cancel));
         vbox.setMaxSize(USE_PREF_SIZE,USE_PREF_SIZE);
         wizard.setCenter(vbox);
     }
@@ -125,6 +161,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         geometry = null;
         coords.clear();
         justCreated = false;
+        ended.set(false);
         geomLayer.getGeometries().clear();
     }
 
@@ -133,6 +170,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         geometry = null;
         coords.clear();
         justCreated = false;
+        ended.set(false);
         geomLayer.getGeometries().clear();
 
         vegetation = newVegetation();
@@ -201,6 +239,8 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
 
         @Override
         public void mouseClicked(MouseEvent e) {
+            if(ended.get()) return;
+
             mousebutton = e.getButton();
             if(mousebutton!=MouseButton.PRIMARY){
                 super.mouseClicked(e);
@@ -237,12 +277,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
                     //on sauvegarde
                     vegetation.setExplicitGeometry(geometry);
                     vegetation.setGeometry(geometry);
-                    vegetation.setGeometryMode(FXPositionableExplicitMode.MODE);
-                    vegetation.setValid(true);
-                    vegetation.setForeignParentId(parcelle.getDocumentId());                    
-                    final AbstractSIRSRepository vegetationRepo = session.getRepositoryForClass(vegetationClass);
-                    vegetationRepo.add(vegetation);
-                    startGeometry();
+                    ended.set(true);
                 }else{
 
                     final double x = getMouseX(e);
@@ -281,6 +316,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
 
         @Override
         public void mouseMoved(MouseEvent e) {
+            if(ended.get()) return;
             final MouseButton button = e.getButton();
             if(button!=MouseButton.PRIMARY) super.mouseMoved(e);
             

@@ -19,6 +19,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Modality;
 
 /**
  *
@@ -48,6 +49,8 @@ public class FXPositionableForm extends BorderPane {
         final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
                 "Confirmer la suppression de "+ new SirsStringConverter().toString(pos),
                 ButtonType.YES, ButtonType.NO);
+        alert.initOwner(this.getScene().getWindow());
+        alert.initModality(Modality.WINDOW_MODAL);
         final ButtonType res = alert.showAndWait().get();
         if (res == ButtonType.YES) {
             final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(pos.getClass());

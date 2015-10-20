@@ -18,13 +18,10 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Side;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -90,7 +87,8 @@ public class EditVegetationTool extends AbstractEditionTool{
     private EditionHelper helper;
     private final FXGeometryLayer decoration = new FXGeometryLayer();
     private final EditionHelper.EditionGeometry selection = new EditionHelper.EditionGeometry();
-    private final Label lblMessage = new Label("Sélectionner une zone de végétation sur la carte.");
+    private final Label lblMessage = new Label("Sélectionner une zone de végétation sur la carte.\n"
+            + "La couche de données doit être dévérouillée pour être sélectionnable.");
     private boolean modified = false;
     private MouseButton pressed = null;
 
