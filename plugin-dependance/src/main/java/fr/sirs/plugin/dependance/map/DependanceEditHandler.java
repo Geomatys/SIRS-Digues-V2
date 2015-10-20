@@ -27,7 +27,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -62,6 +61,7 @@ import java.util.Optional;
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
+import javafx.scene.control.ChoiceDialog;
 
 /**
  * Contrôle les actions possibles pour le bouton d'édition et de modification de dépendances
@@ -132,6 +132,27 @@ public class DependanceEditHandler extends AbstractNavigationHandler {
             editGeometry.geometry.set((Geometry)dependance.getGeometry().clone());
             decorationLayer.getGeometries().setAll(editGeometry.geometry.get());
             newDependance = false;
+        }else{
+            //choix du type de géometrie
+            if(dependance instanceof AireStockageDependance){
+                newGeomType = Polygon.class;
+            }else if(dependance instanceof CheminAccesDependance){
+                newGeomType = LineString.class;
+            }else {
+                //on demande a l'utilisateur
+                final ChoiceDialog<String> choice = new ChoiceDialog<>("Ponctuel", "Ponctuel","Linéaire","Surfacique");
+                choice.setHeaderText("Choix de la forme géométrique de la dépendance.");
+                choice.setTitle("Type de géométrie");
+                final Optional<String> showAndWait = choice.showAndWait();
+                if(showAndWait.isPresent()){
+                    switch (showAndWait.get()) {
+                        case "Ponctuel" : newGeomType = Point.class; break;
+                        case "Linéaire" : newGeomType = LineString.class; break;
+                        case "Surfacique" : newGeomType = Polygon.class; break;
+                        default: newGeomType = Point.class;
+                    }
+                }
+            }
         }
     }
 
