@@ -1378,9 +1378,14 @@ public class PojoTable extends BorderPane {
         public String getName(){return name;}
 
         public PropertyColumn(final PropertyDescriptor desc) {
-            super(labelMapper.mapPropertyName(desc.getDisplayName()));
+            super();
+            this.name = desc.getName();
 
-            this.name = desc.getDisplayName();
+            String pName = labelMapper.mapPropertyName(name);
+            if (pName != null)
+                setText(pName);
+            else
+                setText(name);
 
             //choix de l'editeur en fonction du type de données
             boolean isEditable = true;
@@ -1392,7 +1397,7 @@ public class PojoTable extends BorderPane {
                 //reference vers un autre objet
                 setCellFactory((TableColumn<Element, Object> param) -> new ReferenceTableCell(ref.ref()));
                 try {
-                    final Method propertyAccessor = ref.ref().getMethod(desc.getName()+"Property");
+                    final Method propertyAccessor = ref.ref().getMethod(name+"Property");
                     setCellValueFactory((CellDataFeatures<Element, Object> param) -> {
                         if(param!=null && param.getValue()!=null && propertyAccessor!=null){
                             try {
@@ -1406,14 +1411,14 @@ public class PojoTable extends BorderPane {
                         }
                     });
                 } catch (Exception ex) {
-                    setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
+                    setCellValueFactory(new PropertyValueFactory<>(name));
                 }
 
             } else {
                 this.ref = null;
                 this.refList = FXCollections.emptyObservableList();
 
-                setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
+                setCellValueFactory(new PropertyValueFactory<>(name));
                 final Class type = desc.getReadMethod().getReturnType();
                 if (Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
@@ -1449,7 +1454,7 @@ public class PojoTable extends BorderPane {
                     Exception tmpError = null;
                     final Object rowElement = event.getRowValue();
                     if (rowElement == null) return;
-                    final PropertyReference<Object> propertyReference = new PropertyReference<>(rowElement.getClass(), desc.getName());
+                    final PropertyReference<Object> propertyReference = new PropertyReference<>(rowElement.getClass(), name);
                     Object oldValue = propertyReference.get(rowElement);
                     try {
                         propertyReference.set(rowElement, event.getNewValue());
