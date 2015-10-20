@@ -57,9 +57,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import org.elasticsearch.common.base.Objects;
 
 /**
@@ -585,7 +583,6 @@ public class FXPlanTable extends BorderPane{
     private static class InfoStage extends Stage {
 
         private InfoStage(final ParcelleVegetation parcelle){
-            super(StageStyle.UNDECORATED);
             final GridPane grid = new GridPane();
             grid.setPadding(new Insets(10, 10, 10, 10));
             grid.setHgap(10);
@@ -641,7 +638,6 @@ public class FXPlanTable extends BorderPane{
             GridPane.setHalignment(ok, HPos.CENTER);
 
             setScene(new Scene(grid));
-            initModality(Modality.APPLICATION_MODAL);
         }
 
     }
