@@ -15,7 +15,9 @@ import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
-import fr.sirs.plugin.vegetation.PluginVegetation;
+import static fr.sirs.plugin.vegetation.PluginVegetation.DEFAULT_INVASIVE_VEGETATION_TYPE;
+import static fr.sirs.plugin.vegetation.PluginVegetation.DEFAULT_PEUPLEMENT_VEGETATION_TYPE;
+import static fr.sirs.plugin.vegetation.PluginVegetation.paramTraitement;
 import fr.sirs.util.SirsStringConverter;
 import java.lang.reflect.Modifier;
 import java.text.NumberFormat;
@@ -79,14 +81,17 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
             // S'il s'agit d'une zone d'invasive ou de peuplement, il faut affecter le type par défaut et effectuer le paramétrage éventuel
 
             if(retrievedClass==PeuplementVegetation.class){
-                ((PeuplementVegetation) zone).setTypePeuplementId(PluginVegetation.DEFAULT_PEUPLEMENT_VEGETATION_TYPE);
+                ((PeuplementVegetation) zone).setTypePeuplementId(DEFAULT_PEUPLEMENT_VEGETATION_TYPE);
+                paramTraitement(PeuplementVegetation.class, (PeuplementVegetation) zone, DEFAULT_PEUPLEMENT_VEGETATION_TYPE);
             }
             else if(retrievedClass==InvasiveVegetation.class){
-                ((InvasiveVegetation) zone).setTypeInvasive(PluginVegetation.DEFAULT_INVASIVE_VEGETATION_TYPE);
+                ((InvasiveVegetation) zone).setTypeInvasive(DEFAULT_INVASIVE_VEGETATION_TYPE);
+                paramTraitement(InvasiveVegetation.class, (InvasiveVegetation) zone, DEFAULT_INVASIVE_VEGETATION_TYPE);
             }
             else if(retrievedClass==ArbreVegetation.class){
                 zone.setGeometryType(GeometryType.PONCTUAL);
             }
+
         }
         else {
             zone = null;
