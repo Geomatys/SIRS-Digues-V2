@@ -14,8 +14,8 @@ public class FXPositionableVegetationPane extends FXPositionablePane {
 
     public FXPositionableVegetationPane() {
         super(Arrays.asList(
-                new FXPositionableCoordMode(),
-                new FXPositionableAreaMode(),
+                new FXPositionableCoordAreaMode(),
+                new FXPositionableLinearAreaMode(),
                 new FXPositionableExplicitMode()
                 ), PositionableVegetation.class);
     }

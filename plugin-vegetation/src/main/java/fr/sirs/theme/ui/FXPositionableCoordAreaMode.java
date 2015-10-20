@@ -7,11 +7,11 @@ import fr.sirs.core.model.Positionable;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXPositionableCoordMode extends FXPositionableAbstractCoordMode {
+public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode {
 
-    private static final String MODE = "COORD";
+    private static final String MODE = "COORD_AREA";
 
-    public FXPositionableCoordMode() {
+    public FXPositionableCoordAreaMode() {
         super();
     }
 

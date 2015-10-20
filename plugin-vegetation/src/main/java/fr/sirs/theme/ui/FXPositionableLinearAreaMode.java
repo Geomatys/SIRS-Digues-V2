@@ -42,9 +42,9 @@ import static org.geotoolkit.referencing.LinearReferencing.asLineString;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
+public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMode {
 
-    private static final String MODE = "AREA";
+    private static final String MODE = "LINEAR_AREA";
 
     //area
     @FXML private Spinner<Double> uiStartNear;
@@ -66,7 +66,7 @@ public class FXPositionableAreaMode extends FXPositionableAbstractLinearMode {
 
     final ChangeListener<String> typeCoteChangeListener = (ObservableValue<? extends String> observable, String oldValue, String newValue) -> buildGeometry();
 
-    public FXPositionableAreaMode() {
+    public FXPositionableLinearAreaMode() {
         super();
 
         uiStartNear.disableProperty().bind(disableProperty);
