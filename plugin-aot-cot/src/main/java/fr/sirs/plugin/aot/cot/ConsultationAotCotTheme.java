@@ -1,18 +1,21 @@
 package fr.sirs.plugin.aot.cot;
 
-import fr.sirs.Injector;
+import fr.sirs.PrintManager;
+import fr.sirs.Printable;
 import fr.sirs.core.model.AotCotAssociable;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.PositionConvention;
 import static fr.sirs.plugin.aot.cot.PluginAotCot.getConventionTableForObjet;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
+import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
+import org.geotoolkit.data.FeatureCollection;
 
 /**
  * Bouton de suivi d'AOT / COT.
@@ -54,9 +57,18 @@ public final class ConsultationAotCotTheme extends AbstractPluginsButtonTheme {
         
         // Sinon on recherche l'objet courant sélectionné dans l'interface qui est également l'élément sélectionné pour impression.
         else{
-            final List<? extends Element> elements = Injector.getSession().getPrintManager().getElementsToPrint();
+            final Printable printable = PrintManager.printableProperty().get();
+            final List<Element> elements = new ArrayList<>();
+            if(printable!=null){
+                Object printableElements = printable.getPrintableElements().get();
+                if(printableElements instanceof Element){
+                    elements.add((Element)printableElements);
+                }else if(printableElements instanceof List && !(printableElements instanceof FeatureCollection)){
+                    elements.addAll((List)printableElements);
+                }
+            }
 
-            if(elements!=null && elements.size()==1 && 
+            if(elements.size()==1 && 
                     (elements.get(0) instanceof AotCotAssociable 
                     || elements.get(0) instanceof Objet
                     || elements.get(0) instanceof PositionConvention)){

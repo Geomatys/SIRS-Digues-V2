@@ -1,5 +1,6 @@
 package fr.sirs;
 
+import com.sun.javafx.stage.StageHelper;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
@@ -29,6 +30,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.embed.swing.SwingFXUtils;
@@ -37,6 +39,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
@@ -99,6 +102,7 @@ public class FXMainFrame extends BorderPane {
     @FXML private MenuButton uiThemesUnlocalized;
     @FXML private MenuButton uiPlugins;
     @FXML private Button uiAlertsBtn;
+    @FXML private Button uiPrintButton;
     @FXML private ImageView uiPluginsImg;
     @FXML private ToolBar uiToolBarPlugins;
     @FXML private TabPane uiTabs;
@@ -192,6 +196,38 @@ public class FXMainFrame extends BorderPane {
                 }
             }
         });
+
+
+        //on ecoute le changement d'element imprimable
+        uiPrintButton.setAlignment(Pos.CENTER);
+        uiPrintButton.setTextAlignment(TextAlignment.CENTER);
+        uiPrintButton.disableProperty().bind(PrintManager.printableProperty().isNull());
+        PrintManager.printableProperty().addListener(new ChangeListener<Printable>() {
+            @Override
+            public void changed(ObservableValue<? extends Printable> observable, Printable oldValue, Printable newValue) {
+                if(newValue==null){
+                    uiPrintButton.setText("Impression");
+                }else{
+                    String title = newValue.getPrintTitle();
+                    if(title==null || title.isEmpty()){
+                        uiPrintButton.setText("Impression");
+                    }else{
+                        uiPrintButton.setText("Impression \n"+title);
+                    }
+                }
+            }
+        });
+        final Printable newValue = PrintManager.printableProperty().get();
+        if(newValue==null){
+            uiPrintButton.setText("Impression");
+        }else{
+            String title = newValue.getPrintTitle();
+            if(title==null || title.isEmpty()){
+                uiPrintButton.setText("Impression");
+            }else{
+                uiPrintButton.setText("Impression \n"+title);
+            }
+        }
 
     }
 
@@ -472,18 +508,12 @@ public class FXMainFrame extends BorderPane {
 
     @FXML
     private void print() throws Exception {
-
-        final Thread t = new Thread() {
+        new Thread() {
             @Override
             public void run() {
-                if(session.getPrintManager().getElementsToPrint()!=null){
-                    session.getPrintManager().printElements();
-                } else if(session.getPrintManager().getFeaturesToPrint()!=null){
-                    session.getPrintManager().printFeatures();
-                }
+                session.getPrintManager().printFocusedPrintable();
             }
-        };
-        t.start();
+        }.start();
     }
 
     @FXML

@@ -1,12 +1,18 @@
 
 package fr.sirs.util;
 
+import fr.sirs.Printable;
 import fr.sirs.SIRS;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
@@ -21,10 +27,11 @@ import javafx.stage.WindowEvent;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXFreeTab extends Tab implements FXTextAbregeable{
+public class FXFreeTab extends Tab implements FXTextAbregeable, Printable {
     
     private static boolean DEFAULT_ABREGEABLE = true;
     private static int DEFAULT_NB_AFFICHABLE = 25;
+    private final ObjectProperty printElements = new SimpleObjectProperty();
     
     private FXFreeTab(String text, boolean abregeable, int nbAffichable) {
         super();
@@ -58,6 +65,17 @@ public class FXFreeTab extends Tab implements FXTextAbregeable{
         
         final ContextMenu menu = new ContextMenu(item);
         setContextMenu(menu);
+
+        selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(Boolean.TRUE.equals(newValue)){
+                    if(getContent()!=null){
+                        getContent().requestFocus();
+                    }
+                }
+            }
+        });
     }
     
     public FXFreeTab(String text, int nbAffichable) {
@@ -115,6 +133,10 @@ public class FXFreeTab extends Tab implements FXTextAbregeable{
             setText(text);
         }
     }
-    
+
+    @Override
+    public ObjectProperty getPrintableElements() {
+        return printElements;
+    }
     
 }

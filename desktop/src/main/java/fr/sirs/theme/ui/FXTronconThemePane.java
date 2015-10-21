@@ -17,6 +17,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Separator;
@@ -44,7 +45,14 @@ public class FXTronconThemePane extends BorderPane {
         SIRS.loadFXML(this, FXTronconThemePane.class, null);
 
         if (groups.length==1) {
-            uiCenter.setCenter(createContent(groups[0]));
+            final Parent content = createContent(groups[0]);
+            uiCenter.setCenter(content);
+            if(content instanceof BorderPane){
+                content.requestFocus();
+                final Node center = ((BorderPane)content).getCenter();
+                center.requestFocus();
+            }
+            
         }else{
             final TabPane pane = new TabPane();
             pane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);

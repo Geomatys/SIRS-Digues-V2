@@ -1,6 +1,7 @@
 package fr.sirs.digue;
 
 import fr.sirs.Injector;
+import fr.sirs.Printable;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.DocumentListener;
@@ -10,6 +11,8 @@ import fr.sirs.theme.ui.AbstractFXElementPane;
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.function.Predicate;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -19,6 +22,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
@@ -38,7 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public abstract class FXAbstractTronconTreePane extends SplitPane implements DocumentListener {
+public abstract class FXAbstractTronconTreePane extends SplitPane implements DocumentListener, Printable {
     
     @FXML protected Label uiTitle;
     @FXML protected TreeView uiTree;
@@ -62,6 +66,7 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
     public FXAbstractTronconTreePane(final String title) {
         SIRS.loadFXML(this, FXAbstractTronconTreePane.class, null);
         Injector.injectDependencies(this);
+        setFocusTraversable(true);
         uiTitle.setText(title);
         uiTree.setShowRoot(false);
 
@@ -142,9 +147,29 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
     public void displayElement(final Element obj) {
         AbstractFXElementPane ctrl = SIRS.generateEditionPane(obj);
         uiRight.setCenter(ctrl);
-        session.getPrintManager().prepareToPrint(obj);
+        ctrl.requestFocus();
     }
 
+    @Override
+    public String getPrintTitle() {
+        final Node right = uiRight.getCenter();
+        if(right instanceof Printable){
+            return ((Printable)right).getPrintTitle();
+        }else{
+            return null;
+        }
+    }
+
+    @Override
+    public ObjectProperty getPrintableElements() {
+        final Node right = uiRight.getCenter();
+        if(right instanceof Printable){
+            return ((Printable)right).getPrintableElements();
+        }else{
+            return new SimpleObjectProperty();
+        }
+    }
+    
     public static void searchExtended(TreeItem<?> ti, Set objects){
         if(ti==null) return;
         if(ti.isExpanded()){

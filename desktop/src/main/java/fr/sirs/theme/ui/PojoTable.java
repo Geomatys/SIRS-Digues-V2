@@ -3,6 +3,7 @@ package fr.sirs.theme.ui;
 import com.sun.javafx.property.PropertyReference;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
+import fr.sirs.Printable;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.AUTHOR_FIELD;
 import static fr.sirs.SIRS.COMMENTAIRE_FIELD;
@@ -161,7 +162,7 @@ import org.opengis.filter.Filter;
  * @author Alexis Manin (Geomatys)
  * @author Samuel Andrés (Geomatys)
  */
-public class PojoTable extends BorderPane {
+public class PojoTable extends BorderPane implements Printable {
 
     protected static final String BUTTON_STYLE = "buttonbar-button";
     private static final Image ICON_SHOWONMAP = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GLOBE, 16, FontAwesomeIcons.DEFAULT_COLOR),null);
@@ -278,6 +279,8 @@ public class PojoTable extends BorderPane {
             throw new IllegalArgumentException("Pojo class to expose and Repository parameter are both null. At least one of them must be valid.");
         }
 
+        setFocusTraversable(true);
+        
         dataSupplierProperty.addListener(this::updateTableItems);
 
         if (pojoClass == null) {
@@ -328,10 +331,6 @@ public class PojoTable extends BorderPane {
             }
         });
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        uiTable.getSelectionModel().selectedItemProperty().addListener(
-                (ObservableValue<? extends Element> observable, Element oldValue, Element newValue) -> {
-                    session.getPrintManager().prepareToPrint(uiTable.getSelectionModel().getSelectedItems());
-                });
 
         /* We cannot bind visible properties of those columns, because TableView
          * will set their value when user will request to hide them.
@@ -1285,6 +1284,17 @@ public class PojoTable extends BorderPane {
             return Optional.of(col);
         }
         return Optional.empty();
+    }
+
+    @Override
+    public String getPrintTitle() {
+        return "Table";
+    }
+
+    @Override
+    public ObjectProperty getPrintableElements() {
+        final List selection = uiTable.getSelectionModel().getSelectedItems();
+        return new SimpleObjectProperty(selection.isEmpty()?null : new ArrayList(selection));
     }
 
 ////////////////////////////////////////////////////////////////////////////////

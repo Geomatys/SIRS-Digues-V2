@@ -13,6 +13,7 @@ import fr.sirs.SIRS;
 import fr.sirs.Injector;
 import fr.sirs.Plugin;
 import fr.sirs.Plugins;
+import fr.sirs.Printable;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
@@ -39,7 +40,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -103,7 +106,7 @@ import org.opengis.util.GenericName;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXMapPane extends BorderPane {
+public class FXMapPane extends BorderPane implements Printable{
     
     public static final Image ICON_SPLIT= SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COLUMNS,16,FontAwesomeIcons.DEFAULT_COLOR),null);
     
@@ -136,6 +139,7 @@ public class FXMapPane extends BorderPane {
     private final FXMapContextTree uiTree;
     
     public FXMapPane() {
+        setFocusTraversable(true);
         
         uiCoordBar2.setCrsButtonVisible(false);
         uiMap1.getCanvas().setBackgroundPainter(new SolidColorPainter(Color.WHITE));
@@ -407,6 +411,16 @@ public class FXMapPane extends BorderPane {
             }
         }
         return null;
+    }
+
+    @Override
+    public String getPrintTitle() {
+        return "Carte";
+    }
+
+    @Override
+    public ObjectProperty getPrintableElements() {
+        return new SimpleObjectProperty();
     }
     
     /**

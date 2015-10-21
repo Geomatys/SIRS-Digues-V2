@@ -446,11 +446,6 @@ public class CorePlugin extends Plugin {
     public FXFreeTab openTronconPane(final Element element){
         final DiguesTab diguesTab = Injector.getSession().getFrame().getDiguesTab();
         diguesTab.getDiguesController().displayElement(element);
-        diguesTab.setOnSelectionChanged((Event event) -> {
-            if (diguesTab.isSelected()) {
-                Injector.getSession().getPrintManager().prepareToPrint(element);
-            }
-        });
         return diguesTab;
     }
 

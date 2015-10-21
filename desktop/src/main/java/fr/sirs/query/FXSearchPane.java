@@ -5,6 +5,7 @@ import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
 import fr.sirs.Plugin;
 import fr.sirs.Plugins;
+import fr.sirs.Printable;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -754,7 +756,6 @@ public class FXSearchPane extends BorderPane {
             table.setLoadAll(true);
             table.init(layer);
             setCenter(table);
-            Injector.getSession().getPrintManager().prepareToPrint(FeatureStoreUtilities.collection(layer.getCollection().getFeatureType(), layer.getCollection()));
             uiNbResults.setText(layer.getCollection().size()+" résultat(s).");
         }
     }
@@ -786,26 +787,19 @@ public class FXSearchPane extends BorderPane {
         return CorePlugin.createDefaultStyle(Color.GRAY, (geomType == null)? null : geomType.getName().toString());
     }
 
-    private static class CustomizedFeatureTable extends FXFeatureTable {
+    private static class CustomizedFeatureTable extends FXFeatureTable implements Printable{
 
         CustomizedFeatureTable(final String path, final Locale locale, final ClassLoader classLoader){
             super(path, locale, classLoader);
         }
 
         @Override
-        public boolean init(Object candidate){
-            final  boolean result = super.init(candidate);
-            table.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<Feature>() {
-
-                @Override
-                public void onChanged(ListChangeListener.Change<? extends Feature> c) {
-                    final List<Feature> ftrs = table.getSelectionModel().getSelectedItems();
-                    if(ftrs!=null && !ftrs.isEmpty()){
-                        Injector.getSession().getPrintManager().prepareToPrint(FeatureStoreUtilities.collection(ftrs.get(0).getType(), ftrs));
-                    }
-                }
-            });
-            return result;
+        public ObjectProperty getPrintableElements() {
+            List selection = table.getSelectionModel().getSelectedItems();
+            if(selection.isEmpty()){
+                selection = table.getItems();
+            }
+            return new SimpleObjectProperty(selection);
         }
     }
 }

@@ -463,7 +463,7 @@ public class Session extends SessionCore {
             FadeTransition ft = new FadeTransition(Duration.millis(1000), n);
             ft.setFromValue(0.0);
             ft.setToValue(1.0);
-            Platform.runLater(()->{content.setCenter(n);ft.play();});
+            Platform.runLater(()->{content.setCenter(n);n.requestFocus();ft.play();});
         });
 
         if(element instanceof PositionDocument){
@@ -484,11 +484,6 @@ public class Session extends SessionCore {
             }
         });
         tab.setTextAbrege(generateElementTitle(element));
-        tab.setOnSelectionChanged((Event event) -> {
-            if (tab.isSelected()) {
-                printManager.prepareToPrint(element);
-            }
-        });
 
         // Remove from cache when tab is closed.
         tab.setOnClosed(event -> openEditors.remove(element));

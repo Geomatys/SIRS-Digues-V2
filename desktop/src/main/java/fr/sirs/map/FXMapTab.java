@@ -1,6 +1,8 @@
 
 package fr.sirs.map;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 
@@ -18,6 +20,17 @@ public class FXMapTab extends Tab {
         this.map = new FXMapPane();
         setText("Carte");
         setContent(map);
+        
+        selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(Boolean.TRUE.equals(newValue)){
+                    if(getContent()!=null){
+                        getContent().requestFocus();
+                    }
+                }
+            }
+        });
     }    
 
     public FXMapPane getMap() {

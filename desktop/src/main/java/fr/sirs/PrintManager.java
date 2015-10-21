@@ -1,5 +1,6 @@
 package fr.sirs;
 
+import com.sun.javafx.stage.StageHelper;
 import static fr.sirs.SIRS.AUTHOR_FIELD;
 import static fr.sirs.SIRS.BORNE_IDS_REFERENCE;
 import static fr.sirs.SIRS.COUCH_DB_DOCUMENT_FIELD;
@@ -41,6 +42,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import net.sf.jasperreports.engine.JRException;
@@ -54,35 +65,117 @@ import org.xml.sax.SAXException;
  * @author Samuel Andrés (Geomatys)
  */
 public class PrintManager {
-    
-    private List<Element> elementsToPrint = null;
-    private FeatureCollection featuresToPrint = null;
-    
-    public List<? extends Element> getElementsToPrint(){return elementsToPrint;}
-    public FeatureCollection getFeaturesToPrint(){return featuresToPrint;}
 
-    public void prepareToPrint(final Element object){
-        featuresToPrint = null;
-        elementsToPrint = new ArrayList<>();
-        elementsToPrint.add(object);
+    private static final ChangeListener<Scene> sceneListener = new ChangeListener<Scene>() {
+        @Override
+        public void changed(ObservableValue<? extends Scene> observable, Scene oldValue, Scene newValue) {
+            if(oldValue!=null){
+                oldValue.focusOwnerProperty().removeListener(focusOwnerListener);
+            }
+            if(newValue!=null){
+                newValue.focusOwnerProperty().addListener(focusOwnerListener);
+            }
+        }
+    };
+    private static final ChangeListener<Node> focusOwnerListener = new ChangeListener<Node>() {
+        @Override
+        public void changed(ObservableValue<? extends Node> observable, Node oldValue, Node newValue) {
+            if(newValue!=null){
+                Node focusedNode = newValue;
+                while(focusedNode!=null && !(focusedNode instanceof Printable)){
+                    focusedNode = focusedNode.getParent();
+                }
+                if(!(focusedNode instanceof Printable)){
+                    //si c'est un border pane on regarde le composant central
+                    focusedNode = newValue;
+                    while(focusedNode instanceof BorderPane && !(focusedNode instanceof Printable)){
+                        focusedNode = ((BorderPane)focusedNode).getCenter();
+                    }
+                }
+                if(focusedNode instanceof Printable){
+                    printable.set( (Printable) focusedNode);
+                }
+            }
+        }
+    };
+
+    private static Stage focusedStage = null;
+    private static final ObjectProperty<Printable> printable = new SimpleObjectProperty<>();
+
+    static {
+        //on ecoute quel element a le focus pour savoir qui est imprimable
+        StageHelper.getStages().addListener(new ListChangeListener<Stage>() {
+            @Override
+            public void onChanged(ListChangeListener.Change<? extends Stage> c) {
+                while(c.next()){
+                    for(Stage s : c.getAddedSubList()){
+                        s.focusedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                            if(Boolean.TRUE.equals(newValue)) setFocusedStage(s);
+                        });
+                    }
+                }
+            }
+        });
+        for(Stage s : StageHelper.getStages()){
+            if(s.isFocused()){
+                setFocusedStage(s);
+            }
+        }
     }
 
-    public void prepareToPrint(final List<Element> objects){
-        featuresToPrint = null;
-        elementsToPrint = objects;
+    private static synchronized void setFocusedStage(Stage stage){
+        if(focusedStage!=null){
+            focusedStage.sceneProperty().removeListener(sceneListener);
+            focusedStage.getScene().focusOwnerProperty().removeListener(focusOwnerListener);
+        }
+        focusedStage = stage;
+        if(focusedStage!=null){
+            focusedStage.sceneProperty().addListener(sceneListener);
+            focusedStage.getScene().focusOwnerProperty().addListener(focusOwnerListener);
+            focusOwnerListener.changed(null, null, focusedStage.getScene().getFocusOwner());
+        }
+    }
+
+    /**
+     * Récuperer l'element imprimable actif.
+     * 
+     * @return Printable
+     */
+    public static ReadOnlyObjectProperty<Printable> printableProperty() {
+        return printable;
+    }
+
+    public void printFocusedPrintable() {
+        final Printable printable = PrintManager.printable.get();
+        if(!printable.print()){
+            final Object candidate = printable.getPrintableElements().get();
+            print(candidate);
+        }
     }
     
-    public void prepareToPrint(final Feature feature){
-        elementsToPrint = null;
-        featuresToPrint = FeatureStoreUtilities.collection(feature);
+    public final void print(Object candidate){
+        List<Element> elementsToPrint = null;
+        FeatureCollection featuresToPrint = null;
+
+        if(candidate instanceof Feature){
+            featuresToPrint = FeatureStoreUtilities.collection((Feature)candidate);
+        }else if(candidate instanceof Element){
+            elementsToPrint = new ArrayList<>();
+            elementsToPrint.add((Element)candidate);
+        }else if(candidate instanceof FeatureCollection){
+            featuresToPrint = (FeatureCollection) candidate;
+        }else if(candidate instanceof List){
+            elementsToPrint = (List)candidate;
+        }
+
+        if(elementsToPrint!=null){
+            printElements(elementsToPrint);
+        } else if(featuresToPrint!=null){
+            printFeatures(featuresToPrint);
+        }
     }
-    
-    public void prepareToPrint(final FeatureCollection featureCollection){
-        elementsToPrint = null;
-        featuresToPrint = featureCollection;
-    }
-    
-    public final void printFeatures(){
+
+    private final void printFeatures(FeatureCollection featuresToPrint){
         try {
             final File fileToPrint = PrinterUtilities.print(null, featuresToPrint);
             if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
@@ -91,7 +184,7 @@ public class PrintManager {
         }
     }
     
-    public final void printElements(){
+    private final void printElements(List<Element> elementsToPrint){
         final List avoidFields = new ArrayList<>();
         avoidFields.add(GEOMETRY_FIELD);
         avoidFields.add(DOCUMENT_ID_FIELD);

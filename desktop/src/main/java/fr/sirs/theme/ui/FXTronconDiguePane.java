@@ -226,7 +226,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         }
 
         if (newElement != null) {
-            Injector.getSession().getPrintManager().prepareToPrint(newElement);
 
             ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
             // * commentaire

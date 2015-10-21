@@ -49,6 +49,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
     public FXElementContainerPane(final T element) {
         SIRS.loadFXML(this);
         date_maj.setDisable(true);
+        setFocusTraversable(true);
 
         uiMode.setSaveAction(this::save);
         uiMode.requireEditionForElement(element);
@@ -151,7 +152,6 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
             //validation
             uiMode.validProperty().bind(newValue.validProperty());
             uiMode.authorIDProperty().bind(newValue.authorProperty());
-            Injector.getSession().getPrintManager().prepareToPrint(newValue);
 
             uiDesignation.textProperty().bindBidirectional(newValue.designationProperty());
 
