@@ -1,9 +1,7 @@
 package fr.sirs.theme.ui;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.core.LinearReferencingUtilities;
@@ -17,9 +15,9 @@ import fr.sirs.core.model.PositionableVegetation;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.ZoneVegetation;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
+import static fr.sirs.plugin.vegetation.PluginVegetation.computeRatio;
+import static fr.sirs.plugin.vegetation.PluginVegetation.toPoint;
+import static fr.sirs.plugin.vegetation.PluginVegetation.toPolygon;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,8 +31,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import org.geotoolkit.display2d.GO2Utilities;
-import org.geotoolkit.display2d.primitive.jts.JTSLineIterator;
-import org.geotoolkit.displayt2d.style.j2d.DoublePathWalker;
 import static org.geotoolkit.referencing.LinearReferencing.asLineString;
 
 /**
@@ -62,7 +58,6 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
     private final String originalLblStartNear;
 
     private final BooleanProperty pctProp = new SimpleBooleanProperty(false);
-
 
     final ChangeListener<String> typeCoteChangeListener = (ObservableValue<? extends String> observable, String oldValue, String newValue) -> buildGeometry();
 
@@ -202,10 +197,10 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
             uiDistanceEnd.getValueFactory().setValue(rp.distanceEndBorne);
             uiBorneEnd.getSelectionModel().select(rp.borneDigueEnd);
 
-            uiStartNear.getValueFactory().setValue(0.0);
-            uiStartFar.getValueFactory().setValue(0.0);
-            uiEndNear.getValueFactory().setValue(0.0);
-            uiEndFar.getValueFactory().setValue(0.0);
+            uiStartNear.getValueFactory().setValue(pos.getDistanceDebutMin());
+            uiStartFar.getValueFactory().setValue(pos.getDistanceDebutMax());
+            uiEndNear.getValueFactory().setValue(pos.getDistanceFinMin());
+            uiEndFar.getValueFactory().setValue(pos.getDistanceFinMax());
         }else{
             uiAvalStart.setSelected(true);
             uiAmontStart.setSelected(false);
@@ -258,36 +253,8 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
         //on recalculate la geometrie linear
         final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
 
-
         //on calcule le ratio on fonction de la rive et du coté
-        final String typeRiveId = troncon.getTypeRiveId();
-        final String typeCoteId = positionable.getTypeCoteId();
-        double ratio = 1.0;
-        if("RefRive:1".equals(typeRiveId)){
-            //rive gauche
-            ratio *= -1.0;
-        }
-
-        switch (typeCoteId==null ? "" : typeCoteId) {
-            //coté eau
-            case "RefCote:1": //riviere
-            case "RefCote:3": //etang
-            case "RefCote:4": //mer
-                ratio *= 1.0;
-                break;
-            //coté terre
-            case "RefCote:2": //terre
-            case "RefCote:6": //crete
-            case "RefCote:99"://indéfini
-            default :
-                //Terre, Crete
-                ratio *= -1.0;
-                break;
-            case "RefCote:5": //2 coté
-                ratio = 0.0;
-                break;
-        }
-
+        double ratio = computeRatio(troncon, positionable);
 
         //on extrude avec la distance
         Geometry geometry;
@@ -353,153 +320,4 @@ public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMo
         positionable.setPositionFin(TronconUtils.getPointFromGeometry(positionable.getGeometry(), getSourceLinear(sr), Injector.getSession().getProjection(), true));
     }
 
-    /**
-     * Builds an area from a linear.
-     *
-     *        ||
-     *        ||
-     *        ||
-     *        ||----------->   --------------(startFar)
-     *        ||---->          --------------(startNear)
-     *        ||     *******
-     *        ||     *\\\\\*
-     *        ||     *\\\\\*
-     *        \\    *\\\\\\\*
-     *         \\    *\\\\\\\*
-     *          \\    *\\\\\\\*     (SURFACE)
-     *           \\   *\\\\\\\\\*
-     *            ||   *\\\\\\\\\*
-     *            ||   *\\\\\\\\\*
-     *            ||  *\\\\\\\\\\\*
-     *            ||  *\\\\\\\\\\\*
-     *            ||  *************
-     *            ||->                  --------(endNear)
-     *            ||-------------->     --------(endFar)
-     *            ||
-     *            ||
-     *
-     *
-     *
-     *
-     *
-     * Utilisé dans le plugin vegetation.
-     *
-     */
-    private static Polygon toPolygon(LineString linear, final double startNear,
-            final double startFar, final double endNear, final double endFar) {
-
-        final PathIterator ite = new JTSLineIterator(linear, null);
-        final DoublePathWalker walker = new DoublePathWalker(ite);
-        final Point2D.Double pt = new Point2D.Double();
-        final double totalLength = linear.getLength();
-        final Coordinate c0 = new Coordinate(0,0);
-        final Coordinate c1 = new Coordinate(0,0);
-        final List<Coordinate> coords = new ArrayList<>();
-
-        double distance = 0;
-        double distNear = startNear;
-        double distFar = startFar;
-
-        //premiers points
-        walker.walk(0);
-        walker.getPosition(pt);
-        double angle = Math.PI/2 + walker.getRotation();
-        double cos = Math.cos(angle);
-        double sin = Math.sin(angle);
-        c0.x = pt.x + cos*distNear;
-        c0.y = pt.y + sin*distNear;
-        c1.x = pt.x + cos*distFar;
-        c1.y = pt.y + sin*distFar;
-        coords.add(0,new Coordinate(c0));
-        coords.add(new Coordinate(c1));
-
-
-        while(!walker.isFinished()){
-            final double d = walker.getSegmentLengthRemaining();
-            distance += d;
-            walker.walk(d+0.0001f);
-            walker.getPosition(pt);
-            angle = Math.PI/2 + walker.getRotation();
-            cos = Math.cos(angle);
-            sin = Math.sin(angle);
-
-            distNear = startNear + (endNear-startNear)*(distance/totalLength);
-            distFar = startFar + (endFar-startFar)*(distance/totalLength);
-
-            c0.x = pt.x + cos*distNear;
-            c0.y = pt.y + sin*distNear;
-            c1.x = pt.x + cos*distFar;
-            c1.y = pt.y + sin*distFar;
-            coords.add(0,new Coordinate(c0));
-            coords.add(new Coordinate(c1));
-        }
-
-        //on ferme le polygone
-        coords.add(new Coordinate(coords.get(0)));
-        while(coords.size()<4){
-            coords.add(new Coordinate(coords.get(0)));
-        }
-
-        final Polygon polygon = GO2Utilities.JTS_FACTORY.createPolygon(coords.toArray(new Coordinate[0]));
-        polygon.setSRID(linear.getSRID());
-        polygon.setUserData(linear.getUserData());
-        return polygon;
-    }
-
-    /**
-     * Calcule les coordonnées d'un point à partir d'un segment de référence,
-     * d'une distance au point de départ du segment et d'une distance au segment
-     * lui-même.
-     *
-     *
-     *                         X Point computed
-     *                         |
-     *                         | perpendicular distance
-     *        linear distance  |
-     *     x---------------------------------------------x
-     *     start             linear (segment)           end
-     *
-     * @param segment Te reference segment
-     * @param perpendicularDistance
-     * @param linearDistance
-     * @return
-     */
-    private static Point toPoint(final LineString segment, final double perpendicularDistance, final double linearDistance) {
-
-        final double segmentLength = segment.getLength();
-        /*
-        La suite calcule les coordonnées du point définitif à la distance
-        "perpendicularDistance" du segment.
-         */
-        final PathIterator ite = new JTSLineIterator(segment, null);
-        final DoublePathWalker walker = new DoublePathWalker(ite);
-        final Point2D.Double pt = new Point2D.Double();
-        final Coordinate coord = new Coordinate(0,0);
-
-        /*
-        On va jusqu'au point intermédiaire, on récupère la position et la
-        direction perpendiculaire.
-        */
-//        final float d = walker.getSegmentLengthRemaining();
-        final double distanceToWalk;
-        // On sécurise la distance à parcourir pour que celle-ci soit bien incluse dans le segment.
-        if(linearDistance>segmentLength) distanceToWalk=segmentLength;
-        else if(linearDistance<0.) distanceToWalk=0.;
-        else distanceToWalk = linearDistance;
-
-        walker.walk(distanceToWalk);
-        walker.getPosition(pt);
-        double angle = Math.PI/2 + walker.getRotation();
-
-        coord.x = pt.x + Math.cos(angle)*perpendicularDistance;
-        coord.y = pt.y + Math.sin(angle)*perpendicularDistance;
-
-        /**
-         * Les quatre points retournés par "toPolygon()" sont identiques. On prend le premier.
-         */
-        final Point polygon = GO2Utilities.JTS_FACTORY.createPoint(coord);
-        polygon.setSRID(segment.getSRID());
-        polygon.setUserData(segment.getUserData());
-        return polygon;
-    }
 }

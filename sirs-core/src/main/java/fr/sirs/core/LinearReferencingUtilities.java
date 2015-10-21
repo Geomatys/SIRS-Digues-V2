@@ -400,20 +400,35 @@ public final class LinearReferencingUtilities extends LinearReferencing {
     }
 
     /**
+     *
+     * @param segments
+     * @param distanceAlongLinear
+     * @return
+     */
+    public static Entry<LineString, Double> buildSegmentFromDistance(final SegmentInfo[] segments,
+            final double distanceAlongLinear) {
+
+        final Entry<SegmentInfo, Double> segmentAndDistance = getSegmentAndDistance(segments, distanceAlongLinear);
+
+        return new HashMap.SimpleEntry<>(segmentAndDistance.getKey().geometry, segmentAndDistance.getValue());
+    }
+
+    /**
      * Pour un point sur le linéaire donné par une borne, sa distance à cette
      * borne et leur position relative, retourne le segment sur lequel se trouve
      * ce point, accompagné de la distance entre le début du segment et le point.
      *
-     * @param tronconGeom
+     * @param tronconLineString
      * @param borneId
      * @param borneAval
      * @param borneDistance
      * @param repo
      * @return
      */
-    public static Entry<LineString, Double> buildSegmentFromBorne(final Geometry tronconGeom, final String borneId, final boolean borneAval, final double borneDistance, AbstractSIRSRepository<BorneDigue> repo) {
+    public static Entry<LineString, Double> buildSegmentFromBorne(final LineString tronconLineString, 
+            final String borneId, final boolean borneAval, final double borneDistance,
+            final AbstractSIRSRepository<BorneDigue> repo) {
 
-        final LineString tronconLineString = asLineString(tronconGeom);
         final SegmentInfo[] segments = buildSegments(tronconLineString);
 
         //reconstruction a partir de bornes et de distances
@@ -438,9 +453,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
         // La distance au début du troncon se calcule par ajout de la distance entre la borne et le début du troncon à la distance du point à la borne
         distanceDebut += distanceBorneTronconStart;
 
-        final Entry<SegmentInfo, Double> segmentAndDistance = getSegmentAndDistance(segments, distanceDebut);
-
-        return new HashMap.SimpleEntry<>(segmentAndDistance.getKey().geometry, segmentAndDistance.getValue());
+        return buildSegmentFromDistance(segments, distanceDebut);
     }
 
     /**

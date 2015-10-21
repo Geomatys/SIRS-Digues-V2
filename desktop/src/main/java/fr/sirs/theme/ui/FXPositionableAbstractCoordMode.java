@@ -41,8 +41,11 @@ import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.CRS;
+import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
+import org.opengis.util.FactoryException;
 
 /**
  * Edition des coordonées géographique d'un {@link Positionable}.
@@ -54,17 +57,19 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
     private final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
 
     private final ObjectProperty<Positionable> posProperty = new SimpleObjectProperty<>();
-    private final BooleanProperty disableProperty = new SimpleBooleanProperty(true);
+    protected final BooleanProperty disableProperty = new SimpleBooleanProperty(true);
 
-    @FXML private ComboBox<CoordinateReferenceSystem> uiCRSs;
-    @FXML private Spinner<Double> uiLongitudeStart;
-    @FXML private Spinner<Double> uiLongitudeEnd;
-    @FXML private Spinner<Double> uiLatitudeStart;
-    @FXML private Spinner<Double> uiLatitudeEnd;
+    @FXML protected ComboBox<CoordinateReferenceSystem> uiCRSs;
+    @FXML protected Spinner<Double> uiLongitudeStart;
+    @FXML protected Spinner<Double> uiLongitudeEnd;
+    @FXML protected Spinner<Double> uiLatitudeStart;
+    @FXML protected Spinner<Double> uiLatitudeEnd;
 
     private Button uiImport;
 
     private boolean reseting = false;
+    public boolean isReseting(){return reseting;}
+    public void setReseting(final boolean res){reseting = res;}
 
     public FXPositionableAbstractCoordMode() {
         SIRS.loadFXML(this, Positionable.class);
@@ -255,7 +260,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         if(endPoint==null) endPoint = startPoint;
 
         final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
-        final LineString geometry = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(),startPoint,endPoint);
+        final LineString geometry = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), startPoint, endPoint);
 
         //on sauvegarde les points dans le crs de la base
         positionable.setGeometry(geometry);
@@ -264,7 +269,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
                 final MathTransform trs = CRS.findMathTransform(crs, Injector.getSession().getProjection());
                 startPoint = (Point) JTS.transform(startPoint, trs);
                 endPoint = (Point) JTS.transform(endPoint, trs);
-            }catch(Exception ex){
+            }catch(FactoryException | MismatchedDimensionException | TransformException ex){
                 GeotkFX.newExceptionDialog("La conversion des positions a échouée.", ex).show();
                 throw new RuntimeException("La conversion des positions a échouée.", ex);
             }
@@ -275,9 +280,8 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         positionable.geometryProperty().set(geometry);
     }
 
-    private void coordChange(){
+    protected void coordChange(){
         if(reseting) return;
-
         reseting = true;
         buildGeometry();
         reseting = false;
