@@ -368,6 +368,7 @@ public class PojoTable extends BorderPane implements Printable {
             // On donne toutes les informations de position.
             if (Positionable.class.isAssignableFrom(this.pojoClass)) {
                 final Set<String> positionableKeys = SIRS.listSimpleProperties(Positionable.class).keySet();
+                positionableKeys.remove(SIRS.DESIGNATION_FIELD);
                 final ArrayList<TableColumn> positionColumns = new ArrayList<>();
                 for (final String key : positionableKeys) {
                     getPropertyColumn(properties.remove(key)).ifPresent(column -> {
@@ -379,6 +380,7 @@ public class PojoTable extends BorderPane implements Printable {
                 // On permet de cacher toutes les infos de position d'un coup.
                 final ImageView viewOn = new ImageView(SIRS.ICON_COMPASS_WHITE);
                 final ToggleButton uiPositionVisibility = new ToggleButton(null, viewOn);
+                uiPositionVisibility.setSelected(true); // Prepare to be forced to change.
                 uiPositionVisibility.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
                     if (newValue == null) return;
                     for (final TableColumn col : positionColumns) {
@@ -393,8 +395,7 @@ public class PojoTable extends BorderPane implements Printable {
                 uiPositionVisibility.visibleProperty().bind(uiFicheMode.selectedProperty().not());
                 uiPositionVisibility.managedProperty().bind(uiPositionVisibility.visibleProperty());
                 uiPositionVisibility.getStyleClass().add(BUTTON_STYLE);
-                uiPositionVisibility.setSelected(true);
-                uiPositionVisibility.setSelected(false);
+                uiPositionVisibility.setSelected(false);// Force to change.
                 searchEditionToolbar.getChildren().add(uiPositionVisibility);
             }
 
