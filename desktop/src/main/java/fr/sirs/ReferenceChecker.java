@@ -1,6 +1,8 @@
 package fr.sirs;
 
+import static fr.sirs.SIRS.REFERENCE_GET_ID;
 import fr.sirs.core.model.ReferenceType;
+import fr.sirs.util.StreamingIterable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -22,17 +24,15 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import static java.util.logging.Level.WARNING;
 import javafx.concurrent.Task;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
-import static fr.sirs.SIRS.REFERENCE_GET_ID;
-import fr.sirs.util.StreamingIterable;
-import java.util.HashSet;
-import java.util.Iterator;
-import static java.util.logging.Level.WARNING;
 import org.ektorp.DocumentOperationResult;
 import org.geotoolkit.util.collection.CloseableIterator;
 
@@ -435,6 +435,7 @@ public class ReferenceChecker extends Task<Void> {
         }
 
         final File file = File.createTempFile("tempReference", ".csv");
+        file.deleteOnExit();
 
         final URLConnection connection = url.openConnection();
         try{
