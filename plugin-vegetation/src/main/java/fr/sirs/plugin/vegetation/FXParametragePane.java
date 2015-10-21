@@ -21,6 +21,7 @@ import java.util.Optional;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -31,7 +32,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.cell.ComboBoxListCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import org.elasticsearch.common.joda.time.LocalDate;
@@ -66,7 +66,7 @@ public class FXParametragePane extends SplitPane {
         this.getItems().add(pane);
 
         refreshPlanList();
-        uiPlanList.setCellFactory(ComboBoxListCell.forListView(new SirsStringConverter()));
+//        uiPlanList.setCellFactory(ComboBoxListCell.forListView(new SirsStringConverter()));
         
         uiPlanList.setCellFactory((ListView<PlanVegetation> param)-> new UpdatableListCell());
         
@@ -79,6 +79,14 @@ public class FXParametragePane extends SplitPane {
                 }
             }
         });
+
+        VegetationSession.INSTANCE.planProperty().addListener(new WeakChangeListener<>(new ChangeListener<PlanVegetation>() {
+
+            @Override
+            public void changed(ObservableValue<? extends PlanVegetation> observable, PlanVegetation oldValue, PlanVegetation newValue) {
+                refreshPlanList();
+            }
+        }));
         
         uiAdd.setOnAction(this::planAdd);
         uiAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
@@ -95,6 +103,7 @@ public class FXParametragePane extends SplitPane {
      * Updates the planification list.
      */
     private void refreshPlanList() {
+        uiPlanList.setItems(FXCollections.emptyObservableList()); // Pour obliger la liste à rafraîchir même les éléments qui semblent n'avoir pas "bougé" (de manière à forcer la vérification du plan actif).
         uiPlanList.setItems(FXCollections.observableList(planRepo.getAll()));
     }
 
@@ -264,6 +273,11 @@ public class FXParametragePane extends SplitPane {
 
             textProperty().unbind();
             if(item!=null){
+                if(item==VegetationSession.INSTANCE.planProperty().get()){
+                    setGraphic(new ImageView(SIRS.ICON_CHECK));
+                }
+                else setGraphic(null);
+
                 textProperty().bind(new ObjectBinding<String>() {
 
                     {
@@ -277,6 +291,7 @@ public class FXParametragePane extends SplitPane {
                 });
             } else {
                 setText("");
+                setGraphic(null);
             }
         }
     }
