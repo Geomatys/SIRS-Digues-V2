@@ -52,9 +52,9 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
                 if(pojo instanceof ZoneVegetation) ((AbstractSIRSRepository) Injector.getSession().getRepositoryForClass(pojo.getClass())).remove(pojo);
             }
         });
-        getTable().getColumns().add(3, (TableColumn) new VegetationClassColumm());
-        getTable().getColumns().add(4, (TableColumn) new VegetationTypeColumm());
-        getTable().getColumns().add(5, (TableColumn) new VegetationAreaColumm());
+        getTable().getColumns().add(4, (TableColumn) new VegetationClassColumm());
+        getTable().getColumns().add(5, (TableColumn) new VegetationTypeColumm());
+        getTable().getColumns().add(6, (TableColumn) new VegetationAreaColumm());
     }
     
     @Override
