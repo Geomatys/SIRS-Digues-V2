@@ -66,7 +66,6 @@ public class FXParametragePane extends SplitPane {
         this.getItems().add(pane);
 
         refreshPlanList();
-//        uiPlanList.setCellFactory(ComboBoxListCell.forListView(new SirsStringConverter()));
         
         uiPlanList.setCellFactory((ListView<PlanVegetation> param)-> new UpdatableListCell());
         
@@ -273,7 +272,7 @@ public class FXParametragePane extends SplitPane {
 
             textProperty().unbind();
             if(item!=null){
-                if(item==VegetationSession.INSTANCE.planProperty().get()){
+                if(item.equals(VegetationSession.INSTANCE.planProperty().get())){
                     setGraphic(new ImageView(SIRS.ICON_CHECK));
                 }
                 else setGraphic(null);
