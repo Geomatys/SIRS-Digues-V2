@@ -1,14 +1,11 @@
 package fr.sirs.theme.ui;
 
-import fr.sirs.Injector;
-import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractZoneVegetationRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
-import static fr.sirs.plugin.vegetation.PluginVegetation.isCoherent;
 import fr.sirs.plugin.vegetation.VegetationSession;
 import fr.sirs.theme.AbstractTheme;
 import fr.sirs.theme.TronconTheme;
@@ -17,15 +14,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javafx.application.Platform;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Separator;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -135,50 +127,50 @@ public class FXVegetationTronconThemePane extends FXTronconThemePane {
         return new BorderPane(table, topPane, null, null, null);
     }
 
-    /**
-     * Colonne d'alerte lorsque les traitements réalisés sur une parcelle paraissent incohérents avec la planification.
-     * @deprecated : plus utilisé d'après la spec 0.3
-     */
-    @Deprecated
-    private static class AlertTableColumn extends TableColumn<ParcelleVegetation, ParcelleVegetation> {
-
-        /**
-         * @deprecated : plus utilisé d'après la spec 0.3
-         */
-        @Deprecated
-        public AlertTableColumn(){
-            setGraphic(new ImageView(SIRS.ICON_EXCLAMATION_TRIANGLE_BLACK));
-            setPrefWidth(24);
-            setMinWidth(24);
-            setMaxWidth(24);
-            setCellValueFactory((TableColumn.CellDataFeatures<ParcelleVegetation, ParcelleVegetation> param) -> new SimpleObjectProperty(param.getValue()));
-            setCellFactory((TableColumn<ParcelleVegetation, ParcelleVegetation> param) -> new AlertTableCell());
-        }
-    }
-
-
-    /**
-     * Cellule d'alerte lorsque les traitements réalisés sur une parcelle paraissent incohérents avec la planification.
-     * @deprecated : plus utilisé d'après la spec 0.3
-     */
-    @Deprecated
-    private static class AlertTableCell extends TableCell<ParcelleVegetation, ParcelleVegetation>{
-        @Override
-        protected void updateItem(final ParcelleVegetation item, boolean empty){
-            super.updateItem(item, empty);
-
-            if(item!=null && item.getPlanId()!=null){
-
-                final Runnable cellUpdater = () -> {
-                    final ImageView image = isCoherent(item) ? null : new ImageView(SIRS.ICON_EXCLAMATION_TRIANGLE);
-                    Platform.runLater(() -> setGraphic(image));
-                };
-
-                Injector.getSession().getTaskManager().submit("Vérification de la cohérence de traitement de la parcelle "+item.getDesignation(), cellUpdater);
-            }
-            else{
-                setGraphic(null);
-            }
-        }
-    }
+//    /**
+//     * Colonne d'alerte lorsque les traitements réalisés sur une parcelle paraissent incohérents avec la planification.
+//     * @deprecated : plus utilisé d'après la spec 0.3
+//     */
+//    @Deprecated
+//    private static class AlertTableColumn extends TableColumn<ParcelleVegetation, ParcelleVegetation> {
+//
+//        /**
+//         * @deprecated : plus utilisé d'après la spec 0.3
+//         */
+//        @Deprecated
+//        public AlertTableColumn(){
+//            setGraphic(new ImageView(SIRS.ICON_EXCLAMATION_TRIANGLE_BLACK));
+//            setPrefWidth(24);
+//            setMinWidth(24);
+//            setMaxWidth(24);
+//            setCellValueFactory((TableColumn.CellDataFeatures<ParcelleVegetation, ParcelleVegetation> param) -> new SimpleObjectProperty(param.getValue()));
+//            setCellFactory((TableColumn<ParcelleVegetation, ParcelleVegetation> param) -> new AlertTableCell());
+//        }
+//    }
+//
+//
+//    /**
+//     * Cellule d'alerte lorsque les traitements réalisés sur une parcelle paraissent incohérents avec la planification.
+//     * @deprecated : plus utilisé d'après la spec 0.3
+//     */
+//    @Deprecated
+//    private static class AlertTableCell extends TableCell<ParcelleVegetation, ParcelleVegetation>{
+//        @Override
+//        protected void updateItem(final ParcelleVegetation item, boolean empty){
+//            super.updateItem(item, empty);
+//
+//            if(item!=null && item.getPlanId()!=null){
+//
+//                final Runnable cellUpdater = () -> {
+//                    final ImageView image = isCoherent(item) ? null : new ImageView(SIRS.ICON_EXCLAMATION_TRIANGLE);
+//                    Platform.runLater(() -> setGraphic(image));
+//                };
+//
+//                Injector.getSession().getTaskManager().submit("Vérification de la cohérence de traitement de la parcelle "+item.getDesignation(), cellUpdater);
+//            }
+//            else{
+//                setGraphic(null);
+//            }
+//        }
+//    }
 }
