@@ -18,7 +18,7 @@ public class FXPeuplementVegetationPane extends FXPeuplementVegetationPaneStub {
 
 
         // Paramétrage du traitement lors du changement de type de peuplement
-        ui_typePeuplementId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Preview>() {
+        ui_typeVegetationId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Preview>() {
 
             @Override
             public void changed(ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) {

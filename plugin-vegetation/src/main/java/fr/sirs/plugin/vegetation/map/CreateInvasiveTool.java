@@ -48,7 +48,7 @@ public class CreateInvasiveTool extends CreateVegetationPolygonTool<InvasiveVege
     protected InvasiveVegetation newVegetation() {
         final InvasiveVegetation candidate = super.newVegetation();
         //classement indéfini
-        candidate.setTypeInvasive(DEFAULT_INVASIVE_VEGETATION_TYPE);
+        candidate.setTypeVegetationId(DEFAULT_INVASIVE_VEGETATION_TYPE);
 
         /*
         Si on peut, on paramètre le traitement qui a été associé dans super.newVegetation();

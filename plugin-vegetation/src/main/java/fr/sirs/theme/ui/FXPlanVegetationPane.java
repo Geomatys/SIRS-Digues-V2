@@ -159,10 +159,10 @@ public class FXPlanVegetationPane extends BorderPane {
                     // On détermine le type de végétation éventuel.
                     final String typeVegetation;
                     if(type==PeuplementVegetation.class){
-                        typeVegetation = ((PeuplementVegetation) zone).getTypePeuplementId();
+                        typeVegetation = ((PeuplementVegetation) zone).getTypeVegetationId();
                     }
                     else if(type==InvasiveVegetation.class){
-                        typeVegetation = ((InvasiveVegetation) zone).getTypeInvasive();
+                        typeVegetation = ((InvasiveVegetation) zone).getTypeVegetationId();
                     }
                     else typeVegetation = null;
 

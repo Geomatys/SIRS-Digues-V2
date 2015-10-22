@@ -600,7 +600,7 @@ public class FXPlanTable extends BorderPane{
             for(final ZoneVegetation zone : zones){
                 final StringBuilder label = new StringBuilder(cvt.toString(zone));
                 if(zone instanceof PeuplementVegetation){
-                    final String typeId = ((PeuplementVegetation)zone).getTypePeuplementId();
+                    final String typeId = ((PeuplementVegetation)zone).getTypeVegetationId();
                     if(typeId!=null){
                         try{
                             final Preview preview = Injector.getSession().getPreviews().get(typeId);
@@ -615,7 +615,7 @@ public class FXPlanTable extends BorderPane{
                     }
                 }
                 else if(zone instanceof InvasiveVegetation){
-                    final String typeId = ((InvasiveVegetation)zone).getTypeInvasive();
+                    final String typeId = ((InvasiveVegetation)zone).getTypeVegetationId();
                     if(typeId!=null){
                         try{
                             final Preview preview = Injector.getSession().getPreviews().get(typeId);

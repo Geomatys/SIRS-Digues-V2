@@ -17,7 +17,7 @@ public class FXInvasiveVegetationPane extends FXInvasiveVegetationPaneStub {
         super(invasiveVegetation);
 
         // Paramétrage du traitement lors du changement de type de peuplement
-        ui_typeInvasive.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Preview>() {
+        ui_typeVegetationId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Preview>() {
 
             @Override
             public void changed(ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) {

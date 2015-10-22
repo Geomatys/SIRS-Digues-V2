@@ -8,7 +8,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PeuplementVegetation" eSuperTypes="#//ZoneVegetation">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typePeuplementId" eType="#//RefTypePeuplementVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeVegetationId" eType="#//RefTypePeuplementVegetation"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="densite" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteur" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="diametre" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
@@ -16,7 +16,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="InvasiveVegetation" eSuperTypes="#//ZoneVegetation">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="densiteId" eType="#//RefDensiteVegetation"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeInvasive" eType="#//RefTypeInvasiveVegetation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="typeVegetationId" eType="#//RefTypeInvasiveVegetation"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="HerbaceeVegetation" eSuperTypes="#//ZoneVegetation">
     <eAnnotations source="couchDBDocument"/>

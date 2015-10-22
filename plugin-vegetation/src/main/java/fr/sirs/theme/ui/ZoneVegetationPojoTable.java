@@ -81,11 +81,11 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
             // S'il s'agit d'une zone d'invasive ou de peuplement, il faut affecter le type par défaut et effectuer le paramétrage éventuel
 
             if(retrievedClass==PeuplementVegetation.class){
-                ((PeuplementVegetation) zone).setTypePeuplementId(DEFAULT_PEUPLEMENT_VEGETATION_TYPE);
+                ((PeuplementVegetation) zone).setTypeVegetationId(DEFAULT_PEUPLEMENT_VEGETATION_TYPE);
                 paramTraitement(PeuplementVegetation.class, (PeuplementVegetation) zone, DEFAULT_PEUPLEMENT_VEGETATION_TYPE);
             }
             else if(retrievedClass==InvasiveVegetation.class){
-                ((InvasiveVegetation) zone).setTypeInvasive(DEFAULT_INVASIVE_VEGETATION_TYPE);
+                ((InvasiveVegetation) zone).setTypeVegetationId(DEFAULT_INVASIVE_VEGETATION_TYPE);
                 paramTraitement(InvasiveVegetation.class, (InvasiveVegetation) zone, DEFAULT_INVASIVE_VEGETATION_TYPE);
             }
             else if(retrievedClass==ArbreVegetation.class){
@@ -154,9 +154,9 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
                     if(param!=null){
                         final ZoneVegetation zone = param.getValue();
                         if(zone instanceof PeuplementVegetation){
-                           return ((PeuplementVegetation)zone).typePeuplementIdProperty();
+                           return ((PeuplementVegetation)zone).typeVegetationIdProperty();
                         }else if(zone instanceof InvasiveVegetation){
-                            return ((InvasiveVegetation)zone).typeInvasiveProperty();
+                            return ((InvasiveVegetation)zone).typeVegetationIdProperty();
                         }
                         else return null;
                     }

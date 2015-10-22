@@ -49,7 +49,7 @@ public class CreatePeuplementTool extends CreateVegetationPolygonTool<Peuplement
         final PeuplementVegetation candidate = super.newVegetation();
 
         //classement indéfini
-        candidate.setTypePeuplementId(DEFAULT_PEUPLEMENT_VEGETATION_TYPE);
+        candidate.setTypeVegetationId(DEFAULT_PEUPLEMENT_VEGETATION_TYPE);
 
         /*
         Si on peut, on paramètre le traitement qui a été associé dans super.newVegetation();
