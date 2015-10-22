@@ -225,7 +225,7 @@ public class PluginVegetation extends Plugin {
             final AbstractSIRSRepository<RefTypePeuplementVegetation> typePeuplementRepo = getSession().getRepositoryForClass(RefTypePeuplementVegetation.class);
             for(RefTypePeuplementVegetation ref : typePeuplementRepo.getAll()){
                 final String id = ref.getId();
-                final Filter filter = FF.equals(FF.property("typePeuplementId"),FF.literal(id));
+                final Filter filter = FF.equals(FF.property("typeVegetationId"),FF.literal(id));
                 final FeatureCollection col = peuplementSession.getFeatureCollection(
                         QueryBuilder.all(peuplementStore.getNames().iterator().next()));
                 final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col);
@@ -262,7 +262,7 @@ public class PluginVegetation extends Plugin {
             final AbstractSIRSRepository<RefTypeInvasiveVegetation> typeInvasiveRepo = getSession().getRepositoryForClass(RefTypeInvasiveVegetation.class);
             for(RefTypeInvasiveVegetation ref : typeInvasiveRepo.getAll()){
                 final String id = ref.getId();
-                final Filter filter = FF.equals(FF.property("typeInvasive"),FF.literal(id));
+                final Filter filter = FF.equals(FF.property("typeVegetationId"),FF.literal(id));
                 final FeatureCollection col = invasiveSession.getFeatureCollection(
                         QueryBuilder.filtered(invasiveStore.getNames().iterator().next(),filter));
                 final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col);
