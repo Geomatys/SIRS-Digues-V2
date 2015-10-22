@@ -99,6 +99,14 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
         return zone;
     }
 
+    @Override
+    protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event){
+        final Element obj = event.getRowValue();
+        if(obj != null){
+            ((AbstractSIRSRepository) Injector.getSession().getRepositoryForClass(obj.getClass())).update(obj);
+        }
+    }
+
     private static class VegetationClassColumm extends TableColumn<ZoneVegetation, Class<? extends ZoneVegetation>>{
 
         private VegetationClassColumm(){
