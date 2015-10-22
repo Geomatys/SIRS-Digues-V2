@@ -22,9 +22,11 @@ import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.SirsPreferences;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
 import java.net.URL;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,11 +50,17 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.util.Duration;
+import javax.measure.unit.SI;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
 import org.ektorp.CouchDbConnector;
+import org.geotoolkit.display2d.ext.DecorationXMLParser;
 import org.geotoolkit.display2d.ext.DefaultBackgroundTemplate;
 import org.geotoolkit.display2d.ext.legend.DefaultLegendTemplate;
+import org.geotoolkit.display2d.ext.northarrow.DefaultNorthArrowTemplate;
+import org.geotoolkit.display2d.ext.northarrow.NorthArrowTemplate;
+import org.geotoolkit.display2d.ext.scalebar.DefaultScaleBarTemplate;
+import org.geotoolkit.display2d.ext.scalebar.ScaleBarTemplate;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -108,8 +116,8 @@ public class Session extends SessionCore {
     //generate a template for the legend
     final DefaultLegendTemplate legendTemplate = new DefaultLegendTemplate(
             new DefaultBackgroundTemplate( //legend background
-                    new BasicStroke(2), //stroke
-                    Color.BLUE, //stroke paint
+                    new BasicStroke(1), //stroke
+                    Color.LIGHT_GRAY, //stroke paint
                     Color.WHITE, // fill paint
                     new Insets(10, 10, 10, 10), //border margins
                     8 //round border
@@ -118,9 +126,39 @@ public class Session extends SessionCore {
             null, //glyph size, we can let it to null for the legend to use the best size
             new Font("Serial", Font.PLAIN, 11), //Font used for style rules
             true, // show layer names
-            new Font("Serial", Font.BOLD, 12), //Font used for layer names
+            new Font("Serial", Font.BOLD, 13), //Font used for layer names
             true // display only visible layers
     );
+    public static final ScaleBarTemplate SCALEBAR_KILOMETER_TEMPLATE = new DefaultScaleBarTemplate(
+                            new DefaultBackgroundTemplate(
+                                    new BasicStroke(1),
+                                    new Color(0, 0, 0, 0),
+                                    new Color(255,255,255,170),
+                                    new Insets(6, 6, 0, 6), 20),
+                            new Dimension(250,40),10,
+                            false, 4, NumberFormat.getNumberInstance(),
+                            Color.DARK_GRAY, Color.GRAY, Color.WHITE,
+                            10,true,false, new Font("Serial", Font.BOLD, 10),true,
+                            SI.KILOMETRE);
+    public static final ScaleBarTemplate SCALEBAR_METER_TEMPLATE = new DefaultScaleBarTemplate(
+                            new DefaultBackgroundTemplate(
+                                    new BasicStroke(1),
+                                    new Color(0, 0, 0, 0),
+                                    new Color(255,255,255,170),
+                                    new Insets(6, 6, 0, 6), 20),
+                            new Dimension(250,40),10,
+                            false, 4, NumberFormat.getNumberInstance(),
+                            Color.DARK_GRAY, Color.GRAY, Color.WHITE,
+                            10,true,false, new Font("Serial", Font.BOLD, 10),true,
+                            SI.METRE);
+    public static final NorthArrowTemplate NORTH_ARROW_TEMPLATE = new DefaultNorthArrowTemplate(
+                     new DefaultBackgroundTemplate(
+                                    new BasicStroke(1),
+                                    new Color(0, 0, 0, 0),
+                                    new Color(255,255,255,170),
+                                    new Insets(4, 4, 4, 4), 500),
+                    DecorationXMLParser.class.getResource("/org/geotoolkit/icon/boussole.svg"),
+                    new Dimension(100,100));
 
     /**
      * Clear session cache.

@@ -56,6 +56,11 @@
       <artifactId>geotk-jasperreport</artifactId>
       <version>${geotoolkit.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.geotoolkit</groupId>
+      <artifactId>geotk-svg-batik</artifactId>
+      <version>${geotoolkit.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>net.sf.jodreports</groupId>
