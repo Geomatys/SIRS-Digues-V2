@@ -520,8 +520,6 @@
   <eClassifiers xsi:type="ecore:EClass" name="EchelleLimnimetrique" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
-        eType="#//ObservationEchelleLimnimetrique" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OuvertureBatardable" eSuperTypes="#//ObjetReseau">
     <eAnnotations source="couchDBDocument"/>
@@ -662,8 +660,6 @@
         eType="#//RefReseauTelecomEnergie"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="implantationId" eType="#//RefImplantation"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
-        eType="#//ObservationReseauTelecomEnergie" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageTelecomEnergieIds"
         upperBound="-1" eType="#//OuvrageTelecomEnergie" eOpposite="#//OuvrageTelecomEnergie/reseauTelecomEnergieIds"/>
   </eClassifiers>
@@ -672,8 +668,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageTelecomEnergieId"
         eType="#//RefOuvrageTelecomEnergie"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
-        eType="#//ObservationOuvrageTelecomEnergie" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="reseauTelecomEnergieIds"
         upperBound="-1" eType="#//ReseauTelecomEnergie" eOpposite="#//ReseauTelecomEnergie/ouvrageTelecomEnergieIds"/>
   </eClassifiers>
@@ -692,8 +686,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeOuvrageParticulierId"
         eType="#//RefOuvrageParticulier"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
-        eType="#//ObservationOuvrageParticulier" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObjetMesure" abstract="true" eSuperTypes="#//ObjetPhotographiable">
     <eStructuralFeatures xsi:type="ecore:EReference" name="articleIds" upperBound="-1"
@@ -1479,8 +1471,4 @@
   <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauHydrauliqueCielOuvert"
       eSuperTypes="#//AbstractObservation"/>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationStationPompage" eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageTelecomEnergie" eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauTelecomEnergie" eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationOuvrageParticulier" eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ObservationEchelleLimnimetrique" eSuperTypes="#//AbstractObservation"/>
 </ecore:EPackage>
