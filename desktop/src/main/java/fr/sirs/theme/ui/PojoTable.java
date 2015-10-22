@@ -343,11 +343,12 @@ public class PojoTable extends BorderPane implements Printable {
         cellEditableProperty.bind(editableProperty);
         detaillableProperty.addListener(
                 (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                    editCol.setVisible(newValue && detaillableProperty.get());
+                    editCol.setVisible(newValue);
                 });
 
         uiTable.getColumns().add(deleteColumn);
         uiTable.getColumns().add((TableColumn) editCol);
+//        uiTable.getColumns().add((TableColumn) new DuplicateColumn());
 
         if(AvecGeometrie.class.isAssignableFrom(pojoClass)){
             uiTable.getColumns().add(new ShowOnMapColumn());
@@ -1534,6 +1535,46 @@ public class PojoTable extends BorderPane implements Printable {
         transition.setFromValue(0);
         transition.setToValue(1);
         transition.play();
+    }
+
+    public class DuplicateColumn<T extends Element> extends TableColumn<T, T> {
+
+        public DuplicateColumn() {
+            super("Dupliquer");
+            setSortable(false);
+            setResizable(false);
+            setPrefWidth(24);
+            setMinWidth(24);
+            setMaxWidth(24);
+            setGraphic(new ImageView(GeotkFX.ICON_DUPLICATE));
+
+            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<T, T>, ObservableValue<T>>() {
+
+                @Override
+                public ObservableValue<T> call(TableColumn.CellDataFeatures param) {
+                    return new SimpleObjectProperty(param.getValue());
+                }
+            });
+
+            if(pojoClass!=null && repo!=null){
+                setCellFactory(new Callback<TableColumn<T, T>, TableCell<T, T>>() {
+
+                    @Override
+                    public TableCell call(TableColumn param) {
+                        return new ButtonTableCell(
+                                false, new ImageView(GeotkFX.ICON_DUPLICATE),
+                                (Object t) -> t != null, (Object t) -> {
+                                    if (pojoClass.isAssignableFrom(t.getClass())) {
+                                        final Element newElement = ((T) t).copy();
+                                        repo.add(newElement);
+                                    }
+                                    return t;
+                                });
+                    }
+                });
+            } 
+            else setVisible(false);
+        }
     }
 
     /**
