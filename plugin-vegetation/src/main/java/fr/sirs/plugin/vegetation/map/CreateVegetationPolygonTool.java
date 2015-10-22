@@ -275,6 +275,11 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
 
                 if(e.getClickCount()>1){
                     //on sauvegarde
+                    if(geometry.isEmpty() || !geometry.isValid()){
+                        //il faut un polygon valid
+                        return;
+                    }
+
                     vegetation.setExplicitGeometry(geometry);
                     vegetation.setGeometry(geometry);
                     ended.set(true);
