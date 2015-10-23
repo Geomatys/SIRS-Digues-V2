@@ -433,8 +433,6 @@ public class DbImporter {
                         importCtx.getBean(TronconDigueUpdater.class).compute();
 
                         final Collection<AbstractImporter> importers = context.importers.values();
-
-                        final long totalWork = importers.size() + context.linkers.size();
                         for (final AbstractImporter importer : importers) {
                             importer.compute();
                         }
