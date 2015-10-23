@@ -56,7 +56,7 @@ public class FXParamFrequenceTraitementVegetationPane extends FXParamFrequenceTr
             }
         });
 
-        ui_traitementId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+        ui_typeTraitementId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
 
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -65,8 +65,8 @@ public class FXParamFrequenceTraitementVegetationPane extends FXParamFrequenceTr
                     final String traitementId = ((Preview) newValue).getElementId();
                     if(traitementId!=null){
                         final List<RefSousTraitementVegetation> sousTypesDispos = sousTypeRepo.getAll();
-                        sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTraitementId()));
-                        SIRS.initCombo(ui_sousTraitementId, FXCollections.observableList(sousTypesDispos), null);
+                        sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTypeTraitementId()));
+                        SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.observableList(sousTypesDispos), null);
                     }
                 }
             }
@@ -112,7 +112,7 @@ public class FXParamFrequenceTraitementVegetationPane extends FXParamFrequenceTr
         }
         final List<Preview> sousTraitementPreviews = previewRepository.getByClass(RefSousTraitementVegetation.class);
 
-        PluginVegetation.initComboSousTraitement(newElement.getTraitementId(), newElement.getSousTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTraitementId);
+        PluginVegetation.initComboSousTraitement(newElement.getTypeTraitementId(), newElement.getSousTypeTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementId);
     }
 
 

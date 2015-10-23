@@ -161,7 +161,7 @@ public class FXParametragePane extends SplitPane {
                         newParcelle.getPlanifications().set(i, Boolean.FALSE);
                     }
                     // Réajustement de la taille (normalement inutile, mais par précaution…
-                    PluginVegetation.initPlanifs(newParcelle, newPlan.getAnneeFin()-newPlan.getAnneeDebut());
+                    PluginVegetation.ajustPlanifSize(newParcelle, newPlan.getAnneeFin()-newPlan.getAnneeDebut());
                     
                     newParcelle.setPlanId(newPlan.getId());
                     newParcelles.put(oldParcelle.getId(), newParcelle);

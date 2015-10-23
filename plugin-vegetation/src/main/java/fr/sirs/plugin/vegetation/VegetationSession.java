@@ -239,12 +239,12 @@ public final class VegetationSession {
 
         // Indexation des paramètres.
         for(final ParamCoutTraitementVegetation param : params){
-            if(param.getTraitementId()!=null){
-                if(param.getSousTraitementId()!=null){
-                    indexedParams1.put(new HashMap.SimpleEntry<>(param.getTraitementId(), param.getSousTraitementId()), param);
+            if(param.getTypeTraitementId()!=null){
+                if(param.getSousTypeTraitementId()!=null){
+                    indexedParams1.put(new HashMap.SimpleEntry<>(param.getTypeTraitementId(), param.getSousTypeTraitementId()), param);
                 }
                 else{
-                    indexedParams2.put(param.getTraitementId(), param);
+                    indexedParams2.put(param.getTypeTraitementId(), param);
                 }
             }
         }
@@ -281,8 +281,8 @@ public final class VegetationSession {
                     !!! (UNIQUEMENT SI ON EST LA PREMIÈRE ANNÉE DE TRAITEMENT DE LA PARCELLE DANS LE PLAN) !!!
                     */
                     if(planifState==PLANIFIE_PREMIERE_FOIS){
-                        final String traitementPonctuelId = traitement.getTraitementPonctuelId();
-                        final String sousTraitementPonctuelId = traitement.getSousTraitementPonctuelId();
+                        final String traitementPonctuelId = traitement.getTypeTraitementPonctuelId();
+                        final String sousTraitementPonctuelId = traitement.getSousTypeTraitementPonctuelId();
 
                         // On récupère et on ajoute le cout sur la zone de la combinaison traitement/sous-traitement
                         if(traitementPonctuelId!=null){
@@ -302,8 +302,8 @@ public final class VegetationSession {
                     /*
                     Puis on s'occupe du traitement non ponctuel
                     */
-                    final String traitementId = traitement.getTraitementId();
-                    final String sousTraitementId = traitement.getSousTraitementId();
+                    final String traitementId = traitement.getTypeTraitementId();
+                    final String sousTraitementId = traitement.getSousTypeTraitementId();
 
                     // On récupère et on ajoute le cout sur la zone de la combinaison traitement/sous-traitement
                     if(traitementId!=null){
@@ -629,13 +629,13 @@ public final class VegetationSession {
                 if(zone.getTraitement()!=null){
                     if(planifState==PLANIFIE_PREMIERE_FOIS){
                         //premiere année
-                        String tid = zone.getTraitement().getTraitementPonctuelId();
+                        String tid = zone.getTraitement().getTypeTraitementPonctuelId();
                         if(tid==null || tid.isEmpty()){
-                            tid = zone.getTraitement().getTraitementId();
+                            tid = zone.getTraitement().getTypeTraitementId();
                         }
                         etat = trmts.get(tid);
                     }else if(planifState==PLANIFIE_PREMIERE_FOIS){
-                        final String tid = zone.getTraitement().getTraitementId();
+                        final String tid = zone.getTraitement().getTypeTraitementId();
                         etat = trmts.get(tid);
                     }
                 }

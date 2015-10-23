@@ -24,7 +24,7 @@ public class FXParamCoutTraitementVegetationPane extends FXParamCoutTraitementVe
     public FXParamCoutTraitementVegetationPane(final ParamCoutTraitementVegetation paramCoutTraitementVegetation){
         super(paramCoutTraitementVegetation);
 
-        ui_traitementId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+        ui_typeTraitementId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
 
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -33,8 +33,8 @@ public class FXParamCoutTraitementVegetationPane extends FXParamCoutTraitementVe
                     final String traitementId = ((Preview) newValue).getElementId();
                     if(traitementId!=null){
                         final List<RefSousTraitementVegetation> sousTypesDispos = sousTypeRepo.getAll();
-                        sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTraitementId()));
-                        SIRS.initCombo(ui_sousTraitementId, FXCollections.observableList(sousTypesDispos), null);
+                        sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTypeTraitementId()));
+                        SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.observableList(sousTypesDispos), null);
                     }
                 }
             }
@@ -60,7 +60,7 @@ public class FXParamCoutTraitementVegetationPane extends FXParamCoutTraitementVe
         }
         final List<Preview> sousTraitementPreviews = previewRepository.getByClass(RefSousTraitementVegetation.class);
 
-        PluginVegetation.initComboSousTraitement(newElement.getTraitementId(), newElement.getSousTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTraitementId);
+        PluginVegetation.initComboSousTraitement(newElement.getTypeTraitementId(), newElement.getSousTypeTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementId);
     }
 
     /**

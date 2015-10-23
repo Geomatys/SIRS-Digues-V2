@@ -24,7 +24,7 @@ public class FXTraitementParcelleVegetationPane extends FXTraitementParcelleVege
     public FXTraitementParcelleVegetationPane(final TraitementParcelleVegetation traitementParcelleVegetation){
         super(traitementParcelleVegetation);
 
-        ui_traitementId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+        ui_typeTraitementId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
 
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -33,8 +33,8 @@ public class FXTraitementParcelleVegetationPane extends FXTraitementParcelleVege
                     final String traitementId = ((Preview) newValue).getElementId();
                     if(traitementId!=null){
                         final List<RefSousTraitementVegetation> sousTypesDispos = sousTypeRepo.getAll();
-                        sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTraitementId()));
-                        SIRS.initCombo(ui_sousTraitementId, FXCollections.observableList(sousTypesDispos), null);
+                        sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTypeTraitementId()));
+                        SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.observableList(sousTypesDispos), null);
                     }
                 }
             }
@@ -55,6 +55,6 @@ public class FXTraitementParcelleVegetationPane extends FXTraitementParcelleVege
 
         final List<Preview> sousTraitementPreviews = previewRepository.getByClass(RefSousTraitementVegetation.class);
 
-        initComboSousTraitement(newElement.getTraitementId(), newElement.getSousTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTraitementId);
+        initComboSousTraitement(newElement.getTypeTraitementId(), newElement.getSousTypeTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementId);
     }
 }

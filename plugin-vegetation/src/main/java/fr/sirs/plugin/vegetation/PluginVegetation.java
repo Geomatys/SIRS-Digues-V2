@@ -451,7 +451,7 @@ public class PluginVegetation extends Plugin {
                 final String sousTypeId = sousType.getElementId();
                 if(sousTypeId!=null){
                     final RefSousTraitementVegetation sousTraitement = sousTraitements.get(sousTypeId);
-                    if(typeTraitementId.equals(sousTraitement.getTraitementId())){
+                    if(typeTraitementId.equals(sousTraitement.getTypeTraitementId())){
                         sousTypes.add(sousType);
                     }
 
@@ -561,7 +561,7 @@ public class PluginVegetation extends Plugin {
     }
 
     /**
-     * Use resetAutoPlanif(ParcelleVegetation parcelle, int planDuration, int initialIndex) if you
+     * Use resetAutoPlanif(ParcelleVegetation parcelle, int initialIndex, int planDuration) if you
      * already know planDuration.
      *
      * @param parcelle
@@ -607,7 +607,6 @@ public class PluginVegetation extends Plugin {
      */
     public static void updateParcelleAutoPlanif(final ZoneVegetation changed){
 
-
         /*
         Si la parcelle de la zone à laquelle le traitement se réfère est en mode
         de planification automatique, alors la modification du traitement peut
@@ -615,36 +614,46 @@ public class PluginVegetation extends Plugin {
         Il faut donc vérifier si la parcelle est en mode automatique et dans ce
         cas mettre à jour les planifications de la parcelle.
 
-        NOTE (*) : il faut faire cette opération après avoir fait une première
-        sauvegarde provisoire du traitement en cours de sauvegarde définitive,
-        car sinon, lors du passage en planification automatique, la parcelle n'
-        aura accès qu'à l'ancienne valeur du présent traitement. On la nouvelle
-        valeur (en particulier avec la nouvelle valeur de fréquence du
-        traitement non ponctuel peut être décisive pour le calcul des
-        planifications automatiques
+//        NOTE (*) : il faut faire cette opération après avoir fait une première
+//        sauvegarde provisoire du traitement en cours de sauvegarde définitive,
+//        car sinon, lors du passage en planification automatique, la parcelle n'
+//        aura accès qu'à l'ancienne valeur du présent traitement. On la nouvelle
+//        valeur (en particulier avec la nouvelle valeur de fréquence du
+//        traitement non ponctuel peut être décisive pour le calcul des
+//        planifications automatiques
         */
 
+//        //(*) opération préalable de sauvegarde du traitement.
+//        final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(changed.getClass());
+//        repo.update(changed);
 
         final String parcelleId = changed.getParcelleId();
         if(parcelleId!=null){
             final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = Injector.getSession().getRepositoryForClass(ParcelleVegetation.class);
             if(parcelleRepo!=null){
                 final ParcelleVegetation parcelle=parcelleRepo.get(parcelleId);
-                if(parcelle!=null){
-                    if(parcelle.getModeAuto()){
+                updateParcelleAutoPlanif(parcelle);
+            }
+        }
+    }
+    
+    /**
+     * Met à jour la planification de la parcelle donnée en paramètre, à partir
+     * de l'année en cours.
+     *
+     * @param parcelle
+     */
+    public static void updateParcelleAutoPlanif(final ParcelleVegetation parcelle){
+        final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = Injector.getSession().getRepositoryForClass(ParcelleVegetation.class);
+        if(parcelle!=null){
+            if(parcelle.getModeAuto()){
 
-                        //(*) opération préalable de sauvegarde du traitement.
-                        final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(changed.getClass());
-                        repo.update(changed);
-
-                        // Calcul proprement dit de la planification automatique de la parcelle
-                        final PlanVegetation plan = Injector.getSession().getRepositoryForClass(PlanVegetation.class).get(parcelle.getPlanId());
-                        if(plan!=null){
-                            PluginVegetation.resetAutoPlanif(parcelle, LocalDate.now().getYear()-plan.getAnneeDebut());
-                        }
-                        parcelleRepo.update(parcelle);// Il faut sauvegarder la parcelle car la méthode setAutoPlanifs ne s'en charge pas.
-                    }
+                // Calcul proprement dit de la planification automatique de la parcelle
+                final PlanVegetation plan = Injector.getSession().getRepositoryForClass(PlanVegetation.class).get(parcelle.getPlanId());
+                if(plan!=null){
+                    PluginVegetation.resetAutoPlanif(parcelle, LocalDate.now().getYear()-plan.getAnneeDebut());
                 }
+                parcelleRepo.update(parcelle);// Il faut sauvegarder la parcelle car la méthode setAutoPlanifs ne s'en charge pas.
             }
         }
     }
@@ -757,7 +766,7 @@ public class PluginVegetation extends Plugin {
      * @param parcelle
      * @param dureePlan
      */
-    public static void initPlanifs(final ParcelleVegetation parcelle, final int dureePlan){
+    public static void ajustPlanifSize(final ParcelleVegetation parcelle, final int dureePlan){
         final ObservableList<Boolean> planifications = parcelle.getPlanifications();
         if(planifications.size()<dureePlan){
             while(planifications.size()<dureePlan) planifications.add(Boolean.FALSE);
@@ -879,13 +888,13 @@ public class PluginVegetation extends Plugin {
                             if(param.getType().equals(zoneType) && typeVegetationId.equals(param.getTypeVegetationId())){
 
                                 if(param.getPonctuel()){
-                                    peuplement.getTraitement().setTraitementPonctuelId(param.getTraitementId());
-                                    peuplement.getTraitement().setSousTraitementPonctuelId(param.getSousTraitementId());
+                                    peuplement.getTraitement().setTypeTraitementPonctuelId(param.getTypeTraitementId());
+                                    peuplement.getTraitement().setSousTypeTraitementPonctuelId(param.getSousTypeTraitementId());
                                     ponctuelSet=true;
                                 }
                                 else{
-                                    peuplement.getTraitement().setTraitementId(param.getTraitementId());
-                                    peuplement.getTraitement().setSousTraitementId(param.getSousTraitementId());
+                                    peuplement.getTraitement().setTypeTraitementId(param.getTypeTraitementId());
+                                    peuplement.getTraitement().setSousTypeTraitementId(param.getSousTypeTraitementId());
                                     peuplement.getTraitement().setFrequenceId(param.getFrequenceId());
                                     nonPonctuelSet=true;
                                 }

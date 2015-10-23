@@ -56,21 +56,22 @@
               <children>
                    <!-- EBoolean -->   
                    <Label text="%type" GridPane.rowIndex="0" />
-                   <ComboBox fx:id="ui_type" GridPane.columnIndex="1" GridPane.rowIndex="0" />                
-                   <Label text="%ponctuel" GridPane.rowIndex="1" />
-                   <CheckBox fx:id="ui_ponctuel" GridPane.columnIndex="1" GridPane.rowIndex="1"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <Label text="%traitementId" GridPane.rowIndex="2" />
-                   <ComboBox fx:id="ui_traitementId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                   <Button fx:id="ui_traitementId_link" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                   <Label text="%sousTraitementId" GridPane.rowIndex="3" />
-                   <ComboBox fx:id="ui_sousTraitementId" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                   <Button fx:id="ui_sousTraitementId_link" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                   <Label text="%frequenceId" GridPane.rowIndex="4" />
-                   <ComboBox fx:id="ui_frequenceId" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                   <Button fx:id="ui_frequenceId_link" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                   <Label text="%typeVegetationId" GridPane.rowIndex="5" />
-                   <ComboBox fx:id="ui_typeVegetationId" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                   <Button fx:id="ui_typeVegetationId_link" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                   <ComboBox fx:id="ui_type" GridPane.columnIndex="1" GridPane.rowIndex="0" />       
+                   <Label text="%typeVegetationId" GridPane.rowIndex="1" />
+                   <ComboBox fx:id="ui_typeVegetationId" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                   <Button fx:id="ui_typeVegetationId_link" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                   <Label text="%typeTraitementId" GridPane.rowIndex="2" />
+                   <ComboBox fx:id="ui_typeTraitementId" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                   <Button fx:id="ui_typeTraitementId_link" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                   <Label text="%sousTypeTraitementId" GridPane.rowIndex="3" />
+                   <ComboBox fx:id="ui_sousTypeTraitementId" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                   <Button fx:id="ui_sousTypeTraitementId_link" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                            
+                   <Label text="%ponctuel" GridPane.rowIndex="4" />
+                   <CheckBox fx:id="ui_ponctuel" GridPane.columnIndex="1" GridPane.rowIndex="4"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <Label text="%frequenceId" GridPane.rowIndex="5" />
+                   <ComboBox fx:id="ui_frequenceId" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                   <Button fx:id="ui_frequenceId_link" GridPane.columnIndex="2" GridPane.rowIndex="5" />
 
               </children>
               <padding>

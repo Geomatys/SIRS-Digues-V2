@@ -29,7 +29,7 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
     public FXTraitementZoneVegetationPane(final TraitementZoneVegetation traitementZoneVegetation){
         super(traitementZoneVegetation);
 
-        ui_traitementId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+        ui_typeTraitementId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
 
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -38,14 +38,14 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
                     final String traitementId = ((Preview) newValue).getElementId();
                     if(traitementId!=null){
                         final List<RefSousTraitementVegetation> sousTypesDispos = sousTypeRepo.getAll();
-                        sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTraitementId()));
-                        SIRS.initCombo(ui_sousTraitementId, FXCollections.observableList(sousTypesDispos), null);
+                        sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTypeTraitementId()));
+                        SIRS.initCombo(ui_sousTypeTraitementId, FXCollections.observableList(sousTypesDispos), null);
                     }
                 }
             }
         });
 
-        ui_traitementPonctuelId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+        ui_typeTraitementPonctuelId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
 
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -54,8 +54,8 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
                     final String traitementId = ((Preview) newValue).getElementId();
                     if(traitementId!=null){
                         final List<RefSousTraitementVegetation> sousTypesDispos = sousTypeRepo.getAll();
-                        sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTraitementId()));
-                        SIRS.initCombo(ui_sousTraitementPonctuelId, FXCollections.observableList(sousTypesDispos), null);
+                        sousTypesDispos.removeIf((RefSousTraitementVegetation st) -> !traitementId.equals(st.getTypeTraitementId()));
+                        SIRS.initCombo(ui_sousTypeTraitementPonctuelId, FXCollections.observableList(sousTypesDispos), null);
                     }
                 }
             }
@@ -97,10 +97,10 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
             }
         }
 
-        SIRS.initCombo(ui_traitementPonctuelId, FXCollections.observableList(traitementsPonctuels),
-            newElement.getTraitementPonctuelId() == null? null : previewRepository.get(newElement.getTraitementPonctuelId()));
-        SIRS.initCombo(ui_traitementId, FXCollections.observableList(traitementsNonPonctuels),
-            newElement.getTraitementId() == null? null : previewRepository.get(newElement.getTraitementId()));
+        SIRS.initCombo(ui_typeTraitementPonctuelId, FXCollections.observableList(traitementsPonctuels),
+            newElement.getTypeTraitementPonctuelId() == null? null : previewRepository.get(newElement.getTypeTraitementPonctuelId()));
+        SIRS.initCombo(ui_typeTraitementId, FXCollections.observableList(traitementsNonPonctuels),
+            newElement.getTypeTraitementId() == null? null : previewRepository.get(newElement.getTypeTraitementId()));
 
 
 
@@ -114,10 +114,61 @@ public class FXTraitementZoneVegetationPane extends FXTraitementZoneVegetationPa
 
         final List<Preview> sousTraitementPreviews = previewRepository.getByClass(RefSousTraitementVegetation.class);
 
-        initComboSousTraitement(newElement.getTraitementPonctuelId(), newElement.getSousTraitementPonctuelId(), sousTraitementPreviews, sousTraitements, ui_sousTraitementPonctuelId);
+        initComboSousTraitement(newElement.getTypeTraitementPonctuelId(), newElement.getSousTypeTraitementPonctuelId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementPonctuelId);
 
-        initComboSousTraitement(newElement.getTraitementId(), newElement.getSousTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTraitementId);
+        initComboSousTraitement(newElement.getTypeTraitementId(), newElement.getSousTypeTraitementId(), sousTraitementPreviews, sousTraitements, ui_sousTypeTraitementId);
     }
+
+    /*
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    IMPORTANT
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    La modification d'une donnée dans un traitemetn de zone de végétation est
+    susceptible d'avoir un effet sur la planification d'une parcelle en mode
+    auto.
+
+    MAIS !
+
+    Il est à noter que la planification, tout en étant en mode auto, peut avoir
+    été personnalisée !
+
+    exemple : si la planification est de 5 ans en 5 ans à partir de 2015
+    (prochain traitement auto-calculé en 2020), on peut avoir forcé la planif à
+    partir de 2016 (ce qui implique un prochain traitement auto-calculé en 2021)
+
+    Ainsi, même en mode automatique, on ne peut pas être au courant des souhaits
+    de l'utilisateur à vouloir ou pas garder sa planification courante.
+
+    IL FAUT DONC LAISSER L'UTILISATEUR GÉRER SA PLANIFICATION COMME IL L'ENTEND.
+
+    LES MODIFICATIONS RELATIVES AU TRAITEMENT DE LA ZONE DE VÉGÉTATION QUI
+    AURAIENT ÉTÉ APPORTÉES VIA CE PANNEAU SERONT PRISES EN COMPTE LORS DES
+    MODIFICATIONS POSTÉRIEURES DE LA PLANIFICATION DES PARCELLES.
+    
+     */
+
+//    @Override
+//    public void preSave(){
+//        super.preSave();
+//
+//        final TraitementZoneVegetation traitement = elementProperty.get();
+//        if(traitement!=null){
+//            final Element parent = traitement.getParent();
+//            if(parent instanceof ZoneVegetation && !(parent instanceof InvasiveVegetation)){
+//                final Alert alert = new Alert(Alert.AlertType.INFORMATION,
+//                        "La planification d'une parcelle doit être mise à jour.",
+//                        ButtonType.OK);
+//                alert.setResizable(true);
+//                final Optional<ButtonType> result = alert.showAndWait();
+//                if(result.isPresent() && result.get()==ButtonType.OK){
+//                    updateParcelleAutoPlanif((ZoneVegetation) parent);
+//                }
+//            }
+//        }
+//
+//    }
+
 
 //    @Override
 //    public void preSave(){

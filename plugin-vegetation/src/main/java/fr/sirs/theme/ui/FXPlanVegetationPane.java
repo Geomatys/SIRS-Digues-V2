@@ -178,13 +178,13 @@ public class FXPlanVegetationPane extends BorderPane {
                         rester null car il peut n'avoir pas de sous-traitement
                         disponible ou affecté.
                         */
-                        if(traitement.getTraitementPonctuelId()!=null){
-                            candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTraitementPonctuelId(), traitement.getSousTraitementPonctuelId(), true));
-                            candidateCoutsToAdd.add(toParamCout(traitement.getTraitementPonctuelId(), traitement.getSousTraitementPonctuelId()));
+                        if(traitement.getTypeTraitementPonctuelId()!=null){
+                            candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTypeTraitementPonctuelId(), traitement.getSousTypeTraitementPonctuelId(), true));
+                            candidateCoutsToAdd.add(toParamCout(traitement.getTypeTraitementPonctuelId(), traitement.getSousTypeTraitementPonctuelId()));
                         }
-                        if(traitement.getTraitementId()!=null){
-                            candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTraitementId(), traitement.getSousTraitementId(), false));
-                            candidateCoutsToAdd.add(toParamCout(traitement.getTraitementId(), traitement.getSousTraitementId()));
+                        if(traitement.getTypeTraitementId()!=null){
+                            candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTypeTraitementId(), traitement.getSousTypeTraitementId(), false));
+                            candidateCoutsToAdd.add(toParamCout(traitement.getTypeTraitementId(), traitement.getSousTypeTraitementId()));
                         }
                     }
                 }
@@ -262,16 +262,16 @@ public class FXPlanVegetationPane extends BorderPane {
         final ParamFrequenceTraitementVegetation param = Injector.getSession().getElementCreator().createElement(ParamFrequenceTraitementVegetation.class);
         param.setType(type);
         param.setTypeVegetationId(typeVegetationId);
-        param.setTraitementId(traitementId);
-        param.setSousTraitementId(sousTraitementId);
+        param.setTypeTraitementId(traitementId);
+        param.setSousTypeTraitementId(sousTraitementId);
         param.setPonctuel(ponctuel);
         return param;
     }
 
     private static boolean equivParamFrequence(final ParamFrequenceTraitementVegetation p1, final ParamFrequenceTraitementVegetation p2){
         if(!Objects.equals(p1.getType(), p2.getType())) return false;
-        else if(!Objects.equals(p1.getTraitementId(), p2.getTraitementId())) return false;
-        else if(!Objects.equals(p1.getSousTraitementId(), p2.getSousTraitementId())) return false;
+        else if(!Objects.equals(p1.getTypeTraitementId(), p2.getTypeTraitementId())) return false;
+        else if(!Objects.equals(p1.getSousTypeTraitementId(), p2.getSousTypeTraitementId())) return false;
         else if(!Objects.equals(p1.getTypeVegetationId(), p2.getTypeVegetationId())) return false;
         else if(p1.getPonctuel()!=p2.getPonctuel()) return false;
         else return true;
@@ -279,14 +279,14 @@ public class FXPlanVegetationPane extends BorderPane {
 
     private static ParamCoutTraitementVegetation toParamCout(final String traitementId, final String sousTraitementId){
         final ParamCoutTraitementVegetation param = Injector.getSession().getElementCreator().createElement(ParamCoutTraitementVegetation.class);
-        param.setTraitementId(traitementId);
-        param.setSousTraitementId(sousTraitementId);
+        param.setTypeTraitementId(traitementId);
+        param.setSousTypeTraitementId(sousTraitementId);
         return param;
     }
 
     private static boolean equivParamCout(final ParamCoutTraitementVegetation p1, final ParamCoutTraitementVegetation p2){
-        if(!Objects.equals(p1.getTraitementId(), p2.getTraitementId())) return false;
-        else if(!Objects.equals(p1.getSousTraitementId(), p2.getSousTraitementId())) return false;
+        if(!Objects.equals(p1.getTypeTraitementId(), p2.getTypeTraitementId())) return false;
+        else if(!Objects.equals(p1.getSousTypeTraitementId(), p2.getSousTypeTraitementId())) return false;
         else return true;
     }
 

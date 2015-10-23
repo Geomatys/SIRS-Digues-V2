@@ -13,7 +13,7 @@ import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
-import static fr.sirs.plugin.vegetation.PluginVegetation.initPlanifs;
+import static fr.sirs.plugin.vegetation.PluginVegetation.ajustPlanifSize;
 import fr.sirs.plugin.vegetation.VegetationSession;
 import fr.sirs.theme.ui.FXPositionableLinearMode;
 import fr.sirs.util.ResourceInternationalString;
@@ -137,7 +137,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
                 }
 
                 //configuration de base des planifs
-                initPlanifs(parcelle, plan.getAnneeFin() - plan.getAnneeDebut());
+                ajustPlanifSize(parcelle, plan.getAnneeFin() - plan.getAnneeDebut());
 
                 //sauvegarde
                 parcelleRepo.add(parcelle);

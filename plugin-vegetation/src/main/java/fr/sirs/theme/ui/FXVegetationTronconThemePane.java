@@ -71,7 +71,7 @@ public class FXVegetationTronconThemePane extends FXTronconThemePane {
                     created.setPlanId(planActif.getId());
 
                     // Initialisation des planifications pour les années du plan.
-                    PluginVegetation.initPlanifs(created, dureePlan);
+                    PluginVegetation.ajustPlanifSize(created, dureePlan);
                     
                     repo.add(created);
                     getAllValues().add(created);
