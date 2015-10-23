@@ -162,7 +162,7 @@ public class ReferenceChecker extends Task<Void> {
                                             && localId.equals(serverId)) {
                                         presentOnServer = true;
                                         serverIt.remove();
-                                        if (!sameReferences(localReferenceInstance, serverReferenceInstance)) {
+                                        if (!localReferenceInstance.contentBasedEquals(serverReferenceInstance)) {
                                             registerIncoherentReferences(localReferenceInstance, serverReferenceInstance);
                                         }
                                         break;
@@ -406,20 +406,20 @@ public class ReferenceChecker extends Task<Void> {
         }
     }
 
-    /**
-     * Compare reference instances.
-     *
-     * @param localReferenceInstance
-     * @param serverReferenceInstance
-     * @return
-     */
-    private static boolean sameReferences(final ReferenceType localReferenceInstance,
-            final ReferenceType serverReferenceInstance) {
-        // equals ne vérifie pas l'identité de contenu, mais l'égalité des identifiants !!!!
-        // La méthode equals ne se basant que sur les ID, on vérifie en plus l'égalité des contenus avec "toString"
-        return localReferenceInstance.equals(serverReferenceInstance)
-                && localReferenceInstance.toString().equals(serverReferenceInstance.toString());
-    }
+//    /**
+//     * Compare reference instances.
+//     *
+//     * @param localReferenceInstance
+//     * @param serverReferenceInstance
+//     * @return
+//     */
+//    private static boolean sameReferences(final ReferenceType localReferenceInstance,
+//            final ReferenceType serverReferenceInstance) {
+//        // equals ne vérifie pas l'identité de contenu, mais l'égalité des identifiants !!!!
+//        // La méthode equals ne se basant que sur les ID, on vérifie en plus l'égalité des contenus avec "toString"
+//        return localReferenceInstance.equals(serverReferenceInstance)
+//                && localReferenceInstance.toString().equals(serverReferenceInstance.toString());
+//    }
 
     /**
      * Return the file content located at the URL.
