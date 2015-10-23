@@ -76,7 +76,7 @@ public class TronconDigueUpdater implements ExtraOperator {
         try {
             final Table borneTable = context.inputDb.getTable(borneImporter.getTableName());
             borneFilterColumn = borneTable.getColumn(BorneDigueImporter.Columns.ID_TRONCON_GESTION.name());
-            borneCursor = borneTable.getDefaultCursor();
+            borneCursor = borneTable.newCursor().beforeFirst().toCursor();
         } catch (IOException e) {
             throw new AccessDbImporterException("Cannot find borne table.", e);
         }
@@ -112,11 +112,11 @@ public class TronconDigueUpdater implements ExtraOperator {
             throw new AccessDbImporterException("Troncon to update has no Id in origin database !");
         }
 
+        borneCursor.beforeFirst();
         while (borneCursor.findNextRow(borneFilterColumn, tronconId)) {
             Integer borneId = borneCursor.getCurrentRow().getInt(borneImporter.getRowIdFieldName());
             output.getBorneIds().add(borneImporter.getImportedId(borneId));
         }
-        borneCursor.reset();
 
         return output;
     }

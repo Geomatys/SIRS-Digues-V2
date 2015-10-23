@@ -130,7 +130,7 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
          * Import entire table  content. We split import in packets to avoid memory overload.
          */
         try {
-            final Iterator<Row> it = table.iterator();
+            final Iterator<Row> it = table.newCursor().toCursor().iterator();
             int rowCount = table.getRowCount();
             while (rowCount > 0) {
                 int bulkCount = Math.min(context.bulkLimit, rowCount);
@@ -138,7 +138,7 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
                 final HashMap<Object, T> imports = new HashMap<>(bulkCount);
                 final HashSet<Element> dataToPost = new HashSet<>(bulkCount);
 
-                while (it.hasNext() && imports.size() < context.bulkLimit) {
+                while (it.hasNext() && imports.size() < bulkCount) {
                     final Row row = it.next();
 
                     final Object rowId = row.get(getRowIdFieldName());

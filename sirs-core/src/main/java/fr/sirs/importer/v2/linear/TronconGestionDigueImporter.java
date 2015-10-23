@@ -8,7 +8,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.importer.AccessDbImporterException;
-import static fr.sirs.importer.DbImporter.TableName.*;
+import static fr.sirs.importer.DbImporter.TableName.TRONCON_GESTION_DIGUE;
 import fr.sirs.importer.v2.AbstractImporter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -61,7 +61,7 @@ public class TronconGestionDigueImporter extends AbstractImporter<TronconDigue> 
 
         try {
             final Table t = context.inputCartoDb.getTable(GEOM_TABLE);
-            geometryCursor = t.getDefaultCursor();
+            geometryCursor = t.newCursor().beforeFirst().toCursor();
             idColumn = t.getColumn(getRowIdFieldName());
         } catch (Exception e) {
             throw new AccessDbImporterException("Cannot get geometry data for TronconDigue.", e);

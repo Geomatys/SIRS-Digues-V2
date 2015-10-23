@@ -91,7 +91,7 @@ public class ParametrePTraversImporter extends SimpleUpdater<ParametreHydrauliqu
 
         ProfilTravers result = null;
         try {
-            final Cursor cursor = leveTable.getDefaultCursor();
+            final Cursor cursor = leveTable.newCursor().beforeFirst().toCursor();
             if (cursor.findFirstRow(leveColumn, leveId)) {
                 final Integer profilId = cursor.getCurrentRow().getInt(profilColumn.getName());
                 if (profilId == null) {

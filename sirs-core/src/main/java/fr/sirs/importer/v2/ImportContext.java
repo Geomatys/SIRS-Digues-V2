@@ -356,7 +356,7 @@ public class ImportContext implements ApplicationContextAware {
 
     }
 
-    private void logError(final ErrorReport report) {
+    public static void logError(final ErrorReport report) {
         SirsCore.LOGGER.log(Level.WARNING, new ErrorMessenger(report));
     }
 
@@ -635,7 +635,7 @@ public class ImportContext implements ApplicationContextAware {
                     out.writeObject(report);
                 } catch (NotSerializableException e) {
                     report.setSerializable();
-                    out.writeObject(out);
+                    out.writeObject(report);
                 }
             }
         }
@@ -656,7 +656,7 @@ public class ImportContext implements ApplicationContextAware {
                 final InputStream fileInput = Files.newInputStream(reportFile);
                 final ObjectInputStream in = new ObjectInputStream(fileInput)) {
             final ArrayList<ErrorReport> reports = new ArrayList<>();
-            while (in.available() > 0) {
+            while (fileInput.available() > 0) {
                 try {
                     Object readObject = in.readObject();
                     if (readObject instanceof ErrorReport) {

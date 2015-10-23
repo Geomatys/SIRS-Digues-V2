@@ -16,18 +16,18 @@ import java.util.logging.Level;
  */
 public class ErrorReport implements Serializable {
 
-    Exception error;
+    public Exception error;
 
-    Row sourceData;
-    String sourceTableName;
-    String sourceColumnName;
+    public Row sourceData;
+    public String sourceTableName;
+    public String sourceColumnName;
 
-    Object target;
-    String targetFieldName;
+    public Object target;
+    public String targetFieldName;
 
-    String customErrorMsg;
+    public String customErrorMsg;
 
-    CorruptionLevel corruptionLevel;
+    public CorruptionLevel corruptionLevel;
 
     public ErrorReport() {}
 
