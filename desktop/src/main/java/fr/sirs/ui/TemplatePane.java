@@ -3,7 +3,7 @@ package fr.sirs.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.model.TemplateOdt;
+import fr.sirs.core.model.report.ModeleElement;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,12 +34,12 @@ public class TemplatePane extends GridPane implements Initializable {
     @FXML private TextField uiTitre;
     @FXML private TextField uiFile;
 
-    private final TemplateOdt template;
+    private final ModeleElement template;
 
-    public TemplatePane(TemplateOdt rapport) {
+    public TemplatePane(ModeleElement rapport) {
         ArgumentChecks.ensureNonNull("rapport", rapport);
         this.template = rapport;
-        
+
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
 
@@ -48,10 +48,10 @@ public class TemplatePane extends GridPane implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         uiTitre.textProperty().bindBidirectional(template.libelleProperty());
-        uiFile.textProperty().bindBidirectional(template.fichierProperty());
+        //uiFile.textProperty().bindBidirectional(template.fichierProperty());
     }
 
-    public TemplateOdt getTemplate(){
+    public ModeleElement getTemplate(){
         return template;
     }
 
@@ -64,7 +64,7 @@ public class TemplatePane extends GridPane implements Initializable {
 
         final File file = chooser.showOpenDialog(null);
         if(file!=null){
-            template.setFichier(file.getPath());
+            //template.setFichier(file.getPath());
             try {
                 template.setOdt(readAll(file));
             } catch (IOException ex) {
@@ -73,8 +73,8 @@ public class TemplatePane extends GridPane implements Initializable {
         }
     }
 
-    public static TemplateOdt showCreateDialog(){
-        final TemplatePane rpane = new TemplatePane(Injector.getSession().getElementCreator().createElement(TemplateOdt.class));
+    public static ModeleElement showCreateDialog(){
+        final TemplatePane rpane = new TemplatePane(Injector.getSession().getElementCreator().createElement(ModeleElement.class));
         rpane.template.setValid(true);
 
         final Dialog dialog = new Dialog();
@@ -87,7 +87,7 @@ public class TemplatePane extends GridPane implements Initializable {
 
         final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.APPLY.equals(opt.get())){
-            final TemplateOdt template = rpane.getTemplate();
+            final ModeleElement template = rpane.getTemplate();
             if(template.getOdt()==null){
                 final Alert alert = new Alert(Alert.AlertType.WARNING, "Le modèle ajouté en base semble vide.\nIl ne pourra pas être utilisé avant d'avoir été rempli par un modèle odt.", ButtonType.OK);
                 alert.setResizable(true);
@@ -98,7 +98,7 @@ public class TemplatePane extends GridPane implements Initializable {
         return null;
     }
 
-    public static TemplateOdt showEditDialog(TemplateOdt rapport){
+    public static ModeleElement showEditDialog(ModeleElement rapport){
         final TemplatePane rpane = new TemplatePane(rapport);
         rpane.template.setValid(true);
 

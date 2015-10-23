@@ -300,7 +300,7 @@ public final class SIRS extends SirsCore {
                     + "depuis les préférences de l'application (Fichier > Preferences).", e);
         }
 
-        /* 
+        /*
         HACK 1 : change all separators, because when we use 2 different system
         separator in the same time, it produces invalid paths. We also check
         if path starts with file separator, because unix consider it as system
@@ -372,7 +372,7 @@ public final class SIRS extends SirsCore {
     }
 
     /**
-     * 
+     *
      * @param element
      * @return
      * @throws ClassNotFoundException

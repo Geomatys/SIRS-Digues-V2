@@ -414,7 +414,7 @@ public class FXSearchPane extends BorderPane {
         final List<SQLQuery> queries;
         try {
             queries = SQLQueries.getLocalQueries();
-            final SQLQueryRepository repo = (SQLQueryRepository)Injector.getSession().getRepositoryForClass(SQLQuery.class);
+            final SQLQueryRepository repo = (SQLQueryRepository) Injector.getSession().getRepositoryForClass(SQLQuery.class);
             queries.addAll(repo.getAll());
         } catch (IOException ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
@@ -426,6 +426,15 @@ public class FXSearchPane extends BorderPane {
 
     private void showQueryTable(final List<SQLQuery> queries, final boolean editable){
 
+        Optional<SQLQuery> choice = chooseSQLQuery(queries);
+        if (choice.isPresent()) {
+            final SQLQuery selected = choice.get();
+            sqlLibelle = selected.getLibelle();
+            uiSQLText.setText(selected.getSql());
+        }
+    }
+
+    public static Optional<SQLQuery> chooseSQLQuery(final List<SQLQuery> queries) {
         if (queries.isEmpty()) {
             final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune requête disponible.", ButtonType.OK);
             alert.setResizable(true);
@@ -447,13 +456,10 @@ public class FXSearchPane extends BorderPane {
             table.save();
             if (res.isPresent() && bt.equals(res.get())) {
                 //sauvegarde s'il y a eu des changements
-                final SQLQuery selected = table.getSelection();
-                if (selected != null) {
-                    sqlLibelle = selected.getLibelle();
-                    uiSQLText.setText(selected.getSql());
-                }
+                return Optional.ofNullable(table.getSelection());
             }
         }
+        return Optional.empty();
     }
 
     @FXML

@@ -2,7 +2,7 @@
 package fr.sirs.ui;
 
 import fr.sirs.Injector;
-import fr.sirs.core.model.TemplateOdt;
+import fr.sirs.core.model.report.ModeleElement;
 import fr.sirs.theme.ui.PojoTable;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -14,7 +14,7 @@ import javafx.scene.control.TableColumn;
 public class TemplatesTable extends PojoTable {
 
     public TemplatesTable() {
-        super(Injector.getSession().getRepositoryForClass(TemplateOdt.class), "Modèles .odt enregistrés en base");
+        super(Injector.getSession().getRepositoryForClass(ModeleElement.class), "Modèles .odt enregistrés en base");
         editableProperty().set(true);
         detaillableProperty().set(true);
         fichableProperty().set(false);
@@ -35,8 +35,8 @@ public class TemplatesTable extends PojoTable {
     }
 
     @Override
-    protected TemplateOdt createPojo() {
-        final TemplateOdt ele = TemplatePane.showCreateDialog();
+    protected ModeleElement createPojo() {
+        final ModeleElement ele = TemplatePane.showCreateDialog();
         if(ele!=null){
             repo.add(ele);
             getAllValues().add(ele);
@@ -46,21 +46,21 @@ public class TemplatesTable extends PojoTable {
 
     @Override
     protected void editPojo(Object pojo) {
-        final TemplateOdt rapport = TemplatePane.showEditDialog((TemplateOdt) pojo);
+        final ModeleElement rapport = TemplatePane.showEditDialog((ModeleElement) pojo);
         if(rapport!=null){
             repo.update(rapport);
         }
     }
 
-    private static class StateColumn extends TableColumn<TemplateOdt, byte[]>{
+    private static class StateColumn extends TableColumn<ModeleElement, byte[]>{
         public StateColumn(){
             super("État du modèle");
-            setCellValueFactory((CellDataFeatures<TemplateOdt, byte[]> param) -> param.getValue().odtProperty());
-            setCellFactory((TableColumn<TemplateOdt, byte[]> param) ->  new StateCell());
+            setCellValueFactory((CellDataFeatures<ModeleElement, byte[]> param) -> param.getValue().odtProperty());
+            setCellFactory((TableColumn<ModeleElement, byte[]> param) ->  new StateCell());
         }
     }
 
-    private static class StateCell extends TableCell<TemplateOdt, byte[]>{
+    private static class StateCell extends TableCell<ModeleElement, byte[]>{
         public StateCell(){
             super();
             setEditable(false);

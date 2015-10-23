@@ -244,5 +244,17 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
         }
         return false;
     }
+
+    /**
+     * Put current object attributes in given one.
+     * @param target The object to set attribute values.
+     */
+    protected void copy(final AbstractSectionRapport target) {
+        target.setAuthor(getAuthor());
+        target.setValid(getValid());
+        target.setDesignation(getDesignation());
+        target.setLibelle(getLibelle());
+        target.setRequeteId(getRequeteId());
+    }
 }
 
