@@ -17,12 +17,21 @@
             <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
         </columnConstraints>
         <rowConstraints>
-          <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+          <RowConstraints maxHeight="-Infinity" minHeight="40.0" valignment="TOP" vgrow="NEVER" />
+            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+            <RowConstraints maxHeight="-Infinity" minHeight="24.0" vgrow="NEVER" />
+            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
         </rowConstraints>
          <children>
             <Button fx:id="uiDelete" mnemonicParsing="false" onAction="#delete" styleClass="btn-single" text="Supprimer" />
             <Button fx:id="uiGoto" mnemonicParsing="false" onAction="#gotoForm" styleClass="btn-single" text="Fiche complète" GridPane.columnIndex="2" />
             <Button fx:id="uiSave" mnemonicParsing="false" onAction="#save" styleClass="btn-single" text="Sauvegarder" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="3" />
+            <Label styleClass="label-text" text="Tronçon" GridPane.rowIndex="2" />
+            <Label styleClass="label-text" text="Désignation" GridPane.rowIndex="1" />
+            <Label fx:id="uiTroncon" minWidth="100.0" styleClass="label-text" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
+            <TextField fx:id="uiDesignation" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+            <Label fx:id="uiTypeLabel" styleClass="label-text" text="Type de végétation" GridPane.rowIndex="3" />
+            <ComboBox fx:id="uiType" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
          </children>
          <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
