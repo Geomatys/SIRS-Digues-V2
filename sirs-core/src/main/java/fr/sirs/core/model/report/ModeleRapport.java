@@ -167,22 +167,20 @@ public class ModeleRapport  extends CouchDbDocument
     @Override
     public ModeleRapport copy() {
 
-        ModeleRapport rapportModeleObligationReglementaire = new ModeleRapport();
+        ModeleRapport copy = new ModeleRapport();
 
-        rapportModeleObligationReglementaire.setDesignation(getDesignation());
-        rapportModeleObligationReglementaire.setAuthor(getAuthor());
-        rapportModeleObligationReglementaire.setValid(getValid());
-        rapportModeleObligationReglementaire.setLibelle(getLibelle());
+        copy.setDesignation(getDesignation());
+        copy.setAuthor(getAuthor());
+        copy.setValid(getValid());
+        copy.setLibelle(getLibelle());
 
-    {
         ObservableList<AbstractSectionRapport> list = FXCollections.observableArrayList();
         for(AbstractSectionRapport element: getSections()){
             list.add((AbstractSectionRapport)element.copy());
         }
-        rapportModeleObligationReglementaire.setSections(list);
-    }
+        copy.setSections(list);
 
-        return rapportModeleObligationReglementaire;
+        return copy;
     }
 
     @Override

@@ -1394,7 +1394,7 @@ public class PojoTable extends BorderPane implements Printable {
             super();
             this.name = desc.getName();
 
-            String pName = labelMapper.mapPropertyName(name);
+            String pName = labelMapper == null ? null : labelMapper.mapPropertyName(name);
             if (pName != null)
                 setText(pName);
             else

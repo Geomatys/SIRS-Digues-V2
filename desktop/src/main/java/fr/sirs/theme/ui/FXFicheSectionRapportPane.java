@@ -11,6 +11,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -55,7 +56,7 @@ public class FXFicheSectionRapportPane extends AbstractFXElementPane<FicheSectio
         queryProperty.addListener(this::queryChanged);
         modelProperty.addListener(this::modelChanged);
         uiNbPhotoChoice.valueProperty().addListener((ObservableValue<? extends PhotoChoice> observable, PhotoChoice oldValue, PhotoChoice newValue) -> {
-            uiNbPhotoSpinner.setVisible(newValue.number < 0);
+            uiNbPhotoSpinner.setVisible(newValue != null && newValue.number < 0);
         });
         uiNbPhotoChoice.setItems(FXCollections.observableArrayList(PhotoChoice.values()));
         uiNbPhotoChoice.setValue(PhotoChoice.NONE);
@@ -63,10 +64,18 @@ public class FXFicheSectionRapportPane extends AbstractFXElementPane<FicheSectio
         // TODO : tooltips.
     }
 
+    /**
+     * Called when element edited change. We must update all UI to manage the new one.
+     * @param obs
+     * @param oldValue
+     * @param newValue
+     */
     private void elementChanged(ObservableValue<? extends FicheSectionRapport> obs, FicheSectionRapport oldValue, FicheSectionRapport newValue) {
+        // Start by clearing bindings from old element.
         if (oldValue != null) {
             uiTitle.textProperty().unbindBidirectional(oldValue.libelleProperty());
         }
+
         if (newValue != null) {
             uiTitle.textProperty().bindBidirectional(newValue.libelleProperty());
             if (newValue.getRequeteId() != null) {
@@ -85,6 +94,7 @@ public class FXFicheSectionRapportPane extends AbstractFXElementPane<FicheSectio
                 }
             }
 
+            // Analyze number of photos chosen, to pick adapted UI element (combo-box or spinner)
             final int nbPhotos = newValue.getNbPhotos();
             uiNbPhotoChoice.setValue(null);
             for (final PhotoChoice c : PhotoChoice.values()) {
@@ -108,6 +118,9 @@ public class FXFicheSectionRapportPane extends AbstractFXElementPane<FicheSectio
         }
     }
 
+    /**
+     * Update query label when user change its value.
+     */
     private void queryChanged(ObservableValue<? extends SQLQuery> obs, SQLQuery oldValue, SQLQuery newValue) {
         if (newValue == null)
             uiQueryTitle.setText("N/A");
@@ -115,6 +128,9 @@ public class FXFicheSectionRapportPane extends AbstractFXElementPane<FicheSectio
             uiQueryTitle.setText(newValue.getLibelle());
     }
 
+    /**
+     * Change model label whan user modify it value.
+     */
     private void modelChanged(ObservableValue<? extends ModeleElement> obs, ModeleElement oldValue, ModeleElement newValue) {
         if (newValue == null)
             uiModelTitle.setText("N/A");
@@ -138,25 +154,37 @@ public class FXFicheSectionRapportPane extends AbstractFXElementPane<FicheSectio
         }
     }
 
+    /**
+     * Action to perform when user want to select a query.
+     */
     @FXML
-    private void chooseQuery() {
+    private void chooseQuery(final ActionEvent e) {
         final Optional<SQLQuery> query = FXSearchPane.chooseSQLQuery(Injector.getSession().getRepositoryForClass(SQLQuery.class).getAll());
         if (query.isPresent())
             queryProperty.set(query.get());
     }
 
+    /**
+     * Triggered when user clean query value.
+     */
     @FXML
-    private void deleteQuery() {
+    private void deleteQuery(final ActionEvent e) {
         queryProperty.set(null);
     }
 
+    /**
+     * Action to perform when user want to select a model.
+     */
     @FXML
-    private void chooseModel() {
+    private void chooseModel(final ActionEvent e) {
         // TODO
     }
 
+    /**
+     * Action performed when user remove model.
+     */
     @FXML
-    private void deleteModel() {
+    private void deleteModel(final ActionEvent e) {
         modelProperty.set(null);
     }
 }

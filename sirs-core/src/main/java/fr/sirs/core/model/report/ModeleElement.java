@@ -15,7 +15,7 @@ import javafx.beans.property.StringProperty;
 import org.ektorp.support.*;
 
 /**
- * Contient les informations à propos d'un template ODT pour l'impression d'une fiche pour un objet précis.
+ * Template ODT pour l'impression d'une fiche à propos d'un objet précis.
  * @author Alexis Manin (Geomatys)
  */
 @JsonInclude(Include.NON_EMPTY)

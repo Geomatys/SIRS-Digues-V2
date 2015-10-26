@@ -4,16 +4,20 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.util.SirsStringConverter;
 import java.awt.Color;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Level;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -30,7 +34,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javafx.util.StringConverter;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.odftoolkit.simple.TextDocument;
@@ -51,10 +54,7 @@ public class TemplateGeneratorPane extends VBox{
     /**
      * Attributs que l'on ne souhaite pas garder dans le formulaire.
      */
-    private static final String FOREIGN_PARENT_ID = "foreignParentId";
-    private static final String AUTHOR = "author";
-    private static final String VALID = "valid";
-    private static final String DATE_MAJ = "dateMaj";
+    private static final List<String> FIELDS_TO_IGNORE = Arrays.asList(new String[] {SIRS.AUTHOR_FIELD, SIRS.VALID_FIELD, SIRS.FOREIGN_PARENT_ID_FIELD});
 
     /**
      * Liste des classes possibles.
@@ -97,7 +97,7 @@ public class TemplateGeneratorPane extends VBox{
                 gridBoxes.setVgap(5);
                 gridBoxes.setPadding(new Insets(10));
 
-                final AttributeConverter cvt = new AttributeConverter();
+            final Function<String, String> titleBuilder = createPropertyNameMapper(uiClassChoice.getValue());
                 final Map<String, PropertyDescriptor> props;
                 try {
                     props = SIRS.listSimpleProperties(newValue);
@@ -110,11 +110,11 @@ public class TemplateGeneratorPane extends VBox{
                     // Ajout des checkbox pour la nouvelle classe choisie
                     final CheckBox checkBox = new CheckBox();
                     final String key = entry.getKey();
-                    if (FOREIGN_PARENT_ID.equals(key) || AUTHOR.equals(key) || VALID.equals(key) || DATE_MAJ.equals(key)) {
+                    if (FIELDS_TO_IGNORE.contains(key)) {
                         // On ne garde pas cet attribut
                         continue;
                     }
-                    checkBox.setText(cvt.toString(key));
+                    checkBox.setText(titleBuilder.apply(key));
                     checkBox.setOnAction(event -> {
                         progressLabel.setText("");
                         if (checkBox.isSelected()) {
@@ -137,12 +137,16 @@ public class TemplateGeneratorPane extends VBox{
             }
         });
 
+        // Build model class list.
         final ObservableList<Class> clazz = FXCollections.observableArrayList(Injector.getSession().getAvailableModels());
-        Collections.sort(clazz, (o1, o2) ->
-                Collator.getInstance().compare(LabelMapper.get(o1).mapClassName(), LabelMapper.get(o2).mapClassName()));
+        Collections.sort(clazz, (o1, o2) -> {
+            final SirsStringConverter converter = new SirsStringConverter();
+            return Collator.getInstance().compare(converter.toString(o1), converter.toString(o2));
+        });
         SIRS.initCombo(uiClassChoice, clazz, null);
         getChildren().add(vboxChoices);
 
+        // Action launched on template generation.
         final Button generateBtn = new Button("Générer le template");
         generateBtn.setOnAction(event -> {
             try {
@@ -182,10 +186,10 @@ public class TemplateGeneratorPane extends VBox{
         try {
             doc = TextDocument.newTextDocument();
 
-            final AttributeConverter cvt = new AttributeConverter();
+            final Function<String, String> titleBuilder = createPropertyNameMapper(uiClassChoice.getValue());
             final StringBuilder sb = new StringBuilder();
             for (final String prop : selectedProperties) {
-                sb.append(cvt.toString(prop)).append(" : ${").append(prop).append("}\n");
+                sb.append(titleBuilder.apply(prop)).append(" : ${").append(prop).append("}\n");
             }
 
             doc.addParagraph(sb.toString());
@@ -197,16 +201,20 @@ public class TemplateGeneratorPane extends VBox{
         }
     }
 
-    private class AttributeConverter extends StringConverter<String> {
-
-        @Override
-        public String toString(String object) {
-            return LabelMapper.get(uiClassChoice.getSelectionModel().getSelectedItem()).mapPropertyName(object);
-        }
-
-        @Override
-        public String fromString(String string) {
-            return string;
+    /**
+     * Create a function giving display name for properties of a given class.
+     * @param propertyHolder Class holding properties to translate.
+     * @return A function which take a property name, and return a display name for it.
+     */
+    public static Function<String, String> createPropertyNameMapper(final Class propertyHolder) {
+        final LabelMapper mapper = LabelMapper.get(propertyHolder);
+        if (mapper == null) {
+            /*
+             * If we cannot find any mapper, we try to build a decent name by putting space on word end / beginning.
+             */
+            return (input) -> input.replaceAll("([A-Z0-9][^A-Z0-9])", " $1").replaceAll("([^A-Z0-9\\s])([A-Z0-9])", "$1 $2");
+        } else {
+            return (input) -> mapper.mapPropertyName(input);
         }
     }
 }

@@ -76,11 +76,11 @@ public class TemplatesTable extends PojoTable {
             }
             else if(item==null || item.length==0){
                 setStyle("-fx-background-color: red");
-                setText("Template vide");
+                setText("Aucun modèle défini");
             }
             else{
                 setStyle("-fx-background-color: green");
-                setText("Template non vide");
+                setText("Modèle présent");
             }
         }
     }

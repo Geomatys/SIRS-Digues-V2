@@ -63,7 +63,7 @@ public class TemplatePane extends GridPane implements Initializable {
         chooser.setSelectedExtensionFilter(filter);
 
         final File file = chooser.showOpenDialog(null);
-        if(file!=null){
+        if (file!=null) {
             //template.setFichier(file.getPath());
             try {
                 template.setOdt(readAll(file));

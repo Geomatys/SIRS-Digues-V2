@@ -101,8 +101,11 @@ public class SirsStringConverter extends StringConverter {
             else if(item==GUEST) text.append("Invité");
             else if(item==EXTERN) text.append("Externe");
         } else if (item instanceof Class) {
-            if(Element.class.isAssignableFrom((Class) item)){
-                text.append(LabelMapper.get((Class) item).mapClassName());
+            final LabelMapper mapper = LabelMapper.get((Class) item);
+            if (mapper != null) {
+                text.append(mapper.mapClassName());
+            } else {
+                text.append(((Class) item).getSimpleName());
             }
         } else if(item!=null && item.getClass().isEnum()){
             text.append(((Enum)item).name());
