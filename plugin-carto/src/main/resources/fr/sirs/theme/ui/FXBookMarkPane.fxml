@@ -31,8 +31,7 @@
                  </rowConstraints-->
 <children>
 <!-- EString -->                 
-<Label text="%description" GridPane.rowIndex="1" />
-<TextField fx:id="ui_description" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+<Label text="%description" GridPane.rowIndex="1" GridPane.valignment="TOP" />
 <!-- EString -->                 
 <Label text="%titre" />
 <TextField fx:id="ui_titre" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
@@ -40,12 +39,12 @@
 <Label text="%url" GridPane.rowIndex="3" />
 <TextField fx:id="ui_parametres" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 <!-- EString -->                 
-<Label text="%identifiant" GridPane.rowIndex="5" />
+<Label fx:id="ui_identifiantLbl" text="%identifiant" GridPane.rowIndex="5" />
 <TextField fx:id="ui_identifiant" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="5" />
 <!-- EString -->                 
-<Label text="%motDePasse" GridPane.rowIndex="6" />
+<Label fx:id="ui_motDePasseLbl" text="%motDePasse" GridPane.rowIndex="6" />
             <Label text="%service" GridPane.rowIndex="2" />
-            <Label text="%authentication" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+            <Label fx:id="ui_authLbl" text="%authentication" GridPane.columnSpan="2" GridPane.rowIndex="4" />
             <ChoiceBox fx:id="ui_service" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <TableView fx:id="ui_table" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="350.0" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.rowSpan="7">
                <columnResizePolicy>
@@ -54,6 +53,7 @@
             </TableView>
             <Button mnemonicParsing="false" onAction="#refreshList" text="%refresh" GridPane.columnIndex="2" />
             <PasswordField fx:id="ui_motDePasse" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+            <TextArea fx:id="ui_description" prefHeight="60.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
 </children>
 <padding>

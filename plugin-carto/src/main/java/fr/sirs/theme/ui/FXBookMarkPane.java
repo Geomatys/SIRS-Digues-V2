@@ -7,6 +7,7 @@ import fr.sirs.Session;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.BookMark;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.Role;
 import fr.sirs.ui.Growl;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,6 +28,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -68,9 +70,12 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
     @FXML private TextField ui_identifiant;
     @FXML private TableView<MapLayer> ui_table;
     @FXML private TextField ui_parametres;
-    @FXML private TextField ui_description;
+    @FXML private TextArea ui_description;
     @FXML private TextField ui_titre;
     @FXML private ChoiceBox<String> ui_service;
+    @FXML private Label ui_identifiantLbl;
+    @FXML private Label ui_motDePasseLbl;
+    @FXML private Label ui_authLbl;
 
     public FXBookMarkPane(final BookMark bookMark){
         this();
@@ -141,6 +146,16 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
         ui_motDePasse.textProperty().bindBidirectional(newElement.motDePasseProperty());
 
         ui_service.valueProperty().bindBidirectional(newElement.typeServiceProperty());
+
+
+        final Role role = session.getRole();
+        if(!Role.ADMIN.equals(role)){
+            ui_identifiant.setVisible(false);
+            ui_motDePasse.setVisible(false);
+            ui_identifiantLbl.setVisible(false);
+            ui_motDePasseLbl.setVisible(false);
+            ui_authLbl.setVisible(false);
+        }
     }
     @Override
     public void preSave() {
@@ -179,6 +194,7 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
         }
 
         final List<MapLayer> layers = new ArrayList<>();
+        String error = null;
         if(store!=null){
             try{
                 for(GenericName n : store.getNames()){
@@ -187,13 +203,68 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
                     layer.setName(n.tip().toString());
                     layers.add(layer);
                 }
-            }catch(DataStoreException ex){
-                final Growl successGrowl = new Growl(Growl.Type.ERROR, "Echec de connection\n"+ex.getMessage());
+            }catch(Throwable ex){
+                error = "Echec de connection\n"+ex.getMessage();
+                final Growl successGrowl = new Growl(Growl.Type.ERROR, error);
                 successGrowl.showAndFade();
             }
         }
 
+        if(error!=null){
+            ui_table.setPlaceholder(new Label(error));
+        } else if(layers.isEmpty() && store!=null){
+            ui_table.setPlaceholder(new Label("Absence de données"));
+        } else {
+            ui_table.setPlaceholder(new Label(""));
+        }
+
         ui_table.setItems(FXCollections.observableArrayList(layers));
+    }
+
+    public static List<MapLayer> listLayers(BookMark bm){
+
+        final String service = bm.getTypeService();
+        final URL url;
+        try {
+            url = new URL(bm.getParametres());
+        } catch (MalformedURLException ex) {
+            final Growl successGrowl = new Growl(Growl.Type.ERROR, "URL mal formée");
+            successGrowl.showAndFade();
+            return null;
+        }
+
+        ClientSecurity security = null;
+        if(!bm.getMotDePasse().trim().isEmpty() && !bm.getIdentifiant().trim().isEmpty()){
+            security = new BasicAuthenticationSecurity(bm.getIdentifiant(), bm.getIdentifiant());
+        }
+
+        CoverageStore store = null;
+        if(WMS_110.equals(service)){
+            store = new WebMapClient(url, security, WMSVersion.v111);
+        }else if(WMS_130.equals(service)){
+            store = new WebMapClient(url, security, WMSVersion.v130);
+        }else if(WMTS_100.equals(service)){
+            store = new WebMapTileClient(url, security, WMTSVersion.v100);
+        }
+
+        final List<MapLayer> layers = new ArrayList<>();
+        String error = null;
+        if(store!=null){
+            try{
+                for(GenericName n : store.getNames()){
+                    final CoverageReference cref = store.getCoverageReference(n);
+                    final CoverageMapLayer layer = MapBuilder.createCoverageLayer(cref);
+                    layer.setName(n.tip().toString());
+                    layers.add(layer);
+                }
+            }catch(Throwable ex){
+                error = "Echec de connection\n"+ex.getMessage();
+                final Growl successGrowl = new Growl(Growl.Type.ERROR, error);
+                successGrowl.showAndFade();
+            }
+        }
+
+        return layers;
     }
 
     private static class NameColumn extends TableColumn<MapLayer, String>{

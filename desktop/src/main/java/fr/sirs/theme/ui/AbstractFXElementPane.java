@@ -1,7 +1,6 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.Printable;
-import fr.sirs.Session;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import javafx.beans.property.BooleanProperty;
