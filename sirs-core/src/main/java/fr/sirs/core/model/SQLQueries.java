@@ -4,6 +4,7 @@ import fr.sirs.core.SirsCore;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -44,12 +45,22 @@ public class SQLQueries {
                 props.load(in);
             }
         }
+        return propertiesToQueries(props);
+    }
+
+    /**
+     * Lecture d'une propriété de fichier de requête : transformation d'une
+     * propriété en objet de type SQLQuery (libellé, requête, description).
+     * @param props
+     * @return
+     */
+    public static List<SQLQuery> propertiesToQueries(final Properties props){
 
         final List<SQLQuery> queries = new ArrayList<>();
         for (Entry entry : props.entrySet()) {
             final SQLQuery query = new SQLQuery();
             query.setLibelle((String) entry.getKey());
-            
+
             final String value = (String) entry.getValue();
             final int index = value.indexOf(SEPARATOR);
             if(index<=0){
@@ -63,8 +74,24 @@ public class SQLQueries {
         }
 
         return queries;
+
     }
-    
+
+    /**
+     * Chargement des requêtes préprogrammées.
+     *
+     * @return
+     * @throws URISyntaxException
+     * @throws IOException
+     */
+    public static List<SQLQuery> defaultQueries() throws URISyntaxException, IOException{
+        final Properties props = new Properties();
+        try (final InputStream in = SQLQueries.class.getResourceAsStream("defaultQueries")) {
+            props.load(in);
+        }
+        return propertiesToQueries(props);
+    }
+
     private static String getValueString(final SQLQuery query){
         return query.getSql()+SEPARATOR+query.getDescription();
     }
@@ -99,9 +126,10 @@ public class SQLQueries {
      * input list, they're lost.
      *
      * @param queries The list of queries to save.
+     * @param outputFile
      * @throws IOException If an error occurred at writing.
      */
-    public static void saveQueriesInFile(List<SQLQuery> queries, final Path outputFile) throws IOException {
+    public static void saveQueriesInFile(final List<SQLQuery> queries, final Path outputFile) throws IOException {
         ArgumentChecks.ensureNonNull("Queries to save.", queries);
         ArgumentChecks.ensureNonNull("File to save queries into.", outputFile);
 
@@ -117,6 +145,9 @@ public class SQLQueries {
         }
     }
 
+    /**
+     * CellFactory pour ListViews de SQLQueries.
+     */
     public static class QueryListCellFactory implements Callback<ListView<SQLQuery>, ListCell<SQLQuery>> {
 
         @Override
@@ -125,6 +156,11 @@ public class SQLQueries {
         }
     }
 
+    /**
+     * ListCell pour ListViews de SQLQueries.
+     *
+     * Affiche le libellé de la SQLQuery.
+     */
     public static class SQLQueryListCell extends ListCell<SQLQuery> {
 
         @Override

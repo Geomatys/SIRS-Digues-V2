@@ -1296,6 +1296,7 @@ public class PojoTable extends BorderPane implements Printable {
     @Override
     public ObjectProperty getPrintableElements() {
         final List selection = uiTable.getSelectionModel().getSelectedItems();
+        
         return new SimpleObjectProperty(selection.isEmpty()?null : new ArrayList(selection));
     }
 

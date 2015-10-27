@@ -1,7 +1,7 @@
 package fr.sirs.util;
 
 import fr.sirs.SIRS;
-import fr.sirs.core.component.Previews;
+import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
 import java.lang.reflect.InvocationTargetException;
@@ -10,10 +10,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
-import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
-import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.ObjectConverters;
 import org.apache.sis.util.UnconvertibleObjectException;
 import org.apache.sis.util.logging.Logging;
@@ -24,27 +22,35 @@ import org.geotoolkit.report.CollectionDataSource;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class ObjectDataSource<T> implements JRDataSource {
-    
-    protected final Iterator<T> iterator;
-    protected T currentObject;
-    protected final Previews previewRepository;
-    protected final SirsStringConverter stringConverter;
-    
-    public ObjectDataSource(final Iterable<T> iterable){
-        this(iterable, null);
+public class DesordreDataSource extends ObjectDataSource<Desordre> {
+
+    public static final String obsdt = "observation_data_source";
+    public static final String predt = "prestation_data_source";
+    public static final String phodt = "photo_data_source";
+
+    public DesordreDataSource(Iterable<Desordre> iterable) {
+        super(iterable);
     }
     
-    public ObjectDataSource(final Iterable<T> iterable, final Previews previewLabelRepository){
-        this(iterable, previewLabelRepository, null);
-    }
+//    private final Iterator<Desordre> iterator;
+//    private T currentObject;
+//    private final Previews previewRepository;
+//    private final SirsStringConverter stringConverter;
     
-    public ObjectDataSource(final Iterable<T> iterable, final Previews previewLabelRepository, final SirsStringConverter stringConverter){
-        ArgumentChecks.ensureNonNull("iterable", iterable);
-        iterator = iterable.iterator();
-        this.previewRepository = previewLabelRepository;
-        this.stringConverter = stringConverter;
-    }
+//    public DesordreDataSource(final Iterable<T> iterable){
+//        this(iterable, null);
+//    }
+//
+//    public DesordreDataSource(final Iterable<T> iterable, final Previews previewLabelRepository){
+//        this(iterable, previewLabelRepository, null);
+//    }
+    
+//    public DesordreDataSource(final Iterable<T> iterable, final Previews previewLabelRepository, final SirsStringConverter stringConverter){
+//        ArgumentChecks.ensureNonNull("iterable", iterable);
+//        iterator = iterable.iterator();
+//        this.previewRepository = previewLabelRepository;
+//        this.stringConverter = stringConverter;
+//    }
 
     @Override
     public boolean next() throws JRException {
@@ -61,6 +67,10 @@ public class ObjectDataSource<T> implements JRDataSource {
 
         final String name = jrf.getName();
         final Class clazz = jrf.getValueClass();
+
+        if(name.equals("observation_data_source")){
+
+        }
         
         final Class currentClass = currentObject.getClass();
         try {

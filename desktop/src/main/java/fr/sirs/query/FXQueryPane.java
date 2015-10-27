@@ -1,8 +1,11 @@
 
 package fr.sirs.query;
 
-import fr.sirs.core.model.SQLQuery;
 import fr.sirs.SIRS;
+import fr.sirs.core.model.SQLQuery;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
@@ -20,7 +23,8 @@ public class FXQueryPane extends GridPane {
     @FXML private TextArea uiSql;
     @FXML private TextField uiLibelle;
 
-    private final SimpleObjectProperty<SQLQuery> sqlQueryProperty = new SimpleObjectProperty<>();
+    private final ObjectProperty<SQLQuery> sqlQueryProperty = new SimpleObjectProperty<>();
+    private final BooleanProperty modifiableProperty = new SimpleBooleanProperty(true);
     
     public FXQueryPane() {
         this(null);
@@ -29,11 +33,16 @@ public class FXQueryPane extends GridPane {
     public FXQueryPane(SQLQuery query) {
         SIRS.loadFXML(this);
         setSQLQuery(query);
+        uiDesc.disableProperty().bind(modifiableProperty.not());
+        uiSql.disableProperty().bind(modifiableProperty.not());
+        uiLibelle.disableProperty().bind(modifiableProperty.not());
     }
     
     public SQLQuery getSQLQuery() {
         return sqlQueryProperty.get();
     }
+
+    public final BooleanProperty modifiableProperty(){return modifiableProperty;}
     
     public void setSQLQuery(final SQLQuery newValue) {
         

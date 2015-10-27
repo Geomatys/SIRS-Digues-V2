@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 import java.util.logging.Level;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -45,6 +47,8 @@ public class FXQueryTable extends BorderPane{
     private final Button uiImportQueries = new Button("Importer");
     /** A button to export queries to a chosen properties file. */
     private final Button uiExportQueries = new Button("Exporter");
+
+    private final BooleanProperty modifiableProperty = new SimpleBooleanProperty(true);
     
     public FXQueryTable(List<SQLQuery> queries) {
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -64,7 +68,9 @@ public class FXQueryTable extends BorderPane{
         });
         
         table.getColumns().add(nameCol);
-        table.getColumns().add(new DeleteColumn());
+        final TableColumn deleteColumn = new DeleteColumn();
+        deleteColumn.visibleProperty().bind(modifiableProperty());
+        table.getColumns().add(deleteColumn);
         
         table.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<SQLQuery>() {
 
@@ -72,7 +78,9 @@ public class FXQueryTable extends BorderPane{
             public void onChanged(ListChangeListener.Change<? extends SQLQuery> c) {
                 final SQLQuery sqlq = table.getSelectionModel().getSelectedItem();
                 if(sqlq !=null){
-                    setCenter(new FXQueryPane(sqlq));
+                    final FXQueryPane queryPane = new FXQueryPane(sqlq);
+                    queryPane.modifiableProperty().bind(modifiableProperty());
+                    setCenter(queryPane);
                 }else{
                     setCenter(null);
                 }
@@ -89,6 +97,8 @@ public class FXQueryTable extends BorderPane{
         
         setPadding(new Insets(5));
     }
+
+    public final BooleanProperty modifiableProperty(){return modifiableProperty;}
     
     private void importRequests(ActionEvent e) {
         FileChooser chooser = new FileChooser();

@@ -27,8 +27,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URISyntaxException;
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +46,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
@@ -97,12 +96,10 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.geotoolkit.data.FeatureCollection;
-import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.data.query.Query;
 import org.geotoolkit.db.FilterToSQL;
 import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.db.h2.H2FeatureStore;
-import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.feature.type.NamesExt;
 import org.geotoolkit.font.FontAwesomeIcons;
@@ -127,6 +124,7 @@ public class FXSearchPane extends BorderPane {
 
     public static final Image ICON_SAVE    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_SAVE_ALIAS,22,Color.WHITE),null);
     public static final Image ICON_OPEN    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_LIST_UL,22,Color.WHITE),null);
+    public static final Image ICON_OPEN_DEFAULT    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COGS,22,Color.WHITE),null);
     public static final Image ICON_EXPORT  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_UPLOAD,22,Color.WHITE),null);
     public static final Image ICON_MODEL   = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_SHARE_ALT_SQUARE,22,Color.WHITE),null);
     public static final Image ICON_CARTO   = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COMPASS,22,Color.WHITE),null);
@@ -134,6 +132,7 @@ public class FXSearchPane extends BorderPane {
 
     @FXML private Button uiSave;
     @FXML private Button uiOpen;
+    @FXML private Button uiOpenDefault;
     @FXML private Button uiQueryManagement;
     @FXML private Button uiExportModel;
     @FXML private Button uiRefreshModel;
@@ -239,6 +238,7 @@ public class FXSearchPane extends BorderPane {
 
         uiSave.setGraphic(new ImageView(ICON_SAVE));
         uiOpen.setGraphic(new ImageView(ICON_OPEN));
+        uiOpenDefault.setGraphic(new ImageView(ICON_OPEN_DEFAULT));
         uiExportModel.setGraphic(new ImageView(ICON_EXPORT));
         uiRefreshModel.setGraphic(new ImageView(ICON_REFRESH));
         uiViewModel.setGraphic(new ImageView(ICON_MODEL));
@@ -309,8 +309,9 @@ public class FXSearchPane extends BorderPane {
         uiExportModel.setTooltip(new Tooltip("Voir la structure de la base SQL."));
         uiExportModel.setTooltip(new Tooltip("Exporter l'intégralité de la base SQL."));
         uiOpen.setTooltip(new Tooltip("Choisir une requête SQL parmi celles stockées dans le système."));
+        uiOpenDefault.setTooltip(new Tooltip("Choisir une requête SQL préprogrammée."));
         uiSave.setTooltip(new Tooltip("Enregistrer la requête actuelle dans le système local."));
-        uiSave.setTooltip(new Tooltip("Ajouter / supprimer des requêtes en base de données."));
+        uiQueryManagement.setTooltip(new Tooltip("Ajouter / supprimer des requêtes en base de données."));
 
         uiCarto.setTooltip(new Tooltip("Afficher le résultat de la requête sur la carte."));
 
@@ -419,6 +420,19 @@ public class FXSearchPane extends BorderPane {
     }
 
     @FXML
+    private void openDefaultSQLQuery(ActionEvent event){
+        final List<SQLQuery> queries;
+        try {
+            queries = SQLQueries.defaultQueries();
+        } catch (IOException | URISyntaxException ex) {
+            SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
+            GeotkFX.newExceptionDialog("Une erreur s'est produite pendant le chargement des requêtes préprogrammées.", ex).show();
+            return;
+        }
+        showQueryTable(queries, false);
+    }
+
+    @FXML
     private void openSQLQuery(ActionEvent event){
         final List<SQLQuery> queries;
         try {
@@ -429,7 +443,11 @@ public class FXSearchPane extends BorderPane {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             GeotkFX.newExceptionDialog("Une erreur s'est produite pendant la création de la liste des requêtes.", ex).show();
             return;
-        }
+        } 
+        showQueryTable(queries, true);
+    }
+
+    private void showQueryTable(final List<SQLQuery> queries, final boolean editable){
 
         if (queries.isEmpty()) {
             final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune requête disponible.", ButtonType.OK);
@@ -438,6 +456,8 @@ public class FXSearchPane extends BorderPane {
         } else {
             final Dialog dia = new Dialog();
             final FXQueryTable table = new FXQueryTable(queries);
+            table.modifiableProperty().set(editable);
+
             final DialogPane pane = new DialogPane();
             pane.setPrefSize(700, 400);
             final ButtonType bt = new ButtonType("Ouvrir");

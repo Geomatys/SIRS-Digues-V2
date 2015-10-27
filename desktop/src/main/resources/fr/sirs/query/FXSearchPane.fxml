@@ -155,7 +155,13 @@
                               <String fx:value="label-header" />
                            </styleClass>
                         </Button>
-                        <Button fx:id="uiSave" mnemonicParsing="false" onAction="#saveSQLQuery" text="Sauvegarder" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <Button fx:id="uiSave" mnemonicParsing="false" onAction="#saveSQLQuery" text="Sauvegarder" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                           <styleClass>
+                              <String fx:value="buttonbar-button" />
+                              <String fx:value="label-header" />
+                           </styleClass>
+                        </Button>
+                        <Button fx:id="uiOpenDefault" mnemonicParsing="false" onAction="#openDefaultSQLQuery" text="Requêtes préprogrammées" GridPane.columnIndex="1" GridPane.rowIndex="1">
                            <styleClass>
                               <String fx:value="buttonbar-button" />
                               <String fx:value="label-header" />
@@ -163,6 +169,7 @@
                         </Button>
                      </children>
                      <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" />
                         <ColumnConstraints hgrow="SOMETIMES" />
                         <ColumnConstraints hgrow="SOMETIMES" />
                      </columnConstraints>
