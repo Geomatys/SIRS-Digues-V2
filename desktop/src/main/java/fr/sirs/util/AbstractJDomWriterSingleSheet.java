@@ -4,10 +4,12 @@ import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import static fr.sirs.util.JRUtils.ATT_CLASS;
 import static fr.sirs.util.JRUtils.ATT_NAME;
 import static fr.sirs.util.JRUtils.TAG_BAND;
+import static fr.sirs.util.JRUtils.TAG_COLUMN_FOOTER;
 import static fr.sirs.util.JRUtils.TAG_COLUMN_HEADER;
 import static fr.sirs.util.JRUtils.TAG_DETAIL;
 import static fr.sirs.util.JRUtils.TAG_FIELD;
 import static fr.sirs.util.JRUtils.TAG_FIELD_DESCRIPTION;
+import static fr.sirs.util.JRUtils.TAG_PAGE_FOOTER;
 import static fr.sirs.util.JRUtils.TAG_PAGE_HEADER;
 import static fr.sirs.util.JRUtils.TAG_STATIC_TEXT;
 import static fr.sirs.util.JRUtils.TAG_TEXT;
@@ -38,13 +40,17 @@ public abstract class AbstractJDomWriterSingleSheet extends AbstractJDomWriter {
     protected final Element pageHeader;
     protected final Element columnHeader;
     protected final Element detail;
-    
+    protected final Element columnFooter;
+    protected final Element pageFooter;
+
     public AbstractJDomWriterSingleSheet() {
         super();
-        this.title = null;
-        this.pageHeader = null;
-        this.columnHeader = null;
-        this.detail = null;
+        title = null;
+        pageHeader = null;
+        columnHeader = null;
+        detail = null;
+        columnFooter = null;
+        pageFooter = null;
     }
 
     public AbstractJDomWriterSingleSheet(final InputStream stream) throws ParserConfigurationException, SAXException, IOException{
@@ -53,6 +59,8 @@ public abstract class AbstractJDomWriterSingleSheet extends AbstractJDomWriter {
         pageHeader = (Element) root.getElementsByTagName(TAG_PAGE_HEADER).item(0);
         columnHeader = (Element) root.getElementsByTagName(TAG_COLUMN_HEADER).item(0);
         detail = (Element) root.getElementsByTagName(TAG_DETAIL).item(0);
+        columnFooter = (Element) root.getElementsByTagName(TAG_COLUMN_FOOTER).item(0);
+        pageFooter = (Element) root.getElementsByTagName(TAG_PAGE_FOOTER).item(0);
     }
 
     /**
@@ -91,6 +99,14 @@ public abstract class AbstractJDomWriterSingleSheet extends AbstractJDomWriter {
 
     protected void writeColumnHeader(){
         root.appendChild(columnHeader);
+    }
+
+    protected void writePageFooter(){
+        root.appendChild(pageFooter);
+    }
+
+    protected void writeColumnFooter(){
+        root.appendChild(columnFooter);
     }
 
     /**

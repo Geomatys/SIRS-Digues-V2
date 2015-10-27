@@ -84,26 +84,30 @@ public class PrinterUtilities {
         final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
         templateFile.deleteOnExit();
 
-        final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(
-                ReseauHydrauliqueFerme.class,
-                PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_RESEAU_FERME),
-                avoidDesordreFields, avoidObservationFields,
-                reseauFields, printPhoto, printReseauOuvrage);
-        templateWriter.setOutput(templateFile);
-        templateWriter.write();
+        final JasperPrint print;
+        try(final InputStream logoStream = PrinterUtilities.class.getResourceAsStream(LOGO_PATH);
+                final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_RESEAU_FERME);
+                final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS)){
+            final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(
+                    metaTemplateStream,
+                    avoidDesordreFields, avoidObservationFields,
+                    reseauFields, printPhoto, printReseauOuvrage);
+            templateWriter.setOutput(templateFile);
+            templateWriter.write();
 
-        final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
+            final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
 
-        final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter);
+            final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter);
 
-        final Map<String, Object> parameters = new HashMap<>();
+            final Map<String, Object> parameters = new HashMap<>();
 
-        parameters.put("logo", PrinterUtilities.class.getResourceAsStream(LOGO_PATH));
+            parameters.put("logo", logoStream);
 
-        final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS));
-        parameters.put(PHOTOS_SUBREPORT, photosReport);
+            final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(photoTemplateStream);
+            parameters.put(PHOTOS_SUBREPORT, photosReport);
 
-        final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
+            print = JasperFillManager.fillReport(jasperReport, parameters, source);
+        }
 
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile("RESEAU_HYDRAULIQUE_FERME_OBSERVATION", PDF_EXTENSION);
@@ -133,27 +137,32 @@ public class PrinterUtilities {
         final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
         templateFile.deleteOnExit();
 
-        final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(
-                Desordre.class,
-                PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE), 
-                avoidDesordreFields, avoidObservationFields, avoidPrestationFields, 
-                reseauFields, printPhoto, printReseauOuvrage, printVoirie);
-        templateWriter.setOutput(templateFile);
-        templateWriter.write();
+        final JasperPrint print;
+        try(final InputStream logoStream = PrinterUtilities.class.getResourceAsStream(LOGO_PATH);
+                final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE);
+                final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS)){
 
-        final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
+            final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(
+                    metaTemplateStream,
+                    avoidDesordreFields, avoidObservationFields, avoidPrestationFields,
+                    reseauFields, printPhoto, printReseauOuvrage, printVoirie);
+            templateWriter.setOutput(templateFile);
+            templateWriter.write();
 
-        final JRDataSource source = new DesordreDataSource(desordres, previewLabelRepository, stringConverter);
+            final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
 
-        final Map<String, Object> parameters = new HashMap<>();
+            final JRDataSource source = new DesordreDataSource(desordres, previewLabelRepository, stringConverter);
 
-        parameters.put("logo", PrinterUtilities.class.getResourceAsStream(LOGO_PATH));
+            final Map<String, Object> parameters = new HashMap<>();
 
-        final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS));
-        parameters.put(PHOTOS_SUBREPORT, photosReport);
+            parameters.put("logo", logoStream);
 
-        final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
-        
+            final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(photoTemplateStream);
+            parameters.put(PHOTOS_SUBREPORT, photosReport);
+
+            print = JasperFillManager.fillReport(jasperReport, parameters, source);
+        }
+
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile("DESORDRE_OBSERVATION", PDF_EXTENSION);
         try (final FileOutputStream outStream = new FileOutputStream(fout)) {
@@ -195,7 +204,6 @@ public class PrinterUtilities {
         // Retrives the compiled template and the feature type -----------------
         final Map.Entry<JasperReport, FeatureType> entry = JasperReportService.prepareTemplate(template);
         final JasperReport report = entry.getKey();
-        final FeatureType type = entry.getValue();
         
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile(featureCollection.getFeatureType().getName().tip().toString(), PDF_EXTENSION);
