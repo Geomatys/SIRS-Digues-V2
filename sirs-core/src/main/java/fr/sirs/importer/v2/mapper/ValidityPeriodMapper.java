@@ -17,6 +17,9 @@ import org.springframework.stereotype.Component;
  */
 public class ValidityPeriodMapper extends AbstractMapper<AvecBornesTemporelles> {
 
+    private static final String DEFAULT_START_FIELD = "DATE_DEBUT_VAL";
+    private static final String DEFAULT_END_FIELD = "DATE_FIN_VAL";
+
     private static final String START_STRING = "DEBUT";
     private static final String END_STRING = "FIN";
     private static final String DATE_STRING = "DATE";
@@ -55,13 +58,33 @@ public class ValidityPeriodMapper extends AbstractMapper<AvecBornesTemporelles> 
         public Optional<Mapper<AvecBornesTemporelles>> configureInput(Table inputType) {
             String startDateName = null;
             String endDateName = null;
+
+            try {
+                if (inputType.getColumn(DEFAULT_START_FIELD) != null) {
+                    startDateName = DEFAULT_START_FIELD;
+                }
+            } catch (IllegalArgumentException e) {
+                // No field with search name. We will try to use fallback case.
+            }
+
+            try {
+                if (inputType.getColumn(DEFAULT_END_FIELD) != null) {
+                    endDateName = DEFAULT_END_FIELD;
+                }
+            } catch (IllegalArgumentException e) {
+                // No field with search name. We will try to use fallback case.
+            }
+
+            // Fallback.
             for (final Column c : inputType.getColumns()) {
                 String cName = c.getName().toUpperCase();
                 if (cName.contains(DATE_STRING)) {
-                    if (cName.contains(START_STRING)) {
+                    if (startDateName == null && cName.contains(START_STRING)) {
                         startDateName = c.getName();
-                    } else if (cName.contains(END_STRING)) {
+                    }  else if (endDateName == null && cName.contains(END_STRING)) {
                         endDateName = c.getName();
+                    } else if (endDateName != null && startDateName != null) {
+                        break;
                     }
                 }
             }
