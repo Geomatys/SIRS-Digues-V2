@@ -16,10 +16,6 @@
   <name>Desktop</name>
   <description>Desktop</description>
 
-  <properties>
-    <spring.version>4.1.0.RELEASE</spring.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>fr.sirs</groupId>
