@@ -30,9 +30,6 @@
 	<subDataset name="Observation Dataset" uuid="f87f5cd0-3234-40c4-9ea3-250724f36d5e"/>
 	<subDataset name="ReseauOuvrage Dataset" uuid="ac0fddac-67df-47b9-83cb-4b6fb7d9d014"/>
 	<parameter name="logo" class="java.lang.Object"/>
-	<parameter name="OBSERVATION_TABLE_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
-	<parameter name="RESEAU_OUVRAGE_TABLE_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
-	<parameter name="PHOTO_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
 	<parameter name="PHOTO_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport"/>
 	<title>
 		<band height="60">

@@ -64,19 +64,23 @@ public abstract class AbstractJDomWriterSingleSheet extends AbstractJDomWriter {
         // Builds the name of the field.----------------------------------------
         final String fieldName = method.getName().substring(3, 4).toLowerCase()
                         + method.getName().substring(4);
+        writeField(method.getParameterTypes()[0], fieldName, "Mettre ici une description du champ.");
+    }
+
+    protected void writeField(final Class type, final String name, final String description){
 
         // Creates the field element.-------------------------------------------
         final Element field = document.createElement(TAG_FIELD);
-        field.setAttribute(ATT_NAME, fieldName);
+        field.setAttribute(ATT_NAME, name);
 
-        final Optional<String> canonicalName = getCanonicalName(method.getParameterTypes()[0]);
+        final Optional<String> canonicalName = getCanonicalName(type);
         if(canonicalName.isPresent()) field.setAttribute(ATT_CLASS, canonicalName.get());
 
         final Element fieldDescription = document.createElement(TAG_FIELD_DESCRIPTION);
-        final CDATASection description = document.createCDATASection("Mettre ici une description du champ.");
+        final CDATASection desc = document.createCDATASection(description);
 
         // Builds the DOM tree.-------------------------------------------------
-        fieldDescription.appendChild(description);
+        fieldDescription.appendChild(desc);
         field.appendChild(fieldDescription);
         root.appendChild(field);
     }

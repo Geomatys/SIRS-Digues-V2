@@ -1,30 +1,11 @@
 package fr.sirs.util;
 
-import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.EchelleLimnimetrique;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.ObjetReseau;
-import fr.sirs.core.model.Observation;
-import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
-import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.OuvrageParticulier;
-import fr.sirs.core.model.OuvrageTelecomEnergie;
-import fr.sirs.core.model.OuvrageVoirie;
-import fr.sirs.core.model.Photo;
-import fr.sirs.core.model.Prestation;
-import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.ReseauTelecomEnergie;
-import fr.sirs.core.model.VoieDigue;
-import static fr.sirs.util.JRDomWriterDesordreSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTOS_SUBREPORT;
-import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTO_DATA_SOURCE;
-import static fr.sirs.util.JRDomWriterDesordreSheet.PRESTATION_TABLE_DATA_SOURCE;
-import static fr.sirs.util.JRDomWriterDesordreSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
-import static fr.sirs.util.JRDomWriterDesordreSheet.VOIRIE_TABLE_DATA_SOURCE;
 import fr.sirs.util.property.SirsPreferences;
 import java.io.File;
 import java.io.FileInputStream;
@@ -72,6 +53,7 @@ public class PrinterUtilities {
     
     private static final String JRXML_EXTENSION = ".jrxml";
     private static final String PDF_EXTENSION = ".pdf";
+    private static final String LOGO_PATH = "/fr/sirs/images/icon-sirs.png";
     
     private static final List<String> falseGetter = new ArrayList<>();
     static{
@@ -98,80 +80,36 @@ public class PrinterUtilities {
             final List<ReseauHydrauliqueFerme> reseaux,
             final boolean printPhoto, final boolean printReseauOuvrage) throws Exception {
 
-        JasperPrint firstPrint = null;
-        final List<JasperPrint> followingPrints = new ArrayList<>();
-        for(final ReseauHydrauliqueFerme reseau : reseaux){
+        // Creates the Jasper Reports specific template from the generic template.
+        final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
+        templateFile.deleteOnExit();
 
-            // Creates the Jasper Reports specific template from the generic template.
-            final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
-            templateFile.deleteOnExit();
+        final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(
+                ReseauHydrauliqueFerme.class,
+                PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_RESEAU_FERME),
+                avoidDesordreFields, avoidObservationFields,
+                reseauFields, printPhoto, printReseauOuvrage);
+        templateWriter.setOutput(templateFile);
+        templateWriter.write();
 
-            final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(
-                    ReseauHydrauliqueFerme.class,
-                    PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_RESEAU_FERME),
-                    avoidDesordreFields, avoidObservationFields,
-                    reseauFields, printPhoto, printReseauOuvrage);
-            templateWriter.setOutput(templateFile);
-            templateWriter.write(reseau);
+        final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
 
-            final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
+        final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter);
 
-            final JRDataSource source = new ObjectDataSource(Collections.singletonList(reseau), previewLabelRepository, stringConverter);
+        final Map<String, Object> parameters = new HashMap<>();
 
-            final Map<String, Object> parameters = new HashMap<>();
-            parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
+        parameters.put("logo", PrinterUtilities.class.getResourceAsStream(LOGO_PATH));
 
-            parameters.put(OBSERVATION_TABLE_DATA_SOURCE, new ObjectDataSource<>(reseau.getObservations(), previewLabelRepository, stringConverter));
+        final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS));
+        parameters.put(PHOTOS_SUBREPORT, photosReport);
 
-            final List<Photo> photos = new ArrayList<>();
-            for(final ObservationReseauHydrauliqueFerme observation : reseau.getObservations()){
-                if(observation.getPhotos()!=null && !observation.getPhotos().isEmpty()){
-                    photos.addAll(observation.getPhotos());
-                }
-            }
-            if(reseau.getPhotos()!=null && !reseau.getPhotos().isEmpty()){
-                photos.addAll(reseau.getPhotos());
-            }
-
-            if(printPhoto) {
-                parameters.put(PHOTO_DATA_SOURCE, new ObjectDataSource<>(photos, previewLabelRepository, stringConverter));
-            }
-
-            if(printReseauOuvrage) {
-                final List<ObjetReseau> reseauOuvrageList = new ArrayList<>();
-                final List<List<? extends ObjetReseau>> retrievedLists = new ArrayList();
-                retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageHydrauliqueAssocie.class).get(reseau.getOuvrageHydrauliqueAssocieIds()));
-                retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueCielOuvert.class).get(reseau.getReseauHydrauliqueCielOuvertIds()));
-                retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).get(reseau.getStationPompageIds()));
-
-                for(final List candidate : retrievedLists){
-                    if(candidate!=null && !candidate.isEmpty()){
-                        reseauOuvrageList.addAll(candidate);
-                    }
-                }
-
-                parameters.put(RESEAU_OUVRAGE_TABLE_DATA_SOURCE, new ObjectDataSource<>(reseauOuvrageList, previewLabelRepository, stringConverter));
-            }
-
-            final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS));
-            parameters.put(PHOTOS_SUBREPORT, photosReport);
-
-            final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
-            if(firstPrint==null) firstPrint=print;
-            else followingPrints.add(print);
-        }
-
-        for(final JasperPrint print : followingPrints){
-            for(final JRPrintPage page : print.getPages()){
-                if(firstPrint!=null) firstPrint.addPage(page);
-            }
-        }
+        final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
 
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile("RESEAU_HYDRAULIQUE_FERME_OBSERVATION", PDF_EXTENSION);
         try (final FileOutputStream outStream = new FileOutputStream(fout)) {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
-            JasperReportService.generate(firstPrint, output);
+            JasperReportService.generate(print, output);
         }
         return fout;
     }
@@ -191,98 +129,36 @@ public class PrinterUtilities {
             final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie)
         throws ParserConfigurationException, SAXException, JRException, TransformerException, IOException {
         
-        JasperPrint firstPrint = null;
-        final List<JasperPrint> followingPrints = new ArrayList<>();
-        for(final Desordre desordre : desordres){
-            
-            // Creates the Jasper Reports specific template from the generic template.
-            final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
-            templateFile.deleteOnExit();
+        // Creates the Jasper Reports specific template from the generic template.
+        final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
+        templateFile.deleteOnExit();
 
-            final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(
-                    Desordre.class,
-                    PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE), 
-                    avoidDesordreFields, avoidObservationFields, avoidPrestationFields, 
-                    reseauFields, printPhoto, printReseauOuvrage, printVoirie);
-            templateWriter.setOutput(templateFile);
-            templateWriter.write(desordre);
+        final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(
+                Desordre.class,
+                PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE), 
+                avoidDesordreFields, avoidObservationFields, avoidPrestationFields, 
+                reseauFields, printPhoto, printReseauOuvrage, printVoirie);
+        templateWriter.setOutput(templateFile);
+        templateWriter.write();
 
-            final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
-                
-            final JRDataSource source = new ObjectDataSource(Collections.singletonList(desordre), previewLabelRepository, stringConverter);
-            
-            final Map<String, Object> parameters = new HashMap<>();
-            parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
-            
-            parameters.put(OBSERVATION_TABLE_DATA_SOURCE, new ObjectDataSource<>(desordre.observations, previewLabelRepository, stringConverter));
-            
-            parameters.put(PRESTATION_TABLE_DATA_SOURCE, new ObjectDataSource<>(Injector.getSession().getRepositoryForClass(Prestation.class).get(desordre.getPrestationIds()), previewLabelRepository, stringConverter));
-            
-            final List<Photo> photos = new ArrayList<>();
-            for(final Observation observation : desordre.observations){
-                if(observation.photos!=null && !observation.photos.isEmpty()){
-                    photos.addAll(observation.photos);
-                }
-            }
-            
-            if(printPhoto) {
-                parameters.put(PHOTO_DATA_SOURCE, new ObjectDataSource<>(photos, previewLabelRepository, stringConverter));
-            }
-            
-            if(printReseauOuvrage) {
-                final List<ObjetReseau> reseauOuvrageList = new ArrayList<>();
-                final List<List<? extends ObjetReseau>> retrievedLists = new ArrayList();
-                retrievedLists.add(Injector.getSession().getRepositoryForClass(EchelleLimnimetrique.class).get(desordre.getEchelleLimnimetriqueIds()));
-                retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageParticulier.class).get(desordre.getOuvrageParticulierIds()));
-                retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauTelecomEnergie.class).get(desordre.getReseauTelecomEnergieIds()));
-                retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageTelecomEnergie.class).get(desordre.getOuvrageTelecomEnergieIds()));
-                retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageHydrauliqueAssocie.class).get(desordre.getOuvrageHydrauliqueAssocieIds()));
-                retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueCielOuvert.class).get(desordre.getReseauHydrauliqueCielOuvertIds()));
-                retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).get(desordre.getReseauHydrauliqueFermeIds()));
-                
-                for(final List candidate : retrievedLists){
-                    if(candidate!=null && !candidate.isEmpty()){
-                        reseauOuvrageList.addAll(candidate);
-                    }
-                }
-                
-                parameters.put(RESEAU_OUVRAGE_TABLE_DATA_SOURCE, new ObjectDataSource<>(reseauOuvrageList, previewLabelRepository, stringConverter));
-            }
-            
-            if(printVoirie) {
-                final List<ObjetReseau> voirieList = new ArrayList<>();
-                final List<List<? extends ObjetReseau>> retrievedLists = new ArrayList();
-                retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageVoirie.class).get(desordre.getOuvrageVoirieIds()));
-                retrievedLists.add(Injector.getSession().getRepositoryForClass(VoieDigue.class).get(desordre.getVoieDigueIds()));
-                
-                for(final List candidate : retrievedLists){
-                    if(candidate!=null && !candidate.isEmpty()){
-                        voirieList.addAll(candidate);
-                    }
-                }
-                
-                parameters.put(VOIRIE_TABLE_DATA_SOURCE, new ObjectDataSource<>(voirieList, previewLabelRepository, stringConverter));
-            }
-            
-            final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS));
-            parameters.put(PHOTOS_SUBREPORT, photosReport);
-            
-            final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
-            if(firstPrint==null) firstPrint=print;
-            else followingPrints.add(print);
-        }
-        
-        for(final JasperPrint print : followingPrints){
-            for(final JRPrintPage page : print.getPages()){
-                if(firstPrint!=null) firstPrint.addPage(page);
-            }
-        }
+        final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
+
+        final JRDataSource source = new DesordreDataSource(desordres, previewLabelRepository, stringConverter);
+
+        final Map<String, Object> parameters = new HashMap<>();
+
+        parameters.put("logo", PrinterUtilities.class.getResourceAsStream(LOGO_PATH));
+
+        final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS));
+        parameters.put(PHOTOS_SUBREPORT, photosReport);
+
+        final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
         
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile("DESORDRE_OBSERVATION", PDF_EXTENSION);
         try (final FileOutputStream outStream = new FileOutputStream(fout)) {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
-            JasperReportService.generate(firstPrint, output);
+            JasperReportService.generate(print, output);
         }
         return fout;
     }
@@ -327,7 +203,7 @@ public class PrinterUtilities {
         try (final FileOutputStream outStream = new FileOutputStream(fout)) {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
             final Map<String, Object> parameters = new HashMap<>();
-            parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
+            parameters.put("logo", PrinterUtilities.class.getResourceAsStream(LOGO_PATH));
             parameters.put(JRDomWriterQueryResultSheet.TABLE_DATA_SOURCE, new CollectionDataSource(featureCollection));
 
             final JasperPrint print = JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());
@@ -382,7 +258,7 @@ public class PrinterUtilities {
             final JRDataSource source = new ObjectDataSource(Collections.singletonList(element), previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
-            parameters.put("logo", PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/icon-sirs.png"));
+            parameters.put("logo", PrinterUtilities.class.getResourceAsStream(LOGO_PATH));
             final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
             if(finalPrint==null) finalPrint=print;
             else{

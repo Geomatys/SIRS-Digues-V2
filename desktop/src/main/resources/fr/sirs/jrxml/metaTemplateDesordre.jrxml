@@ -32,11 +32,6 @@
 	<subDataset name="ReseauOuvrage Dataset" uuid="ac0fddac-67df-47b9-83cb-4b6fb7d9d014"/>
 	<subDataset name="Voirie Dataset" uuid="dafa0e8d-c219-44fe-9097-387a54fe781d"/>
 	<parameter name="logo" class="java.lang.Object"/>
-	<parameter name="OBSERVATION_TABLE_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
-	<parameter name="PRESTATION_TABLE_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
-	<parameter name="RESEAU_OUVRAGE_TABLE_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
-	<parameter name="VOIRIE_TABLE_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
-	<parameter name="PHOTO_DATA_SOURCE" class="fr.sirs.util.ObjectDataSource"/>
 	<parameter name="PHOTO_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport"/>
 	<title>
 		<band height="60">

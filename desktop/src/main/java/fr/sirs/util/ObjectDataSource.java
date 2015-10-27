@@ -23,6 +23,7 @@ import org.geotoolkit.report.CollectionDataSource;
 /**
  *
  * @author Samuel Andrés (Geomatys)
+ * @param <T>
  */
 public class ObjectDataSource<T> implements JRDataSource {
     
@@ -57,7 +58,7 @@ public class ObjectDataSource<T> implements JRDataSource {
     }
 
     @Override
-    public Object getFieldValue(JRField jrf) throws JRException {
+    public Object getFieldValue(final JRField jrf) throws JRException {
 
         final String name = jrf.getName();
         final Class clazz = jrf.getValueClass();

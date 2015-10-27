@@ -106,10 +106,9 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
     /**
      * <p>This method writes a Jasper Reports template mapping the parameter class.</p>
      * 
-     * @param candidate
      * @throws TransformerException
      */
-    public void write(final T candidate) throws TransformerException {
+    public void write() throws TransformerException {
 
         // Remove elements before inserting fields.-----------------------------
         root.removeChild(title);
@@ -118,7 +117,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         root.removeChild(detail);
 
         // Modifies the template, based on the given class.---------------------
-        writeObject(candidate);
+        writeObject();
 
         // Serializes the document.---------------------------------------------
         //DomUtilities.write(this.document, this.output);
@@ -289,7 +288,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         datasetRun.setAttribute(ATT_SUB_DATASET, datasetName);
         final Element datasourceExpression = document.createElementNS(URI_JRXML, TAG_DATA_SOURCE_EXPRESSION);
 
-        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $P{"+datasourceParameter+"})");//.cloneDataSource()
+        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $F{"+datasourceParameter+"})");//.cloneDataSource()
 
         datasourceExpression.appendChild(datasourceExpressionField);
         datasetRun.appendChild(datasourceExpression);
@@ -484,5 +483,5 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         table.appendChild(column);
     }
 
-    protected abstract void writeObject(T candidate);
+    protected abstract void writeObject();
 }

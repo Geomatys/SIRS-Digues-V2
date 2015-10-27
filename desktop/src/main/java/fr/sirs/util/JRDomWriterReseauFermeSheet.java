@@ -4,7 +4,6 @@ package fr.sirs.util;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
-import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import static fr.sirs.util.JRUtils.ATT_HEIGHT;
 import static fr.sirs.util.JRUtils.ATT_POSITION_TYPE;
@@ -21,7 +20,6 @@ import static fr.sirs.util.JRUtils.TAG_SUB_DATASET;
 import static fr.sirs.util.JRUtils.URI_JRXML;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.CDATASection;
@@ -74,16 +72,18 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
 
     /**
      * <p>This method modifies the body of the DOM.</p>
-     * @param candidate
      */
     @Override
-    protected void writeObject(final ReseauHydrauliqueFerme candidate) {
+    protected void writeObject() {
         
         writeSubDataset(ObservationReseauHydrauliqueFerme.class, observationFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(0));
         writeSubDataset(ObjetReseau.class, reseauFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(1));
         
         // Sets the initial fields used by the template.------------------------
         writeFields();
+        writeField(ObjectDataSource.class, PHOTO_DATA_SOURCE, "Source de données des photos");
+        writeField(ObjectDataSource.class, OBSERVATION_TABLE_DATA_SOURCE, "Source de données des observations");
+        writeField(ObjectDataSource.class, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, "Source de données des réseaux");
         
         // Modifies the title block.--------------------------------------------
         writeTitle();
@@ -93,7 +93,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         writeColumnHeader();
         
         // Builds the body of the Jasper Reports template.----------------------
-        writeDetail(candidate);
+        writeDetail();
     }
     
     /**
@@ -101,7 +101,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
      * @param classToMap
      * @throws Exception 
      */
-    private void writeDetail(final ReseauHydrauliqueFerme candidate) {
+    private void writeDetail() {
         
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         currentY = Integer.valueOf(band.getAttribute(ATT_HEIGHT));
@@ -109,43 +109,23 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         /*----------------------------------------------------------------------
         TABLEAU DES OBSERVATIONS
         ----------------------------------------------------------------------*/
-        if(candidate.getObservations()!=null && !candidate.getObservations().isEmpty()){
-            currentY+=2;
-            writeSectionTitle("Observations", 15, 1, 10, 9);
-            currentY+=2;
-            writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 30);
-            currentY+=2;
-        }
+        currentY+=2;
+        writeSectionTitle("Observations", 15, 1, 10, 9);
+        currentY+=2;
+        writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 30);
+        currentY+=2;
         
         /*----------------------------------------------------------------------
         SOUS-RAPPORTS DES PHOTOS
         ----------------------------------------------------------------------*/
         if(printPhoto){
-            
-            // On sait que les photos qui seront fournies par le datasource seront les photos des observations du désordre courant
-            final List<Photo> photos = new ArrayList<>();
-            for(final ObservationReseauHydrauliqueFerme observation : candidate.getObservations()){
-                final List<Photo> obsPhotos = observation.getPhotos();
-                if(obsPhotos!=null && !obsPhotos.isEmpty()){
-                    photos.addAll(obsPhotos);
-                }
-            }
-            if(candidate.getPhotos()!=null && !candidate.getPhotos().isEmpty()){
-                photos.addAll(candidate.getPhotos());
-            }
-            if(!photos.isEmpty()){
-                currentY+=2;
-                includePhotoSubreport(64);
-            }
+            includePhotoSubreport(64);
         }
         
         /*----------------------------------------------------------------------
         TABLEAU DES OUVRAGES ET RÉSEAUX
         ----------------------------------------------------------------------*/
-        final int nbReseauOuvrage = candidate.getOuvrageHydrauliqueAssocieIds().size()
-                + candidate.getReseauHydrauliqueCielOuvertIds().size()
-                + candidate.getStationPompageIds().size();
-        if(printReseauOuvrage && nbReseauOuvrage>0){
+        if(printReseauOuvrage){
             currentY+=2;
             writeSectionTitle("Réseaux et ouvrages", 15, 1, 10, 9);
             currentY+=2;
@@ -175,7 +155,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         
         final Element datasourceExpression = document.createElementNS(URI_JRXML, TAG_DATA_SOURCE_EXPRESSION);
         
-        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $P{"+PHOTO_DATA_SOURCE+"})");
+        final CDATASection datasourceExpressionField = document.createCDATASection("(("+ObjectDataSource.class.getCanonicalName()+") $F{"+PHOTO_DATA_SOURCE+"})");
         
         datasourceExpression.appendChild(datasourceExpressionField);
         subReport.appendChild(datasourceExpression);

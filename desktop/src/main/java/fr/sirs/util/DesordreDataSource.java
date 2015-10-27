@@ -1,22 +1,30 @@
 package fr.sirs.util;
 
-import fr.sirs.SIRS;
+import fr.sirs.Injector;
+import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Preview;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import fr.sirs.core.model.EchelleLimnimetrique;
+import fr.sirs.core.model.ObjetReseau;
+import fr.sirs.core.model.Observation;
+import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
+import fr.sirs.core.model.OuvrageParticulier;
+import fr.sirs.core.model.OuvrageTelecomEnergie;
+import fr.sirs.core.model.OuvrageVoirie;
+import fr.sirs.core.model.Photo;
+import fr.sirs.core.model.Prestation;
+import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
+import fr.sirs.core.model.ReseauHydrauliqueFerme;
+import fr.sirs.core.model.ReseauTelecomEnergie;
+import fr.sirs.core.model.VoieDigue;
+import static fr.sirs.util.JRDomWriterDesordreSheet.OBSERVATION_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTO_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterDesordreSheet.PRESTATION_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterDesordreSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterDesordreSheet.VOIRIE_TABLE_DATA_SOURCE;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
-import org.apache.sis.util.ObjectConverters;
-import org.apache.sis.util.UnconvertibleObjectException;
-import org.apache.sis.util.logging.Logging;
-import org.ektorp.DocumentNotFoundException;
-import org.geotoolkit.report.CollectionDataSource;
 
 /**
  *
@@ -24,161 +32,74 @@ import org.geotoolkit.report.CollectionDataSource;
  */
 public class DesordreDataSource extends ObjectDataSource<Desordre> {
 
-    public static final String obsdt = "observation_data_source";
-    public static final String predt = "prestation_data_source";
-    public static final String phodt = "photo_data_source";
-
     public DesordreDataSource(Iterable<Desordre> iterable) {
         super(iterable);
     }
-    
-//    private final Iterator<Desordre> iterator;
-//    private T currentObject;
-//    private final Previews previewRepository;
-//    private final SirsStringConverter stringConverter;
-    
-//    public DesordreDataSource(final Iterable<T> iterable){
-//        this(iterable, null);
-//    }
-//
-//    public DesordreDataSource(final Iterable<T> iterable, final Previews previewLabelRepository){
-//        this(iterable, previewLabelRepository, null);
-//    }
-    
-//    public DesordreDataSource(final Iterable<T> iterable, final Previews previewLabelRepository, final SirsStringConverter stringConverter){
-//        ArgumentChecks.ensureNonNull("iterable", iterable);
-//        iterator = iterable.iterator();
-//        this.previewRepository = previewLabelRepository;
-//        this.stringConverter = stringConverter;
-//    }
 
-    @Override
-    public boolean next() throws JRException {
-        if(iterator.hasNext()){
-            currentObject = iterator.next();
-            return true;
-        } else {
-            return false;
-        }
+    public DesordreDataSource(final Iterable<Desordre> iterable, final Previews previewLabelRepository){
+        super(iterable, previewLabelRepository);
+    }
+    
+    public DesordreDataSource(final Iterable<Desordre> iterable, final Previews previewLabelRepository, final SirsStringConverter stringConverter){
+        super(iterable, previewLabelRepository, stringConverter);
     }
 
     @Override
-    public Object getFieldValue(JRField jrf) throws JRException {
+    public Object getFieldValue(final JRField jrf) throws JRException {
 
         final String name = jrf.getName();
-        final Class clazz = jrf.getValueClass();
 
-        if(name.equals("observation_data_source")){
-
-        }
-        
-        final Class currentClass = currentObject.getClass();
-        try {
-            final Method getter = currentClass.getMethod("get"+name.substring(0, 1).toUpperCase()+name.substring(1));
-            final Object propertyValue = getter.invoke(currentObject);
-            
-            if(propertyValue != null){
-                try {
-                    final Object propertyValueToPrint = parsePropertyValue(propertyValue, clazz);
-                    return ObjectConverters.convert(propertyValueToPrint, clazz);
-                } catch (UnconvertibleObjectException e) {
-                    Logging.recoverableException(SIRS.LOGGER, CollectionDataSource.class, "getFieldValue", e);
-                    // TODO - do we really want to ignore?
+        if(PHOTO_DATA_SOURCE.equals(name)){
+            final List<Photo> photos = new ArrayList<>();
+            for(final Observation observation : currentObject.observations){
+                if(observation.photos!=null && !observation.photos.isEmpty()){
+                    photos.addAll(observation.photos);
                 }
             }
-        } catch (SecurityException | IllegalArgumentException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ex) {
-            SIRS.LOGGER.log(Level.WARNING, null, ex);
-        } 
+            return new ObjectDataSource<>(photos, previewRepository, stringConverter);
+        }
+        else if(OBSERVATION_TABLE_DATA_SOURCE.equals(name)){
+            return new ObjectDataSource<>(currentObject.getObservations(), previewRepository, stringConverter);
+        }
+        else if(PRESTATION_TABLE_DATA_SOURCE.equals(name)){
+            return new ObjectDataSource<>(Injector.getSession().getRepositoryForClass(Prestation.class).get(currentObject.getPrestationIds()), previewRepository, stringConverter);
+        }
+        else if(RESEAU_OUVRAGE_TABLE_DATA_SOURCE.equals(name)){
 
-        //No field that match this name, looks like the feature type
-        //used is not the exact one returned by the JasperReportservice.
-        //This is not necessarly an error if for exemple someone ignore
-        //some attribut from the template because he doesn't need them.
-        return null;
-    }
-    
-    private Object parsePropertyValue(final Object propertyValue, final Class clazz){
-        final Object propertyValueToPrint;
-        if(String.class.isAssignableFrom(clazz)){
-            if(previewRepository!=null){
-                Preview previewLabel = null;
-                try{
-                    previewLabel = previewRepository.get((String) propertyValue);
-                } catch(DocumentNotFoundException e){
-                    SIRS.LOGGER.log(Level.WARNING, e.getMessage());
-                }
-                if(previewLabel!=null){
-                    if(stringConverter!=null){
-                        propertyValueToPrint = stringConverter.toString(previewLabel, false);
-                    } else if(previewLabel.getDesignation()!=null && !"".equals(previewLabel.getDesignation())){
-                        propertyValueToPrint = previewLabel.getDesignation();
-                    } else propertyValueToPrint = propertyValue;
-                }
-                else{
-                    propertyValueToPrint = propertyValue;
-                }
-            }
-            else{
-                propertyValueToPrint = propertyValue;
-            }
-        } else if(Element.class.isAssignableFrom(clazz) && stringConverter!=null){
-            propertyValueToPrint = stringConverter.toString(propertyValue, false);
-        } else if(List.class.isAssignableFrom(clazz)) {
-            propertyValueToPrint = new PrintableArrayList(true);
-            for(final Object o : (List) propertyValue){
-                ((List)propertyValueToPrint).add(parsePropertyValue(o, o.getClass())); // On autorise obligatoirement le préfixage des éléments des listes sinon on n'a plus rien à afficher.
-            }
-        } else {
-            propertyValueToPrint = propertyValue;
-        }
-        return propertyValueToPrint;
-    }
-    
-    /**
-     * Extention of ArrayList for redefining toString() in order to improve printing.
-     * 
-     * @param <E> 
-     */
-    private class PrintableArrayList<E> extends ArrayList<E>{
+            final List<ObjetReseau> reseauOuvrageList = new ArrayList<>();
+            final List<List<? extends ObjetReseau>> retrievedLists = new ArrayList();
+            retrievedLists.add(Injector.getSession().getRepositoryForClass(EchelleLimnimetrique.class).get(currentObject.getEchelleLimnimetriqueIds()));
+            retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageParticulier.class).get(currentObject.getOuvrageParticulierIds()));
+            retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauTelecomEnergie.class).get(currentObject.getReseauTelecomEnergieIds()));
+            retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageTelecomEnergie.class).get(currentObject.getOuvrageTelecomEnergieIds()));
+            retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageHydrauliqueAssocie.class).get(currentObject.getOuvrageHydrauliqueAssocieIds()));
+            retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueCielOuvert.class).get(currentObject.getReseauHydrauliqueCielOuvertIds()));
+            retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).get(currentObject.getReseauHydrauliqueFermeIds()));
 
-        private final boolean ordered;
-        
-        /**
-         * 
-         * @param ordered Specifies if the list has to be ordered.
-         */
-        public PrintableArrayList(final boolean ordered) {
-            super();
-            this.ordered = ordered;
-        }
-        
-        /**
-         * Creates an unordered PrintableArrayList.
-         */
-        public PrintableArrayList(){
-            this(false);
-        }
-        
-        @Override
-        public String toString(){
-            final Iterator<E> it = iterator();
-            if (! it.hasNext())
-                return "";
-
-            final StringBuilder sb = new StringBuilder();
-            
-            int order = 0;
-            for (;;) {
-                E e = it.next();
-                if(ordered){
-                    sb.append(order++);
+            for(final List candidate : retrievedLists){
+                if(candidate!=null && !candidate.isEmpty()){
+                    reseauOuvrageList.addAll(candidate);
                 }
-                sb.append('-').append(' ');
-                sb.append(e == this ? "(this Collection)" : e);
-                if (! it.hasNext()) return sb.toString();
-                else sb.append('\n');
             }
+
+            return new ObjectDataSource<>(reseauOuvrageList, previewRepository, stringConverter);
         }
+        else if(VOIRIE_TABLE_DATA_SOURCE.equals(name)){
+
+            final List<ObjetReseau> voirieList = new ArrayList<>();
+            final List<List<? extends ObjetReseau>> retrievedLists = new ArrayList();
+            retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageVoirie.class).get(currentObject.getOuvrageVoirieIds()));
+            retrievedLists.add(Injector.getSession().getRepositoryForClass(VoieDigue.class).get(currentObject.getVoieDigueIds()));
+
+            for(final List candidate : retrievedLists){
+                if(candidate!=null && !candidate.isEmpty()){
+                    voirieList.addAll(candidate);
+                }
+            }
+
+            return new ObjectDataSource<>(voirieList, previewRepository, stringConverter);
+        }
+        else return super.getFieldValue(jrf);
     }
     
 }
