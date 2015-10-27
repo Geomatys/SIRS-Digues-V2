@@ -1,41 +1,110 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
 <fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <center>
-      <GridPane BorderPane.alignment="CENTER">
-        <columnConstraints>
-          <ColumnConstraints hgrow="NEVER" />
-          <ColumnConstraints hgrow="SOMETIMES" />
-            <ColumnConstraints hgrow="SOMETIMES" />
-            <ColumnConstraints hgrow="SOMETIMES" />
-            <ColumnConstraints hgrow="SOMETIMES" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints vgrow="NEVER" />
-          <RowConstraints vgrow="NEVER" />
-          <RowConstraints vgrow="SOMETIMES" />
-            <RowConstraints vgrow="SOMETIMES" />
-            <RowConstraints vgrow="SOMETIMES" />
-        </rowConstraints>
+      <StackPane BorderPane.alignment="CENTER">
          <children>
-            <Label text="Titre" />
-            <Label text="Type de cible" GridPane.rowIndex="1" />
-            <Label text="Modèle ODT" GridPane.rowIndex="2" />
-            <TextField fx:id="uiTitle" promptText="Titre du modèle" GridPane.columnIndex="1" />
-            <ComboBox fx:id="uiTargetClass" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label text="Aucun modèle sélectionné" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Label text="Taille" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-            <Button mnemonicParsing="false" onAction="#createODT" text="Créer" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <Button mnemonicParsing="false" onAction="#editODT" text="Editer" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-            <Button mnemonicParsing="false" onAction="#deleteODT" text="Supprimer" GridPane.columnIndex="4" GridPane.rowIndex="3" />
-            <Button mnemonicParsing="false" onAction="#importODT" text="Importer" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-            <Hyperlink onAction="#changeODTAttributes" text="Modifier les attributs exposés" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
+            <GridPane hgap="5.0" vgap="10.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="NEVER" />
+                  <ColumnConstraints hgrow="SOMETIMES" />
+                  <ColumnConstraints hgrow="NEVER" />
+                  <ColumnConstraints hgrow="NEVER" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints vgrow="NEVER" />
+                <RowConstraints vgrow="NEVER" />
+                <RowConstraints vgrow="SOMETIMES" />
+                <RowConstraints vgrow="SOMETIMES" />
+                  <RowConstraints />
+                  <RowConstraints minHeight="10.0" />
+              </rowConstraints>
+               <children>
+                  <Label text="Titre" />
+                  <Label text="Type d'objet" GridPane.rowIndex="1" />
+                  <Label text="Modèle ODT" GridPane.rowIndex="2" />
+                  <TextField fx:id="uiTitle" promptText="Titre du modèle" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" />
+                  <ComboBox fx:id="uiTargetClass" prefWidth="150.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="1" />
+                  <Button fx:id="uiImportODT" mnemonicParsing="false" onAction="#importODT" text="Importer" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <Button fx:id="uiExportODT" mnemonicParsing="false" onAction="#exportODT" text="Exporter" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                  <Label fx:id="uiNoModelLabel" text="Aucun modèle présent" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Label fx:id="uiSizeLabel" text="Taille" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                  <HBox fx:id="uiEditBar" spacing="5.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4">
+                     <children>
+                        <Button mnemonicParsing="false" onAction="#editODT" text="Editer" />
+                        <Button mnemonicParsing="false" onAction="#deleteODT" text="Supprimer" />
+                     </children>
+                  </HBox>
+                  <BorderPane fx:id="uiPropertyPane" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="5">
+                     <top>
+                        <Label text="Propriétés utilisées dans le modèle" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets bottom="10.0" left="5.0" right="5.0" top="10.0" />
+                           </BorderPane.margin>
+                        </Label>
+                     </top>
+                     <left>
+                        <VBox BorderPane.alignment="CENTER">
+                           <children>
+                              <Label text="Propriétés disponibles" />
+                              <ListView fx:id="uiAvailableProperties" minHeight="10.0" minWidth="10.0" prefHeight="150.0">
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </ListView>
+                           </children>
+                        </VBox>
+                     </left>
+                     <right>
+                        <VBox BorderPane.alignment="CENTER">
+                           <children>
+                              <Label text="Propriétés utilisées" />
+                              <ListView fx:id="uiUsedProperties" prefHeight="150.0">
+                                 <VBox.margin>
+                                    <Insets top="5.0" />
+                                 </VBox.margin>
+                              </ListView>
+                           </children>
+                        </VBox>
+                     </right>
+                     <bottom>
+                        <Button fx:id="uiGenerate" mnemonicParsing="false" onAction="#generateODT" text="Générer le modèle" BorderPane.alignment="CENTER_RIGHT">
+                           <BorderPane.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </BorderPane.margin>
+                        </Button>
+                     </bottom>
+                     <center>
+                        <VBox alignment="CENTER" spacing="5.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#addProperties" text="&gt;" />
+                              <Button mnemonicParsing="false" onAction="#removeProperties" text="&lt;" />
+                           </children>
+                           <BorderPane.margin>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </BorderPane.margin>
+                        </VBox>
+                     </center>
+                  </BorderPane>
+                  <Label fx:id="uiModelPresentLabel" text="Taille du modèle :" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+               </children>
+            </GridPane>
+            <Label fx:id="uiProgressLabel" text="Opération en cours" textFill="#3268b9" visible="false">
+               <font>
+                  <Font name="System Bold Italic" size="19.0" />
+               </font>
+            </Label>
+            <ProgressIndicator fx:id="uiProgress" visible="false" />
          </children>
-      </GridPane>
+      </StackPane>
    </center>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
 </fx:root>
