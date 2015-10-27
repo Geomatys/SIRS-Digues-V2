@@ -96,10 +96,12 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.geotoolkit.data.FeatureCollection;
+import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.data.query.Query;
 import org.geotoolkit.db.FilterToSQL;
 import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.db.h2.H2FeatureStore;
+import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.feature.type.NamesExt;
 import org.geotoolkit.font.FontAwesomeIcons;
@@ -807,7 +809,7 @@ public class FXSearchPane extends BorderPane {
         return CorePlugin.createDefaultStyle(Color.GRAY, (geomType == null)? null : geomType.getName().toString());
     }
 
-    private static class CustomizedFeatureTable extends FXFeatureTable implements Printable{
+    private static class CustomizedFeatureTable extends FXFeatureTable implements Printable {
 
         CustomizedFeatureTable(final String path, final Locale locale, final ClassLoader classLoader){
             super(path, locale, classLoader);
@@ -815,11 +817,11 @@ public class FXSearchPane extends BorderPane {
 
         @Override
         public ObjectProperty getPrintableElements() {
-            List selection = table.getSelectionModel().getSelectedItems();
-            if(selection.isEmpty()){
-                selection = table.getItems();
+            ObservableList<Feature> ftrs = table.getSelectionModel().getSelectedItems();
+            if(ftrs.isEmpty()){
+                ftrs = table.getItems();
             }
-            return new SimpleObjectProperty(selection);
+            return new SimpleObjectProperty(FeatureStoreUtilities.collection(ftrs.get(0).getType(), ftrs));
         }
     }
 }

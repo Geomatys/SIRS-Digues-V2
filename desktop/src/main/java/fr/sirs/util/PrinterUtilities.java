@@ -194,12 +194,15 @@ public class PrinterUtilities {
         if(avoidFields==null) avoidFields=new ArrayList<>();
         
         // Creates the Jasper Reports specific template from the generic template.
-        final JRDomWriterQueryResultSheet writer = new JRDomWriterQueryResultSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_QUERY));
-        writer.setFieldsInterline(2);
-        final File template = File.createTempFile(featureCollection.getFeatureType().getName().tip().toString(), JRXML_EXTENSION);
-        template.deleteOnExit();
-        writer.setOutput(template);
-        writer.write(featureCollection.getFeatureType(), avoidFields);
+        final File template;
+        try(final InputStream templateInputStream =PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_QUERY)){
+            final JRDomWriterQueryResultSheet writer = new JRDomWriterQueryResultSheet(templateInputStream);
+            writer.setFieldsInterline(2);
+            template = File.createTempFile(featureCollection.getFeatureType().getName().tip().toString(), JRXML_EXTENSION);
+            template.deleteOnExit();
+            writer.setOutput(template);
+            writer.write(featureCollection.getFeatureType(), avoidFields);
+        }
         
         // Retrives the compiled template and the feature type -----------------
         final Map.Entry<JasperReport, FeatureType> entry = JasperReportService.prepareTemplate(template);
@@ -208,10 +211,11 @@ public class PrinterUtilities {
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile(featureCollection.getFeatureType().getName().tip().toString(), PDF_EXTENSION);
         
-        try (final FileOutputStream outStream = new FileOutputStream(fout)) {
+        try (final FileOutputStream outStream = new FileOutputStream(fout);
+                final InputStream logoStream = PrinterUtilities.class.getResourceAsStream(LOGO_PATH)) {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
             final Map<String, Object> parameters = new HashMap<>();
-            parameters.put("logo", PrinterUtilities.class.getResourceAsStream(LOGO_PATH));
+            parameters.put("logo", logoStream);
             parameters.put(JRDomWriterQueryResultSheet.TABLE_DATA_SOURCE, new CollectionDataSource(featureCollection));
 
             final JasperPrint print = JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());

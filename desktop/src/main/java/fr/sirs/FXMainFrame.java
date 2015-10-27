@@ -1,6 +1,5 @@
 package fr.sirs;
 
-import com.sun.javafx.stage.StageHelper;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
@@ -15,6 +14,7 @@ import fr.sirs.ui.AlertItem;
 import static fr.sirs.ui.AlertItem.AlertItemLevel.HIGH;
 import static fr.sirs.ui.AlertItem.AlertItemLevel.INFORMATION;
 import fr.sirs.ui.AlertManager;
+import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,7 +30,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.embed.swing.SwingFXUtils;
@@ -39,7 +38,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
@@ -110,7 +108,7 @@ public class FXMainFrame extends BorderPane {
 
     private FXMapTab mapTab;
     private DiguesTab diguesTab;
-    private Tab searchTab;
+    private FXFreeTab searchTab;
     private Stage prefEditor;
 
 
@@ -454,7 +452,7 @@ public class FXMainFrame extends BorderPane {
     @FXML
     private void openSearchTab(ActionEvent event) {
         if (searchTab == null || !uiTabs.equals(searchTab.getTabPane())) {
-            searchTab = new Tab(bundle.getString(BUNDLE_KEY_SEARCH));
+            searchTab = new FXFreeTab(bundle.getString(BUNDLE_KEY_SEARCH), false);
             final FXSearchPane searchPane = new FXSearchPane();
             searchTab.setContent(searchPane);
             uiTabs.getTabs().add(searchTab);

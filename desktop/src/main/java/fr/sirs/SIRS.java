@@ -141,7 +141,6 @@ public final class SIRS extends SirsCore {
     public static final String REVISION_FIELD = "revision";
     public static final String PARENT_FIELD = "parent";
     public static final String COUCH_DB_DOCUMENT_FIELD = "couchDBDocument";
-    public static final String GEOMETRY_MODE = "geometryMode";
 
     public static final String LINEAR_ID_FIELD = "linearId";
     public static final String FOREIGN_PARENT_ID_FIELD = "foreignParentId";

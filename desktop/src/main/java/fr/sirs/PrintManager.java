@@ -19,7 +19,7 @@ import static fr.sirs.SIRS.DesordreFields.RESEAU_TELECOM_ENERGIE_REFERENCE;
 import static fr.sirs.SIRS.DesordreFields.VOIE_DIGUE_REFERENCE;
 import static fr.sirs.SIRS.FOREIGN_PARENT_ID_FIELD;
 import static fr.sirs.SIRS.GEOMETRY_FIELD;
-import static fr.sirs.SIRS.GEOMETRY_MODE;
+import static fr.sirs.SIRS.GEOMETRY_MODE_FIELD;
 import static fr.sirs.SIRS.ID_FIELD;
 import static fr.sirs.SIRS.LATITUDE_MAX_FIELD;
 import static fr.sirs.SIRS.LATITUDE_MIN_FIELD;
@@ -177,7 +177,9 @@ public class PrintManager {
 
     private final void printFeatures(FeatureCollection featuresToPrint){
         try {
-            final File fileToPrint = PrinterUtilities.print(null, featuresToPrint);
+            final List<String> avoidFields = new ArrayList<>();
+            avoidFields.add(GEOMETRY_MODE_FIELD);
+            final File fileToPrint = PrinterUtilities.print(avoidFields, featuresToPrint);
             if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (IOException | ParserConfigurationException | SAXException | JRException | TransformerException ex) {
            SIRS.LOGGER.log(Level.WARNING, null, ex);
@@ -185,7 +187,7 @@ public class PrintManager {
     }
     
     private final void printElements(List<Element> elementsToPrint){
-        final List avoidFields = new ArrayList<>();
+        final List<String> avoidFields = new ArrayList<>();
         avoidFields.add(GEOMETRY_FIELD);
         avoidFields.add(DOCUMENT_ID_FIELD);
         avoidFields.add(ID_FIELD);
@@ -199,7 +201,7 @@ public class PrintManager {
         avoidFields.add(POSITION_FIN_FIELD);
         avoidFields.add(PARENT_FIELD);
         avoidFields.add(COUCH_DB_DOCUMENT_FIELD);
-        avoidFields.add(GEOMETRY_MODE);
+        avoidFields.add(GEOMETRY_MODE_FIELD);
         
         for(final Element element : elementsToPrint){
             if(element instanceof TronconDigue){

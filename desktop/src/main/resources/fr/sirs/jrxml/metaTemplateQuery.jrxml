@@ -30,7 +30,7 @@
 	<subDataset name="Query Dataset">
 	</subDataset>
 	<parameter name="logo" class="java.lang.Object"/>
-	<parameter name="TABLE_DATA_SOURCE" class="org.geotoolkit.report.FeatureCollectionDataSource"/>
+	<parameter name="TABLE_DATA_SOURCE" class="org.geotoolkit.report.CollectionDataSource"/>
 
 	<title>
 		<band height="60">
