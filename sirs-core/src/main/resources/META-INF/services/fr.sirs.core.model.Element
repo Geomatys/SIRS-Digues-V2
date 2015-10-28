@@ -53,6 +53,7 @@ fr.sirs.core.model.ProfilTravers
 fr.sirs.core.model.PrZProfilLong
 fr.sirs.core.model.RapportEtude
 fr.sirs.core.model.RefConduiteFermee
+fr.sirs.core.model.RefCategorieDesordre
 fr.sirs.core.model.RefCote
 fr.sirs.core.model.RefDevers
 fr.sirs.core.model.RefDocumentGrandeEchelle
@@ -62,7 +63,6 @@ fr.sirs.core.model.RefFonction
 fr.sirs.core.model.RefFonctionDeversoir
 fr.sirs.core.model.RefFonctionMaitreOeuvre
 fr.sirs.core.model.RefFrequenceEvenementHydraulique
-fr.sirs.core.model.RefGroupeTypeDesordre
 fr.sirs.core.model.RefImplantation
 fr.sirs.core.model.RefLargeurFrancBord
 fr.sirs.core.model.RefMateriau

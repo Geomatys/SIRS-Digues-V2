@@ -294,6 +294,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="coteId" eType="#//RefCote"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionId" eType="#//RefPosition"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceId" eType="#//RefSource"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="categorieDesordreId" eType="#//RefCategorieDesordre"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="typeDesordreId" eType="#//RefTypeDesordre"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observations" upperBound="-1"
         eType="#//Observation" containment="true"/>
@@ -1218,7 +1219,7 @@
       <details key="document" value="true"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="groupeId" eType="#//RefGroupeTypeDesordre"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="categorieId" eType="#//RefCategorieDesordre"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefCote" eSuperTypes="#//ReferenceType">
     <eAnnotations source="couchDBDocument">
@@ -1472,7 +1473,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="ObservationReseauHydrauliqueCielOuvert"
       eSuperTypes="#//AbstractObservation"/>
   <eClassifiers xsi:type="ecore:EClass" name="ObservationStationPompage" eSuperTypes="#//AbstractObservation"/>
-  <eClassifiers xsi:type="ecore:EClass" name="RefGroupeTypeDesordre" eSuperTypes="#//ReferenceType">
+  <eClassifiers xsi:type="ecore:EClass" name="RefCategorieDesordre" eSuperTypes="#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="abrege" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>

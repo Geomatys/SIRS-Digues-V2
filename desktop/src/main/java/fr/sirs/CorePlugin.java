@@ -46,6 +46,7 @@ import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.ProfilTravers;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.RapportEtude;
+import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauTelecomEnergie;
@@ -80,8 +81,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javax.measure.unit.NonSI;
@@ -926,6 +928,61 @@ public class CorePlugin extends Plugin {
         }
     }
 
+    /**
+     * Méthode d'initialisation des comboboxes de types de désordres
+     * de manière à préserver la cohérence des choix qu'elles proposent en
+     * fonction d'un choix de catégorie de désordre.
+     *
+     * @param categorieId catégorie de désordres pour laquelle on veut charger les types de désordres
+     * @param typeIdToSelect type de désordre à sélectionner
+     * @param allTypePreviews liste de previews des types de désordres de toutes les catégories.
+     * @param types types de désordres indexés par leur id.
+     * @param comboBox combobox à remplir
+     */
+    public static void initComboTypeDesordre(final String categorieId,
+            final String typeIdToSelect,
+            final List<Preview> allTypePreviews,
+            final Map<String, RefTypeDesordre> types, final ComboBox comboBox){
+
+        Preview selectedPreview = null;
+        final List<Preview> typePreviews = new ArrayList<>();
+
+        // 1- si la catégorie est nulle, on charge les types qui n'ont pas de catégorie
+        if(categorieId == null){
+
+            // On trie de manière à ne récupérer que les previews de la catégorie
+            for(final Preview typePreview : allTypePreviews){
+                final String typeId = typePreview.getElementId();
+                if(typeId!=null){
+                    final RefTypeDesordre typeDesordre = types.get(typeId);
+                    if(typeDesordre.getCategorieId()==null){
+                        typePreviews.add(typePreview);
+                    }
+
+                    if(typeId.equals(typeIdToSelect)) selectedPreview = typePreview;
+                }
+            }
+        }
+
+        // 2- sinon on va chercher ses éventuels types
+        else {
+
+            // On trie de manière à ne récupérer que les previews de la catégorie
+            for(final Preview typePreview : allTypePreviews){
+                final String typeId = typePreview.getElementId();
+                if(typeId!=null){
+                    final RefTypeDesordre typeDesordre = types.get(typeId);
+                    if(categorieId.equals(typeDesordre.getCategorieId())){
+                        typePreviews.add(typePreview);
+                    }
+
+                    if(typeId.equals(typeIdToSelect)) selectedPreview = typePreview;
+                }
+            }
+        }
+
+        SIRS.initCombo(comboBox, FXCollections.observableList(typePreviews), selectedPreview);
+    }
 
     public static void initTronconDigue(final TronconDigue troncon, final Session session){
 
