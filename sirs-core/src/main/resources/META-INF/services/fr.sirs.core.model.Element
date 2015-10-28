@@ -62,6 +62,7 @@ fr.sirs.core.model.RefFonction
 fr.sirs.core.model.RefFonctionDeversoir
 fr.sirs.core.model.RefFonctionMaitreOeuvre
 fr.sirs.core.model.RefFrequenceEvenementHydraulique
+fr.sirs.core.model.RefGroupeTypeDesordre
 fr.sirs.core.model.RefImplantation
 fr.sirs.core.model.RefLargeurFrancBord
 fr.sirs.core.model.RefMateriau
