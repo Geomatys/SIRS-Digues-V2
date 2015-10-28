@@ -121,6 +121,8 @@ public final class SIRS extends SirsCore {
     // Champs spéciaux des classes utilisés dans le code
     //--------------------------------------------------------------------------
 
+    public static final String NEW_FIELD = "new";
+    
     // Champs de contrôle des dates
     public static final String DATE_DEBUT_FIELD = "date_debut";
     public static final String DATE_FIN_FIELD = "date_fin";

@@ -15,6 +15,9 @@ import static fr.sirs.SIRS.LATITUDE_MIN_FIELD;
 import static fr.sirs.SIRS.LONGITUDE_MAX_FIELD;
 import static fr.sirs.SIRS.LONGITUDE_MIN_FIELD;
 import static fr.sirs.SIRS.VALID_FIELD;
+import static fr.sirs.SIRS.ID_FIELD;
+import static fr.sirs.SIRS.REVISION_FIELD;
+import static fr.sirs.SIRS.NEW_FIELD;
 import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.Repository;
@@ -167,10 +170,11 @@ public class PojoTable extends BorderPane implements Printable {
     protected static final String BUTTON_STYLE = "buttonbar-button";
     private static final Image ICON_SHOWONMAP = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GLOBE, 16, FontAwesomeIcons.DEFAULT_COLOR),null);
 
-    public static final String[] COLUMNS_TO_IGNORE = new String[] {
+    public static final String[] COLUMNS_TO_IGNORE = new String[]{
         AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD,
-        LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD,
-        DATE_MAJ_FIELD, COMMENTAIRE_FIELD, GEOMETRY_MODE_FIELD};
+        LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD, DATE_MAJ_FIELD,
+        COMMENTAIRE_FIELD, GEOMETRY_MODE_FIELD, REVISION_FIELD, ID_FIELD, NEW_FIELD
+    };
 
     protected final Class pojoClass;
     protected final AbstractSIRSRepository repo;

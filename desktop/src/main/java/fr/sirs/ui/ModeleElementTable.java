@@ -2,21 +2,30 @@
 package fr.sirs.ui;
 
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.report.ModeleElement;
+import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.PojoTable;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.layout.BorderPane;
 
 /**
  *
- * @author Johann Sorel
+ * @author Johann Sorel (Geomatys)
+ * @author Alexis Manin (Geomatys)
  */
-public class TemplatesTable extends PojoTable {
+public class ModeleElementTable extends PojoTable {
 
-    public TemplatesTable() {
+    private AbstractFXElementPane editor;
+
+    public ModeleElementTable() {
         super(Injector.getSession().getRepositoryForClass(ModeleElement.class), "Modèles .odt enregistrés en base");
-        editableProperty().set(true);
-        detaillableProperty().set(true);
+        editableProperty().set(false);
+        detaillableProperty().set(false);
         fichableProperty().set(false);
         importPointProperty().set(false);
         commentAndPhotoProperty().set(false);
@@ -24,31 +33,38 @@ public class TemplatesTable extends PojoTable {
         exportVisibleProperty().set(false);
         ficheModeVisibleProperty().set(false);
         filterVisibleProperty().set(false);
-        openEditorOnNewProperty().set(false);
 
-        for(TableColumn col : getColumns()){
+        uiAdd.disableProperty().unbind();
+        uiAdd.setDisable(false);
+
+        uiDelete.disableProperty().unbind();
+        uiDelete.setDisable(false);
+
+        for(TableColumn col : getColumns()) {
             if("Désignation".equalsIgnoreCase(col.getText())){
                 col.setVisible(false);
             }
         }
-        getColumns().add((TableColumn) new StateColumn());
-    }
 
-    @Override
-    protected ModeleElement createPojo() {
-        final ModeleElement ele = TemplatePane.showCreateDialog();
-        if(ele!=null){
-            repo.add(ele);
-            getAllValues().add(ele);
-        }
-        return ele;
+        getColumns().add((TableColumn) new StateColumn());
+
+        getTable().setMaxWidth(USE_COMPUTED_SIZE);
+        getTable().setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        final TableView.TableViewSelectionModel<Element> selectionModel = getTable().getSelectionModel();
+        selectionModel.setSelectionMode(SelectionMode.SINGLE);
+        selectionModel.selectedItemProperty().addListener((obs, oldValue, newValue) -> editPojo(newValue));
+
+        setRight(new BorderPane());
     }
 
     @Override
     protected void editPojo(Object pojo) {
-        final ModeleElement rapport = TemplatePane.showEditDialog((ModeleElement) pojo);
-        if(rapport!=null){
-            repo.update(rapport);
+        if (editor == null) {
+            editor = SIRS.generateEditionPane((Element)pojo);
+            setRight(editor);
+            editor.visibleProperty().bind(editor.elementProperty().isNotNull());
+        } else {
+            editor.setElement((Element)pojo);
         }
     }
 

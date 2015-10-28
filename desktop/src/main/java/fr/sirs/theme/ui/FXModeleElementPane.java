@@ -11,6 +11,8 @@ import java.awt.Desktop;
 import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -23,7 +25,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -108,11 +112,13 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
     @FXML
     private ProgressIndicator uiProgress;
 
+
     /** When ODT document is updated, it change label displaying its size. */
     private final ChangeListener<byte[]> sizeListener;
 
     /** A temporary file used for ODT modifications happening before save. */
     private final Path tempODT;
+    private final SimpleBooleanProperty tempODTexists = new SimpleBooleanProperty(false);
 
     public FXModeleElementPane() {
         super();
@@ -141,6 +147,7 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
         uiImportODT.disableProperty().bind(disableFieldsProperty());
         uiEditBar.disableProperty().bind(disableFieldsProperty());
         uiPropertyPane.disableProperty().bind(disableFieldsProperty());
+        uiGenerate.disableProperty().bind(disableFieldsProperty().or(Bindings.isEmpty(uiUsedProperties.getItems())));
 
         // Panel update
         elementProperty.addListener(this::elementChanged);
@@ -161,6 +168,11 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
         }
     }
 
+    public FXModeleElementPane(final ModeleElement input) {
+        this();
+        setElement(input);
+    }
+
     private void elementChanged(ObservableValue<? extends ModeleElement> obs, ModeleElement oldElement, ModeleElement newElement) {
         if (oldElement != null) {
             uiTitle.textProperty().unbindBidirectional(oldElement.libelleProperty());
@@ -176,7 +188,7 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
         if (newElement != null) {
             uiTitle.textProperty().bindBidirectional(newElement.libelleProperty());
             final BooleanBinding elementPresent = newElement.odtProperty().isNotNull();
-            uiEditBar.visibleProperty().bind(elementPresent);
+            uiEditBar.visibleProperty().bind(elementPresent.or(tempODTexists));
             uiExportODT.disableProperty().bind(elementPresent);
             uiNoModelLabel.visibleProperty().bind(elementPresent);
             uiModelPresentLabel.visibleProperty().bind(elementPresent);
@@ -186,16 +198,21 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
 
             final byte[] odt = newElement.getOdt();
 
-        // Temporary file for ODT edition
-        try {
+            // Temporary file for ODT edition
+            try {
                 if (odt == null || odt.length < 1) {
-                    Files.delete(tempODT);
+                    Files.deleteIfExists(tempODT);
+                    tempODTexists.set(false);
                 } else {
-                    Files.write(tempODT, odt, StandardOpenOption.WRITE);
+                    Files.write(tempODT, odt, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+                    tempODTexists.set(true);
                 }
             } catch (IOException ex) {
                 throw new IllegalStateException("Cannot work with temporary file !", ex);
             }
+        } else {
+            uiTitle.setText(null);
+            uiTargetClass.setValue(null);
         }
     }
 
@@ -212,6 +229,7 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
     private void updateAvailableProperties(ObservableValue<? extends Class> obs, Class oldValue, Class newValue) {
         if (newValue == null) {
             uiAvailableProperties.setItems(null);
+            uiUsedProperties.setItems(null);
             return;
         }
 
@@ -250,6 +268,7 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
     void deleteODT(ActionEvent event) {
         try {
             Files.deleteIfExists(tempODT);
+            tempODTexists.set(false);
         } catch (IOException ex) {
             throw new IllegalStateException("Cannot delete temporary file !", ex);
         }
@@ -320,21 +339,39 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
 
     @FXML
     void generateODT(ActionEvent event) {
+        final ObservableList<String> items = uiUsedProperties.getItems();
+
+        // Get a title for each wanted property.
+        final HashMap<String, String> properties = new HashMap<>(items.size());
+        final Function<String, String> nameMapper = createPropertyNameMapper(uiTargetClass.getValue());
+        for (final String prop : items) {
+            properties.put(prop, nameMapper.apply(prop));
+        }
+
         if (Files.isRegularFile(tempODT)) {
-            // TODO : update ODT
-        } else {
-            final ObservableList<String> items = uiUsedProperties.getItems();
-            if (items == null || items.isEmpty())
-                // TODO : alert user
-                return;
-            final HashMap<String, String> properties = new HashMap<>(items.size());
-            final Function<String, String> nameMapper = createPropertyNameMapper(uiTargetClass.getValue());
-            for (final String prop : items) {
-                properties.put(nameMapper.apply(prop), prop);
+            final Alert alert = new Alert(AlertType.WARNING, "Attention, le modèle existant sera modifié, êtes-vous sûr ?", ButtonType.NO, ButtonType.YES);
+            alert.setResizable(true);
+            if (ButtonType.YES.equals(alert.showAndWait().orElse(null))) {
+                try {
+                    final TextDocument tmpDoc;
+                    try (final InputStream docInput = Files.newInputStream(tempODT, StandardOpenOption.READ)) {
+                        tmpDoc = TextDocument.loadDocument(docInput);
+                        ODTUtils.setVariables(tmpDoc, properties);
+                    }
+                    try (OutputStream docOutput = Files.newOutputStream(tempODT, StandardOpenOption.WRITE)) {
+                        tmpDoc.save(docOutput);
+                    }
+                    tempODTexists.set(true);
+                } catch (Exception e) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Cannot modify template !", e);
+                    GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du modèle ODT.", e);
+                }
             }
-            try {
+        } else {
+            try (final OutputStream outputStream = Files.newOutputStream(tempODT, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
                 final TextDocument newTemplate = ODTUtils.newSimplePropertyModel(uiTitle.getText(), properties);
-                newTemplate.save(Files.newOutputStream(tempODT, StandardOpenOption.WRITE));
+                newTemplate.save(outputStream);
+                tempODTexists.set(true);
             } catch (Exception ex) {
                 SirsCore.LOGGER.log(Level.WARNING, "Cannot create template !", ex);
                 GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du modèle ODT.", ex);
@@ -344,16 +381,18 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
 
     @FXML
     void importODT(ActionEvent event) {
-        final FileChooser outputChooser = new FileChooser();
-        outputChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Tous", "*"));
-        outputChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("OpenOffice document", "*.odt", "*.ODT"));
-        File output = outputChooser.showOpenDialog(getScene().getWindow());
-        if (output != null) {
-            try {
-                TextDocument.loadDocument(output);
-                Files.copy(output.toPath(), tempODT, StandardCopyOption.REPLACE_EXISTING);
+        final FileChooser inputChooser = new FileChooser();
+        inputChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Tous", "*"));
+        inputChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("OpenOffice document", "*.odt", "*.ODT"));
+        File tmpInput = inputChooser.showOpenDialog(getScene().getWindow());
+        if (tmpInput != null) {
+            final Path input = tmpInput.toPath();
+            try (final InputStream stream = Files.newInputStream(input, StandardOpenOption.READ)) {
+                TextDocument.loadDocument(stream); // only here to ensure we import a valid ODT.
+                Files.copy(input, tempODT, StandardCopyOption.REPLACE_EXISTING);
+                tempODTexists.set(true);
             } catch (IOException ex) {
-                throw new IllegalStateException("Cannot import file : "+output.getAbsolutePath(), ex);
+                throw new IllegalStateException("Cannot import file : "+input.toString(), ex);
             } catch (Exception ex) {
                 throw new IllegalStateException("Input file is not an ODT file !");
             }

@@ -15,8 +15,7 @@ import fr.sirs.other.FXReferencePane;
 import fr.sirs.other.FXValidationPane;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.ui.PojoTable;
-import fr.sirs.ui.TemplateGeneratorPane;
-import fr.sirs.ui.TemplatesTable;
+import fr.sirs.ui.ModeleElementTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.SirsPreferences;
@@ -47,8 +46,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.util.Duration;
 import javax.measure.unit.SI;
 import org.apache.sis.util.collection.Cache;
@@ -324,18 +321,8 @@ public class Session extends SessionCore {
             } else {
                 return openPrintTabs.getOrCreate(PrintTab.TEMPLATE, () -> {
                     final FXFreeTab tab = new FXFreeTab(title);
-                    final HBox hbox = new HBox();
-                    hbox.setPadding(new javafx.geometry.Insets(10, 0, 0, 0));
-                    final TemplatesTable table = new TemplatesTable();
-                    HBox.setHgrow(table, Priority.SOMETIMES);
-                    hbox.getChildren().add(table);
-                    final TemplateGeneratorPane genPane = new TemplateGeneratorPane();
-                    HBox.setHgrow(genPane, Priority.SOMETIMES);
-                    hbox.getChildren().add(genPane);
-                    hbox.setMinWidth(400);
-                    hbox.setMaxWidth(Double.MAX_VALUE);
-                    hbox.setFillHeight(true);
-                    tab.setContent(hbox);
+                    final ModeleElementTable table = new ModeleElementTable();
+                    tab.setContent(table);
                     return tab;
                 });
             }

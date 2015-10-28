@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -75,4 +76,16 @@ public abstract class CouchDBTestCase {
     protected void log(String message) {
         SirsCore.LOGGER.log(Level.INFO, message);
     }
+
+    @Component
+    private static class MockSession extends SessionCore {
+
+        @Autowired
+        public MockSession(CouchDbConnector couchDbConnector) {
+            super(couchDbConnector);
+        }
+    }
+
+    @Component
+    private static class MockInjector extends InjectorCore {}
 }
