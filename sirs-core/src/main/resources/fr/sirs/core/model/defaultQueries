@@ -21,3 +21,6 @@ Montant\ des\ travaux\ d'entretien\ par\ type\ de\ travail=select sum("coutGloba
 
 Montant\ des\ travaux\ d'entretien\ par\ type\ de\ travail\ par\ tron\u00E7on=select sum("coutGlobal") as cout, tp."libelle" as prestation, td."libelle" as troncon  from "Prestation" p, "RefPrestation" tp, "TronconDigue" td  where p."typePrestationId" like tp."id" and td."id" like p."linearId" group by "typePrestationId", td."id" order by cout desc\u00A7
 
+Longueur\ cumul\u00E9e\ des\ objets\ de\ strucure\ par\ type=select "concrete_table_name", sum(abs("prFin"-"prDebut")) as "lin\u00E9aire (km)" from "ObjetStructure" group by "concrete_table_name"\u00A7
+
+Longueur\ cumul\u00E9e\ des\ objets\ de\ strucure\ par\ type\ et\ par\ tron\u00E7on=select s."concrete_table_name" as "type d'\u00E9l\u00E9ment", t."libelle", t."designation", sum(abs(s."prFin"-s."prDebut")) as "lin\u00E9aire (km)" from "ObjetStructure" s, "TronconDigue" t where t."id"=s."linearId" group by s."concrete_table_name", s."linearId" order by "concrete_table_name", s."linearId"\u00A7
