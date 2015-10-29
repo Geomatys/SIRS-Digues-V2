@@ -46,6 +46,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
@@ -53,6 +54,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
+import javafx.util.Callback;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.odftoolkit.simple.TextDocument;
@@ -67,7 +69,7 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
     /**
      * Attributs que l'on ne souhaite pas garder dans le formulaire.
      */
-    private static final List<String> FIELDS_TO_IGNORE = Arrays.asList(new String[]{SIRS.AUTHOR_FIELD, SIRS.VALID_FIELD, SIRS.FOREIGN_PARENT_ID_FIELD, ODTUtils.CLASS_KEY});
+    private static final List<String> FIELDS_TO_IGNORE = Arrays.asList(new String[]{SIRS.AUTHOR_FIELD, SIRS.VALID_FIELD, SIRS.FOREIGN_PARENT_ID_FIELD, SIRS.GEOMETRY_MODE_FIELD, ODTUtils.CLASS_KEY});
 
     private static String DESKTOP_UNSUPPORTED = "Impossible de dialoguer avec le système. Pour éditer le modèle, vous pouvez cependant utiliser la fonction d'export, "
             + "puis ré-importer votre ficher lorsque vous aurez terminé vos modifications.";
@@ -332,6 +334,28 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
             if (!properties.remove(usedProps.next())) {
                 usedProps.remove();
             }
+        }
+
+        // Finally, try to configure translations to display properties.
+        final LabelMapper mapper = LabelMapper.get(newValue);
+        if (mapper != null) {
+            final Callback<ListView<String>, ListCell<String>> converter = (ListView<String> param) -> {
+                return new ListCell<String>() {
+
+                    @Override
+                    protected void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty || item == null) {
+                            setText(null);
+                        } else {
+                            setText(mapper.mapPropertyName(item));
+                        }
+                    }
+
+                };
+            };
+            uiAvailableProperties.setCellFactory(converter);
+            uiUsedProperties.setCellFactory(converter);
         }
     }
 
