@@ -18,12 +18,14 @@ import fr.sirs.core.model.ZoneVegetation;
 import fr.sirs.plugin.vegetation.PluginVegetation;
 import static fr.sirs.plugin.vegetation.PluginVegetation.zoneVegetationClasses;
 import fr.sirs.plugin.vegetation.VegetationSession;
+import fr.sirs.ui.Growl;
 import fr.sirs.util.SirsStringConverter;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -98,41 +100,63 @@ public class FXPlanVegetationPane extends BorderPane {
             }
         });
 
-        uiActive.setOnAction(event -> VegetationSession.INSTANCE.planProperty().set(plan));
+        uiActive.setOnAction(event -> {
+                    try{
+                        VegetationSession.INSTANCE.planProperty().set(plan);
+
+                        final Growl growlInfo = new Growl(Growl.Type.INFO, "Le plan a été activé.");
+                        growlInfo.showAndFade();
+                    }
+                    catch(Exception e){
+                        SIRS.LOGGER.log(Level.WARNING, e.getMessage());
+                        final Growl growlInfo = new Growl(Growl.Type.ERROR, "Une erreur est survenue lors de l'activation du plan.");
+                        growlInfo.showAndFade();
+                    }
+                });
         
         uiSave.setOnAction((ActionEvent event) -> {
 
-            // On sauvegarde la plan.
-            planRepo.update(FXPlanVegetationPane.this.plan);
-            
-            // Si les dates ont changé, il faut également mettre à jour les
-            // planifications des parcelles !
+            try{
+                // On sauvegarde la plan.
+                planRepo.update(FXPlanVegetationPane.this.plan);
 
-            // On mémorise le décalade des années du début afin de décaler les
-            // planifications avec le même décalage.
-            final int beginShift = initialDebutPlan - this.plan.getAnneeDebut();
+                // Si les dates ont changé, il faut également mettre à jour les
+                // planifications des parcelles !
 
-            /*
-            On réinitialise la mémorisation des dates de début et de fin et on
-            détermine également s'il est nécessaire de mettre à jour la liste de
-            planifications des parcelles.
-            */
-            boolean updatePlanifs = false;
-            if(this.plan.getAnneeDebut()!=initialDebutPlan) {
-                initialDebutPlan = this.plan.getAnneeDebut();
-                updatePlanifs = true;
+                // On mémorise le décalade des années du début afin de décaler les
+                // planifications avec le même décalage.
+                final int beginShift = initialDebutPlan - this.plan.getAnneeDebut();
+
+                /*
+                On réinitialise la mémorisation des dates de début et de fin et on
+                détermine également s'il est nécessaire de mettre à jour la liste de
+                planifications des parcelles.
+                */
+                boolean updatePlanifs = false;
+                if(this.plan.getAnneeDebut()!=initialDebutPlan) {
+                    initialDebutPlan = this.plan.getAnneeDebut();
+                    updatePlanifs = true;
+                }
+                if(this.plan.getAnneeFin()!=initialFinPlan) {
+                    initialFinPlan = this.plan.getAnneeFin();
+                    if(!updatePlanifs) updatePlanifs=true;
+                }
+
+                /*
+                Si les dates de début et de fin du plan ont bougé, il faut mettre à
+                jour les planifications des parcelles.
+                */
+                if(updatePlanifs){
+                    PluginVegetation.updatePlanifs(this.plan, beginShift);
+                }
+
+                final Growl growlInfo = new Growl(Growl.Type.INFO, "Le plan a été enregistré.");
+                growlInfo.showAndFade();
             }
-            if(this.plan.getAnneeFin()!=initialFinPlan) {
-                initialFinPlan = this.plan.getAnneeFin();
-                if(!updatePlanifs) updatePlanifs=true;
-            }
-
-            /*
-            Si les dates de début et de fin du plan ont bougé, il faut mettre à
-            jour les planifications des parcelles.
-            */
-            if(updatePlanifs){
-                PluginVegetation.updatePlanifs(this.plan, beginShift);
+            catch(Exception e){
+                SIRS.LOGGER.log(Level.WARNING, e.getMessage());
+                final Growl growlInfo = new Growl(Growl.Type.ERROR, "Une erreur est survenue lors de l'enregistrement du plan.");
+                growlInfo.showAndFade();
             }
 
         });
