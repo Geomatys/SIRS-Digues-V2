@@ -107,10 +107,21 @@ public abstract class Plugin {
     public abstract CharSequence getTitle();
 
     /**
-     * Renvoit l'image du plugin, si une image a été fournie. Peut être {@code null}.
+     * Renvoie l'image du plugin, si une image a été fournie. Peut être {@code null}.
      * @return 
      */
     public abstract Image getImage();
+
+    /**
+     * Renvoie une éventuelle représentation du modèle du module sous forme d'image.
+     * 
+     * @return Un optional contenant l'image éventuelle du modèle du module.
+     *
+     * @throws java.io.IOException Si le chargement de l'image échoue.
+     */
+    public Optional<Image> getModelImage() throws IOException {
+        return Optional.empty();
+    }
 
     /**
      * Chargement du plugin.

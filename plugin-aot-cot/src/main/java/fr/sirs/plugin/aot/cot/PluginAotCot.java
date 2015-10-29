@@ -26,10 +26,13 @@ import fr.sirs.ui.AlertItem;
 import fr.sirs.ui.AlertManager;
 import fr.sirs.util.SirsStringConverter;
 import java.awt.Color;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -261,6 +264,16 @@ public class PluginAotCot extends Plugin {
         }
 
         AlertManager.getInstance().addAlerts(alerts);
+    }
+
+    @Override
+    public Optional<Image> getModelImage() throws IOException {
+        final Image image;
+
+        try (final InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("fr/sirs/aotCotModel.png")) {
+            image = new Image(in);
+        }
+        return Optional.of(image);
     }
 }
 

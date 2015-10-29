@@ -2,6 +2,7 @@
 package fr.sirs.query;
 
 import fr.sirs.CorePlugin;
+import static fr.sirs.FXMainFrame.modelStage;
 import fr.sirs.Injector;
 import fr.sirs.Plugin;
 import fr.sirs.Plugins;
@@ -52,7 +53,6 @@ import javafx.concurrent.Worker;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -78,14 +78,12 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -338,31 +336,8 @@ public class FXSearchPane extends BorderPane {
     }
 
     @FXML
-    private void viewDBModel(ActionEvent event) {
-
-        final Stage stage = new Stage();
-
-        final WebView webView = new WebView();
-        final String url = this.getClass().getResource("/fr/sirs/model.html").toExternalForm();
-        webView.getEngine().load(url);
-        webView.setOnScroll(new EventHandler<ScrollEvent>() {
-
-            @Override
-            public void handle(ScrollEvent event) {
-                final double zoom = webView.getZoom();
-                if(event.getDeltaY()>0)
-                    webView.setZoom(zoom * 1.1);
-                else if(event.getDeltaY()<0)
-                    webView.setZoom(zoom * .9);
-            }
-        });
-
-        stage.getIcons().add(SIRS.ICON);
-        stage.setScene(new Scene(webView));
-        stage.setTitle("Modèle");
-        stage.setWidth(800);
-        stage.setHeight(600);
-        stage.show();
+    private void viewDBModel(ActionEvent event) throws IOException {
+        modelStage().show();
     }
 
     @FXML

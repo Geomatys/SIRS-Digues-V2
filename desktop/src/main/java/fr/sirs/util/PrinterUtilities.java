@@ -78,7 +78,7 @@ public class PrinterUtilities {
             final Previews previewLabelRepository,
             final SirsStringConverter stringConverter,
             final List<ReseauHydrauliqueFerme> reseaux,
-            final boolean printPhoto, final boolean printReseauOuvrage) throws Exception {
+            final boolean printPhoto, final boolean printReseauOuvrage) throws IOException, ParserConfigurationException, SAXException, TransformerException, JRException {
 
         // Creates the Jasper Reports specific template from the generic template.
         final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);

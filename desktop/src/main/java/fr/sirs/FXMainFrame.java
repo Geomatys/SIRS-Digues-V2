@@ -23,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import javafx.beans.binding.Bindings;
@@ -48,6 +49,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.OverrunStyle;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ToolBar;
@@ -478,6 +480,40 @@ public class FXMainFrame extends BorderPane {
     @FXML
     void exit(ActionEvent event) {
         System.exit(0);
+    }
+
+    /**
+     *
+     * @return
+     * @throws IOException
+     */
+    public static Stage modelStage() throws IOException{
+
+        final Stage stage = new Stage();
+
+        final TabPane tabPane = new TabPane();
+
+        for(final Plugin p : Plugins.getPlugins()){
+            final Optional<Image> opt = p.getModelImage();
+            if(opt.isPresent()){
+
+                final ImageView imageView = new ImageView(opt.get());
+                final Tab tab = new Tab(p.getTitle().toString(), new ScrollPane(imageView));
+                tabPane.getTabs().add(tab);
+            }
+        }
+
+        stage.getIcons().add(SIRS.ICON);
+        stage.setScene(new Scene(tabPane));
+        stage.setTitle("Modèle");
+        stage.setWidth(800);
+        stage.setHeight(600);
+        return stage;
+    }
+
+    @FXML
+    private void openModel() throws IOException {
+        modelStage().show();
     }
 
     @FXML

@@ -38,6 +38,7 @@
                                       <items>
                                           <MenuItem mnemonicParsing="false" onAction="#showUserGuide" text="%userGuide" />
                                           <MenuItem mnemonicParsing="false" onAction="#openAppInfo" text="%about" />
+                                    <MenuItem mnemonicParsing="false" onAction="#openModel" text="%model" />
                                       </items>
                                   </Menu>
                               </menus>

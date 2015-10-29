@@ -20,6 +20,13 @@ import fr.sirs.core.model.sql.DependanceSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.dependance.map.DependanceToolBar;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.logging.Level;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import org.geotoolkit.data.bean.BeanStore;
@@ -27,11 +34,6 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Level;
 
 /**
  * Plugin correspondant au module dépendance.
@@ -177,5 +179,15 @@ public class PluginDependance extends Plugin {
     @Override
     public SQLHelper getSQLHelper() {
         return DependanceSqlHelper.getInstance();
+    }
+
+    @Override
+    public Optional<Image> getModelImage() throws IOException {
+        final Image image;
+
+        try (final InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("fr/sirs/dependanceModel.png")) {
+            image = new Image(in);
+        }
+        return Optional.of(image);
     }
 }

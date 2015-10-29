@@ -25,11 +25,14 @@ import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.berge.map.BergeToolBar;
 import java.awt.Color;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
@@ -206,6 +209,16 @@ public class PluginBerge extends Plugin {
                 (String)null,DEFAULT_DESCRIPTION,NonSI.PIXEL,stroke1,LITERAL_ONE_FLOAT);
 
         return SF.style(line1);
+    }
+
+    @Override
+    public Optional<Image> getModelImage() throws IOException {
+        final Image image;
+
+        try (final InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("fr/sirs/bergeModel.png")) {
+            image = new Image(in);
+        }
+        return Optional.of(image);
     }
 
 }

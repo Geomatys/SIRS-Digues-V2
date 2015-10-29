@@ -3,6 +3,9 @@ package fr.sirs.plugin.document;
 import fr.sirs.Plugin;
 import fr.sirs.core.model.sql.DocumentSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Optional;
 import javafx.scene.image.Image;
 
 /**
@@ -44,5 +47,15 @@ public class PluginDocument extends Plugin {
     @Override
     public SQLHelper getSQLHelper() {
         return DocumentSqlHelper.getInstance();
+    }
+
+    @Override
+    public Optional<Image> getModelImage() throws IOException {
+        final Image image;
+
+        try (final InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("fr/sirs/documentModel.png")) {
+            image = new Image(in);
+        }
+        return Optional.of(image);
     }
 }

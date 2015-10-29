@@ -2,6 +2,9 @@ package fr.sirs.plugin.carto;
 
 import fr.sirs.Plugin;
 import fr.sirs.core.model.sql.SQLHelper;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Optional;
 import javafx.scene.image.Image;
 
 /**
@@ -39,5 +42,15 @@ public class PluginCarto extends Plugin {
     public SQLHelper getSQLHelper() {
         // TODO: renvoyer le SQLHelper du plugin pour l'export RDBMS !
         return null;
+    }
+
+    @Override
+    public Optional<Image> getModelImage() throws IOException {
+        final Image image;
+
+        try (final InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("fr/sirs/cartoModel.png")) {
+            image = new Image(in);
+        }
+        return Optional.of(image);
     }
 }

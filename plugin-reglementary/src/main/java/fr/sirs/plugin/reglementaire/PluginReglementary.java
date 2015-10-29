@@ -14,12 +14,14 @@ import fr.sirs.core.model.sql.ReglementarySqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.ui.AlertItem;
 import fr.sirs.ui.AlertManager;
-import javafx.scene.image.Image;
-
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import javafx.scene.image.Image;
 
 /**
  * Plugin correspondant au module réglementaire, permettant de gérer des documents de suivis.
@@ -128,5 +130,15 @@ public class PluginReglementary extends Plugin {
     @Override
     public SQLHelper getSQLHelper() {
         return ReglementarySqlHelper.getInstance();
+    }
+
+    @Override
+    public Optional<Image> getModelImage() throws IOException {
+        final Image image;
+
+        try (final InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("fr/sirs/reglementaryModel.png")) {
+            image = new Image(in);
+        }
+        return Optional.of(image);
     }
 }

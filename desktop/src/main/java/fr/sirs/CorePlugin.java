@@ -71,6 +71,7 @@ import fr.sirs.util.FXFreeTab;
 import java.awt.Color;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -79,6 +80,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import javafx.collections.FXCollections;
@@ -999,6 +1001,16 @@ public class CorePlugin extends Plugin {
         session.getRepositoryForClass((Class) troncon.getClass()).update(troncon);
         //mise en place du SR élémentaire
         TronconUtils.updateSRElementaire(troncon, session);
+    }
+
+    @Override
+    public Optional<Image> getModelImage() throws IOException {
+        final Image image;
+
+        try (final InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("fr/sirs/coreModel.png")) {
+            image = new Image(in);
+        }
+        return Optional.of(image);
     }
 
 }
