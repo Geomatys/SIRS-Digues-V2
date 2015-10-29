@@ -10,10 +10,11 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
+import org.apache.sis.util.ArgumentChecks;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclElement;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclsElement;
 import org.odftoolkit.odfdom.dom.element.text.TextVariableDeclElement;
@@ -21,6 +22,7 @@ import org.odftoolkit.odfdom.dom.element.text.TextVariableDeclsElement;
 import org.odftoolkit.odfdom.pkg.OdfElement;
 import org.odftoolkit.simple.TextDocument;
 import org.odftoolkit.simple.common.field.AbstractVariableContainer;
+import org.odftoolkit.simple.common.field.Field.FieldType;
 import org.odftoolkit.simple.common.field.Fields;
 import org.odftoolkit.simple.common.field.VariableField;
 
@@ -36,18 +38,17 @@ import org.odftoolkit.simple.common.field.VariableField;
  */
 public class ODTUtils {
 
-    private static final String VARIABLE_START = "${";
-    private static final String VARIABLE_END = "}";
-    private static final String VARIABLE_SEARCH = VARIABLE_START + "*" + VARIABLE_END;
-
-    private static final Pattern VARIABLE_BUILDER = Pattern.compile("^" + Pattern.quote(VARIABLE_START) + "(.*)" + VARIABLE_END + "$");
+    public static final String CLASS_KEY = "The.Sirs.Class";
 
     private static final String NOTE_MODELE_FICHE = "Note : Ci-dessous se trouve"
             + " la liste des champs utilisés par SIRS-Digues lors de la création"
             + " d'une fiche. Vous pouvez compléter ce modèle (Ajout de contenu,"
-            + " mise en forme) et déplacer les variables (les textes surlignés"
-            + " de gris) où vous voulez dans le document. Ils seront"
+            + " mise en forme) et déplacer / copier les variables (les textes"
+            + " surlignés de gris) où vous voulez dans le document. Elles seront"
             + " automatiquement remplacés à la génération du rapport.";
+
+    private static Field USER_FIELD;
+    private static Field SIMPLE_FIELD;
 
     /**
      * Generate a new template which will put "variables" into it to be easily
@@ -73,6 +74,40 @@ public class ODTUtils {
     }
 
     /**
+     * Save given class reference in input document, setting it as the class to
+     * use when generating a report.
+     * @param input The document to modify.
+     * @param targetClass Class to put, or null to remove information from document.
+     */
+    public static void setTargetClass(final TextDocument input, final Class targetClass) {
+        ArgumentChecks.ensureNonNull("Input document", input);
+        if (targetClass == null) {
+            removeVariable(input.getVariableFieldByName(CLASS_KEY));
+        } else {
+            Fields.createUserVariableField(input, CLASS_KEY, targetClass.getCanonicalName());
+        }
+    }
+
+    /**
+     * Analyze input document to find which type of object it is planned for.
+     * @param source Source document to analyze.
+     * @return The class which must be used for report creation, or null if we
+     * cannot find information in given document.
+     * @throws ReflectiveOperationException If we fail analyzing document.
+     */
+    public static Class getTargetClass(final TextDocument source) throws ReflectiveOperationException {
+        final VariableField var = source.getVariableFieldByName(CLASS_KEY);
+        if (var != null && FieldType.USER_VARIABLE_FIELD.equals(var.getFieldType())) {
+            Object value = getVariableValue(var);
+            if (value instanceof String) {
+                return Thread.currentThread().getContextClassLoader().loadClass((String) value);
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Replace all variables defined in input document template with the one given
      * in parameter. For variables in document also present in given property mapping,
      * they're left as is. New properties to be put are added in paragraphs at the end
@@ -95,9 +130,22 @@ public class ODTUtils {
         }
 
         for (final VariableField var : vars.values()) {
-            final OdfElement varElement = var.getOdfElement();
-            varElement.getParentNode().removeChild(varElement);
+            removeVariable(var);
         }
+    }
+
+    /**
+     * Remove given variable from its holding document.
+     * @param var the variable field to get rid of.
+     * @return true if we succeeded, false otherwise.
+     */
+    public static boolean removeVariable(final VariableField var) {
+        if (var == null)
+            return false;
+        final OdfElement varElement = var.getOdfElement();
+        if (varElement == null)
+            return false;
+        return varElement.getParentNode().removeChild(varElement) != null;
     }
 
     /**
@@ -244,19 +292,7 @@ public class ODTUtils {
                 Object value;
                 while (userVariable != null) {
                     // really crappy...
-                    value = userVariable.getOfficeStringValueAttribute();
-                    if (value == null) {
-                        value = userVariable.getOfficeTimeValueAttribute();
-                        if (value == null) {
-                            value = userVariable.getOfficeDateValueAttribute();
-                            if (value == null) {
-                                value = userVariable.getOfficeBooleanValueAttribute();
-                                if (value == null) {
-                                    value = userVariable.getOfficeValueAttribute();
-                                }
-                            }
-                        }
-                    }
+                    value = getValue(userVariable);
 
                     // even crappier ...
                     tmpField = Fields.createUserVariableField(source, userVariable.getTextNameAttribute(), value.toString());
@@ -269,18 +305,87 @@ public class ODTUtils {
 
         // then look for simple variables.
         if (type == null || VariableField.VariableType.SIMPLE.equals(type)) {
-                        TextVariableDeclsElement userVariableElements = OdfElement.findFirstChildNode(TextVariableDeclsElement.class, variableContainer);
+            TextVariableDeclsElement userVariableElements = OdfElement.findFirstChildNode(TextVariableDeclsElement.class, variableContainer);
             if (userVariableElements != null) {
                 TextVariableDeclElement variable = OdfElement.findFirstChildNode(TextVariableDeclElement.class, userVariableElements);
                 while (variable != null) {
                     tmpField = Fields.createSimpleVariableField(source, variable.getTextNameAttribute());
                     result.put(tmpField.getVariableName(), tmpField);
-
                     variable = OdfElement.findNextChildNode(TextVariableDeclElement.class, variable);
                 }
             }
         }
 
         return result;
+    }
+
+    /**
+     * Try to extract value from given field.
+     *
+     * IMPORTANT ! For now, only fields of {@link VariableField.VariableType#USER}
+     * type are supported.
+     *
+     * @param field Object to extract value from.
+     * @return Found value, or null if we cannot find any.
+     * @throws ReflectiveOperationException If an error occurred while analyzing
+     * input variable.
+     * @throws UnsupportedOperationException If input variable type is not {@link VariableField.VariableType#USER}
+     */
+    public static Object getVariableValue(final VariableField field) throws ReflectiveOperationException {
+        ArgumentChecks.ensureNonNull("input variable field", field);
+        if (FieldType.USER_VARIABLE_FIELD.equals(field.getFieldType())) {
+            Field userVariableField = getUserVariableField();
+            return getValue((TextUserFieldDeclElement) userVariableField.get(field));
+        } else {
+            throw new UnsupportedOperationException("Not done yet.");
+        }
+    }
+
+    private static Field getUserVariableField() {
+        if (USER_FIELD == null) {
+            try {
+                USER_FIELD = VariableField.class.getDeclaredField("userVariableElement");
+            } catch (NoSuchFieldException ex) {
+                throw new IllegalStateException("Cannot access user field.", ex);
+            }
+            USER_FIELD.setAccessible(true);
+        }
+        return USER_FIELD;
+    }
+
+    private static Field getSimpleVariableField() {
+        if (SIMPLE_FIELD == null) {
+            try {
+                SIMPLE_FIELD = VariableField.class.getDeclaredField("simpleVariableElement");
+            } catch (NoSuchFieldException ex) {
+                throw new IllegalStateException("Cannot access user field.", ex);
+            }
+            SIMPLE_FIELD.setAccessible(true);
+        }
+        return SIMPLE_FIELD;
+    }
+
+    /**
+     * Analyze input element tto find contained value.
+     * @param input
+     * @return value hold by given object, or null.
+     */
+    private static Object getValue(TextUserFieldDeclElement userVariable) {
+        // really crappy...
+        Object value = userVariable.getOfficeStringValueAttribute();
+        if (value == null) {
+            value = userVariable.getOfficeTimeValueAttribute();
+            if (value == null) {
+                value = userVariable.getOfficeDateValueAttribute();
+                if (value == null) {
+                    value = userVariable.getOfficeBooleanValueAttribute();
+                    if (value == null) {
+                        value = userVariable.getOfficeValueAttribute();
+                    }
+                }
+            }
+        }
+
+        return value;
     }
 }

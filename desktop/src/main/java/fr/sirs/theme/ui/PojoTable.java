@@ -1333,6 +1333,23 @@ public class PojoTable extends BorderPane implements Printable {
         }
     }
 
+    private static class SimpleCell extends TableCell<Element, Object> {
+
+        private final SirsStringConverter converter = new SirsStringConverter();
+
+        @Override
+        protected void updateItem(Object item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setText(null);
+            } else if (item instanceof String) {
+                setText((String) item);
+            } else {
+                setText(converter.toString(item));
+            }
+        }
+    }
+
     private class DistanceComputedPropertyColumn extends TableColumn<Element, Double>{
 
         private boolean titleSet = false;
@@ -1454,6 +1471,7 @@ public class PojoTable extends BorderPane implements Printable {
                 } else if (Point.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXPointCell());
                 } else {
+                    setCellFactory((TableColumn<Element, Object> param) -> new SimpleCell());
                     isEditable = false;
                 }
             }

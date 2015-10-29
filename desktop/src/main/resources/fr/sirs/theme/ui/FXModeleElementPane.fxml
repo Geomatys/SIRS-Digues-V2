@@ -13,6 +13,7 @@
             <GridPane hgap="5.0" vgap="10.0">
               <columnConstraints>
                 <ColumnConstraints hgrow="NEVER" />
+                  <ColumnConstraints hgrow="NEVER" />
                   <ColumnConstraints hgrow="SOMETIMES" />
                   <ColumnConstraints hgrow="NEVER" />
                   <ColumnConstraints hgrow="NEVER" />
@@ -21,27 +22,32 @@
                 <RowConstraints vgrow="NEVER" />
                 <RowConstraints vgrow="NEVER" />
                 <RowConstraints vgrow="NEVER" />
-                <RowConstraints vgrow="NEVER" />
                   <RowConstraints vgrow="NEVER" />
                   <RowConstraints minHeight="10.0" />
               </rowConstraints>
                <children>
                   <Label text="Titre" />
-                  <Label text="Type d'objet" GridPane.rowIndex="1" />
-                  <Label text="Modèle ODT" GridPane.rowIndex="2" />
+                  <Label text="Type d'objet" GridPane.rowIndex="1">
+                     <padding>
+                        <Insets right="10.0" />
+                     </padding></Label>
+                  <Label text="Modèle ODT" GridPane.rowIndex="2">
+                     <padding>
+                        <Insets right="10.0" />
+                     </padding></Label>
                   <TextField fx:id="uiTitle" promptText="Titre du modèle" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" />
                   <ComboBox fx:id="uiTargetClass" prefWidth="150.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="1" />
-                  <Button fx:id="uiImportODT" mnemonicParsing="false" onAction="#importODT" styleClass="white-with-borders" text="Importer" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                  <Button fx:id="uiExportODT" mnemonicParsing="false" onAction="#exportODT" styleClass="white-with-borders" text="Exporter" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                  <Label fx:id="uiNoModelLabel" text="Aucun modèle présent" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <Label fx:id="uiSizeLabel" text="Taille" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                  <HBox fx:id="uiEditBar" spacing="5.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4">
+                  <Button fx:id="uiImportODT" mnemonicParsing="false" onAction="#importODT" styleClass="white-with-borders" text="Importer" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                  <Button fx:id="uiExportODT" mnemonicParsing="false" onAction="#exportODT" styleClass="white-with-borders" text="Exporter" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                  <Label fx:id="uiNoModelLabel" text="Aucun modèle présent" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label fx:id="uiSizeLabel" text="Taille" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <HBox fx:id="uiEditBar" spacing="5.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
                      <children>
                         <Button mnemonicParsing="false" onAction="#editODT" styleClass="white-with-borders" text="Editer" />
                         <Button mnemonicParsing="false" onAction="#deleteODT" styleClass="white-with-borders" text="Supprimer" />
                      </children>
                   </HBox>
-                  <BorderPane fx:id="uiPropertyPane" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" GridPane.valignment="TOP">
+                  <BorderPane fx:id="uiPropertyPane" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" GridPane.valignment="TOP">
                      <top>
                         <Label text="Propriétés utilisées dans le modèle" BorderPane.alignment="CENTER">
                            <BorderPane.margin>
@@ -50,7 +56,7 @@
                         </Label>
                      </top>
                      <left>
-                        <VBox BorderPane.alignment="CENTER">
+                        <VBox BorderPane.alignment="TOP_LEFT">
                            <children>
                               <Label text="Propriétés disponibles" />
                               <ListView fx:id="uiAvailableProperties" minHeight="10.0" minWidth="10.0" prefHeight="150.0">
@@ -62,7 +68,7 @@
                         </VBox>
                      </left>
                      <right>
-                        <VBox BorderPane.alignment="CENTER">
+                        <VBox BorderPane.alignment="TOP_LEFT">
                            <children>
                               <Label text="Propriétés utilisées" />
                               <ListView fx:id="uiUsedProperties" prefHeight="150.0">
@@ -74,7 +80,7 @@
                         </VBox>
                      </right>
                      <bottom>
-                        <Button fx:id="uiGenerate" mnemonicParsing="false" onAction="#generateODT" styleClass="btn-single" text="Générer le modèle" BorderPane.alignment="CENTER_RIGHT">
+                        <Button fx:id="uiGenerate" mnemonicParsing="false" onAction="#updateODT" styleClass="btn-single" text="Générer le modèle" BorderPane.alignment="TOP_RIGHT">
                            <BorderPane.margin>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="10.0" />
                            </BorderPane.margin>
@@ -92,10 +98,10 @@
                         </VBox>
                      </center>
                   </BorderPane>
-                  <Label fx:id="uiModelPresentLabel" text="Taille du modèle :" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Label fx:id="uiModelPresentLabel" text="Taille du modèle :" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                </children>
             </GridPane>
-            <Label fx:id="uiProgressLabel" text="Opération en cours" textFill="#3268b9" visible="false">
+            <Label fx:id="uiProgressLabel" text="Opération en cours" textFill="#3268b9" visible="false" StackPane.alignment="CENTER">
                <font>
                   <Font name="System Bold Italic" size="19.0" />
                </font>

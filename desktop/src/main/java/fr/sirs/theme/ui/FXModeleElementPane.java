@@ -3,12 +3,15 @@ package fr.sirs.theme.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.report.ModeleElement;
+import fr.sirs.ui.Growl;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.odt.ODTUtils;
 import java.awt.Desktop;
 import java.beans.IntrospectionException;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,18 +20,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
+import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -43,6 +48,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -50,6 +56,7 @@ import javafx.stage.FileChooser;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.odftoolkit.simple.TextDocument;
+import org.odftoolkit.simple.common.field.VariableField;
 
 /**
  *
@@ -60,7 +67,7 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
     /**
      * Attributs que l'on ne souhaite pas garder dans le formulaire.
      */
-    private static final List<String> FIELDS_TO_IGNORE = Arrays.asList(new String[] {SIRS.AUTHOR_FIELD, SIRS.VALID_FIELD, SIRS.FOREIGN_PARENT_ID_FIELD});
+    private static final List<String> FIELDS_TO_IGNORE = Arrays.asList(new String[]{SIRS.AUTHOR_FIELD, SIRS.VALID_FIELD, SIRS.FOREIGN_PARENT_ID_FIELD, ODTUtils.CLASS_KEY});
 
     private static String DESKTOP_UNSUPPORTED = "Impossible de dialoguer avec le système. Pour éditer le modèle, vous pouvez cependant utiliser la fonction d'export, "
             + "puis ré-importer votre ficher lorsque vous aurez terminé vos modifications.";
@@ -112,17 +119,29 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
     @FXML
     private ProgressIndicator uiProgress;
 
-
-    /** When ODT document is updated, it change label displaying its size. */
-    private final ChangeListener<byte[]> sizeListener;
-
-    /** A temporary file used for ODT modifications happening before save. */
+    /**
+     * A temporary file used for ODT modifications happening before save.
+     */
     private final Path tempODT;
     private final SimpleBooleanProperty tempODTexists = new SimpleBooleanProperty(false);
+
+    /**
+     * Property holding current performed task. It allow us to centralize
+     * progress behavior definition, by binding it to this property.
+     */
+    private final ObjectProperty<Task> taskProperty = new SimpleObjectProperty<>();
+
+    private final ObservableList<String> availableProperties = FXCollections.observableArrayList();
+    private final ObservableList<String> usedProperties = FXCollections.observableArrayList();
 
     public FXModeleElementPane() {
         super();
         SIRS.loadFXML(this);
+
+        uiAvailableProperties.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        uiAvailableProperties.setItems(availableProperties);
+        uiUsedProperties.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        uiUsedProperties.setItems(usedProperties);
 
         // Build ordered list of possible target classes.
         final SirsStringConverter converter = new SirsStringConverter();
@@ -131,6 +150,8 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
                 Injector.getSession().getAvailableModels());
         classes.sort((o1, o2) -> collator.compare(converter.toString(o1), converter.toString(o2)));
         SIRS.initCombo(uiTargetClass, classes, null);
+
+        taskProperty.addListener(this::taskChanged);
 
         // Modify available properties when target class is modified.
         uiTargetClass.valueProperty().addListener(this::updateAvailableProperties);
@@ -147,17 +168,17 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
         uiImportODT.disableProperty().bind(disableFieldsProperty());
         uiEditBar.disableProperty().bind(disableFieldsProperty());
         uiPropertyPane.disableProperty().bind(disableFieldsProperty());
-        uiGenerate.disableProperty().bind(disableFieldsProperty().or(Bindings.isEmpty(uiUsedProperties.getItems())));
+        uiGenerate.disableProperty().bind(disableFieldsProperty());
+        uiExportODT.disableProperty().bind(tempODTexists.not());
 
-        // Panel update
-        elementProperty.addListener(this::elementChanged);
-        sizeListener = (obs, oldValue, newValue) -> {
-            if (newValue == null) {
-                uiSizeLabel.setText("Modèle inexistant");
-            } else {
-                uiSizeLabel.setText(SIRS.toReadableSize(newValue.length));
-            }
-        };
+        uiEditBar.visibleProperty().bind(tempODTexists);
+        uiEditBar.managedProperty().bind(uiEditBar.visibleProperty());
+        uiNoModelLabel.visibleProperty().bind(tempODTexists.not());
+        uiNoModelLabel.managedProperty().bind(uiNoModelLabel.visibleProperty());
+        uiModelPresentLabel.visibleProperty().bind(tempODTexists);
+        uiModelPresentLabel.managedProperty().bind(uiModelPresentLabel.visibleProperty());
+        uiSizeLabel.visibleProperty().bind(tempODTexists);
+        uiSizeLabel.managedProperty().bind(uiSizeLabel.visibleProperty());
 
         // Prepare reference to temporary file used for ODT edition. Keep it suppressed until we need it.
         try {
@@ -166,6 +187,22 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
         } catch (IOException ex) {
             throw new IllegalStateException("Cannot create temporary file !", ex);
         }
+
+        // When ODT document is updated, it change label displaying its size.
+        elementProperty.addListener(this::elementChanged);
+            tempODTexists.addListener((obs, oldValue, newValue) -> {
+            if (newValue) {
+                try {
+                    uiSizeLabel.setText(SIRS.toReadableSize(
+                            Files.getFileAttributeView(tempODT, BasicFileAttributeView.class).readAttributes().size()));
+                } catch (IOException ex) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Unable to read file size : "+tempODT, ex);
+                    uiSizeLabel.setText("illisible");
+                }
+            } else {
+                uiSizeLabel.setText("Modèle inexistant");
+            }
+        });
     }
 
     public FXModeleElementPane(final ModeleElement input) {
@@ -173,43 +210,89 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
         setElement(input);
     }
 
+    private void taskChanged(ObservableValue<? extends Task> obs, Task oldTask, Task newTask) {
+        if (oldTask != null) {
+            uiProgress.visibleProperty().unbind();
+            uiProgressLabel.visibleProperty().unbind();
+            uiProgressLabel.textProperty().unbind();
+        }
+
+        if (newTask != null) {
+            uiProgressLabel.textProperty().bind(newTask.titleProperty());
+            uiProgressLabel.visibleProperty().bind(newTask.runningProperty());
+            uiProgress.visibleProperty().bind(newTask.runningProperty());
+            uiProgress.progressProperty().bind(newTask.progressProperty());
+
+        } else {
+            uiProgressLabel.setVisible(false);
+            uiProgress.setVisible(false);
+        }
+    }
+
     private void elementChanged(ObservableValue<? extends ModeleElement> obs, ModeleElement oldElement, ModeleElement newElement) {
         if (oldElement != null) {
             uiTitle.textProperty().unbindBidirectional(oldElement.libelleProperty());
-            uiEditBar.visibleProperty().unbind();
-            uiExportODT.visibleProperty().unbind();
-            uiNoModelLabel.visibleProperty().unbind();
-            uiModelPresentLabel.visibleProperty().unbind();
+        }
 
-            uiSizeLabel.visibleProperty().unbind();
-            oldElement.odtProperty().removeListener(sizeListener);
+        try {
+            Files.deleteIfExists(tempODT);
+            tempODTexists.set(false);
+        } catch (IOException ex) {
+            throw new SirsCoreRuntimeException("Cannot delete temporary file !", ex);
         }
 
         if (newElement != null) {
             uiTitle.textProperty().bindBidirectional(newElement.libelleProperty());
-            final BooleanBinding elementPresent = newElement.odtProperty().isNotNull();
-            uiEditBar.visibleProperty().bind(elementPresent.or(tempODTexists));
-            uiExportODT.disableProperty().bind(elementPresent);
-            uiNoModelLabel.visibleProperty().bind(elementPresent);
-            uiModelPresentLabel.visibleProperty().bind(elementPresent);
-
-            uiSizeLabel.visibleProperty().bind(elementPresent);
-            newElement.odtProperty().addListener(sizeListener);
-
+            final String targetClassName = newElement.getTargetClass();
+            if (targetClassName == null || targetClassName.isEmpty()) {
+                uiTargetClass.setValue(null);
+            } else {
+                try {
+                    Class<?> tClass = Thread.currentThread().getContextClassLoader().loadClass(targetClassName);
+                    uiTargetClass.setValue(tClass);
+                } catch (ClassNotFoundException e) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Invalid target class in model "+newElement.getId(), e);
+                    uiTargetClass.setValue(null);
+                }
+            }
             final byte[] odt = newElement.getOdt();
 
             // Temporary file for ODT edition
-            try {
-                if (odt == null || odt.length < 1) {
-                    Files.deleteIfExists(tempODT);
-                    tempODTexists.set(false);
-                } else {
-                    Files.write(tempODT, odt, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-                    tempODTexists.set(true);
+            final Task<Boolean> loadTask = new Task() {
+
+                @Override
+                protected Object call() throws Exception {
+                    updateTitle("Chargement d'un modèle");
+                    if (odt == null || odt.length < 1) {
+                        // deletion has been done before.
+                        return false;
+                    } else {
+                        // Check saved document is a real odt, + analyze contained properties.
+                        try (final InputStream stream = new ByteArrayInputStream(odt)) {
+                            updateProperties(stream);
+                        }
+                        Files.write(tempODT, odt, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+                        return true;
+                    }
                 }
-            } catch (IOException ex) {
-                throw new IllegalStateException("Cannot work with temporary file !", ex);
-            }
+            };
+
+            taskProperty.set(loadTask);
+            loadTask.setOnSucceeded((success) -> {
+                Platform.runLater(() -> {
+                    tempODTexists.set(loadTask.getValue());
+                    new Growl(Growl.Type.INFO, "Chargement terminé").showAndFade();
+                });
+            });
+            loadTask.setOnFailed((fail) -> {
+                Platform.runLater(() -> {
+                    tempODTexists.set(false);
+                    GeotkFX.newExceptionDialog("Imposssible de charger le modèle", loadTask.getException()).show();
+                });
+            });
+
+            TaskManager.INSTANCE.submit(loadTask);
+
         } else {
             uiTitle.setText(null);
             uiTargetClass.setValue(null);
@@ -217,10 +300,8 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
     }
 
     /**
-     * Called when model class is changed. It reloads property lists, and update
-     * ODT file to keep only properties common to both the old and new types.
-     *
-     * TODO : update ODT file
+     * Called when model class is changed. It reloads property lists.
+     * WARNING : Does not update ODT template.
      *
      * @param obs Originating property which has changed.
      * @param oldValue Old model type.
@@ -228,8 +309,8 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
      */
     private void updateAvailableProperties(ObservableValue<? extends Class> obs, Class oldValue, Class newValue) {
         if (newValue == null) {
-            uiAvailableProperties.setItems(null);
-            uiUsedProperties.setItems(null);
+            availableProperties.clear();
+            usedProperties.clear();
             return;
         }
 
@@ -244,24 +325,22 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
         properties.removeAll(FIELDS_TO_IGNORE);
 
         // refresh available property list
-        uiAvailableProperties.setItems(FXCollections.observableArrayList(properties));
-
+        availableProperties.setAll(properties);
         // Remove all selected properties not present into selected type.
-        final Iterator<String> usedProps = uiUsedProperties.getItems().iterator();
+        final Iterator<String> usedProps = usedProperties.iterator();
         while (usedProps.hasNext()) {
             if (!properties.remove(usedProps.next())) {
                 usedProps.remove();
             }
         }
-
-        generateODT(null);
     }
 
     @FXML
     void addProperties(ActionEvent event) {
         final ObservableList<String> selectedItems = uiAvailableProperties.getSelectionModel().getSelectedItems();
-        uiUsedProperties.getItems().addAll(selectedItems);
-        uiAvailableProperties.getItems().removeAll(selectedItems);
+        // TODO : null pointer check.
+        usedProperties.addAll(selectedItems);
+        availableProperties.removeAll(selectedItems);
     }
 
     @FXML
@@ -277,7 +356,7 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
     @FXML
     void editODT(ActionEvent event) {
         if (Desktop.isDesktopSupported()) {
-            final Task<Boolean> editTask  = TaskManager.INSTANCE.submit("Edition d'un modèle ODT", () -> {
+            final Task<Boolean> editTask = TaskManager.INSTANCE.submit("Edition d'un modèle ODT", () -> {
                 final Desktop desktop = Desktop.getDesktop();
                 if (desktop.isSupported(Desktop.Action.EDIT)) {
                     desktop.edit(tempODT.toAbsolutePath().toFile());
@@ -289,32 +368,31 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
                 return true;
             });
 
-            uiProgressLabel.setText("Édition du modèle en cours");
-            uiProgressLabel.visibleProperty().bind(editTask.runningProperty());
-            uiProgress.visibleProperty().bind(editTask.runningProperty());
+            taskProperty.set(editTask);
 
             editTask.setOnSucceeded(taskEvent -> {
-                final Alert alert;
-                if (Boolean.TRUE.equals(taskEvent.getSource().getValue())) {
-                    alert = new Alert(AlertType.WARNING, DESKTOP_FAILED + " " + MANUAL_EDIT, ButtonType.OK);
-                } else {
-                    alert = new Alert(AlertType.INFORMATION, "Edition terminée", ButtonType.OK);
+                if (Boolean.FALSE.equals(taskEvent.getSource().getValue())) {
+                    Platform.runLater(() -> {
+                        final Alert alert = new Alert(AlertType.WARNING, DESKTOP_FAILED + " " + MANUAL_EDIT, ButtonType.OK);
+                        alert.setResizable(true);
+                        alert.show();
+                    });
                 }
-                alert.setResizable(true);
-                alert.show();
             });
 
             editTask.setOnFailed(taskEvent -> {
-                if (taskEvent.getSource().getException() != null) {
-                    GeotkFX.newExceptionDialog("Une erreur est survenue lors de l'édition du modèle ODT", taskEvent.getSource().getException()).show();
-                } else {
-                    final Alert alert = new Alert(AlertType.ERROR, "Une erreur inattendue est survenue lors de l'édition du modèle ODT.", ButtonType.OK);
-                    alert.setResizable(true);
-                    alert.show();
-                }
+                Platform.runLater(() -> {
+                    if (taskEvent.getSource().getException() != null) {
+                        GeotkFX.newExceptionDialog("Une erreur est survenue lors de l'édition du modèle ODT", taskEvent.getSource().getException()).show();
+                    } else {
+                        final Alert alert = new Alert(AlertType.ERROR, "Une erreur inattendue est survenue lors de l'édition du modèle ODT.", ButtonType.OK);
+                        alert.setResizable(true);
+                        alert.show();
+                    }
+                });
             });
         } else {
-            Alert alert = new Alert(AlertType.WARNING, DESKTOP_UNSUPPORTED+ " "+MANUAL_EDIT, ButtonType.OK);
+            Alert alert = new Alert(AlertType.WARNING, DESKTOP_UNSUPPORTED + " " + MANUAL_EDIT, ButtonType.OK);
             alert.setResizable(true);
             alert.show();
         }
@@ -325,57 +403,74 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
         final FileChooser outputChooser = new FileChooser();
         File output = outputChooser.showSaveDialog(getScene().getWindow());
         if (output != null) {
-            try {
+            final Task exportTask = TaskManager.INSTANCE.submit("Export de modèle", () -> {
                 if (Files.isRegularFile(tempODT)) {
                     Files.copy(tempODT, output.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 } else {
                     Files.write(output.toPath(), elementProperty.get().getOdt(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
                 }
-            } catch (IOException ex) {
-                throw new IllegalStateException("Cannot export ODT template !", ex);
-            }
+                return true;
+            });
+
+            taskProperty.set(exportTask);
+            exportTask.setOnSucceeded((success) -> Platform.runLater(() -> new Growl(Growl.Type.INFO, "Export terminé").showAndFade()));
+            exportTask.setOnCancelled((cancelled) -> Platform.runLater(() -> new Growl(Growl.Type.WARNING, "Export annulé").showAndFade()));
+            exportTask.setOnFailed((failed) -> Platform.runLater(() ->
+                GeotkFX.newExceptionDialog("L'export a échoué suite à une erreur inattendue.", exportTask.getException()).show()
+            ));
         }
     }
 
     @FXML
-    void generateODT(ActionEvent event) {
-        final ObservableList<String> items = uiUsedProperties.getItems();
-
+    void updateODT(ActionEvent event) {
         // Get a title for each wanted property.
-        final HashMap<String, String> properties = new HashMap<>(items.size());
-        final Function<String, String> nameMapper = createPropertyNameMapper(uiTargetClass.getValue());
-        for (final String prop : items) {
+        final HashMap<String, String> properties = new HashMap<>(usedProperties.size());
+        final Class targetClass = uiTargetClass.getValue();
+        final Function<String, String> nameMapper = createPropertyNameMapper(targetClass);
+        for (final String prop : usedProperties) {
             properties.put(prop, nameMapper.apply(prop));
         }
 
+        final Task generationTask;
         if (Files.isRegularFile(tempODT)) {
             final Alert alert = new Alert(AlertType.WARNING, "Attention, le modèle existant sera modifié, êtes-vous sûr ?", ButtonType.NO, ButtonType.YES);
             alert.setResizable(true);
             if (ButtonType.YES.equals(alert.showAndWait().orElse(null))) {
-                try {
+                generationTask = TaskManager.INSTANCE.submit("Génération d'un modèle", () -> {
                     final TextDocument tmpDoc;
                     try (final InputStream docInput = Files.newInputStream(tempODT, StandardOpenOption.READ)) {
                         tmpDoc = TextDocument.loadDocument(docInput);
                         ODTUtils.setVariables(tmpDoc, properties);
+                        ODTUtils.setTargetClass(tmpDoc, targetClass);
                     }
                     try (OutputStream docOutput = Files.newOutputStream(tempODT, StandardOpenOption.WRITE)) {
                         tmpDoc.save(docOutput);
                     }
-                    tempODTexists.set(true);
-                } catch (Exception e) {
-                    SirsCore.LOGGER.log(Level.WARNING, "Cannot modify template !", e);
-                    GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du modèle ODT.", e);
-                }
+                    return true;
+                });
+            } else {
+                generationTask = null;
             }
         } else {
-            try (final OutputStream outputStream = Files.newOutputStream(tempODT, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
-                final TextDocument newTemplate = ODTUtils.newSimplePropertyModel(uiTitle.getText(), properties);
-                newTemplate.save(outputStream);
+            generationTask = TaskManager.INSTANCE.submit("Génération d'un modèle", () -> {
+                try (final OutputStream outputStream = Files.newOutputStream(tempODT, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+                    final TextDocument newTemplate = ODTUtils.newSimplePropertyModel(uiTitle.getText(), properties);
+                    ODTUtils.setTargetClass(newTemplate, targetClass);
+                    newTemplate.save(outputStream);
+                }
+                return true;
+            });
+        }
+
+        if (generationTask != null) {
+            taskProperty.set(generationTask);
+            generationTask.setOnSucceeded((success) -> Platform.runLater(() -> {
                 tempODTexists.set(true);
-            } catch (Exception ex) {
-                SirsCore.LOGGER.log(Level.WARNING, "Cannot create template !", ex);
-                GeotkFX.newExceptionDialog("Une erreur est survenue lors de la génération du modèle ODT.", ex);
-            }
+                new Growl(Growl.Type.INFO, "Génération terminée").showAndFade();
+            }));
+            generationTask.setOnCancelled((cancel) -> Platform.runLater(() -> new Growl(Growl.Type.WARNING, "Génération annulée").showAndFade()));
+            generationTask.setOnFailed((success) -> Platform.runLater(() ->
+                    GeotkFX.newExceptionDialog("La génération du modèle a échoué !", generationTask.getException()).show()));
         }
     }
 
@@ -387,23 +482,37 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
         File tmpInput = inputChooser.showOpenDialog(getScene().getWindow());
         if (tmpInput != null) {
             final Path input = tmpInput.toPath();
-            try (final InputStream stream = Files.newInputStream(input, StandardOpenOption.READ)) {
-                TextDocument.loadDocument(stream); // only here to ensure we import a valid ODT.
+            final Task importTask = TaskManager.INSTANCE.submit("Import de modèle", () -> {
+                // Check saved document is a real odt, + analyze contained properties.
+                try (final InputStream stream = Files.newInputStream(input, StandardOpenOption.READ)) {
+                    updateProperties(stream);
+                }
+
                 Files.copy(input, tempODT, StandardCopyOption.REPLACE_EXISTING);
+                return true;
+            });
+            taskProperty.set(importTask);
+            importTask.setOnSucceeded((success) -> Platform.runLater(() -> {
                 tempODTexists.set(true);
-            } catch (IOException ex) {
-                throw new IllegalStateException("Cannot import file : "+input.toString(), ex);
-            } catch (Exception ex) {
-                throw new IllegalStateException("Input file is not an ODT file !");
-            }
+                new Growl(Growl.Type.INFO, "Import terminé").showAndFade();
+            }));
+            importTask.setOnCancelled((cancelled) -> Platform.runLater(() -> new Growl(Growl.Type.WARNING, "Import annulé").showAndFade()));
+            importTask.setOnFailed((failed) -> Platform.runLater(() -> {
+                final Throwable exception = importTask.getException();
+                if (exception instanceof IOException) {
+                    GeotkFX.newExceptionDialog("Une erreur est survenue lors de l'accès aux données", exception).show();
+                } else {
+                    GeotkFX.newExceptionDialog("Le fichier fourni n'est pas reconnu en tant que modèle ODT.", exception).show();
+                }
+            }));
         }
     }
 
     @FXML
     void removeProperties(ActionEvent event) {
         final ObservableList<String> selectedItems = uiUsedProperties.getSelectionModel().getSelectedItems();
-        uiAvailableProperties.getItems().addAll(selectedItems);
-        uiUsedProperties.getItems().removeAll(selectedItems);
+        availableProperties.addAll(selectedItems);
+        usedProperties.removeAll(selectedItems);
     }
 
     @Override
@@ -411,12 +520,43 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
         ModeleElement result = elementProperty.get();
         final Class targetClass = uiTargetClass.valueProperty().get();
         if (targetClass != null) {
+            // Check if model needs to be updated.
             result.setTargetClass(targetClass.getCanonicalName());
         } else {
             result.setTargetClass(null);
         }
 
-        // TODO : Do this only if ODT has been edited.
+        // User have cleared model
+        if (usedProperties.isEmpty()) {
+            Files.deleteIfExists(tempODT);
+        } else {
+            boolean mustUpdate = false;
+            if (!Files.isRegularFile(tempODT)) {
+                mustUpdate = true;
+            } else {
+                // Analyze document content to know if it needs to be updated.
+                try (final InputStream stream = Files.newInputStream(tempODT, StandardOpenOption.READ)) {
+                    final TextDocument doc = TextDocument.loadDocument(stream);
+                    final Set<String> keySet = ODTUtils.findAllVariables(doc, VariableField.VariableType.USER).keySet();
+                    keySet.removeAll(FIELDS_TO_IGNORE);
+                    if (keySet.size() != usedProperties.size()) {
+                        mustUpdate = true;
+                    } else {
+                        for (final String name : usedProperties) {
+                            if (!keySet.contains(name)) {
+                                mustUpdate = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (mustUpdate) {
+                updateODT(null);
+            }
+        }
+
         if (Files.isRegularFile(tempODT)) {
             result.setOdt(Files.readAllBytes(tempODT));
         } else {
@@ -425,9 +565,52 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
     }
 
     /**
+     * Read document from given stream, and analyze it to find class / properties
+     * information. If we found it, UI is updated.
+     * @param inputDocument Stream pointing to the document to analyze.
+     * @throws Exception If we cannot read given document.
+     */
+    private void updateProperties(final InputStream inputDocument) throws Exception {
+        final TextDocument tmpDoc = TextDocument.loadDocument(inputDocument);
+        final Map<String, VariableField> vars = ODTUtils.findAllVariables(tmpDoc, VariableField.VariableType.USER);
+
+        // First, we try to retrieve target class from document.
+        try {
+            final Class foundClass = ODTUtils.getTargetClass(tmpDoc);
+            if (foundClass != null) {
+                if (Platform.isFxApplicationThread()) {
+                    uiTargetClass.setValue(foundClass);
+                } else {
+                    TaskManager.MockTask<Object> mockTask = new TaskManager.MockTask<>(() -> uiTargetClass.setValue(foundClass));
+                    Platform.runLater(mockTask);
+                    // Ensure available property list is updated before going further.
+                    mockTask.get();
+                }
+            }
+        } catch (ReflectiveOperationException e) {
+            SirsCore.LOGGER.log(Level.FINE, "Document variable 'class' does not contains a valid class information.", e);
+        }
+
+        // Now, we build list of used properties
+        final Set<String> keys = vars.keySet();
+        keys.removeAll(FIELDS_TO_IGNORE);
+        final Runnable r = () -> {
+            availableProperties.removeAll(keys);
+            usedProperties.setAll(keys);
+        };
+        if (Platform.isFxApplicationThread()) {
+            r.run();
+        } else {
+            Platform.runLater(r);
+        }
+    }
+
+    /**
      * Create a function giving display name for properties of a given class.
+     *
      * @param propertyHolder Class holding properties to translate.
-     * @return A function which take a property name, and return a display name for it.
+     * @return A function which take a property name, and return a display name
+     * for it.
      */
     public static Function<String, String> createPropertyNameMapper(final Class propertyHolder) {
         final LabelMapper mapper = LabelMapper.get(propertyHolder);
