@@ -20,6 +20,7 @@ fr.sirs.core.model.GestionObjet
 fr.sirs.core.model.GestionTroncon
 fr.sirs.core.model.LaisseCrue
 fr.sirs.core.model.LargeurFrancBord
+fr.sirs.core.model.LevePositionProfilTravers
 fr.sirs.core.model.LeveProfilTravers
 fr.sirs.core.model.LigneEau
 fr.sirs.core.model.MaitreOeuvreMarche
@@ -30,6 +31,14 @@ fr.sirs.core.model.MesureMonteeEaux
 fr.sirs.core.model.Meteo
 fr.sirs.core.model.MonteeEaux
 fr.sirs.core.model.Observation
+fr.sirs.core.model.ObservationEchelleLimnimetrique
+fr.sirs.core.model.ObservationOuvrageHydrauliqueAssocie
+fr.sirs.core.model.ObservationOuvrageParticulier
+fr.sirs.core.model.ObservationOuvrageTelecomEnergie
+fr.sirs.core.model.ObservationReseauHydrauliqueCielOuvert
+fr.sirs.core.model.ObservationReseauHydrauliqueFerme
+fr.sirs.core.model.ObservationReseauTelecomEnergie
+fr.sirs.core.model.ObservationStationPompage
 fr.sirs.core.model.Organisme
 fr.sirs.core.model.OuvertureBatardable
 fr.sirs.core.model.OuvrageFranchissement
@@ -107,6 +116,7 @@ fr.sirs.core.model.ReseauHydrauliqueCielOuvert
 fr.sirs.core.model.ReseauTelecomEnergie
 fr.sirs.core.model.Seuil
 fr.sirs.core.model.SommetRisberme
+fr.sirs.core.model.SQLQuery
 fr.sirs.core.model.StationPompage
 fr.sirs.core.model.SystemeEndiguement
 fr.sirs.core.model.SystemeReperageBorne

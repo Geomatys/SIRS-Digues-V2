@@ -77,6 +77,11 @@ public class FXModeleRapportPane extends AbstractFXElementPane<ModeleRapport> {
         }
     }
 
+    public FXModeleRapportPane(final ModeleRapport rapport) {
+        this();
+        setElement(rapport);
+    }
+
     private void elementChanged(ObservableValue<? extends ModeleRapport> obs, ModeleRapport oldModele, ModeleRapport newModele) {
         if (oldModele != null) {
             oldModele.libelleProperty().unbindBidirectional(uiName.textProperty());

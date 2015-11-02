@@ -561,8 +561,13 @@ public class FXMainFrame extends BorderPane {
     }
 
     @FXML
-    private void templatesPrint(){
-        addTab(session.getOrCreatePrintTab(Session.PrintTab.TEMPLATE, "Modèles de mise en forme"));
+    private void elementModelPrint(){
+        addTab(session.getOrCreatePrintTab(Session.PrintTab.TEMPLATE, "Edition des modèles de fiche"));
+    }
+
+    @FXML
+    private void reportPrint() {
+        addTab(session.getOrCreatePrintTab(Session.PrintTab.REPORT, "Edition des modèles de rapport"));
     }
 
     @FXML

@@ -15,6 +15,7 @@ import fr.sirs.other.FXReferencePane;
 import fr.sirs.other.FXValidationPane;
 import fr.sirs.theme.Theme;
 import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.ui.report.FXModeleRapportsPane;
 import fr.sirs.ui.ModeleElementTable;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SirsStringConverter;
@@ -106,7 +107,7 @@ public class Session extends SessionCore {
     private final Cache<Class<? extends Element>, FXFreeTab> openDesignationPanes = new Cache<>(12, 0, false);
     public enum AdminTab{VALIDATION, USERS}
     private final Cache<AdminTab, FXFreeTab> openAdminTabs = new Cache<>(2, 0, false);
-    public enum PrintTab{DESORDRE, RESEAU_FERME, TEMPLATE}
+    public enum PrintTab{DESORDRE, RESEAU_FERME, TEMPLATE, REPORT}
     private final Cache<PrintTab, FXFreeTab> openPrintTabs = new Cache<>(2, 0, false);
     private static FXFreeTab userGuideTab = null;
 
@@ -318,14 +319,24 @@ public class Session extends SessionCore {
                     tab.setContent(new FXReseauFermePrintPane());
                     return tab;
                 });
-            } else {
+            } else if (PrintTab.TEMPLATE.equals(printTab)) {
                 return openPrintTabs.getOrCreate(PrintTab.TEMPLATE, () -> {
                     final FXFreeTab tab = new FXFreeTab(title);
                     final ModeleElementTable table = new ModeleElementTable();
                     tab.setContent(table);
                     return tab;
                 });
+            } else if (PrintTab.REPORT.equals(printTab)) {
+                return openPrintTabs.getOrCreate(PrintTab.REPORT, () -> {
+                    final FXFreeTab tab = new FXFreeTab(title);
+                    tab.setContent(new FXModeleRapportsPane());
+                    return tab;
+                });
+            } else {
+                throw new UnsupportedOperationException("Object type unrecognized : "+printTab);
             }
+        } catch (RuntimeException ex) {
+            throw ex;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

@@ -14,7 +14,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 
 /**
- *
+ * Table displaying list of available models for element printing. Special behavior :
+ * Model editor is opened next to the table.
+ * 
  * @author Johann Sorel (Geomatys)
  * @author Alexis Manin (Geomatys)
  */
