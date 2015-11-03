@@ -79,7 +79,7 @@ public class ReferenceChecker extends Task<Void> {
         /*
          Récupération des classes de référence de l'application.
          */
-        localClassReferences = Session.getReferences();
+        localClassReferences = Session.getConcreteSubTypes(ReferenceType.class);
         final int progressSize = localClassReferences.size();
         int progress = 0;
         updateProgress(0, progressSize);

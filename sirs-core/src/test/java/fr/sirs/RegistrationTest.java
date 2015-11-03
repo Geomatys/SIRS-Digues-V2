@@ -11,7 +11,9 @@ import org.ektorp.support.CouchDbRepositorySupport;
 import org.junit.Test;
 
 /**
- *
+ * Verify all importers and repositories are registered into Spring context, and
+ * all element types are listed into service loader.
+ * 
  * @author Alexis Manin (Geomatys)
  */
 public class RegistrationTest extends ServiceRegistrationTestBase {

@@ -2,6 +2,9 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.Session;
+import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.report.FicheSectionRapport;
 import fr.sirs.core.model.report.ModeleElement;
@@ -14,8 +17,10 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import org.ektorp.DbAccessException;
 
@@ -41,27 +46,38 @@ public class FXFicheSectionRapportPane extends AbstractFXElementPane<FicheSectio
 
     @FXML private TextField uiTitle;
     @FXML private Label uiQueryTitle;
-    @FXML private Label uiModelTitle;
+    @FXML private ComboBox<Preview> uiModelChoice;
     @FXML private ChoiceBox<PhotoChoice> uiNbPhotoChoice;
     @FXML private Spinner<Integer> uiNbPhotoSpinner;
 
     private final ObjectProperty<SQLQuery> queryProperty = new SimpleObjectProperty<>();
-    private final ObjectProperty<ModeleElement> modelProperty = new SimpleObjectProperty<>();
+
+    private final AbstractSIRSRepository<ModeleElement> modelRepo;
 
     public FXFicheSectionRapportPane() {
         super();
         SIRS.loadFXML(this);
+        final Session session = Injector.getSession();
+
+        modelRepo = session.getRepositoryForClass(ModeleElement.class);
+        SIRS.initCombo(uiModelChoice, FXCollections.observableList(session.getPreviews().getByClass(ModeleElement.class)), null);
 
         elementProperty.addListener(this::elementChanged);
         queryProperty.addListener(this::queryChanged);
-        modelProperty.addListener(this::modelChanged);
         uiNbPhotoChoice.valueProperty().addListener((ObservableValue<? extends PhotoChoice> observable, PhotoChoice oldValue, PhotoChoice newValue) -> {
             uiNbPhotoSpinner.setVisible(newValue != null && newValue.number < 0);
         });
         uiNbPhotoChoice.setItems(FXCollections.observableArrayList(PhotoChoice.values()));
         uiNbPhotoChoice.setValue(PhotoChoice.NONE);
 
+        uiNbPhotoSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Short.MAX_VALUE, 0));
+
         // TODO : tooltips.
+    }
+
+    public FXFicheSectionRapportPane(final FicheSectionRapport rapport) {
+        this();
+        setElement(rapport);
     }
 
     /**
@@ -85,12 +101,13 @@ public class FXFicheSectionRapportPane extends AbstractFXElementPane<FicheSectio
                     queryProperty.set(null);
                 }
             }
-
-            if (newValue.getModeleElementId()!= null) {
-                try {
-                    modelProperty.set(Injector.getSession().getRepositoryForClass(ModeleElement.class).get(newValue.getModeleElementId()));
-                } catch (DbAccessException e) {
-                    modelProperty.set(null);
+            final String modelId = newValue.getModeleElementId();
+            if (modelId!= null) {
+                for (final Preview p : uiModelChoice.getItems()) {
+                    if (modelId.equals(p.getElementId())) {
+                        uiModelChoice.setValue(p);
+                        break;
+                    }
                 }
             }
 
@@ -113,7 +130,7 @@ public class FXFicheSectionRapportPane extends AbstractFXElementPane<FicheSectio
             }
         } else {
             queryProperty.set(null);
-            modelProperty.set(null);
+            uiModelChoice.setValue(null);
             uiNbPhotoChoice.setValue(PhotoChoice.NONE);
         }
     }
@@ -128,29 +145,34 @@ public class FXFicheSectionRapportPane extends AbstractFXElementPane<FicheSectio
             uiQueryTitle.setText(newValue.getLibelle());
     }
 
-    /**
-     * Change model label whan user modify it value.
-     */
-    private void modelChanged(ObservableValue<? extends ModeleElement> obs, ModeleElement oldValue, ModeleElement newValue) {
-        if (newValue == null)
-            uiModelTitle.setText("N/A");
-        else
-            uiModelTitle.setText(newValue.getLibelle());
-    }
-
     @Override
     public void preSave() throws Exception {
+        final FicheSectionRapport element = elementProperty.get();
         if (queryProperty.get() != null) {
-            elementProperty.get().setRequeteId(queryProperty.get().getId());
+            element.setRequeteId(queryProperty.get().getId());
         } else {
-            elementProperty.get().setRequeteId(null);
+            element.setRequeteId(null);
         }
 
         final PhotoChoice photoChoice = uiNbPhotoChoice.getValue();
         if (photoChoice.number < 0) {
-            elementProperty.get().setNbPhotos(Math.max(0, uiNbPhotoSpinner.getValue()));
+            final Integer spinnerValue = uiNbPhotoSpinner.getValue();
+            if (spinnerValue == null ) {
+                element.setNbPhotos(0);
+            } else {
+                element.setNbPhotos(Math.max(0, spinnerValue));
+            }
         } else {
-            elementProperty.get().setNbPhotos(photoChoice.number);
+            element.setNbPhotos(photoChoice.number);
+        }
+
+        final String modelChoice = uiModelChoice.getValue() == null? null : uiModelChoice.getValue().getElementId();
+        if (modelChoice != null) {
+            if (!modelChoice.equals(element.getModeleElementId())) {
+                element.setModeleElementId(modelChoice);
+            }
+        } else if (element.getModeleElementId() != null) {
+            element.setModeleElementId(null);
         }
     }
 
@@ -170,21 +192,5 @@ public class FXFicheSectionRapportPane extends AbstractFXElementPane<FicheSectio
     @FXML
     private void deleteQuery(final ActionEvent e) {
         queryProperty.set(null);
-    }
-
-    /**
-     * Action to perform when user want to select a model.
-     */
-    @FXML
-    private void chooseModel(final ActionEvent e) {
-        // TODO
-    }
-
-    /**
-     * Action performed when user remove model.
-     */
-    @FXML
-    private void deleteModel(final ActionEvent e) {
-        modelProperty.set(null);
     }
 }

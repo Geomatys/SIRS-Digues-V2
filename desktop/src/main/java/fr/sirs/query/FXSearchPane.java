@@ -207,7 +207,7 @@ public class FXSearchPane extends BorderPane {
             uiNbResults.setText("");
         });
 
-        final List<Class<? extends Element>> modelClasses = Session.getElements();
+        final List<Class<? extends Element>> modelClasses = Session.getConcreteSubTypes(Element.class);
         final ObservableList<Class<? extends Element>> modelObs = FXCollections.observableArrayList(modelClasses);
         modelObs.removeIf(new Predicate<Class<? extends Element>>() {
             @Override

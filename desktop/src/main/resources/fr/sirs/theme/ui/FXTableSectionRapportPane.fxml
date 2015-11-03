@@ -5,7 +5,6 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
 <fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@/fr/sirs/theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <GridPane hgap="10.0" vgap="10.0" BorderPane.alignment="CENTER">
@@ -24,7 +23,7 @@
             <Label text="Titre" />
             <Label text="Filtre" GridPane.rowIndex="1" />
             <Label fx:id="uiQueryTitle" text="N/A" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <TextField GridPane.columnIndex="1" GridPane.columnSpan="2147483647" />
+            <TextField fx:id="uiTitle" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" />
             <Button mnemonicParsing="false" onAction="#deleteQuery" text="Supprimer" GridPane.columnIndex="2" GridPane.rowIndex="1" />
          </children>
          <padding>

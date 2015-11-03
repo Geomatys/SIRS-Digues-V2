@@ -9,6 +9,7 @@ import java.util.Optional;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -33,6 +34,11 @@ public class FXTableSectionRapportPane extends AbstractFXElementPane<TableSectio
         queryProperty.addListener(this::queryChanged);
     }
 
+    public FXTableSectionRapportPane(final TableSectionRapport rapport) {
+        this();
+        setElement(rapport);
+    }
+    
     private void elementChanged(ObservableValue<? extends TableSectionRapport> obs, TableSectionRapport oldValue, TableSectionRapport newValue) {
         if (oldValue != null) {
             uiTitle.textProperty().unbindBidirectional(oldValue.libelleProperty());
@@ -69,13 +75,14 @@ public class FXTableSectionRapportPane extends AbstractFXElementPane<TableSectio
     }
 
     @FXML
-    private void chooseQuery() {
+    private void chooseQuery(ActionEvent event) {
         final Optional<SQLQuery> query = FXSearchPane.chooseSQLQuery(Injector.getSession().getRepositoryForClass(SQLQuery.class).getAll());
         if (query.isPresent())
             queryProperty.set(query.get());
     }
 
-    private void deleteQuery() {
+    @FXML
+    private void deleteQuery(ActionEvent event) {
         queryProperty.set(null);
     }
 }

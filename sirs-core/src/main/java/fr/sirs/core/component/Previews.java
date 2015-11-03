@@ -4,7 +4,6 @@ import fr.sirs.core.SessionCore;
 import static fr.sirs.core.component.Previews.BY_CLASS;
 import static fr.sirs.core.component.Previews.BY_ID;
 import static fr.sirs.core.component.Previews.VALIDATION;
-import fr.sirs.core.model.Element;
 import java.util.List;
 
 import org.ektorp.CouchDbConnector;
@@ -13,10 +12,9 @@ import org.ektorp.support.View;
 
 import fr.sirs.core.model.Preview;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.HashSet;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.Options;
@@ -116,18 +114,11 @@ public class Previews extends CouchDbRepositorySupport<Preview> {
      * @return
      */
     public List<Preview> getByClass(final Class... classes) {
-        final ArrayList<String> classNames = new ArrayList();
+        final HashSet<String> classNames = new HashSet<>();
         for (final Class c : classes) {
-            if(Modifier.isAbstract(c.getModifiers()) || c.isInterface()){
-                final Iterator<Class<? extends Element>> classIt = SessionCore.getElements().iterator();
-                while (classIt.hasNext()){
-                    final Class<? extends Element> slClass = classIt.next();
-                    if(!Modifier.isAbstract(slClass.getModifiers())
-                            && !slClass.isInterface()
-                            && c.isAssignableFrom(slClass)){
-                        classNames.add(slClass.getCanonicalName());
-                    }
-                }
+            // To retrieve all previews for an abstract class, we must find all its implementations first.
+            if(Modifier.isAbstract(c.getModifiers()) || c.isInterface()) {
+                classNames.addAll(SessionCore.getConcreteSubTypes(c));
             } else {
                 classNames.add(c.getCanonicalName());
             }

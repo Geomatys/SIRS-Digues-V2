@@ -3,10 +3,12 @@ package fr.sirs;
 import fr.sirs.core.ModuleDescription;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Utilisateur;
@@ -30,16 +32,12 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
@@ -49,6 +47,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Duration;
 import javax.measure.unit.SI;
+import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
 import org.ektorp.CouchDbConnector;
@@ -101,15 +100,11 @@ public class Session extends SessionCore {
 
     private FXMainFrame frame = null;
 
-    private final Cache<Element, FXFreeTab> openEditors = new Cache<>(12, 0, false);
-    private final Cache<Theme, FXFreeTab> openThemes = new Cache<>(12, 0, false);
-    private final Cache<Class<? extends ReferenceType>, FXFreeTab> openReferencePanes = new Cache<>(12, 0, false);
-    private final Cache<Class<? extends Element>, FXFreeTab> openDesignationPanes = new Cache<>(12, 0, false);
+    private final Cache<Object, FXFreeTab> openEditors = new Cache<>(12, 0, false);
+
     public enum AdminTab{VALIDATION, USERS}
-    private final Cache<AdminTab, FXFreeTab> openAdminTabs = new Cache<>(2, 0, false);
+
     public enum PrintTab{DESORDRE, RESEAU_FERME, TEMPLATE, REPORT}
-    private final Cache<PrintTab, FXFreeTab> openPrintTabs = new Cache<>(2, 0, false);
-    private static FXFreeTab userGuideTab = null;
 
     //generate a template for the legend
     final DefaultLegendTemplate legendTemplate = new DefaultLegendTemplate(
@@ -157,17 +152,6 @@ public class Session extends SessionCore {
                                     new Insets(4, 4, 4, 4), 500),
                     DecorationXMLParser.class.getResource("/org/geotoolkit/icon/boussole.svg"),
                     new Dimension(100,100));
-
-    /**
-     * Clear session cache.
-     */
-    public void clearCache(){
-        openEditors.clear();
-        openThemes.clear();
-        openReferencePanes.clear();
-        openDesignationPanes.clear();
-        openAdminTabs.clear();
-    }
 
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
@@ -304,118 +288,88 @@ public class Session extends SessionCore {
         }
     }
 
-    public FXFreeTab getOrCreatePrintTab(final PrintTab printTab, final String title){
-
-        try {
-            if (PrintTab.DESORDRE.equals(printTab)) {
-                return openPrintTabs.getOrCreate(PrintTab.DESORDRE, () -> {
-                    final FXFreeTab tab = new FXFreeTab(title);
+    public FXFreeTab getOrCreatePrintTab(final PrintTab printTab, final String title) {
+        return getOrCreateTab(printTab, () -> {
+            final FXFreeTab tab = new FXFreeTab(title);
+            switch (printTab) {
+                case DESORDRE:
                     tab.setContent(new FXDisorderPrintPane());
-                    return tab;
-                });
-            } else if(PrintTab.RESEAU_FERME.equals(printTab)) {
-                return openPrintTabs.getOrCreate(PrintTab.RESEAU_FERME, () -> {
-                    final FXFreeTab tab = new FXFreeTab(title);
+                    break;
+                case RESEAU_FERME:
                     tab.setContent(new FXReseauFermePrintPane());
-                    return tab;
-                });
-            } else if (PrintTab.TEMPLATE.equals(printTab)) {
-                return openPrintTabs.getOrCreate(PrintTab.TEMPLATE, () -> {
-                    final FXFreeTab tab = new FXFreeTab(title);
-                    final ModeleElementTable table = new ModeleElementTable();
-                    tab.setContent(table);
-                    return tab;
-                });
-            } else if (PrintTab.REPORT.equals(printTab)) {
-                return openPrintTabs.getOrCreate(PrintTab.REPORT, () -> {
-                    final FXFreeTab tab = new FXFreeTab(title);
+                    break;
+                case TEMPLATE:
+                    tab.setContent(new ModeleElementTable());
+                    break;
+                case REPORT:
                     tab.setContent(new FXModeleRapportsPane());
-                    return tab;
-                });
-            } else {
-                throw new UnsupportedOperationException("Object type unrecognized : "+printTab);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unknown print type : "+printTab);
             }
-        } catch (RuntimeException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
+            return tab;
+        });
     }
 
-    public FXFreeTab getOrCreateAdminTab(final AdminTab adminTab, final String title){
-
-        try {
+    public FXFreeTab getOrCreateAdminTab(final AdminTab adminTab, final String title) {
             switch(adminTab){
-                case USERS:
-                    return openAdminTabs.getOrCreate(AdminTab.USERS, () -> {
-                        final FXFreeTab tab = new FXFreeTab(title);
-                        final PojoTable usersTable = new PojoTable(getRepositoryForClass(Utilisateur.class), "Table des utilisateurs"){
-                            @Override
-                            protected void deletePojos(final Element... pojos) {
-                                final List<Element> pojoList = new ArrayList<>();
-                                for (final Element pojo : pojos) {
-                                    if(pojo instanceof Utilisateur){
-                                        final Utilisateur utilisateur = (Utilisateur) pojo;
-                                        // On interdit la suppression de l'utilisateur courant !
-                                        if(utilisateur.equals(session.getUtilisateur())){
-                                            final Alert alert = new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer votre propre compte.", ButtonType.CLOSE);
-                                            alert.setResizable(true);
-                                            alert.showAndWait();
-                                        }
-                                        // On interdit également la suppression de l'invité par défaut !
-                                        else if (UtilisateurRepository.GUEST_USER.equals(utilisateur)){
-                                            final Alert alert = new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer le compte de l'invité par défaut.", ButtonType.CLOSE);
-                                            alert.setResizable(true);
-                                            alert.showAndWait();
-                                        }
-                                        else{
-                                            pojoList.add(pojo);
-                                        }
+            case USERS:
+                return getOrCreateTab(AdminTab.USERS, () -> {
+                    final FXFreeTab tab = new FXFreeTab(title);
+                    final PojoTable usersTable = new PojoTable(getRepositoryForClass(Utilisateur.class), "Table des utilisateurs") {
+                        @Override
+                        protected void deletePojos(final Element... pojos) {
+                            final List<Element> pojoList = new ArrayList<>();
+                            for (final Element pojo : pojos) {
+                                if (pojo instanceof Utilisateur) {
+                                    final Utilisateur utilisateur = (Utilisateur) pojo;
+                                    // On interdit la suppression de l'utilisateur courant !
+                                    if (utilisateur.equals(session.getUtilisateur())) {
+                                        final Alert alert = new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer votre propre compte.", ButtonType.CLOSE);
+                                        alert.setResizable(true);
+                                        alert.showAndWait();
+                                    } // On interdit également la suppression de l'invité par défaut !
+                                    else if (UtilisateurRepository.GUEST_USER.equals(utilisateur)) {
+                                        final Alert alert = new Alert(Alert.AlertType.ERROR, "Vous ne pouvez pas supprimer le compte de l'invité par défaut.", ButtonType.CLOSE);
+                                        alert.setResizable(true);
+                                        alert.showAndWait();
+                                    } else {
+                                        pojoList.add(pojo);
                                     }
                                 }
-                                super.deletePojos(pojoList.toArray(new Element[0]));
                             }
-                        };
-                        usersTable.cellEditableProperty().unbind();
-                        usersTable.cellEditableProperty().set(false);
-                        tab.setContent(usersTable);
-                        return tab;
-                    });
-                case VALIDATION:
-                    return openAdminTabs.getOrCreate(AdminTab.VALIDATION, () -> {
-                        final FXFreeTab tab = new FXFreeTab(title);
-                        tab.setContent(new FXValidationPane());
-                        return tab;
-                    });
-                default:
-                    throw new UnsupportedOperationException("Unsupported administration pane.");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+                            super.deletePojos(pojoList.toArray(new Element[0]));
+                        }
+                    };
+                    usersTable.cellEditableProperty().unbind();
+                    usersTable.cellEditableProperty().set(false);
+                    tab.setContent(usersTable);
+                    return tab;
+                });
+            case VALIDATION:
+                return getOrCreateTab(AdminTab.VALIDATION, () -> {
+                    final FXFreeTab tab = new FXFreeTab(title);
+                    tab.setContent(new FXValidationPane());
+                    return tab;
+                });
+            default:
+                throw new UnsupportedOperationException("Unsupported administration pane.");
         }
     }
 
     public FXFreeTab getOrCreateThemeTab(final Theme theme) {
-        if(theme.isCached()){
-            try {
-                return openThemes.getOrCreate(theme, new Callable<FXFreeTab>() {
-                    @Override
-                    public FXFreeTab call() throws Exception {
-                        final Parent parent = theme.createPane();
-                        if (parent == null) {
-                            return null;
-                        } else {
-                            final FXFreeTab tab = new FXFreeTab(theme.getName());
-                            tab.setContent(parent);
-                            tab.setOnClosed(event -> openThemes.remove(theme));
-                            tab.selectedProperty().addListener(theme.getSelectedPropertyListener());
-                            return tab;
-                        }
-                    }
-                });
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        if (theme.isCached()) {
+            return getOrCreateTab(theme, () -> {
+                final Parent parent = theme.createPane();
+                if (parent == null) {
+                    return null;
+                } else {
+                    final FXFreeTab tab = new FXFreeTab(theme.getName());
+                    tab.setContent(parent);
+                    tab.selectedProperty().addListener(theme.getSelectedPropertyListener());
+                    return tab;
+                }
+            });
         }
         /*
         Certains thèmes doivent pouvoir être ouverts depuis plusieus origines et
@@ -444,90 +398,23 @@ public class Session extends SessionCore {
         }
     }
 
-    public FXFreeTab getOrCreateDesignationTab(final Class<? extends Element> clazz){
-        try {
-            return openDesignationPanes.getOrCreate(clazz, new Callable<FXFreeTab>() {
-                final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
-                @Override
-                public FXFreeTab call() throws Exception {
-                    final FXFreeTab tab = new FXFreeTab("Désignations du type " + bdl.getString(BUNDLE_KEY_CLASS));
-                    tab.setContent(new FXDesignationPane(clazz));
-                    return tab;
-                }
+    public FXFreeTab getOrCreateDesignationTab(final Class<? extends Element> clazz) {
+            return getOrCreateTab(clazz, () -> {
+                final FXFreeTab tab = new FXFreeTab("Désignations du type " + LabelMapper.get(clazz).mapClassName());
+                tab.setContent(new FXDesignationPane(clazz));
+                return tab;
             });
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public FXFreeTab getOrCreateReferenceTypeTab(final Class<? extends ReferenceType> clazz){
-        try {
-            return openReferencePanes.getOrCreate(clazz, new Callable<FXFreeTab>() {
-                final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
-                @Override
-                public FXFreeTab call() throws Exception {
-                    final FXFreeTab tab = new FXFreeTab(bdl.getString(BUNDLE_KEY_CLASS));
-                    tab.setContent(new FXReferencePane(clazz));
-                    return tab;
-                }
-            });
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     *
-     * @param element
-     * @return
-     */
-    public FXFreeTab generateTabForPane(final Element element){
-        final FXFreeTab tab = new FXFreeTab();
-
-        final ProgressIndicator wait = new ProgressIndicator();
-        wait.setMaxSize(200, 200);
-        wait.setProgress(-1);
-        final BorderPane content = new BorderPane(wait);
-        tab.setContent(content);
-
-        Injector.getSession().getTaskManager().submit(() -> {
-            Node edit = (Node) SIRS.generateEditionPane(element);
-            if (edit == null) {
-                edit = new BorderPane(new Label("Pas d'éditeur pour le type : " + element.getClass().getSimpleName()));
-            }
-            final Node n = edit;
-            FadeTransition ft = new FadeTransition(Duration.millis(1000), n);
-            ft.setFromValue(0.0);
-            ft.setToValue(1.0);
-            Platform.runLater(()->{content.setCenter(n);n.requestFocus();ft.play();});
+        return getOrCreateTab(clazz, () -> {
+            final FXFreeTab tab = new FXFreeTab(LabelMapper.get(clazz).mapClassName());
+            tab.setContent(new FXReferencePane(clazz));
+            return tab;
         });
-
-        if(element instanceof PositionDocument){
-            final PositionDocument positionDocument = (PositionDocument) element;
-            positionDocument.sirsdocumentProperty().addListener(new ChangeListener<String>() {
-
-                @Override
-                public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                    tab.setTextAbrege(generateElementTitle(element));
-                }
-            });
-        }
-        element.designationProperty().addListener(new ChangeListener<String>() {
-
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                tab.setTextAbrege(generateElementTitle(element));
-            }
-        });
-        tab.setTextAbrege(generateElementTitle(element));
-
-        // Remove from cache when tab is closed.
-        tab.setOnClosed(event -> openEditors.remove(element));
-        return tab;
     }
 
     public FXFreeTab getOrCreateElementTab(final Element element) {
-
         // On commence par regarder si un plugin spécifie une ouverture particulière.
         for(final Plugin plugin : Plugins.getPlugins()){
             if(plugin.handleTronconType(element.getClass())){
@@ -536,16 +423,28 @@ public class Session extends SessionCore {
         }
 
         // Si on a affaire à un élément qui n'est pas un tronçon, ou bien d'un type de tronçon qu'aucun plugin n'ouvre de manière particulière, on ouvre l'élément de manière standard.
+        return getOrCreateTab(element, new ElementTabCreator(element));
+    }
+
+    public FXFreeTab getOrCreateTab(final Object target, final Callable<FXFreeTab> tabCreator) {
         try {
-            return openEditors.getOrCreate(element, () -> generateTabForPane(element));
+            return openEditors.getOrCreate(target, () -> {
+                final FXFreeTab newTab = tabCreator.call();
+                newTab.setOnClosed(event -> openEditors.remove(target));
+                return newTab;
+            });
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new SirsCoreRuntimeException(e);
         }
     }
 
+    /**
+     * Create a title for a given element.
+     * @param element Object to get title for.
+     * @return a title, never null, but can be empty.
+     */
     public static String generateElementTitle(final Element element) {
         String title="";
-
         final String libelle = new SirsStringConverter().toString(element);
         if (libelle != null && !libelle.isEmpty()) {
             title += libelle;
@@ -570,5 +469,61 @@ public class Session extends SessionCore {
 
     public DefaultLegendTemplate getLegendTemplate() {
         return legendTemplate;
+    }
+
+
+    /**
+     * Create a new tab containing an editor to work on input target.
+     */
+    private static class ElementTabCreator implements Callable<FXFreeTab> {
+
+        private final Element target;
+
+        public ElementTabCreator(Element target) {
+            ArgumentChecks.ensureNonNull("Target element", target);
+            this.target = target;
+        }
+
+        @Override
+        public FXFreeTab call() throws Exception {
+            final FXFreeTab tab = new FXFreeTab();
+
+            // TODO : remove
+            final ProgressIndicator wait = new ProgressIndicator();
+            wait.setMaxSize(200, 200);
+            wait.setProgress(-1);
+            final BorderPane content = new BorderPane(wait);
+            tab.setContent(content);
+
+            Injector.getSession().getTaskManager().submit(() -> {
+                Node edit = (Node) SIRS.generateEditionPane(target);
+                if (edit == null) {
+                    edit = new BorderPane(new Label("Pas d'éditeur pour le type : " + target.getClass().getSimpleName()));
+                }
+                final Node n = edit;
+                FadeTransition ft = new FadeTransition(Duration.millis(1000), n);
+                ft.setFromValue(0.0);
+                ft.setToValue(1.0);
+                Platform.runLater(() -> {
+                    content.setCenter(n);
+                    n.requestFocus();
+                    ft.play();
+                });
+            });
+
+            // Update tab title if element designation changes.
+            if (target instanceof PositionDocument) {
+                final PositionDocument positionDocument = (PositionDocument) target;
+                positionDocument.sirsdocumentProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+                    tab.setTextAbrege(generateElementTitle(target));
+                });
+            }
+            target.designationProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+                tab.setTextAbrege(generateElementTitle(target));
+            });
+            tab.setTextAbrege(generateElementTitle(target));
+
+            return tab;
+        }
     }
 }

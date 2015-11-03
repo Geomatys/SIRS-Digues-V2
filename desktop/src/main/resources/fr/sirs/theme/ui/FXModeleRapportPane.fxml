@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import jidefx.scene.control.field.*?>
 <?import java.lang.*?>
 <?import java.net.*?>
@@ -8,24 +9,27 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root id="BorderPane" type="BorderPane" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.40">
+<fx:root id="BorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
     <stylesheets>
         <URL value="@/fr/sirs/theme.css" />
     </stylesheets>
    <top>
-      <HBox alignment="CENTER_LEFT" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER_LEFT" spacing="5.0" BorderPane.alignment="CENTER">
          <children>
             <Label text="Nom" HBox.hgrow="NEVER" />
             <TextField fx:id="uiName" HBox.hgrow="SOMETIMES" />
-            <Separator maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" orientation="VERTICAL" HBox.hgrow="ALWAYS" />
+            <Separator maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" orientation="VERTICAL" visible="false" HBox.hgrow="SOMETIMES" />
             <MenuButton fx:id="uiAddSection" mnemonicParsing="false" text="Ajouter une section" HBox.hgrow="NEVER" />
          </children>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
       </HBox>
    </top>
    <center>
-      <ScrollPane fitToWidth="true" BorderPane.alignment="CENTER">
+      <ScrollPane fitToHeight="true" fitToWidth="true" BorderPane.alignment="CENTER">
          <content>
-            <VBox fx:id="uiSections" />
+            <VBox fx:id="uiSections" spacing="10.0" />
          </content>
       </ScrollPane>
    </center>

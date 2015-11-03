@@ -1,27 +1,27 @@
 package fr.sirs.theme.ui;
 
-import com.sun.tools.javac.util.ServiceLoader;
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.report.AbstractSectionRapport;
 import fr.sirs.core.model.report.ModeleRapport;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.ServiceLoader;
 import java.util.logging.Level;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.internal.GeotkFX;
@@ -52,29 +52,32 @@ public class FXModeleRapportPane extends AbstractFXElementPane<ModeleRapport> {
 
         final AbstractSectionRapport[] sections = getAvailableSections();
         if (sections != null && sections.length > 0) {
-            for (final AbstractSectionRapport rapport : sections) {
-                if (rapport == null)
+            for (final AbstractSectionRapport section : sections) {
+                if (section == null)
                     continue;
                 // Check that an editor is available for given section.
                 try {
-                    if (SIRS.createFXPaneForElement(rapport) == null) {
+                    if (SIRS.createFXPaneForElement(section) == null) {
                         throw new IllegalArgumentException("No editor found.");
                     }
                 } catch (ReflectiveOperationException | IllegalArgumentException ex) {
-                    SirsCore.LOGGER.log(Level.WARNING, "No editor found for type " + rapport.getClass().getCanonicalName(), ex);
+                    SirsCore.LOGGER.log(Level.WARNING, "No editor found for type " + section.getClass().getCanonicalName(), ex);
                     continue;
                 }
                 String sectionTitle = null;
-                final LabelMapper mapper = LabelMapper.get(rapport.getClass());
+                final LabelMapper mapper = LabelMapper.get(section.getClass());
                 if (mapper != null)
                     sectionTitle = mapper.mapClassName();
                 if (sectionTitle == null || sectionTitle.isEmpty())
-                    sectionTitle = rapport.getClass().getSimpleName();
+                    sectionTitle = section.getClass().getSimpleName();
 
                 final MenuItem item = new MenuItem(sectionTitle);
-                item.setOnAction((event) -> addSection(rapport));
+                uiAddSection.getItems().add(item);
+                item.setOnAction((event) -> addSectionCopy(section));
             }
         }
+
+        elementProperty.addListener(this::elementChanged);
     }
 
     public FXModeleRapportPane(final ModeleRapport rapport) {
@@ -85,34 +88,46 @@ public class FXModeleRapportPane extends AbstractFXElementPane<ModeleRapport> {
     private void elementChanged(ObservableValue<? extends ModeleRapport> obs, ModeleRapport oldModele, ModeleRapport newModele) {
         if (oldModele != null) {
             oldModele.libelleProperty().unbindBidirectional(uiName.textProperty());
+            uiName.setText(null);
             uiSections.getChildren().clear();
+            sectionEditors.clear();
         }
 
         if (newModele != null) {
             newModele.libelleProperty().bindBidirectional(uiName.textProperty());
+
+            for (final AbstractSectionRapport section : newModele.sections) {
+                addSectionEditor(section);
+            }
         }
     }
 
     @Override
     public void preSave() throws Exception {
-        for (final AbstractFXElementPane editor : sectionEditors) {
+        final ArrayList<AbstractSectionRapport> editedSections = new ArrayList<>();
+        for (final AbstractFXElementPane<AbstractSectionRapport> editor : sectionEditors) {
             editor.preSave();
+            editedSections.add(editor.elementProperty.get());
         }
+
+        elementProperty.get().sections.setAll(editedSections);
     }
 
     /**
      * @return an empty instance of each available implementation of section objects.
      */
-    private static AbstractSectionRapport[] getAvailableSections() {
+    private static synchronized AbstractSectionRapport[] getAvailableSections() {
         if (AVAILABLE_SECTIONS == null) {
-            Iterator<AbstractSectionRapport> iterator = ServiceLoader.load(
-                    AbstractSectionRapport.class,
+            Iterator<Element> iterator = ServiceLoader.load(
+                    Element.class,
                     Thread.currentThread().getContextClassLoader())
                     .iterator();
 
             final ArrayList<AbstractSectionRapport> tmpList = new ArrayList<>();
             while (iterator.hasNext()) {
-                tmpList.add(iterator.next());
+                final Element next = iterator.next();
+                if (next instanceof AbstractSectionRapport)
+                    tmpList.add((AbstractSectionRapport) next);
             }
             AVAILABLE_SECTIONS = tmpList.toArray(new AbstractSectionRapport[tmpList.size()]);
         }
@@ -120,23 +135,29 @@ public class FXModeleRapportPane extends AbstractFXElementPane<ModeleRapport> {
     }
 
     /**
-     * Try to add a new editor for a new section created by copying given one.
-     * @param template Default implementation of the section tto add / edit.
+     * Try to add a new editor for given section.
+     * @param section Section to edit.
      */
-    private void addSection(final AbstractSectionRapport template) {
-        ArgumentChecks.ensureNonNull("Section template", template);
+    private void addSectionEditor(final AbstractSectionRapport section) {
+        ArgumentChecks.ensureNonNull("Section to edit", section);
         try {
-            final AbstractSectionRapport copy = (AbstractSectionRapport) template.copy();
-            final AbstractFXElementPane editor = SIRS.createFXPaneForElement(copy);
-            uiSections.getChildren().add(new SectionContainer(copy, editor));
-            // If (and only if) we succeed acquisition of an editor, we add he new section.
-            elementProperty.get().sections.add(copy);
+            final AbstractFXElementPane editor = SIRS.createFXPaneForElement(section);
+            uiSections.getChildren().add(new SectionContainer(section, editor));
             sectionEditors.add(editor);
 
         } catch (ReflectiveOperationException | IllegalArgumentException ex) {
-            SirsCore.LOGGER.log(Level.WARNING, "No editor found for type " + template.getClass().getCanonicalName(), ex);
+            SirsCore.LOGGER.log(Level.WARNING, "No editor found for type " + section.getClass().getCanonicalName(), ex);
             GeotkFX.newExceptionDialog("Impossible de créer un éditeur pour le type de section demandé.", ex);
         }
+    }
+
+    /**
+     * Add a new section in currently edited model, which is a copy of given section.
+     * @param original Original section to duplicate
+     */
+    private void addSectionCopy(final AbstractSectionRapport original) {
+        final AbstractSectionRapport copy = (AbstractSectionRapport) original.copy();
+        addSectionEditor(copy);
     }
 
     /**
@@ -157,21 +178,16 @@ public class FXModeleRapportPane extends AbstractFXElementPane<ModeleRapport> {
 
             final Button deleteButton = new Button(null, new ImageView(GeotkFX.ICON_DELETE));
             final Button copyButton = new Button(null, new ImageView(GeotkFX.ICON_DUPLICATE));
-            final Separator sep = new Separator();
-            sep.setMaxWidth(Double.MAX_VALUE);
-            sep.setMinWidth(0);
-            HBox.setHgrow(sep, Priority.ALWAYS);
-            final HBox headerButtons = new HBox(5, sep, copyButton, deleteButton);
-
+            final HBox headerButtons = new HBox(5, copyButton, deleteButton);
+            headerButtons.setAlignment(Pos.TOP_RIGHT);
             setGraphic(headerButtons);
 
             deleteButton.setOnAction((event) -> {
                 uiSections.getChildren().remove(this);
                 sectionEditors.remove(getContent());
-                elementProperty.get().sections.remove(section);
             });
 
-            copyButton.setOnAction((event) -> addSection(section));
+            copyButton.setOnAction((event) -> addSectionCopy(section));
         }
     }
 }

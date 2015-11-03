@@ -31,13 +31,9 @@ fr.sirs.core.model.MesureMonteeEaux
 fr.sirs.core.model.Meteo
 fr.sirs.core.model.MonteeEaux
 fr.sirs.core.model.Observation
-fr.sirs.core.model.ObservationEchelleLimnimetrique
 fr.sirs.core.model.ObservationOuvrageHydrauliqueAssocie
-fr.sirs.core.model.ObservationOuvrageParticulier
-fr.sirs.core.model.ObservationOuvrageTelecomEnergie
 fr.sirs.core.model.ObservationReseauHydrauliqueCielOuvert
 fr.sirs.core.model.ObservationReseauHydrauliqueFerme
-fr.sirs.core.model.ObservationReseauTelecomEnergie
 fr.sirs.core.model.ObservationStationPompage
 fr.sirs.core.model.Organisme
 fr.sirs.core.model.OuvertureBatardable
@@ -129,3 +125,7 @@ fr.sirs.core.model.VoieAcces
 fr.sirs.core.model.VoieDigue
 fr.sirs.core.model.XYZLeveProfilTravers
 fr.sirs.core.model.XYZProfilLong
+fr.sirs.core.model.report.FicheSectionRapport
+fr.sirs.core.model.report.ModeleElement
+fr.sirs.core.model.report.ModeleRapport
+fr.sirs.core.model.report.TableSectionRapport

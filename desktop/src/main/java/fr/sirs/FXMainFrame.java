@@ -3,6 +3,8 @@ package fr.sirs;
 import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.Element;
+import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.digue.DiguesTab;
@@ -155,14 +157,14 @@ public class FXMainFrame extends BorderPane {
         });
 
         final Menu uiReference = new Menu(bundle.getString(BUNDLE_KEY_REFERENCES));
-        for (final Class reference : Session.getReferences()) {
-            uiReference.getItems().add(toMenuItem(reference, Choice.REFERENCE));
-        }
-
         final Menu uiDesignation = new Menu(bundle.getString(BUNDLE_KEY_DESIGNATIONS));
-        for (final Class elementClass : Session.getElements()) {
-            if (!Session.getReferences().contains(elementClass)) {
-                uiDesignation.getItems().add(toMenuItem(elementClass, Choice.MODEL));
+
+        final List<Class<? extends Element>> elementTypes = Session.getConcreteSubTypes(Element.class);
+        for (final Class c : elementTypes) {
+            if (ReferenceType.class.isAssignableFrom(c)) {
+                uiReference.getItems().add(toMenuItem(c, Choice.REFERENCE));
+            } else {
+                uiDesignation.getItems().add(toMenuItem(c, Choice.MODEL));
             }
         }
 
@@ -334,8 +336,7 @@ public class FXMainFrame extends BorderPane {
     }
 
     @FXML
-    private void clearCache(){
-        session.clearCache();
+    private void clearCache() {
         final Collection<AbstractSIRSRepository> repos = session.getModelRepositories();
         for(final AbstractSIRSRepository repo : repos){
             repo.clearCache();
@@ -530,7 +531,7 @@ public class FXMainFrame extends BorderPane {
     void changeUser(ActionEvent event) throws IOException{
         this.getScene().getWindow().hide();
         session.setUtilisateur(null);
-        session.clearCache();
+        clearCache();
         session.getTaskManager().reset();
         SIRS.LOADER.showSplashStage();
     }

@@ -23,7 +23,6 @@ import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProprieteTroncon;
-import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.index.ElementHit;
@@ -32,15 +31,12 @@ import fr.sirs.util.StreamingIterable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.logging.Level;
@@ -429,44 +425,39 @@ public class SessionCore implements ApplicationContextAware {
         return positionables;
     }
 
-    // REFERENCES
-    private static final List<Class<? extends Element>> ELEMENTS;
-    private static final List<Class<? extends ReferenceType>> REFERENCES;
-    private static final Comparator<Class<? extends Element>> BUNDLE_CLASS_NAME_COMPARATOR = new Comparator<Class<? extends Element>>() {
-            @Override
-            public int compare(Class<? extends Element> o1, Class<? extends Element> o2) {
-                final ResourceBundle bdl1 = ResourceBundle.getBundle(o1.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
-                final ResourceBundle bdl2 = ResourceBundle.getBundle(o2.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
-                return bdl1.getString(BUNDLE_KEY_CLASS).compareTo(bdl2.getString(BUNDLE_KEY_CLASS));
+    private static List<Class<? extends Element>> ELEMENT_IMPLS;
+    /**
+     * Search in {@link Element} {@link ServiceLoader} for all implementations of
+     * a given type.
+     * 
+     * @param <T> Type of object to search for.
+     * @param target Class to find implementations for.
+     * @return List of concrete classes inheriting {@link Element} and given target.
+     */
+    public static <T> List<Class<? extends T>>getConcreteSubTypes(final Class<T> target) {
+        synchronized (SessionCore.class) {
+            if (ELEMENT_IMPLS == null) {
+                final Iterator<Element> registeredImpls = ServiceLoader.load(Element.class).iterator();
+                final ArrayList<Class<? extends Element>> tmpList = new ArrayList<>();
+                while (registeredImpls.hasNext()) {
+                    tmpList.add(registeredImpls.next().getClass());
+                }
+                ELEMENT_IMPLS = Collections.unmodifiableList(tmpList);
             }
-        };
-    private static final Comparator<Class<? extends Element>> CLASS_NAME_COMPARATOR = new Comparator<Class<? extends Element>>() {
-            @Override
-            public int compare(Class<? extends Element> o1, Class<? extends Element> o2) {
-                return o1.getSimpleName().compareTo(o2.getSimpleName());
-            }
-        };
-    public Comparator<Class<? extends Element>> getBundleClassNameComparator(){return BUNDLE_CLASS_NAME_COMPARATOR;}
-
-    static{
-        final Iterator<Element> it = ServiceLoader.load(Element.class).iterator();
-
-        final List<Class<? extends Element>> elements = new ArrayList<>();
-        final List<Class<? extends ReferenceType>> references = new ArrayList<>();
-
-        while(it.hasNext()){
-            final Class c = it.next().getClass();
-            elements.add(c);
-            if(ReferenceType.class.isAssignableFrom(c)) references.add(c);
         }
-        Collections.sort(elements, BUNDLE_CLASS_NAME_COMPARATOR);
-        Collections.sort(references, CLASS_NAME_COMPARATOR);
-        ELEMENTS = Collections.unmodifiableList(elements);
-        REFERENCES = Collections.unmodifiableList(references);
-    }
 
-    public static List<Class<? extends ReferenceType>> getReferences(){return REFERENCES;}
-    public static List<Class<? extends Element>> getElements(){return ELEMENTS;}
+        if (target == null || target.equals(Element.class)) {
+            return (List) ELEMENT_IMPLS;
+        }
+
+        final ArrayList<Class<? extends T>> result = new ArrayList<>();
+        for (final Class c : ELEMENT_IMPLS) {
+            if (target.isAssignableFrom(c))
+                result.add(c);
+        }
+
+        return result;
+    }
 
     /**
      * Take an element in input, and return the same, but with its {@link Element#parentProperty() }

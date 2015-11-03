@@ -6,24 +6,31 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="@/fr/sirs/theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root minHeight="-Infinity" minWidth="-Infinity" stylesheets="@/fr/sirs/theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <left>
       <GridPane hgap="5.0" vgap="5.0" BorderPane.alignment="CENTER">
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" />
-            <ColumnConstraints hgrow="SOMETIMES" />
-            <ColumnConstraints hgrow="SOMETIMES" />
+            <ColumnConstraints hgrow="NEVER" />
+            <ColumnConstraints hgrow="NEVER" />
          </columnConstraints>
          <rowConstraints>
-            <RowConstraints vgrow="SOMETIMES" />
+            <RowConstraints vgrow="NEVER" />
+            <RowConstraints vgrow="NEVER" />
             <RowConstraints vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Label text="Modèles existants" />
-            <ListView fx:id="uiReportList" GridPane.columnSpan="2147483647" GridPane.rowIndex="1" />
-            <Button mnemonicParsing="false" onAction="#addReport" text="Ajouter" GridPane.columnIndex="1" />
-            <Button mnemonicParsing="false" onAction="#deleteReport" text="Supprimer" GridPane.columnIndex="2" />
+            <Label text="Modèles existants" GridPane.columnSpan="2147483647">
+               <padding>
+                  <Insets bottom="5.0" />
+               </padding></Label>
+            <ListView fx:id="uiReportList" GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
+            <Button mnemonicParsing="false" onAction="#addReport" text="Ajouter" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Button mnemonicParsing="false" onAction="#deleteReport" text="Supprimer" GridPane.columnIndex="2" GridPane.rowIndex="1" />
          </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
       </GridPane>
    </left>
    <top>

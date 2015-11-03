@@ -56,7 +56,8 @@ public class FXModeleRapportsPane extends BorderPane {
                     if (empty || item == null) {
                         setText(null);
                     } else {
-                        setText(item.getLibelle());
+                        final String libelle = item.getLibelle();
+                        setText((libelle == null || libelle.isEmpty())? "Sans nom" : libelle);
                     }
                 }
             };
@@ -112,7 +113,7 @@ public class FXModeleRapportsPane extends BorderPane {
 
             if (editor == null) {
                 editor = SIRS.generateEditionPane(rapport);
-                setRight(editor);
+                setCenter(editor);
             } else {
                 editor.setElement(rapport);
             }
