@@ -420,7 +420,7 @@ public class FXSearchPane extends BorderPane {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             GeotkFX.newExceptionDialog("Une erreur s'est produite pendant la création de la liste des requêtes.", ex).show();
             return;
-        } 
+        }
         showQueryTable(queries, true);
     }
 
@@ -435,6 +435,10 @@ public class FXSearchPane extends BorderPane {
     }
 
     public static Optional<SQLQuery> chooseSQLQuery(final List<SQLQuery> queries) {
+        return chooseSQLQuery(queries, false);
+    }
+
+    public static Optional<SQLQuery> chooseSQLQuery(final List<SQLQuery> queries, final boolean editable) {
         if (queries.isEmpty()) {
             final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune requête disponible.", ButtonType.OK);
             alert.setResizable(true);
