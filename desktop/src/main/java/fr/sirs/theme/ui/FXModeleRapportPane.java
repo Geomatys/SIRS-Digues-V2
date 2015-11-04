@@ -14,7 +14,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
@@ -38,7 +37,7 @@ public class FXModeleRapportPane extends AbstractFXElementPane<ModeleRapport> {
     @FXML private MenuButton uiAddSection;
     @FXML private VBox uiSections;
 
-    private final ArrayList<AbstractFXElementPane> sectionEditors = new ArrayList<>();
+    private final ArrayList<AbstractFXElementPane<? extends AbstractSectionRapport>> sectionEditors = new ArrayList<>();
 
     public FXModeleRapportPane() {
         super();
@@ -87,15 +86,14 @@ public class FXModeleRapportPane extends AbstractFXElementPane<ModeleRapport> {
 
     private void elementChanged(ObservableValue<? extends ModeleRapport> obs, ModeleRapport oldModele, ModeleRapport newModele) {
         if (oldModele != null) {
-            oldModele.libelleProperty().unbindBidirectional(uiName.textProperty());
+            uiName.textProperty().unbindBidirectional(oldModele.libelleProperty());
             uiName.setText(null);
             uiSections.getChildren().clear();
             sectionEditors.clear();
         }
 
         if (newModele != null) {
-            newModele.libelleProperty().bindBidirectional(uiName.textProperty());
-
+            uiName.textProperty().bindBidirectional(newModele.libelleProperty());
             for (final AbstractSectionRapport section : newModele.sections) {
                 addSectionEditor(section);
             }
@@ -105,7 +103,7 @@ public class FXModeleRapportPane extends AbstractFXElementPane<ModeleRapport> {
     @Override
     public void preSave() throws Exception {
         final ArrayList<AbstractSectionRapport> editedSections = new ArrayList<>();
-        for (final AbstractFXElementPane<AbstractSectionRapport> editor : sectionEditors) {
+        for (final AbstractFXElementPane<? extends AbstractSectionRapport> editor : sectionEditors) {
             editor.preSave();
             editedSections.add(editor.elementProperty.get());
         }
@@ -142,7 +140,7 @@ public class FXModeleRapportPane extends AbstractFXElementPane<ModeleRapport> {
         ArgumentChecks.ensureNonNull("Section to edit", section);
         try {
             final AbstractFXElementPane editor = SIRS.createFXPaneForElement(section);
-            uiSections.getChildren().add(new SectionContainer(section, editor));
+            uiSections.getChildren().add(new SectionContainer(editor));
             sectionEditors.add(editor);
 
         } catch (ReflectiveOperationException | IllegalArgumentException ex) {
@@ -166,28 +164,37 @@ public class FXModeleRapportPane extends AbstractFXElementPane<ModeleRapport> {
      */
     private final class SectionContainer extends TitledPane {
 
-        private final AbstractSectionRapport section;
-
-        public SectionContainer(AbstractSectionRapport input, Node sectionEditor) {
+        public SectionContainer(AbstractFXElementPane<? extends AbstractSectionRapport> sectionEditor) {
             super();
 
-            ArgumentChecks.ensureNonNull("Input section object", input);
             ArgumentChecks.ensureNonNull("Input section editor", sectionEditor);
-            section = input;
+            sectionEditor.getStyleClass().add("transparent");
             setContent(sectionEditor);
 
             final Button deleteButton = new Button(null, new ImageView(GeotkFX.ICON_DELETE));
             final Button copyButton = new Button(null, new ImageView(GeotkFX.ICON_DUPLICATE));
             final HBox headerButtons = new HBox(5, copyButton, deleteButton);
+            headerButtons.setMaxWidth(Double.MAX_VALUE);
             headerButtons.setAlignment(Pos.TOP_RIGHT);
             setGraphic(headerButtons);
 
             deleteButton.setOnAction((event) -> {
                 uiSections.getChildren().remove(this);
-                sectionEditors.remove(getContent());
+                sectionEditors.remove(sectionEditor);
             });
+            copyButton.setOnAction((event) -> addSectionCopy(sectionEditor.elementProperty.get()));
+            copyButton.disableProperty().bind(sectionEditor.elementProperty.isNull());
+            copyButton.getStyleClass().add("white-with-borders");
+            deleteButton.getStyleClass().add("white-with-borders");
+            sectionChanged(sectionEditor.elementProperty, null, sectionEditor.elementProperty.get());
+        }
 
-            copyButton.setOnAction((event) -> addSectionCopy(section));
+        private void sectionChanged(final ObservableValue<? extends AbstractSectionRapport> obs, AbstractSectionRapport oldValue, AbstractSectionRapport newValue) {
+            if (newValue == null) {
+                setText(null);
+            } else {
+                setText(LabelMapper.get(newValue.getClass()).mapClassName());
+            }
         }
     }
 }

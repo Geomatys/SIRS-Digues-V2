@@ -12,7 +12,6 @@
           <ColumnConstraints hgrow="NEVER" />
           <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="-Infinity" />
             <ColumnConstraints hgrow="NEVER" />
-            <ColumnConstraints halignment="RIGHT" hgrow="NEVER" />
         </columnConstraints>
         <rowConstraints>
           <RowConstraints vgrow="NEVER" />
@@ -21,17 +20,25 @@
             <RowConstraints vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Button mnemonicParsing="false" onAction="#chooseQuery" text="Choisir" GridPane.columnIndex="3" GridPane.rowIndex="1" />
             <Label text="Titre" />
             <Label text="Filtre" GridPane.rowIndex="1" />
             <Label fx:id="uiQueryTitle" text="N/A" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <TextField fx:id="uiTitle" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" />
-            <Button mnemonicParsing="false" onAction="#deleteQuery" text="Supprimer" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <HBox spacing="5.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#deleteQuery" text="Supprimer" />
+                  <Button mnemonicParsing="false" onAction="#chooseQuery" text="Choisir" />
+               </children>
+            </HBox>
             <Label text="Modèle de fiche" GridPane.rowIndex="2" />
             <Label text="Photos" GridPane.rowIndex="3" />
-            <Spinner fx:id="uiNbPhotoSpinner" maxWidth="1.7976931348623157E308" prefWidth="50.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-            <ChoiceBox fx:id="uiNbPhotoChoice" prefWidth="231.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            <ComboBox fx:id="uiModelChoice" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
+            <HBox spacing="5.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
+               <children>
+                  <ChoiceBox fx:id="uiNbPhotoChoice" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                  <Spinner fx:id="uiNbPhotoSpinner" prefWidth="80.0" />
+               </children>
+            </HBox>
+            <ComboBox fx:id="uiModelChoice" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
          </children>
          <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

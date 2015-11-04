@@ -22,6 +22,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
+import javafx.util.StringConverter;
 import org.ektorp.DbAccessException;
 
 /**
@@ -69,9 +70,26 @@ public class FXFicheSectionRapportPane extends AbstractFXElementPane<FicheSectio
         });
         uiNbPhotoChoice.setItems(FXCollections.observableArrayList(PhotoChoice.values()));
         uiNbPhotoChoice.setValue(PhotoChoice.NONE);
+        uiNbPhotoChoice.setConverter(new StringConverter<PhotoChoice>() {
 
+            @Override
+            public String toString(PhotoChoice object) {
+                return object.title;
+            }
+
+            @Override
+            public PhotoChoice fromString(String string) {
+                if (string == null)
+                    return null;
+                for (final PhotoChoice ph : PhotoChoice.values()) {
+                    if (ph.title.equals(string))
+                        return ph;
+                }
+                return null;
+            }
+        });
         uiNbPhotoSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Short.MAX_VALUE, 0));
-
+        uiNbPhotoSpinner.managedProperty().bind(uiNbPhotoSpinner.visibleProperty());
         // TODO : tooltips.
     }
 

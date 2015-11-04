@@ -4,6 +4,7 @@
     -sirs-color-normal : rgb(74,123,165);
     -sirs-color-bright : rgb(109,149,182);
     -sirs-text-dark : rgb(34,93,135);
+    -sirs-form-background : rgb(220, 220, 220);
 }
 
 // FOR ALL WIDGETS
@@ -62,7 +63,7 @@
 }
 
 .item-contact{
-    -fx-background-color: rgb(220,220,220);
+    -fx-background-color: -sirs-form-background;
 }
 
 .blue-light{
@@ -89,7 +90,7 @@
 }
 
 .gray-light{
-    -fx-background-color: rgb(220,220,220);
+    -fx-background-color: -sirs-form-background;
     -fx-background-radius: 5 5 5 5;
 }
 
@@ -202,7 +203,7 @@
 }
 
 .pos-bottom{
-    -fx-background-color: rgb(220,220,220);
+    -fx-background-color: -sirs-form-background;
     -fx-background-radius: 0 0 10 10;
 }
 
@@ -256,13 +257,12 @@
 }
 
 .titled-pane {
-    -fx-background-color: #AAAAAA;
+    -fx-background-color: -sirs-form-background;
     -fx-background-radius: 7;
     -fx-border-color: transparent;
-    -fx-text-fill: white;
 }
 
-.titled-pane > .title {
+.transparent, .titled-pane > .title, .content {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
 }
@@ -312,6 +312,7 @@
 
 .white-with-borders {
     -fx-background-color: #FFFFFF;
+    -fx-background-radius: 5;
     -fx-border-color: #AAAAAA;
     -fx-border-width: 1px;
     -fx-border-radius: 5;

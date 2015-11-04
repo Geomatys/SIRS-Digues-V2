@@ -19,7 +19,7 @@
             <Label text="Nom" HBox.hgrow="NEVER" />
             <TextField fx:id="uiName" HBox.hgrow="SOMETIMES" />
             <Separator maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" orientation="VERTICAL" visible="false" HBox.hgrow="SOMETIMES" />
-            <MenuButton fx:id="uiAddSection" mnemonicParsing="false" text="Ajouter une section" HBox.hgrow="NEVER" />
+            <MenuButton fx:id="uiAddSection" mnemonicParsing="false" styleClass="white-with-borders" text="Ajouter une section" HBox.hgrow="NEVER" />
          </children>
          <padding>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -27,9 +27,12 @@
       </HBox>
    </top>
    <center>
-      <ScrollPane fitToHeight="true" fitToWidth="true" BorderPane.alignment="CENTER">
+      <ScrollPane fitToHeight="true" BorderPane.alignment="CENTER">
          <content>
-            <VBox fx:id="uiSections" spacing="10.0" />
+            <VBox fx:id="uiSections" spacing="10.0">
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding></VBox>
          </content>
       </ScrollPane>
    </center>

@@ -52,14 +52,16 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
         setFocusTraversable(true);
 
         uiMode.setSaveAction(this::save);
-        uiMode.requireEditionForElement(element);
         disableFieldsProperty().bind(uiMode.editionState().not());
 
         uiDesignation.disableProperty().bind(disableFieldsProperty());
 
         elementProperty.addListener(this::initPane);
 
-        setElement((T) element);
+        if (element != null) {
+            uiMode.requireEditionForElement(element);
+            setElement((T) element);
+        }
     }
 
     public void setShowOnMapButton(final boolean isShown){

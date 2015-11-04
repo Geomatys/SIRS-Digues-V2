@@ -467,7 +467,7 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
                         ODTUtils.setVariables(tmpDoc, properties);
                         ODTUtils.setTargetClass(tmpDoc, targetClass);
                     }
-                    try (OutputStream docOutput = Files.newOutputStream(tempODT, StandardOpenOption.WRITE)) {
+                    try (OutputStream docOutput = Files.newOutputStream(tempODT, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
                         tmpDoc.save(docOutput);
                     }
                     return true;
@@ -477,7 +477,7 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
             }
         } else {
             generationTask = TaskManager.INSTANCE.submit("Génération d'un modèle", () -> {
-                try (final OutputStream outputStream = Files.newOutputStream(tempODT, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+                try (final OutputStream outputStream = Files.newOutputStream(tempODT, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
                     final TextDocument newTemplate = ODTUtils.newSimplePropertyModel(uiTitle.getText(), properties);
                     ODTUtils.setTargetClass(newTemplate, targetClass);
                     newTemplate.save(outputStream);

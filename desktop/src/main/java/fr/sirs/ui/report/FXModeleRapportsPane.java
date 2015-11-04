@@ -7,6 +7,7 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.theme.ui.AbstractFXElementPane;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -28,7 +29,7 @@ public class FXModeleRapportsPane extends BorderPane {
     @FXML
     private ListView<Preview> uiReportList;
 
-    private AbstractFXElementPane<ModeleRapport> editor;
+    private final AbstractFXElementPane<ModeleRapport> editor;
 
     private final AbstractSIRSRepository<ModeleRapport> repo;
 
@@ -62,6 +63,15 @@ public class FXModeleRapportsPane extends BorderPane {
                 }
             };
         });
+
+        editor = SIRS.generateEditionPane(null);
+        editor.visibleProperty().bind(editor.elementProperty().isNotNull());
+        editor.managedProperty().bind(editor.visibleProperty());
+        setCenter(editor);
+    }
+
+    public ReadOnlyObjectProperty<ModeleRapport> selectedModelProperty() {
+        return editor.elementProperty();
     }
 
     @FXML
@@ -110,13 +120,7 @@ public class FXModeleRapportsPane extends BorderPane {
         if (newValue != null) {
             final ModeleRapport rapport = repo.get(newValue.getElementId());
             newValue.libelleProperty().bind(rapport.libelleProperty());
-
-            if (editor == null) {
-                editor = SIRS.generateEditionPane(rapport);
-                setCenter(editor);
-            } else {
-                editor.setElement(rapport);
-            }
+            editor.setElement(rapport);
         }
     }
 }
