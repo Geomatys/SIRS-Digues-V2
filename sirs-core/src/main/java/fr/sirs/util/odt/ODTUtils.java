@@ -9,22 +9,36 @@ import fr.sirs.util.property.Reference;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import javafx.geometry.Insets;
+import org.apache.pdfbox.pdfparser.PDFStreamParser;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.sis.util.ArgumentChecks;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclElement;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclsElement;
 import org.odftoolkit.odfdom.dom.element.text.TextVariableDeclElement;
 import org.odftoolkit.odfdom.dom.element.text.TextVariableDeclsElement;
 import org.odftoolkit.odfdom.pkg.OdfElement;
+import org.odftoolkit.simple.Document;
 import org.odftoolkit.simple.TextDocument;
 import org.odftoolkit.simple.common.field.AbstractVariableContainer;
 import org.odftoolkit.simple.common.field.Field.FieldType;
 import org.odftoolkit.simple.common.field.Fields;
 import org.odftoolkit.simple.common.field.VariableField;
+import org.odftoolkit.simple.style.MasterPage;
+import org.odftoolkit.simple.style.StyleTypeDefinitions;
 
 /**
  * Utility methods used to create ODT templates, or fill ODT templates.
@@ -388,4 +402,96 @@ public class ODTUtils {
 
         return value;
     }
+
+    /**
+     * Get master page with same orientation / margin properties as inputs, or
+     * create a new one if we cannot find any.
+     *
+     * TODO : Check footnote settings
+     *
+     * @param doc Document to search for existing master pages.
+     * @param orientation Orientation wanted for the returned page configuration. If null, portrait orientation is used.
+     * @param margin Margins to set to the master page. If null, default style margins are used.
+     * @return Found master page, or a new one.
+     * @throws Exception If we cannot read given document.
+     */
+    public static MasterPage getOrCreateOrientationMasterPage(Document doc, StyleTypeDefinitions.PrintOrientation orientation, Insets margin) throws Exception {
+        if (orientation == null) {
+            orientation = StyleTypeDefinitions.PrintOrientation.PORTRAIT;
+        }
+
+        final String masterName = orientation.name() + (margin == null? "" : " " + margin.toString());
+
+        final MasterPage masterPage = MasterPage.getOrCreateMasterPage(doc, masterName);
+        masterPage.setPrintOrientation(orientation);
+        switch (orientation) {
+            case LANDSCAPE:
+                masterPage.setPageHeight(210);
+                masterPage.setPageWidth(297);
+                break;
+            case PORTRAIT:
+                masterPage.setPageWidth(210);
+                masterPage.setPageHeight(297);
+        }
+        if (margin != null) {
+            masterPage.setMargins(margin.getTop(), margin.getBottom(), margin.getLeft(), margin.getRight());
+        }
+        masterPage.setFootnoteMaxHeight(0);
+        return masterPage;
+    }
+
+    /**
+     * Aggregation dans un seul fichier ODT de tous les fichiers fournis.
+     * Fichier supportés :
+     * - images
+     * - odt
+     * - pdf
+     *
+     * Supporte aussi les objets de type :
+     * - File
+     * - Path
+     * - TextDocument
+     *
+     * @param output fichier ODT de sortie
+     * @param candidates
+     */
+    public static void concatenateFiles(Path output, Object ... candidates) throws Exception {
+        final TextDocument doc = TextDocument.newTextDocument();
+
+        for(Object candidate : candidates){
+            //concatenateFile(doc, candidate);
+        }
+
+        try (final OutputStream stream = Files.newOutputStream(output, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)) {
+            doc.save(stream);
+        } catch (Exception e) {
+            try {
+                Files.deleteIfExists(output);
+            } catch (Exception ignored) {
+                e.addSuppressed(ignored);
+            }
+        }
+    }
+
+
+        public static Path convertPDFToODT(final Path input) throws IOException {
+            ArgumentChecks.ensureNonNull("Input document", input);
+            try (final InputStream in = Files.newInputStream(input, StandardOpenOption.READ)) {
+                    final List<PDPage> pages = PDDocument.load(in).getDocumentCatalog().getAllPages();
+                    for (final PDPage page : pages) {
+                        final PDStream contents = page.getContents();
+                        if (contents == null)
+                            continue;
+                        new PDFStreamParser(contents);
+
+                        //contents.getStream().
+        //List<PDAnnotation> annotations = page.getAnnotations();
+//                        for (final PDAnnotation annot : annotations) {
+//
+//                        }
+                    }
+                return null;
+            }
+
+        }
 }

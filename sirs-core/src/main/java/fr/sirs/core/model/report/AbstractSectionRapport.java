@@ -12,12 +12,15 @@ import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.Element;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.Reference;
+import java.util.Iterator;
 import java.util.UUID;
 import javafx.beans.property.*;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.apache.sis.util.ArgumentChecks;
+import org.odftoolkit.simple.TextDocument;
 
 @JsonInclude(Include.NON_EMPTY)
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -25,6 +28,18 @@ import javafx.beans.property.StringProperty;
 public abstract class AbstractSectionRapport implements Element , AvecLibelle {
 
     private String id;
+
+    protected void print(final TextDocument target, final Iterable sourceData) {
+        ArgumentChecks.ensureNonNull("Target document", target);
+        ArgumentChecks.ensureNonNull("Source data collection", sourceData);
+
+        final Iterator it = sourceData.iterator();
+        while (it.hasNext()) {
+            TextDocument.newTextDocument().print(target, it.next());
+        }
+    }
+
+    public abstract TextDocument print(final Object sourceData);
 
     @Override
     @Internal

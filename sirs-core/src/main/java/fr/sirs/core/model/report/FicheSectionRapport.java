@@ -79,4 +79,31 @@ public class FicheSectionRapport extends AbstractSectionRapport {
             return this;
         return null;
     }
+
+//    @Override
+//    public void print(TextDocument target, Object sourceData) {
+//        if (modeleElementId.get() == null)
+//            throw new IllegalStateException("No model set for printing !");
+//        final SessionCore session = InjectorCore.getBean(SessionCore.class);
+//        ModeleElement model = session.getRepositoryForClass(ModeleElement.class).get(modeleElementId.get());
+//        final String targetClassName = model.getTargetClass();
+//        if (targetClassName == null)
+//            throw new IllegalStateException("No data type specified by model !");
+//
+//        final Class targetClass = Thread.currentThread().getContextClassLoader().loadClass(targetClassName);
+//
+//        if (sourceData instanceof Iterable) {
+//            print(target, (Iterable)sourceData);
+//        } else {
+//            if (sourceData instanceof Element) {
+//                ODTUtils.reportFromTemplate(model.getOdt(), sourceData);
+//            }
+//
+//            if (sourceData instanceof Feature) {
+//
+//            } else {
+//                throw new IllegalArgumentException()
+//            }
+//        }
+//    }
 }

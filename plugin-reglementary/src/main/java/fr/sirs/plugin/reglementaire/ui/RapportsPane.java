@@ -36,19 +36,18 @@ import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.PhotoChoiceObligationReglementaire;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.RapportModeleObligationReglementaire;
-import fr.sirs.core.model.RapportSectionObligationReglementaire;
 import fr.sirs.core.model.RefEtapeObligationReglementaire;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.SectionTypeObligationReglementaire;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.TemplateOdt;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.report.AbstractSectionRapport;
+import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.plugin.reglementaire.ODTUtils;
 import fr.sirs.theme.ColumnOrder;
-import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.ui.report.FXModeleRapportsPane;
 import fr.sirs.util.SirsStringConverter;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -84,6 +83,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -132,6 +132,7 @@ import org.odftoolkit.simple.style.StyleTypeDefinitions;
 import org.odftoolkit.simple.table.Cell;
 import org.odftoolkit.simple.table.Table;
 import org.odftoolkit.simple.text.Paragraph;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -153,7 +154,7 @@ public class RapportsPane extends BorderPane implements Initializable {
     @FXML private DatePicker uiPeriodeDebut;
     @FXML private CheckBox uiCreateObligation;
     @FXML private TextField uiTitre;
-    @FXML private BorderPane uiTablePane;
+    @FXML private BorderPane uiModelPane;
     @FXML private GridPane uiGrid;
     @FXML private ComboBox<RefTypeObligationReglementaire> uiTypeObligation;
     @FXML private ComboBox<RefEtapeObligationReglementaire> uiTypeEtape;
@@ -161,22 +162,26 @@ public class RapportsPane extends BorderPane implements Initializable {
     @FXML private ProgressIndicator uiProgress;
     @FXML private Label uiProgressLabel;
 
-    private PojoTable uiTable;
     private final BooleanProperty running = new SimpleBooleanProperty(false);
+
+    @Autowired
     private Session session;
+
+    private final SimpleObjectProperty<ModeleRapport> modelProperty = new SimpleObjectProperty<>();
 
     public RapportsPane() {
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
+
+        uiGenerate.disableProperty().bind(
+                Bindings.or(running, modelProperty.isNull()));
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        session = Injector.getSession();
-        final Previews previewRepository = session.getPreviews();
-
-        uiTable = new RapportsTable();
-        uiTablePane.setCenter(uiTable);
+        final FXModeleRapportsPane rapportEditor = new FXModeleRapportsPane();
+        modelProperty.bind(rapportEditor.selectedModelProperty());
+        uiModelPane.setCenter(rapportEditor);
         uiPrDebut = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE,0.0));
         uiPrDebut.setEditable(true);
         uiPrFin = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE,0.0));
@@ -188,7 +193,6 @@ public class RapportsPane extends BorderPane implements Initializable {
         uiPeriodeDebut.valueProperty().set(date.minus(10, ChronoUnit.YEARS));
         uiPeriodeFin.valueProperty().set(date);
 
-        uiSystemEndiguement.setEditable(false);
         uiSystemEndiguement.valueProperty().addListener(this::systemeEndiguementChange);
         uiTroncons.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         uiTroncons.getSelectionModel().getSelectedItems().addListener(this::tronconSelectionChange);
@@ -206,21 +210,15 @@ public class RapportsPane extends BorderPane implements Initializable {
             }
         });
 
-        uiSystemEndiguement.setConverter(new SirsStringConverter());
-        uiSystemEndiguement.setItems(FXCollections.observableArrayList(
-                previewRepository.getByClass(SystemeEndiguement.class)));
-        if(uiSystemEndiguement.getItems()!=null){
-            uiSystemEndiguement.getSelectionModel().select(0);
-        }
+        final Previews previewRepository = session.getPreviews();
+        SIRS.initCombo(uiSystemEndiguement, FXCollections.observableArrayList(
+                previewRepository.getByClass(SystemeEndiguement.class)), null);
 
         SIRS.initCombo(uiTypeObligation, FXCollections.observableArrayList(session.getRepositoryForClass(RefTypeObligationReglementaire.class).getAll()), null);
         uiTypeObligation.disableProperty().bind(uiCreateObligation.selectedProperty().not());
 
         SIRS.initCombo(uiTypeEtape, FXCollections.observableArrayList(session.getRepositoryForClass(RefEtapeObligationReglementaire.class).getAll()), null);
         uiTypeEtape.disableProperty().bind(uiCreateObligation.selectedProperty().not());
-
-        uiGenerate.disableProperty().bind(
-                Bindings.or(running, uiTable.getUiTable().getSelectionModel().selectedItemProperty().isNull()));
 
         // Pour mettre a jour l'etat actif des boutons
         tronconSelectionChange(null);
@@ -271,8 +269,8 @@ public class RapportsPane extends BorderPane implements Initializable {
 
     @FXML
     private void generateReport(ActionEvent event) {
-        final RapportModeleObligationReglementaire report = (RapportModeleObligationReglementaire)
-                uiTable.getUiTable().getSelectionModel().getSelectedItem();
+        final ModeleRapport report = modelProperty.get();
+        if (report == null) return;
 
         final FileChooser chooser = new FileChooser();
         final File file = chooser.showSaveDialog(null);
@@ -337,7 +335,7 @@ public class RapportsPane extends BorderPane implements Initializable {
                 final Path folder = Files.createTempDirectory("rapport");
                 try {
                     final AtomicInteger progress = new AtomicInteger();
-                    for (RapportSectionObligationReglementaire section : report.section) {
+                    for (AbstractSectionRapport section : report.sections) {
                         String libelle = section.getLibelle();
                         if (libelle == null || libelle.isEmpty()) {
                             libelle = "sans nom";
