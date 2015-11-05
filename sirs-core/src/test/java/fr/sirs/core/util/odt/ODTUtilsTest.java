@@ -3,18 +3,11 @@ package fr.sirs.core.util.odt;
 import fr.sirs.core.CouchDBTestCase;
 import fr.sirs.core.model.Crete;
 import fr.sirs.util.odt.ODTUtils;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Field;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javafx.geometry.Insets;
-import javax.imageio.ImageIO;
 import org.apache.sis.test.DependsOnMethod;
 import org.junit.Assert;
 import org.junit.Test;
@@ -23,7 +16,6 @@ import org.odftoolkit.simple.TextDocument;
 import org.odftoolkit.simple.common.field.VariableField;
 import org.odftoolkit.simple.style.MasterPage;
 import org.odftoolkit.simple.style.StyleTypeDefinitions;
-import org.odftoolkit.simple.text.Paragraph;
 
 /**
  *
@@ -63,8 +55,8 @@ public class ODTUtilsTest extends CouchDBTestCase {
         properties.put("commentaire", "Commentaire");
         properties.put("date_debut", "Date de début");
 
-        final TextDocument template = ODTUtils.newSimplePropertyModel("Crete", properties);
-        TextDocument report = ODTUtils.reportFromTemplate(template, data);
+        final TextDocument report = ODTUtils.newSimplePropertyModel("Crete", properties);
+        ODTUtils.fillTemplate(report, data);
 
         Assert.assertNotNull("Generated report", report);
         // Now, check that variables have been set correctly
@@ -104,59 +96,5 @@ public class ODTUtilsTest extends CouchDBTestCase {
         Assert.assertEquals("Master page copy", mp.getMarginRight(), copy.getMarginRight(), 0.0001);
         Assert.assertEquals("Master page copy", mp.getMarginBottom(), copy.getMarginBottom(), 0.0001);
         Assert.assertEquals("Master page copy", mp.getMarginLeft(), copy.getMarginLeft(), 0.0001);
-    }
-
-
-    public static void concatenateFile(TextDocument holder, Object candidate) throws Exception {
-        if (candidate instanceof TextDocument) {
-            holder.insertContentFromDocumentAfter((TextDocument) candidate, holder.addParagraph(""), true);
-        }
-
-        if(candidate instanceof File || candidate instanceof Path){
-            final File file;
-            if(candidate instanceof Path){
-                file = ((Path)candidate).toFile();
-            }else{
-                file = (File) candidate;
-            }
-            final String fileName = file.getName().toLowerCase();
-            if(fileName.endsWith(".odt")){
-                //append content at the end
-                final TextDocument childDoc = TextDocument.loadDocument(file);
-                final Paragraph paragraph = doc.addParagraph("");
-                doc.insertContentFromDocumentAfter(childDoc, paragraph, true);
-
-            }else if(fileName.endsWith(".pdf")){
-                //transform it to image
-                try (PDDocument document = PDDocument.loadNonSeq(file, null)) {
-                    final List<PDPage> pages = document.getDocumentCatalog().getAllPages();
-                    for(int i=0,n=pages.size();i<n;i++) {
-                        final PDPage page = pages.get(i);
-                        final BufferedImage bim = page.convertToImage(BufferedImage.TYPE_INT_RGB, 300);
-                        final File imgFile = File.createTempFile("pdf_"+page+"_", ".png");
-                        imgFile.deleteOnExit();
-                        try(final FileOutputStream imgStream = new FileOutputStream(imgFile)){
-                            ImageIOUtil.writeImage(bim, "png", imgStream, 300);
-                            insertImageFullPage(doc, imgFile.toURI());
-                        }finally{
-                            file.delete();
-                        }
-                    }
-                }
-
-            }else{
-                //try image
-                try{
-                    final BufferedImage img = ImageIO.read(file);
-                    insertImage(doc, file.toURI(), img);
-                }catch(IOException ex){
-                    throw new IOException("Unvalid file "+candidate+". Only PDF, ODT and images are supported.");
-                }
-            }
-        }else if(candidate instanceof TextDocument){
-            final TextDocument textDoc = (TextDocument) candidate;
-            final Paragraph paragraph = doc.addParagraph("");
-            doc.insertContentFromDocumentAfter(textDoc, paragraph, true);
-        }
     }
 }

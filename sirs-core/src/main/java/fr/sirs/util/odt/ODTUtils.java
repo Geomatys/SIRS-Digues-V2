@@ -3,29 +3,54 @@ package fr.sirs.util.odt;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Element;
 import fr.sirs.util.property.Reference;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
-import org.apache.pdfbox.pdfparser.PDFStreamParser;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.common.PDStream;
+import org.apache.pdfbox.pdmodel.encryption.BadSecurityHandlerException;
+import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
 import org.apache.sis.util.ArgumentChecks;
+import org.geotoolkit.gui.javafx.util.TaskManager;
+import org.geotoolkit.image.io.XImageIO;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclElement;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclsElement;
 import org.odftoolkit.odfdom.dom.element.text.TextVariableDeclElement;
@@ -37,6 +62,7 @@ import org.odftoolkit.simple.common.field.AbstractVariableContainer;
 import org.odftoolkit.simple.common.field.Field.FieldType;
 import org.odftoolkit.simple.common.field.Fields;
 import org.odftoolkit.simple.common.field.VariableField;
+import org.odftoolkit.simple.draw.Image;
 import org.odftoolkit.simple.style.MasterPage;
 import org.odftoolkit.simple.style.StyleTypeDefinitions;
 
@@ -52,9 +78,21 @@ import org.odftoolkit.simple.style.StyleTypeDefinitions;
  */
 public class ODTUtils {
 
+    /**
+     * Width of an ODT documentt page in portrait mode. Unit is millimeter.
+     */
+    private static final int PORTRAIT_WIDTH = 210;
+
+    /**
+     * Height of an ODT documentt page in portrait mode. Unit is millimeter.
+     */
+    private static final int PORTRAIT_HEIGHT = 297;
+
     public static final String CLASS_KEY = "The.Sirs.Class";
 
-    private static final String NOTE_MODELE_FICHE = "Note : Ci-dessous se trouve"
+    private static final String ASK_PASSWORD = "Le document suivant est protégé par mot de passe. Veuillez insérer le mot de passe pour continuer.";
+
+    private static final String ELEMENT_MODEL_NOTE = "Note : Ci-dessous se trouve"
             + " la liste des champs utilisés par SIRS-Digues lors de la création"
             + " d'une fiche. Vous pouvez compléter ce modèle (Ajout de contenu,"
             + " mise en forme) et déplacer / copier les variables (les textes"
@@ -79,7 +117,7 @@ public class ODTUtils {
     public static TextDocument newSimplePropertyModel(final String title, final Map<String, String> properties) throws Exception {
         final TextDocument result = TextDocument.newTextDocument();
         result.addParagraph(title).applyHeading();
-        result.addParagraph(NOTE_MODELE_FICHE);
+        result.addParagraph(ELEMENT_MODEL_NOTE);
         for (final Map.Entry<String, String> entry : properties.entrySet()) {
             appendUserVariable(result, entry.getKey(), entry.getValue(), entry.getValue());
         }
@@ -165,27 +203,13 @@ public class ODTUtils {
     /**
      * Fill given template with data originating from candidate object.
      *
-     * @param templateData Source template to fill.
-     * @param candidate The object to get data from to fill given template.
-     * @return A Document formatted as input template, but filled with given
-     * data.
-     * @throws java.lang.Exception If we cannot load template, or element data cannot be read or converted.
-     */
-    public static TextDocument reportFromTemplate(final InputStream templateData, final Element candidate) throws Exception {
-        return reportFromTemplate(TextDocument.loadDocument(templateData), candidate);
-    }
-
-    /**
-     * Fill given template with data originating from candidate object.
-     *
      * @param template Source template to fill.
      * @param candidate The object to get data from to fill given template.
-     * @return A Document formatted as input template, but filled with given
-     * data.
+     * 
      * @throws java.beans.IntrospectionException If input candidate cannot be analyzed.
      * @throws java.lang.ReflectiveOperationException If we fail reading candidate properties.
      */
-    public static TextDocument reportFromTemplate(final TextDocument template, final Element candidate) throws IntrospectionException, ReflectiveOperationException {
+    public static void fillTemplate(final TextDocument template, final Element candidate) throws IntrospectionException, ReflectiveOperationException {
         //final TextNavigation search = new TextNavigation(VARIABLE_SEARCH, document);
 
         // We iterate through input properties to extract all mappable attributes.
@@ -226,23 +250,6 @@ public class ODTUtils {
                 SirsCore.LOGGER.fine("No variable found for name "+entry.getKey());
             }
         }
-
-//        while (search.hasNext()) {
-//            final Selection selection = search.nextSelection();
-//            if (selection instanceof TextSelection) {
-//                final TextSelection tSelection = (TextSelection) selection;
-//                final Matcher matcher = VARIABLE_BUILDER.matcher(tSelection.getText());
-//                if (matcher.matches()) {
-//                    final String varName = matcher.group(1);
-//                    final Object value = properties.get(varName);
-//                    if (value != null) {
-//                        tSelection.replaceWith(value.toString()); // TODO : better string conversion ?
-//                    }
-//                }
-//            }
-//        }
-
-        return template;
     }
 
     /**
@@ -426,12 +433,12 @@ public class ODTUtils {
         masterPage.setPrintOrientation(orientation);
         switch (orientation) {
             case LANDSCAPE:
-                masterPage.setPageHeight(210);
-                masterPage.setPageWidth(297);
+                masterPage.setPageHeight(PORTRAIT_WIDTH);
+                masterPage.setPageWidth(PORTRAIT_HEIGHT);
                 break;
             case PORTRAIT:
-                masterPage.setPageWidth(210);
-                masterPage.setPageHeight(297);
+                masterPage.setPageWidth(PORTRAIT_WIDTH);
+                masterPage.setPageHeight(PORTRAIT_HEIGHT);
         }
         if (margin != null) {
             masterPage.setMargins(margin.getTop(), margin.getBottom(), margin.getLeft(), margin.getRight());
@@ -441,57 +448,407 @@ public class ODTUtils {
     }
 
     /**
-     * Aggregation dans un seul fichier ODT de tous les fichiers fournis.
-     * Fichier supportés :
-     * - images
-     * - odt
-     * - pdf
+     * Aggregate all provided data into one ODT document.
      *
-     * Supporte aussi les objets de type :
-     * - File
-     * - Path
-     * - TextDocument
+     * Recognized data :
+     * - {@link TextDocument}
+     * - {@link RenderedImage}
+     * - {@link PDDocument}
+     * - {@link PDPage}
+     * - {@link CharSequence}
      *
-     * @param output fichier ODT de sortie
-     * @param candidates
+     * Also, if a data reference is given as :
+     * - {@link URI}
+     * - {@link URL}
+     * - {@link File}
+     * - {@link Path}
+     * - {@link InputStream}
+     *
+     * We'll try to read it and convert it into one of the managed objects.
+     *
+     * @param output output ODT file. If it already exists, we try to open it and
+     * add content at the end of the document. If it does not exists, we create
+     * a new file.
+     * @param candidates Objects to concatenate.
+     * @throws java.lang.Exception If output
      */
-    public static void concatenateFiles(Path output, Object ... candidates) throws Exception {
-        final TextDocument doc = TextDocument.newTextDocument();
+    public static void concatenate(Path output, Object ... candidates) throws Exception {
+        try (final TextDocument doc = Files.exists(output)?
+                TextDocument.loadDocument(output.toFile()) : TextDocument.newTextDocument()) {
 
-        for(Object candidate : candidates){
-            //concatenateFile(doc, candidate);
-        }
+            for (Object candidate : candidates) {
+                append(doc, candidate);
+            }
 
-        try (final OutputStream stream = Files.newOutputStream(output, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)) {
-            doc.save(stream);
-        } catch (Exception e) {
-            try {
-                Files.deleteIfExists(output);
-            } catch (Exception ignored) {
-                e.addSuppressed(ignored);
+            try (final OutputStream stream = Files.newOutputStream(output, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)) {
+                doc.save(stream);
+            } catch (Exception e) {
+                try {
+                    Files.deleteIfExists(output);
+                } catch (Exception ignored) {
+                    e.addSuppressed(ignored);
+                }
             }
         }
     }
 
+    /**
+     * Try to read input object and put it into given document.
+     *
+     * Recognized data :
+     * - {@link TextDocument}
+     * - {@link RenderedImage}
+     * - {@link PDDocument}
+     * - {@link PDPage}
+     * - {@link CharSequence}
+     *
+     * Also, if a data reference is given as :
+     * - {@link URI}
+     * - {@link URL}
+     * - {@link File}
+     * - {@link Path}
+     * - {@link InputStream}
+     *
+     * We'll try to read it and convert it into one of the managed objects.
+     *
+     * @param holder Document to append data into.
+     * @param candidate Object to read and put at the end of given document.
+     * @throws Exception If we cannot read object or it is not a supported format.
+     */
+    public static void append(TextDocument holder, Object candidate) throws Exception {
+        if (candidate == null) {
+            return;
+        }
 
-        public static Path convertPDFToODT(final Path input) throws IOException {
-            ArgumentChecks.ensureNonNull("Input document", input);
-            try (final InputStream in = Files.newInputStream(input, StandardOpenOption.READ)) {
-                    final List<PDPage> pages = PDDocument.load(in).getDocumentCatalog().getAllPages();
-                    for (final PDPage page : pages) {
-                        final PDStream contents = page.getContents();
-                        if (contents == null)
-                            continue;
-                        new PDFStreamParser(contents);
+        boolean deletePath = false;
 
-                        //contents.getStream().
-        //List<PDAnnotation> annotations = page.getAnnotations();
-//                        for (final PDAnnotation annot : annotations) {
-//
-//                        }
-                    }
-                return null;
+        // Unify all reference APIs to Path.
+        if (candidate instanceof File) {
+            candidate = ((File)candidate).toPath();
+        } else if (candidate instanceof URI) {
+            candidate = Paths.get((URI)candidate);
+        } else if (candidate instanceof URL) {
+            candidate = Paths.get(((URL)candidate).toURI());
+        } else if (candidate instanceof InputStream) {
+            final Path tmpFile = Files.createTempFile("candidate", ".tmp");
+            Files.copy((InputStream)candidate, tmpFile);
+            candidate = tmpFile;
+            deletePath = true;
+        }
+
+        // If we've got a reference to an external data, we try to read it.
+        if (candidate instanceof Path) {
+            final Path tmpPath = (Path) candidate;
+            if (!Files.isReadable(tmpPath)) {
+                throw new IllegalArgumentException("Path given for document concatenation is not readable : "+tmpPath);
             }
 
+            try (final TextDocument tmpDoc = TextDocument.loadDocument(tmpPath.toFile())) {
+
+                holder.insertContentFromDocumentAfter(tmpDoc, holder.addParagraph(""), true);
+
+            } catch (Exception e) {
+                try {
+
+                    appendPDF(holder, tmpPath);
+
+                } catch (Exception e1) {
+                    try {
+
+                        appendImage(holder, tmpPath);
+
+                    } catch (Exception e2) {
+                        try {
+
+                            appendTextFile(holder, tmpPath);
+
+                        } catch (Exception e3) {
+                            e.addSuppressed(e1);
+                            e.addSuppressed(e2);
+                            e.addSuppressed(e3);
+                            throw e;
+                        }
+                    }
+                }
+            } finally {
+                if (deletePath) {
+                    Files.deleteIfExists(tmpPath);
+                }
+            }
+
+        } else if (candidate instanceof TextDocument) {
+            holder.insertContentFromDocumentAfter((TextDocument) candidate, holder.addParagraph(""), true);
+        } else if (candidate instanceof PDDocument) {
+            appendPDF(holder, (PDDocument) candidate);
+        } else if (candidate instanceof PDPage) {
+            appendPage(holder, (PDPage) candidate);
+        } else if (candidate instanceof RenderedImage) {
+            appendImage(holder, (RenderedImage) candidate);
+        } else if (candidate instanceof CharSequence) {
+            holder.addParagraph(((CharSequence)candidate).toString());
+        } else {
+            throw new UnsupportedOperationException("Object type not supported for insertion in ODT : "+ candidate.getClass().getCanonicalName());
         }
+    }
+
+    /**
+     * Put content of a text file into given document. We assume that input text file
+     * paragraphs are separated by a blank line.
+     *
+     * Note : all lines are trimmed and all blank line are suppressed.
+     *
+     * @param holder Document to append data into.
+     * @param txtFile Text file to read and concatenate.
+     * @throws IOException If an error occurs while reading input file.
+     */
+    public static void appendTextFile(final TextDocument holder, final Path txtFile) throws IOException {
+        try (final BufferedReader reader = Files.newBufferedReader(txtFile)) {
+            String line = reader.readLine();
+            if (line != null) {
+                StringBuilder txtBuilder = new StringBuilder(line);
+                final String sep = System.lineSeparator();
+                while ((line = reader.readLine().trim()) != null) {
+                    if (line.isEmpty()) {
+                        // skip all blank lines
+                        if (txtBuilder.length() <= 0)
+                            continue;
+                        holder.addParagraph(txtBuilder.toString());
+                        line = reader.readLine();
+                        if (line == null) {
+                            break;
+                        }
+                        txtBuilder = new StringBuilder(line);
+                    } else {
+                        txtBuilder.append(sep).append(line);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Read a PDF document and put its content into given document.
+     *
+     * Note : Each PDF page is transformed into an image.
+     *
+     * @param target Document to put pdf content into.
+     * @param input Location of the PDF document to read.
+     * @throws IOException If we fail reading input pdf, or writing image generated from it.
+     */
+    public static void appendPDF(final TextDocument target, final Path input) throws IOException {
+        ArgumentChecks.ensureNonNull("Output document", target);
+        ArgumentChecks.ensureNonNull("Input document", input);
+        try (final InputStream in = Files.newInputStream(input, StandardOpenOption.READ);
+                final PDDocument loaded = PDDocument.load(in)) {
+            appendPDF(target, loaded);
+        }
+    }
+
+    /**
+     * Read a PDF document and put its content into given document.
+     *
+     * Note : Each PDF page is transformed into an image.
+     *
+     * @param target Document to put pdf content into.
+     * @param input PDF document to read.
+     * @throws IOException If we fail reading input pdf, or writing image generated from it.
+     */
+    public static void appendPDF(final TextDocument target, final PDDocument input) throws IOException {
+        ArgumentChecks.ensureNonNull("Output document", target);
+        ArgumentChecks.ensureNonNull("Input document", input);
+        if (input.isEncrypted()) {
+            Optional<String> pwd = askPassword(ASK_PASSWORD, input);
+            while (pwd.isPresent()) {
+                try {
+                    input.openProtection(new StandardDecryptionMaterial(pwd.get()));
+                    break;
+                } catch (CryptographyException | BadSecurityHandlerException e) {
+                    pwd = askPassword("Le mot de passe est invalide. Veuillez recommencer.", input);
+                }
+            }
+
+            if (!pwd.isPresent()) {
+                throw new IOException("No password available to decode PDF file.");
+            }
+        }
+        final List<PDPage> pages = input.getDocumentCatalog().getAllPages();
+        for (final PDPage page : pages) {
+            appendPage(target, page);
+        }
+    }
+
+    /**
+     * Pops a JavaFX alert to query document password.
+     * @param headerText A quick sentence about what is asked to user.
+     * @param input Document to get password for.
+     * @return An optional containing user password, or an empty optional if user cancelled the alert.
+     */
+    private static Optional<String> askPassword(final String headerText, final PDDocument input) {
+        final String sep = System.lineSeparator();
+        final StringBuilder builder = new StringBuilder(headerText).append(sep).append("Informations sur le document : ");
+
+        final PDDocumentInformation docInfo = input.getDocumentInformation();
+        builder.append("Titre : ").append(valueOrUnknown(docInfo.getTitle())).append(sep);
+        builder.append("Auteur : ").append(valueOrUnknown(docInfo.getAuthor())).append(sep);
+        builder.append("Editeur : ").append(valueOrUnknown(docInfo.getProducer())).append(sep);
+        builder.append("Sujet : ").append(valueOrUnknown(docInfo.getSubject()));
+
+        final Callable<Optional<String>> query = () -> {
+            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, null, ButtonType.CANCEL, ButtonType.OK);
+            alert.setHeaderText(builder.toString());
+
+            final PasswordField field = new PasswordField();
+            HBox.setHgrow(field, Priority.ALWAYS);
+            alert.getDialogPane().setContent(new HBox(5, new Label("Mot de passe : "), field));
+            alert.setResizable(true);
+            if (ButtonType.OK.equals(alert.showAndWait().orElse(ButtonType.CANCEL))) {
+                final String pwd = field.getText();
+                return Optional.of(pwd == null ? "" : pwd);
+            } else {
+                return Optional.empty();
+            }
+        };
+
+        if (Platform.isFxApplicationThread()) {
+            try {
+                return query.call();
+            } catch (Exception ex) {
+                throw new SirsCoreRuntimeException(ex);
+            }
+        } else {
+            final TaskManager.MockTask<Optional<String>> mockTask = new TaskManager.MockTask("Demande de mot de passe", query);
+            Platform.runLater(mockTask);
+            try {
+                return mockTask.get();
+            } catch (InterruptedException ex) {
+                // No response for too long
+                return Optional.empty();
+            } catch (ExecutionException ex) {
+                throw new SirsCoreRuntimeException(ex);
+            }
+        }
+    }
+
+    /**
+     * Adapt input string value.
+     * @param input The string to test.
+     * @return input string if not null nor empty, or "Inconnu".
+     */
+    private static String valueOrUnknown(final String input) {
+        if (input == null || input.isEmpty()) {
+            return "Inconnu";
+        } else {
+            return input;
+        }
+    }
+
+    /**
+     * Put content of the given PDF page at the end of input ODT document.
+     *
+     * Note: As processing pdf text is hell (no, really), we just convert it
+     * into an image and put it into given document.
+     *
+     * @param holder Document to append content to.
+     * @param page Page to convert and write into ODT document.
+     * @throws java.io.IOException If we fail reading input page, or writing generated image.
+     */
+    public static void appendPage(final TextDocument holder, final PDPage page) throws IOException {
+        final BufferedImage img = page.convertToImage();
+        holder.addPageBreak();
+        ODTUtils.appendImage(holder, img, true);
+    }
+
+    /**
+     * Insert given image into input document. Image is inserted in a new empty
+     * paragraph, to avoid overlapping with another content.
+     *
+     * @param holder Document to insert image into.
+     * @param image Image to put.
+     */
+    public static void appendImage(final TextDocument holder, final RenderedImage image) throws IOException {
+        ODTUtils.appendImage(holder, image, false);
+    }
+
+    public static void appendImage(final TextDocument holder, final RenderedImage image, final boolean fullPage) throws IOException {
+        final Path tmpImage = Files.createTempFile("img", ".png");
+        if (!ImageIO.write(image, "png", tmpImage.toFile())) {
+            throw new IllegalStateException("No valid writer found for image format png !");
+        }
+
+        try {
+            final StyleTypeDefinitions.PrintOrientation orientation = (image.getWidth() < image.getHeight())
+                    ? StyleTypeDefinitions.PrintOrientation.PORTRAIT : StyleTypeDefinitions.PrintOrientation.LANDSCAPE;
+            appendImage(holder, tmpImage, orientation, fullPage);
+        } finally {
+            Files.delete(tmpImage);
+        }
+    }
+
+    /**
+     * Insert given image into input document. Image is inserted in a new empty
+     * paragraph, to avoid overlapping with another content.
+     *
+     * @param holder Document to insert into
+     * @param imagePath Location off the image to insert.
+     */
+    public static void appendImage(final TextDocument holder, final Path imagePath) {
+        appendImage(holder, imagePath, null, false);
+    }
+
+    /**
+     * Insert given image into input document. Image is inserted in a new empty
+     * paragraph, to avoid overlapping with another content.
+     *
+     * @param holder Document to insert into
+     * @param imagePath Location off the image to insert.
+     * @param fullPage If true, we will create a new page (no margin, orientation set according to image dimension) in which the image will be rendered.
+     */
+    public static void appendImage(final TextDocument holder, final Path imagePath, final boolean fullPage) {
+        appendImage(holder, imagePath, null, fullPage);
+    }
+
+    /**
+     * Insert given image into input document. Image is inserted in a new empty
+     * paragraph, to avoid overlapping with another content.
+     *
+     * @param holder Document to insert into
+     * @param imagePath Location off the image to insert.
+     * @param orientation Orientation of the image to insert. Only used if a full page rendering is queried.
+     * If null, we will try to determine the best orientation by analyzing image dimension.
+     * @param fullPage If true, we will create a new page (no margin, orientation set by previous parameter) in which the image will be rendered.
+     */
+    public static void appendImage(
+            final TextDocument holder,
+            final Path imagePath,
+            StyleTypeDefinitions.PrintOrientation orientation,
+            final boolean fullPage) {
+
+        if (fullPage) {
+            if (orientation == null) {
+                try {
+                    ImageReader reader = XImageIO.getReader(imagePath.toFile(), false, false);
+                    orientation = (reader.getWidth(0) < reader.getHeight(0))
+                            ? StyleTypeDefinitions.PrintOrientation.PORTRAIT : StyleTypeDefinitions.PrintOrientation.LANDSCAPE;
+                } catch (IOException e) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Cannot read image attributes : " + imagePath, e);
+                    orientation = StyleTypeDefinitions.PrintOrientation.PORTRAIT;
+                }
+            }
+
+            try {
+                holder.addPageBreak(
+                        holder.getParagraphByReverseIndex(0, false),
+                        getOrCreateOrientationMasterPage(holder, orientation, Insets.EMPTY)
+                );
+            } catch (Exception ex) {
+                SirsCore.LOGGER.log(Level.WARNING, "Cannot add a page break in a text document", ex);
+            }
+        }
+
+        final Image newImage = Image.newImage(holder.addParagraph(""), imagePath.toUri());
+
+        if (fullPage) {
+            newImage.getStyleHandler().setAchorType(StyleTypeDefinitions.AnchorType.TO_PAGE);
+        }
+    }
 }

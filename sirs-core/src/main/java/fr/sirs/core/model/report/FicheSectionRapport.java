@@ -1,12 +1,19 @@
 package fr.sirs.core.model.report;
 
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
+import fr.sirs.util.odt.ODTUtils;
 import fr.sirs.util.property.Reference;
+import java.io.ByteArrayInputStream;
+import java.util.Iterator;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.odftoolkit.simple.TextDocument;
+import org.odftoolkit.simple.text.Paragraph;
 
 /**
  * Detailed element printing.
@@ -80,30 +87,25 @@ public class FicheSectionRapport extends AbstractSectionRapport {
         return null;
     }
 
-//    @Override
-//    public void print(TextDocument target, Object sourceData) {
-//        if (modeleElementId.get() == null)
-//            throw new IllegalStateException("No model set for printing !");
-//        final SessionCore session = InjectorCore.getBean(SessionCore.class);
-//        ModeleElement model = session.getRepositoryForClass(ModeleElement.class).get(modeleElementId.get());
-//        final String targetClassName = model.getTargetClass();
-//        if (targetClassName == null)
-//            throw new IllegalStateException("No data type specified by model !");
-//
-//        final Class targetClass = Thread.currentThread().getContextClassLoader().loadClass(targetClassName);
-//
-//        if (sourceData instanceof Iterable) {
-//            print(target, (Iterable)sourceData);
-//        } else {
-//            if (sourceData instanceof Element) {
-//                ODTUtils.reportFromTemplate(model.getOdt(), sourceData);
-//            }
-//
-//            if (sourceData instanceof Feature) {
-//
-//            } else {
-//                throw new IllegalArgumentException()
-//            }
-//        }
-//    }
+    @Override
+    public void printSection(final TextDocument target, final Paragraph sectionStart, final Paragraph sectionEnd, final Iterator<Element> sourceIt) throws Exception {
+        if (modeleElementId.get() == null)
+            throw new IllegalStateException("No model set for printing !");
+
+        final SessionCore session = InjectorCore.getBean(SessionCore.class);
+        ModeleElement model = session.getRepositoryForClass(ModeleElement.class).get(modeleElementId.get());
+        byte[] odt = model.getOdt();
+        if (odt == null || odt.length <= 0) {
+            throw new IllegalStateException("No ODT template available.");
+        }
+
+        try (final ByteArrayInputStream stream = new ByteArrayInputStream(odt);
+                TextDocument doc = TextDocument.loadDocument(stream)) {
+
+            while (sourceIt.hasNext()) {
+                ODTUtils.fillTemplate(doc, sourceIt.next());
+                target.insertContentFromDocumentBefore(target, sectionEnd, true);
+            }
+        }
+    }
 }

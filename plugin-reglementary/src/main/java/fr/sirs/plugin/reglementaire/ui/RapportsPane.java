@@ -55,7 +55,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -74,7 +73,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -91,7 +89,6 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -109,7 +106,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
-import javafx.util.Callback;
 import net.sf.jooreports.templates.DocumentTemplate;
 import net.sf.jooreports.templates.DocumentTemplateFactory;
 import org.apache.sis.measure.NumberRange;
@@ -132,6 +128,7 @@ import org.odftoolkit.simple.style.StyleTypeDefinitions;
 import org.odftoolkit.simple.table.Cell;
 import org.odftoolkit.simple.table.Table;
 import org.odftoolkit.simple.text.Paragraph;
+import org.opengis.util.GenericName;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -139,7 +136,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class RapportsPane extends BorderPane implements Initializable {
+public class RapportsPane extends BorderPane {
 
     public static final String[] COLUMNS_TO_IGNORE = new String[] {
         AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD,
@@ -175,13 +172,13 @@ public class RapportsPane extends BorderPane implements Initializable {
 
         uiGenerate.disableProperty().bind(
                 Bindings.or(running, modelProperty.isNull()));
-    }
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
+        // model edition
         final FXModeleRapportsPane rapportEditor = new FXModeleRapportsPane();
         modelProperty.bind(rapportEditor.selectedModelProperty());
         uiModelPane.setCenter(rapportEditor);
+
+        // Filter parameters
         uiPrDebut = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE,0.0));
         uiPrDebut.setEditable(true);
         uiPrFin = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE,0.0));
@@ -197,17 +194,14 @@ public class RapportsPane extends BorderPane implements Initializable {
         uiTroncons.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         uiTroncons.getSelectionModel().getSelectedItems().addListener(this::tronconSelectionChange);
         final SirsStringConverter converter = new SirsStringConverter();
-        uiTroncons.setCellFactory(new Callback<ListView<TronconDigue>, ListCell<TronconDigue>>() {
-            @Override
-            public ListCell<TronconDigue> call(ListView<TronconDigue> param) {
-                return new ListCell() {
-                    @Override
-                    protected void updateItem(Object item, boolean empty) {
-                        super.updateItem(item, empty);
-                        setText(converter.toString(item));
-                    }
-                };
-            }
+        uiTroncons.setCellFactory(param -> {
+            return new ListCell() {
+                @Override
+                protected void updateItem(Object item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(converter.toString(item));
+                }
+            };
         });
 
         final Previews previewRepository = session.getPreviews();
@@ -224,8 +218,7 @@ public class RapportsPane extends BorderPane implements Initializable {
         tronconSelectionChange(null);
     }
 
-    private void systemeEndiguementChange(ObservableValue<? extends Preview> observable,
-                Preview oldValue, Preview newValue) {
+    private void systemeEndiguementChange(ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) {
         if(newValue==null){
             uiTroncons.setItems(FXCollections.emptyObservableList());
         }else{
@@ -243,7 +236,7 @@ public class RapportsPane extends BorderPane implements Initializable {
         }
     }
 
-    private void tronconSelectionChange(ListChangeListener.Change<? extends TronconDigue> c){
+    private void tronconSelectionChange(ListChangeListener.Change<? extends TronconDigue> c) {
         final ObservableList<TronconDigue> selectedItems = uiTroncons.getSelectionModel().getSelectedItems();
         if (selectedItems.size() == 1) {
             final TronconDigue troncon = selectedItems.get(0);
@@ -602,9 +595,22 @@ public class RapportsPane extends BorderPane implements Initializable {
         //creation de la requete
         final SQLQueryRepository queryRepo = (SQLQueryRepository)Injector.getSession().getRepositoryForClass(SQLQuery.class);
         final SQLQuery sqlQuery = queryRepo.get(requeteId);
+
         final Query fsquery = org.geotoolkit.data.query.QueryBuilder.language(
                 JDBCFeatureStore.CUSTOM_SQL, sqlQuery.getSql(), NamesExt.create("requete"));
 
+        boolean noId = true;
+        for (final GenericName name : fsquery.getPropertyNames()) {
+            if (SIRS.ID_FIELD.equalsIgnoreCase(name.tip().toString())) {
+                noId = false;
+                break;
+            }
+        }
+
+        if (noId) {
+            throw new UnsupportedOperationException("Impossible de filtrer les élements en utilisant une requête qui ne contient pas leur ID dans le résultat.");
+        }
+        
         //recupération de la base H2
         final FeatureStore h2Store = (H2FeatureStore) H2Helper.getStore(session.getConnector());
         final FeatureCollection col = h2Store.createSession(false).getFeatureCollection(fsquery);

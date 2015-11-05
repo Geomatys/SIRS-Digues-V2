@@ -21,6 +21,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.apache.sis.util.ArgumentChecks;
 import org.odftoolkit.simple.TextDocument;
+import org.odftoolkit.simple.text.Paragraph;
 
 @JsonInclude(Include.NON_EMPTY)
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -29,17 +30,21 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
 
     private String id;
 
-    protected void print(final TextDocument target, final Iterable sourceData) {
+    public final void print(final TextDocument target, final Iterable<Element> sourceData) throws Exception {
         ArgumentChecks.ensureNonNull("Target document", target);
         ArgumentChecks.ensureNonNull("Source data collection", sourceData);
 
-        final Iterator it = sourceData.iterator();
-        while (it.hasNext()) {
-            TextDocument.newTextDocument().print(target, it.next());
-        }
+        // TODO : put title ?
+        // TODO : apply filter now
+        final Paragraph sectionStart = target.addParagraph(libelle.get());
+        final Paragraph sectionEnd = target.insertParagraph(sectionStart, sectionStart, false);
+
+        sectionStart.applyHeading(true, 2);
+
+        printSection(target, sectionStart, sectionEnd, sourceData.iterator());
     }
 
-    public abstract TextDocument print(final Object sourceData);
+    protected abstract void printSection(final TextDocument target, final Paragraph sectionStart, final Paragraph sectionEnd, final Iterator<Element> dataIt) throws Exception;
 
     @Override
     @Internal
