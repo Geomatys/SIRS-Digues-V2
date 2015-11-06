@@ -13,7 +13,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.odftoolkit.simple.TextDocument;
-import org.odftoolkit.simple.text.Paragraph;
 
 /**
  * Detailed element printing.
@@ -88,7 +87,7 @@ public class FicheSectionRapport extends AbstractSectionRapport {
     }
 
     @Override
-    public void printSection(final TextDocument target, final Paragraph sectionStart, final Paragraph sectionEnd, final Iterator<Element> sourceIt) throws Exception {
+    public void printSection(final PrintContext ctx) throws Exception {
         if (modeleElementId.get() == null)
             throw new IllegalStateException("No model set for printing !");
 
@@ -101,10 +100,10 @@ public class FicheSectionRapport extends AbstractSectionRapport {
 
         try (final ByteArrayInputStream stream = new ByteArrayInputStream(odt);
                 TextDocument doc = TextDocument.loadDocument(stream)) {
-
-            while (sourceIt.hasNext()) {
-                ODTUtils.fillTemplate(doc, sourceIt.next());
-                target.insertContentFromDocumentBefore(target, sectionEnd, true);
+            final Iterator<Element> it = ctx.elements.iterator();
+            while (it.hasNext()) {
+                ODTUtils.fillTemplate(doc, it.next());
+                ctx.target.insertContentFromDocumentBefore(doc, ctx.endParagraph, true);
             }
         }
     }

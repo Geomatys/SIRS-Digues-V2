@@ -2,10 +2,10 @@ package fr.sirs.core.model.report;
 
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
-import java.util.Iterator;
-import org.odftoolkit.simple.TextDocument;
-import org.odftoolkit.simple.table.Table;
-import org.odftoolkit.simple.text.Paragraph;
+import fr.sirs.util.odt.ODTUtils;
+import java.util.ArrayList;
+import org.odftoolkit.odfdom.dom.element.text.TextSectionElement;
+import org.odftoolkit.simple.text.Section;
 
 /**
  * Used for printing brut table reports.
@@ -39,8 +39,9 @@ public class TableSectionRapport extends AbstractSectionRapport {
     }
 
     @Override
-    protected void printSection(TextDocument target, Paragraph sectionStart, Paragraph sectionEnd, Iterator<Element> dataIt) throws Exception {
-        Table table = target.addTable();
-        //table.appendColumn()
+    protected void printSection(final PrintContext ctx) throws Exception {
+        final TextSectionElement element = new TextSectionElement(ctx.target.getContentDom());
+        ctx.target.insertOdfElement(ctx.endParagraph.getOdfElement(), ctx.target, element, true);
+        ODTUtils.appendTable(Section.getInstance(element), ctx.elements.iterator(), new ArrayList<>(ctx.propertyNames));
     }
 }

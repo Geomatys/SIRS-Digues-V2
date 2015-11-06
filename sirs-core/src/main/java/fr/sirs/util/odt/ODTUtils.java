@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -65,6 +66,7 @@ import org.odftoolkit.simple.common.field.VariableField;
 import org.odftoolkit.simple.draw.Image;
 import org.odftoolkit.simple.style.MasterPage;
 import org.odftoolkit.simple.style.StyleTypeDefinitions;
+import org.odftoolkit.simple.table.TableContainer;
 
 /**
  * Utility methods used to create ODT templates, or fill ODT templates.
@@ -205,7 +207,7 @@ public class ODTUtils {
      *
      * @param template Source template to fill.
      * @param candidate The object to get data from to fill given template.
-     * 
+     *
      * @throws java.beans.IntrospectionException If input candidate cannot be analyzed.
      * @throws java.lang.ReflectiveOperationException If we fail reading candidate properties.
      */
@@ -237,6 +239,8 @@ public class ODTUtils {
             if (refClass != null && (value instanceof String)) {
                 value = previews.get((String) value).getLibelle();
             }
+
+            // TODO : introduce printers to improve string conversion.
             properties.put(desc.getName(), value);
         }
 
@@ -850,5 +854,17 @@ public class ODTUtils {
         if (fullPage) {
             newImage.getStyleHandler().setAchorType(StyleTypeDefinitions.AnchorType.TO_PAGE);
         }
+    }
+
+    /**
+     * Create a table at the end of the given {@link TableContainer}, and fill it
+     * with input data.
+     * @param target Document or section to put table into.
+     * @param data List of elements to extract properties from in order to fill table.
+     * @param propertyNames List of properties (as returned by {@link PropertyDescriptor#getName() } to use for table columns.
+     * If null or empty, all properties of input objects will be used.
+     */
+    public static void appendTable(final TableContainer target, final Iterator<Element> data, final List<String> propertyNames) {
+        // TODO
     }
 }

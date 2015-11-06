@@ -8,20 +8,46 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
+import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsCoreRuntimeException;
+import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.SQLQuery;
+import fr.sirs.util.FilteredIterable;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.Reference;
-import java.util.Iterator;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.logging.Level;
 import javafx.beans.property.*;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArgumentChecks;
+import org.geotoolkit.data.FeatureCollection;
+import org.geotoolkit.data.FeatureIterator;
+import org.geotoolkit.data.FeatureReader;
+import org.geotoolkit.data.FeatureStore;
+import org.geotoolkit.data.query.Query;
+import org.geotoolkit.data.query.QueryBuilder;
+import org.geotoolkit.db.JDBCFeatureStore;
+import org.geotoolkit.feature.Feature;
+import org.geotoolkit.feature.type.NamesExt;
 import org.odftoolkit.simple.TextDocument;
 import org.odftoolkit.simple.text.Paragraph;
+import org.opengis.util.GenericName;
 
 @JsonInclude(Include.NON_EMPTY)
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -41,10 +67,11 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
 
         sectionStart.applyHeading(true, 2);
 
-        printSection(target, sectionStart, sectionEnd, sourceData.iterator());
+        final PrintContext ctx = new PrintContext(target, sectionStart, sectionEnd, sourceData);
+        printSection(ctx);
     }
 
-    protected abstract void printSection(final TextDocument target, final Paragraph sectionStart, final Paragraph sectionEnd, final Iterator<Element> dataIt) throws Exception;
+    protected abstract void printSection(PrintContext context) throws Exception;
 
     @Override
     @Internal
@@ -275,6 +302,140 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
         target.setDesignation(getDesignation());
         target.setLibelle(getLibelle());
         target.setRequeteId(getRequeteId());
+    }
+
+    /**
+     * Contains all informations needed for current section printing :
+     * - target document
+     * - A start paragraph which determine beginning of the section
+     * - An end paragraph to tells where section must ends
+     * - Names of all the properties returned by this section filter
+     * - List of the elements to print (already filtered using this section query).
+     */
+    protected class PrintContext {
+
+        public final TextDocument target;
+        public final Paragraph startParagraph;
+        public final Paragraph endParagraph;
+        protected final HashSet<String> propertyNames;
+        public final Iterable<Element> elements;
+
+        public PrintContext(TextDocument target, Paragraph startParagraph, Paragraph endParagraph, Iterable<Element> elements) throws SQLException, DataStoreException {
+            ArgumentChecks.ensureNonNull("Target document", target);
+            ArgumentChecks.ensureNonNull("Start paragraph", startParagraph);
+            ArgumentChecks.ensureNonNull("End paragraph", endParagraph);
+            ArgumentChecks.ensureNonNull("Elements to print", elements);
+            this.target = target;
+            this.startParagraph = startParagraph;
+            this.endParagraph = endParagraph;
+
+            if (getRequeteId() == null) {
+                propertyNames = null;
+                this.elements = elements;
+            } else {
+                final SessionCore session = InjectorCore.getBean(SessionCore.class);
+                final Query query = QueryBuilder.language(JDBCFeatureStore.CUSTOM_SQL,
+                        session.getRepositoryForClass(SQLQuery.class).get(getRequeteId()).getSql(),
+                        NamesExt.create("query")
+                );
+
+                propertyNames = new HashSet<>();
+                for (final GenericName name : query.getPropertyNames()) {
+                    propertyNames.add(name.tip().toString());
+                }
+
+                final FeatureStore h2Store = H2Helper.getStore(session.getConnector());
+                final Predicate<Element> predicate;
+                // Analyze input filter to determine if we only need ID comparison, or if we must perform a full scan.
+                if (propertyNames.contains(SirsCore.ID_FIELD)) {
+                    final HashSet<String> ids = new HashSet<>();
+                    try (FeatureReader reader = h2Store.getFeatureReader(query)) {
+                        while (reader.hasNext()) {
+                            final Object pValue = reader.next().getPropertyValue(SirsCore.ID_FIELD);
+                            if (pValue instanceof String) {
+                                ids.add((String) pValue);
+                            }
+                        }
+                    }
+
+                    predicate = input -> ids.contains(input.getId());
+
+                } else {
+                    final HashMap<String, HashMap<String, PropertyDescriptor>> classProperties = new HashMap<>();
+                    final FeatureCollection filterValues = h2Store.createSession(false).getFeatureCollection(query);
+                    predicate = input -> {
+                        // Get list of input element properties.
+                        final String className = input.getClass().getCanonicalName();
+                        HashMap<String, PropertyDescriptor> properties = classProperties.get(className);
+                        if (properties == null) {
+                            final PropertyDescriptor[] descriptors;
+                            try {
+                                descriptors = Introspector.getBeanInfo(input.getClass()).getPropertyDescriptors();
+                            } catch (IntrospectionException ex) {
+                                SirsCore.LOGGER.log(Level.WARNING, "Invalid class : " + className, ex);
+                                return false;
+                            }
+                            properties = new HashMap<>(descriptors.length);
+                            for (final PropertyDescriptor desc : descriptors) {
+                                if (desc.getReadMethod() != null) {
+                                    desc.getReadMethod().setAccessible(true);
+                                    properties.put(desc.getName(), desc);
+                                }
+                            }
+                            classProperties.put(className, properties);
+                        }
+
+                        /* Now we can compare our element to filtered data. 2 steps :
+                         * - Ensure our input element has at least all the properties of the filtered features
+                         * - Ensure equality of all these properties with one of our filtered features.
+                         */
+                        final HashMap<String, Object> values = new HashMap<>(propertyNames.size());
+                        for (final String pName : propertyNames) {
+                            final PropertyDescriptor desc = properties.get(pName);
+                            if (desc == null) {
+                                return false;
+                            } else {
+                                try {
+                                    values.put(pName, desc.getReadMethod().invoke(input));
+                                } catch (Exception ex) {
+                                    throw new SirsCoreRuntimeException(ex);
+                                }
+                            }
+                        }
+
+                        boolean isEqual;
+                        try (final FeatureIterator reader = filterValues.iterator()) {
+                            while (reader.hasNext()) {
+                                isEqual = true;
+                                final Feature next = reader.next();
+                                for (final org.geotoolkit.feature.Property p : next.getProperties()) {
+                                    if (!Objects.equals(p.getValue(), values.get(p.getName().tip().toString()))) {
+                                        isEqual = false;
+                                        break;
+                                    }
+                                }
+                                if (isEqual)
+                                    return true;
+                            }
+                        }
+
+                        return false;
+                    };
+                }
+
+                this.elements = new FilteredIterable<>(elements, predicate);
+
+            }
+        }
+
+        /**
+         * Tells if a given property should be ignored when building report.
+         * @param propertyName Name of the property to test.
+         * @return True if given property should be ignored, false otherwise
+         */
+        public boolean ignoreProperty(final String propertyName) {
+            return (propertyNames != null && propertyNames.contains(propertyName));
+        }
     }
 }
 

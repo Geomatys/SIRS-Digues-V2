@@ -42,6 +42,11 @@ import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.jdbc.DBCPDataSource;
 
+/**
+ * TODO : Set as component to check rdbms integrity when querying data store.
+ * @author Alexis Manin (Geomatys)
+ * @author Olivier Nouguier (Geomatys)
+ */
 public class H2Helper {
 
     private static final Pattern UNMANAGED_IDS = Pattern.compile("^($|_).*");
