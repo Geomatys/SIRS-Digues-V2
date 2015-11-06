@@ -71,6 +71,15 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
         printSection(ctx);
     }
 
+    /**
+     * Execute printing of the current section according to given context data.
+     *
+     * Note : elements / properties given by input context has already been filtered
+     * user {@link #getRequeteId() }.
+     *
+     * @param context Printing context, contains all data needed to print section.
+     * @throws Exception
+     */
     protected abstract void printSection(PrintContext context) throws Exception;
 
     @Override
@@ -314,10 +323,25 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
      */
     protected class PrintContext {
 
+        /**
+         * Doccument to insert content into
+         */
         public final TextDocument target;
+        /**
+         * Sections must print their data after this paragraph.
+         */
         public final Paragraph startParagraph;
+        /**
+         * Sections must print their data before this paragraph.
+         */
         public final Paragraph endParagraph;
+        /**
+         * Names of the properties which should be used to print input elements.
+         */
         protected final HashSet<String> propertyNames;
+        /**
+         * Filtered list of elements which should be printed.
+         */
         public final Iterable<Element> elements;
 
         public PrintContext(TextDocument target, Paragraph startParagraph, Paragraph endParagraph, Iterable<Element> elements) throws SQLException, DataStoreException {
