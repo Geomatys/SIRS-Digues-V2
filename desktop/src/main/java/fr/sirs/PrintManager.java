@@ -1,35 +1,8 @@
 package fr.sirs;
 
 import com.sun.javafx.stage.StageHelper;
-import static fr.sirs.SIRS.AUTHOR_FIELD;
-import static fr.sirs.SIRS.BORNE_IDS_REFERENCE;
-import static fr.sirs.SIRS.COUCH_DB_DOCUMENT_FIELD;
-import static fr.sirs.SIRS.DATE_MAJ_FIELD;
-import static fr.sirs.SIRS.DOCUMENT_ID_FIELD;
-import static fr.sirs.SIRS.DesordreFields.ECHELLE_LIMINIMETRIQUE_REFERENCE;
-import static fr.sirs.SIRS.DesordreFields.OBSERVATIONS_REFERENCE;
-import static fr.sirs.SIRS.DesordreFields.OUVRAGE_HYDRAULIQUE_REFERENCE;
-import static fr.sirs.SIRS.DesordreFields.OUVRAGE_PARTICULIER_REFERENCE;
-import static fr.sirs.SIRS.DesordreFields.OUVRAGE_TELECOM_ENERGIE_REFERENCE;
-import static fr.sirs.SIRS.DesordreFields.OUVRAGE_VOIRIE_REFERENCE;
-import static fr.sirs.SIRS.DesordreFields.PRESTATION_REFERENCE;
-import static fr.sirs.SIRS.DesordreFields.RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE;
-import static fr.sirs.SIRS.DesordreFields.RESEAU_HYDRAULIQUE_FERME_REFERENCE;
-import static fr.sirs.SIRS.DesordreFields.RESEAU_TELECOM_ENERGIE_REFERENCE;
-import static fr.sirs.SIRS.DesordreFields.VOIE_DIGUE_REFERENCE;
-import static fr.sirs.SIRS.FOREIGN_PARENT_ID_FIELD;
-import static fr.sirs.SIRS.GEOMETRY_FIELD;
-import static fr.sirs.SIRS.GEOMETRY_MODE_FIELD;
-import static fr.sirs.SIRS.ID_FIELD;
-import static fr.sirs.SIRS.LATITUDE_MAX_FIELD;
-import static fr.sirs.SIRS.LATITUDE_MIN_FIELD;
-import static fr.sirs.SIRS.LONGITUDE_MAX_FIELD;
-import static fr.sirs.SIRS.LONGITUDE_MIN_FIELD;
-import static fr.sirs.SIRS.PARENT_FIELD;
-import static fr.sirs.SIRS.POSITION_DEBUT_FIELD;
-import static fr.sirs.SIRS.POSITION_FIN_FIELD;
-import static fr.sirs.SIRS.REVISION_FIELD;
-import static fr.sirs.SIRS.VALID_FIELD;
+import static fr.sirs.core.SirsCore.*;
+import static fr.sirs.core.SirsCore.DesordreFields.*;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
@@ -138,7 +111,7 @@ public class PrintManager {
 
     /**
      * Récuperer l'element imprimable actif.
-     * 
+     *
      * @return Printable
      */
     public static ReadOnlyObjectProperty<Printable> printableProperty() {
@@ -152,7 +125,7 @@ public class PrintManager {
             print(candidate);
         }
     }
-    
+
     public final void print(Object candidate){
         List<Element> elementsToPrint = null;
         FeatureCollection featuresToPrint = null;
@@ -185,7 +158,7 @@ public class PrintManager {
            SIRS.LOGGER.log(Level.WARNING, null, ex);
         }
     }
-    
+
     private final void printElements(List<Element> elementsToPrint){
         final List<String> avoidFields = new ArrayList<>();
         avoidFields.add(GEOMETRY_FIELD);
@@ -202,7 +175,7 @@ public class PrintManager {
         avoidFields.add(PARENT_FIELD);
         avoidFields.add(COUCH_DB_DOCUMENT_FIELD);
         avoidFields.add(GEOMETRY_MODE_FIELD);
-        
+
         for(final Element element : elementsToPrint){
             if(element instanceof TronconDigue){
                 if(!avoidFields.contains(BORNE_IDS_REFERENCE)) avoidFields.add(BORNE_IDS_REFERENCE);
@@ -226,7 +199,7 @@ public class PrintManager {
      * @param printVoirie
      */
     public final void printDesordres(final List<Desordre> desordres, final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie) {
-        
+
             final List avoidDesordreFields = new ArrayList<>();
             avoidDesordreFields.add(GEOMETRY_FIELD);
             avoidDesordreFields.add(DOCUMENT_ID_FIELD);
@@ -240,7 +213,7 @@ public class PrintManager {
             avoidDesordreFields.add(PARENT_FIELD);
             avoidDesordreFields.add(COUCH_DB_DOCUMENT_FIELD);
             avoidDesordreFields.add(OBSERVATIONS_REFERENCE);
-            
+
             avoidDesordreFields.add(ECHELLE_LIMINIMETRIQUE_REFERENCE);
             avoidDesordreFields.add(OUVRAGE_PARTICULIER_REFERENCE);
             avoidDesordreFields.add(RESEAU_TELECOM_ENERGIE_REFERENCE);
@@ -251,11 +224,11 @@ public class PrintManager {
             avoidDesordreFields.add(OUVRAGE_VOIRIE_REFERENCE);
             avoidDesordreFields.add(VOIE_DIGUE_REFERENCE);
             avoidDesordreFields.add(PRESTATION_REFERENCE);
-            
+
             avoidDesordreFields.add(VALID_FIELD);
             avoidDesordreFields.add(AUTHOR_FIELD);
             avoidDesordreFields.add(DATE_MAJ_FIELD);
-            
+
             final List<String> observationFields = new ArrayList<>();
             observationFields.add("designation");
             observationFields.add("urgenceId");
@@ -264,7 +237,7 @@ public class PrintManager {
             observationFields.add("date");
             observationFields.add("evolution");
             observationFields.add("suite");
-            
+
             final List<String> prestationFields = new ArrayList<>();
             prestationFields.add("designation");
             prestationFields.add("libelle");
@@ -275,22 +248,22 @@ public class PrintManager {
             prestationFields.add("date_debut");
             prestationFields.add("date_fin");
             prestationFields.add("commentaire");
-            
+
             final List<String> reseauFields = new ArrayList<>();
             reseauFields.add("designation");
             reseauFields.add("libelle");
             reseauFields.add("date_debut");
             reseauFields.add("date_fin");
             reseauFields.add("commentaire");
-            
-        try{  
+
+        try{
             final File fileToPrint = PrinterUtilities.printDisorders(
-                    avoidDesordreFields, 
-                    observationFields, 
-                    prestationFields, 
+                    avoidDesordreFields,
+                    observationFields,
+                    prestationFields,
                     reseauFields,
-                    Injector.getSession().getPreviews(), 
-                    new SirsStringConverter(), 
+                    Injector.getSession().getPreviews(),
+                    new SirsStringConverter(),
                     desordres, printPhoto, printReseauOuvrage, printVoirie);
             if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
         } catch (Exception ex) {
@@ -365,5 +338,5 @@ public class PrintManager {
             SIRS.LOGGER.log(Level.WARNING, null, ex);
         }
     }
-    
+
 }

@@ -170,11 +170,6 @@ public class PluginAotCot extends Plugin {
         }
         return lst;
     }
-
-    @Override
-    public SQLHelper getSQLHelper() {
-        return AotCotSqlHelper.getInstance();
-    }
     
     private class ViewFormObjetItem extends MenuItem {
 

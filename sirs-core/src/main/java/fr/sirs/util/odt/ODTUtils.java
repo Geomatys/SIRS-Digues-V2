@@ -1,12 +1,9 @@
 package fr.sirs.util.odt;
 
-import fr.sirs.core.InjectorCore;
-import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
-import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Element;
-import fr.sirs.util.property.Reference;
+import fr.sirs.core.model.LabelMapper;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.beans.IntrospectionException;
@@ -18,18 +15,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -66,6 +65,9 @@ import org.odftoolkit.simple.common.field.VariableField;
 import org.odftoolkit.simple.draw.Image;
 import org.odftoolkit.simple.style.MasterPage;
 import org.odftoolkit.simple.style.StyleTypeDefinitions;
+import org.odftoolkit.simple.table.Cell;
+import org.odftoolkit.simple.table.Row;
+import org.odftoolkit.simple.table.Table;
 import org.odftoolkit.simple.table.TableContainer;
 
 /**
@@ -212,46 +214,17 @@ public class ODTUtils {
      * @throws java.lang.ReflectiveOperationException If we fail reading candidate properties.
      */
     public static void fillTemplate(final TextDocument template, final Element candidate) throws IntrospectionException, ReflectiveOperationException {
-        //final TextNavigation search = new TextNavigation(VARIABLE_SEARCH, document);
-
         // We iterate through input properties to extract all mappable attributes.
         final PropertyDescriptor[] descriptors = Introspector.getBeanInfo(candidate.getClass()).getPropertyDescriptors();
-        final HashMap<String, Object> properties = new HashMap<>(descriptors.length);
-        final Previews previews = InjectorCore.getBean(SessionCore.class).getPreviews();
+        VariableField var;
+        String pName;
         for (final PropertyDescriptor desc : descriptors) {
-            final Method readMethod = desc.getReadMethod();
-            if (readMethod == null) {
-                continue; // Non readble attribute, skip.
-            } else {
-                readMethod.setAccessible(true);
-            }
-
-            // Check if we've got a real data or a link.
-            final Reference ref = readMethod.getAnnotation(Reference.class);
-            final Class<?> refClass;
-            if (ref != null) {
-                refClass = ref.ref();
-            } else {
-                refClass = null;
-            }
-
-            Object value = readMethod.invoke(candidate);
-            if (refClass != null && (value instanceof String)) {
-                value = previews.get((String) value).getLibelle();
-            }
-
-            // TODO : introduce printers to improve string conversion.
-            properties.put(desc.getName(), value);
-        }
-
-        Object value;
-        for (final Map.Entry<String, Object> entry : properties.entrySet()) {
-            value = entry.getValue();
-            VariableField var = template.getVariableFieldByName(entry.getKey());
+            pName = desc.getName();
+            var = template.getVariableFieldByName(pName);
             if (var != null) {
-                var.updateField(value == null ? "N/A" : value.toString(), null);
+                var.updateField(Printers.getPrinter(pName).print(candidate, desc), null);
             } else {
-                SirsCore.LOGGER.fine("No variable found for name "+entry.getKey());
+                SirsCore.LOGGER.fine("No variable found for name "+pName);
             }
         }
     }
@@ -768,11 +741,20 @@ public class ODTUtils {
      *
      * @param holder Document to insert image into.
      * @param image Image to put.
+     * @throws java.io.IOException If we cannot write input image.
      */
     public static void appendImage(final TextDocument holder, final RenderedImage image) throws IOException {
         ODTUtils.appendImage(holder, image, false);
     }
 
+    /**
+     * Insert an image into given document.
+     * @param holder Document to insert image into.
+     * @param image Image to put in
+     * @param fullPage True if given image should be placed on a new page, alone.
+     * alse to integrate it just below previous element in the document.
+     * @throws IOException If input image cannot be written in given document.
+     */
     public static void appendImage(final TextDocument holder, final RenderedImage image, final boolean fullPage) throws IOException {
         final Path tmpImage = Files.createTempFile("img", ".png");
         if (!ImageIO.write(image, "png", tmpImage.toFile())) {
@@ -859,12 +841,94 @@ public class ODTUtils {
     /**
      * Create a table at the end of the given {@link TableContainer}, and fill it
      * with input data.
+     *
+     * Note : if no property listing is given, no ordering will be performed on columns.
+     *
      * @param target Document or section to put table into.
      * @param data List of elements to extract properties from in order to fill table.
      * @param propertyNames List of properties (as returned by {@link PropertyDescriptor#getName() } to use for table columns.
      * If null or empty, all properties of input objects will be used.
+     * @throws java.beans.IntrospectionException If an error occurs while analyzing properties of an element.
+     * @throws java.lang.ReflectiveOperationException If an error occurs while accessing an element property.
      */
-    public static void appendTable(final TableContainer target, final Iterator<Element> data, final List<String> propertyNames) {
-        // TODO
+    public static void appendTable(final TableContainer target, final Iterator<Element> data, final List<String> propertyNames) throws IntrospectionException, ReflectiveOperationException {
+        ArgumentChecks.ensureNonNull("Target document", target);
+        if (!data.hasNext()) {
+            return; // No elements, do not create table
+        }
+
+        Element element = data.next();
+        Class<? extends Element> elementClass = element.getClass();
+        LinkedHashMap<String, PropertyDescriptor> elementProperties = SirsCore.listSimpleProperties(elementClass);
+        final HashMap<String, LinkedHashMap<String, PropertyDescriptor>> descriptorsByClass = new HashMap<>();
+        descriptorsByClass.put(elementClass.getCanonicalName(), elementProperties);
+
+        final List<String> headers;
+        if (propertyNames == null) {
+            headers = new ArrayList<>(elementProperties.keySet());
+        } else {
+            headers = propertyNames;
+            elementProperties.keySet().retainAll(headers);
+        }
+
+        // Create table and headers
+        final Table table = target.addTable(1, headers.size());
+        LabelMapper lMapper = LabelMapper.get(elementClass);
+        Cell currentCell;
+        for (int i = 0 ; i < headers.size() ; i++) {
+            currentCell = table.getCellByPosition(i, 0);
+            currentCell.addParagraph(lMapper.mapPropertyName(headers.get(i)))
+                    .getFont().setFontStyle(StyleTypeDefinitions.FontStyle.BOLD);
+        }
+
+        // Fill first line
+        Row dataRow = table.appendRow();
+        String propertyName;
+        for (int i = 0 ; i < headers.size() ; i++) {
+            propertyName = headers.get(i);
+            dataRow.getCellByIndex(i).addParagraph(
+                    Printers.getPrinter(propertyName).print(element, elementProperties.get(propertyName)));
+        }
+
+        // Fill remaining lines
+        while (data.hasNext()) {
+            element = data.next();
+            elementClass = element.getClass();
+            lMapper = LabelMapper.get(elementClass);
+            /*
+             * If current object is a new type of element, we retrieve its properties
+             * and add necessary columns in case none have been specified as input.
+            */
+            elementProperties = descriptorsByClass.get(elementClass.getCanonicalName());
+            if (elementProperties == null) {
+                elementProperties = SirsCore.listSimpleProperties(elementClass);
+                descriptorsByClass.put(elementClass.getCanonicalName(), elementProperties);
+                // If no properties have been specified, we put all properties of the current object in the table.
+                if (propertyNames == null) {
+                    final Set<String> tmpKeys = elementProperties.keySet();
+                    for (final String key : tmpKeys) {
+                        if (!headers.contains(key)) {
+                            headers.add(key);
+                            table.appendColumn().getCellByIndex(0).addParagraph(lMapper.mapPropertyName(key))
+                                    .getFont().setFontStyle(StyleTypeDefinitions.FontStyle.BOLD);
+                        }
+                    }
+                } else {
+                    elementProperties.keySet().retainAll(headers);
+                }
+            }
+
+            // Fill data
+            dataRow = table.appendRow();
+            PropertyDescriptor desc;
+            for (int i = 0; i < headers.size(); i++) {
+                propertyName = headers.get(i);
+                desc = elementProperties.get(propertyName);
+                if (desc != null) {
+                    dataRow.getCellByIndex(i).addParagraph(
+                            Printers.getPrinter(propertyName).print(element, elementProperties.get(propertyName)));
+                }
+            }
+        }
     }
 }

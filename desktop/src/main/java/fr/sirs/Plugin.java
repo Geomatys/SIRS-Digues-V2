@@ -4,7 +4,6 @@ package fr.sirs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.theme.Theme;
 import fr.sirs.util.FXFreeTab;
@@ -29,59 +28,59 @@ import org.geotoolkit.map.MapItem;
  * Un plugin est un ensemble de thèmes et de couches de données cartographique.
  * - Les thèmes se retrouvent dans les menus de la barre d'outil principale de l'application.
  * - Les couches cartographiques seront ajoutées dans la vue cartographique.
- * 
+ *
  * @author Johann Sorel (Geomatys)
  */
 public abstract class Plugin {
-    
+
     public static String PLUGIN_FLAG = "pluginSirs";
-    
+
     protected String name;
     /** Message affiché lors du chargement du plugin */
     protected final SimpleStringProperty loadingMessage = new SimpleStringProperty("");
     /** Liste des themes géré par le plugin */
     protected final List<Theme> themes = new ArrayList<>();
-        
+
     /**
      * Récupérer la session SIRS en cours.
-     * 
+     *
      * @return Session, jamais nulle
      */
     public Session getSession() {
         return Injector.getBean(Session.class);
     }
-    
+
     /**
      * Récupérer la liste des couches de données à ajouter dans la vue
      * cartographique.
-     * 
+     *
      * @return Liste de MapItem, jamais nulle
      */
     public List<MapItem> getMapItems() {
         return Collections.EMPTY_LIST;
     }
-    
+
     /**
      * Message affiché lors du chargement du plugin.
-     * 
+     *
      * @return SimpleStringProperty, jamais nulle
      */
     public final ReadOnlyStringProperty getLoadingMessage() {
         return loadingMessage;
     }
-    
+
     /**
      * Liste des themes géré par le plugin.
-     * 
+     *
      * @return Liste de Theme, jamais nulle
      */
     public List<Theme> getThemes() {
         return themes;
     }
-    
+
     /**
      * Récupère les actions disponibles pour un object selectionné sur la carte.
-     * 
+     *
      * @param candidate objet selectionné
      * @return Liste d'action possible, jamais nulle
      */
@@ -108,13 +107,13 @@ public abstract class Plugin {
 
     /**
      * Renvoie l'image du plugin, si une image a été fournie. Peut être {@code null}.
-     * @return 
+     * @return
      */
     public abstract Image getImage();
 
     /**
      * Renvoie une éventuelle représentation du modèle du module sous forme d'image.
-     * 
+     *
      * @return Un optional contenant l'image éventuelle du modèle du module.
      *
      * @throws java.io.IOException Si le chargement de l'image échoue.
@@ -128,27 +127,20 @@ public abstract class Plugin {
      * Cette méthode est appelée au démarrage de l'application.
      * Il est recommandé de remplir et de mettre à jour la valeur de 'loadingMessage'
      * au cours du chargement.
-     * 
+     *
      * @throws java.lang.Exception : en cas d'erreur de chargement du plugin
      */
     public abstract void load() throws Exception;
-    
+
     /**
      * Opérations à effectuer après importation. Il s'agit par exemple de la
      * génération des vues.
-     * 
+     *
      * Par défaut, on ne fait rien.
-     * 
-     * @throws Exception 
+     *
+     * @throws Exception
      */
     public void afterImport() throws Exception {}
-    
-    /**
-     * SQLHelper chargé de l'export des données dans la base RDBMS.
-     * 
-     * @return 
-     */
-    public abstract SQLHelper getSQLHelper();
 
     /**
      * This method declares the plugin is able to display the type of TronconDigue
@@ -160,36 +152,36 @@ public abstract class Plugin {
     public boolean handleTronconType(final Class<? extends Element> tronconType){
         return false;
     }
-    
+
     /**
-     * This method opens a pane for the TronconDigue given as a parameter. It 
-     * garantees to open the right pane if and only if the method 
-     * handleTronconType() had returned "true" for the runtime type of the 
+     * This method opens a pane for the TronconDigue given as a parameter. It
+     * garantees to open the right pane if and only if the method
+     * handleTronconType() had returned "true" for the runtime type of the
      * troncon.
-     * 
+     *
      * Note if handleTronconType had returned "false", this method result is
-     * undefined. The default implementation returns null, but other 
+     * undefined. The default implementation returns null, but other
      * redefinitions could return a pane without error but which doesn't exactly
      * match the runtime type of the given TronconDigue.
-     * 
-     * For instance, it may be possible to open a Berge (which inherits 
-     * TronconDigue) using openTronconPane() of the CorePlugin, which is 
-     * designed for TronconDigue. To avoid this "inconsistent" case, 
+     *
+     * For instance, it may be possible to open a Berge (which inherits
+     * TronconDigue) using openTronconPane() of the CorePlugin, which is
+     * designed for TronconDigue. To avoid this "inconsistent" case,
      * handleTronconType() of the CorePlugin must return false for Berge class.
-     * 
+     *
      * @param element
-     * @return 
+     * @return
      */
     public FXFreeTab openTronconPane(final Element element){
         return null;
     }
-    
+
     /**
      * Cherche une configuration valide pour le plugin courant. Par défaut, la
      * méthode cherche un JSON descriptif dans le dossier des plugins. Si aucun
      * fichier ne peut être utilisé, on essaie de construire un descriptif grâce
      * aux informations de la classe Java.
-     * @return 
+     * @return
      */
     public PluginInfo getConfiguration() {
         final String pluginName = name == null? this.getClass().getSimpleName() : name;
@@ -223,5 +215,5 @@ public abstract class Plugin {
         }
         return info;
     }
-       
+
 }

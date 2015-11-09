@@ -128,11 +128,6 @@ public class PluginReglementary extends Plugin {
     }
 
     @Override
-    public SQLHelper getSQLHelper() {
-        return ReglementarySqlHelper.getInstance();
-    }
-
-    @Override
     public Optional<Image> getModelImage() throws IOException {
         final Image image;
 

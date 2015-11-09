@@ -177,11 +177,6 @@ public class PluginDependance extends Plugin {
     }
 
     @Override
-    public SQLHelper getSQLHelper() {
-        return DependanceSqlHelper.getInstance();
-    }
-
-    @Override
     public Optional<Image> getModelImage() throws IOException {
         final Image image;
 

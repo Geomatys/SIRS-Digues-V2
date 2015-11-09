@@ -39,12 +39,6 @@ public class PluginCarto extends Plugin {
     }
 
     @Override
-    public SQLHelper getSQLHelper() {
-        // TODO: renvoyer le SQLHelper du plugin pour l'export RDBMS !
-        return null;
-    }
-
-    @Override
     public Optional<Image> getModelImage() throws IOException {
         final Image image;
 

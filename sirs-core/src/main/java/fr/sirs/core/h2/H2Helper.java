@@ -1,7 +1,6 @@
 package fr.sirs.core.h2;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,10 +15,8 @@ import java.util.List;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.sis.storage.DataStoreException;
 import org.ektorp.CouchDbConnector;
-import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.db.h2.H2FeatureStoreFactory;
 import org.geotoolkit.parameter.Parameters;
-import org.h2.util.JdbcUtils;
 import org.h2gis.h2spatial.CreateSpatialExtension;
 import org.opengis.parameter.ParameterValueGroup;
 
@@ -28,111 +25,218 @@ import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.sql.CoreSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.logging.Level;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewResult;
 import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.jdbc.DBCPDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * TODO : Set as component to check rdbms integrity when querying data store.
+ *
  * @author Alexis Manin (Geomatys)
  * @author Olivier Nouguier (Geomatys)
  */
+@Component
 public class H2Helper {
 
     private static final Pattern UNMANAGED_IDS = Pattern.compile("^($|_).*");
 
-    private static JDBCFeatureStore STORE = null;
+    private JDBCFeatureStore store;
+    private final CouchDbConnector couchDb;
+    private final List<SQLHelper> sqlHelpers;
 
-    private static SQLHelper[] sqlHelpers;
+    private Task<Boolean> exportTask;
 
-    public static synchronized Task init(final SQLHelper... sqlHelpers) {
+    @Autowired
+    private H2Helper(final CouchDbConnector connector, final List<SQLHelper> helpers) {
+        couchDb = connector;
 
-        if (STORE != null) {
-            try {
-                Connection cnx = STORE.getDataSource().getConnection();
-                cnx.createStatement().executeUpdate("SHUTDOWN");
-
-                //STORE.close();
-            } catch (Exception ex) {
-                SirsCore.LOGGER.log(Level.WARNING, "Cannot close H2 feature store.", ex);
+        // Put core helper in first position.
+        if (!helpers.isEmpty() && !(helpers.get(0) instanceof CoreSqlHelper)) {
+            for (int i = 1; i < helpers.size(); i++) {
+                if (helpers.get(i) instanceof CoreSqlHelper) {
+                    helpers.add(0, helpers.remove(i));
+                    break;
+                }
             }
-            STORE = null;
         }
-
-        H2Helper.sqlHelpers = sqlHelpers;
-
-        return TaskManager.INSTANCE.submit(new H2Helper.ExportToRDBMS(InjectorCore.getBean(CouchDbConnector.class)));
+        sqlHelpers = helpers;
     }
 
-    public static Connection createConnection(CouchDbConnector connector) throws SQLException {
-        final Path file = getDBFile(connector);
-        final Connection connection = DriverManager.getConnection("jdbc:h2:" + file.toString(), "sirs$user", "sirs$pwd");
-        CreateSpatialExtension.initSpatialExtension(connection);
+    /**
+     * Export data from current CouchDB to an H2 dump. If dump have already been
+     * performed yet, it will be erased and done a second time. However, only
+     * one export can be performed at a time, and returned task
+     *
+     * @return The task in charge of export. Returned task is already submitted
+     * for execution. As only one export can be performed at a time, the
+     * returned task could be a process initiated by another thread / component.
+     */
+    public synchronized Task<Boolean> export() {
+        if (exportTask == null || exportTask.isDone()) {
+            exportTask = new ExportToRDBMS();
+        }
+
+        TaskManager.MockTask<Boolean> exportState = new TaskManager.MockTask<>(() -> exportTask.isRunning());
+        if (Platform.isFxApplicationThread()) {
+            exportState.run();
+        } else {
+            Platform.runLater(exportState);
+        }
+        final Boolean running;
+        try {
+            running = exportState.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            throw new SirsCoreRuntimeException("Cannot check SQL export task status", ex);
+        }
+
+        if (Boolean.TRUE.equals(running)) {
+            return exportTask;
+        } else {
+            return TaskManager.INSTANCE.submit(exportTask);
+        }
+    }
+
+    private Connection createConnection() throws SQLException {
+        final Connection connection = DriverManager.getConnection("jdbc:h2:" + getDBFile().toString(), "sirs$user", "sirs$pwd");
         return connection;
     }
 
-    public static synchronized FeatureStore getStore(CouchDbConnector connector) throws SQLException, DataStoreException {
-        if (STORE == null) {
-            final Path file = getDBFile(connector);
-            final BasicDataSource ds = new BasicDataSource();
-            ds.setUrl("jdbc:h2:" + file.toString());
-            ds.setUsername("sirs$user");
-            ds.setPassword("sirs$pwd");
+    public synchronized Task<JDBCFeatureStore> getStore() throws SQLException, DataStoreException {
+        return TaskManager.INSTANCE.submit(new Task<JDBCFeatureStore>() {
 
-            final ParameterValueGroup params = H2FeatureStoreFactory.PARAMETERS_DESCRIPTOR.createValue();
-            Parameters.getOrCreate(H2FeatureStoreFactory.USER, params).setValue("sirs$user");
-            Parameters.getOrCreate(H2FeatureStoreFactory.PASSWORD, params).setValue("sirs$pwd");
-            Parameters.getOrCreate(H2FeatureStoreFactory.PORT, params).setValue(5555);
-            Parameters.getOrCreate(H2FeatureStoreFactory.DATABASE, params).setValue("sirs");
-            Parameters.getOrCreate(H2FeatureStoreFactory.HOST, params).setValue("localhost");
-            Parameters.getOrCreate(H2FeatureStoreFactory.NAMESPACE, params).setValue("no namespace");
-            Parameters.getOrCreate(H2FeatureStoreFactory.SIMPLETYPE, params).setValue(Boolean.FALSE);
-            Parameters.getOrCreate(H2FeatureStoreFactory.DATASOURCE, params).setValue(new DBCPDataSource(ds));
+            @Override
+            protected JDBCFeatureStore call() throws Exception {
+                /**
+                 * First, we check that database have already been exported. If not,
+                 * we launch a new db export.
+                 */
+                synchronized (H2Helper.this) {
+                    if (exportTask == null) {
+                        export();
+                    }
+                }
 
-            STORE = (JDBCFeatureStore) new H2FeatureStoreFactory().create(params);
-        }
+                Platform.runLater(() -> {
+                    if (exportTask.isRunning()) {
+                        updateTitle(exportTask.getTitle());
+                        exportTask.messageProperty().addListener((obs, oldValue, newValue) -> updateMessage(newValue));
+                    }
+                });
 
-        return STORE;
+                // Ensure db export is finished before going further.
+                if (!exportTask.get()) {
+                    throw new IllegalStateException("Failed to export database !");
+                }
+
+                updateTitle("Connexion à la base de donnée");
+                updateMessage("Connexion à la base de donnée");
+
+                // Now we can create the data store. Ensure thread synchronization to avoid multiple initializations.
+                synchronized (H2Helper.this) {
+                    if (store == null) {
+                        final Path file = getDBFile();
+                        final BasicDataSource ds = new BasicDataSource();
+                        ds.setUrl("jdbc:h2:" + file.toString());
+                        ds.setUsername("sirs$user");
+                        ds.setPassword("sirs$pwd");
+
+                        final ParameterValueGroup params = H2FeatureStoreFactory.PARAMETERS_DESCRIPTOR.createValue();
+                        Parameters.getOrCreate(H2FeatureStoreFactory.USER, params).setValue("sirs$user");
+                        Parameters.getOrCreate(H2FeatureStoreFactory.PASSWORD, params).setValue("sirs$pwd");
+                        Parameters.getOrCreate(H2FeatureStoreFactory.PORT, params).setValue(5555);
+                        Parameters.getOrCreate(H2FeatureStoreFactory.DATABASE, params).setValue("sirs");
+                        Parameters.getOrCreate(H2FeatureStoreFactory.HOST, params).setValue("localhost");
+                        Parameters.getOrCreate(H2FeatureStoreFactory.NAMESPACE, params).setValue("no namespace");
+                        Parameters.getOrCreate(H2FeatureStoreFactory.SIMPLETYPE, params).setValue(Boolean.FALSE);
+                        Parameters.getOrCreate(H2FeatureStoreFactory.DATASOURCE, params).setValue(new DBCPDataSource(ds));
+
+                        store = (JDBCFeatureStore) new H2FeatureStoreFactory().create(params);
+                    }
+
+                    return store;
+                }
+            }
+        });
     }
 
-    public static Path getDBFile(CouchDbConnector connector) {
-        final SirsDBInfo sirs = connector.get(SirsDBInfo.class, INFO_DOCUMENT_ID);
-        Path file = SirsCore.H2_PATH.resolve(URLEncoder.encode(sirs.getUuid()));
+    /**
+     *
+     * @return Path to the file storing H2 dump for this CouchDB database.
+     */
+    public Path getDBFile() {
+        final SirsDBInfo sirs = couchDb.get(SirsDBInfo.class, INFO_DOCUMENT_ID);
+        Path file = SirsCore.H2_PATH.resolve(sirs.getUuid());
         return file;
     }
 
-    public static void dumbSchema(Connection connection, Path file) throws SQLException {
-        Statement stat = null;
-        String create = "SCRIPT TO '" + file.resolve("sirs-schema.sql") + "' ";
-        try {
-            stat = connection.createStatement();
-            stat.execute(create);
+    /**
+     *
+     * Dump database in a script file. Dump is performed asynchonously using a task.
+     * @param file File to put dump into.
+     * @return The task performing export (task is already running).
+     */
+    public Task dumbSchema(Path file) {
+        return TaskManager.INSTANCE.submit(new Task() {
 
-        } finally {
-            JdbcUtils.closeSilently(stat);
-            JdbcUtils.closeSilently(connection);
-        }
+            @Override
+            protected Object call() throws Exception {
+                /**
+                 * First, we check that database have already been exported. If
+                 * not, we launch a new db export.
+                 */
+                synchronized (H2Helper.this) {
+                    if (exportTask == null) {
+                        export();
+                    }
+                }
+
+                Platform.runLater(() -> {
+                    if (exportTask.isRunning()) {
+                        updateTitle(exportTask.getTitle());
+                        exportTask.messageProperty().addListener((obs, oldValue, newValue) -> updateMessage(newValue));
+                    }
+                });
+
+                // Ensure db export is finished before going further.
+                if (!exportTask.get()) {
+                    throw new IllegalStateException("Failed to export database !");
+                }
+
+                updateTitle("Export SQL");
+                updateMessage("Export de la base SQL dans un script");
+
+                final String create = "SCRIPT TO '" + file.resolve("sirs-schema.sql") + "' ";
+                try (final Connection con = createConnection();
+                        final Statement stat = con.createStatement()) {
+                    stat.execute(create);
+                }
+
+                return null;
+            }
+        });
     }
 
     /**
      * A task which export a couchDb database content to SQL database.
      */
-    public static class ExportToRDBMS extends Task<Boolean> {
+    public class ExportToRDBMS extends Task<Boolean> {
 
-        private final CouchDbConnector couchConnector;
-
-        public ExportToRDBMS(CouchDbConnector connector) {
-            couchConnector = connector;
+        public ExportToRDBMS() {
             updateTitle("Export vers la base RDBMS");
         }
 
@@ -141,7 +245,20 @@ public class H2Helper {
             updateMessage("Nettoyage de la base.");
             updateProgress(-1, -1);
 
-            Path file = getDBFile(couchConnector);
+            synchronized (H2Helper.this) {
+                if (store != null) {
+                    try {
+                        Connection cnx = store.getDataSource().getConnection();
+                        cnx.createStatement().executeUpdate("SHUTDOWN");
+                    } finally {
+                        store.close();
+                        store = null;
+                    }
+                    store = null;
+                }
+            }
+
+            final Path file = getDBFile();
             if (Files.isDirectory(file.getParent())) {
                 Files.walkFileTree(file.getParent(), new SimpleFileVisitor<Path>() {
                     @Override
@@ -160,12 +277,13 @@ public class H2Helper {
                 });
             }
 
-            if (sqlHelpers == null || sqlHelpers.length == 0) {
+            if (sqlHelpers == null || sqlHelpers.isEmpty()) {
                 return false;
             }
 
-            final Connection conn = createConnection(couchConnector);
+            final Connection conn = createConnection();
             try {
+                CreateSpatialExtension.initSpatialExtension(conn);
                 String create = "SET REFERENTIAL_INTEGRITY FALSE ";
                 try (final Statement stat = conn.createStatement()) {
                     stat.execute(create);
@@ -190,7 +308,7 @@ public class H2Helper {
 
                 // Compute number of documents to export
                 updateMessage("Analyse des éléments à exporter");
-                List<String> allDocIds = couchConnector.getAllDocIds();
+                List<String> allDocIds = couchDb.getAllDocIds();
                 Iterator<String> idIt = allDocIds.iterator();
                 while (idIt.hasNext()) {
                     if (UNMANAGED_IDS.matcher(idIt.next()).matches()) {
@@ -199,7 +317,7 @@ public class H2Helper {
                 }
 
                 // Start document insertion
-                DocHelper docHelper = new DocHelper(couchConnector);
+                DocHelper docHelper = new DocHelper(couchDb);
                 try (final StreamingViewResult allDocsAsStream = docHelper.getAllDocsAsStream()) {
 
                     Iterator<ViewResult.Row> iterator = allDocsAsStream.iterator();

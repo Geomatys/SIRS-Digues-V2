@@ -45,11 +45,6 @@ public class PluginDocument extends Plugin {
     }
 
     @Override
-    public SQLHelper getSQLHelper() {
-        return DocumentSqlHelper.getInstance();
-    }
-
-    @Override
     public Optional<Image> getModelImage() throws IOException {
         final Image image;
 

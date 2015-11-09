@@ -59,8 +59,6 @@ import fr.sirs.core.model.TalusRisberme;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
-import fr.sirs.core.model.sql.CoreSqlHelper;
-import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.digue.DiguesTab;
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DocumentTheme;
@@ -432,11 +430,6 @@ public class CorePlugin extends Plugin {
         }
 
         return items;
-    }
-
-    @Override
-    public SQLHelper getSQLHelper() {
-        return CoreSqlHelper.getInstance();
     }
 
     @Override

@@ -91,12 +91,6 @@ public class PluginBerge extends Plugin {
     }
 
     @Override
-    public SQLHelper getSQLHelper() {
-        handleTronconType(Berge.class);
-        return BergeSqlHelper.getInstance();
-    }
-
-    @Override
     public List<ToolBar> getMapToolBars(final FXMapPane mapPane) {
         return Collections.singletonList(new BergeToolBar(mapPane.getUiMap()));
     }

@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.sirs.core.model.Element;
+import org.ektorp.Options;
 import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewQuery;
 
@@ -22,16 +23,16 @@ public class DocHelper {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DocHelper.class);
-    
+
     private final CouchDbConnector connector;
-    
+
     public DocHelper(CouchDbConnector db) {
         connector = db;
     }
 
     private Optional<String> getAsString(String id, Optional<String> rev) {
         try (final InputStream inputStream = rev.isPresent() ?
-                connector.getAsStream(id, rev.get()) :
+                connector.getAsStream(id, new Options().revision(rev.get())) :
                 connector.getAsStream(id)) {
             final StringWriter stringWriter = new StringWriter();
             IOUtils.copy(inputStream, stringWriter, "UTF-8");
@@ -41,7 +42,7 @@ public class DocHelper {
             return Optional.empty();
         }
     }
-    
+
     private Optional<Element> getElement(String id, Optional<String> rev) {
         final Optional<String> str = getAsString(id, rev);
 
@@ -51,7 +52,7 @@ public class DocHelper {
                 .flatMap(DocHelper::asClass)
                 .flatMap(clazz -> toElement(str.get(), clazz));
     }
-    
+
     public Optional<Element> toElement(final JsonNode node) {
         final JsonNode classNode = node.get("@class");
         if (classNode != null) {
@@ -69,7 +70,7 @@ public class DocHelper {
         }
         return Optional.empty();
     }
-    
+
     private Optional<Element> toElement(String str, Class<?> clazz) {
         try {
             return Optional.of((Element) objectMapper.reader(clazz).readValue(str));
@@ -86,7 +87,7 @@ public class DocHelper {
             return Optional.empty();
         }
     }
-    
+
     public static Optional<Class<?>> asClass(String clazz) {
         try {
             return Optional.of(Class.forName(clazz, true, Thread.currentThread().getContextClassLoader()));
@@ -99,7 +100,7 @@ public class DocHelper {
     public Optional<Element> getElement(String id) {
         return getElement(id, Optional.empty());
     }
-    
+
     public StreamingViewResult getAllDocsAsStream() {
         return connector.queryForStreamingView(new ViewQuery().allDocs().includeDocs(true));
     }

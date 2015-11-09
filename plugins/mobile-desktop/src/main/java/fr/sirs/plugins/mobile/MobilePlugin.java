@@ -59,11 +59,6 @@ public class MobilePlugin extends Plugin {
         return PLUGIN_ICON;
     }
 
-    @Override
-    public SQLHelper getSQLHelper() {
-        return null;
-    }
-
     /**
      * Resolve suffix path over a given prefix. If prefix path contains a part
      * of given suffix, we truncate suffix to resolve its non-common parts over

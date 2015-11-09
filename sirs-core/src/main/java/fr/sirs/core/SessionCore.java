@@ -7,6 +7,7 @@ import fr.sirs.core.component.PositionProfilTraversRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.component.ReferenceUsageRepository;
+import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.AvecPhotos;
@@ -429,7 +430,7 @@ public class SessionCore implements ApplicationContextAware {
     /**
      * Search in {@link Element} {@link ServiceLoader} for all implementations of
      * a given type.
-     * 
+     *
      * @param <T> Type of object to search for.
      * @param target Class to find implementations for.
      * @return List of concrete classes inheriting {@link Element} and given target.
@@ -658,5 +659,10 @@ public class SessionCore implements ApplicationContextAware {
         } else {
             throw new IllegalArgumentException("An user already exists for login " + login);
         }
+    }
+
+
+    public H2Helper getH2Helper() {
+        return applicationContext.getBean(H2Helper.class);
     }
 }

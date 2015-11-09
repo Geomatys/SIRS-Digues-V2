@@ -102,11 +102,6 @@ public class PluginLit extends Plugin {
     }
 
     @Override
-    public SQLHelper getSQLHelper() {
-        return LitSqlHelper.getInstance();
-    }
-
-    @Override
     public List<ToolBar> getMapToolBars(final FXMapPane mapPane) {
         return Collections.singletonList(new LitToolBar(mapPane.getUiMap()));
     }

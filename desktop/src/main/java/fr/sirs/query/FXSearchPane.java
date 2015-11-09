@@ -4,24 +4,21 @@ package fr.sirs.query;
 import fr.sirs.CorePlugin;
 import static fr.sirs.FXMainFrame.modelStage;
 import fr.sirs.Injector;
-import fr.sirs.Plugin;
-import fr.sirs.Plugins;
 import fr.sirs.Printable;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
 import fr.sirs.core.component.SQLQueryRepository;
-import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.SQLQueries;
 import fr.sirs.core.model.SQLQuery;
-import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.index.ElementHit;
 import fr.sirs.theme.ui.ObjectTable;
+import fr.sirs.ui.Growl;
 import fr.sirs.util.SirsStringConverter;
 import java.awt.Color;
 import java.io.File;
@@ -29,7 +26,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URISyntaxException;
-import java.sql.Connection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -98,7 +94,6 @@ import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.data.query.Query;
 import org.geotoolkit.db.FilterToSQL;
 import org.geotoolkit.db.JDBCFeatureStore;
-import org.geotoolkit.db.h2.H2FeatureStore;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.feature.type.NamesExt;
@@ -173,7 +168,7 @@ public class FXSearchPane extends BorderPane {
 
     private final Session session;
 
-    private H2FeatureStore h2Store;
+    private JDBCFeatureStore h2Store;
 
     /**
      * Définit s'il est nécessaire de lancer le processus d'export RDBMS pour pouvoir faire
@@ -356,7 +351,7 @@ public class FXSearchPane extends BorderPane {
     private ReadOnlyObjectProperty<Worker.State> connectToH2Store() {
         //h2 connection
         Task<ObservableList> h2Names = TaskManager.INSTANCE.submit("Connexion à la base de données", () -> {
-            h2Store = (H2FeatureStore) H2Helper.getStore(session.getConnector());
+            h2Store = session.getH2Helper().getStore().get();
 
             final Set<GenericName> names = h2Store.getNames();
             final ObservableList observableNames = FXCollections.observableArrayList();
@@ -468,18 +463,15 @@ public class FXSearchPane extends BorderPane {
 
     @FXML
     private void exportModel(ActionEvent event) {
-
         final DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Dossier d'export");
         final File file = chooser.showDialog(null);
 
         if (file != null) {
-            TaskManager.INSTANCE.submit("Export vers un fichier SQL", () -> {
-                try (Connection cnx = h2Store.getDataSource().getConnection()) {
-                    H2Helper.dumbSchema(cnx, file.toPath());
-                }
-                return null;
-            });
+            Task export = session.getH2Helper().dumbSchema(file.toPath());
+            export.setOnSucceeded((success) -> Platform.runLater(() -> new Growl(Growl.Type.INFO, "L'export dans le fichier "+file.getAbsolutePath()+" est terminé.").showAndFade()));
+            export.setOnCancelled((cancelled) -> Platform.runLater(() -> new Growl(Growl.Type.INFO, "L'export dans le fichier "+file.getAbsolutePath()+" a été annulé.").showAndFade()));
+            export.setOnFailed((failed) -> Platform.runLater(() -> GeotkFX.newExceptionDialog("L'export dans le fichier "+file.getAbsolutePath()+" a échoué.", export.getException()).show()));
         }
     }
 
@@ -608,7 +600,7 @@ public class FXSearchPane extends BorderPane {
 
         container.setCenter(vboxProgress);
 
-        final Task task = couchDbToSql();
+        final Task task = session.getH2Helper().export();
         progressLabel.textProperty().bind(task.messageProperty());
         progressBar.progressProperty().bind(task.progressProperty());
 
@@ -645,23 +637,6 @@ public class FXSearchPane extends BorderPane {
             progressLabel.textProperty().unbind();
             progressLabel.setText("Une erreur est survenue pendant le chargement de la base.");
         }));
-    }
-
-    private Task couchDbToSql() {
-        final Plugin[] plugins = Plugins.getPlugins();
-        final SQLHelper[] sqlHelpers = new SQLHelper[plugins.length];
-
-        for (int i=0; i<sqlHelpers.length; i++) {
-            sqlHelpers[i] = plugins[i].getSQLHelper();
-
-            //Il faut mettre le helper du coeur en premier !
-            if(plugins[i] instanceof CorePlugin && i!=0){
-                final SQLHelper tmpHelper = sqlHelpers[0];
-                sqlHelpers[0] = sqlHelpers[i];
-                sqlHelpers[i] = tmpHelper;
-            }
-        }
-        return H2Helper.init(sqlHelpers);
     }
 
     @FXML

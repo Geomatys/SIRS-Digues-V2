@@ -12,7 +12,6 @@ import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
-import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SQLQuery;
@@ -25,8 +24,10 @@ import java.beans.PropertyDescriptor;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import javafx.beans.property.*;
@@ -338,13 +339,13 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
         /**
          * Names of the properties which should be used to print input elements.
          */
-        protected final HashSet<String> propertyNames;
+        protected final LinkedHashSet<String> propertyNames;
         /**
          * Filtered list of elements which should be printed.
          */
         public final Iterable<Element> elements;
 
-        public PrintContext(TextDocument target, Paragraph startParagraph, Paragraph endParagraph, Iterable<Element> elements) throws SQLException, DataStoreException {
+        public PrintContext(TextDocument target, Paragraph startParagraph, Paragraph endParagraph, Iterable<Element> elements) throws SQLException, DataStoreException, InterruptedException, ExecutionException {
             ArgumentChecks.ensureNonNull("Target document", target);
             ArgumentChecks.ensureNonNull("Start paragraph", startParagraph);
             ArgumentChecks.ensureNonNull("End paragraph", endParagraph);
@@ -363,12 +364,12 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
                         NamesExt.create("query")
                 );
 
-                propertyNames = new HashSet<>();
+                propertyNames = new LinkedHashSet<>();
                 for (final GenericName name : query.getPropertyNames()) {
                     propertyNames.add(name.tip().toString());
                 }
 
-                final FeatureStore h2Store = H2Helper.getStore(session.getConnector());
+                final FeatureStore h2Store = session.getH2Helper().getStore().get();
                 final Predicate<Element> predicate;
                 // Analyze input filter to determine if we only need ID comparison, or if we must perform a full scan.
                 if (propertyNames.contains(SirsCore.ID_FIELD)) {

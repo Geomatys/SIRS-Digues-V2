@@ -155,11 +155,6 @@ public class PluginVegetation extends Plugin {
     }
 
     @Override
-    public SQLHelper getSQLHelper() {
-        return VegetationSqlHelper.getInstance();
-    }
-
-    @Override
     public List<MapItem> getMapItems() {
         final List<MapItem> items = new ArrayList<>();
         final MapItem vegetationGroup = VegetationSession.INSTANCE.getVegetationGroup();

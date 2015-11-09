@@ -24,7 +24,6 @@ import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.h2.H2Helper;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.EtapeObligationReglementaire;
@@ -39,16 +38,15 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefEtapeObligationReglementaire;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
 import fr.sirs.core.model.SQLQuery;
-import fr.sirs.core.model.SectionTypeObligationReglementaire;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.report.AbstractSectionRapport;
 import fr.sirs.core.model.report.ModeleRapport;
-import fr.sirs.plugin.reglementaire.ODTUtils;
 import fr.sirs.theme.ColumnOrder;
 import fr.sirs.ui.report.FXModeleRapportsPane;
 import fr.sirs.util.SirsStringConverter;
+import fr.sirs.util.odt.ODTUtils;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.ByteArrayInputStream;
@@ -75,6 +73,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import javafx.application.Platform;
@@ -113,10 +112,8 @@ import org.apache.sis.storage.DataStoreException;
 import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureIterator;
-import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.data.query.Query;
 import org.geotoolkit.db.JDBCFeatureStore;
-import org.geotoolkit.db.h2.H2FeatureStore;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.NamesExt;
 import org.geotoolkit.gui.javafx.util.TaskManager;
@@ -133,16 +130,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
- *
  * @author Johann Sorel (Geomatys)
+ * @author Alexis Manin (Geomatys)
  */
 public class RapportsPane extends BorderPane {
 
+    // TODO : check ignored fields
     public static final String[] COLUMNS_TO_IGNORE = new String[] {
         AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD,
         LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD,
         DATE_MAJ_FIELD, COMMENTAIRE_FIELD,
         "prDebut", "prFin", "valid", "positionDebut", "positionFin", "epaisseur"};
+
     @FXML private ComboBox<Preview> uiSystemEndiguement;
     @FXML private ListView<TronconDigue> uiTroncons;
     private Spinner<Double> uiPrDebut;
@@ -293,6 +292,9 @@ public class RapportsPane extends BorderPane {
                     if (troncon == null)
                         continue;
 
+                    // TODO : Loop over PositionDocument and other types ?
+                    session.getRepositoriesForClass(Objet.class);
+
                     final List<Objet> objetList = TronconUtils.getObjetList(troncon.getDocumentId());
 
                     for (Objet obj : objetList) {
@@ -334,21 +336,12 @@ public class RapportsPane extends BorderPane {
                             libelle = "sans nom";
                         }
                         updateMessage("Génération de la section : " + libelle);
-                        if (SectionTypeObligationReglementaire.TABLE.equals(section.getType())) {
-                            parts.addAll(generateTable(section, elements));
-                        } else if (SectionTypeObligationReglementaire.FICHE.equals(section.getType())) {
-                            parts.addAll(generateFiches(section, elements, folder, progress));
-                        }
+                        section.print(headerDoc, elements.values());
                     }
 
                     // on aggrege le tout
                     updateMessage("Aggrégation des sections");
-                    final TextDocument aggDoc = TextDocument.newTextDocument();
-                    for (int i = 0, n = parts.size(); i < n; i++) {
-                        updateMessage("Aggrégation des sections " + i + "/" + n);
-                        ODTUtils.concatenateFile(aggDoc, parts.get(i));
-                    }
-                    aggDoc.save(file);
+                        ODTUtils.concatenate(file.toPath(), parts.toArray());
                 } finally {
                     Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
                         @Override
@@ -582,7 +575,7 @@ public class RapportsPane extends BorderPane {
         return parts;
     }
 
-    private List<Element> listValidElements(RapportSectionObligationReglementaire section, Map<String,Objet> elements) throws SQLException, DataStoreException{
+    private List<Element> listValidElements(RapportSectionObligationReglementaire section, Map<String,Objet> elements) throws SQLException, DataStoreException, InterruptedException, ExecutionException{
         final List<Element> validElements = new ArrayList<>();
         final String requeteId = section.getRequeteId();
 
@@ -610,9 +603,10 @@ public class RapportsPane extends BorderPane {
         if (noId) {
             throw new UnsupportedOperationException("Impossible de filtrer les élements en utilisant une requête qui ne contient pas leur ID dans le résultat.");
         }
-        
+
         //recupération de la base H2
-        final FeatureStore h2Store = (H2FeatureStore) H2Helper.getStore(session.getConnector());
+        // TODO : progress
+        final JDBCFeatureStore h2Store = session.getH2Helper().getStore().get();
         final FeatureCollection col = h2Store.createSession(false).getFeatureCollection(fsquery);
         final String firstProperty = col.getFeatureType().getDescriptors().iterator().next().getName().tip().toString();
 
