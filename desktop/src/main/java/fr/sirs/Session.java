@@ -302,7 +302,9 @@ public class Session extends SessionCore {
                     tab.setContent(new ModeleElementTable());
                     break;
                 case REPORT:
-                    tab.setContent(new FXModeleRapportsPane());
+                    final FXModeleRapportsPane reportPane = new FXModeleRapportsPane();
+                    reportPane.setRight(reportPane.editor);
+                    tab.setContent(reportPane);
                     break;
                 default:
                     throw new UnsupportedOperationException("Unknown print type : "+printTab);

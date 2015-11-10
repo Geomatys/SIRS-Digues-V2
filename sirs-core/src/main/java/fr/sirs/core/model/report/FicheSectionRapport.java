@@ -2,12 +2,17 @@ package fr.sirs.core.model.report;
 
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
+import fr.sirs.core.model.AbstractPhoto;
+import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.util.odt.ODTUtils;
 import fr.sirs.util.property.Reference;
 import java.io.ByteArrayInputStream;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -98,13 +103,48 @@ public class FicheSectionRapport extends AbstractSectionRapport {
             throw new IllegalStateException("No ODT template available.");
         }
 
+        final PhotoComparator comparator = new PhotoComparator();
         try (final ByteArrayInputStream stream = new ByteArrayInputStream(odt);
                 TextDocument doc = TextDocument.loadDocument(stream)) {
             final Iterator<Element> it = ctx.elements.iterator();
             while (it.hasNext()) {
-                ODTUtils.fillTemplate(doc, it.next());
+                final Element next = it.next();
+                ODTUtils.fillTemplate(doc, next);
                 ctx.target.insertContentFromDocumentBefore(doc, ctx.endParagraph, true);
+                final int nbPhotosToPrint = nbPhotos.get();
+
+                // Print photographs
+                if (nbPhotosToPrint > 0 && next instanceof AvecPhotos) {
+                    List<? extends AbstractPhoto> photos = ((AvecPhotos<? extends AbstractPhoto>)next).getPhotos();
+                    photos.sort(comparator);
+
+                    for (int i = 0 ; i < nbPhotosToPrint && i < photos.size() ; i++) {
+                        ODTUtils.appendImage(ctx.target, ctx.target.insertParagraph(ctx.endParagraph, ctx.endParagraph, true), photos.get(i), false);
+                    }
+                }
             }
         }
+    }
+
+    private static class PhotoComparator implements Comparator<AbstractPhoto> {
+
+        @Override
+        public int compare(AbstractPhoto o1, AbstractPhoto o2) {
+            if (o1 == null)
+                return 1;
+            else if (o2 == null)
+                return -1;
+
+            LocalDate date1 = o1.getDate();
+            LocalDate date2 = o2.getDate();
+
+            if (date1 == null)
+                return 1;
+            else if (date2 == null)
+                return -1;
+            // We want early dates first
+            else return -date1.compareTo(date2);
+        }
+
     }
 }

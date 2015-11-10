@@ -47,9 +47,14 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
     private Element couchDbDocument;
 
     public FXElementContainerPane(final T element) {
+        super();
         SIRS.loadFXML(this);
         date_maj.setDisable(true);
         setFocusTraversable(true);
+
+        uiShowOnMapButton.managedProperty().bind(uiShowOnMapButton.visibleProperty());
+        uiDateMajLabel.managedProperty().bind(uiDateMajLabel.visibleProperty());
+        date_maj.managedProperty().bind(date_maj.visibleProperty());
 
         uiMode.setSaveAction(this::save);
         disableFieldsProperty().bind(uiMode.editionState().not());

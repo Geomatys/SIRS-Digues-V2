@@ -61,8 +61,6 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
         ArgumentChecks.ensureNonNull("Target document", target);
         ArgumentChecks.ensureNonNull("Source data collection", sourceData);
 
-        // TODO : put title ?
-        // TODO : apply filter now
         final Paragraph sectionStart = target.addParagraph(libelle.get());
         final Paragraph sectionEnd = target.insertParagraph(sectionStart, sectionStart, false);
 

@@ -17,64 +17,41 @@ import fr.sirs.Session;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
+import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.Previews;
-import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
+import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.EtapeObligationReglementaire;
-import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.ObjetPhotographiable;
 import fr.sirs.core.model.ObligationReglementaire;
-import fr.sirs.core.model.Photo;
-import fr.sirs.core.model.PhotoChoiceObligationReglementaire;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefEtapeObligationReglementaire;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
-import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.report.AbstractSectionRapport;
 import fr.sirs.core.model.report.ModeleRapport;
-import fr.sirs.theme.ColumnOrder;
 import fr.sirs.ui.report.FXModeleRapportsPane;
 import fr.sirs.util.SirsStringConverter;
-import fr.sirs.util.odt.ODTUtils;
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.io.ByteArrayInputStream;
+import fr.sirs.util.StreamingIterable;
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -97,39 +74,29 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
-import net.sf.jooreports.templates.DocumentTemplate;
-import net.sf.jooreports.templates.DocumentTemplateFactory;
 import org.apache.sis.measure.NumberRange;
-import org.apache.sis.storage.DataStoreException;
 import org.ektorp.DocumentNotFoundException;
-import org.geotoolkit.data.FeatureCollection;
-import org.geotoolkit.data.FeatureIterator;
-import org.geotoolkit.data.query.Query;
-import org.geotoolkit.db.JDBCFeatureStore;
-import org.geotoolkit.feature.Feature;
-import org.geotoolkit.feature.type.NamesExt;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.LinearReferencing;
+import org.geotoolkit.util.collection.CloseableIterator;
 import org.odftoolkit.simple.TextDocument;
-import org.odftoolkit.simple.style.Font;
-import org.odftoolkit.simple.style.StyleTypeDefinitions;
-import org.odftoolkit.simple.table.Cell;
-import org.odftoolkit.simple.table.Table;
 import org.odftoolkit.simple.text.Paragraph;
-import org.opengis.util.GenericName;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
+ * Display print configuration for obligation report.
  *
+ * Note :
  * @author Johann Sorel (Geomatys)
  * @author Alexis Manin (Geomatys)
  */
@@ -155,8 +122,10 @@ public class RapportsPane extends BorderPane {
     @FXML private ComboBox<RefTypeObligationReglementaire> uiTypeObligation;
     @FXML private ComboBox<RefEtapeObligationReglementaire> uiTypeEtape;
     @FXML private Button uiGenerate;
-    @FXML private ProgressIndicator uiProgress;
+    @FXML private ProgressBar uiProgress;
     @FXML private Label uiProgressLabel;
+    @FXML private Pane uiListPane;
+    @FXML private Pane uiEditorPane;
 
     private final BooleanProperty running = new SimpleBooleanProperty(false);
 
@@ -166,6 +135,7 @@ public class RapportsPane extends BorderPane {
     private final SimpleObjectProperty<ModeleRapport> modelProperty = new SimpleObjectProperty<>();
 
     public RapportsPane() {
+        super();
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
 
@@ -175,7 +145,8 @@ public class RapportsPane extends BorderPane {
         // model edition
         final FXModeleRapportsPane rapportEditor = new FXModeleRapportsPane();
         modelProperty.bind(rapportEditor.selectedModelProperty());
-        uiModelPane.setCenter(rapportEditor);
+        uiListPane.getChildren().add(rapportEditor);
+        uiEditorPane.getChildren().add(rapportEditor.editor);
 
         // Filter parameters
         uiPrDebut = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE,0.0));
@@ -268,94 +239,97 @@ public class RapportsPane extends BorderPane {
         final File file = chooser.showSaveDialog(null);
         if(file==null) return;
 
-        final Task task = new Task() {
+        final RefTypeObligationReglementaire typeObligation = uiTypeObligation.valueProperty().get();
+        final RefEtapeObligationReglementaire typeEtape = uiTypeEtape.valueProperty().get();
+        final Preview sysEndi = uiSystemEndiguement.valueProperty().get();
+        final String titre = uiTitre.getText();
+
+        // Filters
+        final LocalDate periodeDebut = uiPeriodeDebut.getValue();
+        final LocalDate periodeFin = uiPeriodeFin.getValue();
+        final NumberRange dateRange;
+        if (periodeDebut == null && periodeFin == null) {
+            dateRange = null;
+        } else {
+            final long dateDebut = periodeDebut == null ? 0 : periodeDebut.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
+            final long dateFin = periodeFin == null ? Long.MAX_VALUE : periodeFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
+            dateRange = NumberRange.create(dateDebut, true, dateFin, true);
+        }
+
+        final Double prDebut = uiPrDebut.getValue() == null? -1d : uiPrDebut.getValue();
+        final Double prFin = uiPrFin.getValue() == null? -1d : uiPrFin.getValue();
+        final NumberRange prRange;
+        if (prDebut <= 0d && prFin <= 0d) {
+            prRange = null;
+        } else {
+            prRange = NumberRange.create(Math.min(prDebut, prFin), true, Math.max(prDebut, prFin), true);
+        }
+
+        final Task task;
+        task = new Task() {
 
             @Override
             protected Object call() throws Exception {
                 updateTitle("Création d'un rapport");
-                final long dateDebut = uiPeriodeDebut.getValue().atTime(0, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli();
-                final long dateFin = uiPeriodeFin.getValue().atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
-                final NumberRange dateRange = NumberRange.create(dateDebut, true, dateFin, true);
-                final RefTypeObligationReglementaire typeObligation = uiTypeObligation.valueProperty().get();
-                final RefEtapeObligationReglementaire typeEtape = uiTypeEtape.valueProperty().get();
-                final Preview sysEndi = uiSystemEndiguement.valueProperty().get();
-                final String titre = uiTitre.getText();
-                final Double prDebut = uiPrFin.getValue();
-                final Double prFin = uiPrFin.getValue();
-                final NumberRange prRange = NumberRange.create(prDebut, true, prFin, true);
 
                 // on liste tous les elements a générer
                 updateMessage("Recherche des objets du rapport...");
                 final ObservableList<TronconDigue> troncons = uiTroncons.getSelectionModel().getSelectedItems();
-                final Map<String, Objet> elements = new LinkedHashMap<>();
+                final Collection<AbstractPositionableRepository<Objet>> repos = (Collection) session.getRepositoriesForClass(Objet.class);
+                final ArrayList<Element> elements = new ArrayList<>();
                 for (TronconDigue troncon : troncons) {
                     if (troncon == null)
                         continue;
 
-                    // TODO : Loop over PositionDocument and other types ?
-                    session.getRepositoriesForClass(Objet.class);
+                    for (final AbstractPositionableRepository<Objet> repo : repos) {
+                        StreamingIterable<Objet> tmpElements = repo.getByLinearIdStreaming(troncon.getId());
+                        try (final CloseableIterator<Objet> it = tmpElements.iterator()) {
+                            while (it.hasNext()) {
+                                Objet next = it.next();
+                                if (dateRange != null) {
+                                    //on vérifie la date
+                                    final AvecBornesTemporelles tmpObj = (AvecBornesTemporelles) next;
+                                    final LocalDate objDateDebut = tmpObj.getDate_debut();
+                                    final LocalDate objDateFin = tmpObj.getDate_fin();
+                                    final long debut = objDateDebut == null ? 0 : objDateDebut.atTime(0, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli();
+                                    final long fin = objDateFin == null ? Long.MAX_VALUE : objDateFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
+                                    final NumberRange objDateRange = NumberRange.create(debut, true, fin, true);
+                                    if (!dateRange.intersectsAny(objDateRange)) {
+                                        continue;
+                                    }
+                                }
 
-                    final List<Objet> objetList = TronconUtils.getObjetList(troncon.getDocumentId());
+                                //on verifie la position
+                                if (prRange != null) {
+                                    if (!prRange.intersectsAny(NumberRange.create(next.getPrDebut(), true, next.getPrFin(), true))) {
+                                        continue;
+                                    }
+                                }
 
-                    for (Objet obj : objetList) {
-                        //on verifie la position
-                        if (!(prDebut == 0.0 && prFin == 0.0)) {
-                            if (!prRange.intersectsAny(NumberRange.create(obj.getPrDebut(), true, obj.getPrFin(), true))) {
-                                continue;
+                                elements.add(next);
                             }
                         }
-                        //on vérifie la date
-                        final LocalDate objDateDebut = obj.getDate_debut();
-                        final LocalDate objDateFin = obj.getDate_fin();
-                        final long debut = objDateDebut == null ? 0 : objDateDebut.atTime(0, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli();
-                        final long fin = objDateFin == null ? Long.MAX_VALUE : objDateFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
-                        final NumberRange objDateRange = NumberRange.create(debut, true, fin, true);
-                        if (!dateRange.intersectsAny(objDateRange)) {
-                            continue;
-                        }
-
-                        elements.put(obj.getDocumentId(), obj);
                     }
                 }
 
-                final List<TextDocument> parts = new ArrayList<>();
-
-                // on crée un document qui contient le titre
+                // on crée le document de rapport
                 final TextDocument headerDoc = TextDocument.newTextDocument();
                 final Paragraph paragraph = headerDoc.addParagraph(titre);
-                paragraph.setFont(new Font("Serial", StyleTypeDefinitions.FontStyle.BOLD, 20));
-                parts.add(headerDoc);
+                paragraph.applyHeading();
 
-                // on crée un rapport pour chaque section
-                final Path folder = Files.createTempDirectory("rapport");
-                try {
-                    final AtomicInteger progress = new AtomicInteger();
-                    for (AbstractSectionRapport section : report.sections) {
-                        String libelle = section.getLibelle();
-                        if (libelle == null || libelle.isEmpty()) {
-                            libelle = "sans nom";
-                        }
-                        updateMessage("Génération de la section : " + libelle);
-                        section.print(headerDoc, elements.values());
+                // on aggrege chaque section
+                for (AbstractSectionRapport section : report.sections) {
+                    String libelle = section.getLibelle();
+                    if (libelle == null || libelle.isEmpty()) {
+                        libelle = "sans nom";
                     }
-
-                    // on aggrege le tout
-                    updateMessage("Aggrégation des sections");
-                        ODTUtils.concatenate(file.toPath(), parts.toArray());
-                } finally {
-                    Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
-                        @Override
-                        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                            Files.delete(dir);
-                            return super.postVisitDirectory(dir, exc);
-                        }
-                        @Override
-                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                            Files.delete(file);
-                            return super.visitFile(file, attrs);
-                        }
-                    });
+                    updateMessage("Génération de la section : " + libelle);
+                    section.print(headerDoc, (Iterable) elements);
                 }
+
+                // on sauvegarde le tout
+                updateMessage("Sauvegarde du rapport");
+                headerDoc.save(file);
 
                 if (uiCreateObligation.isSelected()) {
                     updateMessage("Création de l'obligation réglementaire");
@@ -365,7 +339,6 @@ public class RapportsPane extends BorderPane {
                     final ObligationReglementaire obligation = rep.create();
                     final LocalDate date = LocalDate.now();
                     obligation.setAnnee(date.getYear());
-                    //obligation.setDateRealisation(date);
                     obligation.setLibelle(titre);
                     if (sysEndi != null)
                         obligation.setSystemeEndiguementId(sysEndi.getElementId());
@@ -398,229 +371,6 @@ public class RapportsPane extends BorderPane {
         task.setOnSucceeded((successEvent) -> Platform.runLater(() -> new Alert(Alert.AlertType.INFORMATION, "La génération du rapport s'est terminée avec succès", ButtonType.OK).show()));
 
         TaskManager.INSTANCE.submit(task);
-    }
-
-    private List<TextDocument> generateTable(RapportSectionObligationReglementaire section,
-            Map<String,Objet> elements) throws Exception {
-        final TextDocument doc = TextDocument.newTextDocument();
-
-        //landscape mode: bug
-//        final Paragraph para = doc.addParagraph("");
-//        final MasterPage masterPage = ODTUtils.createMasterPage(doc, false, 5);
-//        doc.addPageBreak(para, masterPage);
-
-
-        //on recupere les elements qui correspondent a la requete
-        final List<Element> validElements = listValidElements(section, elements);
-        if(validElements.isEmpty()){
-            return Collections.EMPTY_LIST;
-        }
-
-        //liste des champs
-        final Class pojoClass = validElements.get(0).getClass();
-        final LabelMapper labelMapper = LabelMapper.get(pojoClass);
-        final Map<String,Printer> cols = new TreeMap<>(ColumnOrder.createComparator(pojoClass.getSimpleName()));
-
-        try {
-            //contruction des colonnes editable
-            final HashMap<String, PropertyDescriptor> properties = SIRS.listSimpleProperties(pojoClass);
-            for(Entry<String,PropertyDescriptor> entry : properties.entrySet()){
-                cols.put(entry.getKey(),entry.getValue().getReadMethod()::invoke);
-            }
-
-            // On donne toutes les informations de position.
-            if (Positionable.class.isAssignableFrom(pojoClass)) {
-                final HashMap<String, PropertyDescriptor> positionable = SIRS.listSimpleProperties(Positionable.class);
-                positionable.remove("systemeRepId");
-                for(String key : positionable.keySet()){
-                    cols.remove(key);
-                }
-
-                cols.put("borneDebutId", new BorneDebutPrinter());
-                cols.put("borneFinId", new BorneFinPrinter());
-            }
-
-            // On enlève les propriétés inutiles pour l'utilisateur
-            for (final String key : COLUMNS_TO_IGNORE) {
-                cols.remove(key);
-            }
-        } catch (IntrospectionException ex) {
-            SIRS.LOGGER.log(Level.WARNING, "property columns cannot be created.", ex);
-        }
-
-        //titre
-        final String titre = section.getLibelle();
-        final Paragraph paragraph = doc.addParagraph(titre);
-        paragraph.setFont(new Font("Serial", StyleTypeDefinitions.FontStyle.BOLD, 16));
-
-        //table
-        final Table table = doc.addTable(validElements.size(), cols.size());
-        //header
-         int colIndex = 0;
-        for(Entry<String,Printer> entry : cols.entrySet()){
-            final Cell cell = table.getCellByPosition(colIndex, 0);
-            cell.setStringValue(labelMapper.mapPropertyName(entry.getKey()));
-            colIndex++;
-        }
-        //cells
-        final Previews previews = session.getPreviews();
-        final SirsStringConverter cvt = new SirsStringConverter();
-        for(int i=0,n=validElements.size();i<n;i++){
-            final Element element = validElements.get(i);
-            colIndex = 0;
-            for(Entry<String,Printer> entry : cols.entrySet()){
-                Object obj = entry.getValue().print(element);
-                if(obj!=null){
-                    final Cell cell = table.getCellByPosition(colIndex, i+1);
-                    if(obj instanceof String){
-                        try{
-                            obj = cvt.toString(previews.get((String)obj));
-                        }catch(DocumentNotFoundException ex){/**pas important*/}
-                    }
-                    cell.setStringValue(String.valueOf(obj));
-                }
-                colIndex++;
-            }
-        }
-
-        return Collections.singletonList(doc);
-    }
-
-
-    private List generateFiches(RapportSectionObligationReglementaire section,
-            Map<String,Objet> elements, Path tempFolder, AtomicInteger inc) throws Exception{
-
-        final PhotoChoiceObligationReglementaire photoChoice = section.getPhotoChoice();
-
-        final List parts = new ArrayList();
-
-        //titre
-        final TextDocument doc = TextDocument.newTextDocument();
-        final String titre = section.getLibelle();
-        final Paragraph paragraph = doc.addParagraph(titre);
-        paragraph.setFont(new Font("Serial", StyleTypeDefinitions.FontStyle.BOLD, 16));
-        parts.add(doc);
-
-        //on recupere le template
-        final boolean isDefaultTemplate;
-        final DocumentTemplate templateDoc;
-        final String templateId = section.getTemplateId();
-        if(templateId==null || templateId.isEmpty()){
-            isDefaultTemplate = true;
-            templateDoc = ODTUtils.getDefaultTemplate();
-        }else{
-            isDefaultTemplate = false;
-            final AbstractSIRSRepository<TemplateOdt> repo = session.getRepositoryForClass(TemplateOdt.class);
-            final TemplateOdt template = repo.get(templateId);
-            if(template==null){
-                throw new Exception("Template manquant pour l'identifiant : "+templateId);
-            }
-            final DocumentTemplateFactory documentTemplateFactory = new DocumentTemplateFactory();
-            templateDoc = documentTemplateFactory.getTemplate(new ByteArrayInputStream(template.getOdt()));
-        }
-
-
-        //on recupere les elements qui correspondent a la requete
-        final List<Element> validElements = listValidElements(section, elements);
-        if(validElements.isEmpty()){
-            return Collections.EMPTY_LIST;
-        }
-
-        //on genere une fiche pour chaque objet
-        for(Element ele : validElements){
-            final Path f = tempFolder.resolve(section.getLibelle()+"_"+inc.incrementAndGet()+".odt");
-            if(isDefaultTemplate){
-                ODTUtils.generateReport(templateDoc, ODTUtils.toTemplateMap(ele), f);
-            }else{
-                ODTUtils.generateReport(templateDoc, ele, f);
-            }
-
-            parts.add(f);
-
-            if(ele instanceof ObjetPhotographiable){
-                final ObjetPhotographiable photographiable = (ObjetPhotographiable) ele;
-                final List<Photo> photos = photographiable.getPhotos();
-                if(!photos.isEmpty()){
-                    if(PhotoChoiceObligationReglementaire.DERNIERE.equals(photoChoice)){
-                        Photo last = null;
-                        for(Photo p : photos){
-                            final String str = p.getChemin();
-                            if(str!=null && !str.isEmpty()){
-                                if(last==null || last.getDate()==null || (p.getDate()!=null && last.getDate().isBefore(p.getDate()))){
-                                    final Path path = SIRS.getDocumentAbsolutePath(p.getChemin());
-                                    if(Files.exists(path, LinkOption.NOFOLLOW_LINKS)){
-                                        last = p;
-                                    }
-                                }
-                            }
-                        }
-                        if(last!=null){
-                            parts.add(SIRS.getDocumentAbsolutePath(last.getChemin()));
-                        }
-                    }else if(PhotoChoiceObligationReglementaire.TOUTE.equals(photoChoice)){
-                        for(Photo p : photos){
-                            final String str = p.getChemin();
-                            if(str!=null && !str.isEmpty()){
-                                final Path path = SIRS.getDocumentAbsolutePath(p.getChemin());
-                                if(Files.exists(path, LinkOption.NOFOLLOW_LINKS)){
-                                    parts.add(SIRS.getDocumentAbsolutePath(str));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return parts;
-    }
-
-    private List<Element> listValidElements(RapportSectionObligationReglementaire section, Map<String,Objet> elements) throws SQLException, DataStoreException, InterruptedException, ExecutionException{
-        final List<Element> validElements = new ArrayList<>();
-        final String requeteId = section.getRequeteId();
-
-        if(requeteId==null || requeteId.isEmpty()){
-            //pas de filtre
-            validElements.addAll(elements.values());
-            return validElements;
-        }
-
-        //creation de la requete
-        final SQLQueryRepository queryRepo = (SQLQueryRepository)Injector.getSession().getRepositoryForClass(SQLQuery.class);
-        final SQLQuery sqlQuery = queryRepo.get(requeteId);
-
-        final Query fsquery = org.geotoolkit.data.query.QueryBuilder.language(
-                JDBCFeatureStore.CUSTOM_SQL, sqlQuery.getSql(), NamesExt.create("requete"));
-
-        boolean noId = true;
-        for (final GenericName name : fsquery.getPropertyNames()) {
-            if (SIRS.ID_FIELD.equalsIgnoreCase(name.tip().toString())) {
-                noId = false;
-                break;
-            }
-        }
-
-        if (noId) {
-            throw new UnsupportedOperationException("Impossible de filtrer les élements en utilisant une requête qui ne contient pas leur ID dans le résultat.");
-        }
-
-        //recupération de la base H2
-        // TODO : progress
-        final JDBCFeatureStore h2Store = session.getH2Helper().getStore().get();
-        final FeatureCollection col = h2Store.createSession(false).getFeatureCollection(fsquery);
-        final String firstProperty = col.getFeatureType().getDescriptors().iterator().next().getName().tip().toString();
-
-        //on filtre les elements
-        try (FeatureIterator iterator = col.iterator()) {
-            while(iterator.hasNext()){
-                final Feature feature = iterator.next();
-                final Object val = feature.getPropertyValue(firstProperty);
-                final Objet ele = elements.get(val);
-                if(ele!=null) validElements.add(ele);
-            }
-        }
-
-        return validElements;
     }
 
     private static interface Printer{

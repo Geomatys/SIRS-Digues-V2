@@ -21,6 +21,11 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.BorderPane;
 
 /**
+ * Displays list of available models for edition. The {@link #editor} displays
+ * currently selected model, but it is not added into the scene by default. The
+ * aim is to let user get the editor and put it wherever he wants. For example,
+ * you could display it just next to the model list by calling {@link #setRight(javafx.scene.Node) }
+ * with {@link #editor} as parameter.
  *
  * @author Alexis Manin (Geomatys)
  */
@@ -29,7 +34,10 @@ public class FXModeleRapportsPane extends BorderPane {
     @FXML
     private ListView<Preview> uiReportList;
 
-    private final AbstractFXElementPane<ModeleRapport> editor;
+    /**
+     * Editor for currently selected model
+     */
+    public final AbstractFXElementPane<ModeleRapport> editor;
 
     private final AbstractSIRSRepository<ModeleRapport> repo;
 
@@ -67,7 +75,8 @@ public class FXModeleRapportsPane extends BorderPane {
         editor = SIRS.generateEditionPane(null);
         editor.visibleProperty().bind(editor.elementProperty().isNotNull());
         editor.managedProperty().bind(editor.visibleProperty());
-        setCenter(editor);
+        editor.setMinSize(10, 10);
+        editor.setMaxSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
     }
 
     public ReadOnlyObjectProperty<ModeleRapport> selectedModelProperty() {

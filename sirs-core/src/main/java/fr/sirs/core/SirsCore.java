@@ -1,6 +1,7 @@
 package fr.sirs.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.javafx.PlatformUtil;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.SirsPreferences;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -37,6 +39,7 @@ import javax.measure.unit.Unit;
 
 import javax.sql.DataSource;
 import org.apache.sis.geometry.GeneralEnvelope;
+import org.apache.sis.util.ArgumentChecks;
 
 import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.factory.Hints;
@@ -265,6 +268,44 @@ public class SirsCore {
 
     public static String getVersion() {
         return SirsCore.class.getPackage().getImplementationVersion();
+    }
+
+    public static Path getDocumentRootPath() throws InvalidPathException {
+        String rootStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.DOCUMENT_ROOT);
+       return Paths.get(rootStr);
+    }
+
+    /**
+     *
+     * @param relativeReference Un chemin relatif dénotant une référence dans un {@link Element}
+     * @return Un chemin absolu vers la réference passée en paramètre.
+     * @throws IllegalStateException Si la propriété {@link SirsPreferences.PROPERTIES#DOCUMENT_ROOT} est inexistante ou ne dénote pas un chemin valide.
+     * Dans ce cas, il est FORTEMENT conseillé d'attraper l'exception, et de proposer à l'utilisateur de vérifier la valeur de cette propriété dans les
+     * préférences de l'application.
+     * @throws InvalidPathException Si il est impossible de construire un chemin valide avec le paramètre d'entrée.
+     *
+     * Note : les deux exceptions ci-dessus ne sont pas lancées dans le cas où le
+     * chemin créé dénote un fichier inexistant. Elles sont invoquées uniquement
+     * si les chemins sont incorrects syntaxiquement.
+     */
+    public static Path getDocumentAbsolutePath(final String relativeReference) throws IllegalStateException, InvalidPathException {
+        ArgumentChecks.ensureNonEmpty("Document relative path", relativeReference);
+        final Path docRoot;
+        try {
+            docRoot = getDocumentRootPath();
+        } catch (InvalidPathException e) {
+            throw new IllegalStateException("La preference " + SirsPreferences.PROPERTIES.DOCUMENT_ROOT.name()
+                    + "ne dénote pas un chemin valide. Vous pouvez vérifier sa valeur "
+                    + "depuis les préférences de l'application (Fichier > Preferences).", e);
+        }
+
+        if (PlatformUtil.isWindows()) {
+            return docRoot.resolve(relativeReference.replaceAll("/+", "\\\\") // On remplace les séparateurs issus d'un autre système.
+                    .replaceFirst("^\\\\+", "")); // On enlève tout séparateur en début de chaîne qui tendrait à signifier que le chemin n'est pas relatif.
+        } else {
+            return docRoot.resolve(relativeReference.replaceAll("\\\\+", File.separator) // On remplace les séparateurs issus d'un autre système.
+                    .replaceFirst("^"+File.separator+"+", "")); // On enlève tout séparateur en début de chaîne qui tendrait à signifier que le chemin n'est pas relatif.
+        }
     }
 
     /**

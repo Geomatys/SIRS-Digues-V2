@@ -10,23 +10,17 @@
    <children>
    </children>
    <center>
-      <GridPane hgap="10.0" vgap="10.0" BorderPane.alignment="CENTER">
+      <GridPane hgap="10.0" vgap="10.0" BorderPane.alignment="TOP_LEFT">
         <columnConstraints>
           <ColumnConstraints hgrow="NEVER" />
-          <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
-            <ColumnConstraints />
+          <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" />
         </columnConstraints>
         <rowConstraints>
-          <RowConstraints maxHeight="1.7976931348623157E308" minHeight="250.0" prefHeight="250.0" vgrow="ALWAYS" />
+            <RowConstraints />
           <RowConstraints vgrow="NEVER" />
             <RowConstraints valignment="CENTER" vgrow="NEVER" />
         </rowConstraints>
          <children>
-            <Label text="Propriétés du document" GridPane.rowIndex="1">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Label>
             <GridPane fx:id="uiGrid" hgap="10.0" styleClass="gray-light" vgap="10.0" GridPane.rowIndex="2">
               <columnConstraints>
                 <ColumnConstraints hgrow="NEVER" />
@@ -43,7 +37,8 @@
                   <RowConstraints vgrow="NEVER" />
                   <RowConstraints vgrow="NEVER" />
                   <RowConstraints vgrow="NEVER" />
-                  <RowConstraints vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="NEVER" />
+                  <RowConstraints minHeight="10.0" vgrow="NEVER" />
               </rowConstraints>
                <children>
                   <Label text="Période du :" />
@@ -54,7 +49,7 @@
                   <CheckBox fx:id="uiCreateObligation" mnemonicParsing="false" text="Créer une obligation règlementaire et sa première étape à la date actuelle" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" />
                   <TextField fx:id="uiTitre" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4" />
                   <Label text="PR de fin :" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                  <ListView fx:id="uiTroncons" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
+                  <ListView fx:id="uiTroncons" minHeight="100.0" prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
                   <Label text="au :" GridPane.columnIndex="2" />
                   <DatePicker fx:id="uiPeriodeDebut" GridPane.columnIndex="1" />
                   <DatePicker fx:id="uiPeriodeFin" GridPane.columnIndex="3" />
@@ -63,6 +58,12 @@
                   <ComboBox fx:id="uiTypeObligation" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.rowIndex="6" />
                   <Label text="Type de l'obigation" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                   <Label text="Type de l'étape" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                  <Button fx:id="uiGenerate" mnemonicParsing="false" onAction="#generateReport" styleClass="btn-single" text="Générer" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.rowSpan="2" GridPane.valignment="CENTER" />
+                  <Label fx:id="uiProgressLabel" alignment="CENTER" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="9">
+                     <font>
+                        <Font name="System Italic" size="13.0" />
+                     </font></Label>
+                  <ProgressBar fx:id="uiProgress" maxWidth="1.7976931348623157E308" progress="0.0" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.valignment="CENTER" />
                </children>
                <GridPane.margin>
                   <Insets />
@@ -71,14 +72,13 @@
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </padding>
             </GridPane>
-            <BorderPane fx:id="uiTablePane" GridPane.columnSpan="3" />
-            <VBox alignment="CENTER" maxHeight="150.0" spacing="20.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.rowIndex="2" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
-               <children>
-                  <Button fx:id="uiGenerate" mnemonicParsing="false" onAction="#generateReport" styleClass="btn-single" text="Générer et télécharger le document" textAlignment="CENTER" wrapText="true" />
-                  <ProgressIndicator fx:id="uiProgress" visible="false" />
-                  <Label fx:id="uiProgressLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" />
-               </children>
-            </VBox>
+            <Label text="Propriétés du document" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <Pane fx:id="uiEditorPane" minWidth="10.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2147483647" />
+            <Pane fx:id="uiListPane" />
          </children>
       </GridPane>
    </center>

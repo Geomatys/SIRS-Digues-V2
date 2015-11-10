@@ -1,6 +1,5 @@
 package fr.sirs;
 
-import com.sun.javafx.PlatformUtil;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -11,16 +10,11 @@ import fr.sirs.core.model.Element;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementContainerPane;
 import fr.sirs.util.SirsStringConverter;
-import fr.sirs.util.property.SirsPreferences;
 import java.awt.Color;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.List;
@@ -182,55 +176,6 @@ public final class SIRS extends SirsCore {
         });
 
         candidate.getStylesheets().add(CSS_PATH);
-    }
-
-    public static Path getDocumentRootPath() throws InvalidPathException {
-        String rootStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.DOCUMENT_ROOT);
-       return Paths.get(rootStr);
-    }
-
-    /**
-     *
-     * @param relativeReference Un chemin relatif dénotant une référence dans un {@link Element}
-     * @return Un chemin absolu vers la réference passée en paramètre.
-     * @throws IllegalStateException Si la propriété {@link SirsPreferences.PROPERTIES#DOCUMENT_ROOT} est inexistante ou ne dénote pas un chemin valide.
-     * Dans ce cas, il est FORTEMENT conseillé d'attraper l'exception, et de proposer à l'utilisateur de vérifier la valeur de cette propriété dans les
-     * préférences de l'application.
-     * @throws InvalidPathException Si il est impossible de construire un chemin valide avec le paramètre d'entrée.
-     *
-     * Note : les deux exceptions ci-dessus ne sont pas lancées dans le cas où le
-     * chemin créé dénote un fichier inexistant. Elles sont invoquées uniquement
-     * si les chemins sont incorrects syntaxiquement.
-     */
-    public static Path getDocumentAbsolutePath(final String relativeReference) throws IllegalStateException, InvalidPathException {
-        ArgumentChecks.ensureNonEmpty("Document relative path", relativeReference);
-        final Path docRoot;
-        try {
-            docRoot = getDocumentRootPath();
-        } catch (InvalidPathException e) {
-            throw new IllegalStateException("La preference " + SirsPreferences.PROPERTIES.DOCUMENT_ROOT.name()
-                    + "ne dénote pas un chemin valide. Vous pouvez vérifier sa valeur "
-                    + "depuis les préférences de l'application (Fichier > Preferences).", e);
-        }
-
-        /*
-        HACK 1 : change all separators, because when we use 2 different system
-        separator in the same time, it produces invalid paths. We also check
-        if path starts with file separator, because unix consider it as system
-        root, and will not resolve image path as relative if we keep it.
-
-        HACK 2 : De nombreux chemins du SIRS V1 commencent par un "\" et ne
-        peuvent ainsi pas rigoureusement être considérés comme des chemins
-        relatifs. Il faut donc commencer par supprimer ce "\" en début de chaîne
-        lorsqu'il est présent.
-         */
-        if (PlatformUtil.isWindows()) {
-            return docRoot.resolve(relativeReference.replaceAll("/+", "\\\\") // On remplace les séparateurs issus d'un autre système.
-                    .replaceFirst("^\\\\+", "")); // On enlève tout séparateur en début de chaîne qui tendrait à signifier que le chemin n'est pas relatif.
-        } else {
-            return docRoot.resolve(relativeReference.replaceAll("\\\\+", File.separator) // On remplace les séparateurs issus d'un autre système.
-                    .replaceFirst("^"+File.separator+"+", "")); // On enlève tout séparateur en début de chaîne qui tendrait à signifier que le chemin n'est pas relatif.
-        }
     }
 
     /**

@@ -1,7 +1,10 @@
 package fr.sirs.util.odt;
 
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
+import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import java.awt.image.BufferedImage;
@@ -21,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -69,6 +73,7 @@ import org.odftoolkit.simple.table.Cell;
 import org.odftoolkit.simple.table.Row;
 import org.odftoolkit.simple.table.Table;
 import org.odftoolkit.simple.table.TableContainer;
+import org.odftoolkit.simple.text.Paragraph;
 
 /**
  * Utility methods used to create ODT templates, or fill ODT templates.
@@ -736,15 +741,68 @@ public class ODTUtils {
     }
 
     /**
+     * Print given photograph into input document. Created image title and description
+     * will be filled with input {@link AbstractPhoto} information (libelle, comment, author and date).
+     * @param holder Document to append content to.
+     * @param anchor Paragraph to insert image into. If null, image is append at the end of the document.
+     * @param toPrint Photo to insert in document.
+     * @param fullPage Used only if image is not inserted in a paragraph. Specifies if we should dedicate a page for image display.
+     * @return Created image.
+     */
+    public static Image appendImage(final TextDocument holder, final Paragraph anchor, final AbstractPhoto toPrint, final boolean fullPage) {
+        final String chemin = toPrint.getChemin();
+        if (chemin == null || chemin.isEmpty())
+            throw new IllegalArgumentException("Input photograph path is invalid !");
+        final Path imgPath = SirsCore.getDocumentAbsolutePath(chemin);
+
+        final Image img;
+        if (anchor == null) {
+            img = appendImage(holder, imgPath, fullPage);
+        } else {
+            img = Image.newImage(anchor, imgPath.toUri());
+        }
+
+        final String title = toPrint.getLibelle();
+        if (title == null || title.isEmpty()) {
+            img.setTitle(title);
+        }
+
+        final StringBuilder description = new StringBuilder();
+        final LocalDate date = toPrint.getDate();
+        description.append(System.lineSeparator());
+        if (date == null) {
+            description.append("date inconnue");
+        } else {
+            description.append("Prise le : ").append(date);
+        }
+
+        final String photographeId = toPrint.getPhotographeId();
+        description.append(System.lineSeparator());
+        if (photographeId == null) {
+            description.append("Photographe inconnu");
+        } else {
+            description.append("par : ").append(InjectorCore.getBean(SessionCore.class).getPreviews().get(photographeId).getLibelle());
+        }
+
+        final String commentaire = toPrint.getCommentaire();
+        if (commentaire != null && !commentaire.isEmpty()) {
+            description.append(System.lineSeparator()).append("Commentaire : ").append(commentaire);
+        }
+
+        return img;
+    }
+
+    /**
      * Insert given image into input document. Image is inserted in a new empty
      * paragraph, to avoid overlapping with another content.
      *
      * @param holder Document to insert image into.
      * @param image Image to put.
+     * @return Created image in document.
      * @throws java.io.IOException If we cannot write input image.
      */
-    public static void appendImage(final TextDocument holder, final RenderedImage image) throws IOException {
-        ODTUtils.appendImage(holder, image, false);
+    public static Image appendImage(final TextDocument holder, final RenderedImage image) throws IOException {
+        return appendImage(holder, image, false);
     }
 
     /**
@@ -753,9 +811,10 @@ public class ODTUtils {
      * @param image Image to put in
      * @param fullPage True if given image should be placed on a new page, alone.
      * alse to integrate it just below previous element in the document.
+     * @return Created image in document.
      * @throws IOException If input image cannot be written in given document.
      */
-    public static void appendImage(final TextDocument holder, final RenderedImage image, final boolean fullPage) throws IOException {
+    public static Image appendImage(final TextDocument holder, final RenderedImage image, final boolean fullPage) throws IOException {
         final Path tmpImage = Files.createTempFile("img", ".png");
         if (!ImageIO.write(image, "png", tmpImage.toFile())) {
             throw new IllegalStateException("No valid writer found for image format png !");
@@ -764,7 +823,7 @@ public class ODTUtils {
         try {
             final StyleTypeDefinitions.PrintOrientation orientation = (image.getWidth() < image.getHeight())
                     ? StyleTypeDefinitions.PrintOrientation.PORTRAIT : StyleTypeDefinitions.PrintOrientation.LANDSCAPE;
-            appendImage(holder, tmpImage, orientation, fullPage);
+            return appendImage(holder, tmpImage, orientation, fullPage);
         } finally {
             Files.delete(tmpImage);
         }
@@ -776,9 +835,10 @@ public class ODTUtils {
      *
      * @param holder Document to insert into
      * @param imagePath Location off the image to insert.
+     * @return Created image in document.
      */
-    public static void appendImage(final TextDocument holder, final Path imagePath) {
-        appendImage(holder, imagePath, null, false);
+    public static Image appendImage(final TextDocument holder, final Path imagePath) {
+        return appendImage(holder, imagePath, null, false);
     }
 
     /**
@@ -788,9 +848,10 @@ public class ODTUtils {
      * @param holder Document to insert into
      * @param imagePath Location off the image to insert.
      * @param fullPage If true, we will create a new page (no margin, orientation set according to image dimension) in which the image will be rendered.
+     * @return Created image in document.
      */
-    public static void appendImage(final TextDocument holder, final Path imagePath, final boolean fullPage) {
-        appendImage(holder, imagePath, null, fullPage);
+    public static Image appendImage(final TextDocument holder, final Path imagePath, final boolean fullPage) {
+        return appendImage(holder, imagePath, null, fullPage);
     }
 
     /**
@@ -802,8 +863,9 @@ public class ODTUtils {
      * @param orientation Orientation of the image to insert. Only used if a full page rendering is queried.
      * If null, we will try to determine the best orientation by analyzing image dimension.
      * @param fullPage If true, we will create a new page (no margin, orientation set by previous parameter) in which the image will be rendered.
+     * @return Created image in document.
      */
-    public static void appendImage(
+    public static Image appendImage(
             final TextDocument holder,
             final Path imagePath,
             StyleTypeDefinitions.PrintOrientation orientation,
@@ -836,6 +898,8 @@ public class ODTUtils {
         if (fullPage) {
             newImage.getStyleHandler().setAchorType(StyleTypeDefinitions.AnchorType.TO_PAGE);
         }
+
+        return newImage;
     }
 
     /**

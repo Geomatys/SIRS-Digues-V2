@@ -42,6 +42,6 @@ public class TableSectionRapport extends AbstractSectionRapport {
     protected void printSection(final PrintContext ctx) throws Exception {
         final TextSectionElement element = new TextSectionElement(ctx.target.getContentDom());
         ctx.target.insertOdfElement(ctx.endParagraph.getOdfElement(), ctx.target, element, true);
-        ODTUtils.appendTable(Section.getInstance(element), ctx.elements.iterator(), new ArrayList<>(ctx.propertyNames));
+        ODTUtils.appendTable(Section.getInstance(element), ctx.elements.iterator(), ctx.propertyNames == null? null : new ArrayList<>(ctx.propertyNames));
     }
 }
