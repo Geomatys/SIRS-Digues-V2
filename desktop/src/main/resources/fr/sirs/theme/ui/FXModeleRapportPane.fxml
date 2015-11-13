@@ -9,16 +9,16 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root id="BorderPane" minHeight="10.0" minWidth="10.0" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root id="BorderPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="10.0" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
     <stylesheets>
         <URL value="@/fr/sirs/theme.css" />
     </stylesheets>
    <top>
-      <HBox alignment="CENTER_LEFT" minWidth="10.0" spacing="5.0" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" minWidth="10.0" spacing="5.0" BorderPane.alignment="CENTER">
          <children>
             <Label text="Nom" HBox.hgrow="NEVER" />
-            <TextField fx:id="uiName" HBox.hgrow="SOMETIMES" />
-            <Separator maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" orientation="VERTICAL" visible="false" HBox.hgrow="SOMETIMES" />
+            <TextField fx:id="uiName" HBox.hgrow="NEVER" />
+            <Separator maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" orientation="VERTICAL" visible="false" HBox.hgrow="ALWAYS" />
             <MenuButton fx:id="uiAddSection" mnemonicParsing="false" styleClass="white-with-borders" text="Ajouter une section" HBox.hgrow="NEVER" />
          </children>
          <padding>
@@ -27,7 +27,7 @@
       </HBox>
    </top>
    <center>
-      <ScrollPane minHeight="10.0" minWidth="10.0" BorderPane.alignment="CENTER">
+      <ScrollPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="10.0" BorderPane.alignment="CENTER">
          <content>
             <VBox fx:id="uiSections" minWidth="10.0" spacing="10.0">
                <padding>

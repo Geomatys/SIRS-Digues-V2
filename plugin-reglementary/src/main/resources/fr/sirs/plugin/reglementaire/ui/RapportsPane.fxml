@@ -6,22 +6,22 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root id="BorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root id="BorderPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <children>
    </children>
    <center>
-      <GridPane hgap="10.0" vgap="10.0" BorderPane.alignment="TOP_LEFT">
+      <GridPane hgap="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vgap="10.0" BorderPane.alignment="TOP_LEFT">
         <columnConstraints>
           <ColumnConstraints hgrow="NEVER" />
-          <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" />
+          <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" />
         </columnConstraints>
         <rowConstraints>
             <RowConstraints />
           <RowConstraints vgrow="NEVER" />
-            <RowConstraints valignment="CENTER" vgrow="NEVER" />
+            <RowConstraints maxHeight="1.7976931348623157E308" valignment="CENTER" vgrow="NEVER" />
         </rowConstraints>
          <children>
-            <GridPane fx:id="uiGrid" hgap="10.0" styleClass="gray-light" vgap="10.0" GridPane.rowIndex="2">
+            <GridPane fx:id="uiGrid" hgap="10.0" maxHeight="1.7976931348623157E308" styleClass="gray-light" vgap="10.0" GridPane.rowIndex="2">
               <columnConstraints>
                 <ColumnConstraints hgrow="NEVER" />
                 <ColumnConstraints hgrow="NEVER" />
@@ -31,7 +31,7 @@
               <rowConstraints>
                 <RowConstraints vgrow="NEVER" />
                 <RowConstraints vgrow="NEVER" />
-                <RowConstraints valignment="TOP" vgrow="NEVER" />
+                <RowConstraints maxHeight="1.7976931348623157E308" valignment="TOP" vgrow="NEVER" />
                   <RowConstraints vgrow="NEVER" />
                   <RowConstraints vgrow="NEVER" />
                   <RowConstraints vgrow="NEVER" />
@@ -49,7 +49,7 @@
                   <CheckBox fx:id="uiCreateObligation" mnemonicParsing="false" text="Créer une obligation règlementaire et sa première étape à la date actuelle" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" />
                   <TextField fx:id="uiTitre" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4" />
                   <Label text="PR de fin :" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                  <ListView fx:id="uiTroncons" minHeight="100.0" prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
+                  <ListView fx:id="uiTroncons" maxWidth="1.7976931348623157E308" minHeight="100.0" prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
                   <Label text="au :" GridPane.columnIndex="2" />
                   <DatePicker fx:id="uiPeriodeDebut" GridPane.columnIndex="1" />
                   <DatePicker fx:id="uiPeriodeFin" GridPane.columnIndex="3" />
@@ -59,11 +59,11 @@
                   <Label text="Type de l'obigation" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                   <Label text="Type de l'étape" GridPane.columnIndex="1" GridPane.rowIndex="7" />
                   <Button fx:id="uiGenerate" mnemonicParsing="false" onAction="#generateReport" styleClass="btn-single" text="Générer" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.rowSpan="2" GridPane.valignment="CENTER" />
-                  <Label fx:id="uiProgressLabel" alignment="CENTER" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="9">
+                  <Label fx:id="uiProgressLabel" alignment="CENTER" visible="false" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="9">
                      <font>
                         <Font name="System Italic" size="13.0" />
                      </font></Label>
-                  <ProgressBar fx:id="uiProgress" maxWidth="1.7976931348623157E308" progress="0.0" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.valignment="CENTER" />
+                  <ProgressBar fx:id="uiProgress" maxWidth="1.7976931348623157E308" visible="false" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.valignment="CENTER" />
                </children>
                <GridPane.margin>
                   <Insets />
@@ -77,8 +77,8 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <Pane fx:id="uiEditorPane" minWidth="10.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2147483647" />
-            <Pane fx:id="uiListPane" />
+            <BorderPane fx:id="uiEditorPane" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2147483647" />
+            <BorderPane fx:id="uiListPane" GridPane.hgrow="SOMETIMES" />
          </children>
       </GridPane>
    </center>

@@ -4,6 +4,7 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.util.odt.ODTUtils;
 import java.util.ArrayList;
+import java.util.Spliterators;
 import org.odftoolkit.odfdom.dom.element.text.TextSectionElement;
 import org.odftoolkit.simple.text.Section;
 
@@ -42,6 +43,9 @@ public class TableSectionRapport extends AbstractSectionRapport {
     protected void printSection(final PrintContext ctx) throws Exception {
         final TextSectionElement element = new TextSectionElement(ctx.target.getContentDom());
         ctx.target.insertOdfElement(ctx.endParagraph.getOdfElement(), ctx.target, element, true);
-        ODTUtils.appendTable(Section.getInstance(element), ctx.elements.iterator(), ctx.propertyNames == null? null : new ArrayList<>(ctx.propertyNames));
+        ODTUtils.appendTable(
+                Section.getInstance(element),
+                Spliterators.iterator(ctx.elements.spliterator()), 
+                ctx.propertyNames == null? null : new ArrayList<>(ctx.propertyNames));
     }
 }

@@ -15,7 +15,6 @@ import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SQLQuery;
-import fr.sirs.util.FilteredIterable;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.Reference;
 import java.beans.IntrospectionException;
@@ -30,6 +29,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.beans.property.*;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -48,7 +49,6 @@ import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.NamesExt;
 import org.odftoolkit.simple.TextDocument;
 import org.odftoolkit.simple.text.Paragraph;
-import org.opengis.util.GenericName;
 
 @JsonInclude(Include.NON_EMPTY)
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -57,7 +57,7 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
 
     private String id;
 
-    public final void print(final TextDocument target, final Iterable<Element> sourceData) throws Exception {
+    public final void print(final TextDocument target, final Stream<? extends Element> sourceData) throws Exception {
         ArgumentChecks.ensureNonNull("Target document", target);
         ArgumentChecks.ensureNonNull("Source data collection", sourceData);
 
@@ -341,9 +341,9 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
         /**
          * Filtered list of elements which should be printed.
          */
-        public final Iterable<Element> elements;
+        public final Stream<? extends Element> elements;
 
-        public PrintContext(TextDocument target, Paragraph startParagraph, Paragraph endParagraph, Iterable<Element> elements) throws SQLException, DataStoreException, InterruptedException, ExecutionException {
+        public PrintContext(TextDocument target, Paragraph startParagraph, Paragraph endParagraph, Stream<? extends Element> elements) throws SQLException, DataStoreException, InterruptedException, ExecutionException {
             ArgumentChecks.ensureNonNull("Target document", target);
             ArgumentChecks.ensureNonNull("Start paragraph", startParagraph);
             ArgumentChecks.ensureNonNull("End paragraph", endParagraph);
@@ -355,19 +355,29 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
             if (getRequeteId() == null) {
                 propertyNames = null;
                 this.elements = elements;
+
             } else {
                 final SessionCore session = InjectorCore.getBean(SessionCore.class);
+
                 final Query query = QueryBuilder.language(JDBCFeatureStore.CUSTOM_SQL,
                         session.getRepositoryForClass(SQLQuery.class).get(getRequeteId()).getSql(),
                         NamesExt.create("query")
                 );
 
-                propertyNames = new LinkedHashSet<>();
-                for (final GenericName name : query.getPropertyNames()) {
-                    propertyNames.add(name.tip().toString());
+                // Retrieve properties returned by input query.
+                final FeatureStore h2Store = session.getH2Helper().getStore().get();
+                try (FeatureReader reader = h2Store.getFeatureReader(query)) {
+                    if (!reader.hasNext()) {
+                        throw new IllegalStateException("Input query has no result. Elements cannot be filtered.");
+                    }
+
+                    Feature next = reader.next();
+                    propertyNames = new LinkedHashSet<>(next.getType().getProperties(true).stream()
+                            .map(pType -> pType.getName().tip().toString())
+                            .collect(Collectors.toList())
+                    );
                 }
 
-                final FeatureStore h2Store = session.getH2Helper().getStore().get();
                 final Predicate<Element> predicate;
                 // Analyze input filter to determine if we only need ID comparison, or if we must perform a full scan.
                 if (propertyNames.contains(SirsCore.ID_FIELD)) {
@@ -446,8 +456,7 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
                     };
                 }
 
-                this.elements = new FilteredIterable<>(elements, predicate);
-
+                this.elements = elements.filter(predicate);
             }
         }
 

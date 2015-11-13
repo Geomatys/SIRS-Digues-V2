@@ -100,7 +100,6 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public class FXLauncherPane extends BorderPane {
 
-    private static final String IMPORTER_CONTEXT = "classpath:/fr/sirs/spring/importer-context.xml";
     private static final Logger LOGGER = Logging.getLogger("fr.sirs");
 
     /**

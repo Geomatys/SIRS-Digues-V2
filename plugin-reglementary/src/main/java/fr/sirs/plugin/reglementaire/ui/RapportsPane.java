@@ -24,9 +24,7 @@ import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.EtapeObligationReglementaire;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ObligationReglementaire;
@@ -44,6 +42,9 @@ import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.StreamingIterable;
 import java.io.File;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -53,6 +54,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.prefs.Preferences;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -81,7 +83,6 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import org.apache.sis.measure.NumberRange;
 import org.ektorp.DocumentNotFoundException;
@@ -117,15 +118,14 @@ public class RapportsPane extends BorderPane {
     @FXML private DatePicker uiPeriodeDebut;
     @FXML private CheckBox uiCreateObligation;
     @FXML private TextField uiTitre;
-    @FXML private BorderPane uiModelPane;
     @FXML private GridPane uiGrid;
     @FXML private ComboBox<RefTypeObligationReglementaire> uiTypeObligation;
     @FXML private ComboBox<RefEtapeObligationReglementaire> uiTypeEtape;
     @FXML private Button uiGenerate;
     @FXML private ProgressBar uiProgress;
     @FXML private Label uiProgressLabel;
-    @FXML private Pane uiListPane;
-    @FXML private Pane uiEditorPane;
+    @FXML private BorderPane uiListPane;
+    @FXML private BorderPane uiEditorPane;
 
     private final BooleanProperty running = new SimpleBooleanProperty(false);
 
@@ -145,8 +145,8 @@ public class RapportsPane extends BorderPane {
         // model edition
         final FXModeleRapportsPane rapportEditor = new FXModeleRapportsPane();
         modelProperty.bind(rapportEditor.selectedModelProperty());
-        uiListPane.getChildren().add(rapportEditor);
-        uiEditorPane.getChildren().add(rapportEditor.editor);
+        uiListPane.setCenter(rapportEditor);
+        uiEditorPane.setCenter(rapportEditor.editor);
 
         // Filter parameters
         uiPrDebut = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE,0.0));
@@ -236,9 +236,14 @@ public class RapportsPane extends BorderPane {
         if (report == null) return;
 
         final FileChooser chooser = new FileChooser();
+        final Path previous = getPreviousPath();
+        if (previous != null) {
+            chooser.setInitialDirectory(previous.toFile());
+        }
         final File file = chooser.showSaveDialog(null);
         if(file==null) return;
 
+        setPreviousPath(file.toPath().getParent());
         final RefTypeObligationReglementaire typeObligation = uiTypeObligation.valueProperty().get();
         final RefEtapeObligationReglementaire typeEtape = uiTypeEtape.valueProperty().get();
         final Preview sysEndi = uiSystemEndiguement.valueProperty().get();
@@ -276,7 +281,7 @@ public class RapportsPane extends BorderPane {
                 updateMessage("Recherche des objets du rapport...");
                 final ObservableList<TronconDigue> troncons = uiTroncons.getSelectionModel().getSelectedItems();
                 final Collection<AbstractPositionableRepository<Objet>> repos = (Collection) session.getRepositoriesForClass(Objet.class);
-                final ArrayList<Element> elements = new ArrayList<>();
+                final ArrayList<Objet> elements = new ArrayList<>();
                 for (TronconDigue troncon : troncons) {
                     if (troncon == null)
                         continue;
@@ -288,9 +293,8 @@ public class RapportsPane extends BorderPane {
                                 Objet next = it.next();
                                 if (dateRange != null) {
                                     //on vérifie la date
-                                    final AvecBornesTemporelles tmpObj = (AvecBornesTemporelles) next;
-                                    final LocalDate objDateDebut = tmpObj.getDate_debut();
-                                    final LocalDate objDateFin = tmpObj.getDate_fin();
+                                    final LocalDate objDateDebut = next.getDate_debut();
+                                    final LocalDate objDateFin = next.getDate_fin();
                                     final long debut = objDateDebut == null ? 0 : objDateDebut.atTime(0, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli();
                                     final long fin = objDateFin == null ? Long.MAX_VALUE : objDateFin.atTime(23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli();
                                     final NumberRange objDateRange = NumberRange.create(debut, true, fin, true);
@@ -324,7 +328,7 @@ public class RapportsPane extends BorderPane {
                         libelle = "sans nom";
                     }
                     updateMessage("Génération de la section : " + libelle);
-                    section.print(headerDoc, (Iterable) elements);
+                    section.print(headerDoc, elements.stream());
                 }
 
                 // on sauvegarde le tout
@@ -440,4 +444,28 @@ public class RapportsPane extends BorderPane {
         }
     }
 
+    /**
+     *
+     * @return Last chosen path for generation report, or null if we cannot find any.
+     */
+    private static Path getPreviousPath() {
+        final Preferences prefs = Preferences.userNodeForPackage(RapportsPane.class);
+        final String str = prefs.get("path", null);
+        if (str != null) {
+            final Path file = Paths.get(str);
+            if (Files.isDirectory(file)) {
+                return file;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Set value to be retrieved by {@link #getPreviousPath() }.
+     * @param path To put as previously chosen path. Should be a directory.
+     */
+    private static void setPreviousPath(final Path path) {
+        final Preferences prefs = Preferences.userNodeForPackage(RapportsPane.class);
+        prefs.put("path", path.toAbsolutePath().toString());
+    }
 }

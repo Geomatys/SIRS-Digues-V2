@@ -2,6 +2,7 @@ package fr.sirs.core.model.report;
 
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Element;
@@ -11,7 +12,6 @@ import fr.sirs.util.property.Reference;
 import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -105,24 +105,28 @@ public class FicheSectionRapport extends AbstractSectionRapport {
 
         final PhotoComparator comparator = new PhotoComparator();
         try (final ByteArrayInputStream stream = new ByteArrayInputStream(odt);
-                TextDocument doc = TextDocument.loadDocument(stream)) {
-            final Iterator<Element> it = ctx.elements.iterator();
-            while (it.hasNext()) {
-                final Element next = it.next();
-                ODTUtils.fillTemplate(doc, next);
+                final TextDocument doc = TextDocument.loadDocument(stream)) {
+            ctx.elements.forEach(next -> {
+                try {
+                    ODTUtils.fillTemplate(doc, next);
+                } catch (RuntimeException ex) {
+                    throw ex;
+                } catch (Exception ex) {
+                    throw new SirsCoreRuntimeException(ex);
+                }
                 ctx.target.insertContentFromDocumentBefore(doc, ctx.endParagraph, true);
                 final int nbPhotosToPrint = nbPhotos.get();
 
                 // Print photographs
                 if (nbPhotosToPrint > 0 && next instanceof AvecPhotos) {
-                    List<? extends AbstractPhoto> photos = ((AvecPhotos<? extends AbstractPhoto>)next).getPhotos();
+                    List<? extends AbstractPhoto> photos = ((AvecPhotos<? extends AbstractPhoto>) next).getPhotos();
                     photos.sort(comparator);
 
-                    for (int i = 0 ; i < nbPhotosToPrint && i < photos.size() ; i++) {
+                    for (int i = 0; i < nbPhotosToPrint && i < photos.size(); i++) {
                         ODTUtils.appendImage(ctx.target, ctx.target.insertParagraph(ctx.endParagraph, ctx.endParagraph, true), photos.get(i), false);
                     }
                 }
-            }
+            });
         }
     }
 
