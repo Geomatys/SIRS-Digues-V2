@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -183,7 +184,9 @@ public class FXModeleRapportPane extends AbstractFXElementPane<ModeleRapport> {
                 sectionEditors.remove(sectionEditor);
             });
             copyButton.setOnAction((event) -> addSectionCopy(sectionEditor.elementProperty.get()));
-            copyButton.disableProperty().bind(sectionEditor.elementProperty.isNull());
+            final BooleanBinding btnDisabled = sectionEditor.elementProperty.isNull().or(disableFieldsProperty());
+            copyButton.disableProperty().bind(btnDisabled);
+            deleteButton.disableProperty().bind(btnDisabled);
             copyButton.getStyleClass().add("white-with-borders");
             deleteButton.getStyleClass().add("white-with-borders");
             sectionChanged(sectionEditor.elementProperty, null, sectionEditor.elementProperty.get());
