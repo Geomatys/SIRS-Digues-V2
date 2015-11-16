@@ -9,6 +9,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import org.apache.sis.util.ArgumentChecks;
+import org.opengis.feature.Feature;
 
 /**
  * Printer used by default to convert object properties into string for ODT templates.
@@ -62,5 +63,9 @@ class DefaultPrinter extends PropertyPrinter {
             }
     }
 
-
+    @Override
+    protected String printImpl(Feature source, String propertyToPrint) {
+        final Object propertyValue = source.getPropertyValue(propertyToPrint);
+        return propertyValue == null? "N/A" : propertyValue.toString();
+    }
 }

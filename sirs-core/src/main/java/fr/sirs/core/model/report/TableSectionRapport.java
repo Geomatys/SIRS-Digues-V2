@@ -4,9 +4,9 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.util.odt.ODTUtils;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Spliterators;
-import org.odftoolkit.odfdom.dom.element.text.TextSectionElement;
-import org.odftoolkit.simple.text.Section;
+import org.geotoolkit.data.FeatureIterator;
 
 /**
  * Used for printing brut table reports.
@@ -41,11 +41,13 @@ public class TableSectionRapport extends AbstractSectionRapport {
 
     @Override
     protected void printSection(final PrintContext ctx) throws Exception {
-        final TextSectionElement element = new TextSectionElement(ctx.target.getContentDom());
-        ctx.target.insertOdfElement(ctx.endParagraph.getOdfElement(), ctx.target, element, true);
-        ODTUtils.appendTable(
-                Section.getInstance(element),
-                Spliterators.iterator(ctx.elements.spliterator()), 
-                ctx.propertyNames == null? null : new ArrayList<>(ctx.propertyNames));
+            final List<String> properties = ctx.propertyNames == null? null : new ArrayList<>(ctx.propertyNames);
+        if (ctx.elements != null) {
+            ODTUtils.appendTable(ctx.target, Spliterators.iterator(ctx.elements.spliterator()), properties);
+        } else if (ctx.filterValues != null) {
+            try (final FeatureIterator it = ctx.filterValues.iterator()) {
+                ODTUtils.appendTable(ctx.target, it, properties);
+            }
+        }
     }
 }

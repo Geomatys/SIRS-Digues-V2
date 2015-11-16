@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
@@ -53,6 +54,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.encryption.BadSecurityHandlerException;
 import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
 import org.apache.sis.util.ArgumentChecks;
+import org.geotoolkit.data.FeatureIterator;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.image.io.XImageIO;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclElement;
@@ -74,6 +76,7 @@ import org.odftoolkit.simple.table.Row;
 import org.odftoolkit.simple.table.Table;
 import org.odftoolkit.simple.table.TableContainer;
 import org.odftoolkit.simple.text.Paragraph;
+import org.opengis.feature.Feature;
 
 /**
  * Utility methods used to create ODT templates, or fill ODT templates.
@@ -909,7 +912,7 @@ public class ODTUtils {
      * Note : if no property listing is given, no ordering will be performed on columns.
      *
      * @param target Document or section to put table into.
-     * @param data List of elements to extract properties from in order to fill table.
+     * @param data List of elements to extract properties from in order to fill table. Each element of the iterator is a row in output table.
      * @param propertyNames List of properties (as returned by {@link PropertyDescriptor#getName() } to use for table columns.
      * If null or empty, all properties of input objects will be used.
      * @throws java.beans.IntrospectionException If an error occurs while analyzing properties of an element.
@@ -917,7 +920,7 @@ public class ODTUtils {
      */
     public static void appendTable(final TableContainer target, final Iterator<Element> data, final List<String> propertyNames) throws IntrospectionException, ReflectiveOperationException {
         ArgumentChecks.ensureNonNull("Target document", target);
-        if (!data.hasNext()) {
+        if (data == null || !data.hasNext()) {
             return; // No elements, do not create table
         }
 
@@ -928,11 +931,13 @@ public class ODTUtils {
         descriptorsByClass.put(elementClass.getCanonicalName(), elementProperties);
 
         final List<String> headers;
+        final Set<String> pKeys = elementProperties.keySet();
         if (propertyNames == null) {
-            headers = new ArrayList<>(elementProperties.keySet());
+            headers = new ArrayList<>(pKeys);
         } else {
             headers = propertyNames;
-            elementProperties.keySet().retainAll(headers);
+            headers.retainAll(pKeys);
+            pKeys.retainAll(headers);
         }
 
         // Create table and headers
@@ -992,6 +997,46 @@ public class ODTUtils {
                     dataRow.getCellByIndex(i).addParagraph(
                             Printers.getPrinter(propertyName).print(element, elementProperties.get(propertyName)));
                 }
+            }
+        }
+    }
+
+    public static void appendTable(final TableContainer target, final FeatureIterator data, List<String> propertyNames) {
+        ArgumentChecks.ensureNonNull("Target document", target);
+        if (data == null || !data.hasNext()) {
+            return; // No elements, do not create table
+        }
+
+        Feature next = data.next();
+        if (propertyNames == null) {
+            propertyNames = next.getType().getProperties(true).stream().map(type -> type.getName().tip().toString()).collect(Collectors.toList());
+        }
+
+        // Create table and headers
+        final Table table = target.addTable(1, propertyNames.size());
+        Cell currentCell;
+        for (int i = 0 ; i < propertyNames.size() ; i++) {
+            currentCell = table.getCellByPosition(i, 0);
+            currentCell.setStringValue(propertyNames.get(i));
+        }
+
+        // Fill first line
+        Row dataRow = table.appendRow();
+        String propertyName;
+        for (int i = 0 ; i < propertyNames.size() ; i++) {
+            propertyName = propertyNames.get(i);
+            dataRow.getCellByIndex(i).setStringValue(
+                    Printers.getPrinter(propertyName).print(next, propertyName));
+        }
+
+        // remaining lines
+        while (data.hasNext()) {
+            next = data.next();
+            dataRow = table.appendRow();
+            for (int i = 0; i < propertyNames.size(); i++) {
+                propertyName = propertyNames.get(i);
+                dataRow.getCellByIndex(i).setStringValue(
+                        Printers.getPrinter(propertyName).print(next, propertyName));
             }
         }
     }

@@ -107,23 +107,24 @@ public class FicheSectionRapport extends AbstractSectionRapport {
         try (final ByteArrayInputStream stream = new ByteArrayInputStream(odt);
                 final TextDocument doc = TextDocument.loadDocument(stream)) {
             ctx.elements.forEach(next -> {
+                // Fill section template
                 try {
                     ODTUtils.fillTemplate(doc, next);
+                    ODTUtils.append(ctx.target, doc);
                 } catch (RuntimeException ex) {
                     throw ex;
                 } catch (Exception ex) {
                     throw new SirsCoreRuntimeException(ex);
                 }
-                ctx.target.insertContentFromDocumentBefore(doc, ctx.endParagraph, true);
-                final int nbPhotosToPrint = nbPhotos.get();
 
                 // Print photographs
+                final int nbPhotosToPrint = nbPhotos.get();
                 if (nbPhotosToPrint > 0 && next instanceof AvecPhotos) {
                     List<? extends AbstractPhoto> photos = ((AvecPhotos<? extends AbstractPhoto>) next).getPhotos();
                     photos.sort(comparator);
 
                     for (int i = 0; i < nbPhotosToPrint && i < photos.size(); i++) {
-                        ODTUtils.appendImage(ctx.target, ctx.target.insertParagraph(ctx.endParagraph, ctx.endParagraph, true), photos.get(i), false);
+                        ODTUtils.appendImage(ctx.target, null, photos.get(i), false);
                     }
                 }
             });

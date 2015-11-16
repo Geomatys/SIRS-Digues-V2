@@ -15,6 +15,7 @@ import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SQLQuery;
+import fr.sirs.util.odt.ODTUtils;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.Reference;
 import java.beans.IntrospectionException;
@@ -40,7 +41,6 @@ import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureIterator;
-import org.geotoolkit.data.FeatureReader;
 import org.geotoolkit.data.FeatureStore;
 import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
@@ -66,8 +66,13 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
 
         sectionStart.applyHeading(true, 2);
 
-        final PrintContext ctx = new PrintContext(target, sectionStart, sectionEnd, sourceData);
-        printSection(ctx);
+        //Write section in a temporary document to ensure it will be inserted entirely or not at all in real target.
+        try (final TextDocument tmpDoc = TextDocument.newTextDocument()) {
+            final PrintContext ctx = new PrintContext(tmpDoc, sectionStart, sectionEnd, sourceData);
+            printSection(ctx);
+
+            ODTUtils.append(target, tmpDoc);
+        }
     }
 
     /**
@@ -314,9 +319,7 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
 
     /**
      * Contains all informations needed for current section printing :
-     * - target document
-     * - A start paragraph which determine beginning of the section
-     * - An end paragraph to tells where section must ends
+     * - target document : All content will be appended at its end
      * - Names of all the properties returned by this section filter
      * - List of the elements to print (already filtered using this section query).
      */
@@ -326,14 +329,7 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
          * Doccument to insert content into
          */
         public final TextDocument target;
-        /**
-         * Sections must print their data after this paragraph.
-         */
-        public final Paragraph startParagraph;
-        /**
-         * Sections must print their data before this paragraph.
-         */
-        public final Paragraph endParagraph;
+
         /**
          * Names of the properties which should be used to print input elements.
          */
@@ -343,14 +339,15 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
          */
         public final Stream<? extends Element> elements;
 
+        /**
+         * Features which have been used for element filtering. Can be null.
+         */
+        public FeatureCollection filterValues;
+
         public PrintContext(TextDocument target, Paragraph startParagraph, Paragraph endParagraph, Stream<? extends Element> elements) throws SQLException, DataStoreException, InterruptedException, ExecutionException {
             ArgumentChecks.ensureNonNull("Target document", target);
-            ArgumentChecks.ensureNonNull("Start paragraph", startParagraph);
-            ArgumentChecks.ensureNonNull("End paragraph", endParagraph);
             ArgumentChecks.ensureNonNull("Elements to print", elements);
             this.target = target;
-            this.startParagraph = startParagraph;
-            this.endParagraph = endParagraph;
 
             if (getRequeteId() == null) {
                 propertyNames = null;
@@ -366,7 +363,9 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
 
                 // Retrieve properties returned by input query.
                 final FeatureStore h2Store = session.getH2Helper().getStore().get();
-                try (FeatureReader reader = h2Store.getFeatureReader(query)) {
+                filterValues = h2Store.createSession(false).getFeatureCollection(query);
+
+                try (FeatureIterator reader = filterValues.iterator()) {
                     if (!reader.hasNext()) {
                         throw new IllegalStateException("Input query has no result. Elements cannot be filtered.");
                     }
@@ -382,7 +381,7 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
                 // Analyze input filter to determine if we only need ID comparison, or if we must perform a full scan.
                 if (propertyNames.contains(SirsCore.ID_FIELD)) {
                     final HashSet<String> ids = new HashSet<>();
-                    try (FeatureReader reader = h2Store.getFeatureReader(query)) {
+                    try (FeatureIterator reader = filterValues.iterator()) {
                         while (reader.hasNext()) {
                             final Object pValue = reader.next().getPropertyValue(SirsCore.ID_FIELD);
                             if (pValue instanceof String) {
@@ -395,7 +394,6 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
 
                 } else {
                     final HashMap<String, HashMap<String, PropertyDescriptor>> classProperties = new HashMap<>();
-                    final FeatureCollection filterValues = h2Store.createSession(false).getFeatureCollection(query);
                     predicate = input -> {
                         // Get list of input element properties.
                         final String className = input.getClass().getCanonicalName();
