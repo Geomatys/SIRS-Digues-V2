@@ -48,7 +48,6 @@ import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.NamesExt;
 import org.odftoolkit.simple.TextDocument;
-import org.odftoolkit.simple.text.Paragraph;
 
 @JsonInclude(Include.NON_EMPTY)
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
@@ -61,14 +60,10 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
         ArgumentChecks.ensureNonNull("Target document", target);
         ArgumentChecks.ensureNonNull("Source data collection", sourceData);
 
-        final Paragraph sectionStart = target.addParagraph(libelle.get());
-        final Paragraph sectionEnd = target.insertParagraph(sectionStart, sectionStart, false);
-
-        sectionStart.applyHeading(true, 2);
-
         //Write section in a temporary document to ensure it will be inserted entirely or not at all in real target.
         try (final TextDocument tmpDoc = TextDocument.newTextDocument()) {
-            final PrintContext ctx = new PrintContext(tmpDoc, sectionStart, sectionEnd, sourceData);
+            tmpDoc.addParagraph(libelle.get()).applyHeading(true, 2);
+            final PrintContext ctx = new PrintContext(tmpDoc, sourceData);
             printSection(ctx);
 
             ODTUtils.append(target, tmpDoc);
@@ -344,7 +339,7 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
          */
         public FeatureCollection filterValues;
 
-        public PrintContext(TextDocument target, Paragraph startParagraph, Paragraph endParagraph, Stream<? extends Element> elements) throws SQLException, DataStoreException, InterruptedException, ExecutionException {
+        public PrintContext(TextDocument target, Stream<? extends Element> elements) throws SQLException, DataStoreException, InterruptedException, ExecutionException {
             ArgumentChecks.ensureNonNull("Target document", target);
             ArgumentChecks.ensureNonNull("Elements to print", elements);
             this.target = target;
@@ -440,7 +435,7 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
                                 isEqual = true;
                                 final Feature next = reader.next();
                                 for (final org.geotoolkit.feature.Property p : next.getProperties()) {
-                                    if (!Objects.equals(p.getValue(), values.get(p.getName().tip().toString()))) {
+                                    if (!propertiesEqual(p.getValue(), values.get(p.getName().tip().toString()))) {
                                         isEqual = false;
                                         break;
                                     }
@@ -465,6 +460,22 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
          */
         public boolean ignoreProperty(final String propertyName) {
             return (propertyNames != null && propertyNames.contains(propertyName));
+        }
+
+        /**
+         * Test equality of input objects. It has been designed to manage numeric
+         * properties with different precision.
+         * @param p1 The first object to test
+         * @param p2 The second object to test
+         * @return True if input properties are equal, false otherwise.
+         */
+        private boolean propertiesEqual(final Object p1, final Object p2) {
+            if (p1 instanceof Double && p2 instanceof Float
+                    || p1 instanceof Float && p2 instanceof Double) {
+                return ((Number)p1).floatValue() == ((Number)p2).floatValue();
+            } else {
+                return Objects.equals(p1, p2);
+            }
         }
     }
 }

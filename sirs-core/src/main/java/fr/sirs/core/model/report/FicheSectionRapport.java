@@ -12,12 +12,15 @@ import fr.sirs.util.property.Reference;
 import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.odftoolkit.simple.TextDocument;
+import org.odftoolkit.simple.text.Paragraph;
 
 /**
  * Detailed element printing.
@@ -103,31 +106,50 @@ public class FicheSectionRapport extends AbstractSectionRapport {
             throw new IllegalStateException("No ODT template available.");
         }
 
-        final PhotoComparator comparator = new PhotoComparator();
-        try (final ByteArrayInputStream stream = new ByteArrayInputStream(odt);
-                final TextDocument doc = TextDocument.loadDocument(stream)) {
-            ctx.elements.forEach(next -> {
-                // Fill section template
-                try {
-                    ODTUtils.fillTemplate(doc, next);
-                    ODTUtils.append(ctx.target, doc);
-                } catch (RuntimeException ex) {
-                    throw ex;
-                } catch (Exception ex) {
-                    throw new SirsCoreRuntimeException(ex);
-                }
+        /**
+         * If we've got elements to print, section template is read, then we fill
+         * it for each element, and append it to context target.
+         */
+        final Iterator<? extends Element> iterator = ctx.elements.iterator();
+        if (iterator.hasNext()) {
+            final Element first = iterator.next();
 
-                // Print photographs
+            try (final ByteArrayInputStream stream = new ByteArrayInputStream(odt);
+                    final TextDocument doc = TextDocument.loadDocument(stream)) {
+
+                ODTUtils.fillTemplate(doc, first);
+                // Forced to do it to avoid variable erasing at concatenation
+                final Map<String, List<Paragraph>> replaced = ODTUtils.replaceUserVariablesWithText(doc);
                 final int nbPhotosToPrint = nbPhotos.get();
-                if (nbPhotosToPrint > 0 && next instanceof AvecPhotos) {
-                    List<? extends AbstractPhoto> photos = ((AvecPhotos<? extends AbstractPhoto>) next).getPhotos();
-                    photos.sort(comparator);
 
-                    for (int i = 0; i < nbPhotosToPrint && i < photos.size(); i++) {
-                        ODTUtils.appendImage(ctx.target, null, photos.get(i), false);
+                ODTUtils.append(ctx.target, doc);
+                printPhotos(ctx.target, first, nbPhotosToPrint);
+
+                // For next elements, we replace directly text attributes we've put instead of variables, to avoid reloading original template.
+                iterator.forEachRemaining(next -> {
+                    try {
+                        ODTUtils.replaceTextContent(next, replaced);
+
+                        ODTUtils.append(ctx.target, doc);
+                        printPhotos(ctx.target, next, nbPhotosToPrint);
+                    } catch (RuntimeException ex) {
+                        throw ex;
+                    } catch (Exception ex) {
+                        throw new SirsCoreRuntimeException(ex);
                     }
-                }
-            });
+                });
+            }
+        }
+    }
+
+    private static void printPhotos(final TextDocument holder, final Element source, int nbPhotosToPrint) {
+        if (nbPhotosToPrint > 0 && source instanceof AvecPhotos) {
+            final List<? extends AbstractPhoto> photos = ((AvecPhotos<? extends AbstractPhoto>) source).getPhotos();
+            photos.sort(new PhotoComparator());
+
+            for (int i = 0; i < nbPhotosToPrint && i < photos.size(); i++) {
+                ODTUtils.appendImage(holder, null, photos.get(i), false);
+            }
         }
     }
 

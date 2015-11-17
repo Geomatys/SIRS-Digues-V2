@@ -57,10 +57,13 @@ import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.FeatureIterator;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.image.io.XImageIO;
+import org.odftoolkit.odfdom.dom.element.text.TextPElement;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclElement;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclsElement;
+import org.odftoolkit.odfdom.dom.element.text.TextUserFieldGetElement;
 import org.odftoolkit.odfdom.dom.element.text.TextVariableDeclElement;
 import org.odftoolkit.odfdom.dom.element.text.TextVariableDeclsElement;
+import org.odftoolkit.odfdom.pkg.ElementVisitor;
 import org.odftoolkit.odfdom.pkg.OdfElement;
 import org.odftoolkit.simple.Document;
 import org.odftoolkit.simple.TextDocument;
@@ -77,6 +80,8 @@ import org.odftoolkit.simple.table.Table;
 import org.odftoolkit.simple.table.TableContainer;
 import org.odftoolkit.simple.text.Paragraph;
 import org.opengis.feature.Feature;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Utility methods used to create ODT templates, or fill ODT templates.
@@ -238,6 +243,30 @@ public class ODTUtils {
     }
 
     /**
+     * Extract properties from given candidate, and for each node registered for
+     * it, we set its text using property value.
+     * @param candidate Element to extract properties from.
+     * @param propertyContainers A registry of all elements to modify, sorted by property name.
+     * @throws IntrospectionException If input candidate cannot be analyzed.
+     * @throws ReflectiveOperationException If we fail reading candidate properties.
+     */
+    public static void replaceTextContent(final Element candidate, final Map<String, List<Paragraph>> propertyContainers) throws IntrospectionException, ReflectiveOperationException {
+        // We iterate through input properties to extract all mappable attributes.
+        final PropertyDescriptor[] descriptors = Introspector.getBeanInfo(candidate.getClass()).getPropertyDescriptors();
+        List<Paragraph> containers;
+        String pName;
+        for (final PropertyDescriptor desc : descriptors) {
+            pName = desc.getName();
+            containers = propertyContainers.get(pName);
+            if (containers != null) {
+                for (final Paragraph p : containers) {
+                    p.setTextContent(Printers.getPrinter(pName).print(candidate, desc));
+                }
+            }
+        }
+    }
+
+    /**
      * Find variable with given name into input document, and update its value with specified one.
      * If we cannot find a matching variable into given document, this method just returns.
      *
@@ -323,6 +352,88 @@ public class ODTUtils {
         }
 
         return result;
+    }
+
+    /**
+     * Rename user variables listed in input map.
+     * /!\ It does not rename user variable occurrences in content dom, only their declarations !
+     *
+     * @param source Document containing user variables to rename.
+     * @param replacements Map of variables to rename. Key is the original variable
+     * name, and value its replacement.
+     */
+    public static void renameUserVariables(final TextDocument source, final Map<String, String> replacements) {
+        final OdfElement variableContainer = source.getVariableContainerElement();
+        TextUserFieldDeclsElement userVariableElements = OdfElement.findFirstChildNode(TextUserFieldDeclsElement.class, variableContainer);
+        if (userVariableElements != null) {
+            TextUserFieldDeclElement userVariable = OdfElement.findFirstChildNode(TextUserFieldDeclElement.class, userVariableElements);
+            String oldName, newName;
+            while (userVariable != null) {
+                oldName = userVariable.getTextNameAttribute();
+                if (oldName != null) {
+                    newName = replacements.get(oldName);
+                    if (newName != null) {
+                        userVariable.setTextNameAttribute(newName);
+                    }
+                }
+
+                userVariable = OdfElement.findNextChildNode(TextUserFieldDeclElement.class, userVariable);
+            }
+        }
+    }
+
+
+    public static Map<String, List<Paragraph>> replaceUserVariablesWithText(final TextDocument source) throws Exception {
+        final HashMap<String, List<Paragraph>> replaced = new HashMap<>();
+        final Map<String, VariableField> vars = findAllVariables(source, VariableField.VariableType.USER);
+        if (vars.isEmpty())
+            return replaced;
+
+        source.getContentRoot().accept(new ElementVisitor() {
+
+            @Override
+            public void visit(OdfElement element) {
+                if (element instanceof TextUserFieldGetElement) {
+                    final String varName = ((TextUserFieldGetElement)element).getTextNameAttribute();
+                    // Replace variable
+                    final Paragraph text;
+                    try {
+                        text = Paragraph.getInstanceof(new TextPElement(source.getContentDom()));
+                        text.setTextContent(getVariableValue(vars.get(varName)).toString());
+                    } catch (Exception ex) {
+                        throw new SirsCoreRuntimeException(ex);
+                    }
+                    final Node papa = element.getParentNode();
+                    // hack : paragraphs cannot embed other paragraphs.
+                    if (papa instanceof Paragraph) {
+                        source.insertParagraph((Paragraph)papa, text, false);
+                        papa.removeChild(element);
+                    } else {
+                        papa.replaceChild(text.getOdfElement(), element);
+                    }
+                    List<Paragraph> tmpList = replaced.get(varName);
+                    if (tmpList == null) {
+                        tmpList = new ArrayList<>();
+                        replaced.put(varName, tmpList);
+                    }
+                    tmpList.add(text);
+
+                } else if (element.hasChildNodes()) {
+                    // Browse tree
+                    final NodeList children = element.getChildNodes();
+                    Node child;
+                    for (int i = 0 ; i < children.getLength() ; i++) {
+                        child = children.item(i);
+                        if (child instanceof OdfElement) {
+                            ((OdfElement)child).accept(this);
+                        }
+                    }
+                }
+            }
+        });
+
+        // TODO : remove declared variables
+        return replaced;
     }
 
     /**
