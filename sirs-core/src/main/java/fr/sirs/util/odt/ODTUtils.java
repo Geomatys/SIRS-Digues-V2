@@ -7,6 +7,8 @@ import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.report.AbstractSectionRapport;
+import fr.sirs.core.model.report.ModeleRapport;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.beans.IntrospectionException;
@@ -26,6 +28,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -35,9 +38,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -57,13 +63,18 @@ import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.FeatureIterator;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.image.io.XImageIO;
+import org.odftoolkit.odfdom.dom.OdfSchemaDocument;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclElement;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclsElement;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldGetElement;
 import org.odftoolkit.odfdom.dom.element.text.TextVariableDeclElement;
 import org.odftoolkit.odfdom.dom.element.text.TextVariableDeclsElement;
+import org.odftoolkit.odfdom.dom.style.OdfStyleFamily;
+import org.odftoolkit.odfdom.incubator.doc.office.OdfOfficeStyles;
+import org.odftoolkit.odfdom.incubator.doc.style.OdfStyle;
 import org.odftoolkit.odfdom.pkg.ElementVisitor;
 import org.odftoolkit.odfdom.pkg.OdfElement;
+import org.odftoolkit.odfdom.type.Color;
 import org.odftoolkit.simple.Document;
 import org.odftoolkit.simple.TextDocument;
 import org.odftoolkit.simple.common.field.AbstractVariableContainer;
@@ -73,6 +84,7 @@ import org.odftoolkit.simple.common.field.VariableField;
 import org.odftoolkit.simple.draw.Image;
 import org.odftoolkit.simple.style.MasterPage;
 import org.odftoolkit.simple.style.StyleTypeDefinitions;
+import org.odftoolkit.simple.style.TableCellProperties;
 import org.odftoolkit.simple.table.Cell;
 import org.odftoolkit.simple.table.Row;
 import org.odftoolkit.simple.table.Table;
@@ -128,7 +140,8 @@ public class ODTUtils {
      * formatting.
      *
      * @param title Title for the document to create.
-     * @param properties A map whose keys are properties to put in template, and values are titles for them.
+     * @param properties A map whose keys are properties to put in template, and
+     * values are titles for them.
      * @return A new template document with prepared variables.
      */
     public static TextDocument newSimplePropertyModel(final String title, final Map<String, String> properties) throws Exception {
@@ -145,8 +158,10 @@ public class ODTUtils {
     /**
      * Save given class reference in input document, setting it as the class to
      * use when generating a report.
+     *
      * @param input The document to modify.
-     * @param targetClass Class to put, or null to remove information from document.
+     * @param targetClass Class to put, or null to remove information from
+     * document.
      */
     public static void setTargetClass(final TextDocument input, final Class targetClass) {
         ArgumentChecks.ensureNonNull("Input document", input);
@@ -159,6 +174,7 @@ public class ODTUtils {
 
     /**
      * Analyze input document to find which type of object it is planned for.
+     *
      * @param source Source document to analyze.
      * @return The class which must be used for report creation, or null if we
      * cannot find information in given document.
@@ -177,15 +193,15 @@ public class ODTUtils {
     }
 
     /**
-     * Replace all variables defined in input document template with the one given
-     * in parameter. For variables in document also present in given property mapping,
-     * they're left as is. New properties to be put are added in paragraphs at the end
-     * of the document.
+     * Replace all variables defined in input document template with the one
+     * given in parameter. For variables in document also present in given
+     * property mapping, they're left as is. New properties to be put are added
+     * in paragraphs at the end of the document.
      *
      * @param source Document template to modify.
-     * @param properties Properties to set in given document. Keys are property names,
-     * and values are associated title. If null, all user variables will be deleted
-     * from input document.
+     * @param properties Properties to set in given document. Keys are property
+     * names, and values are associated title. If null, all user variables will
+     * be deleted from input document.
      */
     public static void setVariables(final TextDocument source, final Map<String, String> properties) {
         Map<String, VariableField> vars = findAllVariables(source, VariableField.VariableType.USER);
@@ -205,6 +221,7 @@ public class ODTUtils {
 
     /**
      * Remove given variable from its holding document.
+     *
      * @param var the variable field to get rid of.
      * @return true if we succeeded, false otherwise.
      */
@@ -223,8 +240,10 @@ public class ODTUtils {
      * @param template Source template to fill.
      * @param candidate The object to get data from to fill given template.
      *
-     * @throws java.beans.IntrospectionException If input candidate cannot be analyzed.
-     * @throws java.lang.ReflectiveOperationException If we fail reading candidate properties.
+     * @throws java.beans.IntrospectionException If input candidate cannot be
+     * analyzed.
+     * @throws java.lang.ReflectiveOperationException If we fail reading
+     * candidate properties.
      */
     public static void fillTemplate(final TextDocument template, final Element candidate) throws IntrospectionException, ReflectiveOperationException {
         // We iterate through input properties to extract all mappable attributes.
@@ -237,7 +256,7 @@ public class ODTUtils {
             if (var != null) {
                 var.updateField(Printers.getPrinter(pName).print(candidate, desc), null);
             } else {
-                SirsCore.LOGGER.fine("No variable found for name "+pName);
+                SirsCore.LOGGER.fine("No variable found for name " + pName);
             }
         }
     }
@@ -245,10 +264,13 @@ public class ODTUtils {
     /**
      * Extract properties from given candidate, and for each node registered for
      * it, we set its text using property value.
+     *
      * @param candidate Element to extract properties from.
-     * @param propertyContainers A registry of all elements to modify, sorted by property name.
+     * @param propertyContainers A registry of all elements to modify, sorted by
+     * property name.
      * @throws IntrospectionException If input candidate cannot be analyzed.
-     * @throws ReflectiveOperationException If we fail reading candidate properties.
+     * @throws ReflectiveOperationException If we fail reading candidate
+     * properties.
      */
     public static void replaceTextContent(final Element candidate, final Map<String, List<? extends Node>> propertyContainers) throws IntrospectionException, ReflectiveOperationException {
         // We iterate through input properties to extract all mappable attributes.
@@ -267,8 +289,9 @@ public class ODTUtils {
     }
 
     /**
-     * Find variable with given name into input document, and update its value with specified one.
-     * If we cannot find a matching variable into given document, this method just returns.
+     * Find variable with given name into input document, and update its value
+     * with specified one. If we cannot find a matching variable into given
+     * document, this method just returns.
      *
      * @param doc The document to search into.
      * @param varName Name of the variable to find.
@@ -307,12 +330,14 @@ public class ODTUtils {
     /**
      * Search in input document for all declared variables of a given type.
      *
-     * For algorithm, see {@link AbstractVariableContainer#getVariableFieldByName(java.lang.String) }
+     * For algorithm, see {@link AbstractVariableContainer#getVariableFieldByName(java.lang.String)
+     * }
      *
      * @param source Document to search into.
      * @param type Type of variable to retrieve. If null, all type of variables
      * will be returned.
-     * @return A map of all found variables. Keys are variable names, values are concrete variables. Never null, but can be empty.
+     * @return A map of all found variables. Keys are variable names, values are
+     * concrete variables. Never null, but can be empty.
      */
     public static Map<String, VariableField> findAllVariables(final TextDocument source, final VariableField.VariableType type) {
         final OdfElement variableContainer = source.getVariableContainerElement();
@@ -355,12 +380,12 @@ public class ODTUtils {
     }
 
     /**
-     * Rename user variables listed in input map.
-     * /!\ It does not rename user variable occurrences in content dom, only their declarations !
+     * Rename user variables listed in input map. /!\ It does not rename user
+     * variable occurrences in content dom, only their declarations !
      *
      * @param source Document containing user variables to rename.
-     * @param replacements Map of variables to rename. Key is the original variable
-     * name, and value its replacement.
+     * @param replacements Map of variables to rename. Key is the original
+     * variable name, and value its replacement.
      */
     public static void renameUserVariables(final TextDocument source, final Map<String, String> replacements) {
         final OdfElement variableContainer = source.getVariableContainerElement();
@@ -382,7 +407,6 @@ public class ODTUtils {
         }
     }
 
-
     public static Map<String, List<Text>> replaceUserVariablesWithText(final TextDocument source) throws Exception {
         final HashMap<String, List<Text>> replaced = new HashMap<>();
         final Map<String, VariableField> vars = findAllVariables(source, VariableField.VariableType.USER);
@@ -394,7 +418,7 @@ public class ODTUtils {
             @Override
             public void visit(OdfElement element) {
                 if (element instanceof TextUserFieldGetElement) {
-                    final String varName = ((TextUserFieldGetElement)element).getTextNameAttribute();
+                    final String varName = ((TextUserFieldGetElement) element).getTextNameAttribute();
                     // Replace variable
                     final Text text;
                     try {
@@ -416,10 +440,10 @@ public class ODTUtils {
                     // Browse tree
                     final NodeList children = element.getChildNodes();
                     Node child;
-                    for (int i = 0 ; i < children.getLength() ; i++) {
+                    for (int i = 0; i < children.getLength(); i++) {
                         child = children.item(i);
                         if (child instanceof OdfElement) {
-                            ((OdfElement)child).accept(this);
+                            ((OdfElement) child).accept(this);
                         }
                     }
                 }
@@ -433,14 +457,15 @@ public class ODTUtils {
     /**
      * Try to extract value from given field.
      *
-     * IMPORTANT ! For now, only fields of {@link VariableField.VariableType#USER}
-     * type are supported.
+     * IMPORTANT ! For now, only fields of
+     * {@link VariableField.VariableType#USER} type are supported.
      *
      * @param field Object to extract value from.
      * @return Found value, or null if we cannot find any.
      * @throws ReflectiveOperationException If an error occurred while analyzing
      * input variable.
-     * @throws UnsupportedOperationException If input variable type is not {@link VariableField.VariableType#USER}
+     * @throws UnsupportedOperationException If input variable type is not
+     * {@link VariableField.VariableType#USER}
      */
     public static Object getVariableValue(final VariableField field) throws ReflectiveOperationException {
         ArgumentChecks.ensureNonNull("input variable field", field);
@@ -478,6 +503,7 @@ public class ODTUtils {
 
     /**
      * Analyze input element tto find contained value.
+     *
      * @param input
      * @return value hold by given object, or null.
      */
@@ -507,8 +533,10 @@ public class ODTUtils {
      * TODO : Check footnote settings
      *
      * @param doc Document to search for existing master pages.
-     * @param orientation Orientation wanted for the returned page configuration. If null, portrait orientation is used.
-     * @param margin Margins to set to the master page. If null, default style margins are used.
+     * @param orientation Orientation wanted for the returned page
+     * configuration. If null, portrait orientation is used.
+     * @param margin Margins to set to the master page. If null, default style
+     * margins are used.
      * @return Found master page, or a new one.
      * @throws Exception If we cannot read given document.
      */
@@ -517,7 +545,7 @@ public class ODTUtils {
             orientation = StyleTypeDefinitions.PrintOrientation.PORTRAIT;
         }
 
-        final String masterName = orientation.name() + (margin == null? "" : " " + margin.toString());
+        final String masterName = orientation.name() + (margin == null ? "" : " " + margin.toString());
 
         final MasterPage masterPage = MasterPage.getOrCreateMasterPage(doc, masterName);
         masterPage.setPrintOrientation(orientation);
@@ -540,15 +568,13 @@ public class ODTUtils {
     /**
      * Aggregate all provided data into one ODT document.
      *
-     * Recognized data :
-     * - {@link TextDocument}
+     * Recognized data : - {@link TextDocument}
      * - {@link RenderedImage}
      * - {@link PDDocument}
      * - {@link PDPage}
      * - {@link CharSequence}
      *
-     * Also, if a data reference is given as :
-     * - {@link URI}
+     * Also, if a data reference is given as : - {@link URI}
      * - {@link URL}
      * - {@link File}
      * - {@link Path}
@@ -556,15 +582,15 @@ public class ODTUtils {
      *
      * We'll try to read it and convert it into one of the managed objects.
      *
-     * @param output output ODT file. If it already exists, we try to open it and
-     * add content at the end of the document. If it does not exists, we create
-     * a new file.
+     * @param output output ODT file. If it already exists, we try to open it
+     * and add content at the end of the document. If it does not exists, we
+     * create a new file.
      * @param candidates Objects to concatenate.
      * @throws java.lang.Exception If output
      */
-    public static void concatenate(Path output, Object ... candidates) throws Exception {
-        try (final TextDocument doc = Files.exists(output)?
-                TextDocument.loadDocument(output.toFile()) : TextDocument.newTextDocument()) {
+    public static void concatenate(Path output, Object... candidates) throws Exception {
+        try (final TextDocument doc = Files.exists(output)
+                ? TextDocument.loadDocument(output.toFile()) : TextDocument.newTextDocument()) {
 
             for (Object candidate : candidates) {
                 append(doc, candidate);
@@ -585,15 +611,13 @@ public class ODTUtils {
     /**
      * Try to read input object and put it into given document.
      *
-     * Recognized data :
-     * - {@link TextDocument}
+     * Recognized data : - {@link TextDocument}
      * - {@link RenderedImage}
      * - {@link PDDocument}
      * - {@link PDPage}
      * - {@link CharSequence}
      *
-     * Also, if a data reference is given as :
-     * - {@link URI}
+     * Also, if a data reference is given as : - {@link URI}
      * - {@link URL}
      * - {@link File}
      * - {@link Path}
@@ -603,7 +627,8 @@ public class ODTUtils {
      *
      * @param holder Document to append data into.
      * @param candidate Object to read and put at the end of given document.
-     * @throws Exception If we cannot read object or it is not a supported format.
+     * @throws Exception If we cannot read object or it is not a supported
+     * format.
      */
     public static void append(TextDocument holder, Object candidate) throws Exception {
         if (candidate == null) {
@@ -614,14 +639,14 @@ public class ODTUtils {
 
         // Unify all reference APIs to Path.
         if (candidate instanceof File) {
-            candidate = ((File)candidate).toPath();
+            candidate = ((File) candidate).toPath();
         } else if (candidate instanceof URI) {
-            candidate = Paths.get((URI)candidate);
+            candidate = Paths.get((URI) candidate);
         } else if (candidate instanceof URL) {
-            candidate = Paths.get(((URL)candidate).toURI());
+            candidate = Paths.get(((URL) candidate).toURI());
         } else if (candidate instanceof InputStream) {
             final Path tmpFile = Files.createTempFile("candidate", ".tmp");
-            Files.copy((InputStream)candidate, tmpFile);
+            Files.copy((InputStream) candidate, tmpFile);
             candidate = tmpFile;
             deletePath = true;
         }
@@ -630,7 +655,7 @@ public class ODTUtils {
         if (candidate instanceof Path) {
             final Path tmpPath = (Path) candidate;
             if (!Files.isReadable(tmpPath)) {
-                throw new IllegalArgumentException("Path given for document concatenation is not readable : "+tmpPath);
+                throw new IllegalArgumentException("Path given for document concatenation is not readable : " + tmpPath);
             }
 
             try (final TextDocument tmpDoc = TextDocument.loadDocument(tmpPath.toFile())) {
@@ -675,15 +700,15 @@ public class ODTUtils {
         } else if (candidate instanceof RenderedImage) {
             appendImage(holder, (RenderedImage) candidate);
         } else if (candidate instanceof CharSequence) {
-            holder.addParagraph(((CharSequence)candidate).toString());
+            holder.addParagraph(((CharSequence) candidate).toString());
         } else {
-            throw new UnsupportedOperationException("Object type not supported for insertion in ODT : "+ candidate.getClass().getCanonicalName());
+            throw new UnsupportedOperationException("Object type not supported for insertion in ODT : " + candidate.getClass().getCanonicalName());
         }
     }
 
     /**
-     * Put content of a text file into given document. We assume that input text file
-     * paragraphs are separated by a blank line.
+     * Put content of a text file into given document. We assume that input text
+     * file paragraphs are separated by a blank line.
      *
      * Note : all lines are trimmed and all blank line are suppressed.
      *
@@ -723,7 +748,8 @@ public class ODTUtils {
      *
      * @param target Document to put pdf content into.
      * @param input Location of the PDF document to read.
-     * @throws IOException If we fail reading input pdf, or writing image generated from it.
+     * @throws IOException If we fail reading input pdf, or writing image
+     * generated from it.
      */
     public static void appendPDF(final TextDocument target, final Path input) throws IOException {
         ArgumentChecks.ensureNonNull("Output document", target);
@@ -741,7 +767,8 @@ public class ODTUtils {
      *
      * @param target Document to put pdf content into.
      * @param input PDF document to read.
-     * @throws IOException If we fail reading input pdf, or writing image generated from it.
+     * @throws IOException If we fail reading input pdf, or writing image
+     * generated from it.
      */
     public static void appendPDF(final TextDocument target, final PDDocument input) throws IOException {
         ArgumentChecks.ensureNonNull("Output document", target);
@@ -769,9 +796,11 @@ public class ODTUtils {
 
     /**
      * Pops a JavaFX alert to query document password.
+     *
      * @param headerText A quick sentence about what is asked to user.
      * @param input Document to get password for.
-     * @return An optional containing user password, or an empty optional if user cancelled the alert.
+     * @return An optional containing user password, or an empty optional if
+     * user cancelled the alert.
      */
     private static Optional<String> askPassword(final String headerText, final PDDocument input) {
         final String sep = System.lineSeparator();
@@ -821,6 +850,7 @@ public class ODTUtils {
 
     /**
      * Adapt input string value.
+     *
      * @param input The string to test.
      * @return input string if not null nor empty, or "Inconnu".
      */
@@ -840,7 +870,8 @@ public class ODTUtils {
      *
      * @param holder Document to append content to.
      * @param page Page to convert and write into ODT document.
-     * @throws java.io.IOException If we fail reading input page, or writing generated image.
+     * @throws java.io.IOException If we fail reading input page, or writing
+     * generated image.
      */
     public static void appendPage(final TextDocument holder, final PDPage page) throws IOException {
         final BufferedImage img = page.convertToImage();
@@ -849,12 +880,16 @@ public class ODTUtils {
     }
 
     /**
-     * Print given photograph into input document. Created image title and description
-     * will be filled with input {@link AbstractPhoto} information (libelle, comment, author and date).
+     * Print given photograph into input document. Created image title and
+     * description will be filled with input {@link AbstractPhoto} information
+     * (libelle, comment, author and date).
+     *
      * @param holder Document to append content to.
-     * @param anchor Paragraph to insert image into. If null, image is append at the end of the document.
+     * @param anchor Paragraph to insert image into. If null, image is append at
+     * the end of the document.
      * @param toPrint Photo to insert in document.
-     * @param fullPage Used only if image is not inserted in a paragraph. Specifies if we should dedicate a page for image display.
+     * @param fullPage Used only if image is not inserted in a paragraph.
+     * Specifies if we should dedicate a page for image display.
      * @return Created image.
      */
     public static Image appendImage(final TextDocument holder, final Paragraph anchor, final AbstractPhoto toPrint, final boolean fullPage) {
@@ -915,10 +950,11 @@ public class ODTUtils {
 
     /**
      * Insert an image into given document.
+     *
      * @param holder Document to insert image into.
      * @param image Image to put in
-     * @param fullPage True if given image should be placed on a new page, alone.
-     * alse to integrate it just below previous element in the document.
+     * @param fullPage True if given image should be placed on a new page,
+     * alone. alse to integrate it just below previous element in the document.
      * @return Created image in document.
      * @throws IOException If input image cannot be written in given document.
      */
@@ -955,7 +991,9 @@ public class ODTUtils {
      *
      * @param holder Document to insert into
      * @param imagePath Location off the image to insert.
-     * @param fullPage If true, we will create a new page (no margin, orientation set according to image dimension) in which the image will be rendered.
+     * @param fullPage If true, we will create a new page (no margin,
+     * orientation set according to image dimension) in which the image will be
+     * rendered.
      * @return Created image in document.
      */
     public static Image appendImage(final TextDocument holder, final Path imagePath, final boolean fullPage) {
@@ -968,9 +1006,12 @@ public class ODTUtils {
      *
      * @param holder Document to insert into
      * @param imagePath Location off the image to insert.
-     * @param orientation Orientation of the image to insert. Only used if a full page rendering is queried.
-     * If null, we will try to determine the best orientation by analyzing image dimension.
-     * @param fullPage If true, we will create a new page (no margin, orientation set by previous parameter) in which the image will be rendered.
+     * @param orientation Orientation of the image to insert. Only used if a
+     * full page rendering is queried. If null, we will try to determine the
+     * best orientation by analyzing image dimension.
+     * @param fullPage If true, we will create a new page (no margin,
+     * orientation set by previous parameter) in which the image will be
+     * rendered.
      * @return Created image in document.
      */
     public static Image appendImage(
@@ -1011,17 +1052,22 @@ public class ODTUtils {
     }
 
     /**
-     * Create a table at the end of the given {@link TableContainer}, and fill it
-     * with input data.
+     * Create a table at the end of the given {@link TableContainer}, and fill
+     * it with input data.
      *
-     * Note : if no property listing is given, no ordering will be performed on columns.
+     * Note : if no property listing is given, no ordering will be performed on
+     * columns.
      *
      * @param target Document or section to put table into.
-     * @param data List of elements to extract properties from in order to fill table. Each element of the iterator is a row in output table.
-     * @param propertyNames List of properties (as returned by {@link PropertyDescriptor#getName() } to use for table columns.
-     * If null or empty, all properties of input objects will be used.
-     * @throws java.beans.IntrospectionException If an error occurs while analyzing properties of an element.
-     * @throws java.lang.ReflectiveOperationException If an error occurs while accessing an element property.
+     * @param data List of elements to extract properties from in order to fill
+     * table. Each element of the iterator is a row in output table.
+     * @param propertyNames List of properties (as returned by {@link PropertyDescriptor#getName()
+     * } to use for table columns. If null or empty, all properties of input
+     * objects will be used.
+     * @throws java.beans.IntrospectionException If an error occurs while
+     * analyzing properties of an element.
+     * @throws java.lang.ReflectiveOperationException If an error occurs while
+     * accessing an element property.
      */
     public static void appendTable(final TableContainer target, final Iterator<Element> data, final List<String> propertyNames) throws IntrospectionException, ReflectiveOperationException {
         ArgumentChecks.ensureNonNull("Target document", target);
@@ -1047,18 +1093,28 @@ public class ODTUtils {
 
         // Create table and headers
         final Table table = target.addTable(1, headers.size());
+        final OdfStyle headerStyle;
+        if (target instanceof OdfSchemaDocument) {
+            headerStyle = getOrCreateTableHeaderStyle((OdfSchemaDocument) target);
+        } else {
+            headerStyle = null;
+        }
         LabelMapper lMapper = LabelMapper.get(elementClass);
+        Row dataRow = table.getRowByIndex(0);
         Cell currentCell;
-        for (int i = 0 ; i < headers.size() ; i++) {
-            currentCell = table.getCellByPosition(i, 0);
+        for (int i = 0; i < headers.size(); i++) {
+            currentCell = dataRow.getCellByIndex(i);
             currentCell.addParagraph(lMapper.mapPropertyName(headers.get(i)))
                     .getFont().setFontStyle(StyleTypeDefinitions.FontStyle.BOLD);
+            if (headerStyle != null) {
+                currentCell.setCellStyleName(headerStyle.getStyleNameAttribute());
+            }
         }
 
         // Fill first line
-        Row dataRow = table.appendRow();
+        dataRow = table.appendRow();
         String propertyName;
-        for (int i = 0 ; i < headers.size() ; i++) {
+        for (int i = 0; i < headers.size(); i++) {
             propertyName = headers.get(i);
             dataRow.getCellByIndex(i).addParagraph(
                     Printers.getPrinter(propertyName).print(element, elementProperties.get(propertyName)));
@@ -1072,7 +1128,7 @@ public class ODTUtils {
             /*
              * If current object is a new type of element, we retrieve its properties
              * and add necessary columns in case none have been specified as input.
-            */
+             */
             elementProperties = descriptorsByClass.get(elementClass.getCanonicalName());
             if (elementProperties == null) {
                 elementProperties = SirsCore.listSimpleProperties(elementClass);
@@ -1119,16 +1175,26 @@ public class ODTUtils {
 
         // Create table and headers
         final Table table = target.addTable(1, propertyNames.size());
+        final OdfStyle headerStyle;
+        if (target instanceof OdfSchemaDocument) {
+            headerStyle = getOrCreateTableHeaderStyle((OdfSchemaDocument) target);
+        } else {
+            headerStyle = null;
+        }
+        Row dataRow = table.getRowByIndex(0);
         Cell currentCell;
-        for (int i = 0 ; i < propertyNames.size() ; i++) {
-            currentCell = table.getCellByPosition(i, 0);
+        for (int i = 0; i < propertyNames.size(); i++) {
+            currentCell = dataRow.getCellByIndex(i);
             currentCell.setStringValue(propertyNames.get(i));
+            if (headerStyle != null) {
+                currentCell.setCellStyleName(headerStyle.getStyleNameAttribute());
+            }
         }
 
         // Fill first line
-        Row dataRow = table.appendRow();
+        dataRow = table.appendRow();
         String propertyName;
-        for (int i = 0 ; i < propertyNames.size() ; i++) {
+        for (int i = 0; i < propertyNames.size(); i++) {
             propertyName = propertyNames.get(i);
             dataRow.getCellByIndex(i).setStringValue(
                     Printers.getPrinter(propertyName).print(next, propertyName));
@@ -1144,5 +1210,76 @@ public class ODTUtils {
                         Printers.getPrinter(propertyName).print(next, propertyName));
             }
         }
+    }
+
+    public static OdfStyle getOrCreateTableHeaderStyle(final OdfSchemaDocument source) {
+        OdfOfficeStyles styles = source.getOrCreateDocumentStyles();
+        OdfStyle style = styles.getStyle("table.header", OdfStyleFamily.TableCell);
+        if (style == null) {
+            style = styles.newStyle("table.header", OdfStyleFamily.TableCell);
+            final TableCellProperties cellProps = TableCellProperties.getOrCreateTableCellProperties(style);
+            cellProps.setBackgroundColor(new Color(109, 149, 182));
+            cellProps.setVerticalAlignment(StyleTypeDefinitions.VerticalAlignmentType.MIDDLE);
+            //ParagraphProperties.getOrCreateParagraphProperties(style).setHorizontalAlignment(StyleTypeDefinitions.HorizontalAlignmentType.CENTER);
+        }
+        return style;
+    }
+
+    public static Task generateReport(final ModeleRapport report, final Collection<? extends Element> elements, final Path output, String title) {
+        final String titre;
+        if (title == null || title.isEmpty()) {
+            titre = report.getLibelle();
+        } else {
+            titre = title;
+        }
+
+        return TaskManager.INSTANCE.submit(new Task() {
+            @Override
+            protected Object call() throws Exception {
+                updateTitle("Génération de rapport" + titre != null ? " (" + titre + ")" : "");
+                final long totalWork = elements.size() * report.sections.size();
+                final AtomicLong currentWork = new AtomicLong(-1);
+
+                // on crée le document de rapport
+                try (final TextDocument headerDoc = TextDocument.newTextDocument()) {
+                    if (titre != null && !titre.isEmpty()) {
+                        final Paragraph paragraph = headerDoc.addParagraph(titre);
+                        paragraph.applyHeading();
+                    }
+
+                    // on aggrege chaque section
+                    AbstractSectionRapport section;
+                    long expectedWork;
+                    for (int i = 0; i < report.sections.size(); i++) {
+                        section = report.sections.get(i);
+                        String libelle = section.getLibelle();
+                        if (libelle == null || libelle.isEmpty()) {
+                            libelle = "sans nom";
+                        }
+                        updateMessage("Génération de la section : " + libelle);
+
+                        try (final Stream dataStream = elements.stream().peek(input -> updateProgress(currentWork.incrementAndGet(), totalWork))) {
+                            section.print(headerDoc, dataStream);
+                            // In case section printing has not used provided stream, we have to update progress manually.
+                            expectedWork = (i + 1) * elements.size() - 1;
+                            if (currentWork.get() != expectedWork) {
+                                currentWork.set(expectedWork);
+                                updateProgress(expectedWork, totalWork);
+                            }
+                        }
+                    }
+
+                    // on sauvegarde le tout
+                    updateProgress(-1, -1);
+                    updateMessage("Sauvegarde du rapport");
+
+                    try (final OutputStream out = Files.newOutputStream(output)) {
+                        headerDoc.save(output.toFile());
+                    }
+
+                    return true;
+                }
+            }
+        });
     }
 }

@@ -1,15 +1,14 @@
 package fr.sirs.plugin.document;
 
 import fr.sirs.Plugin;
-import fr.sirs.core.model.sql.DocumentSqlHelper;
-import fr.sirs.core.model.sql.SQLHelper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 import javafx.scene.image.Image;
 
 /**
- * Minimal example of a plugin.
+ * Document d'ouvrage. Permet de générer des rapports concernant les ouvrages
+ * présents sur les digues
  *
  * @author Alexis Manin (Geomatys)
  * @author Cédric Briançon (Geomatys)
@@ -25,7 +24,7 @@ public class PluginDocument extends Plugin {
         final DynamicDocumentTheme dynDcTheme = new DynamicDocumentTheme(root);
         themes.add(new DocumentManagementTheme(root, dynDcTheme));
         themes.add(dynDcTheme);
-        
+
     }
 
     @Override

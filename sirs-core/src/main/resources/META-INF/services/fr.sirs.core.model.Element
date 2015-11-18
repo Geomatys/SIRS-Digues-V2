@@ -125,7 +125,8 @@ fr.sirs.core.model.VoieAcces
 fr.sirs.core.model.VoieDigue
 fr.sirs.core.model.XYZLeveProfilTravers
 fr.sirs.core.model.XYZProfilLong
-fr.sirs.core.model.report.FicheSectionRapport
 fr.sirs.core.model.report.ModeleElement
 fr.sirs.core.model.report.ModeleRapport
+fr.sirs.core.model.report.FicheSectionRapport
 fr.sirs.core.model.report.TableSectionRapport
+fr.sirs.core.model.report.ExternalSectionRapport

@@ -35,11 +35,11 @@ import fr.sirs.core.model.RefTypeObligationReglementaire;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.core.model.report.AbstractSectionRapport;
 import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.ui.report.FXModeleRapportsPane;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.StreamingIterable;
+import fr.sirs.util.odt.ODTUtils;
 import java.io.File;
 import java.math.BigDecimal;
 import java.nio.file.Files;
@@ -53,10 +53,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
-import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -92,8 +90,6 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.LinearReferencing;
 import org.geotoolkit.util.collection.CloseableIterator;
-import org.odftoolkit.simple.TextDocument;
-import org.odftoolkit.simple.text.Paragraph;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -245,7 +241,8 @@ public class RapportsPane extends BorderPane {
         final File file = chooser.showSaveDialog(null);
         if(file==null) return;
 
-        setPreviousPath(file.toPath().getParent());
+        final Path output = file.toPath();
+        setPreviousPath(output.getParent());
         final RefTypeObligationReglementaire typeObligation = uiTypeObligation.valueProperty().get();
         final RefEtapeObligationReglementaire typeEtape = uiTypeEtape.valueProperty().get();
         final Preview sysEndi = uiSystemEndiguement.valueProperty().get();
@@ -318,32 +315,14 @@ public class RapportsPane extends BorderPane {
                     }
                 }
 
-                // on crée le document de rapport
-                final long totalWork = elements.size() * report.sections.size();
-                final AtomicLong currentWork = new AtomicLong(-1);
-                try (final TextDocument headerDoc = TextDocument.newTextDocument()) {
-                    final Paragraph paragraph = headerDoc.addParagraph(titre);
-                    paragraph.applyHeading();
+                final Task reportGenerator = ODTUtils.generateReport(report, elements, output, titre);
+                Platform.runLater(() -> {
+                    reportGenerator.messageProperty().addListener((obs, oldValue, newValue) -> updateMessage(newValue));
+                    reportGenerator.workDoneProperty().addListener((obs, oldValue, newValue) -> updateProgress(newValue.doubleValue(), reportGenerator.getTotalWork()));
+                });
+                reportGenerator.get();
 
-                    // on aggrege chaque section
-                    Stream dataStream;
-                    for (AbstractSectionRapport section : report.sections) {
-                        String libelle = section.getLibelle();
-                        if (libelle == null || libelle.isEmpty()) {
-                            libelle = "sans nom";
-                        }
-                        updateMessage("Génération de la section : " + libelle);
-
-                        dataStream = elements.stream().peek(input -> updateProgress(currentWork.incrementAndGet(), totalWork));
-                        section.print(headerDoc, dataStream);
-                    }
-
-                    // on sauvegarde le tout
-                    updateProgress(-1, -1);
-                    updateMessage("Sauvegarde du rapport");
-                    headerDoc.save(file);
-                }
-
+                updateProgress(-1, -1);
                 if (uiCreateObligation.isSelected()) {
                     updateMessage("Création de l'obligation réglementaire");
                     //on crée une obligation à la date d'aujourdhui

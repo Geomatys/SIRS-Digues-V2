@@ -6,8 +6,8 @@ import fr.sirs.SIRS;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.RapportModeleDocument;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.plugin.document.FileTreeItem;
 import fr.sirs.plugin.document.ODTUtils;
 import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -33,7 +32,7 @@ import org.apache.sis.util.logging.Logging;
  * @author guilhem
  */
 public class GenerationPane extends GridPane {
-    
+
     @FXML
     public ProgressIndicator uiProgress;
 
@@ -42,17 +41,17 @@ public class GenerationPane extends GridPane {
 
     @FXML
     public Label uiProgressLabel;
-    
+
     private static final Logger LOGGER = Logging.getLogger("fr.sirs");
-    
+
     public GenerationPane() {
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
         uiProgress.setVisible(false);
         uiGenerateFinish.setVisible(false);
     }
-    
-    public void generateDoc(final String docName, boolean onlySe, final RapportModeleDocument modele, final Collection<TronconDigue> troncons, final File seDir,
+
+    public void generateDoc(final String docName, boolean onlySe, final ModeleRapport modele, final Collection<TronconDigue> troncons, final File seDir,
             final FileTreeItem root) {
 
         uiProgress.setVisible(true);
@@ -60,11 +59,13 @@ public class GenerationPane extends GridPane {
             if (onlySe) {
                 final File docDir = new File(seDir, DocumentsPane.DOCUMENT_FOLDER);
                 final File newDoc = new File(docDir, docName);
-                
+
                 Platform.runLater(()->uiProgressLabel.setText("Recherche des objets du rapport..."));
                 Map<String, Objet> objects  = getElements(troncons);
-                
+
+                // TODO : replace. See task used in RapportsPane.
                 ODTUtils.write(modele, newDoc, objects, uiProgressLabel, "");
+
                 setBooleanProperty(newDoc, DYNAMIC, true);
                 setProperty(newDoc, MODELE, modele.getId());
             } else {
@@ -78,7 +79,8 @@ public class GenerationPane extends GridPane {
                     final File newDoc = new File(docDir, docName);
                     Platform.runLater(()->uiProgressLabel.setText(prefix + "Recherche des objets du rapport..."));
                     Map<String, Objet> objects  = getElements(Collections.singleton(troncon));
-                    
+
+                // TODO : replace. See task used in RapportsPane.
                     ODTUtils.write(modele, newDoc, objects, uiProgressLabel, prefix);
                     setBooleanProperty(newDoc, DYNAMIC, true);
                     setProperty(newDoc, MODELE, modele.getId());
@@ -99,9 +101,9 @@ public class GenerationPane extends GridPane {
             Platform.runLater(()->uiProgressLabel.setText("Erreur pendant la génération"));
         }
     }
-    
-    
-    public void reGenerateDoc(final RapportModeleDocument modele, final Collection<TronconDigue> troncons, final File item, final FileTreeItem root, boolean showhiddenFile) {
+
+
+    public void reGenerateDoc(final ModeleRapport modele, final Collection<TronconDigue> troncons, final File item, final FileTreeItem root, boolean showhiddenFile) {
 
         uiProgress.setVisible(true);
         try {
@@ -124,18 +126,18 @@ public class GenerationPane extends GridPane {
             uiProgressLabel.setText("Erreur pendant la génération");
         }
     }
-    
+
     public void writeDoSynth(final FileTreeItem item, final File f) {
         uiProgress.setVisible(true);
         try {
             Platform.runLater(() -> uiProgressLabel.setText("Recherche des fichers à aggréger..."));
-            
+
             ODTUtils.writeDoSynth(item, f, uiProgressLabel);
-            
+
             uiProgress.setVisible(false);
             Platform.runLater(() -> uiProgressLabel.setText("Génération terminée"));
             uiGenerateFinish.setVisible(true);
-            
+
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, null, ex);
             uiProgress.setVisible(false);
