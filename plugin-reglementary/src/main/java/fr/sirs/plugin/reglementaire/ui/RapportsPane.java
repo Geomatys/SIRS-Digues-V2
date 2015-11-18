@@ -53,8 +53,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
+import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -317,23 +319,30 @@ public class RapportsPane extends BorderPane {
                 }
 
                 // on crée le document de rapport
-                final TextDocument headerDoc = TextDocument.newTextDocument();
-                final Paragraph paragraph = headerDoc.addParagraph(titre);
-                paragraph.applyHeading();
+                final long totalWork = elements.size() * report.sections.size();
+                final AtomicLong currentWork = new AtomicLong(-1);
+                try (final TextDocument headerDoc = TextDocument.newTextDocument()) {
+                    final Paragraph paragraph = headerDoc.addParagraph(titre);
+                    paragraph.applyHeading();
 
-                // on aggrege chaque section
-                for (AbstractSectionRapport section : report.sections) {
-                    String libelle = section.getLibelle();
-                    if (libelle == null || libelle.isEmpty()) {
-                        libelle = "sans nom";
+                    // on aggrege chaque section
+                    Stream dataStream;
+                    for (AbstractSectionRapport section : report.sections) {
+                        String libelle = section.getLibelle();
+                        if (libelle == null || libelle.isEmpty()) {
+                            libelle = "sans nom";
+                        }
+                        updateMessage("Génération de la section : " + libelle);
+
+                        dataStream = elements.stream().peek(input -> updateProgress(currentWork.incrementAndGet(), totalWork));
+                        section.print(headerDoc, dataStream);
                     }
-                    updateMessage("Génération de la section : " + libelle);
-                    section.print(headerDoc, elements.stream());
-                }
 
-                // on sauvegarde le tout
-                updateMessage("Sauvegarde du rapport");
-                headerDoc.save(file);
+                    // on sauvegarde le tout
+                    updateProgress(-1, -1);
+                    updateMessage("Sauvegarde du rapport");
+                    headerDoc.save(file);
+                }
 
                 if (uiCreateObligation.isSelected()) {
                     updateMessage("Création de l'obligation réglementaire");
@@ -362,6 +371,7 @@ public class RapportsPane extends BorderPane {
         };
 
         uiProgress.visibleProperty().bind(task.runningProperty());
+        uiProgress.progressProperty().bind(task.progressProperty());
         uiProgressLabel.visibleProperty().bind(task.runningProperty());
         uiProgressLabel.textProperty().bind(task.messageProperty());
         running.bind(task.runningProperty());
