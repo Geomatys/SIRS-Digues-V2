@@ -57,7 +57,6 @@ import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.FeatureIterator;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.image.io.XImageIO;
-import org.odftoolkit.odfdom.dom.element.text.TextPElement;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclElement;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldDeclsElement;
 import org.odftoolkit.odfdom.dom.element.text.TextUserFieldGetElement;
@@ -82,6 +81,7 @@ import org.odftoolkit.simple.text.Paragraph;
 import org.opengis.feature.Feature;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 /**
  * Utility methods used to create ODT templates, or fill ODT templates.
@@ -250,17 +250,17 @@ public class ODTUtils {
      * @throws IntrospectionException If input candidate cannot be analyzed.
      * @throws ReflectiveOperationException If we fail reading candidate properties.
      */
-    public static void replaceTextContent(final Element candidate, final Map<String, List<Paragraph>> propertyContainers) throws IntrospectionException, ReflectiveOperationException {
+    public static void replaceTextContent(final Element candidate, final Map<String, List<? extends Node>> propertyContainers) throws IntrospectionException, ReflectiveOperationException {
         // We iterate through input properties to extract all mappable attributes.
         final PropertyDescriptor[] descriptors = Introspector.getBeanInfo(candidate.getClass()).getPropertyDescriptors();
-        List<Paragraph> containers;
+        List<? extends Node> containers;
         String pName;
         for (final PropertyDescriptor desc : descriptors) {
             pName = desc.getName();
             containers = propertyContainers.get(pName);
             if (containers != null) {
-                for (final Paragraph p : containers) {
-                    p.setTextContent(Printers.getPrinter(pName).print(candidate, desc));
+                for (final Node n : containers) {
+                    n.setTextContent(Printers.getPrinter(pName).print(candidate, desc));
                 }
             }
         }
@@ -383,8 +383,8 @@ public class ODTUtils {
     }
 
 
-    public static Map<String, List<Paragraph>> replaceUserVariablesWithText(final TextDocument source) throws Exception {
-        final HashMap<String, List<Paragraph>> replaced = new HashMap<>();
+    public static Map<String, List<Text>> replaceUserVariablesWithText(final TextDocument source) throws Exception {
+        final HashMap<String, List<Text>> replaced = new HashMap<>();
         final Map<String, VariableField> vars = findAllVariables(source, VariableField.VariableType.USER);
         if (vars.isEmpty())
             return replaced;
@@ -396,22 +396,16 @@ public class ODTUtils {
                 if (element instanceof TextUserFieldGetElement) {
                     final String varName = ((TextUserFieldGetElement)element).getTextNameAttribute();
                     // Replace variable
-                    final Paragraph text;
+                    final Text text;
                     try {
-                        text = Paragraph.getInstanceof(new TextPElement(source.getContentDom()));
-                        text.setTextContent(getVariableValue(vars.get(varName)).toString());
+                        text = source.getContentDom().createTextNode(getVariableValue(vars.get(varName)).toString());
                     } catch (Exception ex) {
                         throw new SirsCoreRuntimeException(ex);
                     }
                     final Node papa = element.getParentNode();
+                    papa.replaceChild(text, element);
                     // hack : paragraphs cannot embed other paragraphs.
-                    if (papa instanceof Paragraph) {
-                        source.insertParagraph((Paragraph)papa, text, false);
-                        papa.removeChild(element);
-                    } else {
-                        papa.replaceChild(text.getOdfElement(), element);
-                    }
-                    List<Paragraph> tmpList = replaced.get(varName);
+                    List<Text> tmpList = replaced.get(varName);
                     if (tmpList == null) {
                         tmpList = new ArrayList<>();
                         replaced.put(varName, tmpList);
