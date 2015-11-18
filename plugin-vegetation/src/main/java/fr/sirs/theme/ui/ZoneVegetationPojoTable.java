@@ -5,7 +5,6 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ArbreVegetation;
 import fr.sirs.core.model.Element;
@@ -15,19 +14,16 @@ import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.TraitementZoneVegetation;
 import fr.sirs.core.model.ZoneVegetation;
+import fr.sirs.plugin.vegetation.PluginVegetation;
 import static fr.sirs.plugin.vegetation.PluginVegetation.DEFAULT_INVASIVE_VEGETATION_TYPE;
 import static fr.sirs.plugin.vegetation.PluginVegetation.DEFAULT_PEUPLEMENT_VEGETATION_TYPE;
 import static fr.sirs.plugin.vegetation.PluginVegetation.paramTraitement;
 import fr.sirs.util.SirsStringConverter;
-import java.lang.reflect.Modifier;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.stage.Modality;
@@ -40,7 +36,7 @@ import org.geotoolkit.display.MeasureUtilities;
  * @author Samuel Andrés (Geomatys)
  */
 public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
-    
+
     private static final SirsStringConverter converter = new SirsStringConverter();
 
     public ZoneVegetationPojoTable(String title) {
@@ -56,7 +52,7 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
         getTable().getColumns().add(5, (TableColumn) new VegetationTypeColumm());
         getTable().getColumns().add(6, (TableColumn) new VegetationAreaColumm());
     }
-    
+
     @Override
     protected ZoneVegetation createPojo() {
 
@@ -259,18 +255,7 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
         private ChoiceStage(){
             super();
             setTitle("Choix du type de zone");
-
-            final List<Class<? extends Element>> classes = Session.getElements();
-
-            final List<Class<? extends ZoneVegetation>> zoneTypes = new ArrayList<>();
-            for(final Class element : classes){
-                if(ZoneVegetation.class.isAssignableFrom(element) && !Modifier.isAbstract(element.getModifiers())){
-                    zoneTypes.add(element);
-                }
-            }
-
-            comboBox.setItems(FXCollections.observableList(zoneTypes));
-
+            comboBox.setItems(PluginVegetation.zoneVegetationClasses());
             retrievedElement.bind(comboBox.getSelectionModel().selectedItemProperty());
         }
     }

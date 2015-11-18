@@ -13,7 +13,6 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.AbstractZoneVegetationRepository;
 import fr.sirs.core.component.ParcelleVegetationRepository;
 import fr.sirs.core.model.ArbreVegetation;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.HerbaceeVegetation;
 import fr.sirs.core.model.InvasiveVegetation;
 import fr.sirs.core.model.LabelMapper;
@@ -29,8 +28,6 @@ import fr.sirs.core.model.RefTypePeuplementVegetation;
 import fr.sirs.core.model.TraitementParcelleVegetation;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.ZoneVegetation;
-import fr.sirs.core.model.sql.SQLHelper;
-import fr.sirs.core.model.sql.VegetationSqlHelper;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.vegetation.map.CreateParcelleTool;
 import java.awt.Color;
@@ -112,6 +109,8 @@ public class PluginVegetation extends Plugin {
 
     private final VegetationToolBar toolbar = new VegetationToolBar();
 
+    private static ObservableList<Class<? extends ZoneVegetation>> ZONE_TYPES;
+
     public PluginVegetation() {
         name = NAME;
         loadingMessage.set("module végétation");
@@ -174,7 +173,7 @@ public class PluginVegetation extends Plugin {
 
         try{
             //parcelles
-            final StructBeanSupplier parcelleSupplier = new StructBeanSupplier(ParcelleVegetation.class, () -> 
+            final StructBeanSupplier parcelleSupplier = new StructBeanSupplier(ParcelleVegetation.class, () ->
                     vs.getParcelleRepo().getByPlanId(plan.getId()));
             final BeanStore parcelleStore = new BeanStore(parcelleSupplier);
             final MapLayer parcelleLayer = MapBuilder.createFeatureLayer(parcelleStore.createSession(true)
@@ -188,7 +187,7 @@ public class PluginVegetation extends Plugin {
             parcelleLayer.setSelectionStyle(createParcelleStyleSelected());
 
             //strates herbacée
-            final StructBeanSupplier herbeSupplier = new StructBeanSupplier(HerbaceeVegetation.class, 
+            final StructBeanSupplier herbeSupplier = new StructBeanSupplier(HerbaceeVegetation.class,
                     () -> vs.getHerbaceeRepo().getByParcelleIds(getParcelleIds(plan.getId())));
             final BeanStore herbeStore = new BeanStore(herbeSupplier);
             final MapLayer herbeLayer = MapBuilder.createFeatureLayer(herbeStore.createSession(true)
@@ -465,7 +464,7 @@ public class PluginVegetation extends Plugin {
      * associés (ponctuel et non ponctuel).
      *
      * NOTE : Cette méthode ignore les parcelles d'invasives.
-     * 
+     *
      * Le traitement non ponctuel est associé à une certaine fréquence. La
      * fréquence de traitement de la parcelle est égale à la plus petite des
      * fréquences des traitements non ponctuels des zones de végétation de la
@@ -566,7 +565,7 @@ public class PluginVegetation extends Plugin {
      * souhaite faire la mise à jour. En pratique cela corresponda à l'année en
      * cours de manière à ce que les modifications dans le plan n'aient pas d'
      * impact sur les planifications des années passées.
-     * 
+     *
      * @throws NullPointerException if parcelle is null
      * @throws IllegalStateException if:
      * 1) the planId of the parcelle is null,
@@ -633,7 +632,7 @@ public class PluginVegetation extends Plugin {
             }
         }
     }
-    
+
     /**
      * Met à jour la planification de la parcelle donnée en paramètre, à partir
      * de l'année en cours.
@@ -714,18 +713,18 @@ public class PluginVegetation extends Plugin {
 
         return coherent;
     }
-    
+
     /**
      * Gives the information if the parcelle is coherent.
-     * 
-     * Cette version calcule la plus courte fréquence de traitement de la 
-     * parcelle, ce qui nécessite plusieurs boucles et des appels à des dépôts 
+     *
+     * Cette version calcule la plus courte fréquence de traitement de la
+     * parcelle, ce qui nécessite plusieurs boucles et des appels à des dépôts
      * de données.
-     * 
-     * Si la plus courte fréquence a déjà été utilisée dans le contexte d'appel 
-     * de cette méthode et qu'elle est a priori toujours valide, préférer 
+     *
+     * Si la plus courte fréquence a déjà été utilisée dans le contexte d'appel
+     * de cette méthode et qu'elle est a priori toujours valide, préférer
      * l'utilisation de:
-     * 
+     *
      * isCoherent(ParcelleVegetation parcelle, int plusCourteFrequence)
      *
      * @param parcelle
@@ -759,7 +758,7 @@ public class PluginVegetation extends Plugin {
      * (doit être appelée à la création d'une parcelle,
      * soit à partir de la carte, soit à partir du tableau des parcelles,
      * soit lors de la duplication d'un plan).
-     * 
+     *
      * @param parcelle
      * @param dureePlan
      */
@@ -771,13 +770,15 @@ public class PluginVegetation extends Plugin {
             while(planifications.size()>dureePlan) planifications.remove(planifications.size()-1);
         }
     }
-    
-    public static List<Class<? extends ZoneVegetation>> zoneVegetationClasses(){
-        final List<Class<? extends ZoneVegetation>> vegetationClasses = new ArrayList<>();
-        for(final Class<? extends Element> eltClass : Session.getElements()){
-            if(ZoneVegetation.class.isAssignableFrom(eltClass))vegetationClasses.add((Class<? extends ZoneVegetation>) eltClass);
+
+    public static ObservableList<Class<? extends ZoneVegetation>> zoneVegetationClasses(){
+        if (ZONE_TYPES == null) {
+            FXCollections.unmodifiableObservableList(FXCollections.observableList(
+                    Session.getConcreteSubTypes(ZoneVegetation.class)
+            ));
         }
-        return vegetationClasses;
+
+        return ZONE_TYPES;
     }
 
     /**
@@ -855,7 +856,7 @@ public class PluginVegetation extends Plugin {
 
     /**
      * Parametrization of the traitement of a vegetation zone.
-     * 
+     *
      * @param <T>
      * @param zoneType
      * @param peuplement
@@ -917,7 +918,7 @@ public class PluginVegetation extends Plugin {
 
         final String typeRiveId = troncon.getTypeRiveId();
         final String typeCoteId = zone.getTypeCoteId();
-        
+
         double ratio = 1.0;
 
         if("RefRive:1".equals(typeRiveId)){

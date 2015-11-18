@@ -29,7 +29,7 @@ import javafx.scene.control.ComboBox;
 public class FXParamFrequenceTraitementVegetationPane extends FXParamFrequenceTraitementVegetationPaneStub {
 
     @FXML ComboBox<Class<? extends ZoneVegetation>> ui_type;
-    
+
     public FXParamFrequenceTraitementVegetationPane(final ParamFrequenceTraitementVegetation paramFrequenceTraitementVegetation){
         super(paramFrequenceTraitementVegetation);
 
@@ -101,7 +101,7 @@ public class FXParamFrequenceTraitementVegetationPane extends FXParamFrequenceTr
 
         super.initFields(observableElement, oldElement, newElement);
 
-        SIRS.initCombo(ui_type, FXCollections.observableList(PluginVegetation.zoneVegetationClasses()), newElement.getType() == null ? null : newElement.getType());
+        SIRS.initCombo(ui_type, PluginVegetation.zoneVegetationClasses(), newElement.getType() == null ? null : newElement.getType());
 
         // Initialisation des sous-types
         final AbstractSIRSRepository<RefSousTraitementVegetation> repoSousTraitements = Injector.getSession().getRepositoryForClass(RefSousTraitementVegetation.class);
