@@ -20,7 +20,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.odftoolkit.simple.TextDocument;
-import org.odftoolkit.simple.text.Paragraph;
+import org.w3c.dom.Text;
 
 /**
  * Detailed element printing.
@@ -106,11 +106,20 @@ public class FicheSectionRapport extends AbstractSectionRapport {
             throw new IllegalStateException("No ODT template available.");
         }
 
+        // Print only elements managed by underlying model.
+        final Iterator<? extends Element> iterator;
+        final String targetClass = model.getTargetClass();
+        if (targetClass != null && !targetClass.isEmpty()) {
+            final Class tmpClass = Thread.currentThread().getContextClassLoader().loadClass(targetClass);
+            iterator = ctx.elements.filter(input -> tmpClass.isAssignableFrom(input.getClass())).iterator();
+        } else {
+            iterator = ctx.elements.iterator();
+        }
+
         /**
          * If we've got elements to print, section template is read, then we fill
          * it for each element, and append it to context target.
          */
-        final Iterator<? extends Element> iterator = ctx.elements.iterator();
         if (iterator.hasNext()) {
             final Element first = iterator.next();
 
@@ -119,7 +128,7 @@ public class FicheSectionRapport extends AbstractSectionRapport {
 
                 ODTUtils.fillTemplate(doc, first);
                 // Forced to do it to avoid variable erasing at concatenation
-                final Map<String, List<Paragraph>> replaced = ODTUtils.replaceUserVariablesWithText(doc);
+                final Map<String, List<Text>> replaced = ODTUtils.replaceUserVariablesWithText(doc);
                 final int nbPhotosToPrint = nbPhotos.get();
 
                 ODTUtils.append(ctx.target, doc);
@@ -128,7 +137,7 @@ public class FicheSectionRapport extends AbstractSectionRapport {
                 // For next elements, we replace directly text attributes we've put instead of variables, to avoid reloading original template.
                 iterator.forEachRemaining(next -> {
                     try {
-                        ODTUtils.replaceTextContent(next, replaced);
+                        ODTUtils.replaceTextContent(next, (Map) replaced);
 
                         ODTUtils.append(ctx.target, doc);
                         printPhotos(ctx.target, next, nbPhotosToPrint);
