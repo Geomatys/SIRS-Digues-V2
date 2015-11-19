@@ -30,23 +30,6 @@
             <version>0.x-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>net.sf.jodreports</groupId>
-            <artifactId>jodreports</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.odftoolkit</groupId>
-            <artifactId>simple-odf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.pdfbox</groupId>
-            <artifactId>pdfbox</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sis.core</groupId>
-            <artifactId>sis-utility</artifactId>
-            <version>${sis.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -103,54 +86,6 @@
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>
                     </archive>
-                </configuration>
-            </plugin>
-            
-            
-            <plugin>
-                <groupId>com.geomatys.maven</groupId>
-                <artifactId>maven-fxmodel-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>fxmodel</id>
-                        <goals>
-                            <goal>fxmodel</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>fxmodel2sql</id>
-                        <goals>
-                            <goal>fxmodel2sql</goal>
-                        </goals>
-                      <configuration>
-                        <helperName>DocumentSqlHelper</helperName>
-                      </configuration>
-                    </execution>
-                    <execution>
-                      <id>fxml</id>
-                      <goals>
-                        <goal>fxml</goal>
-                      </goals>
-                      <configuration>
-                        <packageName>fr.sirs.theme.ui</packageName>
-                      </configuration>
-                    </execution>
-                    <execution>
-                      <id>fx-controller</id>
-                      <goals>
-                        <goal>fxcontroller</goal>
-                      </goals>
-                      <configuration>
-                        <packageName>fr.sirs.theme.ui</packageName>
-                      </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <generateEquals>true</generateEquals>
-                    <model>model/document.ecore</model>
-                    <modelPackage>fr.sirs.core.model</modelPackage>
-                    <repositoryPackage>fr.sirs.core.component</repositoryPackage>
-                    <repositoryInterface>fr.sirs.core.Repository</repositoryInterface>
                 </configuration>
             </plugin>
             

@@ -2,28 +2,26 @@ package fr.sirs.plugin.document.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.Session;
 import fr.sirs.core.component.DigueRepository;
-import fr.sirs.core.component.Previews;
-import fr.sirs.core.component.RapportModeleDocumentRepository;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.RapportModeleDocument;
-import fr.sirs.core.model.RapportSectionDocument;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.plugin.document.FileTreeItem;
+import fr.sirs.plugin.document.ODTUtils;
 import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
 import static fr.sirs.plugin.document.ui.DocumentsPane.ROOT_FOLDER;
-import fr.sirs.ui.Growl;
+import fr.sirs.ui.report.FXModeleRapportsPane;
 import fr.sirs.util.SirsStringConverter;
 import java.io.File;
+import java.nio.file.Path;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
@@ -31,93 +29,69 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
-import java.net.URL;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import org.apache.sis.util.logging.Logging;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Panneau de gestion de création de documents dynamiques.
  *
  * @author Cédric Briançon (Geomatys)
  */
-public class DynamicDocumentsPane extends BorderPane implements Initializable {
-    
+public class DynamicDocumentsPane extends BorderPane {
+
     @FXML private CheckBox uiSelectAllTronconBox;
-    
+
     @FXML private CheckBox uiOnlySEBox;
-    
+
     @FXML private ComboBox<Preview> uiSECombo;
 
     @FXML private ListView<TronconDigue> uiTronconsList;
 
-    @FXML private ListView<RapportModeleDocument> uiModelsList;
+    @FXML private BorderPane uiListPane;
 
-    @FXML private VBox uiRightVBox;
+    @FXML private BorderPane uiModelPane;
 
-    @FXML private VBox uiParagraphesVbox;
-
-    @FXML private Button uiAddParagrapheBtn;
-
-    @FXML private TextField uiModelNameTxtField;
-    
-    @FXML private Label uiTronconLabel;
-    
     @FXML private Button uiGenerateBtn;
-    
+
+    @FXML private Label uiTronconLabel;
+
     @FXML private TextField uiDocumentNameField;
-    
-    @FXML private Button uiSaveModelBtn;
-    
-    @FXML private Button uiDeleteBtn;
-    
-    @FXML private Button uiNewModelBtn;
-    
+
     private final FileTreeItem root;
-    
+
+    @Autowired
+    private Session session;
+
+    private final SimpleObjectProperty<ModeleRapport> modelProperty = new SimpleObjectProperty<>();
+
     public DynamicDocumentsPane(final FileTreeItem root) {
+        super();
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
         this.root = root;
-    }
 
-    /**
-     * Initialise les différents panneaux de la page.
-     *
-     * @param location
-     * @param resources
-     */
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        final Previews previewRepository = Injector.getSession().getPreviews();
-
-        uiAddParagrapheBtn.setTooltip(new Tooltip("Ajouter un paragraphe au modèle"));
         uiGenerateBtn.setTooltip(new Tooltip("Générer le document dynamique"));
-        uiSaveModelBtn.setTooltip(new Tooltip("Sauvegarder le modèle"));
-        uiDeleteBtn.setTooltip(new Tooltip("Supprimer le modèle"));
-        uiNewModelBtn.setTooltip(new Tooltip("Créer un nouveau modèle"));
-        
+
+        SIRS.initCombo(uiSECombo, FXCollections.observableList(session.getPreviews().getByClass(SystemeEndiguement.class)), null);
+
         // Gestion de la liste de système d'endiguements et de tronçons associés
-        uiSECombo.setEditable(false);
         uiSECombo.valueProperty().addListener(this::systemeEndiguementChange);
         uiTronconsList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         final SirsStringConverter converter = new SirsStringConverter();
@@ -128,178 +102,82 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
                     @Override
                     protected void updateItem(TronconDigue item, boolean empty) {
                         super.updateItem(item, empty);
-                        setText(converter.toString(item));
-                    }
-                };
-            }
-        });
-
-        uiSECombo.setConverter(new SirsStringConverter());
-        uiSECombo.setItems(FXCollections.observableArrayList(
-                previewRepository.getByClass(SystemeEndiguement.class)));
-        if(uiSECombo.getItems()!=null){
-            uiSECombo.getSelectionModel().select(0);
-        }
-
-        final RapportModeleDocumentRepository rmdr = Injector.getBean(RapportModeleDocumentRepository.class);
-        uiModelsList.setCellFactory(new Callback<ListView<RapportModeleDocument>, ListCell<RapportModeleDocument>>() {
-            @Override
-            public ListCell<RapportModeleDocument> call(ListView<RapportModeleDocument> param) {
-                return new ListCell<RapportModeleDocument>() {
-                    @Override
-                    protected void updateItem(RapportModeleDocument item, boolean empty) {
-                        super.updateItem(item, empty);
-
-                        if (item != null) {
-                            setText(item.getLibelle());
-                        } else {
+                        if (empty || item == null) {
                             setText(null);
+                        } else {
+                            setText(converter.toString(item));
                         }
                     }
                 };
             }
         });
 
-        uiModelsList.setItems(FXCollections.observableArrayList(rmdr.getAll()));
-
-        // Gestion de l'affichage de la partie de droite.
-        uiModelsList.getSelectionModel().selectedItemProperty().addListener((observable, oldModel, newModel) -> {
-            if (oldModel != null) {
-                uiModelNameTxtField.textProperty().unbindBidirectional(oldModel.libelleProperty());
-            }
-
-            if (newModel != null) {
-                if (uiParagraphesVbox.getChildren().size() > 1) {
-                    uiParagraphesVbox.getChildren().remove(1, uiParagraphesVbox.getChildren().size());
-                }
-
-                uiModelNameTxtField.textProperty().bindBidirectional(newModel.libelleProperty());
-
-                uiAddParagrapheBtn.setOnAction(event -> addParagraphePane(newModel));
-                final List<RapportSectionDocument> sections = newModel.getSections();
-                for (int i=0, length=sections.size(); i<length; i++) {
-                    final RapportSectionDocument section = sections.get(i);
-                    uiParagraphesVbox.getChildren().add(new ModelParagraphePane(uiParagraphesVbox, newModel, section, i+1));
-                }
-            }
-        });
-
-        uiRightVBox.visibleProperty().bind(uiModelsList.getSelectionModel().selectedItemProperty().isNotNull());
-        
         uiOnlySEBox.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             uiTronconLabel.setVisible(!newValue);
             uiSelectAllTronconBox.setVisible(!newValue);
             uiTronconsList.setVisible(!newValue);
         });
-        
+
         uiSelectAllTronconBox.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             if (newValue) {
-                uiTronconsList.getSelectionModel().selectRange(0, uiTronconsList.getItems().size());
+                uiTronconsList.getSelectionModel().selectAll();
             } else {
                 uiTronconsList.getSelectionModel().clearSelection();
             }
         });
+
+        // model edition
+        final FXModeleRapportsPane rapportEditor = new FXModeleRapportsPane();
+        modelProperty.bind(rapportEditor.selectedModelProperty());
+        uiListPane.setCenter(rapportEditor);
+        uiModelPane.setCenter(rapportEditor.editor);
+        uiGenerateBtn.disableProperty().bind(modelProperty.isNull());
     }
 
-    @FXML
-    private void addModel() {
-        final RapportModeleDocumentRepository rmdr = Injector.getBean(RapportModeleDocumentRepository.class);
-        final RapportModeleDocument model = rmdr.create();
-        model.setLibelle("Nouveau modèle");
-        rmdr.add(model);
-        uiModelsList.getItems().add(model);
-    }
-
-    @FXML
-    private void deleteModel() {
-        final RapportModeleDocument model = uiModelsList.getSelectionModel().getSelectedItem();
-        if (model != null) {
-            final Dialog dialog    = new Dialog();
-            final DialogPane pane  = new DialogPane();
-            pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
-            dialog.setDialogPane(pane);
-            dialog.setResizable(true);
-            dialog.setTitle("Détruire modèle");
-            dialog.setContentText("Détruire le modèle dans la base de données ?");
-
-            final Optional opt = dialog.showAndWait();
-            if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
-               uiModelsList.getItems().remove(model);
-               Injector.getBean(RapportModeleDocumentRepository.class).remove(model);
-            }
-        } else {
-            showErrorDialog("Vous devez sélectionner un modèle.");
-        }
-    }
-
-    @FXML
-    private void saveModel() {
-        final RapportModeleDocument model = uiModelsList.getSelectionModel().getSelectedItem();
-        Injector.getBean(RapportModeleDocumentRepository.class).update(model);
-        final ObservableList<RapportModeleDocument> oldModels = uiModelsList.getItems();
-        uiModelsList.setItems(null);
-        uiModelsList.setItems(oldModels);
-        uiModelsList.getSelectionModel().select(model);
-        
-        final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
-        growlInfo.showAndFade();
-    }
-    
     @FXML
     private void generateDocument(ActionEvent event) {
-        String tmp = uiDocumentNameField.getText();
+        final String tmp = uiDocumentNameField.getText();
         if (tmp.isEmpty()) {
             showErrorDialog("Vous devez remplir le nom du fichier");
             return;
         }
-        
+
         final String docName;
-        if (!tmp.endsWith(".odt")) {
+        if (!tmp.toLowerCase().endsWith(".odt")) {
             docName = tmp + ".odt";
         } else {
             docName= tmp;
         }
         final Preferences prefs = Preferences.userRoot().node("DocumentPlugin");
         String rootPath = prefs.get(ROOT_FOLDER, null);
-        
+
         if (rootPath == null || rootPath.isEmpty()) {
             rootPath = setMainFolder();
         }
-        
+
         final File rootDir = new File (rootPath);
-        root.setValue(new File (rootPath));
-        
-        final RapportModeleDocument modele = uiModelsList.getSelectionModel().getSelectedItem();
+        root.setValue(rootDir);
+
+        ModeleRapport modele = modelProperty.get();
         if (modele == null) {
             showErrorDialog("Vous devez sélectionner un modèle.");
             return;
         }
-        
-        final Stage dialog         = new Stage();
-        final DialogPane pane      = new DialogPane();
-        final GenerationPane ipane = new GenerationPane();
-        ipane.uiGenerateFinish.setOnAction((ActionEvent event1) -> {dialog.hide();});
-        pane.setContent(ipane);
-        dialog.setScene(new Scene(pane));
-        dialog.setResizable(true);
-        dialog.setTitle("Génération des documents");
-        dialog.initModality(Modality.APPLICATION_MODAL);
-        
-        final Collection<TronconDigue> troncons = getTronconList();
-        final File seDir                        = getOrCreateSE(rootDir, getSelectedSE());
 
-        new Thread() {
-           @Override
-           public void run() {
-               ipane.generateDoc(docName, uiOnlySEBox.isSelected(), modele, troncons, seDir, root); 
-           }
-        }.start();
-            
-        dialog.show();
+        final boolean onlySE = uiOnlySEBox.isSelected();
+        final File seDir = getOrCreateSE(rootDir, getSelectedSE());
+        final Task generator;
+        if (onlySE) {
+            final Path outputDoc = seDir.toPath().resolve(DocumentsPane.DOCUMENT_FOLDER).resolve(docName);
+            generator = ODTUtils.generateDoc(modele, getTronconList(), outputDoc.toFile(), root);
+        } else {
+            generator = ODTUtils.generateDocsForDigues(docName, onlySE, modele, getTronconList(), seDir, root);
+        }
+        LoadingPane.showDialog(generator);
     }
-        
 
-    
+
+
     public String setMainFolder() {
         final Dialog dialog    = new Dialog();
         final DialogPane pane  = new DialogPane();
@@ -316,7 +194,7 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
             File f = new File(ipane.rootFolderField.getText());
             if (f.isDirectory() && verifyDatabaseVersion(f)) {
                 rootPath = f.getPath();
-                
+
                 final Preferences prefs = Preferences.userRoot().node("DocumentPlugin");
                 prefs.put(ROOT_FOLDER, rootPath);
                 updateDatabaseIdentifier(new File(rootPath));
@@ -350,37 +228,33 @@ public class DynamicDocumentsPane extends BorderPane implements Initializable {
         }
     }
 
-    /**
-     * Ajoute un paragraphe au modèle de document.
-     */
-    private void addParagraphePane(final RapportModeleDocument model) {
-        final RapportSectionDocument newSection =
-                Injector.getSession().getElementCreator().createElement(RapportSectionDocument.class);
-        model.getSections().add(newSection);
-        uiParagraphesVbox.getChildren().add(new ModelParagraphePane(uiParagraphesVbox, model, newSection, model.getSections().size()));
-    }
-    
     private SystemeEndiguement getSelectedSE() {
         final Preview newValue = uiSECombo.getSelectionModel().getSelectedItem();
-        final SystemeEndiguementRepository sdRepo = (SystemeEndiguementRepository) Injector.getSession().getRepositoryForClass(SystemeEndiguement.class);
-        return sdRepo.get(newValue.getElementId());
+        if (newValue != null) {
+            return session.getRepositoryForClass(SystemeEndiguement.class).get(newValue.getElementId());
+        } else {
+            return null;
+        }
     }
-    
+
     private Collection<TronconDigue> getTronconList() {
         if (uiOnlySEBox.isSelected()) {
             final SystemeEndiguement sd              = getSelectedSE();
-            final DigueRepository digueRepo          = (DigueRepository) Injector.getSession().getRepositoryForClass(Digue.class);
-            final TronconDigueRepository tronconRepo = (TronconDigueRepository) Injector.getSession().getRepositoryForClass(TronconDigue.class);
+            if (sd == null) {
+                return Collections.EMPTY_LIST;
+            }
+            final DigueRepository digueRepo          = (DigueRepository) session.getRepositoryForClass(Digue.class);
+            final TronconDigueRepository tronconRepo = (TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class);
             final Set<TronconDigue> troncons         = new HashSet<>();
             final List<Digue> digues                 = digueRepo.getBySystemeEndiguement(sd);
             for(Digue digue : digues){
                 troncons.addAll(tronconRepo.getByDigue(digue));
             }
             return troncons;
-            
+
         } else {
             return  uiTronconsList.getSelectionModel().getSelectedItems();
         }
     }
-    
+
 }

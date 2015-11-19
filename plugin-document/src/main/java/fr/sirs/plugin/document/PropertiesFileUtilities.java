@@ -20,10 +20,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,28 +41,28 @@ import org.geotoolkit.util.FileUtilities;
 
 /**
  * Utility class managing the properties file adding different properties to the filesystem objects.
- * 
+ *
  * @author Guilhem Legal (Geomatys)
  */
 public class PropertiesFileUtilities {
-    
+
     private static final Logger LOGGER = Logging.getLogger("fr.sirs");
-    
+
     /**
      * Extract a property in the sirs.properties file coupled to the specified file.
-     * 
+     *
      * @param f A file, can be a folder correspounding to a SE, DG or TR. Or a simple file.
      * @param property Name of the property.
-     * @return 
+     * @return
      */
     public static String getProperty(final File f, final String property) {
         final Properties prop = getSirsProperties(f, true);
         return prop.getProperty(f.getName() + "_" + property, "");
     }
-    
+
     /**
      * Set a property in the sirs.properties file coupled to the specified file.
-     * 
+     *
      * @param f A file, can be a folder correspounding to a SE, DG or TR. Or a simple file.
      * @param property Name of the property.
      * @param value The value to set.
@@ -72,7 +72,7 @@ public class PropertiesFileUtilities {
         prop.put(f.getName() + "_" + property, value);
         storeSirsProperties(prop, f, true);
     }
-    
+
     /**
      * Remove a property in the sirs.properties file coupled to the specified file.
      * @param f A file, can be a folder correspounding to a SE, DG or TR. Or a simple file.
@@ -83,22 +83,22 @@ public class PropertiesFileUtilities {
         prop.remove(f.getName() + "_" + property);
         storeSirsProperties(prop, f, true);
     }
-    
+
     /**
      * Extract a property in the sirs.properties file coupled to the specified file.
-     * 
+     *
      * @param f A file, can be a folder correspounding to a SE, DG or TR. Or a simple file.
      * @param property Name of the property.
-     * @return 
+     * @return
      */
     public static Boolean getBooleanProperty(final File f, final String property) {
         final Properties prop = getSirsProperties(f, true);
         return Boolean.parseBoolean(prop.getProperty(f.getName() + "_" + property, "false"));
     }
-    
+
     /**
      * Set a property in the sirs.properties file coupled to the specified file.
-     * 
+     *
      * @param f A file, can be a folder correspounding to a SE, DG or TR. Or a simple file.
      * @param property Name of the property.
      * @param value The value to set.
@@ -106,34 +106,34 @@ public class PropertiesFileUtilities {
     public static void setBooleanProperty(final File f, final String property, boolean value) {
         final Properties prop   = getSirsProperties(f, true);
         prop.put(f.getName() + "_" + property, Boolean.toString(value));
-        
+
         storeSirsProperties(prop, f, true);
     }
-    
+
     /**
      * Return true if the specified file correspound to a a SE, DG or TR folder.
-     * 
+     *
      * @param f A file.
-     * @return 
+     * @return
      */
     public static Boolean getIsModelFolder(final File f) {
         return getIsModelFolder(f, SE) || getIsModelFolder(f, TR) || getIsModelFolder(f, DG);
     }
-    
+
     /**
      * Return true if the specified file correspound to a a specific specified model (SE, DG or TR).
      * @param f A file.
      * @param model SE, DG or TR.
-     * @return 
+     * @return
      */
     public static Boolean getIsModelFolder(final File f, final String model) {
         final Properties prop = getSirsProperties(f, true);
         return Boolean.parseBoolean(prop.getProperty(f.getName() + "_" + model, "false"));
     }
-    
+
     /**
      * Set the specific specified model (SE, DG or TR) for a folder.
-     * 
+     *
      * @param f A model folder.
      * @param model SE, DG or TR.
      * @param libelle The name that will be displayed in UI.
@@ -142,18 +142,18 @@ public class PropertiesFileUtilities {
         final Properties prop   = getSirsProperties(f, true);
         prop.put(f.getName() + "_" + model, "true");
         prop.put(f.getName() + "_" + LIBELLE, libelle);
-        
+
        storeSirsProperties(prop, f, true);
     }
-    
+
     /**
      * Remove all properties coupled to the specified file.
-     * 
+     *
      * @param f A file.
      */
     public static void removeProperties(final File f) {
         final Properties prop   = getSirsProperties(f, true);
-        
+
         Set<Entry<Object,Object>> properties = new HashSet<>(prop.entrySet());
         for (Entry<Object,Object> entry : properties) {
             if (((String)entry.getKey()).startsWith(f.getName())) {
@@ -163,10 +163,10 @@ public class PropertiesFileUtilities {
         //save cleaned properties file
         storeSirsProperties(prop, f, true);
     }
-    
+
     /**
      * Store the updated properties to the sirs file.
-     * 
+     *
      * @param prop the updated properties. (will replace the previous one in the file).
      * @param f The file adding properties (not the sirs file).
      * @param parent {@code true} if the file f is not the root directory.
@@ -188,15 +188,15 @@ public class PropertiesFileUtilities {
             }
         }
     }
-    
+
     /**
      * Get or create a sirs.properties file next to the specified one (or in the directory if parent is set to false)
-     * 
+     *
      * @param f A file.
      * @param parent {@code true} if the file f is not the root directory.
-     * 
+     *
      * @return A sirs.properties file.
-     * @throws IOException 
+     * @throws IOException
      */
     private static File getSirsPropertiesFile(final File f, final boolean parent) throws IOException {
         final File parentFile;
@@ -214,13 +214,13 @@ public class PropertiesFileUtilities {
         }
         return null;
     }
-    
+
     /**
      * Return the Properties associated with all the files next to the one specified (or in the directory if parent is set to false).
-     * 
+     *
      * @param f A file.
      * @param parent {@code true} if the file f is not the root directory.
-     * @return 
+     * @return
      */
     private static Properties getSirsProperties(final File f, final boolean parent) {
         final Properties prop = new Properties();
@@ -241,12 +241,12 @@ public class PropertiesFileUtilities {
 
         return prop;
     }
-    
+
     /**
      * Return a label for a file size (if it is a directory the all the added size of its children).
-     * 
+     *
      * @param f A file.
-     * @return 
+     * @return
      */
     public static String getStringSizeFile(final File f) {
         final long size        = getFileSize(f);
@@ -267,11 +267,11 @@ public class PropertiesFileUtilities {
         }
         return "";
     }
-    
+
     /**
      * Return the size of a file (if it is a directory the all the added size of its children).
      * @param f
-     * @return 
+     * @return
      */
     private static long getFileSize(final File f) {
         if (f.isDirectory()) {
@@ -284,7 +284,7 @@ public class PropertiesFileUtilities {
             return f.length();
         }
     }
-    
+
     public static File getOrCreateSE(final File rootDirectory, SystemeEndiguement sd){
         final File sdDir = new File(rootDirectory, sd.getId());
         if (!sdDir.exists()) {
@@ -295,13 +295,13 @@ public class PropertiesFileUtilities {
             name = "null";
         }
         setIsModelFolder(sdDir, SE, name);
-        final File docDir = new File(sdDir, DocumentsPane.DOCUMENT_FOLDER); 
+        final File docDir = new File(sdDir, DocumentsPane.DOCUMENT_FOLDER);
         if (!docDir.exists()) {
             docDir.mkdir();
         }
         return sdDir;
     }
-    
+
     public static File getOrCreateDG(final File rootDirectory, Digue digue){
         final File digueDir = new File(rootDirectory, digue.getId());
         if (!digueDir.exists()) {
@@ -312,13 +312,13 @@ public class PropertiesFileUtilities {
             name = "null";
         }
         setIsModelFolder(digueDir, DG, name);
-        final File docDir = new File(digueDir, DocumentsPane.DOCUMENT_FOLDER); 
+        final File docDir = new File(digueDir, DocumentsPane.DOCUMENT_FOLDER);
         if (!docDir.exists()) {
             docDir.mkdir();
         }
         return digueDir;
     }
-    
+
     public static File getOrCreateTR(final File rootDirectory, TronconDigue tr){
         final File trDir = new File(rootDirectory, tr.getId());
         if (!trDir.exists()) {
@@ -329,47 +329,47 @@ public class PropertiesFileUtilities {
             name = "null";
         }
         setIsModelFolder(trDir, TR, name);
-        final File docDir = new File(trDir, DocumentsPane.DOCUMENT_FOLDER); 
+        final File docDir = new File(trDir, DocumentsPane.DOCUMENT_FOLDER);
         if (!docDir.exists()) {
             docDir.mkdir();
         }
         return trDir;
     }
-    
+
     public static File getOrCreateUnclassif(final File rootDirectory){
-        final File unclassifiedDir = new File(rootDirectory, UNCLASSIFIED); 
+        final File unclassifiedDir = new File(rootDirectory, UNCLASSIFIED);
         if (!unclassifiedDir.exists()) {
             unclassifiedDir.mkdir();
         }
-        
-        final File docDir = new File(unclassifiedDir, DocumentsPane.DOCUMENT_FOLDER); 
+
+        final File docDir = new File(unclassifiedDir, DocumentsPane.DOCUMENT_FOLDER);
         if (!docDir.exists()) {
             docDir.mkdir();
         }
         return unclassifiedDir;
     }
-    
+
     public static String getExistingDatabaseIdentifier(final File rootDirectory) {
         final Properties prop = getSirsProperties(rootDirectory, false);
         return (String) prop.get("database_identifier");
     }
-    
+
     public static void updateDatabaseIdentifier(final File rootDirectory) {
         final String key = getDatabaseIdentifier();
         final Properties prop = getSirsProperties(rootDirectory, false);
         prop.put("database_identifier", key);
-        
+
         storeSirsProperties(prop, rootDirectory, false);
     }
- 
+
     public static void backupDirectories(final File saveDir, final Collection<File> files) {
         for (File f : files) {
             backupDirectory(saveDir, f);
         }
     }
-    
+
     public static void backupDirectory(final File saveDir, final File f) {
-        
+
         // extract properties
         final Map<Object, Object> extracted  = new HashMap<>();
         final Properties prop                = getSirsProperties(f, true);
@@ -380,47 +380,47 @@ public class PropertiesFileUtilities {
                 prop.remove(entry.getKey());
             }
         }
-        
+
         //save cleaned properties file
         storeSirsProperties(prop, f, true);
-        
-        
+
+
         final File newDir = new File(saveDir, f.getName());
         try {
             // we copy only the "dossier d'ouvrage" directory
             if (!newDir.exists()) {
                 newDir.mkdir();
             }
-            
+
             final File doFile    = new File(f, DOCUMENT_FOLDER);
             final File newDoFile = new File(newDir, DOCUMENT_FOLDER);
-            
+
             FileUtilities.copy(doFile, newDoFile);
             FileUtilities.deleteDirectory(f);
-            
+
             // save new properties
             final Properties newProp = getSirsProperties(newDir, true);
             newProp.putAll(extracted);
-            
+
             storeSirsProperties(newProp, newDir, true);
-            
+
         } catch (IOException ex) {
             LOGGER.log(Level.WARNING, "Error while moving destroyed obj to backup folder", ex);
         }
     }
-    
+
     public  static Set<File> listModel(final File rootDirectory, final String model) {
         Set<File> modelList = new HashSet<>();
         listModel(rootDirectory, modelList, model, true);
         return modelList;
     }
-    
+
     public  static Set<File> listModel(final File rootDirectory, final String model, final boolean deep) {
         Set<File> modelList = new HashSet<>();
         listModel(rootDirectory, modelList, model, deep);
         return modelList;
     }
-    
+
     private static void listModel(final File rootDirectory, Set<File> modelList, String model, final boolean deep) {
         for (File f : rootDirectory.listFiles()) {
             if (f.isDirectory()) {
@@ -432,7 +432,7 @@ public class PropertiesFileUtilities {
             }
         }
     }
-    
+
     public static File findFile(final File rootDirectory, File file) {
         for (File f : rootDirectory.listFiles()) {
             if (f.getName().equals(file.getName()) && !f.getPath().equals(file.getPath())) {
@@ -446,7 +446,7 @@ public class PropertiesFileUtilities {
         }
         return null;
     }
-    
+
     public static boolean verifyDatabaseVersion(final File rootDirectory) {
         final String key         = getDatabaseIdentifier();
         final String existingKey = getExistingDatabaseIdentifier(rootDirectory);
@@ -457,7 +457,7 @@ public class PropertiesFileUtilities {
         }
         return true;
     }
-    
+
     private static boolean showBadVersionDialog(final String existingKey, final String dbKey) {
         final Dialog dialog    = new Alert(Alert.AlertType.ERROR);
         final DialogPane pane  = new DialogPane();
@@ -471,7 +471,7 @@ public class PropertiesFileUtilities {
         final Optional opt = dialog.showAndWait();
         return opt.isPresent() && ButtonType.YES.equals(opt.get());
     }
-    
+
     public static String getDatabaseIdentifier() {
         final SirsDBInfoRepository DBrepo = Injector.getBean(SirsDBInfoRepository.class);
         final Optional<SirsDBInfo> info = DBrepo.get();
@@ -481,22 +481,19 @@ public class PropertiesFileUtilities {
         }
         return null;
     }
-    
-    public static  Map<String, Objet> getElements(Collection<TronconDigue> troncons) {
-        final Map<String, Objet> elements = new LinkedHashMap<>();
+
+    public static  List<Objet> getElements(Collection<TronconDigue> troncons) {
+        final ArrayList<Objet> elements = new ArrayList<>();
         for (TronconDigue troncon : troncons) {
             if (troncon == null) {
                 continue;
             }
 
-            final List<Objet> objetList = TronconUtils.getObjetList(troncon.getDocumentId());
-            for (Objet obj : objetList) {
-                elements.put(obj.getDocumentId(), obj);
-            }
+            elements.addAll(TronconUtils.getObjetList(troncon.getDocumentId()));
         }
         return elements;
     }
-    
+
     public static void showErrorDialog(final String errorMsg) {
         final Dialog dialog    = new Alert(Alert.AlertType.ERROR);
         final DialogPane pane  = new DialogPane();
@@ -507,7 +504,7 @@ public class PropertiesFileUtilities {
         dialog.setContentText(errorMsg);
         dialog.showAndWait();
     }
-    
+
     public static void showConfirmDialog(final String errorMsg) {
         final Dialog dialog    = new Alert(Alert.AlertType.CONFIRMATION);
         final DialogPane pane  = new DialogPane();
@@ -518,20 +515,20 @@ public class PropertiesFileUtilities {
         dialog.setContentText(errorMsg);
         dialog.showAndWait();
     }
-    
+
     public static void updateFileSystem(final File rootDirectory) {
-        
+
         final File saveDir = new File(rootDirectory, SAVE_FOLDER);
         if (!saveDir.exists()) {
             saveDir.mkdir();
         }
-        
+
         final File unclassifiedDir = getOrCreateUnclassif(rootDirectory);
-                
+
         final SystemeEndiguementRepository SErepo = Injector.getBean(SystemeEndiguementRepository.class);
         final DigueRepository Drepo = Injector.getBean(DigueRepository.class);
         final TronconDigueRepository TRrepo = Injector.getBean(TronconDigueRepository.class);
-        
+
         /**
          * On recupere tous les elements.
          */
@@ -543,20 +540,20 @@ public class PropertiesFileUtilities {
         final Set<File> seFiles               = listModel(rootDirectory, SE);
         final Set<File> digueMoved            = new HashSet<>();
         final Set<File> tronMoved             = new HashSet<>();
-        
+
         for (SystemeEndiguement se : ses) {
             final File seDir = getOrCreateSE(rootDirectory, se);
             seFiles.remove(seDir);
-            
+
             final Set<File> digueFiles = listModel(seDir, DG);
             final List<Digue> diguesForSE = Drepo.getBySystemeEndiguement(se);
             for (Digue digue : digues) {
                 if (!diguesForSE.contains(digue)) continue;
                 diguesFound.add(digue);
-                
+
                 final File digueDir = getOrCreateDG(seDir, digue);
                 digueFiles.remove(digueDir);
-                
+
                 final Set<File> trFiles = listModel(digueDir, TR);
 
                 final List<TronconDigue> tronconForDigue = TRrepo.getByDigue(digue);
@@ -567,33 +564,33 @@ public class PropertiesFileUtilities {
                     final File trDir = getOrCreateTR(digueDir, td);
                     trFiles.remove(trDir);
                 }
-                
+
                 // on place les tronçon disparus dans les fichiers deplacé
                 tronMoved.addAll(trFiles);
             }
-            
+
             // on place les digues disparues dans les fichiers deplacé
             digueMoved.addAll(digueFiles);
         }
         digues.removeAll(diguesFound);
-        
+
         // on recupere les repertoire des digues / tronçons dans les SE detruits
         for (File seFile : seFiles) {
             digueMoved.addAll(listModel(seFile, DG));
             tronMoved.addAll(listModel(seFile, TR));
         }
-        
+
         /**
          * On place toute les digues et troncons non trouvé dans un group a part.
-         */      
+         */
         final Set<File> digueFiles = listModel(unclassifiedDir, DG);
-        
+
         for (final Digue digue : digues) {
             final File digueDir = getOrCreateDG(unclassifiedDir, digue);
             digueFiles.remove(digueDir);
-            
+
             final Set<File> trFiles = listModel(digueDir, TR);
-            
+
             for (final TronconDigue td : troncons) {
                 if (td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;
                 tronconsFound.add(td);
@@ -601,31 +598,31 @@ public class PropertiesFileUtilities {
                 final File trDir = getOrCreateTR(digueDir, td);
                 trFiles.remove(trDir);
             }
-            
+
             // on place les tronçon disparus dans les fichiers deplacé
             tronMoved.addAll(trFiles);
         }
-        
+
         // on place les digues disparues dans les fichiers deplacé
         digueMoved.addAll(digueFiles);
-        
+
         // on recupere les repertoire tronçons dans les digues detruites
         for (File digueFile : digueFiles) {
             tronMoved.addAll(listModel(digueFile, TR));
         }
-        
+
         troncons.removeAll(tronconsFound);
-        
+
         final Set<File> trFiles = listModel(unclassifiedDir, TR, false);
-        
+
         for(final TronconDigue td : troncons){
             final File trDir = getOrCreateTR(unclassifiedDir, td);
             trFiles.remove(trDir);
         }
-        
+
         // on place les tronçon disparus dans les fichiers deplacé
         tronMoved.addAll(trFiles);
-        
+
         /**
          * On restore les fichier deplacé dans leur nouvel emplacement.
          */
@@ -638,7 +635,7 @@ public class PropertiesFileUtilities {
             }
         }
         tronMoved.removeAll(tronMovedFound);
-        
+
         final Set<File> digueMovedFound = new HashSet<>();
         for (File movedFile : digueMoved) {
             final File newFile = findFile(rootDirectory, movedFile);
@@ -648,10 +645,10 @@ public class PropertiesFileUtilities {
             }
         }
         digueMoved.removeAll(digueMovedFound);
-        
+
         /**
          * On place les fichiers deplacé non relocaliser dans le backup.
-         */ 
+         */
         backupDirectories(saveDir, tronMoved);
         backupDirectories(saveDir, digueMoved);
         backupDirectories(saveDir, seFiles);

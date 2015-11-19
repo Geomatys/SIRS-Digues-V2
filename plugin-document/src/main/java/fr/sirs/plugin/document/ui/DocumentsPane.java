@@ -36,15 +36,15 @@ import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.util.FileUtilities;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.DigueRepository;
-import fr.sirs.core.component.RapportModeleDocumentRepository;
+import fr.sirs.core.component.ModeleRapportRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.RapportModeleDocument;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.plugin.document.DynamicDocumentTheme;
 import fr.sirs.plugin.document.ODTUtils;
-        
+
 import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
 import java.awt.Desktop;
 import java.util.ArrayList;
@@ -57,20 +57,17 @@ import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 
 /**
  *
  * @author guilhem
  */
 public class DocumentsPane extends GridPane {
-    
+
     @FXML
     private Button importDocButton;
 
@@ -91,15 +88,15 @@ public class DocumentsPane extends GridPane {
 
     @FXML
     private Button listButton;
-    
+
     @FXML
     private Button hideShowButton;
 
     @FXML
     private Button hideFileButton;
-    
+
     protected static final String BUTTON_STYLE = "buttonbar-button";
-    
+
     private static final Image ADDF_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/add_folder.png"));
     private static final Image ADDD_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/add_doc.png"));
     private static final Image IMP_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/import.png"));
@@ -111,14 +108,14 @@ public class DocumentsPane extends GridPane {
     private static final Image HIDE_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/cocher-decocher.png"));
     private static final Image HI_HISH_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/afficher.png"));
     private static final Image SH_HISH_BUTTON_IMAGE = new Image(DocumentManagementTheme.class.getResourceAsStream("images/masquer.png"));
-    
+
     private static final DateFormat DATE_FORMATTER = new SimpleDateFormat("dd/MM/yyyy");
-    
+
     public static final String UNCLASSIFIED     = "Non classés";
     public static final String SAVE_FOLDER      = "Sauvegarde";
     public static final String DOCUMENT_FOLDER  = "Dossier d'ouvrage";
     public static final String ROOT_FOLDER      = "symadrem.root.foler";
-    
+
     // SIRS hidden file properties
     public static final String INVENTORY_NUMBER = "inventory_number";
     public static final String CLASS_PLACE      = "class_place";
@@ -127,26 +124,26 @@ public class DocumentsPane extends GridPane {
     public static final String DYNAMIC          = "dynamic";
     public static final String MODELE           = "modele";
     public static final String HIDDEN           = "hidden";
-    
+
     public static final String SE = "se";
     public static final String TR = "tr";
     public static final String DG = "dg";
-    
-    
+
+
     private static final Logger LOGGER = Logging.getLogger("fr.sirs");
-    
+
     private final FileTreeItem root;
-    
+
     private final DynamicDocumentTheme dynDcTheme;
-    
+
     public DocumentsPane(final FileTreeItem root, final DynamicDocumentTheme dynDcTheme) {
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
         this.root = root;
         this.dynDcTheme = dynDcTheme;
-        
+
         getStylesheets().add(SIRS.CSS_PATH);
-        
+
         addFolderButton.setGraphic(new ImageView(ADDF_BUTTON_IMAGE));
         importDocButton.setGraphic(new ImageView(IMP_BUTTON_IMAGE));
         deleteDocButton.setGraphic(new ImageView(DEL_BUTTON_IMAGE));
@@ -159,8 +156,8 @@ public class DocumentsPane extends GridPane {
         } else {
             hideShowButton.setGraphic(new ImageView(HI_HISH_BUTTON_IMAGE));
         }
-            
-        
+
+
         addFolderButton.setTooltip(new Tooltip("Ajouter un dossier"));
         importDocButton.setTooltip(new Tooltip("Importer un fichier"));
         deleteDocButton.setTooltip(new Tooltip("Supprimer un fichier"));
@@ -169,7 +166,7 @@ public class DocumentsPane extends GridPane {
         listButton.setTooltip(new Tooltip("Exporter le sommaire"));
         hideShowButton.setTooltip(new Tooltip("Cacher/Afficher les fichiers cachés"));
         hideFileButton.setTooltip(new Tooltip("Cacher/Afficher le fichier sélectionné"));
-        
+
         addFolderButton.getStyleClass().add(BUTTON_STYLE);
         importDocButton.getStyleClass().add(BUTTON_STYLE);
         deleteDocButton.getStyleClass().add(BUTTON_STYLE);
@@ -178,7 +175,7 @@ public class DocumentsPane extends GridPane {
         listButton.getStyleClass().add(BUTTON_STYLE);
         hideShowButton.getStyleClass().add(BUTTON_STYLE);
         hideFileButton.getStyleClass().add(BUTTON_STYLE);
-        
+
         // Name column
         tree1.getColumns().get(0).setEditable(false);
         tree1.getColumns().get(0).setCellValueFactory(new Callback() {
@@ -198,7 +195,7 @@ public class DocumentsPane extends GridPane {
                 return new FileNameCell();
             }
         });
-        
+
         // Date column
         tree1.getColumns().get(1).setEditable(false);
         tree1.getColumns().get(1).setCellValueFactory(new Callback() {
@@ -214,7 +211,7 @@ public class DocumentsPane extends GridPane {
                 return null;
             }
         });
-        
+
         // Size column
         tree1.getColumns().get(2).setEditable(false);
         tree1.getColumns().get(2).setCellValueFactory(new Callback() {
@@ -227,7 +224,7 @@ public class DocumentsPane extends GridPane {
                 return null;
             }
         });
-        
+
         // Inventory number column
         tree1.getColumns().get(3).setCellValueFactory(new Callback() {
             @Override
@@ -246,7 +243,7 @@ public class DocumentsPane extends GridPane {
                 return new PropertyCell(INVENTORY_NUMBER);
             }
         });
-        
+
         // class place column
         tree1.getColumns().get(4).setCellValueFactory(new Callback() {
             @Override
@@ -265,7 +262,7 @@ public class DocumentsPane extends GridPane {
                 return new PropertyCell(CLASS_PLACE);
             }
         });
-        
+
         // do integrated column
         tree1.getColumns().get(5).setCellValueFactory(new Callback() {
             @Override
@@ -284,7 +281,7 @@ public class DocumentsPane extends GridPane {
                 return new DOIntegatedCell();
             }
         });
-        
+
         // publish column
         tree1.getColumns().get(6).setCellValueFactory(new Callback() {
             @Override
@@ -299,7 +296,7 @@ public class DocumentsPane extends GridPane {
                 return new PublicationCell(root);
             }
         });
-        
+
         // open column
         tree1.getColumns().get(7).setCellValueFactory(new Callback() {
             @Override
@@ -314,19 +311,19 @@ public class DocumentsPane extends GridPane {
                 return new OpenCell();
             }
         });
-        
-        
+
+
         tree1.setShowRoot(false);
         tree1.setRoot(root);
-        
+
         final Preferences prefs = Preferences.userRoot().node("DocumentPlugin");
         final String rootPath   = prefs.get(ROOT_FOLDER, null);
-        
+
         if (rootPath != null && verifyDatabaseVersion(new File(rootPath))) {
             final File rootDirectory = new File(rootPath);
             root.setValue(rootDirectory);
             updateDatabaseIdentifier(rootDirectory);
-           
+
         } else {
             importDocButton.disableProperty().set(true);
             deleteDocButton.disableProperty().set(true);
@@ -335,7 +332,7 @@ public class DocumentsPane extends GridPane {
             listButton .disableProperty().set(true);
         }
     }
-    
+
     @FXML
     public void showImportDialog(ActionEvent event) throws IOException {
         final Dialog dialog    = new Dialog();
@@ -356,13 +353,13 @@ public class DocumentsPane extends GridPane {
                 FileUtilities.copy(f, newFile);
                 setProperty(newFile, INVENTORY_NUMBER, ipane.inventoryNumField.getText());
                 setProperty(newFile, CLASS_PLACE,      ipane.classPlaceField.getText());
-                
+
                 // refresh tree
                 update();
             }
         }
     }
-    
+
     @FXML
     public void showRemoveDialog(ActionEvent event) {
         final Dialog dialog    = new Dialog();
@@ -391,7 +388,7 @@ public class DocumentsPane extends GridPane {
             }
         }
     }
-    
+
     @FXML
     public void setMainFolder(ActionEvent event) {
         final Dialog dialog    = new Dialog();
@@ -408,7 +405,7 @@ public class DocumentsPane extends GridPane {
             File f = new File(ipane.rootFolderField.getText());
             if (f.isDirectory() && verifyDatabaseVersion(f)) {
                 String rootPath = f.getPath();
-                
+
                 final Preferences prefs = Preferences.userRoot().node("DocumentPlugin");
                 prefs.put(ROOT_FOLDER, rootPath);
                 importDocButton.disableProperty().set(false);
@@ -425,7 +422,7 @@ public class DocumentsPane extends GridPane {
             }
         }
     }
-    
+
     @FXML
     public void showAddFolderDialog(ActionEvent event) {
         final Dialog dialog    = new Dialog();
@@ -442,13 +439,13 @@ public class DocumentsPane extends GridPane {
             String folderName  = ipane.folderNameField.getText();
             final File rootDir = root.getValue();
             switch (ipane.locCombo.getValue()) {
-                case NewFolderPane.IN_CURRENT_FOLDER: 
+                case NewFolderPane.IN_CURRENT_FOLDER:
                     addToSelectedFolder(folderName);
                     break;
                 case NewFolderPane.IN_ALL_FOLDER:
                     addToAllFolder(rootDir, folderName);
                     update();
-                    break;     
+                    break;
                 case NewFolderPane.IN_SE_FOLDER:
                     addToModelFolder(rootDir, folderName, SE);
                     update();
@@ -464,7 +461,7 @@ public class DocumentsPane extends GridPane {
             }
         }
     }
-    
+
     @FXML
     public void exportOdtSummary(ActionEvent event) {
         final Dialog dialog    = new Dialog();
@@ -479,21 +476,17 @@ public class DocumentsPane extends GridPane {
         final Optional opt = dialog.showAndWait();
         if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
             File f = new File(ipane.newFileFIeld.getText());
-            try {
-                ODTUtils.writeSummary(root, f);
-            } catch (Exception ex) {
-                showErrorDialog(ex.getMessage());
-            }
+            LoadingPane.showDialog(ODTUtils.writeSummary(root, f));
         }
     }
-    
+
     @FXML
     public void openDynamicDocTab(ActionEvent event) {
         Session session = Injector.getSession();
         final Tab result = session.getOrCreateThemeTab(dynDcTheme);
         session.getFrame().addTab(result);
     }
-    
+
     @FXML
     public void hideFiles(ActionEvent event) {
         FileTreeItem item = (FileTreeItem) tree1.getSelectionModel().getSelectedItem();
@@ -511,7 +504,7 @@ public class DocumentsPane extends GridPane {
         }
         update();
     }
-    
+
     private File getSelectedFile() {
         TreeItem<File> item = tree1.getSelectionModel().getSelectedItem();
         if (item != null) {
@@ -519,11 +512,11 @@ public class DocumentsPane extends GridPane {
         }
         return null;
     }
-    
+
     private void update() {
         root.update(root.rootShowHiddenFile);
     }
-    
+
     private void addToSelectedFolder(final String folderName) {
         File directory = getSelectedFile();
         if (directory != null && directory.isDirectory()) {
@@ -540,7 +533,7 @@ public class DocumentsPane extends GridPane {
             showErrorDialog("Vous devez sélectionner un dossier.");
         }
     }
-    
+
     private void addToAllFolder(final File rootDir, final String folderName) {
         for (File f : rootDir.listFiles()) {
             if (f.isDirectory()) {
@@ -555,7 +548,7 @@ public class DocumentsPane extends GridPane {
             }
         }
     }
-    
+
     private void addToModelFolder(final File rootDir, final String folderName, final String model) {
         for (File f : rootDir.listFiles()) {
             if (f.isDirectory()) {
@@ -574,7 +567,7 @@ public class DocumentsPane extends GridPane {
             }
         }
     }
-    
+
     private static class DOIntegatedCell extends TreeTableCell {
 
         private final CheckBox box = new CheckBox();
@@ -594,7 +587,7 @@ public class DocumentsPane extends GridPane {
                 }
             });
         }
-        
+
         @Override
         public void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
@@ -607,13 +600,13 @@ public class DocumentsPane extends GridPane {
             }
         }
     }
-    
+
     private static class PropertyCell extends TreeTableCell {
 
         private TextField text = new TextField();
 
         private final String property;
-        
+
         public PropertyCell(final String property) {
             this.property = property;
             setGraphic(text);
@@ -629,7 +622,7 @@ public class DocumentsPane extends GridPane {
                 }
             });
         }
-        
+
         @Override
         public void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
@@ -642,13 +635,13 @@ public class DocumentsPane extends GridPane {
             }
         }
     }
-    
+
     private static class PublicationCell extends TreeTableCell {
 
         private final Button button = new Button();
 
         private final FileTreeItem root;
-        
+
         public PublicationCell(final FileTreeItem root) {
             setGraphic(button);
             this.root = root;
@@ -656,9 +649,9 @@ public class DocumentsPane extends GridPane {
             button.getStyleClass().add(BUTTON_STYLE);
             button.disableProperty().bind(editingProperty());
             button.setOnAction(this::handle);
-            
+
         }
-        
+
         public void handle(ActionEvent event) {
             final FileTreeItem item = (FileTreeItem) getItem();
             if (getBooleanProperty(item.getValue(), DYNAMIC)) {
@@ -667,7 +660,7 @@ public class DocumentsPane extends GridPane {
                 printSynthesisDoc(item);
             }
         }
-        
+
         private void printSynthesisDoc(final FileTreeItem item) {
             final Dialog dialog    = new Dialog();
             final DialogPane pane  = new DialogPane();
@@ -681,63 +674,25 @@ public class DocumentsPane extends GridPane {
             final Optional opt = dialog.showAndWait();
             if(opt.isPresent() && ButtonType.OK.equals(opt.get())){
                 File f = new File(ipane.newFileFIeld.getText());
-                try {
-                    final Stage stage         = new Stage();
-                    final DialogPane stagePane      = new DialogPane();
-                    final GenerationPane gpane = new GenerationPane();
-                    gpane.uiGenerateFinish.setOnAction((ActionEvent event1) -> {stage.hide();});
-                    stagePane.setContent(gpane);
-                    stage.setScene(new Scene(stagePane));
-                    stage.setResizable(true);
-                    stage.setTitle("Génération du document de synthèse");
-                    stage.initModality(Modality.APPLICATION_MODAL);
-                    
-                    new Thread() {
-                       @Override
-                       public void run() {
-                           gpane.writeDoSynth(item, f);
-                       }
-                    }.start();
-
-                    stage.show();
-                } catch (Exception ex) {
-                    showErrorDialog(ex.getMessage());
-                }
+                LoadingPane.showDialog(ODTUtils.writeDoSynth(item, f));
             }
         }
-        
+
         private void regenerateDynamicDocument(final File item) {
-            final RapportModeleDocumentRepository rmdr = Injector.getBean(RapportModeleDocumentRepository.class);
+            final ModeleRapportRepository modelRepo = Injector.getBean(ModeleRapportRepository.class);
             String modelId = getProperty(item, MODELE);
             if (modelId != null && !modelId.isEmpty()) {
-                final RapportModeleDocument modele = rmdr.get(modelId);
+                final ModeleRapport modele = modelRepo.get(modelId);
                 if (modele != null) {
-                    
-                    final Stage dialog         = new Stage();
-                    final DialogPane pane      = new DialogPane();
-                    final GenerationPane ipane = new GenerationPane();
-                    ipane.uiGenerateFinish.setOnAction((ActionEvent event1) -> {dialog.hide();});
-                    pane.setContent(ipane);
-                    dialog.setScene(new Scene(pane));
-                    dialog.setResizable(true);
-                    dialog.setTitle("Mise à jour du document");
-                    dialog.initModality(Modality.APPLICATION_MODAL);
-                    
-                    final Collection<TronconDigue> troncons = getTronconList();
-                    new Thread() {
-                       @Override
-                       public void run() {
-                           ipane.reGenerateDoc(modele, troncons, item, root, root.rootShowHiddenFile);
-                       }
-                    }.start();
-
-                    dialog.show();
+                    LoadingPane.showDialog(ODTUtils.generateDoc(modele, getTronconList(), item, root));
+                } else {
+                    showErrorDialog("Pas de modèle disponible pour le fichier: " + item.getName());
                 }
             } else {
                 showErrorDialog("Impossible de résoudre l'identifiant du modèle pour le fichier: " + item.getName());
             }
         }
-        
+
         private Collection<TronconDigue> getTronconList() {
             final FileTreeItem item = (FileTreeItem) getItem();
             final File modelFolder  = getModelFolder(item.getValue());
@@ -770,7 +725,7 @@ public class DocumentsPane extends GridPane {
             }
             return null;
         }
-        
+
         @Override
         public void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
@@ -792,21 +747,21 @@ public class DocumentsPane extends GridPane {
             }
         }
     }
-    
+
     private static class OpenCell extends TreeTableCell {
 
         private final Button button = new Button();
 
-        
+
         public OpenCell() {
             setGraphic(button);
             button.setGraphic(new ImageView(OP_BUTTON_IMAGE));
             button.getStyleClass().add(BUTTON_STYLE);
             button.disableProperty().bind(editingProperty());
             button.setOnAction(this::handle);
-            
+
         }
-        
+
         public void handle(ActionEvent event) {
             final FileTreeItem item = (FileTreeItem) getItem();
             if (item != null && item.getValue() != null) {
@@ -818,9 +773,9 @@ public class DocumentsPane extends GridPane {
                     return;
                 }
 
-                 new Thread(new Runnable() {  
-                        @Override  
-                        public void run() {  
+                 new Thread(new Runnable() {
+                        @Override
+                        public void run() {
                             try {
                                 Desktop.getDesktop().open(file);
                             } catch (IOException ex) {
@@ -832,9 +787,9 @@ public class DocumentsPane extends GridPane {
 
             }
         }
-        
-        
-        
+
+
+
         @Override
         public void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
@@ -852,7 +807,7 @@ public class DocumentsPane extends GridPane {
             }
         }
     }
-    
+
     private static class FileNameCell extends TreeTableCell {
 
         private final Label label = new Label();
@@ -860,7 +815,7 @@ public class DocumentsPane extends GridPane {
         public FileNameCell() {
             setGraphic(label);
         }
-        
+
         @Override
         public void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
