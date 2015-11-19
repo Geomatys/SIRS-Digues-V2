@@ -1236,7 +1236,7 @@ public class ODTUtils {
         return TaskManager.INSTANCE.submit(new Task() {
             @Override
             protected Object call() throws Exception {
-                updateTitle("Génération de rapport" + titre != null ? " (" + titre + ")" : "");
+                updateTitle("Génération de rapport" + (titre != null ? " (" + titre + ")" : ""));
                 final long totalWork = elements.size() * report.sections.size();
                 final AtomicLong currentWork = new AtomicLong(-1);
 

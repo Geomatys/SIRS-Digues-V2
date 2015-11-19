@@ -28,7 +28,7 @@
             <artifactId>desktop</artifactId>
             <!-- SIRS application version is defined at archetype generation goal -->
             <version>0.x-SNAPSHOT</version>
-            <!--scope>provided</scope-->
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

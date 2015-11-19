@@ -173,6 +173,8 @@ public class DynamicDocumentsPane extends BorderPane {
         } else {
             generator = ODTUtils.generateDocsForDigues(docName, onlySE, modele, getTronconList(), seDir, root);
         }
+
+        disableProperty().bind(generator.runningProperty());
         LoadingPane.showDialog(generator);
     }
 

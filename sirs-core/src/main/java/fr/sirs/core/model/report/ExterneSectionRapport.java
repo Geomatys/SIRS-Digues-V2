@@ -22,7 +22,7 @@ import javafx.beans.property.StringProperty;
  * 
  * @author Alexis Manin (Geomatys)
  */
-public class ExternalSectionRapport extends AbstractSectionRapport implements SIRSFileReference {
+public class ExterneSectionRapport extends AbstractSectionRapport implements SIRSFileReference {
     /**
      * Path to external document to reference.
      */
@@ -43,7 +43,7 @@ public class ExternalSectionRapport extends AbstractSectionRapport implements SI
 
     @Override
     public Element copy() {
-        final ExternalSectionRapport rapport = ElementCreator.createAnonymValidElement(ExternalSectionRapport.class);
+        final ExterneSectionRapport rapport = ElementCreator.createAnonymValidElement(ExterneSectionRapport.class);
         super.copy(rapport);
 
         rapport.setChemin(getChemin());

@@ -1,7 +1,6 @@
 
 package fr.sirs.plugin.document.ui;
 
-import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -42,7 +41,6 @@ public class LoadingPane extends GridPane {
 
     public LoadingPane(final Task input) {
         SIRS.loadFXML(this);
-        Injector.injectDependencies(this);
 
         this.taskProperty = new SimpleObjectProperty<>();
         taskProperty.addListener(this::taskChanged);
@@ -64,7 +62,7 @@ public class LoadingPane extends GridPane {
             uiProgress.setVisible(true);
             uiProgress.progressProperty().bind(newValue.progressProperty());
             uiProgressLabel.textProperty().bind(newValue.messageProperty());
-            uiGenerateFinish.visibleProperty().bind(newValue.runningProperty().not());
+            uiGenerateFinish.disableProperty().bind(newValue.runningProperty());
         }
     }
 
@@ -77,7 +75,7 @@ public class LoadingPane extends GridPane {
 
         stage.setScene(new Scene(gpane));
         stage.sizeToScene();
-        stage.setResizable(true);
+        stage.setResizable(false);
         stage.show();
     }
 }

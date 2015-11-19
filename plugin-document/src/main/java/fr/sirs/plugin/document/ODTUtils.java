@@ -15,6 +15,7 @@ import static fr.sirs.plugin.document.ui.DocumentsPane.DYNAMIC;
 import static fr.sirs.plugin.document.ui.DocumentsPane.MODELE;
 import static fr.sirs.util.odt.ODTUtils.generateReport;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javafx.application.Platform;
@@ -22,9 +23,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 import org.geotoolkit.gui.javafx.util.TaskManager;
-import org.odftoolkit.odfdom.type.Color;
 import org.odftoolkit.simple.TextDocument;
-import org.odftoolkit.simple.table.Cell;
 import org.odftoolkit.simple.table.Row;
 import org.odftoolkit.simple.table.Table;
 
@@ -47,23 +46,28 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
                 final DigueRepository digueRepo = Injector.getBean(DigueRepository.class);
                 final int total = troncons.size();
                 int i = 1;
+                final ArrayList<Task> tasks = new ArrayList<>();
                 for (TronconDigue troncon : troncons) {
-                    final String prefix = "Tronçon " + i + '/' + total + System.lineSeparator();
                     final File digDir = getOrCreateDG(seDir, digueRepo.get(troncon.getDigueId()));
                     final File docDir = new File(getOrCreateTR(digDir, troncon), DocumentsPane.DOCUMENT_FOLDER);
                     final File newDoc = new File(docDir, docName);
 
                     final Task reportGenerator = generateReport(modele, getElements(troncons), newDoc.toPath(), root.getLibelle());
-                    Platform.runLater(() -> {
-                        reportGenerator.messageProperty().addListener((obs, oldValue, newValue) -> updateMessage(prefix + newValue));
-                        reportGenerator.workDoneProperty().addListener((obs, oldValue, newValue) -> updateProgress(newValue.doubleValue(), reportGenerator.getTotalWork()));
-                    });
+                    Platform.runLater(() -> reportGenerator.setOnSucceeded(event -> {
+                        setBooleanProperty(newDoc, DYNAMIC, true);
+                        setProperty(newDoc, MODELE, modele.getId());
+                    }));
+                    tasks.add(reportGenerator);
 
-                    setBooleanProperty(newDoc, DYNAMIC, true);
-                    setProperty(newDoc, MODELE, modele.getId());
                     i++;
                 }
+
+                updateMessage("rapports en cours de construction...");
+                for (final Task t : tasks) {
+                    t.get();
+                }
                 updateMessage("Génération terminée");
+                updateProgress(1, 1);
 
                 // reload tree
                 root.update(false);
@@ -81,15 +85,17 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
                 updateMessage("Recherche des objets du rapport...");
 
                 final Task reportGenerator = generateReport(modele, getElements(troncons), outputDoc.toPath(), root.getLibelle());
-
                 Platform.runLater(() -> {
                     reportGenerator.messageProperty().addListener((obs, oldValue, newValue) -> updateMessage(newValue));
                     reportGenerator.workDoneProperty().addListener((obs, oldValue, newValue) -> updateProgress(newValue.doubleValue(), reportGenerator.getTotalWork()));
                 });
 
+                reportGenerator.get();
                 setBooleanProperty(outputDoc, DYNAMIC, true);
                 setProperty(outputDoc, MODELE, modele.getId());
 
+                updateMessage("Génération terminée");
+                updateProgress(1, 1);
                 return outputDoc;
             }
         });
@@ -124,6 +130,7 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
                 doc.save(file);
 
                 msgProperty.set("Génération terminée");
+                updateProgress(1, 1);
                 return file;
             }
         });
@@ -154,6 +161,7 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
                 doc.save(file);
 
                 msgProperty.set("Génération terminée");
+                updateProgress(1, 1);
                 return file;
             }
         });
@@ -198,11 +206,8 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
                 final Table table = Table.newTable(doc, 1, TABLE_HEADERS.length);
                 // header
                 Row row = table.getRowByIndex(0);
-                Cell cell;
                 for (int i = 0 ; i < TABLE_HEADERS.length ; i++) {
-                    cell = row.getCellByIndex(i);
-                    cell.setStringValue(TABLE_HEADERS[i]);
-                    cell.setCellBackgroundColor(new Color(109, 149, 182));
+                    row.getCellByIndex(i).setStringValue(TABLE_HEADERS[i]);
                 }
 
                 FileTreeItem file;
