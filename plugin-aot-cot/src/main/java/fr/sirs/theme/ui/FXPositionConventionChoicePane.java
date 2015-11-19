@@ -18,8 +18,6 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
 import static java.lang.Double.max;
 import static java.lang.Double.min;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -51,12 +49,12 @@ public class FXPositionConventionChoicePane extends BorderPane {
     @FXML private ComboBox<Preview> ui_linear;
     @FXML private ComboBox<Class<? extends Objet>> ui_types;
     @FXML private ComboBox<SystemeReperage> ui_sr;
-    
+
     @FXML private Spinner<Double> ui_prDebut;
     @FXML private Label ui_prDebutComputed;
     @FXML private Spinner<Double> ui_prFin;
     @FXML private Label ui_prFinComputed;
-    
+
     @FXML private ListView<? extends Objet> ui_list;
 
     private final Session session = Injector.getSession();
@@ -72,34 +70,34 @@ public class FXPositionConventionChoicePane extends BorderPane {
     private final DoubleProperty prFinProperty = new SimpleDoubleProperty();
 //    private final Predicate<Objet> inclusivePrPredicate = (Objet t) -> t.getPrDebut()<prDebutProperty.doubleValue() && t.getPrFin()>prFinProperty.doubleValue();
     private final Predicate<Objet> exclusivePrPredicate = (Objet t) -> t.getPrDebut()>prDebutProperty.doubleValue() && t.getPrFin()<prFinProperty.doubleValue();
-    
+
     public ObjectProperty<Objet> selectedObjetProperty(){return selectedObjetProperty;}
     public DoubleProperty prDebutProperty(){return prDebutProperty;}
     public DoubleProperty prFinProperty(){return prFinProperty;}
-    
+
     private class PrChangeListener implements ChangeListener<Double> {
 
         private final DoubleProperty pr;
         private final Label ui_prComputed;
-        
+
         private PrChangeListener(DoubleProperty pr, Label ui_prComputed){
             this.pr = pr;
             this.ui_prComputed = ui_prComputed;
         }
-        
+
         @Override
         public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
-            
+
             final Class<? extends Objet> selectedClass = ui_types.getSelectionModel().getSelectedItem();
             final SystemeReperage initialSR = ui_sr.getSelectionModel().getSelectedItem();
             final SystemeReperage targetSR = sr_repo.get(currentLinear.getSystemeRepDefautId());
-            
+
             if(selectedClass!=null && newValue!=null && initialSR!=null && targetSR!=null){
                 final AbstractSIRSRepository repo = session.getRepositoryForClass(selectedClass);
                 if(repo instanceof AbstractPositionableRepository){
                     if(targetSR.equals(initialSR)){
                         pr.set(newValue);
-                    } 
+                    }
                     else {
                         final LinearReferencing.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(LinearReferencing.asLineString(currentLinear.getGeometry()));
                         pr.set(TronconUtils.switchSRForPR(segments, newValue, initialSR, targetSR, borneRepo));
@@ -122,21 +120,16 @@ public class FXPositionConventionChoicePane extends BorderPane {
                 ui_list.setItems(FXCollections.emptyObservableList());
             }
         }
-        
+
     }
-            
+
 
     public FXPositionConventionChoicePane() {
 
         SIRS.loadFXML(this, (Class)null);
-        
-        final List<Class<? extends Objet>> concreteObjetClasses = new ArrayList<>();
-        for(final Class co : Session.getElements()){
-            if(Objet.class.isAssignableFrom(co) && !Modifier.isAbstract(co.getModifiers())){
-                concreteObjetClasses.add(co);
-            }
-        }
-        
+
+        final List<Class<? extends Objet>> concreteObjetClasses = Session.getConcreteSubTypes(Objet.class);
+
         ui_types.setItems(FXCollections.observableArrayList(concreteObjetClasses));
         ui_types.setConverter(converter);
         ui_types.getSelectionModel().selectedItemProperty().addListener(
@@ -150,7 +143,7 @@ public class FXPositionConventionChoicePane extends BorderPane {
 
             @Override
             public void changed(ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) {
-                
+
                 try {
                     // Mise à jour de la liste des SRs
                     currentLinear = Injector.getSession().getRepositoryForClass(TronconDigue.class).get(newValue.getElementId());
@@ -160,13 +153,13 @@ public class FXPositionConventionChoicePane extends BorderPane {
                         // Mise à jour de la liste des objets
                         updateObjetList(ui_types.getSelectionModel().getSelectedItem(), currentLinear);
                     }
-                    
+
                 } catch (Exception e) {
                     SIRS.LOGGER.log(Level.WARNING, "SR document not found. {0}", e);
                 }
             }
         });
-        
+
         ui_prDebut.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0, 1));
         ui_prFin.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0, 1));
 
@@ -186,22 +179,22 @@ public class FXPositionConventionChoicePane extends BorderPane {
                 }
             }
         });
-        
+
         ui_prDebut.valueProperty().addListener(new PrChangeListener(prDebutProperty, ui_prDebutComputed));
         ui_prFin.valueProperty().addListener(new PrChangeListener(prFinProperty, ui_prFinComputed));
         ui_prDebut.setEditable(true); ui_prFin.setEditable(true);
         ui_list.setCellFactory(ComboBoxListCell.forListView(converter));
         selectedObjetProperty.bind(ui_list.getSelectionModel().selectedItemProperty());
     }
-    
-    
+
+
     private void updateObjetList(final Class<? extends Objet> clazz, final TronconDigue linear){
-        
+
         if(clazz==null) {
             objetList = FXCollections.emptyObservableList();
-        } 
-        
-        else { 
+        }
+
+        else {
             final AbstractSIRSRepository repo = Injector.getSession().getRepositoryForClass(clazz);
             if(repo instanceof AbstractPositionableRepository){
                 final AbstractPositionableRepository positionableRepo = (AbstractPositionableRepository) repo;
