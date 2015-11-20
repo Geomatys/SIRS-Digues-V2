@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -53,6 +54,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
+import javax.measure.converter.ConversionException;
+import javax.measure.converter.UnitConverter;
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
 import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
@@ -81,6 +86,7 @@ import org.odftoolkit.simple.common.field.AbstractVariableContainer;
 import org.odftoolkit.simple.common.field.Field.FieldType;
 import org.odftoolkit.simple.common.field.Fields;
 import org.odftoolkit.simple.common.field.VariableField;
+import org.odftoolkit.simple.draw.FrameRectangle;
 import org.odftoolkit.simple.draw.Image;
 import org.odftoolkit.simple.style.MasterPage;
 import org.odftoolkit.simple.style.StyleTypeDefinitions;
@@ -116,6 +122,8 @@ public class ODTUtils {
      * Height of an ODT documentt page in portrait mode. Unit is millimeter.
      */
     private static final int PORTRAIT_HEIGHT = 297;
+
+    private static final int DEFAULT_MARGIN = 20;
 
     public static final String CLASS_KEY = "The.Sirs.Class";
 
@@ -1020,6 +1028,8 @@ public class ODTUtils {
             StyleTypeDefinitions.PrintOrientation orientation,
             final boolean fullPage) {
 
+        Dimension2D pageDim = null;
+        Insets margin = null;
         if (fullPage) {
             if (orientation == null) {
                 try {
@@ -1033,22 +1043,102 @@ public class ODTUtils {
             }
 
             try {
-                holder.addPageBreak(
-                        holder.getParagraphByReverseIndex(0, false),
-                        getOrCreateOrientationMasterPage(holder, orientation, Insets.EMPTY)
-                );
+                final MasterPage masterPage = getOrCreateOrientationMasterPage(holder, orientation, Insets.EMPTY);
+                holder.addPageBreak(null, masterPage);
+                margin = Insets.EMPTY;
+                pageDim = new Dimension2D(masterPage.getPageWidth(), masterPage.getPageHeight());
             } catch (Exception ex) {
                 SirsCore.LOGGER.log(Level.WARNING, "Cannot add a page break in a text document", ex);
             }
         }
 
         final Image newImage = Image.newImage(holder.addParagraph(""), imagePath.toUri());
-
         if (fullPage) {
             newImage.getStyleHandler().setAchorType(StyleTypeDefinitions.AnchorType.TO_PAGE);
         }
 
+        try {
+            resizeImage(newImage, pageDim, margin, SI.MILLIMETRE, true, false);
+        } catch (ConversionException ex) {
+            SirsCore.LOGGER.log(Level.WARNING, "Cannot resize an image.", ex);
+        }
+
         return newImage;
+    }
+
+    /**
+     * Resize input image to fit given page requirements.
+     *
+     * TODO : find page parameters by analyzing input image.
+     *
+     * @param toResize The image to resize.
+     * @param pageDim Dimension of the page containing image. If null {@link #PORTRAIT_WIDTH} and {@link #PORTRAIT_HEIGHT} are assumed as dimension.
+     * @param margin Margins of the page to put image into. If null, {@link #DEFAULT_MARGIN} is assumed for each border.
+     * @param measureUnit Unit in which page dimension/margin are expressed. If null, milimeter is assumed.
+     * @param keepRatio True if we should keep image Ratio, or false to distort it to fit strictly the page.
+     * @param forceLower True to resize image even if the page is bigger, false to left image untouched if it already fit into page.
+     * @throws ConversionException If we cannot convert given page dimension into image rectangle unit.
+     */
+    public static void resizeImage(
+            final Image toResize,
+            Dimension2D pageDim,
+            Insets margin,
+            Unit measureUnit,
+            final boolean keepRatio,
+            final boolean forceLower) throws ConversionException {
+
+        ArgumentChecks.ensureNonNull("Image to resize", toResize);
+        final FrameRectangle rectangle = toResize.getRectangle();
+        final Unit rectUnit = Unit.valueOf(rectangle.getLinearMeasure().toString());
+
+        if (measureUnit == null) {
+            measureUnit = SI.MILLIMETRE;
+        }
+
+        final UnitConverter pageConverter, marginConverter;
+        if (pageDim == null) {
+            pageDim = new Dimension2D(PORTRAIT_WIDTH, PORTRAIT_HEIGHT);
+            pageConverter = SI.MILLIMETRE.getConverterToAny(rectUnit);
+        } else {
+            pageConverter = measureUnit.getConverterTo(rectUnit);
+        }
+        if (margin == null) {
+            margin = new Insets(DEFAULT_MARGIN);
+            marginConverter = SI.MILLIMETRE.getConverterToAny(rectUnit);
+        } else {
+            marginConverter = measureUnit.getConverterTo(rectUnit);
+        }
+
+        ArgumentChecks.ensurePositive("Page width", pageDim.getWidth());
+        ArgumentChecks.ensurePositive("Page height", pageDim.getHeight());
+
+        ArgumentChecks.ensurePositive("Margin top", margin.getTop());
+        ArgumentChecks.ensurePositive("Margin right", margin.getRight());
+        ArgumentChecks.ensurePositive("Margin bottom", margin.getBottom());
+        ArgumentChecks.ensurePositive("Margin left", margin.getLeft());
+
+        double width = pageConverter.convert(pageDim.getWidth()) - (marginConverter.convert(margin.getLeft()) + marginConverter.convert(margin.getRight()));
+        double height = pageConverter.convert(pageDim.getHeight()) - (marginConverter.convert(margin.getTop()) + marginConverter.convert(margin.getBottom()));
+
+        if (keepRatio) {
+            final boolean portrait = rectangle.getWidth() < rectangle.getHeight();
+            final double imgRatio = portrait? rectangle.getHeight() / rectangle.getWidth() : rectangle.getWidth() / rectangle.getHeight();
+
+            if (portrait) {
+                width = height / imgRatio;
+            } else {
+                height = width /imgRatio;
+            }
+        }
+
+        if (forceLower? rectangle.getWidth() != width : rectangle.getWidth() > width) {
+            rectangle.setWidth(width);
+        }
+
+        if (forceLower? rectangle.getHeight() != height : rectangle.getHeight() > height) {
+            rectangle.setHeight(height);
+        }
+        toResize.setRectangle(rectangle);
     }
 
     /**
