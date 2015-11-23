@@ -1,5 +1,6 @@
 package fr.sirs.plugins.mobile;
 
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
@@ -25,6 +26,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -44,6 +46,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -72,7 +75,6 @@ import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -86,7 +88,7 @@ public class PhotoImportPane extends StackPane {
      * application to differentiate different images owned by the same document.
      * We also ensure that file extension matches one famous image format.
      */
-    private static final Pattern IMG_PATTERN = Pattern.compile("(?i)^((\\w{32})|(\\w{36}))(.*)(\\.(jpe?g|png|bmp|tiff?))$");
+    private static final Pattern IMG_PATTERN = Pattern.compile("(?i)^(\\w{32}|[\\w-]{36})(.*)(\\.(jpe?g|png|bmp|tiff?))$");
 
     public static final Image ICON_TRASH_BLACK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TRASH_O,16,Color.BLACK),null);
 
@@ -167,7 +169,7 @@ public class PhotoImportPane extends StackPane {
      */
     private final SimpleObjectProperty<Path> subDirProperty = new SimpleObjectProperty<>();
 
-    private final SimpleObjectProperty<CopyTask> copyTaskProperty = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<Task> taskProperty = new SimpleObjectProperty<>();
 
     private final ObservableList<PropertyDescriptor> availablePrefixes = FXCollections.observableArrayList();
 
@@ -182,10 +184,13 @@ public class PhotoImportPane extends StackPane {
         sourceDirProperty.addListener(this::sourceChanged);
         rootDirProperty.addListener(this::destinationChanged);
         subDirProperty.addListener(this::destinationChanged);
+        taskProperty.addListener(this::taskUpdate);
 
         uiCopyMessage.managedProperty().bind(uiCopyMessage.visibleProperty());
         uiCopyMessage.visibleProperty().bind(uiCopyMessage.textProperty().isNotEmpty());
 
+        uiImportProgress.visibleProperty().bind(taskProperty.isNotNull());
+        
         // prefix composition UIs
         final ObservableList<Character> prefixSeparators = FXCollections.observableArrayList();
         prefixSeparators.addAll(' ', '.', '-', '_');
@@ -296,6 +301,7 @@ public class PhotoImportPane extends StackPane {
         alert.setResizable(true);
         alert.setWidth(400);
         alert.getDialogPane().setContent(choices);
+        alert.setHeaderText("Choisissez un attribut à utiliser comme préfixe");
 
         ButtonType result = alert.showAndWait().orElse(ButtonType.CANCEL);
         if (ButtonType.OK.equals(result)) {
@@ -337,10 +343,11 @@ public class PhotoImportPane extends StackPane {
     void chooseSubDirectory(ActionEvent event) {
         final DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Répertoire destination");
-        chooser.setInitialDirectory(rootDirProperty.get().toFile());
+        final Path root = rootDirProperty.get();
+        chooser.setInitialDirectory(root.toFile());
         File chosen = chooser.showDialog(getScene().getWindow());
         if (chosen != null) {
-            subDirProperty.set(chosen.toPath());
+            subDirProperty.set(root.relativize(chosen.toPath()));
         }
     }
 
@@ -365,7 +372,7 @@ public class PhotoImportPane extends StackPane {
      * @param oldTask
      * @param newTask
      */
-    void copyTaskUpdate(final ObservableValue<? extends CopyTask> obs, CopyTask oldValue, CopyTask newValue) {
+    void taskUpdate(final ObservableValue<? extends Task> obs, Task oldValue, Task newValue) {
         if (oldValue != null) {
             uiCopyMessage.textProperty().unbind();
             copyMessageTooltip.textProperty().unbind();
@@ -375,33 +382,37 @@ public class PhotoImportPane extends StackPane {
             uiCopyMessage.textProperty().bind(newValue.messageProperty());
             copyMessageTooltip.textProperty().bind(newValue.messageProperty());
             uiImportProgress.progressProperty().bind(newValue.progressProperty());
+        } else {
+            uiCopyMessage.setText(null);
+            copyMessageTooltip.setText(null);
         }
     }
 
     @FXML
     void importPhotos(ActionEvent event) {
         // If another task is already running, import button will have "cancel" button role.
-        if (copyTaskProperty.get() != null) {
-            copyTaskProperty.get().cancel();
-            copyTaskProperty.set(null);
+        if (taskProperty.get() != null) {
+            taskProperty.get().cancel();
+            taskProperty.set(null);
             return;
         }
 
         uiImportProgress.setProgress(-1);
         // Ensure source media is configured
-        Path source = sourceDirProperty.get();
-        if (source == null || !Files.isDirectory(source)) {
+        Path tmpSource = sourceDirProperty.get();
+        if (tmpSource == null || !Files.isDirectory(tmpSource)) {
             warning("aucun périphérique d'entrée valide spécifié. Veuillez vérifiez vos paramètres d'import.");
             return;
         }
 
-        source = source.resolve(MobilePlugin.PHOTO_FOLDER);
-        if (!Files.isDirectory(source)) {
+        tmpSource = tmpSource.resolve(MobilePlugin.PHOTO_FOLDER);
+        if (!Files.isDirectory(tmpSource)) {
             warning("Aucune photo disponible pour import sur le périphérique mobile.");
             return;
         }
 
         // Check destination is configured
+        final Path source = tmpSource;
         final Path root = rootDirProperty.get();
         if (root == null || !Files.isDirectory(root)) {
             warning("aucun dossier de sortie valide spécifié. Veuillez vérifiez vos paramètres d'import.");
@@ -409,9 +420,8 @@ public class PhotoImportPane extends StackPane {
         }
 
         // Find all images in source media
-        uiCopyMessage.setText("Recherche de fichiers images");
-        final HashSet<Path> filesToCopy = new HashSet<>();
-        try {
+        final Task<HashSet<Path>> listTask = TaskManager.INSTANCE.submit("Recherche de fichiers images", () -> {
+            final HashSet<Path> filesToCopy = new HashSet<>();
             Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
@@ -421,12 +431,28 @@ public class PhotoImportPane extends StackPane {
                     return super.visitFile(file, attrs);
                 }
             });
-        } catch (IOException e) {
-            GeotkFX.newExceptionDialog("Impossible de lister les photos dipoonibles sur le média source.", e).show();
-            SirsCore.LOGGER.log(Level.WARNING, "Photo import : cannot list images on source media.", e);
-            return;
-        }
+            return filesToCopy;
+        });
 
+        taskProperty.set(listTask);
+        listTask.setOnFailed(listEvent -> Platform.runLater(() -> {
+            GeotkFX.newExceptionDialog("Impossible de lister les photos dipoonibles sur le média source.", listTask.getException()).show();
+            SirsCore.LOGGER.log(Level.WARNING, "Photo import : cannot list images on source media.", listTask.getException());
+            taskProperty.set(null);
+        }));
+
+        listTask.setOnSucceeded(listEvent -> Platform.runLater(() -> {
+            final HashSet<Path> files = listTask.getValue();
+            if (files != null && !files.isEmpty()) {
+                copyPhotos(files, root);
+            } else {
+                taskProperty.set(null);
+                warning("Aucune photo n'a été trouvée pour l'import.");
+            }
+        }));
+    }
+
+    private void copyPhotos(final Collection<Path> filesToCopy, final Path root) {
         // Build destination path
         final Path subDir = subDirProperty.get();
         final Path destination = subDir == null ? root : root.resolve(subDir);
@@ -443,17 +469,13 @@ public class PhotoImportPane extends StackPane {
             return;
         }
 
-        final LinkedHashSet prefixes = new LinkedHashSet(uiPrefixListView.getItems());
-        final PathResolver resolver = new PathResolver(subDir, prefixes, uiSeparatorChoice.getValue());
         /* We give root directory as destination. sub-directory will be managed by
          * the resolver, because we have to update CouchDB documents accordingly.
          */
-        if (filesToCopy.isEmpty()) {
-            warning("Aucune photo n'a été trouvée pour l'import.");
-            return;
-        }
+        final LinkedHashSet prefixes = new LinkedHashSet(uiPrefixListView.getItems());
+        final PathResolver resolver = new PathResolver(subDir, prefixes, uiSeparatorChoice.getValue());
         final CopyTask cpTask = new CopyTask(filesToCopy, root, resolver);
-        copyTaskProperty.set(cpTask);
+        taskProperty.set(cpTask);
 
         uiImportBtn.setText("Annuler");
         TaskManager.INSTANCE.submit(cpTask);
@@ -464,7 +486,7 @@ public class PhotoImportPane extends StackPane {
                 Platform.runLater(() -> {
                     uiImportBtn.setText("Importer");
                     uiParameterContainer.setDisable(false);
-                    copyTaskProperty.set(null);
+                    taskProperty.set(null);
                 });
             }
         });
@@ -572,8 +594,7 @@ public class PhotoImportPane extends StackPane {
      */
     static class PathResolver implements Function<Path, Path> {
 
-        @Autowired
-        private Session session;
+        private final Session session;
 
         private final Path rootRelativeDir;
         private final LinkedHashSet<PropertyDescriptor> prefixes;
@@ -582,6 +603,7 @@ public class PhotoImportPane extends StackPane {
         private final boolean noOp;
 
         public PathResolver(Path rootRelativeDir, LinkedHashSet<PropertyDescriptor> prefixes, Character separator) {
+            session = Injector.getSession();
             this.rootRelativeDir = rootRelativeDir;
             this.prefixes = prefixes;
             noOp = rootRelativeDir == null && (prefixes == null || prefixes.isEmpty());
@@ -639,11 +661,15 @@ public class PhotoImportPane extends StackPane {
                 newName = t.getFileName().toString();
             } else {
                 final StringBuilder nameBuilder = new StringBuilder();
+                Object prefixValue;
                 for (final PropertyDescriptor desc : prefixes) {
                     Method readMethod = desc.getReadMethod();
                     if (readMethod != null) {
                         try {
-                            nameBuilder.append(readMethod.invoke(photo)).append(separator);
+                            prefixValue = readMethod.invoke(photo);
+                            if (prefixValue != null) {
+                                nameBuilder.append(prefixValue).append(separator);
+                            }
                         } catch (Exception ex) {
                             warning("Le préfixe "+LabelMapper.mapPropertyName(AbstractPhoto.class, desc.getName())+" ne peut être ajouté. L'import est annulé.");
                             SirsCore.LOGGER.log(Level.WARNING, "Photo import : cannot add following prefix in file name : "+desc.getDisplayName(), ex);

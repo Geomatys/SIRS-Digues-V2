@@ -96,6 +96,10 @@ public class FicheSectionRapport extends AbstractSectionRapport {
 
     @Override
     public void printSection(final PrintContext ctx) throws Exception {
+        if (ctx.elements == null) {
+            return; // TODO : print template using filter values.
+        }
+        
         if (modeleElementId.get() == null)
             throw new IllegalStateException("No model set for printing !");
 

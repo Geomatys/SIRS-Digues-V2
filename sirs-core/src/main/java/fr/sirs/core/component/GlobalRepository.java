@@ -25,7 +25,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Views({
-    @View(name=GlobalRepository.BY_CLASS_AND_LINEAR_VIEW, map="function(doc) {if(doc['@class']) {emit([doc['@class'], doc.linearId], doc._id)}}")
+    @View(name=GlobalRepository.BY_CLASS_AND_LINEAR_VIEW, map="function(doc) {if(doc['@class']) {emit([doc['@class'], doc.linearId], {" +
+"            id: doc._id," +
+"            rev: doc._rev," +
+"            designation: doc.designation," +
+"            libelle: doc.libelle," +
+"            geometry: doc.geometry" +
+"        })}}")
 })
 public class GlobalRepository extends CouchDbRepositorySupport<Element> {
 

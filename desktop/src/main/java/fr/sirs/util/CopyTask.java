@@ -166,6 +166,7 @@ public class CopyTask extends Task<Boolean> {
                     return false;
                 }
 
+                updateMessage("Analyse de " + p.toString());
                 // If no resolver has been given, we put input file directly in
                 // destination folder. otherwise, we reproduce folder structure
                 // from given resolver to current input file.

@@ -58,7 +58,6 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
 
     public final void print(final TextDocument target, final Stream<? extends Element> sourceData) throws Exception {
         ArgumentChecks.ensureNonNull("Target document", target);
-        ArgumentChecks.ensureNonNull("Source data collection", sourceData);
 
         //Write section in a temporary document to ensure it will be inserted entirely or not at all in real target.
         try (final TextDocument tmpDoc = TextDocument.newTextDocument()) {
@@ -317,6 +316,10 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
      * - target document : All content will be appended at its end
      * - Names of all the properties returned by this section filter
      * - List of the elements to print (already filtered using this section query).
+     *
+     * If no element is provided (null value), It's the responsability of the aimed
+     * section implementation to decide if it can print content or just return empty
+     * document.
      */
     protected class PrintContext {
 
@@ -330,7 +333,7 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
          */
         protected final LinkedHashSet<String> propertyNames;
         /**
-         * Filtered list of elements which should be printed.
+         * Filtered list of elements which should be printed. Can be null.
          */
         public final Stream<? extends Element> elements;
 
@@ -341,7 +344,6 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
 
         public PrintContext(TextDocument target, Stream<? extends Element> elements) throws SQLException, DataStoreException, InterruptedException, ExecutionException {
             ArgumentChecks.ensureNonNull("Target document", target);
-            ArgumentChecks.ensureNonNull("Elements to print", elements);
             this.target = target;
 
             if (getRequeteId() == null) {
@@ -372,6 +374,10 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
                     );
                 }
 
+                if (elements == null) {
+                    this.elements = null;
+
+                } else {
                 final Predicate<Element> predicate;
                 // Analyze input filter to determine if we only need ID comparison, or if we must perform a full scan.
                 if (propertyNames.contains(SirsCore.ID_FIELD)) {
@@ -387,69 +393,70 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
 
                     predicate = input -> ids.contains(input.getId());
 
-                } else {
-                    final HashMap<String, HashMap<String, PropertyDescriptor>> classProperties = new HashMap<>();
-                    predicate = input -> {
-                        // Get list of input element properties.
-                        final String className = input.getClass().getCanonicalName();
-                        HashMap<String, PropertyDescriptor> properties = classProperties.get(className);
-                        if (properties == null) {
-                            final PropertyDescriptor[] descriptors;
-                            try {
-                                descriptors = Introspector.getBeanInfo(input.getClass()).getPropertyDescriptors();
-                            } catch (IntrospectionException ex) {
-                                SirsCore.LOGGER.log(Level.WARNING, "Invalid class : " + className, ex);
-                                return false;
-                            }
-                            properties = new HashMap<>(descriptors.length);
-                            for (final PropertyDescriptor desc : descriptors) {
-                                if (desc.getReadMethod() != null) {
-                                    desc.getReadMethod().setAccessible(true);
-                                    properties.put(desc.getName(), desc);
-                                }
-                            }
-                            classProperties.put(className, properties);
-                        }
-
-                        /* Now we can compare our element to filtered data. 2 steps :
-                         * - Ensure our input element has at least all the properties of the filtered features
-                         * - Ensure equality of all these properties with one of our filtered features.
-                         */
-                        final HashMap<String, Object> values = new HashMap<>(propertyNames.size());
-                        for (final String pName : propertyNames) {
-                            final PropertyDescriptor desc = properties.get(pName);
-                            if (desc == null) {
-                                return false;
-                            } else {
+                    } else {
+                        final HashMap<String, HashMap<String, PropertyDescriptor>> classProperties = new HashMap<>();
+                        predicate = input -> {
+                            // Get list of input element properties.
+                            final String className = input.getClass().getCanonicalName();
+                            HashMap<String, PropertyDescriptor> properties = classProperties.get(className);
+                            if (properties == null) {
+                                final PropertyDescriptor[] descriptors;
                                 try {
-                                    values.put(pName, desc.getReadMethod().invoke(input));
-                                } catch (Exception ex) {
-                                    throw new SirsCoreRuntimeException(ex);
+                                    descriptors = Introspector.getBeanInfo(input.getClass()).getPropertyDescriptors();
+                                } catch (IntrospectionException ex) {
+                                    SirsCore.LOGGER.log(Level.WARNING, "Invalid class : " + className, ex);
+                                    return false;
                                 }
-                            }
-                        }
-
-                        boolean isEqual;
-                        try (final FeatureIterator reader = filterValues.iterator()) {
-                            while (reader.hasNext()) {
-                                isEqual = true;
-                                final Feature next = reader.next();
-                                for (final org.geotoolkit.feature.Property p : next.getProperties()) {
-                                    if (!propertiesEqual(p.getValue(), values.get(p.getName().tip().toString()))) {
-                                        isEqual = false;
-                                        break;
+                                properties = new HashMap<>(descriptors.length);
+                                for (final PropertyDescriptor desc : descriptors) {
+                                    if (desc.getReadMethod() != null) {
+                                        desc.getReadMethod().setAccessible(true);
+                                        properties.put(desc.getName(), desc);
                                     }
                                 }
-                                if (isEqual)
-                                    return true;
+                                classProperties.put(className, properties);
                             }
-                        }
 
-                        return false;
-                    };
+                            /* Now we can compare our element to filtered data. 2 steps :
+                             * - Ensure our input element has at least all the properties of the filtered features
+                             * - Ensure equality of all these properties with one of our filtered features.
+                             */
+                            final HashMap<String, Object> values = new HashMap<>(propertyNames.size());
+                            for (final String pName : propertyNames) {
+                                final PropertyDescriptor desc = properties.get(pName);
+                                if (desc == null) {
+                                    return false;
+                                } else {
+                                    try {
+                                        values.put(pName, desc.getReadMethod().invoke(input));
+                                    } catch (Exception ex) {
+                                        throw new SirsCoreRuntimeException(ex);
+                                    }
+                                }
+                            }
+
+                            boolean isEqual;
+                            try (final FeatureIterator reader = filterValues.iterator()) {
+                                while (reader.hasNext()) {
+                                    isEqual = true;
+                                    final Feature next = reader.next();
+                                    for (final org.geotoolkit.feature.Property p : next.getProperties()) {
+                                        if (!propertiesEqual(p.getValue(), values.get(p.getName().tip().toString()))) {
+                                            isEqual = false;
+                                            break;
+                                        }
+                                    }
+                                    if (isEqual)
+                                        return true;
+                                }
+                            }
+
+                            return false;
+                        };
+                    }
+
+                    this.elements = elements.filter(predicate);
                 }
-
-                this.elements = elements.filter(predicate);
             }
         }
 
