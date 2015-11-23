@@ -9,6 +9,7 @@ import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DesordreRepository;
+import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.AvecBornesTemporelles;
@@ -29,7 +30,6 @@ import java.nio.file.FileStore;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributeView;
@@ -90,8 +90,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Alexis Manin (Geomatys)
  */
 public class DocumentExportPane extends StackPane {
-
-    private static final Path DOCUMENT_FOLDER = Paths.get("files", "documents");
 
     @FXML
     private BorderPane uiConfigPane;
@@ -492,20 +490,25 @@ public class DocumentExportPane extends StackPane {
      */
     @FXML
     void exportToMobile(ActionEvent event) {
-        final Path mobileDir = mobileDocumentDir.get();
-        if (mobileDir == null || !Files.isDirectory(mobileDir)) {
+        final Path destination = mobileDocumentDir.get();
+        if (destination == null || !Files.isDirectory(destination)) {
             new Alert(Alert.AlertType.WARNING, "Impossible de déterminer le répertoire de sortie.", ButtonType.OK).show();
             return;
         }
 
-        final Path destination = mobileDir.resolve(DOCUMENT_FOLDER);
-        if (!Files.isDirectory(destination)) {
-            try {
-                Files.createDirectories(destination);
-            } catch (Exception ex) {
-                SirsCore.LOGGER.log(Level.WARNING, "Cannot create following directory on mobile device : "+destination.toString(), ex);
-                new Alert(Alert.AlertType.WARNING, "Impossible de déterminer le répertoire de sortie.", ButtonType.OK).show();
-                return;
+        final Path[] toCheck = new Path[]{
+            destination.resolve(MobilePlugin.DOCUMENT_FOLDER),
+            destination.resolve(MobilePlugin.PHOTO_FOLDER)
+        };
+        for (final Path tmpPath : toCheck) {
+            if (!Files.isDirectory(tmpPath)) {
+                try {
+                    Files.createDirectories(tmpPath);
+                } catch (Exception ex) {
+                    SirsCore.LOGGER.log(Level.WARNING, "Cannot create following directory on mobile device : " + tmpPath.toString(), ex);
+                    new Alert(Alert.AlertType.WARNING, "Impossible de déterminer le répertoire de sortie.", ButtonType.OK).show();
+                    return;
+                }
             }
         }
 
@@ -526,8 +529,11 @@ public class DocumentExportPane extends StackPane {
         // 1
         uiLoadingPane.setVisible(true);
         uiLoadingLabel.setText("Liste les documents à copier");
-        final Task<ArrayList<Path>> listFileTask = TaskManager.INSTANCE.submit(uiLoadingLabel.getText(), () -> {
-            final ArrayList<Path> docList = new ArrayList<>();
+        // List each files which must be copied (map value), sorted by output directory (map key)
+        final Task<Map<Path, Collection<Path>>> listFileTask = TaskManager.INSTANCE.submit(uiLoadingLabel.getText(), () -> {
+            final HashMap<Path, Collection<Path>> docMap = new HashMap<>();
+            final HashSet<Path> docList = new HashSet<>();
+            docMap.put(MobilePlugin.DOCUMENT_FOLDER, docList);
             // Find document list size
             for (final SIRSFileReference ref : uiMobileList.getItems()) {
                 final String chemin = ref.getChemin();
@@ -551,7 +557,7 @@ public class DocumentExportPane extends StackPane {
                 final PhotoDateComparator photoComparator = new PhotoDateComparator();
                 ObservableList<Preview> tronconItems = uiTronconList.getSelectionModel().getSelectedItems();
                 if (!tronconItems.isEmpty()) {
-                    final List<Photo> photos = new ArrayList<>();
+                    final List<AbstractPhoto> photos = new ArrayList<>();
                     List<AbstractPositionableRepository> repos = (List) session.getRepositoriesForClass(AvecPhotos.class)
                             .stream().filter(repo -> repo instanceof AbstractPositionableRepository).collect(Collectors.toList());
 
@@ -569,7 +575,7 @@ public class DocumentExportPane extends StackPane {
                                 .collect(Collectors.toList())
                         );
 
-                        photos.addAll((Collection<? extends Photo>) repos.stream()
+                        photos.addAll((Collection<? extends AbstractPhoto>) repos.stream()
                                 .flatMap(repo -> repo.getByLinearId(linearId).stream())
                                 // for each object, we take the most recent valid photos.
                                 .flatMap(pos -> ((AvecPhotos) pos).getPhotos().stream()
@@ -580,33 +586,44 @@ public class DocumentExportPane extends StackPane {
                     }
 
                     // keep only photos defined with an accessible file.
-                    docList.addAll(photos.stream()
+                    docMap.put(MobilePlugin.PHOTO_FOLDER, photos.stream()
                             .map(photo -> SIRS.getDocumentAbsolutePath(photo.getChemin()))
-                            .collect(Collectors.toList())
+                            .collect(Collectors.toSet())
                     );
                 }
             }
-            return docList;
+            return docMap;
         });
 
         listFileTask.runningProperty().addListener((obs, oldValue, newValue) -> {
             if (newValue == false && oldValue == true) {
                 try {
-                    final ArrayList<Path> toCopy = listFileTask.get();
+                    final Map<Path, Collection<Path>> toCopy = listFileTask.get();
+                    final ArrayList paths = new ArrayList<>();
 
                     // 2
                     uiLoadingLabel.setText("Calcul de la quantité de donnée à copier");
-                    final long sizeToCopy = TaskManager.INSTANCE.submit(uiLoadingLabel.getText(), () -> {
-                        return toCopy.stream()
-                                .map(doc -> {
-                                    try {
-                                        return Files.getFileAttributeView(doc, BasicFileAttributeView.class).readAttributes().size();
-                                    } catch (IOException ex) {
-                                        throw new RuntimeException("Cannot get file size for " + doc, ex);
-                                    }
-                                })
-                                .reduce(0l, (first, second) -> first + second);
-                    }).get();
+                    final List<Task<Long>> sizeComputing = new ArrayList<>(toCopy.size());
+                    for (final Collection<Path> tmpList : toCopy.values()) {
+                        sizeComputing.add(TaskManager.INSTANCE.submit(uiLoadingLabel.getText(), () -> {
+                            return tmpList.stream()
+                                    .map(doc -> {
+                                        try {
+                                            return Files.getFileAttributeView(doc, BasicFileAttributeView.class).readAttributes().size();
+                                        } catch (IOException ex) {
+                                            throw new RuntimeException("Cannot get file size for " + doc, ex);
+                                        }
+                                    })
+                                    .reduce(0l, (first, second) -> first + second);
+                        }));
+                        paths.addAll(tmpList);
+                    }
+
+                    long tmpSizeToCopy = 0;
+                    for (final Task<Long> t : sizeComputing) {
+                        tmpSizeToCopy += t.get();
+                    }
+                    final long sizeToCopy = tmpSizeToCopy;
 
                     // 3
                     if (sizeToCopy <= 0) {
@@ -627,7 +644,14 @@ public class DocumentExportPane extends StackPane {
 
                             if (ButtonType.YES.equals(choice)) {
                                 final Path documentRootPath = SIRS.getDocumentRootPath();
-                                final CopyTask copyTask = new DocumentCopy(toCopy, destination, input -> documentRootPath.relativize(input));
+                                final CopyTask copyTask = new DocumentCopy(paths, destination, input -> {
+                                    for (final Map.Entry<Path, Collection<Path>> entry : toCopy.entrySet()) {
+                                        if (entry.getValue().contains(input)) {
+                                            return entry.getKey().resolve(documentRootPath.relativize(input));
+                                        }
+                                    }
+                                    throw new IllegalArgumentException("Input file is not registered as document !");
+                                });
                                 // 5
                                 copyTaskProperty.set(copyTask);
                                 // 6 & 7 : Let's do it !

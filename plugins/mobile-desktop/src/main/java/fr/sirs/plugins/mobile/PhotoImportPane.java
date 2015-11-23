@@ -80,15 +80,13 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class PhotoImportPane extends StackPane {
 
-    private static final Path PHOTO_FOLDER = Paths.get("files", "nouvellesPhotos");
-
     /**
      * Expected structure for the name of images to import. It should start with
      * the related document id, followed by any suffix judged convinient by mobile
      * application to differentiate different images owned by the same document.
      * We also ensure that file extension matches one famous image format.
      */
-    private static final Pattern IMG_PATTERN = Pattern.compile("(?i)^(\\w{32})(.*)(\\.(jpe?g|png|bmp|tiff?))$");
+    private static final Pattern IMG_PATTERN = Pattern.compile("(?i)^((\\w{32})|(\\w{36}))(.*)(\\.(jpe?g|png|bmp|tiff?))$");
 
     public static final Image ICON_TRASH_BLACK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TRASH_O,16,Color.BLACK),null);
 
@@ -397,7 +395,7 @@ public class PhotoImportPane extends StackPane {
             return;
         }
 
-        source = source.resolve(PHOTO_FOLDER);
+        source = source.resolve(MobilePlugin.PHOTO_FOLDER);
         if (!Files.isDirectory(source)) {
             warning("Aucune photo disponible pour import sur le périphérique mobile.");
             return;

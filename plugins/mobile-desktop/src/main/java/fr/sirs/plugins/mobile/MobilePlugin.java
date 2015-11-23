@@ -36,6 +36,8 @@ public class MobilePlugin extends Plugin {
     private static final Image PLUGIN_ICON = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_MOBILE, 100, Color.BLACK), null);
 
     static final Path MOBILE_APP_DIR = Paths.get("Android/data/com.rdardie.sirsMobile");
+    static final Path DOCUMENT_FOLDER = Paths.get("files", "documents");
+    static final Path PHOTO_FOLDER = Paths.get("files", "medias");
 
     public MobilePlugin() {
         name = NAME;
