@@ -2,7 +2,6 @@ package fr.sirs.plugins.mobile;
 
 import fr.sirs.Plugin;
 import fr.sirs.SIRS;
-import fr.sirs.core.model.sql.SQLHelper;
 import java.awt.Color;
 import java.io.File;
 import java.nio.file.FileStore;

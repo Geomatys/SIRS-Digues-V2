@@ -58,25 +58,6 @@
       <version>${geotoolkit.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>net.sf.jodreports</groupId>
-      <artifactId>jodreports</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.odftoolkit</groupId>
-      <artifactId>simple-odf</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.pdfbox</groupId>
-      <artifactId>pdfbox</artifactId>
-    </dependency>
-
     <!-- format -->
     <dependency>
       <groupId>org.geotoolkit</groupId>

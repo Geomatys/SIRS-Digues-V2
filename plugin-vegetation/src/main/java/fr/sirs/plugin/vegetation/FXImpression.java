@@ -13,6 +13,7 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.plugin.vegetation.map.PlanifState;
 import static fr.sirs.plugin.vegetation.map.PlanifState.NON_PLANIFIE;
 import fr.sirs.util.SirsStringConverter;
+import fr.sirs.util.odt.ODTUtils;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -52,7 +53,6 @@ import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
-import javax.imageio.ImageIO;
 import javax.measure.unit.SI;
 import javax.swing.SwingConstants;
 import org.apache.sis.storage.DataStoreException;
@@ -132,7 +132,7 @@ public class FXImpression extends GridPane{
     @FXML private Button uiPrint;
     @FXML private ProgressIndicator uiProgress;
     @FXML private Label uiProgressLabel;
-    
+
     @FXML private CheckBox uiTraiteeNonPlanif;
     @FXML private CheckBox uiTraiteePlanif;
     @FXML private CheckBox uiNonTraiteeNonPlanif;
@@ -333,9 +333,7 @@ public class FXImpression extends GridPane{
                         final ViewDef vdef = new ViewDef(parcelleLayer.getBounds());
                         final BufferedImage mapImage = DefaultPortrayalService.portray(cdef, sdef, vdef);
 
-                        final File mapFile = File.createTempFile("map", ".png");
-                        ImageIO.write(mapImage, "PNG", mapFile);
-                        ODTUtils.insertImage(doc, mapFile.toURI(), mapImage);
+                        ODTUtils.appendImage(doc, mapImage);
 
                         //on construit les listes
                         final List<ParcelleVegetation> planifieTraitee = uiTraiteePlanif.isSelected() ? new ArrayList<>() : null ;
@@ -361,7 +359,7 @@ public class FXImpression extends GridPane{
                                 }
                             }
                         }
-                        
+
                         final int nbRow = Math.max(
                                         Math.max(planifieTraitee==null       ? 0:planifieTraitee.size(),
                                                  planifieNonTraitee==null    ? 0:planifieNonTraitee.size()),
@@ -439,7 +437,7 @@ public class FXImpression extends GridPane{
                 }
             }
         }.start();
-        
+
 
     }
 
