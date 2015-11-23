@@ -192,6 +192,8 @@ public class FXSearchPane extends BorderPane {
         uiToggleSQL.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             if (newValue && needsSQLExportProperty.get()) {
                 showPopupForRDBMSExport(group);
+            } else {
+                connectToH2Store();
             }
 
         });

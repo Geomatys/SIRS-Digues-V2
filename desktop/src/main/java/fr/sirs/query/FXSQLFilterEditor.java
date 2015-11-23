@@ -14,6 +14,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
+import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -31,7 +32,10 @@ import org.geotoolkit.feature.type.AssociationType;
 import org.geotoolkit.feature.type.ComplexType;
 import org.geotoolkit.feature.type.PropertyDescriptor;
 import org.geotoolkit.feature.type.PropertyType;
+import org.geotoolkit.gui.javafx.parameter.FXValueEditor;
+import org.geotoolkit.gui.javafx.parameter.FXValueEditorSpi;
 import org.geotoolkit.gui.javafx.util.TextFieldCompletion;
+import org.opengis.feature.AttributeType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Literal;
@@ -43,7 +47,6 @@ import org.opengis.filter.expression.PropertyName;
  */
 public class FXSQLFilterEditor extends GridPane {
 
-    private static final String PARENT_DESCRIPTORS = "parentDescriptorsKey";
     private static final FilterFactory2 FF = GO2Utilities.FILTER_FACTORY;
     private static final int SPACING = 5;
     private static final Image DIV_HAUT = new Image("/fr/sirs/div_haut.png");
@@ -95,7 +98,7 @@ public class FXSQLFilterEditor extends GridPane {
     private final ChoiceBox<Type> uiTypeBox = new ChoiceBox<>(FXCollections.observableArrayList(Type.values()));
     private final ChoiceBox<Condition> uiConditionBox = new ChoiceBox<>(FXCollections.observableArrayList(Condition.values()));
     private final TextField uiPropertyName = new TextField();
-    private final TextField uiPropertyValue = new TextField();
+    private FXValueEditor uiPropertyValue;
     private final GridPane uiPropertyPane = new GridPane();
     private final ObservableList<String> choices = FXCollections.observableArrayList();
 
@@ -104,6 +107,8 @@ public class FXSQLFilterEditor extends GridPane {
     private FXSQLFilterEditor uiSub1 = null;
     private FXSQLFilterEditor uiSub2 = null;
 
+    private SimpleObjectProperty<AttributeType> attributeTypeProperty = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty propertyValue = new SimpleObjectProperty();
     public final SimpleObjectProperty<Filter> filterProperty = new SimpleObjectProperty<>();
 
     public FXSQLFilterEditor() {
@@ -156,17 +161,15 @@ public class FXSQLFilterEditor extends GridPane {
         uiPropertyPane.getRowConstraints().add(new RowConstraints());
         uiPropertyPane.add(uiPropertyName, 0, 0);
         uiPropertyPane.add(uiConditionBox, 1, 0);
-        uiPropertyPane.add(uiPropertyValue, 2, 0);
 
         //autocompletion sur les champs
         final TextFieldCompletion textFieldCompletion = new columnCompletor(uiPropertyName);
 
         uiConditionBox.getSelectionModel().selectedItemProperty().addListener(this::setFilterProperty);
+        uiPropertyName.textProperty().addListener(this::updateAttributeType);
+        attributeTypeProperty.addListener(this::updateEditor);
         uiPropertyName.textProperty().addListener(this::setFilterProperty);
-        uiPropertyValue.textProperty().addListener(this::setFilterProperty);
-        uiPropertyValue.visibleProperty().bind(
-                uiConditionBox.valueProperty().isNotEqualTo(Condition.NULL)
-                        .and(uiConditionBox.valueProperty().isNotEqualTo(Condition.NOT_NULL)));
+        propertyValue.addListener(this::setFilterProperty);
     }
 
     public void setChoices(ObservableList<String> choices) {
@@ -242,6 +245,70 @@ public class FXSQLFilterEditor extends GridPane {
         }
     }
 
+    private void updateEditor(ObservableValue<? extends AttributeType> obs, final AttributeType oldValue, final AttributeType newValue) {
+        if (newValue == null) {
+            if (uiPropertyValue != null) {
+                propertyValue.unbind();
+                final Node component = uiPropertyValue.getComponent();
+                if (component != null) {
+                    uiPropertyPane.getChildren().remove(component);
+                }
+                uiPropertyValue = null;
+            }
+        } else {
+            if (uiPropertyValue != null && uiPropertyValue.spi.canHandle(newValue)) {
+                uiPropertyValue.setAttributeType(newValue);
+            } else {
+                if (uiPropertyValue != null) {
+                    propertyValue.unbind();
+                    final Node component = uiPropertyValue.getComponent();
+                    if (component != null) {
+                        uiPropertyPane.getChildren().remove(component);
+                    }
+                    uiPropertyValue = null;
+                }
+                uiPropertyValue = FXValueEditorSpi.findEditor(newValue).orElse(null);
+                if (uiPropertyValue != null) {
+                    propertyValue.bind(uiPropertyValue.valueProperty());
+                    final Node component = uiPropertyValue.getComponent();
+                    if (component != null) {
+                        uiPropertyPane.add(component, 2, 0);
+                        component.visibleProperty().bind(
+                                uiConditionBox.valueProperty().isNotEqualTo(Condition.NULL)
+                                .and(uiConditionBox.valueProperty().isNotEqualTo(Condition.NOT_NULL)));
+                    }
+                }
+            }
+        }
+    }
+
+    private void updateAttributeType(final ObservableValue<? extends String> obs, final String oldValue, final String newValue) {
+        if (newValue == null || newValue.isEmpty()) {
+            attributeTypeProperty.set(null);
+            return;
+        }
+
+        String[] splitted = newValue.split("/");
+        PropertyType parentType = type;
+        PropertyDescriptor tmpDesc;
+        for (int i = 0; i < splitted.length; i++) {
+            if (parentType instanceof ComplexType) {
+                tmpDesc = ((ComplexType) parentType).getDescriptor(splitted[i]);
+                if (tmpDesc != null) {
+                    parentType = tmpDesc.getType();
+                    if (parentType instanceof AssociationType) {
+                        parentType = ((AssociationType)parentType).getRelatedType();
+                    }
+                }
+            } else {
+                parentType = null;
+            }
+        }
+        if (parentType instanceof AttributeType) {
+            attributeTypeProperty.set((AttributeType)parentType);
+        }
+    }
+
     private void setFilterProperty(ObservableValue observable, Object oldValue, Object newValue) {
         filterProperty.set(toFilter());
     }
@@ -250,7 +317,7 @@ public class FXSQLFilterEditor extends GridPane {
         final Type t = uiTypeBox.getValue();
         if (Type.PROPERTY.equals(t)) {
             final PropertyName propName = FF.property(uiPropertyName.getText());
-            final Literal propValue = FF.literal(uiPropertyValue.getText());
+            final Literal propValue = uiPropertyValue == null? FF.literal("") : FF.literal(uiPropertyValue.valueProperty().getValue());
 
             final Condition condition = uiConditionBox.getValue();
             if (Condition.INFERIOR.equals(condition)) {
@@ -293,7 +360,7 @@ public class FXSQLFilterEditor extends GridPane {
 
         @Override
         protected ObservableList<String> getChoices(String text) {
-            // If there's no text to analyze, 
+            // If there's no text to analyze,
             if (text == null || text.isEmpty()) {
                 return choices;
             }
@@ -327,10 +394,10 @@ public class FXSQLFilterEditor extends GridPane {
 
         final Matcher matcher = filters.get(filterIndex++).matcher(descriptorName);
         /*
-         * Search for correspondance with given filter. If the match is complete, 
+         * Search for correspondance with given filter. If the match is complete,
          * we will search for children matching the next step of the filter sequence.
          If there's no more fiter, we will return all children as suggestion.
-         * If the match is partial, it means user search for a field in the current 
+         * If the match is partial, it means user search for a field in the current
          * level, so we won't pollute output list with next level elements.
          */
         if (matcher.matches()) {
