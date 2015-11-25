@@ -47,6 +47,8 @@
                     <mainClass>fr.sirs.launcher.Launcher</mainClass>
                     <needMenu>true</needMenu>
                     <jvmArgs>
+                        <!-- Force GC. CMS try to keep the lowest heap print over time, it's what we search as target systems will not have many resources available.-->
+                        <jvmArg>-XX:+UseConcMarkSweepGC</jvmArg>
                         <!-- Memory management. Application cannot run with less 
                         than 256MB heap, so we forbid its use when this requirement
                         cannot be fulfilled. Another important point is that multiple 
