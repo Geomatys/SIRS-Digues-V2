@@ -315,7 +315,7 @@ public class RapportsPane extends BorderPane {
                     }
                 }
 
-                final Task reportGenerator = ODTUtils.generateReport(report, elements, output, titre);
+                final Task reportGenerator = ODTUtils.generateReport(report, troncons.isEmpty()? null : elements, output, titre);
                 Platform.runLater(() -> {
                     reportGenerator.messageProperty().addListener((obs, oldValue, newValue) -> updateMessage(newValue));
                     reportGenerator.workDoneProperty().addListener((obs, oldValue, newValue) -> updateProgress(newValue.doubleValue(), reportGenerator.getTotalWork()));

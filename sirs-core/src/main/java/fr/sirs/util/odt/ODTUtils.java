@@ -1327,7 +1327,7 @@ public class ODTUtils {
             @Override
             protected Object call() throws Exception {
                 updateTitle("Génération de rapport" + (titre != null ? " (" + titre + ")" : ""));
-                final long totalWork = elements.size() * report.sections.size();
+                final long totalWork = elements == null? -1 : elements.size() * report.sections.size();
                 final AtomicLong currentWork = new AtomicLong(-1);
 
                 // on crée le document de rapport
@@ -1348,13 +1348,17 @@ public class ODTUtils {
                         }
                         updateMessage("Génération de la section : " + libelle);
 
-                        try (final Stream dataStream = elements.stream().peek(input -> updateProgress(currentWork.incrementAndGet(), totalWork))) {
-                            section.print(headerDoc, dataStream);
-                            // In case section printing has not used provided stream, we have to update progress manually.
-                            expectedWork = (i + 1) * elements.size() - 1;
-                            if (currentWork.get() != expectedWork) {
-                                currentWork.set(expectedWork);
-                                updateProgress(expectedWork, totalWork);
+                        if (elements == null) {
+                            section.print(headerDoc, null);
+                        } else {
+                            try (final Stream dataStream = elements.stream().peek(input -> updateProgress(currentWork.incrementAndGet(), totalWork))) {
+                                section.print(headerDoc, dataStream);
+                                // In case section printing has not used provided stream, we have to update progress manually.
+                                expectedWork = (i + 1) * elements.size() - 1;
+                                if (currentWork.get() != expectedWork) {
+                                    currentWork.set(expectedWork);
+                                    updateProgress(expectedWork, totalWork);
+                                }
                             }
                         }
                     }

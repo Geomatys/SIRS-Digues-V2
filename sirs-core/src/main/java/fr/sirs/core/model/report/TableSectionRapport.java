@@ -41,7 +41,7 @@ public class TableSectionRapport extends AbstractSectionRapport {
 
     @Override
     protected void printSection(final PrintContext ctx) throws Exception {
-            final List<String> properties = ctx.propertyNames == null? null : new ArrayList<>(ctx.propertyNames);
+        final List<String> properties = ctx.propertyNames == null? null : new ArrayList<>(ctx.propertyNames);
         if (ctx.elements != null) {
             ODTUtils.appendTable(ctx.target, Spliterators.iterator(ctx.elements.spliterator()), properties);
         } else if (ctx.filterValues != null) {

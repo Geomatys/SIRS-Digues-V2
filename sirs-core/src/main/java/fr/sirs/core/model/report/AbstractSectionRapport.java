@@ -378,20 +378,20 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
                     this.elements = null;
 
                 } else {
-                final Predicate<Element> predicate;
-                // Analyze input filter to determine if we only need ID comparison, or if we must perform a full scan.
-                if (propertyNames.contains(SirsCore.ID_FIELD)) {
-                    final HashSet<String> ids = new HashSet<>();
-                    try (FeatureIterator reader = filterValues.iterator()) {
-                        while (reader.hasNext()) {
-                            final Object pValue = reader.next().getPropertyValue(SirsCore.ID_FIELD);
-                            if (pValue instanceof String) {
-                                ids.add((String) pValue);
+                    final Predicate<Element> predicate;
+                    // Analyze input filter to determine if we only need ID comparison, or if we must perform a full scan.
+                    if (propertyNames.contains(SirsCore.ID_FIELD)) {
+                        final HashSet<String> ids = new HashSet<>();
+                        try (FeatureIterator reader = filterValues.iterator()) {
+                            while (reader.hasNext()) {
+                                final Object pValue = reader.next().getPropertyValue(SirsCore.ID_FIELD);
+                                if (pValue instanceof String) {
+                                    ids.add((String) pValue);
+                                }
                             }
                         }
-                    }
 
-                    predicate = input -> ids.contains(input.getId());
+                        predicate = input -> ids.contains(input.getId());
 
                     } else {
                         final HashMap<String, HashMap<String, PropertyDescriptor>> classProperties = new HashMap<>();
