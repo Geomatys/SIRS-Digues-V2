@@ -184,9 +184,8 @@ public class FXModeleRapportPane extends AbstractFXElementPane<ModeleRapport> {
                 sectionEditors.remove(sectionEditor);
             });
             copyButton.setOnAction((event) -> addSectionCopy(sectionEditor.elementProperty.get()));
-            final BooleanBinding btnDisabled = sectionEditor.elementProperty.isNull().or(disableFieldsProperty());
-            copyButton.disableProperty().bind(btnDisabled);
-            deleteButton.disableProperty().bind(btnDisabled);
+            final BooleanBinding disabled = sectionEditor.elementProperty.isNull().or(disableFieldsProperty());
+            disableProperty().bind(disabled);
             copyButton.getStyleClass().add("white-with-borders");
             deleteButton.getStyleClass().add("white-with-borders");
             sectionChanged(sectionEditor.elementProperty, null, sectionEditor.elementProperty.get());
