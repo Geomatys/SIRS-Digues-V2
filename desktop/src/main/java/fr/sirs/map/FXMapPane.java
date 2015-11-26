@@ -14,8 +14,6 @@ import fr.sirs.Injector;
 import fr.sirs.Plugin;
 import fr.sirs.Printable;
 import fr.sirs.Session;
-import fr.sirs.core.SirsCore;
-import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.AvecBornesTemporelles;
@@ -34,13 +32,15 @@ import java.awt.Dimension;
 import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -68,13 +68,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
-import javafx.stage.Window;
 import javax.swing.SwingConstants;
 import org.apache.sis.measure.NumberRange;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.query.QueryBuilder;
-import org.geotoolkit.display.PortrayalException;
 import org.geotoolkit.display2d.GO2Hints;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.canvas.J2DCanvas;
@@ -85,7 +83,6 @@ import org.geotoolkit.display2d.ext.northarrow.GraphicNorthArrowJ2D;
 import org.geotoolkit.display2d.ext.scalebar.GraphicScaleBarJ2D;
 import org.geotoolkit.display2d.service.CanvasDef;
 import org.geotoolkit.display2d.service.DefaultPortrayalService;
-import org.geotoolkit.display2d.service.OutputDef;
 import org.geotoolkit.display2d.service.PortrayalExtension;
 import org.geotoolkit.display2d.service.SceneDef;
 import org.geotoolkit.display2d.service.ViewDef;
@@ -118,8 +115,8 @@ import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.temporal.object.TemporalUtilities;
 import org.odftoolkit.simple.TextDocument;
+import org.odftoolkit.simple.style.StyleTypeDefinitions;
 import org.opengis.filter.Id;
 import org.opengis.geometry.Envelope;
 import org.opengis.util.GenericName;
@@ -128,7 +125,7 @@ import org.opengis.util.GenericName;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXMapPane extends BorderPane implements Printable{
+public class FXMapPane extends BorderPane implements Printable {
 
     public static final Image ICON_SPLIT= SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COLUMNS,16,FontAwesomeIcons.DEFAULT_COLOR),null);
 
@@ -442,92 +439,100 @@ public class FXMapPane extends BorderPane implements Printable{
 
     @Override
     public boolean print() {
-        final Window window = this.getScene().getWindow();
-        // TODO : DO NOT EXECUTE IN RENDER THREAD AND REFACTOR !
-        Platform.runLater(new Runnable() {
+        // Choose output file
+        final Path outputFile = SIRS.fxRunAndWait(() -> {
+            final FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Document OpenOffice", "*.odt");
+            final FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(extFilter);
+            fileChooser.setSelectedExtensionFilter(extFilter);
+            final File result = fileChooser.showSaveDialog(FXMapPane.this.getScene().getWindow());
+            if (result == null) {
+                return null;
+            } else {
+                return result.toPath();
+            }
+        });
+
+        if (outputFile == null)
+            return true; // Printing aborted. Return true to avoid another component to print instead of us.
+
+        final Task<Boolean> printTask = new Task() {
+
             @Override
-            public void run() {
-                final FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Document OpenOffice", "*.odt");
-                final FileChooser fileChooser = new FileChooser();
-                fileChooser.getExtensionFilters().add(extFilter);
-                fileChooser.setSelectedExtensionFilter(extFilter);
-                final File docFile = fileChooser.showSaveDialog(window);
-                if(docFile==null) return;
+            protected Object call() throws Exception {
+                updateTitle("Impression de la carte");
+                final Rectangle2D dispSize = uiMap1.getCanvas().getDisplayBounds();
 
-                    //map image
-                    final Path imgFile;
-                try {
-                    imgFile = Files.createTempFile("map", ".png");
-                } catch (IOException ex) {
-                    throw new SirsCoreRuntimeException(ex);
-                }
-                try {
+                final Hints hints = new Hints();
+                hints.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                hints.put(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                hints.put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-                    final Rectangle2D dispSize = uiMap1.getCanvas().getDisplayBounds();
+                final PortrayalExtension ext = (J2DCanvas canvas) -> {
+                    final GraphicScaleBarJ2D graphicScaleBarJ2D = new GraphicScaleBarJ2D(canvas);
+                    graphicScaleBarJ2D.setPosition(SwingConstants.SOUTH_WEST);
+                    final GraphicNorthArrowJ2D northArrowJ2D = new GraphicNorthArrowJ2D(canvas, Session.NORTH_ARROW_TEMPLATE);
+                    northArrowJ2D.setPosition(SwingConstants.SOUTH_WEST);
+                    northArrowJ2D.setOffset(10, 60);
 
-                    final Hints hints = new Hints();
-                    hints.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    hints.put(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                    hints.put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-
-                    final PortrayalExtension ext = new PortrayalExtension() {
-                        @Override
-                        public void completeCanvas(J2DCanvas canvas) throws PortrayalException {
-                            final GraphicScaleBarJ2D graphicScaleBarJ2D = new GraphicScaleBarJ2D(canvas);
-                            graphicScaleBarJ2D.setPosition(SwingConstants.SOUTH_WEST);
-                            final GraphicNorthArrowJ2D northArrowJ2D = new GraphicNorthArrowJ2D(canvas,Session.NORTH_ARROW_TEMPLATE);
-                            northArrowJ2D.setPosition(SwingConstants.SOUTH_WEST);
-                            northArrowJ2D.setOffset(10, 60);
-
-                            try{
-                                final double span = canvas.getVisibleEnvelope2D().getSpan(0);
-                                if(span>5000){
-                                     graphicScaleBarJ2D.setTemplate(Session.SCALEBAR_KILOMETER_TEMPLATE);
-                                }else{
-                                     graphicScaleBarJ2D.setTemplate(Session.SCALEBAR_METER_TEMPLATE);
-                                }
-                            }catch(Exception ex){
-                                SIRS.LOGGER.log(Level.INFO, ex.getMessage(), ex);
-                            }
-                            canvas.getContainer().getRoot().getChildren().add(graphicScaleBarJ2D);
-                            canvas.getContainer().getRoot().getChildren().add(northArrowJ2D);
-                        }
-                    };
-
-                    final CanvasDef cdef = new CanvasDef(new Dimension((int)dispSize.getWidth(),(int)dispSize.getHeight()),new Color(0, 0, 0, 0));
-                    final SceneDef sdef = new SceneDef(uiMap1.getContainer().getContext(),hints,ext);
-                    final ViewDef vdef = new ViewDef(uiMap1.getCanvas().getVisibleEnvelope());
-                    final OutputDef odef = new OutputDef("image/png", imgFile);
-                    DefaultPortrayalService.portray(cdef, sdef, vdef, odef);
-
-                    //legend image
-                    final File legendFile = File.createTempFile("legend", ".png");
-                    legendFile.deleteOnExit();
-                    final OutputDef lodef = new OutputDef("image/png", legendFile);
-                    DefaultLegendService.portray(Injector.getSession().getLegendTemplate(), uiMap1.getContainer().getContext(), null, lodef);
-
-
-                    //create ODT
-                    final TextDocument header = TextDocument.newTextDocument();
-                    header.addParagraph("Date de création : "+TemporalUtilities.toISO8601(new Date()));
-
-                    ODTUtils.concatenate(docFile.toPath(), header, imgFile, legendFile);
-                } catch (RuntimeException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw new SirsCoreRuntimeException("Cannot print map !", e);
-                } finally {
                     try {
-                        Files.deleteIfExists(imgFile);
-                    } catch (IOException ex) {
-                        SirsCore.LOGGER.log(Level.WARNING, "Cannot delete a temporary file !", ex);
+                        final double span = canvas.getVisibleEnvelope2D().getSpan(0);
+                        if (span > 5000) {
+                            graphicScaleBarJ2D.setTemplate(Session.SCALEBAR_KILOMETER_TEMPLATE);
+                        } else {
+                            graphicScaleBarJ2D.setTemplate(Session.SCALEBAR_METER_TEMPLATE);
+                        }
+                    } catch (Exception ex) {
+                        SIRS.LOGGER.log(Level.INFO, ex.getMessage(), ex);
+                    }
+                    canvas.getContainer().getRoot().getChildren().add(graphicScaleBarJ2D);
+                    canvas.getContainer().getRoot().getChildren().add(northArrowJ2D);
+                };
+
+                final CanvasDef cdef = new CanvasDef(new Dimension((int) dispSize.getWidth(), (int) dispSize.getHeight()), new Color(0, 0, 0, 0));
+                final SceneDef sdef = new SceneDef(uiMap1.getContainer().getContext(), hints, ext);
+                final ViewDef vdef = new ViewDef(uiMap1.getCanvas().getVisibleEnvelope());
+
+                //create ODT
+                try (final TextDocument content = TextDocument.newTextDocument()) {
+                    content.addParagraph("Carte").applyHeading(true, 0);
+
+                    // Map
+                    ODTUtils.appendImage(content, DefaultPortrayalService.portray(cdef, sdef, vdef));
+
+                    // Legend
+                    content.addParagraph("Légende").applyHeading(true, 2);
+                    ODTUtils.appendImage(content, DefaultLegendService.portray(Injector.getSession().getLegendTemplate(), uiMap1.getContainer().getContext(), null))
+                            .setHorizontalPosition(StyleTypeDefinitions.FrameHorizontalPosition.LEFT);
+
+                    content.getFooter().appendSection("information").addParagraph("Date de création : " + LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+
+                    try (OutputStream out = Files.newOutputStream(outputFile, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
+                        content.save(out);
                     }
                 }
 
+                return true;
             }
-        });
+        };
+
+        // Events to launch when task finishes
+        SIRS.fxRun(false, new TaskManager.MockTask(() -> {
+            printTask.setOnFailed(event -> Platform.runLater(() -> GeotkFX.newExceptionDialog("Impossible d'imprimer la carte", printTask.getException()).show()));
+            printTask.setOnCancelled(event -> Platform.runLater(() -> new Growl(Growl.Type.WARNING, "L'impression a été annulée").showAndFade()));
+            printTask.setOnSucceeded(event -> Platform.runLater(() -> {
+                new Growl(Growl.Type.INFO, "L'impression de la carte est terminée").showAndFade();
+                if (!SIRS.openFile(outputFile)) {
+                    new Growl(Growl.Type.WARNING, "Impossible de trouver un programme pour ouvrir la carte").showAndFade();
+                }
+            }));
+        }));
+
+        // Print map.
+        TaskManager.INSTANCE.submit(printTask);
         return true;
     }
+
     @Override
     public ObjectProperty getPrintableElements() {
         return new SimpleObjectProperty();

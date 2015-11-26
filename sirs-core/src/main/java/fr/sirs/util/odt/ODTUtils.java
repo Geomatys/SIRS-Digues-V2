@@ -883,7 +883,6 @@ public class ODTUtils {
      */
     public static void appendPage(final TextDocument holder, final PDPage page) throws IOException {
         final BufferedImage img = page.convertToImage();
-        holder.addPageBreak();
         ODTUtils.appendImage(holder, img, true);
     }
 
@@ -1117,27 +1116,22 @@ public class ODTUtils {
         ArgumentChecks.ensurePositive("Margin bottom", margin.getBottom());
         ArgumentChecks.ensurePositive("Margin left", margin.getLeft());
 
+        // Initialize output dimension to page space.
         double width = pageConverter.convert(pageDim.getWidth()) - (marginConverter.convert(margin.getLeft()) + marginConverter.convert(margin.getRight()));
         double height = pageConverter.convert(pageDim.getHeight()) - (marginConverter.convert(margin.getTop()) + marginConverter.convert(margin.getBottom()));
 
+        // No need for rescale if more little image is accepted.
+        if (!forceLower && rectangle.getWidth() <= width && rectangle.getHeight() <= height)
+            return;
+
         if (keepRatio) {
-            final boolean portrait = rectangle.getWidth() < rectangle.getHeight();
-            final double imgRatio = portrait? rectangle.getHeight() / rectangle.getWidth() : rectangle.getWidth() / rectangle.getHeight();
-
-            if (portrait) {
-                width = height / imgRatio;
-            } else {
-                height = width /imgRatio;
-            }
+            final double ratio = Math.min(width / rectangle.getWidth(), height / rectangle.getHeight());
+            width = rectangle.getWidth() * ratio;
+            height = rectangle.getHeight() * ratio;
         }
 
-        if (forceLower? rectangle.getWidth() != width : rectangle.getWidth() > width) {
-            rectangle.setWidth(width);
-        }
-
-        if (forceLower? rectangle.getHeight() != height : rectangle.getHeight() > height) {
-            rectangle.setHeight(height);
-        }
+        rectangle.setWidth(width);
+        rectangle.setHeight(height);
         toResize.setRectangle(rectangle);
     }
 

@@ -5,25 +5,27 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementContainerPane;
 import fr.sirs.util.SirsStringConverter;
 import java.awt.Color;
+import java.awt.Desktop;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -31,6 +33,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableListBase;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -42,6 +45,7 @@ import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
@@ -374,51 +378,89 @@ public final class SIRS extends SirsCore {
 
     }
 
-    public static void fxRunAndWait(final Executable run)
-            throws RuntimeException {
+    /**
+     * Run given task in FX application thread (immediately if we're already in it),
+     * and wait for its result before returning.
+     *
+     * @param <T> Return type of the input task.
+     * @param toRun Task to run in JavaFX thread.
+     * @return Result of the input task.
+     */
+    public static <T> T fxRunAndWait(final Callable<T> toRun) {
+        return fxRunAndWait(new TaskManager.MockTask<>(toRun));
+    }
+
+    /**
+     *
+     * @param toRun The task to run.
+     */
+    public static void fxRunAndWait(final Runnable toRun) {
+        fxRunAndWait(new TaskManager.MockTask(toRun));
+    }
+
+    /**
+     * Run given task in FX application thread (immediately if we're already in it),
+     * and wait for its result before returning.
+     *
+     * @param <T> Return type of the input task.
+     * @param toRun Task to run in JavaFX thread.
+     * @return Result of the input task.
+     */
+    public static <T> T fxRunAndWait(final Task<T> toRun) {
+        return fxRun(true, toRun);
+    }
+
+    /**
+     * Run given task in FX application thread (immediately if we're already in it).
+     * According to input boolean, we will return immediately or wait for the task to
+     * be over.
+     * @param <T> Return type of input task.
+     * @param wait True if we must wait for the task to end before returning, false
+     * to return immediately after submission.
+     * @param toRun The task to run into JavaFX application thread.
+     * @return The task return value if we must wait, or we're in platform thread. Otherwise null.
+     */
+    public static <T> T fxRun(final boolean wait, final Task<T> toRun) {
         if (Platform.isFxApplicationThread()) {
-            try {
-                run.call();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            toRun.run();
+            return toRun.getValue();
         } else {
-            final Lock lock = new ReentrantLock();
-            final Condition condition = lock.newCondition();
-            final Throwable[] throwableWrapper = new Throwable[1];
-            lock.lock();
-            try {
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        lock.lock();
-                        try {
-                            run.call();
-                        } catch (Throwable e) {
-                            throwableWrapper[0] = e;
-                        } finally {
-                            try {
-                                condition.signal();
-                            } finally {
-                                lock.unlock();
-                            }
-                        }
-                    }
-                });
-                condition.await();
-                if (throwableWrapper[0] != null) {
-                    throw new RuntimeException(throwableWrapper[0]);
+            Platform.runLater(toRun);
+            if (wait) {
+                try {
+                    return toRun.get();
+                } catch (RuntimeException ex) {
+                    throw ex;
+                } catch (Exception ex) {
+                    throw new SirsCoreRuntimeException(ex);
                 }
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
-            } finally {
-                lock.unlock();
-            }
+            } else return null;
         }
     }
 
-    public static interface Executable{
-        void call() throws Exception;
+    /**
+     * Try to open given file on system.
+     * @param toOpen The file open on underlying system.
+     * @return True if we succeeded opening file on system, false otherwise.
+     */
+    public static boolean openFile(final Path toOpen) {
+        return openFile(toOpen.toAbsolutePath().toFile());
     }
 
+    /**
+     * Try to open given file on system.
+     * @param toOpen The file open on underlying system.
+     * @return True if we succeeded opening file on system, false otherwise.
+     */
+    public static boolean openFile(final File toOpen) {
+        final Desktop desktop = Desktop.getDesktop();
+        if (desktop.isSupported(Desktop.Action.EDIT)) {
+            TaskManager.INSTANCE.submit("Ouverture d'un fichier", () -> {desktop.edit(toOpen); return true;});
+        } else if (desktop.isSupported(Desktop.Action.OPEN)) {
+            TaskManager.INSTANCE.submit("Ouverture d'un fichier", () -> {desktop.open(toOpen); return true;});
+        } else {
+            return false;
+        }
+        return true;
+    }
 }
