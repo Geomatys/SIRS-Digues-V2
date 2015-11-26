@@ -60,6 +60,8 @@ public class FXFicheSectionRapportPane extends AbstractFXElementPane<FicheSectio
         SIRS.loadFXML(this);
         final Session session = Injector.getSession();
 
+        disableProperty().bind(disableFieldsProperty());
+        
         modelRepo = session.getRepositoryForClass(ModeleElement.class);
         SIRS.initCombo(uiModelChoice, FXCollections.observableList(session.getPreviews().getByClass(ModeleElement.class)), null);
 

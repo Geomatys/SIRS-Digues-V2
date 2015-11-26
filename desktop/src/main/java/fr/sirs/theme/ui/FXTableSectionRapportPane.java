@@ -32,13 +32,15 @@ public class FXTableSectionRapportPane extends AbstractFXElementPane<TableSectio
 
         elementProperty.addListener(this::elementChanged);
         queryProperty.addListener(this::queryChanged);
+
+        disableProperty().bind(disableFieldsProperty());
     }
 
     public FXTableSectionRapportPane(final TableSectionRapport rapport) {
         this();
         setElement(rapport);
     }
-    
+
     private void elementChanged(ObservableValue<? extends TableSectionRapport> obs, TableSectionRapport oldValue, TableSectionRapport newValue) {
         if (oldValue != null) {
             uiTitle.textProperty().unbindBidirectional(oldValue.libelleProperty());

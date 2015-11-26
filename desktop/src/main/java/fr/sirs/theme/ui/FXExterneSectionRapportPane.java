@@ -30,6 +30,9 @@ public class FXExterneSectionRapportPane extends AbstractFXElementPane<ExterneSe
         uiPathEditor = new FXFileTextField();
         uiPathContainer.setCenter(uiPathEditor);
         elementProperty.addListener(this::elementChanged);
+
+        uiTitle.disableProperty().bind(disableFieldsProperty());
+        uiPathEditor.disableProperty().bind(disableFieldsProperty());
     }
 
     public FXExterneSectionRapportPane(final ExterneSectionRapport rapport) {
