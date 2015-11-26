@@ -118,6 +118,7 @@ public class FXModeleRapportsPane extends BorderPane {
                 modeles[i] = selectedItems.get(i).getElementId();
             }
             repo.executeBulkDelete(repo.get(modeles));
+            uiReportList.getItems().removeAll(selectedItems);
         }
     }
 
