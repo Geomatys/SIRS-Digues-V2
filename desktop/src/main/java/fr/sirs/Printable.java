@@ -13,7 +13,7 @@ public interface Printable {
 
     /**
      * Un titre tres court placé dans le bouton d'impression.
-     * 
+     *
      * @return titre ou null
      */
     default String getPrintTitle(){
@@ -24,6 +24,7 @@ public interface Printable {
      * Demander à l'objet de s'imprimer.
      * L'objet est responsable de toutes les opérations.
      * Si la valeur retourné est 'false' alors la methode {@link #getPrintableElements() }
+     * peut être invoquée pour récupérer la liste des élements potentiellement imprimables
      *
      * @return true si l'objet c'est imprimé.
      */
@@ -35,10 +36,8 @@ public interface Printable {
     /**
      * Recuperer la liste des element pouvant etre imprimés.
      * Type possible :
-     * - Element
-     * - Feature
-     * - List<Feature>
-     * - FeatureCollection
+     * - Element ou liste d'éléments
+     * - Feature ou collection de features
      *
      * @return
      */

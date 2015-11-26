@@ -163,20 +163,22 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
             uiDesignation.textProperty().bindBidirectional(newValue.designationProperty());
 
             // If we previously edited same type of element, we recycle edition panel.
-            if (specificThemePane != null && oldValue != null && oldValue.getClass().equals(newValue.getClass())) {
-                specificThemePane.setElement(newValue);
-            } else {
-                try {
-                    SIRS.fxRunAndWait( ()-> specificThemePane = createFXPaneForElement(newValue));
-                    specificThemePane.disableFieldsProperty().bind(disableFieldsProperty());
-                    if (specificThemePane instanceof FXUtilisateurPane) {
-                        ((FXUtilisateurPane) specificThemePane).setAdministrable(ADMIN.equals(session.getRole()));
+            SIRS.fxRunAndWait(() -> {
+                if (specificThemePane != null && oldValue != null && oldValue.getClass().equals(newValue.getClass())) {
+                    specificThemePane.setElement(newValue);
+                } else {
+                    try {
+                        specificThemePane = createFXPaneForElement(newValue);
+                        specificThemePane.disableFieldsProperty().bind(disableFieldsProperty());
+                        if (specificThemePane instanceof FXUtilisateurPane) {
+                            ((FXUtilisateurPane) specificThemePane).setAdministrable(ADMIN.equals(session.getRole()));
+                        }
+                        setCenter((Node) specificThemePane);
+                    } catch (Exception ex) {
+                        throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
                     }
-                    setCenter((Node) specificThemePane);
-                } catch (Throwable ex) {
-                    throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
                 }
-            }
+            });
         }
 
         uiShowOnMapButton.setVisible(newValue instanceof Positionable || newValue instanceof AvecGeometrie);
