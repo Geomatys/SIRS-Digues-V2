@@ -569,8 +569,11 @@ public class ODTUtils {
         }
         if (margin != null) {
             masterPage.setMargins(margin.getTop(), margin.getBottom(), margin.getLeft(), margin.getRight());
+            if (margin.getBottom() <= 0) {
+                masterPage.setFootnoteMaxHeight(0);
+            }
         }
-        masterPage.setFootnoteMaxHeight(0);
+
         return masterPage;
     }
 

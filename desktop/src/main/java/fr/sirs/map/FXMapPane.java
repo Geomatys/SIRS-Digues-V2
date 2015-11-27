@@ -496,7 +496,7 @@ public class FXMapPane extends BorderPane implements Printable {
 
                 //create ODT
                 try (final TextDocument content = TextDocument.newTextDocument()) {
-                    content.addParagraph("Carte").applyHeading(true, 0);
+                    content.addParagraph("Carte").applyHeading(true, 1);
                     content.getFooter().appendSection("information").addParagraph("Date de création : " + LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
 
                     // Legend

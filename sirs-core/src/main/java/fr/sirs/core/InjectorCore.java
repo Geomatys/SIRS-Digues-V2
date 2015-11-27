@@ -27,15 +27,15 @@ public class InjectorCore implements ApplicationContextAware {
 
 
     public static <T> T getBean(Class<T> clazz) {
-        return applicationContext.getBean(clazz);
+        return applicationContext == null? null : applicationContext.getBean(clazz);
     }
-    
+
     public static DocumentChangeEmiter getDocumentChangeEmiter(){
         return getBean(DocumentChangeEmiter.class);
     }
-    
+
     public static ElasticSearchEngine getElasticSearchEngine(){
         return getBean(ElasticSearchEngine.class);
     }
-    
+
 }

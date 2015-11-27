@@ -112,7 +112,7 @@ import org.opengis.filter.Filter;
 import org.opengis.util.GenericName;
 
 /**
- *
+ * TODO : make printable.
  * @author Johann Sorel (Geomatys)
  */
 public class FXSearchPane extends BorderPane {

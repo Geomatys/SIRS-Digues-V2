@@ -42,10 +42,12 @@ import fr.sirs.theme.ColumnOrder;
 import fr.sirs.theme.ui.PojoTablePointBindings.DXYZBinding;
 import fr.sirs.theme.ui.PojoTablePointBindings.PRXYZBinding;
 import fr.sirs.theme.ui.PojoTablePointBindings.PRZBinding;
+import fr.sirs.ui.Growl;
 import fr.sirs.util.FXReferenceEqualsOperator;
 import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.SEClassementEqualsOperator;
 import fr.sirs.util.SirsStringConverter;
+import fr.sirs.util.odt.ODTUtils;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.Reference;
 import java.beans.BeanInfo;
@@ -53,7 +55,10 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -65,6 +70,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -125,6 +131,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.util.Callback;
 import javafx.util.Duration;
@@ -156,6 +163,7 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
+import org.odftoolkit.simple.TextDocument;
 import org.opengis.feature.PropertyType;
 import org.opengis.filter.Filter;
 
@@ -270,6 +278,8 @@ public class PojoTable extends BorderPane implements Printable {
 
     protected final StackPane notifier = new StackPane();
 
+    protected final StringProperty titleProperty = new SimpleStringProperty();
+
     public PojoTable(final Class pojoClass, final String title) {
         this(pojoClass, title, null);
     }
@@ -284,7 +294,7 @@ public class PojoTable extends BorderPane implements Printable {
         }
 
         setFocusTraversable(true);
-        
+
         dataSupplierProperty.addListener(this::updateTableItems);
 
         if (pojoClass == null) {
@@ -430,7 +440,9 @@ public class PojoTable extends BorderPane implements Printable {
         uiSearch.getStyleClass().add("label-header");
         uiSearch.disableProperty().bind(searchableProperty.not());
 
-        final Label uiTitle = new Label(title==null? labelMapper.mapClassName() : title);
+        titleProperty.set(title==null? labelMapper == null? null : labelMapper.mapClassName() : title);
+        final Label uiTitle = new Label();
+        uiTitle.textProperty().bind(titleProperty);
         uiTitle.getStyleClass().add("pojotable-header");
         uiTitle.setAlignment(Pos.CENTER);
 
@@ -662,6 +674,10 @@ public class PojoTable extends BorderPane implements Printable {
         uiFilter.setTooltip(new Tooltip("Filtrer les données"));
 
         updateView();
+    }
+
+    public StringProperty titleProperty() {
+        return titleProperty;
     }
 
     protected final ObservableList<TableColumn<Element, ?>> getColumns(){
@@ -1294,14 +1310,85 @@ public class PojoTable extends BorderPane implements Printable {
 
     @Override
     public String getPrintTitle() {
-        return "Table";
+        return titleProperty.get();
     }
 
     @Override
     public ObjectProperty getPrintableElements() {
         final List selection = uiTable.getSelectionModel().getSelectedItems();
-        
-        return new SimpleObjectProperty(selection.isEmpty()?null : new ArrayList(selection));
+
+        return new SimpleObjectProperty(selection.isEmpty()? new ArrayList<>(filteredValues) : new ArrayList(selection));
+    }
+
+    @Override
+    public boolean print() {
+        boolean nothingToPrint = filteredValues.isEmpty();
+        final ArrayList<String> propertyNames = new ArrayList<>();
+        for (final TableColumn c : getColumns()) {
+            if (c.isVisible() && (c instanceof PropertyColumn)) {
+                propertyNames.add(((PropertyColumn) c).name);
+            }
+        }
+
+        nothingToPrint = nothingToPrint || propertyNames.isEmpty();
+        if (nothingToPrint) {
+            SIRS.fxRun(false, new TaskManager.MockTask<>(() -> new Growl(Growl.Type.WARNING, "Aucun contenu à imprimer.").showAndFade()));
+            return true;
+        }
+
+        final String title = titleProperty.get();
+        // Choose output file
+        final Path outputFile = SIRS.fxRunAndWait(() -> {
+            final FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Document OpenOffice", "*.odt");
+            final FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(extFilter);
+            fileChooser.setSelectedExtensionFilter(extFilter);
+            final File result = fileChooser.showSaveDialog(PojoTable.this.getScene().getWindow());
+            if (result == null) {
+                return null;
+            } else {
+                return result.toPath();
+            }
+        });
+
+        if (outputFile == null)
+            return true; // Printing aborted. Return true to avoid another component to print instead of us.
+
+        final Task<Boolean> printTask = new Task() {
+            @Override
+            protected Object call() throws Exception {
+                updateTitle("Impression : " + title);
+                try (final TextDocument doc = TextDocument.newTextDocument()) {
+                    doc.addParagraph(title).applyHeading();
+
+                    final long totalWork = filteredValues.size();
+                    final AtomicLong work = new AtomicLong(0);
+                    ODTUtils.appendTable(doc, filteredValues.stream().peek(e -> updateProgress(work.getAndIncrement(), totalWork)).iterator(), propertyNames);
+
+                    try (final OutputStream out = Files.newOutputStream(outputFile)) {
+                        doc.save(out);
+                    }
+                }
+
+                return true;
+            }
+        };
+
+        // Events to launch when task finishes
+        SIRS.fxRun(false, new TaskManager.MockTask(() -> {
+            printTask.setOnFailed(event -> Platform.runLater(() -> GeotkFX.newExceptionDialog("Impossible d'imprimer la table \"" + title + "\"", printTask.getException()).show()));
+            printTask.setOnCancelled(event -> Platform.runLater(() -> new Growl(Growl.Type.WARNING, "L'impression de la table \"" + title + "\" a été annulée").showAndFade()));
+            printTask.setOnSucceeded(event -> Platform.runLater(() -> {
+                new Growl(Growl.Type.INFO, "L'impression de la table \"" + title + "\" la carte est terminée").showAndFade();
+                if (!SIRS.openFile(outputFile)) {
+                    new Growl(Growl.Type.WARNING, "Impossible de trouver un programme pour ouvrir la table \"" + title + "\"").showAndFade();
+                }
+            }));
+        }));
+
+        // Print map.
+        TaskManager.INSTANCE.submit(printTask);
+        return true;
     }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1595,7 +1682,7 @@ public class PojoTable extends BorderPane implements Printable {
                                 });
                     }
                 });
-            } 
+            }
             else setVisible(false);
         }
     }

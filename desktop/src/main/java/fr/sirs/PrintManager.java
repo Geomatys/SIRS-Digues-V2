@@ -13,6 +13,7 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import javafx.beans.property.ObjectProperty;
@@ -20,10 +21,12 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -39,6 +42,33 @@ import org.xml.sax.SAXException;
  */
 public class PrintManager {
 
+    /**
+     * Find first encountered printable element while browsing recursively given
+     * nodes. Browsing is done "depth last".
+     * @param nodes Nodes to find a printable object into.
+     * @return First encountered printable, or null if we cannot find any.
+     */
+    private static Printable findPrintableChild(final Collection<Node> nodes) {
+        if (nodes == null || nodes.isEmpty())
+            return null;
+
+        final ArrayList<Node> children = new ArrayList<>();
+        for (final Node n : nodes) {
+            if (n.isDisabled() || n.isMouseTransparent() || !n.isVisible()) {
+                continue;
+            }
+
+            if (n instanceof Printable) {
+                return (Printable) n;
+
+            } else if (n instanceof Parent) {
+                children.addAll(((Parent)n).getChildrenUnmodifiable());
+            }
+        }
+
+        return findPrintableChild(children);
+    }
+
     private static final ChangeListener<Scene> sceneListener = new ChangeListener<Scene>() {
         @Override
         public void changed(ObservableValue<? extends Scene> observable, Scene oldValue, Scene newValue) {
@@ -50,25 +80,52 @@ public class PrintManager {
             }
         }
     };
+
     private static final ChangeListener<Node> focusOwnerListener = new ChangeListener<Node>() {
         @Override
         public void changed(ObservableValue<? extends Node> observable, Node oldValue, Node newValue) {
-            if(newValue!=null){
-                Node focusedNode = newValue;
-                while(focusedNode!=null && !(focusedNode instanceof Printable)){
-                    focusedNode = focusedNode.getParent();
-                }
-                if(!(focusedNode instanceof Printable)){
-                    //si c'est un border pane on regarde le composant central
-                    focusedNode = newValue;
-                    while(focusedNode instanceof BorderPane && !(focusedNode instanceof Printable)){
-                        focusedNode = ((BorderPane)focusedNode).getCenter();
-                    }
-                }
-                if(focusedNode instanceof Printable){
-                    printable.set( (Printable) focusedNode);
+            if (newValue == null) {
+                printable.set(null);
+                return;
+            }
+
+            // Do not update if user focused print button.
+            Session session = Injector.getSession();
+            if (session != null) {
+                final FXMainFrame frame = session.getFrame();
+                if (frame != null) {
+                    if (newValue == frame.uiPrintButton)
+                        return;
                 }
             }
+
+            // On regarde si un des enfants est imprimable.
+            Printable p = null;
+            if (newValue instanceof Printable) {
+                p = (Printable) newValue;
+            } else if (newValue instanceof Parent) {
+                p = findPrintableChild(((Parent) newValue).getChildrenUnmodifiable());
+            }
+
+            // Si aucun enfant ne l'est on s'interesse aux parents du noeud selectionné
+            if (p == null) {
+                Node previous = newValue;
+                Parent papa = newValue.getParent();
+                while (p ==null && papa != null) {
+                    if (papa instanceof Printable) {
+                        p = (Printable) papa;
+                    } else {
+                        // Check other children of current parent.
+                        final ObservableList<Node> otherChildren = FXCollections.observableArrayList(papa.getChildrenUnmodifiable());
+                        otherChildren.remove(previous);
+                        p = findPrintableChild(otherChildren);
+                        previous = papa;
+                        papa = papa.getParent();
+                    }
+                }
+            }
+
+            printable.set(p);
         }
     };
 
@@ -338,5 +395,4 @@ public class PrintManager {
             SIRS.LOGGER.log(Level.WARNING, null, ex);
         }
     }
-
 }

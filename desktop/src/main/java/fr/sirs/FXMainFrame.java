@@ -104,7 +104,7 @@ public class FXMainFrame extends BorderPane {
     @FXML private MenuButton uiThemesUnlocalized;
     @FXML private MenuButton uiPlugins;
     @FXML private Button uiAlertsBtn;
-    @FXML private Button uiPrintButton;
+    @FXML Button uiPrintButton;
     @FXML private ImageView uiPluginsImg;
     @FXML private ToolBar uiToolBarPlugins;
     @FXML private TabPane uiTabs;
