@@ -116,6 +116,7 @@ import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
 import org.odftoolkit.simple.TextDocument;
+import org.odftoolkit.simple.draw.FrameStyleHandler;
 import org.odftoolkit.simple.style.StyleTypeDefinitions;
 import org.opengis.filter.Id;
 import org.opengis.geometry.Envelope;
@@ -496,16 +497,19 @@ public class FXMapPane extends BorderPane implements Printable {
                 //create ODT
                 try (final TextDocument content = TextDocument.newTextDocument()) {
                     content.addParagraph("Carte").applyHeading(true, 0);
-
-                    // Map
-                    ODTUtils.appendImage(content, DefaultPortrayalService.portray(cdef, sdef, vdef));
+                    content.getFooter().appendSection("information").addParagraph("Date de création : " + LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
 
                     // Legend
                     content.addParagraph("Légende").applyHeading(true, 2);
                     ODTUtils.appendImage(content, DefaultLegendService.portray(Injector.getSession().getLegendTemplate(), uiMap1.getContainer().getContext(), null))
                             .setHorizontalPosition(StyleTypeDefinitions.FrameHorizontalPosition.LEFT);
 
-                    content.getFooter().appendSection("information").addParagraph("Date de création : " + LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+                    // Map
+                    org.odftoolkit.simple.draw.Image map = ODTUtils.appendImage(content, DefaultPortrayalService.portray(cdef, sdef, vdef), true);
+                    final FrameStyleHandler styleHandler = map.getStyleHandler();
+                    styleHandler.setAchorType(StyleTypeDefinitions.AnchorType.TO_PAGE);
+                    styleHandler.setHorizontalPosition(StyleTypeDefinitions.FrameHorizontalPosition.CENTER);
+                    styleHandler.setVerticalPosition(StyleTypeDefinitions.FrameVerticalPosition.MIDDLE);
 
                     try (OutputStream out = Files.newOutputStream(outputFile, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
                         content.save(out);

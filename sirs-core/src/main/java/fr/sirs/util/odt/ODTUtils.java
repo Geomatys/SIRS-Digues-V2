@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -1027,6 +1028,7 @@ public class ODTUtils {
             StyleTypeDefinitions.PrintOrientation orientation,
             final boolean fullPage) {
 
+        Paragraph tmpParagraph = holder.addParagraph("");
         Dimension2D pageDim = null;
         Insets margin = null;
         if (fullPage) {
@@ -1043,7 +1045,22 @@ public class ODTUtils {
 
             try {
                 final MasterPage masterPage = getOrCreateOrientationMasterPage(holder, orientation, Insets.EMPTY);
-                holder.addPageBreak(null, masterPage);
+                OdfOfficeStyles styles = holder.getStylesDom().getOfficeStyles();
+                OdfStyle toUse = null;
+                for (final OdfStyle style : styles.getStylesForFamily(OdfStyleFamily.Paragraph)) {
+                    if (masterPage.getName().equals(style.getStyleMasterPageNameAttribute())) {
+                        toUse = style;
+                        break;
+                    }
+                }
+                if (toUse == null) {
+                    toUse = styles.newStyle(UUID.randomUUID().toString(), OdfStyleFamily.Paragraph);
+                    toUse.setStyleMasterPageNameAttribute(masterPage.getName());
+                }
+                /* BUG ! Cannot set paragraph style name directly, see :
+                 * http://stackoverflow.com/questions/26574174/setting-style-on-a-paragraph-using-odf-toolkit
+                 */
+                tmpParagraph.getOdfElement().setStyleName(toUse.getStyleNameAttribute());
                 margin = Insets.EMPTY;
                 pageDim = new Dimension2D(masterPage.getPageWidth(), masterPage.getPageHeight());
             } catch (Exception ex) {
@@ -1051,11 +1068,7 @@ public class ODTUtils {
             }
         }
 
-        final Image newImage = Image.newImage(holder.addParagraph(""), imagePath.toUri());
-        if (fullPage) {
-            newImage.getStyleHandler().setAchorType(StyleTypeDefinitions.AnchorType.TO_PAGE);
-        }
-
+        final Image newImage = Image.newImage(tmpParagraph, imagePath.toUri());
         try {
             resizeImage(newImage, pageDim, margin, SI.MILLIMETRE, true, false);
         } catch (ConversionException ex) {
@@ -1116,9 +1129,9 @@ public class ODTUtils {
         ArgumentChecks.ensurePositive("Margin bottom", margin.getBottom());
         ArgumentChecks.ensurePositive("Margin left", margin.getLeft());
 
-        // Initialize output dimension to page space.
-        double width = pageConverter.convert(pageDim.getWidth()) - (marginConverter.convert(margin.getLeft()) + marginConverter.convert(margin.getRight()));
-        double height = pageConverter.convert(pageDim.getHeight()) - (marginConverter.convert(margin.getTop()) + marginConverter.convert(margin.getBottom()));
+        // Initialize output dimension to available page space.
+        double width = pageConverter.convert(pageDim.getWidth()) - (marginConverter.convert(margin.getLeft()) + marginConverter.convert(margin.getRight()) + rectangle.getX());
+        double height = pageConverter.convert(pageDim.getHeight()) - (marginConverter.convert(margin.getTop()) + marginConverter.convert(margin.getBottom()) + rectangle.getY());
 
         // No need for rescale if more little image is accepted.
         if (!forceLower && rectangle.getWidth() <= width && rectangle.getHeight() <= height)
@@ -1362,7 +1375,7 @@ public class ODTUtils {
                     updateMessage("Sauvegarde du rapport");
 
                     try (final OutputStream out = Files.newOutputStream(output)) {
-                        headerDoc.save(output.toFile());
+                        headerDoc.save(out);
                     }
 
                     return true;
