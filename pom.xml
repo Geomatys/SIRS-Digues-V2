@@ -12,7 +12,7 @@
   <groupId>fr.sirs</groupId>
   <artifactId>sirs</artifactId>
   <packaging>pom</packaging>
-  <version>0.x-SNAPSHOT</version>
+  <version>0.16</version>
   <name>SIRS</name>
 
   <organization>
