@@ -5,11 +5,11 @@
     <!-- Name of the plugin, used for packaging and description -->
     <artifactId>mobile-desktop</artifactId>
     <!-- Version must be composed of two integers (major and minor version) separated by a dot. -->
-    <version>0.x-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
     
     <name>Plugin mobile</name>
-    <description>Gère la synchronization entre le mobile et l'application bureau</description>
+    <description>Gère la synchronisation entre le mobile et l'application bureau</description>
     <!--url>http://www.myorganization.org</url-->
 
     <parent>
@@ -17,6 +17,10 @@
         <artifactId>sirs</artifactId>
         <version>0.x-SNAPSHOT</version>
     </parent>
+
+    <properties>
+        <plugin.core.version.min>16</plugin.core.version.min>
+    </properties>
 
     <dependencies>
         <dependency>

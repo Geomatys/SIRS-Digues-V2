@@ -15,6 +15,10 @@
         <version>0.x-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <plugin.core.version.min>16</plugin.core.version.min>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>fr.sirs</groupId>

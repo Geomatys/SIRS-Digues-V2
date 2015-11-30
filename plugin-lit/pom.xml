@@ -5,11 +5,11 @@
     <!-- Name of the plugin, used for packaging and description -->
     <artifactId>plugin-lit</artifactId>
     <!-- Version must be composed of two integers (major and minor version) separated by a dot. -->
-    <version>1.0</version>
+    <version>1.1</version>
     <packaging>jar</packaging>
     
     <name>Plugin lit</name>
-    <description>Gestion de lit de rivière</description>
+    <description>Gestion des lits de rivière</description>
     <!--url>http://www.myorganization.org</url-->
 
     <parent>
@@ -19,7 +19,7 @@
     </parent>
 
     <properties>
-        <plugin.core.version.min>15</plugin.core.version.min>
+        <plugin.core.version.min>16</plugin.core.version.min>
     </properties>
 
     <dependencies>
