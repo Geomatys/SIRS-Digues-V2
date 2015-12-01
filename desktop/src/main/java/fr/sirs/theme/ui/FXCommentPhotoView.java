@@ -4,32 +4,35 @@ import fr.sirs.SIRS;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.AvecCommentaire;
 import fr.sirs.core.model.AvecPhotos;
+import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Photo;
+import fr.sirs.core.model.Observation;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.web.WebView;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
- * Un panneau qui affiche (en lecture seule) le commentaire et les éventuelles 
+ * Un panneau qui affiche (en lecture seule) le commentaire et les éventuelles
  * photos attachées à un objet.
- * 
+ *
  * @author Alexis Manin (Geomatys)
  */
 public class FXCommentPhotoView extends SplitPane {
@@ -39,137 +42,176 @@ public class FXCommentPhotoView extends SplitPane {
     @FXML private ImageView uiPhotoView;
     @FXML private Label uiPhotoLibelle;
     @FXML private Label uiPhotoDate;
-    
+    @FXML private ProgressIndicator uiImageProgress;
+
     private final SimpleObjectProperty<Element> valueProperty = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<List<AbstractPhoto>> photos = new SimpleObjectProperty<>();
 
     public FXCommentPhotoView() {
         SIRS.loadFXML(this);
-        
+
         uiPhotoView.fitHeightProperty().bind(new DoubleBinding() {
 
             {
                 bind(heightProperty());
             }
-            
+
             @Override
             protected double computeValue() {
                 return heightProperty().get() - uiPhotoLibelle.getHeight() - uiPhotoDate.getHeight();
             }
         });
-        
+
         uiPhotoScroll.setBlockIncrement(1.0);
         uiPhotoScroll.setUnitIncrement(1.0);
+        uiPhotoScroll.setVisibleAmount(0.5);
         uiPhotoScroll.setMin(0);
-        
+
         valueProperty.addListener(this::elementSet);
-        
-        uiPhotoScroll.valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            updatePhoto();
-        });
+
+        uiPhotoScroll.valueProperty().addListener(this::updateDisplayedPhoto);
+        photos.addListener(this::updatePhotos);
     }
-    
+
     private void elementSet(ObservableValue<? extends Element> observable, Element oldValue, Element newValue) {
         if (newValue instanceof AvecCommentaire) {
             uiCommentArea.getEngine().loadContent(((AvecCommentaire)newValue).getCommentaire());
         }
+
+        final ArrayList<AbstractPhoto> tmpPhotos = new ArrayList<>();
         if (newValue instanceof AvecPhotos) {
             final AvecPhotos photoContainer = (AvecPhotos) newValue;
             uiPhotoScroll.setVisible(true);
             if (photoContainer.getPhotos() != null && !photoContainer.getPhotos().isEmpty()) {
-                uiPhotoScroll.setMax(photoContainer.getPhotos().size() - 1);
-            } else {
-                uiPhotoScroll.setMax(0);
+                tmpPhotos.addAll(photoContainer.getPhotos());
             }
-        } else if (newValue instanceof Photo) {
-            uiPhotoScroll.setVisible(true);
-            uiPhotoScroll.setMax(0);
-        } else {
-            uiPhotoScroll.setVisible(false);
+        } else if (newValue instanceof AbstractPhoto) {
+            tmpPhotos.add((AbstractPhoto) newValue);
+        } else if (newValue instanceof Desordre) {
+            final Desordre tmpDisorder = (Desordre) newValue;
+            Observation target = null;
+            if (tmpDisorder.observations != null && !tmpDisorder.observations.isEmpty()) {
+                target = tmpDisorder.observations.get(0);
+                Observation current;
+                LocalDate date;
+                for (int i = 1 ; i < tmpDisorder.observations.size() ; i++) {
+                    current = tmpDisorder.observations.get(i);
+                    date = current.dateProperty().get();
+                    if (date != null && (target.dateProperty().get() == null || date.isAfter(target.dateProperty().get()))) {
+                        target = current;
+                    }
+                }
+            }
+
+            if (target != null && target.getPhotos() != null && !target.getPhotos().isEmpty()) {
+                tmpPhotos.addAll(target.getPhotos());
+            }
         }
-        
-        uiPhotoScroll.setValue(0);
-        updatePhoto();
+
+        if (!tmpPhotos.isEmpty()) {
+            tmpPhotos.sort((o1, o2) -> {
+                if (o1 == null || o1.getDate() == null)
+                    return 1;
+                else if (o2 == null || o2.getDate() == null)
+                    return -1;
+                else return o1.getDate().compareTo(o2.getDate());
+            });
+        }
+
+        photos.set(tmpPhotos);
     }
-    
+
     public ObjectProperty<Element> valueProperty() {
         return valueProperty;
     }
-    
-    public ObjectProperty<Element> objetProperty() {
-        return valueProperty;
-    }
 
-    public void updatePhoto() {
+    private void updateDisplayedPhoto(final ObservableValue<? extends Number> obs, Number oldIndex, Number newIndex) {
         uiPhotoLibelle.textProperty().unbind();
         uiPhotoLibelle.setText("Pas de photo associée");
         uiPhotoDate.textProperty().unbind();
         uiPhotoDate.setText("");
-        
+
         uiPhotoView.setImage(null);
-        
-        final AbstractPhoto selected;
-        final Object value = valueProperty.get();
-        if (value instanceof AvecPhotos) {
-            final List<AbstractPhoto> photos = ((AvecPhotos)value).getPhotos();
-            final int imageIndex = uiPhotoScroll.valueProperty().intValue();
-            if (photos == null || photos.isEmpty() || imageIndex > photos.size()) {
-                selected = null;
-            } else {
-                selected = photos.get(imageIndex);
-            }
-            
-        } else if (value instanceof AbstractPhoto) {
-            selected = (AbstractPhoto)value;
-        } else {
-            selected = null;
+
+        if (newIndex == null)
+            return;
+
+        final int index = newIndex.shortValue();
+        if (index < 0)
+            return;
+
+        final List<? extends AbstractPhoto> tmpPhotos = photos.get();
+        if (tmpPhotos == null || tmpPhotos.size() <= index) {
+            return;
         }
-        
-        if (selected == null) {
-            uiPhotoLibelle.setText("");
-        } else if (selected.getChemin()==null || selected.getChemin().isEmpty()) {
+
+        final AbstractPhoto selected = tmpPhotos.get(index);
+        if (selected.getChemin() == null || selected.getChemin().isEmpty()) {
             uiPhotoLibelle.setText("Aucun fichier n'est associé à la photo.");
         } else {
+            uiPhotoLibelle.setText("");
+            // Do not bind directly date as string because it can return ugly "null" text.
             try {
-                final Path imagePath = SIRS.getDocumentAbsolutePath(selected.getChemin());
-                // TODO : How to manage image loading error ? No exception is thrown here...
-                uiPhotoView.setImage(new Image(imagePath.toUri().toURL().toExternalForm()));
-                uiPhotoLibelle.setText("");
-                // Do not bind directly date as string because it can return ugly "null" text.
-                try {
                     // Try to find a dateProperty() method in AbstractPhoto subclasses, otherwise use directly
-                    // the getDate() value, but will not be bind.
-                    final Method methodDateProperty = selected.getClass().getMethod("dateProperty");
-                    final Object returnObj = methodDateProperty.invoke(selected);
-                    if (returnObj instanceof ObjectProperty) {
-                        final ObjectProperty<LocalDate> dateProperty = (ObjectProperty<LocalDate>) returnObj;
-                        uiPhotoDate.textProperty().bind(
-                                Bindings.createStringBinding(() -> {
-                                    String result = dateProperty.asString().get();
-                                    if (result == null || result.equals("null"))
-                                        result = "";
-                                    return result;
-                                }, dateProperty));
-                    } else {
-                        uiPhotoDate.setText(selected.getDate() == null || selected.getDate().toString().equals("null") ?
-                                "" : selected.getDate().toString());
-                    }
-                } catch (ReflectiveOperationException e) {
-                    uiPhotoDate.setText(selected.getDate() == null || selected.getDate().toString().equals("null") ?
-                            "" : selected.getDate().toString());
+                // the getDate() value, but will not be bind.
+                final Method methodDateProperty = selected.getClass().getMethod("dateProperty");
+                final Object returnObj = methodDateProperty.invoke(selected);
+                if (returnObj instanceof ObjectProperty) {
+                    final ObjectProperty<LocalDate> dateProperty = (ObjectProperty<LocalDate>) returnObj;
+                    uiPhotoDate.textProperty().bind(
+                            Bindings.createStringBinding(() -> {
+                                String result = dateProperty.asString().get();
+                                if (result == null || result.equals("null"))
+                                    result = "";
+                                return result;
+                            }, dateProperty));
+                } else {
+                    uiPhotoDate.setText(selected.getDate() == null || selected.getDate().toString().equals("null")
+                            ? "" : selected.getDate().toString());
                 }
-            } catch (IllegalStateException e) {
-                uiPhotoLibelle.setText(e.getLocalizedMessage());
-            } catch (IllegalArgumentException | MalformedURLException e) {
-                uiPhotoLibelle.setText("Le chemin de l'image est invalide : " + selected.getLibelle());
+            } catch (ReflectiveOperationException e) {
+                uiPhotoDate.setText(selected.getDate() == null || selected.getDate().toString().equals("null")
+                        ? "" : selected.getDate().toString());
             }
+
+            final Task<Image> loader = new TaskManager.MockTask<>("Lecture d'image",
+                    () -> new Image(SIRS.getDocumentAbsolutePath(selected.getChemin()).toUri().toURL().toExternalForm()));
+
+            loader.setOnFailed(event -> Platform.runLater(() -> uiPhotoLibelle.setText("Le chemin de l'image est invalide : " + selected.getLibelle())));
+            loader.setOnCancelled(event -> Platform.runLater(() -> uiPhotoLibelle.setText("Le chargement de l'image a été annulé")));
+            loader.setOnSucceeded(event -> Platform.runLater(() -> {
+                uiPhotoLibelle.setText(selected.getLibelle());
+                // TODO : How to manage image loading error ? No exception is thrown here...
+                uiPhotoView.setImage(loader.getValue());
+                /* We want the image to be resized to fit it's stage bounding box, while
+                 * keeping its proportions as the original image.
+                 * /!\ We are forced to repeat this operation each time we change
+                 * image, because the ImageView internally reset all its size
+                 * properties to fit new image dimension.
+                 */
+                uiPhotoView.minWidth(0);
+                uiPhotoView.minHeight(0);
+            }));
+
+            uiImageProgress.visibleProperty().bind(loader.runningProperty());
+            TaskManager.INSTANCE.submit(loader);
         }
-        /* We want the image to be resized to fit it's stage bounding box, while
-         * keeping its proportions as the original image.
-         * /!\ We are forced to repeat this operation each time we change
-         * image, because the ImageView internally reset all its size 
-         * properties to fit new image dimension.
-         */
-        uiPhotoView.minWidth(0);
-        uiPhotoView.minHeight(0);
+    }
+
+    private void updatePhotos(final ObservableValue<? extends List<AbstractPhoto>> obs, final List<AbstractPhoto> oldList, List<AbstractPhoto> newList) {
+        final boolean manualUpdate = uiPhotoScroll.getValue() == 0;
+        if (newList == null || newList.isEmpty()) {
+            uiPhotoScroll.setVisible(false);
+            uiPhotoScroll.setMax(0);
+        } else {
+            uiPhotoScroll.setVisible(true);
+            uiPhotoScroll.setMax(newList.size() - 1);
+        }
+
+        if (manualUpdate) {
+            updateDisplayedPhoto(uiPhotoScroll.valueProperty(), 0, 0);
+        } else {
+            uiPhotoScroll.setValue(0);
+        }
     }
 }
