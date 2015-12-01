@@ -773,7 +773,7 @@ public class PluginVegetation extends Plugin {
 
     public static ObservableList<Class<? extends ZoneVegetation>> zoneVegetationClasses(){
         if (ZONE_TYPES == null) {
-            FXCollections.unmodifiableObservableList(FXCollections.observableList(
+            ZONE_TYPES = FXCollections.unmodifiableObservableList(FXCollections.observableList(
                     Session.getConcreteSubTypes(ZoneVegetation.class)
             ));
         }
