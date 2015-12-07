@@ -10,9 +10,16 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.PRComputer;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
@@ -21,6 +28,7 @@ import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 import org.ektorp.support.View;
 import org.ektorp.support.Views;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
  * Outil gérant les échanges avec la bdd CouchDB pour tous les objets tronçons.
@@ -63,6 +71,9 @@ public class AbstractTronconDigueRepository<T extends TronconDigue> extends Abst
     public static final String BY_DIGUE_ID = "byDigueId";
     public static final String BY_BORNE_ID = "byBorneId";
 
+    protected final ArrayList<WeakReference<T>> prUpdates = new ArrayList<>();
+    protected final ConcurrentHashMap<T, PRComputer> prComputings = new ConcurrentHashMap<>();
+
     protected AbstractTronconDigueRepository(CouchDbConnector db, Class<T> typeClass) {
         super(typeClass, db);
         initStandardDesignDocument();
@@ -78,6 +89,24 @@ public class AbstractTronconDigueRepository<T extends TronconDigue> extends Abst
         ArgumentChecks.ensureNonNull("Tronçon à supprimer", entity);
         constraintDeleteBoundEntities(entity);
         super.remove(entity);
+    }
+
+    @Override
+    public void update(T entity) {
+        checkPRUpdate();
+        super.update(entity);
+    }
+
+    @Override
+    public List<DocumentOperationResult> executeBulk(T... bulkList) {
+        checkPRUpdate(bulkList);
+        return super.executeBulk(bulkList);
+    }
+
+    @Override
+    public List<DocumentOperationResult> executeBulk(Collection<T> bulkList) {
+        checkPRUpdate((T[]) bulkList.toArray());
+        return super.executeBulk(bulkList);
     }
 
     @Override
@@ -159,8 +188,63 @@ public class AbstractTronconDigueRepository<T extends TronconDigue> extends Abst
     }
 
     @Override
-    protected T onLoad(T toLoad) {
-        new DefaultSRChangeListener(toLoad);
+    protected T onLoad(final T toLoad) {
+        toLoad.geometryProperty().addListener((obs, oldValue, newValue) -> {registerForPRComputing(toLoad);});
+        new DefaultSRChangeListener(toLoad, this);
         return toLoad;
+    }
+
+    public void registerForPRComputing(final T tr) {
+        if (tr == null)
+            return;
+        synchronized (prUpdates) {
+            final Iterator<WeakReference<T>> it = prUpdates.iterator();
+            T tmp;
+            while (it.hasNext()) {
+                tmp = it.next().get();
+                if (tmp == null) {
+                    it.remove();
+                } else if (tr == tmp) {
+                    return;
+                }
+            }
+
+            // Object has not been found into registered ones, we can add it now.
+            prUpdates.add(new WeakReference<>(tr));
+        }
+    }
+
+    /**
+     * Check if any submitted object needs a PR update (compute PRs of all objects
+     * positioned amongst it), and launch it.
+     * @param toCheck The {@link TronconDigue} objects to check.
+     */
+    private void checkPRUpdate(final T... toCheck) {
+        if (toCheck == null || toCheck.length < 1)
+            return;
+
+        final HashSet<T> trs = new HashSet<>(Arrays.asList(toCheck));
+        synchronized (prUpdates) {
+            final Iterator<WeakReference<T>> it = prUpdates.iterator();
+            while (it.hasNext()) {
+                final T tmp = it.next().get();
+                if (tmp == null) {
+                    it.remove();
+                } else if (trs.remove(tmp)) {
+                    PRComputer computer = prComputings.get(tmp);
+                    if (computer != null) {
+                        computer.cancel();
+                    }
+
+                    computer = new PRComputer(tmp);
+                    prComputings.put(tmp, computer);
+                    computer.runningProperty().addListener((obs, oldValue, newValue) -> {
+                        if (oldValue && !newValue)
+                            prComputings.remove(tmp);
+                    });
+                    TaskManager.INSTANCE.submit(computer);
+                }
+            }
+        }
     }
 }
