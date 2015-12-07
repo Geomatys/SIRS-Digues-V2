@@ -93,7 +93,7 @@ public class AbstractTronconDigueRepository<T extends TronconDigue> extends Abst
 
     @Override
     public void update(T entity) {
-        checkPRUpdate();
+        checkPRUpdate(entity);
         super.update(entity);
     }
 
