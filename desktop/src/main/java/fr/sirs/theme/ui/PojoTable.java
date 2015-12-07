@@ -23,6 +23,8 @@ import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.AbstractObservation;
+import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.AvecGeometrie;
 import fr.sirs.core.model.Element;
@@ -1245,20 +1247,67 @@ public class PojoTable extends BorderPane implements Printable {
         if (result instanceof Element) {
             final Element newlyCreated = (Element) result;
 
+            AvecBornesTemporelles timePeriod = null;
+            final Element parent = parentElementProperty.get();
+            final Element owner = ownerElementProperty.get();
+
             /* Dans le cas où on a un parent, il n'est pas nécessaire de faire
             addChild(), car la liste des éléments de la table est directement
             cette liste d'éléments enfants, sur laquelle on fait un add().*/
-            if (parentElementProperty.get() != null) {
+            if (parent != null) {
                 // this should do nothing for new
-                newlyCreated.setParent(parentElementProperty.get());
+                newlyCreated.setParent(parent);
+                if (parent instanceof AvecBornesTemporelles) {
+                    timePeriod = (AvecBornesTemporelles) parent;
+
+                }
             }
 
             /* Mais dans le cas où on a un référant principal, il faut faire un
             addChild(), car la liste des éléments de la table n'est pas une
             liste d'éléments enfants. Le référant principal n'a qu'une liste
             d'identifiants qu'il convient de mettre à jour avec addChild().*/
-            else if(ownerElementProperty.get() != null){
-                ownerElementProperty.get().addChild(newlyCreated);
+            else if(owner != null){
+                owner.addChild(newlyCreated);
+                if (owner instanceof AvecBornesTemporelles) {
+                    timePeriod = (AvecBornesTemporelles) owner;
+                }
+            }
+
+            // Force les bornes temporelles à respecter celles du parent.
+            if (timePeriod != null) {
+                final AvecBornesTemporelles fTimePeriod = timePeriod;
+                if (newlyCreated instanceof AvecBornesTemporelles) {
+                    final AvecBornesTemporelles child = (AvecBornesTemporelles) newlyCreated;
+                    child.date_debutProperty().addListener((obs, oldValue, newValue) -> {
+                        if (newValue != null && fTimePeriod.getDate_fin() != null && fTimePeriod.getDate_fin().isBefore(newValue)) {
+                            child.setDate_debut(oldValue);
+                            SIRS.fxRun(false, () -> new Growl(Growl.Type.WARNING, "Impossible d'affecter une date de début après la fin de validité du parent.").showAndFade());
+                        }
+                    });
+                    child.date_finProperty().addListener((obs, oldValue, newValue) -> {
+                        if (newValue != null && fTimePeriod.getDate_debut()!= null && fTimePeriod.getDate_debut().isAfter(newValue)) {
+                            child.setDate_debut(oldValue);
+                            SIRS.fxRun(false, () -> new Growl(Growl.Type.WARNING, "Impossible d'affecter une date de fin antérieure à la validité du parent.").showAndFade());
+                        }
+                    });
+                } else if (newlyCreated instanceof AbstractObservation) {
+                    final AbstractObservation observation = (AbstractObservation) newlyCreated;
+                    observation.dateProperty().addListener((obs, oldValue, newValue) -> {
+                        final LocalDate parentDebut = fTimePeriod.getDate_debut();
+                        final LocalDate parentFin = fTimePeriod.getDate_fin();
+                        if (newValue != null) {
+                            if (parentDebut != null && parentDebut.isAfter(newValue)) {
+                                observation.setDate(oldValue);
+                                SIRS.fxRun(false, () -> new Growl(Growl.Type.WARNING, "Impossible d'affecter une date antérieure à la validité du parent.").showAndFade());
+
+                            } else if (parentFin != null && parentFin.isBefore(newValue)) {
+                                observation.setDate(oldValue);
+                                SIRS.fxRun(false, () -> new Growl(Growl.Type.WARNING, "Impossible d'affecter une date plus récente que la fin de validité du parent.").showAndFade());
+                            }
+                        }
+                    });
+                }
             }
 
             synchronized(this) {

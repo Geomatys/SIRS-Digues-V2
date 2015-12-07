@@ -414,11 +414,37 @@ public final class SIRS extends SirsCore {
      * Run given task in FX application thread (immediately if we're already in it).
      * According to input boolean, we will return immediately or wait for the task to
      * be over.
-     * @param <T> Return type of input task.
      * @param wait True if we must wait for the task to end before returning, false
      * to return immediately after submission.
      * @param toRun The task to run into JavaFX application thread.
+     */
+    public static void fxRun(final boolean wait, final Runnable toRun) {
+        fxRun(wait, new TaskManager.MockTask(toRun));
+    }
+
+    /**
+     * Run given task in FX application thread (immediately if we're already in it).
+     * According to input boolean, we will return immediately or wait for the task to
+     * be over.
+     * @param <T> Return type of input task.
+     * @param wait True if we must wait for the task to end before returning, false
+     * to return immediately after submission.
      * @return The task return value if we must wait, or we're in platform thread. Otherwise null.
+     * @param toRun The task to run into JavaFX application thread.
+     */
+    public static <T> T fxRun(final boolean wait, final Callable<T> toRun) {
+        return fxRun(wait, new TaskManager.MockTask<>(toRun));
+    }
+
+    /**
+     * Run given task in FX application thread (immediately if we're already in it).
+     * According to input boolean, we will return immediately or wait for the task to
+     * be over.
+     * @param <T> Return type of input task.
+     * @param wait True if we must wait for the task to end before returning, false
+     * to return immediately after submission.
+     * @return The task return value if we must wait, or we're in platform thread. Otherwise null.
+     * @param toRun The task to run into JavaFX application thread.
      */
     public static <T> T fxRun(final boolean wait, final Task<T> toRun) {
         if (Platform.isFxApplicationThread()) {
