@@ -136,6 +136,7 @@ public class PluginVegetation extends Plugin {
             }
         });
 
+        updatePlanLayers(VegetationSession.INSTANCE.planProperty().get());
     }
 
     @Override
