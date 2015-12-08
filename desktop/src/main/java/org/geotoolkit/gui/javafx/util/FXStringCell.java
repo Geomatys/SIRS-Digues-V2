@@ -18,59 +18,57 @@ package org.geotoolkit.gui.javafx.util;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
 
 /**
+ * A simple table cell allowing to edit a String value using a text field.
  *
- * @author Samuel Andrés (Geomatys)
- * 
- * TODO : REPLACE BY THE SAME CLASS DEFINED IN GEOTOOLKIT
- * 
- * @param <S> 
+ * @author Johann Sorel (Geomatys)
+ * @author Alexis Manin (Geomatys)
  */
-public class FXStringCell2<S> extends TableCell<S, String> {
-    
+public class FXStringCell<S> extends FXTableCell<S, String> {
+
     private final TextField field = new TextField();
 
-    public FXStringCell2() {
-        setGraphic(field);
+    public FXStringCell() {
         setAlignment(Pos.CENTER);
         setContentDisplay(ContentDisplay.CENTER);
         field.setOnAction(event -> commitEdit(field.getText()));
+
+        // Remove editor from display every time edition is cancelled / finished.
+        editingProperty().addListener((obs, oldValue, newValue) -> {
+            if (oldValue && !newValue)
+                setGraphic(null);
+        });
     }
 
     @Override
-    public void startEdit() {
-        field.setText(getItem());
-        super.startEdit();
-        setText(null);
-        setGraphic(field);
-    }
-
-    @Override
-    public void commitEdit(String newValue) {
-        setItem(newValue);
-        super.commitEdit(newValue);
+    public void terminateEdit() {
+        commitEdit(field.getText());
     }
 
     @Override
     public void cancelEdit() {
+        setText(getItem());
         super.cancelEdit();
-        updateItem(getItem(), false);
+    }
+
+    @Override
+    public void startEdit() {
+        super.startEdit();
+        setGraphic(field);
+        field.setText(getItem());
+        field.requestFocus();
+        setText(null);
     }
 
     @Override
     protected void updateItem(String item, boolean empty) {
         super.updateItem(item, empty);
-        setGraphic(null);
-        field.setText(item);
-        if(item==null || empty){
+        if (item == null || empty) {
             setText(null);
-        }
-        else {
+        } else {
             setText(item);
         }
     }
 }
-

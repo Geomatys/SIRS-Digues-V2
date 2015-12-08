@@ -38,6 +38,8 @@ import org.geotoolkit.referencing.LinearReferencing;
 /**
  * Compute PRs of objects positioned on the given {@link TronconDigue}.
  *
+ * TODO : Split computing in multiple bulk, to limit memory usage.
+ *
  * @author Alexis Manin (Geomatys)
  */
 public class PRComputer extends Task<Boolean> {
