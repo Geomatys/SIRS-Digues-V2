@@ -4,6 +4,7 @@ package fr.sirs.plugin.vegetation;
 import com.vividsolutions.jts.geom.Geometry;
 import fr.sirs.Injector;
 import fr.sirs.Session;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.AbstractZoneVegetationRepository;
 import fr.sirs.core.component.ArbreVegetationRepository;
@@ -37,6 +38,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.prefs.Preferences;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
@@ -49,6 +52,7 @@ import javafx.scene.paint.Color;
 import javax.measure.unit.NonSI;
 import javax.swing.ImageIcon;
 import org.apache.sis.storage.DataStoreException;
+import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureWriter;
 import org.geotoolkit.data.bean.BeanFeature;
@@ -92,6 +96,8 @@ import org.opengis.style.Stroke;
  */
 public final class VegetationSession {
 
+    private static final String PLAN_GESTION_PREF_KEY = "Plan de gestion";
+
     public static final VegetationSession INSTANCE = new VegetationSession();
     public static final String PLANIFIE_TRAITE = "Planifié / Traité";
     public static final String PLANIFIE_NON_TRAITE = "Planifié / Non traité";
@@ -123,6 +129,24 @@ public final class VegetationSession {
         vegetationGroup = MapBuilder.createItem();
         vegetationGroup.setName("Végétation");
         vegetationGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+
+        final String pid = Preferences.userNodeForPackage(VegetationSession.class).get(PLAN_GESTION_PREF_KEY, null);
+        if (pid != null && !pid.isEmpty()) {
+            try {
+                planProperty.set(planRepo.get(pid));
+            } catch (DocumentNotFoundException e) {
+                SirsCore.LOGGER.log(Level.WARNING, "Le plan de gestion par défaut ne peut être activé.", e);
+            }
+        }
+
+        planProperty.addListener((obs, oldValue, newValue) -> {
+            final Preferences node = Preferences.userNodeForPackage(VegetationSession.class);
+            if (newValue == null || newValue.getId() == null) {
+                node.remove(PLAN_GESTION_PREF_KEY);
+            } else {
+                node.put(PLAN_GESTION_PREF_KEY, newValue.getId());
+            }
+        });
     }
 
     public MapItem getVegetationGroup() {
@@ -132,7 +156,7 @@ public final class VegetationSession {
     public AbstractSIRSRepository<PlanVegetation> getPlanRepository() {
         return planRepo;
     }
-    
+
     public ArbreVegetationRepository getArbreRepo() {
         return arbreRepo;
     }
@@ -160,7 +184,7 @@ public final class VegetationSession {
 
     /**
      * Plan de gestion actif.
-     * 
+     *
      * @return
      */
     public ObjectProperty<PlanVegetation> planProperty() {
@@ -354,10 +378,10 @@ public final class VegetationSession {
      *
      * Il suffit qu'un traitement ait eu lieu pour que la parcelle soit déclarée
      * traitée dans l'année.
-     * 
+     *
      * @param parcelle
      * @param year
-     * @return 
+     * @return
      */
     public static boolean isParcelleTraitee(ParcelleVegetation parcelle, int year){
         boolean done = false;
@@ -372,7 +396,7 @@ public final class VegetationSession {
 
     /**
      * Retourne l'etat de planification de la parcelle pour l'année donnée.
-     * 
+     *
      * @param plan
      * @param parcelle
      * @param year
@@ -410,11 +434,11 @@ public final class VegetationSession {
     /**
      * String en fonction de l'etat des traitements.
      * Voir constantes : ETAT_X
-     * 
+     *
      * @param parcelle
      * @param planifie
      * @param year
-     * @return 
+     * @return
      */
     public static String getParcelleEtat(final ParcelleVegetation parcelle, final boolean planifie, final int year){
         final int thisYear = LocalDate.now().getYear();
@@ -502,7 +526,7 @@ public final class VegetationSession {
             //n'arrive pas avec un feature store en mémoire
             throw new RuntimeException(ex);
         }
-        
+
         if(parcelles==null) parcelles = parcelleRepo.getByPlanId(plan.getId());
 
         for(ParcelleVegetation pv : parcelles){
@@ -556,7 +580,7 @@ public final class VegetationSession {
             //n'arrive pas avec un feature store en mémoire
             throw new RuntimeException(ex);
         }
-        
+
         if(parcelles==null) parcelles = parcelleRepo.getByPlanId(plan.getId());
 
         for(ParcelleVegetation pv : parcelles){

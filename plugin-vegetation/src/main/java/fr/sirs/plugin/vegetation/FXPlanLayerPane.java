@@ -3,6 +3,7 @@ package fr.sirs.plugin.vegetation;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.model.PlanVegetation;
+import javafx.beans.property.ObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -16,7 +17,7 @@ import org.geotoolkit.map.MapLayer;
 
 /**
  * Panneau d'ajout de couche de données analyzées.
- * 
+ *
  * @author Johann Sorel (Geomatys)
  */
 public class FXPlanLayerPane extends GridPane{
@@ -27,21 +28,8 @@ public class FXPlanLayerPane extends GridPane{
     @FXML private CheckBox uiTrmtPlanif;
     @FXML private Button uiAddButton;
 
-    private final PlanVegetation plan;
-
     public FXPlanLayerPane() {
-        plan = VegetationSession.INSTANCE.planProperty().get();
         SIRS.loadFXML(this);
-    }
-
-    public void initialize(){
-        final int anneDebut = plan.getAnneeDebut();
-        final int anneFin = plan.getAnneeFin();
-
-        final ObservableList<Integer> years = FXCollections.observableArrayList();
-        for(int year = anneDebut;year<anneFin;year++) years.add(year);
-        uiAnnee.setItems(years);
-        if(!years.isEmpty()) uiAnnee.valueProperty().set(years.get(0));
 
         uiAddButton.disableProperty().bind(
                 uiTrmtReel.selectedProperty().not()
@@ -49,10 +37,34 @@ public class FXPlanLayerPane extends GridPane{
                 .and(uiParcelleType.selectedProperty().not())
                 .or(uiAnnee.valueProperty().isNull())
         );
+
+        ObjectProperty<PlanVegetation> planProperty = VegetationSession.INSTANCE.planProperty();
+        planProperty.addListener((obs, oldValue, newValue) -> {
+            initialize(newValue);
+        });
+        initialize(planProperty.get());
+    }
+
+    private void initialize(final PlanVegetation plan){
+        if (plan == null) {
+            uiAnnee.setItems(null);
+        } else {
+            final int anneDebut = plan.getAnneeDebut();
+            final int anneFin = plan.getAnneeFin();
+
+            final ObservableList<Integer> years = FXCollections.observableArrayList();
+            for (int year = anneDebut; year < anneFin; year++) {
+                years.add(year);
+            }
+            uiAnnee.setItems(years);
+            if (!years.isEmpty())
+                uiAnnee.valueProperty().set(years.get(0));
+        }
     }
 
     @FXML
     public void addLayer(ActionEvent event) {
+        PlanVegetation plan = VegetationSession.INSTANCE.planProperty().get();
         final Integer year = uiAnnee.valueProperty().get();
         final MapItem vegetationGroup = VegetationSession.INSTANCE.getVegetationGroup();
 

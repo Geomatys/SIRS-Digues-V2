@@ -33,11 +33,11 @@ import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
  * @author Johann Sorel (Geomatys)
  */
 public class FXTraitementsPane extends SplitPane {
-    
+
     private final Session session = Injector.getSession();
     private final Previews previews = session.getPreviews();
     private final ParcelleVegetationRepository parcellesRepo = VegetationSession.INSTANCE.getParcelleRepo();
-    
+
     @FXML ComboBox ui_linear;
     @FXML ListView<ParcelleVegetation> ui_parcelles;
     @FXML SplitPane uiSplitPane;
@@ -59,11 +59,11 @@ public class FXTraitementsPane extends SplitPane {
         ui_parcelles.setCellFactory(ComboBoxListCell.forListView(new SirsStringConverter()));
         ui_parcelles.getSelectionModel().selectedItemProperty().addListener(this::parcelleChanged);
 
+        uiSplitPane.getItems().add(rightPane);
+        
         //list to plan change
         VegetationSession.INSTANCE.planProperty().addListener((ObservableValue<? extends PlanVegetation> observable, PlanVegetation oldValue, PlanVegetation newValue) -> planChanged());
-
-        uiSplitPane.getItems().add(rightPane);
-
+        planChanged();
     }
 
     private void planChanged(){
