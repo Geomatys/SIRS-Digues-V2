@@ -31,7 +31,6 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
@@ -44,6 +43,7 @@ import javafx.util.Callback;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.gui.javafx.util.FXStringCell;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
+import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.util.StringUtilities;
 
@@ -62,8 +62,8 @@ public class FXTronconCut extends VBox {
     };
 
     @FXML private TextField uiTronconLabel;
-    @FXML private TableView<CutPoint> uiCutTable;
-    @FXML private TableView<Segment> uiSegmentTable;
+    @FXML private FXTableView<CutPoint> uiCutTable;
+    @FXML private FXTableView<Segment> uiSegmentTable;
     @FXML private ToggleButton uiAddCut;
     @FXML private Label TronconTypeNameLabel;
 

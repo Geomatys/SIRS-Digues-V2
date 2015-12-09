@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import org.geotoolkit.gui.javafx.util.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root spacing="10.0" type="VBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root spacing="10.0" type="VBox" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
         <columnConstraints>
@@ -46,21 +47,21 @@
             <Label text="Points de coupe :" />
             <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="1">
                <content>
-                  <TableView fx:id="uiCutTable" editable="true" prefHeight="200.0" prefWidth="200.0">
+                  <FXTableView fx:id="uiCutTable" prefHeight="200.0" prefWidth="200.0">
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                      </columnResizePolicy>
-                  </TableView>
+                  </FXTableView>
                </content>
             </ScrollPane>
             <Label text="Découpe :" GridPane.rowIndex="2" />
             <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="3">
                <content>
-                  <TableView fx:id="uiSegmentTable" editable="true" prefHeight="200.0" prefWidth="200.0">
+                  <FXTableView fx:id="uiSegmentTable" prefHeight="200.0" prefWidth="200.0">
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                      </columnResizePolicy>
-                  </TableView>
+                  </FXTableView>
                </content>
             </ScrollPane>
          </children>

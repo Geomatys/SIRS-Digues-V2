@@ -50,13 +50,14 @@ public class DefaultSRChangeListener implements ChangeListener<String> {
     @Override
     public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
         TronconDigue troncon = target.get();
-        if (troncon != null && newValue != null) {
+        if (troncon != null && oldValue != null && newValue != null) { // TODO : manage troncon cutting (oldValue == null)
             // Value reset
             if (previousValue != null && previousValue.equals(newValue)) {
                 previousValue = null;
                 // Ask user if he's sure of his change.
 
             } else {
+                // TODO : use notification system ?
                 final Task<Optional<ButtonType>> confirmation = new Task<Optional<ButtonType>>() {
 
                     @Override
