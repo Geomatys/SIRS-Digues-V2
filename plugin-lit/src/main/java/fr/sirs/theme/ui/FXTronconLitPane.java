@@ -16,8 +16,6 @@ import fr.sirs.core.model.OccupationRiveraineLit;
 import fr.sirs.core.model.OuvrageAssocieLit;
 import fr.sirs.core.model.PenteLit;
 import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.RefRive;
-import fr.sirs.core.model.RefTypeTroncon;
 import fr.sirs.core.model.RegimeEcoulementLit;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -59,7 +57,7 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
 
     protected final Previews previewRepository;
     protected LabelMapper labelMapper;
-    
+
     @FXML private FXValidityPeriodPane uiValidityPeriod;
 
 
@@ -68,28 +66,23 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
     @FXML protected HTMLEditor ui_commentaire;
     @FXML protected ComboBox ui_litId;
     @FXML protected Button ui_litId_link;
-    @FXML protected ComboBox ui_typeRiveId;
-    @FXML protected Button ui_typeRiveId_link;
-    @FXML protected ComboBox ui_typeTronconId;
-    @FXML protected Button ui_typeTronconId_link;
     @FXML protected ComboBox ui_systemeRepDefautId;
-//    @FXML protected Button ui_systemeRepDefautId_link;
-    
-    
+
+
     // Onglet "SR"
     @FXML private ListView<SystemeReperage> uiSRList;
     @FXML private Button uiSRDelete;
     @FXML private Button uiSRAdd;
     @FXML private BorderPane uiSrTab;
     private final FXSystemeReperagePane srController = new FXSystemeReperagePane();
-    
+
     @FXML protected ListView ui_LeftList;
     @FXML protected VBox ui_mainBox;
     @FXML protected BorderPane ui_centerPane;
-    
+
 
     /**
-     * Constructor. Initialize part of the UI which will not require update when 
+     * Constructor. Initialize part of the UI which will not require update when
      * element edited change.
      */
     protected FXTronconLitPane() {
@@ -106,24 +99,17 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         ui_litId.disableProperty().bind(disableFieldsProperty());
         ui_litId_link.disableProperty().bind(ui_litId.getSelectionModel().selectedItemProperty().isNull());
         ui_litId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
-        ui_litId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_litId.getSelectionModel().getSelectedItem()));       
+        ui_litId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_litId.getSelectionModel().getSelectedItem()));
         ui_libelle.disableProperty().bind(disableFieldsProperty());
-        ui_commentaire.disableProperty().bind(disableFieldsProperty());      
-        ui_typeRiveId.disableProperty().bind(disableFieldsProperty());
-        ui_typeRiveId_link.setVisible(false);
-        ui_typeTronconId.disableProperty().bind(disableFieldsProperty());
-        ui_typeTronconId_link.setVisible(false);
+        ui_commentaire.disableProperty().bind(disableFieldsProperty());
         ui_systemeRepDefautId.disableProperty().bind(disableFieldsProperty());
-//        ui_systemeRepDefautId_link.disableProperty().bind(ui_systemeRepDefautId.getSelectionModel().selectedItemProperty().isNull());
-//        ui_systemeRepDefautId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
-//        ui_systemeRepDefautId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_systemeRepDefautId.getSelectionModel().getSelectedItem()));
-        
+
         srController.editableProperty().bind(disableFieldsProperty().not());
         uiSRAdd.disableProperty().set(true);
         uiSRAdd.setVisible(false);
         uiSRDelete.disableProperty().set(true);
         uiSRDelete.setVisible(false);
-        
+
         uiSrTab.setCenter(srController);
         uiSRDelete.setGraphic(new ImageView(SIRS.ICON_TRASH_WHITE));
         uiSRAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
@@ -153,13 +139,13 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
                 srController.getSystemeReperageProperty().set(newValue);
             }
         });
-        
+
     }
-    
+
     public FXTronconLitPane(final TronconLit tronconLit){
         this();
         this.elementProperty().set(tronconLit);
-    }     
+    }
 
     /**
      * Initialize fields at element setting.
@@ -173,14 +159,14 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
             ui_libelle.textProperty().unbindBidirectional(oldElement.libelleProperty());
         }
 
-        final Session session = Injector.getBean(Session.class);        
+        final Session session = Injector.getBean(Session.class);
 
         /*
          * Bind control properties to Element ones.
          */
         // Propriétés de TronconLit
         SIRS.initCombo(ui_litId, FXCollections.observableList(
-            previewRepository.getByClass(Lit.class)), 
+            previewRepository.getByClass(Lit.class)),
             newElement.getLitId() == null? null : previewRepository.get(newElement.getLitId()));
         // Propriétés de AvecGeometrie
         // Propriétés de TronconDigue
@@ -188,21 +174,15 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
         // * commentaire
         ui_commentaire.setHtmlText(newElement.getCommentaire());
-        SIRS.initCombo(ui_typeRiveId, FXCollections.observableList(
-            previewRepository.getByClass(RefRive.class)), 
-            newElement.getTypeRiveId() == null? null : previewRepository.get(newElement.getTypeRiveId()));
-        SIRS.initCombo(ui_typeTronconId, FXCollections.observableList(
-            previewRepository.getByClass(RefTypeTroncon.class)), 
-            newElement.getTypeTronconId() == null? null : previewRepository.get(newElement.getTypeTronconId()));
-                
+
         final SystemeReperageRepository srRepo = Injector.getBean(SystemeReperageRepository.class);
         final SystemeReperage defaultSR = newElement.getSystemeRepDefautId() == null? null : srRepo.get(newElement.getSystemeRepDefautId());;
         final ObservableList<SystemeReperage> srList = FXCollections.observableArrayList(srRepo.getByLinear(newElement));
 
         SIRS.initCombo(ui_systemeRepDefautId, srList, defaultSR);
-        
+
         uiSRList.setItems(srList);
-        
+
         final List<String> items = new ArrayList<>();
         items.add("Description générale");
         items.add("Ouvrages associés");
@@ -265,7 +245,7 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
             }
         });
     }
-    
+
     @FXML
     private void srAdd(ActionEvent event) {
         final Session session = Injector.getBean(Session.class);
@@ -305,7 +285,7 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         final List<SystemeReperage> srs = repo.getByLinear(troncon);
         uiSRList.setItems(FXCollections.observableArrayList(srs));
     }
-    
+
     @Override
     public void preSave() {
         final Session session = Injector.getBean(Session.class);
@@ -324,22 +304,7 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         } else if (cbValue == null) {
             element.setLitId(null);
         }
-        cbValue = ui_typeRiveId.getValue();
-        if (cbValue instanceof Preview) {
-            element.setTypeRiveId(((Preview)cbValue).getElementId());
-        } else if (cbValue instanceof Element) {
-            element.setTypeRiveId(((Element)cbValue).getId());
-        } else if (cbValue == null) {
-            element.setTypeRiveId(null);
-        }
-        cbValue = ui_typeTronconId.getValue();
-        if (cbValue instanceof Preview) {
-            element.setTypeTronconId(((Preview)cbValue).getElementId());
-        } else if (cbValue instanceof Element) {
-            element.setTypeTronconId(((Element)cbValue).getId());
-        } else if (cbValue == null) {
-            element.setTypeTronconId(null);
-        }
+
         cbValue = ui_systemeRepDefautId.getValue();
         if (cbValue instanceof Preview) {
             element.setSystemeRepDefautId(((Preview)cbValue).getElementId());
@@ -349,7 +314,7 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
             element.setSystemeRepDefautId(null);
         }
     }
-    
+
     protected class LitThemePojoTable<T extends AvecForeignParent> extends ForeignParentPojoTable<T>{
 
         private final TronconTheme.ThemeManager<T> group;
@@ -375,7 +340,7 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
                 setTableItems(() -> (ObservableList) group.getExtractor().apply(newValue));
             }
         }
-        
+
         public BooleanProperty getEditableProperty() {
             return editableProperty;
         }
