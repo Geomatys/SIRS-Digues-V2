@@ -118,7 +118,10 @@ public class Previews extends CouchDbRepositorySupport<Preview> {
         for (final Class c : classes) {
             // To retrieve all previews for an abstract class, we must find all its implementations first.
             if(Modifier.isAbstract(c.getModifiers()) || c.isInterface()) {
-                classNames.addAll(SessionCore.getConcreteSubTypes(c));
+                final List<Class> subTypes = SessionCore.getConcreteSubTypes(c);
+                for (final Class clazz : subTypes) {
+                    classNames.add(clazz.getCanonicalName());
+                }
             } else {
                 classNames.add(c.getCanonicalName());
             }

@@ -179,7 +179,9 @@ public final class SIRS extends SirsCore {
             }
         });
 
-        candidate.getStylesheets().add(CSS_PATH);
+        if (candidate.getStylesheets().isEmpty()) {
+            candidate.getStylesheets().add(CSS_PATH);
+        }
     }
 
     /**

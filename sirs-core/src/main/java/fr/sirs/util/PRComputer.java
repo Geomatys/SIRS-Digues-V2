@@ -61,7 +61,12 @@ public class PRComputer extends Task<Boolean> {
         thread = Thread.currentThread();
         try {
             final SessionCore session = InjectorCore.getBean(SessionCore.class);
-            sr = session.getRepositoryForClass(SystemeReperage.class).get(troncon.getSystemeRepDefautId());
+            String srid = troncon.getSystemeRepDefautId();
+            if (srid == null) {
+                cancel();
+                return false;
+            }
+            sr = session.getRepositoryForClass(SystemeReperage.class).get(srid);
 
             borneRepo = session.getRepositoryForClass(BorneDigue.class);
 

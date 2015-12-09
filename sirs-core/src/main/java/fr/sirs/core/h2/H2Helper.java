@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.ektorp.StreamingViewResult;
+import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.gui.javafx.util.TaskManager;
@@ -317,8 +318,7 @@ public class H2Helper {
                 }
 
                 // Start document insertion
-                DocHelper docHelper = new DocHelper(couchDb);
-                try (final StreamingViewResult allDocsAsStream = docHelper.getAllDocsAsStream()) {
+                try (final StreamingViewResult allDocsAsStream = couchDb.queryForStreamingView(new ViewQuery().allDocs().includeDocs(true))) {
 
                     Iterator<ViewResult.Row> iterator = allDocsAsStream.iterator();
 
@@ -336,7 +336,7 @@ public class H2Helper {
                         }
 
                         updateProgress(currentProgress++, allDocIds.size());
-                        Optional<Element> element = docHelper.toElement(currentRow.getDocAsNode());
+                        Optional<Element> element = DocHelper.toElement(currentRow.getDocAsNode());
                         if (element.isPresent()) {
                             for (final SQLHelper sqlHelper : sqlHelpers) {
                                 if (sqlHelper != null) {

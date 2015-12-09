@@ -189,7 +189,11 @@ public class AbstractTronconDigueRepository<T extends TronconDigue> extends Abst
 
     @Override
     protected T onLoad(final T toLoad) {
-        toLoad.geometryProperty().addListener((obs, oldValue, newValue) -> {registerForPRComputing(toLoad);});
+        toLoad.geometryProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue != null) {
+                registerForPRComputing(toLoad);
+            }
+        });
         new DefaultSRChangeListener(toLoad, this);
         return toLoad;
     }

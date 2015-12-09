@@ -29,14 +29,6 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
  */
 public class ElasticSearchEngine implements Closeable {
 
-    // TODO : put elastic search configuration in a properties file.
-    private static final HashMap<String, String> DEFAULT_CONFIGURATION = new HashMap<>();
-    static {
-        // We are forced to escape backslashes, or elastic search crash on windows platforms.
-        DEFAULT_CONFIGURATION.put("path.home", SirsCore.ELASTIC_SEARCH_PATH.toString().replace("\\", "\\\\"));
-        DEFAULT_CONFIGURATION.put("index.mapping.ignore_malformed", "true");
-    }
-
     /**
      * List of fields to embed in search hits.
      */
@@ -48,9 +40,14 @@ public class ElasticSearchEngine implements Closeable {
     private final String adName = "_river";
 
     public ElasticSearchEngine(final String dbHost, final int dbPort, String dbName, String user, String password) throws IOException {
+        final HashMap<String, String> defaultConfiguration = new HashMap<>();
+        // We are forced to escape backslashes, or elastic search crash on windows platforms.
+        defaultConfiguration.put("path.home", SirsCore.ELASTIC_SEARCH_PATH.toString().replace("\\", "\\\\"));
+        defaultConfiguration.put("index.mapping.ignore_malformed", "true");
+
         String riverConfig = readConfig("/fr/sirs/db/riverConfig.json");
         String indexConfig = readConfig("/fr/sirs/db/indexConfig.json");
-        riverConfig = riverConfig.replace("$DC", DEFAULT_CONFIGURATION.get("path.home"));
+        riverConfig = riverConfig.replace("$DC", defaultConfiguration.get("path.home"));
         riverConfig = riverConfig.replace("$dbHost", dbHost);
         riverConfig = riverConfig.replace("$dbPort", ""+dbPort);
         riverConfig = riverConfig.replace("$dbName", dbName);
@@ -58,7 +55,7 @@ public class ElasticSearchEngine implements Closeable {
         riverConfig = riverConfig.replace("$password", password);
         final String cstConfig = riverConfig;
 
-        this.node = nodeBuilder().settings(ImmutableSettings.settingsBuilder().put(DEFAULT_CONFIGURATION)).local(true).node();
+        this.node = nodeBuilder().settings(ImmutableSettings.settingsBuilder().put(defaultConfiguration)).local(true).node();
         this.client = node.client();
         currentDbName = dbName;
 
