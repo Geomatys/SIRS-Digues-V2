@@ -41,7 +41,7 @@ public class ClosingDaemon {
                 }
             }
         });
-        closer.setName("SIRS resource closer");
+        closer.setName("SIRS resource disposer");
         closer.setDaemon(true);
         closer.start();
     }

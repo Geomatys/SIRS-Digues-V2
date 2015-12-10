@@ -45,6 +45,7 @@ import org.ektorp.impl.StdCouchDbInstance;
 import org.ektorp.impl.StdReplicationTask;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.util.FileUtilities;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -282,24 +283,20 @@ public class DatabaseRegistry {
         // Initializing application context will load application repositories, which will publish their views on the new database.
         final ClassPathXmlApplicationContext parentContext = new ClassPathXmlApplicationContext();
         parentContext.refresh();
-        parentContext.getBeanFactory().registerSingleton(CouchDbConnector.class.getSimpleName(), connector);
-
-        final ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext(
-                new String[]{SirsCore.SPRING_CONTEXT}, parentContext);
-
+        final ConfigurableListableBeanFactory parentFactory = parentContext.getBeanFactory();
+        parentFactory.registerSingleton(CouchDbConnector.class.getSimpleName(), connector);
+        if (initChangeListener) {
+            DocumentChangeEmiter changeEmiter = new DocumentChangeEmiter(connector);
+            parentFactory.registerSingleton(DocumentChangeEmiter.class.getSimpleName(), changeEmiter);
+            changeEmiter.start();
+        }
         if (initIndex) {
             ElasticSearchEngine elasticEngine = new ElasticSearchEngine(
                     couchDbUrl.getHost(), (couchDbUrl.getPort() < 0) ? 5984 : couchDbUrl.getPort(), dbContext, username, userPass);
-            appContext.getBeanFactory().registerSingleton(ElasticSearchEngine.class.getSimpleName(), elasticEngine);
+            parentFactory.registerSingleton(ElasticSearchEngine.class.getSimpleName(), elasticEngine);
         }
 
-        if (initChangeListener) {
-            DocumentChangeEmiter changeEmmiter = new DocumentChangeEmiter(connector);
-            appContext.getBeanFactory().registerSingleton(DocumentChangeEmiter.class.getSimpleName(), changeEmmiter);
-            changeEmmiter.start();
-        }
-
-        return appContext;
+        return new ClassPathXmlApplicationContext(new String[]{SirsCore.SPRING_CONTEXT}, parentContext);
     }
 
     /**

@@ -205,7 +205,9 @@ public class SessionCore implements ApplicationContextAware {
     // SPECIFIC REPOSITORIES
     ////////////////////////////////////////////////////////////////////////////
     private final ReferenceUsageRepository referenceUsageRepository;
-    private final Previews previews;
+
+    @Autowired
+    private Previews previews;
 
     private final CouchDbConnector connector;
     private CoordinateReferenceSystem projection;
@@ -241,12 +243,13 @@ public class SessionCore implements ApplicationContextAware {
                     }
                 }
             });
+
+            statDaemon.setName("Ektorp connection counter");
             statDaemon.setDaemon(true);
             statDaemon.start();
         }
 
         referenceUsageRepository = new ReferenceUsageRepository(connector);
-        previews = new Previews(connector);
         elementCreator = new ElementCreator(this);
 
         // Listen on user change

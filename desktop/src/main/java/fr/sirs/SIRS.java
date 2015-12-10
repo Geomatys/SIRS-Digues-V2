@@ -33,6 +33,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableListBase;
+import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
@@ -263,9 +264,14 @@ public final class SIRS extends SirsCore {
      * @param current the element to select by default.
      */
     public static void initCombo(final ComboBox comboBox, final ObservableList items, final Object current) {
-        comboBox.setConverter(new SirsStringConverter());
+        final SirsStringConverter converter = new SirsStringConverter();
+        comboBox.setConverter(converter);
+        if (items instanceof SortedList) {
+            comboBox.setItems(items);
+        } else {
+            comboBox.setItems(items.sorted((o1, o2) -> converter.toString(o1).compareTo(converter.toString(o2))));
+        }
         comboBox.setEditable(true);
-        comboBox.setItems(items);
         comboBox.getSelectionModel().select(current);
         ComboBoxCompletion.autocomplete(comboBox);
     }

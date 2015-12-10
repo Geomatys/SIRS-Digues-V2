@@ -70,6 +70,7 @@ public class DocumentChangeEmiter {
             };
         };
 
+        thread.setName("CouchDB change watch");
         thread.setDaemon(true);
         thread.start();
 

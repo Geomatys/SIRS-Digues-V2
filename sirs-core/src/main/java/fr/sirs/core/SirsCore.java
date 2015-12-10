@@ -25,10 +25,13 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -519,5 +522,20 @@ public class SirsCore {
             this.distantVersion = distantVersion;
             this.updateURL = updateURL;
         }
+    }
+
+    /**
+     * Same as {@link FXCollections#observableList(java.util.List) }, but if input
+     * is already an observable list, it is returned directly.
+     * @param <T>
+     * @param toWrap
+     * @return
+     */
+    public static <T> ObservableList<T> observableList(List<T> toWrap) {
+        ArgumentChecks.ensureNonNull("List to wrap", toWrap);
+        if (toWrap instanceof ObservableList)
+            return (ObservableList) toWrap;
+        else
+            return FXCollections.observableList(toWrap);
     }
 }

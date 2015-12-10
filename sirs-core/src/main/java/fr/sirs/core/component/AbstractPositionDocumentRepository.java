@@ -1,11 +1,11 @@
 package fr.sirs.core.component;
 
 import fr.sirs.core.SessionCore;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.SIRSDocument;
 import java.util.Collection;
 import java.util.List;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
@@ -36,8 +36,8 @@ public abstract class AbstractPositionDocumentRepository<T extends AbstractPosit
     /**
      * Return the AbstractPositionDocumentAssociable linked to one document
      * specified by the given id.
-     * 
-     * If you know the AbstractPositionDocumentAssociable concrete class, 
+     *
+     * If you know the AbstractPositionDocumentAssociable concrete class,
      * prefer to use :
      * getPositionDocumentByDocumentId(final Class<T> targetClass, final String documentId, final SessionCore session)
      *
@@ -50,7 +50,7 @@ public abstract class AbstractPositionDocumentRepository<T extends AbstractPosit
         final Collection<AbstractSIRSRepository> candidateRepos = session.getRepositoriesForClass(AbstractPositionDocumentAssociable.class);
         for(AbstractSIRSRepository candidateRepo : candidateRepos){
             if(candidateRepo instanceof AbstractPositionDocumentRepository){
-                result = FXCollections.observableList(((AbstractPositionDocumentRepository) candidateRepo).getByDocumentId(documentId));
+                result = SirsCore.observableList(((AbstractPositionDocumentRepository) candidateRepo).getByDocumentId(documentId));
                 if(!result.isEmpty()) return result; // Si la liste n'est pas vide c'est qu'on a trouvé le bon repo et on sort donc de la boucle en renvoyant la liste.
             }
         }
@@ -77,7 +77,7 @@ public abstract class AbstractPositionDocumentRepository<T extends AbstractPosit
         ObservableList<T> result = null;
         final AbstractSIRSRepository<T> repo = session.getRepositoryForClass(targetClass);
         if(repo instanceof AbstractPositionDocumentRepository){
-            result = FXCollections.observableList(((AbstractPositionDocumentRepository<T>) repo).getByDocumentId(documentId));
+            result = SirsCore.observableList(((AbstractPositionDocumentRepository<T>) repo).getByDocumentId(documentId));
         }
         return result;
     }

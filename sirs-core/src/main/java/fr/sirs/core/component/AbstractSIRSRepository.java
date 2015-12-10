@@ -7,19 +7,23 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.AvecDateMaj;
 import fr.sirs.core.model.AvecForeignParent;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.util.ClosingDaemon;
 import fr.sirs.util.StreamingIterable;
 import java.lang.ref.PhantomReference;
+import java.lang.ref.WeakReference;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 import javax.annotation.PostConstruct;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
@@ -70,6 +74,18 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
     protected final Cache<String, T> cache;
 
+    /**
+     * Cache result of {@link #getAll() } method, to avoid querying from database
+     * while someone is already working with it.
+     */
+    private WeakReference<ObservableList<T>> all;
+
+    /**
+     * A listener to keep {@link #all} up to date over time. If we cannot register
+     * a listener, no cache of {@link #getAll() } will be done.
+     */
+    private DocumentListener allListener;
+
     @Autowired
     protected GlobalRepository globalRepo;
 
@@ -80,9 +96,18 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         cache = new Cache(20, 0, CacheRules.cacheElementsOfType(type));
     }
 
+
     @PostConstruct
     private void init() {
         allStreaming = new StreamingViewIterable(globalRepo.createByClassQuery(type));
+    }
+
+    @Autowired(required=false)
+    private void initListener(final DocumentChangeEmiter changeEmiter) {
+        if (changeEmiter != null) {
+            allListener = new AllCachedUpdater();
+            changeEmiter.addListener(allListener);
+        }
     }
 
     @Override
@@ -98,8 +123,16 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     }
 
     @Override
-    public List<T> getAll() {
-        return cacheList(globalRepo.getAllForClass(type));
+    public synchronized List<T> getAll() {
+        if (all != null && all.get() != null) {
+            return all.get();
+        } else {
+            final ObservableList<T> cachedList = SirsCore.observableList(cacheList(globalRepo.getAllForClass(type)));
+            if (allListener != null) {
+                all = new WeakReference<>(cachedList);
+            }
+            return cachedList;
+        }
     }
 
     /**
@@ -463,5 +496,44 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
                 SirsCore.LOGGER.log(Level.WARNING, "A streamed CouchDB view result cannot be closed. It's likely to cause memory leaks.", e);
             }
         }
+    }
+
+    private class AllCachedUpdater implements DocumentListener {
+
+        @Override
+        public void documentCreated(Map<Class, List<Element>> added) {
+            final List<T> cached;
+            synchronized (this) {
+                cached = all == null? null : all.get();
+            }
+            if (cached != null) {
+                final List<T> created = (List<T>) added.get(getModelClass());
+                if (created != null) {
+                    cached.addAll(cacheList(created));
+                }
+            }
+        }
+
+        @Override
+        public void documentChanged(Map<Class, List<Element>> changed) {
+            synchronized (this) {
+                all = null;
+            }
+        }
+
+        @Override
+        public void documentDeleted(Map<Class, List<Element>> deletedObject) {
+            final List<T> cached;
+            synchronized (this) {
+                cached = all == null? null : all.get();
+            }
+            if (cached != null) {
+                final List<T> deleted = (List<T>) deletedObject.get(getModelClass());
+                if (deleted != null) {
+                    cached.removeAll(deleted);
+                }
+            }
+        }
+
     }
 }

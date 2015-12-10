@@ -9,8 +9,6 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTheme;
 import fr.sirs.theme.TronconTheme;
 import fr.sirs.util.SimpleFXEditMode;
-import fr.sirs.util.SirsStringConverter;
-import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
@@ -52,7 +50,7 @@ public class FXTronconThemePane extends BorderPane {
                 final Node center = ((BorderPane)content).getCenter();
                 center.requestFocus();
             }
-            
+
         }else{
             final TabPane pane = new TabPane();
             pane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
@@ -64,9 +62,8 @@ public class FXTronconThemePane extends BorderPane {
             uiCenter.setCenter(pane);
         }
 
-        final List<Preview> linearPreviews = session.getPreviews().getByClass(TronconDigue.class);
-        uiLinearChoice.setItems(FXCollections.observableList(linearPreviews));
-        uiLinearChoice.setConverter(new SirsStringConverter());
+        final ObservableList<Preview> linearPreviews = FXCollections.observableList(session.getPreviews().getByClass(TronconDigue.class));
+        SIRS.initCombo(uiLinearChoice, linearPreviews, linearPreviews.isEmpty()? null : linearPreviews.get(0));
 
         uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) -> {
             linearIdProperty.set(newValue.getElementId());
@@ -91,14 +88,6 @@ public class FXTronconThemePane extends BorderPane {
             if(newValue==null || group==null) {
                 setTableItems(FXCollections::emptyObservableList);
             } else {
-                //JavaFX bug : sortable is not possible on filtered list
-                // http://stackoverflow.com/questions/17958337/javafx-tableview-with-filteredlist-jdk-8-does-not-sort-by-column
-                // https://javafx-jira.kenai.com/browse/RT-32091
-//                setTableItems(() -> {
-//                    final SortedList<T> sortedList = new SortedList<>(group.getExtractor().apply(newValue));
-//                    sortedList.comparatorProperty().bind(getUiTable().comparatorProperty());
-//                    return sortedList;
-//                });
                 setTableItems(() -> (ObservableList) group.getExtractor().apply(newValue));
             }
         }
