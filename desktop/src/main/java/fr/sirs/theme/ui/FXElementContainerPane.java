@@ -63,10 +63,23 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
 
         elementProperty.addListener(this::initPane);
 
+        // When requesting edition, focus on designation field.
+        uiMode.editionState().addListener((obs, oldValue, newValue) -> {
+            if (newValue)
+                uiDesignation.requestFocus();
+        });
+
         if (element != null) {
             uiMode.requireEditionForElement(element);
             setElement((T) element);
+            if (uiMode.editionState().get())
+                uiDesignation.requestFocus();
         }
+
+        focusedProperty().addListener((obs, oldValue, newValue) -> {
+            if (Boolean.TRUE.equals(newValue))
+                uiDesignation.requestFocus();
+        });
     }
 
     public void setShowOnMapButton(final boolean isShown){
