@@ -60,7 +60,7 @@ public class SirsViewIterator<T> implements Iterator<T>, AutoCloseable {
 
     public static <T> SirsViewIterator<T> create(Class<T> resultType, StreamingViewResult queryForStreamingView) {
         SirsViewIterator<T> iterator = new SirsViewIterator<>(resultType, queryForStreamingView);
-        ClosingDaemon.watchResource(iterator, new SimpleObjectProperty<AutoCloseable>(iterator.result));
+        ClosingDaemon.watchResource(iterator, new SimpleObjectProperty<>(iterator.result));
         return iterator;
     }
 }

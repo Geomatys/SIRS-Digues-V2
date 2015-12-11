@@ -60,7 +60,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
      * to display for it.
      */
     private static final WeakHashMap<String, StringProperty> CACHED_VALUES = new WeakHashMap<>();
-    private static final LibelleUpdater libelleUpdater = new LibelleUpdater();
+    private static final LibelleUpdater LIBELLE_UPDATER = new LibelleUpdater();
 
     private final Class refClass;
     private final ComboBox editor = new ComboBox();
@@ -95,8 +95,8 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
         // Check if we're already listening on document update. If not, we register our listener.
         try {
             DocumentChangeEmiter docChange = Injector.getBean(DocumentChangeEmiter.class);
-            if (!docChange.getListenersUnmodifiable().contains(libelleUpdater)) {
-                docChange.addListener(libelleUpdater);
+            if (!docChange.getListenersUnmodifiable().contains(LIBELLE_UPDATER)) {
+                docChange.addListener(LIBELLE_UPDATER);
             }
         } catch (NoSuchBeanDefinitionException e) {
             SIRS.LOGGER.log(Level.FINE, "Cannot register a listener on CouchDB doc change, because the emitter is not present in spring context.", e);
@@ -163,15 +163,6 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
         }
     }
 
-    private ObservableList<SystemeReperageBorne> findSRBornes() {
-        SystemeReperage sr = findSystemeReperage();
-        if (sr != null) {
-            return sr.systemeReperageBornes;
-        } else {
-            return FXCollections.emptyObservableList();
-        }
-    }
-
     private ObservableList<BorneDigue> findBornes() {
         SystemeReperage sr = findSystemeReperage();
         AbstractSIRSRepository<BorneDigue> repo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
@@ -204,7 +195,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
                     try {
                         toUse = Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(srid);
                     } catch (DocumentNotFoundException e) {
-                        SirsCore.LOGGER.fine("No SystemeReperage for id "+srid);
+                        SirsCore.LOGGER.fine("No SystemeReperage for id ".concat(srid));
                     }
                 }
             }

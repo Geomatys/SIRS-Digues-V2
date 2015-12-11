@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import javafx.beans.property.IntegerProperty;
@@ -49,8 +50,8 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
      */
     private Map<Object, String> importedRows;
 
-    private HashSet<Mapper<T>> mappers = new HashSet<>();
-    private HashSet<ElementModifier<T>> modifiers = new HashSet<>();
+    private Set<Mapper<T>> mappers;
+    private Set<ElementModifier<T>> modifiers;
 
     private HashMap<Class, Collection<Mapper>> additionalMappers;
     private HashMap<Class, Collection<ElementModifier>> additionalModifiers;
