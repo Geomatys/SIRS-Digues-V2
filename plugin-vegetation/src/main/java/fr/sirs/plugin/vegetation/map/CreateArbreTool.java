@@ -61,9 +61,9 @@ public class CreateArbreTool extends AbstractEditionTool{
 
         public Spi() {
             super("CreateParcelle",
-                new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle", 
+                new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle",
                         "fr.sirs.plugin.vegetation.map.CreateArbreTool.title",CreateArbreTool.class.getClassLoader()),
-                new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle", 
+                new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle",
                         "fr.sirs.plugin.vegetation.map.CreateArbreTool.abstract",CreateArbreTool.class.getClassLoader()),
                 new Image("fr/sirs/plugin/vegetation/arbres.png"));
         }
@@ -148,7 +148,6 @@ public class CreateArbreTool extends AbstractEditionTool{
         //on rend les couches troncon et borne selectionnables
         final MapContext context = component.getContainer().getContext();
         for(MapLayer layer : context.layers()){
-            layer.setSelectable(false);
             if(layer.getName().equalsIgnoreCase(PluginVegetation.PARCELLE_LAYER_NAME)){
                 parcelleLayer = (FeatureMapLayer) layer;
             }
@@ -237,7 +236,7 @@ public class CreateArbreTool extends AbstractEditionTool{
                 parcelle = p;
                 lblParcelle.setText(cvt.toString(parcelle));
                 lblPoint.setText("Cliquer sur la carte pour créer la géométrie");
-                
+
             }
 
         }

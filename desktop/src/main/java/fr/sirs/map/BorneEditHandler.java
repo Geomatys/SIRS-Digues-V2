@@ -12,6 +12,7 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -96,11 +97,14 @@ public class BorneEditHandler extends AbstractNavigationHandler {
     // overriden variable by init();
     protected String layerName;
     protected String typeName;
-    
+
+    /** List of layers deactivated on tool install. They will be activated back at uninstallation. */
+    private List<MapLayer> toActivateBack;
+
     protected void init() {
         this.layerName = CorePlugin.TRONCON_LAYER_NAME;
         this.typeName = "tronçon";
-        
+
     }
 
     public BorneEditHandler(final FXMap map) {
@@ -223,14 +227,17 @@ public class BorneEditHandler extends AbstractNavigationHandler {
 
         final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
         final MapContext context = cc.getContext();
+        toActivateBack = new ArrayList<>();
         for(MapLayer layer : context.layers()){
-            layer.setSelectable(false);
             if(layer.getName().equalsIgnoreCase(layerName)){
                 tronconLayer = (FeatureMapLayer) layer;
                 layer.setSelectable(true);
             }else if(layer.getName().equalsIgnoreCase(CorePlugin.BORNE_LAYER_NAME)){
                 borneLayer = (FeatureMapLayer) layer;
                 layer.setSelectable(true);
+            } else if (layer.isSelectable()) {
+                toActivateBack.add(layer);
+                layer.setSelectable(false);
             }
         }
 
@@ -254,6 +261,11 @@ public class BorneEditHandler extends AbstractNavigationHandler {
                 ButtonType.YES.equals(alert.showAndWait().get())){
 
             super.uninstall(component);
+            if (toActivateBack != null) {
+                for (final MapLayer layer : toActivateBack) {
+                    layer.setSelectable(true);
+                }
+            }
             component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
             component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
             component.removeDecoration(geomlayer);

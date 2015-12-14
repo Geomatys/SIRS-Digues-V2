@@ -78,7 +78,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     protected ParcelleVegetation parcelle = null;
     private final Label lblParcelle = new Label();
     private final Label lblGeom = new Label();
-    
+
     private final Button end = new Button("Enregistrer");
     private final Button cancel = new Button("Annuler");
 
@@ -91,7 +91,9 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     private final List<Coordinate> coords = new ArrayList<>();
     private boolean justCreated = false;
     private final BooleanProperty ended = new SimpleBooleanProperty(false);
-    
+
+    /** List of layers deactivated on tool install. They will be activated back at uninstallation. */
+    private List<MapLayer> toActivateBack;
 
     public CreateVegetationPolygonTool(FXMap map, Spi spi, Class<T> clazz) {
         super(spi);
@@ -120,7 +122,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         });
         end.getStyleClass().add("btn-single");
         cancel.getStyleClass().add("btn-single");
-        
+
 
         session = Injector.getSession();
         parcelleRepo = session.getRepositoryForClass(ParcelleVegetation.class);
@@ -209,9 +211,11 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         //on rend les couches troncon et borne selectionnables
         final MapContext context = component.getContainer().getContext();
         for(MapLayer layer : context.layers()){
-            layer.setSelectable(false);
             if(layer.getName().equalsIgnoreCase(PluginVegetation.PARCELLE_LAYER_NAME)){
                 parcelleLayer = (FeatureMapLayer) layer;
+            } else if (layer.isSelectable()) {
+                toActivateBack.add(layer);
+                layer.setSelectable(false);
             }
         }
 
@@ -223,6 +227,11 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
     @Override
     public boolean uninstall(FXMap component) {
         super.uninstall(component);
+        if (toActivateBack != null) {
+            for (final MapLayer layer : toActivateBack) {
+                layer.setSelectable(true);
+            }
+        }
         component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
         component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
         component.setCursor(Cursor.DEFAULT);
@@ -324,7 +333,7 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
             if(ended.get()) return;
             final MouseButton button = e.getButton();
             if(button!=MouseButton.PRIMARY) super.mouseMoved(e);
-            
+
             if(coords.size() > 2){
                 final double x = getMouseX(e);
                 final double y = getMouseY(e);

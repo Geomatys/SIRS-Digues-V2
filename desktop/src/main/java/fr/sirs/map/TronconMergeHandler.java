@@ -6,7 +6,9 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.model.TronconDigue;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
@@ -43,36 +45,39 @@ import org.opengis.filter.identity.Identifier;
  * @author Johann Sorel (Geomatys)
  */
 public class TronconMergeHandler extends AbstractNavigationHandler {
-    
+
     private final MouseListen mouseInputListener = new MouseListen();
-    
+
     //edition variables
     private FeatureMapLayer tronconLayer = null;
     private EditionHelper helper;
-    
+
     private Stage dialog;
     private final FXTronconMerge editPane;
     private final Session session;
-    
+
     // overriden variable by init();
     protected String layerName;
     protected String typeName;
     protected boolean maleGender;
-    
+
+    /** List of layers deactivated on tool install. They will be activated back at uninstallation. */
+    private List<MapLayer> toActivateBack;
+
     protected void init() {
         this.layerName = CorePlugin.TRONCON_LAYER_NAME;
         this.typeName = "tronçon";
         this.maleGender = true;
     }
-    
+
     public TronconMergeHandler(final FXMap map) {
         super();
         init();
-        
+
         session = Injector.getSession();
         editPane = new FXTronconMerge(map, typeName, maleGender);
-        
-        editPane.getTroncons().addListener(this::tronconChanged);        
+
+        editPane.getTroncons().addListener(this::tronconChanged);
     }
 
     private void tronconChanged(ListChangeListener.Change c){
@@ -84,7 +89,7 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
             tronconLayer.setSelectionFilter(GO2Utilities.FILTER_FACTORY.id(ids));
         }
     }
-        
+
     /**
      * {@inheritDoc }
      */
@@ -94,23 +99,25 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
         component.addEventHandler(MouseEvent.ANY, mouseInputListener);
         component.addEventHandler(ScrollEvent.ANY, mouseInputListener);
         map.setCursor(Cursor.CROSSHAIR);
-        
+
         //recuperation du layer de troncon
         tronconLayer = null;
         final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
         final MapContext context = cc.getContext();
+        toActivateBack = new ArrayList<>();
         for(MapLayer layer : context.layers()){
             if(layer.getName().equalsIgnoreCase(layerName)){
                 tronconLayer = (FeatureMapLayer) layer;
                 layer.setSelectable(true);
-            } else {
+            } else if (layer.isSelectable()) {
+                toActivateBack.add(layer);
                 layer.setSelectable(false);
             }
         }
-        
+
         helper = new EditionHelper(map, tronconLayer);
         helper.setMousePointerSize(6);
-        
+
         installDialog();
     }
 
@@ -119,32 +126,37 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
      */
     @Override
     public boolean uninstall(final FXMap component) {
-        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.", 
+        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.",
                         ButtonType.YES,ButtonType.NO);
         alert.setResizable(true);
-        if(editPane.getTroncons().isEmpty() || 
+        if(editPane.getTroncons().isEmpty() ||
                 ButtonType.YES.equals(alert.showAndWait().get())){
             super.uninstall(component);
+            if (toActivateBack != null) {
+                for (final MapLayer layer : toActivateBack) {
+                    layer.setSelectable(true);
+                }
+            }
             component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
             component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
-            
+
             uninstallDialog();
             return true;
         }
-        
+
         return false;
     }
-    
+
     private void installDialog() {
         dialog = new Stage();
-        
+
         final Button finishBtn = new Button("Terminer");
         final Button cancelBtn = new Button("Annuler");
         cancelBtn.setCancelButton(true);
-        
+
         final ButtonBar babar = new ButtonBar();
         babar.getButtons().addAll(cancelBtn, finishBtn);
-        
+
         final BorderPane dialogContent = new BorderPane();
         dialogContent.setCenter(editPane);
         dialogContent.setBottom(babar);
@@ -155,7 +167,7 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
         dialog.initModality(Modality.NONE);
         dialog.initOwner(map.getScene().getWindow());
         dialog.setScene(new Scene(dialogContent));
-        
+
         finishBtn.setOnAction((ActionEvent e)-> {
 
             editPane.processMerge();
@@ -166,7 +178,7 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
             }
             map.setHandler(new FXPanHandler(false));
         });
-        
+
         cancelBtn.setOnAction((ActionEvent e)-> {
             dialog.hide();
             if (tronconLayer != null) {
@@ -174,17 +186,17 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
             }
             map.setHandler(new FXPanHandler(false));
         });
-        
+
         dialog.show();
     }
-    
+
     private void uninstallDialog() {
         if (dialog != null) {
             dialog.close();
             dialog = null;
         }
     }
-        
+
     private class MouseListen extends FXPanMouseListen {
 
         private final ContextMenu popup = new ContextMenu();
@@ -193,13 +205,13 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
             super(TronconMergeHandler.this);
             popup.setAutoHide(true);
         }
-        
+
         @Override
-        public void mouseClicked(final MouseEvent e) {            
+        public void mouseClicked(final MouseEvent e) {
             if(tronconLayer==null) return;
-            
+
             mousebutton = e.getButton();
-                
+
             if(mousebutton == MouseButton.PRIMARY){
                 //selection d'un troncon
                 final Feature feature = helper.grabFeature(e.getX(), e.getY(), false);
@@ -213,8 +225,8 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
                         }
                     }
                 }
-            }            
+            }
         }
     }
-        
+
 }

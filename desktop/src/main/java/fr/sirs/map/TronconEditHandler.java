@@ -21,9 +21,11 @@ import java.beans.PropertyChangeEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import javafx.application.Platform;
@@ -132,6 +134,8 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
     protected String parentLabel;
     protected boolean showRive;
 
+    /** List of layers deactivated on tool install. They will be activated back at uninstallation. */
+    private List<MapLayer> toActivateBack;
 
     protected void init() {
         this.layerName = CorePlugin.TRONCON_LAYER_NAME;
@@ -210,8 +214,8 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         tronconProperty.set(null);
         final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
         final MapContext context = cc.getContext();
+        toActivateBack = new ArrayList<>();
         for(MapLayer layer : context.layers()){
-            layer.setSelectable(false);
             if(layer.getName().equalsIgnoreCase(layerName)){
                 tronconLayer = (FeatureMapLayer) layer;
                 //TODO : activate back graduation after Geotk milestone MC0044
@@ -220,6 +224,9 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
 
                 layer.setSelectable(true);
                 tronconLayer.addItemListener(this);
+            } else if (layer.isSelectable()) {
+                toActivateBack.add(layer);
+                layer.setSelectable(false);
             }
         }
 
@@ -239,6 +246,11 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
         if (tronconProperty.get()==null ||
                 ButtonType.YES.equals(alert.showAndWait().get())) {
             super.uninstall(component);
+            if (toActivateBack != null) {
+                for (final MapLayer layer : toActivateBack) {
+                    layer.setSelectable(true);
+                }
+            }
             component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
             component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
             component.removeDecoration(geomlayer);
@@ -479,18 +491,16 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                             if (foundElements.size() == 1) {
                                 tronconProperty.set(foundElements.iterator().next());
                             } else if (foundElements.size() > 1) {
-                                final ContextMenu choice = new ContextMenu();
-                                choice.setAutoHide(true);
-                                final Session session = Injector.getSession();
                                 final Iterator<TronconDigue> it = foundElements.iterator();
-                                final ObservableList<MenuItem> items = choice.getItems();
+                                final ObservableList<MenuItem> items = popup.getItems();
+                                items.clear();
                                 while (it.hasNext()) {
                                     final TronconDigue current = it.next();
                                     final MenuItem item = new MenuItem(session.generateElementTitle(current));
                                     item.setOnAction((ActionEvent ae) -> tronconProperty.set(current));
                                     items.add(item);
                                 }
-                                choice.show(map, e.getScreenX(), e.getScreenY());
+                                popup.show(map, e.getScreenX(), e.getScreenY());
                             }
                         }
                     };

@@ -21,6 +21,7 @@ import fr.sirs.util.SirsStringConverter;
 import java.awt.geom.Rectangle2D;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -67,9 +68,9 @@ public class CreateParcelleTool extends AbstractEditionTool{
 
         public Spi() {
             super("CreateParcelle",
-                new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle", 
+                new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle",
                         "fr.sirs.plugin.vegetation.map.CreateParcelleTool.title",CreateParcelleTool.class.getClassLoader()),
-                new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle", 
+                new ResourceInternationalString("fr/sirs/plugin/vegetation/bundle",
                         "fr.sirs.plugin.vegetation.map.CreateParcelleTool.abstract",CreateParcelleTool.class.getClassLoader()),
                 new Image("fr/sirs/plugin/vegetation/parcelle.png"));
         }
@@ -108,6 +109,9 @@ public class CreateParcelleTool extends AbstractEditionTool{
     private FeatureMapLayer tronconLayer = null;
     private FeatureMapLayer borneLayer = null;
 
+    /** List of layers deactivated on tool install. They will be activated back at uninstallation. */
+    private List<MapLayer> toActivateBack;
+    
     public CreateParcelleTool(FXMap map) {
         super(SPI);
         wizard.getStylesheets().add(CSS_PATH);
@@ -119,7 +123,7 @@ public class CreateParcelleTool extends AbstractEditionTool{
                 parcelle.setPlanId(plan.getId());
                 parcelle.setModeAuto(true);
                 parcelle.setGeometryMode(FXPositionableLinearMode.MODE);
-                
+
                 //calcule de la geometrie
                 parcelle.setGeometry(LinearReferencingUtilities.buildGeometry(
                         tronconDigue.getGeometry(), parcelle, session.getRepositoryForClass(BorneDigue.class)));
@@ -225,12 +229,13 @@ public class CreateParcelleTool extends AbstractEditionTool{
         //on rend les couches troncon et borne selectionnables
         final MapContext context = component.getContainer().getContext();
         for(MapLayer layer : context.layers()){
-            layer.setSelectable(false);
             if(layer.getName().equalsIgnoreCase(CorePlugin.TRONCON_LAYER_NAME)){
                 tronconLayer = (FeatureMapLayer) layer;
-            }
-            if(layer.getName().equalsIgnoreCase(CorePlugin.BORNE_LAYER_NAME)){
+            } else if(layer.getName().equalsIgnoreCase(CorePlugin.BORNE_LAYER_NAME)){
                 borneLayer = (FeatureMapLayer) layer;
+            } else if (layer.isSelectable()) {
+                layer.setSelectable(false);
+                toActivateBack.add(layer);
             }
         }
         component.setCursor(Cursor.CROSSHAIR);
@@ -239,6 +244,11 @@ public class CreateParcelleTool extends AbstractEditionTool{
     @Override
     public boolean uninstall(FXMap component) {
         super.uninstall(component);
+        if (toActivateBack != null) {
+            for (final MapLayer layer : toActivateBack) {
+                layer.setSelectable(true);
+            }
+        }
         component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
         component.setCursor(Cursor.DEFAULT);
         reset();

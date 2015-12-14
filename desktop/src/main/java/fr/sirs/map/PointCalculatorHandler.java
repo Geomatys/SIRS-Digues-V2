@@ -6,6 +6,8 @@ import fr.sirs.CorePlugin;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.core.model.TronconDigue;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -64,24 +66,27 @@ public class PointCalculatorHandler extends AbstractNavigationHandler {
     // overriden variable by init();
     protected String layerName;
     protected Class typeClass;
-    
+
+    /** List of layers deactivated on tool install. They will be activated back at uninstallation. */
+    private List<MapLayer> toActivateBack;
+
     protected void init() {
         this.layerName = CorePlugin.TRONCON_LAYER_NAME;
         this.typeClass = TronconDigue.class;
     }
-    
+
     public PointCalculatorHandler() {
         init();
         pane = new FXPRPane(this, typeClass);
     }
-    
+
     public FXGeometryLayer getDecoration() {
         return decoration;
     }
 
     /**
      * Activer le mode de selection.
-     * 
+     *
      * @param type  0 : -
      *              1 : troncon
      *              2 : coordonnée
@@ -122,11 +127,14 @@ public class PointCalculatorHandler extends AbstractNavigationHandler {
 
         final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
         final MapContext context = cc.getContext();
+        toActivateBack = new ArrayList<>();
         for(MapLayer layer : context.layers()){
-            layer.setSelectable(false);
             if(layer.getName().equalsIgnoreCase(layerName)){
                 tronconLayer = (FeatureMapLayer) layer;
                 layer.setSelectable(true);
+            }  else if (layer.isSelectable()) {
+                toActivateBack.add(layer);
+                layer.setSelectable(false);
             }
         }
         helperTroncon = new EditionHelper(map, tronconLayer);
@@ -140,6 +148,11 @@ public class PointCalculatorHandler extends AbstractNavigationHandler {
     @Override
     public boolean uninstall(final FXMap component) {
         super.uninstall(component);
+        if (toActivateBack != null) {
+            for (final MapLayer layer : toActivateBack) {
+                layer.setSelectable(true);
+            }
+        }
         component.removeEventHandler(MouseEvent.ANY, mouseInputListener);
         component.removeEventHandler(ScrollEvent.ANY, mouseInputListener);
         component.removeDecoration(decoration);
