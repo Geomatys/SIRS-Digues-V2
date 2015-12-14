@@ -339,7 +339,6 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * @return The object to load. By default, the one in parameter.
      */
     protected T onLoad(final T loaded) {
-        CacheRules.incrementLoaded(type);
         return loaded;
     }
 
