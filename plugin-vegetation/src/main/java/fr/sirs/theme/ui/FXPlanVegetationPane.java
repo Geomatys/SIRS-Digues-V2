@@ -47,16 +47,16 @@ import org.geotoolkit.gui.javafx.util.FXListTableCell;
  * @author Samuel Andrés (Geomatys)
  */
 public class FXPlanVegetationPane extends BorderPane {
-    
+
     @FXML private TextField uiPlanName;
     @FXML private TextField uiDesignation;
     @FXML private Spinner uiPlanDebut;
     @FXML private Spinner uiPlanFin;
     @FXML private VBox uiVBox;
     @FXML private Button uiActive;
-    
+
     private final PojoTable uiFrequenceTable;
-    
+
     private final PojoTable uiCoutTable;
     @FXML private Button uiSave;
 
@@ -73,7 +73,7 @@ public class FXPlanVegetationPane extends BorderPane {
     public FXPlanVegetationPane(final PlanVegetation plan) {
         SIRS.loadFXML(this, FXPlanVegetationPane.class);
         this.plan = plan;
-        
+
         uiDesignation.textProperty().bindBidirectional(plan.designationProperty());
         uiPlanName.textProperty().bindBidirectional(plan.libelleProperty());
         uiPlanDebut.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, LocalDate.now().getYear()));
@@ -113,7 +113,7 @@ public class FXPlanVegetationPane extends BorderPane {
                         growlInfo.showAndFade();
                     }
                 });
-        
+
         uiSave.setOnAction((ActionEvent event) -> {
 
             try{
@@ -270,6 +270,7 @@ public class FXPlanVegetationPane extends BorderPane {
 
         uiFrequenceTable.setTableItems(() -> (ObservableList) plan.paramFrequence);
         uiFrequenceTable.commentAndPhotoProperty().set(false);
+        uiFrequenceTable.openEditorOnNewProperty().set(false);
 
         ////////////////////////////////////////////////////////////////////////
         // Construction des paramètes de coûts.
@@ -277,7 +278,8 @@ public class FXPlanVegetationPane extends BorderPane {
         uiCoutTable = new PojoTable(ParamCoutTraitementVegetation.class, "Paramétrage des coûts des traitements");
         uiCoutTable.setTableItems(() -> (ObservableList) plan.paramCout);
         uiCoutTable.commentAndPhotoProperty().set(false);
-        
+        uiCoutTable.openEditorOnNewProperty().set(false);
+
         // Mise en page
         uiVBox.getChildren().addAll(uiCoutTable, uiFrequenceTable);
     }

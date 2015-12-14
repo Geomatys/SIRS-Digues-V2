@@ -24,6 +24,9 @@ public class FXParamCoutTraitementVegetationPane extends FXParamCoutTraitementVe
     public FXParamCoutTraitementVegetationPane(final ParamCoutTraitementVegetation paramCoutTraitementVegetation){
         super(paramCoutTraitementVegetation);
 
+        ui_parent_link.setVisible(false);
+        ui_parent_link.setManaged(false);
+        
         ui_typeTraitementId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
 
             @Override
@@ -39,7 +42,7 @@ public class FXParamCoutTraitementVegetationPane extends FXParamCoutTraitementVe
                 }
             }
         });
-    }     
+    }
 
     /**
      * Initialize fields at element setting.
@@ -64,7 +67,7 @@ public class FXParamCoutTraitementVegetationPane extends FXParamCoutTraitementVe
     }
 
     /**
-     * 
+     *
      */
     @Override
     public void preSave(){
