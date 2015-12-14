@@ -13,6 +13,7 @@ import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.PositionDocument;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
 import static fr.sirs.core.model.Role.ADMIN;
 import static fr.sirs.core.model.Role.EXTERN;
@@ -21,6 +22,7 @@ import static fr.sirs.core.model.Role.USER;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.index.ElementHit;
+import java.lang.reflect.Method;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -148,6 +150,17 @@ public class SirsStringConverter extends StringConverter {
     }
 
     public static String getDesignation(final Element source) {
+        if (source instanceof ReferenceType) {
+            try {
+                final Method method = source.getClass().getMethod("getAbrege");
+                method.setAccessible(true);
+                return (String) method.invoke(source);
+            } catch (ReflectiveOperationException | SecurityException e) {
+                SIRS.LOGGER.log(Level.FINE, null, e);
+                // No abrege available, use default method.
+            }
+        }
+
         final LabelMapper labelMapper =  LabelMapper.get(source.getClass());
         String prefixedDesignation = (labelMapper == null) ? "" : labelMapper.mapPropertyName(BUNDLE_KEY_CLASS_ABREGE);
         if(source.getDesignation()!=null){
