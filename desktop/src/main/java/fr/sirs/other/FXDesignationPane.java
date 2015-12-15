@@ -40,7 +40,7 @@ public class FXDesignationPane extends BorderPane {
     private final ChoiceBox<Choice> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(Choice.values()));
 
     private List<Preview> previews;
-    
+
     private enum Choice {DOUBLON, ALL, EMPTY};
 
     public FXDesignationPane(final Class type) {
@@ -49,12 +49,12 @@ public class FXDesignationPane extends BorderPane {
 
         previews = repository.getByClass(type);
 
-        table = new TableView<>(FXCollections.observableArrayList(previews));
+        table = new TableView<>(SIRS.observableList(previews));
         table.setEditable(true);
 
         table.getColumns().add(new FXPreviewToElementTableColumn());
         table.getColumns().add(new FXPreviewToElementDesignationTableColumn(previewBundle.getString(PREVIEW_BUNDLE_KEY_DESIGNATION)));
-        
+
         final TableColumn<Preview, String> labelColumn = new TableColumn<>(previewBundle.getString(PREVIEW_BUNDLE_KEY_LIBELLE));
         labelColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                 return new SimpleObjectProperty(param.getValue().getLibelle());
@@ -94,7 +94,7 @@ public class FXDesignationPane extends BorderPane {
 
         final Button reload = new Button("Recharger", new ImageView(SIRS.ICON_ROTATE_LEFT_ALIAS));
         reload.setOnAction((ActionEvent e) -> {previews = repository.getByClass(type); fillTable();});
-        
+
         final HBox hBox = new HBox(choiceBox, reload);
         hBox.setAlignment(Pos.CENTER);
         hBox.setPadding(new Insets(20));
@@ -103,7 +103,7 @@ public class FXDesignationPane extends BorderPane {
         setTop(hBox);
 
     }
-    
+
     private void fillTable(){
         final List<Preview> referenceUsages;
         switch (choiceBox.getSelectionModel().getSelectedItem()) {
@@ -117,7 +117,7 @@ public class FXDesignationPane extends BorderPane {
             default:
                 referenceUsages = previews;
         }
-        table.setItems(FXCollections.observableArrayList(referenceUsages));
+        table.setItems(SIRS.observableList(referenceUsages));
     }
 
     private List<Preview> empty() {

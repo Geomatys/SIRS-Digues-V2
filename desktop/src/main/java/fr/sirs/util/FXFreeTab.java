@@ -113,6 +113,7 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
         stage.titleProperty().bind(textProperty());
 
         final TabPane newPane = new TabPane(this);
+        newPane.getStylesheets().add(SIRS.CSS_PATH);
         stage.setScene(new Scene(newPane));
         stage.setOnHidden((WindowEvent event1) -> {
             newPane.getTabs().remove(FXFreeTab.this);

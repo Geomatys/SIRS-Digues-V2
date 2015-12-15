@@ -20,10 +20,8 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -39,21 +37,21 @@ import javafx.util.Callback;
  * @author Samuel Andrés (Geomatys)
  */
 public class FXReferenceAnalysePane extends BorderPane {
-    
+
     private TableView<ReferenceUsage> usages;
     private final Session session = Injector.getSession();
     private final Map<String, ResourceBundle> bundles = new HashMap<>();
-        
+
     public FXReferenceAnalysePane(final ReferenceType reference) {
         final ResourceBundle bundle = ResourceBundle.getBundle(ReferenceUsage.class.getName(), Locale.getDefault(),
                 Thread.currentThread().getContextClassLoader());
-        
+
         try {
             final Method getId = reference.getClass().getMethod("getId");
             final String id = (String) getId.invoke(reference);
             final ReferenceUsageRepository referenceUsageRepository = session.getReferenceUsageRepository();
             final List<ReferenceUsage> referenceUsages = new ArrayList<>();
-            
+
             final Task task = new Task() {
 
                 @Override
@@ -63,13 +61,13 @@ public class FXReferenceAnalysePane extends BorderPane {
                     return null;
                 }
             };
-            
+
             task.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
 
                 @Override
                 public void handle(WorkerStateEvent event) {
                     if(!referenceUsages.isEmpty()){
-                        usages = new TableView<>(FXCollections.observableArrayList(referenceUsages));
+                        usages = new TableView<>(SIRS.observableList(referenceUsages));
                         usages.setEditable(false);
 
                         final TableColumn<ReferenceUsage, String> propertyColumn = new TableColumn<>(bundle.getString("property"));
@@ -127,13 +125,13 @@ public class FXReferenceAnalysePane extends BorderPane {
                     }
                 }
             });
-                
+
             Injector.getSession().getTaskManager().submit(task);
-            
+
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             SIRS.LOGGER.log(Level.SEVERE, null, ex);
         }
     }
-    
-    
+
+
 }

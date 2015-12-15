@@ -1,9 +1,9 @@
 package fr.sirs.theme;
 
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.model.Positionable;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Parent;
 
@@ -92,7 +92,7 @@ public abstract class AbstractTheme extends Theme {
     public static <T extends Positionable> ThemeManager<T> generateThemeManager(final Class<T> themeClass){
         return generateThemeManager(null, themeClass);
     }
-    
+
     public static <T extends Positionable> ThemeManager<T> generateThemeManager(String tableTitle, final Class<T> themeClass){
         return generateThemeManager(null, tableTitle, themeClass);
     }
@@ -102,7 +102,7 @@ public abstract class AbstractTheme extends Theme {
                 Thread.currentThread().getContextClassLoader());
         final Function<String, ObservableList<T>> extractor = (String linearId) -> {
             final List<T> result = ((AbstractPositionableRepository<T>) Injector.getSession().getRepositoryForClass(themeClass)).getByLinearId(linearId);
-            return FXCollections.observableList(result);
+            return SIRS.observableList(result);
         };
         final Consumer<T> deletor = (T themeElement) -> Injector.getSession().getRepositoryForClass(themeClass).remove(themeElement);
 

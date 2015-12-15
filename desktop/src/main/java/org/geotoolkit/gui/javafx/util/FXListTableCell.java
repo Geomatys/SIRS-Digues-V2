@@ -16,8 +16,8 @@
  */
 package org.geotoolkit.gui.javafx.util;
 
+import fr.sirs.SIRS;
 import java.util.List;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -29,7 +29,7 @@ import javafx.util.StringConverter;
 /**
  *
  * @author Samuel Andrés (Geomatys)
- * 
+ *
  * @param <S> The type of the TableView generic type (i.e. S == TableView&lt;S&gt;).
  *           This should also match with the first generic type in TableColumn.
  * @param <T> The type of the item contained within the Cell.
@@ -64,7 +64,7 @@ public class FXListTableCell<S, T> extends TableCell<S, T> {
 
     @Override
     public void startEdit() {
-            field.setItems(FXCollections.observableList(list));
+            field.setItems(SIRS.observableList(list));
             T value = getItem();
             field.setValue(value);
             field.getSelectionModel().select(value);

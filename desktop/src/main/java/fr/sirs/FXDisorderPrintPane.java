@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Level;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -20,44 +19,44 @@ import javafx.scene.control.Tab;
  * @author Samuel Andrés (Geomatys)
  */
 public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
-    
+
     @FXML private Tab uiDisorderTypeChoice;
     @FXML private Tab uiUrgenceTypeChoice;
-    
+
     @FXML private CheckBox uiOptionPhoto;
     @FXML private CheckBox uiOptionReseauOuvrage;
     @FXML private CheckBox uiOptionVoirie;
 
     private final TypeChoicePojoTable disordreTypesTable = new TypeChoicePojoTable(RefTypeDesordre.class, "Types de désordres");
     private final TypeChoicePojoTable urgenceTypesTable = new TypeChoicePojoTable(RefUrgence.class, "Types d'urgences");
-    
+
     public FXDisorderPrintPane(){
         super(FXDisorderPrintPane.class);
-        disordreTypesTable.setTableItems(()-> (ObservableList) FXCollections.observableList(Injector.getSession().getRepositoryForClass(RefTypeDesordre.class).getAll()));
+        disordreTypesTable.setTableItems(()-> (ObservableList) SIRS.observableList(Injector.getSession().getRepositoryForClass(RefTypeDesordre.class).getAll()));
         disordreTypesTable.commentAndPhotoProperty().set(false);
         uiDisorderTypeChoice.setContent(disordreTypesTable);
-        urgenceTypesTable.setTableItems(()-> (ObservableList) FXCollections.observableList(Injector.getSession().getRepositoryForClass(RefUrgence.class).getAll()));
+        urgenceTypesTable.setTableItems(()-> (ObservableList) SIRS.observableList(Injector.getSession().getRepositoryForClass(RefUrgence.class).getAll()));
         urgenceTypesTable.commentAndPhotoProperty().set(false);
         uiUrgenceTypeChoice.setContent(urgenceTypesTable);
     }
-    
+
     @FXML private void cancel(){
-        
+
     }
-    
-    
-    @FXML 
+
+
+    @FXML
     private void print(){
         Injector.getSession().getTaskManager().submit("Génération de fiches détaillées de désordres",
         () -> {
-            
+
             final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll();
 
             // On retire les désordres de la liste dans les cas suivants...
             desordres.removeIf(new LocalPredicate().or(
                     new LocationPredicate<>().or(
                             (Predicate) new TemporalPredicate())));
-            
+
             try {
                 if(!desordres.isEmpty()){
                     Injector.getSession().getPrintManager().printDesordres(desordres, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionVoirie.isSelected());

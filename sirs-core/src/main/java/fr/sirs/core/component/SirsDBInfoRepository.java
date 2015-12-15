@@ -20,7 +20,6 @@ import java.util.Map;
 public class SirsDBInfoRepository {
 
     private CouchDbConnector db;
-    private SirsDBInfo info;
 
     @Autowired
     protected SirsDBInfoRepository(CouchDbConnector db) {
@@ -29,7 +28,7 @@ public class SirsDBInfoRepository {
 
     public Optional<SirsDBInfo> get() {
         try {
-            info = db.get(SirsDBInfo.class, INFO_DOCUMENT_ID);
+            final SirsDBInfo info = db.get(SirsDBInfo.class, INFO_DOCUMENT_ID);
             return Optional.of(info);
         } catch (DocumentNotFoundException e) {
             return Optional.empty();
@@ -39,15 +38,15 @@ public class SirsDBInfoRepository {
     public SirsDBInfo setRemoteDatabase(String remoteDatabase) {
         return set(null, remoteDatabase);
     }
-    
+
     public SirsDBInfo setSRID(String epsgCode) {
         return set(epsgCode, null);
     }
-    
+
     public SirsDBInfo updateModuleDescriptions(final Map<String, ModuleDescription> toSet) {
         return set(null, null, toSet);
     }
-    
+
     public SirsDBInfo updateModuleDescriptions(final Collection<ModuleDescription> toSet) {
         if (toSet == null || toSet.isEmpty()) {
             return set(null, null, null);
@@ -59,19 +58,22 @@ public class SirsDBInfoRepository {
             return set(null, null, map);
         }
     }
-    
+
     public SirsDBInfo set(String epsgCode, String remoteDatabase) {
         return set(epsgCode, remoteDatabase, null);
     }
-    
+
     private SirsDBInfo set(String epsgCode, String remoteDatabase, final Map<String, ModuleDescription> moduleDescriptions) {
+        SirsDBInfo info;
         Optional<SirsDBInfo> optInfo = get();
-        if (!optInfo.isPresent()) {
+        if (optInfo.isPresent()) {
+            info = optInfo.get();
+        } else {
             info = new SirsDBInfo();
             info.setVersion(SirsCore.getVersion());
             info.setUuid(UUID.randomUUID().toString());
         }
-        
+
         if (epsgCode != null && !epsgCode.isEmpty()) {
             if (info.getEpsgCode() != null && !info.getEpsgCode().equals(epsgCode)) {
                 // TODO : If no remote is present, we could setup a reprojection process instead of an exception ?
@@ -79,21 +81,21 @@ public class SirsDBInfoRepository {
             }
             info.setEpsgCode(epsgCode);
         }
-        
+
         if (remoteDatabase != null && !remoteDatabase.isEmpty()) {
             info.setRemoteDatabase(remoteDatabase);
         }
-        
+
         if (moduleDescriptions != null && !moduleDescriptions.isEmpty()) {
             info.addModuleDescriptions(moduleDescriptions);
         }
-        
+
         if (optInfo.isPresent()) {
             db.update(info);
         } else {
             db.create(INFO_DOCUMENT_ID, info);
         }
-        
+
         return info;
     }
 }

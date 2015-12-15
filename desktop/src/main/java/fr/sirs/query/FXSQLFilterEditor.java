@@ -1,6 +1,5 @@
 package fr.sirs.query;
 
-import static fr.sirs.SIRS.CSS_PATH;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -116,7 +115,6 @@ public class FXSQLFilterEditor extends GridPane {
     }
 
     public FXSQLFilterEditor(Type type) {
-        getStylesheets().add(CSS_PATH);
         alignmentProperty().set(Pos.CENTER_LEFT);
         setHgap(0);
         setVgap(0);

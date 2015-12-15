@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
@@ -206,12 +205,7 @@ public class FXSearchPane extends BorderPane {
 
         final List<Class<? extends Element>> modelClasses = Session.getConcreteSubTypes(Element.class);
         final ObservableList<Class<? extends Element>> modelObs = FXCollections.observableArrayList(modelClasses);
-        modelObs.removeIf(new Predicate<Class<? extends Element>>() {
-            @Override
-            public boolean test(Class<? extends Element> t) {
-                return ReferenceType.class.isAssignableFrom(t);
-            }
-        });
+        modelObs.removeIf((Class<? extends Element> t) -> ReferenceType.class.isAssignableFrom(t));
 
         uiDesignationClass.setItems(modelObs);
         uiDesignationClass.setConverter(new SirsStringConverter());
@@ -721,7 +715,7 @@ public class FXSearchPane extends BorderPane {
             });
 
         final ObjectTable table = new ObjectTable(Preview.class, "Résultats");
-        table.setTableItems(FXCollections.observableList(validitySummaries));
+        table.setTableItems(SIRS.observableList(validitySummaries));
         uiNbResults.setText(validitySummaries.size()+" résultat(s).");
 
         final ScrollPane scroll = new ScrollPane(table);

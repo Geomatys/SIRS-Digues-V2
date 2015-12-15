@@ -27,7 +27,6 @@ import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
@@ -133,7 +132,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
         if (SystemeReperageBorne.class.isAssignableFrom(refClass) || BorneDigue.class.isAssignableFrom(refClass)) {
             items = findBornes();
         } else {
-            items = FXCollections.observableList(previews.getByClass(refClass));
+            items = SIRS.observableList(previews.getByClass(refClass));
         }
 
         // Analyze current item to determine default selection
@@ -167,11 +166,11 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
         SystemeReperage sr = findSystemeReperage();
         AbstractSIRSRepository<BorneDigue> repo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
         if (sr == null) {
-            return FXCollections.observableList(repo.getAll());
+            return SIRS.observableList(repo.getAll());
         } else {
             final HashSet<String> borneIds = new HashSet<>(sr.systemeReperageBornes.size());
             sr.systemeReperageBornes.stream().forEach(srb -> borneIds.add(srb.getBorneId()));
-            return FXCollections.observableList(repo.get(borneIds.toArray(new String[0])));
+            return SIRS.observableList(repo.get(borneIds.toArray(new String[0])));
         }
     }
 

@@ -136,7 +136,7 @@ public class FXImportBornesPane extends BorderPane {
         uiImportButton.setTooltip(new Tooltip("Importer la séléction"));
         uiImportButton.setDisable(true);
 
-        uiTronconBox.setItems(FXCollections.observableList(
+        uiTronconBox.setItems(SIRS.observableList(
                 Injector.getSession().getPreviews().getByClass(typeClass)));
         uiTronconBox.setConverter(stringConverter);
         uiTronconBox.valueProperty().addListener(this::updateSrList);

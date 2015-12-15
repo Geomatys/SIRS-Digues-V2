@@ -20,7 +20,6 @@ import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -169,7 +168,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
 
         //maj de la liste
         final List<SystemeReperage> srs = repo.getByLinear(troncon);
-        uiSRList.setItems(FXCollections.observableArrayList(srs));
+        uiSRList.setItems(SIRS.observableList(srs));
     }
 
     @FXML
@@ -192,7 +191,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
 
         //maj de la liste
         final List<SystemeReperage> srs = repo.getByLinear(troncon);
-        uiSRList.setItems(FXCollections.observableArrayList(srs));
+        uiSRList.setItems(SIRS.observableList(srs));
     }
 
 //    @FXML
@@ -231,20 +230,20 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             // * commentaire
             ui_commentaire.setHtmlText(newElement.getCommentaire());
 
-            SIRS.initCombo(ui_digueId, FXCollections.observableArrayList(
+            SIRS.initCombo(ui_digueId, SIRS.observableList(
                     previewRepository.getByClass(Digue.class)),
                     newElement.getDigueId() == null ? null : previewRepository.get(newElement.getDigueId()));
-            SIRS.initCombo(ui_typeRiveId, FXCollections.observableArrayList(
+            SIRS.initCombo(ui_typeRiveId, SIRS.observableList(
                     previewRepository.getByClass(RefRive.class)),
                     newElement.getTypeRiveId() == null ? null : previewRepository.get(newElement.getTypeRiveId()));
-            SIRS.initCombo(ui_typeTronconId, FXCollections.observableArrayList(
+            SIRS.initCombo(ui_typeTronconId, SIRS.observableList(
                     previewRepository.getByClass(RefTypeTroncon.class)),
                     newElement.getTypeTronconId() == null ? null : previewRepository.get(newElement.getTypeTronconId()));
 
 
             final SystemeReperageRepository srRepo = Injector.getBean(SystemeReperageRepository.class);
             final SystemeReperage defaultSR = newElement.getSystemeRepDefautId() == null? null : srRepo.get(newElement.getSystemeRepDefautId());;
-            final ObservableList<SystemeReperage> srList = FXCollections.observableArrayList(srRepo.getByLinear(newElement));
+            final ObservableList<SystemeReperage> srList = SIRS.observableList(srRepo.getByLinear(newElement));
 
             SIRS.initCombo(ui_systemeRepDefautId, srList, defaultSR);
 
@@ -253,9 +252,9 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             uiGestionsTable.setParentElement(newElement);
             uiGestionsTable.setTableItems(() -> (ObservableList) newElement.gestions);
             uiProprietesTable.setForeignParentId(newElement.getId());
-            uiProprietesTable.setTableItems(() -> (ObservableList) FXCollections.observableList(session.getProprietesByTronconId(newElement.getId())));
+            uiProprietesTable.setTableItems(() -> (ObservableList) SIRS.observableList(session.getProprietesByTronconId(newElement.getId())));
             uiGardesTable.setForeignParentId(newElement.getId());
-            uiGardesTable.setTableItems(() -> (ObservableList) FXCollections.observableList(session.getGardesByTronconId(newElement.getId())));
+            uiGardesTable.setTableItems(() -> (ObservableList) SIRS.observableList(session.getGardesByTronconId(newElement.getId())));
         }
     }
 

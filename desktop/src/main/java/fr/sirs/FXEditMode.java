@@ -2,7 +2,6 @@
 package fr.sirs;
 
 import static fr.sirs.SIRS.COLOR_INVALID_ICON;
-import static fr.sirs.SIRS.CSS_PATH;
 import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import static fr.sirs.SIRS.ICON_EXCLAMATION_CIRCLE;
 import fr.sirs.core.model.Element;
@@ -63,7 +62,6 @@ public class FXEditMode extends VBox {
         } catch (IOException ex) {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
-        getStylesheets().add(CSS_PATH);
 
         uiEdit.disableProperty().bind(session.nonGeometryEditionProperty().not());
         final BooleanBinding editBind = uiEdit.selectedProperty().not();

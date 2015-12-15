@@ -14,7 +14,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -36,7 +35,7 @@ import org.geotoolkit.internal.GeotkFX;
 /**
  * A panel which lists queries stored locally or imported from a file. It allows
  * for deletion and selection of multiple queries.
- * 
+ *
  * @author Alexis Manin
  * @author Johann Sorel
  */
@@ -49,16 +48,16 @@ public class FXQueryTable extends BorderPane{
     private final Button uiExportQueries = new Button("Exporter");
 
     private final BooleanProperty modifiableProperty = new SimpleBooleanProperty(true);
-    
+
     public FXQueryTable(List<SQLQuery> queries) {
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         table.columnResizePolicyProperty().set(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setPrefSize(200, 400);
         FXUtilities.hideTableHeader(table);
         setLeft(table);
-        
-        table.setItems(FXCollections.observableList(queries));
-        
+
+        table.setItems(SIRS.observableList(queries));
+
         final TableColumn<SQLQuery,String> nameCol = new TableColumn<>();
         nameCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<SQLQuery, String>, ObservableValue<String>>() {
             @Override
@@ -66,12 +65,12 @@ public class FXQueryTable extends BorderPane{
                 return param.getValue().libelleProperty();
             }
         });
-        
+
         table.getColumns().add(nameCol);
         final TableColumn deleteColumn = new DeleteColumn();
         deleteColumn.visibleProperty().bind(modifiableProperty());
         table.getColumns().add(deleteColumn);
-        
+
         table.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<SQLQuery>() {
 
             @Override
@@ -94,12 +93,12 @@ public class FXQueryTable extends BorderPane{
         uiExportQueries.setTooltip(new Tooltip("Exporter les requêtes SQL dans un fichier."));
         uiExportQueries.setOnAction(this::exportRequests);
         setBottom(box);
-        
+
         setPadding(new Insets(5));
     }
 
     public final BooleanProperty modifiableProperty(){return modifiableProperty;}
-    
+
     private void importRequests(ActionEvent e) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Fichier à charger");
@@ -152,13 +151,13 @@ public class FXQueryTable extends BorderPane{
     /**
      * Get all queries of the current table which are not contained into CouchDB
      * database (system local and imported from a file).
-     * 
+     *
      * @return A list of queries. Never null, but can be empty.
      */
     private List<SQLQuery> getLocalQueries() {
         return table.getItems().filtered((SQLQuery current)-> current.getId() == null);
     }
-    
+
     public class DeleteColumn extends SimpleButtonColumn {
 
         public DeleteColumn() {
@@ -169,7 +168,7 @@ public class FXQueryTable extends BorderPane{
                             return new SimpleObjectProperty<>(param.getValue());
                         }
                     },
-                    (Object t) -> true, 
+                    (Object t) -> true,
                     new Function() {
 
                         public Object apply(Object t) {

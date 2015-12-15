@@ -177,6 +177,9 @@ import org.opengis.filter.Filter;
  */
 public class PojoTable extends BorderPane implements Printable {
 
+    private static final Callback<TableColumn.CellDataFeatures, ObservableValue> DEFAULT_VALUE_FACTORY = param -> new SimpleObjectProperty(param.getValue());
+    private static final Predicate DEFAULT_VISIBLE_PREDICATE = o -> o != null;
+
     protected static final String BUTTON_STYLE = "buttonbar-button";
     private static final Image ICON_SHOWONMAP = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GLOBE, 16, FontAwesomeIcons.DEFAULT_COLOR),null);
 
@@ -304,7 +307,7 @@ public class PojoTable extends BorderPane implements Printable {
         } else {
             this.pojoClass = pojoClass;
         }
-        getStylesheets().add(SIRS.CSS_PATH);
+
         this.labelMapper = LabelMapper.get(this.pojoClass);
         if (repo == null) {
             AbstractSIRSRepository tmpRepo;
@@ -438,7 +441,7 @@ public class PojoTable extends BorderPane implements Printable {
          */
         uiSearch.textProperty().bind(currentSearch);
         uiSearch.getStyleClass().add(BUTTON_STYLE);
-        uiSearch.setOnAction((ActionEvent event) -> {searchText();});
+        uiSearch.setOnAction((ActionEvent event) -> searchText());
         uiSearch.getStyleClass().add("label-header");
         uiSearch.disableProperty().bind(searchableProperty.not());
 
@@ -508,7 +511,7 @@ public class PojoTable extends BorderPane implements Printable {
         uiTable.setTableMenuButtonVisible(true);
         // Load all elements only if the user gave us the repository.
         if (repo != null) {
-            setTableItems(()-> FXCollections.observableList(this.repo.getAll()));
+            setTableItems(()-> SIRS.observableList(this.repo.getAll()));
         }
 
         commentPhotoView.valueProperty().bind(uiTable.getSelectionModel().selectedItemProperty());
@@ -1104,30 +1107,26 @@ public class PojoTable extends BorderPane implements Printable {
         });
 
 
-        updater.stateProperty().addListener(new ChangeListener() {
-            @Override
-            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                if (Worker.State.SUCCEEDED.equals(newValue)) {
-                    Platform.runLater(() -> {
-                        uiTable.setItems(decoratedValues);
-                        uiSearch.setGraphic(searchNone);
-                    });
-                } else if (Worker.State.FAILED.equals(newValue) || Worker.State.CANCELLED.equals(newValue)) {
-                    final Throwable ex = updater.getException();
-                    if(ex!=null){
-                        SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-                    }
-                    Platform.runLater(() -> {
-                        uiSearch.setGraphic(searchNone);
-                    });
-                } else if (Worker.State.RUNNING.equals(newValue)) {
-                    Platform.runLater(() -> uiSearch.setGraphic(searchRunning));
+        updater.stateProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
+            if (Worker.State.SUCCEEDED.equals(newValue)) {
+                Platform.runLater(() -> {
+                    uiTable.setItems(decoratedValues);
+                    uiSearch.setGraphic(searchNone);
+                });
+            } else if (Worker.State.FAILED.equals(newValue) || Worker.State.CANCELLED.equals(newValue)) {
+                final Throwable ex = updater.getException();
+                if(ex!=null){
+                    SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 }
+                Platform.runLater(() -> {
+                    uiSearch.setGraphic(searchNone);
+                });
+            } else if (Worker.State.RUNNING.equals(newValue)) {
+                Platform.runLater(() -> uiSearch.setGraphic(searchRunning));
             }
         });
 
         tableUpdaterProperty.set(TaskManager.INSTANCE.submit("Recherche...", updater));
-
     }
 
 //    protected final Lock lock = new ReentrantReadWriteLock().readLock();
@@ -1446,20 +1445,16 @@ public class PojoTable extends BorderPane implements Printable {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-    private class EnumColumn extends TableColumn<Element, Object>{
-        private EnumColumn(PropertyDescriptor desc){
+    private class EnumColumn extends TableColumn<Element, Object> {
+
+        private EnumColumn(final PropertyDescriptor desc) {
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
             setEditable(false);
             setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
-            setCellFactory(new Callback<TableColumn<Element, Object>, TableCell<Element, Object>>() {
-
-                @Override
-                public TableCell<Element, Object> call(TableColumn<Element, Object> param) {
-                    final TableCell<Element, Object> cell = new FXEnumTableCell(desc.getReadMethod().getReturnType(), new SirsStringConverter());
-                    editableProperty().bind(cellEditableProperty);
-                    return cell;
-                }
-
+            setCellFactory((TableColumn<Element, Object> param) -> {
+                final TableCell<Element, Object> cell = new FXEnumTableCell(desc.getReadMethod().getReturnType(), new SirsStringConverter());
+                editableProperty().bind(cellEditableProperty);
+                return cell;
             });
             addEventHandler(TableColumn.editCommitEvent(), (CellEditEvent<Element, Object> event) -> {
                 final Object rowElement = event.getRowValue();
@@ -1486,62 +1481,60 @@ public class PojoTable extends BorderPane implements Printable {
         }
     }
 
+    private static final Callback<TableColumn<Element, Double>, TableCell<Element, Double>> DOUBLE_CELL_FACTORY = param -> new FXNumberCell(Double.class);
+
     private class DistanceComputedPropertyColumn extends TableColumn<Element, Double>{
 
         private boolean titleSet = false;
 
-
         public DistanceComputedPropertyColumn(){
-            setCellFactory((TableColumn<Element, Double> param) -> new FXNumberCell(Double.class));
+            setCellFactory(DOUBLE_CELL_FACTORY);
             setEditable(false);
             setText("Valeur calculée");
-            setCellValueFactory(new Callback<CellDataFeatures<Element, Double>, ObservableValue<Double>>() {
-
-                @Override
-                public ObservableValue<Double> call(CellDataFeatures<Element, Double> param) {
-
-                    if(param.getValue() instanceof PointXYZ){
-                        // Cas des XYZ de profils en long et des lignes d'eau avec PR calculé
-                        if(parentElementProperty().get() instanceof ProfilLong
-                                || parentElementProperty().get() instanceof LigneEau){
-                            if(!titleSet){setText("PR calculé");titleSet=true;}
-                            return new PRXYZBinding((PointXYZ) param.getValue(), (Positionable) parentElementProperty().get()).asObject();
-                        }
-                        // Cas des XYZ de levés de profils en travers avec distance calculée
-                        else {
-                            final Element origine = getTableView().getItems().get(0);
-                            if(origine instanceof PointXYZ){
-                                if(!titleSet){setText("Distance calculée");titleSet=true;}
-                                return new DXYZBinding((PointXYZ) param.getValue(), (PointXYZ) origine).asObject();
-                            }
-                            else{
-                                // Sinon la colonne ne sert à rien et on la retire dès que possible.
-                                if(uiTable.getColumns().contains(DistanceComputedPropertyColumn.this)) uiTable.getColumns().remove(DistanceComputedPropertyColumn.this);
-                                return null;
-                            }
-                        }
+            setCellValueFactory((CellDataFeatures<Element, Double> param) -> {
+                if(param.getValue() instanceof PointXYZ){
+                    // Cas des XYZ de profils en long et des lignes d'eau avec PR calculé
+                    if(parentElementProperty().get() instanceof ProfilLong
+                            || parentElementProperty().get() instanceof LigneEau){
+                        if(!titleSet){setText("PR calculé");titleSet=true;}
+                        return new PRXYZBinding((PointXYZ) param.getValue(), (Positionable) parentElementProperty().get()).asObject();
                     }
-
-                    // Das des PrZ de profils en long ou lignes d'eau avec PR saisi converti en PR calculé dans le SR par défaut
-                    else if(param.getValue() instanceof PointDZ
-                            && parentElementProperty().get() instanceof PrZPointImporter
-                            && parentElementProperty().get() instanceof Positionable){
-                        if(!titleSet){setText("PR calculé"); titleSet=true;}
-                        return new PRZBinding((PointDZ) param.getValue(), (Positionable) parentElementProperty().get()).asObject();
-                    }
+                    // Cas des XYZ de levés de profils en travers avec distance calculée
                     else {
-                        // Sinon la colonne ne sert à rien et on la retire dès que possible.
-                        if(uiTable.getColumns().contains(DistanceComputedPropertyColumn.this)) uiTable.getColumns().remove(DistanceComputedPropertyColumn.this);
-                        return null;
+                        final Element origine = getTableView().getItems().get(0);
+                        if(origine instanceof PointXYZ){
+                            if(!titleSet){setText("Distance calculée");titleSet=true;}
+                            return new DXYZBinding((PointXYZ) param.getValue(), (PointXYZ) origine).asObject();
+                        }
+                        else{
+                            // Sinon la colonne ne sert à rien et on la retire dès que possible.
+                            if(uiTable.getColumns().contains(DistanceComputedPropertyColumn.this)) uiTable.getColumns().remove(DistanceComputedPropertyColumn.this);
+                            return null;
+                        }
                     }
+                }
+
+                // Das des PrZ de profils en long ou lignes d'eau avec PR saisi converti en PR calculé dans le SR par défaut
+                else if(param.getValue() instanceof PointDZ
+                        && parentElementProperty().get() instanceof PrZPointImporter
+                        && parentElementProperty().get() instanceof Positionable){
+                    if(!titleSet){setText("PR calculé"); titleSet=true;}
+                    return new PRZBinding((PointDZ) param.getValue(), (Positionable) parentElementProperty().get()).asObject();
+                }
+                else {
+                    // Sinon la colonne ne sert à rien et on la retire dès que possible.
+                    if(uiTable.getColumns().contains(DistanceComputedPropertyColumn.this)) uiTable.getColumns().remove(DistanceComputedPropertyColumn.this);
+                    return null;
                 }
             });
         }
     }
 
+    /**
+     * Column used to display / edit simple attributes or references of an element.
+     */
     public final class PropertyColumn extends TableColumn<Element, Object>{
 
-        private final ObservableList refList;
         private final Reference ref;
         private final String name;
 
@@ -1559,11 +1552,8 @@ public class PojoTable extends BorderPane implements Printable {
 
             //choix de l'editeur en fonction du type de données
             boolean isEditable = true;
-            final Reference ref = desc.getReadMethod().getAnnotation(Reference.class);
+            this.ref = desc.getReadMethod().getAnnotation(Reference.class);
             if (ref != null) {
-                this.ref = ref;
-                this.refList = FXCollections.observableArrayList(session.getPreviews().getByClass(ref.ref()));
-
                 //reference vers un autre objet
                 setCellFactory((TableColumn<Element, Object> param) -> new ReferenceTableCell(ref.ref()));
                 try {
@@ -1585,9 +1575,6 @@ public class PojoTable extends BorderPane implements Printable {
                 }
 
             } else {
-                this.ref = null;
-                this.refList = FXCollections.emptyObservableList();
-
                 setCellValueFactory(new PropertyValueFactory<>(name));
                 final Class type = desc.getReadMethod().getReturnType();
                 if (Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)) {
@@ -1659,11 +1646,6 @@ public class PojoTable extends BorderPane implements Printable {
         public Reference getReference() {
             return ref;
         }
-
-        public ObservableList<Preview> getReferencesList(){
-            return refList;
-        }
-
     }
 
     /**
@@ -1707,13 +1689,7 @@ public class PojoTable extends BorderPane implements Printable {
             setMaxWidth(24);
             setGraphic(new ImageView(GeotkFX.ICON_DUPLICATE));
 
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures<T, T>, ObservableValue<T>>() {
-
-                @Override
-                public ObservableValue<T> call(TableColumn.CellDataFeatures param) {
-                    return new SimpleObjectProperty(param.getValue());
-                }
-            });
+            setCellValueFactory((Callback) DEFAULT_VALUE_FACTORY);
 
             if(pojoClass!=null && repo!=null){
                 setCellFactory(new Callback<TableColumn<T, T>, TableCell<T, T>>() {
@@ -1722,7 +1698,7 @@ public class PojoTable extends BorderPane implements Printable {
                     public TableCell call(TableColumn param) {
                         return new ButtonTableCell(
                                 false, new ImageView(GeotkFX.ICON_DUPLICATE),
-                                (Object t) -> t != null, (Object t) -> {
+                                DEFAULT_VISIBLE_PREDICATE, (Object t) -> {
                                     if (pojoClass.isAssignableFrom(t.getClass())) {
                                         final Element newElement = ((T) t).copy();
                                         repo.add(newElement);
@@ -1754,12 +1730,12 @@ public class PojoTable extends BorderPane implements Printable {
 
             final Tooltip deleteTooltip = new Tooltip("Supprimer l'élement");
             final Tooltip unlinkTooltip = new Tooltip("Dissocier l'élement");
-            setCellValueFactory((TableColumn.CellDataFeatures<Element, Element> param) -> new SimpleObjectProperty<>(param.getValue()));
+            setCellValueFactory((Callback)DEFAULT_VALUE_FACTORY);
             setCellFactory((TableColumn<Element, Element> param) -> {
                 final boolean realDelete = createNewProperty.get();
                 final ButtonTableCell<Element, Element> button = new ButtonTableCell<>(false,
                         realDelete ? new ImageView(GeotkFX.ICON_DELETE) : new ImageView(GeotkFX.ICON_UNLINK),
-                        (Element t) -> t!=null,
+                        DEFAULT_VISIBLE_PREDICATE,
                         (Element t) -> {
                             final Alert confirm;
                             if (realDelete) {
@@ -1802,11 +1778,11 @@ public class PojoTable extends BorderPane implements Printable {
             setGraphic(new ImageView(ICON_SHOWONMAP));
 
             final Tooltip tooltip = new Tooltip("Voir l'élément sur la carte");
-            setCellValueFactory((TableColumn.CellDataFeatures<Element, Element> param) -> new SimpleObjectProperty<>(param.getValue()));
+            setCellValueFactory((Callback)DEFAULT_VALUE_FACTORY);
             setCellFactory((TableColumn<Element, Element> param) -> {
                 final ButtonTableCell<Element, Element> button = new ButtonTableCell<>(false,
                         new ImageView(ICON_SHOWONMAP),
-                        (Element t) -> t!=null,
+                        DEFAULT_VISIBLE_PREDICATE,
                         (Element t) -> {
                             final FXMapTab tab = session.getFrame().getMapTab();
                             tab.getMap().focusOnElement(t);
@@ -1832,13 +1808,7 @@ public class PojoTable extends BorderPane implements Printable {
 
             final Tooltip tooltip = new Tooltip("Ouvrir la fiche de l'élément");
 
-            setCellValueFactory(new Callback<TableColumn.CellDataFeatures, ObservableValue>() {
-
-                @Override
-                public ObservableValue call(TableColumn.CellDataFeatures param) {
-                    return new SimpleObjectProperty<>(param.getValue());
-                }
-            });
+            setCellValueFactory(DEFAULT_VALUE_FACTORY);
 
             setCellFactory(new Callback<TableColumn, TableCell>() {
 
@@ -1846,7 +1816,7 @@ public class PojoTable extends BorderPane implements Printable {
                 public TableCell call(TableColumn param) {
                     ButtonTableCell button = new ButtonTableCell(
                             false, new ImageView(SIRS.ICON_EDIT_BLACK),
-                            (Object t) -> t!=null, (Object t) -> {
+                            DEFAULT_VISIBLE_PREDICATE, (Object t) -> {
                                 editFct.accept(t);
                                 return t;
                             });
@@ -1894,10 +1864,10 @@ public class PojoTable extends BorderPane implements Printable {
             setTitle("Choix de l'élément");
 
             if(tronconSourceProperty.get()==null){
-                comboBox.setItems(FXCollections.observableArrayList(session.getPreviews().getByClass(pojoClass)));
+                comboBox.setItems(SIRS.observableList(session.getPreviews().getByClass(pojoClass)));
             }
             else{
-                comboBox.setItems(FXCollections.observableArrayList(session.getPreviews().getByClass(pojoClass))
+                comboBox.setItems(SIRS.observableList(session.getPreviews().getByClass(pojoClass))
                         .filtered((Preview t) -> { return tronconSourceProperty.get().equals(t.getDocId());}));
             }
 

@@ -179,10 +179,6 @@ public final class SIRS extends SirsCore {
                 throw new IllegalArgumentException(ex.getMessage(), ex);
             }
         });
-
-        if (candidate.getStylesheets().isEmpty()) {
-            candidate.getStylesheets().add(CSS_PATH);
-        }
     }
 
     /**

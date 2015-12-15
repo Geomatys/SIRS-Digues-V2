@@ -62,7 +62,7 @@ public class FXTronconThemePane extends BorderPane {
             uiCenter.setCenter(pane);
         }
 
-        final ObservableList<Preview> linearPreviews = FXCollections.observableList(session.getPreviews().getByClass(TronconDigue.class));
+        final ObservableList<Preview> linearPreviews = SIRS.observableList(session.getPreviews().getByClass(TronconDigue.class));
         SIRS.initCombo(uiLinearChoice, linearPreviews, linearPreviews.isEmpty()? null : linearPreviews.get(0));
 
         uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) -> {

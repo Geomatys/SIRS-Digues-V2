@@ -9,7 +9,7 @@ import fr.sirs.core.model.*;
 import fr.sirs.util.javafx.FloatSpinnerValueFactory;
 
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.web.HTMLEditor;
@@ -27,7 +27,7 @@ public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndig
 
     private final Previews previewRepository;
     private LabelMapper labelMapper;
-    
+
     private final DiguePojoTable table = new DiguePojoTable();
 
     // Propriétés de SystemeEndiguement
@@ -67,21 +67,21 @@ public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndig
         ui_gestionnaireDecretId.disableProperty().bind(disableFieldsProperty());
         ui_gestionnaireDecretId_link.disableProperty().bind(ui_gestionnaireDecretId.getSelectionModel().selectedItemProperty().isNull());
         ui_gestionnaireDecretId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
-        ui_gestionnaireDecretId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_gestionnaireDecretId.getSelectionModel().getSelectedItem()));       
+        ui_gestionnaireDecretId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_gestionnaireDecretId.getSelectionModel().getSelectedItem()));
         ui_gestionnaireTechniqueId.disableProperty().bind(disableFieldsProperty());
         ui_gestionnaireTechniqueId_link.disableProperty().bind(ui_gestionnaireTechniqueId.getSelectionModel().selectedItemProperty().isNull());
         ui_gestionnaireTechniqueId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
-        ui_gestionnaireTechniqueId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_gestionnaireTechniqueId.getSelectionModel().getSelectedItem()));       
+        ui_gestionnaireTechniqueId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_gestionnaireTechniqueId.getSelectionModel().getSelectedItem()));
     }
-    
+
     public FXSystemeEndiguementPane(final SystemeEndiguement systemeEndiguement){
         this();
         this.elementProperty().set(systemeEndiguement);
-        
+
         table.editableProperty().bind(disableFieldsProperty().not());
         table.parentElementProperty().bind(elementProperty);
         tabs.getTabs().add(new Tab("Digues", table));
-    }     
+    }
 
     /**
      * Initialize fields at element setting.
@@ -99,7 +99,7 @@ public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndig
             ui_niveauProtection.getValueFactory().valueProperty().unbindBidirectional(oldElement.niveauProtectionProperty());
         }
 
-        final Session session = Injector.getBean(Session.class);        
+        final Session session = Injector.getBean(Session.class);
 
         /*
          * Bind control properties to Element ones.
@@ -116,14 +116,14 @@ public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndig
         // * niveauProtection
         ui_niveauProtection.getValueFactory().valueProperty().bindBidirectional(newElement.niveauProtectionProperty());
 
-        table.setTableItems(()->FXCollections.observableArrayList(
+        table.setTableItems(()-> (ObservableList) SIRS.observableList(
                 ((DigueRepository) session.getRepositoryForClass(Digue.class)).getBySystemeEndiguement(newElement)));
-            
-        SIRS.initCombo(ui_gestionnaireDecretId, FXCollections.observableArrayList(
-            previewRepository.getByClass(Organisme.class)), 
+
+        SIRS.initCombo(ui_gestionnaireDecretId, SIRS.observableList(
+            previewRepository.getByClass(Organisme.class)),
             newElement.getGestionnaireDecretId() == null? null : previewRepository.get(newElement.getGestionnaireDecretId()));
-        SIRS.initCombo(ui_gestionnaireTechniqueId, FXCollections.observableArrayList(
-            previewRepository.getByClass(Organisme.class)), 
+        SIRS.initCombo(ui_gestionnaireTechniqueId, SIRS.observableList(
+            previewRepository.getByClass(Organisme.class)),
             newElement.getGestionnaireTechniqueId() == null? null : previewRepository.get(newElement.getGestionnaireTechniqueId()));
     }
     @Override
@@ -152,9 +152,9 @@ public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndig
             element.setGestionnaireTechniqueId(null);
         }
     }
-    
+
     private class DiguePojoTable extends PojoTable {
-    
+
         public DiguePojoTable() {
             super(Digue.class, "Digues du système d'endiguement");
         }

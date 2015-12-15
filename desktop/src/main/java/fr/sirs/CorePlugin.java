@@ -81,7 +81,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.MenuItem;
@@ -976,7 +975,7 @@ public class CorePlugin extends Plugin {
             }
         }
 
-        SIRS.initCombo(comboBox, FXCollections.observableList(typePreviews), selectedPreview);
+        SIRS.initCombo(comboBox, SirsCore.observableList(typePreviews), selectedPreview);
     }
 
     public static void initTronconDigue(final TronconDigue troncon, final Session session){

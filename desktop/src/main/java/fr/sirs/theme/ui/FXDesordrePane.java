@@ -15,14 +15,13 @@ import java.util.List;
 import java.util.Map;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
 public class FXDesordrePane extends FXDesordrePaneStub {
-    
+
     public FXDesordrePane(final Desordre desordre){
         super(desordre);
 
@@ -42,10 +41,10 @@ public class FXDesordrePane extends FXDesordrePaneStub {
                 else if (newValue==null){
                     typesDispos.removeIf((RefTypeDesordre st) -> st.getCategorieId()!=null);
                 }
-                SIRS.initCombo(ui_typeDesordreId, FXCollections.observableList(typesDispos), null);
+                SIRS.initCombo(ui_typeDesordreId, SIRS.observableList(typesDispos), null);
             }
         });
-    }     
+    }
 
     /**
      * Initialize fields at element setting.
@@ -80,7 +79,7 @@ public class FXDesordrePane extends FXDesordrePaneStub {
         }
 
 
-        SIRS.initCombo(ui_categorieDesordreId, FXCollections.observableList(categoriePreviews),
+        SIRS.initCombo(ui_categorieDesordreId, SIRS.observableList(categoriePreviews),
             newElement.getCategorieDesordreId()== null? null : previewRepository.get(newElement.getCategorieDesordreId()));
 
 

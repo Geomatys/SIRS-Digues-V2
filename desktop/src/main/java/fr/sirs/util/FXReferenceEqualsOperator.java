@@ -2,10 +2,10 @@
 package fr.sirs.util;
 
 import fr.sirs.Injector;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Preview;
 import java.util.List;
 import java.util.Optional;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
@@ -54,7 +54,7 @@ public class FXReferenceEqualsOperator implements FXFilterOperator {
     @Override
     public Optional<Node> createFilterEditor(PropertyType target) {
         final Class refClass = getReferenceClass(target);
-        ObservableList<Preview> choices = FXCollections.observableList(
+        ObservableList<Preview> choices = SirsCore.observableList(
                 Injector.getSession().getPreviews().getByClass(refClass));
         if (choices.isEmpty())
             return Optional.empty();

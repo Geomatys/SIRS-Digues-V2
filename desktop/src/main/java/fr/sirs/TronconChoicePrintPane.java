@@ -18,7 +18,6 @@ import java.util.function.Predicate;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
@@ -33,7 +32,7 @@ import org.geotoolkit.referencing.LinearReferencing;
 
 /**
  * Classe abstraite de factorisation des fonctionnalités communes aux panneaux
- * d'impression permettant de choisir des tronçons et des PRs pour restreindre 
+ * d'impression permettant de choisir des tronçons et des PRs pour restreindre
  * les objets à inclure dans le document à imprimer.
  *
  * @author Samuel Andrés (Geomatys)
@@ -46,7 +45,7 @@ public abstract class TronconChoicePrintPane extends BorderPane {
 
     public TronconChoicePrintPane(final Class forBundle) {
         SIRS.loadFXML(this, forBundle);
-        tronconsTable.setTableItems(()-> (ObservableList) FXCollections.observableList(Injector.getSession().getRepositoryForClass(TronconDigue.class).getAll()));
+        tronconsTable.setTableItems(()-> (ObservableList) SIRS.observableList(Injector.getSession().getRepositoryForClass(TronconDigue.class).getAll()));
         tronconsTable.commentAndPhotoProperty().set(false);
         uiTronconChoice.setContent(tronconsTable);
     }

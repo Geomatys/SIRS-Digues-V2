@@ -243,7 +243,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
      */
     protected Map<String,BorneDigue> initSRBorneLists(final TronconDigue t, final SystemeReperage defaultSR){
         final List<SystemeReperage> srs = ((SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class)).getByLinear(t);
-        uiSRs.setItems(FXCollections.observableList(srs));
+        uiSRs.setItems(SIRS.observableList(srs));
         uiSRs.getSelectionModel().select(defaultSR);
 
         // Init list of bornes

@@ -32,7 +32,6 @@ import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -326,7 +325,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
 
         final ComboBox<Preview> parentChoice;
         if (parentClass != null) {
-            parentChoice = new ComboBox<>(FXCollections.observableList(session.getPreviews().getByClass(parentClass)));
+            parentChoice = new ComboBox<>(SIRS.observableList(session.getPreviews().getByClass(parentClass)));
             parentChoice.setConverter(strConverter);
             parentChoice.setEditable(true);
             ComboBoxCompletion.autocomplete(parentChoice);
@@ -339,7 +338,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
 
         final ComboBox<RefRive> rives;
         if (showRive) {
-            rives = new ComboBox<>(FXCollections.observableList(session.getRepositoryForClass(RefRive.class).getAll()));
+            rives = new ComboBox<>(SIRS.observableList(session.getRepositoryForClass(RefRive.class).getAll()));
             rives.setConverter(strConverter);
             bp.add(new Label("Sur la rive"), 0, 4);
             bp.add(rives, 0, 5);

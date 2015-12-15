@@ -9,7 +9,6 @@ import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -54,7 +53,7 @@ public class FXModeleRapportsPane extends BorderPane {
         uiReportList.getSelectionModel().selectedItemProperty().addListener(this::selectionChanged);
         uiReportList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        uiReportList.setItems(FXCollections.observableList(session.getPreviews().getByClass(ModeleRapport.class)));
+        uiReportList.setItems(SIRS.observableList(session.getPreviews().getByClass(ModeleRapport.class)));
         uiReportList.setCellFactory((ListView<Preview> param) -> {
             return new ListCell<Preview>() {
 

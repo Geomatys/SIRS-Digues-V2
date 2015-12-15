@@ -12,7 +12,6 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Popup;
 import javafx.util.Duration;
 

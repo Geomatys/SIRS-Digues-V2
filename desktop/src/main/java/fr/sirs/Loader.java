@@ -55,7 +55,7 @@ public class Loader extends Application {
     public Loader(String databaseName, final DatabaseRegistry localRegistry) {
         ArgumentChecks.ensureNonEmpty("Database name", databaseName);
         ArgumentChecks.ensureNonNull("Database registry", localRegistry);
-        
+
         this.databaseName = databaseName;
         // Initialize splash screen
         splashStage = new Stage(StageStyle.TRANSPARENT);

@@ -1,9 +1,9 @@
 package fr.sirs;
 
-import static fr.sirs.SIRS.BUNDLE_KEY_CLASS;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.Utilisateur;
@@ -30,6 +30,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -62,6 +63,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
+import javafx.scene.transform.Transform;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -171,10 +173,7 @@ public class FXMainFrame extends BorderPane {
         uiAdmin.getItems().addAll(uiUserAdmin, uiValidation, uiReference, uiDesignation);
         uiAdmin.visibleProperty().bind(Bindings.createBooleanBinding(() -> {
             Utilisateur user = session.utilisateurProperty().get();
-            if (user != null && Role.ADMIN.equals(user.getRole())) {
-                return true;
-            }
-            return false;
+            return user != null && Role.ADMIN.equals(user.getRole());
         }, session.utilisateurProperty()));
 
         final ObservableSet<AlertItem> alerts = AlertManager.getInstance().getAlerts();
@@ -188,55 +187,42 @@ public class FXMainFrame extends BorderPane {
         SIRS.LOGGER.log(Level.FINE, org.apache.sis.setup.About.configuration().toString());
 
         //on change les boutons de la barre en fonction du plugin actif.
-        activePlugin.addListener(new ChangeListener<Plugin>() {
-            @Override
-            public void changed(ObservableValue<? extends Plugin> observable, Plugin oldValue, Plugin newValue) {
-                uiPlugins.setText(newValue.getTitle().toString());
-                uiToolBarPlugins.getItems().clear();
-                for (Theme theme : newValue.getThemes()) {
-                    uiToolBarPlugins.getItems().add(toButton((AbstractPluginsButtonTheme) theme));
-                }
+        activePlugin.addListener((ObservableValue<? extends Plugin> observable, Plugin oldValue, Plugin newValue) -> {
+            uiPlugins.setText(newValue.getTitle().toString());
+            uiToolBarPlugins.getItems().clear();
+            for (Theme theme : newValue.getThemes()) {
+                uiToolBarPlugins.getItems().add(toButton((AbstractPluginsButtonTheme) theme));
             }
         });
-
 
         //on ecoute le changement d'element imprimable
         uiPrintButton.setAlignment(Pos.CENTER);
         uiPrintButton.setTextAlignment(TextAlignment.CENTER);
-        uiPrintButton.disableProperty().bind(PrintManager.printableProperty().isNull());
-        PrintManager.printableProperty().addListener(new ChangeListener<Printable>() {
-            @Override
-            public void changed(ObservableValue<? extends Printable> observable, Printable oldValue, Printable newValue) {
-                if(newValue==null){
-                    uiPrintButton.setText("Impression");
-                }else{
-                    String title = newValue.getPrintTitle();
-                    if(title==null || title.isEmpty()){
-                        uiPrintButton.setText("Impression");
-                    }else{
-                        uiPrintButton.setText("Impression \n"+title);
-                    }
-                }
-            }
-        });
-        final Printable newValue = PrintManager.printableProperty().get();
-        if(newValue==null){
-            uiPrintButton.setText("Impression");
-        }else{
-            String title = newValue.getPrintTitle();
-            if(title==null || title.isEmpty()){
+
+        final ReadOnlyObjectProperty<Printable> printableProperty = PrintManager.printableProperty();
+        uiPrintButton.disableProperty().bind(printableProperty.isNull());
+
+        final ChangeListener<Printable> printListener = (obs, oldValue, newValue) -> {
+            if(newValue==null){
                 uiPrintButton.setText("Impression");
             }else{
-                uiPrintButton.setText("Impression \n"+title);
+                String title = newValue.getPrintTitle();
+                if(title==null || title.isEmpty()){
+                    uiPrintButton.setText("Impression");
+                }else{
+                    final StringBuilder builder = new StringBuilder("Impression");
+                    uiPrintButton.setText(builder.append(System.lineSeparator()).append(title).toString());
+                }
             }
-        }
+        };
 
+        printableProperty.addListener(printListener);
+        printListener.changed(printableProperty, null, printableProperty.get());
     }
 
     public void showAlertsPopup() {
         final ObservableSet<AlertItem> alerts = AlertManager.getInstance().getAlerts();
         final VBox vbox = new VBox();
-        vbox.getStylesheets().add(SIRS.CSS_PATH);
         vbox.getStyleClass().add(CSS_POPUP_ALERTS);
 
         final DateTimeFormatter dfFormat = DateTimeFormatter.ofPattern("d MMMM uuuu");
@@ -259,14 +245,21 @@ public class FXMainFrame extends BorderPane {
         alertPopup.setAutoHide(true);
         alertPopup.setConsumeAutoHidingEvents(false);
 
-        uiAlertsBtn.localToSceneTransformProperty().addListener((observable, oldValue, newValue) -> {
-            if (alertPopup.isShowing()) {
-                final Point2D popupPos = uiAlertsBtn.localToScreen(uiAlertsBtn.getWidth(), 0);
-                alertPopup.show(uiAlertsBtn, popupPos.getX() - alertPopup.getWidth() - 5, popupPos.getY() - alertPopup.getHeight());
-            }
-        });
-
         if (!alerts.isEmpty()) {
+            // If we've got content, we set alert popup to keep its position near alert button.
+            final ChangeListener<Transform> trListener = (observable, oldValue, newValue) -> {
+                if (alertPopup.isShowing()) {
+                    final Point2D popupPos = uiAlertsBtn.localToScreen(uiAlertsBtn.getWidth(), 0);
+                    alertPopup.show(uiAlertsBtn, popupPos.getX() - alertPopup.getWidth() - 5, popupPos.getY() - alertPopup.getHeight());
+                }
+            };
+
+            uiAlertsBtn.localToSceneTransformProperty().addListener(trListener);
+            alertPopup.setOnHiding(evt -> {
+                uiAlertsBtn.localToSceneTransformProperty().removeListener(trListener);
+                alertPopup.setOnHiding(null);
+            });
+
             final Point2D popupPos = uiAlertsBtn.localToScreen(uiAlertsBtn.getWidth(), 0);
             alertPopup.show(uiAlertsBtn, popupPos.getX() - alertPopup.getWidth() - 5, popupPos.getY() - alertPopup.getHeight());
         }
@@ -300,18 +293,16 @@ public class FXMainFrame extends BorderPane {
 
     private enum Choice{REFERENCE, MODEL};
     private MenuItem toMenuItem(final Class clazz, final Choice typeOfSummary){
-        final ResourceBundle bdl = ResourceBundle.getBundle(clazz.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
+        final LabelMapper mapper = LabelMapper.get(clazz);
         final MenuItem item;
         if(typeOfSummary==Choice.REFERENCE){
-            item = new MenuItem(clazz.getSimpleName()+" ("+bdl.getString(BUNDLE_KEY_CLASS)+")");
+            item = new MenuItem(clazz.getSimpleName()+" ("+mapper.mapClassName()+")");
         }
         else{
-            item = new MenuItem(bdl.getString(BUNDLE_KEY_CLASS));
+            item = new MenuItem(mapper.mapClassName());
         }
 
-
         final EventHandler<ActionEvent> handler;
-
         if(typeOfSummary==Choice.REFERENCE){
             handler = (ActionEvent event) -> {
                 addTab(Injector.getSession().getOrCreateReferenceTypeTab(clazz));
