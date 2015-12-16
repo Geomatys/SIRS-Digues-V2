@@ -4,6 +4,7 @@ import fr.sirs.SIRS;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTOS_SUBREPORT;
 import fr.sirs.util.property.SirsPreferences;
@@ -17,10 +18,12 @@ import java.net.URI;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import javafx.collections.FXCollections;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import net.sf.jasperreports.engine.JRDataSource;
@@ -43,18 +46,18 @@ import org.xml.sax.SAXException;
  * <p>This class provides utilities for two purposes:</p>
  * <ul>
  * <li>generating Jasper Reports templates mapping the classes of the model.</li>
- * <li>generating portable documents (.pdf) based on the templates on the one 
+ * <li>generating portable documents (.pdf) based on the templates on the one
  * hand and the instances on the other hand.</li>
  * </ul>
  * <p>These are tools for printing functionnalities.</p>
  * @author Samuel Andrés (Geomatys)
  */
 public class PrinterUtilities {
-    
+
     private static final String JRXML_EXTENSION = ".jrxml";
     private static final String PDF_EXTENSION = ".pdf";
     private static final String LOGO_PATH = "/fr/sirs/images/icon-sirs.png";
-    
+
     private static final List<String> falseGetter = new ArrayList<>();
     static{
         falseGetter.add("getClass");
@@ -64,7 +67,7 @@ public class PrinterUtilities {
         falseGetter.add("getConflicts");
         falseGetter.add("getDocumentId");
     }
-    
+
     private static final String TEMPLATE_PHOTOS = "/fr/sirs/jrxml/photoTemplate.jrxml";
 
     ////////////////////////////////////////////////////////////////////////////
@@ -117,22 +120,22 @@ public class PrinterUtilities {
         }
         return fout;
     }
-    
+
     ////////////////////////////////////////////////////////////////////////////
     // FICHES DÉTAILLÉES DE DESORDRES
     ////////////////////////////////////////////////////////////////////////////
     private static final String META_TEMPLATE_DESORDRE = "/fr/sirs/jrxml/metaTemplateDesordre.jrxml";
-    
-    public static File printDisorders(final List<String> avoidDesordreFields, 
-            final List<String> avoidObservationFields, 
-            final List<String> avoidPrestationFields, 
+
+    public static File printDisorders(final List<String> avoidDesordreFields,
+            final List<String> avoidObservationFields,
+            final List<String> avoidPrestationFields,
             final List<String> reseauFields,
-            final Previews previewLabelRepository, 
+            final Previews previewLabelRepository,
             final SirsStringConverter stringConverter,
-            final List<Desordre> desordres, 
+            final List<Desordre> desordres,
             final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie)
         throws ParserConfigurationException, SAXException, JRException, TransformerException, IOException {
-        
+
         // Creates the Jasper Reports specific template from the generic template.
         final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
         templateFile.deleteOnExit();
@@ -151,7 +154,7 @@ public class PrinterUtilities {
 
             final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
 
-            final JRDataSource source = new DesordreDataSource(desordres, previewLabelRepository, stringConverter);
+            final JRDataSource source = new DesordreDataSource(FXCollections.observableList(desordres).sorted((Comparator)new PRComparator()), previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
 
@@ -171,7 +174,7 @@ public class PrinterUtilities {
         }
         return fout;
     }
-    
+
     ////////////////////////////////////////////////////////////////////////////
     // FICHES DE RESULTATS DE REQUETES
     ////////////////////////////////////////////////////////////////////////////
@@ -190,9 +193,9 @@ public class PrinterUtilities {
      */
     public static File print(List<String> avoidFields, final FeatureCollection featureCollection)
         throws IOException, ParserConfigurationException, SAXException, JRException, TransformerException {
-        
+
         if(avoidFields==null) avoidFields=new ArrayList<>();
-        
+
         // Creates the Jasper Reports specific template from the generic template.
         final File template;
         try(final InputStream templateInputStream =PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_QUERY)){
@@ -203,14 +206,14 @@ public class PrinterUtilities {
             writer.setOutput(template);
             writer.write(featureCollection.getFeatureType(), avoidFields);
         }
-        
+
         // Retrives the compiled template and the feature type -----------------
         final Map.Entry<JasperReport, FeatureType> entry = JasperReportService.prepareTemplate(template);
         final JasperReport report = entry.getKey();
-        
+
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile(featureCollection.getFeatureType().getName().tip().toString(), PDF_EXTENSION);
-        
+
         try (final FileOutputStream outStream = new FileOutputStream(fout);
                 final InputStream logoStream = PrinterUtilities.class.getResourceAsStream(LOGO_PATH)) {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
@@ -224,47 +227,47 @@ public class PrinterUtilities {
         }
         return fout;
     }
-    
+
     ////////////////////////////////////////////////////////////////////////////
     // FICHES SYNOPTIQUES D'ELEMENTS DU MODELE
     ////////////////////////////////////////////////////////////////////////////
     private static final String META_TEMPLATE_ELEMENT = "/fr/sirs/jrxml/metaTemplateElement.jrxml";
-    
+
     /**
      * <p>Generate the specific Jasper Reports template for a given class.
-     * This method is based on a meta-template defined in 
+     * This method is based on a meta-template defined in
      * src/main/resources/fr/sirs/jrxml/metaTemplate.jrxml
      * and produce a specific template : ClassName.jrxml".</p>
-     * 
+     *
      * <p>This specific template is used to print objects of the model.</p>
-     * 
-     * @param elements Pojos to print. The list must contain at least one element. 
+     *
+     * @param elements Pojos to print. The list must contain at least one element.
      * If it contains more than one, they must be all of the same class.
      * @param avoidFields Names of the fields to avoid printing.
      * @param previewLabelRepository
      * @param stringConverter
-     * @return 
+     * @return
      * @throws java.io.IOException
      * @throws javax.xml.parsers.ParserConfigurationException
      * @throws org.xml.sax.SAXException
      * @throws net.sf.jasperreports.engine.JRException
      * @throws javax.xml.transform.TransformerException
      */
-    public static File print(final List<String> avoidFields, 
+    public static File print(final List<String> avoidFields,
             final Previews previewLabelRepository, final SirsStringConverter stringConverter, final List<? extends Element> elements)
             throws IOException, ParserConfigurationException, SAXException, JRException, TransformerException {
-        
+
         // Creates the Jasper Reports specific template from the generic template.
         final File templateFile = File.createTempFile(elements.get(0).getClass().getSimpleName(), JRXML_EXTENSION);
         templateFile.deleteOnExit();
-        
+
         final JRDomWriterElementSheet templateWriter = new JRDomWriterElementSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_ELEMENT));
         templateWriter.setFieldsInterline(2);
         templateWriter.setOutput(templateFile);
         templateWriter.write(elements.get(0).getClass(), avoidFields);
-        
+
         final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
-                
+
         JasperPrint finalPrint = null;
         for(final Element element : elements){
             final JRDataSource source = new ObjectDataSource(Collections.singletonList(element), previewLabelRepository, stringConverter);
@@ -279,7 +282,7 @@ public class PrinterUtilities {
                 }
             }
         }
-        
+
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile(elements.get(0).getClass().getSimpleName(), PDF_EXTENSION);
         try (final FileOutputStream outStream = new FileOutputStream(fout)) {
@@ -288,14 +291,14 @@ public class PrinterUtilities {
         }
         return fout;
     }
-    
+
     /*
-    
+
     Pour l'impression de plusieurs documents, plusieurs solutions (http://stackoverflow.com/questions/24115885/combining-two-jasper-reports)
-    
-    
+
+
     solution 1
-    
+
     List<JasperPrint> jasperPrints = new ArrayList<JasperPrint>();
 // Your code to get Jasperreport objects
 JasperReport jasperReportReport1 = JasperCompileManager.compileReport(jasperDesignReport1);
@@ -313,10 +316,10 @@ exporter.setParameter(JRExporterParameter.JASPER_PRINT_LIST, jasperPrints);
 exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
 exporter.exportReport();
 byte[] bytes = out.toByteArray();
-    
-    
+
+
     solution 2 (adoptée pour le moment) :
-    
+
     JasperPrint jp1 = JasperFillManager.fillReport(url.openStream(), parameters,
                     new JRBeanCollectionDataSource(inspBean));
 JasperPrint jp2 = JasperFillManager.fillReport(url.openStream(), parameters,
@@ -329,9 +332,9 @@ List pages = jp2 .getPages();
 
 }
 JasperViewer.viewReport(jp1,false);
-    
+
     */
-    
+
     ////////////////////////////////////////////////////////////////////////////
     // METHODES UTILITAIRES
     ////////////////////////////////////////////////////////////////////////////
@@ -341,10 +344,10 @@ JasperViewer.viewReport(jp1,false);
      * @return true if the method is a getter.
      */
     static public boolean isGetter(final Method method){
-        if (method == null) 
-            return false; 
-        else 
-            return (method.getName().startsWith("get") 
+        if (method == null)
+            return false;
+        else
+            return (method.getName().startsWith("get")
                 || method.getName().startsWith("is"))
                 && method.getParameterTypes().length == 0
                 && !falseGetter.contains(method.getName());
@@ -353,29 +356,29 @@ JasperViewer.viewReport(jp1,false);
     /**
      * <p>This method detects if a method is a setter.</p>
      * @param method
-     * @return true if the method is a setter. 
+     * @return true if the method is a setter.
      */
     static public boolean isSetter(final Method method){
-        if (method == null) 
+        if (method == null)
             return false;
-        else 
+        else
             return method.getName().startsWith("set")
                 && method.getParameterTypes().length == 1
                 && void.class.equals(method.getReturnType());
     }
-    
+
     public static String getFieldNameFromSetter(final Method setter){
         return setter.getName().substring(3, 4).toLowerCase()
                             + setter.getName().substring(4);
     }
-    
+
     /**
-     * Utility method used to build complete path into jasper templates from 
+     * Utility method used to build complete path into jasper templates from
      * local path only.
-     * 
+     *
      * @param inputText
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
     public static InputStream streamFromText(final String inputText) throws Exception {
         final URI resultURI = imageUriFromText(inputText);
@@ -384,7 +387,7 @@ JasperViewer.viewReport(jp1,false);
         } catch(Exception e){
             SIRS.LOGGER.log(Level.INFO, "No image found at URI "+resultURI);
             return FXFileTextField.class.getResourceAsStream("/fr/sirs/images/imgNotFound.png");
-        } 
+        }
     }
 
     public static URI imageUriFromText(final String inputText) throws Exception {
@@ -397,7 +400,30 @@ JasperViewer.viewReport(jp1,false);
         }
         return resultURI;
     }
-    
+
     ////////////////////////////////////////////////////////////////////////////
     private PrinterUtilities(){}
+
+    /**
+     * Compare objects according to their PRs. They're sorted by ascending order
+     * of their {@link Positionable#getPrDebut() } value, and then by {@link Positionable#getPrFin() } (length).
+     */
+    private static class PRComparator implements Comparator<Positionable> {
+
+        @Override
+        public int compare(Positionable o1, Positionable o2) {
+            if (o1 == null || Float.isNaN(o1.getPrDebut())) {
+                return 1;
+            } else if (o2 == null || Float.isNaN(o2.getPrDebut())) {
+                return -1;
+            } else {
+                final int compare = Float.compare(o1.getPrDebut(), o2.getPrDebut());
+                if (compare == 0) {
+                    return Float.compare(o1.getPrFin(), o2.getPrFin());
+                } else {
+                    return compare;
+                }
+            }
+        }
+    }
 }
