@@ -176,9 +176,9 @@ public class PrintManager {
     }
 
     public void printFocusedPrintable() {
-        final Printable printable = PrintManager.printable.get();
-        if(!printable.print()){
-            final Object candidate = printable.getPrintableElements().get();
+        final Printable tmpPrintable = PrintManager.printable.get();
+        if(!tmpPrintable.print()){
+            final Object candidate = tmpPrintable.getPrintableElements().get();
             print(candidate);
         }
     }
@@ -205,7 +205,7 @@ public class PrintManager {
         }
     }
 
-    private final void printFeatures(FeatureCollection featuresToPrint){
+    private void printFeatures(FeatureCollection featuresToPrint){
         try {
             final List<String> avoidFields = new ArrayList<>();
             avoidFields.add(GEOMETRY_MODE_FIELD);
@@ -216,7 +216,7 @@ public class PrintManager {
         }
     }
 
-    private final void printElements(List<Element> elementsToPrint){
+    private void printElements(List<Element> elementsToPrint){
         final List<String> avoidFields = new ArrayList<>();
         avoidFields.add(GEOMETRY_FIELD);
         avoidFields.add(DOCUMENT_ID_FIELD);

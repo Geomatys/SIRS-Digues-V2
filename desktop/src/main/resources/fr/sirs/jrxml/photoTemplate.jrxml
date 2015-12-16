@@ -43,21 +43,21 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{libelle}==null ? "Non renseigné" : $F{libelle}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{libelle}==null ? " - " : $F{libelle}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="332" y="82" width="174" height="12" uuid="6a5dcd94-1371-4e02-a641-770c9eb2e020"/>
 				<textElement>
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{chemin}==null?"Non renseigné":$F{chemin}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{chemin}==null?" - ":$F{chemin}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="332" y="10" width="58" height="12" uuid="c6d7a5ca-50c3-4d7d-89af-15705a8412f7"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{designation}==null ? "Non renseigné" : $F{designation}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{designation}==null ? " - " : $F{designation}]]></textFieldExpression>
 			</textField>
 			<image>
 				<reportElement x="6" y="5" width="226" height="150" uuid="072d6ffa-5b23-4566-a9ef-ea6ac8c4c115"/>
@@ -96,14 +96,14 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{prDebut}==null ? "Non renseigné" : $F{prDebut}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{prDebut}==null ? " - " : $F{prDebut}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="448" y="22" width="58" height="12" uuid="99604ce1-1de3-4b06-9a2e-fc7f20867f5e"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{prFin}==null ? "Non renseigné" : $F{prFin}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{prFin}==null ? " - " : $F{prFin}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="274" y="22" width="58" height="12" uuid="60efb4f4-80f7-469c-8bfb-1106733558ac"/>
@@ -124,14 +124,14 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{date}==null?"Non renseigné":$F{date}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{date}==null?" - ":$F{date}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="332" y="46" width="174" height="12" uuid="3ec5cfd8-54d9-4cd6-9a1f-9309e2dbfd25"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{coteId}==null?"Non renseigné":$F{coteId}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{coteId}==null?" - ":$F{coteId}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="274" y="46" width="58" height="12" uuid="a403b664-3480-4251-a3bd-b762bafe0375"/>
@@ -145,7 +145,7 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{orientationPhoto}==null?"Non renseigné":$F{orientationPhoto}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{orientationPhoto}==null?" - ":$F{orientationPhoto}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="274" y="58" width="58" height="12" uuid="d8693e42-a934-41f3-bb75-fd5ffe31bc95"/>
@@ -159,7 +159,7 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{photographeId}==null?"Non renseigné":$F{photographeId}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{photographeId}==null?" - ":$F{photographeId}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="274" y="70" width="58" height="12" uuid="b844e08e-70f0-436a-aefb-c20194eca081"/>
@@ -180,7 +180,7 @@
 				<textElement markup="html">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{commentaire}==null?"Non renseigné":$F{commentaire}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{commentaire}==null?" - ":$F{commentaire}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

@@ -1,12 +1,13 @@
 package fr.sirs.util;
 
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.Previews;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Preview;
-import java.lang.reflect.InvocationTargetException;
+import fr.sirs.core.model.ReferenceType;
+import fr.sirs.util.property.Reference;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -15,10 +16,6 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.ObjectConverters;
-import org.apache.sis.util.UnconvertibleObjectException;
-import org.apache.sis.util.logging.Logging;
-import org.ektorp.DocumentNotFoundException;
-import org.geotoolkit.report.CollectionDataSource;
 
 /**
  *
@@ -26,20 +23,20 @@ import org.geotoolkit.report.CollectionDataSource;
  * @param <T>
  */
 public class ObjectDataSource<T> implements JRDataSource {
-    
+
     protected final Iterator<T> iterator;
     protected T currentObject;
     protected final Previews previewRepository;
     protected final SirsStringConverter stringConverter;
-    
+
     public ObjectDataSource(final Iterable<T> iterable){
         this(iterable, null);
     }
-    
+
     public ObjectDataSource(final Iterable<T> iterable, final Previews previewLabelRepository){
         this(iterable, previewLabelRepository, null);
     }
-    
+
     public ObjectDataSource(final Iterable<T> iterable, final Previews previewLabelRepository, final SirsStringConverter stringConverter){
         ArgumentChecks.ensureNonNull("iterable", iterable);
         iterator = iterable.iterator();
@@ -59,27 +56,17 @@ public class ObjectDataSource<T> implements JRDataSource {
 
     @Override
     public Object getFieldValue(final JRField jrf) throws JRException {
-
         final String name = jrf.getName();
-        final Class clazz = jrf.getValueClass();
-        
-        final Class currentClass = currentObject.getClass();
         try {
-            final Method getter = currentClass.getMethod("get"+name.substring(0, 1).toUpperCase()+name.substring(1));
+            final Method getter = currentObject.getClass().getMethod("get" + name.substring(0, 1).toUpperCase() + name.substring(1));
             final Object propertyValue = getter.invoke(currentObject);
-            
-            if(propertyValue != null){
-                try {
-                    final Object propertyValueToPrint = parsePropertyValue(propertyValue, clazz);
-                    return ObjectConverters.convert(propertyValueToPrint, clazz);
-                } catch (UnconvertibleObjectException e) {
-                    Logging.recoverableException(SIRS.LOGGER, CollectionDataSource.class, "getFieldValue", e);
-                    // TODO - do we really want to ignore?
-                }
+            if (propertyValue != null) {
+                final Reference ref = getter.getAnnotation(Reference.class);
+                return parsePropertyValue(propertyValue, ref == null ? null : ref.ref(), jrf.getValueClass());
             }
-        } catch (SecurityException | IllegalArgumentException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ex) {
-            SIRS.LOGGER.log(Level.WARNING, null, ex);
-        } 
+        } catch (Exception ex) {
+            SIRS.LOGGER.log(Level.WARNING, "Impossible to print a field value.", ex);
+        }
 
         //No field that match this name, looks like the feature type
         //used is not the exact one returned by the JasperReportservice.
@@ -87,69 +74,69 @@ public class ObjectDataSource<T> implements JRDataSource {
         //some attribut from the template because he doesn't need them.
         return null;
     }
-    
-    private Object parsePropertyValue(final Object propertyValue, final Class clazz){
-        final Object propertyValueToPrint;
-        if(String.class.isAssignableFrom(clazz)){
-            if(previewRepository!=null){
-                Preview previewLabel = null;
-                try{
-                    previewLabel = previewRepository.get((String) propertyValue);
-                } catch(DocumentNotFoundException e){
-                    SIRS.LOGGER.log(Level.WARNING, e.getMessage());
-                }
-                if(previewLabel!=null){
-                    if(stringConverter!=null){
-                        propertyValueToPrint = stringConverter.toString(previewLabel, false);
-                    } else if(previewLabel.getDesignation()!=null && !"".equals(previewLabel.getDesignation())){
-                        propertyValueToPrint = previewLabel.getDesignation();
-                    } else propertyValueToPrint = propertyValue;
-                }
-                else{
-                    propertyValueToPrint = propertyValue;
-                }
+
+    /**
+     * Extract information from input object to put it in an object of queried type.
+     * @param propertyValue The object to get data from.
+     * @param refClass If input object is a reference to an element, this class give the pointed element type. Can be null.
+     * @param outputClass The type of object to return.
+     * @return Extracted information, or null if analysis failed.
+     */
+    private Object parsePropertyValue(Object propertyValue, final Class refClass, final Class outputClass) {
+        if (propertyValue instanceof Collection) {
+            final PrintableArrayList resultList = new PrintableArrayList(propertyValue instanceof List);
+            for (final Object data : (Collection) propertyValue) {
+                resultList.add(parsePropertyValue(data, refClass, outputClass));
             }
-            else{
-                propertyValueToPrint = propertyValue;
-            }
-        } else if(Element.class.isAssignableFrom(clazz) && stringConverter!=null){
-            propertyValueToPrint = stringConverter.toString(propertyValue, false);
-        } else if(List.class.isAssignableFrom(clazz)) {
-            propertyValueToPrint = new PrintableArrayList(true);
-            for(final Object o : (List) propertyValue){
-                ((List)propertyValueToPrint).add(parsePropertyValue(o, o.getClass())); // On autorise obligatoirement le préfixage des éléments des listes sinon on n'a plus rien à afficher.
-            }
-        } else {
-            propertyValueToPrint = propertyValue;
+
+            return resultList;
         }
-        return propertyValueToPrint;
+
+        if (refClass != null) {
+            if (!refClass.isAssignableFrom(propertyValue.getClass()) && (propertyValue instanceof String)) {
+                if (ReferenceType.class.isAssignableFrom(refClass)) {
+                    propertyValue = Injector.getSession().getRepositoryForClass(refClass).get((String)propertyValue);
+                } else {
+                    propertyValue = previewRepository.get((String)propertyValue);
+                }
+            }
+        }
+
+        if (outputClass.isAssignableFrom(propertyValue.getClass()))
+            return propertyValue;
+
+        if (String.class.isAssignableFrom(outputClass)) {
+            return stringConverter.toString(propertyValue);
+        } else {
+            return ObjectConverters.convert(propertyValue, outputClass);
+        }
     }
-    
+
     /**
      * Extention of ArrayList for redefining toString() in order to improve printing.
-     * 
-     * @param <E> 
+     *
+     * @param <E>
      */
     private class PrintableArrayList<E> extends ArrayList<E>{
 
         private final boolean ordered;
-        
+
         /**
-         * 
+         *
          * @param ordered Specifies if the list has to be ordered.
          */
         public PrintableArrayList(final boolean ordered) {
             super();
             this.ordered = ordered;
         }
-        
+
         /**
          * Creates an unordered PrintableArrayList.
          */
         public PrintableArrayList(){
             this(false);
         }
-        
+
         @Override
         public String toString(){
             final Iterator<E> it = iterator();
@@ -157,7 +144,7 @@ public class ObjectDataSource<T> implements JRDataSource {
                 return "";
 
             final StringBuilder sb = new StringBuilder();
-            
+
             int order = 0;
             for (;;) {
                 E e = it.next();
@@ -171,5 +158,5 @@ public class ObjectDataSource<T> implements JRDataSource {
             }
         }
     }
-    
+
 }

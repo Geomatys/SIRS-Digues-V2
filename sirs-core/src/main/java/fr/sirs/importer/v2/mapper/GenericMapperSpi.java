@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * A general mapper which will try to convert rows accordingly to user parameters.
  * @author Alexis Manin (Geomatys)
+ * @param <T> Target type of the objects which can be filled by current implementation.
  */
 public abstract class GenericMapperSpi<T> implements MapperSpi<T> {
 

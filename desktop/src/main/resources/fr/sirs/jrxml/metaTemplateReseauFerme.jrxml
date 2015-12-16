@@ -88,7 +88,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{designation}==null ? "Non renseigné" : $F{designation}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{designation}==null ? " - " : $F{designation}]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -108,7 +108,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{date_debut}==null ? "Non renseigné" : $F{date_debut}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{date_debut}==null ? " - " : $F{date_debut}]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement positionType="Float" x="350" y="0" width="100" height="12" uuid="b1da5310-7da5-4a2a-8d9d-3689b5ad86ea"/>
@@ -122,7 +122,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{date_fin}==null ? "Non renseigné" : $F{date_fin}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{date_fin}==null ? " - " : $F{date_fin}]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -142,7 +142,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{typeConduiteFermeeId}==null ? "Non renseigné" : $F{typeConduiteFermeeId}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{typeConduiteFermeeId}==null ? " - " : $F{typeConduiteFermeeId}]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -162,7 +162,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle" markup="html">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{commentaire}==null ? "Non renseigné" : $F{commentaire}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{commentaire}==null ? " - " : $F{commentaire}]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -182,7 +182,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle" markup="html">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{sourceId}==null ? "Non renseigné" : $F{sourceId}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{sourceId}==null ? " - " : $F{sourceId}]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -212,7 +212,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{linearId}==null ? "Non renseigné" : $F{linearId}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{linearId}==null ? " - " : $F{linearId}]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -232,7 +232,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{systemeRepId}==null ? "Non renseigné" : $F{systemeRepId}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{systemeRepId}==null ? " - " : $F{systemeRepId}]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -252,7 +252,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{prDebut}==null ? "Non renseigné" : $F{prDebut}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{prDebut}==null ? " - " : $F{prDebut}]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement positionType="Float" x="350" y="0" width="100" height="12" uuid="0e1215e7-a658-48e4-b0ce-2c4d045c6c73"/>
@@ -266,7 +266,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{prFin}==null ? "Non renseigné" : $F{prFin}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{prFin}==null ? " - " : $F{prFin}]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -360,14 +360,14 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{borneDebutId}==null ? "Non renseigné" : $F{borneDebutId}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{borneDebutId}==null ? " - " : $F{borneDebutId}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
 					<reportElement positionType="Float" x="210" y="0" width="100" height="12" uuid="b7fd2eea-1058-4ea7-9d62-66bb7058e328"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{borne_debut_aval}==null ? "Non renseigné" : ($F{borne_debut_aval} ? "Amont" : "Aval")]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{borne_debut_aval}==null ? " - " : ($F{borne_debut_aval} ? "Amont" : "Aval")]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement positionType="Float" x="310" y="0" width="100" height="12" uuid="e9de5183-203c-441f-81e4-1742aa3720bc"/>
@@ -381,7 +381,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{borne_debut_distance}==null ? "Non renseigné" : $F{borne_debut_distance}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{borne_debut_distance}==null ? " - " : $F{borne_debut_distance}]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -401,14 +401,14 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{borneFinId}==null ? "Non renseigné" : $F{borneFinId}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{borneFinId}==null ? " - " : $F{borneFinId}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
 					<reportElement positionType="Float" x="210" y="0" width="100" height="12" uuid="f36f745d-620a-43af-8536-03eeb78cc14b"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{borne_fin_aval}==null ? "Non renseigné" : ($F{borne_fin_aval} ? "Amont" : "Aval")]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{borne_fin_aval}==null ? " - " : ($F{borne_fin_aval} ? "Amont" : "Aval")]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement positionType="Float" x="310" y="0" width="100" height="12" uuid="f8be7dd2-a528-4b41-8e67-028a689d1059"/>
@@ -422,7 +422,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{borne_fin_distance}==null ? "Non renseigné" : $F{borne_fin_distance}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{borne_fin_distance}==null ? " - " : $F{borne_fin_distance}]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -448,7 +448,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{coteId}==null ? "Non renseigné" : $F{coteId}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{coteId}==null ? " - " : $F{coteId}]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -468,7 +468,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{positionId}==null ? "Non renseigné" : $F{positionId}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{positionId}==null ? " - " : $F{positionId}]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -481,7 +481,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{diametre}==null ? "Non renseigné" : $F{diametre}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{diametre}==null ? " - " : $F{diametre}]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement positionType="Float" x="150" y="0" width="100" height="12" uuid="17c35dba-be53-4ddc-893d-fdbf44195ea8"/>
@@ -502,7 +502,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{autorise}==null ? "Non renseigné" : ($F{autorise} ? "Oui" : "Non")]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{autorise}==null ? " - " : ($F{autorise} ? "Oui" : "Non")]]></textFieldExpression>
 				</textField>
 			</frame>
 		</band>
