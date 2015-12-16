@@ -11,7 +11,6 @@ import fr.sirs.core.model.ParcelleVegetation;
 import fr.sirs.core.model.PeuplementVegetation;
 import fr.sirs.core.model.PlanVegetation;
 import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.ZoneVegetation;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.EXPLOITATION;
 import static fr.sirs.plugin.vegetation.FXPlanTable.Mode.PLANIFICATION;
@@ -75,7 +74,7 @@ public class FXPlanTable extends BorderPane{
     private final PlanVegetation plan;
     private final List<ParcelleVegetation> tableParcelles = new ArrayList<>();
     private final Mode mode;
-    
+
     private final Session session = Injector.getSession();
     private final BooleanProperty editable = new SimpleBooleanProperty(true);
 
@@ -84,7 +83,7 @@ public class FXPlanTable extends BorderPane{
     private final GridPane gridBottom = new GridPane();
     private Region[] headerNodes;
 
-    public FXPlanTable(final PlanVegetation plan, final TronconDigue troncon, final Mode mode, final List<String> filteredStates, final int filterIndex){
+    public FXPlanTable(final PlanVegetation plan, final String tronconId, final Mode mode, final List<String> filteredStates, final int filterIndex){
         this.plan = plan;
         this.mode = mode;
 
@@ -211,12 +210,12 @@ public class FXPlanTable extends BorderPane{
             }
 
             gridCenter.getRowConstraints().add(new RowConstraints(30, 30, 30, Priority.NEVER, VPos.CENTER, true));
-            
+
             //on vérifie que la parcelle fait partie du troncon
-            if(troncon!=null && !Objects.equal(parcelle.getForeignParentId(), troncon.getDocumentId())){
+            if(tronconId !=null && tronconId.equals(parcelle.getForeignParentId())) {
                 continue;
             }
-            
+
             // On ajoute la parcelle aux parcelles contenues dans le tableau (on en aura besoin pour les calculs des coûts).
             tableParcelles.add(parcelle);
 
@@ -326,7 +325,7 @@ public class FXPlanTable extends BorderPane{
      *
      * En mode d'exploitation, la couleur de la cellule indique la cohérence des
      * traitements d'exploitation avec les planifications.
-     * 
+     *
      */
     private final class ParcelleDateCell extends CheckBox implements ListChangeListener<Boolean>{
 
@@ -441,7 +440,7 @@ public class FXPlanTable extends BorderPane{
                             // On change l'état de planification en cours : FAUX
                             this.planifGroup.planifChangeProperty().set(false);
                         }
-                        
+
                         this.estGroup.update();
                     }
                     else{
@@ -503,8 +502,8 @@ public class FXPlanTable extends BorderPane{
         @Override
         public void onChanged(Change<? extends Boolean> c) {
             /*
-            Si la liste est vide, on ne fait rien, car c'est qu'on est en train 
-            de supprimer son contenu pour le réinitialiser depuis le méthode de 
+            Si la liste est vide, on ne fait rien, car c'est qu'on est en train
+            de supprimer son contenu pour le réinitialiser depuis le méthode de
             calcul des planifications automatiques.
             */
             if(!parcelle.getPlanifications().isEmpty()){
@@ -523,7 +522,7 @@ public class FXPlanTable extends BorderPane{
 
         public AutoModeCell(ParcelleVegetation parcelle) {
             setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-            
+
             disableProperty().bind(editable.not());
             setSelected(parcelle.getModeAuto());
             selectedProperty().bindBidirectional(parcelle.modeAutoProperty());

@@ -11,29 +11,29 @@ import javafx.beans.property.StringProperty;
  * @author Alexis Manin (Geomatys)
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class Preview implements AvecLibelle {
-    
+public class Preview implements AvecLibelle, Comparable {
+
     @JsonProperty("docId")
     private String docId;
-    
+
     @JsonProperty("docClass")
     private String docClass;
-    
+
     @JsonProperty("elementId")
     private String elementId;
-    
+
     @JsonProperty("elementClass")
     private String elementClass;
-    
+
     @JsonProperty("author")
     private String author;
-    
+
     @JsonProperty("valid")
     private boolean valid;
-    
+
     @JsonProperty("designation")
     private String designation;
-    
+
     private final SimpleStringProperty libelleProperty = new SimpleStringProperty();
 
     /**
@@ -119,5 +119,31 @@ public class Preview implements AvecLibelle {
     public void setLibelle(String libelle) {
         libelleProperty.set(libelle);
     }
-    
+
+    @Override
+    public int compareTo(Object o) {
+        if (o instanceof Preview) {
+            final Preview other = (Preview) o;
+            if ((designation == null || designation.isEmpty())) {
+                if (other.designation == null || other.designation.isEmpty()) {
+                    return (getLibelle() == null? 1 : getLibelle().compareTo(other.getLibelle()));
+                } else {
+                    return 1;
+                }
+            } else {
+                /* If both designation can be converted to numbers, we will
+                 * perform a algebric comparision. Otherwise, we'll compare
+                 * directly strings.
+                 */
+                try {
+                    Integer.decode(designation).compareTo(Integer.decode(other.designation));
+                } catch (NumberFormatException e) {
+                    return designation.compareTo(other.designation);
+                }
+            }
+        }
+
+        return -1;
+    }
+
 }
