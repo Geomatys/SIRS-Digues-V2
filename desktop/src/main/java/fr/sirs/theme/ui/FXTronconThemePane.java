@@ -62,16 +62,13 @@ public class FXTronconThemePane extends BorderPane {
             uiCenter.setCenter(pane);
         }
 
-        final ObservableList<Preview> linearPreviews = SIRS.observableList(session.getPreviews().getByClass(TronconDigue.class)).sorted();
-        SIRS.initCombo(uiLinearChoice, linearPreviews, linearPreviews.isEmpty()? null : linearPreviews.get(0));
-
         uiLinearChoice.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) -> {
             linearIdProperty.set(newValue.getElementId());
         });
+        
+        final ObservableList<Preview> linearPreviews = SIRS.observableList(session.getPreviews().getByClass(TronconDigue.class)).sorted();
+        SIRS.initCombo(uiLinearChoice, linearPreviews, linearPreviews.isEmpty()? null : linearPreviews.get(0));
 
-        if(!linearPreviews.isEmpty()){
-            uiLinearChoice.getSelectionModel().select(linearPreviews.get(0));
-        }
     }
 
     protected class TronconThemePojoTable<T extends AvecForeignParent> extends ForeignParentPojoTable<T>{

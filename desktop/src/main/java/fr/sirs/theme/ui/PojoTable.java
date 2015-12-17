@@ -298,6 +298,8 @@ public class PojoTable extends BorderPane implements Printable {
             throw new IllegalArgumentException("Pojo class to expose and Repository parameter are both null. At least one of them must be valid.");
         }
 
+        SIRS.setColumnResize(uiTable);
+
         setFocusTraversable(true);
 
         dataSupplierProperty.addListener(this::updateTableItems);
@@ -1864,10 +1866,10 @@ public class PojoTable extends BorderPane implements Printable {
             setTitle("Choix de l'élément");
 
             if(tronconSourceProperty.get()==null){
-                comboBox.setItems(SIRS.observableList(session.getPreviews().getByClass(pojoClass)));
+                comboBox.setItems(SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted());
             }
             else{
-                comboBox.setItems(SIRS.observableList(session.getPreviews().getByClass(pojoClass))
+                comboBox.setItems(SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted()
                         .filtered((Preview t) -> { return tronconSourceProperty.get().equals(t.getDocId());}));
             }
 

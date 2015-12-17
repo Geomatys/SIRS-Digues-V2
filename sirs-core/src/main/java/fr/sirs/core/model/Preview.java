@@ -120,27 +120,45 @@ public class Preview implements AvecLibelle, Comparable {
         libelleProperty.set(libelle);
     }
 
+    /**
+     * Compare previews by class, designation, and finally libelle.
+     * @param o
+     */
     @Override
     public int compareTo(Object o) {
         if (o instanceof Preview) {
             final Preview other = (Preview) o;
-            if ((designation == null || designation.isEmpty())) {
-                if (other.designation == null || other.designation.isEmpty()) {
-                    return (getLibelle() == null? 1 : getLibelle().compareTo(other.getLibelle()));
-                } else {
-                    return 1;
-                }
-            } else {
+
+            // Class comparison
+            final int classComparison = elementClass == null ?
+                    other.elementClass == null? 0 : 1
+                    : elementClass.compareTo(other.elementClass);
+            if (classComparison != 0) {
+                return classComparison;
+            }
+
+            int designationComparison = -1;
+            if (designation == null) {
+                designationComparison = other.designation == null? 0 : 1;
+            } else if (other.designation != null) {
                 /* If both designation can be converted to numbers, we will
                  * perform a algebric comparision. Otherwise, we'll compare
                  * directly strings.
                  */
                 try {
-                    Integer.decode(designation).compareTo(Integer.decode(other.designation));
+                    designationComparison = Integer.decode(designation).compareTo(Integer.decode(other.designation));
                 } catch (NumberFormatException e) {
-                    return designation.compareTo(other.designation);
+                    designationComparison = designation.compareTo(other.designation);
                 }
             }
+
+            if (designationComparison != 0) {
+                return designationComparison;
+            }
+
+            return getLibelle() == null?
+                    other.getLibelle() == null? 0 : 1
+                    : getLibelle().compareTo(other.getLibelle());
         }
 
         return -1;

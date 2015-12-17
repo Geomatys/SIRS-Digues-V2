@@ -120,10 +120,10 @@ public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndig
                 ((DigueRepository) session.getRepositoryForClass(Digue.class)).getBySystemeEndiguement(newElement)));
 
         SIRS.initCombo(ui_gestionnaireDecretId, SIRS.observableList(
-            previewRepository.getByClass(Organisme.class)),
+            previewRepository.getByClass(Organisme.class)).sorted(),
             newElement.getGestionnaireDecretId() == null? null : previewRepository.get(newElement.getGestionnaireDecretId()));
         SIRS.initCombo(ui_gestionnaireTechniqueId, SIRS.observableList(
-            previewRepository.getByClass(Organisme.class)),
+            previewRepository.getByClass(Organisme.class)).sorted(),
             newElement.getGestionnaireTechniqueId() == null? null : previewRepository.get(newElement.getGestionnaireTechniqueId()));
     }
     @Override

@@ -325,7 +325,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
 
         final ComboBox<Preview> parentChoice;
         if (parentClass != null) {
-            parentChoice = new ComboBox<>(SIRS.observableList(session.getPreviews().getByClass(parentClass)));
+            parentChoice = new ComboBox<>(SIRS.observableList(session.getPreviews().getByClass(parentClass)).sorted());
             parentChoice.setConverter(strConverter);
             parentChoice.setEditable(true);
             ComboBoxCompletion.autocomplete(parentChoice);

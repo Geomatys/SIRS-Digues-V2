@@ -2,8 +2,10 @@
 package fr.sirs.util;
 
 import fr.sirs.Injector;
-import fr.sirs.core.SirsCore;
+import fr.sirs.SIRS;
+import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.ReferenceType;
 import java.util.List;
 import java.util.Optional;
 import javafx.collections.ObservableList;
@@ -13,7 +15,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ComboBoxBase;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.gui.javafx.filter.FXFilterOperator;
-import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
 import org.opengis.feature.AttributeType;
 import org.opengis.feature.FeatureAssociationRole;
 import org.opengis.feature.PropertyType;
@@ -31,7 +32,6 @@ import org.opengis.filter.expression.Expression;
 public class FXReferenceEqualsOperator implements FXFilterOperator {
 
     public static final String CLASS_ATTRIBUTE = "class";
-    private static final SirsStringConverter CHOICE_CONVERTER = new SirsStringConverter();
 
     @Override
     public boolean canHandle(PropertyType target) {
@@ -54,22 +54,30 @@ public class FXReferenceEqualsOperator implements FXFilterOperator {
     @Override
     public Optional<Node> createFilterEditor(PropertyType target) {
         final Class refClass = getReferenceClass(target);
-        ObservableList<Preview> choices = SirsCore.observableList(
-                Injector.getSession().getPreviews().getByClass(refClass));
+
+        final ObservableList<Preview> choices;
+        if (ReferenceType.class.isAssignableFrom(refClass)) {
+            choices = SIRS.observableList(Injector.getSession().getRepositoryForClass(refClass).getAll());
+        } else {
+            choices = SIRS.observableList(
+                Injector.getSession().getPreviews().getByClass(refClass)).sorted();
+        }
+
         if (choices.isEmpty())
             return Optional.empty();
 
-        final ComboBox cBox = new ComboBox(choices);
-        cBox.setConverter(CHOICE_CONVERTER);
-        cBox.setEditable(true);
-        new ComboBoxCompletion(cBox);
+        final ComboBox cBox = new ComboBox();
+        SIRS.initCombo(cBox, choices, target);
         return Optional.of(cBox);
     }
 
     @Override
     public boolean canExtractSettings(PropertyType propertyType, Node settingsContainer) {
-        final List choices;
         final Class refClass = getReferenceClass(propertyType);
+        if (refClass == null)
+            return false;
+
+        final List choices;
         if (settingsContainer instanceof ComboBox) {
             choices = ((ComboBox)settingsContainer).getItems();
         } else if (settingsContainer instanceof ChoiceBox) {
@@ -78,11 +86,16 @@ public class FXReferenceEqualsOperator implements FXFilterOperator {
             choices = null;
         }
 
-        if (choices != null && !choices.isEmpty() && refClass.isInstance(choices.get(0))) {
-            return true;
-        } else {
-            return false;
+        if (choices != null && !choices.isEmpty()) {
+            final Object firstChoice = choices.get(0);
+            if (refClass.isInstance(firstChoice)) {
+                return true;
+            } else if (firstChoice instanceof Preview) {
+                return refClass.getCanonicalName().equals(((Preview)firstChoice).getElementClass());
+            }
         }
+
+        return false;
     }
 
     @Override
@@ -92,12 +105,17 @@ public class FXReferenceEqualsOperator implements FXFilterOperator {
             choice = ((ComboBoxBase)filterEditor).valueProperty().get();
         }
 
+        final String choiceId;
         if (choice instanceof Preview) {
-            return GO2Utilities.FILTER_FACTORY.equals(toApplyOn,
-                    GO2Utilities.FILTER_FACTORY.literal(((Preview)choice).getElementId()));
+            choiceId = ((Preview)choice).getElementId();
+        } else if (choice instanceof Identifiable) {
+            choiceId = ((Identifiable)choice).getId();
         } else {
             throw new IllegalArgumentException("L'éditeur des paramètres du filtre est invalide.");
         }
+
+        return GO2Utilities.FILTER_FACTORY.equals(toApplyOn,
+                GO2Utilities.FILTER_FACTORY.literal(((Preview) choice).getElementId()));
     }
 
     private static Class getReferenceClass(PropertyType propertyType) {

@@ -15,11 +15,13 @@ import java.awt.Color;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -28,6 +30,8 @@ import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ModifiableObservableListBase;
@@ -39,6 +43,8 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.ArgumentChecks;
@@ -379,7 +385,6 @@ public final class SIRS extends SirsCore {
             }
             endChange();
         }
-
     }
 
     /**
@@ -492,5 +497,56 @@ public final class SIRS extends SirsCore {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Attach a listener on iven table {@link TableView#widthProperty() } to set
+     * automatically itss columns preferred size to fill entire table.
+     * Note : Only resizable / visible columns are affected.
+     *
+     * @param target Table view to operate on.
+     * @return Listener attached to given table to manage its column sizes.
+     */
+    public static InvalidationListener setColumnResize(final TableView target) {
+        final ColumnAutomaticResize resize = new ColumnAutomaticResize(target);
+        target.widthProperty().addListener(resize);
+        return resize;
+    }
+
+    /**
+     * An invalidation listener to put on a table width property to set its column's
+     * preferred size to fill entire width.
+     */
+    private static class ColumnAutomaticResize implements InvalidationListener {
+
+        private final WeakReference<TableView> target;
+
+        public ColumnAutomaticResize(TableView target) {
+            this.target = new WeakReference<>(target);
+        }
+
+        @Override
+        public void invalidated(Observable observable) {
+            final TableView<?> tView = target.get();
+            if (tView == null)
+                return;
+
+            double unresizable = 0;
+            final ArrayList<TableColumn> resizableColumns = new ArrayList<>();
+            for (final TableColumn col : tView.getColumns()) {
+                if (!col.isResizable()) {
+                    unresizable += col.getWidth();
+                } else if (col.isVisible()) {
+                    resizableColumns.add(col);
+                }
+            }
+
+            final double prefWidth = (tView.getWidth() - unresizable) / resizableColumns.size();
+            for (final TableColumn col : resizableColumns) {
+                if (prefWidth > col.getPrefWidth() && prefWidth <= col.getMaxWidth()) {
+                    col.setPrefWidth(prefWidth);
+                }
+            }
+        }
     }
 }

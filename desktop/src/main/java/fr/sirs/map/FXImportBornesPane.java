@@ -137,7 +137,7 @@ public class FXImportBornesPane extends BorderPane {
         uiImportButton.setDisable(true);
 
         uiTronconBox.setItems(SIRS.observableList(
-                Injector.getSession().getPreviews().getByClass(typeClass)));
+                Injector.getSession().getPreviews().getByClass(typeClass)).sorted());
         uiTronconBox.setConverter(stringConverter);
         uiTronconBox.valueProperty().addListener(this::updateSrList);
 

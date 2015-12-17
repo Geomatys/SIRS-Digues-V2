@@ -1,20 +1,15 @@
 
 package fr.sirs.theme.ui;
 
-import static fr.sirs.CorePlugin.initComboTypeDesordre;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefCategorieDesordre;
 import fr.sirs.core.model.RefTypeDesordre;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 /**
  *
@@ -25,75 +20,19 @@ public class FXDesordrePane extends FXDesordrePaneStub {
     public FXDesordrePane(final Desordre desordre){
         super(desordre);
 
-        ui_categorieDesordreId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+        final AbstractSIRSRepository<RefCategorieDesordre> catRepo = Injector.getSession().getRepositoryForClass(RefCategorieDesordre.class);
+        final AbstractSIRSRepository<RefTypeDesordre> typeRepo = Injector.getSession().getRepositoryForClass(RefTypeDesordre.class);
 
-            @Override
-            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                final AbstractSIRSRepository<RefTypeDesordre> typeRepo = Injector.getSession().getRepositoryForClass(RefTypeDesordre.class);
-                final List<RefTypeDesordre> typesDispos = typeRepo.getAll();
+        // Update available types according to chosen category.
+        ui_categorieDesordreId.getSelectionModel().selectedItemProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
 
-                if(newValue instanceof Preview){
-                    final String traitementId = ((Preview) newValue).getElementId();
-                    if(traitementId!=null){
-                        typesDispos.removeIf((RefTypeDesordre st) -> !traitementId.equals(st.getCategorieId()));
-                    }
-                }
-                else if (newValue==null){
-                    typesDispos.removeIf((RefTypeDesordre st) -> st.getCategorieId()!=null);
-                }
-                SIRS.initCombo(ui_typeDesordreId, SIRS.observableList(typesDispos), null);
+            final ObservableList<RefTypeDesordre> typeList = SIRS.observableList(typeRepo.getAll());
+            if (newValue instanceof RefCategorieDesordre) {
+                final FilteredList fList = typeList.filtered(type -> type.getCategorieId().equals(((RefCategorieDesordre) newValue).getId()));
+                ui_typeDesordreId.setItems(fList);
+            } else {
+                ui_typeDesordreId.setItems(typeList);
             }
         });
-    }
-
-    /**
-     * Initialize fields at element setting.
-     * @param observableElement
-     * @param oldElement
-     * @param newElement
-     */
-    @Override
-    protected void initFields(ObservableValue<? extends Desordre > observableElement, Desordre oldElement, Desordre newElement) {
-        super.initFields(observableElement, oldElement, newElement);
-
-
-        // Initialisation des catégories
-        final AbstractSIRSRepository<RefCategorieDesordre> repoCategories = Injector.getSession().getRepositoryForClass(RefCategorieDesordre.class);
-        final Map<String, RefCategorieDesordre> categories = new HashMap<>();
-
-        for(final RefCategorieDesordre categorie : repoCategories.getAll()){
-            categories.put(categorie.getId(), categorie);
-        }
-
-        final List<Preview> allCategoriePreviews = previewRepository.getByClass(RefCategorieDesordre.class);
-        final List<Preview> categoriePreviews = new ArrayList<>();
-
-        for(final Preview categoriePreview : allCategoriePreviews){
-            final String categorieId = categoriePreview.getElementId();
-            if(categorieId!=null){
-                final RefCategorieDesordre categorie = categories.get(categorieId);
-                if(categorie!=null){
-                    categoriePreviews.add(categoriePreview);
-                }
-            }
-        }
-
-
-        SIRS.initCombo(ui_categorieDesordreId, SIRS.observableList(categoriePreviews),
-            newElement.getCategorieDesordreId()== null? null : previewRepository.get(newElement.getCategorieDesordreId()));
-
-
-
-        // Initialisation des types
-        final AbstractSIRSRepository<RefTypeDesordre> repoTypes = Injector.getSession().getRepositoryForClass(RefTypeDesordre.class);
-        final Map<String, RefTypeDesordre> types = new HashMap<>();
-
-        for(final RefTypeDesordre type : repoTypes.getAll()){
-            types.put(type.getId(), type);
-        }
-
-        final List<Preview> typePreviews = previewRepository.getByClass(RefTypeDesordre.class);
-
-        initComboTypeDesordre(newElement.getCategorieDesordreId(), newElement.getTypeDesordreId(), typePreviews, types, ui_typeDesordreId);
     }
 }

@@ -63,7 +63,7 @@ public class FXFicheSectionRapportPane extends AbstractFXElementPane<FicheSectio
         disableProperty().bind(disableFieldsProperty());
 
         modelRepo = session.getRepositoryForClass(ModeleElement.class);
-        SIRS.initCombo(uiModelChoice, SIRS.observableList(session.getPreviews().getByClass(ModeleElement.class)), null);
+        SIRS.initCombo(uiModelChoice, SIRS.observableList(session.getPreviews().getByClass(ModeleElement.class)).sorted(), null);
 
         elementProperty.addListener(this::elementChanged);
         queryProperty.addListener(this::queryChanged);

@@ -132,7 +132,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
         if (SystemeReperageBorne.class.isAssignableFrom(refClass) || BorneDigue.class.isAssignableFrom(refClass)) {
             items = findBornes();
         } else {
-            items = SIRS.observableList(previews.getByClass(refClass));
+            items = SIRS.observableList(previews.getByClass(refClass)).sorted();
         }
 
         // Analyze current item to determine default selection

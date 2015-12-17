@@ -231,13 +231,13 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             ui_commentaire.setHtmlText(newElement.getCommentaire());
 
             SIRS.initCombo(ui_digueId, SIRS.observableList(
-                    previewRepository.getByClass(Digue.class)),
+                    previewRepository.getByClass(Digue.class)).sorted(),
                     newElement.getDigueId() == null ? null : previewRepository.get(newElement.getDigueId()));
             SIRS.initCombo(ui_typeRiveId, SIRS.observableList(
-                    previewRepository.getByClass(RefRive.class)),
+                    previewRepository.getByClass(RefRive.class)).sorted(),
                     newElement.getTypeRiveId() == null ? null : previewRepository.get(newElement.getTypeRiveId()));
             SIRS.initCombo(ui_typeTronconId, SIRS.observableList(
-                    previewRepository.getByClass(RefTypeTroncon.class)),
+                    previewRepository.getByClass(RefTypeTroncon.class)).sorted(),
                     newElement.getTypeTronconId() == null ? null : previewRepository.get(newElement.getTypeTronconId()));
 
 

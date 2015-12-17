@@ -53,7 +53,7 @@ public class FXModeleRapportsPane extends BorderPane {
         uiReportList.getSelectionModel().selectedItemProperty().addListener(this::selectionChanged);
         uiReportList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        uiReportList.setItems(SIRS.observableList(session.getPreviews().getByClass(ModeleRapport.class)));
+        uiReportList.setItems(SIRS.observableList(session.getPreviews().getByClass(ModeleRapport.class)).sorted());
         uiReportList.setCellFactory((ListView<Preview> param) -> {
             return new ListCell<Preview>() {
 
