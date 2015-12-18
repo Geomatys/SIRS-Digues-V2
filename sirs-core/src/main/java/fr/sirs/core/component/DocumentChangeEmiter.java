@@ -1,25 +1,18 @@
 package fr.sirs.core.component;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 
-import org.apache.commons.io.IOUtils;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.Options;
 import org.ektorp.changes.ChangesCommand;
 import org.ektorp.changes.ChangesFeed;
 import org.ektorp.changes.DocumentChange;
-import org.ektorp.support.Revisions;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sirs.core.DocHelper;
 
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Element;
@@ -40,7 +33,6 @@ public class DocumentChangeEmiter {
 
     // TODO : Transform to Observable list ?
     private final List<DocumentListener> listeners = new ArrayList<>();
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final CouchDbConnector connector;
 
     /**
@@ -62,7 +54,7 @@ public class DocumentChangeEmiter {
                 final ChangesFeed feed = connector.changesFeed(cmd);
                 while (feed.isAlive()) {
                     try {
-                        handlerChanges(feed);
+                        handleChanges(feed);
                     } catch (Exception e) {
                         log(e);
                     }
@@ -78,105 +70,37 @@ public class DocumentChangeEmiter {
 
     }
 
-    protected Optional<Element> retrieveDeletedElement(String docId) {
-        return retrieveDeleted(docId)
-                .flatMap(doc -> retrieveDeletedObject(doc));
+    protected Optional<Element> getDeleted(final String deletedDoc) throws IOException, ClassNotFoundException {
+        final DeletedCouchDbDocument deleted = DocHelper.SIMPLE_MAPPER.readValue(deletedDoc, DeletedCouchDbDocument.class);
+        return DocHelper.toElement(getAsString(deleted.getId(), Optional.of(deleted.getRevision())));
     }
 
-    protected Optional<Element> retrieveDeletedObject(
-            DeletedCouchDbDocument deleted) {
-
-        Revisions revisions = deleted.getRevisions();
-
-        String rev = revisions.getStart() - 1 + "-" + revisions.getIds().get(1);
-
-        return getElement(deleted.getId(), Optional.of(rev));
-
-    }
-
-
-    private static Optional<Class<?>> asClass(String clazz) {
-        try {
-            return Optional.of(Class.forName(clazz, true, Thread.currentThread().getContextClassLoader()));
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return Optional.empty();
-        }
-    }
-
-    private Optional<Element> getElement(String id, Optional<String> rev) {
-        final Optional<String> str = getAsString(id, rev);
-
-        return str.flatMap(s -> toJsonNode(s))
-                .map(node -> node.get("@class"))
-                .map(json -> json.asText())
-                .flatMap(DocumentChangeEmiter::asClass)
-                .flatMap(clazz -> toElement(str.get(), clazz));
-    }
-
-    private Optional<String> getAsString(String id, Optional<String> rev) {
+    private String getAsString(String id, Optional<String> rev) throws IOException {
         InputStream inputStream;
-        try {
-            if (rev.isPresent()) {
-                Options options = new Options().revision(rev.get());
-                inputStream = connector.getAsStream(id, options);
-            } else
-                inputStream = connector.getAsStream(id);
-            StringWriter stringWriter = new StringWriter();
-            IOUtils.copy(inputStream, stringWriter, "UTF-8");
-            return Optional.of(stringWriter.toString());
-        } catch (Exception e1) {
-            log(e1);
-            return Optional.empty();
-        }
-    }
-
-    private Optional<Element> toElement(String str, Class<?> clazz) {
-        try {
-            return Optional.of((Element) objectMapper.reader(clazz).readValue(
-                    str));
-        } catch (IOException e) {
-            return Optional.empty();
-        }
-
-    }
-
-    private Optional<JsonNode> toJsonNode(String s) {
-        try {
-            return Optional.of(objectMapper.readTree(s));
-        } catch (IOException e) {
-            return Optional.empty();
-        }
-    }
-
-    protected Optional<DeletedCouchDbDocument> retrieveDeleted(String docId) {
-        Options options = new Options().includeRevisions().param("open_revs",
-                "all");
-        InputStream stream = connector.getAsStream(docId, options);
-        try (BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(stream))) {
-            String line;
-            while (((line) = bufferedReader.readLine()) != null) {
-                if (line.startsWith("{")) {
-                    return Optional.of(objectMapper.readValue(line,
-                            DeletedCouchDbDocument.class));
-
-                }
+        if (rev.isPresent()) {
+            Options options = new Options().revision(rev.get());
+            inputStream = connector.getAsStream(id, options);
+        } else
+            inputStream = connector.getAsStream(id);
+        try (final InputStream stream = rev.isPresent() ? connector.getAsStream(id, new Options().revision(rev.get())) : connector.getAsStream(id)) {
+            final StringBuilder builder = new StringBuilder();
+            int available;
+            byte[] nextChars;
+            while ((available = stream.available()) > 0) {
+                nextChars = new byte[available];
+                stream.read(nextChars);
+                builder.append(nextChars);
             }
-        } catch (IOException e1) {
-            e1.printStackTrace();
+            return builder.toString();
         }
-        return Optional.empty();
     }
 
     public boolean addListener(DocumentListener listener) {
         return listeners.add(listener);
-
     }
 
     public boolean removeListener(DocumentListener listener) {
         return listeners.remove(listener);
-
     }
 
     /**
@@ -186,7 +110,7 @@ public class DocumentChangeEmiter {
         return Collections.unmodifiableList(listeners);
     }
 
-    private void handlerChanges(ChangesFeed feed) throws InterruptedException {
+    private void handleChanges(ChangesFeed feed) throws InterruptedException {
 
         final Thread currentThread = Thread.currentThread();
         final HashMap<Class, List<Element>> addedElements = new HashMap<>();
@@ -195,14 +119,19 @@ public class DocumentChangeEmiter {
 
         while (!currentThread.isInterrupted()) {
             final DocumentChange change = feed.next(bulkTime, bulkUnit);
-            if (change == null) break;
+            if (change == null)
+                break;
 
-            if (change.isDeleted()) {
-                retrieveDeletedElement(change.getId()).ifPresent((Element e)-> putElement(e, removedElements));
-            } else if (FIRST_REVISION.matcher(change.getRevision()).find()) {
-                getElement(change.getId(), Optional.empty()).ifPresent((Element e)-> putElement(e, addedElements));
-            } else {
-                getElement(change.getId(), Optional.empty()).ifPresent((Element e)-> putElement(e, changedElements));
+            try {
+                if (change.isDeleted()) {
+                    getDeleted(change.getDoc()).ifPresent((Element e) -> putElement(e, removedElements));
+                } else if (FIRST_REVISION.matcher(change.getRevision()).find()) {
+                    DocHelper.toElement(change.getDoc()).ifPresent((Element e) -> putElement(e, addedElements));
+                } else {
+                    DocHelper.toElement(change.getDoc()).ifPresent((Element e) -> putElement(e, changedElements));
+                }
+            } catch (Exception e) {
+                SirsCore.LOGGER.log(Level.WARNING, "An error occurred while analyzing a database change. Change will be ignored.", e);
             }
         }
 
