@@ -76,12 +76,6 @@ public class DocumentChangeEmiter {
     }
 
     private String getAsString(String id, Optional<String> rev) throws IOException {
-        InputStream inputStream;
-        if (rev.isPresent()) {
-            Options options = new Options().revision(rev.get());
-            inputStream = connector.getAsStream(id, options);
-        } else
-            inputStream = connector.getAsStream(id);
         try (final InputStream stream = rev.isPresent() ? connector.getAsStream(id, new Options().revision(rev.get())) : connector.getAsStream(id)) {
             final StringBuilder builder = new StringBuilder();
             int available;

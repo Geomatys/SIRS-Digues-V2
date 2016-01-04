@@ -43,7 +43,6 @@ import org.ektorp.http.RestTemplate;
 import org.ektorp.http.StdHttpClient;
 import org.ektorp.impl.StdCouchDbInstance;
 import org.ektorp.impl.StdReplicationTask;
-import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.util.FileUtilities;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -56,9 +55,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Alexis Manin (Geomatys)
  */
 public class DatabaseRegistry {
-
-    /** Administrator list section */
-    private static final String ADMIN_SECTION = "admins";
 
     // Httpd related configurations
     private static final String HTTPD_SECTION = "httpd";
@@ -77,10 +73,8 @@ public class DatabaseRegistry {
     private static final String AUTH_SECTION = "couch_httpd_auth";
     private static final String REQUIRE_USER_OPTION = "require_valid_user";
 
-    private static final Pattern BASIC_AUTH = Pattern.compile("([^\\:/@]+)(?:\\:([^\\:/@]+))?@");
     private static final Pattern LOCAL_URL = Pattern.compile("(?i)^([A-Za-z]+://)?(localhost|127\\.0\\.0\\.1)(:\\d+)?");
     private static final Pattern URL_START = Pattern.compile("(?i)^[A-Za-z]+://([^@]+@)?");
-    private static final Pattern AUTH_ERROR_CODE = Pattern.compile("40(1|3)");
 
     private static final int MAX_CONNECTIONS = 100;
     private static final int SOCKET_TIMEOUT = 45000;
@@ -363,13 +357,27 @@ public class DatabaseRegistry {
     /**
      * Synchronize two databases content.
      *
+     * Notes :
+     * - "local" database information will be updated. Its "remote database"
+     * information will be updated with "distant" database path.
+     *
+     * - Since the method return only when synchronisation is finished (except
+     * if continuous, in case it returns after first synchronisation pass is over),
+     * it can take quite a long time.
+     *
+     * - If client throws an error, but replication is still going on the couchdb
+     * service, it means the replication is going as planned, but client cannot
+     * wait any longer. In that case, the error is caught silently, allowing client
+     * to go further while replication keep going.
+     *
      * @param distant The source database name if it's in current service, complete URL otherwise.
      * @param local Name of target database. It have to be in current service.
      * @param continuous True if we must keep databases synchronized over time. False for one shot synchronization.
-     * @throws IOException If an error occurs while rying to connect to one database.
+     * @throws IOException If an error occurs while trying to connect to one database.
      * @throws IllegalArgumentException If databases are incompatible (different SRID, or distant bdd is not a SIRS one).
+     * @throws DbAccessException If an error occcurs during replication.
      */
-    public void synchronizeSirsDatabases(String distant, String local, boolean continuous) throws IOException {
+    public void synchronizeSirsDatabases(String distant, final String local, boolean continuous) throws IOException {
         Optional<SirsDBInfo> distantInfo = getInfo(distant);
         if (!distantInfo.isPresent()) {
             throw new IllegalArgumentException("Input distant database is not a SIRS application one.");
@@ -383,7 +391,6 @@ public class DatabaseRegistry {
         if (info.isPresent()) {
             SirsDBInfo localInfo = info.get();
 
-            // TODO : check that SRID of local and distant database are one and the same.
             if (localInfo.getEpsgCode() != null && !localInfo.getEpsgCode().equals(srid)) {
                 throw new IllegalArgumentException("Impossible de synchroniser les bases de données car elles n'utilisent pas le même système de projection :\n"
                         + "Base distante : " + srid + "\n"
@@ -405,6 +412,9 @@ public class DatabaseRegistry {
             }
         }
 
+        // Update local database information : remote db.
+        new SirsDBInfoRepository(localConnector).set(srid, distant);
+
         // Force authentication on distant database. We can rely on wallet information
         // because a connection should have been opened already to retrieve SIRS information.
         URL distantURL = toURL(distant);
@@ -421,31 +431,47 @@ public class DatabaseRegistry {
             }
         }
 
-        // Copy source data in our database.
-        ReplicationCommand cmd = new ReplicationCommand.Builder()
-                .continuous(continuous).source(distant).target(localPath)
-                .createTarget(true).build();
-
-        // Send back local data to source database.
-        ReplicationCommand cmdRev = new ReplicationCommand.Builder()
-                .continuous(continuous).source(localPath).target(distant)
-                .createTarget(true).build();
-
         try {
-            couchDbInstance.replicate(cmd);
-            couchDbInstance.replicate(cmdRev);
-        } catch (DbAccessException ex) {
-            SirsCore.LOGGER.log(Level.WARNING, "La réplication de la base a échoué.", ex);
-            GeotkFX.newExceptionDialog("La réplication de la base a échoué. Veuillez vérifier l'URL de la base distante saisie\n " +
-                    "ansi que les identifiants de la base CouchDB indiqués dans l'URL.", ex).show();
-            return;
+            copyDatabase(distant, local, continuous);
+        } catch (DbAccessException e) {
+            checkReplicationError(e, distant, local);
         }
 
-        new SirsDBInfoRepository(localConnector).set(srid, distant);
+        try {
+            copyDatabase(local, distant, continuous);
+        } catch (DbAccessException e) {
+            checkReplicationError(e, local, distant);
+        }
     }
 
     /**
-     * Retrieve list of Synchronization tasks the input database is part of. Even
+     * Check that a replication task is still running for given databases. If not,
+     * input error is thrown.
+     * @param e The error to throw if no replication task is found.
+     * @param sourceDb Source database of the replication task.
+     * @param targetDb Target database of the replication tassk.
+     * @throws DbAccessException If no replication is found between given databases.
+     */
+    private void checkReplicationError(final DbAccessException e, final String sourceDb, final String targetDb) throws DbAccessException {
+        final long count;
+        try {
+            count = getReplicationTasks().stream()
+                    .filter(status -> status.getSourceDatabaseName().equals(sourceDb) && status.getTargetDatabaseName().equals(targetDb))
+                    .count();
+        } catch (Exception e1) {
+            e.addSuppressed(e1);
+            throw e;
+        }
+
+        if (count < 1) {
+            throw e;
+        } else {
+            SirsCore.LOGGER.log(Level.FINE, e, () -> new StringBuilder("An error occured during a replication from ").append(sourceDb).append(" to ").append(targetDb).toString());
+        }
+    }
+
+    /**
+     * Retrieve list of continuous synchronization tasks the input database is part of. Even
      * paused tasks are returned.
      *
      * @param dbName Target database name or path for synchronizations.
@@ -467,8 +493,21 @@ public class DatabaseRegistry {
      * @return A status of started replication task.
      */
     public ReplicationStatus copyDatabase(final String dbToCopy, final String dbToPasteInto) {
+        return copyDatabase(dbToCopy, dbToPasteInto, false);
+    }
+
+    /**
+     * Copy source database content to destination database. If destination database
+     * does not exists, it will be created.
+     *
+     * @param dbToCopy Database to copy. Only its name if it's in current service, complete URL otherwise.
+     * @param dbToPasteInto Database to paste content into. Only its name if it's in current service, complete URL otherwise.
+     * @param continuous If true, target database will continuously retrieve changes happening in source database. If not, it's one shot copy.
+     * @return A status of started replication task.
+     */
+    public ReplicationStatus copyDatabase(final String dbToCopy, final String dbToPasteInto, final boolean continuous) {
         ReplicationCommand cmd = new ReplicationCommand.Builder()
-                .continuous(false).source(dbToCopy).target(dbToPasteInto)
+                .continuous(continuous).source(dbToCopy).target(dbToPasteInto)
                 .createTarget(true).build();
 
         return couchDbInstance.replicate(cmd);
@@ -500,6 +539,11 @@ public class DatabaseRegistry {
         return counter.get();
     }
 
+    /**
+     *
+     * @return All replications found on current CouchDb service.
+     * @throws IOException If an error happens while connecting to couchdb, or while reading a replication status.
+     */
     ArrayList<ReplicationTask> getReplicationTasks() throws IOException {
         HttpResponse httpResponse = couchDbInstance.getConnection().get("/_active_tasks");
 
