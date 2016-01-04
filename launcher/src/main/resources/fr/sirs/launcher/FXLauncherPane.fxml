@@ -9,7 +9,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.45" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <TabPane fx:id="uiTabPane" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
@@ -55,7 +55,7 @@
                         <RowConstraints vgrow="NEVER" />
                         <RowConstraints vgrow="NEVER" />
                         <RowConstraints maxHeight="1.7976931348623157E308" vgrow="NEVER" />
-                        <RowConstraints maxHeight="1.7976931348623157E308" vgrow="ALWAYS" />
+                        <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" vgrow="ALWAYS" />
                         <RowConstraints vgrow="NEVER" />
                     </rowConstraints>
                      <children>
@@ -65,6 +65,15 @@
                         <Button mnemonicParsing="false" onAction="#connectDistant" text="Créer" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
                         <Label text="Nom de la base locale" GridPane.columnSpan="2" GridPane.rowIndex="4" />
                         <TextField fx:id="uiDistantName" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+                        <VBox fx:id="uiSynchroRunning" alignment="CENTER" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                           <children>
+                              <ProgressIndicator maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="10.0" VBox.vgrow="ALWAYS" />
+                              <Label text="Synchronisation en cours" />
+                           </children>
+                           <padding>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </padding>
+                        </VBox>
                      </children>
                      <padding>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

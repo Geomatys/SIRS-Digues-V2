@@ -76,6 +76,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -138,6 +139,8 @@ public class FXLauncherPane extends BorderPane {
     private TextField uiDistantUrl;
     @FXML
     private CheckBox uiDistantSync;
+    @FXML
+    private VBox uiSynchroRunning;
 
     // onglet base creation
     @FXML
@@ -206,6 +209,8 @@ public class FXLauncherPane extends BorderPane {
 
         uiProgressImport.visibleProperty().bindBidirectional(uiImportButton.disableProperty());
         uiProgressCreate.visibleProperty().bindBidirectional(uiCreateButton.disableProperty());
+        uiSynchroRunning.visibleProperty().bind(uiDistantTab.getContent().disabledProperty());
+        uiSynchroRunning.managedProperty().bind(uiSynchroRunning.visibleProperty());
 
         final TableColumn<String, String> column = new TableColumn<>("Base de données");
         column.setCellValueFactory((TableColumn.CellDataFeatures<String, String> param) -> new SimpleObjectProperty<>(param.getValue()));
@@ -425,20 +430,42 @@ public class FXLauncherPane extends BorderPane {
         }
 
         final String distantUrl = uiDistantUrl.getText();
-        try {
+        final Task t = new TaskManager.MockTask("", () -> {
             localRegistry.synchronizeSirsDatabases(distantUrl, uiDistantName.getText(), uiDistantSync.isSelected());
+            return true;
+        });
+
+        t.runningProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue) {
+                Platform.runLater(() -> uiDistantTab.getContent().setDisable(true));
+            } else {
+                Platform.runLater(() -> uiDistantTab.getContent().setDisable(false));
+            }
+        });
+
+        t.setOnSucceeded(evt -> Platform.runLater(() -> {
             //aller au panneau principal
             updateLocalDbList();
             uiTabPane.getSelectionModel().clearAndSelect(0);
-        } catch (DbAccessException ex) {
-            LOGGER.log(Level.WARNING, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
-            GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
-                    "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
-                    "puis relancer l'application.", ex).showAndWait();
-        } catch (Exception ex) {
-            LOGGER.log(Level.WARNING, "Impossible de synchroniser deux bases de données.", ex);
-            GeotkFX.newExceptionDialog("Impossible de synchroniser les bases de données.", ex).show();
-        }
+        }));
+
+        t.setOnCancelled(evt -> Platform.runLater(() -> {
+            new Alert(AlertType.WARNING, "Synchronisation annulée").show();
+        }));
+
+        t.setOnFailed(evt -> Platform.runLater(() -> {
+            final Throwable ex = t.getException();
+            if (ex instanceof DbAccessException) {
+                LOGGER.log(Level.WARNING, "Problème d'accès à CouchDB", ex);
+                GeotkFX.newExceptionDialog("Impossible d'accéder à la base de donnée demandée. Veuillez vérifier l'URL de la base distante saisie."
+                        + "Si le problème persiste, contactez votre administrateur.", ex).showAndWait();
+            } else {
+                LOGGER.log(Level.WARNING, "Impossible de synchroniser deux bases de données.", ex);
+                GeotkFX.newExceptionDialog("Impossible de synchroniser les bases de données.", ex).show();
+            }
+        }));
+
+        TaskManager.INSTANCE.submit(t);
     }
 
     @FXML

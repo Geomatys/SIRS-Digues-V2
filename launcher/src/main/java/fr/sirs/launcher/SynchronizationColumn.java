@@ -10,7 +10,6 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -160,6 +159,5 @@ public class SynchronizationColumn extends TableColumn<String, Callable> {
             dbRegistry.synchronizeSirsDatabases(remoteName, dbName, true);
             return new StopSync(dbName);
         }
-
     }
 }
