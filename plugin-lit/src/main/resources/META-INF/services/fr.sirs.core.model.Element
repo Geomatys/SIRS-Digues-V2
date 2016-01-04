@@ -15,7 +15,6 @@ fr.sirs.core.model.DomanialiteLit
 fr.sirs.core.model.ZoneAtterrissementLit
 fr.sirs.core.model.RefZoneAtterrissementLit
 fr.sirs.core.model.DesordreLit
-fr.sirs.core.model.RefTypeDesordreLit
 fr.sirs.core.model.OuvrageFreineurLit
 fr.sirs.core.model.BarrageLit
 fr.sirs.core.model.AutreOuvrageRegulationLit

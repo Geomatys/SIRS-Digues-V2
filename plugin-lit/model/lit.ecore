@@ -171,12 +171,8 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DesordreLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//Desordre">
     <eAnnotations source="couchDBDocument"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="typeDesordreLitId" eType="#//RefTypeDesordreLit"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="seuilIds" upperBound="-1"
         eType="#//SeuilLit" eOpposite="#//SeuilLit/desordreIds"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RefTypeDesordreLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
-    <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeOuvrageRegulationLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
