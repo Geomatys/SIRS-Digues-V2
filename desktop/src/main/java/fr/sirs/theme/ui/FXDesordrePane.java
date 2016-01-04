@@ -20,10 +20,8 @@ public class FXDesordrePane extends FXDesordrePaneStub {
     public FXDesordrePane(final Desordre desordre){
         super(desordre);
 
-        final AbstractSIRSRepository<RefCategorieDesordre> catRepo = Injector.getSession().getRepositoryForClass(RefCategorieDesordre.class);
-        final AbstractSIRSRepository<RefTypeDesordre> typeRepo = Injector.getSession().getRepositoryForClass(RefTypeDesordre.class);
-
         // Update available types according to chosen category.
+        final AbstractSIRSRepository<RefTypeDesordre> typeRepo = Injector.getSession().getRepositoryForClass(RefTypeDesordre.class);
         ui_categorieDesordreId.getSelectionModel().selectedItemProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
 
             final ObservableList<RefTypeDesordre> typeList = SIRS.observableList(typeRepo.getAll());
