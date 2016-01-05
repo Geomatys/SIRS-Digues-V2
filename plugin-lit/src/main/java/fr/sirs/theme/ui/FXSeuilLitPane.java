@@ -6,11 +6,14 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
+import fr.sirs.core.model.CoucheSeuilLit;
 import fr.sirs.core.model.DesordreLit;
 import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.EchelleLimnimetrique;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.GestionObjet;
+import fr.sirs.core.model.InspectionSeuilLit;
+import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.OuvrageFranchissement;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.OuvrageParticulier;
@@ -20,16 +23,11 @@ import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.PlanSeuilLit;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProprieteObjet;
-import fr.sirs.core.model.RefFonction;
 import fr.sirs.core.model.RefFonctionSeuilLit;
 import fr.sirs.core.model.RefGeometrieCreteSeuilLit;
 import fr.sirs.core.model.RefMateriau;
-import fr.sirs.core.model.RefNature;
 import fr.sirs.core.model.RefPositionAxeSeuilLit;
-import fr.sirs.core.model.RefPositionStructureSeuilLit;
 import fr.sirs.core.model.RefProfilCoursierSeuilLit;
-import fr.sirs.core.model.RefSource;
-import fr.sirs.core.model.RefTypeInspectionSeuilLit;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauTelecomEnergie;
@@ -47,8 +45,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.web.HTMLEditor;
 import org.geotoolkit.util.collection.CloseableIterator;
 
 /**
@@ -56,40 +61,97 @@ import org.geotoolkit.util.collection.CloseableIterator;
  * @author Olivier Nouguier (Geomatys)
  * @author Alexis Manin (Geomatys)
  */
-public class FXSeuilLitPane extends FXSeuilLitPaneStub {
+public class FXSeuilLitPane  extends AbstractFXElementPane<SeuilLit> {
 
     protected final Previews previewRepository;
-    
+    protected LabelMapper labelMapper;
+
     // Propriétés de Positionable
     @FXML private FXPositionablePane uiPositionable;
     @FXML private FXValidityPeriodPane uiValidityPeriod;
 
+    // Propriétés de SeuilLit
+    @FXML protected TextField ui_libelle;
+    @FXML protected TextField ui_commune;
+    @FXML protected Spinner ui_anneeConstruction;
+    @FXML protected Spinner ui_penteRampant;
+    @FXML protected Spinner ui_longueurTotale;
+    @FXML protected Spinner ui_longueurCoursier;
+    @FXML protected Spinner ui_largeurEnCrete;
+    @FXML protected Spinner ui_hauteurChute;
+    @FXML protected CheckBox ui_passeSportEauVive;
+    @FXML protected CheckBox ui_passePoisson;
+    @FXML protected Spinner ui_surfaceRempantEntretien;
+    @FXML protected ComboBox ui_fonctionSeuilId;
+    @FXML protected Button ui_fonctionSeuilId_link;
+    @FXML protected ComboBox ui_materiauPrincipalA;
+    @FXML protected Button ui_materiauPrincipalA_link;
+    @FXML protected ComboBox ui_materiauPrincipalB;
+    @FXML protected Button ui_materiauPrincipalB_link;
+    @FXML protected ComboBox ui_positionSeuilId;
+    @FXML protected Button ui_positionSeuilId_link;
+    @FXML protected ComboBox ui_geometrieCreteId;
+    @FXML protected Button ui_geometrieCreteId_link;
+    @FXML protected ComboBox ui_profilCoursierId;
+    @FXML protected Button ui_profilCoursierId_link;
+    @FXML protected Tab ui_plans;
     protected final PojoTable plansTable;
+    @FXML protected Tab ui_voieAccesIds;
     protected final ListeningPojoTable voieAccesIdsTable;
+    @FXML protected Tab ui_ouvrageFranchissementIds;
     protected final ListeningPojoTable ouvrageFranchissementIdsTable;
+    @FXML protected Tab ui_voieDigueIds;
     protected final ListeningPojoTable voieDigueIdsTable;
+    @FXML protected Tab ui_ouvrageVoirieIds;
     protected final ListeningPojoTable ouvrageVoirieIdsTable;
+    @FXML protected Tab ui_stationPompageIds;
     protected final ListeningPojoTable stationPompageIdsTable;
+    @FXML protected Tab ui_reseauHydrauliqueFermeIds;
     protected final ListeningPojoTable reseauHydrauliqueFermeIdsTable;
+    @FXML protected Tab ui_reseauHydrauliqueCielOuvertIds;
     protected final ListeningPojoTable reseauHydrauliqueCielOuvertIdsTable;
+    @FXML protected Tab ui_ouvrageHydrauliqueAssocieIds;
     protected final ListeningPojoTable ouvrageHydrauliqueAssocieIdsTable;
+    @FXML protected Tab ui_ouvrageTelecomEnergieIds;
     protected final ListeningPojoTable ouvrageTelecomEnergieIdsTable;
+    @FXML protected Tab ui_reseauTelecomEnergieIds;
     protected final ListeningPojoTable reseauTelecomEnergieIdsTable;
+    @FXML protected Tab ui_ouvrageParticulierIds;
     protected final ListeningPojoTable ouvrageParticulierIdsTable;
+    @FXML protected Tab ui_echelleLimnimetriqueIds;
     protected final ListeningPojoTable echelleLimnimetriqueIdsTable;
+    @FXML protected Tab ui_desordreIds;
     protected final ListeningPojoTable desordreIdsTable;
+    @FXML protected Tab ui_bergeIds;
     protected final ListeningPojoTable bergeIdsTable;
+    @FXML protected Tab ui_digueIds;
     protected final ListeningPojoTable digueIdsTable;
+    @FXML protected Tab ui_inspections;
+    protected final PojoTable inspectionsTable;
+    @FXML protected Tab ui_couches;
+    protected final PojoTable couchesTable;
 
+    // Propriétés de AvecGeometrie
+
+    // Propriétés de Objet
+    @FXML protected HTMLEditor ui_commentaire;
+    @FXML protected ComboBox ui_linearId;
+    @FXML protected Button ui_linearId_link;
+
+    // Propriétés de ObjetPhotographiable
+    @FXML protected Tab ui_photos;
     protected final PojoTable photosTable;
 
+    // Propriétés de ObjetLit
+    @FXML protected Tab ui_proprietes;
     protected final PojoTable proprietesTable;
+    @FXML protected Tab ui_gestions;
     protected final PojoTable gestionsTable;
 
     private Class bergeClass;
 
     /**
-     * Constructor. Initialize part of the UI which will not require update when 
+     * Constructor. Initialize part of the UI which will not require update when
      * element edited change.
      */
     protected FXSeuilLitPane() {
@@ -110,7 +172,6 @@ public class FXSeuilLitPane extends FXSeuilLitPaneStub {
         ui_anneeConstruction.disableProperty().bind(disableFieldsProperty());
         ui_anneeConstruction.setEditable(true);
         ui_anneeConstruction.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
-        ui_dateDerniereInspection.disableProperty().bind(disableFieldsProperty());
         ui_penteRampant.disableProperty().bind(disableFieldsProperty());
         ui_penteRampant.setEditable(true);
         ui_penteRampant.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE));
@@ -126,12 +187,6 @@ public class FXSeuilLitPane extends FXSeuilLitPaneStub {
         ui_hauteurChute.disableProperty().bind(disableFieldsProperty());
         ui_hauteurChute.setEditable(true);
         ui_hauteurChute.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE));
-        ui_numCouche.disableProperty().bind(disableFieldsProperty());
-        ui_numCouche.setEditable(true);
-        ui_numCouche.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
-        ui_epaisseur.disableProperty().bind(disableFieldsProperty());
-        ui_epaisseur.setEditable(true);
-        ui_epaisseur.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE));
         ui_passeSportEauVive.disableProperty().bind(disableFieldsProperty());
         ui_passePoisson.disableProperty().bind(disableFieldsProperty());
         ui_surfaceRempantEntretien.disableProperty().bind(disableFieldsProperty());
@@ -139,8 +194,6 @@ public class FXSeuilLitPane extends FXSeuilLitPaneStub {
         ui_surfaceRempantEntretien.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE));
         ui_fonctionSeuilId.disableProperty().bind(disableFieldsProperty());
         ui_fonctionSeuilId_link.setVisible(false);
-        ui_typeInspectionId.disableProperty().bind(disableFieldsProperty());
-        ui_typeInspectionId_link.setVisible(false);
         ui_materiauPrincipalA.disableProperty().bind(disableFieldsProperty());
         ui_materiauPrincipalA_link.setVisible(false);
         ui_materiauPrincipalB.disableProperty().bind(disableFieldsProperty());
@@ -151,16 +204,6 @@ public class FXSeuilLitPane extends FXSeuilLitPaneStub {
         ui_geometrieCreteId_link.setVisible(false);
         ui_profilCoursierId.disableProperty().bind(disableFieldsProperty());
         ui_profilCoursierId_link.setVisible(false);
-        ui_natureId.disableProperty().bind(disableFieldsProperty());
-        ui_natureId_link.setVisible(false);
-        ui_materiauId.disableProperty().bind(disableFieldsProperty());
-        ui_materiauId_link.setVisible(false);
-        ui_fonctionId.disableProperty().bind(disableFieldsProperty());
-        ui_fonctionId_link.setVisible(false);
-        ui_sourceId.disableProperty().bind(disableFieldsProperty());
-        ui_sourceId_link.setVisible(false);
-        ui_positionStructureId.disableProperty().bind(disableFieldsProperty());
-        ui_positionStructureId_link.setVisible(false);
         plansTable = new PojoTable(PlanSeuilLit.class, null);
         plansTable.editableProperty().bind(disableFieldsProperty().not());
         ui_plans.setContent(plansTable);
@@ -235,11 +278,19 @@ public class FXSeuilLitPane extends FXSeuilLitPaneStub {
         digueIdsTable.createNewProperty().set(false);
         ui_digueIds.setContent(digueIdsTable);
         ui_digueIds.setClosable(false);
+        inspectionsTable = new PojoTable(InspectionSeuilLit.class, null);
+        inspectionsTable.editableProperty().bind(disableFieldsProperty().not());
+        ui_inspections.setContent(inspectionsTable);
+        ui_inspections.setClosable(false);
+        couchesTable = new PojoTable(CoucheSeuilLit.class, null);
+        couchesTable.editableProperty().bind(disableFieldsProperty().not());
+        ui_couches.setContent(couchesTable);
+        ui_couches.setClosable(false);
         ui_commentaire.disableProperty().bind(disableFieldsProperty());
         ui_linearId.disableProperty().bind(disableFieldsProperty());
         ui_linearId_link.disableProperty().bind(ui_linearId.getSelectionModel().selectedItemProperty().isNull());
         ui_linearId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
-        ui_linearId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_linearId.getSelectionModel().getSelectedItem()));       
+        ui_linearId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_linearId.getSelectionModel().getSelectedItem()));
         photosTable = new PojoTable(Photo.class, null);
         photosTable.editableProperty().bind(disableFieldsProperty().not());
         ui_photos.setContent(photosTable);
@@ -272,41 +323,28 @@ public class FXSeuilLitPane extends FXSeuilLitPaneStub {
             ui_bergeIds.getTabPane().getTabs().remove(ui_bergeIds);
         }
     }
-    
+
     public FXSeuilLitPane(final SeuilLit seuilLit){
         this();
-        this.elementProperty().set(seuilLit);  
-    }     
+        this.elementProperty().set(seuilLit);
+    }
 
     /**
      * Initialize fields at element setting.
-     * @param observableElement
-     * @param oldElement
-     * @param newElement
      */
-    @Override
     protected void initFields(ObservableValue<? extends SeuilLit > observableElement, SeuilLit oldElement, SeuilLit newElement) {   // Unbind fields bound to previous element.
         if (oldElement != null) {
-        // Propriétés de SeuilLit
             ui_libelle.textProperty().unbindBidirectional(oldElement.libelleProperty());
             ui_commune.textProperty().unbindBidirectional(oldElement.communeProperty());
             ui_anneeConstruction.getValueFactory().valueProperty().unbindBidirectional(oldElement.anneeConstructionProperty());
-            ui_dateDerniereInspection.valueProperty().unbindBidirectional(oldElement.dateDerniereInspectionProperty());
             ui_penteRampant.getValueFactory().valueProperty().unbindBidirectional(oldElement.penteRampantProperty());
             ui_longueurTotale.getValueFactory().valueProperty().unbindBidirectional(oldElement.longueurTotaleProperty());
             ui_longueurCoursier.getValueFactory().valueProperty().unbindBidirectional(oldElement.longueurCoursierProperty());
             ui_largeurEnCrete.getValueFactory().valueProperty().unbindBidirectional(oldElement.largeurEnCreteProperty());
             ui_hauteurChute.getValueFactory().valueProperty().unbindBidirectional(oldElement.hauteurChuteProperty());
-            ui_numCouche.getValueFactory().valueProperty().unbindBidirectional(oldElement.numCoucheProperty());
-            ui_epaisseur.getValueFactory().valueProperty().unbindBidirectional(oldElement.epaisseurProperty());
             ui_passeSportEauVive.selectedProperty().unbindBidirectional(oldElement.passeSportEauViveProperty());
             ui_passePoisson.selectedProperty().unbindBidirectional(oldElement.passePoissonProperty());
             ui_surfaceRempantEntretien.getValueFactory().valueProperty().unbindBidirectional(oldElement.surfaceRempantEntretienProperty());
-        // Propriétés de AvecGeometrie
-        // Propriétés de AotCotAssociable
-        // Propriétés de Objet
-        // Propriétés de ObjetPhotographiable
-        // Propriétés de ObjetLit
         }
 
         final Session session = Injector.getBean(Session.class);
@@ -321,8 +359,6 @@ public class FXSeuilLitPane extends FXSeuilLitPaneStub {
         ui_commune.textProperty().bindBidirectional(newElement.communeProperty());
         // * anneeConstruction
         ui_anneeConstruction.getValueFactory().valueProperty().bindBidirectional(newElement.anneeConstructionProperty());
-        // * dateDerniereInspection
-        ui_dateDerniereInspection.valueProperty().bindBidirectional(newElement.dateDerniereInspectionProperty());
         // * penteRampant
         ui_penteRampant.getValueFactory().valueProperty().bindBidirectional(newElement.penteRampantProperty());
         // * longueurTotale
@@ -333,52 +369,24 @@ public class FXSeuilLitPane extends FXSeuilLitPaneStub {
         ui_largeurEnCrete.getValueFactory().valueProperty().bindBidirectional(newElement.largeurEnCreteProperty());
         // * hauteurChute
         ui_hauteurChute.getValueFactory().valueProperty().bindBidirectional(newElement.hauteurChuteProperty());
-        // * numCouche
-        ui_numCouche.getValueFactory().valueProperty().bindBidirectional(newElement.numCoucheProperty());
-        // * epaisseur
-        ui_epaisseur.getValueFactory().valueProperty().bindBidirectional(newElement.epaisseurProperty());
         // * passeSportEauVive
         ui_passeSportEauVive.selectedProperty().bindBidirectional(newElement.passeSportEauViveProperty());
         // * passePoisson
         ui_passePoisson.selectedProperty().bindBidirectional(newElement.passePoissonProperty());
         // * surfaceRempantEntretien
         ui_surfaceRempantEntretien.getValueFactory().valueProperty().bindBidirectional(newElement.surfaceRempantEntretienProperty());
-        SIRS.initCombo(ui_fonctionSeuilId, FXCollections.observableList(
-            previewRepository.getByClass(RefFonctionSeuilLit.class)),
-            newElement.getFonctionSeuilId() == null? null : previewRepository.get(newElement.getFonctionSeuilId()));
-        SIRS.initCombo(ui_typeInspectionId, FXCollections.observableList(
-            previewRepository.getByClass(RefTypeInspectionSeuilLit.class)),
-            newElement.getTypeInspectionId() == null? null : previewRepository.get(newElement.getTypeInspectionId()));
-        SIRS.initCombo(ui_materiauPrincipalA, FXCollections.observableList(
-            previewRepository.getByClass(RefMateriau.class)),
-            newElement.getMateriauPrincipalA() == null? null : previewRepository.get(newElement.getMateriauPrincipalA()));
-        SIRS.initCombo(ui_materiauPrincipalB, FXCollections.observableList(
-            previewRepository.getByClass(RefMateriau.class)),
-            newElement.getMateriauPrincipalB() == null? null : previewRepository.get(newElement.getMateriauPrincipalB()));
-        SIRS.initCombo(ui_positionSeuilId, FXCollections.observableList(
-            previewRepository.getByClass(RefPositionAxeSeuilLit.class)),
-            newElement.getPositionSeuilId() == null? null : previewRepository.get(newElement.getPositionSeuilId()));
-        SIRS.initCombo(ui_geometrieCreteId, FXCollections.observableList(
-            previewRepository.getByClass(RefGeometrieCreteSeuilLit.class)),
-            newElement.getGeometrieCreteId() == null? null : previewRepository.get(newElement.getGeometrieCreteId()));
-        SIRS.initCombo(ui_profilCoursierId, FXCollections.observableList(
-            previewRepository.getByClass(RefProfilCoursierSeuilLit.class)),
-            newElement.getProfilCoursierId() == null? null : previewRepository.get(newElement.getProfilCoursierId()));
-        SIRS.initCombo(ui_natureId, FXCollections.observableList(
-            previewRepository.getByClass(RefNature.class)),
-            newElement.getNatureId() == null? null : previewRepository.get(newElement.getNatureId()));
-        SIRS.initCombo(ui_materiauId, FXCollections.observableList(
-            previewRepository.getByClass(RefMateriau.class)),
-            newElement.getMateriauId() == null? null : previewRepository.get(newElement.getMateriauId()));
-        SIRS.initCombo(ui_fonctionId, FXCollections.observableList(
-            previewRepository.getByClass(RefFonction.class)),
-            newElement.getFonctionId() == null? null : previewRepository.get(newElement.getFonctionId()));
-        SIRS.initCombo(ui_sourceId, FXCollections.observableList(
-            previewRepository.getByClass(RefSource.class)),
-            newElement.getSourceId() == null? null : previewRepository.get(newElement.getSourceId()));
-        SIRS.initCombo(ui_positionStructureId, FXCollections.observableList(
-            previewRepository.getByClass(RefPositionStructureSeuilLit.class)),
-            newElement.getPositionStructureId() == null? null : previewRepository.get(newElement.getPositionStructureId()));
+            final AbstractSIRSRepository<RefFonctionSeuilLit> fonctionSeuilIdRepo = session.getRepositoryForClass(RefFonctionSeuilLit.class);
+            SIRS.initCombo(ui_fonctionSeuilId, SIRS.observableList(fonctionSeuilIdRepo.getAll()), newElement.getFonctionSeuilId() == null? null : fonctionSeuilIdRepo.get(newElement.getFonctionSeuilId()));
+            final AbstractSIRSRepository<RefMateriau> materiauPrincipalARepo = session.getRepositoryForClass(RefMateriau.class);
+            SIRS.initCombo(ui_materiauPrincipalA, SIRS.observableList(materiauPrincipalARepo.getAll()), newElement.getMateriauPrincipalA() == null? null : materiauPrincipalARepo.get(newElement.getMateriauPrincipalA()));
+            final AbstractSIRSRepository<RefMateriau> materiauPrincipalBRepo = session.getRepositoryForClass(RefMateriau.class);
+            SIRS.initCombo(ui_materiauPrincipalB, SIRS.observableList(materiauPrincipalBRepo.getAll()), newElement.getMateriauPrincipalB() == null? null : materiauPrincipalBRepo.get(newElement.getMateriauPrincipalB()));
+            final AbstractSIRSRepository<RefPositionAxeSeuilLit> positionSeuilIdRepo = session.getRepositoryForClass(RefPositionAxeSeuilLit.class);
+            SIRS.initCombo(ui_positionSeuilId, SIRS.observableList(positionSeuilIdRepo.getAll()), newElement.getPositionSeuilId() == null? null : positionSeuilIdRepo.get(newElement.getPositionSeuilId()));
+            final AbstractSIRSRepository<RefGeometrieCreteSeuilLit> geometrieCreteIdRepo = session.getRepositoryForClass(RefGeometrieCreteSeuilLit.class);
+            SIRS.initCombo(ui_geometrieCreteId, SIRS.observableList(geometrieCreteIdRepo.getAll()), newElement.getGeometrieCreteId() == null? null : geometrieCreteIdRepo.get(newElement.getGeometrieCreteId()));
+            final AbstractSIRSRepository<RefProfilCoursierSeuilLit> profilCoursierIdRepo = session.getRepositoryForClass(RefProfilCoursierSeuilLit.class);
+            SIRS.initCombo(ui_profilCoursierId, SIRS.observableList(profilCoursierIdRepo.getAll()), newElement.getProfilCoursierId() == null? null : profilCoursierIdRepo.get(newElement.getProfilCoursierId()));
         plansTable.setParentElement(newElement);
         plansTable.setTableItems(()-> (ObservableList) newElement.getPlans());
         voieAccesIdsTable.setParentElement(null);
@@ -461,7 +469,7 @@ public class FXSeuilLitPane extends FXSeuilLitPaneStub {
             bergeIdsTable.setObservableListToListen(newElement.getBergeIds());
         }
         digueIdsTable.setObservableListToListen(newElement.getDigueIds());
-        
+
     }
 
     @Override
@@ -482,14 +490,6 @@ public class FXSeuilLitPane extends FXSeuilLitPaneStub {
             element.setFonctionSeuilId(((Element)cbValue).getId());
         } else if (cbValue == null) {
             element.setFonctionSeuilId(null);
-        }
-        cbValue = ui_typeInspectionId.getValue();
-        if (cbValue instanceof Preview) {
-            element.setTypeInspectionId(((Preview)cbValue).getElementId());
-        } else if (cbValue instanceof Element) {
-            element.setTypeInspectionId(((Element)cbValue).getId());
-        } else if (cbValue == null) {
-            element.setTypeInspectionId(null);
         }
         cbValue = ui_materiauPrincipalA.getValue();
         if (cbValue instanceof Preview) {
@@ -530,46 +530,6 @@ public class FXSeuilLitPane extends FXSeuilLitPaneStub {
             element.setProfilCoursierId(((Element)cbValue).getId());
         } else if (cbValue == null) {
             element.setProfilCoursierId(null);
-        }
-        cbValue = ui_natureId.getValue();
-        if (cbValue instanceof Preview) {
-            element.setNatureId(((Preview)cbValue).getElementId());
-        } else if (cbValue instanceof Element) {
-            element.setNatureId(((Element)cbValue).getId());
-        } else if (cbValue == null) {
-            element.setNatureId(null);
-        }
-        cbValue = ui_materiauId.getValue();
-        if (cbValue instanceof Preview) {
-            element.setMateriauId(((Preview)cbValue).getElementId());
-        } else if (cbValue instanceof Element) {
-            element.setMateriauId(((Element)cbValue).getId());
-        } else if (cbValue == null) {
-            element.setMateriauId(null);
-        }
-        cbValue = ui_fonctionId.getValue();
-        if (cbValue instanceof Preview) {
-            element.setFonctionId(((Preview)cbValue).getElementId());
-        } else if (cbValue instanceof Element) {
-            element.setFonctionId(((Element)cbValue).getId());
-        } else if (cbValue == null) {
-            element.setFonctionId(null);
-        }
-        cbValue = ui_sourceId.getValue();
-        if (cbValue instanceof Preview) {
-            element.setSourceId(((Preview)cbValue).getElementId());
-        } else if (cbValue instanceof Element) {
-            element.setSourceId(((Element)cbValue).getId());
-        } else if (cbValue == null) {
-            element.setSourceId(null);
-        }
-        cbValue = ui_positionStructureId.getValue();
-        if (cbValue instanceof Preview) {
-            element.setPositionStructureId(((Preview)cbValue).getElementId());
-        } else if (cbValue instanceof Element) {
-            element.setPositionStructureId(((Element)cbValue).getId());
-        } else if (cbValue == null) {
-            element.setPositionStructureId(null);
         }
         // Manage opposite references for VoieAcces...
         final List<String> currentVoieAccesIdsList = new ArrayList<>();
