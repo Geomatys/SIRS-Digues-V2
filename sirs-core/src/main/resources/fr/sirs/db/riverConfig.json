@@ -4,6 +4,7 @@
     },
     "type": "couchdb",
     "couchdb": {
+        "ignore_attachments":true,
         "host"    : "$dbHost",
         "port"    : "$dbPort",
         "db"      : "$dbName",

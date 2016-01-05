@@ -36,7 +36,6 @@
     <project.encoding>UTF-8</project.encoding>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.version>4.1.0.RELEASE</spring.version>
-    <liquidbase.version>3.2.0</liquidbase.version>
     <ektorp.version>1.4.3</ektorp.version>
   </properties>
   
@@ -77,10 +76,6 @@
   </dependencies>
 
 
-
-  
-
-
   <!-- Optional dependencies. These dependencies are not automatically inherited 
     by parameters modules. But if a child module declare one of those depencies 
     without specifying any number of version, then the version by default will 
@@ -106,15 +101,7 @@
         <groupId>org.apache.pdfbox</groupId>
         <artifactId>pdfbox</artifactId>
         <version>1.8.9</version>
-      </dependency>
-      
-      <!-- HACK : due to an incompatibility of RichText 0.6 with jre 8u60, we force richtext version here. -->
-      <!--dependency>
-      <groupId>org.fxmisc.richtext</groupId>
-        <artifactId>richtextfx</artifactId>
-        <version>0.6.9</version>
-      </dependency-->
-      
+      </dependency>      
     </dependencies>
   </dependencyManagement>
 
