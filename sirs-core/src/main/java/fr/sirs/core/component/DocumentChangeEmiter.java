@@ -16,6 +16,7 @@ import fr.sirs.core.DocHelper;
 
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Element;
+import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
@@ -28,8 +29,11 @@ import java.util.regex.Pattern;
  */
 public class DocumentChangeEmiter {
 
+    private static char[] BUFFER = new char[4096];
+
     /** A pattern to identify new elements. They must have a revision number equal to 1 */
     private static final Pattern FIRST_REVISION = Pattern.compile("^1\\D.*");
+    private static final int LIMIT = 1000;
 
     // TODO : Transform to Observable list ?
     private final List<DocumentListener> listeners = new ArrayList<>();
@@ -46,11 +50,10 @@ public class DocumentChangeEmiter {
     }
 
     public Thread start() {
-
         Thread thread = new Thread() {
             @Override
             public void run() {
-                final ChangesCommand cmd = new ChangesCommand.Builder().build();
+                final ChangesCommand cmd = new ChangesCommand.Builder().includeDocs(true).since(connector.getDbInfo().getUpdateSeq()).build();
                 final ChangesFeed feed = connector.changesFeed(cmd);
                 while (feed.isAlive()) {
                     try {
@@ -65,9 +68,7 @@ public class DocumentChangeEmiter {
         thread.setName("CouchDB change watch");
         thread.setDaemon(true);
         thread.start();
-
         return thread;
-
     }
 
     protected Optional<Element> getDeleted(final String deletedDoc) throws IOException, ClassNotFoundException {
@@ -76,15 +77,14 @@ public class DocumentChangeEmiter {
     }
 
     private String getAsString(String id, Optional<String> rev) throws IOException {
-        try (final InputStream stream = rev.isPresent() ? connector.getAsStream(id, new Options().revision(rev.get())) : connector.getAsStream(id)) {
+        try (final InputStream stream = rev.isPresent() ? connector.getAsStream(id, new Options().revision(rev.get())) : connector.getAsStream(id);
+                final InputStreamReader reader = new InputStreamReader(stream, "UTF-8")) {
             final StringBuilder builder = new StringBuilder();
-            int available;
-            byte[] nextChars;
-            while ((available = stream.available()) > 0) {
-                nextChars = new byte[available];
-                stream.read(nextChars);
-                builder.append(nextChars);
+            int readSize;
+            while ((readSize = reader.read(BUFFER)) >= 0) {
+                builder.append(BUFFER, 0, readSize);
             }
+
             return builder.toString();
         }
     }
