@@ -104,8 +104,6 @@ public class SessionCore implements ApplicationContextAware {
 
     public ElementCreator getElementCreator(){return elementCreator;}
 
-    public static final String BUNDLE_KEY_CLASS = "class";
-
     ////////////////////////////////////////////////////////////////////////////
     // GESTION DU CONTEXTE SPRING
     ////////////////////////////////////////////////////////////////////////////
@@ -439,28 +437,37 @@ public class SessionCore implements ApplicationContextAware {
      * @return List of concrete classes inheriting {@link Element} and given target.
      */
     public static <T> List<Class<? extends T>>getConcreteSubTypes(final Class<T> target) {
-        synchronized (SessionCore.class) {
-            if (ELEMENT_IMPLS == null) {
-                final Iterator<Element> registeredImpls = ServiceLoader.load(Element.class).iterator();
-                final ArrayList<Class<? extends Element>> tmpList = new ArrayList<>();
-                while (registeredImpls.hasNext()) {
-                    tmpList.add(registeredImpls.next().getClass());
-                }
-                ELEMENT_IMPLS = Collections.unmodifiableList(tmpList);
-            }
-        }
-
-        if (target == null || target.equals(Element.class)) {
-            return (List) ELEMENT_IMPLS;
-        }
+        final SessionCore sc = InjectorCore.getBean(SessionCore.class);
 
         final ArrayList<Class<? extends T>> result = new ArrayList<>();
-        for (final Class c : ELEMENT_IMPLS) {
-            if (target.isAssignableFrom(c))
-                result.add(c);
+        for (final T t : sc.getApplicationContext().getBeansOfType(target).values()) {
+            result.add((Class<? extends T>) t.getClass());
         }
 
         return result;
+
+//        synchronized (SessionCore.class) {
+//            if (ELEMENT_IMPLS == null) {
+//                final Iterator<Element> registeredImpls = ServiceLoader.load(Element.class).iterator();
+//                final ArrayList<Class<? extends Element>> tmpList = new ArrayList<>();
+//                while (registeredImpls.hasNext()) {
+//                    tmpList.add(registeredImpls.next().getClass());
+//                }
+//                ELEMENT_IMPLS = Collections.unmodifiableList(tmpList);
+//            }
+//        }
+//
+//        if (target == null || target.equals(Element.class)) {
+//            return (List) ELEMENT_IMPLS;
+//        }
+//
+//        final ArrayList<Class<? extends T>> result = new ArrayList<>();
+//        for (final Class c : ELEMENT_IMPLS) {
+//            if (target.isAssignableFrom(c))
+//                result.add(c);
+//        }
+//
+//        return result;
     }
 
     /**

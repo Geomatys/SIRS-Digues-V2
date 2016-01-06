@@ -4,6 +4,7 @@ package fr.sirs.core.model.report;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -49,6 +50,7 @@ import org.geotoolkit.feature.Feature;
 import org.geotoolkit.feature.type.NamesExt;
 import org.odftoolkit.simple.TextDocument;
 
+@JsonIgnoreProperties(ignoreUnknown=true)
 @JsonInclude(Include.NON_EMPTY)
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
 @SuppressWarnings("serial")

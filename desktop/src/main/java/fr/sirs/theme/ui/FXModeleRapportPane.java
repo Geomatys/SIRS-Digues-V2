@@ -1,14 +1,12 @@
 package fr.sirs.theme.ui;
 
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.report.AbstractSectionRapport;
 import fr.sirs.core.model.report.ModeleRapport;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.ServiceLoader;
 import java.util.logging.Level;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -117,18 +115,9 @@ public class FXModeleRapportPane extends AbstractFXElementPane<ModeleRapport> {
      */
     private static synchronized AbstractSectionRapport[] getAvailableSections() {
         if (AVAILABLE_SECTIONS == null) {
-            Iterator<Element> iterator = ServiceLoader.load(
-                    Element.class,
-                    Thread.currentThread().getContextClassLoader())
-                    .iterator();
-
-            final ArrayList<AbstractSectionRapport> tmpList = new ArrayList<>();
-            while (iterator.hasNext()) {
-                final Element next = iterator.next();
-                if (next instanceof AbstractSectionRapport)
-                    tmpList.add((AbstractSectionRapport) next);
-            }
-            AVAILABLE_SECTIONS = tmpList.toArray(new AbstractSectionRapport[tmpList.size()]);
+            AVAILABLE_SECTIONS = Injector.getSession().getApplicationContext()
+                    .getBeansOfType(AbstractSectionRapport.class).values()
+                    .toArray(new AbstractSectionRapport[0]);
         }
         return AVAILABLE_SECTIONS;
     }

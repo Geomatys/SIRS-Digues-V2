@@ -20,6 +20,9 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.odftoolkit.simple.TextDocument;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import org.w3c.dom.Text;
 
 /**
@@ -27,6 +30,8 @@ import org.w3c.dom.Text;
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class FicheSectionRapport extends AbstractSectionRapport {
 
     private final SimpleIntegerProperty nbPhotos = new SimpleIntegerProperty(0);
@@ -99,7 +104,7 @@ public class FicheSectionRapport extends AbstractSectionRapport {
         if (ctx.elements == null) {
             return; // TODO : print template using filter values.
         }
-        
+
         if (modeleElementId.get() == null)
             throw new IllegalStateException("No model set for printing !");
 

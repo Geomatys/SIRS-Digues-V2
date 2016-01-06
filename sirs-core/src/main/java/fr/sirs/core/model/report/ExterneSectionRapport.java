@@ -12,6 +12,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 /**
  * A section composed of an unique external file (can be an image, a PDF or
@@ -19,9 +22,11 @@ import javafx.beans.property.StringProperty;
  *
  * Note : {@link #requeteIdProperty() } is not used here, because section generation
  * is independent from any element.
- * 
+ *
  * @author Alexis Manin (Geomatys)
  */
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ExterneSectionRapport extends AbstractSectionRapport implements SIRSFileReference {
     /**
      * Path to external document to reference.

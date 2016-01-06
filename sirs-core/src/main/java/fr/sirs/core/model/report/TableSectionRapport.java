@@ -7,12 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Spliterators;
 import org.geotoolkit.data.FeatureIterator;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 /**
  * Used for printing brut table reports.
  *
  * @author Alexis Manin (Geomatys)
  */
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class TableSectionRapport extends AbstractSectionRapport {
 
     @Override
