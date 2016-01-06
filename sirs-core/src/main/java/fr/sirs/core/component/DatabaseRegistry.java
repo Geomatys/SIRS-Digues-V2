@@ -412,9 +412,6 @@ public class DatabaseRegistry {
             }
         }
 
-        // Update local database information : remote db.
-        new SirsDBInfoRepository(localConnector).set(srid, distant);
-
         // Force authentication on distant database. We can rely on wallet information
         // because a connection should have been opened already to retrieve SIRS information.
         URL distantURL = toURL(distant);
@@ -429,6 +426,14 @@ public class DatabaseRegistry {
                 }
                 distant = distantURL.toExternalForm().replaceFirst("(^\\w+://)", "$1" + userInfo);
             }
+        } else {
+            distant = distantURL.toExternalForm();
+        }
+
+        try {
+            copyDatabase(local, distant, continuous);
+        } catch (DbAccessException e) {
+            checkReplicationError(e, local, distant);
         }
 
         try {
@@ -437,11 +442,8 @@ public class DatabaseRegistry {
             checkReplicationError(e, distant, local);
         }
 
-        try {
-            copyDatabase(local, distant, continuous);
-        } catch (DbAccessException e) {
-            checkReplicationError(e, local, distant);
-        }
+        // Update local database information : remote db.
+        new SirsDBInfoRepository(localConnector).set(srid, distant);
     }
 
     /**
@@ -454,9 +456,18 @@ public class DatabaseRegistry {
      */
     private void checkReplicationError(final DbAccessException e, final String sourceDb, final String targetDb) throws DbAccessException {
         final long count;
+        /* Replication status modify database url to hide password, so we have to truncate this part to allow comparison.
+           We also remove end '/' which could appear in urls.
+         */
+        final String tmpSource = URL_START.matcher(sourceDb).replaceFirst("").replaceFirst("/$", "");
+        final String tmpTarget = URL_START.matcher(targetDb).replaceFirst("").replaceFirst("/$", "");
         try {
             count = getReplicationTasks().stream()
-                    .filter(status -> status.getSourceDatabaseName().equals(sourceDb) && status.getTargetDatabaseName().equals(targetDb))
+                    .filter(status -> {
+                        final String replicatorSource = URL_START.matcher(status.getSourceDatabaseName()).replaceFirst("").replaceFirst("/$", "");
+                        final String replicatorTarget = URL_START.matcher(status.getTargetDatabaseName()).replaceFirst("").replaceFirst("/$", "");
+                        return replicatorSource.equals(tmpSource) && replicatorTarget.equals(tmpTarget);
+                    })
                     .count();
         } catch (Exception e1) {
             e.addSuppressed(e1);
