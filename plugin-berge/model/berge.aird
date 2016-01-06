@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <viewpoint:DAnalysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:description="http://www.eclipse.org/sirius/description/1.1.0" xmlns:description_1="http://www.eclipse.org/sirius/diagram/description/1.1.0" xmlns:diagram="http://www.eclipse.org/sirius/diagram/1.1.0" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:style="http://www.eclipse.org/sirius/diagram/description/style/1.1.0" xmlns:viewpoint="http://www.eclipse.org/sirius/1.1.0" xsi:schemaLocation="http://www.eclipse.org/sirius/description/1.1.0 http://www.eclipse.org/sirius/1.1.0#//description http://www.eclipse.org/sirius/diagram/description/1.1.0 http://www.eclipse.org/sirius/diagram/1.1.0#//description http://www.eclipse.org/sirius/diagram/description/style/1.1.0 http://www.eclipse.org/sirius/diagram/1.1.0#//description/style" xmi:id="_UGU90C7HEeWv4JwE7hUOUQ" selectedViews="_Xn94kC7HEeWv4JwE7hUOUQ _XqqnQC7HEeWv4JwE7hUOUQ _Xq0_UC7HEeWv4JwE7hUOUQ _XsNfYC7HEeWv4JwE7hUOUQ" version="8.1.1">
-  <models xmi:type="ecore:EPackage" href="berge.ecore#/"/>
-  <models xmi:type="ecore:EPackage" href="platform:/resource/sirs-core/model/sirs.ecore#/"/>
-  <models xmi:type="ecore:EPackage" href="http://www.eclipse.org/emf/2002/Ecore#/"/>
-  <models xmi:type="ecore:EPackage" href="platform:/resource/sirs-core/model/jts.ecore#/"/>
+  <semanticResources>berge.ecore</semanticResources>
+  <semanticResources>platform:/resource/sirs-core/model/sirs.ecore</semanticResources>
+  <semanticResources>platform:/resource/sirs-core/model/jts.ecore</semanticResources>
+  <semanticResources>http://www.eclipse.org/emf/2002/Ecore</semanticResources>
   <ownedViews xmi:type="viewpoint:DRepresentationContainer" xmi:id="_Xn94kC7HEeWv4JwE7hUOUQ" initialized="true">
     <ownedRepresentations xmi:type="diagram:DSemanticDiagram" xmi:id="_Zb7JgC7HEeWv4JwE7hUOUQ" name="berge class diagram">
       <ownedAnnotationEntries xmi:type="description:AnnotationEntry" xmi:id="_Zb7wkC7HEeWv4JwE7hUOUQ" source="GMF_DIAGRAMS">
