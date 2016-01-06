@@ -29,11 +29,10 @@ import java.util.regex.Pattern;
  */
 public class DocumentChangeEmiter {
 
-    private static char[] BUFFER = new char[4096];
+    private static final char[] BUFFER = new char[4096];
 
     /** A pattern to identify new elements. They must have a revision number equal to 1 */
     private static final Pattern FIRST_REVISION = Pattern.compile("^1\\D.*");
-    private static final int LIMIT = 1000;
 
     // TODO : Transform to Observable list ?
     private final List<DocumentListener> listeners = new ArrayList<>();
