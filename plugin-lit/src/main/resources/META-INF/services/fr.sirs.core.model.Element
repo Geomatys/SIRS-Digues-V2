@@ -1,6 +1,8 @@
 fr.sirs.core.model.Lit
 fr.sirs.core.model.TronconLit
 fr.sirs.core.model.SeuilLit
+fr.sirs.core.model.InspectionSeuilLit
+fr.sirs.core.model.CoucheSeuilLit
 fr.sirs.core.model.IleBancLit
 fr.sirs.core.model.PlageDepotLit
 fr.sirs.core.model.AutreOuvrageLit
