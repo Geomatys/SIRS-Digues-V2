@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
@@ -36,6 +37,7 @@ import javax.imageio.ImageIO;
 import org.apache.sis.util.ArgumentChecks;
 import org.controlsfx.dialog.ExceptionDialog;
 import org.geotoolkit.factory.Hints;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.image.jai.Registry;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.lang.Setup;
@@ -304,7 +306,15 @@ public class Loader extends Application {
                 for (Plugin plugin : plugins) {
                     updateProgress(inc++, total);
                     updateMessage("Chargement du plugin " + plugin.getLoadingMessage().getValue());
-                    plugin.load();
+                    try {
+                        plugin.load();
+                    } catch (Exception e) { // If we fail loading plugin, we just deactivate it.
+                        final String errorMsg = "Le chargement du plugin "+plugin.getTitle()+" a échoué. Il sera désactivé.";
+                        updateMessage(errorMsg);
+                        SIRS.LOGGER.log(Level.WARNING, errorMsg, e);
+                        // Send error notification in main window
+                        TaskManager.INSTANCE.submit("Chargement d'un plugin", (Callable) () -> {throw e;});
+                    }
                 }
 
                 // MAP INITIALISATION //////////////////////////////////////////
@@ -323,7 +333,8 @@ public class Loader extends Application {
                 updateMessage("Chargement terminé.");
                 Thread.sleep(400);
             } catch (Throwable ex) {
-                updateMessage("Une erreur inattendue est survenue : "
+                updateProgress(-1, -1);
+                updateMessage("Erreur inattendue : "
                         + ex.getLocalizedMessage());
                 SIRS.LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
                 cancel();
