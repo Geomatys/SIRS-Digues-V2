@@ -77,7 +77,7 @@ import org.apache.sis.util.logging.Logging;
 import static org.geotoolkit.db.JDBCFeatureStore.JDBC_PROPERTY_RELATION;
 import org.geotoolkit.db.reverse.RelationMetaModel;
 import org.geotoolkit.feature.type.AssociationType;
-import org.geotoolkit.feature.type.NamesExt;
+import org.geotoolkit.util.NamesExt;
 import org.geotoolkit.feature.type.PropertyDescriptor;
 import org.geotoolkit.filter.DefaultPropertyName;
 import org.opengis.util.GenericName;
@@ -272,33 +272,33 @@ public class SirsFilterToSQL implements FilterToSQL {
     public StringBuilder visit(PropertyName candidate, Object o) {
         final StringBuilder sb = toStringBuilder(o);
         final GenericName name = NamesExt.valueOf(candidate.getPropertyName());
-        
+
         //split the path
         final String str = name.tip().toString();
         int indexOf = str.indexOf('/');
         final String[] parts = str.split("/");
-        
+
         if(parts.length==1){
             sb.append('"');
             sb.append(name.tip().toString());
             sb.append('"');
         }else{
             //make sub queries
-            
+
         }
-        
+
         return sb;
     }
-    
+
     private void visitPropertyNameName(String name, StringBuilder sb){
         int index = name.indexOf('/');
         if(index<0){
-            
-            
+
+
         }else{
-            
+
         }
-        
+
     }
 
     @Override
@@ -463,7 +463,7 @@ public class SirsFilterToSQL implements FilterToSQL {
         sb.append(" LIKE '");
         sb.append(pattern);
         sb.append("' ");
-        
+
         final Expression expression = candidate.getExpression();
         return unwrapPath(expression, sb.toString(), o);
     }
@@ -481,15 +481,15 @@ public class SirsFilterToSQL implements FilterToSQL {
     private StringBuilder unwrapPath(Expression exp, String pattern, Object o){
         return unwrapPath(featureType, exp, pattern, o);
     }
-    
+
     private StringBuilder unwrapPath(ComplexType type, Expression exp, String pattern, Object o){
         final StringBuilder sb = toStringBuilder(o);
-        
+
         final StringBuilder subsb = new StringBuilder();
         if(exp instanceof PropertyName){
             final PropertyName prop = ((PropertyName)exp);
             final String path = NamesExt.valueOf(prop.getPropertyName()).tip().toString();
-            
+
             final int index = path.indexOf('/');
             if(index<0){
                 exp.accept(this, subsb);
@@ -502,14 +502,14 @@ public class SirsFilterToSQL implements FilterToSQL {
                     exp.accept(this, subsb);
                     sb.append(pattern.replaceFirst("\\$", subsb.toString()));
                 }else{
-                    
+
                     final RelationMetaModel relation = (RelationMetaModel)desc.getUserData().get(JDBC_PROPERTY_RELATION);
                     final AssociationType at = (AssociationType) desc.getType();
                     final ComplexType dt = (ComplexType) at.getRelatedType();
-                    
+
                     //sub type filter
                     unwrapPath(dt, new DefaultPropertyName(path.substring(index+1)), pattern, subsb);
-                    
+
                     sb.append(" \"").append(fieldName).append("\"");
                     sb.append(" IN (SELECT \"").append(relation.getForeignColumn()).append('\"');
                     sb.append(" FROM \"").append(relation.getForeignTable());
@@ -517,15 +517,15 @@ public class SirsFilterToSQL implements FilterToSQL {
                     sb.append(" ) ");
                 }
             }
-            
+
         }else{
             exp.accept(this, subsb);
             sb.append(pattern.replaceFirst("\\$", subsb.toString()));
         }
-        
+
         return sb;
     }
-    
+
     @Override
     public StringBuilder visit(BBOX candidate, Object o) {
         final StringBuilder sb = toStringBuilder(o);

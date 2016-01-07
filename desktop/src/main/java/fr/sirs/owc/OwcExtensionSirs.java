@@ -21,7 +21,7 @@ import org.geotoolkit.data.query.Source;
 import org.geotoolkit.data.query.TextStatement;
 import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.display2d.GO2Utilities;
-import org.geotoolkit.feature.type.NamesExt;
+import org.geotoolkit.util.NamesExt;
 import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;

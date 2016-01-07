@@ -26,8 +26,7 @@
     <!-- Define parent projects versions -->
     <slf4j.version>1.7.7</slf4j.version>
     <sis.version>0.7-jdk7-MC0022</sis.version>
-    <geotoolkit.version>4.0.0-MC0069</geotoolkit.version>
-    <geotoolkit.dwg.version>1.0.1</geotoolkit.dwg.version>
+    <geotoolkit.version>4.0.0-MC0074</geotoolkit.version>
     <geotoolkit.esri.version>1.0.1</geotoolkit.esri.version>
     <geotoolkit.h2.version>1.0.1</geotoolkit.h2.version>
     <geotoolkit.hexagon.version>1.0.2</geotoolkit.hexagon.version>

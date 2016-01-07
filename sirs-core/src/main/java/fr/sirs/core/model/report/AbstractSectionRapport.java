@@ -47,7 +47,7 @@ import org.geotoolkit.data.query.Query;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.db.JDBCFeatureStore;
 import org.geotoolkit.feature.Feature;
-import org.geotoolkit.feature.type.NamesExt;
+import org.geotoolkit.util.NamesExt;
 import org.odftoolkit.simple.TextDocument;
 
 @JsonIgnoreProperties(ignoreUnknown=true)
