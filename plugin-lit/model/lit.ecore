@@ -18,20 +18,20 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="fonctionSeuilId" eType="#//RefFonctionSeuilLit"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauPrincipalA" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="materiauPrincipalB" eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//RefMateriau"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="plans" upperBound="-1"
-        eType="#//PlanSeuilLit" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="positionSeuilId" eType="#//RefPositionAxeSeuilLit"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="geometrieCreteId" eType="#//RefGeometrieCreteSeuilLit"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="profilCoursierId" eType="#//RefProfilCoursierSeuilLit"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="penteRampant" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="surfaceRempantEntretien"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurTotale" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="longueurCoursier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="largeurEnCrete" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="hauteurChute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="passeSportEauVive" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="passePoisson" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="surfaceRempantEntretien"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="plans" upperBound="-1"
+        eType="#//PlanSeuilLit" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="voieAccesIds" upperBound="-1"
         eType="ecore:EClass ../../sirs-core/model/sirs.ecore#//VoieAcces"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="ouvrageFranchissementIds"

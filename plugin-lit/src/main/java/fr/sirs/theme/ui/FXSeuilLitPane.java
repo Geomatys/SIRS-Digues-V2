@@ -41,7 +41,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -436,13 +435,14 @@ public class FXSeuilLitPane  extends AbstractFXElementPane<SeuilLit> {
         digueIdsTable.setParentElement(null);
         final AbstractSIRSRepository<Digue> digueIdsRepo = session.getRepositoryForClass(Digue.class);
         digueIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getDigueIds(), digueIdsRepo));
-        // Propriétés de AvecGeometrie
-        // Propriétés de AotCotAssociable
-        // Propriétés de Objet
+        inspectionsTable.setParentElement(newElement);
+        inspectionsTable.setTableItems(()-> (ObservableList) newElement.getInspections());
+        couchesTable.setParentElement(newElement);
+        couchesTable.setTableItems(()-> (ObservableList) newElement.getCouches());
         // * commentaire
         ui_commentaire.setHtmlText(newElement.getCommentaire());
-        SIRS.initCombo(ui_linearId, FXCollections.observableList(
-            previewRepository.getByClass(TronconDigue.class)),
+        SIRS.initCombo(ui_linearId, SIRS.observableList(
+            previewRepository.getByClass(TronconDigue.class)).sorted(),
             newElement.getLinearId() == null? null : previewRepository.get(newElement.getLinearId()));
         // Propriétés de ObjetPhotographiable
         photosTable.setParentElement(newElement);

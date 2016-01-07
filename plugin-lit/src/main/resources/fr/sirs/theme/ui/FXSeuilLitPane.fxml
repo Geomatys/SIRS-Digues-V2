@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import fr.sirs.theme.ui.*?>
-<?import fr.sirs.util.FXFileTextField?>
-<?import fr.sirs.util.FXComponentField?>
 <?import org.geotoolkit.gui.javafx.util.*?>
 <?import jidefx.scene.control.field.*?>
 <?import jfxtras.scene.control.*?>
@@ -14,9 +12,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-
-
-<fx:root fx:id="uiBorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root fx:id="uiBorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
   <center>
     <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
       <tabs>
@@ -28,12 +24,12 @@
           <VBox spacing="30.0" BorderPane.alignment="CENTER">
             <children>
 
-  <FXValidityPeriodPane fx:id="uiValidityPeriod"/>
-            <HBox fx:id="ui_parent_box" spacing="20.0" alignment="CENTER_LEFT" styleClass="gray-light">
+  <FXValidityPeriodPane fx:id="uiValidityPeriod" />
+            <HBox fx:id="ui_parent_box" alignment="CENTER_LEFT" spacing="20.0" styleClass="gray-light">
               <children>
-                <Label fx:id="linearId" text="%linearId" maxHeight="-Infinity" maxWidth="-Infinity"/>
-                <ComboBox fx:id="ui_linearId"/>
-                <Button fx:id="ui_linearId_link"/>
+                <Label fx:id="linearId" maxHeight="-Infinity" maxWidth="-Infinity" text="%linearId" />
+                <ComboBox fx:id="ui_linearId" />
+                <Button fx:id="ui_linearId_link" />
               </children>
               <padding>
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -51,137 +47,87 @@
               <columnConstraints>
                 <ColumnConstraints hgrow="NEVER" />
                 <ColumnConstraints hgrow="ALWAYS" />
+                                 <ColumnConstraints />
               </columnConstraints>
-              <!--rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints-->
               <children>
-                  
-                  
-                   <!-- Generalites -->
-                   <Label text="Généralités" GridPane.rowIndex="0" >
-                       <font>
-                        <Font name="System Bold" size="13.0" />
-                     </font>
-                  </Label>
-                  
                    <!-- EString -->                 
-                   <Label text="%libelle" GridPane.rowIndex="1" />
-                   <TextField fx:id="ui_libelle" GridPane.columnIndex="1" GridPane.rowIndex="1"  />
+                   <Label text="%libelle" GridPane.rowIndex="0" />
+                   <TextField fx:id="ui_libelle" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                   <!-- EString -->                 
+                   <Label text="%commune" GridPane.rowIndex="1" />
+                   <TextField fx:id="ui_commune" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                    <!-- EInt -->                 
                    <Label text="%anneeConstruction" GridPane.rowIndex="2" />
-                   <Spinner fx:id="ui_anneeConstruction" GridPane.columnIndex="1" GridPane.rowIndex="2"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <!-- EString -->                 
-                   <Label text="%commune" GridPane.rowIndex="3" />
-                   <TextField fx:id="ui_commune" GridPane.columnIndex="1" GridPane.rowIndex="3"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   
-                   <Label text="%fonctionSeuilId" GridPane.rowIndex="4" />
-                   <ComboBox fx:id="ui_fonctionSeuilId" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                   <Button fx:id="ui_fonctionSeuilId_link" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                   
-                   <!-- EDate -->                 
-                   <Label text="%dateDerniereInspection" GridPane.rowIndex="5" />
-                   <DatePicker fx:id="ui_dateDerniereInspection" GridPane.columnIndex="1" GridPane.rowIndex="5"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <Label text="%typeInspectionId" GridPane.rowIndex="6" />
-                   <ComboBox fx:id="ui_typeInspectionId" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                   <Button fx:id="ui_typeInspectionId_link" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-                   
-                   
-                   
-                   <!-- Description -->
-                   <Separator GridPane.rowIndex="7" GridPane.columnSpan="3" />
-                   <Label text="Description de l'ouvrage" GridPane.rowIndex="8" >
-                       <font>
-                        <Font name="System Bold" size="13.0" />
-                     </font>
-                  </Label>
-                   <Label text="%materiauPrincipalA" GridPane.rowIndex="9" />
-                   <ComboBox fx:id="ui_materiauPrincipalA" GridPane.columnIndex="1" GridPane.rowIndex="9" />
-                   <Button fx:id="ui_materiauPrincipalA_link" GridPane.columnIndex="2" GridPane.rowIndex="9" />
-                   <Label text="%materiauPrincipalB" GridPane.rowIndex="10" />
-                   <ComboBox fx:id="ui_materiauPrincipalB" GridPane.columnIndex="1" GridPane.rowIndex="10" />
-                   <Button fx:id="ui_materiauPrincipalB_link" GridPane.columnIndex="2" GridPane.rowIndex="10" />
-                   <Label text="%positionSeuilId" GridPane.rowIndex="11" />
-                   <ComboBox fx:id="ui_positionSeuilId" GridPane.columnIndex="1" GridPane.rowIndex="11" />
-                   <Button fx:id="ui_positionSeuilId_link" GridPane.columnIndex="2" GridPane.rowIndex="11" />
-                   <Label text="%geometrieCreteId" GridPane.rowIndex="12" />
-                   <ComboBox fx:id="ui_geometrieCreteId" GridPane.columnIndex="1" GridPane.rowIndex="12" />
-                   <Button fx:id="ui_geometrieCreteId_link" GridPane.columnIndex="2" GridPane.rowIndex="12" />
-                   <Label text="%profilCoursierId" GridPane.rowIndex="13" />
-                   <ComboBox fx:id="ui_profilCoursierId" GridPane.columnIndex="1" GridPane.rowIndex="13" />
-                   <Button fx:id="ui_profilCoursierId_link" GridPane.columnIndex="2" GridPane.rowIndex="13" />
-                   
+                   <Spinner fx:id="ui_anneeConstruction" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                   <!-- EDouble -->                 
+                   <Label text="%penteRampant" GridPane.rowIndex="3" />
+                   <Spinner fx:id="ui_penteRampant" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                   <!-- EDouble -->                 
+                   <Label text="%surfaceRempantEntretien" GridPane.rowIndex="4" />
+                   <Spinner fx:id="ui_surfaceRempantEntretien" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                   <!-- EDouble -->                 
+                   <Label text="%longueurTotale" GridPane.rowIndex="5" />
+                   <Spinner fx:id="ui_longueurTotale" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                   <!-- EDouble -->                 
+                   <Label text="%longueurCoursier" GridPane.rowIndex="6" />
+                   <Spinner fx:id="ui_longueurCoursier" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                   <!-- EDouble -->                 
+                   <Label text="%largeurEnCrete" GridPane.rowIndex="7" />
+                   <Spinner fx:id="ui_largeurEnCrete" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="7" />
                    
                    <!-- EDouble -->                 
-                   <Label text="%penteRampant" GridPane.rowIndex="14" />
-                   <Spinner fx:id="ui_penteRampant" GridPane.columnIndex="1" GridPane.rowIndex="14"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <!-- EDouble -->                 
-                   <Label text="%longueurTotale" GridPane.rowIndex="15" />
-                   <Spinner fx:id="ui_longueurTotale" GridPane.columnIndex="1" GridPane.rowIndex="15"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <!-- EDouble -->                 
-                   <Label text="%longueurCoursier" GridPane.rowIndex="16" />
-                   <Spinner fx:id="ui_longueurCoursier" GridPane.columnIndex="1" GridPane.rowIndex="16"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <!-- EDouble -->                 
-                   <Label text="%largeurEnCrete" GridPane.rowIndex="17" />
-                   <Spinner fx:id="ui_largeurEnCrete" GridPane.columnIndex="1" GridPane.rowIndex="17"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <!-- EDouble -->                 
-                   <Label text="%hauteurChute" GridPane.rowIndex="18" />
-                   <Spinner fx:id="ui_hauteurChute" GridPane.columnIndex="1" GridPane.rowIndex="18"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <!-- EDouble -->                 
-                   <Label text="%surfaceRempantEntretien" GridPane.rowIndex="19" />
-                   <Spinner fx:id="ui_surfaceRempantEntretien" GridPane.columnIndex="1" GridPane.rowIndex="19"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <Label text="%hauteurChute" GridPane.rowIndex="8" />
+                   <Spinner fx:id="ui_hauteurChute" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                   <Label text="%fonctionSeuilId" GridPane.rowIndex="9" />
+                   <ComboBox fx:id="ui_fonctionSeuilId" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                   <Button fx:id="ui_fonctionSeuilId_link" GridPane.columnIndex="2" GridPane.rowIndex="9" />
+                   <Label text="%materiauPrincipalA" GridPane.rowIndex="10" />
+                   <ComboBox fx:id="ui_materiauPrincipalA" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+                   <Button fx:id="ui_materiauPrincipalA_link" GridPane.columnIndex="2" GridPane.rowIndex="10" />
+                   <Label text="%materiauPrincipalB" GridPane.rowIndex="11" />
+                   <ComboBox fx:id="ui_materiauPrincipalB" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+                   <Button fx:id="ui_materiauPrincipalB_link" GridPane.columnIndex="2" GridPane.rowIndex="11" />
+                   <Label text="%positionSeuilId" GridPane.rowIndex="12" />
+                   <ComboBox fx:id="ui_positionSeuilId" GridPane.columnIndex="1" GridPane.rowIndex="12" />
+                   <Button fx:id="ui_positionSeuilId_link" GridPane.columnIndex="2" GridPane.rowIndex="12" />
+                   <Label text="%geometrieCreteId" GridPane.rowIndex="13" />
+                   <ComboBox fx:id="ui_geometrieCreteId" GridPane.columnIndex="1" GridPane.rowIndex="13" />
+                   <Button fx:id="ui_geometrieCreteId_link" GridPane.columnIndex="2" GridPane.rowIndex="13" />
+                   <Label text="%profilCoursierId" GridPane.rowIndex="14" />
+                   <ComboBox fx:id="ui_profilCoursierId" GridPane.columnIndex="1" GridPane.rowIndex="14" />
+                   <Button fx:id="ui_profilCoursierId_link" GridPane.columnIndex="2" GridPane.rowIndex="14" />
                    
-                   <!-- Structure -->
-                   <Separator GridPane.rowIndex="20" GridPane.columnSpan="3" />
-                   <Label text="Éléments de structure" GridPane.rowIndex="21" >
-                       <font>
-                        <Font name="System Bold" size="13.0" />
-                     </font>
-                  </Label>
-                  <Label text="%positionStructureId" GridPane.rowIndex="22" />
-                   <ComboBox fx:id="ui_positionStructureId" GridPane.columnIndex="1" GridPane.rowIndex="22" />
-                   <Button fx:id="ui_positionStructureId_link" GridPane.columnIndex="2" GridPane.rowIndex="22" />
-
-                   <!-- EInt -->                 
-                   <Label text="%numCouche" GridPane.rowIndex="23" />
-                   <Spinner fx:id="ui_numCouche" GridPane.columnIndex="1" GridPane.rowIndex="23"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <Label text="%natureId" GridPane.rowIndex="24" />
-                   <ComboBox fx:id="ui_natureId" GridPane.columnIndex="1" GridPane.rowIndex="24" />
-                   <Button fx:id="ui_natureId_link" GridPane.columnIndex="2" GridPane.rowIndex="24" />
-                   <Label text="%materiauId" GridPane.rowIndex="25" />
-                   <ComboBox fx:id="ui_materiauId" GridPane.columnIndex="1" GridPane.rowIndex="25" />
-                   <Button fx:id="ui_materiauId_link" GridPane.columnIndex="2" GridPane.rowIndex="25" />
-                   <Label text="%fonctionId" GridPane.rowIndex="26" />
-                   <ComboBox fx:id="ui_fonctionId" GridPane.columnIndex="1" GridPane.rowIndex="26" />
-                   <Button fx:id="ui_fonctionId_link" GridPane.columnIndex="2" GridPane.rowIndex="26" />
-                   <!-- EDouble -->                 
-                   <Label text="%epaisseur" GridPane.rowIndex="27" />
-                   <Spinner fx:id="ui_epaisseur" GridPane.columnIndex="1" GridPane.rowIndex="27"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   <Label text="%sourceId" GridPane.rowIndex="28" />
-                   <ComboBox fx:id="ui_sourceId" GridPane.columnIndex="1" GridPane.rowIndex="28" />
-                   <Button fx:id="ui_sourceId_link" GridPane.columnIndex="2" GridPane.rowIndex="28" />
-                   
-                   <!-- Ouvrages associés -->
-                   <Separator GridPane.rowIndex="29" GridPane.columnSpan="3" />
-                   <Label text="Ouvrages associés" GridPane.rowIndex="30" >
-                       <font>
-                        <Font name="System Bold" size="13.0" />
-                     </font>
-                  </Label>
                    <!-- EBoolean -->                 
-                   <Label text="%passeSportEauVive" GridPane.rowIndex="31" />
-                   <CheckBox fx:id="ui_passeSportEauVive" GridPane.columnIndex="1" GridPane.rowIndex="31"  maxHeight="-Infinity" maxWidth="-Infinity"/>
+                   <Label text="%passeSportEauVive" GridPane.rowIndex="15" />
+                   <CheckBox fx:id="ui_passeSportEauVive" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="15" />
                    <!-- EBoolean -->                 
-                   <Label text="%passePoisson" GridPane.rowIndex="32" />
-                   <CheckBox fx:id="ui_passePoisson" GridPane.columnIndex="1" GridPane.rowIndex="32"  maxHeight="-Infinity" maxWidth="-Infinity"/>
-                   
+                   <Label text="%passePoisson" GridPane.rowIndex="16" />
+                   <CheckBox fx:id="ui_passePoisson" maxHeight="-Infinity" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="16" />
               </children>
               <padding>
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
               </padding>
+                              <rowConstraints>
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                              </rowConstraints>
             </GridPane>
-            <HTMLEditor fx:id="ui_commentaire" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contentediTable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" maxHeight="-Infinity"  prefHeight="200.0" styleClass="gray-light" />
+            <HTMLEditor fx:id="ui_commentaire" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contentediTable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" maxHeight="-Infinity" prefHeight="200.0" styleClass="gray-light" />
 
             </children>
             <padding>
@@ -191,41 +137,42 @@
             </content>
           </ScrollPane>
         </Tab>
+        <Tab fx:id="ui_couches" text="%couches" />
+        <Tab fx:id="ui_inspections" text="%inspections" />
 
 <!-- REFERENCE TABS -->
-        <Tab fx:id="ui_plans" text="%plans"/>
+        <Tab fx:id="ui_plans" text="%plans" />
         
         
         <Tab text="Réseaux associés">
             <TabPane>
                 <tabs>
-                    <Tab fx:id="ui_voieAccesIds" text="%voieAccesIds"/>
-                    <Tab fx:id="ui_ouvrageFranchissementIds" text="%ouvrageFranchissementIds"/>
-                    <Tab fx:id="ui_voieDigueIds" text="%voieDigueIds"/>
-                    <Tab fx:id="ui_ouvrageVoirieIds" text="%ouvrageVoirieIds"/>
-                    <Tab fx:id="ui_stationPompageIds" text="%stationPompageIds"/>
-                    <Tab fx:id="ui_reseauHydrauliqueFermeIds" text="%reseauHydrauliqueFermeIds"/>
-                    <Tab fx:id="ui_reseauHydrauliqueCielOuvertIds" text="%reseauHydrauliqueCielOuvertIds"/>
-                    <Tab fx:id="ui_ouvrageHydrauliqueAssocieIds" text="%ouvrageHydrauliqueAssocieIds"/>
-                    <Tab fx:id="ui_ouvrageTelecomEnergieIds" text="%ouvrageTelecomEnergieIds"/>
-                    <Tab fx:id="ui_reseauTelecomEnergieIds" text="%reseauTelecomEnergieIds"/>
-                    <Tab fx:id="ui_ouvrageParticulierIds" text="%ouvrageParticulierIds"/>
-                    <Tab fx:id="ui_echelleLimnimetriqueIds" text="%echelleLimnimetriqueIds"/>
+                    <Tab fx:id="ui_voieAccesIds" text="%voieAccesIds" />
+                    <Tab fx:id="ui_ouvrageFranchissementIds" text="%ouvrageFranchissementIds" />
+                    <Tab fx:id="ui_voieDigueIds" text="%voieDigueIds" />
+                    <Tab fx:id="ui_ouvrageVoirieIds" text="%ouvrageVoirieIds" />
+                    <Tab fx:id="ui_stationPompageIds" text="%stationPompageIds" />
+                    <Tab fx:id="ui_reseauHydrauliqueFermeIds" text="%reseauHydrauliqueFermeIds" />
+                    <Tab fx:id="ui_reseauHydrauliqueCielOuvertIds" text="%reseauHydrauliqueCielOuvertIds" />
+                    <Tab fx:id="ui_ouvrageHydrauliqueAssocieIds" text="%ouvrageHydrauliqueAssocieIds" />
+                    <Tab fx:id="ui_ouvrageTelecomEnergieIds" text="%ouvrageTelecomEnergieIds" />
+                    <Tab fx:id="ui_reseauTelecomEnergieIds" text="%reseauTelecomEnergieIds" />
+                    <Tab fx:id="ui_ouvrageParticulierIds" text="%ouvrageParticulierIds" />
+                    <Tab fx:id="ui_echelleLimnimetriqueIds" text="%echelleLimnimetriqueIds" />
                 </tabs>
             </TabPane>
         </Tab>
         
         
-        <Tab fx:id="ui_desordreIds" text="%desordreIds"/>
-        <Tab fx:id="ui_bergeIds" text="%bergeIds"/>
-        <Tab fx:id="ui_digueIds" text="%digueIds"/>
-        <Tab fx:id="ui_photos" text="%photos"/>
-        <Tab fx:id="ui_proprietes" text="%proprietes"/>
-        <Tab fx:id="ui_gestions" text="%gestions"/>
+        <Tab fx:id="ui_desordreIds" text="%desordreIds" />
+        <Tab fx:id="ui_bergeIds" text="%bergeIds" />
+        <Tab fx:id="ui_digueIds" text="%digueIds" />
+        <Tab fx:id="ui_photos" text="%photos" />
+        <Tab fx:id="ui_proprietes" text="%proprietes" />
+        <Tab fx:id="ui_gestions" text="%gestions" />
 
       </tabs>
     </TabPane>
   </center>
 
 </fx:root>
-
