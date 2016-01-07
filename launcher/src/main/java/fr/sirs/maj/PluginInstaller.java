@@ -30,7 +30,6 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,16 +37,21 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import org.apache.sis.util.ArgumentChecks;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
  * Classe utilitaire permettant de retrouver / installer des plugins.
- * Note : Le chargement des plugins est fait au chargement de l'application, 
+ * Note : Le chargement des plugins est fait au chargement de l'application,
  * dans {@link fr.sirs.Loader}.
  */
 public class PluginInstaller {
-        
+
     public static PluginList listLocalPlugins() throws IOException {
         final PluginList list = new PluginList();
         if (Files.isDirectory(SirsCore.PLUGINS_PATH)) {
@@ -91,7 +95,7 @@ public class PluginInstaller {
         stage.initModality(Modality.WINDOW_MODAL);
         stage.initStyle(StageStyle.UTILITY);
         stage.setAlwaysOnTop(true);
-        stage.setOnCloseRequest(event -> deleteOldPlugins(oldVersionPlugins));
+        stage.setOnCloseRequest(event -> deletePlugins(oldVersionPlugins));
         final GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -109,7 +113,7 @@ public class PluginInstaller {
         }
         final Button ok = new Button("Valider");
         ok.setOnAction(event -> {
-            deleteOldPlugins(oldVersionPlugins);
+            deletePlugins(oldVersionPlugins);
             stage.hide();
         });
         grid.add(ok, 0, ++i);
@@ -122,19 +126,20 @@ public class PluginInstaller {
     /**
      * Supprime les anciens plugins non compatibles avec la version actuelle.
      *
-     * @param oldVersionPlugins La liste des plugins à supprimer.
+     * @param toRemove La liste des plugins à supprimer.
      */
-    private static void deleteOldPlugins(final List<PluginInfo> oldVersionPlugins) {
-        for (final PluginInfo oldPlugin : oldVersionPlugins) {
-            try {
-                uninstall(oldPlugin);
-            } catch (IOException ex) {
+    private static void deletePlugins(final List<PluginInfo> toRemove) {
+        for (final PluginInfo oldPlugin : toRemove) {
+            final Task removeTask = uninstall(oldPlugin);
+            removeTask.setOnFailed(evt -> {
+                final Throwable ex = removeTask.getException();
                 SirsCore.LOGGER.log(Level.WARNING, ex.getLocalizedMessage(), ex);
-                GeotkFX.newExceptionDialog(ex.getLocalizedMessage(), ex);
-            }
+                Platform.runLater(() -> GeotkFX.newExceptionDialog(ex.getLocalizedMessage(), ex).show());
+            });
+            TaskManager.INSTANCE.submit(removeTask);
         }
     }
-    
+
     public static PluginList listDistantPlugins(URL serverUrl) throws IOException {
         final PluginList list = new PluginList();
         URLConnection connection = serverUrl.openConnection();
@@ -194,71 +199,26 @@ public class PluginInstaller {
         return (plugin.getAppVersionMax() == 0 && currentAppVersion >= plugin.getAppVersionMin()) ||
                (currentAppVersion >= plugin.getAppVersionMin() && currentAppVersion <= plugin.getAppVersionMax());
     }
-        
-    public static void install(URL serverUrl, PluginInfo toInstall) throws IOException {
-        final Path tmpFile = Files.createTempFile(UUID.randomUUID().toString(), ".tmp");
-        final Path pluginDir = SirsCore.PLUGINS_PATH.resolve(toInstall.getName());
 
-        try {
-            // Start by target directory and descriptor file creation, cause if 
-            // those two simple operations fail, it's useless to download plugin.
-            Files.createDirectories(pluginDir);
-            final Path pluginDescriptor = pluginDir.resolve(toInstall.getName()+".json");            
-            try (final OutputStream stream = Files.newOutputStream(pluginDescriptor)) {
-                new ObjectMapper().writeValue(stream, toInstall);
-            }
-            
-            // Download temporary zip file
-            URL bundleURL = toInstall.bundleURL(serverUrl);
-            try (final InputStream input = bundleURL.openStream()) {
-                Files.copy(input, tmpFile, StandardCopyOption.REPLACE_EXISTING);
-            }
-
-            // Copy zip content into plugin directory.
-            try (FileSystem zipSystem = FileSystems.newFileSystem(URI.create("jar:" + tmpFile.toUri().toString()), new HashMap<>())) {
-                final Path tmpZip = zipSystem.getRootDirectories().iterator().next();
-
-                Files.walkFileTree(tmpZip, new SimpleFileVisitor<Path>() {
-
-                    @Override
-                    public FileVisitResult visitFile(Path t, BasicFileAttributes bfa) throws IOException {
-                        Files.copy(t, pluginDir.resolve(tmpZip.relativize(t).toString()));
-                        return super.visitFile(t, bfa);
-                    }
-
-                    @Override
-                    public FileVisitResult preVisitDirectory(Path t, BasicFileAttributes bfa) throws IOException {
-                        if (!t.equals(tmpZip)) {
-                            Files.createDirectory(pluginDir.resolve(tmpZip.relativize(t).toString()));
-                        }
-                        return super.preVisitDirectory(t, bfa);
-                    }
-
-                });
-            }
-
-        } catch (Throwable e) {
-            // If an error occured while copying plugin files, we clean all created files.
-            try {
-                deleteDirectory(pluginDir);
-            } catch (Throwable bis) {
-                e.addSuppressed(bis);
-            }
-            throw e;
-
-        } finally {
-            try {
-                Files.delete(tmpFile);
-            } catch (Exception e) {
-                SirsCore.LOGGER.log(Level.WARNING, "A temporary file cannot be deleted.", e);
-            }
-        }
+    /**
+     * Create a task whose job is to install plugin pointed by input information.
+     * @param serverUrl Url of the server where the plugin to install is located.
+     * @param toInstall Plugin information about the plugin to install.
+     * @return A task ready to be submitted (not launched yet) to install the plugin.
+     */
+    public static Task install(URL serverUrl, PluginInfo toInstall) {
+        return new InstallPlugin(serverUrl, toInstall);
     }
-    
-    public static void uninstall(final PluginInfo toRemove) throws IOException {
-        // TODO : happen version in plugin directory name ?
-        final Path pluginDir = SirsCore.PLUGINS_PATH.resolve(toRemove.getName());
-        deleteDirectory(pluginDir);
+
+    /**
+     * Create a task to remove plugin pointed by given information. The task result
+     * is a boolean which indicates that the plugin have been found and deleted, or not.
+     *
+     * @param toRemove Information about the plugin to remove.
+     * @return A task (not submitted yet) in charge of plugin deletion.
+     */
+    public static Task<Boolean> uninstall(final PluginInfo toRemove) {
+        return TaskManager.INSTANCE.submit(new UninstallPlugin(toRemove));
     }
 
     private static void deleteDirectory(Path directory) throws IOException {
@@ -276,5 +236,134 @@ public class PluginInstaller {
             }
         });
     }
-    
+
+    /**
+     * Task in charge of plugin deletion.
+     */
+    private static class UninstallPlugin extends Task<Boolean> {
+
+        final PluginInfo toRemove;
+
+        public UninstallPlugin(PluginInfo toRemove) {
+            this.toRemove = toRemove;
+        }
+
+        @Override
+        protected Boolean call() throws Exception {
+            // TODO : happen version in plugin directory name ?
+            final Path pluginDir = SirsCore.PLUGINS_PATH.resolve(toRemove.getName());
+            if (Files.exists(pluginDir)) {
+                deleteDirectory(pluginDir);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * A task whose aim is to install a new plugin. Does not check
+     */
+    private static class InstallPlugin extends Task<Boolean> {
+
+        private final URL serverUrl;
+        private final PluginInfo toInstall;
+
+        public InstallPlugin(URL serverURL, PluginInfo pluginInfo) {
+            ArgumentChecks.ensureNonNull("Download URL", serverURL);
+            ArgumentChecks.ensureNonNull("Information about the plugin to install", pluginInfo);
+            this.serverUrl = serverURL;
+            this.toInstall = pluginInfo;
+        }
+
+        @Override
+        protected Boolean call() throws Exception {
+            updateTitle(toInstall.getTitle());
+
+            final Path tmpFile = Files.createTempFile(UUID.randomUUID().toString(), ".tmp");
+            final Path pluginDir = SirsCore.PLUGINS_PATH.resolve(toInstall.getName());
+
+            try {
+                // Start by target directory and descriptor file creation, cause if
+                // those two simple operations fail, it's useless to download plugin.
+                Files.createDirectories(pluginDir);
+                final Path pluginDescriptor = pluginDir.resolve(toInstall.getName() + ".json");
+                try (final OutputStream stream = Files.newOutputStream(pluginDescriptor)) {
+                    new ObjectMapper().writeValue(stream, toInstall);
+                }
+
+                // Download temporary zip file
+                URL bundleURL = toInstall.bundleURL(serverUrl);
+                updateTitle("Téléchargement : "+toInstall.getTitle());
+                final long totalLength = bundleURL.openConnection().getContentLengthLong();
+                try (final InputStream input = bundleURL.openStream();
+                        final OutputStream output = Files.newOutputStream(tmpFile)) {
+                    int readBytes = 0;
+                    long downloaded = 0;
+                    final byte[] buffer = new byte[8192];
+                    while ((readBytes = input.read(buffer)) >= 0) {
+                        output.write(buffer, 0, readBytes);
+                        downloaded += readBytes;
+                        updateProgress(downloaded, totalLength);
+                    }
+                }
+
+                updateTitle("Extraction : "+toInstall.getTitle());
+
+                // Copy zip content into plugin directory.
+                try (FileSystem zipSystem = FileSystems.newFileSystem(URI.create("jar:" + tmpFile.toUri().toString()), new HashMap<>())) {
+                    final Path tmpZip = zipSystem.getRootDirectories().iterator().next();
+
+                    // Count files to copy
+                    final AtomicLong fileCount = new AtomicLong();
+                    Files.walkFileTree(tmpZip, new SimpleFileVisitor<Path>(){
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                            fileCount.incrementAndGet();
+                            return super.visitFile(file, attrs);
+                        }
+                    });
+
+                    // Proceed to extraction
+                    final AtomicLong extractedEntries = new AtomicLong();
+                    final long totalEntries = fileCount.get();
+                    Files.walkFileTree(tmpZip, new SimpleFileVisitor<Path>() {
+
+                        @Override
+                        public FileVisitResult visitFile(Path t, BasicFileAttributes bfa) throws IOException {
+                            Files.copy(t, pluginDir.resolve(tmpZip.relativize(t).toString()));
+                            updateProgress(extractedEntries.incrementAndGet(), totalEntries);
+                            return super.visitFile(t, bfa);
+                        }
+
+                        @Override
+                        public FileVisitResult preVisitDirectory(Path t, BasicFileAttributes bfa) throws IOException {
+                            if (!t.equals(tmpZip)) {
+                                Files.createDirectory(pluginDir.resolve(tmpZip.relativize(t).toString()));
+                            }
+                            return super.preVisitDirectory(t, bfa);
+                        }
+                    });
+                }
+
+                return true;
+
+            } catch (Throwable e) {
+                // If an error occured while copying plugin files, we clean all created files.
+                try {
+                    deleteDirectory(pluginDir);
+                } catch (Throwable bis) {
+                    e.addSuppressed(bis);
+                }
+                throw e;
+
+            } finally {
+                try {
+                    Files.delete(tmpFile);
+                } catch (Exception e) {
+                    SirsCore.LOGGER.log(Level.WARNING, "A temporary file cannot be deleted.", e);
+                }
+            }
+        }
+    }
 }

@@ -290,8 +290,8 @@ public class FXLauncherPane extends BorderPane {
                             });
                         });
                     } catch (IOException ex) {
-                        LOGGER.log(Level.INFO, ex.getLocalizedMessage(), ex);
-                        GeotkFX.newExceptionDialog("Erreur à l'installation d'un plugin", ex);
+                        LOGGER.log(Level.WARNING, ex.getLocalizedMessage(), ex);
+                        GeotkFX.newExceptionDialog("Erreur à l'installation d'un plugin", ex).show();
                     }
                 });
             } else {
@@ -666,26 +666,35 @@ public class FXLauncherPane extends BorderPane {
 
     private void installPlugin(final PluginInfo pluginInfo) {
         final String name = pluginInfo.getName();
+
+        final Runnable runner = () -> {
+            final Task install = PluginInstaller.install(serverURL, pluginInfo);
+            install.setOnFailed(evt -> {
+                final Throwable ex = install.getException();
+                LOGGER.log(Level.WARNING, "Plugin " + name + " cannot be installed !", ex);
+                Platform.runLater(() -> errorLabel.setText("Une erreur inattendue est survenue pendant l'installation du plugin " + name));
+            });
+            TaskManager.INSTANCE.submit(install);
+        };
+
         Optional<PluginInfo> oldPlugin = local.getPluginInfo(name).findAny();
         if (oldPlugin.isPresent()) {
-            deletePlugin(oldPlugin.get());
-        }
-
-        try {
-            PluginInstaller.install(serverURL, pluginInfo);
-        } catch (IOException ex) {
-            errorLabel.setText("Une erreur inattendue est survenue pendant l'installation du plugin " + name);
-            LOGGER.log(Level.SEVERE, "Plugin " + name + " cannot be installed !", ex);
+            deletePlugin(oldPlugin.get()).setOnSucceeded(evt -> runner.run());
+        } else {
+            runner.run();
         }
     }
 
-    private void deletePlugin(final PluginInfo input) {
-        try {
-            PluginInstaller.uninstall(input);
-        } catch (Exception e) {
-            errorLabel.setText("Le plugin " + input.getName() + "ne peut être désinstallé : Erreur inattendue.");
-            LOGGER.log(Level.SEVERE, "Following plugin cannot be removed : " + input.getName(), e);
-        }
+    private Task deletePlugin(final PluginInfo input) {
+        final Task remove = PluginInstaller.uninstall(input);
+        remove.setOnFailed(evt -> {
+            final Throwable e = remove.getException();
+            LOGGER.log(Level.WARNING, "Following plugin cannot be removed : " + input.getName(), e);
+            Platform.runLater(() -> {
+                errorLabel.setText("Le plugin " + input.getName() + "ne peut être désinstallé : Erreur inattendue.");
+            });
+        });
+        return TaskManager.INSTANCE.submit(remove);
     }
 
     private static String cleanDbName(String name) {
