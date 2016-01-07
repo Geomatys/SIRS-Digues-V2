@@ -1,7 +1,0 @@
-fr.sirs.core.model.ObligationReglementaire
-fr.sirs.core.model.EtapeObligationReglementaire
-fr.sirs.core.model.PlanificationObligationReglementaire
-fr.sirs.core.model.RefTypeObligationReglementaire
-fr.sirs.core.model.RefFrequenceObligationReglementaire
-fr.sirs.core.model.RefEcheanceRappelObligationReglementaire
-fr.sirs.core.model.RefEtapeObligationReglementaire
