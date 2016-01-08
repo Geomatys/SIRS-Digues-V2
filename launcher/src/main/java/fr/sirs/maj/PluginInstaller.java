@@ -1,4 +1,3 @@
-
 package fr.sirs.maj;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -16,7 +15,6 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.geotoolkit.internal.GeotkFX;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +24,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
+import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,23 +33,33 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
- * Classe utilitaire permettant de retrouver / installer des plugins.
- * Note : Le chargement des plugins est fait au chargement de l'application,
- * dans {@link fr.sirs.Loader}.
+ * Classe utilitaire permettant de retrouver / installer des plugins. Note : Le
+ * chargement des plugins est fait au chargement de l'application, dans
+ * {@link fr.sirs.Loader}.
  */
 public class PluginInstaller {
+
+    /**
+     * References operations registered for each plugin. Multiple operations can
+     * be present for a plugin. For example, when updating a plugin, we first
+     * uninstall it, then proceed to next version installation.
+     *
+     * /!\ All thread submissions must be synchronized over this tree map,
+     * because it is used for checking / acting on task states.
+     */
+    private static final TreeMap<String, List<PluginOperation>> OPERATIONS = new TreeMap<>();
 
     public static PluginList listLocalPlugins() throws IOException {
         final PluginList list = new PluginList();
@@ -58,7 +67,7 @@ public class PluginInstaller {
             final Pattern jsonPattern = Pattern.compile("(?i).*(\\.json)$");
             final ObjectMapper jsonMapper = new ObjectMapper();
             final List<PluginInfo> oldVersionPlugins = new ArrayList<>();
-            Files.walkFileTree(SirsCore.PLUGINS_PATH, new HashSet<>(), 2, new SimpleFileVisitor<Path>(){
+            Files.walkFileTree(SirsCore.PLUGINS_PATH, Collections.singleton(FileVisitOption.FOLLOW_LINKS), 2, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes bfa) throws IOException {
                     if (jsonPattern.matcher(file.getFileName().toString()).matches()) {
@@ -83,8 +92,8 @@ public class PluginInstaller {
     }
 
     /**
-     * Affiche une popup avertissant que des plugins sont incompatibles avec la version actuelle
-     * de l'application.
+     * Affiche une popup avertissant que des plugins sont incompatibles avec la
+     * version actuelle de l'application.
      *
      * @param oldVersionPlugins Liste des plugins incompatibles.
      */
@@ -95,15 +104,14 @@ public class PluginInstaller {
         stage.initModality(Modality.WINDOW_MODAL);
         stage.initStyle(StageStyle.UTILITY);
         stage.setAlwaysOnTop(true);
-        stage.setOnCloseRequest(event -> deletePlugins(oldVersionPlugins));
         final GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
 
         int i = 0;
-        grid.add(new Label(oldVersionPlugins.size() > 1 ? "Des plugins précédemment installés sont incompatibles" :
-                "Un plugin précédemment installé est incompatible"), 0, i++);
+        grid.add(new Label(oldVersionPlugins.size() > 1 ? "Des plugins précédemment installés sont incompatibles"
+                : "Un plugin précédemment installé est incompatible"), 0, i++);
         grid.add(new Label("avec la version de l'application lancée."), 0, i++);
         grid.add(new Label(oldVersionPlugins.size() > 1 ? "Ils vont être supprimés." : "Il va être supprimé."), 0, i++);
         i++;
@@ -112,32 +120,21 @@ public class PluginInstaller {
             grid.add(new Label(oldPlugin.getName() + " v" + oldPlugin.getVersionMajor() + "." + oldPlugin.getVersionMinor()), 0, i++);
         }
         final Button ok = new Button("Valider");
-        ok.setOnAction(event -> {
-            deletePlugins(oldVersionPlugins);
-            stage.hide();
-        });
         grid.add(ok, 0, ++i);
         GridPane.setHalignment(ok, HPos.RIGHT);
+
+        ok.setOnAction(event -> stage.close());
+
+        stage.setOnCloseRequest(event -> {
+            for (final PluginInfo info : oldVersionPlugins) {
+                uninstall(info);
+            }
+        });
+
         final Scene scene = new Scene(grid);
         stage.setScene(scene);
+        stage.sizeToScene();
         stage.show();
-    }
-
-    /**
-     * Supprime les anciens plugins non compatibles avec la version actuelle.
-     *
-     * @param toRemove La liste des plugins à supprimer.
-     */
-    private static void deletePlugins(final List<PluginInfo> toRemove) {
-        for (final PluginInfo oldPlugin : toRemove) {
-            final Task removeTask = uninstall(oldPlugin);
-            removeTask.setOnFailed(evt -> {
-                final Throwable ex = removeTask.getException();
-                SirsCore.LOGGER.log(Level.WARNING, ex.getLocalizedMessage(), ex);
-                Platform.runLater(() -> GeotkFX.newExceptionDialog(ex.getLocalizedMessage(), ex).show());
-            });
-            TaskManager.INSTANCE.submit(removeTask);
-        }
     }
 
     public static PluginList listDistantPlugins(URL serverUrl) throws IOException {
@@ -145,7 +142,8 @@ public class PluginInstaller {
         URLConnection connection = serverUrl.openConnection();
         try (final InputStream input = connection.getInputStream()) {
             final List<PluginInfo> plugins = new ObjectMapper().readValue(
-                    input, new TypeReference<List<PluginInfo>>() {});
+                    input, new TypeReference<List<PluginInfo>>() {
+                    });
             final List<PluginInfo> finalList = new ArrayList<>();
             for (final PluginInfo plugin : plugins) {
                 if (isCompatible(plugin)) {
@@ -168,10 +166,12 @@ public class PluginInstaller {
     }
 
     /**
-     * Vérifie si un plugin est compatible avec la version de l'application actuellement lancée.
+     * Vérifie si un plugin est compatible avec la version de l'application
+     * actuellement lancée.
      *
      * @param plugin Le plugin à vérifier.
-     * @return {@code True} si le plugin est compatible pour cette version de l'application, {@code false} sinon.
+     * @return {@code True} si le plugin est compatible pour cette version de
+     * l'application, {@code false} sinon.
      */
     private static boolean isCompatible(final PluginInfo plugin) {
         String appVersion = SirsCore.getVersion();
@@ -196,31 +196,96 @@ public class PluginInstaller {
             // ce plugin vient d'une ancienne version et doit être supprimé.
             return false;
         }
-        return (plugin.getAppVersionMax() == 0 && currentAppVersion >= plugin.getAppVersionMin()) ||
-               (currentAppVersion >= plugin.getAppVersionMin() && currentAppVersion <= plugin.getAppVersionMax());
+        return (plugin.getAppVersionMax() == 0 && currentAppVersion >= plugin.getAppVersionMin())
+                || (currentAppVersion >= plugin.getAppVersionMin() && currentAppVersion <= plugin.getAppVersionMax());
     }
 
     /**
-     * Create a task whose job is to install plugin pointed by input information.
-     * @param serverUrl Url of the server where the plugin to install is located.
+     * Create a task whose job is to install plugin pointed by input
+     * information. If a task attempting to install the plugin is already
+     * submitted, we do not launch a new one, and simply return the one going or
+     * succeeded.
+     *
+     * @param serverUrl Url of the server where the plugin to install is
+     * located.
      * @param toInstall Plugin information about the plugin to install.
-     * @return A task ready to be submitted (not launched yet) to install the plugin.
+     * @return A task ready to be submitted (not launched yet) to install the
+     * plugin.
      */
     public static Task install(URL serverUrl, PluginInfo toInstall) {
-        return new InstallPlugin(serverUrl, toInstall);
+        ArgumentChecks.ensureNonNull("Plugin location", serverUrl);
+        ArgumentChecks.ensureNonNull("Information about plugin to install", toInstall);
+        return scheduleTask(InstallPlugin.class, toInstall, () -> new InstallPlugin(serverUrl, toInstall));
     }
 
     /**
-     * Create a task to remove plugin pointed by given information. The task result
-     * is a boolean which indicates that the plugin have been found and deleted, or not.
+     * Create a task to remove plugin pointed by given information. The task
+     * result is a boolean which indicates that the plugin have been found and
+     * deleted, or not.
      *
      * @param toRemove Information about the plugin to remove.
      * @return A task (not submitted yet) in charge of plugin deletion.
      */
     public static Task<Boolean> uninstall(final PluginInfo toRemove) {
-        return TaskManager.INSTANCE.submit(new UninstallPlugin(toRemove));
+        ArgumentChecks.ensureNonNull("Information about plugin to remove", toRemove);
+        return scheduleTask(UninstallPlugin.class, toRemove, () -> new UninstallPlugin(toRemove));
     }
 
+    /**
+     * Submit a task for execution. The task will be executed after all other tasks
+     * already submitted for the same plugin (whatever its version is) are over.
+     * If the last task found is the same as the task which should be submitted,
+     * no task will be added for execution.
+     * @param <T> Type of operation to submit.
+     * @param operationType Type of operation to submit.
+     * @param plugin Information about the plugin to install.
+     * @param operationSupplier Gives the operation to submit.
+     * @return The submitted task, or a task already running / submitted performing the same operation.
+     */
+    private static <T extends PluginOperation> PluginOperation scheduleTask(
+            final Class<T> operationType, final PluginInfo plugin, final Supplier<T> operationSupplier) {
+
+        synchronized (OPERATIONS) {
+            List<PluginOperation> tasks = OPERATIONS.computeIfAbsent(plugin.getName(), param -> new ArrayList());
+            final PluginOperation op;
+            if (!tasks.isEmpty())
+                op = tasks.get(tasks.size() - 1);
+            else
+                op = null;
+
+            // If the same task is already running or scheduled, we return it directly.
+            if (op != null) {
+                if (operationType.isAssignableFrom(op.getClass())
+                        && op.pluginInfo.getVersionMajor() == plugin.getVersionMajor()
+                        && op.pluginInfo.getVersionMinor() == plugin.getVersionMinor()
+                        && !op.isDone()) {
+
+                    return op;
+                }
+            }
+
+            // Prepare installation
+            final T toSubmit = operationSupplier.get();
+            toSubmit.setOnFailed(evt -> SirsCore.LOGGER.log(Level.WARNING, "An operation on a plugin failed !", toSubmit.getException()));
+            tasks.add(toSubmit);
+
+            // Schedule current operation AFTER all other job on it has been done.
+            final Runnable runner = () -> TaskManager.INSTANCE.submit(toSubmit);
+            if (op != null && !op.isDone()) {
+                op.runningProperty().addListener((obs, oldValue, newValue) -> runner.run());
+            } else {
+                runner.run();
+            }
+
+            return toSubmit;
+        }
+    }
+
+    /**
+     * Recursively delete a folder and all its content.
+     * @param directory Folder to remove.
+     * @throws IOException
+     */
     private static void deleteDirectory(Path directory) throws IOException {
         Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
             @Override
@@ -237,21 +302,29 @@ public class PluginInstaller {
         });
     }
 
+    private static abstract class PluginOperation<T> extends Task<T> {
+
+        final PluginInfo pluginInfo;
+
+        protected PluginOperation(PluginInfo pluginInfo) {
+            ArgumentChecks.ensureNonNull("Plugin information", pluginInfo);
+            this.pluginInfo = pluginInfo;
+        }
+    }
+
     /**
      * Task in charge of plugin deletion.
      */
-    private static class UninstallPlugin extends Task<Boolean> {
-
-        final PluginInfo toRemove;
+    private static class UninstallPlugin extends PluginOperation<Boolean> {
 
         public UninstallPlugin(PluginInfo toRemove) {
-            this.toRemove = toRemove;
+            super(toRemove);
         }
 
         @Override
         protected Boolean call() throws Exception {
             // TODO : happen version in plugin directory name ?
-            final Path pluginDir = SirsCore.PLUGINS_PATH.resolve(toRemove.getName());
+            final Path pluginDir = SirsCore.PLUGINS_PATH.resolve(pluginInfo.getName());
             if (Files.exists(pluginDir)) {
                 deleteDirectory(pluginDir);
                 return true;
@@ -264,51 +337,54 @@ public class PluginInstaller {
     /**
      * A task whose aim is to install a new plugin. Does not check
      */
-    private static class InstallPlugin extends Task<Boolean> {
+    private static class InstallPlugin extends PluginOperation<Boolean> {
 
         private final URL serverUrl;
-        private final PluginInfo toInstall;
 
         public InstallPlugin(URL serverURL, PluginInfo pluginInfo) {
+            super(pluginInfo);
             ArgumentChecks.ensureNonNull("Download URL", serverURL);
-            ArgumentChecks.ensureNonNull("Information about the plugin to install", pluginInfo);
             this.serverUrl = serverURL;
-            this.toInstall = pluginInfo;
         }
 
         @Override
         protected Boolean call() throws Exception {
-            updateTitle(toInstall.getTitle());
+            updateTitle(pluginInfo.getTitle());
+
+            // Delete plugin if already present.
+            new UninstallPlugin(pluginInfo).call();
 
             final Path tmpFile = Files.createTempFile(UUID.randomUUID().toString(), ".tmp");
-            final Path pluginDir = SirsCore.PLUGINS_PATH.resolve(toInstall.getName());
+            final Path pluginDir = SirsCore.PLUGINS_PATH.resolve(pluginInfo.getName());
 
             try {
                 // Start by target directory and descriptor file creation, cause if
                 // those two simple operations fail, it's useless to download plugin.
                 Files.createDirectories(pluginDir);
-                final Path pluginDescriptor = pluginDir.resolve(toInstall.getName() + ".json");
+                final Path pluginDescriptor = pluginDir.resolve(pluginInfo.getName() + ".json");
                 try (final OutputStream stream = Files.newOutputStream(pluginDescriptor)) {
-                    new ObjectMapper().writeValue(stream, toInstall);
+                    new ObjectMapper().writeValue(stream, pluginInfo);
                 }
 
                 // Download temporary zip file
-                URL bundleURL = toInstall.bundleURL(serverUrl);
-                updateTitle("Téléchargement : "+toInstall.getTitle());
+                URL bundleURL = pluginInfo.bundleURL(serverUrl);
+                updateTitle("Téléchargement : " + pluginInfo.getTitle());
                 final long totalLength = bundleURL.openConnection().getContentLengthLong();
+                final String totalReadableSize = SIRS.toReadableSize(totalLength);
                 try (final InputStream input = bundleURL.openStream();
                         final OutputStream output = Files.newOutputStream(tmpFile)) {
                     int readBytes = 0;
                     long downloaded = 0;
-                    final byte[] buffer = new byte[8192];
+                    final byte[] buffer = new byte[65536];
                     while ((readBytes = input.read(buffer)) >= 0) {
                         output.write(buffer, 0, readBytes);
                         downloaded += readBytes;
                         updateProgress(downloaded, totalLength);
+                        updateTitle("Téléchargement ("+ pluginInfo.getTitle() + ") "+ SIRS.toReadableSize(downloaded) + " sur " + totalReadableSize);
                     }
                 }
 
-                updateTitle("Extraction : "+toInstall.getTitle());
+                updateTitle("Extraction : " + pluginInfo.getTitle());
 
                 // Copy zip content into plugin directory.
                 try (FileSystem zipSystem = FileSystems.newFileSystem(URI.create("jar:" + tmpFile.toUri().toString()), new HashMap<>())) {
@@ -316,7 +392,7 @@ public class PluginInstaller {
 
                     // Count files to copy
                     final AtomicLong fileCount = new AtomicLong();
-                    Files.walkFileTree(tmpZip, new SimpleFileVisitor<Path>(){
+                    Files.walkFileTree(tmpZip, new SimpleFileVisitor<Path>() {
                         @Override
                         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                             fileCount.incrementAndGet();

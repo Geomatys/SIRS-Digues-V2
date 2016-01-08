@@ -23,7 +23,6 @@ import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
-import fr.sirs.maj.PluginsDownloadManager;
 import fr.sirs.util.FXAuthenticationWalletEditor;
 import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.property.SirsPreferences;
@@ -58,6 +57,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -86,6 +86,7 @@ import org.apache.sis.util.logging.Logging;
 import org.ektorp.DbAccessException;
 import org.ektorp.ReplicationStatus;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
+import org.geotoolkit.gui.javafx.util.ProgressMonitor;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.CRS;
@@ -164,7 +165,6 @@ public class FXLauncherPane extends BorderPane {
     @FXML private TextField uiImportDBData;
     @FXML private TextField uiImportDBCarto;
     @FXML private ProgressBar uiProgressImport;
-    @FXML private Label uiImportInfo;
     @FXML private Button uiImportButton;
     @FXML private TextField uiImportLogin;
     @FXML private PasswordField uiImportPassword;
@@ -186,9 +186,7 @@ public class FXLauncherPane extends BorderPane {
     private Button uiRestartAppBtn;
 
     @FXML
-    private Label uiDlLbl;
-    @FXML
-    private ProgressBar uiProgressPlugins;
+    private BorderPane uiProgressPlugins;
 
     private URL serverURL;
     private PluginList local = new PluginList();
@@ -200,6 +198,11 @@ public class FXLauncherPane extends BorderPane {
 
     public FXLauncherPane() throws IOException {
         SIRS.loadFXML(this);
+
+        final ProgressMonitor progressMonitor = new ProgressMonitor(TaskManager.INSTANCE);
+        progressMonitor.setAlignment(Pos.CENTER_RIGHT);
+        uiProgressPlugins.setCenter(progressMonitor);
+        uiProgressPlugins.setVisible(false);
 
         localRegistry = new DatabaseRegistry();
 
@@ -235,21 +238,22 @@ public class FXLauncherPane extends BorderPane {
         uiAvailablePlugins.getColumns().add(newVersionColumn());
         uiAvailablePlugins.getColumns().add(newDescriptionColumn());
 
+        final ChangeListener<Boolean> listUpdate = (obs, oldValue, newValue) -> {if (!newValue) Platform.runLater(() -> updatePluginList(null));};
+
         uiInstalledPlugins.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends PluginInfo> observable, PluginInfo oldValue, final PluginInfo newValue) -> {
             if (newValue != null) {
                 uiDeletePluginBtn.setDisable(false);
                 uiDeletePluginBtn.setOnAction((ActionEvent event) -> {
+                    uiProgressPlugins.setVisible(true);
                     restartApplicationNeeded();
-                    deletePlugin(newValue);
-                    if (!PluginsDownloadManager.INSTANCE.hasPendingDl()) {
-                        uiDlLbl.setText("");
-                    }
-                    updatePluginList(null);
+                    PluginInstaller.uninstall(newValue).runningProperty().addListener(listUpdate);
+
                 });
             } else {
                 uiDeletePluginBtn.setDisable(true);
             }
         });
+
 
         uiAvailablePlugins.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends PluginInfo> observable, PluginInfo oldValue, final PluginInfo newValue) -> {
             if (newValue != null) {
@@ -259,48 +263,16 @@ public class FXLauncherPane extends BorderPane {
                     uiInstallPluginBtn.setText("Installer");
                 }
                 uiInstallPluginBtn.setDisable(false);
+
                 uiInstallPluginBtn.setOnAction((ActionEvent event) -> {
-                    restartApplicationNeeded();
                     uiProgressPlugins.setVisible(true);
-
-                    try {
-                        final URL bundleURL = newValue.bundleURL(serverURL);
-                        final double pluginSizeMo = bundleURL.openConnection().getContentLengthLong() / 1E6;
-                        final Task installTask = new TaskManager.MockTask(new Thread(() -> {
-                            installPlugin(newValue);
-                        }));
-                        PluginsDownloadManager.INSTANCE.addToDlQueue(installTask, pluginSizeMo);
-
-                        installTask.setOnSucceeded(e -> {
-                            PluginsDownloadManager.INSTANCE.finished(installTask);
-                            Platform.runLater(() -> {
-                                if (!PluginsDownloadManager.INSTANCE.hasPendingDl()) {
-                                    uiProgressPlugins.setVisible(false);
-                                    updatePluginList(null);
-                                }
-                            });
-                        });
-                        installTask.setOnFailed(e -> {
-                            PluginsDownloadManager.INSTANCE.finished(installTask);
-                            Platform.runLater(() -> {
-                                if (!PluginsDownloadManager.INSTANCE.hasPendingDl()) {
-                                    uiProgressPlugins.setVisible(false);
-                                    updatePluginList(null);
-                                }
-                            });
-                        });
-                    } catch (IOException ex) {
-                        LOGGER.log(Level.WARNING, ex.getLocalizedMessage(), ex);
-                        GeotkFX.newExceptionDialog("Erreur à l'installation d'un plugin", ex).show();
-                    }
+                    restartApplicationNeeded();
+                    PluginInstaller.install(serverURL, newValue).runningProperty().addListener(listUpdate);
                 });
             } else {
                 uiInstallPluginBtn.setDisable(true);
             }
         });
-
-        uiDlLbl.textProperty().bindBidirectional(PluginsDownloadManager.INSTANCE.txtProperty());
-        uiProgressPlugins.setVisible(false);
 
         uiRestartAppBtn.setOnAction((ActionEvent event) -> {
             try {
@@ -662,39 +634,6 @@ public class FXLauncherPane extends BorderPane {
             setPreviousPath(file.getParentFile());
             uiImportDBCarto.setText(file.getAbsolutePath());
         }
-    }
-
-    private void installPlugin(final PluginInfo pluginInfo) {
-        final String name = pluginInfo.getName();
-
-        final Runnable runner = () -> {
-            final Task install = PluginInstaller.install(serverURL, pluginInfo);
-            install.setOnFailed(evt -> {
-                final Throwable ex = install.getException();
-                LOGGER.log(Level.WARNING, "Plugin " + name + " cannot be installed !", ex);
-                Platform.runLater(() -> errorLabel.setText("Une erreur inattendue est survenue pendant l'installation du plugin " + name));
-            });
-            TaskManager.INSTANCE.submit(install);
-        };
-
-        Optional<PluginInfo> oldPlugin = local.getPluginInfo(name).findAny();
-        if (oldPlugin.isPresent()) {
-            deletePlugin(oldPlugin.get()).setOnSucceeded(evt -> runner.run());
-        } else {
-            runner.run();
-        }
-    }
-
-    private Task deletePlugin(final PluginInfo input) {
-        final Task remove = PluginInstaller.uninstall(input);
-        remove.setOnFailed(evt -> {
-            final Throwable e = remove.getException();
-            LOGGER.log(Level.WARNING, "Following plugin cannot be removed : " + input.getName(), e);
-            Platform.runLater(() -> {
-                errorLabel.setText("Le plugin " + input.getName() + "ne peut être désinstallé : Erreur inattendue.");
-            });
-        });
-        return TaskManager.INSTANCE.submit(remove);
     }
 
     private static String cleanDbName(String name) {

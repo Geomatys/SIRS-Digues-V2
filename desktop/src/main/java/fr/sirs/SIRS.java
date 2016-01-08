@@ -288,6 +288,7 @@ public final class SIRS extends SirsCore {
      */
     public static String toReadableSize(final long byteNumber) {
         NumberFormat format = NumberFormat.getNumberInstance();
+        format.setMinimumFractionDigits(2);
         format.setMaximumFractionDigits(2);
         if (byteNumber < 0) {
             return "inconnu";
