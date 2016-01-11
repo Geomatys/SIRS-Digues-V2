@@ -11,7 +11,6 @@ import static fr.sirs.SIRS.binaryMD5;
 import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
 import fr.sirs.core.CacheRules;
-import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
@@ -54,8 +53,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -75,7 +74,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -911,6 +912,10 @@ public class FXLauncherPane extends BorderPane {
         }
     }
 
+    /**
+     * When user tries to delete a database, this stage is showed to identify him.
+     * Deletion will be triggered only if identiffication is successful.
+     */
     private final class IdentificationStage extends Stage {
 
         private final String dbName;
@@ -919,6 +924,8 @@ public class FXLauncherPane extends BorderPane {
         private final TextField login;
         private final PasswordField password;
         private final Label label;
+        private final ProgressBar progress;
+        private final GridPane gridpane;
 
         private IdentificationStage(final String databaseName) {
             super();
@@ -929,40 +936,40 @@ public class FXLauncherPane extends BorderPane {
             ok = new Button("Effacer la base");
             login = new TextField();
             password = new PasswordField();
+            progress = new ProgressBar();
 
-            cancel.setOnAction(new EventHandler<ActionEvent>() {
-
-                @Override
-                public void handle(ActionEvent event) {
-                    hide();
-                }
-            });
-
-            ok.setOnAction(new IdenfificationHandler());
+            cancel.setOnAction((ActionEvent event) -> hide());
+            ok.setOnAction(this::handleDrop);
             password.onActionProperty().bind(ok.onActionProperty());
 
-            final GridPane gridpane = new GridPane();
-            gridpane.add(label, 0, 0, 2, 1);
+            gridpane = new GridPane();
+            gridpane.add(label, 0, 0, GridPane.REMAINING, 1);
             gridpane.add(new Label("Login : "), 0, 1);
-            gridpane.add(login, 1, 1);
+            gridpane.add(login, 1, 1, GridPane.REMAINING, 1);
             gridpane.add(new Label("Mot de passe : "), 0, 2);
-            gridpane.add(password, 1, 2);
-            gridpane.add(cancel, 0, 3);
-            gridpane.add(ok, 1, 3);
+            gridpane.add(password, 1, 2, GridPane.REMAINING, 1);
+            gridpane.add(progress, 0, 3);
+            gridpane.add(cancel, 1, 3);
+            gridpane.add(ok, 2, 3);
             gridpane.setHgap(5);
             gridpane.setVgap(5);
             gridpane.setPadding(new Insets(10));
-
+            gridpane.getColumnConstraints().add(new ColumnConstraints(10, USE_COMPUTED_SIZE, Double.MAX_VALUE, Priority.ALWAYS, HPos.LEFT, true));
+            
+            progress.setVisible(false);
             final Scene scene = new Scene(gridpane);
             setScene(scene);
-
         }
 
-        private class IdenfificationHandler implements EventHandler<ActionEvent> {
+        /**
+         * Action launched when database deletion is triggered.
+         * @param event
+         */
+        private void handleDrop(ActionEvent event) {
 
-            @Override
-            public void handle(ActionEvent event) {
+            final Task dropDb = new TaskManager.MockTask("Suppression de la base de données " + dbName, () -> {
 
+                // Before allowing deletion, we must ensure user is known by database.
                 try (final ConfigurableApplicationContext ctx = localRegistry.connectToSirsDatabase(dbName, false, false, false)) {
 
                     final UtilisateurRepository utilisateurRepository = (UtilisateurRepository) ctx.getBean(Session.class).getRepositoryForClass(Utilisateur.class);
@@ -989,24 +996,32 @@ public class FXLauncherPane extends BorderPane {
                         }
                     }
 
+                    // Launch database deletion.
                     if (allowedToDropDB) {
                         localRegistry.dropDatabase(dbName);
-                        hide();
+                        return true;
                     } else {
-                        final Alert alert = new Alert(Alert.AlertType.ERROR, "Échec d'identification.", ButtonType.CLOSE);
-                        alert.setResizable(true);
-                        alert.showAndWait();
+                        Platform.runLater(() -> {
+                            final Alert alert = new Alert(Alert.AlertType.ERROR, "Échec d'identification.", ButtonType.CLOSE);
+                            alert.setResizable(true);
+                            alert.show();
+                        });
+                        return false;
                     }
-
-                } catch (DbAccessException ex) {
-                    LOGGER.log(Level.SEVERE, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
-                    GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. " +
-                            "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, " +
-                            "puis relancer l'application.", ex).showAndWait();
-                } catch (Exception ex) {
-                    throw new SirsCoreRuntimeException(ex);
                 }
-            }
+            });
+
+            dropDb.setOnSucceeded(evt -> Platform.runLater(() -> hide()));
+            dropDb.setOnFailed(evt -> Platform.runLater(() -> {
+                LOGGER.log(Level.WARNING, "An error occcurred while deleting a database.", dropDb.getException());
+                GeotkFX.newExceptionDialog("Une erreur s'est produite pendant la suppression de la base de donnée " + dbName, dropDb.getException()).show();
+                hide();
+            }));
+            dropDb.setOnCancelled(evt -> Platform.runLater(() -> {new Alert(AlertType.WARNING, "La suppression de la base de donnée " + dbName + " a été annulée", ButtonType.OK).show(); hide();}));
+
+            progress.visibleProperty().bind(dropDb.runningProperty());
+            gridpane.disableProperty().bind(dropDb.runningProperty());
+            TaskManager.INSTANCE.submit(dropDb);
         }
     }
 
