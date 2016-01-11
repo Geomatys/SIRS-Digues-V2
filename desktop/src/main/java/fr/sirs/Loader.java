@@ -3,6 +3,7 @@ package fr.sirs;
 
 import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.model.Role;
@@ -94,6 +95,7 @@ public class Loader extends Application {
         controller.uiCancel.setVisible(false);
         controller.uiProgressLabel.textProperty().bind(task.messageProperty());
         controller.uiProgressBar.progressProperty().bind(task.progressProperty());
+        controller.uiDbState.setText(getDbStateMessage());
 
         final Scene scene = new Scene(root);
         scene.getStylesheets().add("/fr/sirs/splashscreen.css");
@@ -340,6 +342,25 @@ public class Loader extends Application {
                 cancel();
             }
             return null;
+        }
+    }
+
+    public String getDbStateMessage() throws IOException {
+        SirsDBInfo dbInfo = localRegistry.getInfo(databaseName).orElse(null);
+        if (dbInfo != null && dbInfo.getRemoteDatabase() != null && ! dbInfo.getRemoteDatabase().isEmpty()) {
+            final String dbName = DatabaseRegistry.cleanDatabaseName(databaseName);
+            if (localRegistry.getSynchronizationTasks(databaseName).anyMatch(status ->
+                    DatabaseRegistry.cleanDatabaseName(status.getSourceDatabaseName()).equals(dbName)
+                    || DatabaseRegistry.cleanDatabaseName(status.getTargetDatabaseName()).equals(dbName))) {
+                return "Synchronisation active avec "+dbInfo.getRemoteDatabase();
+
+            } else {
+                return "Synchronisation stoppée avec "+dbInfo.getRemoteDatabase();
+            }
+        } else if (localRegistry.getSynchronizationTasks(databaseName).count() > 0) {
+            return "Base synchronisée depuis un point extérieur";
+        } else {
+            return "Base locale (aucune synchronisation configurée)";
         }
     }
 }

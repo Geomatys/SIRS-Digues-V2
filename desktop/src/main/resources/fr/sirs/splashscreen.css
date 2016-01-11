@@ -26,4 +26,5 @@
 .fond{
     -fx-background-color: rgba(255, 0, 0, 0);
     -fx-background-image:  url('images/splashscreen.png');
+    -fx-background-size: stretch;
 }

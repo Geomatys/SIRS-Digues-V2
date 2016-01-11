@@ -459,14 +459,13 @@ public class DatabaseRegistry {
         /* Replication status modify database url to hide password, so we have to truncate this part to allow comparison.
            We also remove end '/' which could appear in urls.
          */
-        final String tmpSource = URL_START.matcher(sourceDb).replaceFirst("").replaceFirst("/$", "");
-        final String tmpTarget = URL_START.matcher(targetDb).replaceFirst("").replaceFirst("/$", "");
+        final String tmpSource = cleanDatabaseName(sourceDb);
+        final String tmpTarget = cleanDatabaseName(targetDb);
         try {
             count = getReplicationTasks().stream()
                     .filter(status -> {
-                        final String replicatorSource = URL_START.matcher(status.getSourceDatabaseName()).replaceFirst("").replaceFirst("/$", "");
-                        final String replicatorTarget = URL_START.matcher(status.getTargetDatabaseName()).replaceFirst("").replaceFirst("/$", "");
-                        return replicatorSource.equals(tmpSource) && replicatorTarget.equals(tmpTarget);
+                        return cleanDatabaseName(status.getSourceDatabaseName()).equals(tmpSource)
+                                && cleanDatabaseName(status.getTargetDatabaseName()).equals(tmpTarget);
                     })
                     .count();
         } catch (Exception e1) {
@@ -576,9 +575,11 @@ public class DatabaseRegistry {
         return result;
     }
 
-    Stream<ReplicationTask> getReplicationTasksBySourceOrTarget(String dst) throws IOException {
+    Stream<ReplicationTask> getReplicationTasksBySourceOrTarget(final String dst) throws IOException {
+        final String cleanedDst = cleanDatabaseName(dst);
         return getReplicationTasks().stream().filter(
-                t -> (t.getSourceDatabaseName().equals(dst) || t.getTargetDatabaseName().equals(dst)));
+                t -> (cleanDatabaseName(t.getSourceDatabaseName()).equals(cleanedDst)
+                        || cleanDatabaseName(t.getTargetDatabaseName()).equals(cleanedDst)));
     }
 
 
@@ -799,6 +800,16 @@ public class DatabaseRegistry {
         }
     }
 
+    /**
+     * Simplfiy database path (if its an URL) to make it comparable without authentication or protocol.
+     * If given database name represents a complete URL, its start (protocol + authentication)
+     * is removed. We also remove any '/' at the end of the name.
+     * @param sourceDbName Database name to simplify.
+     * @return Cut database name.
+     */
+    public static String cleanDatabaseName(final String sourceDbName) {
+        return URL_START.matcher(sourceDbName).replaceFirst("").replaceFirst("/$", "");
+    }
 
     private static class SirsClientBuilder extends StdHttpClient.Builder {
 

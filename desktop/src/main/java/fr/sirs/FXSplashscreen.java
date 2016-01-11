@@ -19,16 +19,17 @@ public class FXSplashscreen {
     @FXML public Label uiProgressLabel;
     @FXML public ProgressBar uiProgressBar;
     @FXML public Button uiCancel;
-    
+
     @FXML public GridPane uiLoginPane;
     @FXML public TextField uiLogin;
     @FXML public PasswordField uiPassword;
     @FXML public Button uiConnexion;
     @FXML public Label uiLogInfo;
-    
+    @FXML public Label uiDbState;
+
     @FXML
     void closeApp(ActionEvent event) {
         System.exit(0);
     }
-        
+
 }
