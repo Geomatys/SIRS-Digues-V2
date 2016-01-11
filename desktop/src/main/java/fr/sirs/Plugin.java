@@ -19,9 +19,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.concurrent.Task;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
+import org.ektorp.CouchDbConnector;
 import org.geotoolkit.map.MapItem;
 
 /**
@@ -216,4 +218,17 @@ public abstract class Plugin {
         return info;
     }
 
+    /**
+     * Override this method to perform a migration from a given version of the
+     * plugin to the current one.
+     *
+     * @param fromMajor
+     * @param fromMinor
+     * @param dbConnector
+     * @return A task, ready to be submitted, which will perform updates (database objects, etc.)
+     * to make database and application ready to work with current plugin version.
+     */
+    public Optional<Task> upgrade(final int fromMajor, final int fromMinor, final CouchDbConnector dbConnector) {
+        return Optional.empty();
+    }
 }
