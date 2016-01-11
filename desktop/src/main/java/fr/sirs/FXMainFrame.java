@@ -215,7 +215,8 @@ public class FXMainFrame extends BorderPane {
                 }
             }
         };
-
+        PrintManager.printButton = uiPrintButton;
+        
         printableProperty.addListener(printListener);
         printListener.changed(printableProperty, null, printableProperty.get());
     }

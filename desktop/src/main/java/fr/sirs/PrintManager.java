@@ -42,6 +42,8 @@ import org.xml.sax.SAXException;
  */
 public class PrintManager {
 
+    static Node printButton;
+
     /**
      * Find first encountered printable element while browsing recursively given
      * nodes. Browsing is done "depth last".
@@ -90,13 +92,8 @@ public class PrintManager {
             }
 
             // Do not update if user focused print button.
-            Session session = Injector.getSession();
-            if (session != null) {
-                final FXMainFrame frame = session.getFrame();
-                if (frame != null) {
-                    if (newValue == frame.uiPrintButton)
-                        return;
-                }
+            if (printButton != null && newValue == printButton) {
+                return;
             }
 
             // On regarde si un des enfants est imprimable.
