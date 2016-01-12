@@ -184,7 +184,7 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
 
         // Prepare reference to temporary file used for ODT edition. Keep it suppressed until we need it.
         try {
-            tempODT = Files.createTempFile("sirs", "odt");
+            tempODT = Files.createTempFile("sirs", ".odt");
             Files.delete(tempODT);
         } catch (IOException ex) {
             throw new IllegalStateException("Cannot create temporary file !", ex);
