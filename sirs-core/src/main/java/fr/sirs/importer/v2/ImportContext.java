@@ -12,16 +12,15 @@ import fr.sirs.importer.v2.mapper.Mapper;
 import fr.sirs.importer.v2.mapper.MapperSpi;
 import fr.sirs.util.ImportParameters;
 import java.beans.PropertyDescriptor;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -145,6 +144,7 @@ public class ImportContext implements ApplicationContextAware {
 
     private final Path errorOutput;
     private boolean flushErrors = true;
+    private ObjectOutputStream errorSerializer;
 
     @Autowired
     public ImportContext(final ImportParameters parameters)
@@ -256,12 +256,19 @@ public class ImportContext implements ApplicationContextAware {
 
     @PreDestroy
     private void destroy() {
-        if (errorBuffer.isEmpty())
-            return;
-        try {
-            serialize(errorBuffer.toArray(new ErrorReport[errorBuffer.size()]));
+        if (!errorBuffer.isEmpty()) {
+            try {
+                serialize(errorBuffer.toArray(new ErrorReport[errorBuffer.size()]));
+            } catch (IOException ex) {
+                SirsCore.LOGGER.log(Level.WARNING, "Cannot flush errors !", ex);
+            }
+        }
+
+        if (errorSerializer != null)
+            try {
+                errorSerializer.close();
         } catch (IOException ex) {
-            SirsCore.LOGGER.log(Level.WARNING, "Cannot flush errors !", ex);
+            SirsCore.LOGGER.log(Level.WARNING, "An error occurred while closing a stream. It may cause memory leaks !", ex);
         }
     }
 
@@ -621,23 +628,35 @@ public class ImportContext implements ApplicationContextAware {
      * @param reports All reports to flush.
      * @throws IOException If an error happens when creating or while writing into output file.
      */
-    private synchronized void serialize(ErrorReport... reports) throws IOException {
-        if (!Files.isRegularFile(errorOutput)) {
-            Files.createDirectories(errorOutput.getParent());
-            Files.createFile(errorOutput);
+    public synchronized void serialize(ErrorReport... reports) throws IOException {
+        if (errorSerializer == null) {
+            if (!Files.isRegularFile(errorOutput)) {
+                Files.createDirectories(errorOutput.getParent());
+                Files.createFile(errorOutput);
+            }
+            errorSerializer = new ObjectOutputStream(Files.newOutputStream(errorOutput));
         }
 
+        /* Each object is written to a buffer, because some of them may fail. If
+           it is the case, we'll apply a treatment to make them serializable.
+           After it, serialization is done, we flush result in error file.
+        */
         try (
-                final OutputStream fileOutput = Files.newOutputStream(errorOutput, StandardOpenOption.APPEND);
-                final ObjectOutputStream out = new ObjectOutputStream(fileOutput)) {
+                final ByteArrayOutputStream tmpStream = new ByteArrayOutputStream();
+                final ObjectOutputStream tmpSerializer = new ObjectOutputStream(tmpStream)) {
+
             for (final ErrorReport report : reports) {
                 try {
-                    out.writeObject(report);
+                    tmpSerializer.writeObject(report);
                 } catch (NotSerializableException e) {
                     report.setSerializable();
-                    out.writeObject(report);
+                } finally {
+                    tmpStream.reset();
                 }
+
+                errorSerializer.writeObject(report);
             }
+            errorSerializer.flush();
         }
     }
 
