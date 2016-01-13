@@ -17,7 +17,8 @@
 
     <properties>
         <plugin.core.version.min>16</plugin.core.version.min>
-        <geotoolkit.dwg.version>1.0.1</geotoolkit.dwg.version>
+        <geotoolkit.dwg.version>1.0.3</geotoolkit.dwg.version>
+        <geotoolkit.hexagon.version>1.0.4</geotoolkit.hexagon.version>
     </properties>
 
     <dependencies>

@@ -27,9 +27,8 @@
     <slf4j.version>1.7.7</slf4j.version>
     <sis.version>0.7-jdk7-MC0022</sis.version>
     <geotoolkit.version>4.0.0-MC0074</geotoolkit.version>
-    <geotoolkit.esri.version>1.0.1</geotoolkit.esri.version>
-    <geotoolkit.h2.version>1.0.1</geotoolkit.h2.version>
-    <geotoolkit.hexagon.version>1.0.2</geotoolkit.hexagon.version>
+    <geotoolkit.esri.version>1.0.2</geotoolkit.esri.version>
+    <geotoolkit.h2.version>1.0.2</geotoolkit.h2.version>
     <jai.version>1.1.4</jai.version>
     <jai-io.version>1.1.1</jai-io.version>
     <project.encoding>UTF-8</project.encoding>
