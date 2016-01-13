@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.core.ModuleDescription;
 import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.index.ElasticSearchEngine;
@@ -21,11 +22,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import org.apache.http.client.HttpClient;
@@ -47,6 +52,7 @@ import org.ektorp.impl.StdCouchDbInstance;
 import org.ektorp.impl.StdReplicationTask;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.Filter;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.util.FileUtilities;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -392,12 +398,27 @@ public class DatabaseRegistry {
         if (info.isPresent()) {
             SirsDBInfo localInfo = info.get();
             if (localInfo.getRemoteDatabase() != null && !localInfo.getRemoteDatabase().equals(distant)) {
-                final Alert alert = new Alert(
-                        Alert.AlertType.WARNING,
-                        "Vous êtes sur le point de changer le point de synchronisation de la base de données.",
-                        ButtonType.CANCEL, ButtonType.OK);
-                final Optional<ButtonType> showAndWait = alert.showAndWait();
+                final TaskManager.MockTask<Optional<ButtonType>> confirmation = new TaskManager.MockTask<>(() -> {
+                    final Alert alert = new Alert(
+                            Alert.AlertType.WARNING,
+                            "Vous êtes sur le point de changer le point de synchronisation de la base de données.",
+                            ButtonType.CANCEL, ButtonType.OK);
+                    alert.setResizable(true);
+                    return alert.showAndWait();
+                });
 
+                if (Platform.isFxApplicationThread()) {
+                    confirmation.run();
+                } else {
+                    Platform.runLater(confirmation);
+                }
+
+                final Optional<ButtonType> showAndWait;
+                try {
+                    showAndWait = confirmation.get(90, TimeUnit.SECONDS);
+                } catch (TimeoutException | InterruptedException | ExecutionException ex) {
+                    throw new SirsCoreRuntimeException(ex);
+                }
                 if (showAndWait.isPresent() && showAndWait.get().equals(ButtonType.OK)) {
                     cancelAllSynchronizations(localConnector.getDatabaseName());
                 } else {
@@ -558,7 +579,7 @@ public class DatabaseRegistry {
                         } else if (!desc.getVersion().equals(entry.getValue().getVersion())) {
                             throwException = true;
                             moduleError.append(System.lineSeparator())
-                                    .append(desc.title)
+                                    .append(desc.title.get())
                                     .append(" : ")
                                     .append(desc.getVersion())
                                     .append(" (")
