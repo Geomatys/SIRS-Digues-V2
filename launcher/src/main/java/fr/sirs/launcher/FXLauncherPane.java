@@ -11,6 +11,8 @@ import static fr.sirs.SIRS.binaryMD5;
 import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
 import fr.sirs.core.CacheRules;
+import fr.sirs.core.ModuleDescription;
+import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
@@ -36,6 +38,7 @@ import java.nio.file.Paths;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -43,6 +46,7 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
@@ -383,8 +387,47 @@ public class FXLauncherPane extends BorderPane {
     @FXML
     void connectLocal(ActionEvent event) {
         final String db = uiLocalBaseTable.getSelectionModel().getSelectedItem();
-        final Window currentWindow = getScene().getWindow();
 
+        // We ensure user plugins are not in conflict with chosen database.
+        final HashMap<PluginInfo, ModuleDescription> olderModules = new HashMap<>();
+        final ArrayList<PluginInfo> newerModules = new ArrayList<>();
+        final HashMap<String, PluginInfo> installedPlugin = new HashMap<>();
+        local.plugins.forEach(plugin -> installedPlugin.put(plugin.getName(), plugin));
+        Optional<SirsDBInfo> info = localRegistry.getInfo(db);
+        if (!info.isPresent()) {
+            // should never happen...
+            throw new IllegalStateException("Chosen database is not SIRS database !");
+        } else if (info.get().getModuleDescriptions() != null) {
+            final Pattern versionPattern = Pattern.compile("\\d+(.)\\d+");
+            for (final ModuleDescription desc : info.get().getModuleDescriptions().values()) {
+                PluginInfo appModule = installedPlugin.get(desc.getName());
+                if (appModule != null) {
+                    final int comparison;
+                    final Matcher matcher = versionPattern.matcher(desc.getVersion());
+                    if (matcher.matches()) {
+                        final String[] split = desc.getVersion().split(matcher.group(1));
+                        final int[] dbVersion = new int[2];
+                        for (int i = 0 ; i < split.length ; i++) {
+                            dbVersion[i] = Integer.parseInt(split[i]);
+                        }
+                        final int majorComp = appModule.getVersionMajor() - dbVersion[0];
+                        comparison = majorComp == 0? appModule.getVersionMinor() - dbVersion[1] : majorComp;
+                    } else {
+                        final String installedVersion = new StringBuilder(appModule.getVersionMajor()).append('.').append(appModule.getVersionMinor()).toString();
+                        comparison = installedVersion.compareTo(desc.getVersion());
+                    }
+
+                    if (comparison < 0) {
+                        olderModules.put(appModule, desc);
+                    } else if (comparison > 0) {
+                        newerModules.add(appModule);
+                    }
+                }
+            }
+
+            // TODO : inform user.
+        }
+        final Window currentWindow = getScene().getWindow();
         if (currentWindow instanceof Stage) {
             final RestartableStage restartableStage = new RestartableStage((Stage) currentWindow);
             SIRS.setLauncher(restartableStage);
@@ -955,7 +998,7 @@ public class FXLauncherPane extends BorderPane {
             gridpane.setVgap(5);
             gridpane.setPadding(new Insets(10));
             gridpane.getColumnConstraints().add(new ColumnConstraints(10, USE_COMPUTED_SIZE, Double.MAX_VALUE, Priority.ALWAYS, HPos.LEFT, true));
-            
+
             progress.setVisible(false);
             final Scene scene = new Scene(gridpane);
             setScene(scene);
