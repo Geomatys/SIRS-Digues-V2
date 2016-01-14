@@ -75,7 +75,7 @@ public class DatabaseRegistry {
     /**
      * Define registry behavior when a connection to one database is queried.
      */
-    private static enum DatabaseConnectionBehavior {
+    public static enum DatabaseConnectionBehavior {
         /**
          * If database to connect to does not exists, an error will be thrown.
          */
@@ -502,6 +502,7 @@ public class DatabaseRegistry {
      * @param dbToCopy Database to copy. Only its name if it's in current service, complete URL otherwise.
      * @param dbToPasteInto Database to paste content into. Only its name if it's in current service, complete URL otherwise.
      * @return A status of started replication task.
+     * @throws java.io.IOException If an error occurs while connecting to one of the databases.
      */
     public ReplicationStatus copyDatabase(final String dbToCopy, final String dbToPasteInto) throws IOException {
         return copyDatabase(dbToCopy, dbToPasteInto, false);
@@ -937,9 +938,17 @@ public class DatabaseRegistry {
     }
 
     /**
-     * Try to connect to the database pointed by given name / URL. It can be a
-     * simple name if the database is present in localhost. Otherwise, an URL
-     * must be given.
+     * Try to make a simple connection over database pointed by given name / URL.
+     *  It can be a simple name if the database is present in localhost. Otherwise,
+     *  an URL must be given.
+     *
+     * /!\ Only a connector is provided. Repositories, session and other application
+     * components are not created. This method purpose is only to make a quick
+     * connection over a database to get back simple information, or in the
+     * special case of module migration. If you want to work with SIRS objects,
+     * you should use {@link #connectToSirsDatabase(java.lang.String, boolean, boolean, boolean) }
+     * to get a complete working environment.
+     *
      * @param dbNameOrPath Path to or name of the target database.
      * @param behavior Defines behavior to adopt when creating connector. If null,
      * {@link DatabaseConnectionBehavior#DEFAULT} is assumed.
@@ -949,7 +958,7 @@ public class DatabaseRegistry {
      * queried database does not exists and {@link DatabaseConnectionBehavior#FAIL_IF_NOT_EXISTS }
      * has been given as parameter.
      */
-    private CouchDbConnector createConnector(final String dbNameOrPath, final DatabaseConnectionBehavior behavior) throws IOException, IllegalArgumentException {
+    public CouchDbConnector createConnector(final String dbNameOrPath, final DatabaseConnectionBehavior behavior) throws IOException, IllegalArgumentException {
         final boolean create = DatabaseConnectionBehavior.CREATE_IF_NOT_EXISTS.equals(behavior);
         final boolean fail = DatabaseConnectionBehavior.FAIL_IF_NOT_EXISTS.equals(behavior);
         if (DB_NAME.matcher(dbNameOrPath).matches()) {

@@ -12,7 +12,8 @@ import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
 import fr.sirs.core.CacheRules;
 import fr.sirs.core.ModuleDescription;
-import fr.sirs.core.SirsDBInfo;
+import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
@@ -22,6 +23,7 @@ import fr.sirs.core.model.Utilisateur;
 import fr.sirs.core.plugins.PluginLoader;
 import fr.sirs.importer.AccessDbImporterException;
 import fr.sirs.importer.DbImporter;
+import fr.sirs.maj.ModuleChecker;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
 import fr.sirs.util.FXAuthenticationWalletEditor;
@@ -38,15 +40,16 @@ import java.nio.file.Paths;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
@@ -57,6 +60,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -88,6 +93,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 import org.apache.sis.util.logging.Logging;
+import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.ReplicationStatus;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
@@ -389,44 +395,37 @@ public class FXLauncherPane extends BorderPane {
         final String db = uiLocalBaseTable.getSelectionModel().getSelectedItem();
 
         // We ensure user plugins are not in conflict with chosen database.
-        final HashMap<PluginInfo, ModuleDescription> olderModules = new HashMap<>();
-        final ArrayList<PluginInfo> newerModules = new ArrayList<>();
-        final HashMap<String, PluginInfo> installedPlugin = new HashMap<>();
-        local.plugins.forEach(plugin -> installedPlugin.put(plugin.getName(), plugin));
-        Optional<SirsDBInfo> info = localRegistry.getInfo(db);
-        if (!info.isPresent()) {
-            // should never happen...
-            throw new IllegalStateException("Chosen database is not SIRS database !");
-        } else if (info.get().getModuleDescriptions() != null) {
-            final Pattern versionPattern = Pattern.compile("\\d+(.)\\d+");
-            for (final ModuleDescription desc : info.get().getModuleDescriptions().values()) {
-                PluginInfo appModule = installedPlugin.get(desc.getName());
-                if (appModule != null) {
-                    final int comparison;
-                    final Matcher matcher = versionPattern.matcher(desc.getVersion());
-                    if (matcher.matches()) {
-                        final String[] split = desc.getVersion().split(matcher.group(1));
-                        final int[] dbVersion = new int[2];
-                        for (int i = 0 ; i < split.length ; i++) {
-                            dbVersion[i] = Integer.parseInt(split[i]);
-                        }
-                        final int majorComp = appModule.getVersionMajor() - dbVersion[0];
-                        comparison = majorComp == 0? appModule.getVersionMinor() - dbVersion[1] : majorComp;
-                    } else {
-                        final String installedVersion = new StringBuilder(appModule.getVersionMajor()).append('.').append(appModule.getVersionMinor()).toString();
-                        comparison = installedVersion.compareTo(desc.getVersion());
-                    }
+        final CouchDbConnector connector;
+        try {
+            connector = localRegistry.createConnector(db, DatabaseRegistry.DatabaseConnectionBehavior.FAIL_IF_NOT_EXISTS);
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "Cannot connect to database ".concat(db), ex);
+            GeotkFX.newExceptionDialog("Impossible de se connecter à la base ".concat(db), ex).show();
+            return;
+        }
 
-                    if (comparison < 0) {
-                        olderModules.put(appModule, desc);
-                    } else if (comparison > 0) {
-                        newerModules.add(appModule);
-                    }
-                }
-            }
+        final ModuleChecker modChecker = new ModuleChecker(local, localRegistry, connector);
 
             // TODO : inform user.
-        }
+            if (!modChecker.getObsoletePlugins().isEmpty()) {
+                final StringBuilder messenger = new StringBuilder("Certains modules installés doivent être mis à jour ou supprimés car la base de données choisie nécessite des versions plus récentes :");
+                final String lineSep = System.lineSeparator();
+                for (final Map.Entry<PluginInfo, ModuleDescription> entry : modChecker.getObsoletePlugins().entrySet()) {
+                    final PluginInfo installed = entry.getKey();
+                    final ModuleDescription dbModule = entry.getValue();
+                    messenger.append(lineSep).append(installed.getName()).append(" :")
+                            .append(lineSep).append('\t').append("Installé :            ").append(installed.getVersionMajor()).append('.').append(installed.getVersionMinor())
+                            .append(lineSep).append('\t').append("Utilisé par la base : ").append(dbModule.getVersion());
+                }
+                final Alert alert = new Alert(AlertType.WARNING, messenger.toString(), ButtonType.OK);
+                alert.setResizable(true);
+                alert.show();
+                return;
+
+            } else if (!modChecker.getUpgrades().isEmpty()) {
+                // TODO
+            }
+
         final Window currentWindow = getScene().getWindow();
         if (currentWindow instanceof Stage) {
             final RestartableStage restartableStage = new RestartableStage((Stage) currentWindow);
@@ -434,6 +433,71 @@ public class FXLauncherPane extends BorderPane {
         }
         currentWindow.hide();
         runDesktop(db, localRegistry);
+    }
+
+    /**
+     * Check if an upgrade is available. If we find at least one, user is asked
+     * if he wants to proceed. When confirmed, migration is launched.
+     *
+     * Note : this method returns ONLY when migrations are over.
+     *
+     * @param upgrades Modules which could possibly need an upgrade.
+     * @param connector A connector to target database. It will allow modules to
+     * perform upgrade.
+     * @return False if a migration is needed but user refuse it (i.e : he should not connect to target databse).
+     * True otherwise (we can proceed with connection).
+     */
+    private boolean upgradeModules(final Map<PluginInfo, int[]> upgrades, final CouchDbConnector connector) {
+        final StringBuilder message = new StringBuilder("Les modules suivants requièrent une mise à jour de la base de donnée :");
+        final ArrayList<Task> realUpgrades = new ArrayList<>();
+        for (final Map.Entry<PluginInfo, int[]> entry : upgrades.entrySet()) {
+            final PluginInfo info = entry.getKey();
+            final Plugin plugin = Plugins.getPlugin(info.getName());
+            final int[] oldVersion = entry.getValue();
+            Optional<Task> upgrade = plugin.findUpgradeTask(oldVersion.length < 1 ? 0 : oldVersion[0], oldVersion.length < 2 ? 0 : oldVersion[1], connector);
+            if (upgrade.isPresent()) {
+                message.append(System.lineSeparator()).append(info.getTitle())
+                        .append(" : mise à jour vers ").append(info.getVersionMajor()).append('.').append(info.getVersionMinor());
+                realUpgrades.add(upgrade.get());
+            }
+        }
+
+        if (!realUpgrades.isEmpty()) {
+            message.append(System.lineSeparator()).append("La mise à jour nécessite l'arrêt des synchronisations en cours sur la base. Confirmer ?");
+            final Alert alert = new Alert(AlertType.CONFIRMATION, message.toString(), ButtonType.CANCEL, ButtonType.OK);
+            alert.setResizable(true);
+
+            if (!ButtonType.OK.equals(alert.showAndWait())) {
+                return false;
+            }
+
+            final AtomicInteger taskCounter = new AtomicInteger();
+            Task t = realUpgrades.get(taskCounter.getAndIncrement());
+            final EventHandler onSuccess = new EventHandler() {
+                public void handle(Event evt) {
+                    final int count = taskCounter.getAndIncrement();
+                    if (count < realUpgrades.size()) {
+                        final Task next = realUpgrades.get(count);
+                        next.setOnSucceeded(this);
+                    }
+                }
+            };
+            t.setOnSucceeded(onSuccess);
+
+            try {
+                realUpgrades.get(realUpgrades.size() -1).get();
+            } catch (InterruptedException ex) {
+                for (final Task tmp : realUpgrades) {
+                    tmp.cancel();
+                }
+                return false;
+            } catch (ExecutionException ex) {
+                SirsCore.LOGGER.log(Level.WARNING, "An error happened during module upgrade", ex);
+                throw new SirsCoreRuntimeException("Une erreur est survenue pendant la mise à jour d'un module", ex);
+            }
+        }
+
+        return true;
     }
 
     @FXML

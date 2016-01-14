@@ -219,16 +219,23 @@ public abstract class Plugin {
     }
 
     /**
-     * Override this method to perform a migration from a given version of the
-     * plugin to the current one.
+     * Override this method to provide a migration process from a given version
+     * of the plugin to the current one.
      *
-     * @param fromMajor
-     * @param fromMinor
-     * @param dbConnector
+     * Notes : this method is called only when the current plugin version is
+     * newer than the one given in database. It is called before {@link #load() }.
+     *
+     * The returned task should not be submitted yet. Application will do it
+     * after user has confirmed his will to upgrade.
+     *
+     * @param fromMajor Major version of the plugin found in database.
+     * @param fromMinor Minor version of the plugin found in database.
+     * @param dbConnector Connector to the database to upgrade.
+     *
      * @return A task, ready to be submitted, which will perform updates (database objects, etc.)
      * to make database and application ready to work with current plugin version.
      */
-    public Optional<Task> upgrade(final int fromMajor, final int fromMinor, final CouchDbConnector dbConnector) {
+    public Optional<Task> findUpgradeTask(final int fromMajor, final int fromMinor, final CouchDbConnector dbConnector) {
         return Optional.empty();
     }
 }
