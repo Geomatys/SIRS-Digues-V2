@@ -6,7 +6,9 @@ import com.healthmarketscience.jackcess.Table;
 import fr.sirs.core.model.AvecCommentaire;
 import fr.sirs.importer.AccessDbImporterException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,20 +17,50 @@ import org.springframework.stereotype.Component;
  */
 public class CommentMapper extends AbstractMapper<AvecCommentaire> {
 
-    private static final String STRUCTURE_FIELD = "DESCRIPTION_";
-    private static final String DEFAULT_FIELD = "COMMENTAIRE";
+    private static final String[] DEFAULT_FIELDS = new String[]{"DESCRIPTION_", "COMMENTAIRE"};
 
-    private final String fieldName;
+    private final String[] fieldNames;
 
-    private CommentMapper(final Table t, String fieldName) {
+    final BiConsumer<Row, AvecCommentaire> mapper;
+
+    private CommentMapper(final Table t, String[] fieldNames) {
         super(t);
-        this.fieldName = fieldName;
+        this.fieldNames = fieldNames;
+        if (fieldNames.length > 1) {
+            mapper = this::mapMultiple;
+        } else {
+            mapper = this::mapSingle;
+        }
     }
 
     @Override
     public void map(Row input, AvecCommentaire output) throws IllegalStateException, IOException, AccessDbImporterException {
-        String comment = input.getString(fieldName);
+        mapper.accept(input, output);
+    }
+
+    private void mapSingle(final Row input, final AvecCommentaire output) {
+        final String comment = input.getString(fieldNames[0]);
         if (comment != null) {
+            output.setCommentaire(comment);
+        }
+    }
+
+    private void mapMultiple(final Row input, final AvecCommentaire output) {
+        final StringBuilder commentBuilder = new StringBuilder();
+
+        String comment = input.getString(fieldNames[0]);
+        if (comment != null) {
+            commentBuilder.append(comment);
+        }
+
+        for (int i = 1; i < fieldNames.length; i++) {
+            comment = input.getString(fieldNames[i]);
+            if (comment != null) {
+                commentBuilder.append(System.lineSeparator()).append(comment);
+            }
+        }
+
+        if (commentBuilder.length() > 0) {
             output.setCommentaire(comment);
         }
     }
@@ -38,11 +70,19 @@ public class CommentMapper extends AbstractMapper<AvecCommentaire> {
 
         @Override
         public Optional<Mapper<AvecCommentaire>> configureInput(Table inputType) {
+            final ArrayList<String> foundComments = new ArrayList<>(DEFAULT_FIELDS.length);
             for (final Column c : inputType.getColumns()) {
-                if (c.getName().toUpperCase().startsWith(STRUCTURE_FIELD)
-                        || c.getName().toUpperCase().startsWith(DEFAULT_FIELD)) {
-                    return Optional.of(new CommentMapper(inputType, c.getName()));
+                for (final String expected : DEFAULT_FIELDS) {
+                    if (c.getName().toUpperCase().startsWith(expected.toUpperCase())) {
+                        foundComments.add(c.getName());
+                    }
+                    if (foundComments.size() >= DEFAULT_FIELDS.length)
+                        break;
                 }
+            }
+
+            if (foundComments.size() > 0) {
+                return Optional.of(new CommentMapper(inputType, foundComments.toArray(new String[foundComments.size()])));
             }
             return Optional.empty();
         }
