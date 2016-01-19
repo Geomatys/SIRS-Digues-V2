@@ -129,6 +129,7 @@ public class BorneEditHandler extends AbstractNavigationHandler {
         dialog.setOnCloseRequest(new EventHandler() {
             @Override
             public void handle(Event event) {
+                editPane.save();
                 dialog.hide();
             }
         });
