@@ -757,6 +757,10 @@ public class TronconUtils {
         ArgumentChecks.ensureNonNull("Point to compute PR for", toGetPRFor);
         ArgumentChecks.ensureNonNull("Database connection", borneRepo);
 
+        if (targetSR.getSystemeReperageBornes().isEmpty()) {
+            return Float.NaN;
+        }
+
         final ProjectedPoint prjPt = projectReference(refLinear, toGetPRFor);
 
         final TreeMap<Double,SystemeReperageBorne> bornes = new TreeMap<>();
@@ -1249,6 +1253,14 @@ public class TronconUtils {
             final Point startPoint = getGeoPointStart();
             final Point endPoint = getGeoPointEnd();
 
+            final PosSR possr = new PosSR();
+            possr.srid = sr.getDocumentId();
+
+            // If given SR is empty, we return an empty position.
+            if (sr.getSystemeReperageBornes().isEmpty()) {
+                return possr;
+            }
+            
             final List<BorneDigue> bornes = new ArrayList<>();
             final List<Point> references = new ArrayList<>();
             for(SystemeReperageBorne srb : sr.systemeReperageBornes){
@@ -1260,24 +1272,19 @@ public class TronconUtils {
                 }
             }
 
-            final PosSR possr = new PosSR();
-            possr.srid = sr.getDocumentId();
-
             final Map.Entry<Integer, Double> startRef = computeRelative(getTronconSegments(false), references.toArray(new Point[0]), startPoint);
             final BorneDigue startBorne = bornes.get(startRef.getKey());
             possr.borneDigueStart = startBorne;
             possr.borneStartId = startBorne.getDocumentId();
-            possr.distanceStartBorne = startRef.getValue();
             possr.startAval = possr.distanceStartBorne < 0;
-            possr.distanceStartBorne = Math.abs(possr.distanceStartBorne);
+            possr.distanceStartBorne = Math.abs(startRef.getValue());
 
             final Map.Entry<Integer, Double> endRef = computeRelative(getTronconSegments(false), references.toArray(new Point[0]), endPoint);
             final BorneDigue endBorne = bornes.get(endRef.getKey());
             possr.borneDigueEnd = endBorne;
             possr.borneEndId = endBorne.getDocumentId();
-            possr.distanceEndBorne = endRef.getValue();
             possr.endAval = possr.distanceEndBorne < 0;
-            possr.distanceEndBorne = Math.abs(possr.distanceEndBorne);
+            possr.distanceEndBorne = Math.abs(endRef.getValue());
 
             return possr;
         }

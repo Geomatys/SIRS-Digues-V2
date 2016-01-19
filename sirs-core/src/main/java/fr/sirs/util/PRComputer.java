@@ -157,8 +157,8 @@ public class PRComputer extends Task<Boolean> {
             current.setPrDebut(TronconUtils.computePR(linear, sr, startPoint, borneRepo));
 
             final Point endPoint = position.getGeoPointEnd();
-            if (startPoint.equals(endPoint)) {
-                current.setPrFin(current.getPrFin());
+            if (endPoint == null || startPoint.equals(endPoint)) {
+                current.setPrFin(current.getPrDebut());
             } else {
                 current.setPrFin(TronconUtils.computePR(linear, sr, endPoint, borneRepo));
             }

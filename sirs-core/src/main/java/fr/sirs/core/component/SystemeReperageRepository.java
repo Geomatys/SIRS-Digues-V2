@@ -2,7 +2,6 @@
 
 package fr.sirs.core.component;
 
-import fr.sirs.core.InjectorCore;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
@@ -42,9 +41,8 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     }
 
     @Override
-    public SystemeReperage create(){
-        final SessionCore session = InjectorCore.getBean(SessionCore.class);
-        if(session!=null){
+    public SystemeReperage create() {
+        if (session!=null) {
             return session.getElementCreator().createElement(SystemeReperage.class);
         } else {
             throw new SirsCoreRuntimeException("Pas de session courante");
@@ -198,8 +196,10 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     /**
      * Cette contrainte s'assure que les bornes du systeme de reperage sont
      * dans la liste des bornes du troncon.
-     *
-     * @param entity
+     * Note : Cette méthode doit être appelée APRES la maj du SR en base.
+     * @param entity Le système de repérage mis à jour / ajouté.
+     * @param troncon Le troncon auquel appartient le SR.
+     * @param forceDefaultSR Forcer le SR en paramètre à devenir le SR par défaut du tronçon parent.
      */
     private void constraintBorneInTronconListBorne(SystemeReperage entity, TronconDigue troncon, final boolean forceDefaultSR) {
         final String tcId = entity.getLinearId();
@@ -236,8 +236,10 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
             needSave = true;
         }
 
-        if (needSave) {
+        if (needSave || entity.getId().equals(troncon.getSystemeRepDefautId())) {
             AbstractSIRSRepository repo = session.getRepositoryForClass(troncon.getClass());
+            if (repo instanceof AbstractTronconDigueRepository)
+                ((AbstractTronconDigueRepository) repo).registerForPRComputing(troncon);
             repo.update(troncon);
         }
     }
@@ -259,14 +261,13 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     private void updatePositionsForSR(final TronconDigue troncon, final SystemeReperage oldSR, final SystemeReperage newSR) {
 
         // We must update position of objects whose position was relative to the SR
-        final SessionCore session = InjectorCore.getBean(SessionCore.class);
         LinearReferencing.SegmentInfo[] tronconSegments = LinearReferencingUtilities.buildSegments(LinearReferencingUtilities.asLineString(troncon.getGeometry()));
         List<Positionable> positionableList = TronconUtils.getPositionableList(troncon);
         Iterator<Positionable> iterator = positionableList.iterator();
         while (iterator.hasNext()) {
             final Positionable p = iterator.next();
             if (oldSR.getId().equals(p.getSystemeRepId())) {
-                if (newSR != null) {
+                if (newSR != null && !newSR.getSystemeReperageBornes().isEmpty()) {
                     // We must update linear information.
                     final TronconUtils.PosInfo pInfo = new TronconUtils.PosInfo(p, troncon, tronconSegments);
                     TronconUtils.PosSR forSR = pInfo.getForSR(newSR);
@@ -306,20 +307,23 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
         }
 
         // TODO : analyse operation list and raise error if needed.
-        List<DocumentOperationResult> response = session.executeBulk((List)positionableList);
-        for (final DocumentOperationResult result : response) {
+        final List<DocumentOperationResult> response = session.executeBulk((List) positionableList);
+        if (!response.isEmpty()) {
             SirsCore.LOGGER.log(Level.WARNING, () -> {
-                final StringBuilder errorMsg = new StringBuilder("Position update failed");
-                errorMsg.append('\n')
-                        .append("Doc: ").append(result.getId())
-                        .append('\n')
-                        .append("Error: ").append(result.getError())
-                        .append('\n')
-                        .append("Reason: ").append(result.getReason());
+                final String sep = System.lineSeparator();
+                final StringBuilder errorMsg = new StringBuilder("Following position updates failed : ");
+                for (final DocumentOperationResult result : response) {
+                    errorMsg.append(sep)
+                            .append("Doc: ").append(result.getId())
+                            .append(sep)
+                            .append("Error: ").append(result.getError())
+                            .append(sep)
+                            .append("Reason: ").append(result.getReason())
+                            .append(sep).append(" ---- ");
+                }
                 return errorMsg.toString();
             });
         }
     }
-
 }
 
