@@ -1,6 +1,7 @@
 
 package fr.sirs;
 
+import fr.sirs.core.plugins.PluginLoader;
 import fr.sirs.theme.Theme;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +44,17 @@ public class Plugins {
             }
             REGISTERED_PLUGINS = Collections.unmodifiableMap(candidates);
         }
-        return REGISTERED_PLUGINS;
+
+        // If system class loader has not loaded plugins yet, we do not build a
+        // definitive list of available plugins.
+        final ClassLoader scl = ClassLoader.getSystemClassLoader();
+        if (scl instanceof PluginLoader && !((PluginLoader) scl).isLoaded()) {
+            final Map<String, Plugin> tmpCopy = REGISTERED_PLUGINS;
+            REGISTERED_PLUGINS = null;
+            return tmpCopy;
+        } else {
+            return REGISTERED_PLUGINS;
+        }
     }
     
     /**

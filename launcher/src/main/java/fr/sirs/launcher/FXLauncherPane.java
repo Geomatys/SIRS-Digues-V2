@@ -404,9 +404,11 @@ public class FXLauncherPane extends BorderPane {
         }));
 
         final Stage checkStage = new Stage(StageStyle.TRANSPARENT);
+        checkStage.setWidth(451);
         checkStage.initModality(Modality.APPLICATION_MODAL);
         checkStage.titleProperty().bind(modChecker.titleProperty());
         checkStage.setScene(new Scene(new FXLoadingPane(modChecker)));
+        checkStage.setResizable(true);
         checkStage.show();
 
         modChecker.runningProperty().addListener((obs, oldValue, newValue) -> {

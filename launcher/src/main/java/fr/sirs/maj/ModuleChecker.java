@@ -7,6 +7,7 @@ import fr.sirs.SIRS;
 import fr.sirs.core.ModuleDescription;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.component.DatabaseRegistry;
+import fr.sirs.core.plugins.PluginLoader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -105,11 +106,11 @@ public class ModuleChecker extends Task<Boolean> {
         final StringBuilder message = new StringBuilder("Les modules suivants requièrent une mise à jour de la base de donnée :");
         for (final Upgrade upgrade : upgrades) {
             final PluginInfo conf = upgrade.toUpgrade.getConfiguration();
-                message.append(System.lineSeparator()).append(upgrade.toUpgrade.getTitle())
+                message.append(System.lineSeparator()).append('\t').append(upgrade.toUpgrade.getTitle())
                         .append(" : mise à jour de ").append(upgrade.oldVersion.stringVersion)
                         .append(" vers ").append(conf.getVersionMajor()).append('.').append(conf.getVersionMinor());
         }
-        message.append(System.lineSeparator()).append("La mise à jour nécessite l'arrêt des synchronisations en cours sur la base. Confirmer ?");
+        message.append(System.lineSeparator()).append(System.lineSeparator()).append("La mise à jour nécessite l'arrêt des synchronisations en cours sur la base. Confirmer ?");
 
         final ButtonType result = SIRS.fxRunAndWait(() -> {
             final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, message.toString(), ButtonType.CANCEL, ButtonType.OK);
@@ -154,6 +155,12 @@ public class ModuleChecker extends Task<Boolean> {
      * It's an essential task, as it initializes most of checker's attributes.
      */
     private void analyzeModules() throws IOException {
+        // First, we ensure modules classes are ready for use.
+        final ClassLoader scl = ClassLoader.getSystemClassLoader();
+        if (scl instanceof PluginLoader) {
+            ((PluginLoader) scl).loadPlugins();
+        }
+
         synchronized (dbRegistry) {
             connector = dbRegistry.createConnector(dbName, DatabaseRegistry.DatabaseConnectionBehavior.FAIL_IF_NOT_EXISTS);
         }
