@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
@@ -34,9 +35,11 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -444,16 +447,63 @@ public class FXSystemeReperagePane extends BorderPane {
         cancelButton.setOnAction(event -> stage.hide());
         final Button deleteButton = new Button("Supprimer");
         deleteButton.disableProperty().bind(borneList.getSelectionModel().selectedItemProperty().isNull());
-        deleteButton.setOnAction(event -> {
-            final ObservableList<BorneDigue> selectedItems = borneList.getSelectionModel().getSelectedItems();
-            InjectorCore.getBean(BorneDigueRepository.class).remove(selectedItems.toArray(new BorneDigue[0]));
-            borneList.getItems().removeAll(selectedItems);
-        });
+
         final HBox buttonBar = new HBox(10, blankSpace, cancelButton, deleteButton);
         buttonBar.setPadding(new Insets(5));
+        buttonBar.setAlignment(Pos.CENTER_RIGHT);
+        final VBox content = new VBox(borneList, buttonBar);
 
-        stage.setScene(new Scene(new VBox(borneList, buttonBar)));
+        stage.setScene(new Scene(content));
+
+        deleteButton.setOnAction(event -> {
+            final BorneDigue[] selectedItems = borneList.getSelectionModel().getSelectedItems().toArray(new BorneDigue[0]);
+            if (checkBorneSuppression(selectedItems)) {
+                final TaskManager.MockTask deletor = new TaskManager.MockTask("Suppression de bornes", () -> {
+                    InjectorCore.getBean(BorneDigueRepository.class).remove(selectedItems);
+                });
+
+                deletor.setOnSucceeded(evt -> Platform.runLater(() -> borneList.getItems().removeAll(selectedItems)));
+                deletor.setOnFailed(evt -> Platform.runLater(() -> GeotkFX.newExceptionDialog("Une erreur est survenue lors de la suppression des bornes.", deletor.getException()).show()));
+                content.disableProperty().bind(deletor.runningProperty());
+
+                TaskManager.INSTANCE.submit(deletor);
+            }
+        });
+
         stage.show();
+    }
+
+    /**
+     * Detect if any available SR would be emptied if input {@link BorneDigue}s
+     * were deleted from database. If it's the case, we ask user to confirm his
+     * will to remove them.
+     * @param bornes Bornes to delete.
+     * @return True if we can proceed to borne deletion, false if not.
+     */
+    public boolean checkBorneSuppression(final BorneDigue... bornes) {
+        final HashSet<String> borneIds = new HashSet<>();
+        for (final BorneDigue bd : bornes) {
+            borneIds.add(bd.getId());
+        }
+
+        // Find all Sr which would be emptied by suppression of input bornes.
+        FilteredList<SystemeReperage> emptiedSrs = uiSrComboBox.getItems().filtered(sr
+                -> sr.systemeReperageBornes.filtered(srb -> !borneIds.contains(srb.getBorneId())).isEmpty()
+        );
+
+        if (emptiedSrs.isEmpty()) {
+            return true;
+        }
+
+        final StringBuilder msg = new StringBuilder("La suppression des bornes séléctionnées va entièrement vider les systèmes de repérage suivants :");
+        for (final SystemeReperage sr : emptiedSrs) {
+            msg.append(System.lineSeparator()).append(uiSrComboBox.getConverter().toString(sr));
+        }
+        msg.append(System.lineSeparator()).append("Voulez-vous tout-de-même supprimer ces bornes ?");
+
+        final Alert alert = new Alert(Alert.AlertType.WARNING, msg.toString(), ButtonType.NO, ButtonType.YES);
+        alert.setResizable(true);
+        return ButtonType.YES.equals(alert.showAndWait().orElse(ButtonType.NO));
     }
 
     /*
