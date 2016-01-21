@@ -30,9 +30,13 @@ import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.sql.CoreSqlHelper;
 import fr.sirs.core.model.sql.SQLHelper;
+import java.io.Closeable;
+import java.sql.PreparedStatement;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -81,7 +85,8 @@ public class H2Helper {
     /**
      * Export data from current CouchDB to an H2 dump. If dump have already been
      * performed yet, it will be erased and done a second time. However, only
-     * one export can be performed at a time, and returned task
+     * one export can be performed at a time, and if an export is already running,
+     * the returned task is the one being executed.
      *
      * @return The task in charge of export. Returned task is already submitted
      * for execution. As only one export can be performed at a time, the
@@ -282,6 +287,7 @@ public class H2Helper {
                 return false;
             }
 
+            updateMessage("Initialisation du module géo-spatial");
             final Connection conn = createConnection();
             try {
                 CreateSpatialExtension.initSpatialExtension(conn);
@@ -289,8 +295,6 @@ public class H2Helper {
                 try (final Statement stat = conn.createStatement()) {
                     stat.execute(create);
                 }
-
-                int srid = InjectorCore.getBean(SessionCore.class).getSrid();
 
                 conn.setAutoCommit(false);
 
@@ -300,7 +304,7 @@ public class H2Helper {
                 updateMessage("Création des tables et contraintes");
                 for (SQLHelper sqlHelper : sqlHelpers) {
                     if (sqlHelper != null) {
-                        sqlHelper.createTables(conn, srid);
+                        sqlHelper.createTables(conn, InjectorCore.getBean(SessionCore.class).getSrid());
                         sqlHelper.addForeignKeys(conn);
                     }
                 }
@@ -336,14 +340,28 @@ public class H2Helper {
                         }
 
                         updateProgress(currentProgress++, allDocIds.size());
-                        Optional<Element> element = DocHelper.toElement(currentRow.getDocAsNode());
+                        Optional<Element> element;
+                        try {
+                            element = DocHelper.toElement(currentRow.getDocAsNode());
+                        } catch (ClassNotFoundException e) {
+                            // Can occur if a plugin has been uninstalled, but related data still lies in database.
+                            SirsCore.LOGGER.log(Level.FINE, "An object cannot be exported due to its unknown type.", e);
+                            continue;
+                        }
+
                         if (element.isPresent()) {
+                            /* Do not stop after first SQL helper able to import
+                               given object, because tables are made for abstract
+                               class, so an element from a module inheriting a core
+                               class should be exported by these two helpers.
+                            */
                             for (final SQLHelper sqlHelper : sqlHelpers) {
                                 if (sqlHelper != null) {
                                     sqlHelper.insertElement(conn, element.get());
-                                    conn.commit();
                                 }
                             }
+
+                            conn.commit();
                         }
                     }
                 }
@@ -351,10 +369,64 @@ public class H2Helper {
                 conn.rollback();
                 throw e;
             } finally {
+                StatementPool.closeStatements(conn);
                 conn.close();
             }
 
             return true;
+        }
+    }
+
+    /**
+     * Keep a cache of used statements for each given connections.
+     * Note : used by model2sql classes.
+     */
+    public static class StatementPool {
+
+        private static final HashMap<Connection, StatementContainer> STATEMENTS = new HashMap<>(2);
+        
+        public static PreparedStatement getOrPrepareStatement(final Connection conn, final String sql) throws SQLException {
+            return STATEMENTS.computeIfAbsent(conn, (key) -> new StatementContainer(key))
+                    .getOrPrepareStatement(sql);
+        }
+
+        public static void closeStatements(final Connection holder) {
+            StatementContainer state = STATEMENTS.get(holder);
+            if (state != null)
+                state.close();
+        }
+    }
+
+    /**
+     * A cache of statements for a given connection.
+     */
+    private static class StatementContainer implements Closeable {
+
+        final Connection holder;
+
+        final HashMap<String, PreparedStatement> statements = new HashMap<>();
+        public StatementContainer(Connection holder) {
+            this.holder = holder;
+        }
+
+        public synchronized PreparedStatement getOrPrepareStatement(final String sql) throws SQLException {
+            PreparedStatement result = statements.get(sql);
+            if (result == null) {
+                result = holder.prepareStatement(sql);
+                statements.put(sql, result);
+            }
+            return result;
+        }
+
+        @Override
+        public void close() {
+            for (final PreparedStatement statement : statements.values()) {
+                try {
+                    statement.close();
+                } catch (SQLException ex) {
+                    SirsCore.LOGGER.log(Level.WARNING, "A statement cannot be closed", ex);
+                }
+            }
         }
     }
 }
