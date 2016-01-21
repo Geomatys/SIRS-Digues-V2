@@ -228,14 +228,13 @@ public class Loader extends Application {
         }, session.utilisateurProperty()));
 
         mainStage.setScene(mainScene);
-        mainStage.setMaximized(true);
         mainStage.setMinWidth(800);
         mainStage.setMinHeight(600);
+        mainStage.setMaximized(true);
         mainStage.setOnCloseRequest((WindowEvent event) -> {
             System.exit(0);
         });
 
-        mainStage.sizeToScene();
         mainStage.show();
         frame.getMapTab().show();
 
