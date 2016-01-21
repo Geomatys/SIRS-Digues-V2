@@ -2,7 +2,6 @@
 package fr.sirs.query;
 
 import fr.sirs.CorePlugin;
-import static fr.sirs.FXMainFrame.modelStage;
 import fr.sirs.Injector;
 import fr.sirs.Printable;
 import fr.sirs.SIRS;
@@ -26,6 +25,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -60,6 +62,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
@@ -101,6 +104,7 @@ import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.layer.FXFeatureTable;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
+import org.geotoolkit.jdbc.html.HtmlBuilder;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
@@ -124,13 +128,15 @@ public class FXSearchPane extends BorderPane {
     public static final Image ICON_CARTO   = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COMPASS,22,Color.WHITE),null);
     public static final Image ICON_REFRESH = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_REFRESH,22,Color.WHITE),null);
 
+    private static Path htmlIndex;
+
     @FXML private Button uiSave;
     @FXML private Button uiOpen;
     @FXML private Button uiOpenDefault;
     @FXML private Button uiQueryManagement;
     @FXML private Button uiExportModel;
     @FXML private Button uiRefreshModel;
-    @FXML private Button uiViewModel;
+    @FXML private MenuButton uiViewModel;
     @FXML private Button uiCarto;
     @FXML private Button uiCancel;
     @FXML private Label uiNbResults;
@@ -163,7 +169,6 @@ public class FXSearchPane extends BorderPane {
     //nom de la requete si affichage sur carte
     private String sqlLibelle;
     private FXSQLFilterEditor uiFilterEditor;
-
 
     private final Session session;
 
@@ -327,8 +332,21 @@ public class FXSearchPane extends BorderPane {
     }
 
     @FXML
-    private void viewDBModel(ActionEvent event) throws IOException {
-        modelStage().show();
+    private void openImageModel(ActionEvent event) throws IOException {
+        session.getFrame().openModel();
+    }
+
+    @FXML
+    private void openHTMLModel(ActionEvent event) {
+        TaskManager.INSTANCE.submit("Analyse du modèle", () -> {
+            if (htmlIndex == null) {
+                final HtmlBuilder htmlBuilder = new HtmlBuilder();
+                final Path tmpDir = Files.createTempDirectory("htmlSirs");
+                htmlIndex = htmlBuilder.setSource(h2Store.getDataSource().getConnection()).setSchema("PUBLIC").setOutput(tmpDir).build();
+            }
+
+            return htmlIndex.toUri().toURL();
+        }).setOnSucceeded(evt -> SIRS.browseURL((URL)evt.getSource().getValue(), "Modèle SQL"));
     }
 
     @FXML
@@ -591,12 +609,21 @@ public class FXSearchPane extends BorderPane {
         final ProgressBar progressBar = new ProgressBar();
         progressBar.setPrefWidth(300);
         final Label progressLabel = new Label();
-        final VBox vboxProgress = new VBox(progressLabel, progressBar);
+        final Button cancelBtn = new Button("Annuler");
+        final HBox bottom = new HBox(cancelBtn);
+        bottom.setAlignment(Pos.BOTTOM_RIGHT);
+        final VBox vboxProgress = new VBox(5, progressLabel, progressBar, cancelBtn);
         vboxProgress.setAlignment(Pos.CENTER);
 
         container.setCenter(vboxProgress);
+        progressStage.sizeToScene();
 
         final Task task = session.getH2Helper().export();
+        cancelBtn.setOnAction(evt -> {
+            task.cancel();
+            progressStage.close();
+        });
+
         progressLabel.textProperty().bind(task.messageProperty());
         progressBar.progressProperty().bind(task.progressProperty());
 
@@ -626,6 +653,7 @@ public class FXSearchPane extends BorderPane {
             setDisable(false);
             progressLabel.textProperty().unbind();
             progressLabel.setText("Le chargement de la base de donnée a été interrompu.");
+            cancelBtn.setText("fermer");
         }));
 
         task.setOnFailed(e -> Platform.runLater(() -> {

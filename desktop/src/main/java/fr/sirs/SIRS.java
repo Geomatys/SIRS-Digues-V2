@@ -459,7 +459,11 @@ public final class SIRS extends SirsCore {
     public static <T> T fxRun(final boolean wait, final Task<T> toRun) {
         if (Platform.isFxApplicationThread()) {
             toRun.run();
-            return toRun.getValue();
+            if (toRun.getException() != null) {
+                throw new SirsCoreRuntimeException(toRun.getException());
+            } else {
+                return toRun.getValue();
+            }
         } else {
             Platform.runLater(toRun);
             if (wait) {

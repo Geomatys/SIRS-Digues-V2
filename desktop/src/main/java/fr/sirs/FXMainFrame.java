@@ -19,6 +19,7 @@ import fr.sirs.ui.AlertManager;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.FXPreferenceEditor;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
@@ -96,6 +97,7 @@ public class FXMainFrame extends BorderPane {
     private static final String CSS_POPUP_ALERT_HIGHT = "popup-alert-hight";
     private static final String CSS_POPUP_ALERT_INFORMATION = "popup-alert-information";
 
+    private static WeakReference<Stage> MODEL_STAGE;
 
     private final Session session = Injector.getBean(Session.class);
     private final ResourceBundle bundle = ResourceBundle.getBundle(FXMainFrame.class.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
@@ -116,7 +118,6 @@ public class FXMainFrame extends BorderPane {
     private DiguesTab diguesTab;
     private FXFreeTab searchTab;
     private Stage prefEditor;
-
 
     public FXMainFrame() {
         SIRS.loadFXML(this, FXMainFrame.class);
@@ -481,33 +482,37 @@ public class FXMainFrame extends BorderPane {
      * @return
      * @throws IOException
      */
-    public static Stage modelStage() throws IOException{
+    public static Stage modelStage() throws IOException {
+        Stage stage = MODEL_STAGE == null? null : MODEL_STAGE.get();
+        if (stage == null) {
 
-        final Stage stage = new Stage();
-
-        final TabPane tabPane = new TabPane();
-
-        for(final Plugin p : Plugins.getPlugins()){
-            final Optional<Image> opt = p.getModelImage();
-            if(opt.isPresent()){
-
-                final ImageView imageView = new ImageView(opt.get());
-                final Tab tab = new Tab(p.getTitle().toString(), new ScrollPane(imageView));
-                tabPane.getTabs().add(tab);
+            final TabPane tabPane = new TabPane();
+            for (final Plugin p : Plugins.getPlugins()) {
+                final Optional<Image> opt = p.getModelImage();
+                if (opt.isPresent()) {
+                    final ImageView imageView = new ImageView(opt.get());
+                    final Tab tab = new Tab(p.getTitle().toString(), new ScrollPane(imageView));
+                    tabPane.getTabs().add(tab);
+                }
             }
+
+            stage = new Stage();
+
+            stage.getIcons().add(SIRS.ICON);
+            stage.setScene(new Scene(tabPane));
+            stage.setTitle("Modèle");
+            stage.setWidth(800);
+            stage.setHeight(600);
         }
 
-        stage.getIcons().add(SIRS.ICON);
-        stage.setScene(new Scene(tabPane));
-        stage.setTitle("Modèle");
-        stage.setWidth(800);
-        stage.setHeight(600);
         return stage;
     }
 
     @FXML
-    private void openModel() throws IOException {
-        modelStage().show();
+    public void openModel() throws IOException {
+        final Stage s = modelStage();
+        s.show();
+        s.requestFocus();
     }
 
     @FXML
