@@ -46,7 +46,7 @@ public class EmptySelectionItem  extends TreeMenuItem {
         
         if (layers.isEmpty()) return null;
         
-        final MenuItem item = new MenuItem("Supprimer le filtre de séléction", new ImageView(GeotkFX.ICON_UNLINK));
+        final MenuItem item = new MenuItem("Enlever la surbrillance", new ImageView(GeotkFX.ICON_UNLINK));
         item.setOnAction((ActionEvent e)-> {
             for (final CollectionMapLayer layer : layers) {
                 layer.setSelectionFilter(null);
@@ -63,7 +63,10 @@ public class EmptySelectionItem  extends TreeMenuItem {
     private static void findFeatureLayers(final List<? extends TreeItem> selected, final List<CollectionMapLayer> toKeep) {
         for (final TreeItem item : selected) {
             if (item.getValue() instanceof CollectionMapLayer) {
-                toKeep.add((CollectionMapLayer) item.getValue());
+                final CollectionMapLayer layer = (CollectionMapLayer) item.getValue();
+                if (layer.getSelectionFilter() != null) {
+                    toKeep.add((CollectionMapLayer) item.getValue());
+                }
             } else if (!item.isLeaf()) {
                 findFeatureLayers(item.getChildren(), toKeep);
             }
