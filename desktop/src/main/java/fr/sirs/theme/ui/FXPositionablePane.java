@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
+import java.util.prefs.Preferences;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -131,6 +132,14 @@ public class FXPositionablePane extends BorderPane {
                 if(posProperty.get()!=null){
                     posProperty.get().setGeometryMode(mode.getID());
                 }
+
+                final Preferences prefNode = Preferences.userNodeForPackage(FXPositionableMode.class);
+                prefNode.put("default", mode.getID());
+                try {
+                    prefNode.flush();
+                } catch (Exception e) {
+                    SIRS.LOGGER.log(Level.FINE, "Cannot flush user preferences for toggle selection.", e);
+                }
             }
         });
 
@@ -145,24 +154,23 @@ public class FXPositionablePane extends BorderPane {
         posProperty.addListener(new ChangeListener<Positionable>() {
             @Override
             public void changed(ObservableValue<? extends Positionable> observable, Positionable oldValue, Positionable newValue) {
-                if(oldValue!=null){
+                if (oldValue != null) {
                     oldValue.geometryProperty().removeListener(geomListener);
                 }
-                if(newValue!=null){
+                if (newValue != null) {
                     newValue.geometryProperty().addListener(geomListener);
 
                     //on active le mode dont le type correspond
-                    final String modeName = newValue.getGeometryMode();
+                    final String modeName = Preferences.userNodeForPackage(FXPositionableMode.class).get("default", null);
                     Toggle active = group.getToggles().get(0);
-                    for(Toggle t : group.getToggles()){
+                    for (Toggle t : group.getToggles()) {
                         final FXPositionableMode mode = (FXPositionableMode) t.getUserData();
-                        if(mode.getID().equalsIgnoreCase(modeName)){
+                        if (mode != null && mode.getID().equalsIgnoreCase(modeName)) {
                             active = t;
                             break;
                         }
                     }
                     group.selectToggle(active);
-
                 }
                 updateSRAndPRInfo();
             }
