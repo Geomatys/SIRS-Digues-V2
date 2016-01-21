@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -470,17 +471,25 @@ public class SirsCore {
                 }
             }).start();
         } else {
-            final WebView webView = new WebView();
-            final Stage infoStage = new Stage();
-            infoStage.getIcons().add(new Image(SirsCore.class.getResource("/fr/sirs/icon.png").toString()));
-            if (title != null)
-                infoStage.setTitle(title);
-            infoStage.setScene(new Scene(webView));
-            webView.getEngine().load(toBrowse.toExternalForm());
-            if (showAndWait)
-                infoStage.showAndWait();
-            else
-                infoStage.show();
+            final Runnable webUI = () -> {
+                final WebView webView = new WebView();
+                final Stage infoStage = new Stage();
+                infoStage.getIcons().add(new Image(SirsCore.class.getResource("/fr/sirs/icon.png").toString()));
+                if (title != null)
+                    infoStage.setTitle(title);
+                infoStage.setScene(new Scene(webView));
+                webView.getEngine().load(toBrowse.toExternalForm());
+                if (showAndWait)
+                    infoStage.showAndWait();
+                else
+                    infoStage.show();
+            };
+
+            if (Platform.isFxApplicationThread()) {
+                webUI.run();
+            } else {
+                Platform.runLater(webUI);
+            }
         }
     }
 
