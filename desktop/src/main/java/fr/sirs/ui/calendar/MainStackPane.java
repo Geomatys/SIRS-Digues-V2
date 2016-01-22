@@ -23,7 +23,7 @@ final class MainStackPane extends StackPane {
     private AnimatedStackPane monthView;
     private AnimatedStackPane yearView;
     private AnimatedStackPane decadesView;
-    private CalendarView calendarView;
+    private final CalendarView calendarView;
 
 
     public MainStackPane(final CalendarView calendarView) {

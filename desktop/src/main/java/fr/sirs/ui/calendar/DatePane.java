@@ -24,6 +24,8 @@ abstract class DatePane extends GridPane {
     protected DatePane(final CalendarView calendarView) {
         this.calendarView = calendarView;
 
+        setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        
         // When the date changed, update the days.
         calendarView.calendarDate.addListener(observable -> {
             updateContent();

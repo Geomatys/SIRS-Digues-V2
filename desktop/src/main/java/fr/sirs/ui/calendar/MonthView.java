@@ -4,7 +4,6 @@ import javafx.beans.Observable;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -12,25 +11,19 @@ import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
 import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+import javafx.geometry.VPos;
+import javafx.scene.layout.RowConstraints;
 
 /**
  * Responsible for displaying the days of a month.
@@ -152,16 +145,25 @@ final class MonthView extends DatePane {
                 final GridPane grid = new GridPane();
                 grid.setMaxWidth(Double.MAX_VALUE);
                 grid.setMaxHeight(Double.MAX_VALUE);
-
                 setVgrow(grid, Priority.ALWAYS);
                 setHgrow(grid, Priority.ALWAYS);
+                
+                // Prepare buttons style
+                grid.setMinSize(0, 0);
+                grid.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+                grid.getStyleClass().add(CSS_CALENDAR_DAY);
+                final ColumnConstraints eventColCstr = new ColumnConstraints(0, USE_COMPUTED_SIZE, Double.MAX_VALUE, Priority.ALWAYS, HPos.LEFT, true);
+                final ColumnConstraints labelColCstr = new ColumnConstraints(USE_PREF_SIZE, USE_COMPUTED_SIZE, Double.MAX_VALUE, Priority.ALWAYS, HPos.RIGHT, true);
+                final RowConstraints dayRowConstraints = new RowConstraints(20, USE_COMPUTED_SIZE, Double.MAX_VALUE, Priority.SOMETIMES, VPos.TOP, false);
+                final RowConstraints eventRowCstr = new RowConstraints(20, USE_COMPUTED_SIZE, Double.MAX_VALUE, Priority.ALWAYS, VPos.TOP, true);
+                grid.getColumnConstraints().addAll(eventColCstr, labelColCstr);
+                grid.getRowConstraints().addAll(dayRowConstraints, eventRowCstr);
+
                 //button.setOnAction(actionEvent -> calendarView.selectedDate.set((Date) button.getUserData()));
                 // add the button, starting at second row.
                 add(grid, colIndex + colOffset, rowIndex + 1);
             }
         }
-
-
     }
 
     /**
@@ -213,28 +215,13 @@ final class MonthView extends DatePane {
             calendar.add(Calendar.DAY_OF_MONTH, -1);
         }
 
-        // Prepare buttons style
-        final ColumnConstraints colLargeTxtEventCstr = new ColumnConstraints(0, USE_COMPUTED_SIZE, Double.MAX_VALUE, Priority.ALWAYS, HPos.LEFT, true);
-        final ColumnConstraints colSmallCstr = new ColumnConstraints(USE_PREF_SIZE, 20, USE_PREF_SIZE, Priority.NEVER, HPos.RIGHT, true);
-
         // Ignore the week day row and the week number column
         for (int i = numberOfDaysPerWeek + (calendarView.getShowWeeks() ? 1 : 0); i < getChildren().size(); i++) {
-            //final Date currentDate = calendar.getTime();
             if (i % (numberOfDaysPerWeek + 1) == 0 && (calendarView.getShowWeeks())) {
                 Label label = (Label) getChildren().get(i);
                 label.setText(Integer.toString(calendar.get(Calendar.WEEK_OF_YEAR)));
             } else {
                 final GridPane gridBtn = (GridPane) getChildren().get(i);
-                //control.setTooltip(new Tooltip(dateFormat.format(currentDate)));
-                gridBtn.setMinSize(0, 0);
-                gridBtn.setPrefWidth(150);
-                gridBtn.setPrefHeight(100);
-                gridBtn.setMaxWidth(Region.USE_PREF_SIZE);
-                gridBtn.setMaxHeight(Region.USE_PREF_SIZE);
-                gridBtn.getStyleClass().add(CSS_CALENDAR_DAY);
-                gridBtn.getColumnConstraints().clear();
-                gridBtn.getColumnConstraints().add(colLargeTxtEventCstr);
-                gridBtn.getColumnConstraints().add(colSmallCstr);
 
                 gridBtn.getChildren().clear();
                 gridBtn.add(new Label(Integer.toString(calendar.get(Calendar.DAY_OF_MONTH))), 1, 0);

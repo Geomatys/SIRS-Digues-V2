@@ -30,6 +30,7 @@ import javafx.scene.layout.Priority;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import javafx.geometry.Insets;
 
 /**
  * Panneau regroupant les fonctionnalités de suivi de documents.
@@ -99,7 +100,12 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
         calendarView.getStylesheets().add(SIRS.CSS_PATH_CALENDAR);
         calendarView.setShowTodayButton(false);
         calendarView.getCalendar().setTime(new Date());
-        calendarTab.setContent(calendarView);
+        calendarView.setPadding(new Insets(20));
+        calendarView.setFillWidth(true);
+        calendarView.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        final BorderPane bp = new BorderPane(calendarView);
+        bp.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        calendarTab.setContent(bp);
 
         // Ajout des onglets
         tabPane.getTabs().add(obligationsTab);

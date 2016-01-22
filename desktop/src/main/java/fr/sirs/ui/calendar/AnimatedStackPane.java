@@ -25,7 +25,7 @@ final class AnimatedStackPane extends StackPane {
     private final static Double SLIDE_ANIMATION_DURATION = 0.7;
 
     public AnimatedStackPane(final DatePane actualPane, final DatePane animatePane) {
-
+        setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         // The first MonthView.
         this.animatePane = animatePane;
 

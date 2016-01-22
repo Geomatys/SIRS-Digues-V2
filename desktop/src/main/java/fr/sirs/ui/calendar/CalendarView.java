@@ -6,7 +6,6 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.Control;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -14,6 +13,7 @@ import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import javafx.scene.layout.Priority;
 
 /**
  * A calendar control
@@ -30,6 +30,8 @@ public class CalendarView extends VBox {
      * Calendar events to display on the calendar view.
      */
     private final ObservableList<CalendarEvent> calEvents = FXCollections.observableArrayList();
+
+    private HBox todayButtonBox;
 
     /**
      * Initializes a calendar with the default locale.
@@ -52,7 +54,7 @@ public class CalendarView extends VBox {
 
         // When the locale changes, also change the calendar.
         this.locale.addListener(observable -> {
-            calendar.set(Calendar.getInstance(localeProperty().get()));
+            calendar.set(Calendar.getInstance(this.locale.get()));
         });
     }
 
@@ -75,8 +77,6 @@ public class CalendarView extends VBox {
 
         getStyleClass().add(CSS_CALENDAR);
 
-        setMaxWidth(Control.USE_PREF_SIZE);
-
         currentlyViewing.set(Calendar.MONTH);
 
         calendarDate.addListener(observable -> {
@@ -91,6 +91,8 @@ public class CalendarView extends VBox {
             calendarDate.set(date);
         });
         MainStackPane mainStackPane = new MainStackPane(this);
+        mainStackPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        VBox.setVgrow(mainStackPane, Priority.ALWAYS);
         //VBox.setVgrow(mainStackPane, Priority.ALWAYS);
         mainNavigationPane = new MainNavigationPane(this);
 
@@ -101,7 +103,7 @@ public class CalendarView extends VBox {
         todayButton.textProperty().bind(todayButtonText);
         todayButton.getStyleClass().add(CSS_CALENDAR_TODAY_BUTTON);
         todayButton.setOnAction(actionEvent -> {
-            Calendar calendar1 = calendarProperty().get();
+            Calendar calendar1 = this.calendar.get();
             calendar1.setTime(new Date());
             calendar1.set(Calendar.HOUR_OF_DAY, 0);
             calendar1.set(Calendar.MINUTE, 0);
@@ -125,9 +127,6 @@ public class CalendarView extends VBox {
 
     }
 
-    private HBox todayButtonBox;
-
-
     /**
      * Gets or sets the locale.
      *
@@ -137,7 +136,7 @@ public class CalendarView extends VBox {
         return locale;
     }
 
-    private ObjectProperty<Locale> locale = new SimpleObjectProperty<Locale>();
+    private final ObjectProperty<Locale> locale = new SimpleObjectProperty<>();
 
     public Locale getLocale() {
         return locale.get();
@@ -157,7 +156,7 @@ public class CalendarView extends VBox {
         return calendar;
     }
 
-    private ObjectProperty<Calendar> calendar = new SimpleObjectProperty<Calendar>();
+    private final ObjectProperty<Calendar> calendar = new SimpleObjectProperty<>();
 
     public Calendar getCalendar() {
         return calendar.get();
@@ -178,8 +177,7 @@ public class CalendarView extends VBox {
         return disabledWeekdays;
     }
 
-    private ObservableList<Integer> disabledWeekdays = FXCollections.observableArrayList();
-
+    private final ObservableList<Integer> disabledWeekdays = FXCollections.observableArrayList();
 
     /**
      * Gets the list of disabled dates.
@@ -191,7 +189,7 @@ public class CalendarView extends VBox {
         return disabledDates;
     }
 
-    private ObservableList<Date> disabledDates = FXCollections.observableArrayList();
+    private final ObservableList<Date> disabledDates = FXCollections.observableArrayList();
 
 
     /**
@@ -203,7 +201,7 @@ public class CalendarView extends VBox {
         return selectedDate;
     }
 
-    private ObjectProperty<Date> currentDate = new SimpleObjectProperty<Date>();
+    private final ObjectProperty<Date> currentDate = new SimpleObjectProperty<>();
 
     public ObjectProperty<Date> currentDateProperty() {
         return currentDate;
@@ -219,7 +217,7 @@ public class CalendarView extends VBox {
         return showTodayButton;
     }
 
-    private BooleanProperty showTodayButton = new SimpleBooleanProperty();
+    private final BooleanProperty showTodayButton = new SimpleBooleanProperty();
 
     public boolean getShowTodayButton() {
         return showTodayButton.get();
@@ -238,7 +236,7 @@ public class CalendarView extends VBox {
         return todayButtonText;
     }
 
-    private StringProperty todayButtonText = new SimpleStringProperty("Today");
+    private final StringProperty todayButtonText = new SimpleStringProperty("Today");
 
     public String getTodayButtonText() {
         return todayButtonText.get();
@@ -258,7 +256,7 @@ public class CalendarView extends VBox {
         return showWeeks;
     }
 
-    private BooleanProperty showWeeks = new SimpleBooleanProperty(false);
+    private final BooleanProperty showWeeks = new SimpleBooleanProperty(false);
 
     public boolean getShowWeeks() {
         return showWeeks.get();
