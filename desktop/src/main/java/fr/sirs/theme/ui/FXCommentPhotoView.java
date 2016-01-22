@@ -74,9 +74,14 @@ public class FXCommentPhotoView extends SplitPane {
     }
 
     private void elementSet(ObservableValue<? extends Element> observable, Element oldValue, Element newValue) {
+        final String comment;
         if (newValue instanceof AvecCommentaire) {
-            uiCommentArea.getEngine().loadContent(((AvecCommentaire)newValue).getCommentaire());
+            comment = ((AvecCommentaire)newValue).getCommentaire();
+        } else {
+            comment = null;
         }
+
+        uiCommentArea.getEngine().loadContent(comment == null? "" : comment);
 
         final ArrayList<AbstractPhoto> tmpPhotos = new ArrayList<>();
         if (newValue instanceof AvecPhotos) {
