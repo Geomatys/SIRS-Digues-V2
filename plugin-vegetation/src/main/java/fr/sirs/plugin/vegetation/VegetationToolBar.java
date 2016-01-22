@@ -23,7 +23,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
@@ -59,6 +58,7 @@ public class VegetationToolBar extends ToolBar {
         getItems().add(new Label("Végétation"));
 
         final Button buttonParcelle = new Button(null, new ImageView(GeotkFX.ICON_EDIT));
+        buttonParcelle.disableProperty().bind(Injector.getSession().geometryEditionProperty().not());
         buttonParcelle.setTooltip(new Tooltip("Outil d'édition de végétation"));
         buttonParcelle.getStyleClass().add(LEFT);
         buttonParcelle.setOnAction(new EventHandler<ActionEvent>() {
@@ -75,7 +75,7 @@ public class VegetationToolBar extends ToolBar {
 
         final Button recherche = new Button(null, new ImageView(SwingFXUtils.toFXImage(IconBuilder.createImage(
                 FontAwesomeIcons.ICON_GEARS_ALIAS,16,FontAwesomeIcons.DEFAULT_COLOR),null)));
-        recherche.setTooltip(new Tooltip("Analyze de la végétation"));
+        recherche.setTooltip(new Tooltip("Analyse de la végétation"));
         recherche.setOnAction(this::showSearchDialog);
         recherche.getStyleClass().add(RIGHT);
 

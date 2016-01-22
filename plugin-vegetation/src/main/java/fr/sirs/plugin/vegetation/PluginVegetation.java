@@ -107,7 +107,7 @@ public class PluginVegetation extends Plugin {
     public static final String DEFAULT_PEUPLEMENT_VEGETATION_TYPE = "RefTypePeuplementVegetation:99";
     public static final String DEFAULT_INVASIVE_VEGETATION_TYPE = "RefTypeInvasiveVegetation:99";
 
-    private final VegetationToolBar toolbar = new VegetationToolBar();
+    private VegetationToolBar toolbar;
 
     private static ObservableList<Class<? extends ZoneVegetation>> ZONE_TYPES;
 
@@ -137,6 +137,8 @@ public class PluginVegetation extends Plugin {
         });
 
         updatePlanLayers(VegetationSession.INSTANCE.planProperty().get());
+
+        toolbar = new VegetationToolBar();
     }
 
     @Override
