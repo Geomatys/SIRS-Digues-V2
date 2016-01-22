@@ -13,7 +13,6 @@ import fr.sirs.core.model.RefFrequenceObligationReglementaire;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
-import org.ektorp.support.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,10 +25,7 @@ import java.util.List;
  * @author Olivier Nouguier (Geomatys)
  * @author Alexis Manin     (Geomatys)
  */
-@Views({
-        @View(name = "all", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.PlanificationObligationReglementaire') {emit(doc._id, doc._id)}}"),
-        @View(name = PlanificationObligationReglementaireRepository.PLANIFS_FOR_ETAPE, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.PlanificationObligationReglementaire') {emit(doc.etapeId, doc._id)}}")
-})
+@View(name = PlanificationObligationReglementaireRepository.PLANIFS_FOR_ETAPE, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.PlanificationObligationReglementaire') {emit(doc.etapeId, doc._id)}}")
 @Component("fr.sirs.core.component.PlanificationObligationReglementaireRepository")
 public class PlanificationObligationReglementaireRepository extends AbstractSIRSRepository<PlanificationObligationReglementaire> {
     /**

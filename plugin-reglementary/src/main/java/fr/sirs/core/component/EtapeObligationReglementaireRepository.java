@@ -7,13 +7,11 @@ import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.model.EtapeObligationReglementaire;
 import fr.sirs.core.model.ObligationReglementaire;
-import fr.sirs.core.model.PlanificationObligationReglementaire;
 import fr.sirs.plugin.reglementaire.PluginReglementary;
 import fr.sirs.ui.AlertManager;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
-import org.ektorp.support.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,10 +23,7 @@ import java.util.List;
  * @author Olivier Nouguier (Geomatys)
  * @author Alexis Manin     (Geomatys)
  */
-@Views({
-        @View(name = "all", map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.EtapeObligationReglementaire') {emit(doc._id, doc._id)}}"),
-        @View(name = EtapeObligationReglementaireRepository.ETAPE_FOR_OBLIGATION, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.EtapeObligationReglementaire') {emit(doc.obligationReglementaireId, doc._id)}}")
-})
+@View(name = EtapeObligationReglementaireRepository.ETAPE_FOR_OBLIGATION, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.EtapeObligationReglementaire') {emit(doc.obligationReglementaireId, doc._id)}}")
 @Component("fr.sirs.core.component.EtapeObligationReglementaireRepository")
 public class EtapeObligationReglementaireRepository extends AbstractSIRSRepository<EtapeObligationReglementaire> {
     /**
