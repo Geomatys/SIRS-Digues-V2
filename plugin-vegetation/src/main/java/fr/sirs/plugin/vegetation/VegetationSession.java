@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.AbstractZoneVegetationRepository;
 import fr.sirs.core.component.ArbreVegetationRepository;
@@ -12,6 +13,7 @@ import fr.sirs.core.component.HerbaceeVegetationRepository;
 import fr.sirs.core.component.InvasiveVegetationRepository;
 import fr.sirs.core.component.ParcelleVegetationRepository;
 import fr.sirs.core.component.PeuplementVegetationRepository;
+import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.model.ArbreVegetation;
 import fr.sirs.core.model.HerbaceeVegetation;
 import fr.sirs.core.model.InvasiveVegetation;
@@ -38,7 +40,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.logging.Level;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -129,18 +133,30 @@ public final class VegetationSession {
         vegetationGroup = MapBuilder.createItem();
         vegetationGroup.setName("Végétation");
         vegetationGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
+        
+        final String dbUUID;
+        final Optional<SirsDBInfo> info = Injector.getBean(SirsDBInfoRepository.class).get();
+        if (info.isPresent()) {
+            dbUUID = info.get().getUuid();
+        } else {
+            dbUUID = null;
+        }
 
-        final String pid = Preferences.userNodeForPackage(VegetationSession.class).get(PLAN_GESTION_PREF_KEY, null);
-        if (pid != null && !pid.isEmpty()) {
-            try {
-                planProperty.set(planRepo.get(pid));
-            } catch (DocumentNotFoundException e) {
-                SirsCore.LOGGER.log(Level.WARNING, "Le plan de gestion par défaut ne peut être activé.", e);
+        final Preferences userPrefs = Preferences.userNodeForPackage(VegetationSession.class);
+
+        try {
+            if (userPrefs.nodeExists(dbUUID)) {
+                final String pid = userPrefs.node(dbUUID).get(PLAN_GESTION_PREF_KEY, null);
+                if (pid != null && !pid.isEmpty()) {
+                    planProperty.set(planRepo.get(pid));
+                }
             }
+        } catch (BackingStoreException | DocumentNotFoundException e) {
+            SirsCore.LOGGER.log(Level.WARNING, "Le plan de gestion par défaut ne peut être activé.", e);
         }
 
         planProperty.addListener((obs, oldValue, newValue) -> {
-            final Preferences node = Preferences.userNodeForPackage(VegetationSession.class);
+            final Preferences node = Preferences.userNodeForPackage(VegetationSession.class).node(dbUUID);
             if (newValue == null || newValue.getId() == null) {
                 node.remove(PLAN_GESTION_PREF_KEY);
             } else {
