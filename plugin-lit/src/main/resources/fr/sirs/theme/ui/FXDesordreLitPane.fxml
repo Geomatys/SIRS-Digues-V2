@@ -46,27 +46,6 @@
 <!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
 
 
-            <!-- DesordreLit -->
-            <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
-              <columnConstraints>
-                <ColumnConstraints hgrow="NEVER" />
-                <ColumnConstraints hgrow="ALWAYS" />
-              </columnConstraints>
-              <!--rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints-->
-              <children>
-                   <Label text="%typeDesordreLitId" GridPane.rowIndex="0" />
-                   <ComboBox fx:id="ui_typeDesordreLitId" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                   <Button fx:id="ui_typeDesordreLitId_link" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-
-              </children>
-              <padding>
-                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-              </padding>
-            </GridPane>
-
             <!-- Desordre -->
             <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
               <columnConstraints>
@@ -114,36 +93,20 @@
         </Tab>
 
 <!-- REFERENCE TABS -->
+        <Tab fx:id="ui_seuilIds" text="%seuilIds"/>
         <Tab fx:id="ui_observations" text="%observations"/>
         <Tab fx:id="ui_prestationIds" text="%prestationIds"/>
-        <Tab fx:id="ui_articleIds" text="%articleIds"/>
         <Tab fx:id="ui_evenementHydrauliqueIds" text="%evenementHydrauliqueIds"/>
-        <Tab fx:id="ui_seuilIds" text="%seuilIds"/>
-        
-        <Tab text="Ouvrages et réseaux associés">
-            <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-              <tabs>
-
-                <Tab fx:id="ui_reseauHydrauliqueCielOuvertIds" text="%reseauHydrauliqueCielOuvertIds"/>
-                <Tab fx:id="ui_reseauHydrauliqueFermeIds" text="%reseauHydrauliqueFermeIds"/>
-                <Tab fx:id="ui_ouvrageHydrauliqueAssocieIds" text="%ouvrageHydrauliqueAssocieIds"/>
-                <Tab fx:id="ui_reseauTelecomEnergieIds" text="%reseauTelecomEnergieIds"/>
-                <Tab fx:id="ui_ouvrageTelecomEnergieIds" text="%ouvrageTelecomEnergieIds"/>
-                <Tab fx:id="ui_ouvrageParticulierIds" text="%ouvrageParticulierIds"/>
-                <Tab fx:id="ui_echelleLimnimetriqueIds" text="%echelleLimnimetriqueIds"/>
-              </tabs>
-            </TabPane>
-        </Tab>
-        
-        <Tab text="Voiries associés">
-            <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-              <tabs>
-
-                <Tab fx:id="ui_voieDigueIds" text="%voieDigueIds"/>
-                <Tab fx:id="ui_ouvrageVoirieIds" text="%ouvrageVoirieIds"/>
-              </tabs>
-            </TabPane>
-        </Tab>
+        <Tab fx:id="ui_reseauHydrauliqueFermeIds" text="%reseauHydrauliqueFermeIds"/>
+        <Tab fx:id="ui_ouvrageHydrauliqueAssocieIds" text="%ouvrageHydrauliqueAssocieIds"/>
+        <Tab fx:id="ui_reseauTelecomEnergieIds" text="%reseauTelecomEnergieIds"/>
+        <Tab fx:id="ui_ouvrageTelecomEnergieIds" text="%ouvrageTelecomEnergieIds"/>
+        <Tab fx:id="ui_reseauHydrauliqueCielOuvertIds" text="%reseauHydrauliqueCielOuvertIds"/>
+        <Tab fx:id="ui_ouvrageParticulierIds" text="%ouvrageParticulierIds"/>
+        <Tab fx:id="ui_voieDigueIds" text="%voieDigueIds"/>
+        <Tab fx:id="ui_ouvrageVoirieIds" text="%ouvrageVoirieIds"/>
+        <Tab fx:id="ui_echelleLimnimetriqueIds" text="%echelleLimnimetriqueIds"/>
+        <Tab fx:id="ui_articleIds" text="%articleIds"/>
 
       </tabs>
     </TabPane>
