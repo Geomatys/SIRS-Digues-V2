@@ -256,11 +256,6 @@ public class FXMainFrame extends BorderPane {
         
         printableProperty.addListener(printListener);
         printListener.changed(printableProperty, null, printableProperty.get());
-
-        /*
-         * DEBUG
-        */
-        TaskManager.INSTANCE.submit(() -> {throw new IllegalArgumentException("toto");});
     }
 
     /**
