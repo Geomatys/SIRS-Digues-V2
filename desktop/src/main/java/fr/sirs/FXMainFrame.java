@@ -45,6 +45,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
@@ -56,6 +57,7 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ToggleButton;
@@ -125,8 +127,9 @@ public class FXMainFrame extends BorderPane {
 
     public FXMainFrame() {
         SIRS.loadFXML(this, FXMainFrame.class);
-
-        final ToolBar pm = new ToolBar(new ProgressMonitor(TaskManager.INSTANCE));
+        final ProgressMonitor progressMonitor = new ProgressMonitor(TaskManager.INSTANCE);
+        initProgressMonitor(progressMonitor);
+        final ToolBar pm = new ToolBar(progressMonitor);
         pm.prefHeightProperty().bind(uiMenu.heightProperty());
         ((HBox) uiMenu.getParent()).getChildren().add(pm);
 
@@ -253,6 +256,11 @@ public class FXMainFrame extends BorderPane {
         
         printableProperty.addListener(printListener);
         printListener.changed(printableProperty, null, printableProperty.get());
+
+        /*
+         * DEBUG
+        */
+        TaskManager.INSTANCE.submit(() -> {throw new IllegalArgumentException("toto");});
     }
 
     /**
@@ -333,6 +341,27 @@ public class FXMainFrame extends BorderPane {
             uiTabs.getTabs().add(tab);
         }
         uiTabs.getSelectionModel().select(tab);
+    }
+
+    /**
+     * HACK : Add an item in progress monitor list, allowing to clear list of
+     * tasks in error.
+     * @param pm Progress monitor to hack.
+     */
+    private void initProgressMonitor(ProgressMonitor pm) {
+        for (final Node n : pm.getChildren()) {
+            if (n instanceof MenuButton) {
+                final MenuButton menu = (MenuButton)n;
+                Node graphic = menu.getGraphic();
+                if (graphic instanceof ImageView && ((ImageView)graphic).getImage() == ProgressMonitor.ICON_ERROR) {
+                    final MenuItem clearList = new MenuItem("Vider la liste");
+                    clearList.setOnAction(evt -> TaskManager.INSTANCE.getTasksInError().clear());
+                    clearList.setGraphic(new ImageView(GeotkFX.ICON_DELETE));
+                    menu.getItems().add(0, clearList);
+                    menu.getItems().add(1, new SeparatorMenuItem());
+                }
+            }
+        }
     }
 
     private enum Choice{REFERENCE, MODEL};
