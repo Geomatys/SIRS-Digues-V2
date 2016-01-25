@@ -194,12 +194,13 @@ public class FXSearchPane extends BorderPane {
         uiToggleSimple.setToggleGroup(group);
         uiToggleSQL.setToggleGroup(group);
         uiToggleSQL.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-            if (newValue && needsSQLExportProperty.get()) {
-                showPopupForRDBMSExport(group);
-            } else {
-                connectToH2Store();
+            if (newValue) {
+                if (needsSQLExportProperty.get()) {
+                    showPopupForRDBMSExport(group);
+                } else {
+                    connectToH2Store();
+                }
             }
-
         });
         group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
             if (newValue == null) {
