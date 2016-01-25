@@ -19,7 +19,7 @@ import java.util.Map;
 @Component
 public class SirsDBInfoRepository {
 
-    private CouchDbConnector db;
+    private final CouchDbConnector db;
 
     @Autowired
     protected SirsDBInfoRepository(CouchDbConnector db) {

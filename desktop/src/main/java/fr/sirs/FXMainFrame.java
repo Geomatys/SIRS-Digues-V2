@@ -29,14 +29,16 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.IntegerBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -56,6 +58,7 @@ import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -64,10 +67,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
-import javafx.scene.transform.Transform;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.ProgressMonitor;
@@ -94,7 +97,7 @@ public class FXMainFrame extends BorderPane {
     private static final String CSS_POPUP_RAPPEL_TITLE = "popup-alerts-rappel-title";
     private static final String CSS_POPUP_ALERT = "popup-alert";
     private static final String CSS_POPUP_ALERT_NORMAL = "popup-alert-normal";
-    private static final String CSS_POPUP_ALERT_HIGHT = "popup-alert-hight";
+    private static final String CSS_POPUP_ALERT_HIGH = "popup-alert-high";
     private static final String CSS_POPUP_ALERT_INFORMATION = "popup-alert-information";
 
     private static WeakReference<Stage> MODEL_STAGE;
@@ -102,12 +105,13 @@ public class FXMainFrame extends BorderPane {
     private final Session session = Injector.getBean(Session.class);
     private final ResourceBundle bundle = ResourceBundle.getBundle(FXMainFrame.class.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
     private final Popup alertPopup = new Popup();
+    private final IntegerBinding numberOfAlerts;
     private final ObjectProperty<Plugin> activePlugin = new SimpleObjectProperty<>();
 
     @FXML private MenuButton uiThemesLocalized;
     @FXML private MenuButton uiThemesUnlocalized;
     @FXML private MenuButton uiPlugins;
-    @FXML private Button uiAlertsBtn;
+    @FXML private ToggleButton uiAlertsBtn;
     @FXML Button uiPrintButton;
     @FXML private ImageView uiPluginsImg;
     @FXML private ToolBar uiToolBarPlugins;
@@ -178,12 +182,41 @@ public class FXMainFrame extends BorderPane {
         }, session.utilisateurProperty()));
 
         final ObservableSet<AlertItem> alerts = AlertManager.getInstance().getAlerts();
-        uiAlertsBtn.setOnMouseClicked(event -> showAlertsPopup());
+        alerts.addListener((Observable obs) -> updateAlertPopupContent());
+        numberOfAlerts = Bindings.size(alerts);
+        numberOfAlerts.addListener(obs -> {
+            final int alertNumber = ((IntegerBinding)obs).get();
+            if (alertNumber < 1) {
+                uiAlertsBtn.setText("pas d'alerte");
+            } else if (alertNumber == 1) {
+                uiAlertsBtn.setText("1 alerte");
+            } else uiAlertsBtn.setText(new StringBuilder().append(alertNumber).append(" alertes").toString());
+        });
+        numberOfAlerts.invalidate();
+        
         uiAlertsBtn.setGraphic(new ImageView(ICON_ALERT));
-        alerts.addListener((SetChangeListener<AlertItem>) c -> uiAlertsBtn.setText(alerts.size() + " alerte(s)"));
-        uiAlertsBtn.setText(alerts.size() + " alerte(s)");
         uiAlertsBtn.managedProperty().bind(uiAlertsBtn.visibleProperty());
-        uiAlertsBtn.setVisible(AlertManager.getInstance().isAlertsEnabled());
+        uiAlertsBtn.visibleProperty().bind(AlertManager.getInstance().alertsEnabledProperty());
+
+        alertPopup.addEventHandler(WindowEvent.WINDOW_HIDING, evt -> uiAlertsBtn.setSelected(false));
+        uiAlertsBtn.selectedProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue && !alertPopup.isShowing()) {
+                showAlertPopup();
+            } else if (!newValue && alertPopup.isShowing()) {
+                alertPopup.hide();
+            }
+        });
+
+        alertPopup.getScene().setUserAgentStylesheet(SIRS.CSS_PATH);
+        alertPopup.setAutoHide(true);
+        alertPopup.setConsumeAutoHidingEvents(false);
+        // set alert popup to keep its position near alert button.
+        final InvalidationListener trListener = (obs) -> {
+            if (alertPopup.isShowing())
+                showAlertPopup();
+        };
+        uiAlertsBtn.localToSceneTransformProperty().addListener(trListener);
+        updateAlertPopupContent();
 
         SIRS.LOGGER.log(Level.FINE, org.apache.sis.setup.About.configuration().toString());
 
@@ -222,7 +255,10 @@ public class FXMainFrame extends BorderPane {
         printListener.changed(printableProperty, null, printableProperty.get());
     }
 
-    public void showAlertsPopup() {
+    /**
+     * Update content of the popup displaying alerts, using data from {@link AlertManager#getAlerts() }
+     */
+    public void updateAlertPopupContent() {
         final ObservableSet<AlertItem> alerts = AlertManager.getInstance().getAlerts();
         final VBox vbox = new VBox();
         vbox.getStyleClass().add(CSS_POPUP_ALERTS);
@@ -231,11 +267,17 @@ public class FXMainFrame extends BorderPane {
         for (final AlertItem alert : alerts) {
             final Label label = new Label(alert.getTitle());
             label.getStyleClass().add(CSS_POPUP_RAPPEL_TITLE);
-
-            final VBox alertBox = new VBox(label, new Label("Echéance " + alert.getDate().format(dfFormat)));
+            final Button closeAlert = new Button("x");
+            closeAlert.setCancelButton(true);
+            closeAlert.getStyleClass().add("btn-without-style");
+            closeAlert.setOnAction(evt -> alerts.remove(alert));
+            final HBox closeBox = new HBox(closeAlert);
+            closeBox.setAlignment(Pos.TOP_RIGHT);
+            
+            final VBox alertBox = new VBox(closeBox, label, new Label("Echéance " + alert.getDate().format(dfFormat)));
             alertBox.getStyleClass().add(CSS_POPUP_ALERT);
             if(alert.getLevel()== HIGH)
-                alertBox.getStyleClass().add(CSS_POPUP_ALERT_HIGHT);
+                alertBox.getStyleClass().add(CSS_POPUP_ALERT_HIGH);
             else if(alert.getLevel()==INFORMATION)
                 alertBox.getStyleClass().add(CSS_POPUP_ALERT_INFORMATION);
             else
@@ -243,26 +285,26 @@ public class FXMainFrame extends BorderPane {
             vbox.getChildren().add(alertBox);
         }
 
-        alertPopup.getContent().setAll(vbox);
-        alertPopup.setAutoHide(true);
-        alertPopup.setConsumeAutoHidingEvents(false);
+        if (alerts.size() > 0) {
+            final Button clearList = new Button("Vider la liste d'alertes");
+            clearList.setMaxWidth(Double.MAX_VALUE);
+            clearList.setAlignment(Pos.CENTER);
+            clearList.getStyleClass().add("buttonbar-button");
+            clearList.setOnAction(evt -> alerts.clear());
+            vbox.getChildren().add(clearList);
+        }
 
-        if (!alerts.isEmpty()) {
-            // If we've got content, we set alert popup to keep its position near alert button.
-            final ChangeListener<Transform> trListener = (observable, oldValue, newValue) -> {
-                if (alertPopup.isShowing()) {
-                    final Point2D popupPos = uiAlertsBtn.localToScreen(uiAlertsBtn.getWidth(), 0);
-                    alertPopup.show(uiAlertsBtn, popupPos.getX() - alertPopup.getWidth() - 5, popupPos.getY() - alertPopup.getHeight());
-                }
-            };
+        final ScrollPane scroll = new ScrollPane(vbox);
+        scroll.setMaxHeight(600);
+        alertPopup.getContent().setAll(scroll);
+        if (alertPopup.isShowing()) {
+            showAlertPopup(); // Force alert popup to stay near alert button.
+        }
+    }
 
-            uiAlertsBtn.localToSceneTransformProperty().addListener(trListener);
-            alertPopup.setOnHiding(evt -> {
-                uiAlertsBtn.localToSceneTransformProperty().removeListener(trListener);
-                alertPopup.setOnHiding(null);
-            });
-
-            final Point2D popupPos = uiAlertsBtn.localToScreen(uiAlertsBtn.getWidth(), 0);
+    public void showAlertPopup() {
+        final Point2D popupPos = uiAlertsBtn.localToScreen(uiAlertsBtn.getWidth(), 0);
+        if (popupPos != null) {
             alertPopup.show(uiAlertsBtn, popupPos.getX() - alertPopup.getWidth() - 5, popupPos.getY() - alertPopup.getHeight());
         }
     }

@@ -138,7 +138,7 @@
          <center>
             <HBox alignment="CENTER_RIGHT" styleClass="bottom-bar" BorderPane.alignment="CENTER">
                <children>
-                  <Button fx:id="uiAlertsBtn" mnemonicParsing="false" styleClass="buttonbar-button" text="alertes" />
+                  <ToggleButton fx:id="uiAlertsBtn" mnemonicParsing="false" styleClass="btn-without-style" text="alertes" />
                </children>
             </HBox>
          </center>

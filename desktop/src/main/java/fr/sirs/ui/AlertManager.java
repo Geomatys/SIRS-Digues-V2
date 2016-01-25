@@ -1,13 +1,13 @@
 package fr.sirs.ui;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.function.Predicate;
+import java.util.TreeSet;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 
 
 /**
@@ -16,18 +16,22 @@ import java.util.function.Predicate;
  * @author Cédric Briançon (Geomatys)
  */
 public class AlertManager {
+    
     /**
      * Liste des alertes à afficher.
      */
-    private final ObservableSet<AlertItem> alerts = FXCollections.observableSet(new HashSet<>());
+    private final ObservableSet<AlertItem> alerts = FXCollections.observableSet(new TreeSet<>());
 
     /**
      * Définit si les alertes doivent être affichées dans l'application ou non.
      */
-    private boolean alertsEnabled = false;
+    private final ReadOnlyBooleanWrapper alertsEnabled = new ReadOnlyBooleanWrapper();
+
     private static AlertManager manager = null;
 
-    private AlertManager() {}
+    private AlertManager() {
+        alertsEnabled.bind(Bindings.isNotEmpty(alerts));
+    }
 
     public static AlertManager getInstance() {
         if (manager == null) {
@@ -41,11 +45,16 @@ public class AlertManager {
     }
 
     public boolean isAlertsEnabled() {
-        return alertsEnabled;
+        return alertsEnabled.get();
     }
 
-    public void setAlertsEnabled(boolean alertsEnabled) {
-        this.alertsEnabled = alertsEnabled;
+    /**
+     *
+     * @return A read-only property indicating if alerts are currently present in this manager.
+     */
+    public ReadOnlyBooleanProperty alertsEnabledProperty() {
+        // return a read-only property to be sure user won't attempt to mess with its value.
+        return alertsEnabled.getReadOnlyProperty();
     }
 
     /**
@@ -54,7 +63,6 @@ public class AlertManager {
      * @param alerts Liste des alertes à afficher.
      */
     public void addAlerts(final Collection<AlertItem> alerts) {
-        manager.setAlertsEnabled(true);
         manager.getAlerts().addAll(alerts);
     }
 

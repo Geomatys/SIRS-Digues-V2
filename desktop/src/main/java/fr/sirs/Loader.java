@@ -238,7 +238,8 @@ public class Loader extends Application {
         mainStage.show();
         frame.getMapTab().show();
 
-        frame.showAlertsPopup();
+        // Display alerts on startup.
+        frame.showAlertPopup();
     }
 
     private final class LoadingTask extends Task {

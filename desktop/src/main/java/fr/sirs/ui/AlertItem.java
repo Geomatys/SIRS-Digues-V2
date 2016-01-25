@@ -8,7 +8,7 @@ import java.time.LocalDate;
  *
  * @author Cédric Briançon (Geomatys)
  */
-public class AlertItem {
+public class AlertItem implements Comparable<AlertItem> {
     /**
      * Titre de l'alerte.
      */
@@ -32,7 +32,17 @@ public class AlertItem {
     /**
      * Niveaux possibles d'alerte.
      */
-    public enum AlertItemLevel{HIGH, NORMAL, WARNING, INFORMATION}
+    public enum AlertItemLevel{
+        INFORMATION(0),
+        NORMAL(1),
+        WARNING(2),
+        HIGH(3);
+        
+        private final int priority;
+        private AlertItemLevel(final int priority) {
+            this.priority = priority;
+        }
+    }
 
     /**
      * Création d'une alerte.
@@ -95,5 +105,29 @@ public class AlertItem {
         result = 31 * result + (date != null ? date.hashCode() : 0);
         result = 31 * result + (level != null ? level.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public int compareTo(AlertItem o) {
+        if (o == null) return -1;
+
+        // First, sort by priority
+        int priority = level == null? 
+                (o.level == null? 0 : 1)
+                : o.level.priority - level.priority;
+        if (priority != 0)
+            return priority;
+
+        // then sort by date
+        priority = date == null?
+                (o.date == null? 0 : 1)
+                : date.compareTo(o.date);
+        if (priority != 0)
+            return priority;
+
+        // finally, sort by title
+        return title == null? 
+                (o.title == null? 0 : 1)
+                : title.compareTo(o.title);
     }
 }

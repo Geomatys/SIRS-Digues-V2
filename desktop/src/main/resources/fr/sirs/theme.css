@@ -47,6 +47,10 @@
     -fx-background-color:none;
 }
 
+.btn-without-style:selected {
+    -fx-blend-mode: DARKEN;
+}
+
 .btn-gray {
     -fx-background-color:none;
     -fx-border-color: #AAAAAA;
@@ -284,6 +288,7 @@
 }
 
 .popup-alerts {
+    -fx-background-color: lightgray;
     -fx-border-color: lightgray;
     -fx-border-width: 1px;
     -fx-background-radius: 5 5 0 0;
@@ -302,7 +307,7 @@
     -fx-background-color: #FF9966;
 }
 
-.popup-alert-hight {
+.popup-alert-high {
     -fx-background-color: #C65757;
 }
 
