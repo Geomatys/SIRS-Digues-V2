@@ -10,8 +10,6 @@ import fr.sirs.core.model.ObligationReglementaire;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.RefEcheanceRappelObligationReglementaire;
 import fr.sirs.core.model.RefTypeObligationReglementaire;
-import fr.sirs.core.model.sql.ReglementarySqlHelper;
-import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.ui.AlertItem;
 import fr.sirs.ui.AlertManager;
 import java.io.IOException;

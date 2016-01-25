@@ -26,8 +26,6 @@ import fr.sirs.core.model.RegimeEcoulementLit;
 import fr.sirs.core.model.SeuilLit;
 import fr.sirs.core.model.TronconLit;
 import fr.sirs.core.model.ZoneAtterrissementLit;
-import fr.sirs.core.model.sql.LitSqlHelper;
-import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.lit.map.LitToolBar;
 import fr.sirs.util.FXFreeTab;

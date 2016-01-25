@@ -16,8 +16,6 @@ import fr.sirs.core.model.CheminAccesDependance;
 import fr.sirs.core.model.DesordreDependance;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.OuvrageVoirieDependance;
-import fr.sirs.core.model.sql.DependanceSqlHelper;
-import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.dependance.map.DependanceToolBar;
 import java.io.IOException;

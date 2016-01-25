@@ -21,8 +21,7 @@ import org.springframework.stereotype.Component;
  */
 @Views ({
 @View(name=AbstractPositionDocumentRepository.BY_DOCUMENT_ID, map="function(doc) {if(doc['@class']=='fr.sirs.core.model.PositionConvention') {emit(doc.sirsdocument, doc._id)}}"),
-@View(name=PositionConventionRepository.BY_OBJET_ID, map="classpath:positionsConventionsByObjetId.js"),
-@View(name="all", map="function(doc) {if(doc['@class']=='fr.sirs.core.model.PositionConvention') {emit(doc._id, doc._id)}}")
+@View(name=PositionConventionRepository.BY_OBJET_ID, map="classpath:positionsConventionsByObjetId.js")
 })
 @Component("fr.sirs.core.component.PositionConventionRepository")
 public class PositionConventionRepository extends 

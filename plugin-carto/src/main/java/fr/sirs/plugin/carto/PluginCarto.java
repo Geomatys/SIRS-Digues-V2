@@ -1,7 +1,6 @@
 package fr.sirs.plugin.carto;
 
 import fr.sirs.Plugin;
-import fr.sirs.core.model.sql.SQLHelper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;

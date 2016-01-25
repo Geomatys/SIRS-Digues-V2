@@ -19,8 +19,6 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.PositionConvention;
-import fr.sirs.core.model.sql.AotCotSqlHelper;
-import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.ui.AlertItem;
 import fr.sirs.ui.AlertManager;

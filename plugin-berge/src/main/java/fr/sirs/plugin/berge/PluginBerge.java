@@ -20,8 +20,6 @@ import fr.sirs.core.model.SommetBerge;
 import fr.sirs.core.model.TalusBerge;
 import fr.sirs.core.model.TalusRisbermeBerge;
 import fr.sirs.core.model.TraitBerge;
-import fr.sirs.core.model.sql.BergeSqlHelper;
-import fr.sirs.core.model.sql.SQLHelper;
 import fr.sirs.map.FXMapPane;
 import fr.sirs.plugin.berge.map.BergeToolBar;
 import java.awt.Color;
