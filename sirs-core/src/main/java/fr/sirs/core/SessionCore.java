@@ -552,21 +552,29 @@ public class SessionCore implements ApplicationContextAware {
 
         if (toGetElementFor instanceof Preview) {
             final Preview summary = (Preview) toGetElementFor;
-            final AbstractSIRSRepository repository = getRepositoryForType(summary.getDocClass());
-            final Identifiable tmp = repository.get(summary.getDocId() == null? summary.getElementId() : summary.getDocId());
-            if (tmp instanceof Element) {
-                if (summary.getElementId() != null) {
-                    return Optional.of(((Element)tmp).getChildById(summary.getElementId()));
-                } else {
-                    return Optional.of((Element)tmp);
+            if (summary.getDocClass() != null) {
+                final AbstractSIRSRepository repository = getRepositoryForType(summary.getDocClass());
+                if (repository != null) {
+                    final Identifiable tmp = repository.get(summary.getDocId() == null ? summary.getElementId() : summary.getDocId());
+                    if (tmp instanceof Element) {
+                        if (summary.getElementId() != null) {
+                            return Optional.of(((Element) tmp).getChildById(summary.getElementId()));
+                        } else {
+                            return Optional.of((Element) tmp);
+                        }
+                    }
                 }
             }
         } else if (toGetElementFor instanceof ElementHit) {
             final ElementHit hit = (ElementHit) toGetElementFor;
-            final AbstractSIRSRepository repository = getRepositoryForType(hit.getElementClassName());
-            final Identifiable tmp = repository.get(hit.getDocumentId());
-            if (tmp instanceof Element) {
-                return Optional.of((Element)tmp);
+            if (hit.getElementClassName() != null) {
+                final AbstractSIRSRepository repository = getRepositoryForType(hit.getElementClassName());
+                if (repository != null) {
+                    final Identifiable tmp = repository.get(hit.getDocumentId());
+                    if (tmp instanceof Element) {
+                        return Optional.of((Element) tmp);
+                    }
+                }
             }
         }
         return Optional.empty();

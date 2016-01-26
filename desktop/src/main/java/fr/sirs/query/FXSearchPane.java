@@ -720,8 +720,11 @@ public class FXSearchPane extends BorderPane {
         final ObservableList<ElementHit> results = FXCollections.observableArrayList();
         final Iterator<SearchHit> ite = hits.iterator();
         while(ite.hasNext()){
-            final SearchHit hit = ite.next();
-            results.add(new ElementHit(hit));
+            final ElementHit hit = new ElementHit(ite.next());
+            // Add result only if we can reach element behind it.
+            if (hit.getElementClassName() != null && session.getRepositoryForType(hit.getElementClassName()) != null) {
+                results.add(hit);
+            }
         }
 
         final ObjectTable table = new ObjectTable(ElementHit.class, "Résultats");
