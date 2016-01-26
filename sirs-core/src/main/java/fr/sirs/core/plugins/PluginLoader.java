@@ -10,6 +10,8 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
+import org.geotoolkit.data.FeatureStoreFinder;
+import org.geotoolkit.storage.coverage.CoverageStoreFinder;
 
 /**
  * A custom class loader whose role is to load all plugin jars. To be effective, 
@@ -37,6 +39,9 @@ public class PluginLoader extends URLClassLoader {
         if (Files.isDirectory(SirsCore.PLUGINS_PATH)) {
             Files.walk(SirsCore.PLUGINS_PATH, FileVisitOption.FOLLOW_LINKS).filter(PluginLoader::isJar).map(PluginLoader::toURL).forEach(this::addURL);
             loaded = true;
+            
+            CoverageStoreFinder.scanForPlugins();
+            FeatureStoreFinder.scanForPlugins();
         }
     }
     
