@@ -17,7 +17,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -36,6 +36,7 @@ import javafx.scene.control.TreeView;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Popup;
+import org.apache.sis.util.ArgumentChecks;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -45,7 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class FXAbstractTronconTreePane extends SplitPane implements DocumentListener, Printable {
     
     @FXML protected Label uiTitle;
-    @FXML protected TreeView uiTree;
+    @FXML protected TreeView<? extends Element> uiTree;
     @FXML protected BorderPane uiRight;
     @FXML protected Button uiSearch;
     @FXML protected Button uiDelete;
@@ -70,14 +71,11 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
         uiTitle.setText(title);
         uiTree.setShowRoot(false);
 
-        uiTree.getSelectionModel().getSelectedIndices().addListener((ListChangeListener.Change c) -> {
-            Object obj = uiTree.getSelectionModel().getSelectedItem();
-            if (obj instanceof TreeItem) {
-                obj = ((TreeItem) obj).getValue();
-            }
-
-            if (obj instanceof Element) {
-                displayElement((Element) obj);
+        uiTree.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue == null || newValue.getValue() == null) {
+                uiRight.setCenter(null);
+            } else {
+                editElement(newValue.getValue());
             }
         });
 
@@ -113,7 +111,7 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
     }
 
     abstract public void deleteSelection(ActionEvent event);
-    abstract public void updateTree();
+    abstract public Task updateTree();
 
 
     @FXML
@@ -145,9 +143,66 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
      * @param obj L'élément à éditer.
      */
     public void displayElement(final Element obj) {
-        AbstractFXElementPane ctrl = SIRS.generateEditionPane(obj);
-        uiRight.setCenter(ctrl);
-        ctrl.requestFocus();
+        if (obj == null) return;
+        // If node selected in tree does not fit requested item, we'll update it.
+        final TreeItem<? extends Element> selectedItem = uiTree.getSelectionModel().getSelectedItem();
+        if (selectedItem == null || !obj.equals(selectedItem.getValue())) {
+            final Runnable search = () -> {
+                TreeItem found = searchItem(obj, uiTree.getRoot());
+                if (found != null) {
+                    uiTree.getSelectionModel().select(found);
+                }
+            };
+
+            if (uiTree.getRoot() == null)
+                updateTree().setOnSucceeded(evt -> SIRS.fxRun(false, search));
+        }
+    }
+
+    /**
+     * Recursive (depth-first) search in given tree item and its children.
+     * @param toSearch The element that must be contained by returned tree item.
+     * @param searchRoot A tree item to search into.
+     * @return A tree item whose value is queried element, null if we cannot find any.
+     */
+    private TreeItem searchItem(final Element toSearch, final TreeItem<? extends Element> searchRoot) {
+        if (searchRoot != null) {
+            if (toSearch.equals(searchRoot.getValue())) 
+                return searchRoot;
+            else for (final TreeItem<? extends Element> child : searchRoot.getChildren()) {
+                    final TreeItem result = searchItem(toSearch, child);
+                    if (result != null)
+                        return result;
+                }
+        }
+
+        return null;
+    }
+
+    /**
+     * Request focus on an editor for input parameter.
+     * @param obj The element to edit.
+     */
+    private void editElement(final Element obj) {
+        ArgumentChecks.ensureNonNull("Object to display", obj);
+        final Node n = uiRight.getCenter();
+        AbstractFXElementPane editor = null;
+        if (n instanceof AbstractFXElementPane) {
+            editor = (AbstractFXElementPane) n;
+            final Object element = editor.elementProperty().get();
+            if (element != null && element.getClass().equals(obj.getClass())) {
+                editor.setElement(obj);
+            } else {
+                editor = null;
+            }
+        }
+
+        if (editor == null) {
+            editor = SIRS.generateEditionPane(obj);
+            uiRight.setCenter(editor);
+        }
+
+        editor.requestFocus();
     }
 
     @Override

@@ -12,6 +12,7 @@ import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.Theme;
+import fr.sirs.util.SirsStringConverter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -36,6 +38,8 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
         Digue.class.getCanonicalName(),
         SystemeEndiguement.class.getCanonicalName()
     };
+
+    private final SirsStringConverter converter = new SirsStringConverter();
 
     private final Predicate<TronconDigue> searchedPredicate = (TronconDigue t) -> {
         final String str = currentSearch.get();
@@ -57,7 +61,7 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
 
     public FXDiguesPane() {
         super("Systèmes d'endiguement");
-        uiTree.setCellFactory((Object param) -> new CustomizedTreeCell());
+        uiTree.setCellFactory((param) -> new CustomizedTreeCell());
         uiAdd.getItems().add(new NewSystemeMenuItem(null));
         uiAdd.getItems().add(new NewDigueMenuItem(null));
         updateTree();
@@ -115,9 +119,8 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
     }
 
     @Override
-    public final void updateTree() {
-
-        Injector.getSession().getTaskManager().submit("Mise à jour de l'arbre des digues", () -> {
+    public final Task updateTree() {
+        return Injector.getSession().getTaskManager().submit("Mise à jour de l'arbre des digues", () -> {
             Platform.runLater(() -> uiSearch.setGraphic(searchRunning));
 
             //on stoque les noeuds ouverts
@@ -272,35 +275,29 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
 
         public CustomizedTreeCell() {
             addMenu = new ContextMenu();
+            setContextMenu(addMenu);
         }
 
         @Override
         protected void updateItem(Object obj, boolean empty) {
             super.updateItem(obj, empty);
-            setContextMenu(null);
+
+            addMenu.getItems().clear();
 
             if (obj instanceof TreeItem) {
                 obj = ((TreeItem) obj).getValue();
             }
 
-            if (obj instanceof SystemeEndiguement) {
-                this.setText(((SystemeEndiguement) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
-                addMenu.getItems().clear();
+            final boolean isSE = (obj instanceof SystemeEndiguement);
+            final boolean isDigue = obj instanceof Digue;
+            if (isSE || isDigue) {
+                this.setText(new StringBuilder(converter.toString(obj)).append(" (").append(getTreeItem().getChildren().size()).append(")").toString());
                 if(session.nonGeometryEditionProperty().get()){
-                    addMenu.getItems().add(new NewDigueMenuItem(getTreeItem()));
-                    setContextMenu(addMenu);
-                }
-            } else if (obj instanceof Digue) {
-                this.setText(((Digue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
-                addMenu.getItems().clear();
-                if(session.nonGeometryEditionProperty().get()){
-                    addMenu.getItems().add(new NewTronconMenuItem(getTreeItem()));
+                    addMenu.getItems().add(isSE? new NewDigueMenuItem(getTreeItem()) : new NewTronconMenuItem(getTreeItem()));
                     setContextMenu(addMenu);
                 }
             } else if (obj instanceof TronconDigue) {
-                this.setText(((TronconDigue) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
-                addMenu.getItems().clear();
-                setContextMenu(null);
+                this.setText(new StringBuilder(converter.toString(obj)).toString());
             } else if (obj instanceof Theme) {
                 setText(((Theme) obj).getName());
             } else if( obj instanceof String){

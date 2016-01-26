@@ -11,6 +11,7 @@ import fr.sirs.core.model.TronconLit;
 import fr.sirs.digue.FXAbstractTronconTreePane;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.Theme;
+import fr.sirs.util.SirsStringConverter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -39,6 +41,8 @@ public class SuiviLitPane extends FXAbstractTronconTreePane {
         Lit.class.getCanonicalName()
     };
 
+    private final SirsStringConverter converter = new SirsStringConverter();
+
     private final Predicate<TronconLit> searchedPredicate = (TronconLit t) -> {
         final String str = currentSearch.get();
         if (str != null && !str.isEmpty()) {
@@ -59,7 +63,7 @@ public class SuiviLitPane extends FXAbstractTronconTreePane {
 
     public SuiviLitPane() {
         super("Lits");
-        uiTree.setCellFactory((Object param) -> new CustomizedTreeCell());
+        uiTree.setCellFactory((param) -> new CustomizedTreeCell());
         uiAdd.getItems().add(new NewLitMenuItem(null));
         updateTree();
     }
@@ -103,9 +107,9 @@ public class SuiviLitPane extends FXAbstractTronconTreePane {
     }
 
     @Override
-    public final void updateTree() {
+    public final Task updateTree() {
 
-        Injector.getSession().getTaskManager().submit("Mise à jour de l'arbre des lits", () -> {
+        return Injector.getSession().getTaskManager().submit("Mise à jour de l'arbre des lits", () -> {
             Platform.runLater(() -> uiSearch.setGraphic(searchRunning));
 
             //on stoque les noeuds ouverts
@@ -235,14 +239,14 @@ public class SuiviLitPane extends FXAbstractTronconTreePane {
             }
 
             if (obj instanceof Lit) {
-                this.setText(((Lit) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
+                this.setText(new StringBuilder(converter.toString(obj)).append(" (").append(getTreeItem().getChildren().size()).append(")").toString());
                 addMenu.getItems().clear();
                 if(session.nonGeometryEditionProperty().get()){
                     addMenu.getItems().add(new NewTronconMenuItem(getTreeItem()));
                     setContextMenu(addMenu);
                 }
             } else if (obj instanceof TronconLit) {
-                this.setText(((TronconLit) obj).getLibelle() + " (" + getTreeItem().getChildren().size() + ") ");
+                this.setText(new StringBuilder(converter.toString(obj)).toString());
                 setContextMenu(null);
             } else if (obj instanceof Theme) {
                 setText(((Theme) obj).getName());
