@@ -166,34 +166,36 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             // IL FAUT ÉGALEMENT VÉRIFIER LES AUTRE OBJETS "CONTENUS" : POSITIONS DE DOCUMENTS, PHOTOS, PROPRIETAIRES ET GARDIENS
 
             if (newValue != null && !TronconUtils.getPositionableList(newValue).isEmpty()) {
-                final String s = maleGender ?  "ce " :  "cette ";
+                final String s = maleGender ? "ce " : "cette ";
                 final Alert alert = new Alert(Alert.AlertType.WARNING,
                         "Attention, " + s + typeName + " contient des données. Toute modification du tracé risque de changer leur position.", ButtonType.CANCEL, ButtonType.OK);
                 alert.setResizable(true);
                 final Optional<ButtonType> result = alert.showAndWait();
                 if (result.isPresent() && ButtonType.OK.equals(result.get())) {
                 } else {
-                    tronconProperty.set(null);
+                    tronconProperty.set(oldValue);
+                    return;
                 }
             }
 
             editGeometry.reset();
-            if (tronconProperty.get() != null) {
-                editGeometry.geometry.set((Geometry) tronconProperty.get().getGeometry().clone());
-            }
-            updateGeometry();
-
             if (newValue != null) {
+                final Geometry geom = (Geometry) newValue.getGeometry().clone();
+                JTS.setCRS(geom, session.getProjection());
+                editGeometry.geometry.set(geom);
                 selectionFilter = GO2Utilities.FILTER_FACTORY.id(
                         Collections.singleton(new DefaultFeatureId(newValue.getId())));
             } else {
                 selectionFilter = null;
             }
+
             if (Platform.isFxApplicationThread()) {
                 tronconLayer.setSelectionFilter(selectionFilter);
             } else {
                 Platform.runLater(() -> tronconLayer.setSelectionFilter(selectionFilter));
             }
+
+            updateGeometry();
         });
     }
 
@@ -266,9 +268,9 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
     }
 
     private void updateGeometry(){
-        if(editGeometry.geometry==null){
+        if (editGeometry.geometry == null) {
             geomlayer.getGeometries().clear();
-        }else{
+        } else {
             geomlayer.getGeometries().setAll(editGeometry.geometry.get());
         }
     }
