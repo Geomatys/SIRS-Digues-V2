@@ -39,8 +39,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -182,13 +182,7 @@ public class FXFeatureTable extends FXPropertyPane{
         this(bundleBaseNamePrefix, Locale.getDefault(), null);
     }
     
-    private ScrollPane initTable(){
-        final ScrollPane scroll = new ScrollPane(table);
-        scroll.setFitToHeight(true);
-        scroll.setFitToWidth(true);
-        scroll.setPrefSize(600, 400);
-        scroll.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        
+    private Node initTable(){
         table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         //listen to table selection
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -209,10 +203,8 @@ public class FXFeatureTable extends FXPropertyPane{
             }
         });
         
-        final Button loadButton = new Button("Load datas");
-        loadButton.setOnAction(this::loadData);
-        table.setPlaceholder(loadButton);
-        return scroll;
+        table.setPlaceholder(new Label("Aucune donnée"));
+        return table;
     }
     
     @Override
