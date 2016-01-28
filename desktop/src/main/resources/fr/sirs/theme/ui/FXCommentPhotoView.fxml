@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.web.*?>
@@ -9,36 +10,30 @@
 
 <fx:root dividerPositions="0.5" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" type="SplitPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
   <items>
-    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0">
+      <WebView fx:id="uiCommentArea" prefHeight="-1.0" prefWidth="-1.0" />
+      <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0">
          <children>
-            <WebView fx:id="uiCommentArea" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-         </children></AnchorPane>
-      <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0">
-         <top>
-            <VBox BorderPane.alignment="CENTER">
-               <children>
-                  <ScrollBar fx:id="uiPhotoScroll" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
-                  <Label fx:id="uiPhotoLibelle">
-                     <font>
-                        <Font name="System Italic" size="13.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="uiPhotoDate">
-                     <font>
-                        <Font name="System Italic" size="13.0" />
-                     </font>
-                  </Label>
-               </children>
-            </VBox>
-         </top>
-         <center>
-            <StackPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" BorderPane.alignment="CENTER">
+            <ScrollBar fx:id="uiPhotoScroll" maxWidth="1.7976931348623157E308" VBox.vgrow="NEVER" />
+            <Label fx:id="uiPhotoLibelle" VBox.vgrow="NEVER">
+               <font>
+                  <Font name="System Italic" size="13.0" />
+               </font>
+            </Label>
+            <Label fx:id="uiPhotoDate" VBox.vgrow="NEVER">
+               <font>
+                  <Font name="System Italic" size="13.0" />
+               </font>
+            </Label>
+            <StackPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" VBox.vgrow="ALWAYS">
                <children>
                   <ProgressIndicator fx:id="uiImageProgress" progress="0.0" visible="false" />
                   <ImageView fx:id="uiPhotoView" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" />
                </children>
             </StackPane>
-         </center>
-      </BorderPane>
+         </children>
+         <padding>
+            <Insets bottom="10.0" />
+         </padding>
+      </VBox>
   </items>
 </fx:root>

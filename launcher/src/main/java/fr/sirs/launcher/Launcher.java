@@ -5,7 +5,6 @@ import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCore.UpdateInfo;
 import static fr.sirs.core.SirsCore.browseURL;
-import fr.sirs.core.plugins.PluginLoader;
 import fr.sirs.core.authentication.SIRSAuthenticator;
 import fr.sirs.util.SystemProxySelector;
 
@@ -38,6 +37,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 
 /**
@@ -183,7 +183,7 @@ public class Launcher extends Application {
         initer.setOnCancelled((WorkerStateEvent event) -> {
             System.exit(0);
         });
-        new Thread(initer).start();
+        TaskManager.INSTANCE.submit(initer);
     }
 
     @Override

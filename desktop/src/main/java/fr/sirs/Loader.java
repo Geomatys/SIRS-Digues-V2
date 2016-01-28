@@ -73,7 +73,7 @@ public class Loader extends Application {
         // perform initialization and plugin loading tasks
         final Task initTask = new LoadingTask();
         showLoadingStage(initTask);
-        new Thread(initTask).start();
+        TaskManager.INSTANCE.submit(initTask);
     }
 
     public void showSplashStage() {
@@ -122,72 +122,68 @@ public class Loader extends Application {
         controller.uiConnexion.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                controller.uiConnexion.setDisable(true);
-                try {
-                    final Session session = Injector.getBean(Session.class);
-                    final UtilisateurRepository utilisateurRepository = (UtilisateurRepository) session.getRepositoryForClass(Utilisateur.class);
+                final Session session = Injector.getBean(Session.class);
+                final UtilisateurRepository utilisateurRepository = (UtilisateurRepository) session.getRepositoryForClass(Utilisateur.class);
 
-                    controller.uiLogInfo.setText("Recherche…");
-                    final List<Utilisateur> candidateUsers = utilisateurRepository.getByLogin(controller.uiLogin.getText());
+                controller.uiLogInfo.setText("Recherche…");
+                final List<Utilisateur> candidateUsers = utilisateurRepository.getByLogin(controller.uiLogin.getText());
 
-                    if (candidateUsers.isEmpty()) {
-                        controller.uiLogInfo.setText("Identifiants erronés.");
-                        controller.uiPassword.setText("");
-                        return;
+                if (candidateUsers.isEmpty()) {
+                    controller.uiLogInfo.setText("Identifiants erronés.");
+                    controller.uiPassword.setText("");
+                    return;
+                }
+
+                // Database passwords are encrypted, so we encrypt input password to compare both.
+                final String passwordText = controller.uiPassword.getText();
+                final String encryptedPassword;
+                if (passwordText == null || passwordText.isEmpty()) {
+                    encryptedPassword = null;
+                } else {
+                    encryptedPassword = hexaMD5(passwordText);
+                }
+
+                Utilisateur user = null;
+                for (final Utilisateur candidate : candidateUsers) {
+                    if (Objects.equals(encryptedPassword, candidate.getPassword())) {
+                        user = candidate;
+                        break;
                     }
+                }
 
-                    // Database passwords are encrypted, so we encrypt input password to compare both.
-                        final String passwordText = controller.uiPassword.getText();
-                        final String encryptedPassword;
-                        if (passwordText == null || passwordText.isEmpty()) {
-                            encryptedPassword = null;
-                        } else {
-                            encryptedPassword = hexaMD5(passwordText);
-                        }
+                if (user == null) {
+                    controller.uiLogInfo.setText("Identifiants erronés.");
+                    controller.uiPassword.setText("");
 
-                        Utilisateur user = null;
-                        for (final Utilisateur candidate : candidateUsers) {
-                            if (Objects.equals(encryptedPassword, candidate.getPassword())) {
-                                user = candidate;
-                                break;
-                            }
-                        }
-
-                    if (user == null) {
-                        controller.uiLogInfo.setText("Identifiants erronés.");
-                        controller.uiPassword.setText("");
-
-                    } else {
-                        session.setUtilisateur(user);
-                        controller.uiLogInfo.setText("Identifiants valides.");
-                        final FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), root);
-                        fadeSplash.setFromValue(1.0);
-                        fadeSplash.setToValue(0.0);
-                        fadeSplash.setOnFinished(new EventHandler<ActionEvent>() {
-                            @Override
-                            public void handle(ActionEvent actionEvent) {
-                                splashStage.hide();
-                                root.setOpacity(1.0);
+                } else {
+                    controller.uiConnexion.setDisable(true);
+                    session.setUtilisateur(user);
+                    controller.uiLogInfo.setText("Identifiants valides.");
+                    final FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), root);
+                    fadeSplash.setFromValue(1.0);
+                    fadeSplash.setToValue(0.0);
+                    fadeSplash.setOnFinished(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent actionEvent) {
+                            splashStage.hide();
+                            root.setOpacity(1.0);
+                            try {
+                                createMainStage();
+                            } catch (Throwable ex) {
                                 try {
-                                    createMainStage();
-                                } catch (Throwable ex) {
-                                    try {
-                                        SIRS.LOGGER.log(Level.WARNING, "Erreur inattendue lors de l'initialisation du panneau principal.", ex);
-                                        ExceptionDialog exDialog = GeotkFX.newExceptionDialog("L'application a rencontré une erreur inattendue et doit fermer.", ex);
-                                        exDialog.setOnHidden((DialogEvent de) -> System.exit(1));
-                                        exDialog.show();
+                                    SIRS.LOGGER.log(Level.WARNING, "Erreur inattendue lors de l'initialisation du panneau principal.", ex);
+                                    ExceptionDialog exDialog = GeotkFX.newExceptionDialog("L'application a rencontré une erreur inattendue et doit fermer.", ex);
+                                    exDialog.setOnHidden((DialogEvent de) -> System.exit(1));
+                                    exDialog.show();
 
-                                    } catch (Throwable e) {
-                                        SIRS.LOGGER.log(Level.WARNING, "Cannot show error dialog to user", e);
-                                        System.exit(1);
-                                    }
+                                } catch (Throwable e) {
+                                    SIRS.LOGGER.log(Level.WARNING, "Cannot show error dialog to user", e);
+                                    System.exit(1);
                                 }
                             }
-                        });
-                        fadeSplash.play();
-                    }
-                } finally {
-                    controller.uiConnexion.setDisable(false);
+                        }
+                    });
+                    fadeSplash.play();
                 }
             }
         });

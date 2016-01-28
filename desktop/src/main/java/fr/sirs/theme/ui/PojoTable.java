@@ -22,6 +22,7 @@ import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AbstractObservation;
 import fr.sirs.core.model.AvecBornesTemporelles;
@@ -74,6 +75,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -141,6 +143,7 @@ import jidefx.scene.control.field.NumberField;
 import org.apache.sis.feature.AbstractIdentifiedType;
 import org.apache.sis.feature.DefaultAssociationRole;
 import org.apache.sis.feature.DefaultAttributeType;
+import org.apache.sis.util.collection.Cache;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -179,6 +182,8 @@ public class PojoTable extends BorderPane implements Printable {
 
     private static final Callback<TableColumn.CellDataFeatures, ObservableValue> DEFAULT_VALUE_FACTORY = param -> new SimpleObjectProperty(param.getValue());
     private static final Predicate DEFAULT_VISIBLE_PREDICATE = o -> o != null;
+
+    private static final Cache<PropertyDescriptor, TableColumn> COLUMN_CACHE = new Cache<>(100, 0, false);
 
     protected static final String BUTTON_STYLE = "buttonbar-button";
     private static final Image ICON_SHOWONMAP = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GLOBE, 16, FontAwesomeIcons.DEFAULT_COLOR),null);
@@ -1198,8 +1203,9 @@ public class PojoTable extends BorderPane implements Printable {
      * Try to find and display a form to edit input object.
      * @param pojo The object we want to edit.
      */
-    protected void editPojo(Object pojo){
+    protected Object editPojo(Object pojo){
         editElement(pojo);
+        return pojo;
     }
 
     /**
@@ -1344,18 +1350,24 @@ public class PojoTable extends BorderPane implements Printable {
 
 
     public Optional<TableColumn> getPropertyColumn(final PropertyDescriptor desc) {
-        if (desc != null) {
-            final TableColumn col;
-            if (desc.getReadMethod().getReturnType().isEnum()) {
-                col = new EnumColumn(desc);
-            } else {
-                col = new PropertyColumn(desc);
-                col.sortableProperty().bind(importPointProperty.not());
-            }
-            col.setId(desc.getName());
-            return Optional.of(col);
+        if (desc == null)
+            return Optional.empty();
+
+        try {
+            return Optional.ofNullable(COLUMN_CACHE.getOrCreate(desc, () -> {
+                final TableColumn col;
+                if (desc.getReadMethod().getReturnType().isEnum()) {
+                    col = new EnumColumn(desc);
+                } else {
+                    col = new PropertyColumn(desc);
+                    col.sortableProperty().bind(importPointProperty.not());
+                }
+                col.setId(desc.getName());
+                return col;
+            }));
+        } catch (Exception e) {
+            throw new SirsCoreRuntimeException(e);
         }
-        return Optional.empty();
     }
 
     @Override
@@ -1799,7 +1811,7 @@ public class PojoTable extends BorderPane implements Printable {
 
     public static class EditColumn extends TableColumn {
 
-        public EditColumn(Consumer editFct) {
+        public EditColumn(Function editFct) {
             super("Edition");
             setSortable(false);
             setResizable(false);
@@ -1818,10 +1830,7 @@ public class PojoTable extends BorderPane implements Printable {
                 public TableCell call(TableColumn param) {
                     ButtonTableCell button = new ButtonTableCell(
                             false, new ImageView(SIRS.ICON_EDIT_BLACK),
-                            DEFAULT_VISIBLE_PREDICATE, (Object t) -> {
-                                editFct.accept(t);
-                                return t;
-                            });
+                            DEFAULT_VISIBLE_PREDICATE, editFct);
                     button.setTooltip(tooltip);
                     return button;
                 }
