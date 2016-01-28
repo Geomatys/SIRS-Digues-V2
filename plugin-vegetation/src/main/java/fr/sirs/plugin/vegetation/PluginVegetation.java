@@ -866,38 +866,38 @@ public class PluginVegetation extends Plugin {
      * @param typeVegetationId
      */
     public static <T extends ZoneVegetation> void paramTraitement(final Class<T> zoneType, final T peuplement, final String typeVegetationId){
+        final Session session = Injector.getSession();
 
         // 1- Récupération de la parcelle :
-        final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = Injector.getSession().getRepositoryForClass(ParcelleVegetation.class);
+        final AbstractSIRSRepository<ParcelleVegetation> parcelleRepo = session.getRepositoryForClass(ParcelleVegetation.class);
         if(parcelleRepo!=null){
             final ParcelleVegetation parcelle = parcelleRepo.get(peuplement.getParcelleId());
             if(parcelle!=null && parcelle.getPlanId()!=null){
 
                 // 2- Récupération du plan
-                final AbstractSIRSRepository<PlanVegetation> planRepo = Injector.getSession().getRepositoryForClass(PlanVegetation.class);
+                final AbstractSIRSRepository<PlanVegetation> planRepo = session.getRepositoryForClass(PlanVegetation.class);
                 if(planRepo!=null){
                     final PlanVegetation plan = planRepo.get(parcelle.getPlanId());
 
                     if(plan!=null){
 
+                        AbstractSIRSRepository<RefFrequenceTraitementVegetation> frequenceRepo = session.getRepositoryForClass(RefFrequenceTraitementVegetation.class);
                         // 3- Récupération des paramétrages de fréquences
                         final ObservableList<ParamFrequenceTraitementVegetation> params = plan.getParamFrequence();
                         boolean ponctuelSet=false, nonPonctuelSet=false;
-                        for(final ParamFrequenceTraitementVegetation param : params){
-
+                        for (final ParamFrequenceTraitementVegetation param : params) {
                             // On ne s'intéresse qu'aux paramètres relatifs au type de zone concerné.
-                            if(param.getType().equals(zoneType) && typeVegetationId.equals(param.getTypeVegetationId())){
-
-                                if(param.getPonctuel()){
+                            if (param.getFrequenceId() != null && param.getType().equals(zoneType) && typeVegetationId.equals(param.getTypeVegetationId())) {
+                                final RefFrequenceTraitementVegetation frequence = frequenceRepo.get(param.getFrequenceId());
+                                if (!ponctuelSet && frequence.getFrequence() <= 0) {
                                     peuplement.getTraitement().setTypeTraitementPonctuelId(param.getTypeTraitementId());
                                     peuplement.getTraitement().setSousTypeTraitementPonctuelId(param.getSousTypeTraitementId());
-                                    ponctuelSet=true;
-                                }
-                                else{
+                                    ponctuelSet = true;
+                                } else if (!nonPonctuelSet) {
                                     peuplement.getTraitement().setTypeTraitementId(param.getTypeTraitementId());
                                     peuplement.getTraitement().setSousTypeTraitementId(param.getSousTypeTraitementId());
                                     peuplement.getTraitement().setFrequenceId(param.getFrequenceId());
-                                    nonPonctuelSet=true;
+                                    nonPonctuelSet = true;
                                 }
                             }
 

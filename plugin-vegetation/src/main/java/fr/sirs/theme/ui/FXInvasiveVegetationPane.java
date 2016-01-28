@@ -1,6 +1,7 @@
 
 package fr.sirs.theme.ui;
 
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.InvasiveVegetation;
 import fr.sirs.core.model.Preview;
 import static fr.sirs.plugin.vegetation.PluginVegetation.paramTraitement;
@@ -17,14 +18,17 @@ public class FXInvasiveVegetationPane extends FXInvasiveVegetationPaneStub {
         super(invasiveVegetation);
 
         // Paramétrage du traitement lors du changement de type de peuplement
-        ui_typeVegetationId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Preview>() {
+        ui_typeVegetationId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
 
             @Override
-            public void changed(ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) {
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
                 final InvasiveVegetation invasive = elementProperty().get();
                 
-                if(invasive!=null && newValue!=null && newValue.getElementId()!=null){
-                    paramTraitement(InvasiveVegetation.class, invasive, newValue.getElementId());
+                if(invasive!=null && newValue!=null) {
+                    final String typeId = (newValue instanceof Element)? ((Element)newValue).getId() : (newValue instanceof Preview)? ((Preview)newValue).getElementId() : null ;
+                    if (typeId != null) {
+                        paramTraitement(InvasiveVegetation.class, invasive, typeId);
+                    }
                 }
             }
         });

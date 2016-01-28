@@ -290,7 +290,6 @@ public class FXPlanVegetationPane extends BorderPane {
         param.setTypeVegetationId(typeVegetationId);
         param.setTypeTraitementId(traitementId);
         param.setSousTypeTraitementId(sousTraitementId);
-        param.setPonctuel(ponctuel);
         return param;
     }
 
@@ -298,9 +297,7 @@ public class FXPlanVegetationPane extends BorderPane {
         if(!Objects.equals(p1.getType(), p2.getType())) return false;
         else if(!Objects.equals(p1.getTypeTraitementId(), p2.getTypeTraitementId())) return false;
         else if(!Objects.equals(p1.getSousTypeTraitementId(), p2.getSousTypeTraitementId())) return false;
-        else if(!Objects.equals(p1.getTypeVegetationId(), p2.getTypeVegetationId())) return false;
-        else if(p1.getPonctuel()!=p2.getPonctuel()) return false;
-        else return true;
+        else return (!Objects.equals(p1.getTypeVegetationId(), p2.getTypeVegetationId()));
     }
 
     private static ParamCoutTraitementVegetation toParamCout(final String traitementId, final String sousTraitementId){
@@ -324,14 +321,14 @@ public class FXPlanVegetationPane extends BorderPane {
         public ParamPojoTable(String title) {
             super(ParamFrequenceTraitementVegetation.class, title);
 
-                // On garde les classes de zones de végétation.
-                vegetationClasses = zoneVegetationClasses();
-                final TableColumn<ParamFrequenceTraitementVegetation, Class> classColumn = new TableColumn<>("Type de zone");
-                classColumn.setCellValueFactory( param -> {
-                    return ((ParamFrequenceTraitementVegetation) param.getValue()).typeProperty();
-                });
-                classColumn.setCellFactory( param -> new FXListTableCell<>(vegetationClasses, converter));
-                getTable().getColumns().add(3, (TableColumn) classColumn);
+            // On garde les classes de zones de végétation.
+            vegetationClasses = zoneVegetationClasses();
+            final TableColumn<ParamFrequenceTraitementVegetation, Class> classColumn = new TableColumn<>("Type de zone");
+            classColumn.setCellValueFactory(param -> {
+                return ((ParamFrequenceTraitementVegetation) param.getValue()).typeProperty();
+            });
+            classColumn.setCellFactory(param -> new FXListTableCell<>(vegetationClasses, converter));
+            getTable().getColumns().add(3, (TableColumn) classColumn);
         }
     }
 }

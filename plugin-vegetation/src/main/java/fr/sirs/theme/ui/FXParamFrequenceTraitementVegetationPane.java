@@ -33,19 +33,6 @@ public class FXParamFrequenceTraitementVegetationPane extends FXParamFrequenceTr
     public FXParamFrequenceTraitementVegetationPane(final ParamFrequenceTraitementVegetation paramFrequenceTraitementVegetation){
         super(paramFrequenceTraitementVegetation);
 
-        // On refait le binding de la liste déroulante des fréquences, pour ne l'activer que pour les paramétrages de traitements ponctuels.
-        ui_frequenceId.disableProperty().unbind();
-        ui_frequenceId.disableProperty().bind(disableFieldsProperty().or(ui_ponctuel.selectedProperty()));
-
-        // On met également un écouteur sur la case à cocher "ponctuel" de manière à annuler la valeur de la fréquence lorsqu'elle est sélectionnée.
-        ui_ponctuel.selectedProperty().addListener(new ChangeListener<Boolean>() {
-
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if(newValue) ui_frequenceId.getSelectionModel().select(null);
-            }
-        });
-
         ui_type.disableProperty().bind(disableFieldsProperty());
 
         ui_type.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Class<? extends ZoneVegetation>>() {
