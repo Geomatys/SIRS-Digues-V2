@@ -14,7 +14,6 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.index.ElementHit;
 import fr.sirs.map.ExportTask;
 import static fr.sirs.theme.ui.PojoTable.editElement;
-import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.property.Reference;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -50,7 +49,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -332,7 +330,7 @@ public class ObjectTable extends BorderPane {
             if (ref != null) {
                 //reference vers un autre objet
                 setEditable(false);
-                setCellFactory((TableColumn<Object, Object> param) -> new ReferenceTableCell(ref.ref()));
+                setCellFactory(SIRS.getOrCreateTableCellFactory(ref));
                 try {
                     final Method propertyAccessor = pojoClass.getMethod(desc.getName()+"Property");
                     setCellValueFactory((TableColumn.CellDataFeatures<Object, Object> param) -> {
@@ -344,11 +342,11 @@ public class ObjectTable extends BorderPane {
                         }
                     });
                 } catch (Exception ex) {
-                    setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
+                    setCellValueFactory(SIRS.getOrCreateCellValueFactory(desc.getName()));
                 }
 
             } else {
-                setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
+                setCellValueFactory(SIRS.getOrCreateCellValueFactory(desc.getName()));
                 setEditable(false);
             }
         }

@@ -913,12 +913,17 @@ public class CorePlugin extends Plugin {
 
     private class ViewFormItem extends MenuItem {
 
-        public ViewFormItem(Element candidate) {
-            setText(getSession().generateElementTitle(candidate));
+        private final Element candidate;
 
-            setOnAction((ActionEvent event) -> {
-                getSession().showEditionTab(candidate);
-            });
+        public ViewFormItem(Element candidate) {
+            this.candidate = candidate;
+            setText(Session.generateElementTitle(candidate));
+
+            setOnAction(this::showEditor);
+        }
+
+        private void showEditor(final ActionEvent evt) {
+            getSession().showEditionTab(candidate);
         }
     }
 

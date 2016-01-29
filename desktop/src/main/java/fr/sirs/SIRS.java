@@ -10,7 +10,9 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementContainerPane;
+import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.SirsStringConverter;
+import fr.sirs.util.property.Reference;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.io.File;
@@ -32,6 +34,7 @@ import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ModifiableObservableListBase;
@@ -43,11 +46,15 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
+import javafx.util.Callback;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.ArgumentChecks;
+import org.apache.sis.util.collection.Cache;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.geometry.jts.JTS;
@@ -121,6 +128,12 @@ public final class SIRS extends SirsCore {
 
     public static final String CSS_PATH = "/fr/sirs/theme.css";
     public static final String CSS_PATH_CALENDAR = "/fr/sirs/calendar.css";
+
+
+    private static final Cache<String, Callback<TableColumn.CellDataFeatures, ObservableValue>> CELL_VALUE_FACTORY = new Cache<>(50, 0, false);
+
+    /** Cache row factories for reference properties, preventing from creating a new one for each column. */
+    private static final Cache<Class, Callback<TableColumn, TableCell>> REF_CELL_FACTORIES = new Cache<>(50, 0, false);
 
     private static AbstractRestartableStage LAUNCHER;
     public static void setLauncher(AbstractRestartableStage currentWindow) {
@@ -552,6 +565,29 @@ public final class SIRS extends SirsCore {
                     col.setPrefWidth(prefWidth);
                 }
             }
+        }
+    }
+
+    /**
+     * Find a cell factory to handle given reference.
+     *
+     * @param ref Reference to the type being held in returned {@link ReferenceTableCell}.
+     * @return A {@link ReferenceTableCell}, got from cache or newly created. never null.
+     */
+    public static Callback getOrCreateTableCellFactory(final Reference ref) {
+        final Class refClass = ref.ref();
+        try {
+            return REF_CELL_FACTORIES.getOrCreate(refClass, () -> (TableColumn param) -> new ReferenceTableCell(ref.ref()));
+        } catch (Exception ex) {
+            throw new SirsCoreRuntimeException(ex);
+        }
+    }
+
+    public static Callback getOrCreateCellValueFactory(final String pName) {
+        try {
+            return CELL_VALUE_FACTORY.getOrCreate(pName, () -> (Callback) new PropertyValueFactory<>(pName));
+        } catch (Exception e) {
+            throw new SirsCoreRuntimeException(e);
         }
     }
 }

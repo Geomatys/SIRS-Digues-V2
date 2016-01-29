@@ -60,7 +60,7 @@ public class ModeleElementTable extends PojoTable {
     }
 
     @Override
-    protected void editPojo(Object pojo) {
+    protected Object editPojo(Object pojo) {
         if (editor == null) {
             editor = SIRS.generateEditionPane((Element)pojo);
             setRight(editor);
@@ -68,6 +68,8 @@ public class ModeleElementTable extends PojoTable {
         } else {
             editor.setElement((Element)pojo);
         }
+
+        return pojo;
     }
 
     private static class StateColumn extends TableColumn<ModeleElement, byte[]>{

@@ -354,6 +354,7 @@ public class FXMainFrame extends BorderPane {
                     clearList.setGraphic(new ImageView(GeotkFX.ICON_DELETE));
                     menu.getItems().add(0, clearList);
                     menu.getItems().add(1, new SeparatorMenuItem());
+                    break;
                 }
             }
         }

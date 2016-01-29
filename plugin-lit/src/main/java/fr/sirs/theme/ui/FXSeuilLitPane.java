@@ -670,12 +670,14 @@ public class FXSeuilLitPane  extends AbstractFXElementPane<SeuilLit> {
             }
         }
         // Manage opposite references for TronconDigue...
-        final List<String> currentTronconDigueIdsList = new ArrayList<>();
-        for(final Element elt : bergeIdsTable.getAllValues()){
-            final TronconDigue tronconDigue = (TronconDigue) elt;
-            currentTronconDigueIdsList.add(tronconDigue.getId());
+        if (bergeIdsTable != null) {
+            final List<String> currentTronconDigueIdsList = new ArrayList<>();
+            for (final Element elt : bergeIdsTable.getAllValues()) {
+                final TronconDigue tronconDigue = (TronconDigue) elt;
+                currentTronconDigueIdsList.add(tronconDigue.getId());
+            }
+            element.setBergeIds(currentTronconDigueIdsList);
         }
-        element.setBergeIds(currentTronconDigueIdsList);
 
         // Manage opposite references for Digue...
         final List<String> currentDigueIdsList = new ArrayList<>();

@@ -43,12 +43,17 @@ import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
+ * Display element attributes which are merely a relation to another element.
+ * We find what is the other element to display a title for it.
  *
+ * Note : implements {@link ChangeListener}, so we update graphic according to
+ * the text in the cell.
+ * 
  * @author Johann Sorel (Geomatys)
  * @author Alexis Manin (Geomatys)
  * @param <S>
  */
-public class ReferenceTableCell<S> extends FXTableCell<S, String> {
+public class ReferenceTableCell<S> extends FXTableCell<S, String> implements ChangeListener<String> {
 
     public static final Image ICON_LINK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_LINK,16,FontAwesomeIcons.DEFAULT_COLOR),null);
 
@@ -64,12 +69,6 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
     private final Class refClass;
     private final ComboBox editor = new ComboBox();
 
-    /**
-     * A simple listener which update graphics when input item label change.
-     */
-    private final ChangeListener<String> graphicUpdater;
-
-
     public ReferenceTableCell(final Class referenceClass) {
         ArgumentChecks.ensureNonNull("Reference class", referenceClass);
         refClass = referenceClass;
@@ -77,19 +76,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
         setContentDisplay(ContentDisplay.LEFT);
         setAlignment(Pos.CENTER_LEFT);
 
-        graphicUpdater = (ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
-            if (newValue == null) {
-                setGraphic(null);
-            } else {
-                setGraphic(new ImageView(ICON_LINK));
-                if (OBJECT_DELETED.equalsIgnoreCase(newValue)) {
-                    setTextFill(Color.RED);
-                } else {
-                    setTextFill(Color.BLACK);
-                }
-            }
-        };
-        textProperty().addListener(graphicUpdater);
+        textProperty().addListener(this);
 
         // Check if we're already listening on document update. If not, we register our listener.
         try {
@@ -245,6 +232,20 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> {
         final Session session = Injector.getSession();
         final Previews previews = session.getPreviews();
         return previews.get(elementId);
+    }
+
+    @Override
+    public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+        if (newValue == null) {
+            setGraphic(null);
+        } else {
+            setGraphic(new ImageView(ICON_LINK));
+            if (OBJECT_DELETED.equalsIgnoreCase(newValue)) {
+                setTextFill(Color.RED);
+            } else {
+                setTextFill(Color.BLACK);
+            }
+        }
     }
 
     /**

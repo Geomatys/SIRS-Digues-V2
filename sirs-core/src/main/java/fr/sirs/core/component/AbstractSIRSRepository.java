@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-import javax.annotation.PostConstruct;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
 import org.ektorp.BulkDeleteDocument;
@@ -67,10 +66,15 @@ import org.springframework.beans.factory.annotation.Autowired;
  * indentée, le deuxième éditeur a donc un tronçon avec un numéro de révision
  * correct.
  *
+ * NOTE : Pour éviter trop de requêtes et de calculs, on garde une réference vers
+ * la liste contenant tous les éléments de ce répertoire, dès lors que l'utilisateur
+ * l'a demandée. Pour garder cette liste à jour, on écoute les changements qui
+ * interviennent sur CouchDB.
+ *
  * @author Alexis Manin (Geomatys)
  * @param <T> The type of object managed by the current repository implementation.
  */
-public abstract class AbstractSIRSRepository<T extends Identifiable> extends CouchDbRepositorySupport<T> {
+public abstract class AbstractSIRSRepository<T extends Identifiable> extends CouchDbRepositorySupport<T> implements DocumentListener {
 
     protected final Cache<String, T> cache;
 
@@ -79,12 +83,6 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * while someone is already working with it.
      */
     private WeakReference<ObservableList<T>> all;
-
-    /**
-     * A listener to keep {@link #all} up to date over time. If we cannot register
-     * a listener, no cache of {@link #getAll() } will be done.
-     */
-    private DocumentListener allListener;
 
     @Autowired
     protected GlobalRepository globalRepo;
@@ -96,17 +94,10 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         cache = new Cache(20, 0, CacheRules.cacheElementsOfType(type));
     }
 
-
-    @PostConstruct
-    private void init() {
-        allStreaming = new StreamingViewIterable(globalRepo.createByClassQuery(type));
-    }
-
     @Autowired(required=false)
     private void initListener(final DocumentChangeEmiter changeEmiter) {
         if (changeEmiter != null) {
-            allListener = new AllCachedUpdater();
-            changeEmiter.addListener(allListener);
+            changeEmiter.addListener(this);
         }
     }
 
@@ -128,9 +119,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
             return all.get();
         } else {
             final ObservableList<T> cachedList = SirsCore.observableList(cacheList(globalRepo.getAllForClass(type)));
-            if (allListener != null) {
-                all = new WeakReference<>(cachedList);
-            }
+            all = new WeakReference<>(cachedList);
             return cachedList;
         }
     }
@@ -142,7 +131,10 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      *
      * Note : provided iteratorss are closeable.
      */
-    public StreamingIterable<T> getAllStreaming() {
+    public synchronized StreamingIterable<T> getAllStreaming() {
+        if (allStreaming == null) {
+            allStreaming = new StreamingViewIterable(globalRepo.createByClassQuery(type));
+        }
         return allStreaming;
     }
 
@@ -364,7 +356,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * @return
      */
     public T getOne(){
-        try (final CloseableIterator<T> it = allStreaming.iterator()) {
+        try (final CloseableIterator<T> it = getAllStreaming().iterator()) {
             if (it.hasNext()) {
                 return it.next();
             } else {
@@ -497,42 +489,38 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         }
     }
 
-    private class AllCachedUpdater implements DocumentListener {
-
-        @Override
-        public void documentCreated(Map<Class, List<Element>> added) {
-            final List<T> cached;
-            synchronized (this) {
-                cached = all == null? null : all.get();
-            }
-            if (cached != null) {
-                final List<T> created = (List<T>) added.get(getModelClass());
-                if (created != null) {
-                    cached.addAll(cacheList(created));
-                }
+    @Override
+    public void documentCreated(Map<Class, List<Element>> added) {
+        final List<T> cached;
+        synchronized (this) {
+            cached = all == null ? null : all.get();
+        }
+        if (cached != null) {
+            final List<T> created = (List<T>) added.get(getModelClass());
+            if (created != null) {
+                cached.addAll(cacheList(created));
             }
         }
+    }
 
-        @Override
-        public void documentChanged(Map<Class, List<Element>> changed) {
-            synchronized (this) {
-                all = null;
+    @Override
+    public void documentChanged(Map<Class, List<Element>> changed) {
+        synchronized (this) {
+            all = null;
+        }
+    }
+
+    @Override
+    public void documentDeleted(Map<Class, List<Element>> deletedObject) {
+        final List<T> cached;
+        synchronized (this) {
+            cached = all == null ? null : all.get();
+        }
+        if (cached != null) {
+            final List<T> deleted = (List<T>) deletedObject.get(getModelClass());
+            if (deleted != null) {
+                cached.removeAll(deleted);
             }
         }
-
-        @Override
-        public void documentDeleted(Map<Class, List<Element>> deletedObject) {
-            final List<T> cached;
-            synchronized (this) {
-                cached = all == null? null : all.get();
-            }
-            if (cached != null) {
-                final List<T> deleted = (List<T>) deletedObject.get(getModelClass());
-                if (deleted != null) {
-                    cached.removeAll(deleted);
-                }
-            }
-        }
-
     }
 }

@@ -22,7 +22,6 @@ import fr.sirs.Session;
 import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AbstractObservation;
 import fr.sirs.core.model.AvecBornesTemporelles;
@@ -47,7 +46,6 @@ import fr.sirs.theme.ui.PojoTablePointBindings.PRXYZBinding;
 import fr.sirs.theme.ui.PojoTablePointBindings.PRZBinding;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.FXReferenceEqualsOperator;
-import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.SEClassementEqualsOperator;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.odt.ODTUtils;
@@ -92,6 +90,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
@@ -119,12 +118,12 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -143,7 +142,6 @@ import jidefx.scene.control.field.NumberField;
 import org.apache.sis.feature.AbstractIdentifiedType;
 import org.apache.sis.feature.DefaultAssociationRole;
 import org.apache.sis.feature.DefaultAttributeType;
-import org.apache.sis.util.collection.Cache;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -183,8 +181,6 @@ public class PojoTable extends BorderPane implements Printable {
     private static final Callback<TableColumn.CellDataFeatures, ObservableValue> DEFAULT_VALUE_FACTORY = param -> new SimpleObjectProperty(param.getValue());
     private static final Predicate DEFAULT_VISIBLE_PREDICATE = o -> o != null;
 
-    private static final Cache<PropertyDescriptor, TableColumn> COLUMN_CACHE = new Cache<>(100, 0, false);
-
     protected static final String BUTTON_STYLE = "buttonbar-button";
     private static final Image ICON_SHOWONMAP = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GLOBE, 16, FontAwesomeIcons.DEFAULT_COLOR),null);
 
@@ -193,6 +189,9 @@ public class PojoTable extends BorderPane implements Printable {
         LONGITUDE_MAX_FIELD, LATITUDE_MIN_FIELD, LATITUDE_MAX_FIELD, DATE_MAJ_FIELD,
         COMMENTAIRE_FIELD, GEOMETRY_MODE_FIELD, REVISION_FIELD, ID_FIELD, NEW_FIELD
     };
+
+    /** Design rows for {@link Element} objects, making its look change according to {@link Element#validProperty() } */
+    private static final Callback<TableView<Element>, TableRow<Element>> ROW_FACTORY = (TableView<Element> param) ->  new ValidityRow();
 
     protected final Class pojoClass;
     protected final AbstractSIRSRepository repo;
@@ -302,7 +301,7 @@ public class PojoTable extends BorderPane implements Printable {
         if (pojoClass == null && repo == null) {
             throw new IllegalArgumentException("Pojo class to expose and Repository parameter are both null. At least one of them must be valid.");
         }
-
+        
         SIRS.setColumnResize(uiTable);
 
         setFocusTraversable(true);
@@ -340,22 +339,7 @@ public class PojoTable extends BorderPane implements Printable {
         uiImport.managedProperty().bind(uiImport.visibleProperty());
         uiExport.managedProperty().bind(uiExport.visibleProperty());
 
-        uiTable.setRowFactory((TableView<Element> param) ->  new TableRow<Element>() {
-
-            @Override
-            protected void updateItem(Element item, boolean empty) {
-                super.updateItem(item, empty);
-
-                if(item!=null && !item.getValid()){
-                    getStyleClass().add("invalidRow");
-                }
-                else{
-                    getStyleClass().removeAll("invalidRow");
-                }
-                disableProperty().unbind();
-                disableProperty().bind(itemProperty().isNull());
-            }
-        });
+        uiTable.setRowFactory(ROW_FACTORY);
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         /* We cannot bind visible properties of those columns, because TableView
@@ -1203,7 +1187,7 @@ public class PojoTable extends BorderPane implements Printable {
      * Try to find and display a form to edit input object.
      * @param pojo The object we want to edit.
      */
-    protected Object editPojo(Object pojo){
+    protected Object editPojo(Object pojo) {
         editElement(pojo);
         return pojo;
     }
@@ -1348,26 +1332,19 @@ public class PojoTable extends BorderPane implements Printable {
         return null;
     }
 
-
     public Optional<TableColumn> getPropertyColumn(final PropertyDescriptor desc) {
         if (desc == null)
             return Optional.empty();
 
-        try {
-            return Optional.ofNullable(COLUMN_CACHE.getOrCreate(desc, () -> {
-                final TableColumn col;
-                if (desc.getReadMethod().getReturnType().isEnum()) {
-                    col = new EnumColumn(desc);
-                } else {
-                    col = new PropertyColumn(desc);
-                    col.sortableProperty().bind(importPointProperty.not());
-                }
-                col.setId(desc.getName());
-                return col;
-            }));
-        } catch (Exception e) {
-            throw new SirsCoreRuntimeException(e);
+        final TableColumn col;
+        if (desc.getReadMethod().getReturnType().isEnum()) {
+            col = new EnumColumn(desc);
+        } else {
+            col = new PropertyColumn(desc);
+            col.sortableProperty().bind(importPointProperty.not());
         }
+        col.setId(desc.getName());
+        return Optional.of(col);
     }
 
     @Override
@@ -1464,7 +1441,7 @@ public class PojoTable extends BorderPane implements Printable {
         private EnumColumn(final PropertyDescriptor desc) {
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
             setEditable(false);
-            setCellValueFactory(new PropertyValueFactory<>(desc.getName()));
+            setCellValueFactory(SIRS.getOrCreateCellValueFactory(desc.getName()));
             setCellFactory((TableColumn<Element, Object> param) -> {
                 final TableCell<Element, Object> cell = new FXEnumTableCell(desc.getReadMethod().getReturnType(), new SirsStringConverter());
                 editableProperty().bind(cellEditableProperty);
@@ -1569,7 +1546,7 @@ public class PojoTable extends BorderPane implements Printable {
             this.ref = desc.getReadMethod().getAnnotation(Reference.class);
             if (ref != null) {
                 //reference vers un autre objet
-                setCellFactory((TableColumn<Element, Object> param) -> new ReferenceTableCell(ref.ref()));
+                setCellFactory(SIRS.getOrCreateTableCellFactory(ref));
                 try {
                     final Method propertyAccessor = ref.ref().getMethod(name+"Property");
                     setCellValueFactory((CellDataFeatures<Element, Object> param) -> {
@@ -1585,11 +1562,11 @@ public class PojoTable extends BorderPane implements Printable {
                         }
                     });
                 } catch (Exception ex) {
-                    setCellValueFactory(new PropertyValueFactory<>(name));
+                    setCellValueFactory(SIRS.getOrCreateCellValueFactory(name));
                 }
 
             } else {
-                setCellValueFactory(new PropertyValueFactory<>(name));
+                setCellValueFactory(SIRS.getOrCreateCellValueFactory(name));
                 final Class type = desc.getReadMethod().getReturnType();
                 if (Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
@@ -1616,49 +1593,62 @@ public class PojoTable extends BorderPane implements Printable {
             setEditable(isEditable);
             if (isEditable) {
                 editableProperty().bind(cellEditableProperty);
-                setOnEditCommit((CellEditEvent<Element, Object> event) -> {
-                    /*
-                     * We try to update data. If it's a failure, we store exception
-                     * to give more information to user. In all cases, a notification
-                     * is requested to inform user if its modification has succeded
-                     * or not.
-                     */
-                    Exception tmpError = null;
-                    final Object rowElement = event.getRowValue();
-                    if (rowElement == null) return;
-                    final PropertyReference<Object> propertyReference = new PropertyReference<>(rowElement.getClass(), name);
-                    Object oldValue = propertyReference.get(rowElement);
-                    try {
-                        propertyReference.set(rowElement, event.getNewValue());
-                        elementEdited(event);
-                    } catch (Exception e) {
-                        SIRS.LOGGER.log(Level.WARNING, "Cannot update field.", e);
-                        tmpError = e;
-                        // rollback value in case of error.
-                        propertyReference.set(rowElement, oldValue);
-                    }
-                    final Exception error = tmpError;
-                    final String message = (error == null)?
-                            "Le champs "+getText()+" a été modifié avec succès"
-                            : "Erreur pendant la mise à jour du champs "+getText();
-                    final ImageView graphic = new ImageView(error == null ? SIRS.ICON_CHECK_CIRCLE : SIRS.ICON_EXCLAMATION_TRIANGLE);
-                    final Label messageLabel = new Label(message, graphic);
-                    if (error == null) {
-                        showNotification(messageLabel);
-                    } else {
-                        final Hyperlink errorLink = new Hyperlink("Voir l'erreur");
-                        errorLink.setOnMouseClicked(linkEvent -> GeotkFX.newExceptionDialog(message, error).show());
-                        final HBox container = new HBox(5, messageLabel, errorLink);
-                        container.setAlignment(Pos.CENTER);
-                        container.setPadding(Insets.EMPTY);
-                        showNotification(container);
-                    }
-                });
+                setOnEditCommit(PojoTable.this::setOnPropertyCommit);
             }
         }
 
         public Reference getReference() {
             return ref;
+        }
+    }
+
+    public void setOnPropertyCommit(final TableColumn.CellEditEvent<Element, Object> event) {
+        /*
+         * We try to update data. If it's a failure, we store exception
+         * to give more information to user. In all cases, a notification
+         * is requested to inform user if its modification has succeded
+         * or not.
+         */
+        Exception tmpError = null;
+        final Object rowElement = event.getRowValue();
+        if (rowElement == null)
+            return;
+        
+        // Check / update value
+        TablePosition<Element, Object> pos = event.getTablePosition();
+        final TableColumn<Element, Object> col = pos.getTableColumn();
+        ObservableValue<Object> value = col.getCellObservableValue(pos.getRow());
+        if (value instanceof WritableValue) {
+            final Object oldValue = value.getValue();
+            try {
+                ((WritableValue)value).setValue(event.getNewValue());
+                elementEdited(event);
+            } catch (Exception e) {
+                SIRS.LOGGER.log(Level.WARNING, "Cannot update field.", e);
+                tmpError = e;
+                // rollback value in case of error.
+                ((WritableValue)value).setValue(oldValue);
+            }
+        } else {
+            tmpError = new IllegalStateException(new StringBuilder("Cannot affect read-only property in column ").append(col.getText()).append("from table ").append(titleProperty.get()).toString());
+        }
+
+        // Inform user
+        final Exception error = tmpError;
+        final String message = (error == null)
+                ? "Le champs " + event.getTableColumn().getText() + " a été modifié avec succès"
+                : "Erreur pendant la mise à jour du champs " + event.getTableColumn().getText();
+        final ImageView graphic = new ImageView(error == null ? SIRS.ICON_CHECK_CIRCLE : SIRS.ICON_EXCLAMATION_TRIANGLE);
+        final Label messageLabel = new Label(message, graphic);
+        if (error == null) {
+            showNotification(messageLabel);
+        } else {
+            final Hyperlink errorLink = new Hyperlink("Voir l'erreur");
+            errorLink.setOnMouseClicked(linkEvent -> GeotkFX.newExceptionDialog(message, error).show());
+            final HBox container = new HBox(5, messageLabel, errorLink);
+            container.setAlignment(Pos.CENTER);
+            container.setPadding(Insets.EMPTY);
+            showNotification(container);
         }
     }
 
@@ -1780,7 +1770,7 @@ public class PojoTable extends BorderPane implements Printable {
     /**
      * A column allowing to show the {@link Element} of a row on the map
      */
-    public class ShowOnMapColumn extends TableColumn<Element,Element>{
+    public static class ShowOnMapColumn extends TableColumn<Element,Element> {
 
         public ShowOnMapColumn() {
             super("Afficher sur la carte");
@@ -1794,18 +1784,21 @@ public class PojoTable extends BorderPane implements Printable {
             final Tooltip tooltip = new Tooltip("Voir l'élément sur la carte");
             setCellValueFactory((Callback)DEFAULT_VALUE_FACTORY);
             setCellFactory((TableColumn<Element, Element> param) -> {
-                final ButtonTableCell<Element, Element> button = new ButtonTableCell<>(false,
+                final ButtonTableCell<Element, Element> button = new ButtonTableCell<>(
+                        false,
                         new ImageView(ICON_SHOWONMAP),
                         DEFAULT_VISIBLE_PREDICATE,
-                        (Element t) -> {
-                            final FXMapTab tab = session.getFrame().getMapTab();
-                            tab.getMap().focusOnElement(t);
-                            tab.show();
-                            return t;
-                        });
+                        ShowOnMapColumn::showOnMap);
                 button.setTooltip(tooltip);
                 return button;
             });
+        }
+
+        public static Element showOnMap(final Element e) {
+            final FXMapTab tab = Injector.getSession().getFrame().getMapTab();
+            tab.getMap().focusOnElement(e);
+            tab.show();
+            return e;
         }
     }
 
@@ -1883,6 +1876,23 @@ public class PojoTable extends BorderPane implements Printable {
             }
 
             retrievedElement.bind(elementBinding);
+        }
+    }
+
+    /**
+     * Change row style according to input {@link Element#validProperty() }.
+     */
+    private static class ValidityRow extends TableRow<Element> {
+
+        @Override
+        protected void updateItem(Element item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (item != null && !item.getValid()) {
+                getStyleClass().add("invalidRow");
+            } else {
+                getStyleClass().removeAll("invalidRow");
+            }
         }
     }
 }

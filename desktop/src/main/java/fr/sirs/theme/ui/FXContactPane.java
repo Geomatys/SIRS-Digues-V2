@@ -195,14 +195,14 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         }
 
         @Override
-        protected void editPojo(Object pojo) {
+        protected Object editPojo(Object pojo) {
             final ContactOrganisme co = (ContactOrganisme) pojo;
             co.contactIdProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
                 if (!elementProperty.get().getId().equals(newValue)) {
                     orgsOfContact.remove(co);
                 }
             });
-            super.editPojo(pojo);
+            return super.editPojo(pojo);
         }
 
         @Override
