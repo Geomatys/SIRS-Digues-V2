@@ -1223,8 +1223,7 @@ public class PojoTable extends BorderPane implements Printable {
             result = (Element) repo.create();
             if(foreignParent!=null && result instanceof AvecForeignParent) ((AvecForeignParent) result).setForeignParentId(foreignParent.getId());
             repo.add(result);
-        }
-        else if (pojoClass != null) {
+        } else if (pojoClass != null) {
             try {
                 result = session.getElementCreator().createElement(pojoClass);
             } catch (RuntimeException e) {
@@ -1301,8 +1300,24 @@ public class PojoTable extends BorderPane implements Printable {
                 }
             }
 
+            /*
+             * We add created element in table items. However, as input list can
+             * listen on database change, maybe the element is already present,
+             * so we check if it's the case or not. Note that we compare only
+             * references, because repositories should provide unique instance of
+             * database objects, and a real equal() could send back different
+             * items with same data.
+             */
             synchronized(this) {
-                allValues.add(newlyCreated);
+                boolean mustAdd = true;
+                for (final Object o : allValues) {
+                    if (o == newlyCreated) {
+                        mustAdd = false;
+                        break;
+                    }
+                }
+                if (mustAdd)
+                    allValues.add(newlyCreated);
             }
         } else {
             final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
