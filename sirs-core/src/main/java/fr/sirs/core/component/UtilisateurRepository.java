@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import fr.sirs.core.model.Utilisateur;
 import java.util.Collections;
 import java.util.List;
+import org.geotoolkit.util.collection.CloseableIterator;
 
 
 @View(name = BY_LOGIN, map = "function(doc) {if(doc['@class']=='fr.sirs.core.model.Utilisateur') {emit(doc.login, doc._id)}}")
@@ -49,6 +50,36 @@ public class UtilisateurRepository extends AbstractSIRSRepository<Utilisateur>{
             return Collections.singletonList(GUEST_USER);
         return this.queryView(BY_LOGIN, login);
     }
+
+
+    public void checkIdentifier(final Utilisateur updated) {
+        final String login = updated.getLogin();
+        if (login == null || login.isEmpty()) {
+            return; // Newly created elements won't have a valid login.
+        }
+
+        try (CloseableIterator<Utilisateur> usersWithSameLogin =
+                new StreamingViewIterable(this.createQuery(BY_LOGIN).includeDocs(true).key(login)).iterator()) {
+
+            while (usersWithSameLogin.hasNext()) {
+                if (!updated.equals(usersWithSameLogin.next()))
+                    throw new IllegalArgumentException("Un utilisateur avec le même identifiant existe déjà !");
+            }
+        }
+    }
+
+    @Override
+    public void update(Utilisateur entity) {
+        checkIdentifier(entity);
+        super.update(entity);
+    }
+
+    @Override
+    public void add(Utilisateur entity) {
+        checkIdentifier(entity);
+        super.add(entity);
+    }
+
 
 }
 
