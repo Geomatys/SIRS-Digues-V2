@@ -1308,16 +1308,18 @@ public class PojoTable extends BorderPane implements Printable {
              * database objects, and a real equal() could send back different
              * items with same data.
              */
-            synchronized(this) {
-                boolean mustAdd = true;
-                for (final Object o : allValues) {
-                    if (o == newlyCreated) {
-                        mustAdd = false;
-                        break;
+            synchronized (this) {
+                synchronized (allValues) {
+                    boolean mustAdd = true;
+                    for (final Object o : allValues) {
+                        if (o == newlyCreated) {
+                            mustAdd = false;
+                            break;
+                        }
                     }
+                    if (mustAdd)
+                        allValues.add(newlyCreated);
                 }
-                if (mustAdd)
-                    allValues.add(newlyCreated);
             }
         } else {
             final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");

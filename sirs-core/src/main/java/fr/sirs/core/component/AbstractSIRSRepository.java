@@ -496,9 +496,13 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
             cached = all == null ? null : all.get();
         }
         if (cached != null) {
-            final List<T> created = (List<T>) added.get(getModelClass());
+            List<T> created = (List<T>) added.get(getModelClass());
             if (created != null) {
-                cached.addAll(cacheList(created));
+                synchronized (cached) {
+                    created = cacheList(created);
+                    created.removeAll(cached);
+                    cached.addAll(created);
+                }
             }
         }
     }
