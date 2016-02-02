@@ -109,7 +109,7 @@ public class DatabaseRegistry {
     private static final String REQUIRE_USER_OPTION = "require_valid_user";
 
     /** Check if a given string is a database URL (i.e not a path / url). */
-    private static final Pattern DB_NAME = Pattern.compile("^[a-z][\\w-]+");
+    private static final Pattern DB_NAME = Pattern.compile("^[a-z][\\w-]+/?");
     private static final Pattern URL_START = Pattern.compile("(?i)^[A-Za-z]+://([^@]+@)?");
     /** Check if given string is an URL to local host. */
     private static final Pattern LOCALHOST_URL = Pattern.compile("(?i)^([A-Za-z]+://)?([^@]+@)?(localhost|127\\.0\\.0\\.1)(:\\d+)?");
@@ -165,7 +165,7 @@ public class DatabaseRegistry {
      */
     public DatabaseRegistry(final String urlParam, final String userParam, final String passParam) throws IOException {
         final boolean isLocal;
-        if (urlParam == null || urlParam.equals(SirsPreferences.INSTANCE.getPropertySafe(COUCHDB_LOCAL_ADDR))) {
+        if (urlParam == null || DB_NAME.matcher(urlParam).matches() || urlParam.equals(SirsPreferences.INSTANCE.getPropertySafe(COUCHDB_LOCAL_ADDR))) {
             this.couchDbUrl = toURL(SirsPreferences.INSTANCE.getProperty(COUCHDB_LOCAL_ADDR));
             isLocal = true;
         } else {

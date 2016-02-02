@@ -1276,14 +1276,14 @@ public class TronconUtils {
             final BorneDigue startBorne = bornes.get(startRef.getKey());
             possr.borneDigueStart = startBorne;
             possr.borneStartId = startBorne.getDocumentId();
-            possr.startAval = possr.distanceStartBorne < 0;
+            possr.startAval = startRef.getValue() < 0;
             possr.distanceStartBorne = Math.abs(startRef.getValue());
 
             final Map.Entry<Integer, Double> endRef = computeRelative(getTronconSegments(false), references.toArray(new Point[0]), endPoint);
             final BorneDigue endBorne = bornes.get(endRef.getKey());
             possr.borneDigueEnd = endBorne;
             possr.borneEndId = endBorne.getDocumentId();
-            possr.endAval = possr.distanceEndBorne < 0;
+            possr.endAval = endRef.getValue() < 0;
             possr.distanceEndBorne = Math.abs(endRef.getValue());
 
             return possr;

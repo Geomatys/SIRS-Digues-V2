@@ -39,10 +39,6 @@ public class RepositoriesTest extends CouchDBTestCase {
     @Autowired
     TronconDigueRepository tronconRepository;
 
-    public void test() {
-        System.out.println(connector.getAllDocIds());
-    }
-
     public void removeDigues() {
         digueRepository.executeBulkDelete(digueRepository.getAllStreaming());
     }

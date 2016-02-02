@@ -29,7 +29,7 @@ public class RegistrationTest extends ServiceRegistrationTestBase {
     public void ElementTest() throws Exception {
         final Pattern pat = Pattern.compile("fr\\.sirs.*");
         final Predicate<Package> pFilter = p -> pat.matcher(p.getName()).matches();
-        checkServiceLoading(Element.class, pFilter);
+        checkSpringComponents(Element.class, pFilter);
     }
 
     @Test

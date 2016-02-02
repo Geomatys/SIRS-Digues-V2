@@ -1,7 +1,6 @@
 
-package fr.sirs.util;
+package fr.sirs.core;
 
-import fr.sirs.core.LinearReferencingUtilities;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;

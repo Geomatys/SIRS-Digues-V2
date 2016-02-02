@@ -1,6 +1,5 @@
 package fr.sirs.core.util.odt;
 
-import fr.sirs.core.CouchDBTestCase;
 import fr.sirs.core.model.Crete;
 import fr.sirs.util.odt.ODTUtils;
 import java.lang.reflect.Field;
@@ -21,7 +20,7 @@ import org.odftoolkit.simple.style.StyleTypeDefinitions;
  *
  * @author Alexis Manin (Geomatys)
  */
-public class ODTUtilsTest extends CouchDBTestCase {
+public class ODTUtilsTest {
 
     @Test
     public void testTemplateCreation() throws Exception {
