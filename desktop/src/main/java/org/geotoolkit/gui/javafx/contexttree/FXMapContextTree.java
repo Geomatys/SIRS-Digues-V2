@@ -16,12 +16,6 @@
  */
 package org.geotoolkit.gui.javafx.contexttree;
 
-import fr.sirs.CorePlugin;
-import fr.sirs.Plugin;
-import fr.sirs.Plugins;
-import fr.sirs.core.authentication.SIRSAuthenticator;
-import fr.sirs.core.component.DatabaseRegistry;
-import java.net.Authenticator;
 import java.util.Collections;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
@@ -31,7 +25,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.JFXPanel;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point3D;
@@ -50,13 +43,7 @@ import javafx.scene.input.PickResult;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
-import org.apache.sis.geometry.Envelope2D;
-import org.apache.sis.referencing.CommonCRS;
-import org.geotoolkit.factory.Hints;
-import org.geotoolkit.gui.javafx.render2d.FXMapFrame;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
-import org.geotoolkit.lang.Setup;
-import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
@@ -365,26 +352,5 @@ public class FXMapContextTree extends BorderPane {
 
     public void setMapItem(MapContext mapItem) {
         itemProperty.set(mapItem);
-    }
-
-    public static void main(String... args) throws Exception {
-        new JFXPanel();
-
-        //Geotoolkit startup
-        Setup.initialize(null);
-        //work in lazy mode, do your best for lenient datum shift
-        Hints.putSystemDefault(Hints.LENIENT_DATUM_SHIFT, Boolean.TRUE);
-
-        // Allow authentication to CouchDb service.
-        Authenticator.setDefault(new SIRSAuthenticator());
-
-        final DatabaseRegistry registry = new DatabaseRegistry();
-        registry.connectToSirsDatabase("isere3", false, false, false);
-        final MapContext ctx = MapBuilder.createContext();
-        ctx.setAreaOfInterest(new Envelope2D(CommonCRS.WGS84.normalizedGeographic(), 5.4, 45, 0.8, 0.5));
-        final Plugin plugin = Plugins.getPlugin(CorePlugin.NAME);
-        plugin.load();
-        ctx.items().addAll(plugin.getMapItems());
-        FXMapFrame.show(ctx);
     }
 }
