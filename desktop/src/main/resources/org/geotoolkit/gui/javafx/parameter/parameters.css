@@ -125,6 +125,11 @@ Component hierarchy for FXParameterGroupPane should be :
 }
 
 //TREETABLE PARAMETERS EDITOR
+
+.tree-table-cell {
+    -fx-border-width:0;
+}
+
 .tree-table-row-cell {
     -fx-background-color: -fx-table-cell-border-color, -fx-control-inner-background;
     -fx-background-insets: 0, 0 0 1 0;
@@ -146,24 +151,27 @@ Component hierarchy for FXParameterGroupPane should be :
     -fx-background-insets: 0, 1, 2;
 }
 
-.dragged-over, .dragged-over:odd {
-    -fx-background-color: aliceblue;
-    -fx-blend-mode: darken;
+.dragged-over {
+    -fx-background-color: derive(-fx-control-inner-background, -20%);
+}
+
+.dragged-over:odd {
+    -fx-background-color: derive(#F9F9F9, -20%);
 }
 
 .dragged-above {
-    -fx-background-color: linear-gradient(from 50% 0% to 50% 25%, aliceblue, -fx-control-inner-background);
+    -fx-background-color: linear-gradient(from 50% 0% to 50% 40%, derive(-fx-control-inner-background, -20%), -fx-control-inner-background);
 }
 
 .dragged-above:odd {
-    -fx-background-color: linear-gradient(from 50% 0% to 50% 20%, aliceblue, #F9F9F9);    
+    -fx-background-color: linear-gradient(from 50% 0% to 50% 40%, derive(#F9F9F9, -20%), #F9F9F9);    
 }
-.dragged-below, .dragged-below:odd {
-    -fx-background-color: linear-gradient(from 50% 100% to 50% 75%, aliceblue, -fx-control-inner-background);
+.dragged-below {
+    -fx-background-color: linear-gradient(from 50% 100% to 50% 60%, derive(-fx-control-inner-background, -20%), -fx-control-inner-background);
 }
 
 .dragged-below:odd {
-    -fx-background-color: linear-gradient(from 50% 100% to 50% 75%, aliceblue, #F9F9F9);
+    -fx-background-color: linear-gradient(from 50% 100% to 50% 60%, derive(#F9F9F9, -20%), #F9F9F9);
 }
 
 /*
