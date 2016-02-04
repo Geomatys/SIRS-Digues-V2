@@ -67,6 +67,7 @@ import org.geotoolkit.osmtms.OSMTileMapClient;
 import org.geotoolkit.storage.coverage.CoverageReference;
 import org.geotoolkit.storage.coverage.CoverageStore;
 import org.geotoolkit.style.DefaultDescription;
+import org.opengis.geometry.Envelope;
 import org.opengis.util.GenericName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -203,9 +204,11 @@ public class Session extends SessionCore {
                     mapContext.items().addAll(mapItems);
                     moduleDescriptions.put(d.getName(), d);
                 }
-                mapContext.setAreaOfInterest(mapContext.getBounds(true));
+                final Envelope bounds = mapContext.getBounds(true);
+                mapContext.setAreaOfInterest(bounds);
                 SirsDBInfoRepository infoRepo = getApplicationContext().getBean(SirsDBInfoRepository.class);
                 infoRepo.updateModuleDescriptions(moduleDescriptions);
+                infoRepo.setEnvelope(bounds);
 
             } catch (Exception ex) {
                 SirsCore.LOGGER.log(Level.WARNING, "Cannot retrieve sirs layers.", ex);

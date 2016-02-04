@@ -1,5 +1,6 @@
 package fr.sirs.core.component;
 
+import com.vividsolutions.jts.geom.Geometry;
 import fr.sirs.core.ModuleDescription;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,6 +16,9 @@ import fr.sirs.core.SirsDBInfo;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.sis.geometry.GeneralEnvelope;
+import org.geotoolkit.geometry.GeometricUtilities;
+import org.opengis.geometry.Envelope;
 
 @Component
 public class SirsDBInfoRepository {
@@ -44,26 +48,26 @@ public class SirsDBInfoRepository {
     }
 
     public SirsDBInfo updateModuleDescriptions(final Map<String, ModuleDescription> toSet) {
-        return set(null, null, toSet);
+        return set(null, null, toSet, null);
     }
 
     public SirsDBInfo updateModuleDescriptions(final Collection<ModuleDescription> toSet) {
         if (toSet == null || toSet.isEmpty()) {
-            return set(null, null, null);
+            return set(null, null, null, null);
         } else {
             final HashMap<String, ModuleDescription> map = new HashMap<>(toSet.size());
             for (final ModuleDescription desc : toSet) {
                 map.put(desc.getName(), desc);
             }
-            return set(null, null, map);
+            return set(null, null, map, null);
         }
     }
 
     public SirsDBInfo set(String epsgCode, String remoteDatabase) {
-        return set(epsgCode, remoteDatabase, null);
+        return set(epsgCode, remoteDatabase, null, null);
     }
 
-    private SirsDBInfo set(String epsgCode, String remoteDatabase, final Map<String, ModuleDescription> moduleDescriptions) {
+    private SirsDBInfo set(String epsgCode, String remoteDatabase, final Map<String, ModuleDescription> moduleDescriptions, final String envelope) {
         SirsDBInfo info;
         Optional<SirsDBInfo> optInfo = get();
         if (optInfo.isPresent()) {
@@ -90,6 +94,10 @@ public class SirsDBInfoRepository {
             info.addModuleDescriptions(moduleDescriptions);
         }
 
+        if (envelope != null && !envelope.isEmpty()) {
+            info.setEnvelope(envelope);
+        }
+
         if (optInfo.isPresent()) {
             db.update(info);
         } else {
@@ -97,5 +105,15 @@ public class SirsDBInfoRepository {
         }
 
         return info;
+    }
+
+    public void setEnvelope(Envelope bounds) {
+        if (bounds != null) {
+            final GeneralEnvelope env = new GeneralEnvelope(bounds);
+            if (!env.isEmpty()) {
+                final Geometry jtsGeom = GeometricUtilities.toJTSGeometry(bounds, GeometricUtilities.WrapResolution.NONE);
+                set(null, null, null, jtsGeom.toText());
+            }
+        }
     }
 }

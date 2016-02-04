@@ -239,6 +239,7 @@ public class FXSearchPane extends BorderPane {
         uiExportModel.setGraphic(new ImageView(ICON_EXPORT));
         uiRefreshModel.setGraphic(new ImageView(ICON_REFRESH));
         uiViewModel.setGraphic(new ImageView(ICON_MODEL));
+        uiViewModel.setTextFill(javafx.scene.paint.Color.WHITE);
 
         // VISIBILITY RULES
         uiSimplePane.visibleProperty().bind(uiToggleSimple.selectedProperty());

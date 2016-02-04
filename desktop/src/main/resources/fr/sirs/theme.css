@@ -1,6 +1,6 @@
 
 
-{
+* {
     -sirs-color-normal : rgb(74,123,165);
     -sirs-color-bright : rgb(109,149,182);
     -sirs-text-dark : rgb(34,93,135);
@@ -49,6 +49,29 @@
 
 .btn-without-style:selected {
     -fx-blend-mode: DARKEN;
+}
+
+.undecorated {
+    -fx-background-color:none;
+    -fx-border-width:0;
+}
+
+.undecorated:hover {
+    -fx-background-color: -sirs-form-background;
+    -fx-background-radius: 4;
+    -fx-border-width:0;
+}
+
+.undecorated:armed {
+    -fx-blend-mode: DARKEN;
+    -fx-background-color: -sirs-form-background;
+    -fx-background-radius: 4;
+    -fx-border-width:0;
+}
+
+.undecorated {
+    -fx-background-color:none;
+    -fx-border-width:0;
 }
 
 .btn-gray {
@@ -339,4 +362,18 @@
 
 .growl-error {
     -fx-background-color: #C65757;
+}
+
+.list-even {
+    -fx-background-color: white;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: -sirs-form-background;
+    -fx-padding: 5;
+}
+
+.list-odd {
+    -fx-background-color: aliceblue;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: -sirs-form-background;
+    -fx-padding: 5;
 }

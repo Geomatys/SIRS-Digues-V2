@@ -11,7 +11,6 @@ import static fr.sirs.SIRS.binaryMD5;
 import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
 import fr.sirs.core.CacheRules;
-import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.UtilisateurRepository;
@@ -23,7 +22,6 @@ import fr.sirs.importer.DbImporter;
 import fr.sirs.maj.ModuleChecker;
 import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
-import fr.sirs.util.FXAuthenticationWalletEditor;
 import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.property.SirsPreferences;
 import java.io.File;
@@ -53,6 +51,7 @@ import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
@@ -74,6 +73,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -89,6 +92,8 @@ import javafx.util.Callback;
 import org.apache.sis.util.logging.Logging;
 import org.ektorp.DbAccessException;
 import org.ektorp.ReplicationStatus;
+import org.geotoolkit.font.FontAwesomeIcons;
+import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
 import org.geotoolkit.gui.javafx.util.ProgressMonitor;
 import org.geotoolkit.gui.javafx.util.TaskManager;
@@ -128,14 +133,14 @@ public class FXLauncherPane extends BorderPane {
     private Tab uiCreateTab;
     @FXML
     private Tab uiImportTab;
-    @FXML
-    private Tab uiWalletTab;
 
     // onglet base locales
     @FXML
     private TableView<String> uiLocalBaseTable;
     @FXML
     private Button uiConnectButton;
+    @FXML
+    private Button uiReloadBtn;
 
     // onglet base distantes
     @FXML
@@ -191,6 +196,9 @@ public class FXLauncherPane extends BorderPane {
 
     @FXML
     private BorderPane uiProgressPlugins;
+
+    @FXML
+    private Button uiPrefBtn;
 
     private URL serverURL;
     private PluginList local = new PluginList();
@@ -309,12 +317,23 @@ public class FXLauncherPane extends BorderPane {
             LOGGER.log(Level.WARNING, ex.getMessage(), ex);
         }
 
-        AuthenticationWallet wallet = AuthenticationWallet.getDefault();
-        if (wallet == null ) {
-            uiTabPane.getTabs().remove(uiWalletTab);
-        } else {
-            uiWalletTab.setContent(new FXAuthenticationWalletEditor(wallet));
-        }
+        uiPrefBtn.setText(null);
+        uiPrefBtn.setTooltip(new Tooltip("Éditer les préférences"));
+        uiPrefBtn.setGraphic(new ImageView(SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GEAR_ALIAS, 22, java.awt.Color.GRAY),null)));
+        uiPrefBtn.setOnAction(evt -> {
+            final Stage prefEditor = SIRS.getPreferenceEditor();
+            prefEditor.show();
+            prefEditor.requestFocus();
+        });
+
+        uiReloadBtn.setText(null);
+        uiReloadBtn.setTooltip(new Tooltip("Rafraichir la liste des bases locales"));
+        uiReloadBtn.setGraphic(new ImageView(SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_REFRESH, 16, java.awt.Color.GRAY),null)));
+        uiReloadBtn.setOnAction(evt -> updateLocalDbList());
+        addEventHandler(KeyEvent.KEY_RELEASED, evt -> {
+            if (KeyCode.F5.equals(evt.getCode()))
+                updateLocalDbList();
+        });
     }
 
     private void restartApplicationNeeded() {
@@ -323,7 +342,6 @@ public class FXLauncherPane extends BorderPane {
         uiDistantTab.setDisable(true);
         uiCreateTab.setDisable(true);
         uiImportTab.setDisable(true);
-        uiWalletTab.setDisable(true);
     }
 
     /**
@@ -508,7 +526,10 @@ public class FXLauncherPane extends BorderPane {
                 SirsDBInfoRepository sirsDBInfoRepository = applicationContext.getBean(SirsDBInfoRepository.class);
                 sirsDBInfoRepository.setSRID(epsgCode);
 
-                applicationContext.getBean(Session.class).createUser(uiCreateLogin.getText(), uiCreatePassword.getText(), Role.ADMIN);
+                final Session session = applicationContext.getBean(Session.class);
+                session.createUser(uiCreateLogin.getText(), uiCreatePassword.getText(), Role.ADMIN);
+                // Initialize module description and envelope.
+                session.getMapContext();
 
                 //aller au panneau principal
                 Platform.runLater(() -> {
@@ -591,7 +612,7 @@ public class FXLauncherPane extends BorderPane {
                     ((PluginLoader) scl).loadPlugins();
                 } catch (Exception ex) {
                     LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-                    GeotkFX.newExceptionDialog("Une erreur est survenue pendant le chargement de plugins.", ex).showAndWait();
+                    Platform.runLater(() -> GeotkFX.newExceptionDialog("Une erreur est survenue pendant le chargement de plugins.", ex).showAndWait());
                     return;
                 }
             }
@@ -599,7 +620,7 @@ public class FXLauncherPane extends BorderPane {
                 final DbImporter importer = new DbImporter(appCtx);
                 Task<Boolean> importTask = TaskManager.INSTANCE.submit(importer.importation(
                         mainDbFile, cartoDbFile, uiImportCRS.crsProperty().get(), uiImportLogin.getText(), uiImportPassword.getText()));
-                uiProgressImport.progressProperty().bind(importTask.progressProperty());
+                Platform.runLater(() -> uiProgressImport.progressProperty().bind(importTask.progressProperty()));
 
                 importTask.get();
                 // Opérations ultérieures à l'importation à réaliser par les plugins.
@@ -612,6 +633,9 @@ public class FXLauncherPane extends BorderPane {
                     }
                 }
 
+                // Initialize module description and envelope.
+                appCtx.getBean(Session.class).getMapContext();
+
                 //aller au panneau principal
                 Platform.runLater(() -> {
                     uiTabPane.getSelectionModel().clearAndSelect(0);
@@ -620,15 +644,15 @@ public class FXLauncherPane extends BorderPane {
 
             } catch (IOException | AccessDbImporterException ex) {
                 LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-                GeotkFX.newExceptionDialog("Une erreur est survenue pendant la création de la base de données.", ex).showAndWait();
+                Platform.runLater(() -> GeotkFX.newExceptionDialog("Une erreur est survenue pendant la création de la base de données.", ex).showAndWait());
             } catch (DbAccessException ex) {
                 LOGGER.log(Level.WARNING, "Problème d'accès au CouchDB, utilisateur n'ayant pas les droits administrateur.", ex);
-                GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. "
+                Platform.runLater(() -> GeotkFX.newExceptionDialog("L'utilisateur de la base CouchDB n'a pas les bons droits. "
                         + "Réinstaller CouchDB ou supprimer cet utilisateur \"geouser\" des administrateurs de CouchDB, "
-                        + "puis relancer l'application.", ex).showAndWait();
+                        + "puis relancer l'application.", ex).showAndWait());
             } catch (Exception ex) {
                 LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-                GeotkFX.newExceptionDialog("Une erreur est survenue pendant l'import de la base.", ex).showAndWait();
+                Platform.runLater(() -> GeotkFX.newExceptionDialog("Une erreur est survenue pendant l'import de la base.", ex).showAndWait());
             } finally {
                 CacheRules.cacheAllDocs.set(false);
                 Platform.runLater(() -> uiImportButton.setDisable(false));

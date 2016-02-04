@@ -907,7 +907,7 @@ public class ODTUtils {
         final String chemin = toPrint.getChemin();
         if (chemin == null || chemin.isEmpty())
             throw new IllegalArgumentException("Input photograph path is invalid !");
-        final Path imgPath = SirsCore.getDocumentAbsolutePath(chemin);
+        final Path imgPath = SirsCore.getDocumentAbsolutePath(toPrint);
 
         final Image img;
         if (anchor == null) {

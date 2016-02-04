@@ -24,9 +24,12 @@ import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AbstractObservation;
+import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.AvecGeometrie;
+import fr.sirs.core.model.AvecPhotos;
+import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.LigneEau;
@@ -83,6 +86,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -280,7 +284,7 @@ public class PojoTable extends BorderPane implements Printable {
     protected final ObjectProperty<Element> ownerElementProperty = new SimpleObjectProperty<>();
 
     //Partie basse pour les commentaires et photos
-    private final FXCommentPhotoView commentPhotoView = new FXCommentPhotoView();
+    private final FXCommentPhotoView commentPhotoView;
 
     /** Task object designed for asynchronous update of the elements contained in the table. */
     protected final SimpleObjectProperty<Task> tableUpdaterProperty = new SimpleObjectProperty<>();
@@ -505,13 +509,18 @@ public class PojoTable extends BorderPane implements Printable {
             setTableItems(()-> SIRS.observableList(this.repo.getAll()));
         }
 
-        commentPhotoView.valueProperty().bind(uiTable.getSelectionModel().selectedItemProperty());
-        commentPhotoView.visibleProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                updateView();
-            }
-        });
+        if (AvecPhotos.class.isAssignableFrom(this.pojoClass) || AbstractPhoto.class.isAssignableFrom(this.pojoClass) || Desordre.class.isAssignableFrom(this.pojoClass)) {
+            commentPhotoView = new FXCommentPhotoView();
+            commentPhotoView.valueProperty().bind(uiTable.getSelectionModel().selectedItemProperty());
+            commentPhotoView.visibleProperty().addListener(new ChangeListener<Boolean>() {
+                @Override
+                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                    updateView();
+                }
+            });
+        } else {
+            commentPhotoView = null;
+        }
 
         //
         // NAVIGATION FICHE PAR FICHE
@@ -717,7 +726,7 @@ public class PojoTable extends BorderPane implements Printable {
             }
             uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
 
-            if(commentPhotoView.isVisible()){
+            if(commentPhotoView != null) {
                 final SplitPane sPane = new SplitPane();
                 sPane.setOrientation(Orientation.VERTICAL);
                 sPane.getItems().addAll(uiTable, commentPhotoView);
@@ -817,6 +826,9 @@ public class PojoTable extends BorderPane implements Printable {
         return importPointProperty;
     }
     public BooleanProperty commentAndPhotoProperty() {
+        if (commentPhotoView == null) {
+            return new ReadOnlyBooleanWrapper(false);
+        }
         return commentPhotoView.visibleProperty();
     }
     public BooleanProperty exportVisibleProperty() {

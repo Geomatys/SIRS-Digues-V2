@@ -67,7 +67,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="couches" upperBound="-1"
         eType="#//CoucheSeuilLit" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PlageDepotLit" eSuperTypes="#//ObjetLit">
+  <eClassifiers xsi:type="ecore:EClass" name="PlageDepotLit" eSuperTypes="#//ObjetLit ../../sirs-core/model/sirs.ecore#//SIRSFileReference">
     <eAnnotations source="couchDBDocument"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="libelle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="commune" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -177,7 +177,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="RefTypeInspectionSeuilLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//ReferenceType">
     <eAnnotations source="couchDBDocument"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PlanSeuilLit">
+  <eClassifiers xsi:type="ecore:EClass" name="PlanSeuilLit" eSuperTypes="../../sirs-core/model/sirs.ecore#//SIRSFileReference">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="chemin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>

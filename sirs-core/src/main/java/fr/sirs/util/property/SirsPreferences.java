@@ -21,16 +21,14 @@ public class SirsPreferences extends Properties {
     private static final String COMMENTS = null;
     
     public static enum PROPERTIES {
-        
-        DOCUMENT_ROOT("Dossier des documents", "Dossier racine où sont stockés les documents référencés par l'application.", null),
         REFERENCE_URL("Adresse des références", "Url à laquelle se trouvent les différents fichiers centralisés des références de l'application.", "http://sirs-digues.info/wp-content/tablesReferences/"),
         UPDATE_CORE_URL("Mise à jour de l'application", "Url à laquelle se trouve le service de mise à jour de l'application.", "http://sirs-digues.info/wp-content/updates/core.json"),
         UPDATE_PLUGINS_URL("Mise à jour des plugins", "Url à laquelle se trouve le service de mise à jour des plugins.", "http://sirs-digues.info/wp-content/updates/plugins.json"),
         COUCHDB_LOCAL_ADDR("Addresse de la base CouchDB locale", "Addresse d'accès à la base CouchDB locale, pour les réplications sur le poste.", "http://127.0.0.1:5984/");
+
         public final String title;
         public final String description;
         public final String defaultValue;
-        
         private PROPERTIES(final String title, final String description, final String defaultValue) {
             this.title = title;
             this.description = description;

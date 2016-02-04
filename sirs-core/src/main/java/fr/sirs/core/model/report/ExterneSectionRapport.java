@@ -89,7 +89,7 @@ public class ExterneSectionRapport extends AbstractSectionRapport implements SIR
         Path path;
         Exception suppressed = null;
         try {
-            path = SirsCore.getDocumentAbsolutePath(strPath);
+            path = SirsCore.getDocumentAbsolutePath(this);
             if (!Files.isRegularFile(path))
                 path = null;
         } catch (Exception e) {

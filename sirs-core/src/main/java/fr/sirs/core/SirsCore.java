@@ -3,6 +3,8 @@ package fr.sirs.core;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.PlatformUtil;
 import com.vividsolutions.jts.geom.Point;
+import fr.sirs.core.model.SIRSFileReference;
+import fr.sirs.util.property.DocumentRoots;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.SirsPreferences;
 import java.awt.Desktop;
@@ -27,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -274,14 +277,10 @@ public class SirsCore {
         return SirsCore.class.getPackage().getImplementationVersion();
     }
 
-    public static Path getDocumentRootPath() throws InvalidPathException {
-        String rootStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.DOCUMENT_ROOT);
-       return Paths.get(rootStr);
-    }
-
     /**
-     *
-     * @param relativeReference Un chemin relatif dénotant une référence dans un {@link Element}
+     * Récupère le chemin absolu vers le fichier référencé par l'objet en entrée.
+     * 
+     * @param ref Un objet faisant réference à un document.
      * @return Un chemin absolu vers la réference passée en paramètre.
      * @throws IllegalStateException Si la propriété {@link SirsPreferences.PROPERTIES#DOCUMENT_ROOT} est inexistante ou ne dénote pas un chemin valide.
      * Dans ce cas, il est FORTEMENT conseillé d'attraper l'exception, et de proposer à l'utilisateur de vérifier la valeur de cette propriété dans les
@@ -292,24 +291,36 @@ public class SirsCore {
      * chemin créé dénote un fichier inexistant. Elles sont invoquées uniquement
      * si les chemins sont incorrects syntaxiquement.
      */
-    public static Path getDocumentAbsolutePath(final String relativeReference) throws IllegalStateException, InvalidPathException {
-        ArgumentChecks.ensureNonEmpty("Document relative path", relativeReference);
-        final Path docRoot;
-        try {
-            docRoot = getDocumentRootPath();
-        } catch (InvalidPathException e) {
-            throw new IllegalStateException("La preference " + SirsPreferences.PROPERTIES.DOCUMENT_ROOT.name()
-                    + "ne dénote pas un chemin valide. Vous pouvez vérifier sa valeur "
-                    + "depuis les préférences de l'application (Fichier > Preferences).", e);
+    public static Path getDocumentAbsolutePath(final SIRSFileReference ref) throws IllegalStateException, InvalidPathException {
+        ArgumentChecks.ensureNonEmpty("Document relative path", ref.getChemin());
+        final Optional<Path> docRoot = DocumentRoots.getRoot(ref);
+        if (!docRoot.isPresent()) {
+            throw new IllegalStateException("Auncun dossier racine n'existe ou "
+                    + "ne dénote un chemin valide. Vous pouvez vérifier sa valeur "
+                    + "depuis les préférences de l'application (Fichier > Preferences).");
         }
 
-        if (PlatformUtil.isWindows()) {
-            return docRoot.resolve(relativeReference.replaceAll("/+", "\\\\") // On remplace les séparateurs issus d'un autre système.
-                    .replaceFirst("^\\\\+", "")); // On enlève tout séparateur en début de chaîne qui tendrait à signifier que le chemin n'est pas relatif.
-        } else {
-            return docRoot.resolve(relativeReference.replaceAll("\\\\+", File.separator) // On remplace les séparateurs issus d'un autre système.
-                    .replaceFirst("^"+File.separator+"+", "")); // On enlève tout séparateur en début de chaîne qui tendrait à signifier que le chemin n'est pas relatif.
+        return concatenatePaths(docRoot.get(), ref.getChemin());
+    }
+
+    public static Path concatenatePaths(final Path first, final String... more) {
+        if (more.length <= 0)
+            return first;
+
+        Path builtPath = first;
+        for (final String str : more) {
+            if (str != null && !str.isEmpty()) {
+                if (PlatformUtil.isWindows()) {
+                    builtPath = builtPath.resolve(str.replaceAll("/+", "\\\\") // On remplace les séparateurs issus d'un autre système.
+                            .replaceFirst("^\\\\+", "")); // On enlève tout séparateur en début de chaîne qui tendrait à signifier que le chemin n'est pas relatif.
+                } else {
+                    builtPath = builtPath.resolve(str.replaceAll("\\\\+", File.separator) // On remplace les séparateurs issus d'un autre système.
+                            .replaceFirst("^" + File.separator + "+", "")); // On enlève tout séparateur en début de chaîne qui tendrait à signifier que le chemin n'est pas relatif.
+                }
+            }
         }
+
+        return builtPath;
     }
 
     /**

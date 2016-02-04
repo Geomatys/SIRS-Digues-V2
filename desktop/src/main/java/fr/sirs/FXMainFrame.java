@@ -17,7 +17,6 @@ import static fr.sirs.ui.AlertItem.AlertItemLevel.HIGH;
 import static fr.sirs.ui.AlertItem.AlertItemLevel.INFORMATION;
 import fr.sirs.ui.AlertManager;
 import fr.sirs.util.FXFreeTab;
-import fr.sirs.util.FXPreferenceEditor;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
@@ -123,7 +122,6 @@ public class FXMainFrame extends BorderPane {
     private FXMapTab mapTab;
     private DiguesTab diguesTab;
     private FXFreeTab searchTab;
-    private Stage prefEditor;
 
     public FXMainFrame() {
         SIRS.loadFXML(this, FXMainFrame.class);
@@ -533,10 +531,9 @@ public class FXMainFrame extends BorderPane {
 
     @FXML
     void openPref(ActionEvent event) {
-        if (prefEditor == null) {
-            prefEditor = new FXPreferenceEditor();
-        }
+        final Stage prefEditor = SIRS.getPreferenceEditor();
         prefEditor.show();
+        prefEditor.requestFocus();
     }
 
     @FXML

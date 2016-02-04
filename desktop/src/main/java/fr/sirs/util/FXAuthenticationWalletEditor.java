@@ -7,6 +7,7 @@ import javafx.scene.layout.BorderPane;
 
 import static fr.sirs.core.authentication.AuthenticationWallet.Entry;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -27,15 +28,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.util.StringConverter;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
@@ -53,16 +50,13 @@ import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
  * 
  * @author Alexis Manin (Geomatys)
  */
-public class FXAuthenticationWalletEditor extends BorderPane {
+public class FXAuthenticationWalletEditor extends BorderPane implements SaveableConfiguration {
 
     /**
      * Elements in the list will alternate their background by picking one in
      * the following array.
      */
-    private static final Background[] LIST_BACKGROUNDS = new Background[] {
-        new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)),
-        new Background(new BackgroundFill(Color.ALICEBLUE, CornerRadii.EMPTY, Insets.EMPTY))
-    };
+    public static final String[] LIST_CLASSES = new String[] {"list-even", "list-odd"};
 
     /** Wallet to display information from. */
     private final AuthenticationWallet wallet;
@@ -79,6 +73,15 @@ public class FXAuthenticationWalletEditor extends BorderPane {
 
     /** Used for list emulation. */
     private final VBox content = new VBox();
+
+    /**
+     * Keep reference of entries to remove on save action.
+     */
+    private final HashSet<Entry> toRemove = new HashSet<>();
+    /**
+     * Keep reference of entries to put / update on save action.
+     */
+    private final HashSet<Entry> toAdd = new HashSet<>();
 
     public FXAuthenticationWalletEditor(final AuthenticationWallet wallet) {
         ArgumentChecks.ensureNonNull("Authentication wallet", wallet);
@@ -162,13 +165,35 @@ public class FXAuthenticationWalletEditor extends BorderPane {
         final ArrayList<EntryCell> cells = new ArrayList<>();
         for (int i = 0 ; i < entries.size() ; i++) {
             final EntryCell cell = new EntryCell(entries.get(i));
-            cell.setBorder(Border.EMPTY);
-            cell.setBackground(LIST_BACKGROUNDS[i%LIST_BACKGROUNDS.length]);
+            cell.getStyleClass().add(LIST_CLASSES[i%LIST_CLASSES.length]);
             cells.add(cell);
         }
         content.getChildren().setAll(cells);
     }
 
+    /**
+     * Save modified entries by removing trashed entries, then updating / adding
+     * the modified / created ones.
+     */
+    @Override
+    public void save() {
+        for (final Entry e : toRemove) {
+            wallet.remove(e);
+        }
+
+        for (final Entry e : toAdd) {
+            wallet.put(e);
+        }
+    }
+
+    @Override
+    public String getTitle() {
+        return "Trousseau de connexion";
+    }
+
+    /**
+     * Display of a single authentication entry.
+     */
     private class EntryCell extends GridPane {
 
         private final Entry source;
@@ -193,11 +218,11 @@ public class FXAuthenticationWalletEditor extends BorderPane {
             add(new Label(source.port < 0? "inconnu" : Integer.toString(source.port)), 1, 1);
 
             final Hyperlink updateButton = new Hyperlink("Mettre à jour");
-            updateButton.setOnAction(event -> updateLogin(this.source).ifPresent(entry -> wallet.put(entry)));
+            updateButton.setOnAction(event -> updateLogin(this.source).ifPresent(entry -> {toRemove.remove(entry); toAdd.add(entry);}));
             add(updateButton, 3, 0);
 
             final Hyperlink removeButton = new Hyperlink("Supprimer");
-            removeButton.setOnAction(event -> wallet.remove(this.source));
+            removeButton.setOnAction(event -> {toAdd.remove(this.source); toRemove.add(this.source);});
             add(removeButton, 3, 1);
         }
     }
@@ -246,6 +271,10 @@ public class FXAuthenticationWalletEditor extends BorderPane {
         }
     }
 
+    /**
+     * A predicate used for filtering visible entries when user types in search
+     * fields.
+     */
     private static class EntryPredicate implements Predicate<Entry> {
 
         private final Pattern hostPattern;

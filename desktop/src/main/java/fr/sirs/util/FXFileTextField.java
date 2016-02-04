@@ -7,7 +7,8 @@ package fr.sirs.util;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.SirsCore;
-import fr.sirs.util.property.SirsPreferences;
+import fr.sirs.core.model.SIRSFileReference;
+import fr.sirs.util.property.DocumentRoots;
 import java.io.File;
 import java.net.URI;
 import java.nio.file.Files;
@@ -16,7 +17,7 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.stage.FileChooser;
 import org.geotoolkit.gui.javafx.util.AbstractPathTextField;
@@ -27,24 +28,27 @@ import org.geotoolkit.gui.javafx.util.AbstractPathTextField;
  */
 public class FXFileTextField extends AbstractPathTextField {
 
-    private final SimpleStringProperty rootPath = new SimpleStringProperty();
+    private final SimpleObjectProperty<Path> rootPath = new SimpleObjectProperty<>();
 
     public final BooleanProperty disableFieldsProperty = new SimpleBooleanProperty();
 
+    public final SimpleObjectProperty<SIRSFileReference> refProperty = new SimpleObjectProperty<>();
+
     public FXFileTextField() {
+        refProperty.addListener(this::updateRef);
         rootPath.addListener(this::updateRoot);
-        rootPath.set(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT));
 
         inputText.disableProperty().bind(disableFieldsProperty);
         choosePathButton.disableProperty().bind(disableFieldsProperty);
     }
 
-    private void updateRoot(final ObservableValue<? extends String> obs, final String oldValue, final String newValue) {
-        if (newValue == null || newValue.isEmpty()) {
-            completor.root = null;
-        } else {
-            completor.root = Paths.get(newValue);
-        }
+    private void updateRef(final ObservableValue<? extends SIRSFileReference> obs, final SIRSFileReference oldRef, final SIRSFileReference newRef) {
+        final Path tmpRoot = DocumentRoots.getRoot(newRef).orElse(null);
+        rootPath.set(tmpRoot);
+    }
+
+    private void updateRoot(final ObservableValue<? extends Path> obs, final Path oldValue, final Path newValue) {
+        completor.root = newValue;
     }
 
     @Override
@@ -73,20 +77,20 @@ public class FXFileTextField extends AbstractPathTextField {
 
     @Override
     protected URI getURIForText(String inputText) throws Exception {
-        rootPath.set(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT));
+        updateRef(refProperty, null, refProperty.get()); // Force root update.
         if (rootPath.get() == null) {
             return inputText.matches("[A-Za-z]+://.+")? new URI(inputText) : Paths.get(inputText).toUri();
         } else if (inputText == null || inputText.isEmpty()) {
-            return Paths.get(rootPath.get()).toUri();
+            return rootPath.get().toUri();
         } else {
-            return SIRS.getDocumentAbsolutePath(inputText == null? "" : inputText).toUri();
+            return SIRS.concatenatePaths(rootPath.get(), inputText).toUri();
         }
     }
 
     public URI getURI() {
-        try{
+        try {
             return getURIForText(getText());
-        } catch(Exception e){
+        } catch(Exception e) {
             SIRS.LOGGER.log(Level.FINEST, "Unable to build URI from "+getText());
             return null;
         }

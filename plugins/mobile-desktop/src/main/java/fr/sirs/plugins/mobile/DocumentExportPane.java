@@ -265,9 +265,10 @@ public class DocumentExportPane extends StackPane {
             // A filter which check that a given document really points on a file reference
             final Predicate fileFilter = element -> {
                 if (element instanceof SIRSFileReference) {
-                    String chemin = ((SIRSFileReference)element).getChemin();
+                    final SIRSFileReference fileRef = (SIRSFileReference)element;
+                    String chemin = fileRef.getChemin();
                     if (chemin != null && !chemin.isEmpty()) {
-                        return Files.isRegularFile(SIRS.getDocumentAbsolutePath(chemin));
+                        return Files.isRegularFile(SIRS.getDocumentAbsolutePath(fileRef));
                     }
                 }
                 return false;
@@ -539,7 +540,7 @@ public class DocumentExportPane extends StackPane {
                 final String chemin = ref.getChemin();
                 if (chemin == null || chemin.isEmpty())
                     continue;
-                final Path doc = SIRS.getDocumentAbsolutePath(chemin);
+                final Path doc = SIRS.getDocumentAbsolutePath(ref);
                 if (Files.isRegularFile(doc)) {
                     docList.add(doc);
                 }
@@ -587,7 +588,7 @@ public class DocumentExportPane extends StackPane {
 
                     // keep only photos defined with an accessible file.
                     docMap.put(MobilePlugin.PHOTO_FOLDER, photos.stream()
-                            .map(photo -> SIRS.getDocumentAbsolutePath(photo.getChemin()))
+                            .map(photo -> SIRS.getDocumentAbsolutePath(photo))
                             .collect(Collectors.toSet())
                     );
                 }
@@ -792,7 +793,7 @@ public class DocumentExportPane extends StackPane {
             if (t == null || t.getChemin() == null || t.getChemin().isEmpty()) {
                 return false;
             } else {
-                return Files.isRegularFile(SIRS.getDocumentAbsolutePath(t.getChemin()));
+                return Files.isRegularFile(SIRS.getDocumentAbsolutePath(t));
             }
         }
     }

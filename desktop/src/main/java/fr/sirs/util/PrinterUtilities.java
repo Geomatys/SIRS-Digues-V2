@@ -1,28 +1,22 @@
 package fr.sirs.util;
 
-import fr.sirs.SIRS;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTOS_SUBREPORT;
-import fr.sirs.util.property.SirsPreferences;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.net.URI;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import javafx.collections.FXCollections;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -367,38 +361,9 @@ JasperViewer.viewReport(jp1,false);
                 && void.class.equals(method.getReturnType());
     }
 
-    public static String getFieldNameFromSetter(final Method setter){
+    public static String getFieldNameFromSetter(final Method setter) {
         return setter.getName().substring(3, 4).toLowerCase()
                             + setter.getName().substring(4);
-    }
-
-    /**
-     * Utility method used to build complete path into jasper templates from
-     * local path only.
-     *
-     * @param inputText
-     * @return
-     * @throws Exception
-     */
-    public static InputStream streamFromText(final String inputText) throws Exception {
-        final URI resultURI = imageUriFromText(inputText);
-        try {
-            return new FileInputStream(new File(resultURI));
-        } catch(Exception e){
-            SIRS.LOGGER.log(Level.INFO, "No image found at URI "+resultURI);
-            return FXFileTextField.class.getResourceAsStream("/fr/sirs/images/imgNotFound.png");
-        }
-    }
-
-    public static URI imageUriFromText(final String inputText) throws Exception {
-        final String rootPath = SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.DOCUMENT_ROOT);
-        final URI resultURI;
-        if (rootPath == null) {
-            resultURI = inputText.matches("[A-Za-z]+://.+")? new URI(inputText) : Paths.get(inputText).toUri();
-        } else {
-            resultURI = SIRS.getDocumentAbsolutePath(inputText == null? "" : inputText).toUri();
-        }
-        return resultURI;
     }
 
     ////////////////////////////////////////////////////////////////////////////

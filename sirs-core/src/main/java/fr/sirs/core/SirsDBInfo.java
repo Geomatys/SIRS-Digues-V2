@@ -16,6 +16,8 @@ public class SirsDBInfo extends CouchDbDocument {
     private String epsgCode;
 
     private String remoteDatabase;
+    
+    private String envelope;
 
     /**
      * No remove method allowed, because even if an application remove a plugin,
@@ -55,6 +57,14 @@ public class SirsDBInfo extends CouchDbDocument {
         this.remoteDatabase = remoteDatabase;
     }
 
+    public String getEnvelope() {
+        return envelope;
+    }
+
+    public void setEnvelope(String envelope) {
+        this.envelope = envelope;
+    }
+    
     public Map<String, ModuleDescription> getModuleDescriptions() {
         return moduleDescriptions;
     }

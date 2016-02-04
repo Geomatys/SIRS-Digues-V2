@@ -10,6 +10,7 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import fr.sirs.theme.ui.FXElementContainerPane;
+import fr.sirs.util.FXPreferenceEditor;
 import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.Reference;
@@ -24,7 +25,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -37,7 +37,6 @@ import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableListBase;
 import javafx.collections.transformation.SortedList;
@@ -51,6 +50,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.ArgumentChecks;
@@ -145,7 +146,21 @@ public final class SIRS extends SirsCore {
 
     public static Loader LOADER;
 
+    private static Stage PREFERENCE_EDITOR;
+
     private SIRS(){};
+
+    public static synchronized Stage getPreferenceEditor() {
+        if (PREFERENCE_EDITOR == null) {
+            PREFERENCE_EDITOR = new FXPreferenceEditor();
+            PREFERENCE_EDITOR.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, (evt) -> {
+                synchronized (SIRS.class) {
+                    PREFERENCE_EDITOR = null;
+                }
+            });
+        }
+        return PREFERENCE_EDITOR;
+    }
 
     public static void loadFXML(Parent candidate) {
         final Class modelClass = null;
@@ -215,29 +230,11 @@ public final class SIRS extends SirsCore {
             return FXCollections.observableArrayList();
 
         } else if (!sourceList.isEmpty() && sourceList.get(0) instanceof Element) {
-            if (sourceList instanceof ModifiableObservableListBase) {
-                return (ObservableList) sourceList;
-            } else {
-                return FXCollections.observableArrayList(sourceList);
-            }
+            return observableList(sourceList);
         } else if (repo == null) {
             return FXCollections.observableArrayList();
         } else {
-            // Version de récupération "Bulk" : récupération de l'ensemble des documents dont les IDs sont spécifiés en une requête unique.
-//            ViewQuery q = new ViewQuery()
-//                      .allDocs()
-//                      .includeDocs(true)
-//                      .keys(sourceList);
-//            return FXCollections.observableArrayList(Injector.getSession().getConnector().queryView(q, repo.getModelClass()));
-
-            // Version de récupération "cache" : fes documents sont récupérés un par un à moins qu'ils ne soient dans le cache du repository
-            // Restauration de cette version, car la duplication "Bulk" ne passe pas par le repository et duplique donc les instances déjà dans son cache.
-            final ObservableList resultList = FXCollections.observableArrayList();
-            final Iterator<String> it = sourceList.iterator();
-            while (it.hasNext()) {
-                resultList.add(repo.get(it.next()));
-            }
-            return resultList;
+            return observableList(repo.get(sourceList));
         }
     }
 

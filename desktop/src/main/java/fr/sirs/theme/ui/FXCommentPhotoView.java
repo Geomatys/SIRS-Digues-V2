@@ -180,7 +180,7 @@ public class FXCommentPhotoView extends SplitPane {
             }
 
             final Task<Image> loader = new TaskManager.MockTask<>("Lecture d'image",
-                    () -> new Image(SIRS.getDocumentAbsolutePath(selected.getChemin()).toUri().toURL().toExternalForm()));
+                    () -> new Image(SIRS.getDocumentAbsolutePath(selected).toUri().toURL().toExternalForm()));
 
             loader.setOnFailed(event -> Platform.runLater(() -> uiPhotoLibelle.setText("Le chemin de l'image est invalide : " + selected.getLibelle())));
             loader.setOnCancelled(event -> Platform.runLater(() -> uiPhotoLibelle.setText("Le chargement de l'image a été annulé")));
