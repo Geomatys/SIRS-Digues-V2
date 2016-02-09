@@ -30,9 +30,11 @@ public class DocumentRoots extends Static {
 
     /**
      * Search for a root path to use for photographs associated with an object
-     * of given type.
+     * of given type. If no type is given, search for default root defined for
+     * {@link AbstractPhoto} objects.
      *
-     * @param associatedType Reference type to retrieve a root path for.
+     * @param associatedType Reference type to retrieve a root path for. If null,
+     * default photo directory will be returned.
      * @param strict If true, an empty optional is returned if no path is
      * defined for given reference, even if a default root is configured. If
      * false, default path is returned if none is defined for the input

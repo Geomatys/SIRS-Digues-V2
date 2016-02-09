@@ -10,6 +10,7 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.util.CopyTask;
+import fr.sirs.util.property.DocumentRoots;
 import fr.sirs.util.property.SirsPreferences;
 import java.awt.Color;
 import java.beans.IntrospectionException;
@@ -20,7 +21,6 @@ import java.lang.reflect.Method;
 import java.nio.file.FileStore;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
@@ -210,11 +210,7 @@ public class PhotoImportPane extends StackPane {
         uiDeletePrefixBtn.setGraphic(new ImageView(ICON_TRASH_BLACK));
         uiDeletePrefixBtn.setText(null);
 
-        try {
-            rootDirProperty.set(SIRS.getDocumentRootPath());
-        } catch (InvalidPathException e) {
-            SirsCore.LOGGER.log(Level.FINE, "Cannot retrieve root directory", e);
-        }
+        rootDirProperty.set(DocumentRoots.getPhotoRoot(null, false).orElse(null));
 
         try {
             availablePrefixes.addAll(SIRS.listSimpleProperties(AbstractPhoto.class).values());
@@ -361,7 +357,7 @@ public class PhotoImportPane extends StackPane {
         File chosen = chooser.showDialog(getScene().getWindow());
         if (chosen != null) {
             rootDirProperty.set(chosen.toPath().toAbsolutePath());
-            SirsPreferences.INSTANCE.setProperty(SirsPreferences.PROPERTIES.DOCUMENT_ROOT.name(), rootDirProperty.get().toString());
+            DocumentRoots.setDefaultPhotoRoot(rootDirProperty.get());
         }
     }
 
@@ -447,7 +443,7 @@ public class PhotoImportPane extends StackPane {
                 copyPhotos(files, root);
             } else {
                 taskProperty.set(null);
-                warning("Aucune photo n'a été trouvée pour l'import.");
+                warning("Aucune nouvelle photo n'a été trouvée pour l'import.");
             }
         }));
     }

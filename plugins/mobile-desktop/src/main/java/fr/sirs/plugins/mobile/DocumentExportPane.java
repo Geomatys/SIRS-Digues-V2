@@ -25,6 +25,7 @@ import fr.sirs.core.model.SIRSReference;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.CopyTask;
 import fr.sirs.util.SirsStringConverter;
+import fr.sirs.util.property.DocumentRoots;
 import java.io.IOException;
 import java.nio.file.FileStore;
 import java.nio.file.FileVisitResult;
@@ -256,8 +257,12 @@ public class DocumentExportPane extends StackPane {
 
         final Task updater = TaskManager.INSTANCE.submit("Recherche de documents", () -> {
             final Class docClass = uiDocumentType.getValue() == null ? SIRSFileReference.class : uiDocumentType.getValue();
+            final ObservableList<Preview> selectedItems = uiTronconList.getSelectionModel().getSelectedItems();
+            if (selectedItems == null || selectedItems.isEmpty()) {
+                return false;
+            }
             final List<TronconDigue> selectedTroncons = session.getRepositoryForClass(TronconDigue.class).get(
-                    uiTronconList.getSelectionModel().getSelectedItems().stream().map(p -> p.getElementId()).collect(Collectors.toList()));
+                    selectedItems.stream().map(p -> p.getElementId()).collect(Collectors.toList()));
 
             // Use an hash set to avoid doublons.
             final HashSet<SIRSFileReference> items = new HashSet();
@@ -530,19 +535,21 @@ public class DocumentExportPane extends StackPane {
         // 1
         uiLoadingPane.setVisible(true);
         uiLoadingLabel.setText("Liste les documents à copier");
-        // List each files which must be copied (map value), sorted by output directory (map key)
-        final Task<Map<Path, Collection<Path>>> listFileTask = TaskManager.INSTANCE.submit(uiLoadingLabel.getText(), () -> {
-            final HashMap<Path, Collection<Path>> docMap = new HashMap<>();
-            final HashSet<Path> docList = new HashSet<>();
-            docMap.put(MobilePlugin.DOCUMENT_FOLDER, docList);
+        // List each files which must be copied (map key), along with their precise destination, relative to destination folder (map value).
+        final Task<Map<Path, Path>> listFileTask = new TaskManager.MockTask<>(uiLoadingLabel.getText(), () -> {
+            final Map<Path, Path> docMap = new HashMap<>();
             // Find document list size
+            String chemin;
+            Path root, docInput, docDest;
             for (final SIRSFileReference ref : uiMobileList.getItems()) {
-                final String chemin = ref.getChemin();
+                chemin = ref.getChemin();
                 if (chemin == null || chemin.isEmpty())
                     continue;
-                final Path doc = SIRS.getDocumentAbsolutePath(ref);
-                if (Files.isRegularFile(doc)) {
-                    docList.add(doc);
+                root = DocumentRoots.getRoot(ref).orElseThrow(() -> new IllegalStateException("Aucune dossier racine trouvé pour les documents !"));
+                docInput = SIRS.concatenatePaths(root, chemin);
+                if (Files.isRegularFile(docInput)) {
+                    docDest = MobilePlugin.DOCUMENT_FOLDER.resolve(root.relativize(docInput));
+                    docMap.put(docInput, docDest);
                 }
             }
 
@@ -587,87 +594,92 @@ public class DocumentExportPane extends StackPane {
                     }
 
                     // keep only photos defined with an accessible file.
-                    docMap.put(MobilePlugin.PHOTO_FOLDER, photos.stream()
-                            .map(photo -> SIRS.getDocumentAbsolutePath(photo))
-                            .collect(Collectors.toSet())
-                    );
+                    for (final AbstractPhoto photo : photos) {
+                        chemin = photo.getChemin();
+                        if (chemin == null || chemin.isEmpty())
+                            continue;
+                        root = DocumentRoots.getRoot(photo).orElseThrow(() -> new IllegalStateException("Aucune dossier racine trouvé pour les photographies !"));
+                        docInput = SIRS.concatenatePaths(root, chemin);
+                        if (Files.isRegularFile(docInput)) {
+                            docDest = MobilePlugin.PHOTO_FOLDER.resolve(root.relativize(docInput));
+                            docMap.put(docInput, docDest);
+                        }
+                    }
                 }
             }
             return docMap;
         });
 
-        listFileTask.runningProperty().addListener((obs, oldValue, newValue) -> {
-            if (newValue == false && oldValue == true) {
+        listFileTask.setOnFailed(evt -> SIRS.fxRun(false, () -> {
+            uiLoadingPane.setVisible(false);
+            GeotkFX.newExceptionDialog("Impossible de lister tous les fichiers pour la copie", listFileTask.getException()).show();
+        }));
+
+        listFileTask.setOnCancelled(evt -> SIRS.fxRun(false, () -> {
+            uiLoadingPane.setVisible(false);
+        }));
+
+        listFileTask.setOnSucceeded(listEvt -> SIRS.fxRun(false, () -> {
+            final Map<Path, Path> toCopy = listFileTask.getValue();
+            // 2
+            uiLoadingLabel.setText("Calcul de la quantité de donnée à copier");
+            final Task<Long> sizeTask = new TaskManager.MockTask<>(uiLoadingLabel.getText(), () -> {
+                return toCopy.keySet().stream()
+                        .map(doc -> {
+                            try {
+                                return Files.getFileAttributeView(doc, BasicFileAttributeView.class).readAttributes().size();
+                            } catch (IOException ex) {
+                                throw new RuntimeException("Impossible de calculer une taille pour " + doc, ex);
+                            }
+                        })
+                        .reduce(0l, (first, second) -> first + second);
+            });
+
+            sizeTask.setOnFailed(evt -> SIRS.fxRun(false, () -> {
+                uiLoadingPane.setVisible(false);
+                GeotkFX.newExceptionDialog("Impossible de calculer la taille totale à copier", sizeTask.getException()).show();
+            }));
+
+            sizeTask.setOnCancelled(evt -> SIRS.fxRun(false, () -> {
+                uiLoadingPane.setVisible(false);
+            }));
+
+            sizeTask.setOnSucceeded(evt -> SIRS.fxRun(false, () -> {
                 try {
-                    final Map<Path, Collection<Path>> toCopy = listFileTask.get();
-                    final ArrayList paths = new ArrayList<>();
-
-                    // 2
-                    uiLoadingLabel.setText("Calcul de la quantité de donnée à copier");
-                    final List<Task<Long>> sizeComputing = new ArrayList<>(toCopy.size());
-                    for (final Collection<Path> tmpList : toCopy.values()) {
-                        sizeComputing.add(TaskManager.INSTANCE.submit(uiLoadingLabel.getText(), () -> {
-                            return tmpList.stream()
-                                    .map(doc -> {
-                                        try {
-                                            return Files.getFileAttributeView(doc, BasicFileAttributeView.class).readAttributes().size();
-                                        } catch (IOException ex) {
-                                            throw new RuntimeException("Cannot get file size for " + doc, ex);
-                                        }
-                                    })
-                                    .reduce(0l, (first, second) -> first + second);
-                        }));
-                        paths.addAll(tmpList);
-                    }
-
-                    long tmpSizeToCopy = 0;
-                    for (final Task<Long> t : sizeComputing) {
-                        tmpSizeToCopy += t.get();
-                    }
-                    final long sizeToCopy = tmpSizeToCopy;
-
                     // 3
+                    final long sizeToCopy = sizeTask.getValue();
                     if (sizeToCopy <= 0) {
                         new Alert(Alert.AlertType.INFORMATION, "Aucune donnée à copier.", ButtonType.OK).show();
                     } else if (outputSize.get() < sizeToCopy) {
                         new Alert(Alert.AlertType.ERROR, "Espace insuffisant sur le media de sortie.", ButtonType.OK).show();
                     } else {
                         // 4
-                        Platform.runLater(() -> {
-                            final String sourceReadable = SIRS.toReadableSize(sizeToCopy);
-                            final String outputName = mobileDocumentDir.get().toString();
-                            final String outputReadable = uiRemainingSpace.getText();
-                            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
-                                    "Vous allez copier " + sourceReadable + " sur " + outputName + " (Espace restant : " + outputReadable + ").\nÊtes-vous sûr ?",
-                                    ButtonType.NO, ButtonType.YES);
-                            alert.setResizable(true);
-                            ButtonType choice = alert.showAndWait().orElse(ButtonType.NO);
+                        final String sourceReadable = SIRS.toReadableSize(sizeToCopy);
+                        final String outputName = mobileDocumentDir.get().toString();
+                        final String outputReadable = uiRemainingSpace.getText();
+                        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                                "Vous allez copier " + sourceReadable + " sur " + outputName + " (Espace restant : " + outputReadable + ").\nÊtes-vous sûr ?",
+                                ButtonType.NO, ButtonType.YES);
+                        alert.setResizable(true);
+                        ButtonType choice = alert.showAndWait().orElse(ButtonType.NO);
 
-                            if (ButtonType.YES.equals(choice)) {
-                                final Path documentRootPath = SIRS.getDocumentRootPath();
-                                final CopyTask copyTask = new DocumentCopy(paths, destination, input -> {
-                                    for (final Map.Entry<Path, Collection<Path>> entry : toCopy.entrySet()) {
-                                        if (entry.getValue().contains(input)) {
-                                            return entry.getKey().resolve(documentRootPath.relativize(input));
-                                        }
-                                    }
-                                    throw new IllegalArgumentException("Input file is not registered as document !");
-                                });
-                                // 5
-                                copyTaskProperty.set(copyTask);
-                                // 6 & 7 : Let's do it !
-                                TaskManager.INSTANCE.submit(copyTask);
-                            }
-                        });
+                        if (ButtonType.YES.equals(choice)) {
+                            final CopyTask copyTask = new DocumentCopy(toCopy.keySet(), destination, input -> toCopy.get(input));
+                            // 5
+                            copyTaskProperty.set(copyTask);
+                            // 6 & 7 : Let's do it !
+                            TaskManager.INSTANCE.submit(copyTask);
+                        }
                     }
-                } catch (Exception e) {
-                    SirsCore.LOGGER.log(Level.WARNING, "Impossible to compute file list for copy.", e);
-                    Platform.runLater(() -> GeotkFX.newExceptionDialog("Une erreur est survenue pendant l'analyse des fichiers à copier.", e).show());
                 } finally {
-                    Platform.runLater(() -> uiLoadingPane.setVisible(false));
+                    uiLoadingPane.setVisible(false);
                 }
-            }
-        });
+            }));
+
+            TaskManager.INSTANCE.submit(sizeTask);
+        }));
+
+        TaskManager.INSTANCE.submit(listFileTask);
     }
 
     private class FocusListener implements ChangeListener<Boolean> {
