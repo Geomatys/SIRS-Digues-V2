@@ -1,4 +1,4 @@
-package fr.sirs.plugins.mobile;
+package fr.sirs.plugins.synchro;
 
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import javafx.scene.Parent;

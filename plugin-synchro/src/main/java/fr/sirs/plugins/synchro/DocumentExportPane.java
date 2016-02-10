@@ -1,4 +1,4 @@
-package fr.sirs.plugins.mobile;
+package fr.sirs.plugins.synchro;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.Injector;
@@ -244,7 +244,7 @@ public class DocumentExportPane extends StackPane {
      */
     @FXML
     private void chooseOutputDir() {
-        mobileDocumentDir.set(MobilePlugin.chooseMedia(getScene().getWindow()));
+        mobileDocumentDir.set(SynchroPlugin.chooseMedia(getScene().getWindow()));
     }
 
     /**
@@ -503,8 +503,8 @@ public class DocumentExportPane extends StackPane {
         }
 
         final Path[] toCheck = new Path[]{
-            destination.resolve(MobilePlugin.DOCUMENT_FOLDER),
-            destination.resolve(MobilePlugin.PHOTO_FOLDER)
+            destination.resolve(SynchroPlugin.DOCUMENT_FOLDER),
+            destination.resolve(SynchroPlugin.PHOTO_FOLDER)
         };
         for (final Path tmpPath : toCheck) {
             if (!Files.isDirectory(tmpPath)) {
@@ -548,7 +548,7 @@ public class DocumentExportPane extends StackPane {
                 root = DocumentRoots.getRoot(ref).orElseThrow(() -> new IllegalStateException("Aucune dossier racine trouvé pour les documents !"));
                 docInput = SIRS.concatenatePaths(root, chemin);
                 if (Files.isRegularFile(docInput)) {
-                    docDest = MobilePlugin.DOCUMENT_FOLDER.resolve(root.relativize(docInput));
+                    docDest = SynchroPlugin.DOCUMENT_FOLDER.resolve(root.relativize(docInput));
                     docMap.put(docInput, docDest);
                 }
             }
@@ -601,7 +601,7 @@ public class DocumentExportPane extends StackPane {
                         root = DocumentRoots.getRoot(photo).orElseThrow(() -> new IllegalStateException("Aucune dossier racine trouvé pour les photographies !"));
                         docInput = SIRS.concatenatePaths(root, chemin);
                         if (Files.isRegularFile(docInput)) {
-                            docDest = MobilePlugin.PHOTO_FOLDER.resolve(root.relativize(docInput));
+                            docDest = SynchroPlugin.PHOTO_FOLDER.resolve(root.relativize(docInput));
                             docMap.put(docInput, docDest);
                         }
                     }

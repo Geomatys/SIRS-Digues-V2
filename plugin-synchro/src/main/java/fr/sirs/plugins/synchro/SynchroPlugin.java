@@ -1,4 +1,4 @@
-package fr.sirs.plugins.mobile;
+package fr.sirs.plugins.synchro;
 
 import fr.sirs.Plugin;
 import fr.sirs.SIRS;
@@ -28,10 +28,10 @@ import org.geotoolkit.internal.GeotkFX;
  * @author Alexis Manin (Geomatys)
  * @author Cédric Briançon (Geomatys)
  */
-public class MobilePlugin extends Plugin {
+public class SynchroPlugin extends Plugin {
 
-    private static final String NAME = "mobile-desktop";
-    private static final String TITLE = "Application mobile";
+    private static final String NAME = "plugin-synchro";
+    private static final String TITLE = "Synchronisation mobile";
 
     private static final Image PLUGIN_ICON = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_MOBILE, 100, Color.BLACK), null);
 
@@ -39,7 +39,7 @@ public class MobilePlugin extends Plugin {
     static final Path DOCUMENT_FOLDER = Paths.get("files", "documents");
     static final Path PHOTO_FOLDER = Paths.get("files", "medias");
 
-    public MobilePlugin() {
+    public SynchroPlugin() {
         name = NAME;
         loadingMessage.set("Chargement du module pour la synchronisation bureau/mobile");
         themes.add(new DocumentExportTheme());
@@ -129,7 +129,7 @@ public class MobilePlugin extends Plugin {
                     }
 
                     for (final Path toAnalyze : toIterateOn) {
-                        final Path appDir = MobilePlugin.resolvePath(toAnalyze, MobilePlugin.MOBILE_APP_DIR);
+                        final Path appDir = SynchroPlugin.resolvePath(toAnalyze, SynchroPlugin.MOBILE_APP_DIR);
                         if (Files.isDirectory(appDir)) {
                             result = appDir;
                             break;

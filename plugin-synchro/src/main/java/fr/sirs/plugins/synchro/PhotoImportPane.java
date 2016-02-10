@@ -1,4 +1,4 @@
-package fr.sirs.plugins.mobile;
+package fr.sirs.plugins.synchro;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
@@ -332,7 +332,7 @@ public class PhotoImportPane extends StackPane {
 
     @FXML
     void chooseSource(ActionEvent event) {
-        sourceDirProperty.set(MobilePlugin.chooseMedia(getScene().getWindow()));
+        sourceDirProperty.set(SynchroPlugin.chooseMedia(getScene().getWindow()));
     }
 
     @FXML
@@ -401,7 +401,7 @@ public class PhotoImportPane extends StackPane {
             return;
         }
 
-        tmpSource = tmpSource.resolve(MobilePlugin.PHOTO_FOLDER);
+        tmpSource = tmpSource.resolve(SynchroPlugin.PHOTO_FOLDER);
         if (!Files.isDirectory(tmpSource)) {
             warning("Aucune photo disponible pour import sur le périphérique mobile.");
             return;

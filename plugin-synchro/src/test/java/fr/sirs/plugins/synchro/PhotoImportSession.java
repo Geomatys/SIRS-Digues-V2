@@ -1,4 +1,4 @@
-package fr.sirs.plugins.mobile;
+package fr.sirs.plugins.synchro;
 
 import fr.sirs.Session;
 import org.ektorp.CouchDbConnector;

@@ -1,5 +1,6 @@
-package fr.sirs.plugins.mobile;
+package fr.sirs.plugins.synchro;
 
+import fr.sirs.plugins.synchro.PhotoImportPane;
 import fr.sirs.core.component.DatabaseRegistry;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;

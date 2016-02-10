@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.sirs.plugins.mobile</groupId>
     <!-- Name of the plugin, used for packaging and description -->
-    <artifactId>mobile-desktop</artifactId>
+    <artifactId>plugin-synchro</artifactId>
     <!-- Version must be composed of two integers (major and minor version) separated by a dot. -->
     <version>1.0</version>
     <packaging>jar</packaging>
     
-    <name>Plugin mobile</name>
-    <description>Gère la synchronisation entre le mobile et l'application bureau</description>
+    <name>Synchonisation mobile</name>
+    <description>Gère la synchronisation entre l'application mobile et le logiciel bureau</description>
     <!--url>http://www.myorganization.org</url-->
 
     <parent>
