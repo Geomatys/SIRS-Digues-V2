@@ -1,0 +1,277 @@
+<%@ jet package="fr.sirs.couchdb.generator"
+class="FXModel2sqlGenerator" imports ="java.util.List org.eclipse.emf.ecore.* org.eclipse.emf.common.util.EList;" %>
+<% SQLModelHelper helper = (SQLModelHelper) argument; %>
+
+package <%= helper.getPackage() %>;
+
+import java.sql.*;
+import java.time.ZoneOffset;
+import java.time.LocalTime;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
+import org.geotoolkit.referencing.LinearReferencing;
+
+import fr.sirs.core.model.*;
+import fr.sirs.core.h2.H2Helper.StatementPool;
+<% if(helper.hasSrid() ) { %>
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
+<% } 
+
+final boolean referenceParent = !helper.isAbstract() && helper.isContained();
+final List<EAttribute> singleAtts = helper.getAllSingleAttributes();
+final List<EReference> singleRefs = helper.getAllSingleReferences(true);
+%>
+
+public class <%= helper.getClassName() %>2sql  {
+
+    private static final String CREATE = "CREATE TABLE \\"<%= helper.getTableName() %>\\" ( " +
+       "\\"id\\" VARCHAR(64) PRIMARY KEY" +
+<% 
+    if (referenceParent) { 
+%>
+       ", \\"parent_id\\" VARCHAR(64) NOT NULL" + 
+<% 
+    }
+
+    // Si on a une classe abstraite, on ajoute une colonne contenant le nom de la table "concrete"
+    if (helper.isAbstract()) { 
+%>
+       ", \\"concrete_table_name\\" VARCHAR(64) NOT NULL" + 
+<% 
+    }
+
+    for(final EAttribute att : singleAtts){
+%>
+        ", \\"<%= helper.lcFirst(att) %>\\" <%= helper.getSQLType(att) %>" +
+<%  
+    }
+        
+    for(final EReference ref: singleRefs ) { 
+%>
+        ", \\"<%= ref.getName() %>\\" CHAR(64)" +
+<%  
+    } 
+%>
+        " )";
+            
+    private static final String INSERT = "INSERT INTO \\"<%= helper.getTableName() %>\\" ( " +
+        "\\"id\\" " +
+<% 
+    if (referenceParent) { 
+%>
+        ", \\"parent_id\\" " +
+<% 
+    }
+
+    // Si on a une classe abstraite, il faut remplir la colonne contenant le nom de la table concrete.
+    if (helper.isAbstract()) { 
+%>
+        ", \\"concrete_table_name\\" " +
+<% 
+    } 
+
+    for(final EAttribute att : singleAtts){
+%>
+        ", \\"<%= helper.lcFirst(att) %>\\"" +       
+<%  
+    }
+
+    for(final EReference ref : singleRefs ) { 
+%>
+        ", \\"<%= ref.getName() %>\\"" +
+<% 
+    } 
+%> 
+        ") values(? " +
+<% 
+    if (referenceParent) {
+%>
+        ", ?" +
+<% 
+    } 
+
+    // Si on a une classe abstraite, il faut remplir la colonne contenant le nom de la table concrete.
+    if (helper.isAbstract()) { 
+%>
+        ", ?" +
+<% 
+    } 
+
+    for(final EAttribute att : singleAtts){
+
+        if(helper.isGeometric(att)) { 
+%>
+        ", ST_GeomFromText(?,?)" +
+<% 
+        } else { 
+%>
+        ", ?" +
+<% 
+        }
+    }
+    
+    for(final EReference ref : singleRefs ) {
+%>
+        ", ? " +
+<%
+    } 
+%>
+        ")" ;
+    
+    
+    public static void createTable(Connection conn, int srid) throws SQLException{
+        final PreparedStatement st = StatementPool.getOrPrepareStatement(conn, CREATE);
+<% for(int i=0; i < helper.getSridCount(); i++ ) { %>
+        st.setInt(<%= i+1 %>, srid);        
+<% } %>
+        st.execute();
+    }
+    
+    
+    public static boolean insert(Connection conn, <%= helper.getClassName() %> toInsert) throws SQLException {
+<% 
+    { 
+        int n=1, geoN=0;  
+%>
+        final PreparedStatement st = StatementPool.getOrPrepareStatement(conn, INSERT);
+        st.setString(<%= n %>, toInsert.getId());
+<% 
+        if(referenceParent) {
+            n++;
+%>
+        st.setString(<%= n %>, toInsert.getParent().getId());
+<% 
+        }        
+
+        if(helper.isAbstract()) {
+            n++;
+%>
+        st.setString(<%= n %>, toInsert.getClass().getSimpleName());
+<% 
+        }  
+   
+        for(final EAttribute att : singleAtts){
+            n++;
+            if( "Timestamp".equals(helper.getSQLParam( att )) ) { 
+%>
+        if(toInsert.<%= helper.getter(att) %>() != null )
+            st.setTimestamp(<%= n+geoN %>, new Timestamp(toInsert.<%= helper.sqlGetter(att) %>));
+        else
+            st.setTimestamp(<%= n+geoN %>, null);
+<%   
+            } 
+            else if( helper.isGeometric(att) ) {
+%>
+        if(toInsert.<%= helper.getter(att) %>() != null ){
+            st.setString(<%= n+geoN %>, toInsert.<%= helper.sqlGetter(att) %> );
+            st.setInt(<%= n+geoN +1 %>, InjectorCore.getBean(SessionCore.class).getSrid()); 
+        } else {
+<% 
+                if ( "Point".equals(helper.getClassName(att))) { 
+%>
+            if (toInsert.getGeometry() != null) {
+                final LineString line = LinearReferencing.asLineString(toInsert.getGeometry());
+                final Point point = <%=att.getName().toLowerCase().contains("fin")? "line.getEndPoint()" : "line.getStartPoint()"%>;
+                st.setString(<%= n+geoN %>, point.toText());
+            } else {
+                st.setString(<%= n+geoN %>, "POINT(0 0)");
+            }
+<% 
+                } 
+                else { 
+%>
+            st.setString(<%= n+geoN %>, "LINESTRING empty");
+<% 
+                } 
+%>
+            st.setInt(<%= n+geoN + 1 %>, InjectorCore.getBean(SessionCore.class).getSrid()); 
+        }
+<% 
+                geoN++; 
+            } else { 
+%>
+        st.set<%= helper.getSQLParam( att ) %>(<%= n+geoN %>, toInsert.<%= helper.sqlGetter(att) %>);
+<%   
+            } 
+        } 
+%>
+
+<% 
+    for(final EReference refInsert: singleRefs ) {
+        n++;
+        if(!refInsert.isContainer()){
+%>
+        st.setString(<%= n+geoN %>, toInsert.<%= helper.sqlGetter(refInsert) %>);
+<%      
+        }
+    } 
+%>      
+
+        boolean result = st.execute();
+
+<% 
+    for(final EReference ref : helper.getEReferences() ){
+        if(ref.isContainment() && ref.isMany()) {
+%>
+        //<%= helper.getClassName(ref) %>
+        for(<%= helper.getClassName(ref) %> child: toInsert.<%= helper.getter(ref) %>()){
+           result &= <%= helper.getClassName(ref) %>2sql.insert(conn, child);
+        }
+<%   
+        } 
+    } 
+%>
+        return result;
+<% 
+    } 
+%>
+    }
+    
+    public static boolean update(Connection conn, <%= helper.getClassName() %> <%= helper.getInstanceName() %>) throws SQLException{
+        return delete(conn, <%= helper.getInstanceName() %>) & insert(conn, <%= helper.getInstanceName() %>);
+    }
+    
+    
+    public static boolean delete(Connection conn, <%= helper.getClassName() %>  <%= helper.getInstanceName() %>) throws SQLException {
+<% 
+    for(final EReference ref : helper.getEReferences() ){ 
+        if( ref.isContainment()) {
+            if(ref.isMany()){
+%>
+        for(<%= helper.getClassName(ref) %> child: <%= helper.getInstanceName() %>.<%= helper.getter(ref) %>()){
+           <%= helper.getClassName(ref) %>2sql.delete(conn, child);
+        }
+<%
+            }
+            else {
+%>
+        <%= helper.getClassName(ref) %>2sql.delete(conn, <%= helper.getInstanceName() %>.<%= helper.getter(ref) %>());
+<%
+            }
+        } 
+    } 
+%>
+       PreparedStatement st  = StatementPool.getOrPrepareStatement(conn, "DELETE FROM \\"<%= helper.getTableName() %>\\" where \\"id\\" = ?");
+       st.setString(1, <%= helper.getInstanceName() %>.getId());
+       return st.execute();
+       
+    }
+    
+    public static void addForeignKeys(Connection conn) throws SQLException {
+<% 
+    for(final EReference ref: singleRefs ) {
+%>
+        StatementPool.getOrPrepareStatement(conn, "ALTER TABLE \\"<%= helper.getTableName() %>\\" ADD FOREIGN KEY (\\"<%= ref.getName()  %>\\")  REFERENCES \\"<%= helper.getTableName(ref) %>\\"(\\"id\\")").execute();
+<% 
+    } //END FOR 
+
+    if(referenceParent && helper.hasContainerConcreteAndUnique()) { 
+%>
+        StatementPool.getOrPrepareStatement(conn, "ALTER TABLE \\"<%= helper.getTableName() %>\\" ADD FOREIGN KEY (\\"parent_id\\") REFERENCES \\"<%= helper.getParentTableName() %>\\"(\\"id\\")").execute();
+<%  
+    } 
+%> 
+    }
+}
+

@@ -1,0 +1,317 @@
+<%@ jet package="fr.sirs.couchdb.generator"
+class="FXMLGenerator" imports ="java.util.* org.eclipse.emf.ecore.* org.eclipse.emf.common.util.EList;" %>
+<% ModelHelper helper = (ModelHelper) argument; %>
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import fr.sirs.theme.ui.*?>
+<?import fr.sirs.util.FXFileTextField?>
+<?import fr.sirs.util.FXComponentField?>
+<?import org.geotoolkit.gui.javafx.util.*?>
+<?import jidefx.scene.control.field.*?>
+<?import jfxtras.scene.control.*?>
+<?import javafx.scene.web.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+
+<%
+////////////////////////////////////////////////////
+//
+// PRE-COMPUTING 
+//
+////////////////////////////////////////////////////
+ 
+/* Store different kind of reference for each class, to avoid multiple loops.
+ * Here are the different types of reference : 
+ *
+ * - Combo references : Unique reference which point on an external element.
+ * User can only change the reference to another element of the same type.
+ *  
+ * - Contained references : point on an internal element. User can edit it.
+ *
+ * - Table references : A list of references to contained or external elements.
+ * We can edit them, as we should be able to create / delete new entries in it.
+ * We can find two types of Table references : contained or external. Mechanisms
+ * used for data interaction are slightly different, but the display is the same. 
+ *
+ * Also, we filter attributes (plain data, not object references), and keep 
+ * only the ones we can find an editor for. 
+ */
+EReference foreignParentReference = null;
+final Map<EClass, List<EReference> > comboReferences = new HashMap<>();
+final Map<EClass, List<EReference> > containedReferences = new HashMap<>();
+final Map<EClass, List<EReference> > containedSingleReferences = new HashMap<>();
+final Map<EClass, List<EReference> > tableReferences = new HashMap<>();
+final Map<EClass, List<EAttribute> > managedAttributes = new HashMap<>();
+
+for(EClass eClass: helper.getTypeTree() ) {
+
+    /*
+     * Check for which attributes we can display editor.
+     * We ignore update date attribute, because it must
+     * handled automatically by our repositories.
+     *
+     * We also ignore designation, author and valid attributes.
+     */
+     final List<EAttribute> attributes = new ArrayList<>();
+    managedAttributes.put(eClass, attributes);
+    for (EAttribute eAtt: eClass.getEAttributes()) {
+        if (eAtt.getName().equalsIgnoreCase(Helper.DATE_DEBUT_FIELD_NAME)) continue;
+        if (eAtt.getName().equalsIgnoreCase(Helper.DATE_FIN_FIELD_NAME)) continue;
+        if (eAtt.getName().equalsIgnoreCase(Helper.DATE_MAJ_FIELD_NAME)) continue;
+        if (eAtt.getName().equalsIgnoreCase(Helper.DESIGNATION_FIELD_NAME)) continue;
+        if (eAtt.getName().equalsIgnoreCase(Helper.VALID_FIELD_NAME)) continue;
+        if (eAtt.getName().equalsIgnoreCase(Helper.AUTHOR_FIELD_NAME)) continue;
+        if (ModelHelper.isManaged(eAtt)) {
+            attributes.add(eAtt);
+        }
+    }
+
+    /*
+     * We check what type of reference we've got, to know if we need to create
+     * Tables and complex editors.
+     */
+    final List<EReference> cbRefs = new ArrayList<>();
+    final List<EReference> containedRefs = new ArrayList<>();
+    final List<EReference> containedSingleRefs = new ArrayList<>();
+    final List<EReference> TableRefs = new ArrayList<>();
+    comboReferences.put(eClass, cbRefs);
+    containedReferences.put(eClass, containedRefs);
+    containedSingleReferences.put(eClass, containedSingleRefs);
+    tableReferences.put(eClass, TableRefs);
+
+    for(EReference eRef: eClass.getEReferences() ) { 
+        if(Helper.isForeignParentReference(eRef)) {
+            foreignParentReference = eRef;
+            continue;
+        }
+
+        // We do not want references to parent document. This will be handled explicitely using parentProperty attribute from the model.
+        final EReference oppositeRef = eRef.getEOpposite();
+        if (oppositeRef != null && oppositeRef.isContainment()) {
+            continue;
+        }
+
+        if(Helper.isComboBoxReference(eRef)) cbRefs.add(eRef);
+        else if (Helper.isTableReference(eRef)) TableRefs.add(eRef);
+        else if (Helper.isContainedMultipleReference(eRef)) containedRefs.add(eRef);
+        else if (Helper.isContainedSingleReference(eRef)) containedSingleRefs.add(eRef);
+    }
+}
+
+////////////////////////////////////////////////////
+//
+// UI TEMPLATE 
+//
+////////////////////////////////////////////////////
+%>
+
+<fx:root fx:id="uiBorderPane" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+  <center>
+    <TabPane TabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <tabs>
+
+<!-- ATTRIBUTE TAB-->
+        <Tab text="Informations">
+          <ScrollPane>
+            <content>
+          <VBox spacing="30.0" BorderPane.alignment="CENTER">
+            <children>
+
+<%
+if (helper.hasBornesTemporelles()) {
+%>
+  <FXValidityPeriodPane fx:id="uiValidityPeriod"/>
+<%
+}
+
+/*
+ * If the current element is not a CouchDb document, we must allow user to change its container.
+ */
+if (!helper.hasDocument()) {
+%>
+            <HBox fx:id="ui_parent_box" spacing="20.0" alignment="CENTER_LEFT" styleClass="gray-light">
+              <children>
+                <Label fx:id="ui_parent_label" text="Conteneur" maxHeight="-Infinity" maxWidth="-Infinity"/>
+                <ComboBox fx:id="ui_parent_choice"/>
+                <Button fx:id="ui_parent_link"/>
+              </children>
+              <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+              </padding>
+            </HBox>
+
+<%
+} else if (foreignParentReference!=null) {
+%>
+            <HBox fx:id="ui_parent_box" spacing="20.0" alignment="CENTER_LEFT" styleClass="gray-light">
+              <children>
+                <Label fx:id="<%= foreignParentReference.getName() %>" text="%<%= foreignParentReference.getName()%>" maxHeight="-Infinity" maxWidth="-Infinity"/>
+                <ComboBox fx:id="ui_<%= foreignParentReference.getName()  %>"/>
+                <Button fx:id="ui_<%= foreignParentReference.getName()  %>_link"/>
+              </children>
+              <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+              </padding>
+            </HBox>
+
+<%
+}
+            
+if(helper.isPositionable() ) { 
+    if(helper.isPositionableVegetation()){
+%>                     
+<!-- POSITIONEMENT -->
+    <FXPositionableVegetationPane fx:id="uiPositionable" />  
+<% 
+    }
+    else {
+%>                     
+<!-- POSITIONEMENT -->
+    <FXPositionablePane fx:id="uiPositionable" />  
+<% 
+    }
+}
+
+%>
+
+<!-- FORM WHICH WILL CONTAIN ALL SIMPLE EDITORS -->
+
+<%
+/*
+ * For each Pane, we'll make a grid with simple attributes which can be filled 
+ * with a single lined editor. For references which need a complex panel or a 
+ * Table, we will put them into another Tab.
+ */
+for(final EClass eClass : helper.getTypeTree() ) {
+    final List<EReference> comboRefs = comboReferences.get(eClass);
+    final List<EReference> singleContainedReferences = containedSingleReferences.get(eClass);
+    final List<EAttribute> attributes = managedAttributes.get(eClass);
+    if(!(comboRefs.size()==0 
+        && (attributes.size()==0 
+            || (attributes.size()==1 && Helper.COMMENTAIRE_FIELD_NAME.equals(attributes.get(0).getName()))))){
+%>
+
+            <!-- <%= eClass.getName() %> -->
+            <GridPane hgap="10.0" styleClass="gray-light" vgap="10.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="NEVER" />
+                <ColumnConstraints hgrow="ALWAYS" />
+              </columnConstraints>
+              <!--rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints-->
+              <children>
+<% 
+    int nAtt=0;
+    for(final EAttribute eAtt: attributes) {
+        final String controlName = helper.getXControl(eAtt);
+        if(Helper.COMMENTAIRE_FIELD_NAME.equals(eAtt.getName()) ) continue; 
+        else if(controlName!=null){
+%>
+                   <!-- <%= eAtt.getEType().getName() %> -->                 
+                   <Label text="%<%= eAtt.getName() %>" GridPane.rowIndex="<%= nAtt %>" />
+                   <<%= controlName %> fx:id="ui_<%= eAtt.getName()  %>" GridPane.columnIndex="1" GridPane.rowIndex="<%= nAtt %>"  <%if(!"libelle".equals(eAtt.getName()) && !"chemin".equals(eAtt.getName())){%>maxHeight="-Infinity" maxWidth="-Infinity"<%}%>/>
+<%
+        }
+        nAtt++;
+    }
+
+    for(final EReference eRef: comboRefs) {
+        //Cas de la liste des SR/dZ des profils en long : on n'affiche pas de combobox pour cette référence qui est traitée à part dans la pojoTable
+        if(!(helper.isProfilLong() && Helper.SYSTEME_REP_DZ_PROFIL_EN_LONG_REF.equals(eRef.getName()))
+            && !(helper.isLigneEau() && Helper.SYSTEME_REP_DZ_LIGNE_EAU_REF.equals(eRef.getName()))){
+%>
+                   <Label text="%<%= eRef.getName() %>" GridPane.rowIndex="<%= nAtt %>" />
+                   <ComboBox fx:id="ui_<%= eRef.getName()  %>" GridPane.columnIndex="1" GridPane.rowIndex="<%= nAtt %>" />
+                   <Button fx:id="ui_<%= eRef.getName()  %>_link" GridPane.columnIndex="2" GridPane.rowIndex="<%= nAtt %>" />
+<%      
+            nAtt++;
+        } 
+    }
+
+    for(final EReference eRef : singleContainedReferences){
+%>
+                    <!-- <%= eRef.getEType().getName() %> -->                 
+                   <Label text="%<%= eRef.getName() %>" GridPane.rowIndex="<%= nAtt %>" />
+                   <<%= helper.getXControl(eRef) %> fx:id="ui_<%= eRef.getName()  %>" GridPane.columnIndex="1" GridPane.rowIndex="<%= nAtt %>" />
+<% 
+        nAtt++;
+    } 
+%>
+
+              </children>
+              <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+              </padding>
+            </GridPane>
+<% 
+    }
+} 
+
+   if(helper.isAvecCommentaire()) { 
+%>
+            <HTMLEditor fx:id="<%=Helper.COMMENTAIRE_UI%>" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contentediTable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" maxHeight="-Infinity"  prefHeight="200.0" styleClass="gray-light" />
+<% } 
+
+    if(helper.isPhoto()){
+%>
+            <ImageView fx:id="<%=Helper.PHOTO_UI%>" pickOnBounds="true" preserveRatio="true" />
+<% } %>
+
+            </children>
+            <padding>
+              <Insets bottom="10.0" left="50.0" right="50.0" top="30.0" />
+            </padding>
+          </VBox>
+            </content>
+          </ScrollPane>
+        </Tab>
+
+<!-- REFERENCE TABS -->
+<%
+    for(EClass eClass: helper.getTypeTree() ) {
+        final List<EReference> Tables = tableReferences.get(eClass);
+        final List<EReference> contained = containedReferences.get(eClass);
+
+        for (final EReference eRef : contained) {
+%>
+        <Tab fx:id="ui_<%=eRef.getName()%>" text="%<%=eRef.getName()%>"/>
+<%
+        }
+
+        for (final EReference eRef : Tables) {
+%>
+        <Tab fx:id="ui_<%=eRef.getName()%>" text="%<%=eRef.getName()%>"/>
+<%
+        }
+    }
+
+    /*
+    Onglets particuliers :
+    - positions de documents pour les documents
+    - zones de végétation pour les parcelles
+    */
+    if(helper.isSIRSDocument()){
+%>
+        <Tab fx:id="<%=Helper.POSITION_DOCUMENT_UI%>" text="<%=helper.getPositionDocumentHeader()%>"/>
+<%
+    } 
+    else if (helper.isParcelleVegetation()) {
+%>
+        <Tab fx:id="<%=Helper.ZONE_VEGETATION_UI%>" text="<%=Helper.getZonesVegetationHeader()%>"/>
+<%
+    }
+%>
+
+      </tabs>
+    </TabPane>
+  </center>
+
+</fx:root>
+

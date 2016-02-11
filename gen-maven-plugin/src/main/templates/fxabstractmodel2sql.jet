@@ -1,0 +1,37 @@
+<%@ jet package="fr.sirs.couchdb.generator"
+class="FXModel2abstractSqlGenerator" imports ="java.util.Iterator org.eclipse.emf.ecore.* org.eclipse.emf.common.util.EList;" %>
+<% ModelHelper helper = (ModelHelper) argument; %>
+
+package <%= helper.getPackage() %>;
+
+import java.sql.*;
+
+import fr.sirs.core.model.*;
+
+public class <%= helper.getClassName() %>2sql  {
+
+    
+    
+    public static boolean insert(Connection conn, Element element) throws SQLException {
+     <% for(EClass eObject : helper.getAllChildrenClass() ) { %>
+        if(element instanceof <%= helper.className(eObject.getName()) %> )
+            return <%= helper.className(eObject.getName()) %>2sql.insert(conn, (<%= helper.className(eObject.getName()) %>)element);
+    <% } %>
+        return false;
+    }
+    
+    
+    
+    public static boolean delete(Connection conn, Element element ) throws SQLException {
+    
+    <% for(EClass eObject : helper.getAllChildrenClass() ) { %>
+        if(element instanceof <%= helper.className(eObject.getName()) %> )
+            return <%= helper.className(eObject.getName()) %>2sql.delete(conn, (<%= helper.className(eObject.getName()) %>)element);
+    <% } %>
+        return false;
+    }
+    
+    
+    
+}
+

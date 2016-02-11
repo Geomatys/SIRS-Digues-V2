@@ -1,0 +1,1084 @@
+<%@ jet package="fr.sirs.couchdb.generator"
+class="FXModelGenerator" imports ="java.util.Iterator java.util.List java.util.ArrayList org.eclipse.emf.ecore.* org.eclipse.emf.common.util.EList;" %>
+
+<% ModelHelper helper = (ModelHelper) argument; %>
+
+package <%= helper.getPackage() %>;
+
+<% for(String imp: helper.imports() ) { %>
+import <%= imp %>;
+<% } %>
+<%
+if (Helper.POSITIONABLE_CLASS_NAME.equals(helper.getClassName())) {
+%>
+import fr.sirs.core.component.ComputeEnvelopeOnGeometryChange;
+<%
+}
+%>
+
+<% 
+/**
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  EN-TETE                                   //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+EN-TETE POUR LES INTERFACES
+*/
+if(helper.isInterface()){
+%>
+public interface <%=helper.getClassName() %> <%=("".equals(helper.getExtends())) ? "extends " : helper.getExtends()+", " %> Element {
+<%
+}
+
+/**
+EN-TETE POUR LES CLASSES CONCRETES OU ABSTRAITES
+*/
+else {
+    if (!helper.isAbstract()) {
+%>
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(Include.NON_EMPTY)
+@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
+@SuppressWarnings("serial")
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+<%
+    }
+%>
+public <% if(helper.isAbstract()) {%>abstract <% } %>class <%= helper.getClassName() %> <%= helper.getExtends() %> 
+    implements Element <%= helper.getDeducedInterfaces() %> <%=("".equals(helper.getModelInterfaces())) ? "" : ", " %> <%= helper.getModelInterfaces() %> {
+<%
+}
+// FIN DE L'EN-TETE ============================================================
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                 CONTRAT                                    //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+if(helper.isAbstract()){ 
+    if(helper.isInterface()) {
+        for(final EOperation operation : helper.getEOperations()){
+%>
+    <%= helper.getSignature(operation) %>;
+<%
+        }
+    }
+    else {
+        for(final EOperation operation : helper.getEOperations()){
+%>
+    public abstract <%= helper.getSignature(operation) %>;
+<%
+        }
+    }
+}
+// FIN DU CONTRAT ==============================================================
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                              IMPLEMENTATION                                //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+Implémentation des constructeurs.
+
+=> Pour la classe Positionable, on implémente un constructeur spécifique permettant
+de gérer la géométrie.
+
+=> Pour les autres classes, on implémente un constructeur uniquement si la classe
+est concrète. Le constructeur est déprécié de manière à alerter sur son usage afin 
+de passer préférentiellement par les outils de l'application destinés à la création
+des instances.
+*/
+if (Helper.POSITIONABLE_CLASS_NAME.equals(helper.getClassName())) {
+%>
+    protected <%= helper.getClassName() %>() {
+        super();
+        this.geometryProperty().addListener(new ComputeEnvelopeOnGeometryChange(this));
+    }
+<%
+} 
+else if(!helper.isAbstract()) {
+%>
+    /**
+    * @deprecated Please avoid to use this constructor from application because 
+    * of validity/author control. If the element you want to create is a 
+    * couchDB document, you can use the create() method from the corresponding 
+    * repo. On the contrary, use the T createElement(Class clazz) method
+    * of the ElementCreator available in the Session.
+    */
+    @Deprecated public <%= helper.getClassName() %>() {super();}
+<%
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PART 1
+//==============================================================================
+// SPECIFIC PART GENERATION FOR COUCHDBDOCUMENTS, OBJECTS ETC.
+////////////////////////////////////////////////////////////////////////////////
+
+/* 
+ * If input class is couchDB document itself (i.e : not an internal structure of 
+ * a document, but the root of the document itself), we've got to define some 
+ * CouchDB mandatory attibutes.
+ */
+if(helper.hasDocument()) { %>
+
+    //
+    // BEGIN-DUP This code is duplicated from org.ektorp.support.CouchDbDocument
+    //
+    public static final String ATTACHMENTS_NAME = "_attachments";
+
+    private String id;
+    private String revision;
+    private Map<String, Attachment> attachments;
+    private List<String> conflicts;
+    private Revisions revisions;
+
+    @Internal
+    @JsonProperty("_id")
+    public String getId() { 
+        return id;
+    }
+
+    @JsonProperty("_id")
+    public void setId(String s) {
+        Assert.hasText(s, "id must have a value");
+        if (id != null && id.equals(s)) {
+            return;
+        }
+        if (id != null) {
+            throw new IllegalStateException("cannot set id, id already set");
+        }
+        id = s;
+    }
+    
+    @Internal
+    @JsonProperty("_rev")
+    public String getRevision() {
+        return revision;
+    }
+
+    @JsonProperty("_rev")
+    public void setRevision(String s) {
+        // no empty strings thanks
+        if (s != null && s.length() == 0) {
+            return;
+        }
+        this.revision = s;
+    }
+
+    @Internal
+    @JsonIgnore
+    public boolean isNew() {
+        return revision == null;
+    }
+
+    @Internal
+    @JsonProperty(ATTACHMENTS_NAME)
+    public Map<String, Attachment> getAttachments() {
+        return attachments;
+    }
+    
+    @JsonProperty(ATTACHMENTS_NAME)
+    void setAttachments(Map<String, Attachment> attachments) {
+        this.attachments = attachments;
+    }
+
+    @JsonProperty("_conflicts")
+    void setConflicts(List<String> conflicts) {
+        this.conflicts = conflicts;
+    }
+
+    @JsonProperty("_revisions")
+    void setRevisions(Revisions r) {
+        this.revisions = r;
+    }
+    
+    /**
+     * Note: Will only be populated if this document has been loaded with the revisions option = true.
+     * @return
+     */
+    @Internal
+    @JsonIgnore
+    public Revisions getRevisions() {
+        return revisions;
+    }
+
+    /**
+     *
+     * @return a list of conflicting revisions. Note: Will only be populated if this document has been loaded through the CouchDbConnector.getWithConflicts method.
+     */
+    @Internal
+    @JsonIgnore
+    public List<String> getConflicts() {
+        return conflicts;
+    }
+    /**
+     *
+     * @return true if this document has a conflict. Note: Will only give a correct value if this document has been loaded through the CouchDbConnector.getWithConflicts method.
+     */
+    public boolean hasConflict() {
+        return conflicts != null && !conflicts.isEmpty();
+    }
+
+    protected void removeAttachment(String id) {
+        Assert.hasText(id, "id may not be null or emtpy");
+        if (attachments != null) {
+            attachments.remove(id);
+        }
+    }
+
+    protected void addInlineAttachment(Attachment a) {
+        Assert.notNull(a, "attachment may not be null");
+        Assert.hasText(a.getDataBase64(), "attachment must have data base64-encoded");
+        if (attachments == null) {
+            attachments = new HashMap<>();
+        }
+        attachments.put(a.getId(), a);
+    }
+        
+    //
+    // END-DUP
+    //
+    
+    /**
+     * @return the parent {@link Element} of the current object, or itself if its a CouchDB document root node.
+     * Can be null for newly created objects which has not been saved in database yet.
+     */
+    @Override
+    @Internal 
+    @JsonIgnore
+    public Element getCouchDBDocument() {
+        return this;
+    }
+    
+    @Override
+    @Internal
+    @JsonIgnore
+    public String getDocumentId() {
+        return getId();
+    }
+    
+    @Override
+    @JsonIgnore
+    public void setParent(Element parent){
+        //
+        // NOP 
+        //
+    }
+
+    /**
+     * @return the parent {@link Element} of the current element, or null if no parent is set.
+     * Note that no CouchDB document has a parent property. Only contained elements have one.
+     */
+    @Override
+    public ObjectProperty<Element> parentProperty() {
+        return null;
+    }
+   
+    /**
+     * @return the parent {@link Element} of the current element, or null if no parent is set.
+     * Note that no CouchDB document has a parent property. Only contained elements have one.
+     */
+    @Override
+    public Element getParent(){
+       return null;
+    }
+
+<% 
+} 
+
+else if (!helper.isInterface()) {
+    if (!helper.isAbstract()) {
+%>
+    private String id;
+
+    @Override
+    @Internal    
+    @JsonProperty("id")
+    public String getId(){
+        if(this.id==null)
+          this.id = UUID.randomUUID().toString();
+        return id;
+    }
+    
+    @JsonProperty("id")
+    public void setId(String id){
+        this.id = id;
+    }
+    
+    @Override
+    @Internal    
+    @JsonIgnore
+    public String getDocumentId(){
+        if(documentId != null)
+            return documentId;
+        if(parent == null )
+            return null;
+        if(parent.get()==null)
+            return null;
+        return parent.get().getDocumentId();
+    }
+        
+    /**
+     * @return the parent {@link Element} of the current object, or itself if its a CouchDB document root node.
+     * Can be null for newly created objects which has not been saved in database yet.
+     */
+    @Override
+    @Internal    
+    @JsonIgnore
+    public Element getCouchDBDocument(){
+        if(parent == null )
+            return null;
+        if(parent.get()==null)
+            return null;
+        return parent.get().getCouchDBDocument();
+    }
+<%
+    } 
+%>
+   
+    private String documentId;
+    
+    @JsonProperty(required=false)
+    public void setDocumentId(String documentId) {
+        this.documentId = documentId;
+    }
+   
+<% 
+    if (!helper.extendsObjet()) {
+%>
+    protected final ObjectProperty<Element> parent =  new SimpleObjectProperty<>();
+
+    /**
+     * @return the parent {@link Element} of the current element, or null if no parent is set.
+     * Note that no CouchDB document has a parent property. Only contained elements have one.
+     */
+    @Override
+    public ObjectProperty<Element> parentProperty() {
+        return parent;
+    }
+   
+    /**
+     * @return the parent {@link Element} of the current element, or null if no parent is set.
+     * Note that no CouchDB document has a parent property. Only contained elements have one.
+     */
+    @Override
+    public Element getParent(){
+       return parent.get();
+    }
+ 
+    @Override
+    @JsonBackReference("parent")
+    public void setParent(Element parent){
+       this.parent.set(parent);
+    } 
+<%
+    }
+}
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// PART 2
+//==============================================================================
+// SPECIFIC ATTRIBUTES GENERATION MODEL ATTRIBUTES AND REFERENCES.
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+Write attributes and FX accessors for model attributes.
+*/
+for(final EAttribute att : helper.getEAttributes()){
+    /*
+    Pour les attributs qui sont des listes, on ne génère pas d'attribut JavaFX
+    mais de simples listes.
+    */
+    if(att.isMany()){
+%>
+    /**
+    * Property for <%= helper.lcFirst(att) %>.
+    */
+    private <%= helper.getFXDeclaration( att ) %>  <%= helper.lcFirst(att) %> = <%= helper.getFXImplementation(att) %>();
+<%
+    } 
+    /*
+    Pour les attributs de cardinalité 1, on génère des attributs JavaFX
+    */
+    else {
+%>
+    /**
+    * JavaFX property for <%= helper.lcFirst(att) %>.
+    */
+<%
+    if ("date_debut".equalsIgnoreCase(helper.lcFirst(att))) {
+%>
+    private final <%= helper.getFXDeclaration( att ) %>  <%= helper.lcFirst(att) %> = new <%= helper.getFXImplementation( att ) %>(LocalDateTime.now().toLocalDate());
+<%  } else {
+%>
+    private final <%= helper.getFXDeclaration( att ) %>  <%= helper.lcFirst(att) %> = new <%= helper.getFXImplementation( att ) %>();
+<%
+    }
+%>    
+    /**
+    * Accessor for JavaFX property on <%= helper.lcFirst(att) %>.
+    */
+    public <%= helper.getFXDeclaration( att ) %> <%= helper.lcFirst(att) %>Property() {
+       return <%= helper.lcFirst(att) %>;
+    }
+<% 
+    }
+}
+
+/*
+Write attributes and FX accessors for references :
+A) Containement
+|---1) isMany
+|---2) not many
+B) Not containment => typed by String (for Id)
+|---1) isMany (List<String>)
+    |--- is interface => signature
+    |--- not an interface => implementation
+|---2) not many (String)
+    |--- is interface => signature
+    |--- not an interface => implementation
+*/
+
+// Do not write attributes into interfaces
+if(!helper.isInterface()){
+    for (final EReference ref : helper.getEReferences()) {
+        if (ref.isContainment() ) {
+            if(ref.isMany() ) {
+    %>
+    
+    public <%= helper.getFXDeclaration( ref ) %>  <%= helper.lcFirst(ref) %> = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+    
+    {
+        <%= helper.lcFirst(ref) %>.addListener(new ListChangeListener<Element>() {
+
+            @Override
+            public void onChanged(javafx.collections.ListChangeListener.Change<? extends Element> event) {
+                while(event.next()){
+                    for (Element element : event.getAddedSubList()) {
+                        element.setParent(<%= helper.getClassName() %>.this);
+                    }
+                }    
+            }
+        });
+    }
+    
+<%      
+            } 
+            else {
+%>
+     
+    public final <%= helper.getFXDeclaration( ref ) %>  <%= helper.lcFirst(ref) %> = new SimpleObjectProperty<>();
+     
+    {
+        <%= helper.lcFirst(ref) %>.addListener(new ChangeListener<Element>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Element> observable, Element oldValue, Element newValue) {
+                if(newValue != null) {
+                    newValue.setParent(<%= helper.getClassName() %>.this);
+                }
+            }
+        });
+    }
+<%     
+            } 
+        } else { 
+            if (ref.isMany() ) { 
+%>
+    private ObservableList<String> <%= helper.lcFirst(ref) %> = FXCollections.observableArrayList();
+<%
+            } else { 
+%>
+    private final StringProperty <%= helper.lcFirst(ref) %> = new SimpleStringProperty();
+    
+    public StringProperty <%= helper.lcFirst(ref) %>Property() {
+        return this.<%= helper.lcFirst(ref) %>;
+    }
+<% 
+            }    
+        } 
+    }
+}
+
+/*******************************************************************************
+Write accessors for model attributes.
+*******************************************************************************/
+for(EStructuralFeature att : helper.getEAttributes() ){
+
+    /*
+    Accesseurs pour les attributs qui sont des listes
+    */
+    if(att.isMany()){
+%>
+    <%= helper.getSerializer(att) %>    
+    public <%= helper.getAttributeClassName(att, false) %> <%= helper.getter(att) %>(){
+        return this.<%= helper.lcFirst(att) %>;
+    }
+    
+    <%= helper.getDeserializer(att) %>    
+    public void <%= helper.setter(att) %>(<%= helper.getAttributeClassName(att, true) %> <%= helper.lcFirst(att) %>){
+        this.<%= helper.lcFirst(att) %>.clear();
+        this.<%= helper.lcFirst(att) %>.addAll( <%= helper.lcFirst(att) %> );
+    }    
+<%
+    }
+
+    /*
+     Accesseurs pour les attributs qui ne sont pas des listes
+     */
+    else {
+        if(att.getEAnnotation("Reference")!=null){
+            final EAnnotation annotation = att.getEAnnotation("Reference");
+%>
+    @Reference(ref=<%=annotation.getDetails().get("ref")%>.class)
+<%}%><%= helper.getSerializer(att) %>    
+    public <%= helper.getAttributeClassName(att, false) %> <%= helper.getter(att) %>(){
+        return this.<%= helper.lcFirst(att) %>.get();
+    }
+    
+    <%= helper.getDeserializer(att) %>    
+    public void <%= helper.setter(att) %>(<%= helper.getAttributeClassName(att, true) %> <%= helper.lcFirst(att) %>){
+        this.<%= helper.lcFirst(att) %>.set(<%= helper.lcFirst(att) %>);
+    }
+<%
+    }
+} 
+
+/*******************************************************************************
+Write accessors for references :
+A) Containement
+|---1) isMany
+|---2) not many
+B) Not containment => typed by String (for Id)
+|---1) isMany (List<String>)
+    |--- is interface => signature
+    |--- not an interface => implementation
+|---2) not many (String)
+    |--- is interface => signature
+    |--- not an interface => implementation
+*******************************************************************************/
+for(final EReference eRef : helper.getEReferences()) {
+    if( eRef.isContainment() ) {
+    %>
+    
+    @Internal
+    @JsonManagedReference("parent")
+    public <%= helper.getAttributeClassName(eRef, false) %> <%= helper.getter(eRef) %>(){
+    <% 
+        if(eRef.isMany() ) {
+    %>
+        return this.<%= helper.lcFirst(eRef) %>;
+    <%  
+        } else { 
+    %>
+        return this.<%= helper.lcFirst(eRef) %>.get();
+    <% 
+        } 
+    %>
+    }
+
+    public void <%= helper.setter(eRef) %>(<%= helper.getAttributeClassName(eRef, true) %> <%= helper.lcFirst(eRef) %>){
+    <% 
+        if(eRef.isMany() ) {
+    %>
+        this.<%= helper.lcFirst(eRef) %>.clear();
+        this.<%= helper.lcFirst(eRef) %>.addAll( <%= helper.lcFirst(eRef) %> );
+    <%  
+        } else { 
+    %>
+        this.<%= helper.lcFirst(eRef) %>.set( <%= helper.lcFirst(eRef) %> );
+    <%  
+        }
+    %>
+    }
+    <% 
+    }
+    else {
+
+        // CAS DES INTERFACES : PAS D'IMPLÉMENTATION MAIS SIMPLE DÉCLARATION
+        if(helper.isInterface()){
+            if (eRef.isMany() ) {
+    %> 
+    @Reference(ref=<%= helper.getType(eRef)%>)
+    public ObservableList<String> <%= helper.getter(eRef) %>();
+
+    public void <%= helper.setter(eRef) %>(List<String> <%= helper.lcFirst(eRef) %>);
+    <%  
+            } else {
+    %>
+    @Reference(ref=<%= helper.getType(eRef)%>)  
+    public String <%= helper.getter(eRef) %>();
+
+    public void <%= helper.setter(eRef) %>(String <%= helper.lcFirst(eRef) %>);
+    <%
+            }
+        } 
+
+        // SI CE N'EST PAS UNE INTERFACE, ON IMPLEMENTE
+        else {
+            if (eRef.isMany()) {
+    %>
+    
+    @Reference(ref=<%= helper.getType(eRef)%>)
+    public ObservableList<String> <%= helper.getter(eRef) %>(){
+        return this.<%= helper.lcFirst(eRef) %>;
+    }
+
+    public void <%= helper.setter(eRef) %>(List<String> <%= helper.lcFirst(eRef) %>){
+        this.<%= helper.lcFirst(eRef) %>.clear();
+        this.<%= helper.lcFirst(eRef) %>.addAll(<%= helper.lcFirst(eRef) %>);
+    }
+    <%  
+            } else {
+    %>
+
+    @Reference(ref=<%= helper.getType(eRef)%>)  
+    public String <%= helper.getter(eRef) %>(){
+        return this.<%= helper.lcFirst(eRef) %>.get();
+    }
+
+    public void <%= helper.setter(eRef) %>(String <%= helper.lcFirst(eRef) %>){
+        this.<%= helper.lcFirst(eRef) %>.set( <%= helper.lcFirst(eRef) %> );
+    }
+    <%    
+                // SI LA REFERENCE EST "FOREIGN PARENT" IL FAUT EGALEMENT IMPLEMENTER LES METHODES DE L'INTERFACE DEDIEE
+                if(helper.isForeignParentReference(eRef)){
+    %>
+    
+    @Override
+    @Reference(ref=<%= helper.getType(eRef)%>)
+    public String <%= Helper.FOREIGN_PARENT_GETTER %>(){
+        return <%= helper.getter(eRef) %>();
+    }
+
+    @Override
+    public void <%= Helper.FOREIGN_PARENT_SETTER %>(String <%= helper.lcFirst(eRef) %>){
+        <%= helper.setter(eRef) %>(<%= helper.lcFirst(eRef) %>);
+    }
+<%  
+                }
+            }
+        }
+    }
+} 
+
+////////////////////////////////////////////////////////////////////////////////
+// PART 3
+//==============================================================================
+// IMPLEMENTATION OF INTERFACES.
+////////////////////////////////////////////////////////////////////////////////
+
+/*******************************************************************************
+If the class is concrete, need to implement all the attributes and their 
+accessor methods specified by implemented interfaces. 
+*******************************************************************************/
+    if(!helper.isAbstract()){
+        for(final EReference eRef : helper.getEReferencesToImplement() ){ 
+            if (eRef.isMany() ) {
+%>
+    private ObservableList<String> <%= helper.lcFirst(eRef) %> = FXCollections.observableArrayList();
+    
+    @Override
+    @Reference(ref=<%= helper.getType(eRef)%>)
+    public List<String> <%= helper.getter(eRef) %>(){
+        return this.<%= helper.lcFirst(eRef) %>;
+    }
+
+    @Override
+    public void <%= helper.setter(eRef) %>(List<String> <%= helper.lcFirst(eRef) %>){
+        this.<%= helper.lcFirst(eRef) %>.clear();
+        this.<%= helper.lcFirst(eRef) %>.addAll(<%= helper.lcFirst(eRef) %>);
+    }
+    <%  
+            } else { 
+    %>
+
+    private final StringProperty <%= helper.lcFirst(eRef) %> = new SimpleStringProperty();
+    
+    public StringProperty <%= helper.lcFirst(eRef) %>Property() {
+        return this.<%= helper.lcFirst(eRef) %>;
+    }
+    
+    @Override
+    @Reference(ref=<%= helper.getType(eRef)%>)  
+    public String <%= helper.getter(eRef) %>(){
+        return this.<%= helper.lcFirst(eRef) %>.get();
+    }
+
+    @Override
+    public void <%= helper.setter(eRef) %>(String <%= helper.lcFirst(eRef) %>){
+        this.<%= helper.lcFirst(eRef) %>.set( <%= helper.lcFirst(eRef) %> );
+    }
+    <%     
+            } 
+        }
+    }
+
+
+    /***************************************************************************
+    If the class is concrete, implement copy() method.
+    ***************************************************************************/
+    if(!helper.isAbstract() ) { 
+    %>
+    
+    @Override
+    public <%= helper.getClassName() %> copy() {
+    
+        <%= helper.getClassName() %> <%= helper.getInstanceName() %> = new <%= helper.getClassName() %>();
+    
+<%    
+        // Copy each attribute
+        for(final EAttribute att : helper.getEAllAttributes() ) { 
+%>
+        <%= helper.getInstanceName() %>.<%= helper.setter(att) %>(<%= helper.getter(att) %>());
+<%    
+        } 
+
+        // Copy each reference
+        for(EReference att : helper.getEAllReferences() ){
+            /*
+             * If we've got a reference to a parent document, we skip it because we will handle it explicitly using setParent() methods.
+             */
+            final EReference oppositeRef = att.getEOpposite();
+                if (oppositeRef != null && oppositeRef.isContainment()) {
+                    continue;
+            }
+            if( att.isContainment() ) { 
+                if( att.isMany() ) {
+%>
+    
+    {
+        ObservableList<<%= helper.getClassName(att) %>> list = FXCollections.observableArrayList();
+        for(<%= helper.getClassName(att) %> element: <%= helper.getter(att) %>()){
+            list.add(element.copy());
+        }
+        <%= helper.getInstanceName() %>.<%= helper.setter(att) %>(list);
+    }
+<%      
+                } else { 
+%>
+        <%= helper.getInstanceName() %>.<%= helper.setter(att) %>(<%= helper.getter(att) %>()==null ? null : <%= helper.getter(att) %>().copy());
+<%      
+                }
+            } else {
+                if( att.isMany() ) { 
+%>
+    
+    {
+        List<String> list = new ArrayList<>();
+        for(String ref: <%= helper.getter(att) %>()){
+            list.add(ref);
+        }
+        <%= helper.getInstanceName() %>.<%= helper.setter(att) %>(list);
+    }
+<%      
+                } else { 
+%>        
+        <%= helper.getInstanceName() %>.<%= helper.setter(att) %>(<%= helper.getter(att) %>());
+<%        
+                } 
+            } 
+        } 
+%>
+
+        return <%= helper.getInstanceName() %>;
+    }
+<% 
+    }
+    /*
+    If the class is not concrete but not an interface, declare abstract method.
+    */
+    else if (!helper.isInterface()) { 
+%>
+    @Override
+    public abstract <%= helper.getClassName() %> copy(); 
+<% 
+    } 
+
+    if(!helper.isAbstract() && helper.generateEquals()) { 
+%>
+
+    @Override
+    public int hashCode() {
+        return (id == null)? 0 : id.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        <%= helper.getClassName() %> other = (<%= helper.getClassName() %>) obj;
+        if (id != null) {
+            return id.equals(other.id); // TODO : check revision ?
+        } else {
+            return contentBasedEquals(other);
+        }
+    }
+<% 
+    } 
+
+    /***************************************************************************
+    If the class is not an interface, generate toString() method.
+    ***************************************************************************/
+    if (!helper.isInterface()) {
+        final EList<EAttribute> atts = helper.getEAllAttributes();
+        final List<EReference> refs = helper.getAllSingleReferences(true);
+%>
+    @Override
+    public String toString(){
+        StringBuilder builder = new StringBuilder("[<%= helper.getClassName() %> ");
+<%
+        for (int i=0; i < atts.size(); i++) {
+            final EStructuralFeature att = atts.get(i);
+%>
+        builder.append("<%= helper.lcFirst(att) %>: ");
+        builder.append(<%= helper.getter(att) %>());
+<%   
+            if(i<atts.size()-1) { 
+%>
+        builder.append(", ");
+<%   
+            }  
+        } 
+%>
+        return builder.toString();
+    }
+    
+    @Override
+    public boolean contentBasedEquals(Element element) {
+        if(element instanceof <%= helper.getClassName() %>) {
+
+            final <%= helper.getClassName() %> other = (<%= helper.getClassName() %>) element;
+            if (getId() == null) {
+                if (other.getId() != null) return false;
+            } else if (!getId().equals(other.getId())) return false;
+<%
+        for (int i=0; i < atts.size(); i++) {
+            final EStructuralFeature att = atts.get(i);
+            if(helper.isPrimitiveType(att)){
+%>
+            if (this.<%= helper.getter(att) %>() != other.<%= helper.getter(att) %>()) return false;
+<%   
+            }
+            else {
+%>
+            if ((this.<%= helper.getter(att) %>()==null ^ other.<%= helper.getter(att) %>()==null) || ( (this.<%= helper.getter(att) %>()!=null && other.<%= helper.getter(att) %>()!=null) && !this.<%= helper.getter(att) %>().equals(other.<%= helper.getter(att) %>()))) return false;
+<%   
+            }
+        }
+
+        for (int i=0; i < refs.size(); i++) {
+            final EStructuralFeature ref = refs.get(i);
+%>
+            if ((this.<%= helper.getter(ref) %>()==null ^ other.<%= helper.getter(ref) %>()==null) || ( (this.<%= helper.getter(ref) %>()!=null && other.<%= helper.getter(ref) %>()!=null) && !this.<%= helper.getter(ref) %>().equals(other.<%= helper.getter(ref) %>()))) return false;
+<%   
+        }
+%>
+            return true;
+        }
+        return false;
+    }
+<%
+    }
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// PART 4
+//==============================================================================
+// CHILDREN ACCESS METHODS.
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+ * For concrete classes, we implement the children access method, which are a 
+ * commodity methods to allow to add, delete or retrieve a contained element 
+ * from current document. 
+ */
+if (!helper.isAbstract()) {
+%>
+
+    @Override
+    public boolean removeChild(final Element toRemove) {
+        if (toRemove == null) return false;
+<%    
+    /* We iterate through all references to find the contained ones. We make 2 checks. First, a fast check on single references.
+     * If we cannot find queried element in it, we will go through reference lists.
+     */
+    final List<EReference> multiples = new ArrayList<>(); 
+    for(EReference eRef : helper.getEAllReferences() ) {
+        /*
+         * If we've got a reference to a parent document, we skip it.
+         */
+        final EReference oppositeRef = eRef.getEOpposite();
+        if (oppositeRef != null && oppositeRef.isContainment()) {
+            continue;
+        } else if (eRef.isMany()) {
+            multiples.add(eRef);
+        } else if (eRef.isContainment()) {
+%>
+        if (toRemove.equals(get<%=Helper.ucFirst(eRef)%>())) {
+            set<%=Helper.ucFirst(eRef)%>(null);
+            return true;
+        }
+<%
+        } else {
+%>
+        if (toRemove.getId().equals(get<%=Helper.ucFirst(eRef)%>())) {
+            set<%=Helper.ucFirst(eRef)%>(null);
+            return true;
+        }
+<%
+        }
+    }
+
+    for (final EReference multiple : multiples) {
+        if (multiple.isContainment()) {
+%>
+        if (get<%=Helper.ucFirst(multiple)%>().remove(toRemove)) {
+            return true;
+        }
+<%
+        } else {
+%>
+        if (get<%=Helper.ucFirst(multiple)%>().remove(toRemove.getId())) {
+            return true;
+        }
+<%
+        }
+    }
+%>
+        return false;
+    }
+
+    @Override
+    public boolean addChild(final Element toAdd) {
+        if (toAdd == null) return false;
+<%    
+    /* We iterate through all references to find the contained ones. If input element is of the same type of 
+     * current reference, we add to or set the value of the reference and return.
+     */
+    for(EReference eRef : helper.getEAllReferences() ) {
+        /*
+         * If we've got a reference to a parent document, we skip it.
+         */
+        final EReference oppositeRef = eRef.getEOpposite();
+        if (oppositeRef != null && oppositeRef.isContainment()) {
+            continue;
+        } else if (eRef.isContainment()) {
+%>
+        if (toAdd instanceof <%=Helper.getClassName(eRef)%>) {
+<%
+            if (eRef.isMany()) {
+%>
+            get<%=Helper.ucFirst(eRef)%>().add((<%=Helper.getClassName(eRef)%>) toAdd);
+            return true;
+<%
+            } 
+            else {
+%>
+            set<%=Helper.ucFirst(eRef)%>((<%=Helper.getClassName(eRef)%>) toAdd);
+            return true;
+<%
+            }
+%>
+        }
+<%
+        } 
+        else {
+%>
+        if (toAdd instanceof <%=Helper.getClassName(eRef)%>) {
+<%
+            if (eRef.isMany()) {
+%>
+            get<%=Helper.ucFirst(eRef)%>().add(toAdd.getId());
+            return true;
+<%
+            } else {
+%>
+            set<%=Helper.ucFirst(eRef)%>(toAdd.getId());
+            return true;
+<%
+            }
+%>
+        }
+<%
+        }
+    }
+%>
+        return false;
+    }
+<%
+
+/*
+ * Implement methods allowing to retrieve a child element.
+ */
+ %>
+ 
+    @Override
+    public Element getChildById(final String toSearch) {
+        if (toSearch == null) return null;
+        if (getId() != null && getId().equals(toSearch)) return this;
+        Element result = null;
+<%    
+    /* We iterate through all references to find the contained ones. We make 2 checks. First, a fast check on single references.
+     * If we cannot find queried element in it, we will go through reference lists.
+     */
+    final List<EReference> multiples2 = new ArrayList<>(); 
+    for(EReference eRef : helper.getEAllReferences() ) {
+        /*
+         * If we've got a reference to a parent document, we skip it.
+         */
+        final EReference oppositeRef = eRef.getEOpposite();
+        if (oppositeRef != null && oppositeRef.isContainment()) {
+            continue;
+        } else if (eRef.isContainment()) {
+            if (eRef.isMany()) {
+                multiples2.add(eRef);
+            } else {
+%>
+        if (<%=Helper.lcFirst(eRef)%>.get() != null && (result = <%=Helper.lcFirst(eRef)%>.get().getChildById(toSearch)) != null) {
+            return result;
+        }
+<%
+            }
+        } 
+    }
+
+    for (final EReference multiple : multiples2) {
+%>
+        for (final Element e : <%=Helper.lcFirst(multiple)%>) {
+            if ((result = e.getChildById(toSearch)) != null) return result;
+        }
+<%
+    }
+%>
+        return result;
+    }
+<%
+ }
+%>
+
+}
+

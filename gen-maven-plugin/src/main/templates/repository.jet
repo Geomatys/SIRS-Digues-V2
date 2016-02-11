@@ -1,0 +1,76 @@
+<%@ jet package="fr.sirs.couchdb.generator"
+class="RepositoryGenerator" imports ="java.util.Iterator org.eclipse.emf.ecore.* org.eclipse.emf.common.util.EList;" %>
+
+<% RepositoryHelper helper = (RepositoryHelper) argument; %>
+
+package <%= helper.getPackage() %>;
+
+<% for(String imp: helper.imports() ) { %>
+import <%= imp %>;
+<% } %>
+
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
+
+import org.ektorp.CouchDbConnector;
+import org.ektorp.support.View;
+import org.springframework.beans.factory.annotation.Autowired;
+
+<% 
+if (!helper.isCustomized() ) { 
+%>
+import org.springframework.stereotype.Component;
+<% 
+} 
+%>
+import <%= helper.getModelQualifiedClassName() %>;
+
+/**
+ * Outil g�rant les �changes avec la bdd CouchDB pour tous les objets <%= helper.getClassName() %>.
+ * 
+ * @author Olivier Nouguier (Geomatys)
+ * @author Alexis Manin     (Geomatys)
+ */
+
+<% 
+if (helper.hasByDocumentView()) {
+%>
+@View(name=AbstractPositionDocumentRepository.BY_DOCUMENT_ID, map="function(doc) {if(doc['@class']=='<%= helper.getModelQualifiedClassName() %>') {emit(doc.<%= Helper.SIRSDOCUMENT_REFERENCE_NAME%>, doc._id)}}")
+<% 
+} 
+
+if (!helper.isCustomized() ) {
+%>
+@Component("<%= helper.getRepositoryCompleteClassName() %>")
+<% 
+}
+%>
+public class <%= helper.getRepositoryClassName() %> extends 
+<%
+if (helper.hasByDocumentView()) {
+%>
+AbstractPositionDocumentRepository
+<%
+} else if (helper.hasByLinearView()) {
+%>
+AbstractPositionableRepository
+<%
+}else{
+%>
+AbstractSIRSRepository
+<%
+}
+%><<%= helper.getClassName() %>> <%= helper.getImplements()%>{
+        
+    @Autowired
+    private <%= helper.getRepositoryClassName() %> ( CouchDbConnector db) {
+       super(<%= helper.getClassName() %>.class, db);
+       initStandardDesignDocument();
+   }
+    
+    @Override
+    public <%= helper.getClassName() %> create() {
+        return InjectorCore.getBean(SessionCore.class).getElementCreator().createElement(<%= helper.getClassName() %>.class);
+    }
+}
+

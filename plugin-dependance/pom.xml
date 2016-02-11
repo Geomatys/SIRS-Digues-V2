@@ -92,8 +92,8 @@
             
             
             <plugin>
-                <groupId>com.geomatys.maven</groupId>
-                <artifactId>maven-fxmodel-plugin</artifactId>
+                <groupId>fr.sirs.maven</groupId>
+                <artifactId>gen-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>fxmodel</id>

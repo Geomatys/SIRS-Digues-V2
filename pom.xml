@@ -10,9 +10,9 @@
   </prerequisites>
 
   <groupId>fr.sirs</groupId>
-  <artifactId>sirs</artifactId>
-  <packaging>pom</packaging>
-  <version>0.x-SNAPSHOT</version>
+    <artifactId>sirs</artifactId>
+    <packaging>pom</packaging>
+    <version>0.x-SNAPSHOT</version>
   <name>SIRS</name>
 
   <organization>
@@ -174,9 +174,9 @@
           <version>8.2.0</version>
         </plugin>
         <plugin>
-          <groupId>com.geomatys.maven</groupId>
-          <artifactId>maven-fxmodel-plugin</artifactId>
-          <version>0.5.75-SNAPSHOT</version>
+          <groupId>fr.sirs.maven</groupId>
+          <artifactId>gen-maven-plugin</artifactId>
+          <version>0.x-SNAPSHOT</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -253,6 +253,7 @@
   </profiles>
 
   <modules>
+    <module>gen-maven-plugin</module>
     <module>sirs-core</module>
     <module>desktop</module>
     <module>launcher</module>

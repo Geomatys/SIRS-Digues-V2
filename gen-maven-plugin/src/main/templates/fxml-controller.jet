@@ -1,0 +1,1012 @@
+<%@ jet package="fr.sirs.couchdb.generator" class="FXMLControllerGenerator" imports ="java.util.* org.eclipse.emf.ecore.* org.eclipse.emf.common.util.EList;" %>
+<% ModelHelper helper = (ModelHelper) argument; %>
+
+package fr.sirs.theme.ui;
+
+import fr.sirs.Session;
+import fr.sirs.SIRS;
+import fr.sirs.Injector;
+import fr.sirs.core.component.*;
+import fr.sirs.core.model.*;
+import fr.sirs.util.FXFileTextField;
+import fr.sirs.util.FXComponentField;
+import fr.sirs.util.javafx.FloatSpinnerValueFactory;
+import fr.sirs.util.StreamingIterable;
+
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.geometry.*;
+import javafx.scene.web.HTMLEditor;
+import javafx.event.ActionEvent;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+
+import org.geotoolkit.gui.javafx.util.FXDateField;
+import org.geotoolkit.util.collection.CloseableIterator;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.function.UnaryOperator;
+import java.util.logging.Level;
+
+/**
+ *
+ * @author Olivier Nouguier (Geomatys)
+ * @author Alexis Manin (Geomatys)
+ */
+public class <%=helper.getFXPaneName()%> extends AbstractFXElementPane<<%= helper.getClassName() %>> {
+<%
+/////////////////////////////////////////////////////////////////
+// 
+//                     ATTRIBUTE DEFINITION
+//
+////////////////////////////////////////////////////////////////
+%>
+
+    protected final Previews previewRepository;
+    protected LabelMapper labelMapper;
+    
+<% 
+if(!helper.hasDocument()) { 
+%>
+    // Document parent
+    @FXML protected Label ui_parent_label;
+    @FXML protected HBox ui_parent_box;
+    @FXML protected ComboBox ui_parent_choice;
+    @FXML protected Button ui_parent_link;
+
+    /** A reference to the parent of the edited element. We keep it to be able to update old parent if a new one is set. */
+    private Element originalParent;
+<% 
+}
+
+if(helper.isPositionable() ) { 
+    if(helper.isPositionableVegetation()){
+%>
+    // PropriÃ©tÃ©s de Positionable végétation
+    @FXML private FXPositionableVegetationPane uiPositionable;
+<%
+    }
+    else {
+%>
+    // PropriÃ©tÃ©s de Positionable
+    @FXML private FXPositionablePane uiPositionable;
+<%
+    } 
+} 
+
+if(helper.hasBornesTemporelles() ) { 
+%>
+    @FXML private FXValidityPeriodPane uiValidityPeriod;
+<% 
+} 
+
+ 
+/* Store different kind of reference for each class, to avoid multiple loops.
+ * Here are the different types of reference : 
+ *
+ * - Combo references : Unique reference which point on an external element.
+ * User can only change the reference to another element of the same type.
+ *  
+ * - Contained references : point on an internal element. User can edit it.
+ *
+ * - table references : A list of references to contained or external elements.
+ * We can edit them, as we should be able to create / delete new entries in it.
+ * We can find two types of table references : contained or external. Mechanisms
+ * used for data interaction are slightly different, but the display is the same. 
+ *
+ * Also, we filter attributes (plain data, not object references), and keep 
+ * only the ones we can find an editor for. 
+ */
+
+final Map<EClass, List<EReference> > comboReferences = new HashMap<>();
+final Map<EClass, List<EReference> > containedReferences = new HashMap<>();
+final Map<EClass, List<EReference> > containedSingleReferences = new HashMap<>();
+final Map<EClass, List<EReference> > tableReferences = new HashMap<>();
+final Map<EClass, List<EAttribute> > managedAttributes = new HashMap<>();
+
+for(EClass eClass: helper.getTypeTree() ) {
+%>
+
+    // PropriÃ©tÃ©s de <%= eClass.getName() %>
+<%   
+    /*
+     * Check for which attributes we can display editor.
+     * We ignore update date attribute, because it must
+     * handled automatically by our repositories.
+     * 
+     * We also ignore designation, author and valid attributes.
+     */
+     final List<EAttribute> attributes = new ArrayList<>();
+    managedAttributes.put(eClass, attributes);
+    for (EAttribute eAtt: eClass.getEAttributes()) { 
+        if (eAtt.getName().equalsIgnoreCase(Helper.DATE_DEBUT_FIELD_NAME)) continue;
+        if (eAtt.getName().equalsIgnoreCase(Helper.DATE_FIN_FIELD_NAME)) continue;
+        if (eAtt.getName().equalsIgnoreCase(Helper.DATE_MAJ_FIELD_NAME)) continue;
+        if (eAtt.getName().equalsIgnoreCase(Helper.DESIGNATION_FIELD_NAME)) continue;
+        if (eAtt.getName().equalsIgnoreCase(Helper.VALID_FIELD_NAME)) continue;
+        if (eAtt.getName().equalsIgnoreCase(Helper.AUTHOR_FIELD_NAME)) continue;
+        if (ModelHelper.isManaged(eAtt)) {
+            attributes.add(eAtt);
+        }
+    }
+
+    for (final EAttribute eAtt: attributes) {
+        final String attEditorName = helper.getXControl(eAtt);
+        if(attEditorName!=null){
+%>
+    @FXML protected <%= attEditorName %> ui_<%= eAtt.getName()  %>;
+<%  
+        }
+    }
+
+    /*
+     * We check what type of reference we've got, to know if we need to create
+     * tables and complex editors.
+     */
+    final List<EReference> cbRefs = new ArrayList<>();
+    final List<EReference> containedRefs = new ArrayList<>();
+    final List<EReference> containedSingleRefs = new ArrayList<>();
+    final List<EReference> tableRefs = new ArrayList<>();
+    comboReferences.put(eClass, cbRefs);
+    containedReferences.put(eClass, containedRefs);
+    containedSingleReferences.put(eClass, containedSingleRefs);
+    tableReferences.put(eClass, tableRefs);
+
+    for(EReference eRef: eClass.getEReferences() ) {
+            // We do not want references to parent document. This will be handled explicitely using parentProperty attribute from the model.
+            final EReference oppositeRef = eRef.getEOpposite();
+            if (oppositeRef != null && oppositeRef.isContainment()) {
+                continue;
+            }
+            if(Helper.isComboBoxReference(eRef)){
+                    cbRefs.add(eRef);
+            }
+            else if (Helper.isTableReference(eRef)) tableRefs.add(eRef);
+            else if (Helper.isContainedMultipleReference(eRef)) containedRefs.add(eRef);
+            else if (Helper.isContainedSingleReference(eRef)) containedSingleRefs.add(eRef);
+            else{
+%>
+            // autre : <%= eRef.getName() %> | <%= eRef.isContainment() %> | <%= !Helper.hasDocument(eRef.getEReferenceType()) %> | <%= eRef.isMany() %> | 
+<%
+            }
+    }
+
+    /*
+     * Define class attributes all references.
+     */
+    for (EReference eRef : cbRefs) {
+        //Cas de la liste des SR/dZ des profils en long : l'affichage de la combobox n'est pas pris en charge par le FXML car il va ï¿½tre associï¿½ au tableau des points en PR/dZ
+        if(helper.isProfilLong() && Helper.SYSTEME_REP_DZ_PROFIL_EN_LONG_REF.equals(eRef.getName())
+            || helper.isLigneEau() && Helper.SYSTEME_REP_DZ_LIGNE_EAU_REF.equals(eRef.getName())){
+%>
+    protected final ComboBox ui_<%= eRef.getName()  %> = new ComboBox();
+    protected final Button ui_<%= eRef.getName()  %>_link = new Button();
+<%
+        }
+        else {
+%>
+    @FXML protected ComboBox ui_<%= eRef.getName()  %>;
+    @FXML protected Button ui_<%= eRef.getName()  %>_link;
+<%
+        }
+   } 
+
+    // Inutile ?
+    for (final EReference eRef : containedRefs) {
+%>
+    //@FXML Tab ui_<%=eRef.getName()%>;
+<%
+    }
+
+    for (final EReference eRef : containedSingleRefs){
+%>
+    @FXML protected FXComponentField<<%=eClass.getName()%>, <%=eRef.getEReferenceType().getName()%>> ui_<%= eRef.getName()%>;
+<%          
+    }
+
+    for (final EReference eRef : tableRefs) {
+%>
+    @FXML protected Tab ui_<%=eRef.getName()%>;
+<%
+        if (!eRef.isContainment() && !Helper.isOwnerReference(eRef)) {
+%>
+    protected final ListeningPojoTable <%=eRef.getName()%>Table;
+<%  
+        } else {
+%>
+    protected final PojoTable <%=eRef.getName()%>Table;
+<%  
+        }
+    }
+}
+
+if(helper.isSIRSDocument()){
+
+    final String inferedType;
+    if(helper.isProfilTravers()){
+        inferedType = Helper.POSITION_DOCUMENT_PROFIL_TRAVERS_CLASS_NAME;
+    }
+    else if(helper.isConvention()){
+        inferedType = Helper.POSITION_CONVENTION_CLASS_NAME;
+    }
+    else{
+        inferedType = Helper.POSITION_DOCUMENT_CLASS_NAME;
+    }
+%>
+    @FXML protected Tab <%=Helper.POSITION_DOCUMENT_UI%>;
+    protected final PositionDocumentPojoTable<<%=inferedType%>> <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table;
+<%
+}
+else if (helper.isParcelleVegetation()){
+%>
+    @FXML protected Tab <%=Helper.ZONE_VEGETATION_UI%>;
+    protected final ZoneVegetationPojoTable <%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table;
+<%
+}
+
+    if(helper.isPhoto()){
+%>
+    @FXML protected ImageView <%=Helper.PHOTO_UI%>;
+<%
+}
+
+
+/////////////////////////////////////////////////////////////////
+// 
+//                     CONSTRUCTORS
+//
+////////////////////////////////////////////////////////////////
+%>
+
+    /**
+     * Constructor. Initialize part of the UI which will not require update when 
+     * element edited change.
+     */
+    protected <%=helper.getFXPaneName()%>() {
+        SIRS.loadFXML(this, <%=helper.getClassName()%>.class);
+        previewRepository = Injector.getBean(Session.class).getPreviews();
+        elementProperty().addListener(this::initFields);
+
+<% 
+    if (!helper.hasDocument()) { 
+%>
+        ui_parent_box.managedProperty().bind(ui_parent_box.visibleProperty());
+        ui_parent_link.disableProperty().bind(ui_parent_choice.getSelectionModel().selectedItemProperty().isNull());
+        ui_parent_link.setGraphic(new ImageView(SIRS.ICON_LINK));
+        ui_parent_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_parent_choice.getSelectionModel().getSelectedItem()));
+        ui_parent_choice.disableProperty().bind(disableFieldsProperty());
+<% 
+    }
+    if(helper.isPositionable() ) { 
+%>
+        uiPositionable.disableFieldsProperty().bind(disableFieldsProperty());
+        uiPositionable.positionableProperty().bind(elementProperty());
+<%  
+    }
+    if(helper.hasBornesTemporelles() ) { 
+%>
+        uiValidityPeriod.disableFieldsProperty().bind(disableFieldsProperty());
+        uiValidityPeriod.targetProperty().bind(elementProperty());
+<%  
+    } 
+%>
+
+        /*
+         * Disabling rules.
+         */
+<%  
+    for(EClass eClass: helper.getTypeTree() ) { 
+
+        /*
+        Paramètres d'activation/déscativation pour les composants des champs.
+        */
+    	for(EAttribute eAtt: managedAttributes.get(eClass) ) {
+            final String attEditorName = helper.getXControl(eAtt);
+            if ("FXFileTextField".equals(attEditorName) ){
+%>
+        ui_<%= eAtt.getName()  %>.refProperty.bind(elementProperty);
+        ui_<%= eAtt.getName()  %>.disableFieldsProperty.bind(disableFieldsProperty());
+<%    		
+            } else if(attEditorName!=null) { 
+%>
+        ui_<%= eAtt.getName()  %>.disableProperty().bind(disableFieldsProperty());
+<%              
+                if ("Spinner".equals(attEditorName)) {
+%>
+        ui_<%= eAtt.getName()  %>.setEditable(true);
+<%
+                    final String attEType = eAtt.getEType().getName();
+                    if ("EDouble".equals(attEType)) {
+%>
+        ui_<%= eAtt.getName()  %>.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE));
+<%                  
+                    } else if ("EFloat".equals(attEType)) {
+%>
+        ui_<%= eAtt.getName()  %>.setValueFactory(new FloatSpinnerValueFactory(0, Float.MAX_VALUE));
+<%              
+                    } 
+                    else {
+%>
+        ui_<%= eAtt.getName()  %>.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
+<%              
+                    }
+                }
+            }
+        }
+
+        /*
+        Paramètres d'activation/déscativation pour les composants des références.
+        */
+        for(EReference eRef : comboReferences.get(eClass) ) { 
+%>
+        ui_<%= eRef.getName()  %>.disableProperty().bind(disableFieldsProperty());
+<%
+            // Si le lien pointe vers un type rï¿½fï¿½rence, on n'affiche pas le boutton
+            if(Helper.isReferenceTypeReference(eRef)){
+%>
+        ui_<%=eRef.getName()  %>_link.setVisible(false);
+<%
+            } 
+            else {
+%>
+        ui_<%= eRef.getName()  %>_link.disableProperty().bind(ui_<%= eRef.getName()  %>.getSelectionModel().selectedItemProperty().isNull());
+        ui_<%= eRef.getName()  %>_link.setGraphic(new ImageView(SIRS.ICON_LINK));
+        ui_<%= eRef.getName()  %>_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_<%= eRef.getName()  %>.getSelectionModel().getSelectedItem()));       
+<%
+            }
+            //Cas de la liste des SR/dZ des profils en long : on n'affiche pas de combobox pour cette rï¿½fï¿½rence qui est traitï¿½e ï¿½ part dans la pojoTable
+            if(helper.isProfilLong() && Helper.SYSTEME_REP_DZ_PROFIL_EN_LONG_REF.equals(eRef.getName())
+                || helper.isLigneEau() && Helper.SYSTEME_REP_DZ_LIGNE_EAU_REF.equals(eRef.getName())){
+%>
+        final HBox prZBox = new HBox(ui_<%= eRef.getName()  %>, ui_<%= eRef.getName()  %>_link);
+        prZBox.setAlignment(Pos.CENTER_RIGHT);
+        prZBox.setSpacing(10);
+        prZBox.setPadding(new Insets(5));
+<%
+            }
+        }
+
+        for (final EReference eRef : containedSingleReferences.get(eClass)){
+%>
+        ui_<%= eRef.getName()%>.initChildClass(<%=eRef.getEReferenceType().getName()%>.class);
+<%          
+            // Si la cardinalité minimale est supérieure à 0, il faut empêcher la possibilité de supprimer l'élément
+            if(eRef.getLowerBound()>0){
+%>
+        ui_<%= eRef.getName()%>.deletableProperty().set(false);
+<%
+            }
+        }
+        
+        for (EReference eRef : tableReferences.get(eClass) ) { 
+            if (!eRef.isContainment() && !Helper.isOwnerReference(eRef)) {
+%>
+        <%= eRef.getName()%>Table = new ListeningPojoTable(<%=Helper.getClassName(eRef) %>.class, null);
+<%          
+            } 
+            else { 
+%>
+        <%= eRef.getName()%>Table = new PojoTable(<%=Helper.getClassName(eRef) %>.class, null);
+<%              
+                // Cas des tableaux permettant l'importation des points de levï¿½s
+                if(Helper.isImportPointReference(eRef)){
+%>
+        <%= eRef.getName()%>Table.importPointProperty().set(true);
+<%
+                }
+            }
+            
+            /* Contrôle de l'éditabilité de la table
+               On bloque l'éditabilité des tables de références de cardinalité 
+               multiple si elles ont une référence opposée de cardinalité unique.
+            */
+            if(eRef.isMany() && eRef.getEOpposite()!=null && !eRef.getEOpposite().isMany()){
+%>
+        <%= eRef.getName()%>Table.editableProperty().set(false);
+        <%= eRef.getName()%>Table.fichableProperty().set(false);
+<%
+            }
+            else {
+%>
+        <%= eRef.getName()%>Table.editableProperty().bind(disableFieldsProperty().not());
+<%  
+            }
+
+
+            if (!eRef.isContainment()){ 
+                if(!Helper.isOwnerReference(eRef)){
+%>
+        <%= eRef.getName()%>Table.createNewProperty().set(false);
+<%  
+                } 
+            }
+
+            //Cas de la liste des points en dZ des profils en long : on n'affiche pas de combobox pour cette rï¿½fï¿½rence qui est traitï¿½e ï¿½ part dans la pojoTable
+            if(helper.isProfilLong() && Helper.POINT_LEVE_DZ_PROFIL_EN_LONG_REF.equals(eRef.getName())
+                || helper.isLigneEau() && Helper.MESURE_DZ_LIGNE_EAU_REF.equals(eRef.getName())){
+%> 
+        final BorderPane borderPane<%= eRef.getName()%> = new BorderPane();
+        borderPane<%= eRef.getName()%>.setCenter(<%= eRef.getName()%>Table);
+        borderPane<%= eRef.getName()%>.setTop(prZBox);
+        ui_<%= eRef.getName()%>.setContent(borderPane<%= eRef.getName()%>);
+<%
+            }
+            else{
+%> 
+        ui_<%= eRef.getName()%>.setContent(<%= eRef.getName()%>Table);
+<%
+            }
+%>
+        ui_<%= eRef.getName()%>.setClosable(false);
+<%
+        }
+    } 
+    if(helper.isSIRSDocument()){
+        if(helper.isProfilTravers()){
+%>
+        <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table = new PositionDocumentPojoTable<>(<%=Helper.POSITION_DOCUMENT_PROFIL_TRAVERS_CLASS_NAME%>.class, "Localisations du profil en travers");
+<%
+        }
+        else if(helper.isConvention()){
+%>
+        <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table = new PositionDocumentPojoTable<>(<%=Helper.POSITION_CONVENTION_CLASS_NAME%>.class, "Objets et positions associés");
+<%
+        }
+        else{
+%>
+        <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table = new PositionDocumentPojoTable<>(<%=Helper.POSITION_DOCUMENT_CLASS_NAME%>.class, "Positions du document");
+<%
+        }
+%>
+        <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table.editableProperty().bind(disableFieldsProperty().not());
+        <%=Helper.POSITION_DOCUMENT_UI%>.setContent(<%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table);
+        <%=Helper.POSITION_DOCUMENT_UI%>.setClosable(false);
+<%
+    }
+    else if (helper.isParcelleVegetation()){
+%>
+        <%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table = new ZoneVegetationPojoTable("<%=Helper.getZonesVegetationHeader()%>");
+        <%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table.editableProperty().bind(disableFieldsProperty().not());
+        <%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table.commentAndPhotoProperty().set(false);
+        <%=Helper.ZONE_VEGETATION_UI%>.setContent(<%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table);
+        <%=Helper.ZONE_VEGETATION_UI%>.setClosable(false);
+<%
+    }
+%>
+    }
+    
+    public <%=helper.getFXPaneName()%>(final <%= helper.getClassName() %> <%= helper.getInstanceName() %>){
+        this();
+        this.elementProperty().set(<%= helper.getInstanceName() %>);  
+    }     
+
+<%
+/////////////////////////////////////////////////////////////////
+// 
+//             PANEL INITIALIZATION
+//
+////////////////////////////////////////////////////////////////
+%>
+    /**
+     * Initialize fields at element setting.
+     */
+    protected void initFields(ObservableValue<? extends <%= helper.getClassName() %> > observableElement, <%= helper.getClassName() %> oldElement, <%= helper.getClassName() %> newElement) {
+        // Unbind fields bound to previous element.
+        if (oldElement != null) {
+<%
+    for(EClass eClass: helper.getTypeTree() ) { %>
+        // PropriÃ©tÃ©s de <%= eClass.getName() %>
+<%   
+        for(EAttribute eAtt: managedAttributes.get(eClass) ) { 
+            final String attEditorName = helper.getXControl(eAtt);
+            if ("HTMLEditor".equals(attEditorName) ){ 
+                // nothing to do
+            } 
+            else if ("CheckBox".equals(attEditorName)) { 
+%>
+            ui_<%= eAtt.getName()  %>.selectedProperty().unbindBidirectional(oldElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+<%      
+            } 
+            else if ("TextField".equals(attEditorName) 
+                    || "TextArea".equals(attEditorName) 
+                    || "FXFileTextField".equals(attEditorName) 
+                    || "FXDirectoryTextField".equals(attEditorName)) { 
+%>
+            ui_<%= eAtt.getName()  %>.textProperty().unbindBidirectional(oldElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+<%
+            } 
+            else if ("Spinner".equals(attEditorName)) { 
+%>
+            ui_<%= eAtt.getName()  %>.getValueFactory().valueProperty().unbindBidirectional(oldElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+<%          
+            } 
+            else if(attEditorName!=null) { 
+%>
+            ui_<%= eAtt.getName()  %>.valueProperty().unbindBidirectional(oldElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+<%      
+            } 
+        } 
+    } 
+%>
+        }
+
+        final Session session = Injector.getBean(Session.class);        
+<% 
+    if (!helper.hasDocument()) { 
+%>
+        originalParent = newElement.getParent();
+        if (originalParent == null && newElement.getDocumentId()!=null) {
+            final Preview preview = previewRepository.get(newElement.getDocumentId());
+            final AbstractSIRSRepository<Element> repository = session.getRepositoryForType(preview.getElementClass());
+            originalParent = repository.get(newElement.getDocumentId());
+        }
+        
+        /* Try to build a list of possible parents. If parent element is not the CouchDb document (depth level > 1), 
+         * we will just display current parent, and won't allow user to change it, because it's too unpredictible.
+         */
+        final String documentId = newElement.getDocumentId();
+        if (originalParent != null && !originalParent.getId().equals(documentId)) {
+            ui_parent_choice.disableProperty().unbind();
+            ui_parent_choice.setDisable(true);
+            SIRS.initCombo(ui_parent_choice, FXCollections.singletonObservableList(originalParent), originalParent);
+
+        } else if (documentId != null) {
+            final Preview parentLabel = previewRepository.get(documentId);
+            SIRS.initCombo(ui_parent_choice, SIRS.observableList(previewRepository.getByClass(parentLabel.getElementClass())).sorted(), parentLabel);
+        } else if (Objet.class.isAssignableFrom(newElement.getClass())
+                    || <%=Helper.POSITION_DOCUMENT_CLASS_NAME%>.class.isAssignableFrom(newElement.getClass())) {
+            SIRS.initCombo(ui_parent_choice, SIRS.observableList(previewRepository.getByClass(TronconDigue.class)).sorted(), null);
+        }
+        // Prepare parent edition. If we've got a list of potential parents, we display combobox, and notify edited element on selection change.
+        ObservableList items = ui_parent_choice.getItems();
+        if (items == null || items.isEmpty()) {
+            ui_parent_box.setVisible(false);
+        } else {
+            if (newElement.parentProperty() != null) {
+                ui_parent_choice.getSelectionModel().selectedItemProperty().addListener(
+                        (ObservableValue observable, Object oldValue, Object newValue) -> {
+                            if (newValue == null) {
+                                newElement.setParent(null);
+                            } else if (newValue instanceof Element) {
+                                newElement.setParent((Element) newValue);
+                            } else if (newValue instanceof Preview) {
+                                final Preview tmpLabel = (Preview) newValue;
+                                newElement.setParent((Element) session.getRepositoryForType(tmpLabel.getElementClass())
+                                        .get(tmpLabel.getElementId()));
+                            }
+                        });
+            }
+            ui_parent_box.setVisible(true);
+
+            // We've got a non-null parent list, we'll try display a more precise label.
+            Object tmpParent = ui_parent_choice.getSelectionModel().getSelectedItem();
+            if (tmpParent == null) {
+                tmpParent = items.get(0);
+            }
+            final String parentType = Injector.getSession().getElementType(tmpParent);
+            if (parentType != null) {
+                try {
+                    ui_parent_label.setText(LabelMapper.get(Class.forName(parentType)).mapClassName());
+                } catch (ClassNotFoundException e) {
+                    SIRS.LOGGER.log(Level.WARNING, "No class for input type " + parentType, e);
+                }
+            }
+        }
+<% 
+    }
+ %>
+
+        /*
+         * Bind control properties to Element ones.
+         */
+<% 
+    final List<EReference> complexTableReferences = new ArrayList<EReference>();
+    for(EClass eClass: helper.getTypeTree() ) { 
+%>
+        // PropriÃ©tÃ©s de <%= eClass.getName() %>
+<%   
+        for(EAttribute eAtt: managedAttributes.get(eClass) ) {
+            final String attEditorName = helper.getXControl(eAtt); 
+%>
+        // * <%= eAtt.getName()  %>
+<%    
+            if ("HTMLEditor".equals(attEditorName) ){  
+%>
+        ui_<%= eAtt.getName()  %>.setHtmlText(newElement.<%= helper.getter(eAtt) %>());
+<%    
+            } 
+            else if ("CheckBox".equals(attEditorName)) { 
+%>
+        ui_<%= eAtt.getName()  %>.selectedProperty().bindBidirectional(newElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+<%    
+            } 
+            else if ("TextField".equals(attEditorName) 
+                    || "TextArea".equals(attEditorName) 
+                    || "FXFileTextField".equals(attEditorName) 
+                    || "FXDirectoryTextField".equals(attEditorName)) { 
+%>
+        ui_<%= eAtt.getName()  %>.textProperty().bindBidirectional(newElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+<%    
+            } else if ("Spinner".equals(attEditorName)) { 
+%>
+        ui_<%= eAtt.getName()  %>.getValueFactory().valueProperty().bindBidirectional(newElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+<%    
+            } 
+            else if(attEditorName!=null) { 
+%>
+        ui_<%= eAtt.getName()  %>.valueProperty().bindBidirectional(newElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+<%    
+            } 
+        } 
+
+
+        for(EReference eRef: comboReferences.get(eClass) ) {
+            if(eRef.getEReferenceType().isInterface()){
+%>
+        SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(
+            previewRepository.getByClass(<%= helper.getClassName(eRef) %>.class)).sorted(), 
+            newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null ? null : previewRepository.get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>()));
+<% 
+                //Cas de la liste des SR/dZ des profils en long : on n'affiche pas de combobox pour cette rï¿½fï¿½rence qui est traitï¿½e ï¿½ part dans la pojoTable
+            } else if(helper.isProfilLong() && Helper.SYSTEME_REP_DZ_PROFIL_EN_LONG_REF.equals(eRef.getName())
+                    || helper.isLigneEau() && Helper.SYSTEME_REP_DZ_LIGNE_EAU_REF.equals(eRef.getName())){
+%>
+        SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).getByLinearId(newElement.getLinearId())),
+            newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null ? null : session.getRepositoryForClass(SystemeReperage.class).get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>()));
+<% 
+                } else if (ModelHelper.isReferenceType(eRef.getEReferenceType())) {
+%>
+            final AbstractSIRSRepository<<%= helper.getClassName(eRef) %>> <%= eRef.getName()%>Repo = session.getRepositoryForClass(<%= helper.getClassName(eRef) %>.class);
+            SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(<%= eRef.getName()%>Repo.getAll()), newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null? null : <%= eRef.getName()%>Repo.get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>()));
+<%
+                } else {
+%>
+        SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(
+            previewRepository.getByClass(<%= helper.getClassName(eRef) %>.class)).sorted(), 
+            newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null? null : previewRepository.get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>()));
+<% 
+                }
+        } 
+        
+        for (EReference eRef: tableReferences.get(eClass) ) { 
+            if (Helper.hasDocument(eRef.getEReferenceType())) {
+%>
+        <%= eRef.getName()%>Table.setParentElement(null);
+        final AbstractSIRSRepository<<%= helper.getClassName(eRef) %>> <%= eRef.getName()%>Repo = session.getRepositoryForClass(<%= helper.getClassName(eRef) %>.class);
+        <%= eRef.getName()%>Table.setTableItems(()-> SIRS.toElementList(newElement.get<%= Helper.ucFirst(eRef.getName()) %>(), <%= eRef.getName()%>Repo));
+<%
+
+                    if(Helper.isOwnerReference(eRef)){
+%>
+        <%= eRef.getName()%>Table.ownerElementProperty().set(newElement);
+<%  
+                    } 
+
+
+
+            } else if (eRef.isContainment()) {
+%>
+        <%= eRef.getName()%>Table.setParentElement(newElement);
+        <%= eRef.getName()%>Table.setTableItems(()-> (ObservableList) newElement.get<%= Helper.ucFirst(eRef.getName())  %>());
+<%
+            } else { // Liens entre objets du tronï¿½on.
+                complexTableReferences.add(eRef);
+            }
+        }
+
+        for (EReference eRef: containedReferences.get(eClass)) { 
+%>
+/*        Node <%=eRef.getName()%>Editor = SIRS.generateEditionPane(newElement.get<%= Helper.ucFirst(eRef.getName()) %>());
+        if (<%=eRef.getName()%>Editor == null) {
+            <%=eRef.getName()%>Editor = new Label("Pas d'Ã©diteur disponible");
+        }
+        ui_<%=eRef.getName()%>.setContent(<%=eRef.getName()%>Editor);*/
+<%    
+        }
+
+
+        for (EReference eRef : containedSingleReferences.get(eClass)){
+%>
+        ui_<%= eRef.getName()%>.setParent(newElement, newElement.<%= eRef.getName()%>);
+<%          
+        }
+    }
+
+   if (!complexTableReferences.isEmpty()) {
+      for(final EReference eRef : complexTableReferences) {
+%>
+        //if (!newElement.get<%= Helper.ucFirst(eRef.getName())  %>().isEmpty()) Commentï¿½ car l'absence d'initialisaton de la table (si la liste est vide) provoque des erreurs.
+        {
+            
+            
+            // Particularitï¿½ de la liaison entre objets : limitation de l'ajout de nouveaux objets au tronï¿½on de l'objet courant.
+            if(Objet.class.isAssignableFrom(newElement.getClass())
+                && Objet.class.isAssignableFrom(<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>.class)){
+                <%= eRef.getName()%>Table.tronconSourceProperty().set(newElement.getDocumentId());
+            }
+            <%= eRef.getName()%>Table.setTableItems(() -> {
+            
+                final HashSet tmpIdSet = new HashSet(newElement.get<%= Helper.ucFirst(eRef.getName())  %>());
+                final ObservableList structures;
+                if(newElement.getCouchDBDocument() instanceof TronconDigue){
+                    structures = SIRS.getStructures(tmpIdSet, newElement.getCouchDBDocument());
+                }
+                else {
+                    structures = SIRS.getStructures(tmpIdSet,  <%= Helper.ucFirst(eRef.getEReferenceType().getName())%>.class);
+                }
+
+                /* 
+                RÃ©activer si l'on veut des interactions inter-tronÃ§on
+                if (tmpIdSet.size() > 0) {
+                    structures.addAll(SIRS.getStructures(tmpIdSet, <%= Helper.getClassName(eRef)%>.class));
+                }
+                */
+                return structures;
+            });
+        }
+<%        
+        }
+    } 
+
+    if(helper.isSIRSDocument()){
+%>
+        <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table.setPropertyToListen("<%=Helper.SIRSDOCUMENT_REFERENCE_NAME%>Property", elementProperty().get().getId());
+        <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table.setTableItems(()-> (ObservableList) AbstractPositionDocumentRepository.getPositionDocumentByDocumentId(elementProperty().get().getId(), Injector.getSession()));
+<%
+    } 
+    else if(helper.isParcelleVegetation()){
+%>
+        <%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table.setPropertyToListen("<%=Helper.PARCELLE_ID_REFERENCE_NAME%>Property", elementProperty().get().getId());
+        <%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table.setTableItems(()-> (ObservableList) AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(elementProperty().get().getId(), Injector.getSession()));
+<%
+    }
+
+    for(EClass eClass: helper.getTypeTree() ) {
+        for (EReference eRef: tableReferences.get(eClass) ) { 
+            if (!eRef.isContainment() && !Helper.isOwnerReference(eRef)) {
+%>
+        <%=eRef.getName()%>Table.setObservableListToListen(newElement.get<%= Helper.ucFirst(eRef.getName()) %>());
+<%
+            }
+        }
+    }
+%>  
+    }
+<%
+
+/////////////////////////////////////////////////////////////////
+// 
+//                     SAVING OPERATION
+//
+////////////////////////////////////////////////////////////////
+%>
+    @Override
+    public void preSave() {
+        final Session session = Injector.getBean(Session.class);
+        final <%= helper.getClassName() %> element = (<%= helper.getClassName() %>) elementProperty().get();
+
+<% if (!helper.hasDocument()) { %>
+        final Object selectedParent = ui_parent_choice.getSelectionModel().selectedItemProperty().get();
+        if (selectedParent == null) {
+            throw new IllegalStateException("L'Ã©lÃ©ment ne peut Ãªtre enregistrÃ© sans parent valide.");
+        }
+        
+        final Element newParent;
+        if (selectedParent instanceof Preview) {
+            final Preview tmpLabel = (Preview) selectedParent;
+            newParent = (Element) session.getRepositoryForType(tmpLabel.getElementClass()).get(tmpLabel.getElementId());
+        } else if (selectedParent instanceof Element) {
+            newParent = (Element) selectedParent;
+        } else {
+            throw new IllegalStateException("L'Ã©lÃ©ment parent est de type inconnu. Sauvegarde impossible.");
+        }
+        
+        // If parent has changed, we have to dereference our object from the old one, and 
+        if (originalParent == null || !originalParent.getId().equals(newParent.getId())) {
+            newParent.addChild(element);
+            if (originalParent != null) {
+                originalParent.removeChild(element);
+            }
+            originalParent = newParent;
+        }
+<% } %>
+
+<% if(helper.isAvecCommentaire()) { %>
+        element.setCommentaire(<%=Helper.COMMENTAIRE_UI%>.getHtmlText());
+<% } %>
+
+<% if(helper.isPositionable() ) { %>
+        uiPositionable.preSave();
+<% } %>
+
+        Object cbValue;
+<%  for(EClass eClass: helper.getTypeTree() ) { %>
+<%      for(EReference eRef: comboReferences.get(eClass)) { %>
+        cbValue = ui_<%= eRef.getName()  %>.getValue();
+        if (cbValue instanceof Preview) {
+            element.set<%= Helper.ucFirst(eRef.getName())  %>(((Preview)cbValue).getElementId());
+        } else if (cbValue instanceof Element) {
+            element.set<%= Helper.ucFirst(eRef.getName())  %>(((Element)cbValue).getId());
+        } else if (cbValue == null) {
+            element.set<%= Helper.ucFirst(eRef.getName())  %>(null);
+        }
+<%      } 
+
+        for (EReference eRef: tableReferences.get(eClass) ) { 
+            if (!eRef.isContainment()) {
+                if(Helper.isOwnerReference(eRef)){
+%>
+        // Reference principale : prevoir la suppression des documents qui ne seraient plus references
+        final ObservableList<String> toDeleteList<%= Helper.ucFirst(eRef.getName())%> = FXCollections.observableArrayList(element.get<%= Helper.ucFirst(eRef.getName())%>());
+        element.get<%= Helper.ucFirst(eRef.getName())%>().clear();    
+<%
+                }
+                if(eRef.getEOpposite()!=null){
+%>
+        /*
+        * En cas de reference opposee on se prepare a stocker les objets 
+        * "opposes" pour les mettre ï¿½ jour.
+        */
+        final List<<%= helper.getClassName(eRef) %>> current<%= helper.getClassName(eRef) %>List = new ArrayList<>();
+<%
+                }
+%>    
+        // Manage opposite references for <%= eRef.getEReferenceType().getName()%>...
+<%
+                if(Helper.hasDocument(eRef.getEReferenceType()) 
+                    && (eRef.getEOpposite()!=null || Helper.isOwnerReference(eRef))){
+%>
+        /* 
+        * Si on est sur une reference principale, on a besoin du depot pour
+        * supprimer reellement les elements que l'on va retirer du tableau.
+        * Si on a une reference opposee, on a besoin du depot pour mettre a jour
+        * les objets qui referencent l'objet courant en sens contraire.
+        */
+        final AbstractSIRSRepository<<%= helper.getClassName(eRef) %>> <%= Helper.lcFirst(helper.getClassName(eRef))%>Repository = session.getRepositoryForClass(<%= eRef.getEReferenceType().getName()%>.class);
+<%
+                }
+%>
+        final List<String> current<%= helper.getClassName(eRef) %>IdsList = new ArrayList<>();
+        for(final Element elt : <%= eRef.getName()%>Table.getAllValues()){
+            final <%= helper.getClassName(eRef)%> <%= Helper.lcFirst(helper.getClassName(eRef))%> = (<%= helper.getClassName(eRef)%>) elt;
+            current<%= helper.getClassName(eRef)%>IdsList.add(<%= Helper.lcFirst(helper.getClassName(eRef))%>.getId());
+<%
+
+                // Cas particulier : s il s agit d une reference principale alors
+                // il faut oublier les elements du tableau de maniere a ne pas 
+                // les supprimer de la base.
+                if(Helper.isOwnerReference(eRef)){
+%>
+            toDeleteList<%= Helper.ucFirst(eRef.getName())%>.remove(elt.getId());
+<%
+                }
+
+                // En cas de reference opposee, il faut les gerer
+                if(eRef.getEOpposite()!=null){
+                    final EReference eOpp = eRef.getEOpposite(); 
+                    if(Helper.hasDocument(eRef.getEReferenceType())){
+
+%>
+            current<%= helper.getClassName(eRef)%>List.add(<%= Helper.lcFirst(helper.getClassName(eRef))%>);
+            
+            // Addition
+<%
+                        if(eOpp.isMany()){
+%>
+            if(!<%= Helper.lcFirst(eRef.getEReferenceType().getName())%>.get<%= Helper.ucFirst(eOpp.getName())%>().contains(element.getId())){
+                <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>.get<%= Helper.ucFirst(eOpp.getName())%>().add(element.getId());
+            }
+<%
+                        }
+                        else{
+%>
+            //<%= Helper.lcFirst(eRef.getEReferenceType().getName())%>.get<%= Helper.ucFirst(eOpp.getName())%>().add(element.getId());
+<%
+                        }
+                    }
+                }
+%>
+        }
+<%
+                if(eRef.getEOpposite()!=null){
+%>
+        <%= Helper.lcFirst(helper.getClassName(eRef))%>Repository.executeBulk(current<%= helper.getClassName(eRef)%>List);
+<%
+                }
+%>
+        element.set<%= Helper.ucFirst(eRef.getName())%>(current<%= helper.getClassName(eRef)%>IdsList);
+        
+<%
+                if(Helper.hasDocument(eRef.getEReferenceType())){
+                    if(eRef.isMany() && eRef.getEOpposite()!=null){
+                        final EReference eOpp = eRef.getEOpposite();
+                        if(eOpp.isMany()){
+%>
+        // Deletion
+        final StreamingIterable<<%= eRef.getEReferenceType().getName()%>> list<%= eRef.getEReferenceType().getName()%> = <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.getAllStreaming();
+        try (final CloseableIterator<<%= eRef.getEReferenceType().getName()%>> it = list<%= eRef.getEReferenceType().getName()%>.iterator()) {
+            while (it.hasNext()) {
+                final <%= eRef.getEReferenceType().getName()%> i = it.next();
+                if(i.get<%= Helper.ucFirst(eOpp.getName())%>().contains(element.getId())
+                    || element.get<%= Helper.ucFirst(eRef.getName())%>().contains(i.getId())){
+                    if(!<%= eRef.getName()%>Table.getAllValues().contains(i)){
+                        element.get<%= Helper.ucFirst(eRef.getName())%>().remove(i.getId()); //Normalement inutile du fait du  clear avant les opï¿½rations d'ajout
+                        i.get<%= Helper.ucFirst(eOpp.getName())%>().remove(element.getId());
+                        <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.update(i);
+                    }
+                }
+            }
+        }
+<%                          
+                        }
+                    }
+                    // Si on a affaire a une reference principale qui a ete 
+                    // supprimee, il faut supprimer le document correspondant
+                    else if(Helper.isOwnerReference(eRef)){
+%>      
+        /*for(final String idToDelete : toDeleteList<%= Helper.ucFirst(eRef.getName())%>){
+            <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.remove(<%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.get(idToDelete));
+        }*/
+        <%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.executeBulkDelete(<%= Helper.lcFirst(eRef.getEReferenceType().getName())%>Repository.get(toDeleteList<%= Helper.ucFirst(eRef.getName())%>));
+<%
+                    }
+                }
+                else if (!eRef.isContainment()){
+                    if(eRef.isMany()){
+                        if(eRef.getEOpposite()!=null){
+                            final EReference eOpp = eRef.getEOpposite();
+                            if(eOpp.isMany()){
+%>
+        Ce cas ne doit plus apparaï¿½tre
+        // Deletion
+        final List<<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>> list<%= Helper.ucFirst(eRef.getEReferenceType().getName())%> = session.getTronconDigueRepository().getAll<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>s();
+        for(final <%= Helper.ucFirst(eRef.getEReferenceType().getName())%> i : list<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>){
+            if(i.get<%= Helper.ucFirst(eOpp.getName())%>().contains(element.getId())
+                    || element.get<%= Helper.ucFirst(eRef.getName())%>().contains(i.getId())){
+                if(!<%= eRef.getName()%>Table.getAllValues().contains(i)){
+                    element.get<%= Helper.ucFirst(eRef.getName())%>().remove(i.getId()); //Normalement inutile du fait du  clear avant les opï¿½rations d'ajout
+                    final TronconDigue couchDBDocument  = (i.getDocumentId().equals(element.getDocumentId())) ? (TronconDigue) element.getCouchDBDocument() : session.getTronconDigueRepository().get(i.getDocumentId());
+                    i.get<%= Helper.ucFirst(eOpp.getName())%>().remove(element.getId());
+                    couchDBDocument.getStructures().replaceAll(new UnaryOperator<Objet>() {
+
+                        @Override
+                        public Objet apply(Objet t) {
+                            return (i.equals(t)) ? i : t;
+                        }
+                    });
+                    if(!i.getDocumentId().equals(element.getDocumentId())) session.getTronconDigueRepository().update(couchDBDocument);
+                }
+            }
+        }
+<%
+                            }
+                        }
+                        else{
+%>
+        // Deletion
+        final List<<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>> list<%= Helper.ucFirst(eRef.getEReferenceType().getName())%> = session.getTronconDigueRepository().getAll<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>s();
+        for(final <%= Helper.ucFirst(eRef.getEReferenceType().getName())%> i : list<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>){
+            if(element.get<%= Helper.ucFirst(eRef.getName())%>().contains(i.getId())){
+                if(!<%= eRef.getName()%>Table.getAllValues().contains(i)){
+                    element.get<%= Helper.ucFirst(eRef.getName())%>().remove(i.getId()); //Normalement inutile du fait du  clear avant les opï¿½rations d'ajout
+                    
+                }
+            }
+        }
+<%
+                      }
+                    }
+                }
+            } 
+        } 
+    }
+%>
+    }
+}
