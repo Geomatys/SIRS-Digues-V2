@@ -1,5 +1,8 @@
 package fr.sirs.core;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.PlatformUtil;
 import com.vividsolutions.jts.geom.Point;
@@ -16,6 +19,7 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
@@ -26,11 +30,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -46,6 +52,8 @@ import javax.measure.unit.Unit;
 
 import javax.sql.DataSource;
 import org.apache.sis.geometry.GeneralEnvelope;
+import org.apache.sis.io.wkt.Convention;
+import org.apache.sis.io.wkt.WKTFormat;
 import org.apache.sis.util.ArgumentChecks;
 
 import org.apache.sis.util.logging.Logging;
@@ -65,6 +73,8 @@ import org.opengis.util.FactoryException;
 
 
 public class SirsCore {
+
+    private static final String PROJ4_RESOURCE = "/fr/sirs/core/proj4.json";
 
     /**
      * An useful variable which specify how many meters an object length should be
@@ -557,5 +567,69 @@ public class SirsCore {
             return (ObservableList) toWrap;
         else
             return FXCollections.observableList(toWrap);
+    }
+
+        /**
+     * Try to build a WKT representation of the {@link CoordinateReferenceSystem}
+     * whose code is given as parameter.
+     * @param crsCode Identifier of the CRS to get WKT representation for.
+     * @return WKT string. Never null. Version 1, using {@link Convention#WKT1_COMMON_UNITS}.
+     */
+    public static String getWkt1Common(final String crsCode) throws FactoryException {
+        final WKTFormat wktFormat = new WKTFormat(null, null);
+        wktFormat.setConvention(Convention.WKT1_COMMON_UNITS);
+        wktFormat.setIndentation(WKTFormat.SINGLE_LINE);
+        return wktFormat.format(CRS.decode(crsCode));
+    }
+
+    /**
+     * Search for Proj4 representation of {@link CoordinateReferenceSystem} with
+     * given identifier.
+     * @param crsCode Identifier of the CRS to get WKT representation for (Mostly EPSG).
+     * @return A filled optional if we found a Proj4 string for given identifier, an empty one otherwise.
+     * @throws IOException
+     */
+    public static Optional<String> getProj4(final String crsCode) throws IOException {
+        try (
+                final InputStream stream = SirsCore.class.getResourceAsStream(PROJ4_RESOURCE);
+                final JsonParser parser = new JsonFactory().createParser(stream)) {
+
+            boolean found = false;
+            JsonToken currentToken;
+            while (!found && (currentToken = parser.nextToken()) != null) {
+                if (currentToken.id() == JsonToken.FIELD_NAME.id()) {
+                    found = crsCode.equalsIgnoreCase(parser.getText());
+                }
+            }
+
+            if (found) {
+                return Optional.of(parser.nextTextValue());
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     *
+     * @return Set of CRS identifier for which application can provide a Proj4
+     * string representation.
+     * @throws IOException
+     */
+    public static Set<String> getProj4ManagedProjections() throws IOException {
+        try (
+                final InputStream stream = SirsCore.class.getResourceAsStream(PROJ4_RESOURCE);
+                final JsonParser parser = new JsonFactory().createParser(stream)) {
+
+            final HashSet<String> codes = new HashSet<>();
+            codes.add("EPSG:3857");// No need for proj4 string for this one. Natively managed by mobile app.
+            JsonToken currentToken;
+            while ((currentToken = parser.nextToken()) != null) {
+                if (currentToken.id() == JsonToken.FIELD_NAME.id()) {
+                    codes.add(parser.getText());
+                }
+            }
+            return codes;
+        }
     }
 }

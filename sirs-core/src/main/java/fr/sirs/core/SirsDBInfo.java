@@ -5,18 +5,41 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.support.CouchDbDocument;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 @SuppressWarnings("serial")
 public class SirsDBInfo extends CouchDbDocument {
 
+    /**
+     * Application version used for this database creation.
+     */
     private String version;
 
+    /**
+     * A unique identifier for the database.
+     */
     private String uuid;
 
+    /**
+     * EPSG code of the {@link CoordinateReferenceSystem} defining dataset geometrys.
+     */
     private String epsgCode;
 
+    /**
+     * WKT (v1 - common units) representation of the database {@link CoordinateReferenceSystem}.
+     */
+    private String crsWkt;
+
+    /**
+     * Proj4 representation of database {@link CoordinateReferenceSystem}.
+     * Needed for mobile application.
+     */
+    private String proj4;
+
+    /** URL to the database used for continuous synchronization. */
     private String remoteDatabase;
-    
+
+    /** Bounding box of the database dataset. */
     private String envelope;
 
     /**
@@ -43,6 +66,22 @@ public class SirsDBInfo extends CouchDbDocument {
 
     public String getEpsgCode() {
         return epsgCode;
+    }
+
+    public String getCrsWkt() {
+        return crsWkt;
+    }
+
+    public void setCrsWkt(final String crsWkt) {
+        this.crsWkt = crsWkt;
+    }
+
+    public String getProj4() {
+        return proj4;
+    }
+
+    public void setProj4(String proj4) {
+        this.proj4 = proj4;
     }
 
     public void setEpsgCode(String epsgCode) {

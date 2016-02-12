@@ -13,12 +13,15 @@ import org.springframework.stereotype.Component;
 import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
 import fr.sirs.core.SirsDBInfo;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import org.apache.sis.geometry.GeneralEnvelope;
 import org.geotoolkit.geometry.GeometricUtilities;
 import org.opengis.geometry.Envelope;
+import org.opengis.util.FactoryException;
 
 @Component
 public class SirsDBInfoRepository {
@@ -81,9 +84,21 @@ public class SirsDBInfoRepository {
         if (epsgCode != null && !epsgCode.isEmpty()) {
             if (info.getEpsgCode() != null && !info.getEpsgCode().equals(epsgCode)) {
                 // TODO : If no remote is present, we could setup a reprojection process instead of an exception ?
-                throw new IllegalStateException("Database SRID cannot be modified after creation !");
+                throw new IllegalArgumentException("Database SRID cannot be modified after creation !");
             }
             info.setEpsgCode(epsgCode);
+            // Initialize WKT
+            try {
+                info.setCrsWkt(SirsCore.getWkt1Common(epsgCode));
+            } catch (FactoryException ex) {
+                SirsCore.LOGGER.log(Level.WARNING, "No WKT can be created for given code : ".concat(epsgCode), ex);
+            }
+            try {
+                // Initialize Proj4
+                SirsCore.getProj4(epsgCode).ifPresent(value -> info.setProj4(value));
+            } catch (IOException ex) {
+                SirsCore.LOGGER.log(Level.WARNING, "No Proj4 representation can be found for code ".concat(epsgCode), ex);
+            }
         }
 
         if (remoteDatabase != null && !remoteDatabase.isEmpty()) {
