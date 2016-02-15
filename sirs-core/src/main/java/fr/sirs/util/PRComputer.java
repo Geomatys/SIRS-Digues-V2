@@ -3,6 +3,7 @@ package fr.sirs.util;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.InjectorCore;
+import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
@@ -48,6 +49,7 @@ public class PRComputer extends Task<Boolean> {
 
     private Thread thread;
     private SystemeReperage sr;
+    private LineString trLine;
     private LinearReferencing.SegmentInfo[] linear;
     private AbstractSIRSRepository<BorneDigue> borneRepo;
 
@@ -72,9 +74,9 @@ public class PRComputer extends Task<Boolean> {
 
             // For optimisation purpose, we compute linear geometry before iteration.
             updateMessage("Calcul des paramètres de projection");
-            final LineString lineString = LinearReferencing.asLineString(troncon.getGeometry());
-            ArgumentChecks.ensureNonNull("Linéaire de réference", lineString);
-            linear = LinearReferencing.buildSegments(lineString);
+            trLine = LinearReferencing.asLineString(troncon.getGeometry());
+            ArgumentChecks.ensureNonNull("Linéaire de réference", trLine);
+            linear = LinearReferencing.buildSegments(trLine);
 
             final Map<Class<? extends AvecForeignParent>, List> listes = new HashMap<>();
             final Consumer<AvecForeignParent> listFeeder = (AvecForeignParent current) -> {
@@ -162,6 +164,10 @@ public class PRComputer extends Task<Boolean> {
             } else {
                 current.setPrFin(TronconUtils.computePR(linear, sr, endPoint, borneRepo));
             }
+
+            // Once we've updated PRs, we refresh object geometry.
+            current.setGeometry(LinearReferencingUtilities.buildGeometryFromGeo(trLine, linear, startPoint, endPoint));
+            
         } catch (RuntimeException ex) {
             SirsCore.LOGGER.log(Level.FINE, ex.getMessage());
         }

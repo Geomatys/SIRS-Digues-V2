@@ -247,6 +247,7 @@ public class AbstractTronconDigueRepository<T extends TronconDigue> extends Abst
                             prComputings.remove(tmp);
                     });
                     TaskManager.INSTANCE.submit(computer);
+                    it.remove();
                 }
             }
         }
