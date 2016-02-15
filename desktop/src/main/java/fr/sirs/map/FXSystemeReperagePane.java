@@ -374,7 +374,7 @@ public class FXSystemeReperagePane extends BorderPane {
         ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).add(sr, troncon);
 
         //maj de la liste des SR
-        tronconChanged(null, null, null);
+        tronconChanged(tronconProperty(), troncon, troncon);
 
         //selection du SR
         uiSrComboBox.getSelectionModel().clearAndSelect(uiSrComboBox.getItems().indexOf(sr));
@@ -396,7 +396,11 @@ public class FXSystemeReperagePane extends BorderPane {
         borne.setLibelle(borneLbl);
         borne.setGeometry(geom);
         session.getRepositoryForClass(BorneDigue.class).add(borne);
-
+        TronconDigue tr = tronconProp.get();
+        if (tr != null) {
+            tr.getBorneIds().add(borne.getId());
+        }
+        
         createBorne(borne);
     }
 

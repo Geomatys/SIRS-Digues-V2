@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import javafx.application.Platform;
@@ -120,6 +121,13 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
 
     @Override
     public final Task updateTree() {
+        TreeItem<? extends Element> selectedItem = uiTree.getSelectionModel().getSelectedItem();
+        final Element lastSelected;
+        if (selectedItem != null) {
+            lastSelected = selectedItem.getValue();
+        } else {
+            lastSelected = null;
+        }
         return Injector.getSession().getTaskManager().submit("Mise à jour de l'arbre des digues", () -> {
             Platform.runLater(() -> uiSearch.setGraphic(searchRunning));
 
@@ -174,11 +182,41 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
                 ncItem.getChildren().add(new TreeItem(tc));
             }
 
+            Optional<TreeItem> toSelect = find(treeRootItem, lastSelected);
             Platform.runLater(() -> {
                 uiTree.setRoot(treeRootItem);
+                if (toSelect.isPresent()) {
+                    uiTree.getSelectionModel().select(toSelect.get());
+                }
                 uiSearch.setGraphic(searchNone);
             });
         });
+    }
+
+    /**
+     * Try to find a tree item containing the given element in inpur item and its
+     * children. Reecursive, depth-first.
+     * @param root Item to search into.
+     * @param toFind Element to find an item for.
+     * @return The tree item containing input element, or an empty optional otherrwise.
+     */
+    private static Optional<TreeItem> find(final TreeItem<? extends Element> root, final Element toFind) {
+        if (toFind == null)
+            return Optional.empty();
+
+        if (toFind.equals(root.getValue())) {
+            return Optional.of(root);
+        }
+
+        Optional found;
+        for (final TreeItem child : root.getChildren()) {
+            found = find(child, toFind);
+            if (found.isPresent()) {
+                return found;
+            }
+        }
+
+        return Optional.empty();
     }
 
     private static TreeItem toNode(final Digue digue, final Set<TronconDigue> troncons,

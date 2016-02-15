@@ -1,12 +1,14 @@
 package fr.sirs.util.javafx;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.util.StringConverter;
 import org.apache.sis.util.ObjectConverter;
 import org.apache.sis.util.ObjectConverters;
+import org.apache.sis.util.UnconvertibleObjectException;
 
 /**
  * A {@link SpinnerValueFactory} which work on float values.
@@ -40,8 +42,18 @@ public class FloatSpinnerValueFactory extends SpinnerValueFactory<Float> {
 
                 @Override
                 public Float fromString(String string) {
-                    return string == null || string.isEmpty()? 
-                            null : STRING_TO_FLOAT.apply(string);
+                    if (string == null || string.isEmpty())
+                        return null;
+                    try {
+                        return STRING_TO_FLOAT.apply(string);
+                    } catch (UnconvertibleObjectException e) {
+                        try {
+                            return FLOAT_TO_STRING.parse(string).floatValue();
+                        } catch (ParseException e1) {
+                            e.addSuppressed(e1);
+                            throw e;
+                        }
+                    }
                 }
             });
 

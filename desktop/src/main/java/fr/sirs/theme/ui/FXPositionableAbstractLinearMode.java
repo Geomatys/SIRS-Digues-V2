@@ -20,6 +20,7 @@ import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -258,7 +259,7 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
 
         // Init list of bornes
         final Map<String,BorneDigue> borneMap = new HashMap<>();
-        final ObservableList<BorneDigue> bornes = FXCollections.observableArrayList();
+        ObservableList<BorneDigue> bornes = FXCollections.observableArrayList();
         if (defaultSR != null) {
             final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
             for(SystemeReperageBorne srb : defaultSR.systemeReperageBornes){
@@ -266,6 +267,8 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
             }
             bornes.addAll(borneMap.values());
         }
+
+        bornes = bornes.sorted(new BorneComparator());
         uiBorneStart.setItems(bornes);
         uiBorneEnd.setItems(bornes);
         return borneMap;
@@ -454,5 +457,18 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
                 throw new RuntimeException(ex);
             }
         }
+    }
+
+    private static class BorneComparator implements Comparator<BorneDigue> {
+
+        @Override
+        public int compare(BorneDigue o1, BorneDigue o2) {
+            if (o1 == null) {
+                return o2 == null? 0 : 1;
+            }
+
+            return o1.getLibelle().compareTo(o2.getLibelle());
+        }
+
     }
 }
