@@ -9,6 +9,7 @@ import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Element;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import javafx.beans.property.ObjectProperty;
@@ -148,14 +149,15 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
         final TreeItem<? extends Element> selectedItem = uiTree.getSelectionModel().getSelectedItem();
         if (selectedItem == null || !obj.equals(selectedItem.getValue())) {
             final Runnable search = () -> {
-                TreeItem found = searchItem(obj, uiTree.getRoot());
-                if (found != null) {
-                    uiTree.getSelectionModel().select(found);
+                final Optional<TreeItem> found = searchItem(obj, uiTree.getRoot());
+                if (found.isPresent()) {
+                    uiTree.getSelectionModel().select(found.get());
                 }
             };
 
             if (uiTree.getRoot() == null)
                 updateTree().setOnSucceeded(evt -> SIRS.fxRun(false, search));
+            else SIRS.fxRun(false, search);
         }
     }
 
@@ -165,18 +167,23 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
      * @param searchRoot A tree item to search into.
      * @return A tree item whose value is queried element, null if we cannot find any.
      */
-    private TreeItem searchItem(final Element toSearch, final TreeItem<? extends Element> searchRoot) {
-        if (searchRoot != null) {
-            if (toSearch.equals(searchRoot.getValue())) 
-                return searchRoot;
-            else for (final TreeItem<? extends Element> child : searchRoot.getChildren()) {
-                    final TreeItem result = searchItem(toSearch, child);
-                    if (result != null)
-                        return result;
-                }
+    protected Optional<TreeItem> searchItem(final Element toSearch, final TreeItem<? extends Element> searchRoot) {
+        if (toSearch == null)
+            return Optional.empty();
+
+        if (toSearch.equals(searchRoot.getValue())) {
+            return Optional.of(searchRoot);
         }
 
-        return null;
+        Optional found;
+        for (final TreeItem child : searchRoot.getChildren()) {
+            found = searchItem(toSearch, child);
+            if (found.isPresent()) {
+                return found;
+            }
+        }
+
+        return Optional.empty();
     }
 
     /**

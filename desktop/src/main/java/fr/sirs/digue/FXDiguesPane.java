@@ -182,7 +182,7 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
                 ncItem.getChildren().add(new TreeItem(tc));
             }
 
-            Optional<TreeItem> toSelect = find(treeRootItem, lastSelected);
+            final Optional<TreeItem> toSelect = searchItem(lastSelected, treeRootItem);
             Platform.runLater(() -> {
                 uiTree.setRoot(treeRootItem);
                 if (toSelect.isPresent()) {
@@ -191,32 +191,6 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
                 uiSearch.setGraphic(searchNone);
             });
         });
-    }
-
-    /**
-     * Try to find a tree item containing the given element in inpur item and its
-     * children. Reecursive, depth-first.
-     * @param root Item to search into.
-     * @param toFind Element to find an item for.
-     * @return The tree item containing input element, or an empty optional otherrwise.
-     */
-    private static Optional<TreeItem> find(final TreeItem<? extends Element> root, final Element toFind) {
-        if (toFind == null)
-            return Optional.empty();
-
-        if (toFind.equals(root.getValue())) {
-            return Optional.of(root);
-        }
-
-        Optional found;
-        for (final TreeItem child : root.getChildren()) {
-            found = find(child, toFind);
-            if (found.isPresent()) {
-                return found;
-            }
-        }
-
-        return Optional.empty();
     }
 
     private static TreeItem toNode(final Digue digue, final Set<TronconDigue> troncons,
