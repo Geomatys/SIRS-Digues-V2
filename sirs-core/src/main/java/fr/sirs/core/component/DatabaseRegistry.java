@@ -605,22 +605,43 @@ public class DatabaseRegistry {
             }
         }
 
-        // Post required filter if it doesn't exists.
-        new SirsFilterRepository(srcConnector);
-
         // We're now sure that replication can be launched (source exists, etc.).
         // We create destination if it does not exists yet, and proceed.
         dstConnector.createDatabaseIfNotExists();
 
-        // Post required filter if it doesn't exists.
-        new SirsFilterRepository(dstConnector);
+        /*
+         * If we're initiating a continuous copy, or the two databases already
+         * contain their own $sirs document, we filter replication to keep them
+         * distinct. Otherwise, we can make a one-shot replication without filter
+         * to speed it up.
+         */
+        final ReplicationCommand cmd;
+        if (info.isPresent() || continuous) {
+            // Post required filter if it doesn't exists.
+            new SirsFilterRepository(srcConnector);
 
-        ReplicationCommand cmd = new ReplicationCommand.Builder()
-                .continuous(continuous).source(dbToCopy).target(dbToPasteInto)
-                .filter(SirsFilters.class.getSimpleName().concat("/").concat(SIRS_FILTER_NAME)) // Filter $sirs document.
-                .createTarget(true).build();
+            // Post required filter if it doesn't exists.
+            new SirsFilterRepository(dstConnector);
 
-        final ReplicationStatus status = couchDbInstance.replicate(cmd);
+            cmd = new ReplicationCommand.Builder()
+                    .continuous(continuous).source(dbToCopy).target(dbToPasteInto)
+                    .filter(SirsFilters.class.getSimpleName().concat("/").concat(SIRS_FILTER_NAME)) // Filter $sirs document.
+                    .createTarget(true).build();
+        } else {
+            cmd = new ReplicationCommand.Builder()
+                    .continuous(continuous).source(dbToCopy).target(dbToPasteInto)
+                    .createTarget(true).build();
+        }
+
+        ReplicationStatus status = null;
+        int remainingAttempt = 5;
+        while (status == null && remainingAttempt-- > 0) {
+            try {
+                status = couchDbInstance.replicate(cmd);
+            } catch (DbAccessException e) {
+                checkReplicationError(e, dbToCopy, dbToPasteInto);
+            }
+        }
 
         // update $sirs if the two databases didn't used the same modules.
         if (modules != null || sridToSet != null) {

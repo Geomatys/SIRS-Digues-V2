@@ -937,10 +937,28 @@ public class FXLauncherPane extends BorderPane {
                                 if (!localRegistry.listSirsDatabases().contains(destDbName)
                                 || ButtonType.YES.equals(alert.showAndWait().get())) {
 
-                                    try {
-                                        final ReplicationStatus copyStatus = localRegistry.copyDatabase(sourceDb, destDbName);
-                                        if (!copyStatus.isOk()) {
-                                            localRegistry.cancelCopy(copyStatus);
+                                    final TaskManager.MockTask<ReplicationStatus> copyTask = new TaskManager.MockTask("Copie de base de données", () -> {
+                                        return localRegistry.copyDatabase(sourceDb, destDbName);
+                                    });
+
+                                    final FXLoadingPane loading = new FXLoadingPane(copyTask);
+                                    final Stage lStage = new Stage(StageStyle.UNDECORATED);
+                                    lStage.setScene(new Scene(loading));
+                                    lStage.initModality(Modality.APPLICATION_MODAL);
+                                    lStage.setOnCloseRequest(evt -> copyTask.cancel());
+                                    lStage.show();
+
+                                    copyTask.runningProperty().addListener((obs, oldValue, newValue) -> {
+                                        if (!newValue) {
+                                            lStage.close();
+                                        }
+                                    });
+                                    
+                                    copyTask.setOnSucceeded(evt -> SIRS.fxRun(false, () -> {
+                                        final ReplicationStatus status = copyTask.getValue();
+
+                                        if (status == null || !status.isOk()) {
+                                            localRegistry.cancelCopy(status);
                                             final Alert alerte = new Alert(
                                                     Alert.AlertType.WARNING,
                                                     "Un problème est survenu pendant la copie. Certaines données pourraient ne pas avoir été copiées.",
@@ -949,10 +967,15 @@ public class FXLauncherPane extends BorderPane {
                                             alerte.show();
                                         }
                                         updateLocalDbList();
-                                    } catch (Exception ex) {
+                                    }));
+
+                                    copyTask.setOnFailed(evt -> {
+                                        final Throwable ex = copyTask.getException();
                                         LOGGER.log(Level.WARNING, "Database copy from " + sourceDb + " to " + destDbName + " failed", ex);
-                                        GeotkFX.newExceptionDialog("Impossible de copier les bases de données.", ex).show();
-                                    }
+                                        SIRS.fxRun(false, () -> GeotkFX.newExceptionDialog("Impossible de copier les bases de données.", ex).show());
+                                    });
+
+                                    TaskManager.INSTANCE.submit(copyTask);
                                 }
                             }
                             return "";
