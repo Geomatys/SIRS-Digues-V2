@@ -169,6 +169,7 @@ public class Loader extends Application {
                             root.setOpacity(1.0);
                             try {
                                 createMainStage();
+                                controller.uiConnexion.setDisable(false);
                             } catch (Throwable ex) {
                                 try {
                                     SIRS.LOGGER.log(Level.WARNING, "Erreur inattendue lors de l'initialisation du panneau principal.", ex);

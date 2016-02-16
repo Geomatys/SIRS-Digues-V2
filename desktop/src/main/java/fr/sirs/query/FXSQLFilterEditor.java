@@ -106,7 +106,7 @@ public class FXSQLFilterEditor extends GridPane {
     private FXSQLFilterEditor uiSub1 = null;
     private FXSQLFilterEditor uiSub2 = null;
 
-    private SimpleObjectProperty<AttributeType> attributeTypeProperty = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<AttributeType> attributeTypeProperty = new SimpleObjectProperty<>();
     private final SimpleObjectProperty propertyValue = new SimpleObjectProperty();
     public final SimpleObjectProperty<Filter> filterProperty = new SimpleObjectProperty<>();
 
@@ -161,7 +161,7 @@ public class FXSQLFilterEditor extends GridPane {
         uiPropertyPane.add(uiConditionBox, 1, 0);
 
         //autocompletion sur les champs
-        final TextFieldCompletion textFieldCompletion = new columnCompletor(uiPropertyName);
+        final TextFieldCompletion textFieldCompletion = new ColumnCompletor(uiPropertyName);
 
         uiConditionBox.getSelectionModel().selectedItemProperty().addListener(this::setFilterProperty);
         uiPropertyName.textProperty().addListener(this::updateAttributeType);
@@ -350,9 +350,9 @@ public class FXSQLFilterEditor extends GridPane {
     /**
      * Text field completion for SQL column names.
      */
-    private class columnCompletor extends TextFieldCompletion {
+    private class ColumnCompletor extends TextFieldCompletion {
 
-        public columnCompletor(TextInputControl textField) {
+        public ColumnCompletor(TextInputControl textField) {
             super(textField);
         }
 
