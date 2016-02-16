@@ -15,11 +15,13 @@ import java.util.Map;
 @Component
 public class OuvrageParticulierMapperSpi extends GenericMapperSpi<OuvrageParticulier> {
 
-    private final HashMap<String, String> bindings = new HashMap<>();
+    private final HashMap<String, String> bindings;
 
     public OuvrageParticulierMapperSpi() throws IntrospectionException {
         super(OuvrageParticulier.class);
+        bindings = new HashMap<>(2);
         bindings.put(ObjetReseauMapperSpi.Columns.ID_TYPE_POSITION.name(), "positionId");
+        bindings.put(ObjetReseauMapperSpi.Columns.ID_TYPE_OUVRAGE_PARTICULIER.name(), "typeOuvrageParticulierId");
     }
 
     @Override

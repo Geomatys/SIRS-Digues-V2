@@ -61,6 +61,7 @@ public class ObjetReseauMapperSpi extends GenericMapperSpi<ObjetReseau> {
         ID_TYPE_POSITION,
         LARGEUR,
         ID_TYPE_OUVRAGE_VOIRIE,
+        ID_TYPE_OUVRAGE_PARTICULIER,
         HAUTEUR,
         DIAMETRE,
         ID_TYPE_RESEAU_EAU,
