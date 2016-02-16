@@ -18,7 +18,6 @@ import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.index.ElementHit;
 import fr.sirs.theme.ui.ObjectTable;
 import fr.sirs.ui.Growl;
-import fr.sirs.util.SirsStringConverter;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +35,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
@@ -155,7 +155,6 @@ public class FXSearchPane extends BorderPane {
     @FXML private GridPane uiDesignationPane;
     @FXML private ComboBox<Class<? extends Element>> uiDesignationClass;
     @FXML private TextField uiDesignation;
-    private List<Preview> validitySummaries;
 
     // 2- Recherche SQL
     @FXML private ToggleButton uiToggleSQL;
@@ -213,8 +212,7 @@ public class FXSearchPane extends BorderPane {
         final ObservableList<Class<? extends Element>> modelObs = FXCollections.observableArrayList(modelClasses);
         modelObs.removeIf((Class<? extends Element> t) -> ReferenceType.class.isAssignableFrom(t));
 
-        uiDesignationClass.setItems(modelObs);
-        uiDesignationClass.setConverter(new SirsStringConverter());
+        SIRS.initCombo(uiDesignationClass, modelObs, null);
 
         uiToggleSimple.setSelected(true);
 
@@ -738,23 +736,33 @@ public class FXSearchPane extends BorderPane {
         setCenter(scroll);
     }
 
-    private void searchDesignation(){
+    private void searchDesignation() {
+        final String designation = uiDesignation.getText();
+        if (designation == null || designation.isEmpty()) {
+            final Label label = new Label("Veuillez spécifier la désignation à chercher");
+            label.setTextFill(javafx.scene.paint.Color.DARKRED);
+            setCenter(label);
+            return;
+        }
 
-        validitySummaries = session.getPreviews().getByClass(uiDesignationClass.getValue());
-        validitySummaries.removeIf((Preview t) -> {
-                return (uiDesignation.getText()==null || "".equals(uiDesignation.getText())) ?
-                        (t.getDesignation()!=null || !"".equals(t.getDesignation())) :
-                        !uiDesignation.getText().equals(t.getDesignation());
-            });
+        final Class<? extends Element> typeClass = uiDesignationClass.getValue();
+        if (typeClass == null) {
+            final Label label = new Label("Veuillez spécifier un type d'objet pour la recherche");
+            label.setTextFill(javafx.scene.paint.Color.DARKRED);
+            setCenter(label);
+            return;
+        }
+
+        final List<Preview> previews = session.getPreviews().getByClass(typeClass);
 
         final ObjectTable table = new ObjectTable(Preview.class, "Résultats");
-        table.setTableItems(SIRS.observableList(validitySummaries));
-        uiNbResults.setText(validitySummaries.size()+" résultat(s).");
+        final ObservableList<Preview> result = SIRS.observableList(previews).filtered(preview ->
+            designation.equalsIgnoreCase(preview.getDesignation()));
 
-        final ScrollPane scroll = new ScrollPane(table);
-        scroll.setFitToHeight(true);
-        scroll.setFitToWidth(true);
-        setCenter(scroll);
+        table.setTableItems(result);
+        uiNbResults.textProperty().bind(Bindings.size(result).asString().concat(" résultat(s)."));
+
+        setCenter(table);
     }
 
     private void searchSQL(String query){
