@@ -17,6 +17,7 @@
 
 package org.geotoolkit.gui.javafx.render2d;
 
+import fr.sirs.core.SirsCore;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
@@ -25,7 +26,6 @@ import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.Level;
@@ -136,8 +136,9 @@ public class FXCoordinateBar extends GridPane {
                         map.getCanvas().setTemporalRange(null,null);
                     }else{
                         final LocalDate date = dateField.valueProperty().get();
-                        final Instant time = date.atTime(LocalTime.MIDNIGHT).toInstant(ZoneOffset.UTC);
-                        map.getCanvas().setTemporalRange(Date.from(time),Date.from(time));
+                        final Instant time = date.atTime(LocalTime.MIDNIGHT).atZone(SirsCore.PARIS_ZONE_ID).toInstant();
+                        final Date dateBound = Date.from(time);
+                        map.getCanvas().setTemporalRange(dateBound, dateBound);
                     }
                 } catch (TransformException ex) {
                     Loggers.JAVAFX.log(Level.INFO, ex.getMessage(), ex);

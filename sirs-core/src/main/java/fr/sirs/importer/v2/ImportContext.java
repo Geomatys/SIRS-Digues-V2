@@ -23,7 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -415,7 +414,7 @@ public class ImportContext implements ApplicationContextAware {
      * @return The converted date, or null if no input was given.
      */
     public static LocalDate toLocalDate(final Date date) {
-        return date == null ? null : LocalDate.from(date.toInstant().atZone(ZoneId.of("UTC")));
+        return date == null ? null : LocalDate.from(date.toInstant().atZone(SirsCore.PARIS_ZONE_ID));
     }
 
     /**
@@ -425,7 +424,7 @@ public class ImportContext implements ApplicationContextAware {
      * @return The converted date and time, or null if no input was given.
      */
     public static LocalDateTime toLocalDateTime(final Date date) {
-        return date == null ? null : LocalDateTime.from(date.toInstant().atZone(ZoneId.of("UTC")));
+        return date == null ? null : LocalDateTime.from(date.toInstant().atZone(SirsCore.PARIS_ZONE_ID));
     }
 
     /**

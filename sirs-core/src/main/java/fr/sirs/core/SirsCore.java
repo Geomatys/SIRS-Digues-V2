@@ -30,6 +30,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -74,6 +75,8 @@ import org.opengis.util.FactoryException;
 
 public class SirsCore {
 
+    public static final ZoneId PARIS_ZONE_ID = ZoneId.of("Europe/Paris");
+    
     private static final String PROJ4_RESOURCE = "/fr/sirs/core/proj4.json";
 
     /**
