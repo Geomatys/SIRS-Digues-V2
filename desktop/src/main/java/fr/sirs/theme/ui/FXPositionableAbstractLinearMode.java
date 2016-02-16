@@ -467,6 +467,18 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
                 return o2 == null? 0 : 1;
             }
 
+            if (o1.getLibelle() == null) {
+                if (o2.getLibelle() == null) {
+                    if (o1.getDesignation() == null) {
+                        if (o2.getDesignation() == null) {
+                            return 0;
+                        } else return 1;
+                    } else if (o2.getDesignation() == null) {
+                        return -1;
+                    } else return o1.getDesignation().compareTo(o2.getDesignation());
+                } else return 1;
+            }
+
             return o1.getLibelle().compareTo(o2.getLibelle());
         }
 
