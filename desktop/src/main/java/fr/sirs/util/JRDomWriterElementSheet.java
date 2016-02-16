@@ -3,6 +3,7 @@ package fr.sirs.util;
 
 import static fr.sirs.SIRS.BORNE_DEBUT_AVAL;
 import static fr.sirs.SIRS.BORNE_FIN_AVAL;
+import fr.sirs.core.model.LabelMapper;
 import static fr.sirs.util.JRUtils.ATT_BACKCOLOR;
 import static fr.sirs.util.JRUtils.ATT_FONT_NAME;
 import static fr.sirs.util.JRUtils.ATT_HEIGHT;
@@ -43,8 +44,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -169,8 +168,7 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
      */
     private void writeDetail(final Class classToMap, List<String> avoidFields) {
         
-        final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName(), Locale.getDefault(),
-                Thread.currentThread().getContextClassLoader());
+        final LabelMapper resourceBundle = LabelMapper.get(classToMap);
         
         // Loops over the method looking for setters (based on the field names).
         final Method[] methods = classToMap.getMethods();
@@ -251,7 +249,7 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
      * @param order
      * @param heightMultiplicator 
      */
-    private void writeDetailField(final String field, final Class fieldClass, final int order, final Markup markup, final ResourceBundle resourceBundle){
+    private void writeDetailField(final String field, final Class fieldClass, final int order, final Markup markup, final LabelMapper resourceBundle){
         
         // Looks for the band element.------------------------------------------
         final Element band = (Element) this.detail.getElementsByTagName(TAG_BAND).item(0);
@@ -324,8 +322,8 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
         final Element text = this.document.createElement(TAG_TEXT);
         
         final CDATASection labelField;
-        if(resourceBundle!=null && resourceBundle.containsKey(field)){
-            labelField = this.document.createCDATASection(resourceBundle.getString(field));
+        if(resourceBundle != null) {
+            labelField = this.document.createCDATASection(resourceBundle.mapPropertyName(field));
         } else{
             labelField = this.document.createCDATASection(field);
         }

@@ -86,7 +86,7 @@ public class ObjectDataSource<T> implements JRDataSource {
         if (propertyValue instanceof Collection) {
             final PrintableArrayList resultList = new PrintableArrayList(propertyValue instanceof List);
             for (final Object data : (Collection) propertyValue) {
-                resultList.add(parsePropertyValue(data, refClass, outputClass));
+                resultList.add(parsePropertyValue(data, refClass, String.class));
             }
 
             return resultList;
