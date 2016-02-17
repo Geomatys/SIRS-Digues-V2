@@ -220,7 +220,8 @@ public class Loader extends Application {
             } else {
                 builder.append(new SirsStringConverter().toString(user.getRole()));
             }
-            builder.append(")");
+            builder.append(") sur la base ")
+                    .append(session.getConnector().getDatabaseName());
             return builder.toString();
         }, session.utilisateurProperty()));
 
