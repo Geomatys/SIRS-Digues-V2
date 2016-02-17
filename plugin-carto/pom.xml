@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.sirs.plugins</groupId>
     <artifactId>plugin-carto</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <packaging>jar</packaging>
     
     <name>plugin carto</name>
@@ -16,7 +16,7 @@
     </parent>
 
     <properties>
-        <plugin.core.version.min>16</plugin.core.version.min>
+        <plugin.core.version.min>0</plugin.core.version.min>
         <geotoolkit.dwg.version>1.0.3</geotoolkit.dwg.version>
         <geotoolkit.hexagon.version>1.0.4</geotoolkit.hexagon.version>
     </properties>
