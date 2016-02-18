@@ -45,10 +45,13 @@ public class AbstractPositionDocumentAssociableMapper extends AbstractMapper<Abs
     @Override
     public void map(Row input, AbstractPositionDocumentAssociable output) throws IllegalStateException, IOException, AccessDbImporterException {
         if (output instanceof PositionProfilTravers) {
-            final Object ptId = input.get(Columns.ID_PROFIL_EN_TRAVERS.name());
+            Object ptId = input.get(Columns.ID_PROFIL_EN_TRAVERS.name());
+            if (ptId == null) {
+                final Object typeDoc = input.get(Columns.ID_TYPE_DOCUMENT.name());
+            }
             if (ptId != null) {
                 String importedId = context.importers.get(ProfilTravers.class).getImportedId(ptId);
-                output.setDocumentId(importedId);
+                output.setSirsdocument(importedId);
             }
         } else if (output instanceof AbstractPositionDocumentAssociable) {
             final Object typeDoc = input.get(Columns.ID_TYPE_DOCUMENT.name());
@@ -65,7 +68,7 @@ public class AbstractPositionDocumentAssociableMapper extends AbstractMapper<Abs
                         if (docId != null) {
                             final String importedId = importer.getImportedId(docId);
                             if (importedId != null) {
-                                output.setDocumentId(importedId);
+                                output.setSirsdocument(importedId);
                             }
                         }
 
@@ -82,7 +85,7 @@ public class AbstractPositionDocumentAssociableMapper extends AbstractMapper<Abs
 
         @Override
         public Optional<Mapper<AbstractPositionDocumentAssociable>> configureInput(Table inputType) throws IllegalStateException {
-            if (ImportContext.columnExists(inputType, Columns.ID_TYPE_DOCUMENT.name())) {
+            if (ImportContext.columnExists(inputType, Columns.ID_TYPE_DOCUMENT.name()) || ImportContext.columnExists(inputType, Columns.ID_PROFIL_EN_TRAVERS.name())) {
                 return Optional.of(new AbstractPositionDocumentAssociableMapper(inputType));
             }
             return Optional.empty();

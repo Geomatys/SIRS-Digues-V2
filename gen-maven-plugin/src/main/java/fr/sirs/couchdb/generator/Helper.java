@@ -103,7 +103,7 @@ public class  Helper {
 
     protected HashSet<String> imports = new HashSet<>();
 
-    private String className;
+    protected final  String className;
 
     /**
      * Super Type.
@@ -112,8 +112,7 @@ public class  Helper {
     
     public Helper(EObject eObject) {
         this.eClass = (EClass) eObject;
-        className = eClass.getName();
-        className = className(className);
+        className = className(eClass.getName());
 
         EList<EClass> eSuperTypes = eClass.getESuperTypes();
         if (!eSuperTypes.isEmpty()) {

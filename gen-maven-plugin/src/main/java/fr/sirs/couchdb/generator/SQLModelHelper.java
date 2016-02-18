@@ -1,10 +1,13 @@
 package fr.sirs.couchdb.generator;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
 public class SQLModelHelper extends ModelHelper {
@@ -118,5 +121,79 @@ private static final Set<String> geometryClassNames = new HashSet<String>();
 
     public boolean isGeometric(EStructuralFeature att) {
         return geometryClassNames.contains(getClassName(att));
+    }
+
+    /**
+     * Analyze current class to find creation scripts for all join tables implying it.
+     *
+     * Note : Returned scripts uses "CREATE TABLE IF NOT EXISTS", to avoid errors if another
+     * table implied in the join table to create have already done the job.
+     * @return All creation scripts of the join tables implying current class.
+     */
+    public List<String> getJoinTableCreationScripts() {
+        final ArrayList<String> scripts = new ArrayList<>();
+        final String classKey = Helper.lcFirst(className).concat("Id");
+        String refClassName, refKey, joinTableName;
+        StringBuilder scriptBuilder;
+        for (final EReference ref : getAllMultipleReferences()) {
+            if (!ref.isContainment()) {
+                refClassName = getClassName(ref);
+                /*
+                 * Force join table name to be the concatenation of the 2 pointed tables,
+                 * conatenated using natural sorting on their name (ensure only one join
+                 * table will be created if the same process is launched on the two tables.
+                 */
+                if (refClassName.compareTo(className) < 0) {
+                    joinTableName = refClassName.concat(className);
+                } else {
+                    joinTableName = className.concat(refClassName);
+                }
+
+                refKey = Helper.lcFirst(refClassName).concat("Id");
+
+                scriptBuilder = new StringBuilder("CREATE TABLE IF NOT EXISTS ")
+                        .append(joinTableName)
+                        .append(" (")
+                            .append(refKey).append(", ")
+                            .append(classKey).append(", ")
+                            .append("PRIMARY KEY (").append(refKey).append(", ").append(classKey).append(")").append(", ")
+                            .append("FOREIGN KEY (").append(refKey).append(") REFERENCES \\\"").append(className).append("\\\"(\\\"id\\\")").append(", ")
+                            .append("FOREIGN KEY (").append(classKey).append(") REFERENCES \\\"").append(refClassName).append("\\\"(\\\"id\\\")")
+                        .append(") ");
+
+                scripts.add(scriptBuilder.toString());
+            }
+        }
+
+        return scripts;
+    }
+
+    /**
+     *
+     * @param ref Reference to find a join table to insert reference into.
+     * @return Insert statement to use if given reference is part of a join table.
+     * Statement first parameter will be reference id, second will be current object id
+     * Return null otherwise.
+     */
+    public String getJoinInsert(final EReference ref) {
+        if (ref.isContainment() || !ref.isMany()) {
+            return null;
+        }
+
+        final StringBuilder builder = new StringBuilder();
+
+        final String refClassName = getClassName(ref);
+        final String refKey = Helper.lcFirst(refClassName).concat("Id");
+        final String classKey = Helper.lcFirst(className).concat("Id");
+        final String joinTableName;
+        if (refClassName.compareTo(className) < 0) {
+                    joinTableName = refClassName.concat(className);
+                } else {
+                    joinTableName = className.concat(refClassName);
+                }
+
+        return new StringBuilder("INSERT INTO ")
+                .append(joinTableName).append(" (").append(refKey).append(", ").append(classKey)
+                .append(") values (?, ?)").toString();
     }
 }

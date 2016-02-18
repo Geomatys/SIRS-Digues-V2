@@ -126,6 +126,10 @@ public class <%= helper.getClassName() %>2sql  {
         st.setInt(<%= i+1 %>, srid);        
 <% } %>
         st.execute();
+
+<% for(final String joinTable : helper.getJoinTableCreationScripts()) { %>
+        StatementPool.getOrPrepareStatement(conn, "<%=joinTable%>").execute();
+<% } %>
     }
     
     
@@ -134,7 +138,7 @@ public class <%= helper.getClassName() %>2sql  {
     { 
         int n=1, geoN=0;  
 %>
-        final PreparedStatement st = StatementPool.getOrPrepareStatement(conn, INSERT);
+        PreparedStatement st = StatementPool.getOrPrepareStatement(conn, INSERT);
         st.setString(<%= n %>, toInsert.getId());
 <% 
         if(referenceParent) {
@@ -212,13 +216,27 @@ public class <%= helper.getClassName() %>2sql  {
 
 <% 
     for(final EReference ref : helper.getEReferences() ){
-        if(ref.isContainment() && ref.isMany()) {
+        if(ref.isMany()) {
+            if (ref.isContainment()) {
 %>
         //<%= helper.getClassName(ref) %>
         for(<%= helper.getClassName(ref) %> child: toInsert.<%= helper.getter(ref) %>()){
            result &= <%= helper.getClassName(ref) %>2sql.insert(conn, child);
         }
 <%   
+            } else {
+                final String insertJoin = helper.getJoinInsert(ref);
+                if (insertJoin != null) {
+%>
+            st = StatementPool.getOrPrepareStatement(conn, "<%=insertJoin%>");
+            st.setString(2, toInsert.getId());
+            for (final String otherId : toInsert.<%= helper.getter(ref) %>()) {
+                st.setString(1, otherId);
+                st.execute();
+            }
+<%
+                }
+            }
         } 
     } 
 %>
