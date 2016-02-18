@@ -152,13 +152,13 @@ private static final Set<String> geometryClassNames = new HashSet<String>();
                 refKey = Helper.lcFirst(refClassName).concat("Id");
 
                 scriptBuilder = new StringBuilder("CREATE TABLE IF NOT EXISTS ")
-                        .append(joinTableName)
+                        .append("\\\"").append(joinTableName).append("\\\"")
                         .append(" (")
-                            .append(refKey).append(", ")
-                            .append(classKey).append(", ")
-                            .append("PRIMARY KEY (").append(refKey).append(", ").append(classKey).append(")").append(", ")
-                            .append("FOREIGN KEY (").append(refKey).append(") REFERENCES \\\"").append(className).append("\\\"(\\\"id\\\")").append(", ")
-                            .append("FOREIGN KEY (").append(classKey).append(") REFERENCES \\\"").append(refClassName).append("\\\"(\\\"id\\\")")
+                            .append("\\\"").append(refKey).append("\\\" VARCHAR(64), ")
+                            .append("\\\"").append(classKey).append("\\\" VARCHAR(64), ")
+                            .append("PRIMARY KEY (\\\"").append(refKey).append("\\\", \\\"").append(classKey).append("\\\")").append(", ")
+                            .append("FOREIGN KEY (\\\"").append(refKey).append("\\\") REFERENCES \\\"").append(className).append("\\\"(\\\"id\\\")").append(", ")
+                            .append("FOREIGN KEY (\\\"").append(classKey).append("\\\") REFERENCES \\\"").append(refClassName).append("\\\"(\\\"id\\\")")
                         .append(") ");
 
                 scripts.add(scriptBuilder.toString());
@@ -192,8 +192,12 @@ private static final Set<String> geometryClassNames = new HashSet<String>();
                     joinTableName = className.concat(refClassName);
                 }
 
-        return new StringBuilder("INSERT INTO ")
-                .append(joinTableName).append(" (").append(refKey).append(", ").append(classKey)
+        /*
+         * Return a merge operation instead of an insert, because the reference could
+         * already be in the koin table if the other implied table has the same links.
+         */
+        return new StringBuilder("MERGE INTO ")
+                .append("\\\"").append(joinTableName).append("\\\" (\\\"").append(refKey).append("\\\", \\\"").append(classKey).append("\\\"")
                 .append(") values (?, ?)").toString();
     }
 }

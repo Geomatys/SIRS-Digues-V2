@@ -65,7 +65,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.RadioButton;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
@@ -494,36 +493,43 @@ public class FXSearchPane extends BorderPane {
         final String query = getCurrentSQLQuery();
         if(query==null) return;
 
-        final FeatureMapLayer layer = searchSQLLayer(query);
-        if(layer==null) return;
+        final Task<FeatureMapLayer> t = searchSQLLayer(query);
+        t.setOnSucceeded(evt -> Platform.runLater(() -> {
+            final FeatureMapLayer layer = t.getValue();
+            if (layer == null || layer.getCollection().size() < 1)
+                return;
 
+            final String name = sqlLibelle == null ? query : sqlLibelle;
+            final TextInputDialog d = new TextInputDialog(name);
+            d.setTitle("Nom de la couche");
+            d.setHeaderText("Titre de la couche affichant les résultats de la requête SQL");
+            d.setContentText("");
+            d.setGraphic(null);
+            final Optional<String> opt = d.showAndWait();
+            if (!opt.isPresent())
+                return;
 
-        final String name = sqlLibelle==null ? query : sqlLibelle;
-        final TextInputDialog d = new TextInputDialog(name);
-        d.setTitle("Nom de la couche");
-        d.setHeaderText("Titre de la couche affichant les résultats de la requête SQL");
-        d.setContentText("");
-        d.setGraphic(null);
-        final Optional<String> opt = d.showAndWait();
-        if(!opt.isPresent()) return;
+            layer.setName(opt.get());
+            final MapContext context = session.getMapContext();
 
-        layer.setName(opt.get());
-        final MapContext context = session.getMapContext();
-
-        MapItem querygroup = null;
-        for(MapItem item : context.items()){
-            if("Requêtes".equalsIgnoreCase(item.getName())){
-                querygroup = item;
+            MapItem querygroup = null;
+            for (MapItem item : context.items()) {
+                if ("Requêtes".equalsIgnoreCase(item.getName())) {
+                    querygroup = item;
+                }
             }
-        }
-        if(querygroup==null){
-            querygroup = MapBuilder.createItem();
-            querygroup.setName("Requêtes");
-            context.items().add(querygroup);
-        }
+            if (querygroup == null) {
+                querygroup = MapBuilder.createItem();
+                querygroup.setName("Requêtes");
+                context.items().add(querygroup);
+            }
 
-        querygroup.items().add(layer);
-        session.getFrame().getMapTab().show();
+            querygroup.items().add(layer);
+            session.getFrame().getMapTab().show();
+        }));
+
+        t.setOnFailed(evt -> displayError(t.getException()));
+        TaskManager.INSTANCE.submit(t);
     }
 
     private void setSQLText(final ObservableValue observable, Object oldValue, Object newValue) {
@@ -686,26 +692,33 @@ public class FXSearchPane extends BorderPane {
             }
         } catch(Exception ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
-
             // Si une erreur s'est produite pendant la requête, on propose un panneau
             // dépliable pour informer l'utilisateur.
+            displayError(ex);
+        }
+    }
+
+    /**
+     * Display given exception in search panel instead of searh result.
+     * @param ex Error to display to user.
+     */
+    private void displayError(final Throwable ex) {
+        SIRS.fxRun(false, () -> {
             Label errorLabel = new Label("Une erreur est survenue. Assurez-vous que la syntaxe de votre requête est correcte.");
             errorLabel.setBackground(Background.EMPTY);
 
             final StringWriter errorStack = new StringWriter();
             ex.printStackTrace(new PrintWriter(errorStack));
-            final TextArea stackArea = new TextArea(errorStack.toString());
-            final TitledPane errorPane = new TitledPane("Trace de l'erreur :", stackArea);
+            final TitledPane errorPane = new TitledPane("Trace de l'erreur :", new TextArea(errorStack.toString()));
             errorPane.setBackground(Background.EMPTY);
             errorPane.setBorder(Border.EMPTY);
 
             final Accordion accordion = new Accordion();
             accordion.getPanes().add(errorPane);
-            VBox vBox = new VBox(errorLabel, accordion);
-            vBox.setSpacing(10);
+            VBox vBox = new VBox(10, errorLabel, accordion);
             vBox.setPadding(new Insets(10));
             setCenter(vBox);
-        }
+        });
     }
 
     private void searchText(){
@@ -729,11 +742,7 @@ public class FXSearchPane extends BorderPane {
         final ObjectTable table = new ObjectTable(ElementHit.class, "Résultats");
         table.setTableItems(results);
         uiNbResults.setText(results.size()+" résultat(s).");
-
-        final ScrollPane scroll = new ScrollPane(table);
-        scroll.setFitToHeight(true);
-        scroll.setFitToWidth(true);
-        setCenter(scroll);
+        setCenter(table);
     }
 
     private void searchDesignation() {
@@ -765,34 +774,41 @@ public class FXSearchPane extends BorderPane {
         setCenter(table);
     }
 
-    private void searchSQL(String query){
-        final FeatureMapLayer layer = searchSQLLayer(query);
-        if (layer == null || layer.getCollection().isEmpty()) {
-            setCenter(new Label("Pas de résultat pour votre recherche."));
-            uiNbResults.setText("0 résultat.");
-        } else {
-            final CustomizedFeatureTable table = new CustomizedFeatureTable(MODEL_PACKAGE+".", Locale.getDefault(), Thread.currentThread().getContextClassLoader());
-            table.setLoadAll(true);
-            table.init(layer);
-            setCenter(table);
-            uiNbResults.setText(layer.getCollection().size()+" résultat(s).");
-        }
+    private void searchSQL(String query) {
+        final Task<FeatureMapLayer> t = searchSQLLayer(query);
+        t.setOnSucceeded(evt -> Platform.runLater(() -> {
+            final FeatureMapLayer layer = t.getValue();
+            if (layer == null || layer.getCollection().isEmpty()) {
+                setCenter(new Label("Pas de résultat pour votre recherche."));
+                uiNbResults.setText("0 résultat.");
+            } else {
+                final CustomizedFeatureTable table = new CustomizedFeatureTable(MODEL_PACKAGE + ".", Locale.getDefault(), Thread.currentThread().getContextClassLoader());
+                table.setLoadAll(true);
+                table.init(layer);
+                setCenter(table);
+                uiNbResults.setText(layer.getCollection().size() + " résultat(s).");
+            }
+        }));
+
+        t.setOnFailed(evt -> displayError(t.getException()));
+        TaskManager.INSTANCE.submit(t);
     }
 
-    private FeatureMapLayer searchSQLLayer(String query){
-        if(!query.toLowerCase().startsWith("select")){
-            final Alert alert = new Alert(Alert.AlertType.WARNING,"Uniquement les requêtes SELECT sont possibles.",ButtonType.CLOSE);
-            alert.setResizable(true);
-            alert.showAndWait();
-            return null;
-        }
-
-        final Query fsquery = org.geotoolkit.data.query.QueryBuilder.language(
-                JDBCFeatureStore.CUSTOM_SQL, query, NamesExt.create("requete"));
-        final FeatureCollection col = h2Store.createSession(false).getFeatureCollection(fsquery);
-        final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, getStyleForType(col.getFeatureType()));
-        layer.setName(query);
-        return layer;
+    /**
+     * Perform given SQL statement, returning result as a map layer.
+     * @param query The SQL request to perfform.
+     * @return A task (not submitted yet) to perform the request and transform it
+     * into map layer.
+     */
+    private Task<FeatureMapLayer> searchSQLLayer(String query) {
+        return new TaskManager.MockTask("Recherche SQL", () -> {
+            final Query fsquery = org.geotoolkit.data.query.QueryBuilder.language(
+                    JDBCFeatureStore.CUSTOM_SQL, query, NamesExt.create("requete"));
+            final FeatureCollection col = h2Store.createSession(false).getFeatureCollection(fsquery);
+            final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, getStyleForType(col.getFeatureType()));
+            layer.setName(query);
+            return layer;
+        });
     }
 
     private static MutableStyle getStyleForType(final FeatureType fType) {

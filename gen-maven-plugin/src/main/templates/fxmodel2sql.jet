@@ -126,10 +126,6 @@ public class <%= helper.getClassName() %>2sql  {
         st.setInt(<%= i+1 %>, srid);        
 <% } %>
         st.execute();
-
-<% for(final String joinTable : helper.getJoinTableCreationScripts()) { %>
-        StatementPool.getOrPrepareStatement(conn, "<%=joinTable%>").execute();
-<% } %>
     }
     
     
@@ -290,6 +286,11 @@ public class <%= helper.getClassName() %>2sql  {
 <%  
     } 
 %> 
+
+<% for(final String joinTable : helper.getJoinTableCreationScripts()) { %>
+        StatementPool.getOrPrepareStatement(conn, "<%=joinTable%>").execute();
+<% } %>
+
     }
 }
 
