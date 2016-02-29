@@ -9,23 +9,10 @@ public class RepositoryHelper extends Helper {
 
     private boolean customized;
 
-    private String repositoryInterface;
-
-    private String repositoryInterfaceSimpleName;
-
-    public RepositoryHelper(EObject eObject, String pack, String modelPackage, String repositoryInterface) {
+    public RepositoryHelper(EObject eObject, String pack, String modelPackage) {
         super(eObject);
         this.pakage = pack;
         this.classQualifiedName = modelPackage + "." + getClassName();
-        if(repositoryInterface != null) {
-            int i = repositoryInterface.lastIndexOf(".");
-            if(i==-1) {
-                throw new IllegalArgumentException("repositoryInterface must be fully qualified" );
-            }
-            this.repositoryInterface = repositoryInterface;
-            this.repositoryInterfaceSimpleName = repositoryInterface.substring(i+1);
-//            imports.add(repositoryInterface);
-        }
     }
     
     public boolean hasByLinearView(){

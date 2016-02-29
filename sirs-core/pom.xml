@@ -38,7 +38,6 @@
           <model>model/sirs.ecore</model>
           <modelPackage>fr.sirs.core.model</modelPackage>
           <repositoryPackage>fr.sirs.core.component</repositoryPackage>
-          <repositoryInterface>fr.sirs.core.Repository</repositoryInterface>
         </configuration>
       </plugin>
     </plugins>

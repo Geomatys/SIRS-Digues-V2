@@ -53,9 +53,6 @@ public class FXModelGeneratorMojo extends AbstractMojo {
     @Parameter(required = true)
     private String repositoryPackage;
 
-    @Parameter(required = true)
-    private String repositoryInterface;
-
     public File getOutputDirectory() {
         return outputDirectory;
     }
@@ -98,7 +95,7 @@ public class FXModelGeneratorMojo extends AbstractMojo {
 
             @Override
             public Helper buildHelper(EClass eClass) {
-                return new RepositoryHelper(eClass, pakage, modelPakage, repositoryInterface);
+                return new RepositoryHelper(eClass, pakage, modelPakage);
             }
 
             @Override

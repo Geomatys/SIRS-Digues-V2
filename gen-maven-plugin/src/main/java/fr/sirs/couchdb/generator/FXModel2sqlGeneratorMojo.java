@@ -35,12 +35,6 @@ public class FXModel2sqlGeneratorMojo extends AbstractMojo {
     @Parameter(required = true)
     private String modelPackage;
 
-    @Parameter(required = true)
-    private String repositoryPackage;
-
-    @Parameter(required = true)
-    private String repositoryInterface;
-
     @Parameter(defaultValue = "SQLHelper")
     private String helperName;
 
