@@ -354,7 +354,7 @@ public class PluginInstaller {
             // Delete plugin if already present.
             new UninstallPlugin(pluginInfo).call();
 
-            final Path tmpFile = Files.createTempFile(UUID.randomUUID().toString(), ".tmp");
+            final Path tmpFile = Files.createTempFile(UUID.randomUUID().toString(), ".zip");
             final Path pluginDir = SirsCore.PLUGINS_PATH.resolve(pluginInfo.getName());
 
             try {
