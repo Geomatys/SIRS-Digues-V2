@@ -759,8 +759,10 @@ public class FXSystemeReperagePane extends BorderPane {
 
             addEventHandler(TableColumn.editCommitEvent(), (TableColumn.CellEditEvent<SystemeReperageBorne, Object> event) -> {
                 final SystemeReperageBorne srb = event.getRowValue();
-                srb.setValeurPR(((Number)event.getNewValue()).floatValue());
-                saveSR.set(true);
+                if (srb != null) {
+                    srb.setValeurPR(((Number) event.getNewValue()).floatValue());
+                    saveSR.set(true);
+                }
             });
         }
     }

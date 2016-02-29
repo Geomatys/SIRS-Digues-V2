@@ -204,6 +204,8 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
 
     @Override
     public void preSave() throws Exception {
-        specificThemePane.preSave();
+        if (specificThemePane != null) {
+            specificThemePane.preSave();
+        }
     }
 }
