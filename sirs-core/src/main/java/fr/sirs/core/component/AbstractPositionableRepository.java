@@ -8,9 +8,9 @@ import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 
 /**
- *
+ * A repository to access the view giving positionable objects by {@link TronconDigue}.
  * @author Samuel Andrés (Geomatys)
- * @param <T>
+ * @param <T> Type of object managed by this repository.
  */
 public abstract class AbstractPositionableRepository<T extends Positionable> extends AbstractSIRSRepository<T> {
     

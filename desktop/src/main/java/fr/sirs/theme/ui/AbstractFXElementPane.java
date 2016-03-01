@@ -10,9 +10,11 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.layout.BorderPane;
 
 /**
- *
+ * Base implementation for {@link Element} editor. Simply provide element property
+ * defined in {@link FXElementPane}.
+ * 
  * @author Alexis Manin (Geomatys)
- * @param <T>
+ * @param <T> Type of element to edit.
  */
 public abstract class AbstractFXElementPane<T extends Element> extends BorderPane implements FXElementPane<T>, Printable{
 

@@ -954,6 +954,7 @@ public class PluginVegetation extends Plugin {
     /**
      * Builds an area from a linear.
      *
+     * {@literal
      *        ||
      *        ||
      *        ||
@@ -975,10 +976,7 @@ public class PluginVegetation extends Plugin {
      *            ||-------------->     --------(endFar)
      *            ||
      *            ||
-     *
-     *
-     *
-     *
+     *}
      *
      * Utilisé dans le plugin vegetation.
      *

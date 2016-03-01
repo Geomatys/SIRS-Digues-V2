@@ -201,6 +201,7 @@
         <version>2.10.1</version>
         <configuration>
           <!-- Default configuration for all reports -->
+            <excludePackageNames>org.geotoolkit.*:org.apache.*</excludePackageNames>
         </configuration>
         <executions>
           <execution>

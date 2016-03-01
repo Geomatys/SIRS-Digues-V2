@@ -205,7 +205,7 @@ if(helper.hasDocument()) { %>
     
     /**
      * Note: Will only be populated if this document has been loaded with the revisions option = true.
-     * @return
+     * @return Known revisions.
      */
     @Internal
     @JsonIgnore
@@ -433,7 +433,7 @@ for(final EAttribute att : helper.getEAttributes()){
     }
 %>    
     /**
-    * Accessor for JavaFX property on <%= helper.lcFirst(att) %>.
+    * @return JavaFX observable property for <%= helper.lcFirst(att) %>.
     */
     public <%= helper.getFXDeclaration( att ) %> <%= helper.lcFirst(att) %>Property() {
        return <%= helper.lcFirst(att) %>;

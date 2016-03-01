@@ -105,7 +105,7 @@ public class FloatSpinnerValueFactory extends SpinnerValueFactory<Float> {
             return min.get();
         }
         /**
-         * Sets the minimum allowable value for this value factory
+         * @return the minimum allowable value for this value factory
          */
         public final FloatProperty minProperty() {
             return min;
@@ -138,7 +138,7 @@ public class FloatSpinnerValueFactory extends SpinnerValueFactory<Float> {
             return max.get();
         }
         /**
-         * Sets the maximum allowable value for this value factory
+         * @return maximum allowable value for this value factory
          */
         public final FloatProperty maxProperty() {
             return max;
@@ -154,7 +154,7 @@ public class FloatSpinnerValueFactory extends SpinnerValueFactory<Float> {
         }
         
         /**
-         * Sets the amount to increment or decrement by, per step.
+         * @return amount to increment or decrement by, per step.
          */
         public final FloatProperty amountToStepByProperty() {
             return amountToStepBy;

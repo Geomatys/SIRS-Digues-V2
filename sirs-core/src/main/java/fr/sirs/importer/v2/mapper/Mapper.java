@@ -21,8 +21,8 @@ public interface Mapper<T> extends Closeable {
      * of the configured class.
      * @param input row to extract information from.
      * @param output Pojo to put data into.
-     * @throws IllegalStateException If {@link #configureInput(com.healthmarketscience.jackcess.Table) } or {@link #configureOutput(java.lang.Class) }
-     * has not been called, or if one of those two methods returned false.
+     * @throws IllegalStateException If input row is not issued from a table compatible 
+     * with this mapper. Compatible tables can be checked using {@link MapperSpi#configureInput(com.healthmarketscience.jackcess.Table) }.
      * @throws java.io.IOException If an error is raised while reading in input database.
      * @throws fr.sirs.importer.AccessDbImporterException If an error occurs while mapping.
      */

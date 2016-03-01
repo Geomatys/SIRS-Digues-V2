@@ -21,6 +21,7 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Task;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tab;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import org.ektorp.CouchDbConnector;
@@ -56,7 +57,7 @@ public abstract class Plugin {
      * Récupérer la liste des couches de données à ajouter dans la vue
      * cartographique.
      *
-     * @return Liste de MapItem, jamais nulle
+     * @return Liste de couches cartographique, jamais nulle
      */
     public List<MapItem> getMapItems() {
         return Collections.EMPTY_LIST;
@@ -109,7 +110,7 @@ public abstract class Plugin {
 
     /**
      * Renvoie l'image du plugin, si une image a été fournie. Peut être {@code null}.
-     * @return
+     * @return Une image à afficher dans le menu de sélection des modules, ou nulle.
      */
     public abstract Image getImage();
 
@@ -140,7 +141,7 @@ public abstract class Plugin {
      *
      * Par défaut, on ne fait rien.
      *
-     * @throws Exception
+     * @throws Exception Si l'opération éxécutée a échouée.
      */
     public void afterImport() throws Exception {}
 
@@ -148,8 +149,8 @@ public abstract class Plugin {
      * This method declares the plugin is able to display the type of TronconDigue
      * given as a parameter, using openTronconPane() method.
      *
-     * @param tronconType
-     * @return
+     * @param tronconType Type of element to check.
+     * @return True if the plugin provide a special management for this type of object.
      */
     public boolean handleTronconType(final Class<? extends Element> tronconType){
         return false;
@@ -171,8 +172,8 @@ public abstract class Plugin {
      * designed for TronconDigue. To avoid this "inconsistent" case,
      * handleTronconType() of the CorePlugin must return false for Berge class.
      *
-     * @param element
-     * @return
+     * @param element Object to get an editor for.
+     * @return A {@link Tab} to add in main frame.
      */
     public FXFreeTab openTronconPane(final Element element){
         return null;
@@ -183,7 +184,7 @@ public abstract class Plugin {
      * méthode cherche un JSON descriptif dans le dossier des plugins. Si aucun
      * fichier ne peut être utilisé, on essaie de construire un descriptif grâce
      * aux informations de la classe Java.
-     * @return
+     * @return Les informations générales du module (version, description, etc.)
      */
     public PluginInfo getConfiguration() {
         final String pluginName = name == null? this.getClass().getSimpleName() : name;

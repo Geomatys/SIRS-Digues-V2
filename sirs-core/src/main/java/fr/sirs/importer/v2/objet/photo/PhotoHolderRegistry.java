@@ -89,7 +89,8 @@ public class PhotoHolderRegistry {
     }
 
     /**
-     * @param typeId An id found in {@link Columns#ID_TYPE_DOCUMENT} column.
+     * @param typeId An id found in {@link Columns#ID_GROUPE_DONNEES} column.
+     * @param subTypeId An id found in {@link Columns#ID_SOUS_GROUPE_DONNEES} column.
      * @return document class associated to given document type ID, or null, if
      * given Id is unknown.
      */

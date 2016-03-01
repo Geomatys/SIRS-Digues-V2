@@ -106,7 +106,7 @@ public class StructureRegistry {
     }
 
     /**
-     * @param typeId An id found in {@link Columns#ID_TYPE_DOCUMENT} column.
+     * @param typeId An id found in {@link Columns#ID_TYPE_ELEMENT_STRUCTURE} column.
      * @return document class associated to given document type ID, or null, if
      * given Id is unknown.
      */

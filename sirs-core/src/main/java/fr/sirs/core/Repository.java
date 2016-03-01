@@ -9,14 +9,13 @@ package fr.sirs.core;
 public interface Repository<T> {
     
     /**
-     * Return the class of the managed object type.
-     * @return 
+     * @return the class of the managed object type.
      */
     Class<T> getModelClass();
     
     /**
      * Create a new instance of Pojo in memory. No creation in database.
-     * @return 
+     * @return A new, empty object.
      */
     T create();
 }

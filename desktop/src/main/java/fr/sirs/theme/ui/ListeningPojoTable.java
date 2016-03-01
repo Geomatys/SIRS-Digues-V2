@@ -15,7 +15,7 @@ import javafx.collections.WeakListChangeListener;
  * containment.
  * 
  * For instance, let us consider two classes A and B, linked by a bidirectional 
- * association : A <-> B.
+ * association.
  * 
  * So, A has a lis of B ids and can observe it in order to update UIs when the 
  * contend of the list changes. So can B. If a new link is added from an 

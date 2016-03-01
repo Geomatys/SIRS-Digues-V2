@@ -107,8 +107,8 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
     /**
      * Compute the maps referencing the retrieved objects.
      *
-     * @throws java.io.IOException
-     * @throws fr.sirs.importer.AccessDbImporterException
+     * @throws java.io.IOException If an error occurs while connecting to database.
+     * @throws fr.sirs.importer.AccessDbImporterException If an error occurs while processing import.
      */
     public synchronized void compute() throws IOException, AccessDbImporterException {
         if (importedRows != null)
@@ -273,8 +273,8 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
      * @param output The object to feed with input row value.
      * @return The object to insert in output database. Should be the same the
      * output parameter.
-     * @throws IOException
-     * @throws AccessDbImporterException
+     * @throws IOException If an error occurs during attribute mapping.
+     * @throws AccessDbImporterException If an error happens during mapping.
      */
     protected T importRow(final Row row, final T output)
             throws IOException, AccessDbImporterException {
@@ -332,7 +332,7 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
     /**
      *
      * @return the list of Access database table names.
-     * @throws IOException
+     * @throws IOException if an error happens while connecting to database.
      */
     public List<String> getTableColumns() throws IOException {
         final List<String> names = new ArrayList<>();
@@ -346,7 +346,7 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
     /**
      * Check all the columns used by the importer exists in the table.
      *
-     * @return
+     * @return all declared fields which cannot be found in access table.
      */
     private List<String> getErroneousUsedFields() throws IOException {
         final List<String> erroneousUsedColumn = new ArrayList<>();
@@ -373,7 +373,7 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
     /**
      *
      * @return The list of column names used by the importer which are empty.
-     * @throws IOException
+     * @throws IOException If an error occurs while connecting to database.
      */
     private List<String> getEmptyUsedFields() throws IOException {
         /*
@@ -423,7 +423,7 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
      *
      * @return The list of table columns names ignored by the importer but
      * containing data.
-     * @throws IOException
+     * @throws IOException If an error occurs while connecting to database.
      */
     private List<String> getForgottenFields() throws IOException {
         final List<String> forgottenFields = new ArrayList<>();

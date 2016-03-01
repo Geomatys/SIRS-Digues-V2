@@ -12,7 +12,7 @@ import javafx.beans.property.ObjectProperty;
 public interface Printable {
 
     /**
-     * Un titre tres court placé dans le bouton d'impression.
+     * Un titre court placé dans le bouton d'impression.
      *
      * @return titre ou null
      */
@@ -39,7 +39,7 @@ public interface Printable {
      * - Element ou liste d'éléments
      * - Feature ou collection de features
      *
-     * @return
+     * @return Un objet ou une collection d'objets à imprimer.
      */
     ObjectProperty getPrintableElements();
 

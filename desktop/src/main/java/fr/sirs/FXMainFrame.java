@@ -388,7 +388,7 @@ public class FXMainFrame extends BorderPane {
     /**
      * Property contenant le plugin actif.
      *
-     * @return
+     * @return Le plugin activé dans l'interface.
      */
     public ObjectProperty<Plugin> activePluginProperty(){
         return activePlugin;
@@ -406,7 +406,7 @@ public class FXMainFrame extends BorderPane {
      * Génère le menu déroulant pour le plugin donné.
      *
      * @param plugin Plugin à montrer.
-     * @return
+     * @return Une entrée de menu pour activer le plugin.
      */
     private MenuItem toMenuItem(final Plugin plugin) {
         final MenuItem item = new MenuItem(plugin.getTitle().toString());
@@ -422,10 +422,10 @@ public class FXMainFrame extends BorderPane {
     }
 
     /**
-     * Créé un bouton pour représenter le sous menu d'un plugin.
+     * Crée un bouton pour représenter le sous menu d'un plugin.
      *
-     * @param theme
-     * @return
+     * @param theme Le thème a afficher dans un bouton.
+     * @return Un bouton dont le rôle est d'ouvrir le panneau associé au thème sur clic.
      */
     private ButtonBase toButton(final AbstractPluginsButtonTheme theme) {
         final ButtonBase button;
@@ -469,8 +469,9 @@ public class FXMainFrame extends BorderPane {
     /**
      * Créé un item de menu et son arborescence pour le thème choisi.
      *
-     * @param theme
-     * @return
+     * @param theme Le thème à afficher dans un menu.
+     * @return Un élément de meu dont le rôle est d'ouvrir le panneau associé au
+     * thème lors d'un clic.
      */
     private MenuItem toMenuItem(final Theme theme) {
         final List<Theme> subs = theme.getSubThemes();
@@ -509,7 +510,6 @@ public class FXMainFrame extends BorderPane {
     /**
      * Get or create search tab. If it has been previously closed, we reset it,
      * so user won't be bothered with an old request.
-     * @param event
      */
     @FXML
     private void openSearchTab(ActionEvent event) {
@@ -543,8 +543,8 @@ public class FXMainFrame extends BorderPane {
 
     /**
      *
-     * @return
-     * @throws IOException
+     * @return Une fenêtre affichant les modèles de données du noyau et des modules chargés.
+     * @throws IOException Si l'on ne peut accéder à un modèle de données.
      */
     public static Stage modelStage() throws IOException {
         Stage stage = MODEL_STAGE == null? null : MODEL_STAGE.get();

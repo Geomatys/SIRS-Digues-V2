@@ -107,22 +107,22 @@ public class Previews extends CouchDbRepositorySupport<Preview> implements Docum
 
 
     /**
-     * Retrieve the previews for objects of given canonicalClassNames (only for
+     * Retrieve the previews for objects with given canonical class names (only for
      * concrete classes).
      *
-     * @param canonicalClassNames
-     * @return
+     * @param canonicalClassNames Canonical name for the classes of the objects to get.
+     * @return A list of previews for all documents of given types.
      */
     public List<Preview> getByClass(final String... canonicalClassNames) {
         return Previews.this.getByClass(Arrays.asList(canonicalClassNames));
     }
 
     /**
-     * Retrieve the previews for objects of given canonicalClassNames (only for
+     * Retrieve the previews for objects with given canonical class names (only for
      * concrete classes).
      *
-     * @param canonicalClassNames
-     * @return
+     * @param canonicalClassNames Canonical name for the classes of the objects to get.
+     * @return A list of previews for all documents of given types.
      */
     public List<Preview> getByClass(final Collection<String> canonicalClassNames) {
         ArgumentChecks.ensureNonNull("Class", canonicalClassNames);
@@ -140,7 +140,7 @@ public class Previews extends CouchDbRepositorySupport<Preview> implements Docum
     /**
      * Search in cache for previews of elements of the specified class. If we cannot
      * find them in it, we query them from database.
-     * @param className
+     * @param className Canonical class name of the documents to retrieve.
      * @return Previews matching given class.
      */
     private ObservableList<Preview> getOrCreateByClass(final String className) {
@@ -161,14 +161,14 @@ public class Previews extends CouchDbRepositorySupport<Preview> implements Docum
     /**
      * Retrieve the previews for objects of given classes.
      *
-     * For a concrete class,retrieve the previews of the objects of this class.
+     * For a concrete class, retrieve the previews of the objects of this class.
      *
      * For an abstract class or an interface, retrive the previews of the
      * objects of all classes extending the abstract class or implementing the
      * interface.
      *
-     * @param classes
-     * @return
+     * @param classes Types of the wanted objects.
+     * @return A list of previews for all documents matching given type.
      */
     public List<Preview> getByClass(final Class... classes) {
         final HashSet<String> classNames = new HashSet<>();

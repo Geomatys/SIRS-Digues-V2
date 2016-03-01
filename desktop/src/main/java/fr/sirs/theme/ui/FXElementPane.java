@@ -14,19 +14,19 @@ public interface FXElementPane<T extends Element> {
     
     /**
      * Change the element displayed by the pane.
-     * @param element 
+     * @param element The new element to edit.
      */
     void setElement(final T element);
     
     /**
      * The element of the panel, as a java-fx property.
-     * @return 
+     * @return Property containing currently edited bean.
      */
     ObjectProperty<T> elementProperty();
     
     /**
      * Set the pane fields editable or not.
-     * @return 
+     * @return Property managing input disabling property.
      */
     BooleanProperty disableFieldsProperty();
     

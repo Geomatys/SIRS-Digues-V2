@@ -29,9 +29,9 @@ public class ElementCreator {
      * 
      * Do not add the element to the database.
      * 
-     * @param <T>
-     * @param clazz
-     * @return 
+     * @param <T> Type of the object to create.
+     * @param clazz Type of the object to create.
+     * @return A new, empty element of queried class.
      */
     public <T extends Element> T createElement(final Class<T> clazz){
         try {

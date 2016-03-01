@@ -29,8 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Create links between object using an MS-Access join table.
  *
  * @author Alexis Manin (Geomatys)
- * @param <T> Target element type --> type pointed by the link.
- * @param <U> Holder element type. Type containing the link.
+ * @param <T> Target element type : type pointed by the link.
+ * @param <U> Holder element type : type containing the link.
  */
 public abstract class JoinTableLinker<T extends Element, U extends Element> implements Linker<T, U>, WorkMeasurable {
 

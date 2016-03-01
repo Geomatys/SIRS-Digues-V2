@@ -131,7 +131,7 @@ public class SessionCore implements ApplicationContextAware {
     /**
      * Retrieve all registries initialized by spring, then add them to current session.
      *
-     * @param registered
+     * @param registered repositories found in application context.
      */
     @Autowired
     public void initRepositories(List<AbstractSIRSRepository> registered) {
@@ -142,7 +142,7 @@ public class SessionCore implements ApplicationContextAware {
 
     /**
      * Find a repository for update operations on {@link Element} of given type.
-     * @param <T>
+     * @param <T> Type of wanted model object.
      * @param elementType The class of the type we want a {@link AbstractSIRSRepository} for. (Ex : RefMateriau.class, TronconDigue.class, etc.)
      * @return A valid repository for input type, or null if we cannot find any repository for given type.
      */
@@ -168,7 +168,7 @@ public class SessionCore implements ApplicationContextAware {
 
     /**
      * Return a collection of candidate repositories for an abstract class or an interface.
-     * @param elementType
+     * @param elementType Type of model object wanted.
      * @return All repositories which work on given element types or its sub-classes. Can be empty, but never null.
      */
     public Collection<AbstractSIRSRepository> getRepositoriesForClass(Class elementType) {

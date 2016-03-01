@@ -129,7 +129,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * @return An iterable object which provides an iterator querying all documents
      * managed by current using a stream, to avoid memory overload.
      *
-     * Note : provided iteratorss are closeable.
+     * Note : provided iterators are closeable.
      */
     public synchronized StreamingIterable<T> getAllStreaming() {
         if (allStreaming == null) {
@@ -148,13 +148,20 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * Retrieve the elements of the given parameter class which Ids are provided
      * as parameters.
      *
-     * @param ids
-     * @return
+     * @param ids Identifier of the documents to read from database.
+     * @return Documents found for the given identifiers.
      */
     public List<T> get(final String... ids) {
         return get(Arrays.asList(ids));
     }
-
+    
+    /**
+     * Retrieve the elements of the given parameter class which Ids are provided
+     * as parameters.
+     *
+     * @param ids Identifier of the documents to read from database.
+     * @return Documents found for the given identifiers.
+     */
     public List<T> get(final Collection<String> ids) {
         final ArrayList result = new ArrayList();
 
@@ -184,8 +191,8 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     /**
      * Execute bulk for add/update operation on several documents.
      *
-     * @param bulkList
-     * @return
+     * @param bulkList List of document to add or update
+     * @return A list of error reports. Can be empty if all documents have been updated successfully.
      */
     public List<DocumentOperationResult> executeBulk(final Collection<T> bulkList){
         final List<T> cachedBulkList = new ArrayList<>();
@@ -220,14 +227,19 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     /**
      * Execute bulk for add/update operation on several documents.
      *
-     * @param bulkList
-     * @return
+     * @param bulkList List of document to add or update
+     * @return A list of error reports. Can be empty if all documents have been updated successfully.
      */
     public List<DocumentOperationResult> executeBulk(final T... bulkList){
         return executeBulk(Arrays.asList(bulkList));
     }
 
-
+    /**
+     * Execute bulk to delete several documents.
+     *
+     * @param bulkList List of document to remove.
+     * @return A list of error reports. Can be empty if all documents have been deleted successfully.
+     */
     public List<DocumentOperationResult> executeBulkDelete(final Iterable<T> bulkList){
         final List<BulkDeleteDocument> toDelete = new ArrayList<>();
         for(final T toBeDeleted : bulkList){
@@ -336,8 +348,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
 
     /**
-     * Return the class of the managed object type.
-     * @return
+     * @return the class of the managed object type.
      */
     public Class<T> getModelClass(){
         return type;
@@ -345,7 +356,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
 
     /**
      * Create a new instance of Pojo in memory. No creation in database.
-     * @return
+     * @return the newly created object.
      */
     public abstract T create();
 
@@ -353,7 +364,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * Return one element of T type.
      * If such elements exist into the database, this method returns the first found of all.
      * If such elements do not exist into the database, this method creates a new one, adds it to the database and returns it.
-     * @return
+     * @return a random element found in database.
      */
     public T getOne(){
         try (final CloseableIterator<T> it = getAllStreaming().iterator()) {

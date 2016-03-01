@@ -33,7 +33,7 @@ public interface FXPositionableMode {
 
     /**
      * ID du mode d'édition.
-     * Cette valeur est stoqué dans le champ geometryMode du positionable.
+     * Cette valeur est stoquée dans le champ geometryMode du positionable.
      *
      * @return identifiant unique 
      */
@@ -76,23 +76,25 @@ public interface FXPositionableMode {
      * bien eu lieu depuis le mode courant car sinon des modifications en boucle
      * risquent de se produire, par exemple :
      *
-     * modification d'un champ dans le mode A
-     * -> mise à jour de la géométrie
-     * -> modification d'un champ dans le mode B pour préserver la cohérence de
-     * l'affichage avec la géométrie modifiée depuis le mode A.
-     * -> mise à jour de la géométrie (si on n'a pas vérifié qu'on n'est pas en
-     * mode B)
-     * -> modification d'un champ dans le mode A pour présernver la cohérence de
-     * l'affichage avec la géométrie modifiée depuis le mode B.
-     * -> etc.
+     * Modification d'un champ dans le mode A
+     * <ul>
+     * <li> mise à jour de la géométrie </li>
+     * <li> modification d'un champ dans le mode B pour préserver la cohérence de
+     * l'affichage avec la géométrie modifiée depuis le mode A.</li>
+     * <li> mise à jour de la géométrie (si on n'a pas vérifié qu'on n'est pas en
+     * mode B)</li>
+     * <li> modification d'un champ dans le mode A pour présernver la cohérence de
+     * l'affichage avec la géométrie modifiée depuis le mode B.</li>
+     * <li> etc.</li>
+     * </ul>
      */
     void buildGeometry();
 
     /**
-     * Searche recursively the troncon of the positionable.
+     * Search recursively the troncon of the positionable.
      *
-     * @param pos
-     * @return
+     * @param pos Positionable object to find parent linear.
+     * @return Found linear object, or null if we cannot deduce it from input.
      */
     public static TronconDigue getTronconFromPositionable(final Positionable pos){
         final Element currentElement = getTronconFromElement(pos);

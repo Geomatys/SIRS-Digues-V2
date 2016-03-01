@@ -40,7 +40,7 @@ public class SirsPreferences extends Properties {
 
     /**
      * Charge les préférences depuis le système.
-     * @throws IOException 
+     * @throws IOException Si on échoue à lire ou créer le fichier contenant les propriétés.
      */
     private SirsPreferences() throws IOException {
         super();
@@ -65,7 +65,7 @@ public class SirsPreferences extends Properties {
     
     /**
      * Recharge les propriétés depuis le disque.
-     * @throws IOException 
+     * @throws IOException Si on échoue à lire le fichier contenant les propriétés.
      */
     public void reload() throws IOException {
         try (final InputStream stream = Files.newInputStream(PREFERENCES_PATH, StandardOpenOption.READ)) {
@@ -85,7 +85,7 @@ public class SirsPreferences extends Properties {
     
     /**
      * Ecris les propriétés courantes sur le disque.
-     * @throws IOException 
+     * @throws IOException Si on échoue à écrire le fichier contenant les propriétés.
      */
     public void store() throws IOException {
         try (OutputStream propertyFile = Files.newOutputStream(PREFERENCES_PATH)) {

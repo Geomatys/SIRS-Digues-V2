@@ -240,7 +240,10 @@ public final class SIRS extends SirsCore {
 
     /**
      * Tente de trouver un éditeur d'élément compatible avec l'objet passé en paramètre.
-     * @param pojo
+     * Contrairement à la méthode {@link #createFXPaneForElement(fr.sirs.core.model.Element) }, l'éditeur
+     * retourné ici est décoré avec un bandeau pour la sauvegarde.
+     *
+     * @param pojo L'objet pour lequel trouver un éditeur.
      * @return Un éditeur pour l'objet d'entrée, ou null si aucun ne peut être
      * trouvé. L'éditeur aura déjà été initialisé avec l'objet en paramètre.
      */
@@ -250,14 +253,14 @@ public final class SIRS extends SirsCore {
 
     /**
      *
-     * @param element
-     * @return
-     * @throws ClassNotFoundException
-     * @throws NoSuchMethodException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
+     * @param element Trouve un éditeur pour l'objet donné
+     * @return L'objet pour lequel trouver un éditeur.
+     * @throws ClassNotFoundException Si aucun éditeur n'est trouvé pour l'objet demandé.
+     * @throws NoSuchMethodException Si aucun constructeur prenant l'objet en paramètre n'est disponible pour l'éditeur choisi.
+     * @throws InstantiationException Si une erreur survient pendant l'initialisation de l'éditeur.
+     * @throws IllegalAccessException Si une règle de sécurité empêche l'initialisation de l'éditeur.
+     * @throws IllegalArgumentException S le constructeur de l'éditeur ne peut traiter l'objet en paramètre.
+     * @throws InvocationTargetException Si une erreur survient pendant l'initialisation de l'éditeur.
      */
     public static AbstractFXElementPane createFXPaneForElement(final Element element)
             throws ClassNotFoundException, NoSuchMethodException, InstantiationException,
@@ -504,10 +507,10 @@ public final class SIRS extends SirsCore {
      */
     public static boolean openFile(final File toOpen) {
         final Desktop desktop = Desktop.getDesktop();
-        if (desktop.isSupported(Desktop.Action.EDIT)) {
-            TaskManager.INSTANCE.submit("Ouverture d'un fichier", () -> {desktop.edit(toOpen); return true;});
-        } else if (desktop.isSupported(Desktop.Action.OPEN)) {
+         if (desktop.isSupported(Desktop.Action.OPEN)) {
             TaskManager.INSTANCE.submit("Ouverture d'un fichier", () -> {desktop.open(toOpen); return true;});
+        } else if (desktop.isSupported(Desktop.Action.EDIT)) {
+            TaskManager.INSTANCE.submit("Ouverture d'un fichier", () -> {desktop.edit(toOpen); return true;});
         } else {
             return false;
         }

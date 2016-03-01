@@ -242,8 +242,10 @@ public class SirsCore {
      * réferencement spatial ne peut être effecctué sans elle. En revanche, la
      * grille NTV2 n'est utile que pour des besoins de précision. Si son installation
      * rate, on n'afficche juste un message d'avertissement.
-     * @throws FactoryException
-     * @throws IOException
+     * @throws FactoryException Si aucun driver n'est trouvé pour la connection
+     * à la base de données EPSG.
+     * @throws IOException Si une erreur survient pendant la création / connexion
+     * à la base de données.
      */
     public static void initEpsgDB() throws FactoryException, IOException {
         // create a database in user directory
@@ -295,7 +297,7 @@ public class SirsCore {
      * 
      * @param ref Un objet faisant réference à un document.
      * @return Un chemin absolu vers la réference passée en paramètre.
-     * @throws IllegalStateException Si la propriété {@link SirsPreferences.PROPERTIES#DOCUMENT_ROOT} est inexistante ou ne dénote pas un chemin valide.
+     * @throws IllegalStateException Si aucune racine n'est configurée ou ne dénote un chemin valide.
      * Dans ce cas, il est FORTEMENT conseillé d'attraper l'exception, et de proposer à l'utilisateur de vérifier la valeur de cette propriété dans les
      * préférences de l'application.
      * @throws InvalidPathException Si il est impossible de construire un chemin valide avec le paramètre d'entrée.
@@ -316,6 +318,14 @@ public class SirsCore {
         return concatenatePaths(docRoot.get(), ref.getChemin());
     }
 
+    /**
+     * Résout les chemins donnés comme le ferait la méthode {@link Path#resolve(java.lang.String) },
+     * mais applique un pré-traitement pour s'assurer que les chemins donnés utilisent les mêmes
+     * séparateurs.
+     * @param first Le chemin racine pour la résolution.
+     * @param more Les chemins enfants à résoudre.
+     * @return Un chemin correspondant à la concaténation des chemins donnés.
+     */
     public static Path concatenatePaths(final Path first, final String... more) {
         if (more.length <= 0)
             return first;
@@ -394,8 +404,10 @@ public class SirsCore {
     /**
      * Récupération des attributs simple pour affichage dans les tables.
      *
-     * @param clazz
+     * @param clazz La classe à analyser
      * @return liste des propriétés simples
+     * @throws java.beans.IntrospectionException Si une erreur survient pendant
+     * l'analyse.
      */
     public static LinkedHashMap<String, PropertyDescriptor> listSimpleProperties(Class clazz) throws IntrospectionException {
         final LinkedHashMap<String, PropertyDescriptor> properties = new LinkedHashMap<>();
@@ -517,7 +529,12 @@ public class SirsCore {
         }
     }
 
-        public static String hexaMD5(final String toEncrypt){
+    /**
+     * Encrypte la chaîne de caractères donnée en MD5.
+     * @param toEncrypt La chaîne de caractère à encoder.
+     * @return La représentation héxadécimale du MD5 créé.
+     */
+    public static String hexaMD5(final String toEncrypt){
         StringBuilder sb = new StringBuilder();
         try {
             byte[] encrypted = MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO).digest(toEncrypt.getBytes());
@@ -530,6 +547,11 @@ public class SirsCore {
         return sb.toString();
     }
 
+    /**
+     * Encrypte la chaîne de caractères donnée en MD5.
+     * @param toEncrypt La chaîne de caractère à encoder.
+     * @return La représentation binaire du MD5 créé.
+     */
     public static String binaryMD5(final String toEncrypt){
         try {
             return new String(MessageDigest.getInstance(PASSWORD_ENCRYPT_ALGO).digest(toEncrypt.getBytes()));
@@ -560,9 +582,10 @@ public class SirsCore {
     /**
      * Same as {@link FXCollections#observableList(java.util.List) }, but if input
      * is already an observable list, it is returned directly.
-     * @param <T>
-     * @param toWrap
-     * @return
+     * @param <T> Type of object contained in the list.
+     * @param toWrap A list to wrap.
+     * @return The input list itself if it's an observable list. An observable view
+     * of the list otherwise.
      */
     public static <T> ObservableList<T> observableList(List<T> toWrap) {
         ArgumentChecks.ensureNonNull("List to wrap", toWrap);
@@ -572,11 +595,12 @@ public class SirsCore {
             return FXCollections.observableList(toWrap);
     }
 
-        /**
+    /**
      * Try to build a WKT representation of the {@link CoordinateReferenceSystem}
      * whose code is given as parameter.
      * @param crsCode Identifier of the CRS to get WKT representation for.
      * @return WKT string. Never null. Version 1, using {@link Convention#WKT1_COMMON_UNITS}.
+     * @throws org.opengis.util.FactoryException If no driver can be found for EPSG database.
      */
     public static String getWkt1Common(final String crsCode) throws FactoryException {
         final WKTFormat wktFormat = new WKTFormat(null, null);
@@ -590,7 +614,7 @@ public class SirsCore {
      * given identifier.
      * @param crsCode Identifier of the CRS to get WKT representation for (Mostly EPSG).
      * @return A filled optional if we found a Proj4 string for given identifier, an empty one otherwise.
-     * @throws IOException
+     * @throws IOException If an error occurs while reading Proj4 resource.
      */
     public static Optional<String> getProj4(final String crsCode) throws IOException {
         try (
@@ -617,7 +641,7 @@ public class SirsCore {
      *
      * @return Set of CRS identifier for which application can provide a Proj4
      * string representation.
-     * @throws IOException
+     * @throws IOException If an error occurs while reading Proj4 resource.
      */
     public static Set<String> getProj4ManagedProjections() throws IOException {
         try (

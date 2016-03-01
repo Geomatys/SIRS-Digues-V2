@@ -17,32 +17,34 @@ import javafx.concurrent.Task;
 /**
  *
  * This is a special kind of PojoTable that listen one specific property of its
- * items in order to kwon if they had to be removed from the table view.
+ * items in order to know if they had to be removed from the table view.
  *
- * This table is usefull for links without opposite in order to detect an object
+ * This table is useful for links without opposite in order to detect an object
  * that were associated to the "virtual container" of the table list is no
  * longer associated, or, may be, associated again.
  *
  * For instance, let us consider two classes A and B, linked by an
- * unidirectional association : A -> B.
+ * unidirectional association : A to B.
  *
- * So, A has a lis of B ids and can observe it in order to update UIs when the
- * contend of the list changes. On the contrary, B has not its own list of A ids
+ * So, A has a list of B ids and can observe it in order to update UIs when the
+ * content of the list changes. On the contrary, B has not its own list of A ids.
  * If a new link is added from an instance of A to an instance of B, this last
  * one cannot know the updates of this link because it doesn't handle it.
  *
  * This table provides some mechanisms of listening between entities that are
  * known to have been associated.
  *
- * 1- It adds a listener to the objects it is initially linked with, or that are
- * added to the table list.
+ * <ol>
+ * <li> It adds a listener to the objects it is initially linked with, or that are
+ * added to the table list.</li>
  *
- * 2- It continues to listen the objects that have been removed from the table
- * in order to detect if they are associated again.
+ * <li> It continues to listen the objects that have been removed from the table
+ * in order to detect if they are associated again.</li>
  *
- * 3- But it does not listen other objects, and so, it cannot know if they are
- * associated for the first time to the "virtual container".
- *
+ * <li> But it does not listen other objects, and so, it cannot know if they are
+ * associated for the first time to the "virtual container".</li>
+ * </ol>
+ * 
  * @author Samuel Andrés (Geomatys)
  *
  * @param <T> The type of the listen property.

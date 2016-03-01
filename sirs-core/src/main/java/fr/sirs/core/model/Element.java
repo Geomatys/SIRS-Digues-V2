@@ -36,7 +36,7 @@ public interface Element extends Identifiable, Serializable {
     /**
      * Set parent for current element. If the current element is a CouchDb document,
      * No parent can be set, and calling this method has no effect.
-     * @param parent 
+     * @param parent an element to set as owner for this one.
      */
     void setParent(Element parent);
     
@@ -71,7 +71,7 @@ public interface Element extends Identifiable, Serializable {
      * Manage the author of an element. This piece of information is used for 
      * validation of documents created by external members.
      * 
-     * @return 
+     * @return Identifier of this object author.
      */
     String getAuthor();
     StringProperty authorProperty();
@@ -79,7 +79,7 @@ public interface Element extends Identifiable, Serializable {
     
     /**
      * Manage the validity of an element.
-     * @return 
+     * @return True if this object is validated, false if it should be validated by an administrator.
      */
     boolean getValid();
     BooleanProperty validProperty();
@@ -90,7 +90,7 @@ public interface Element extends Identifiable, Serializable {
      * an easy task, then elements can be given an ID, without guarantee of 
      * unicity.
      * 
-     * @return 
+     * @return A code for the given object.
      */
     String getDesignation();
     StringProperty designationProperty();
@@ -115,10 +115,10 @@ public interface Element extends Identifiable, Serializable {
      * 
      * All the attributes are not examined, but only the single valued ones.
      * 
-     * @param other
-     * @return 
+     * @param element The element to compare with this one.
+     * @return True if the given element is equal to this one, false otherwise.
      */
-    default boolean contentBasedEquals(final Element element){
+    default boolean contentBasedEquals(final Element element) {
         return this.equals(element);
     }
 }

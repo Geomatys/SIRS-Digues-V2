@@ -2,6 +2,7 @@
 package fr.sirs;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.DocumentChangeEmiter;
 import fr.sirs.core.component.DocumentListener;
 import fr.sirs.core.model.Element;
 import java.beans.IntrospectionException;
@@ -18,7 +19,7 @@ import org.opengis.filter.Id;
 import org.opengis.filter.identity.FeatureId;
 
 /**
- * A data supplier for {@link BeanStore}. It listens on application {@link DocumentChangeEmiter} to be notified when data is updated.
+ * A data supplier which provides feature store wrapping a set of java beans. It listens on application {@link DocumentChangeEmiter} to be notified when data is updated.
  *
  * @author Johann Sorel (Geomatys)
  */

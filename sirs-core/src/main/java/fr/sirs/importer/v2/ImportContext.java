@@ -294,11 +294,11 @@ public class ImportContext implements ApplicationContextAware {
     }
 
     /**
-     * Try to extract start and end points from given a row
+     * Try to extract start and end points from a given row
      *
-     * @param input
-     * @param toSet
-     * @throws TransformException
+     * @param input Row to extract data from.
+     * @param toSet Positionable to write position information into.
+     * @throws TransformException If an error occurs while converting read points from access CRS to user CRS.
      */
     public void setGeoPositions(final Row input, final Positionable toSet) throws TransformException {
         final Double startX = input.getDouble(startXName);
@@ -470,6 +470,7 @@ public class ImportContext implements ApplicationContextAware {
      * For each object in given collection, if it is an {@link Identifiable}
      * object, put it in a map whose keys are values identifiers.
      *
+     * @param <T> Type of the objects to analyze.
      * @param toAnalyze Collection of objects to sort.
      * @return A map containing all identifiable objects of input collection.
      * Never null, but can be empty.

@@ -89,8 +89,8 @@ public class FXReferenceAnalysePane extends BorderPane {
     }
 
     /**
-     * Find the {@link Element} pointed by input {@link ReferenceUsage#getObjectId()
-     * } property, and display an editor for it when user click on the cell.
+     * Find the element pointed by input {@link ReferenceUsage#getObjectId() }
+     * property, and display an editor for it when user click on the cell.
      */
     public static class EditColumn extends TableColumn<ReferenceUsage, String> {
 

@@ -4,7 +4,6 @@ import fr.sirs.core.SirsCore;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -51,8 +50,8 @@ public class SQLQueries {
     /**
      * Lecture d'une propriété de fichier de requête : transformation d'une
      * propriété en objet de type SQLQuery (libellé, requête, description).
-     * @param props
-     * @return
+     * @param props Propriétés à lire.
+     * @return Une liste de requêtes SQL lues depuis les propriétés données.
      */
     public static List<SQLQuery> propertiesToQueries(final Properties props){
 
@@ -80,11 +79,10 @@ public class SQLQueries {
     /**
      * Chargement des requêtes préprogrammées.
      *
-     * @return
-     * @throws URISyntaxException
-     * @throws IOException
+     * @return La liste des requêtes par défaut dans l'application.
+     * @throws IOException Si les requêtes ne peuvent être lues depuis les ressources.
      */
-    public static List<SQLQuery> defaultQueries() throws URISyntaxException, IOException{
+    public static List<SQLQuery> defaultQueries() throws IOException {
         final Properties props = new Properties();
         try (final InputStream in = SQLQueries.class.getResourceAsStream("defaultQueries")) {
             props.load(in);
@@ -126,7 +124,7 @@ public class SQLQueries {
      * input list, they're lost.
      *
      * @param queries The list of queries to save.
-     * @param outputFile
+     * @param outputFile File to write queries into.
      * @throws IOException If an error occurred at writing.
      */
     public static void saveQueriesInFile(final List<SQLQuery> queries, final Path outputFile) throws IOException {

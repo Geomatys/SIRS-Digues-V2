@@ -122,7 +122,7 @@ public class Preview implements AvecLibelle, Comparable {
 
     /**
      * Compare previews by class, designation, and finally libelle.
-     * @param o
+     * @param o The other preview to compare.
      */
     @Override
     public int compareTo(Object o) {

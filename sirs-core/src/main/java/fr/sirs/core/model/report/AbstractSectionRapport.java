@@ -78,7 +78,7 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
      * user {@link #getRequeteId() }.
      *
      * @param context Printing context, contains all data needed to print section.
-     * @throws Exception
+     * @throws Exception If an error occurs while printing this section.
      */
     protected abstract void printSection(PrintContext context) throws Exception;
 

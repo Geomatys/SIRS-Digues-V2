@@ -13,7 +13,7 @@ import org.ektorp.CouchDbConnector;
 /**
  *
  * @author Samuel Andrés (Geomatys)
- * @param <T>
+ * @param <T> Type of managed objects.
  */
 public abstract class AbstractPositionDocumentRepository<T extends AbstractPositionDocumentAssociable> extends AbstractPositionableRepository<T> {
 
@@ -38,12 +38,11 @@ public abstract class AbstractPositionDocumentRepository<T extends AbstractPosit
      * specified by the given id.
      *
      * If you know the AbstractPositionDocumentAssociable concrete class,
-     * prefer to use :
-     * getPositionDocumentByDocumentId(final Class<T> targetClass, final String documentId, final SessionCore session)
+     * prefer the use of {@link #getPositionDocumentByDocumentId(java.lang.Class, java.lang.String, fr.sirs.core.SessionCore) } instead.
      *
-     * @param documentId
-     * @param session
-     * @return
+     * @param documentId Identifier of the document to get.
+     * @param session Active session.
+     * @return List of all positions referencing given doccument.
      */
     public static ObservableList<? extends AbstractPositionDocumentAssociable> getPositionDocumentByDocumentId(final String documentId, final SessionCore session){
         ObservableList<? extends AbstractPositionDocumentAssociable> result = null;
@@ -67,11 +66,11 @@ public abstract class AbstractPositionDocumentRepository<T extends AbstractPosit
      * Return the AbstractPositionDocumentAssociable linked to one document
      * specified by the given id.
      *
-     * @param <T>
-     * @param targetClass
-     * @param documentId
-     * @param session
-     * @return
+     * @param <T> Type of the referenced document.
+     * @param targetClass Class of the document referenced.
+     * @param documentId Identifier of the document to get.
+     * @param session Active session.
+     * @return List of all positions referencing given doccument.
      */
     public static <T extends AbstractPositionDocumentAssociable> ObservableList<T> getPositionDocumentByDocumentId(final Class<T> targetClass, final String documentId, final SessionCore session){
         ObservableList<T> result = null;

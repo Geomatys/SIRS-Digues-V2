@@ -520,7 +520,7 @@ public class DatabaseRegistry {
      * @param dbToPasteInto Database to paste content into. Only its name if it's in current service, complete URL otherwise.
      * @param continuous If true, target database will continuously retrieve changes happening in source database. If not, it's one shot copy.
      * @return A status of started replication task.
-     * @throws java.io.IOException
+     * @throws java.io.IOException If an error occurs while connecting to the databases.
      */
     public ReplicationStatus copyDatabase(String dbToCopy, String dbToPasteInto, final boolean continuous) throws IOException {
         // Ensure database to copy is valid.

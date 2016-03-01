@@ -152,6 +152,7 @@ public class ODTUtils {
      * @param properties A map whose keys are properties to put in template, and
      * values are titles for them.
      * @return A new template document with prepared variables.
+     * @throws java.lang.Exception If we fail creating a new document.
      */
     public static TextDocument newSimplePropertyModel(final String title, final Map<String, String> properties) throws Exception {
         final TextDocument result = TextDocument.newTextDocument();

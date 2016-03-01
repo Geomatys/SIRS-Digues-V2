@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.sirs.core.component;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -21,7 +16,7 @@ import org.opengis.geometry.Envelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
- * A listener which computes a positionable envelope (in long/lat --> CRS:84)
+ * A listener which computes a positionable envelope (in long/lat : CRS:84)
  * when its geometry changes.
  *
  * @author Alexis Manin (Geomatys)

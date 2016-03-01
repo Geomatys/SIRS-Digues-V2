@@ -19,9 +19,9 @@ import java.util.logging.Level;
 import javax.annotation.PostConstruct;
 
 /**
- *
+ * Base class for {@link ReferenceType} object import.
  * @author Samuel Andrés (Geomatys)
- * @param <T>
+ * @param <T> Managed implementation.
  */
 public abstract class GenericTypeReferenceImporter<T extends ReferenceType> extends AbstractImporter<T> {
 

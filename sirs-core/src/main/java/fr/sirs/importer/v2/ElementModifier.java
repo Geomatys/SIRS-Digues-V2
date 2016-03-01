@@ -18,7 +18,7 @@ public interface ElementModifier<T extends Element> {
 
     /**
      *
-     * @param outputData
+     * @param outputData Object to alter.
      */
     void modify(final T outputData);
 }

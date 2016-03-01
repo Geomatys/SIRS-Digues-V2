@@ -81,7 +81,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
     /**
      * Return the Linear geometry on which the input {@link SystemeReperage} is based on.
      *
-     * @param t
+     * @param t {@link TronconDigue} to extract line string from.
      * @param source The SR to get linear for. If null, we'll try to get tronçon
      * geometry of the currently edited {@link Positionable}.
      *
@@ -113,9 +113,9 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      * @param target The positionable to build a geometry for (must have a
      * prDebut, prFin and SRId (to make sense to PRs values). Note the PRs have
      * to be included in the reference positionable geometry !
-     * @param repo
-     * @param srRepo
-     * @return
+     * @param repo A repositoru to query needed {@link BorneDigue} from database.
+     * @param srRepo A repositoru to query needed {@link SystemeReperage} from database.
+     * @return A line string for target positionable object.
      */
     public static LineString buildSubGeometry(final Positionable refPositionable,
             final Positionable target,
@@ -350,11 +350,11 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      * geometry is a line string along an input geometry, whose beginning and
      * end are defined by given bornes.
      *
-     * @param refLinear
-     * @param segments
-     * @param structure
-     * @param repo
-     * @return
+     * @param refLinear Line string to use as source.
+     * @param segments Segments composing given line string.
+     * @param structure The object to build a geometry for.
+     * @param repo A repository to query needed {@link BorneDigue} from database.
+     * @return A line string built for given structure.
      */
     public static LineString buildGeometryFromBorne(LineString refLinear, SegmentInfo[] segments, Positionable structure, AbstractSIRSRepository<BorneDigue> repo) {
         //reconstruction a partir de bornes et de distances
@@ -401,9 +401,9 @@ public final class LinearReferencingUtilities extends LinearReferencing {
 
     /**
      *
-     * @param segments
-     * @param distanceAlongLinear
-     * @return
+     * @param segments An array of segments composing a line string.
+     * @param distanceAlongLinear Distance to the wanted segment, from the start of the segment array.
+     * @return The nearest found segment as a line string, along with distance between segment start and given distance along reference line string.
      */
     public static Entry<LineString, Double> buildSegmentFromDistance(final SegmentInfo[] segments,
             final double distanceAlongLinear) {
@@ -418,12 +418,12 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      * borne et leur position relative, retourne le segment sur lequel se trouve
      * ce point, accompagné de la distance entre le début du segment et le point.
      *
-     * @param tronconLineString
-     * @param borneId
-     * @param borneAval
-     * @param borneDistance
-     * @param repo
-     * @return
+     * @param tronconLineString Polyligne de réference.
+     * @param borneId L'identifiant de la borne cible.
+     * @param borneAval Vrai si la borne est en aval de la position voulue, faux si la borne est en amont.
+     * @param borneDistance Distance entre la borne et le point voulu.
+     * @param repo Connecteur à la base de données permettant de récupérer les bornes dans la base de données.
+     * @return Segment contenant le point décrit, avec la distance entre le point et le debut du segment.
      */
     public static Entry<LineString, Double> buildSegmentFromBorne(final LineString tronconLineString, 
             final String borneId, final boolean borneAval, final double borneDistance,
@@ -459,9 +459,9 @@ public final class LinearReferencingUtilities extends LinearReferencing {
     /**
      * Find nearest segment to given distance.
      *
-     * @param segments
-     * @param distance
-     * @return SegmentInfo
+     * @param segments An array of segments composing a line string.
+     * @param distance Distance to the wanted segment, from the start of the segment array.
+     * @return Extracted segment for given distance, and distance between segment start and given distance along reference line string.
      */
     public static Entry<SegmentInfo, Double> getSegmentAndDistance(SegmentInfo[] segments, double distance){
         SegmentInfo segment = segments[0];
@@ -484,8 +484,8 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      *
      * @param tronconGeom The source geometry to follow when creating the new
      * one.
-     * @param positionDebut
-     * @param positionFin
+     * @param positionDebut Point to use as start for output geometry.
+     * @param positionFin Point to use as end for output geometry.
      * @return A line string for the given structure. Never null.
      */
     public static LineString buildGeometryFromGeo(Geometry tronconGeom, Point positionDebut, Point positionFin) {

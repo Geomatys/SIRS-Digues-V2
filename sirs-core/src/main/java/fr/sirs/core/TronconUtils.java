@@ -70,11 +70,13 @@ public class TronconUtils {
     private static final GeometryFactory GF = GO2Utilities.JTS_FACTORY;
 
     /**
-     *
+     * Crée une copie du tronçon en entrée, dont la géométrie se limite à la polyligne donnée.
+     * Les objets du tronçon source présents sur cette nouvelle polyligne sont copiés,
+     * et les systèmes de repérages copiés et adaptés à la nouvelle géométrie.
      * @param troncon troncon a decouper
      * @param cutLinear partie du troncon a garder
-     * @param newName
-     * @param session
+     * @param newName Le nom à affecter au troncon généré.
+     * @param session La session applicative courante.
      * @return nouveau troncon découpé
      */
     public static TronconDigue cutTroncon(TronconDigue troncon, LineString cutLinear, String newName, SessionCore session) {
@@ -311,67 +313,66 @@ public class TronconUtils {
     }
 
     /**
-     * Retrieve the list of properties linked to a linear which id is given as a
-     * parameter.
-     * @param linearId
-     * @return
+     * Retrieve the list of owners  of a linear whose id is given as parameter.
+     * @param linearId Id of the {@link TronconDigue} to get bound {@link ProprieteTroncon} for.
+     * @return List of {@link ProprieteTroncon} bound to the given {@link TronconDigue}.
      */
     public static List<ProprieteTroncon> getProprieteList(final String linearId){
         return InjectorCore.getBean(SessionCore.class).getProprietesByTronconId(linearId);
     }
 
     /**
-     * Retrieve the list of properties linked to a linear given as a parameter.
-     * @param linear
-     * @return
+     * Retrieve the list of owners  of a linear.
+     * @param linear {@link TronconDigue} to get bound {@link ProprieteTroncon} for.
+     * @return List of {@link ProprieteTroncon} bound to the given {@link TronconDigue}.
      */
     public static List<ProprieteTroncon> getProprieteList(final TronconDigue linear){
         return getProprieteList(linear.getId());
     }
 
     /**
-     * Retrieve the list of gardes linked to a linear which id is given as a
+     * Retrieve the list of guards linked to a linear whose id is given as a
      * parameter.
-     * @param linearId
-     * @return
+     * @param linearId Id of the {@link TronconDigue} to get bound {@link GardeTroncon} for.
+     * @return List of {@link GardeTroncon} bound to the given {@link TronconDigue}.
      */
     public static List<GardeTroncon> getGardeList(final String linearId){
         return InjectorCore.getBean(SessionCore.class).getGardesByTronconId(linearId);
     }
 
     /**
-     * Retrieve the list of gardes linked to a linear given as a parameter.
-     * @param linear
-     * @return
+     * Retrieve the list of guards  of a linear.
+     * @param linear {@link TronconDigue} to get bound {@link GardeTroncon} for.
+     * @return List of {@link GardeTroncon} bound to the given {@link TronconDigue}.
      */
     public static List<GardeTroncon> getGardeList(final TronconDigue linear) {
         return getGardeList(linear.getId());
     }
 
     /**
-     * Retrieve the list of objects linked to a linear which id is given as a
+     * Retrieve the list of objects linked to a linear whose id is given as a
      * parameter.
-     * @param linearId
-     * @return
+     * @param linearId Id of the {@link TronconDigue} to get bound {@link Objet} for.
+     * @return List of {@link Objet} bound to the given {@link TronconDigue}.
      */
     public static List<Objet> getObjetList(final String linearId){
         return InjectorCore.getBean(SessionCore.class).getObjetsByTronconId(linearId);
     }
 
     /**
-     * Retrieve the list of objects linked to a linear given as a parameter.
-     * @param linear
-     * @return
+     * Retrieve the list of objects linked to a linear.
+     * @param linear {@link TronconDigue} to get bound {@link Objet} for.
+     * @return List of {@link Objet} bound to the given {@link TronconDigue}.
      */
     public static List<Objet> getObjetList(final TronconDigue linear) {
         return getObjetList(linear.getId());
     }
 
     /**
-     * Retrieve the list of document positions linked to a linear which id is
+     * Retrieve the list of document positions linked to a linear whose id is
      * given as a parameter.
-     * @param linearId
-     * @return
+     * @param linearId Id of the {@link TronconDigue} to get bound {@link AbstractPositionDocument} for.
+     * @return List of {@link AbstractPositionDocument} bound to the given {@link TronconDigue}.
      */
     public static List<AbstractPositionDocument> getPositionDocumentList(final String linearId){
         return InjectorCore.getBean(SessionCore.class).getPositionDocumentsByTronconId(linearId);
@@ -380,8 +381,8 @@ public class TronconUtils {
     /**
      * Retrieve the list of document positions linked to a linear given as a
      * parameter.
-     * @param linear
-     * @return
+     * @param linear {@link TronconDigue} to get bound {@link AbstractPositionDocument} for.
+     * @return List of {@link AbstractPositionDocument} bound to the given {@link TronconDigue}.
      */
     public static List<AbstractPositionDocument> getPositionDocumentList(final TronconDigue linear){
         return getPositionDocumentList(linear.getId());
@@ -390,8 +391,8 @@ public class TronconUtils {
     /**
      * Retrieve the list of photographs contained in objects or profil en
      * travers positions linked to a linear which id is given as a parameter.
-     * @param linearId
-     * @return
+     * @param linearId Id of the {@link TronconDigue} to get bound {@link Photo} for.
+     * @return List of {@link Photo} bound to the given {@link TronconDigue}.
      */
     public static List<Photo> getPhotoList(final String linearId){
         return InjectorCore.getBean(SessionCore.class).getPhotoList(linearId);
@@ -400,7 +401,7 @@ public class TronconUtils {
     /**
      * Return the positionable included, linked or included into linked elements
      * for the linar given as a parameter.
-     * @param linear
+     * @param linear {@link TronconDigue} to get bound {@link Positionable} for.
      * @return a list containing the objets, positions de documents, proprietes,
      * gardes and photos related to the linear.
      */
@@ -422,8 +423,8 @@ public class TronconUtils {
     /**
      * Retrieve the list of photographs contained in objects or profil en
      * travers positions linked to a linear given as a parameter.
-     * @param linear
-     * @return
+     * @param linear {@link TronconDigue} to get bound {@link Photo} for.
+     * @return List of {@link Photo} bound to the given {@link TronconDigue}.
      */
     public static List<Photo> getPhotoList(final TronconDigue linear) {
         return getPhotoList(linear.getId());
@@ -564,8 +565,8 @@ public class TronconUtils {
     /**
      * Creation ou mise a jour du systeme de reperage elementaire .
      *
-     * @param troncon
-     * @param session
+     * @param troncon Tronçon à analyser.
+     * @param session La session applicative en cours.
      */
     public static void updateSRElementaire(TronconDigue troncon, SessionCore session){
 
@@ -650,8 +651,8 @@ public class TronconUtils {
      * Recalcule des geometries des differents positionnables apres que
      * la géometrie ou que les SR du troncon aient changés.
      *
-     * @param troncon
-     * @param session
+     * @param troncon {@link TronconDigue} contenant les objets à mettre à jour.
+     * @param session La session applicative active.
      */
     public static void updatePositionableGeometry(TronconDigue troncon, SessionCore session){
         for(Objet obj : getObjetList(troncon)){
@@ -672,7 +673,7 @@ public class TronconUtils {
      * @param initialSR The SR the initial PR is expressed in.
      * @param targetSR The SR the result PR is required expressed in.
      * @param borneRepo The borne repository.
-     * @return
+     * @return PR value in chosen {@link SystemeReperage}.
      */
     public static float switchSRForPR(
             final SegmentInfo[] refLinear,
@@ -749,7 +750,7 @@ public class TronconUtils {
      * @param targetSR The system to express output PR into.
      * @param toGetPRFor the point we want to compute a PR for.
      * @param borneRepo Database  connection to read {@link BorneDigue} objects referenced in target {@link SystemeReperage}.
-     * @return Value of the computed PR, or {@link Float.NaN} if we cannot compute any.
+     * @return Value of the computed PR, or {@link Float#NaN} if we cannot compute any.
      */
     public static float computePR(final SegmentInfo[] refLinear, final SystemeReperage targetSR, final Point toGetPRFor, final AbstractSIRSRepository<BorneDigue> borneRepo) {
         ArgumentChecks.ensureNonNull("Reference linear", refLinear);
@@ -796,12 +797,12 @@ public class TronconUtils {
     /**
      * Recherche des bornes amont et aval les plus proches.
      *
-     * @param refLinear
-     * @param targetSR
-     * @param toGetPRFor
-     * @param borneRepo
-     * @return [0] distance<->Borne amont
-     *         [1] distance<->Borne aval
+     * @param refLinear Segments constituant la polyligne sur laquelle effectuer la recherche.
+     * @param targetSR Systeme de repérage cible.
+     * @param toGetPRFor Le point pour lequel on veut trouver les bornes amont / aval les plus proches.
+     * @param borneRepo Accesseur permettant de récupérer les bornes depuis la base de données.
+     * @return [0] distance à la borne en amont comme clé, Borne en amont comme valeur. Peut être nul.
+     *         [1] distance à la borne en aval comme clé, Borne en aval comme valeur. Peut être nul.
      */
     public static Map.Entry<Double, SystemeReperageBorne>[] findNearest(final SegmentInfo[] refLinear, final SystemeReperage targetSR, final Point toGetPRFor, final AbstractSIRSRepository<BorneDigue> borneRepo) {
         ArgumentChecks.ensureNonNull("Reference linear", refLinear);
@@ -862,9 +863,9 @@ public class TronconUtils {
     /**
      * Calcul de la position avec un systeme de reperage et un PR.
      *
-     * @param sr
-     * @param pr
-     * @return
+     * @param sr Système de repérage à utiliser pour le calcul.
+     * @param pr Valeur de PR pour lequel on veut trouver un point.
+     * @return Le point calculé pour le PR donné.
      */
     public static Point computeCoordinate(SystemeReperage sr, double pr){
         final TronconDigueRepository tronconRepo = InjectorCore.getBean(TronconDigueRepository.class);
@@ -922,10 +923,10 @@ public class TronconUtils {
     /**
      * Calcul de la position avec un systeme de reperage, une borne et une distance.
      *
-     * @param sr
-     * @param srBorne
-     * @param distance
-     * @return
+     * @param sr Système de repérage à utiliser pour le calcul.
+     * @param srBorne borne de référence pour le point à calculer.
+     * @param distance Distance du point à la borne (négatif si le point est en amont).
+     * @return Le point calculé pour les paramètres linéaires donnés.
      */
     public static Point computeCoordinate(SystemeReperage sr, SystemeReperageBorne srBorne, double distance){
         final TronconDigueRepository tronconRepo = InjectorCore.getBean(TronconDigueRepository.class);
@@ -946,12 +947,12 @@ public class TronconUtils {
     /**
      * Calcule un point à partir de l'information sur la distance à une borne.
      *
-     * @param borneId
-     * @param distance
-     * @param amontAval
-     * @param tronconSegments
-     * @param borneRepo
-     * @return
+     * @param borneId Identifiant de la borne de référence.
+     * @param distance Distance entre la borne et le point à calculer.
+     * @param amontAval Vrai si la borne est en aval du point, faux si le point à calculer est en aval de la borne.
+     * @param tronconSegments Segments composant le tronçon cible.
+     * @param borneRepo Permet de récupérer les bornes depuis la base de données.
+     * @return Le point calculé pour les paramètres linéaires donnés.
      */
     public static Point getPointFromBorne(final String borneId, final double distance, final boolean amontAval, final SegmentInfo[] tronconSegments, final AbstractSIRSRepository<BorneDigue> borneRepo){
         final Point bornePoint = borneRepo.get(borneId).getGeometry();
@@ -972,22 +973,23 @@ public class TronconUtils {
      * (si on veut le début) ou le second point du dernier segment (si on veut
      * la fin).
      *
-     * @param geometry
-     * @param linearSegments
-     * @param crs
-     * @param endPoint
-     * @return
+     * @param geometry La géométrie pour laquelle on veut extraire un point.
+     * @param linearSegments Les segments constituant la polyligne de référence.
+     * @param crs La projection à utiliser pour la géométrie de sortie.
+     * @param endPoint Vrai si le dernier point de la géométrie doit être retourné, faux si c'est le premier point.
+     * @return Le premier ou dernier point de la géométrie en entrée.
      */
-    public static Point getPointFromGeometry(final Geometry geometry, final SegmentInfo[] linearSegments, final CoordinateReferenceSystem crs, final boolean endPoint){
-        Geometry geom = geometry;
-        if(!(geom instanceof LineString)){
-            geom = LinearReferencing.project(linearSegments, geom);
+    public static Point getPointFromGeometry(Geometry geometry, final SegmentInfo[] linearSegments, final CoordinateReferenceSystem crs, final boolean endPoint) {
+        if(!(geometry instanceof LineString) && linearSegments != null) {
+            geometry = LinearReferencing.project(linearSegments, geometry);
         }
-        final Coordinate[] coords = geom.getCoordinates();
+        final Coordinate[] coords = geometry.getCoordinates();
         // Which point : first or last ?
         final int index = endPoint ? coords.length-1 : 0;
         final Point point = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(coords[index]));
-        JTS.setCRS(point, crs);
+        if (crs != null) {
+            JTS.setCRS(point, crs);
+        }
         return point;
     }
 
@@ -1027,6 +1029,10 @@ public class TronconUtils {
             this.session = InjectorCore.getBean(SessionCore.class);
         }
 
+        /**
+         *
+         * @return Identifier of the {@link TronconDigue} on which this object is placed.
+         */
         public String getTronconId() {
             String tdId = null;
             if (troncon == null) {
@@ -1083,7 +1089,7 @@ public class TronconUtils {
         /**
          * Return the geometry object associated to the {@link TronconDigue} bound to
          * the positionable.
-         * @return
+         * @return geometry of this object {@link TronconDigue}.
          */
         public LineString getTronconLinear() {
             if(linear==null) {
@@ -1145,7 +1151,7 @@ public class TronconUtils {
         /**
          * Get input Positionable start point, reprojected in given CRS. If it does not exist,
          * it's computed from linear position of the Positionable.
-         * @param crs
+         * @param crs projection to use for output point. If null, database projection is used.
          * @return A point, never null.
          * @throws org.opengis.util.FactoryException If we cannot access Referencing module.
          * @throws IllegalStateException If we cannot get nor compute any point.
@@ -1164,18 +1170,18 @@ public class TronconUtils {
 
         /**
          * Calcule un point à partir de l'information sur la distance à une borne.
-         * @param borneId
-         * @param distance
-         * @param amontAval
-         * @return
+         * @param borneId identifiant de la borne de réference.
+         * @param distance Distance entre la borne et le point à calculer.
+         * @param amontAval - Vrai si la borne est en aval du point, faux si le point à calculer est en aval de la borne.
+         * @return Le point calculé pour les paramètres linéaires donnés.
          */
         private Point getPointFromBorne(final String borneId, final double distance, final boolean amontAval){
             return TronconUtils.getPointFromBorne(borneId, distance, amontAval, getTronconSegments(false), session.getRepositoryForClass(BorneDigue.class));
         }
 
         /**
-         *
-         * @return
+         * @param endPoint True if we want end point of the geometry, false if we need its start position.
+         * @return End point or start point of this positionable geometry.
          */
         private Point getPointFromGeometry(final boolean endPoint){
             return TronconUtils.getPointFromGeometry(pos.getGeometry(), getTronconSegments(false), session.getProjection(), endPoint);
@@ -1208,7 +1214,7 @@ public class TronconUtils {
         /**
          * Get input Positionable end point, reprojected in given CRS. If it does not exist,
          * it's computed from linear position of the Positionable.
-         * @param crs
+         * @param crs projection to use for output point. If null, database projection is used.
          * @return A point, never null.
          * @throws org.opengis.util.FactoryException If we cannot access Referencing module.
          * @throws IllegalStateException If we cannot get nor compute any point.

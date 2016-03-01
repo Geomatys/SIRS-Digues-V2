@@ -553,15 +553,15 @@ public class CorePlugin extends Plugin {
     }
 
     /**
-     * Build DocumentTroncon layers for each provided SIRSdocument class.
-     * @param store
-     * @param documentClasses
-     * @param nameMap
-     * @param colors
-     * @param selectionStyle
-     * @param visible
-     * @return
-     * @throws DataStoreException
+     * Build {@link AbstractPositionDocument} layers for each provided {@link SIRSDocument} class.
+     * @param store Data store providing {@link AbstractPositionDocument} objects.
+     * @param documentClasses Document types referenced by document positions.
+     * @param nameMap Map containing layer titles (key : document class simple name, value : title).
+     * @param colors Set of colors to use for style creation.
+     * @param selectionStyle Style to use when an object is selected in a layer.
+     * @param visible True if layer must be visible by default. False otherwise.
+     * @return List of created map layers.
+     * @throws DataStoreException If an error occcurs while reading in input store.
      */
     public static List<MapLayer> buildLayers(BeanStore store, Map<Class<? extends AbstractPositionDocument>, List<Class>> documentClasses, Map<String,String> nameMap, Color[] colors, MutableStyle selectionStyle, boolean visible) throws DataStoreException{
         final List<MapLayer> layers = new ArrayList<>();
