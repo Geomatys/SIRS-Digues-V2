@@ -230,11 +230,6 @@
                   </GridPane>
                </content>
             </Tab>
-            <Tab fx:id="uiWalletTab" closable="false" text="Trousseau de connexion">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" />
-              </content>
-            </Tab>
         </tabs>
       </TabPane>
    </center>
