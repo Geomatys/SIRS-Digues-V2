@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -409,7 +408,7 @@ public class FXSearchPane extends BorderPane {
         final List<SQLQuery> queries;
         try {
             queries = SQLQueries.defaultQueries();
-        } catch (IOException | URISyntaxException ex) {
+        } catch (IOException ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             GeotkFX.newExceptionDialog("Une erreur s'est produite pendant le chargement des requêtes préprogrammées.", ex).show();
             return;
