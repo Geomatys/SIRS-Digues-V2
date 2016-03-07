@@ -10,6 +10,7 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.Assert;
 
 public class DocumentChangeEmiterTestCase extends CouchDBTestCase implements DocumentListener {
@@ -23,6 +24,8 @@ public class DocumentChangeEmiterTestCase extends CouchDBTestCase implements Doc
     @Autowired
     private DigueRepository digueRepository;
 
+    private String digueId;
+
     @Test
     public void testListen() throws InterruptedException {
         // Test creation listening
@@ -30,6 +33,7 @@ public class DocumentChangeEmiterTestCase extends CouchDBTestCase implements Doc
         Digue digue = ElementCreator.createAnonymValidElement(Digue.class);
         digue.setCommentaire(FIRST_COMMENT);
         digueRepository.add(digue);
+        digueId = digue.getId();
 
         synchronized (this) {
             wait(1000);
@@ -52,11 +56,10 @@ public class DocumentChangeEmiterTestCase extends CouchDBTestCase implements Doc
     }
 
     @Override
-    public void documentDeleted(Map<Class, List<Element>> element) {
-        List<Element> deleted = element.get(Digue.class);
+    public void documentDeleted(Set<String> deleted) {
         Assert.assertNotNull("No deleted element found !", deleted);
         Assert.assertFalse("No deleted element found !", deleted.isEmpty());
-        Assert.assertEquals("Deleted element is not expected one", SECOND_COMMENT, ((Digue)deleted.get(0)).getCommentaire());
+        Assert.assertTrue("Deleted element is not expected one", deleted.contains(digueId));
         
         synchronized (this) {
             notify();

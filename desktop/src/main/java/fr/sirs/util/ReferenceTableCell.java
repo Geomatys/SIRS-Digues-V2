@@ -19,6 +19,7 @@ import fr.sirs.core.model.SystemeReperageBorne;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 
@@ -280,22 +281,20 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> implements Cha
         }
 
         @Override
-        public void documentDeleted(Map<Class, List<Element>> deletedObject) {
-            if (CACHED_VALUES.size() < 1) return;
-            for (final List<Element> elements : deletedObject.values()) {
-                for (final Element e : elements) {
-                    final StringProperty tmpProp = CACHED_VALUES.get(e.getId());
-                    if (tmpProp != null) {
-                        final Runnable fxUpdate = () -> tmpProp.set(OBJECT_DELETED);
-                        if (Platform.isFxApplicationThread()) {
-                            fxUpdate.run();
-                        } else {
-                            Platform.runLater(fxUpdate);
-                        }
+        public void documentDeleted(Set<String> deleted) {
+            if (CACHED_VALUES.size() < 1)
+                return;
+            for (final String id : deleted) {
+                final StringProperty tmpProp = CACHED_VALUES.get(id);
+                if (tmpProp != null) {
+                    final Runnable fxUpdate = () -> tmpProp.set(OBJECT_DELETED);
+                    if (Platform.isFxApplicationThread()) {
+                        fxUpdate.run();
+                    } else {
+                        Platform.runLater(fxUpdate);
                     }
                 }
             }
         }
-
     }
 }

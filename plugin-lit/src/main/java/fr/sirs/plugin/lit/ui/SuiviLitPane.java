@@ -185,11 +185,9 @@ public class SuiviLitPane extends FXAbstractTronconTreePane {
     }
 
     @Override
-    public void documentDeleted(Map<Class, List<Element>> candidate) {
-        if(candidate.get(Lit.class) != null  ||
-           candidate.get(TronconLit.class) != null) {
+    public void documentDeleted(Set<String> candidate) {
+        if(containsOne(candidate))
            updateTree();
-        }
     }
 
     private class NewTronconMenuItem extends MenuItem {

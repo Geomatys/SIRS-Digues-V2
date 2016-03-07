@@ -21,7 +21,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import org.apache.sis.util.ArgumentChecks;
@@ -507,14 +509,16 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
             cached = all == null ? null : all.get();
         }
         if (cached != null) {
-            List<T> created = (List<T>) added.get(getModelClass());
-            if (created != null) {
-                synchronized (cached) {
-                    created = cacheList(created);
-                    created.removeAll(cached);
-                    cached.addAll(created);
+            Platform.runLater(() -> {
+                List<T> created = (List<T>) added.get(getModelClass());
+                if (created != null) {
+                    synchronized (cached) {
+                        created = cacheList(created);
+                        created.removeAll(cached);
+                        cached.addAll(created);
+                    }
                 }
-            }
+            });
         }
     }
 
@@ -526,16 +530,15 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     }
 
     @Override
-    public void documentDeleted(Map<Class, List<Element>> deletedObject) {
+    public void documentDeleted(Set<String> deletedObjects) {
         final List<T> cached;
         synchronized (this) {
             cached = all == null ? null : all.get();
         }
         if (cached != null) {
-            final List<T> deleted = (List<T>) deletedObject.get(getModelClass());
-            if (deleted != null) {
-                cached.removeAll(deleted);
-            }
+            Platform.runLater(() -> {
+                cached.removeIf(element -> deletedObjects.contains(element.getId()));
+            });
         }
     }
 }

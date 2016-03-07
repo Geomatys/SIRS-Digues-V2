@@ -73,7 +73,7 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
         uiTree.setShowRoot(false);
 
         uiTree.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
-            if (newValue == null || newValue.getValue() == null) {
+            if (newValue == null || !(newValue.getValue() instanceof Element)) {
                 uiRight.setCenter(null);
             } else {
                 editElement(newValue.getValue());
@@ -184,6 +184,41 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * Check if current tree contains at least one element whose ID is present into
+     * given collection.
+     * @param ids Set of Ids to search into the given tree.
+     * @return True if we've found one element matching a provided ID. False otherwise.
+     */
+    protected boolean containsOne(final Set<String> ids) {
+        if (ids == null || ids.isEmpty())
+            return false;
+
+        return containsIds(ids, uiTree.getRoot());
+    }
+
+    /**
+     * Check if current tree item or one of its children contain at least one
+     * element whose ID is present into given collection.
+     * 
+     * @param ids Set of Ids to search into the given tree.
+     * @return True if we've found one element matching a provided ID. False otherwise.
+     */
+    private boolean containsIds(final Set<String> ids, final TreeItem<? extends Element> searchRoot) {
+        final Element value = (searchRoot.getValue() instanceof Element)? searchRoot.getValue() : null;
+        if (value != null && value.getId() != null && ids.contains(value.getId())) {
+            return true;
+        }
+
+        for (final TreeItem child : searchRoot.getChildren()) {
+            if (containsIds(ids, child)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

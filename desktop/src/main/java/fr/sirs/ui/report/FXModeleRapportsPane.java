@@ -92,9 +92,6 @@ public class FXModeleRapportsPane extends BorderPane {
         p.setDocClass(p.getElementClass());
         p.setElementId(newModele.getId());
         p.setDocId(newModele.getId());
-
-        uiReportList.getItems().add(p);
-        uiReportList.getSelectionModel().select(p);
     }
 
     @FXML
@@ -117,7 +114,6 @@ public class FXModeleRapportsPane extends BorderPane {
                 modeles[i] = selectedItems.get(i).getElementId();
             }
             repo.executeBulkDelete(repo.get(modeles));
-            uiReportList.getItems().removeAll(selectedItems);
         }
     }
 
@@ -130,6 +126,8 @@ public class FXModeleRapportsPane extends BorderPane {
             final ModeleRapport rapport = repo.get(newValue.getElementId());
             newValue.libelleProperty().bind(rapport.libelleProperty());
             editor.setElement(rapport);
+        } else {
+            editor.setElement(null);
         }
     }
 }

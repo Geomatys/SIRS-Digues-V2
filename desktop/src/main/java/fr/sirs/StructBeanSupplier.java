@@ -11,6 +11,7 @@ import java.beans.PropertyDescriptor;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -72,11 +73,11 @@ public class StructBeanSupplier extends BeanFeatureSupplier implements DocumentL
     }
 
     @Override
-    public void documentDeleted(Map<Class, List<Element>> deleteObject) {
-        if (deleteObject == null) {
+    public void documentDeleted(final Set<String> deleted) {
+        if (deleted == null) {
             return;
         }
-        final Id filter = getIdFilter(deleteObject);
+        final Id filter = getIdFilter(deleted);
         if (filter != null) {
             fireFeaturesDeleted(filter);
         }
@@ -94,4 +95,11 @@ public class StructBeanSupplier extends BeanFeatureSupplier implements DocumentL
         return FF.id(fIds);
     }
 
+    private Id getIdFilter(final Set<String> elements) {
+        final HashSet<FeatureId> fIds = new HashSet<>();
+        for (String id : elements) {
+            fIds.add(FF.featureId(id));
+        }
+        return FF.id(fIds);
+    }
 }

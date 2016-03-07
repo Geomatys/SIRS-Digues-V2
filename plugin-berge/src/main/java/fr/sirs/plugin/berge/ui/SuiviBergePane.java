@@ -10,6 +10,7 @@ import fr.sirs.core.model.Element;
 import fr.sirs.util.SimpleFXEditMode;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -92,12 +93,11 @@ public class SuiviBergePane extends BorderPane {
          * @param deletedObject Liste d'éléments à supprimer de la liste.
          */
         @Override
-        public void documentDeleted(Map<Class, List<Element>> deletedObject) {
-            final List deletedObj = deletedObject.get(Berge.class);
-            if (deletedObj == null || deletedObj.isEmpty()) {
+        public void documentDeleted(Set<String> deletedObjects) {
+            if (deletedObjects == null || deletedObjects.isEmpty()) {
                 return;
             }
-            final Runnable delRun = () -> list.removeAll(deletedObj);
+            final Runnable delRun = () -> list.removeIf(berge -> deletedObjects.contains(berge.getId()));
             if (!Platform.isFxApplicationThread()) {
                 Platform.runLater(delRun);
             } else {

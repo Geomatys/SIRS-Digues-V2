@@ -30,6 +30,7 @@ import javafx.scene.layout.Priority;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javafx.geometry.Insets;
 
 /**
@@ -160,12 +161,11 @@ public final class DocumentsTheme extends AbstractPluginsButtonTheme {
          * @param deletedObject Liste d'éléments à supprimer de la liste.
          */
         @Override
-        public void documentDeleted(Map<Class, List<Element>> deletedObject) {
-            final List deletedObj = deletedObject.get(clazz);
-            if (deletedObj == null || deletedObj.isEmpty()) {
+        public void documentDeleted(Set<String> deleted) {
+            if (deleted == null || deleted.isEmpty()) {
                 return;
             }
-            final Runnable delRun = () -> list.removeAll(deletedObj);
+            final Runnable delRun = () -> list.removeIf(e -> deleted.contains(e.getId()));
             if (!Platform.isFxApplicationThread()) {
                 Platform.runLater(delRun);
             } else {

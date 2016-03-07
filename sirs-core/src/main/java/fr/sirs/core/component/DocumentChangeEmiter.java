@@ -19,6 +19,9 @@ import fr.sirs.core.model.Element;
 import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -106,9 +109,9 @@ public class DocumentChangeEmiter {
     private void handleChanges(ChangesFeed feed) throws InterruptedException {
 
         final Thread currentThread = Thread.currentThread();
-        final HashMap<Class, List<Element>> addedElements = new HashMap<>();
-        final HashMap<Class, List<Element>> changedElements = new HashMap<>();
-        final HashMap<Class, List<Element>> removedElements = new HashMap<>();
+        final HashMap<Class, List<Element>> tmpAddedElements = new HashMap<>();
+        final HashMap<Class, List<Element>> tmpChangedElements = new HashMap<>();
+        Set<String> removedElements = new HashSet<>();
 
         while (!currentThread.isInterrupted()) {
             final DocumentChange change = feed.next(bulkTime, bulkUnit);
@@ -117,16 +120,21 @@ public class DocumentChangeEmiter {
 
             try {
                 if (change.isDeleted()) {
-                    getDeleted(change.getDoc()).ifPresent((Element e) -> putElement(e, removedElements));
+                    removedElements.add(change.getId());
                 } else if (FIRST_REVISION.matcher(change.getRevision()).find()) {
-                    DocHelper.toElement(change.getDoc()).ifPresent((Element e) -> putElement(e, addedElements));
+                    DocHelper.toElement(change.getDoc()).ifPresent((Element e) -> putElement(e, tmpAddedElements));
                 } else {
-                    DocHelper.toElement(change.getDoc()).ifPresent((Element e) -> putElement(e, changedElements));
+                    DocHelper.toElement(change.getDoc()).ifPresent((Element e) -> putElement(e, tmpChangedElements));
                 }
             } catch (Exception e) {
                 SirsCore.LOGGER.log(Level.WARNING, "An error occurred while analyzing a database change. Change will be ignored.", e);
             }
         }
+
+        // Prevent modification
+        final Map<Class, List<Element>> addedElements = Collections.unmodifiableMap(tmpAddedElements);
+        final Map<Class, List<Element>> changedElements = Collections.unmodifiableMap(tmpChangedElements);
+        removedElements = Collections.unmodifiableSet(removedElements);
 
         for (DocumentListener listener : listeners) {
             if (!addedElements.isEmpty()) {
@@ -141,7 +149,7 @@ public class DocumentChangeEmiter {
         }
     }
 
-    private static void putElement(final Element e, final HashMap<Class, List<Element>> output) {
+    private static void putElement(final Element e, final Map<Class, List<Element>> output) {
         List<Element> registry = output.get(e.getClass());
         if (registry == null) {
             registry = new ArrayList<>();

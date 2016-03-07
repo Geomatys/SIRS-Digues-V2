@@ -19,6 +19,7 @@ import org.ektorp.support.View;
 
 import fr.sirs.core.model.Preview;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +27,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
@@ -232,9 +236,12 @@ public class Previews extends CouchDbRepositorySupport<Preview> implements Docum
                 continue;
             }
 
+            final ArrayList<Preview> tmpPreviews = new ArrayList<>(entry.getValue().size());
             for (final Element e : entry.getValue()) {
-                previews.add(createPreview(e));
+                tmpPreviews.add(createPreview(e));
             }
+            
+            Platform.runLater(() -> previews.addAll(tmpPreviews));
         }
     }
 
@@ -257,40 +264,35 @@ public class Previews extends CouchDbRepositorySupport<Preview> implements Docum
                 }
             }
 
-            ListIterator<Preview> it = previews.listIterator();
-            Preview p;
-            Element doc, child;
-            while (it.hasNext()) {
-                p = it.next();
-                // Do not remove preview if no document matches it. it's the job of #documentDeleted.
-                if (p.getDocId() != null) {
-                    doc = documents.get(p.getDocId());
-                    if (doc != null) {
-                        child = doc.getChildById(p.getElementId());
-                        if (child == null) { // Child should have been deleted from document. Preview is no longer needed.
-                            it.remove();
-                        } else {
-                            it.set(createPreview(child)); // Update preview.
+            Platform.runLater(() -> {
+                ListIterator<Preview> it = previews.listIterator();
+                Preview p;
+                Element doc, child;
+                while (it.hasNext()) {
+                    p = it.next();
+                    // Do not remove preview if no document matches it. it's the job of #documentDeleted.
+                    if (p.getDocId() != null) {
+                        doc = documents.get(p.getDocId());
+                        if (doc != null) {
+                            child = doc.getChildById(p.getElementId());
+                            if (child == null) { // Child should have been deleted from document. Preview is no longer needed.
+                                it.remove();
+                            } else {
+                                it.set(createPreview(child)); // Update preview.
+                            }
                         }
                     }
                 }
-            }
+            });
         }
     }
 
     @Override
-    public void documentDeleted(Map<Class, List<Element>> deletedObject) {
-        for (final Map.Entry<Class, List<Element>> entry : deletedObject.entrySet()) {
-            final ObservableList<Preview> previews = byClassCache.get(entry.getKey().getCanonicalName());
-            if (previews == null) {
-                continue;
-            }
-
-            final HashSet<String> docIds = new HashSet<>(entry.getValue().size());
-            for (final Element e : entry.getValue()) {
-                docIds.add(e.getDocumentId());
-            }
-            previews.removeIf(p -> docIds.contains(p.getDocId()));
+    public void documentDeleted(Set<String> deleted) {
+        final Predicate<Preview> dp = p -> deleted.contains(p.getDocId()) || deleted.contains(p.getElementId());
+        // Iterate through all cached previews, to ensure previews of nested documents are deleted when its parent is also removed.
+        for (final ObservableList<Preview> cached : byClassCache.values()) {
+            Platform.runLater(()-> cached.removeIf(dp));
         }
     }
 

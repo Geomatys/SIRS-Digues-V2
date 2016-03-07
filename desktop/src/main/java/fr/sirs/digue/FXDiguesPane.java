@@ -226,12 +226,9 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
     }
 
     @Override
-    public void documentDeleted(Map<Class, List<Element>> candidate) {
-        if(candidate.get(SystemeEndiguement.class) != null  ||
-           candidate.get(Digue.class) != null ||
-           candidate.get(TronconDigue.class) != null) {
-           updateTree();
-        }
+    public void documentDeleted(final Set<String> candidate) {
+        if (containsOne(candidate))
+            updateTree();
     }
 
     private class NewTronconMenuItem extends MenuItem {
