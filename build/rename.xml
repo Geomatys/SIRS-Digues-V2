@@ -3,7 +3,7 @@
   <target name="rename">
     <replace dir="..">
       <include name="**/pom.xml"/>
-     <replacefilter token="&lt;version&gt;0.x-SNAPSHOT&lt;/version&gt;"
+     <replacefilter token="&lt;version&gt;2.x-SNAPSHOT&lt;/version&gt;"
                      value="&lt;version&gt;_RELEASE_VERSION_&lt;/version&gt;"/>
     </replace>
   </target>
