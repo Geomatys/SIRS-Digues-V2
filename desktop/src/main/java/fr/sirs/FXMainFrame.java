@@ -21,8 +21,10 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.Collator;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -175,7 +177,25 @@ public class FXMainFrame extends BorderPane {
                 uiDesignation.getItems().add(toMenuItem(c, Choice.MODEL));
             }
         }
+        
+        // A simple comparator to sort menu items according to their title.
+        final Collator collator = Collator.getInstance();
+        final Comparator<MenuItem> menuComparator = (o1, o2) -> {
+            final String t1, t2;
+            if (o1 != null && (t1 = o1.getText()) != null) {
+                if (o2 != null && (t2 = o2.getText()) != null) {
+                    return collator.compare(t1, t2);
+                } else {
+                    return -1;
+                }
+            }
 
+            return 0; // None has title to compare.
+        };
+
+        uiReference.getItems().sort(menuComparator);
+        uiDesignation.getItems().sort(menuComparator);
+        
         uiAdmin.getItems().addAll(uiUserAdmin, uiValidation, uiReference, uiDesignation);
         uiAdmin.visibleProperty().bind(Bindings.createBooleanBinding(() -> {
             Utilisateur user = session.utilisateurProperty().get();
