@@ -9,7 +9,6 @@ import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
-import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -207,7 +206,7 @@ public class PrintManager {
             final List<String> avoidFields = new ArrayList<>();
             avoidFields.add(GEOMETRY_MODE_FIELD);
             final File fileToPrint = PrinterUtilities.print(avoidFields, featuresToPrint);
-            if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
+            SIRS.openFile(fileToPrint);
         } catch (IOException | ParserConfigurationException | SAXException | JRException | TransformerException ex) {
            SIRS.LOGGER.log(Level.WARNING, null, ex);
         }
@@ -238,7 +237,7 @@ public class PrintManager {
 
         try {
             final File fileToPrint = PrinterUtilities.print(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), elementsToPrint);
-            if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
+            SIRS.openFile(fileToPrint);
         } catch (IOException | ParserConfigurationException | SAXException | JRException | TransformerException e) {
             SIRS.LOGGER.log(Level.WARNING, null, e);
         }
@@ -319,7 +318,7 @@ public class PrintManager {
                     Injector.getSession().getPreviews(),
                     new SirsStringConverter(),
                     desordres, printPhoto, printReseauOuvrage, printVoirie);
-            if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
+            SIRS.openFile(fileToPrint);
         } catch (Exception ex) {
             SIRS.LOGGER.log(Level.WARNING, null, ex);
         }
@@ -387,7 +386,7 @@ public class PrintManager {
                     Injector.getSession().getPreviews(),
                     new SirsStringConverter(),
                     reseauxFermes, printPhoto, printReseauOuvrage);
-            if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(fileToPrint);
+            SIRS.openFile(fileToPrint);
         } catch (Exception ex) {
             SIRS.LOGGER.log(Level.WARNING, null, ex);
         }

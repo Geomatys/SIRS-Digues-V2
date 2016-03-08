@@ -9,7 +9,6 @@ import fr.sirs.core.model.report.ModeleElement;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.odt.ODTUtils;
-import java.awt.Desktop;
 import java.beans.IntrospectionException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -73,11 +72,6 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
 
     private static String DESKTOP_UNSUPPORTED = "Impossible de dialoguer avec le système. Pour éditer le modèle, vous pouvez cependant utiliser la fonction d'export, "
             + "puis ré-importer votre ficher lorsque vous aurez terminé vos modifications.";
-
-    private static String DESKTOP_FAILED = "Impossible de trouver un éditeur. Cela peut-être dû au fait que vous n'avez pas installé LibreOffice ou OpenOffice sur votre machine.";
-
-    private static String MANUAL_EDIT = "Pour éditer le modèle, vous pouvez cependant utiliser la fonction d'export, puis ré-importer votre"
-            + " ficher lorsque vous aurez terminé vos modifications.";
 
     @FXML
     private TextField uiTitle;
@@ -379,47 +373,15 @@ public class FXModeleElementPane extends AbstractFXElementPane<ModeleElement> {
 
     @FXML
     void editODT(ActionEvent event) {
-        if (Desktop.isDesktopSupported()) {
-            final Task<Boolean> editTask = TaskManager.INSTANCE.submit("Edition d'un modèle ODT", () -> {
-                final Desktop desktop = Desktop.getDesktop();
-                if (desktop.isSupported(Desktop.Action.EDIT)) {
-                    desktop.edit(tempODT.toAbsolutePath().toFile());
-                } else if (desktop.isSupported(Desktop.Action.OPEN)) {
-                    desktop.open(tempODT.toAbsolutePath().toFile());
-                } else {
-                    return false;
-                }
-                return true;
+        final Task<Boolean> editTask = SIRS.openFile(tempODT);
+        taskProperty.set(editTask);
+        editTask.setOnFailed(taskEvent -> {
+            Platform.runLater(() -> {
+                final Alert alert = new Alert(AlertType.WARNING, DESKTOP_UNSUPPORTED, ButtonType.OK);
+                alert.setResizable(true);
+                alert.show();
             });
-
-            taskProperty.set(editTask);
-
-            editTask.setOnSucceeded(taskEvent -> {
-                if (Boolean.FALSE.equals(taskEvent.getSource().getValue())) {
-                    Platform.runLater(() -> {
-                        final Alert alert = new Alert(AlertType.WARNING, DESKTOP_FAILED + " " + MANUAL_EDIT, ButtonType.OK);
-                        alert.setResizable(true);
-                        alert.show();
-                    });
-                }
-            });
-
-            editTask.setOnFailed(taskEvent -> {
-                Platform.runLater(() -> {
-                    if (taskEvent.getSource().getException() != null) {
-                        GeotkFX.newExceptionDialog("Une erreur est survenue lors de l'édition du modèle ODT", taskEvent.getSource().getException()).show();
-                    } else {
-                        final Alert alert = new Alert(AlertType.ERROR, "Une erreur inattendue est survenue lors de l'édition du modèle ODT.", ButtonType.OK);
-                        alert.setResizable(true);
-                        alert.show();
-                    }
-                });
-            });
-        } else {
-            Alert alert = new Alert(AlertType.WARNING, DESKTOP_UNSUPPORTED + " " + MANUAL_EDIT, ButtonType.OK);
-            alert.setResizable(true);
-            alert.show();
-        }
+        });
     }
 
     @FXML

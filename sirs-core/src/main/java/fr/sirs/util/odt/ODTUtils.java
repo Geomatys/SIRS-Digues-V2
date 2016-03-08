@@ -981,7 +981,11 @@ public class ODTUtils {
                     ? StyleTypeDefinitions.PrintOrientation.PORTRAIT : StyleTypeDefinitions.PrintOrientation.LANDSCAPE;
             return appendImage(holder, tmpImage, orientation, fullPage);
         } finally {
-            Files.delete(tmpImage);
+            try {
+                Files.delete(tmpImage);
+            } catch (IOException e) {
+                SirsCore.LOGGER.log(Level.FINE, "A temporary file cannot be deleted !", e);
+            }
         }
     }
 

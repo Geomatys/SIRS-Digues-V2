@@ -46,15 +46,15 @@ import fr.sirs.plugin.document.DynamicDocumentTheme;
 import fr.sirs.plugin.document.ODTUtils;
 
 import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
-import java.awt.Desktop;
+import fr.sirs.ui.Growl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.prefs.Preferences;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -767,24 +767,13 @@ public class DocumentsPane extends GridPane {
             if (item != null && item.getValue() != null) {
                 File file = item.getValue();
 
-                //first check if Desktop is supported by Platform or not
-                if(!Desktop.isDesktopSupported()){
-                    showErrorDialog("Impossible d'ouvrir des fichiers sur cette application.");
-                    return;
-                }
-
-                 new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                Desktop.getDesktop().open(file);
-                            } catch (IOException ex) {
-                               LOGGER.log(Level.WARNING, null, ex);
-                                showErrorDialog(ex.getMessage());
-                            }
-                        }
-                 }).start();
-
+                SIRS.openFile(file).setOnSucceeded(evt -> {
+                    if (!Boolean.TRUE.equals(evt.getSource().getValue())) {
+                        Platform.runLater(() -> {
+                            new Growl(Growl.Type.WARNING, "Impossible de trouver un programme pour ouvrir le document.").showAndFade();
+                        });
+                    }
+                });
             }
         }
 

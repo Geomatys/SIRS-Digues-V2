@@ -526,9 +526,13 @@ public class FXMapPane extends BorderPane implements Printable {
             printTask.setOnCancelled(event -> Platform.runLater(() -> new Growl(Growl.Type.WARNING, "L'impression a été annulée").showAndFade()));
             printTask.setOnSucceeded(event -> Platform.runLater(() -> {
                 new Growl(Growl.Type.INFO, "L'impression de la carte est terminée").showAndFade();
-                if (!SIRS.openFile(outputFile)) {
-                    new Growl(Growl.Type.WARNING, "Impossible de trouver un programme pour ouvrir la carte").showAndFade();
-                }
+                SIRS.openFile(outputFile).setOnSucceeded(evt -> {
+                    if (!Boolean.TRUE.equals(evt.getSource().getValue())) {
+                        Platform.runLater(() -> {
+                            new Growl(Growl.Type.WARNING, "Impossible de trouver un programme pour ouvrir la carte").showAndFade();
+                        });
+                    }
+                });
             }));
         }));
 

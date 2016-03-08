@@ -1,5 +1,6 @@
 package fr.sirs;
 
+import com.sun.javafx.PlatformUtil;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -496,7 +497,7 @@ public final class SIRS extends SirsCore {
      * @param toOpen The file open on underlying system.
      * @return True if we succeeded opening file on system, false otherwise.
      */
-    public static boolean openFile(final Path toOpen) {
+    public static Task<Boolean> openFile(final Path toOpen) {
         return openFile(toOpen.toAbsolutePath().toFile());
     }
 
@@ -505,16 +506,31 @@ public final class SIRS extends SirsCore {
      * @param toOpen The file open on underlying system.
      * @return True if we succeeded opening file on system, false otherwise.
      */
-    public static boolean openFile(final File toOpen) {
-        final Desktop desktop = Desktop.getDesktop();
-         if (desktop.isSupported(Desktop.Action.OPEN)) {
-            TaskManager.INSTANCE.submit("Ouverture d'un fichier", () -> {desktop.open(toOpen); return true;});
-        } else if (desktop.isSupported(Desktop.Action.EDIT)) {
-            TaskManager.INSTANCE.submit("Ouverture d'un fichier", () -> {desktop.edit(toOpen); return true;});
-        } else {
-            return false;
-        }
-        return true;
+    public static Task<Boolean> openFile(final File toOpen) {
+        return TaskManager.INSTANCE.submit("Ouverture d'un fichier", () -> {
+            try {
+                final Desktop desktop = Desktop.getDesktop();
+                if (desktop.isSupported(Desktop.Action.OPEN)) {
+                    desktop.open(toOpen);
+                } else if (desktop.isSupported(Desktop.Action.EDIT)) {
+                    desktop.edit(toOpen);
+                } else {
+                    throw new IOException("Impossible de communiquer avec l'OS.");
+                }
+            } catch (IOException e) {
+                /*
+                 * HACK : on Windows, it seems that some file associations cannot be found
+                 * using above method (Ex : .odt), so we try running following command as
+                 * a fallback.
+                 */
+                if (PlatformUtil.isWindows()) {
+                    Runtime.getRuntime().exec(new String[]{"cmd /c start", toOpen.toURI().toString()});
+                } else {
+                    throw e;
+                }
+            }
+            return true;
+        });
     }
 
     /**
