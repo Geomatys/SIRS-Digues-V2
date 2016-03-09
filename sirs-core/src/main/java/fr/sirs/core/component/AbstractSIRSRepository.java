@@ -178,13 +178,15 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         }
 
         // On va chercher uniquement les documents qui ne sont pas en cache
-        final ViewQuery q = new ViewQuery().allDocs().includeDocs(true).keys(toGet);
-        final List<T> bulkLoaded = db.queryView(q, getModelClass());
+        if (!toGet.isEmpty()) {
+            final ViewQuery q = new ViewQuery().allDocs().includeDocs(true).keys(toGet);
+            final List<T> bulkLoaded = db.queryView(q, getModelClass());
 
-        for(T loaded : bulkLoaded) {
-            loaded = onLoad(loaded);
-            cache.put(loaded.getId(), loaded);
-            result.add(loaded);
+            for (T loaded : bulkLoaded) {
+                loaded = onLoad(loaded);
+                cache.put(loaded.getId(), loaded);
+                result.add(loaded);
+            }
         }
 
         return result;
@@ -369,6 +371,10 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
      * @return a random element found in database.
      */
     public T getOne(){
+        if (!cache.isEmpty()) {
+            return cache.values().iterator().next();
+        }
+        
         try (final CloseableIterator<T> it = getAllStreaming().iterator()) {
             if (it.hasNext()) {
                 return it.next();
