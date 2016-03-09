@@ -540,7 +540,11 @@ public class PojoTable extends BorderPane implements Printable {
 
         uiNext.getStyleClass().add(BUTTON_STYLE);
         uiNext.setOnAction((ActionEvent event) -> {
-            uiTable.getSelectionModel().selectNext();
+            final TableView.TableViewSelectionModel<Element> sModel = uiTable.getSelectionModel();
+            if (sModel.getSelectedItem() == null) {
+                sModel.selectFirst();
+            }
+            sModel.selectNext();
         });
         navigationToolbar.visibleProperty().bind(uiFicheMode.selectedProperty());
 

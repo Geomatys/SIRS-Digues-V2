@@ -146,6 +146,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
         }
 
         if (newValue == null) {
+            uiDesignation.textProperty().set(null);
             uiHeaderLabel.setText("Aucune information disponible");
             setCenter(new Label("Pas d'éditeur disponible."));
             specificThemePane = null;
