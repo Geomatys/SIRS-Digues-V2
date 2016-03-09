@@ -95,7 +95,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Display print configuration for obligation report.
  *
- * Note :
  * @author Johann Sorel (Geomatys)
  * @author Alexis Manin (Geomatys)
  */
@@ -173,13 +172,12 @@ public class RapportsPane extends BorderPane {
         });
 
         final Previews previewRepository = session.getPreviews();
-        SIRS.initCombo(uiSystemEndiguement, FXCollections.observableArrayList(
-                previewRepository.getByClass(SystemeEndiguement.class)), null);
+        SIRS.initCombo(uiSystemEndiguement, SIRS.observableList(previewRepository.getByClass(SystemeEndiguement.class)).sorted(), null);
 
-        SIRS.initCombo(uiTypeObligation, FXCollections.observableArrayList(session.getRepositoryForClass(RefTypeObligationReglementaire.class).getAll()), null);
+        SIRS.initCombo(uiTypeObligation, SIRS.observableList(session.getRepositoryForClass(RefTypeObligationReglementaire.class).getAll()), null);
         uiTypeObligation.disableProperty().bind(uiCreateObligation.selectedProperty().not());
 
-        SIRS.initCombo(uiTypeEtape, FXCollections.observableArrayList(session.getRepositoryForClass(RefEtapeObligationReglementaire.class).getAll()), null);
+        SIRS.initCombo(uiTypeEtape, SIRS.observableList(session.getRepositoryForClass(RefEtapeObligationReglementaire.class).getAll()), null);
         uiTypeEtape.disableProperty().bind(uiCreateObligation.selectedProperty().not());
 
         // Pour mettre a jour l'etat actif des boutons
