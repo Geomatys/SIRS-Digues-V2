@@ -127,7 +127,8 @@ public abstract class Plugin {
 
     /**
      * Chargement du plugin.
-     * Cette méthode est appelée au démarrage de l'application.
+     * Cette méthode est appelée lorsque l'on se connecte à une base de données
+     * et que le le contexte de travail est mis en place.
      * Il est recommandé de remplir et de mettre à jour la valeur de 'loadingMessage'
      * au cours du chargement.
      *
@@ -141,6 +142,9 @@ public abstract class Plugin {
      *
      * Par défaut, on ne fait rien.
      *
+     * Note : lors de l'appel à cette méthode, la fonction {@link #load() } n'a
+     * pas encore été appelée !
+     * 
      * @throws Exception Si l'opération éxécutée a échouée.
      */
     public void afterImport() throws Exception {}

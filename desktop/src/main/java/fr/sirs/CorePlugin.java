@@ -256,7 +256,7 @@ public class CorePlugin extends Plugin {
     }
 
     @Override
-    public List<MapItem> getMapItems() {
+    public synchronized List<MapItem> getMapItems() {
         final List<MapItem> items = new ArrayList<>();
 
         final MapItem sirsGroup = MapBuilder.createItem();
@@ -1010,4 +1010,11 @@ public class CorePlugin extends Plugin {
         return Optional.of(image);
     }
 
+
+    @Override
+    public void afterImport() throws Exception {
+        if (suppliers.isEmpty()) {
+            loadDataSuppliers();
+        }
+    }
 }
