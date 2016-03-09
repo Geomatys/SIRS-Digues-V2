@@ -2,7 +2,7 @@
     "indices" : {
         "fielddata" : {
             "cache" : {
-                "size" : "32mo"
+                "size" : "4ko"
             }
         }
     },
