@@ -1,22 +1,29 @@
 package fr.sirs.util;
 
+import fr.sirs.SIRS;
 import fr.sirs.core.component.Previews;
+import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTOS_SUBREPORT;
+import fr.sirs.util.property.DocumentRoots;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.logging.Level;
 import javafx.collections.FXCollections;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -51,6 +58,7 @@ public class PrinterUtilities {
     private static final String JRXML_EXTENSION = ".jrxml";
     private static final String PDF_EXTENSION = ".pdf";
     private static final String LOGO_PATH = "/fr/sirs/images/icon-sirs.png";
+    private static final String IMG_NOT_FOUND_PATH = "/fr/sirs/images/imgNotFound.png";
 
     private static final List<String> falseGetter = new ArrayList<>();
     static{
@@ -364,6 +372,26 @@ JasperViewer.viewReport(jp1,false);
     public static String getFieldNameFromSetter(final Method setter) {
         return setter.getName().substring(3, 4).toLowerCase()
                             + setter.getName().substring(4);
+    }
+
+    /**
+     * Find photograph pointed by given path (must be relative to configured
+     * {@link DocumentRoots#getPhotoRoot(java.lang.Class, boolean) }.
+     * Note : Used in .jrxml files.
+     * @param inputText Relative path to the wanted image.
+     * @return The found file, as a stream.
+     */
+    public static InputStream getPhotoStream(final String inputText) {
+        Optional<Path> root = DocumentRoots.getRoot(AbstractPhoto.class, false);
+        if (root.isPresent()) {
+            try {
+                return Files.newInputStream(SIRS.concatenatePaths(root.get(), inputText));
+            } catch (Exception e) {
+                SIRS.LOGGER.log(Level.WARNING, "Cannot access a photograph file.", e);
+            }
+        }
+
+        return PrinterUtilities.class.getResourceAsStream(IMG_NOT_FOUND_PATH);
     }
 
     ////////////////////////////////////////////////////////////////////////////
