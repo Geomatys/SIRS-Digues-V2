@@ -10,10 +10,8 @@ import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.Theme;
 import fr.sirs.util.SirsStringConverter;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,35 +28,10 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.ImageView;
-import org.elasticsearch.index.query.QueryBuilders;
 
 public class FXDiguesPane extends FXAbstractTronconTreePane {
 
-    private static final String[] SEARCH_CLASSES = new String[]{
-        TronconDigue.class.getCanonicalName(),
-        Digue.class.getCanonicalName(),
-        SystemeEndiguement.class.getCanonicalName()
-    };
-
     private final SirsStringConverter converter = new SirsStringConverter();
-
-    private final Predicate<TronconDigue> searchedPredicate = (TronconDigue t) -> {
-        final String str = currentSearch.get();
-        if (str != null && !str.isEmpty()) {
-            final ElasticSearchEngine searchEngine = Injector.getElasticSearchEngine();
-            HashMap<String, HashSet<String>> foundClasses = searchEngine.searchByClass(QueryBuilders.queryString(str));
-            final HashSet resultSet = new HashSet();
-            HashSet tmp;
-            for (final String className : SEARCH_CLASSES) {
-                tmp = foundClasses.get(className);
-                if (tmp != null && !tmp.isEmpty()) {
-                    resultSet.addAll(tmp);
-                }
-            }
-            return resultSet.contains(t.getDocumentId());
-        }
-        else return true;
-    };
 
     public FXDiguesPane() {
         super("Systèmes d'endiguement");
@@ -123,7 +96,7 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
     public final Task updateTree() {
         TreeItem<? extends Element> selectedItem = uiTree.getSelectionModel().getSelectedItem();
         final Element lastSelected;
-        if (selectedItem != null) {
+        if (selectedItem != null && selectedItem.getValue() instanceof Element) {
             lastSelected = selectedItem.getValue();
         } else {
             lastSelected = null;
@@ -136,10 +109,7 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
             searchExtended(uiTree.getRoot(), extendeds);
 
             //creation des filtres
-            Predicate<TronconDigue> filter = searchedPredicate;
-            if(!uiArchived.isSelected()) {
-                filter = filter.and(nonArchivedPredicate);
-            }
+            Predicate<? super TronconDigue> filter = getFilter();
 
             //creation de l'arbre
             final TreeItem treeRootItem = new TreeItem("root");
@@ -179,7 +149,9 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
             }
             troncons.removeAll(tronconsFound);
             for(final TronconDigue tc : troncons){
-                ncItem.getChildren().add(new TreeItem(tc));
+                if (filter == null || filter.test(tc)) {
+                    ncItem.getChildren().add(new TreeItem(tc));
+                }
             }
 
             final Optional<TreeItem> toSelect = searchItem(lastSelected, treeRootItem);
@@ -194,7 +166,7 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
     }
 
     private static TreeItem toNode(final Digue digue, final Set<TronconDigue> troncons,
-            final Set<TronconDigue> tronconsFound, final Predicate<TronconDigue> filter){
+            final Set<TronconDigue> tronconsFound, final Predicate<? super TronconDigue> filter){
         final TreeItem digueItem = new TreeItem(digue);
         for(final TronconDigue td : troncons){
             if(td.getDigueId()==null || !td.getDigueId().equals(digue.getDocumentId())) continue;

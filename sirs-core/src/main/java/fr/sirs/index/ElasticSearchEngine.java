@@ -24,7 +24,7 @@ import org.elasticsearch.search.SearchHits;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
- * TODO : Improve configuration to allow nested documents (Crete, Photo, etc.) as return type.
+ * TODO : Improve configuration to allow nested documents (observation, photo, etc.) as return type.
  * @author Johann Sorel (Geomatys)
  */
 public class ElasticSearchEngine implements Closeable {
@@ -133,5 +133,4 @@ public class ElasticSearchEngine implements Closeable {
         }
         return sb.toString();
     }
-
 }

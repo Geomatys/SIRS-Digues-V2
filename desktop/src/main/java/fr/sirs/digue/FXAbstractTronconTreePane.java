@@ -7,8 +7,11 @@ import fr.sirs.Session;
 import fr.sirs.core.component.DocumentListener;
 import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -38,6 +41,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Popup;
 import org.apache.sis.util.ArgumentChecks;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -64,6 +70,8 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
     protected final Predicate<AvecBornesTemporelles> nonArchivedPredicate = (AvecBornesTemporelles t) -> {
         return (t.getDate_fin()==null || t.getDate_fin().isAfter(LocalDate.now()));
     };
+
+    private Predicate<TronconDigue> textSearchFilter;
 
     public FXAbstractTronconTreePane(final String title) {
         SIRS.loadFXML(this, FXAbstractTronconTreePane.class, null);
@@ -109,11 +117,57 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
         //listen to changes in the db to update tree
         Injector.getDocumentChangeEmiter().addListener(this);
 
+        // Force text filter reload.
+        currentSearch.addListener(change -> textSearchFilter = null);
     }
 
     abstract public void deleteSelection(ActionEvent event);
     abstract public Task updateTree();
 
+    private Optional<Predicate<TronconDigue>> getTextFilter() {
+        if (textSearchFilter == null) {
+            final String text = currentSearch.get();
+            if (text != null && !text.isEmpty()) {
+                SearchResponse response = Injector.getElasticSearchEngine().search(QueryBuilders.simpleQueryStringQuery(text));
+                final Iterator<SearchHit> it = response.getHits().iterator();
+                final HashSet<String> filterIds = new HashSet<>();
+                while (it.hasNext()) {
+                    filterIds.add(it.next().getId());
+                }
+                textSearchFilter = i -> filterIds.contains(i.getId());
+            }
+        }
+
+        if (textSearchFilter == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(textSearchFilter);
+        }
+    }
+
+    private Optional<Predicate<AvecBornesTemporelles>> getTemporalFilter() {
+        if (uiArchived.isSelected()) {
+            return Optional.empty();
+        } else return Optional.of(nonArchivedPredicate);
+    }
+
+    /**
+     *
+     * @return A predicate to apply for filtering of tree elements according to
+     * user parameters. Can be null.
+     */
+    public Predicate<? super TronconDigue> getFilter() {
+        final Optional<Predicate<TronconDigue>> tmpText = getTextFilter();
+        final Optional<Predicate<AvecBornesTemporelles>> tmpTemporal = getTemporalFilter();
+
+        if (tmpText.isPresent() && tmpTemporal.isPresent()) {
+            return tmpText.get().and(tmpTemporal.get());
+        } else if (tmpText.isPresent()) {
+            return tmpText.get();
+        } else if (tmpTemporal.isPresent()) {
+            return tmpTemporal.get();
+        } else return null;
+    }
 
     @FXML
     private void openSearchPopup(ActionEvent event) {

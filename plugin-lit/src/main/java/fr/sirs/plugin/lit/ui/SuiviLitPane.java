@@ -7,12 +7,11 @@ import fr.sirs.SIRS;
 import fr.sirs.core.component.TronconLitRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Lit;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.TronconLit;
 import fr.sirs.digue.FXAbstractTronconTreePane;
-import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.theme.Theme;
 import fr.sirs.util.SirsStringConverter;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.ImageView;
-import org.elasticsearch.index.query.QueryBuilders;
 
 /**
  *
@@ -36,30 +34,7 @@ import org.elasticsearch.index.query.QueryBuilders;
  */
 public class SuiviLitPane extends FXAbstractTronconTreePane {
 
-    private static final String[] SEARCH_CLASSES = new String[]{
-        TronconLit.class.getCanonicalName(),
-        Lit.class.getCanonicalName()
-    };
-
     private final SirsStringConverter converter = new SirsStringConverter();
-
-    private final Predicate<TronconLit> searchedPredicate = (TronconLit t) -> {
-        final String str = currentSearch.get();
-        if (str != null && !str.isEmpty()) {
-            final ElasticSearchEngine searchEngine = Injector.getElasticSearchEngine();
-            HashMap<String, HashSet<String>> foundClasses = searchEngine.searchByClass(QueryBuilders.queryString(str));
-            final HashSet resultSet = new HashSet();
-            HashSet tmp;
-            for (final String className : SEARCH_CLASSES) {
-                tmp = foundClasses.get(className);
-                if (tmp != null && !tmp.isEmpty()) {
-                    resultSet.addAll(tmp);
-                }
-            }
-            return resultSet.contains(t.getDocumentId());
-        }
-        else return true;
-    };
 
     public SuiviLitPane() {
         super("Lits");
@@ -117,10 +92,7 @@ public class SuiviLitPane extends FXAbstractTronconTreePane {
             searchExtended(uiTree.getRoot(), extendeds);
 
             //creation des filtres
-            Predicate<TronconLit> filter = searchedPredicate;
-            if(!uiArchived.isSelected()) {
-                filter = filter.and(nonArchivedPredicate);
-            }
+            Predicate<? super TronconDigue> filter = getFilter();
 
             //creation de l'arbre
             final TreeItem treeRootItem = new TreeItem("root");
