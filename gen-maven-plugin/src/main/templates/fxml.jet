@@ -4,6 +4,7 @@ class="FXMLGenerator" imports ="java.util.* org.eclipse.emf.ecore.* org.eclipse.
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import fr.sirs.theme.ui.*?>
+<?import fr.sirs.util.FXFreeTab?>
 <?import fr.sirs.util.FXFileTextField?>
 <?import fr.sirs.util.FXComponentField?>
 <?import org.geotoolkit.gui.javafx.util.*?>
@@ -281,13 +282,13 @@ for(final EClass eClass : helper.getTypeTree() ) {
 
         for (final EReference eRef : contained) {
 %>
-        <Tab fx:id="ui_<%=eRef.getName()%>" text="%<%=eRef.getName()%>"/>
+        <FXFreeTab fx:id="ui_<%=eRef.getName()%>" text="%<%=eRef.getName()%>"/>
 <%
         }
 
         for (final EReference eRef : Tables) {
 %>
-        <Tab fx:id="ui_<%=eRef.getName()%>" text="%<%=eRef.getName()%>"/>
+        <FXFreeTab fx:id="ui_<%=eRef.getName()%>" text="%<%=eRef.getName()%>"/>
 <%
         }
     }
@@ -299,12 +300,12 @@ for(final EClass eClass : helper.getTypeTree() ) {
     */
     if(helper.isSIRSDocument()){
 %>
-        <Tab fx:id="<%=Helper.POSITION_DOCUMENT_UI%>" text="<%=helper.getPositionDocumentHeader()%>"/>
+        <FXFreeTab fx:id="<%=Helper.POSITION_DOCUMENT_UI%>" text="<%=helper.getPositionDocumentHeader()%>"/>
 <%
     } 
     else if (helper.isParcelleVegetation()) {
 %>
-        <Tab fx:id="<%=Helper.ZONE_VEGETATION_UI%>" text="<%=Helper.getZonesVegetationHeader()%>"/>
+        <FXFreeTab fx:id="<%=Helper.ZONE_VEGETATION_UI%>" text="<%=Helper.getZonesVegetationHeader()%>"/>
 <%
     }
 %>

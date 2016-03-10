@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import fr.sirs.theme.ui.*?>
+<?import fr.sirs.util.FXFreeTab?>
 <?import fr.sirs.util.FXFileTextField?>
 <?import fr.sirs.util.FXComponentField?>
 <?import org.geotoolkit.gui.javafx.util.*?>
@@ -93,20 +94,20 @@
         </Tab>
 
 <!-- REFERENCE TABS -->
-        <Tab fx:id="ui_seuilIds" text="%seuilIds"/>
-        <Tab fx:id="ui_observations" text="%observations"/>
-        <Tab fx:id="ui_prestationIds" text="%prestationIds"/>
-        <Tab fx:id="ui_evenementHydrauliqueIds" text="%evenementHydrauliqueIds"/>
-        <Tab fx:id="ui_reseauHydrauliqueFermeIds" text="%reseauHydrauliqueFermeIds"/>
-        <Tab fx:id="ui_ouvrageHydrauliqueAssocieIds" text="%ouvrageHydrauliqueAssocieIds"/>
-        <Tab fx:id="ui_reseauTelecomEnergieIds" text="%reseauTelecomEnergieIds"/>
-        <Tab fx:id="ui_ouvrageTelecomEnergieIds" text="%ouvrageTelecomEnergieIds"/>
-        <Tab fx:id="ui_reseauHydrauliqueCielOuvertIds" text="%reseauHydrauliqueCielOuvertIds"/>
-        <Tab fx:id="ui_ouvrageParticulierIds" text="%ouvrageParticulierIds"/>
-        <Tab fx:id="ui_voieDigueIds" text="%voieDigueIds"/>
-        <Tab fx:id="ui_ouvrageVoirieIds" text="%ouvrageVoirieIds"/>
-        <Tab fx:id="ui_echelleLimnimetriqueIds" text="%echelleLimnimetriqueIds"/>
-        <Tab fx:id="ui_articleIds" text="%articleIds"/>
+        <FXFreeTab fx:id="ui_seuilIds" text="%seuilIds"/>
+        <FXFreeTab fx:id="ui_observations" text="%observations"/>
+        <FXFreeTab fx:id="ui_prestationIds" text="%prestationIds"/>
+        <FXFreeTab fx:id="ui_evenementHydrauliqueIds" text="%evenementHydrauliqueIds"/>
+        <FXFreeTab fx:id="ui_reseauHydrauliqueFermeIds" text="%reseauHydrauliqueFermeIds"/>
+        <FXFreeTab fx:id="ui_ouvrageHydrauliqueAssocieIds" text="%ouvrageHydrauliqueAssocieIds"/>
+        <FXFreeTab fx:id="ui_reseauTelecomEnergieIds" text="%reseauTelecomEnergieIds"/>
+        <FXFreeTab fx:id="ui_ouvrageTelecomEnergieIds" text="%ouvrageTelecomEnergieIds"/>
+        <FXFreeTab fx:id="ui_reseauHydrauliqueCielOuvertIds" text="%reseauHydrauliqueCielOuvertIds"/>
+        <FXFreeTab fx:id="ui_ouvrageParticulierIds" text="%ouvrageParticulierIds"/>
+        <FXFreeTab fx:id="ui_voieDigueIds" text="%voieDigueIds"/>
+        <FXFreeTab fx:id="ui_ouvrageVoirieIds" text="%ouvrageVoirieIds"/>
+        <FXFreeTab fx:id="ui_echelleLimnimetriqueIds" text="%echelleLimnimetriqueIds"/>
+        <FXFreeTab fx:id="ui_articleIds" text="%articleIds"/>
 
       </tabs>
     </TabPane>

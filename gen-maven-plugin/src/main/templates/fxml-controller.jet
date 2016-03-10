@@ -12,6 +12,7 @@ import fr.sirs.util.FXFileTextField;
 import fr.sirs.util.FXComponentField;
 import fr.sirs.util.javafx.FloatSpinnerValueFactory;
 import fr.sirs.util.StreamingIterable;
+import fr.sirs.util.FXFreeTab;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -69,7 +70,7 @@ if(!helper.hasDocument()) {
 if(helper.isPositionable() ) { 
     if(helper.isPositionableVegetation()){
 %>
-    // PropriÃ©tÃ©s de Positionable végétation
+    // PropriÃ©tÃ©s de Positionable v??ation
     @FXML private FXPositionableVegetationPane uiPositionable;
 <%
     }
@@ -106,7 +107,6 @@ if(helper.hasBornesTemporelles() ) {
  */
 
 final Map<EClass, List<EReference> > comboReferences = new HashMap<>();
-final Map<EClass, List<EReference> > containedReferences = new HashMap<>();
 final Map<EClass, List<EReference> > containedSingleReferences = new HashMap<>();
 final Map<EClass, List<EReference> > tableReferences = new HashMap<>();
 final Map<EClass, List<EAttribute> > managedAttributes = new HashMap<>();
@@ -151,11 +151,9 @@ for(EClass eClass: helper.getTypeTree() ) {
      * tables and complex editors.
      */
     final List<EReference> cbRefs = new ArrayList<>();
-    final List<EReference> containedRefs = new ArrayList<>();
     final List<EReference> containedSingleRefs = new ArrayList<>();
     final List<EReference> tableRefs = new ArrayList<>();
     comboReferences.put(eClass, cbRefs);
-    containedReferences.put(eClass, containedRefs);
     containedSingleReferences.put(eClass, containedSingleRefs);
     tableReferences.put(eClass, tableRefs);
 
@@ -169,7 +167,6 @@ for(EClass eClass: helper.getTypeTree() ) {
                     cbRefs.add(eRef);
             }
             else if (Helper.isTableReference(eRef)) tableRefs.add(eRef);
-            else if (Helper.isContainedMultipleReference(eRef)) containedRefs.add(eRef);
             else if (Helper.isContainedSingleReference(eRef)) containedSingleRefs.add(eRef);
             else{
 %>
@@ -198,13 +195,6 @@ for(EClass eClass: helper.getTypeTree() ) {
         }
    } 
 
-    // Inutile ?
-    for (final EReference eRef : containedRefs) {
-%>
-    //@FXML Tab ui_<%=eRef.getName()%>;
-<%
-    }
-
     for (final EReference eRef : containedSingleRefs){
 %>
     @FXML protected FXComponentField<<%=eClass.getName()%>, <%=eRef.getEReferenceType().getName()%>> ui_<%= eRef.getName()%>;
@@ -213,15 +203,15 @@ for(EClass eClass: helper.getTypeTree() ) {
 
     for (final EReference eRef : tableRefs) {
 %>
-    @FXML protected Tab ui_<%=eRef.getName()%>;
+    @FXML protected FXFreeTab ui_<%=eRef.getName()%>;
 <%
         if (!eRef.isContainment() && !Helper.isOwnerReference(eRef)) {
 %>
-    protected final ListeningPojoTable <%=eRef.getName()%>Table;
+    protected ListeningPojoTable <%=eRef.getName()%>Table;
 <%  
         } else {
 %>
-    protected final PojoTable <%=eRef.getName()%>Table;
+    protected PojoTable <%=eRef.getName()%>Table;
 <%  
         }
     }
@@ -271,7 +261,8 @@ else if (helper.isParcelleVegetation()){
      */
     protected <%=helper.getFXPaneName()%>() {
         SIRS.loadFXML(this, <%=helper.getClassName()%>.class);
-        previewRepository = Injector.getBean(Session.class).getPreviews();
+        final Session session = Injector.getBean(Session.class);
+        previewRepository = session.getPreviews();
         elementProperty().addListener(this::initFields);
 
 <% 
@@ -305,7 +296,7 @@ else if (helper.isParcelleVegetation()){
     for(EClass eClass: helper.getTypeTree() ) { 
 
         /*
-        Paramètres d'activation/déscativation pour les composants des champs.
+        Param?res d'activation/d?cativation pour les composants des champs.
         */
     	for(EAttribute eAtt: managedAttributes.get(eClass) ) {
             final String attEditorName = helper.getXControl(eAtt);
@@ -342,7 +333,7 @@ else if (helper.isParcelleVegetation()){
         }
 
         /*
-        Paramètres d'activation/déscativation pour les composants des références.
+        Param?res d'activation/d?cativation pour les composants des r??ences.
         */
         for(EReference eRef : comboReferences.get(eClass) ) { 
 %>
@@ -377,7 +368,7 @@ else if (helper.isParcelleVegetation()){
 %>
         ui_<%= eRef.getName()%>.initChildClass(<%=eRef.getEReferenceType().getName()%>.class);
 <%          
-            // Si la cardinalité minimale est supérieure à 0, il faut empêcher la possibilité de supprimer l'élément
+            // Si la cardinalitÃ© minimale est supÃ©ieure Ã  0, il faut empÃ©cher la possibilitÃ© de supprimer l'Ã©lÃ©ment
             if(eRef.getLowerBound()>0){
 %>
         ui_<%= eRef.getName()%>.deletableProperty().set(false);
@@ -386,6 +377,10 @@ else if (helper.isParcelleVegetation()){
         }
         
         for (EReference eRef : tableReferences.get(eClass) ) { 
+%>
+
+        ui_<%= eRef.getName()%>.setContent(() -> {
+<%
             if (!eRef.isContainment() && !Helper.isOwnerReference(eRef)) {
 %>
         <%= eRef.getName()%>Table = new ListeningPojoTable(<%=Helper.getClassName(eRef) %>.class, null);
@@ -403,9 +398,9 @@ else if (helper.isParcelleVegetation()){
                 }
             }
             
-            /* Contrôle de l'éditabilité de la table
-               On bloque l'éditabilité des tables de références de cardinalité 
-               multiple si elles ont une référence opposée de cardinalité unique.
+            /* Contr?e de l'?itabilit?de la table
+               On bloque l'?itabilit?des tables de r??ences de cardinalit?
+               multiple si elles ont une r??ence oppos? de cardinalit?unique.
             */
             if(eRef.isMany() && eRef.getEOpposite()!=null && !eRef.getEOpposite().isMany()){
 %>
@@ -428,22 +423,22 @@ else if (helper.isParcelleVegetation()){
                 } 
             }
 
+%>
+        update<%= Helper.ucFirst(eRef.getName())%>Table(session, elementProperty.get());
+<%
             //Cas de la liste des points en dZ des profils en long : on n'affiche pas de combobox pour cette rï¿½fï¿½rence qui est traitï¿½e ï¿½ part dans la pojoTable
             if(helper.isProfilLong() && Helper.POINT_LEVE_DZ_PROFIL_EN_LONG_REF.equals(eRef.getName())
                 || helper.isLigneEau() && Helper.MESURE_DZ_LIGNE_EAU_REF.equals(eRef.getName())){
 %> 
-        final BorderPane borderPane<%= eRef.getName()%> = new BorderPane();
-        borderPane<%= eRef.getName()%>.setCenter(<%= eRef.getName()%>Table);
-        borderPane<%= eRef.getName()%>.setTop(prZBox);
-        ui_<%= eRef.getName()%>.setContent(borderPane<%= eRef.getName()%>);
+        return new BorderPane(<%= eRef.getName()%>Table, prZBox, null, null, null);
 <%
-            }
-            else{
+            } else {
 %> 
-        ui_<%= eRef.getName()%>.setContent(<%= eRef.getName()%>Table);
+        return <%= eRef.getName()%>Table;
 <%
             }
 %>
+        });
         ui_<%= eRef.getName()%>.setClosable(false);
 <%
         }
@@ -456,7 +451,7 @@ else if (helper.isParcelleVegetation()){
         }
         else if(helper.isConvention()){
 %>
-        <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table = new PositionDocumentPojoTable<>(<%=Helper.POSITION_CONVENTION_CLASS_NAME%>.class, "Objets et positions associés");
+        <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table = new PositionDocumentPojoTable<>(<%=Helper.POSITION_CONVENTION_CLASS_NAME%>.class, "Objets et positions associ?");
 <%
         }
         else{
@@ -507,11 +502,14 @@ else if (helper.isParcelleVegetation()){
         for(EAttribute eAtt: managedAttributes.get(eClass) ) { 
             final String attEditorName = helper.getXControl(eAtt);
             if ("HTMLEditor".equals(attEditorName) ){ 
-                // nothing to do
+%>
+        ui_<%= eAtt.getName()  %>.setHtmlText(null);
+<%
             } 
             else if ("CheckBox".equals(attEditorName)) { 
 %>
             ui_<%= eAtt.getName()  %>.selectedProperty().unbindBidirectional(oldElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+            ui_<%= eAtt.getName()  %>.setSelected(false);
 <%      
             } 
             else if ("TextField".equals(attEditorName) 
@@ -520,16 +518,19 @@ else if (helper.isParcelleVegetation()){
                     || "FXDirectoryTextField".equals(attEditorName)) { 
 %>
             ui_<%= eAtt.getName()  %>.textProperty().unbindBidirectional(oldElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+            ui_<%= eAtt.getName()  %>.setText(null);
 <%
             } 
             else if ("Spinner".equals(attEditorName)) { 
 %>
             ui_<%= eAtt.getName()  %>.getValueFactory().valueProperty().unbindBidirectional(oldElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+            ui_<%= eAtt.getName()  %>.getValueFactory().setValue(0);
 <%          
             } 
             else if(attEditorName!=null) { 
 %>
             ui_<%= eAtt.getName()  %>.valueProperty().unbindBidirectional(oldElement.<%= Helper.lcFirst(eAtt.getName())  %>Property());
+            ui_<%= eAtt.getName()  %>.setValue(null);
 <%      
             } 
         } 
@@ -537,7 +538,29 @@ else if (helper.isParcelleVegetation()){
 %>
         }
 
-        final Session session = Injector.getBean(Session.class);        
+        final Session session = Injector.getBean(Session.class); 
+
+        if (newElement == null) {
+<%
+            if (!helper.hasDocument()) {
+%>
+                ui_parent_choice.setItems(null);
+                ui_parent_choice.setDisable(true);
+<%
+            }
+%>
+
+<%
+        for(EClass eClass: helper.getTypeTree() ) {
+            for(EReference eRef: comboReferences.get(eClass) ) {
+%>
+                ui_<%= eRef.getName()  %>.setItems(null);
+<%
+            }
+        }
+%>
+        } else {
+       
 <% 
     if (!helper.hasDocument()) { 
 %>
@@ -607,7 +630,6 @@ else if (helper.isParcelleVegetation()){
          * Bind control properties to Element ones.
          */
 <% 
-    final List<EReference> complexTableReferences = new ArrayList<EReference>();
     for(EClass eClass: helper.getTypeTree() ) { 
 %>
         // PropriÃ©tÃ©s de <%= eClass.getName() %>
@@ -674,9 +696,61 @@ else if (helper.isParcelleVegetation()){
 <% 
                 }
         } 
-        
+
+        for (EReference eRef : containedSingleReferences.get(eClass)){
+%>
+        ui_<%= eRef.getName()%>.setParent(newElement, newElement.<%= eRef.getName()%>);
+<%          
+        }
+    }
+
+    if(helper.isSIRSDocument()){
+%>
+        <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table.setPropertyToListen("<%=Helper.SIRSDOCUMENT_REFERENCE_NAME%>Property", elementProperty().get().getId());
+        <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table.setTableItems(()-> (ObservableList) AbstractPositionDocumentRepository.getPositionDocumentByDocumentId(elementProperty().get().getId(), Injector.getSession()));
+<%
+    } 
+    else if(helper.isParcelleVegetation()){
+%>
+        <%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table.setPropertyToListen("<%=Helper.PARCELLE_ID_REFERENCE_NAME%>Property", elementProperty().get().getId());
+        <%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table.setTableItems(()-> (ObservableList) AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(elementProperty().get().getId(), Injector.getSession()));
+<%
+    }
+%>
+        }
+
+<%
+
+    for(EClass eClass: helper.getTypeTree() ) {
         for (EReference eRef: tableReferences.get(eClass) ) { 
-            if (Helper.hasDocument(eRef.getEReferenceType())) {
+%>
+        update<%= Helper.ucFirst(eRef.getName())%>Table(session, newElement);
+<%
+        }
+    }
+
+%>  
+    }
+<%
+
+
+/*
+ * Methods in charge of updating editors tables when focused element change.
+ */
+    for(EClass eClass: helper.getTypeTree() ) {
+        for (EReference eRef: tableReferences.get(eClass) ) {
+%>
+
+
+    protected void update<%=Helper.ucFirst(eRef.getName())%>Table(final Session session, final <%= helper.getClassName() %> newElement) {
+            if (<%=eRef.getName()%>Table == null)
+                return;
+
+            if (newElement == null) {
+                <%= eRef.getName()%>Table.setTableItems(null);
+            } else {
+<%
+        if (Helper.hasDocument(eRef.getEReferenceType())) {
 %>
         <%= eRef.getName()%>Table.setParentElement(null);
         final AbstractSIRSRepository<<%= helper.getClassName(eRef) %>> <%= eRef.getName()%>Repo = session.getRepositoryForClass(<%= helper.getClassName(eRef) %>.class);
@@ -697,35 +771,8 @@ else if (helper.isParcelleVegetation()){
         <%= eRef.getName()%>Table.setTableItems(()-> (ObservableList) newElement.get<%= Helper.ucFirst(eRef.getName())  %>());
 <%
             } else { // Liens entre objets du tronï¿½on.
-                complexTableReferences.add(eRef);
-            }
-        }
-
-        for (EReference eRef: containedReferences.get(eClass)) { 
 %>
-/*        Node <%=eRef.getName()%>Editor = SIRS.generateEditionPane(newElement.get<%= Helper.ucFirst(eRef.getName()) %>());
-        if (<%=eRef.getName()%>Editor == null) {
-            <%=eRef.getName()%>Editor = new Label("Pas d'Ã©diteur disponible");
-        }
-        ui_<%=eRef.getName()%>.setContent(<%=eRef.getName()%>Editor);*/
-<%    
-        }
 
-
-        for (EReference eRef : containedSingleReferences.get(eClass)){
-%>
-        ui_<%= eRef.getName()%>.setParent(newElement, newElement.<%= eRef.getName()%>);
-<%          
-        }
-    }
-
-   if (!complexTableReferences.isEmpty()) {
-      for(final EReference eRef : complexTableReferences) {
-%>
-        //if (!newElement.get<%= Helper.ucFirst(eRef.getName())  %>().isEmpty()) Commentï¿½ car l'absence d'initialisaton de la table (si la liste est vide) provoque des erreurs.
-        {
-            
-            
             // Particularitï¿½ de la liaison entre objets : limitation de l'ajout de nouveaux objets au tronï¿½on de l'objet courant.
             if(Objet.class.isAssignableFrom(newElement.getClass())
                 && Objet.class.isAssignableFrom(<%= Helper.ucFirst(eRef.getEReferenceType().getName())%>.class)){
@@ -742,44 +789,23 @@ else if (helper.isParcelleVegetation()){
                     structures = SIRS.getStructures(tmpIdSet,  <%= Helper.ucFirst(eRef.getEReferenceType().getName())%>.class);
                 }
 
-                /* 
-                RÃ©activer si l'on veut des interactions inter-tronÃ§on
-                if (tmpIdSet.size() > 0) {
-                    structures.addAll(SIRS.getStructures(tmpIdSet, <%= Helper.getClassName(eRef)%>.class));
-                }
-                */
                 return structures;
             });
-        }
-<%        
-        }
-    } 
 
-    if(helper.isSIRSDocument()){
-%>
-        <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table.setPropertyToListen("<%=Helper.SIRSDOCUMENT_REFERENCE_NAME%>Property", elementProperty().get().getId());
-        <%=Helper.lcFirst(Helper.POSITION_DOCUMENT_CLASS_NAME)%>Table.setTableItems(()-> (ObservableList) AbstractPositionDocumentRepository.getPositionDocumentByDocumentId(elementProperty().get().getId(), Injector.getSession()));
-<%
-    } 
-    else if(helper.isParcelleVegetation()){
-%>
-        <%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table.setPropertyToListen("<%=Helper.PARCELLE_ID_REFERENCE_NAME%>Property", elementProperty().get().getId());
-        <%=Helper.lcFirst(Helper.ZONE_VEGETATION_CLASS_NAME)%>Table.setTableItems(()-> (ObservableList) AbstractZoneVegetationRepository.getAllZoneVegetationByParcelleId(elementProperty().get().getId(), Injector.getSession()));
-<%
-    }
-
-    for(EClass eClass: helper.getTypeTree() ) {
-        for (EReference eRef: tableReferences.get(eClass) ) { 
-            if (!eRef.isContainment() && !Helper.isOwnerReference(eRef)) {
-%>
-        <%=eRef.getName()%>Table.setObservableListToListen(newElement.get<%= Helper.ucFirst(eRef.getName()) %>());
 <%
             }
+
+            if (!eRef.isContainment() && !Helper.isOwnerReference(eRef)) {
+%>
+            <%=eRef.getName()%>Table.setObservableListToListen(newElement.get<%= Helper.ucFirst(eRef.getName()) %>());
+<%
+            }
+%>
         }
     }
-%>  
-    }
 <%
+        }
+    } 
 
 /////////////////////////////////////////////////////////////////
 // 
@@ -840,7 +866,11 @@ else if (helper.isParcelleVegetation()){
 <%      } 
 
         for (EReference eRef: tableReferences.get(eClass) ) { 
+
             if (!eRef.isContainment()) {
+%>
+        if (<%= eRef.getName()%>Table != null) {
+<%
                 if(Helper.isOwnerReference(eRef)){
 %>
         // Reference principale : prevoir la suppression des documents qui ne seraient plus references
@@ -1004,6 +1034,9 @@ else if (helper.isParcelleVegetation()){
                       }
                     }
                 }
+%>
+        }
+<%
             } 
         } 
     }

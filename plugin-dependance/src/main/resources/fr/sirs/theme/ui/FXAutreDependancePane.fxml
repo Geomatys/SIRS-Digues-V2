@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import fr.sirs.theme.ui.*?>
+<?import fr.sirs.util.FXFreeTab?>
 <?import javafx.scene.web.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -62,9 +63,9 @@
         </Tab>
 
 <!-- REFERENCE TABS -->
-        <Tab fx:id="ui_photos" text="%photos"/>
-        <Tab fx:id="ui_proprietes" text="%proprietes"/>
-        <Tab fx:id="ui_gestions" text="%gestions"/>
+        <FXFreeTab fx:id="ui_photos" text="%photos"/>
+        <FXFreeTab fx:id="ui_proprietes" text="%proprietes"/>
+        <FXFreeTab fx:id="ui_gestions" text="%gestions"/>
 
       </tabs>
     </TabPane>

@@ -4,11 +4,16 @@ package fr.sirs.util;
 import fr.sirs.SIRS;
 import fr.sirs.ui.Growl;
 import java.lang.ref.WeakReference;
+import java.util.function.Supplier;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -36,6 +41,8 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
     private WeakReference<TabPane> previous;
     private final MenuItem bindAction;
 
+    private final SimpleObjectProperty<Supplier<Node>> contentSupplier = new SimpleObjectProperty<>();
+
     private FXFreeTab(String text, boolean abregeable, int nbAffichable) {
         super();
         setAbregeable(abregeable);
@@ -45,6 +52,9 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
         bindAction = new MenuItem(UNBIND);
         bindAction.setOnAction(this::unbind);
         setContextMenu(new ContextMenu(bindAction));
+
+        contentSupplier.addListener(this::supplierChanged);
+        setOnSelectionChanged(this::selectionChanged);
     }
 
     public FXFreeTab(String text, int nbAffichable) {
@@ -142,4 +152,37 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
             bindAction.setOnAction(this::unbind);
         }
     }
+
+    private void supplierChanged(final ObservableValue<? extends Supplier<Node>> obs, final Supplier<Node> oldSupplier, final Supplier<Node> newSupplier) {
+        setContent((Node)null);
+        supplyContent();
+    }
+
+    private void selectionChanged(final Event evt) {
+        supplyContent();
+    }
+
+    private void supplyContent() {
+        if (isSelected() && getContent() == null && contentSupplier.get() != null) {
+            Node node = contentSupplier.get().get();
+            // Made for task SYM-1305 (see comments on 2016-03-07)
+//            if (!(node instanceof ScrollPane)) {
+//                final ScrollPane sPane = new ScrollPane(node);
+//                sPane.setFitToWidth(true);
+//                node = sPane;
+//            }
+            setContent(node);
+        }
+    }
+
+    /**
+     * Affect a supplier to this tab so when it will be selected, the supplier is
+     * called to fill tab's content.
+     * @param contentSupplier Supplier giving the node to set as this tab's content.
+     */
+    public void setContent(final Supplier<Node> contentSupplier) {
+        this.contentSupplier.set(contentSupplier);
+    }
+
+
 }
