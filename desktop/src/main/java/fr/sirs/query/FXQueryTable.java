@@ -88,6 +88,8 @@ public class FXQueryTable extends BorderPane{
 
         final HBox box = new HBox(10,uiImportQueries,uiExportQueries);
         box.setPadding(new Insets(10, 10, 10, 10));
+        uiImportQueries.visibleProperty().bind(modifiableProperty);
+        uiImportQueries.managedProperty().bind(uiImportQueries.visibleProperty());
         uiImportQueries.setTooltip(new Tooltip("Importer des requêtes SQL depuis un fichier."));
         uiImportQueries.setOnAction(this::importRequests);
         uiExportQueries.setTooltip(new Tooltip("Exporter les requêtes SQL dans un fichier."));

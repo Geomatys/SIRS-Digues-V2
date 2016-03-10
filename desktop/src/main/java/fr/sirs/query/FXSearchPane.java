@@ -432,8 +432,7 @@ public class FXSearchPane extends BorderPane {
     }
 
     private void showQueryTable(final List<SQLQuery> queries, final boolean editable){
-
-        Optional<SQLQuery> choice = chooseSQLQuery(queries);
+        Optional<SQLQuery> choice = chooseSQLQuery(queries, editable);
         if (choice.isPresent()) {
             final SQLQuery selected = choice.get();
             sqlLibelle = selected.getLibelle();
@@ -464,9 +463,11 @@ public class FXSearchPane extends BorderPane {
             dia.setTitle("Liste des requêtes");
 
             final Optional res = dia.showAndWait();
-            table.save();
+            if (editable) {
+                // Save only in editable mode, it may contain changes
+                table.save();
+            }
             if (res.isPresent() && bt.equals(res.get())) {
-                //sauvegarde s'il y a eu des changements
                 return Optional.ofNullable(table.getSelection());
             }
         }
