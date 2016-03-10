@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -471,25 +472,27 @@ public final class SIRS extends SirsCore {
      * @param toRun The task to run into JavaFX application thread.
      */
     public static <T> T fxRun(final boolean wait, final Task<T> toRun) {
-        if (Platform.isFxApplicationThread()) {
+        if (Platform.isFxApplicationThread())
             toRun.run();
-            if (toRun.getException() != null) {
-                throw new SirsCoreRuntimeException(toRun.getException());
-            } else {
-                return toRun.getValue();
-            }
-        } else {
+        else
             Platform.runLater(toRun);
-            if (wait) {
-                try {
-                    return toRun.get();
-                } catch (RuntimeException ex) {
-                    throw ex;
-                } catch (Exception ex) {
-                    throw new SirsCoreRuntimeException(ex);
+
+        if (wait || Platform.isFxApplicationThread()) {
+            try {
+                return toRun.get();
+            } catch (RuntimeException ex) {
+                throw ex;
+            } catch (ExecutionException ex) {
+                if (ex.getCause() instanceof RuntimeException) {
+                    throw (RuntimeException) ex.getCause();
+                } else {
+                    throw new SirsCoreRuntimeException(ex.getCause());
                 }
-            } else return null;
-        }
+            } catch (Exception e) {
+                throw new SirsCoreRuntimeException(e);
+            }
+        } else
+            return null;
     }
 
     /**
