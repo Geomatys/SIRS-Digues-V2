@@ -20,6 +20,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.odftoolkit.simple.TextDocument;
+import org.opengis.feature.Feature;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -101,10 +102,11 @@ public class FicheSectionRapport extends AbstractSectionRapport {
 
     @Override
     public void printSection(final PrintContext ctx) throws Exception {
-        if (ctx.elements == null) {
-            return; // TODO : print template using filter values.
+        if (ctx.elements == null && ctx.filterValues == null) {
+            return;
         }
 
+        // Find ODT template
         if (modeleElementId.get() == null)
             throw new IllegalStateException("No model set for printing !");
 
@@ -115,14 +117,19 @@ public class FicheSectionRapport extends AbstractSectionRapport {
             throw new IllegalStateException("No ODT template available.");
         }
 
-        // Print only elements managed by underlying model.
-        final Iterator<? extends Element> iterator;
-        final String targetClass = model.getTargetClass();
-        if (targetClass != null && !targetClass.isEmpty()) {
-            final Class tmpClass = Thread.currentThread().getContextClassLoader().loadClass(targetClass);
-            iterator = ctx.elements.filter(input -> tmpClass.isAssignableFrom(input.getClass())).iterator();
+        final Iterator iterator;
+        if (ctx.elements != null) {
+            // Print only elements managed by underlying model.
+            final String targetClass = model.getTargetClass();
+            if (targetClass != null && !targetClass.isEmpty()) {
+                final Class tmpClass = Thread.currentThread().getContextClassLoader().loadClass(targetClass);
+                iterator = ctx.elements.filter(input -> tmpClass.isAssignableFrom(input.getClass())).iterator();
+            } else {
+                iterator = ctx.elements.iterator();
+            }
         } else {
-            iterator = ctx.elements.iterator();
+            // No elements available. Print filter values.
+            iterator = ctx.filterValues.iterator();
         }
 
         /**
@@ -130,26 +137,41 @@ public class FicheSectionRapport extends AbstractSectionRapport {
          * it for each element, and append it to context target.
          */
         if (iterator.hasNext()) {
-            final Element first = iterator.next();
+            final Object first = iterator.next();
 
             try (final ByteArrayInputStream stream = new ByteArrayInputStream(odt);
                     final TextDocument doc = TextDocument.loadDocument(stream)) {
 
-                ODTUtils.fillTemplate(doc, first);
+                final boolean isElement = first instanceof Element;
+                if (first instanceof Element) {
+                    ODTUtils.fillTemplate(doc, (Element)first);
+                } else if (first instanceof Feature) {
+                    ODTUtils.fillTemplate(doc, (Feature)first);
+                } else throw new IllegalArgumentException("Unknown object given for printing !");
+
                 // Forced to do it to avoid variable erasing at concatenation
                 final Map<String, List<Text>> replaced = ODTUtils.replaceUserVariablesWithText(doc);
                 final int nbPhotosToPrint = nbPhotos.get();
 
                 ODTUtils.append(ctx.target, doc);
-                printPhotos(ctx.target, first, nbPhotosToPrint);
+                
+                if (isElement) {
+                    printPhotos(ctx.target, (Element)first, nbPhotosToPrint);
+                }
 
                 // For next elements, we replace directly text attributes we've put instead of variables, to avoid reloading original template.
                 iterator.forEachRemaining(next -> {
                     try {
-                        ODTUtils.replaceTextContent(next, (Map) replaced);
+                        if (isElement) {
+                            ODTUtils.replaceTextContent((Element)next, (Map)replaced);
+                        } else {
+                            ODTUtils.replaceTextContent((Feature)next, (Map)replaced);
+                        }
 
                         ODTUtils.append(ctx.target, doc);
-                        printPhotos(ctx.target, next, nbPhotosToPrint);
+                        if (isElement) {
+                            printPhotos(ctx.target, (Element)next, nbPhotosToPrint);
+                        }
                     } catch (RuntimeException ex) {
                         throw ex;
                     } catch (Exception ex) {
@@ -165,8 +187,14 @@ public class FicheSectionRapport extends AbstractSectionRapport {
             final List<? extends AbstractPhoto> photos = ((AvecPhotos<? extends AbstractPhoto>) source).getPhotos();
             photos.sort(new PhotoComparator());
 
+            AbstractPhoto photo;
             for (int i = 0; i < nbPhotosToPrint && i < photos.size(); i++) {
-                ODTUtils.appendImage(holder, null, photos.get(i), false);
+                photo = photos.get(i);
+                try {
+                    ODTUtils.appendImage(holder, null, photo, false);
+                } catch (IllegalArgumentException e) {
+                    holder.addParagraph("Impossible de retrouver l'image ".concat(photo.getChemin()));
+                }
             }
         }
     }

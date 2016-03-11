@@ -98,6 +98,8 @@ import org.odftoolkit.simple.table.Table;
 import org.odftoolkit.simple.table.TableContainer;
 import org.odftoolkit.simple.text.Paragraph;
 import org.opengis.feature.Feature;
+import org.opengis.feature.Property;
+import org.opengis.feature.PropertyType;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
@@ -271,6 +273,34 @@ public class ODTUtils {
         }
     }
 
+
+    /**
+     * Fill given template with data originating from candidate object.
+     *
+     * @param template Source template to fill.
+     * @param candidate The object to get data from to fill given template.
+     *
+     * @throws java.beans.IntrospectionException If input candidate cannot be
+     * analyzed.
+     * @throws java.lang.ReflectiveOperationException If we fail reading
+     * candidate properties.
+     */
+    public static void fillTemplate(final TextDocument template, final Feature candidate) throws IntrospectionException, ReflectiveOperationException {
+        // We iterate through input properties to extract all mappable attributes.
+        final Collection<? extends PropertyType> properties = candidate.getType().getProperties(true);
+        VariableField var;
+        String pName;
+        for (final PropertyType desc : properties) {
+            pName = desc.getName().tip().toString();
+            var = template.getVariableFieldByName(pName);
+            if (var != null) {
+                var.updateField(Printers.getPrinter(pName).print(candidate, pName), null);
+            } else {
+                SirsCore.LOGGER.fine("No variable found for name " + pName);
+            }
+        }
+    }
+
     /**
      * Extract properties from given candidate, and for each node registered for
      * it, we set its text using property value.
@@ -295,6 +325,34 @@ public class ODTUtils {
                     n.setTextContent(Printers.getPrinter(pName).print(candidate, desc));
                 }
             }
+        }
+    }
+
+
+    /**
+     * Extract properties from given candidate, and for each node registered for
+     * it, we set its text using property value.
+     *
+     * @param candidate Feature to extract properties from.
+     * @param propertyContainers A registry of all elements to modify, sorted by
+     * property name.
+     * @throws IntrospectionException If input candidate cannot be analyzed.
+     * @throws ReflectiveOperationException If we fail reading candidate
+     * properties.
+     */
+    public static void replaceTextContent(final Feature candidate, final Map<String, List<? extends Node>> propertyContainers) throws IntrospectionException, ReflectiveOperationException {
+        // We iterate through input properties to extract all mappable attributes.
+        Property prop;
+        for (final Map.Entry<String, List<? extends Node>> entry : propertyContainers.entrySet()) {
+            if (entry.getValue().isEmpty()) continue;
+            prop = candidate.getProperty(entry.getKey());
+            if (prop == null) {
+                for (final Node n : entry.getValue()) {
+                    n.setTextContent(" - ");
+                }
+            } else for (final Node n : entry.getValue()) {
+                    n.setTextContent(Printers.getPrinter(entry.getKey()).print(candidate, entry.getKey()));
+                }
         }
     }
 
@@ -903,12 +961,17 @@ public class ODTUtils {
      * @param fullPage Used only if image is not inserted in a paragraph.
      * Specifies if we should dedicate a page for image display.
      * @return Created image.
+     * @throws IllegalArgumentException If we cannot find image pointed by input {@link AbstractPhoto}.
      */
-    public static Image appendImage(final TextDocument holder, final Paragraph anchor, final AbstractPhoto toPrint, final boolean fullPage) {
+    public static Image appendImage(final TextDocument holder, final Paragraph anchor, final AbstractPhoto toPrint, final boolean fullPage) throws IllegalArgumentException {
         final String chemin = toPrint.getChemin();
         if (chemin == null || chemin.isEmpty())
             throw new IllegalArgumentException("Input photograph path is invalid !");
         final Path imgPath = SirsCore.getDocumentAbsolutePath(toPrint);
+
+        if (!Files.isRegularFile(imgPath)) {
+            throw new IllegalArgumentException("Input photograph file cannot be found !");
+        }
 
         final Image img;
         if (anchor == null) {
