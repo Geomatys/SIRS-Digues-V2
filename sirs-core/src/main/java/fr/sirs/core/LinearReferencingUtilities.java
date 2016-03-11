@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.primitive.jts.JTSLineIterator;
-import org.geotoolkit.displayt2d.style.j2d.DoublePathWalker;
+import org.geotoolkit.display2d.style.j2d.DoublePathWalker;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.math.XMath;
 import org.geotoolkit.referencing.LinearReferencing;

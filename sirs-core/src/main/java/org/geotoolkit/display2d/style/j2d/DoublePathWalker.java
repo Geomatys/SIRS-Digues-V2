@@ -1,4 +1,4 @@
-package org.geotoolkit.displayt2d.style.j2d;
+package org.geotoolkit.display2d.style.j2d;
 
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;

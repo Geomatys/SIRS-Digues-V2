@@ -59,7 +59,7 @@ import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.primitive.jts.JTSLineIterator;
-import org.geotoolkit.displayt2d.style.j2d.DoublePathWalker;
+import org.geotoolkit.display2d.style.j2d.DoublePathWalker;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.map.FeatureMapLayer;
