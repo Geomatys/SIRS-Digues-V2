@@ -311,7 +311,26 @@ public class CorePlugin extends Plugin {
             };
 
             //troncons
-            final BeanStore tronconStore = new BeanStore(suppliers.get(TronconDigue.class));
+            BeanFeatureSupplier tronconFeatureSupplier = suppliers.get(TronconDigue.class);
+            /*
+             * This supplier for troncon is not supposed to be null, because the method #loadDataSuppliers() is launched
+             * before and put it in the suppliers map. So it usually never happens but a user reports a NullPointerException
+             * on the BeanStore creation for this supplier...
+             * So relaunch the initial loading and it should be found this time in the map. If it is still not found, then
+             * there is nothing we can do. A NullPointerException will be propagated, cause we don't want to go further in
+             * this current state of the application.
+             */
+            if (tronconFeatureSupplier == null) {
+                SIRS.LOGGER.log(Level.WARNING, "Troncon supplier was not found although it was previously loaded. Retrying loading core plugin...");
+                loadDataSuppliers();
+                tronconFeatureSupplier = suppliers.get(TronconDigue.class);
+                // By the way, refill the names map with possibly forgotten items.
+                for(Class elementClass : suppliers.keySet()) {
+                    final LabelMapper mapper = LabelMapper.get(elementClass);
+                    nameMap.put(elementClass.getSimpleName(), mapper.mapClassName());
+                }
+            }
+            final BeanStore tronconStore = new BeanStore(tronconFeatureSupplier);
             sirsGroup.items().addAll(buildLayers(tronconStore,TRONCON_LAYER_NAME,createTronconStyle(),createTronconSelectionStyle(false),true));
 
             //bornes
