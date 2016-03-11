@@ -304,8 +304,8 @@ public class Loader extends Application {
                 // LOAD PLUGINS ////////////////////////////////////////////////
                 for (Plugin plugin : plugins) {
                     updateProgress(inc++, total);
-                    updateMessage("Chargement du plugin " + plugin.getLoadingMessage().getValue());
                     try {
+                        updateMessage("Chargement du plugin ".concat(plugin.getLoadingMessage().getValue()));
                         plugin.load();
                     } catch (Exception e) { // If we fail loading plugin, we just deactivate it.
                         final String errorMsg = "Le chargement du plugin "+plugin.getTitle()+" a échoué. Il sera désactivé.";
