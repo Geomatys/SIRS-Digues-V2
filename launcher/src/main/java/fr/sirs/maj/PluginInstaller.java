@@ -338,6 +338,15 @@ public class PluginInstaller {
      * A task whose aim is to install a new plugin. Does not check
      */
     private static class InstallPlugin extends PluginOperation<Boolean> {
+        /**
+         * Number of millis for opening the connection before timeout.
+         */
+        private static final int CONNECTION_TIMEOUT = 5000;
+
+        /**
+         * Number of millis to wait after launching a timeout if no data has been downloaded.
+         */
+        private static final int READ_TIMEOUT = 20000;
 
         private final URL serverUrl;
 
@@ -369,12 +378,15 @@ public class PluginInstaller {
                 // Download temporary zip file
                 URL bundleURL = pluginInfo.bundleURL(serverUrl);
                 updateTitle("Téléchargement : " + pluginInfo.getTitle());
-                final long totalLength = bundleURL.openConnection().getContentLengthLong();
+                final URLConnection bundleConnec = bundleURL.openConnection();
+                bundleConnec.setConnectTimeout(CONNECTION_TIMEOUT);
+                bundleConnec.setReadTimeout(READ_TIMEOUT);
+                final long totalLength = bundleConnec.getContentLengthLong();
+                long downloaded = 0;
                 final String totalReadableSize = SIRS.toReadableSize(totalLength);
-                try (final InputStream input = bundleURL.openStream();
+                try (final InputStream input = bundleConnec.getInputStream();
                         final OutputStream output = Files.newOutputStream(tmpFile)) {
-                    int readBytes = 0;
-                    long downloaded = 0;
+                    int readBytes;
                     final byte[] buffer = new byte[65536];
                     while ((readBytes = input.read(buffer)) >= 0) {
                         output.write(buffer, 0, readBytes);
@@ -382,6 +394,12 @@ public class PluginInstaller {
                         updateProgress(downloaded, totalLength);
                         updateTitle("Téléchargement ("+ pluginInfo.getTitle() + ") "+ SIRS.toReadableSize(downloaded) + " sur " + totalReadableSize);
                     }
+                    output.flush();
+                }
+
+                // Verify that the content was fully downloaded
+                if (downloaded != totalLength) {
+                    throw new IOException("Le plugin \""+ pluginInfo.getTitle() +"\" n'a pas été entièrement téléchargé");
                 }
 
                 updateTitle("Extraction : " + pluginInfo.getTitle());
