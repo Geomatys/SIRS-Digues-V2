@@ -123,12 +123,14 @@ public class PluginInstaller {
         grid.add(ok, 0, ++i);
         GridPane.setHalignment(ok, HPos.RIGHT);
 
-        ok.setOnAction(event -> stage.close());
+        ok.setOnAction(event -> {
+            oldVersionPlugins.forEach(PluginInstaller::uninstall);
+            stage.close();
+        });
 
         stage.setOnCloseRequest(event -> {
-            for (final PluginInfo info : oldVersionPlugins) {
-                uninstall(info);
-            }
+            oldVersionPlugins.forEach(PluginInstaller::uninstall);
+            stage.close();
         });
 
         final Scene scene = new Scene(grid);
@@ -175,28 +177,27 @@ public class PluginInstaller {
      */
     private static boolean isCompatible(final PluginInfo plugin) {
         String appVersion = SirsCore.getVersion();
-        if (appVersion == null || appVersion.isEmpty()) {
+        if (appVersion == null || appVersion.isEmpty() || !appVersion.contains(".")) {
             // Impossible de récupérer la version de l'application, celà indique que l'application
             // a été lancée via un IDE comme Intellij, pour ne pas bloquer les futures développements
             // on valide tous les plugins.
             return true;
-            //appVersion = "0.14";
         }
 
         final int currentAppVersion;
         try {
-            currentAppVersion = Integer.parseInt(appVersion.substring(2));
+            currentAppVersion = Integer.parseInt(appVersion.substring(appVersion.indexOf(".") + 1));
         } catch (NumberFormatException e) {
             // Nous sommes en dev dans une version de type 0.x-SNAPSHOT, dans ce cadre on active tous les plugins.
             return true;
         }
 
-        if (plugin.getAppVersionMin() == 0) {
+        if (plugin.getAppVersionMin() < 0) {
             // La version minimale de l'application pour laquelle ce plugin fonctionne n'a pas été définie,
             // ce plugin vient d'une ancienne version et doit être supprimé.
             return false;
         }
-        return (plugin.getAppVersionMax() == 0 && currentAppVersion >= plugin.getAppVersionMin())
+        return (plugin.getAppVersionMax() < 0 && currentAppVersion >= plugin.getAppVersionMin())
                 || (currentAppVersion >= plugin.getAppVersionMin() && currentAppVersion <= plugin.getAppVersionMax());
     }
 
