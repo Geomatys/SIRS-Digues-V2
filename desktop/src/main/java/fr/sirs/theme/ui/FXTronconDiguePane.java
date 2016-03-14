@@ -79,14 +79,13 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
 
         //mode edition
         previewRepository = Injector.getBean(Session.class).getPreviews();
-        elementProperty().addListener(this::initFields);
 
         uiValidityPeriod.disableFieldsProperty().bind(disableFieldsProperty());
         uiValidityPeriod.targetProperty().bind(elementProperty());
 
-	/*
-	 * Disabling rules.
-	 */
+        /*
+         * Disabling rules.
+         */
         ui_libelle.disableProperty().bind(disableFieldsProperty());
         ui_commentaire.disableProperty().bind(disableFieldsProperty());
         ui_digueId.disableProperty().bind(disableFieldsProperty());
