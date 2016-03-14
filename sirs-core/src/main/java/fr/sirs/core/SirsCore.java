@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -658,5 +660,97 @@ public class SirsCore {
             }
             return codes;
         }
+    }
+
+    /**
+     * Run given task in FX application thread (immediately if we're already in it),
+     * and wait for its result before returning.
+     *
+     * @param <T> Return type of the input task.
+     * @param toRun Task to run in JavaFX thread.
+     * @return Result of the input task.
+     */
+    public static <T> T fxRunAndWait(final Callable<T> toRun) {
+        return fxRunAndWait(new TaskManager.MockTask<>(toRun));
+    }
+
+    /**
+     *
+     * @param toRun The task to run.
+     */
+    public static void fxRunAndWait(final Runnable toRun) {
+        fxRunAndWait(new TaskManager.MockTask(toRun));
+    }
+
+    /**
+     * Run given task in FX application thread (immediately if we're already in it),
+     * and wait for its result before returning.
+     *
+     * @param <T> Return type of the input task.
+     * @param toRun Task to run in JavaFX thread.
+     * @return Result of the input task.
+     */
+    public static <T> T fxRunAndWait(final Task<T> toRun) {
+        return fxRun(true, toRun);
+    }
+
+    /**
+     * Run given task in FX application thread (immediately if we're already in it).
+     * According to input boolean, we will return immediately or wait for the task to
+     * be over.
+     * @param wait True if we must wait for the task to end before returning, false
+     * to return immediately after submission.
+     * @param toRun The task to run into JavaFX application thread.
+     */
+    public static void fxRun(final boolean wait, final Runnable toRun) {
+        fxRun(wait, new TaskManager.MockTask(toRun));
+    }
+
+    /**
+     * Run given task in FX application thread (immediately if we're already in it).
+     * According to input boolean, we will return immediately or wait for the task to
+     * be over.
+     * @param <T> Return type of input task.
+     * @param wait True if we must wait for the task to end before returning, false
+     * to return immediately after submission.
+     * @return The task return value if we must wait, or we're in platform thread. Otherwise null.
+     * @param toRun The task to run into JavaFX application thread.
+     */
+    public static <T> T fxRun(final boolean wait, final Callable<T> toRun) {
+        return fxRun(wait, new TaskManager.MockTask<>(toRun));
+    }
+
+    /**
+     * Run given task in FX application thread (immediately if we're already in it).
+     * According to input boolean, we will return immediately or wait for the task to
+     * be over.
+     * @param <T> Return type of input task.
+     * @param wait True if we must wait for the task to end before returning, false
+     * to return immediately after submission.
+     * @return The task return value if we must wait, or we're in platform thread. Otherwise null.
+     * @param toRun The task to run into JavaFX application thread.
+     */
+    public static <T> T fxRun(final boolean wait, final Task<T> toRun) {
+        if (Platform.isFxApplicationThread())
+            toRun.run();
+        else
+            Platform.runLater(toRun);
+
+        if (wait || Platform.isFxApplicationThread()) {
+            try {
+                return toRun.get();
+            } catch (RuntimeException ex) {
+                throw ex;
+            } catch (ExecutionException ex) {
+                if (ex.getCause() instanceof RuntimeException) {
+                    throw (RuntimeException) ex.getCause();
+                } else {
+                    throw new SirsCoreRuntimeException(ex.getCause());
+                }
+            } catch (Exception e) {
+                throw new SirsCoreRuntimeException(e);
+            }
+        } else
+            return null;
     }
 }

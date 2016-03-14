@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
 import org.ektorp.BulkDeleteDocument;
@@ -37,6 +38,7 @@ import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 import org.ektorp.support.CouchDbRepositorySupport;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.util.collection.CloseableIterator;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -509,42 +511,33 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     }
 
     @Override
-    public void documentCreated(Map<Class, List<Element>> added) {
-        final List<T> cached;
-        synchronized (this) {
-            cached = all == null ? null : all.get();
-        }
-        if (cached != null) {
-            Platform.runLater(() -> {
+    public synchronized void documentCreated(Map<Class, List<Element>> added) {
+        SirsCore.fxRunAndWait(() -> {
+            final List<T> cached = all == null ? null : all.get();
+
+            if (cached != null) {
                 List<T> created = (List<T>) added.get(getModelClass());
                 if (created != null) {
-                    synchronized (cached) {
-                        created = cacheList(created);
-                        created.removeAll(cached);
-                        cached.addAll(created);
-                    }
+                    created = cacheList(created);
+                    created.removeAll(cached);
+                    cached.addAll(created);
                 }
-            });
-        }
+            }
+        });
     }
 
     @Override
-    public void documentChanged(Map<Class, List<Element>> changed) {
-        synchronized (this) {
-            all = null;
-        }
+    public synchronized void documentChanged(Map<Class, List<Element>> changed) {
+        all = null;
     }
 
     @Override
-    public void documentDeleted(Set<String> deletedObjects) {
-        final List<T> cached;
-        synchronized (this) {
-            cached = all == null ? null : all.get();
-        }
-        if (cached != null) {
-            Platform.runLater(() -> {
+    public synchronized void documentDeleted(Set<String> deletedObjects) {
+        SirsCore.fxRunAndWait(() -> {
+            final List<T> cached = all == null ? null : all.get();
+            if (cached != null) {
                 cached.removeIf(element -> deletedObjects.contains(element.getId()));
-            });
-        }
+            }
+        });
     }
 }

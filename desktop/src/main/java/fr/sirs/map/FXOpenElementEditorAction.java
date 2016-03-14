@@ -82,7 +82,7 @@ public class FXOpenElementEditorAction extends FXMapAction {
             map.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseListener);
             map.addEventHandler(ScrollEvent.SCROLL, mouseListener);
             map.setCursor(Cursor.DEFAULT);
-            SIRS.LOGGER.log(Level.INFO, "Information handler installed.");
+            SIRS.LOGGER.log(Level.FINE, "Information handler installed.");
         }
 
         /**
