@@ -9,9 +9,13 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Observation;
 
 import java.lang.reflect.Method;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
@@ -180,7 +184,16 @@ public class FXCommentPhotoView extends SplitPane {
             }
 
             final Task<Image> loader = new TaskManager.MockTask<>("Lecture d'image",
-                    () -> new Image(SIRS.getDocumentAbsolutePath(selected).toUri().toURL().toExternalForm()));
+                    () -> {
+                        try {
+                            return new Image(SIRS.getDocumentAbsolutePath(selected).toUri().toURL().toExternalForm());
+                        } catch (IllegalStateException e) {
+                            // Illegal state exception here means no root folder has been configured for photos,
+                            // just use the given path for the photo.
+                            SIRS.LOGGER.log(Level.INFO, e.getLocalizedMessage());
+                            return new Image(Paths.get(selected.getChemin()).toUri().toURL().toExternalForm());
+                        }
+                    });
 
             loader.setOnFailed(event -> Platform.runLater(() -> uiPhotoLibelle.setText("Le chemin de l'image est invalide : " + selected.getLibelle())));
             loader.setOnCancelled(event -> Platform.runLater(() -> uiPhotoLibelle.setText("Le chargement de l'image a été annulé")));
