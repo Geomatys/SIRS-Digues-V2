@@ -212,7 +212,7 @@ public class FXPlanTable extends BorderPane{
             gridCenter.getRowConstraints().add(new RowConstraints(30, 30, 30, Priority.NEVER, VPos.CENTER, true));
 
             //on vérifie que la parcelle fait partie du troncon
-            if(tronconId !=null && tronconId.equals(parcelle.getForeignParentId())) {
+            if(tronconId !=null && !tronconId.equals(parcelle.getForeignParentId())) {
                 continue;
             }
 
