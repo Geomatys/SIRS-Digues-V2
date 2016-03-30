@@ -12,6 +12,7 @@ import fr.sirs.core.model.TraitementParcelleVegetation;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.PojoTable;
 import fr.sirs.util.SirsStringConverter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -48,7 +49,8 @@ public class FXTraitementsPane extends SplitPane {
         final ResourceBundle bundle = null;
         SIRS.loadFXML(this, bundle);
 
-        final List troncons = previews.getByClass(TronconDigue.class);
+        final List<Preview> tronconsPreviews = previews.getByClass(TronconDigue.class);
+        final List troncons = new ArrayList(tronconsPreviews);// Pour ne pas modifier la liste de "Previews" avec l'ajout de la ligne suivante.
         troncons.add(0,"-Tous les tronçons-");
         ui_linear.setConverter(new SirsStringConverter());
         ui_linear.setEditable(true);
