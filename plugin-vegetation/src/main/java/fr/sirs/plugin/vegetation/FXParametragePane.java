@@ -58,7 +58,7 @@ public class FXParametragePane extends SplitPane {
     
 
     public FXParametragePane() {
-        SIRS.loadFXML(this, FXParametragePane.class);
+        SIRS.loadFXML(this);
         setDividerPositions(.25);
         initialize();
     }

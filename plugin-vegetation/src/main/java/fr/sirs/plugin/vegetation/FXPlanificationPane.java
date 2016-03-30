@@ -27,7 +27,7 @@ public class FXPlanificationPane extends BorderPane {
     private final Session session = Injector.getSession();
 
     public FXPlanificationPane() {
-        SIRS.loadFXML(this, FXPlanificationPane.class);
+        SIRS.loadFXML(this);
         initialize();
     }
 

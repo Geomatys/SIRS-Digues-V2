@@ -71,7 +71,7 @@ public class FXPlanVegetationPane extends BorderPane {
     private int initialDebutPlan, initialFinPlan;
 
     public FXPlanVegetationPane(final PlanVegetation plan) {
-        SIRS.loadFXML(this, FXPlanVegetationPane.class);
+        SIRS.loadFXML(this);
         this.plan = plan;
 
         uiDesignation.textProperty().bindBidirectional(plan.designationProperty());

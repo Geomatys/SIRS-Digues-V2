@@ -17,7 +17,7 @@ public class FXPlanDeGestionPane extends BorderPane {
 
 
     public FXPlanDeGestionPane() {
-        SIRS.loadFXML(this, FXParametragePane.class);
+        SIRS.loadFXML(this);
         setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
     }
 
