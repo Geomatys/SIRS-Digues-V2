@@ -208,12 +208,16 @@ public abstract class CreateVegetationPolygonTool<T extends ZoneVegetation> exte
         component.addEventHandler(MouseEvent.ANY, mouseInputListener);
         component.addEventHandler(ScrollEvent.ANY, mouseInputListener);
 
+        // On instancie une nouvelle liste pour les couches à désactiver provisoirement (le temps de l'activation de l'outil)
+        toActivateBack = new ArrayList<>();
+        
         //on rend les couches troncon et borne selectionnables
         final MapContext context = component.getContainer().getContext();
         for(MapLayer layer : context.layers()){
             if(layer.getName().equalsIgnoreCase(PluginVegetation.PARCELLE_LAYER_NAME)){
                 parcelleLayer = (FeatureMapLayer) layer;
-            } else if (layer.isSelectable()) {
+            } 
+            else if (layer.isSelectable()) {
                 toActivateBack.add(layer);
                 layer.setSelectable(false);
             }
