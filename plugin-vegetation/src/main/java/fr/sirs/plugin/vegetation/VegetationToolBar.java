@@ -133,7 +133,6 @@ public class VegetationToolBar extends ToolBar {
         toolbox.getTools().add(EditVegetationTool.SPI);
 
         dialog = new Stage();
-        dialog.setAlwaysOnTop(true);
         dialog.initModality(Modality.NONE);
         dialog.initStyle(StageStyle.UTILITY);
         dialog.setTitle("Végétation");
@@ -171,7 +170,7 @@ public class VegetationToolBar extends ToolBar {
         });
 
         dialog.show();
-
+        dialog.requestFocus();
     }
 
     private static class FXBordeRPane extends BorderPane{
