@@ -19,6 +19,7 @@ import fr.sirs.theme.ui.FXPositionableLinearMode;
 import fr.sirs.util.ResourceInternationalString;
 import fr.sirs.util.SirsStringConverter;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -223,9 +224,11 @@ public class CreateParcelleTool extends AbstractEditionTool{
             return;
         }
 
-
         component.addEventHandler(MouseEvent.ANY, mouseInputListener);
 
+        // On instancie une nouvelle liste pour les couches à désactiver provisoirement (le temps de l'activation de l'outil)
+        toActivateBack = new ArrayList<>();
+        
         //on rend les couches troncon et borne selectionnables
         final MapContext context = component.getContainer().getContext();
         for(MapLayer layer : context.layers()){

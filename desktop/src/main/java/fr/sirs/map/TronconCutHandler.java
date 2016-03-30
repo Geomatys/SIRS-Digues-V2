@@ -9,14 +9,12 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
-import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
-import org.geotoolkit.gui.javafx.util.TaskManager;
-import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecBornesTemporelles;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.TronconDigue;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,10 +53,12 @@ import org.geotoolkit.feature.FeatureTypeBuilder;
 import org.geotoolkit.feature.FeatureUtilities;
 import org.geotoolkit.feature.type.FeatureType;
 import org.geotoolkit.geometry.jts.JTS;
+import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
@@ -280,6 +280,10 @@ public class TronconCutHandler extends AbstractNavigationHandler {
 
         //recuperation du layer de troncon
         tronconLayer = null;
+
+        // On instancie une nouvelle liste pour les couches à désactiver provisoirement (le temps de l'activation de l'outil)
+        toActivateBack = new ArrayList<>();
+        
         final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
         final MapContext context = cc.getContext();
         for(MapLayer layer : context.layers()){
