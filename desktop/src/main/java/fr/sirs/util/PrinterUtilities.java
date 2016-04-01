@@ -116,6 +116,7 @@ public class PrinterUtilities {
 
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile("RESEAU_HYDRAULIQUE_FERME_OBSERVATION", PDF_EXTENSION);
+        fout.deleteOnExit();
         try (final FileOutputStream outStream = new FileOutputStream(fout)) {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
             JasperReportService.generate(print, output);
@@ -170,6 +171,7 @@ public class PrinterUtilities {
 
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile("DESORDRE_OBSERVATION", PDF_EXTENSION);
+        fout.deleteOnExit();
         try (final FileOutputStream outStream = new FileOutputStream(fout)) {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
             JasperReportService.generate(print, output);
@@ -215,7 +217,7 @@ public class PrinterUtilities {
 
         // Generate the report -------------------------------------------------
         final File fout = File.createTempFile(featureCollection.getFeatureType().getName().tip().toString(), PDF_EXTENSION);
-
+        fout.deleteOnExit();
         try (final FileOutputStream outStream = new FileOutputStream(fout);
                 final InputStream logoStream = PrinterUtilities.class.getResourceAsStream(LOGO_PATH)) {
             final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);

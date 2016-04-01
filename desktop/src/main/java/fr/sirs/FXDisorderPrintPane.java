@@ -51,15 +51,16 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
         () -> {
 
             final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll();
+            final List<Desordre> tempDesordres = new ArrayList<>(desordres);
 
             // On retire les désordres de la liste dans les cas suivants...
-            desordres.removeIf(new LocalPredicate().or(
+            tempDesordres.removeIf(new LocalPredicate().or(
                     new LocationPredicate<>().or(
                             (Predicate) new TemporalPredicate())));
 
             try {
-                if(!desordres.isEmpty()){
-                    Injector.getSession().getPrintManager().printDesordres(desordres, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionVoirie.isSelected());
+                if(!tempDesordres.isEmpty()){
+                    Injector.getSession().getPrintManager().printDesordres(tempDesordres, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionVoirie.isSelected());
                 }
             } catch (Exception ex) {
                 SIRS.LOGGER.log(Level.WARNING, null, ex);

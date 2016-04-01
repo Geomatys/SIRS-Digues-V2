@@ -6,6 +6,7 @@ import fr.sirs.core.model.RefConduiteFermee;
 import fr.sirs.core.model.RefUrgence;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -50,15 +51,16 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
 
             final List<ReseauHydrauliqueFerme> reseauxFermes = Injector.getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).getAll();
 
+            final List<ReseauHydrauliqueFerme> tempReseaux = new ArrayList<>(reseauxFermes);
             // On retire les désordres de la liste dans les cas suivants :
-            reseauxFermes.removeIf(
+            tempReseaux.removeIf(
                     new LocalPredicate().or(
                             new LocationPredicate<>().or(
                                     (Predicate) new TemporalPredicate())));
 
             try {
-                if(!reseauxFermes.isEmpty()){
-                    Injector.getSession().getPrintManager().printReseaux(reseauxFermes, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected());
+                if(!tempReseaux.isEmpty()){
+                    Injector.getSession().getPrintManager().printReseaux(tempReseaux, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected());
                 }
             } catch (Exception ex) {
                 SIRS.LOGGER.log(Level.WARNING, null, ex);

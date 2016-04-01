@@ -150,62 +150,60 @@ public abstract class TronconChoicePrintPane extends BorderPane {
 
     final protected class LocationPredicate<T extends Positionable & AvecForeignParent> implements Predicate<T>{
 
-        final List<String> tronconIds = new ArrayList<>();
+        final List<String> tronconSelectedIds = new ArrayList<>();
 
         public LocationPredicate(){
             for(final Element element : tronconsTable.getSelectedItems()){
-                tronconIds.add(element.getId());
+                tronconSelectedIds.add(element.getId());
             }
         }
 
         @Override
         public boolean test(final T candidate) {
-
-            final boolean conditionSurTronconEtType;
-            if(!tronconIds.isEmpty() && candidate.getForeignParentId()!=null){
-                final String linearId = candidate.getForeignParentId();
-
-                /*
-                Sous-condition de retrait 1 : si le désordre est
-                associé à un tronçon qui n'est pas sélectionné dans
-                la liste.
-                */
-                final boolean linearSelected = !tronconIds.contains(linearId);
-
-                /*
-                Sous-condition de retrait 2 : si le désordre a des PRs de
-                début et de fin et si le tronçon a des PRs de début et
-                de fin (i.e. s'il a un SR par défaut qui a permi de les
-                calculer), alors on vérifie :
-                */
-                final boolean prOutOfRange;
-                if(candidate.getPrDebut()!=Float.NaN
-                        && candidate.getPrFin()!=Float.NaN
-                        && prsByTronconId.get(linearId)!=null
-                        && prsByTronconId.get(linearId)!=null
-                        && prsByTronconId.get(linearId)[0]!=null
-                        && prsByTronconId.get(linearId)[1]!=null
-                        && prsByTronconId.get(linearId)[0].get()!=null
-                        && prsByTronconId.get(linearId)[1].get()!=null){
-                    final float prInf, prSup;
-                    if(candidate.getPrDebut() < candidate.getPrFin()) {
-                        prInf=candidate.getPrDebut();
-                        prSup=candidate.getPrFin();
-                    } else {
-                        prInf=candidate.getPrFin();
-                        prSup=candidate.getPrDebut();
-                    }
-                    prOutOfRange = (prInf < prsByTronconId.get(linearId)[0].get().floatValue()) // Si le désordre s'achève avant le début de la zone du tronçon que l'on souhaite.
-                    || (prSup > prsByTronconId.get(linearId)[1].get().floatValue()); // Si le désordre débute après la fin de la zone du tronçon que l'on souhaite.
-                }
-                else prOutOfRange=false;
-
-                conditionSurTronconEtType = linearSelected // Si le tronçon ne figure pas parmi les tronçons sélectionnés.
-                        || prOutOfRange; // Si le désordre est en dehors des PR indiqués pour le tronçon
+            if (tronconSelectedIds.isEmpty() || candidate.getForeignParentId()==null) {
+                return false;
             }
-            else conditionSurTronconEtType = false;
 
-            return conditionSurTronconEtType;
+            final String linearId = candidate.getForeignParentId();
+
+            /*
+            Sous-condition de retrait 1 : si le désordre est
+            associé à un tronçon qui n'est pas sélectionné dans
+            la liste.
+            */
+            final boolean linearNotSelected = !tronconSelectedIds.contains(linearId);
+            if (linearNotSelected) {
+                // On ne le garde pas
+                return true;
+            }
+
+            /*
+            Sous-condition de retrait 2 : si le désordre a des PRs de
+            début et de fin et si le tronçon a des PRs de début et
+            de fin (i.e. s'il a un SR par défaut qui a permi de les
+            calculer), alors on vérifie :
+            */
+            if(!Float.isNaN(candidate.getPrDebut()) && !Float.isNaN(candidate.getPrFin())
+                    && prsByTronconId.get(linearId)!=null
+                    && prsByTronconId.get(linearId)[0]!=null
+                    && prsByTronconId.get(linearId)[1]!=null
+                    && prsByTronconId.get(linearId)[0].get()!=null
+                    && prsByTronconId.get(linearId)[1].get()!=null)
+            {
+                final float prInf, prSup;
+                if(candidate.getPrDebut() < candidate.getPrFin()) {
+                    prInf=candidate.getPrDebut();
+                    prSup=candidate.getPrFin();
+                } else {
+                    prInf=candidate.getPrFin();
+                    prSup=candidate.getPrDebut();
+                }
+                return (prInf < prsByTronconId.get(linearId)[0].get().floatValue()) // Si le désordre s'achève avant le début de la zone du tronçon que l'on souhaite.
+                || (prSup > prsByTronconId.get(linearId)[1].get().floatValue()); // Si le désordre débute après la fin de la zone du tronçon que l'on souhaite.
+            } else {
+                // On le garde s'il manque des informations
+                return false;
+            }
         }
 
     }
