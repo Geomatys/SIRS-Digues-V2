@@ -23,7 +23,7 @@ public class FXImportBornesAction extends FXMapAction {
         
     public FXImportBornesAction(FXMap map) {
         super(map, "Importer des bornes",
-                "Import de bornes depuis un fichier Shapefile.", ICON);
+                "Import de bornes depuis un fichier Shapefile", ICON);
         disabledProperty().bind(Injector.getSession().geometryEditionProperty().not());
     }
     

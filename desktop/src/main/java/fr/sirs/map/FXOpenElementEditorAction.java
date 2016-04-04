@@ -43,7 +43,7 @@ public class FXOpenElementEditorAction extends FXMapAction {
     private static final double POINT_RADIUS = 1;
 
     public FXOpenElementEditorAction(final FXMap map) {
-        this(map, "informations sur l'élément", "Ouvre la fiche du tronçon/structure.");
+        this(map, "informations sur l'élément", "Ouvre la fiche du tronçon/de l'objet du thème");
     }
     
     public FXOpenElementEditorAction(final FXMap map, final String shortText, final String longText) {
