@@ -771,27 +771,63 @@ public class TronconUtils {
             bornes.put(projBorne.distanceAlongLinear, srb);
         }
 
-        Map.Entry<Double, SystemeReperageBorne> under = bornes.floorEntry(prjPt.distanceAlongLinear);
-        Map.Entry<Double, SystemeReperageBorne> above = bornes.ceilingEntry(prjPt.distanceAlongLinear);
-        if(under==null) under = above;
-        if(above==null) above = under;
-        if(under==null) return 0.0f;
-
-        if(under.equals(above)){
-            //exactement sur le point.
-            return under.getValue().getValeurPR();
-        }else{
-            //on interpole entre les deux bornes.
-            final double distance = prjPt.distanceAlongLinear;
-            final SystemeReperageBorne underBorne = under.getValue();
-            final SystemeReperageBorne aboveBorne = above.getValue();
-            final double diffPr = aboveBorne.getValeurPR()-underBorne.getValeurPR();
-            final double diffDist = above.getKey() - under.getKey();
-            final double ratio = (distance - under.getKey()) / diffDist;
-            final double pr = underBorne.getValeurPR() + ratio*diffPr;
-            return (float) pr;
+        final Map.Entry<Double, SystemeReperageBorne> under = bornes.floorEntry(prjPt.distanceAlongLinear);
+        final Map.Entry<Double, SystemeReperageBorne> above = bornes.ceilingEntry(prjPt.distanceAlongLinear);
+        if (under == null && above == null) {
+            // Should never occur since it should has already returned NaN because it would mean that the SR has no bornes.
+            return Float.NaN;
         }
 
+        if (under == null || above == null) {
+            //on doit interpoler avec d'autres bornes plus loin sur le tronçon puisqu'il manque une borne avant ou après le point
+            final double delta = 1E-4;
+            if (under == null) {
+                // pas de bornes avant, on prend les 2 prochaines bornes
+                final Map.Entry<Double, SystemeReperageBorne> justAfterAbove = bornes.ceilingEntry(above.getKey() + delta);
+                if (justAfterAbove == null) {
+                    // Only one borne on this troncon, we can't interpolate there...
+                    return Float.NaN;
+                }
+
+                final SystemeReperageBorne aboveBorne = above.getValue();
+                final SystemeReperageBorne justAfterAboveBorne = justAfterAbove.getValue();
+                final double diffPr = justAfterAboveBorne.getValeurPR() - aboveBorne.getValeurPR();
+                final double diffDist = justAfterAbove.getKey() - above.getKey();
+                final double ratio = diffPr / diffDist;
+                final double pr = aboveBorne.getValeurPR() - ratio * (above.getKey() - prjPt.distanceAlongLinear);
+                return (float) pr;
+            } else {
+                // pas de bornes après, on prend les 2 précédentes bornes
+                final Map.Entry<Double, SystemeReperageBorne> justBeforeUnder = bornes.floorEntry(under.getKey() - delta);
+                if (justBeforeUnder == null) {
+                    // Only one borne on this troncon, we can't interpolate there...
+                    return Float.NaN;
+                }
+
+                final SystemeReperageBorne underBorne = under.getValue();
+                final SystemeReperageBorne justBeforeUnderBorne = justBeforeUnder.getValue();
+                final double diffPr = underBorne.getValeurPR() - justBeforeUnderBorne.getValeurPR();
+                final double diffDist = under.getKey() - justBeforeUnder.getKey();
+                final double ratio = diffPr / diffDist;
+                final double pr = underBorne.getValeurPR() + ratio * (prjPt.distanceAlongLinear - under.getKey());
+                return (float) pr;
+            }
+        }else{
+            if (under.equals(above)) {
+                //exactement sur le point.
+                return under.getValue().getValeurPR();
+            } else {
+                //on interpole entre les deux bornes.
+                final double distance = prjPt.distanceAlongLinear;
+                final SystemeReperageBorne underBorne = under.getValue();
+                final SystemeReperageBorne aboveBorne = above.getValue();
+                final double diffPr = aboveBorne.getValeurPR() - underBorne.getValeurPR();
+                final double diffDist = above.getKey() - under.getKey();
+                final double ratio = (distance - under.getKey()) / diffDist;
+                final double pr = underBorne.getValeurPR() + ratio * diffPr;
+                return (float) pr;
+            }
+        }
     }
 
     /**
