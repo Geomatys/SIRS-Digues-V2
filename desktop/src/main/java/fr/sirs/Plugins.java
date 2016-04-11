@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import javax.imageio.spi.ServiceRegistry;
+import java.util.ServiceLoader;
 
 /**
  * Classe utilitaire de chargement des plugins.
@@ -23,6 +23,15 @@ public class Plugins {
      */
     private static Map<String, Plugin> REGISTERED_PLUGINS;
     private static List<Theme> THEMES;
+
+    /**
+     * HACK : A conflict looks to appear on some systems. Multiple instances of
+     * the same plugin seems to be present in memory, because system class loader
+     * is not flagged as loaded even after application loading. We put some safety
+     * here to be sure it can never happen. We'll synchronize jar loading with this
+     * class to ensure unique instance of plugin data.
+     */
+    private static boolean ALL_LOADED = false;
     
     /**
      * Récupérer la liste des plugins.
@@ -33,28 +42,23 @@ public class Plugins {
         return getPluginMap().values().toArray(new Plugin[0]);
     }
     
-    public static Map<String, Plugin> getPluginMap() {
-        if (REGISTERED_PLUGINS == null) {
-            //creation de la liste des plugins disponibles.
-            final Iterator<Plugin> ite = ServiceRegistry.lookupProviders(Plugin.class);
-            final HashMap<String, Plugin> candidates = new HashMap<>();
-            while(ite.hasNext()){
-                Plugin next = ite.next();
-                candidates.put(next.name, next);
+    public synchronized static Map<String, Plugin> getPluginMap() {
+        if (!ALL_LOADED) {
+            final ClassLoader scl = ClassLoader.getSystemClassLoader();
+            ALL_LOADED = (!(scl instanceof PluginLoader)) || ((PluginLoader) scl).isLoaded();
+            if (REGISTERED_PLUGINS == null) {
+                REGISTERED_PLUGINS = new HashMap<>();
             }
-            REGISTERED_PLUGINS = Collections.unmodifiableMap(candidates);
+
+            //creation de la liste des plugins disponibles.
+            final Iterator<Plugin> ite = ServiceLoader.load(Plugin.class).iterator();
+            while (ite.hasNext()) {
+                Plugin next = ite.next();
+                REGISTERED_PLUGINS.putIfAbsent(next.name, next);
+            }
         }
 
-        // If system class loader has not loaded plugins yet, we do not build a
-        // definitive list of available plugins.
-        final ClassLoader scl = ClassLoader.getSystemClassLoader();
-        if (scl instanceof PluginLoader && !((PluginLoader) scl).isLoaded()) {
-            final Map<String, Plugin> tmpCopy = REGISTERED_PLUGINS;
-            REGISTERED_PLUGINS = null;
-            return tmpCopy;
-        } else {
-            return REGISTERED_PLUGINS;
-        }
+        return Collections.unmodifiableMap(REGISTERED_PLUGINS);
     }
     
     /**

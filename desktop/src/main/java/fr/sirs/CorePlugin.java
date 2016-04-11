@@ -64,6 +64,7 @@ import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DocumentTheme;
 import fr.sirs.theme.EvenementsHydrauliquesTheme;
 import fr.sirs.theme.PositionDocumentTheme;
+import fr.sirs.theme.Theme;
 import fr.sirs.theme.TronconTheme;
 import fr.sirs.util.FXFreeTab;
 import java.awt.Color;
@@ -71,7 +72,6 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -322,7 +322,7 @@ public class CorePlugin extends Plugin {
              */
             if (tronconFeatureSupplier == null) {
                 SIRS.LOGGER.log(Level.WARNING, "Troncon supplier was not found although it was previously loaded. Retrying loading core plugin...");
-                loadDataSuppliers();
+                load();
                 tronconFeatureSupplier = suppliers.get(TronconDigue.class);
                 // By the way, refill the names map with possibly forgotten items.
                 for(Class elementClass : suppliers.keySet()) {
@@ -636,7 +636,7 @@ public class CorePlugin extends Plugin {
     }
 
     @Override
-    public void load() throws SQLException, IOException {
+    public void load() {
         loadDataSuppliers();
         themes.add(new TronconTheme("Structure", Crete.class, OuvrageRevanche.class, TalusDigue.class, SommetRisberme.class, TalusRisberme.class, PiedDigue.class, Fondation.class, Epi.class, Deversoir.class));
         themes.add(new TronconTheme("Franc-bord", LargeurFrancBord.class));
@@ -767,6 +767,16 @@ public class CorePlugin extends Plugin {
             return SF.style(line1,direction);
         }
     }
+
+    @Override
+    public List<Theme> getThemes() {
+        if (themes == null || themes.isEmpty()) {
+            load();
+        }
+        return super.getThemes();
+    }
+
+
 
     private static MutableStyle createBorneStyle() throws URISyntaxException{
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(10);
