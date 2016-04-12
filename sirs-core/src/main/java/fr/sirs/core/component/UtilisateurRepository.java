@@ -2,6 +2,7 @@ package fr.sirs.core.component;
 
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
+import static fr.sirs.core.SirsCore.hexaMD5;
 import fr.sirs.core.SirsCoreRuntimeException;
 import static fr.sirs.core.component.UtilisateurRepository.BY_LOGIN;
 import fr.sirs.core.model.ElementCreator;
@@ -81,5 +82,23 @@ public class UtilisateurRepository extends AbstractSIRSRepository<Utilisateur>{
     }
 
 
+    /**
+     * Search given user in database, and check if its role is {@link Role#ADMIN}.
+     * @param db Database to search into.
+     * @param user User name
+     * @param pass User password
+     * @return True if given user is an administrator. False otherwise.
+     */
+    public static boolean isAdmin(final CouchDbConnector db, final String user, final String pass) {
+        final UtilisateurRepository repo = new UtilisateurRepository(db);
+        final List<Utilisateur> byLogin = repo.getByLogin(user);
+        final String encryptedPassword = hexaMD5(pass);
+        for (final Utilisateur utilisateur : byLogin) {
+            if (encryptedPassword.equals(utilisateur.getPassword())) {
+                return Role.ADMIN.equals(utilisateur.getRole());
+            }
+        }
+        return false;
+    }
 }
 

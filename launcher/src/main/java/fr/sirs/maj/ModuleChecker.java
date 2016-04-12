@@ -7,6 +7,7 @@ import fr.sirs.SIRS;
 import fr.sirs.core.ModuleDescription;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.component.DatabaseRegistry;
+import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.plugins.PluginLoader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,6 +22,10 @@ import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 
@@ -125,12 +130,7 @@ public class ModuleChecker extends Task<Boolean> {
             return alert.showAndWait().orElse(ButtonType.CANCEL);
         });
 
-        if (ButtonType.OK.equals(result)) {
-            // TODO : ask identification
-            return true;
-        }
-
-        return false;
+        return ButtonType.OK.equals(result) && isAdmin();
     }
 
     /**
@@ -284,5 +284,33 @@ public class ModuleChecker extends Task<Boolean> {
         public String toString() {
             return stringVersion;
         }
+    }
+
+    private boolean isAdmin() {
+        final TextField userInput = new TextField();
+        final PasswordField passInput = new PasswordField();
+        final boolean accepted = SIRS.fxRunAndWait(() -> {
+            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, null, ButtonType.CANCEL, ButtonType.OK);
+            alert.setHeaderText("Veuillez confirmer vos droit d'administration avant la migration :");
+
+            final GridPane gPane = new GridPane();
+            gPane.add(new Label("Login : "), 0, 0);
+            gPane.add(userInput, 1, 0);
+            gPane.add(new Label("Mot de passe : "), 0, 1);
+            gPane.add(passInput, 1, 1);
+
+            alert.getDialogPane().setContent(gPane);
+            alert.setWidth(400);
+            alert.setHeight(400);
+            alert.setResizable(true);
+            return ButtonType.OK.equals(alert.showAndWait().orElse(null));        
+        });
+
+        if (accepted) {
+            final String username = userInput.textProperty().getValueSafe();
+            final String userpass = passInput.textProperty().getValueSafe();
+            return UtilisateurRepository.isAdmin(connector, username, userpass);
+        }
+        return false;
     }
 }
