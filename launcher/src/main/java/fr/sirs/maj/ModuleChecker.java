@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -34,19 +33,16 @@ public class ModuleChecker extends Task<Boolean> {
 
     private final DatabaseRegistry dbRegistry;
     private final String dbName;
-    private final PluginList installedPlugins;
 
     private CouchDbConnector connector;
     private List<Upgrade> upgrades;
     private Map<PluginInfo, ModuleDescription> obsoletePlugins;
 
-    public ModuleChecker(final PluginList installed, final DatabaseRegistry dbService, final String dbName) {
-        ArgumentChecks.ensureNonNull("List of installed plugins", installed);
+    public ModuleChecker(final DatabaseRegistry dbService, final String dbName) {
         ArgumentChecks.ensureNonNull("CouchDB service", dbService);
         ArgumentChecks.ensureNonNull("Database name", dbName);
         dbRegistry = dbService;
         this.dbName = dbName;
-        installedPlugins = installed;
     }
 
     @Override
@@ -72,9 +68,15 @@ public class ModuleChecker extends Task<Boolean> {
         final ChangeListener<String> msgListener = (obs, oldMsg, newMsg) -> updateMessage(newMsg);
         final String title = new StringBuilder("Mise à jour ").append("0").append(" sur ").append(upgrades.size()).toString();
         final Pattern numbPat = Pattern.compile("\\d+");
+        SirsDBInfo info = DatabaseRegistry.getInfo(connector).orElse(null);
+        if (info == null) {
+            // should never happen...
+            throw new IllegalStateException("Chosen database is not SIRS database !");
+        }
         for (int i = 0; i < upgrades.size(); i++) {
             updateTitle(numbPat.matcher(title).replaceFirst(String.valueOf(i+1)));
-            final Task t = upgrades.get(i).upgradeTask;
+            final Upgrade upgrade = upgrades.get(i);
+            final Task t = upgrade.upgradeTask;
             final ChangeListener<Number> progressListener = (obs, oldValue, newValue) -> {
                 updateProgress(t.getWorkDone(), t.getTotalWork());
             };
@@ -94,7 +96,11 @@ public class ModuleChecker extends Task<Boolean> {
                 stateProperty().removeListener(cancelListener);
             });
 
+            // ensure no error occurred
             t.get();
+
+            info.getModuleDescriptions().get(upgrade.toUpgrade.getConfiguration().getName()).setVersion(getVersion(upgrade.toUpgrade));
+            connector.update(info);
         }
     }
 
@@ -119,7 +125,12 @@ public class ModuleChecker extends Task<Boolean> {
             return alert.showAndWait().orElse(ButtonType.CANCEL);
         });
 
-        return ButtonType.OK.equals(result);
+        if (ButtonType.OK.equals(result)) {
+            // TODO : ask identification
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -144,7 +155,7 @@ public class ModuleChecker extends Task<Boolean> {
                 SIRS.fxRun(false, () -> {
                     final Alert alert = new Alert(Alert.AlertType.WARNING, messenger.toString(), ButtonType.OK);
                     alert.setResizable(true);
-                    alert.show();
+                    alert.showAndWait();
                 });
         }
         return obsoleteFound;
@@ -155,18 +166,12 @@ public class ModuleChecker extends Task<Boolean> {
      * It's an essential task, as it initializes most of checker's attributes.
      */
     private void analyzeModules() throws IOException {
-        // First, we ensure modules classes are ready for use.
-        final ClassLoader scl = ClassLoader.getSystemClassLoader();
-        if (scl instanceof PluginLoader) {
-            ((PluginLoader) scl).loadPlugins();
-        }
-
         synchronized (dbRegistry) {
             connector = dbRegistry.createConnector(dbName, DatabaseRegistry.DatabaseConnectionBehavior.FAIL_IF_NOT_EXISTS);
         }
 
-        Optional<SirsDBInfo> info = DatabaseRegistry.getInfo(connector);
-        if (!info.isPresent()) {
+        final SirsDBInfo info = DatabaseRegistry.getInfo(connector).orElse(null);
+        if (info == null) {
             // should never happen...
             throw new IllegalStateException("Chosen database is not SIRS database !");
         }
@@ -174,22 +179,32 @@ public class ModuleChecker extends Task<Boolean> {
         final ArrayList<Upgrade> tmpUpgrades = new ArrayList<>();
         final HashMap<PluginInfo, ModuleDescription> tmpObsoletePlugins = new HashMap<>();
 
-        if (info.get().getModuleDescriptions() != null) {
-            final HashMap<String, PluginInfo> plugins = new HashMap<>();
-            installedPlugins.plugins.forEach(plugin -> plugins.put(plugin.getName(), plugin));
+        if (info.getModuleDescriptions() != null) {
 
-            for (final ModuleDescription desc : info.get().getModuleDescriptions().values()) {
-                PluginInfo appModule = plugins.get(desc.getName());
+            // First, we ensure modules classes are ready for use.
+            final ClassLoader scl = ClassLoader.getSystemClassLoader();
+            if (scl instanceof PluginLoader) {
+                ((PluginLoader) scl).loadPlugins();
+            }
+
+            Map<String, Plugin> plugins = Plugins.getPluginMap();
+
+            for (final ModuleDescription desc : info.getModuleDescriptions().values()) {
+                Plugin appModule = plugins.get(desc.getName());
                 if (appModule != null) {
-                    final int comparison = new ModuleVersion(desc.getVersion()).compareTo(appModule);
+                    final PluginInfo modConf = appModule.getConfiguration();
+                    final int comparison = new ModuleVersion(desc.getVersion()).compareTo(modConf);
                     if (comparison < 0) {
                         try {
-                            tmpUpgrades.add(new Upgrade(Plugins.getPlugin(appModule.getName()), desc));
+                            tmpUpgrades.add(new Upgrade(appModule, desc));
                         } catch (IllegalArgumentException e) {
-                            SIRS.LOGGER.log(Level.FINE, "No upgrade available for plugin".concat(appModule.getName()), e);
+                            SIRS.LOGGER.log(Level.FINE, "No upgrade available for plugin".concat(modConf.getName()), e);
+                            // No upgrade available. We set version according to installed module.
+                            desc.setVersion(getVersion(appModule));
+                            connector.update(info);
                         }
                     } else if (comparison > 0) {
-                        tmpObsoletePlugins.put(appModule, desc);
+                        tmpObsoletePlugins.put(modConf, desc);
                     }
                 }
             }
@@ -224,6 +239,20 @@ public class ModuleChecker extends Task<Boolean> {
                 throw new IllegalArgumentException("Input plugin is not upgradable.");
         }
     }
+
+    /**
+     * @param p A plugin to extract version from.
+     * @return String representation of the plugin version.
+     */
+    public static String getVersion(final Plugin p) {
+        final PluginInfo conf = p.getConfiguration();
+        if (conf.getVersionMinor() < 0) {
+            return Integer.toString(conf.getVersionMajor());
+        } else {
+            return new StringBuilder().append(conf.getVersionMajor()).append('.').append(conf.getVersionMinor()).toString();
+        }
+    }
+
 
     public static class ModuleVersion implements Comparable<PluginInfo> {
 

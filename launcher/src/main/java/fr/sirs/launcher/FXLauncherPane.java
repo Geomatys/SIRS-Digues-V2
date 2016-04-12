@@ -404,7 +404,7 @@ public class FXLauncherPane extends BorderPane {
     @FXML
     void connectLocal(ActionEvent event) {
         final String db = uiLocalBaseTable.getSelectionModel().getSelectedItem();
-        final ModuleChecker modChecker = new ModuleChecker(local, localRegistry, db);
+        final ModuleChecker modChecker = new ModuleChecker(localRegistry, db);
 
         // Launch application on success
         modChecker.setOnSucceeded(evt -> Platform.runLater(() -> {

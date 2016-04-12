@@ -3,9 +3,11 @@ package fr.sirs.launcher;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.component.DatabaseRegistry;
+import fr.sirs.maj.ModuleChecker;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.function.Function;
 import java.util.logging.Level;
 import javafx.beans.property.SimpleObjectProperty;
@@ -81,10 +83,13 @@ public class SynchronizationColumn extends TableColumn<String, Callable> {
                 public Callable apply(Callable t) {
                     try {
                         return (Callable) (t == null? null : t.call());
+                    } catch (CancellationException|InterruptedException e) {
+                        SirsCore.LOGGER.log(Level.WARNING, "Synchronisation state cannot be modified.", e);
                     } catch (Exception ex) {
                         GeotkFX.newExceptionDialog("Une erreur est survenue lors de la mise à jour des synchronisations.", ex).show();
-                        return t;
                     }
+
+                    return t;
                 }
             });
         }
@@ -156,8 +161,22 @@ public class SynchronizationColumn extends TableColumn<String, Callable> {
 
         @Override
         public StopSync call() throws Exception {
-            dbRegistry.synchronizeSirsDatabases(remoteName, dbName, true);
-            return new StopSync(dbName);
+            // First, we ensure that local database is up to date with installed modules.
+            ModuleChecker modCheck = new ModuleChecker(dbRegistry, dbName);
+            modCheck.run();
+            // Local database is up to date.
+            if (modCheck.get()) {
+                // Now, we must ensure that local AND distant database are based on same module versions.
+                final DatabaseRegistry remoteRegistry = new DatabaseRegistry(remoteName);
+                modCheck = new ModuleChecker(remoteRegistry, remoteName);
+                modCheck.run();
+                if (modCheck.get()) {
+                    dbRegistry.synchronizeSirsDatabases(remoteName, dbName, true);
+                    return new StopSync(dbName);
+                }
+            }
+            
+            throw new IllegalStateException("Impossible de synchroniser les bases de données, car les versions de certains modules installés ne sont pas compatibles avec les versions utilisées par la base distante.");
         }
     }
 }
