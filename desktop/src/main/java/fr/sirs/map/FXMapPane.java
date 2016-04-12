@@ -14,6 +14,8 @@ import fr.sirs.Injector;
 import fr.sirs.Plugin;
 import fr.sirs.Printable;
 import fr.sirs.Session;
+import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPositionDocumentAssociable;
 import fr.sirs.core.model.AvecBornesTemporelles;
@@ -35,6 +37,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -69,6 +72,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javax.swing.SwingConstants;
+import org.apache.sis.geometry.GeneralEnvelope;
 import org.apache.sis.measure.NumberRange;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.FeatureCollection;
@@ -95,6 +99,7 @@ import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.geometry.jts.JTSEnvelope2D;
+import org.geotoolkit.gui.javafx.chooser.FXContextChooser;
 import org.geotoolkit.gui.javafx.contexttree.FXMapContextTree;
 import org.geotoolkit.gui.javafx.contexttree.MapItemFilterColumn;
 import org.geotoolkit.gui.javafx.contexttree.MapItemGlyphColumn;
@@ -115,6 +120,7 @@ import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
+import org.geotoolkit.owc.xml.OwcXmlIO;
 import org.odftoolkit.simple.TextDocument;
 import org.odftoolkit.simple.draw.FrameStyleHandler;
 import org.odftoolkit.simple.style.StyleTypeDefinitions;
@@ -322,25 +328,36 @@ public class FXMapPane extends BorderPane implements Printable {
         //Affiche le contexte carto et le déplace à la date du jour
         TaskManager.INSTANCE.submit("Initialisation de la carte", () -> {
 
-            final MapContext context = Injector.getSession().getMapContext();
-                        final Task t = new Task() {
-                @Override
-                protected Object call() throws Exception {
-                    uiMap1.getContainer().setContext(context);
-                    uiMap1.getCanvas().setObjectiveCRS(Injector.getSession().getProjection());
-                    uiMap1.getCanvas().setVisibleArea(context.getAreaOfInterest());
-                    setTemporalRange(LocalDate.now(), null);
-                    return null;
-                }
-            };
+            MapContext tmpCtx = null;
+            Exception error = null;
+            final String previousXmlContext = FXContextChooser.getPreviousPath();
+            try {
+                tmpCtx = OwcXmlIO.read(Paths.get(previousXmlContext).toFile());
+            } catch (Exception e) {
+                error = e;
+                SIRS.LOGGER.log(Level.WARNING, "Cannot load XML map context from file : ".concat(previousXmlContext), e);
+            }
 
-        if (Platform.isFxApplicationThread()) {
-            t.run();
-        } else {
-            Platform.runLater(t);
-        }
+            final MapContext context;
+            if (error != null || tmpCtx == null || new GeneralEnvelope(tmpCtx.getBounds()).isEmpty()) {
+                context = Injector.getSession().getMapContext();
+            } else {
+                context = tmpCtx;
+            }
 
-            return null;
+            SirsCore.fxRunAndWait(() -> {
+                uiMap1.getContainer().setContext(context);
+                uiMap1.getCanvas().setObjectiveCRS(Injector.getSession().getProjection());
+                uiMap1.getCanvas().setVisibleArea(context.getAreaOfInterest());
+                setTemporalRange(LocalDate.now(), null);
+                return true;
+            });
+
+            if (error != null) {
+                throw new SirsCoreRuntimeException("Le contexte cartigraphique suivant ne peut être ouvert : ".concat(previousXmlContext), error);
+            }
+
+            return true;
         });
     }
 
