@@ -81,7 +81,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.MenuItem;
@@ -90,7 +89,6 @@ import javax.measure.unit.NonSI;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArraysExt;
-import org.ektorp.CouchDbConnector;
 import org.geotoolkit.cql.CQLException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
@@ -102,7 +100,6 @@ import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
 import org.geotoolkit.filter.DefaultLiteral;
 import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
@@ -625,11 +622,6 @@ public class CorePlugin extends Plugin {
             }
         }
         return layers;
-    }
-
-    @Override
-    public Optional<Task> findUpgradeTask(int fromMajor, int fromMinor, CouchDbConnector dbConnector) {
-        return Optional.of(new TaskManager.MockTask<>(()-> {}));
     }
 
     @Override
