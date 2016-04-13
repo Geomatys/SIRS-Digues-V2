@@ -6,27 +6,36 @@ import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.maj.ModuleChecker;
 import java.awt.Color;
 import java.io.IOException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.function.Function;
 import java.util.logging.Level;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.Border;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
-import org.geotoolkit.gui.javafx.util.ButtonTableCell;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 
 /**
  *
  * @author Alexis Manin (Geomatys)
  */
-public class SynchronizationColumn extends TableColumn<String, Callable> {
+public class SynchronizationColumn extends TableColumn<String, Task> {
 
     public static final Image ICON_SYNCHRO_STOPPED = SwingFXUtils.toFXImage(IconBuilder.createImage(
             FontAwesomeIcons.ICON_EXCHANGE, 16, new Color(130, 0, 0)), null);
@@ -51,7 +60,7 @@ public class SynchronizationColumn extends TableColumn<String, Callable> {
         ArgumentChecks.ensureNonNull("Database registry", registry);
         dbRegistry = registry;
 
-        setCellValueFactory((CellDataFeatures<String, Callable> param) -> {
+        setCellValueFactory((CellDataFeatures<String, Task> param) -> {
             final String dbName = param.getValue();
             if (dbName == null || dbName.isEmpty()) {
                 return null;
@@ -72,46 +81,72 @@ public class SynchronizationColumn extends TableColumn<String, Callable> {
             return null;
         });
 
-        setCellFactory((TableColumn<String, Callable> param) -> new SynchronizationCell());
+        setCellFactory((TableColumn<String, Task> param) -> new SynCell());
     }
 
-    private final class SynchronizationCell extends ButtonTableCell<String, Callable> {
+    private final class SynCell extends TableCell<String, Task> {
 
-        public SynchronizationCell() {
-            super(false, null, (Callable c) -> ((c instanceof StopSync) || (c instanceof ResumeSync)), new Function<Callable, Callable>() {
-                @Override
-                public Callable apply(Callable t) {
-                    try {
-                        return (Callable) (t == null? null : t.call());
-                    } catch (CancellationException|InterruptedException e) {
-                        SirsCore.LOGGER.log(Level.WARNING, "Synchronisation state cannot be modified.", e);
-                    } catch (Exception ex) {
-                        GeotkFX.newExceptionDialog("Une erreur est survenue lors de la mise à jour des synchronisations.", ex).show();
-                    }
+        protected final Button button;
 
-                    return t;
-                }
+        private SynCell() {
+            button = new Button();
+            button.setBackground(Background.EMPTY);
+            button.setBorder(Border.EMPTY);
+            button.setPadding(Insets.EMPTY);
+
+            button.setOnAction(evt -> {
+                updateState();
             });
         }
 
         @Override
-        protected void updateItem(Callable item, boolean empty) {
+        protected void updateItem(Task item, boolean empty) {
+            super.updateItem(item, empty);
             if (empty) {
-                button.setVisible(false);
+                setGraphic(null);
 
             } else if (item instanceof StopSync) {
                 button.setGraphic(new ImageView(ICON_SYNCHRO_RUNNING));
                 button.setTooltip(PAUSE_SYNCHRO);
                 button.setVisible(true);
+                setGraphic(button);
 
             } else if (item instanceof ResumeSync) {
                 button.setGraphic(new ImageView(ICON_SYNCHRO_STOPPED));
                 button.setTooltip(RESUME_SYNCHRO);
                 button.setVisible(true);
+                setGraphic(button);
 
             } else {
-                button.setVisible(false);
+                setGraphic(null);
             }
+        }
+
+        private void updateState() {
+            final Task t = getItem();
+            t.setOnFailed(evt -> Platform.runLater(() -> 
+                GeotkFX.newExceptionDialog("Mise à jour de la synchronisation impossible.", t.getException()).show()
+            ));
+
+            t.setOnSucceeded(evt -> Platform.runLater(() -> 
+                   updateItem((Task)t.getValue(), false)
+            ));
+
+            // Block user actions until process is finished.
+            final Stage checkStage = new Stage(StageStyle.TRANSPARENT);
+            checkStage.setWidth(451);
+            checkStage.initModality(Modality.WINDOW_MODAL);
+            checkStage.initOwner(getScene().getWindow());
+            checkStage.titleProperty().bind(t.titleProperty());
+            checkStage.setScene(new Scene(new FXLoadingPane(t)));
+            checkStage.show();
+            t.runningProperty().addListener((obs, oldValue, newValue) -> {
+                if (!newValue) {
+                    Platform.runLater(() -> checkStage.close());
+                }
+            });
+
+            TaskManager.INSTANCE.submit(t);
         }
     }
 
@@ -120,12 +155,13 @@ public class SynchronizationColumn extends TableColumn<String, Callable> {
      * database. returns a callable allowing to restart synchronization between
      * input database and itss remote, specified into {@link SirsDBInfo}.
      */
-    private class StopSync implements Callable<ResumeSync> {
+    private class StopSync extends Task<ResumeSync> {
 
         private final String dbName;
 
         public StopSync(final String dbName) {
             this.dbName = dbName;
+            updateTitle("Arrêt de la synchronisation");
         }
 
         @Override
@@ -144,7 +180,7 @@ public class SynchronizationColumn extends TableColumn<String, Callable> {
      * A simple action to start synchronisation between two given databases.
      * Returns a callable to put main database offline.
      */
-    private class ResumeSync implements Callable<StopSync> {
+    private class ResumeSync extends Task<StopSync> {
 
         private final String dbName;
         private final String remoteName;
@@ -157,25 +193,30 @@ public class SynchronizationColumn extends TableColumn<String, Callable> {
         public ResumeSync(final String dbName, final String remoteName) {
             this.dbName = dbName;
             this.remoteName = remoteName;
+            updateTitle("Reprise de la synchronisation");
         }
 
         @Override
         public StopSync call() throws Exception {
+            final ChangeListener<String> msgListener = (obs, oldMsg, newMsg) -> updateMessage(newMsg);
             // First, we ensure that local database is up to date with installed modules.
-            ModuleChecker modCheck = new ModuleChecker(dbRegistry, dbName);
+            final ModuleChecker modCheck = new ModuleChecker(dbRegistry, dbName);
+            Platform.runLater(() -> modCheck.messageProperty().addListener(msgListener));
+
             modCheck.run();
             // Local database is up to date.
             if (modCheck.get()) {
                 // Now, we must ensure that local AND distant database are based on same module versions.
                 final DatabaseRegistry remoteRegistry = new DatabaseRegistry(remoteName);
-                modCheck = new ModuleChecker(remoteRegistry, remoteName);
-                modCheck.run();
-                if (modCheck.get()) {
+                final ModuleChecker modCheck2 = new ModuleChecker(remoteRegistry, remoteName);
+                Platform.runLater(() -> modCheck2.messageProperty().addListener(msgListener));
+                modCheck2.run();
+                if (modCheck2.get()) {
                     dbRegistry.synchronizeSirsDatabases(remoteName, dbName, true);
                     return new StopSync(dbName);
                 }
             }
-            
+
             throw new IllegalStateException("Impossible de synchroniser les bases de données, car les versions de certains modules installés ne sont pas compatibles avec les versions utilisées par la base distante.");
         }
     }
