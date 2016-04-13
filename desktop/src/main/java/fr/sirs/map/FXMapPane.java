@@ -33,6 +33,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
+import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -75,6 +76,7 @@ import javax.swing.SwingConstants;
 import org.apache.sis.geometry.GeneralEnvelope;
 import org.apache.sis.measure.NumberRange;
 import org.apache.sis.util.ArgumentChecks;
+import org.geotoolkit.coverage.amended.AmendedCoverageReference;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Hints;
@@ -117,10 +119,15 @@ import org.geotoolkit.gui.javafx.render2d.FXScaleBarDecoration;
 import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
 import org.geotoolkit.internal.GeotkFX;
+import org.geotoolkit.map.CoverageMapLayer;
 import org.geotoolkit.map.FeatureMapLayer;
+import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapContext;
+import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
+import org.geotoolkit.osmtms.OSMTMSCoverageReference;
 import org.geotoolkit.owc.xml.OwcXmlIO;
+import org.geotoolkit.storage.coverage.CoverageReference;
 import org.odftoolkit.simple.TextDocument;
 import org.odftoolkit.simple.draw.FrameStyleHandler;
 import org.odftoolkit.simple.style.StyleTypeDefinitions;
@@ -325,17 +332,34 @@ public class FXMapPane extends BorderPane implements Printable {
         uiMap1.addEventHandler(MouseEvent.MOUSE_CLICKED, new MapActionHandler(uiMap1));
         uiMap2.addEventHandler(MouseEvent.MOUSE_CLICKED, new MapActionHandler(uiMap2));
 
+        // Force use of amended coverages, to be able to modify their geo-spatial information via SIRS.
+        uiMap1.getContainer().addPropertyChangeListener((PropertyChangeEvent evt) -> {
+            if (ContextContainer2D.CONTEXT_PROPERTY.equals(evt.getPropertyName())) {
+                final Object newContext = evt.getNewValue();
+                if (newContext instanceof MapContext) {
+                    if (replaceCoverageLayers((MapContext)newContext)) {
+                        // HACK : Forced to do it, or else the map still display unmodified layers.
+                        uiMap1.getContainer().setContext(null);
+                        uiMap1.getContainer().setContext((MapContext)newContext);
+                    }
+
+                }
+            }
+        });
+
         //Affiche le contexte carto et le déplace à la date du jour
         TaskManager.INSTANCE.submit("Initialisation de la carte", () -> {
 
             MapContext tmpCtx = null;
             Exception error = null;
             final String previousXmlContext = FXContextChooser.getPreviousPath();
-            try {
-                tmpCtx = OwcXmlIO.read(Paths.get(previousXmlContext).toFile());
-            } catch (Exception e) {
-                error = e;
-                SIRS.LOGGER.log(Level.WARNING, "Cannot load XML map context from file : ".concat(previousXmlContext), e);
+            if (previousXmlContext != null) {
+                try {
+                    tmpCtx = OwcXmlIO.read(Paths.get(previousXmlContext).toFile());
+                } catch (Exception e) {
+                    error = e;
+                    SIRS.LOGGER.log(Level.WARNING, "Cannot load XML map context from file : ".concat(previousXmlContext), e);
+                }
             }
 
             final MapContext context;
@@ -354,11 +378,46 @@ public class FXMapPane extends BorderPane implements Printable {
             });
 
             if (error != null) {
-                throw new SirsCoreRuntimeException("Le contexte cartigraphique suivant ne peut être ouvert : ".concat(previousXmlContext), error);
+                throw new SirsCoreRuntimeException("Le contexte cartographique suivant ne peut être ouvert : ".concat(previousXmlContext), error);
             }
 
             return true;
         });
+    }
+
+    /**
+     * Tries to replace all coverage layers to use an {@link AmendedCoverageReference}
+     * @param parent The map item containing layers to analyze.
+     * @return True if input children have been replaced, false otherwise.
+     */
+    private boolean replaceCoverageLayers(final MapItem parent) {
+        boolean modified = false;
+        final List<MapItem> items = parent.items();
+        for (int i = 0 ; i < items.size() ; i++) {
+            final MapItem item = items.get(i);
+            if (item instanceof CoverageMapLayer) {
+                final CoverageMapLayer cLayer = (CoverageMapLayer) item;
+                final CoverageReference ref = cLayer.getCoverageReference();
+                if (ref != null && !(ref instanceof AmendedCoverageReference) && !(ref instanceof OSMTMSCoverageReference)) {
+                    final CoverageMapLayer newLayer = MapBuilder.createCoverageLayer(new AmendedCoverageReference(ref, ref.getStore()), cLayer.getStyle());
+                    newLayer.setDescription(cLayer.getDescription());
+                    newLayer.setElevationModel(cLayer.getElevationModel());
+                    newLayer.setName(cLayer.getName());
+                    newLayer.setOpacity(cLayer.getOpacity());
+                    newLayer.setSelectable(cLayer.isSelectable());
+                    newLayer.setSelectionStyle(cLayer.getSelectionStyle());
+                    newLayer.setVisible(cLayer.isVisible());
+                    newLayer.getUserProperties().putAll(cLayer.getUserProperties());
+
+                    items.set(i, newLayer);
+                    modified = true;
+                }
+            } else if (!item.items().isEmpty()) {
+                replaceCoverageLayers(item);
+            }
+        }
+
+        return modified;
     }
 
     /**

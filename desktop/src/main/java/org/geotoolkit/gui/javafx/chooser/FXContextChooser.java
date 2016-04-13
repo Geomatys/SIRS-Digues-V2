@@ -92,12 +92,12 @@ public class FXContextChooser extends BorderPane {
     
     public static String getPreviousPath() {
         final Preferences prefs = Preferences.userNodeForPackage(FXContextChooser.class);
-        return prefs.get("path", null);
+        return prefs.get("owc_xml_path", null);
     }
 
     public static void setPreviousPath(final String path) {
         final Preferences prefs = Preferences.userNodeForPackage(FXContextChooser.class);
-        prefs.put("path", path);
+        prefs.put("owc_xml_path", path);
     }
     
 }
