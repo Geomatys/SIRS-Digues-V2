@@ -530,6 +530,7 @@ public class DatabaseRegistry {
         if (!isLocal(dbToCopy)) {
             dbToCopy = addAuthenticationInformation(dbToCopy);
         }
+        final String toCopyNoAuth = cleanDatabaseName(dbToCopy);
 
         /* Check if target database exists/ can be created, and if we have to
          * add authentication information. We don't create database now. We'll
@@ -540,6 +541,7 @@ public class DatabaseRegistry {
         if (!isLocal(dbToPasteInto)) {
             dbToPasteInto = addAuthenticationInformation(dbToPasteInto);
         }
+        final String targetNoAuth = cleanDatabaseName(dbToPasteInto);
 
         // If no info is found, the database is not a SIRS db. We cannot make any analysis.
         Map<String, ModuleDescription> modules = null;
@@ -554,8 +556,8 @@ public class DatabaseRegistry {
                 if (srcSRID == null ? dstSRID != null : !srcSRID.equals(dstSRID)) {
                     final StringBuilder builder = new StringBuilder("Impossible de synchroniser les bases de données car elles n'utilisent pas le même système de projection :");
                     builder.append(System.lineSeparator())
-                            .append(dbToCopy).append(" : ").append(srcSRID).append(System.lineSeparator())
-                            .append(dbToPasteInto).append(" : ").append(dstSRID);
+                            .append(toCopyNoAuth).append(" : ").append(srcSRID).append(System.lineSeparator())
+                            .append(targetNoAuth).append(" : ").append(dstSRID);
                     throw new IllegalArgumentException(builder.toString());
                 }
 
@@ -584,11 +586,11 @@ public class DatabaseRegistry {
                                     .append(" : ")
                                     .append(desc.getVersion())
                                     .append(" (")
-                                    .append(dbToPasteInto)
+                                    .append(targetNoAuth)
                                     .append(") / ")
                                     .append(entry.getValue().getVersion())
                                     .append(" (")
-                                    .append(dbToCopy)
+                                    .append(toCopyNoAuth)
                                     .append(")");
                         }
                     }
