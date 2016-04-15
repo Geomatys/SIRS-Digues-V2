@@ -16,6 +16,32 @@
     <name>SIRS2 Launcher</name>
     <description>Launcher</description>
     
+    <profiles>
+        
+        <profile>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <additional.resources>src/main/deploy/additional/unix</additional.resources>
+            </properties>
+        </profile>
+        
+        <profile>
+            <id>Windows deployment</id>
+            <activation>
+                <os>
+                    <family>
+                        Windows
+                    </family>
+                </os>
+            </activation>
+            <properties>
+                <additional.resources>src/main/deploy/additional/win</additional.resources>
+            </properties>
+        </profile>
+    </profiles>
+    
     <dependencies>
         <dependency>
             <groupId>fr.sirs</groupId>
@@ -43,7 +69,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <configuration>
                     <additionalAppResources>
-                        src/main/deploy/additional/
+                        ${additional.resources}
                     </additionalAppResources>
                     <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
                     <mainClass>fr.sirs.launcher.Launcher</mainClass>
