@@ -41,7 +41,10 @@
             <plugin>
                 <groupId>com.zenjava</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <configuration>                    
+                <configuration>
+                    <additionalAppResources>
+                        src/main/deploy/additional/
+                    </additionalAppResources>
                     <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
                     <mainClass>fr.sirs.launcher.Launcher</mainClass>
                     <needMenu>true</needMenu>
@@ -66,6 +69,10 @@
                         <!-- Force encoding to ensure IO with CouchDB won't encounter any deformation, whatever the OS. -->
                         <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
                     </jvmArgs>
+                    <bundleArguments>
+                        <copyright>Copyright (C) 2016, France digues</copyright>
+                        <licenseFile>CLUF</licenseFile>
+                    </bundleArguments>
                 </configuration>
             </plugin>
         </plugins>

@@ -35,6 +35,8 @@ Pour compiler un éxecutable de l'application, vous devez tout d'abord vous rend
 
 Note : vous pouvez personnaliser les paramètres de la jvm pour l'application en modifiant le pom.xml de l'application. Dans la section configuration du plugin javafx-maven-plugin, vous pouvez ajouter des balises <jvmArg>votre parametre</jvmArgs>.
 
+IMPORTANT : Si la license du logiciel ou les conditions d'utilisations évoluent, vous devez mettre à jour les fichiers présents dans launcher/src/main/deploy/additional.
+
 ##
 
 3 - Activer la détection de mise à jour
