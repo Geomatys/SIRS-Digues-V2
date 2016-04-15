@@ -16,6 +16,8 @@
     <name>SIRS2 Launcher</name>
     <description>Launcher</description>
     
+    <!-- TODO activate back for license agreement support before 
+    installation. Deactivated because it does not work well for .deb packages.
     <profiles>
         
         <profile>
@@ -40,7 +42,7 @@
                 <additional.resources>src/main/deploy/additional/win</additional.resources>
             </properties>
         </profile>
-    </profiles>
+    </profiles-->
     
     <dependencies>
         <dependency>
@@ -95,10 +97,12 @@
                         <!-- Force encoding to ensure IO with CouchDB won't encounter any deformation, whatever the OS. -->
                         <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
                     </jvmArgs>
+                    <!-- TODO activate back for license agreement support before 
+                    installation. Deactivated because it does not work well for .deb packages.
                     <bundleArguments>
                         <copyright>Copyright (C) 2016, France digues</copyright>
                         <licenseFile>CLUF</licenseFile>
-                    </bundleArguments>
+                    </bundleArguments-->
                 </configuration>
             </plugin>
         </plugins>

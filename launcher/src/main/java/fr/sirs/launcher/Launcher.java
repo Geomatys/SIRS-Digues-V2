@@ -24,15 +24,20 @@ import fr.sirs.core.SirsCore.UpdateInfo;
 import static fr.sirs.core.SirsCore.browseURL;
 import fr.sirs.core.authentication.SIRSAuthenticator;
 import fr.sirs.util.SystemProxySelector;
+import java.io.BufferedReader;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Authenticator;
 import java.net.MalformedURLException;
 import java.net.ProxySelector;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
+import java.util.prefs.Preferences;
 
 import org.ektorp.DbAccessException;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -48,9 +53,11 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
@@ -64,6 +71,11 @@ import org.geotoolkit.internal.GeotkFX;
 public class Launcher extends Application {
 
     private static final String MINIMAL_JAVA_VERSION = "1.8.0_40";
+
+    private static final String EULA_NODE = "user_agreement";
+    private static final String EULA_VALUE = "agreed";
+    private static final String EULA_VERSION = "version";
+
 
     public static void main(String[] args) {
         launch(args);
@@ -269,9 +281,23 @@ public class Launcher extends Application {
                 return false;
             }
 
+            // Ask agreement acceptance while EPSG Database init.
+            final Task agreement = new Task() {
+
+                @Override
+                protected Object call() throws Exception {
+                    acceptEULA();
+                    return null;
+                }
+            };
+
+            SIRS.fxRun(false, agreement);
+
             updateMessage("Initialisation de la base EPSG");
             SirsCore.initEpsgDB();
 
+            agreement.get();
+            
             updateMessage("Lancement de l'application");
             return true;
         }
@@ -287,5 +313,62 @@ public class Launcher extends Application {
     private static boolean isJavaValid() {
         final String javaVersion = System.getProperty("java.version");
         return MINIMAL_JAVA_VERSION.compareTo(javaVersion) < 0;
+    }
+
+    /**
+     * Check End User License Agreement. If user has not validated it yet, we
+     * display the license until he accepts it.
+     */
+    private static void acceptEULA() {
+        Preferences node = Preferences.userNodeForPackage(Launcher.class).node(EULA_NODE);
+        final boolean accepted = node.getBoolean(EULA_VALUE, false);
+        
+        // Already accepted EULA
+        final String appVersion = SirsCore.getVersion();
+        if (accepted && (appVersion == null || appVersion.equals(node.get(EULA_VERSION, "")))) {
+            return;
+        }
+
+        final String agreement;
+        try (final InputStream eula = Launcher.class.getResourceAsStream("CLUF");
+                final InputStreamReader iReader = new InputStreamReader(eula, StandardCharsets.UTF_8);
+                final BufferedReader reader = new BufferedReader(iReader)) {
+
+            final StringBuilder builder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line).append(System.lineSeparator());
+            }
+
+            agreement = builder.toString();
+        } catch (IOException e) {
+            SirsCore.LOGGER.log(Level.SEVERE, "Cannot read EULA.", e);
+            new Alert(Alert.AlertType.ERROR, "Impossible d'afficher les conditions d'utilisation. Votre installation est peut-être corrompue.", ButtonType.OK).showAndWait();
+            System.exit(1);
+            throw new Error(e);
+        }
+
+        final TextArea area = new TextArea(agreement);
+        area.setEditable(false);
+        area.setWrapText(true);
+        area.setPrefHeight(451);
+        area.setPrefWidth(777);
+        
+        final ButtonType accept = new ButtonType("J'accepte");
+        final ButtonType refuse = new ButtonType("Je refuse");
+        final Alert alert = new Alert(Alert.AlertType.INFORMATION, null,refuse, accept);
+        alert.setHeaderText("Veuillez accepter le contrat d'utilisation du programme avant de continuer.");
+        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.getDialogPane().setContent(area);
+
+        if (accept.equals(alert.showAndWait().orElse(refuse))) {
+            if (appVersion != null) {
+                node.put(EULA_VERSION, appVersion);
+            }
+            node.putBoolean(EULA_VALUE, true);
+
+        } else {
+            System.exit(1);
+        }
     }
 }
