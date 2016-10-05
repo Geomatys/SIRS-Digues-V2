@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -27,8 +27,12 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecBornesTemporelles;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Positionable;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.logging.Level;
 import javafx.collections.FXCollections;
@@ -52,7 +56,7 @@ import org.geotoolkit.gui.javafx.util.FXMoveUpTableColumn;
  * @author Johann Sorel (Geomatys)
  */
 public class FXTronconMerge extends VBox {
-    
+
     @FXML private TableView uiTable;
     @FXML private TextField uiLinearName;
     @FXML private Label infoLabel;
@@ -63,13 +67,13 @@ public class FXTronconMerge extends VBox {
     private final FXMap map;
     private final String typeName;
     private final boolean maleGender;
-    
+
     public FXTronconMerge(final FXMap map, final String typeName, final boolean maleGender) {
         SIRS.loadFXML(this);
-        
+
         this.typeName = typeName;
         this.maleGender = maleGender;
-        
+
         if (maleGender) {
             infoLabel.setText("Nom du " + typeName + " résultant de la fusion :");
         } else {
@@ -79,21 +83,21 @@ public class FXTronconMerge extends VBox {
         final TableColumn<TronconDigue,String> col = new TableColumn<>("Nom");
         col.setEditable(false);
         col.setCellValueFactory((TableColumn.CellDataFeatures<TronconDigue, String> param) -> param.getValue().libelleProperty());
-        
+
         uiTable.setItems(troncons);
         uiTable.getColumns().add(new FXMoveUpTableColumn());
         uiTable.getColumns().add(new FXMoveDownTableColumn());
         uiTable.getColumns().add(col);
-        uiTable.getColumns().add(new FXDeleteTableColumn(false));        
+        uiTable.getColumns().add(new FXDeleteTableColumn(false));
         this.map = map;
     }
 
     public ObservableList<TronconDigue> getTroncons() {
         return troncons;
     }
- 
+
     public void processMerge() {
-        
+
         final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment fusionner les " + typeName + "s ? Si oui, vos modifications seront enregistrées.", ButtonType.YES, ButtonType.NO);
         confirm.setResizable(true);
         confirm.showAndWait();
@@ -104,7 +108,7 @@ public class FXTronconMerge extends VBox {
             }
         }
     }
-    
+
     /**
      * A task whose job is to perform fusion of {@link TronconDigue} selected via merge tool.
      */
@@ -115,20 +119,19 @@ public class FXTronconMerge extends VBox {
             if (troncons.size() <= 1) {
                 return false;
             }
-            
+
             updateTitle("Fusion de " + typeName + "s");
             updateProgress(0, troncons.size());
-            
+
             final Session session = Injector.getSession();
 
-            final TronconDigue merge = troncons.get(0).copy();
-            final AbstractSIRSRepository<TronconDigue> tronconRepo = session.getRepositoryForClass(TronconDigue.class);
-            tronconRepo.add(merge);
+            final TronconDigue merge = TronconUtils.copyTronconAndRelative(troncons.get(0), session);
+            final AbstractSIRSRepository<TronconDigue> tronconRepo = (AbstractSIRSRepository<TronconDigue>) session.getRepositoryForClass(merge.getClass());
             try {
                 final StringBuilder sb = new StringBuilder(troncons.get(0).getLibelle());
                 for (int i = 1, n = troncons.size(); i < n; i++) {
                     if (Thread.currentThread().isInterrupted()) throw new InterruptedException("La fusion de " + typeName + " a été interrompue.");
-                    
+
                     final TronconDigue current = troncons.get(i);
                     updateProgress(i, troncons.size());
                     if (maleGender) {
@@ -136,15 +139,17 @@ public class FXTronconMerge extends VBox {
                     } else {
                         updateMessage("Ajout de la " + typeName + " "+current.getLibelle());
                     }
-                    
+
                     TronconUtils.mergeTroncon(merge, current, session);
                     sb.append(" + ").append(current.getLibelle());
                 }
+
                 final String mergedName;
                 if(uiLinearName.getText()==null || uiLinearName.getText().equals("")) mergedName = sb.toString();
                 else mergedName = uiLinearName.getText();
                 merge.setLibelle(mergedName);
-                tronconRepo.update(merge);
+                session.executeBulk(Collections.singleton(merge));
+
             } catch (Exception e) {
                 /* An exception has been thrown. We remove the resulting troncon from
                  * database, as it is not complete.
@@ -156,32 +161,39 @@ public class FXTronconMerge extends VBox {
                 }
                 throw e;
             }
-            
+
             // Merge succeeded, we must now archive old ones.
             Iterator<TronconDigue> it = troncons.iterator();
             while (it.hasNext()) {
                 final TronconDigue current = it.next();
-                LocalDate now = LocalDate.now();
-                current.date_finProperty().set(now);
+                LocalDate yesterday = LocalDate.now().minusDays(1);
+                current.date_finProperty().set(yesterday);
+                tronconRepo.update(current);
+
+                final Collection toSave = new ArrayList<>();
                 for (Positionable obj : TronconUtils.getPositionableList(current)) {
+                    if (((Element)obj).getParent() != null)
+                        continue;
+
                     if (obj instanceof AvecBornesTemporelles) {
-                        ((AvecBornesTemporelles) obj).date_finProperty().set(LocalDate.now());
-                        try {
-                            ((AbstractSIRSRepository) session.getRepositoryForClass(obj.getClass())).add(obj);
-                        } catch (Exception e) {
-                            SirsCore.LOGGER.log(Level.WARNING, "Positioned object cannot be archived : " + obj.getId(), e);
-                        }
+                        final AvecBornesTemporelles dated = (AvecBornesTemporelles) obj;
+                        if (dated.getDate_fin() != null && !dated.getDate_fin().isAfter(yesterday))
+                            continue;
+
+                        dated.setDate_fin(yesterday);
+                        toSave.add(dated);
                     }
                 }
-                session.getRepositoryForClass(TronconDigue.class).update(current);
-                it.remove();
+
+                session.executeBulk(toSave);
             }
-            
+
             try {
                 Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(LocalDate.now(), map);
             } catch (Exception ex) {
                 SirsCore.LOGGER.log(Level.WARNING, "Map temporal range cannot be updated.", ex);
             }
+
             return true;
         }
     }

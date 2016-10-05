@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -31,6 +31,7 @@ import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.AbstractPositionDocument;
+import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
@@ -43,13 +44,13 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.StreamingIterable;
+import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -57,6 +58,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
+import org.ektorp.DocumentOperationResult;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.referencing.CRS;
@@ -86,6 +88,59 @@ public class TronconUtils {
     public static final String SR_ELEMENTAIRE = "Elémentaire";
 
     private static final GeometryFactory GF = GO2Utilities.JTS_FACTORY;
+
+    /**
+     * Copy a {@link TronconDigue} and all bound data, i.e linear referencing
+     * systems and objects positioned on it.
+     * @param original Linear to copy
+     * @param session Current session, to perform database updates.
+     * @return A copy of input data, up to date in database.
+     */
+    public static TronconDigue copyTronconAndRelative(final TronconDigue original, final SessionCore session) {
+        final TronconDigue tdCopy = original.copy();
+
+        final AbstractSIRSRepository<TronconDigue> tronconRepo = (AbstractSIRSRepository<TronconDigue>) session.getRepositoryForClass(original.getClass());
+        tronconRepo.add(tdCopy);
+
+        final SystemeReperageRepository srRepo = InjectorCore.getBean(SystemeReperageRepository.class);
+        SystemeReperage srCopy;
+        final Map<String, String> srMapping =new HashMap<>();
+        for (final SystemeReperage sr : srRepo.getByLinearStreaming(original)) {
+            srCopy = sr.copy();
+            srCopy.setLinearId(tdCopy.getId());
+            srRepo.add(srCopy);
+            srMapping.put(sr.getId(), srCopy.getId());
+        }
+
+        if (tdCopy.getSystemeRepDefautId() != null) {
+            tdCopy.setSystemeRepDefautId(srMapping.get(tdCopy.getSystemeRepDefautId()));
+            tronconRepo.update(tdCopy);
+        }
+
+        // On ajoute les structures du tronçon paramètre.
+        final List<Positionable> toSave = new ArrayList<>();
+        for (final Positionable objet : getPositionableList(original)) {
+            // Si on a un objet imbriqué dans un document, on le passe. Il sera
+            // mis à jour via son parent.
+            if (!objet.getId().equals(objet.getDocumentId()))
+                continue;
+
+            final Positionable copy = objet.copy();
+            toSave.add(copy);
+            if (copy instanceof AvecForeignParent)
+                ((AvecForeignParent) copy).setForeignParentId(tdCopy.getId());
+            if (copy.getSystemeRepId() != null)
+                copy.setSystemeRepId(srMapping.get(copy.getSystemeRepId()));
+        }
+
+        // On sauvegarde les changements.
+        final List<DocumentOperationResult> failures = session.executeBulk((Collection) toSave);
+        for (final DocumentOperationResult failure : failures) {
+            SirsCore.LOGGER.log(Level.WARNING, "Update failed : ".concat(failure.getError()));
+        }
+
+        return tdCopy;
+    }
 
     /**
      * Crée une copie du tronçon en entrée, dont la géométrie se limite à la polyligne donnée.
@@ -133,7 +188,8 @@ public class TronconUtils {
          * garde un index des ids de borne conservés, cela accélerera le tri sur
          * les SR.
          */
-        final SegmentInfo[] sourceTronconSegments = buildSegments(asLineString(troncon.geometryProperty().get()));
+        final LineString sourceLine = asLineString(troncon.getGeometry());
+        final SegmentInfo[] sourceTronconSegments = buildSegments(sourceLine);
         final ListIterator<BorneDigue> borneIt = bdRepo.get(tronconCp.getBorneIds()).listIterator();
         final HashSet<String> keptBornes = new HashSet<>();
         while (borneIt.hasNext()) {
@@ -200,24 +256,36 @@ public class TronconUtils {
          * quand à eux découpés.
          * Note : On fait une copie des objets à affecter au nouveau tronçon
          */
-        final HashMap<SystemeReperage, List<Positionable>> needSRIDUpdate = new HashMap<>();
         final ListIterator<Positionable> posIt = getPositionableList(troncon).listIterator();
         final List<Positionable> newPositions = new ArrayList<>();
         SegmentInfo[] cutTronconSegments = null;
-
+        final Geometry intersectionBuffer = cutLinear.buffer(0.00001);
+        Positionable original;
+        Geometry originalGeometry;
+        Positionable copied;
+        final LocalDate now = LocalDate.now();
         while (posIt.hasNext()) {
-            final Positionable originalPositionable = posIt.next();
+            original = posIt.next();
+
+            // Do not update archived data.
+            if (original instanceof AvecBornesTemporelles) {
+                LocalDate date = ((AvecBornesTemporelles)original).getDate_fin();
+                if (date != null && date.isBefore(now))
+                    continue;
+            }
+
+            final boolean isDocument = ((Element)original).getParent() == null;
 
             //on vérifie que cet objet intersecte le segment
-            Geometry rawObjGeom = originalPositionable.getGeometry();
-
-            if (rawObjGeom == null) {
+            originalGeometry = original.getGeometry();
+            if (originalGeometry == null) {
                 //on la calcule
-                rawObjGeom = buildGeometry(troncon.getGeometry(), originalPositionable, bdRepo);
-                if (rawObjGeom == null) {
-                    throw new IllegalStateException("Impossible de déterminer la géométrie de l'objet suivant :\n" + originalPositionable);
-                }
-                originalPositionable.setGeometry(rawObjGeom);
+                originalGeometry = buildGeometry(sourceLine, sourceTronconSegments, original, bdRepo);
+                if (originalGeometry == null && isDocument) {
+                    throw new IllegalStateException("Impossible de déterminer la géométrie de l'objet suivant :\n" + original);
+                } else if (originalGeometry == null)
+                    continue;
+                original.setGeometry(originalGeometry);
             }
 
             /*
@@ -231,101 +299,76 @@ public class TronconUtils {
             géométries "LINESTRING" qui, de fait représentent des points, de manière
             à obtenir les bons résultats d'opérations topologiques.
             */
-
-            // Dinstinction des cas entre les points et les polylignes
-            Geometry interpObjGeom = rawObjGeom;
-            if(rawObjGeom instanceof LineString){
-                final LineString line = (LineString) rawObjGeom;
+            if (originalGeometry instanceof LineString) {
+                final LineString line = (LineString) originalGeometry;
 
                 // Si l'objet est ponctuel il faut transformer sa géométrie en point pour détecter intersection
-                if(line.getNumPoints()==2 && line.getPointN(0).equals(line.getPointN(1))){
-                    interpObjGeom = line.getPointN(0);
+                if (line.getNumPoints() == 2 && line.getPointN(0).equals(line.getPointN(1))) {
+                    originalGeometry = line.getPointN(0);
                 }
             }
 
-
-            if (!cutLinear.intersects(interpObjGeom)) {
-                posIt.remove();
+            /*
+             * JTS intersections does not work well with colinear polylines. We
+             * must use a buffer to perform them.
+             */
+            if (!intersectionBuffer.intersects(originalGeometry)) {
                 continue;
             }
 
-            final Positionable position = originalPositionable.copy();
-            if (position instanceof AvecForeignParent) {
-                ((AvecForeignParent)position).setForeignParentId(tronconCp.getId());
+            copied = original.copy();
+            if (copied instanceof AvecForeignParent) {
+                ((AvecForeignParent)copied).setForeignParentId(tronconCp.getId());
             }
-            newPositions.add(position);
+            if (isDocument)
+                newPositions.add(copied);
 
             // Mise à jour des infos géographiques
-            if (!cutLinear.contains(interpObjGeom)) {
-                interpObjGeom = cutLinear.intersection(interpObjGeom);
-                position.setGeometry(interpObjGeom);
+            if (!(originalGeometry instanceof Point || intersectionBuffer.covers(originalGeometry))) {
+                final Geometry newGeom = intersectionBuffer.intersection(originalGeometry);
+                copied.setGeometry(newGeom);
             }
 
-            if (interpObjGeom instanceof Point) {
-                position.setPositionDebut((Point) interpObjGeom);
-                position.setPositionFin((Point) interpObjGeom);
+            if ((originalGeometry instanceof Point || intersectionBuffer.covers(originalGeometry)) && (copied.getPositionDebut() != null || copied.getPositionFin() != null)) {
+                // Do nothing. Positions are already correct. If we set them based on geometry, we will lose unprojected information.
             } else {
-                final LineString structureLine = asLineString(interpObjGeom);
-                position.setPositionDebut(structureLine.getStartPoint());
-                position.setPositionFin(structureLine.getEndPoint());
-                position.setGeometry(interpObjGeom);
+                copied.setPositionDebut(GF.createPoint(copied.getGeometry().getCoordinates()[0]));
+                copied.setPositionFin(GF.createPoint(copied.getGeometry().getCoordinates()[copied.getGeometry().getNumPoints() - 1]));
             }
 
             // Mise à jour du réferencement linéaire
-            final SystemeReperage sr = newSRs.get(position.getSystemeRepId());
+            final SystemeReperage sr = newSRs.get(copied.getSystemeRepId());
             if (sr == null) {
-                position.setSystemeRepId(null);
-                position.setBorneDebutId(null);
-                position.setBorneFinId(null);
-                position.setBorne_debut_distance(Float.NaN);
-                position.setBorne_fin_distance(Float.NaN);
+                copied.setSystemeRepId(null);
+                copied.setBorneDebutId(null);
+                copied.setBorneFinId(null);
+                copied.setBorne_debut_distance(0);
+                copied.setBorne_fin_distance(0);
             } else {
                 final PosInfo info;
                 if (cutTronconSegments == null) {
-                    info = new PosInfo(position, tronconCp);
+                    info = new PosInfo(copied, tronconCp);
                     cutTronconSegments = info.getTronconSegments(true);
                 } else {
-                    info = new PosInfo(position, tronconCp, cutTronconSegments);
+                    info = new PosInfo(copied, tronconCp, cutTronconSegments);
                 }
                 final PosSR posSr = info.getForSR(sr);
 
-                // On garde la reference de l'objet, car on devra le lier au nouveau SR quand ce dernier aura été inséré.
-                List<Positionable> boundObjets = needSRIDUpdate.get(sr);
-                if (boundObjets == null) {
-                    boundObjets = new ArrayList<>();
-                    needSRIDUpdate.put(sr, boundObjets);
-                }
-                boundObjets.add(position);
-
-                position.setBorneDebutId(posSr.borneStartId);
-                position.setBorne_debut_distance((float) posSr.distanceStartBorne);
-                position.setBorne_debut_aval(posSr.startAval);
-                position.setBorneFinId(posSr.borneEndId);
-                position.setBorne_fin_distance((float) posSr.distanceEndBorne);
-                position.setBorne_fin_aval(posSr.endAval);
-                position.setPositionDebut(null);
-                position.setPositionFin(null);
-            }
-        }
-
-        // On sauvegarde les modifications
-//        tdRepo.update(tronconCp);
-
-        // Maintenant que notre tronçon et nos SR sont enregistrés, on peut relier
-        // les objets du tronçon à leur SR.
-        if (!needSRIDUpdate.isEmpty()) {
-            Iterator<Map.Entry<SystemeReperage, List<Positionable>>> it = needSRIDUpdate.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry<SystemeReperage, List<Positionable>> next = it.next();
-                final String srid = next.getKey().getId();
-                for (final Positionable o : next.getValue()) {
-                    o.setSystemeRepId(srid);
-                }
+                copied.setSystemeRepId(posSr.srid);
+                copied.setBorneDebutId(posSr.borneStartId);
+                copied.setBorne_debut_distance((float) posSr.distanceStartBorne);
+                copied.setBorne_debut_aval(posSr.startAval);
+                copied.setBorneFinId(posSr.borneEndId);
+                copied.setBorne_fin_distance((float) posSr.distanceEndBorne);
+                copied.setBorne_fin_aval(posSr.endAval);
             }
         }
 
         // Et on termine par la sérialisation des objets positionés sur le nouveau tronçon.
-        session.executeBulk((Collection)newPositions);
+        final List<DocumentOperationResult> bulkErrors = session.executeBulk((Collection) newPositions);
+        for (final DocumentOperationResult failure : bulkErrors) {
+            SirsCore.LOGGER.log(Level.WARNING, "Update failed : ".concat(failure.getError()));
+        }
 
         return tronconCp;
     }
@@ -470,6 +513,21 @@ public class TronconUtils {
         borneIds.addAll(mergeParam.getBorneIds());
         mergeResult.setBorneIds(new ArrayList<>(borneIds));
 
+        //on combine les geometries
+        final Geometry line1 = mergeResult.getGeometry();
+        final Geometry line2 = mergeParam.getGeometry();
+
+        final List<Coordinate> coords = new  ArrayList<>();
+        coords.addAll(Arrays.asList(line1.getCoordinates()));
+        coords.addAll(Arrays.asList(line2.getCoordinates()));
+
+        final LineString serie = GF.createLineString(coords.toArray(new Coordinate[0]));
+        serie.setSRID(line1.getSRID());
+        serie.setUserData(line1.getUserData());
+        mergeResult.setGeometry(serie);
+
+        ((AbstractSIRSRepository<TronconDigue>)session.getRepositoryForClass(mergeResult.getClass())).update(mergeResult);
+
         /* On fusionne les SR. On cherche les systèmes portant le même nom dans
          * les deux tronçons originaux, puis en fait un seul comportant les bornes
          * des deux. Pour le reste, on fait une simple copie des SR.
@@ -520,64 +578,29 @@ public class TronconUtils {
         }
 
         // On ajoute les structures du tronçon paramètre.
-        final HashSet<Positionable> toSave = new HashSet<>();
+        final List<Positionable> toSave = new ArrayList<>();
         for (final Positionable objet : getPositionableList(mergeParam)) {
-            // si l'objet est une photo, alors il ne faut pas faire de copie car
-            // elle est gérée de manière récursive dans l'élément conteneur.
-            Positionable copy = objet;
-            if (objet.getId().equals(objet.getDocumentId())) {
-                toSave.add(objet.copy());
-            }
-        }
+            // Si on a un objet imbriqué dans un document, on le passe. Il sera
+            // mis à jour via son parent.
+            if (!objet.getId().equals(objet.getDocumentId()))
+                continue;
 
-        // On les persiste en bdd pour retrouver facilement tous les élements à modifier
-        for (final Positionable copy : toSave) {
-            // On vérifie que la copie a un dépôt pour l'enregistrer.
-            try {
-                if (copy instanceof AvecForeignParent)
-                    ((AvecForeignParent) copy).setForeignParentId(mergeResult.getId());
-                ((AbstractSIRSRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(copy.getClass())).add(copy);
-            } catch (Exception e) {
-                SirsCore.LOGGER.log(Level.WARNING, "Cannot save a copy of " + copy.getDesignation()+ "[Class: " +copy.getClass()+"]");
-            }
-        }
-
-        // On change le SR des objets copiés
-        for (final Positionable copy : getPositionableList(mergeResult)) {
-            final String srId = modifiedSRs.get(copy.getSystemeRepId());
-            if (srId != null) {
-                copy.setSystemeRepId(srId);
-            }
+            final Positionable copy = objet.copy();
+            toSave.add(copy);
+            if (copy instanceof AvecForeignParent)
+                ((AvecForeignParent) copy).setForeignParentId(mergeResult.getId());
+            if (copy.getSystemeRepId() != null)
+                copy.setSystemeRepId(modifiedSRs.get(copy.getSystemeRepId()));
         }
 
         // On sauvegarde les changements.
-        for (final Positionable copy : toSave) {
-            // On vérifie que la copie a un dépôt pour l'enregistrer.
-            try {
-                if (copy instanceof AvecForeignParent)
-                    ((AvecForeignParent) copy).setForeignParentId(mergeResult.getId());
-                ((AbstractSIRSRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(copy.getClass())).add(copy);
-            } catch (Exception e) {
-                SirsCore.LOGGER.log(Level.WARNING, "Cannot save a copy of " + copy.getDesignation()+ "[Class: " +copy.getClass()+"]");
-            }
+        final List<DocumentOperationResult> failures = session.executeBulk((Collection) toSave);
+        for (final DocumentOperationResult failure : failures) {
+            SirsCore.LOGGER.log(Level.WARNING, "Update failed : ".concat(failure.getError()));
         }
-
-        //on combine les geometries
-        final Geometry line1 = mergeResult.getGeometry();
-        final Geometry line2 = mergeParam.getGeometry();
-
-        final List<Coordinate> coords = new  ArrayList<>();
-        coords.addAll(Arrays.asList(line1.getCoordinates()));
-        coords.addAll(Arrays.asList(line2.getCoordinates()));
-
-        final LineString serie = GF.createLineString(coords.toArray(new Coordinate[0]));
-        serie.setSRID(line1.getSRID());
-        serie.setUserData(line1.getUserData());
-        mergeResult.setGeometry(serie);
 
         return mergeResult;
     }
-
 
 
     /**
@@ -1320,7 +1343,7 @@ public class TronconUtils {
             if (sr.getSystemeReperageBornes().isEmpty()) {
                 return possr;
             }
-            
+
             final List<BorneDigue> bornes = new ArrayList<>();
             final List<Point> references = new ArrayList<>();
             for(SystemeReperageBorne srb : sr.systemeReperageBornes){

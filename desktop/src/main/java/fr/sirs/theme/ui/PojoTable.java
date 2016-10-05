@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -323,7 +323,7 @@ public class PojoTable extends BorderPane implements Printable {
         if (pojoClass == null && repo == null) {
             throw new IllegalArgumentException("Pojo class to expose and Repository parameter are both null. At least one of them must be valid.");
         }
-        
+
         SIRS.setColumnResize(uiTable);
 
         setFocusTraversable(true);
@@ -743,7 +743,7 @@ public class PojoTable extends BorderPane implements Printable {
             uiCurrent.setText("" + (uiTable.getSelectionModel().getSelectedIndex()+1) + " / " + uiTable.getItems().size());
             setCenter((Node) elementPane);
         }else{
-            // Deconnect editor.
+            // Disconnect editor.
             if (elementPane != null) {
                 elementPane.elementProperty().unbind();
             }
@@ -1223,7 +1223,12 @@ public class PojoTable extends BorderPane implements Printable {
      * @param pojo The object we want to edit.
      */
     protected Object editPojo(Object pojo) {
-        editElement(pojo);
+        final int index;
+        if (uiFicheMode.isSelected() && (index = uiTable.getItems().indexOf(pojo)) >= 0) {
+            uiTable.getSelectionModel().select(index);
+        } else {
+            editElement(pojo);
+        }
         return pojo;
     }
 
@@ -1669,7 +1674,7 @@ public class PojoTable extends BorderPane implements Printable {
         final Object rowElement = event.getRowValue();
         if (rowElement == null)
             return;
-        
+
         // Check / update value
         TablePosition<Element, Object> pos = event.getTablePosition();
         final TableColumn<Element, Object> col = pos.getTableColumn();

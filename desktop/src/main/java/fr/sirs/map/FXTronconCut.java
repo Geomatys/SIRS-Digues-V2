@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -139,6 +139,16 @@ public class FXTronconCut extends VBox {
     }
 
     private void cutPointChanged(ListChangeListener.Change c) {
+        /*
+         * HACK : This method clears and rebuild entirely the segment list each
+         * time user add a cut point. This is bad (that's not the word I wanted
+         * to use when I discovered it, but I'm a polite guy), because user data
+         * are lost in the process. A hack have been applied to attempt
+         * restoring it when creating back segments. One good thing to do would
+         * be to entirely recode the function as an iterative process, as
+         * recommended in ListChangeListener doc.
+         */
+        final List<Segment> oldSegs = new ArrayList<>(segments);
         segments.clear();
 
         final TronconDigue troncon = tronconProp.get();
@@ -153,27 +163,33 @@ public class FXTronconCut extends VBox {
         double distanceDebut = 0.0;
         double distanceFin = 0.0;
         for (int i = 0; i < tmpCutPoints.length; i++) {
-            if (i > 0) {
-                distanceDebut = distanceFin;
-            }
             distanceFin = tmpCutPoints[i].distance.doubleValue();
 
             if (distanceDebut != distanceFin) {
                 final FXTronconCut.Segment segment = new FXTronconCut.Segment();
-                segment.colorProp.set(PALETTE[colorIndex++ % PALETTE.length]);
-                segment.typeProp.set(FXTronconCut.SegmentType.CONSERVER);
+                if (i < oldSegs.size()) {
+                    final Segment old = oldSegs.get(i);
+                    segment.colorProp.set(old.colorProp.get());
+                    segment.nameProperty.set(old.nameProperty.get());
+                    segment.typeProp.set(old.typeProp.get());
+                } else {
+                    segment.colorProp.set(PALETTE[colorIndex % PALETTE.length]);
+                    segment.typeProp.set(i == 0 ? SegmentType.CONSERVER : SegmentType.SECTIONNER);
+                }
                 segment.geometryProp.set(LinearReferencingUtilities.cut(linear, distanceDebut, distanceFin));
                 JTS.setCRS(segment.geometryProp.get(), InjectorCore.getBean(SessionCore.class).getProjection());
                 tmpSegments.add(segment);
+
+                distanceDebut = distanceFin;
+                colorIndex++;
             }
         }
         //dernier segment
-        distanceDebut = distanceFin;
         distanceFin = Double.MAX_VALUE;
         if (distanceDebut != distanceFin) {
             final FXTronconCut.Segment segment = new FXTronconCut.Segment();
-            segment.colorProp.set(PALETTE[colorIndex++ % PALETTE.length]);
-            segment.typeProp.set(FXTronconCut.SegmentType.CONSERVER);
+            segment.colorProp.set(PALETTE[colorIndex % PALETTE.length]);
+            segment.typeProp.set(SegmentType.SECTIONNER);
             segment.geometryProp.set(LinearReferencingUtilities.cut(linear, distanceDebut, distanceFin));
             JTS.setCRS(segment.geometryProp.get(), InjectorCore.getBean(SessionCore.class).getProjection());
             tmpSegments.add(segment);
@@ -182,7 +198,7 @@ public class FXTronconCut extends VBox {
         // If no cut points defined, we highlight the entire troncon as "A conserver".
         if (tmpSegments.isEmpty()) {
             final FXTronconCut.Segment segment = new FXTronconCut.Segment();
-            segment.colorProp.set(PALETTE[colorIndex++ % PALETTE.length]);
+            segment.colorProp.set(PALETTE[colorIndex % PALETTE.length]);
             segment.typeProp.set(FXTronconCut.SegmentType.CONSERVER);
             segment.geometryProp.set(linear);
             JTS.setCRS(segment.geometryProp.get(), InjectorCore.getBean(SessionCore.class).getProjection());

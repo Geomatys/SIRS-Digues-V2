@@ -69,8 +69,6 @@ import org.geotoolkit.internal.GeotkFX;
  */
 public class Launcher extends Application {
 
-    private static final String MINIMAL_JAVA_VERSION = "1.8.0_40";
-
     private static final String EULA_NODE = "user_agreement";
     private static final String EULA_VALUE = "agreed";
     private static final String EULA_VERSION = "version";
@@ -82,18 +80,6 @@ public class Launcher extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        // Embedded version of Java is corrupted.
-        if (!isJavaValid()) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "La version de Java détectée est invalide. Il se peut que votre installation de l'application soit corrompue.\n\n"
-                    + "Pour résoudre le problème, désinstallez manuellement toute version de l'application présente sur votre machine, puis ré-installez la version la plus récente.\n\n"
-                    + "Si le problème persiste, contactez un administrateur.", ButtonType.OK);
-            alert.setResizable(true);
-            alert.setWidth(400);
-            alert.setHeight(600);
-            alert.showAndWait();
-            System.exit(1);
-        }
-
         try {
             Thread.setDefaultUncaughtExceptionHandler((Thread t, Throwable e) -> {
                 if ((e instanceof OutOfMemoryError) || (e.getCause() instanceof OutOfMemoryError)) {
@@ -291,19 +277,7 @@ public class Launcher extends Application {
             return true;
         }
     }
-
-    /**
-     * Test wether or not java version is sufficient to run SIRS application without
-     * any further problem.
-     *
-     * @return true if found version of Java is recent enough, false if found jvm
-     * cannot run application.
-     */
-    private static boolean isJavaValid() {
-        final String javaVersion = System.getProperty("java.version");
-        return MINIMAL_JAVA_VERSION.compareTo(javaVersion) < 0;
-    }
-
+    
     /**
      * Check End User License Agreement. If user has not validated it yet, we
      * display the license until he accepts it.

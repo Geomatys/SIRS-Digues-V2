@@ -75,7 +75,7 @@
 
 
   <!-- Optional dependencies. These dependencies are not automatically inherited 
-    by parameters modules. But if a child module declare one of those depencies 
+    by parameters modules. But if a child module declare one of those dependencies 
     without specifying any number of version, then the version by default will 
     be the one declared below. -->
   <dependencyManagement>
@@ -99,7 +99,13 @@
         <groupId>org.apache.pdfbox</groupId>
         <artifactId>pdfbox</artifactId>
         <version>1.8.9</version>
-      </dependency>      
+      </dependency>
+      <!-- Force newer version of controlsfx to avoid jre version checking error --> 
+      <dependency>
+          <groupId>org.controlsfx</groupId>
+          <artifactId>controlsfx</artifactId>
+          <version>8.40.11</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

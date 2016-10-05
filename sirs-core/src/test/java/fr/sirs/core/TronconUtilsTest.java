@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -43,7 +43,7 @@ import static org.junit.Assert.*;
  */
 public class TronconUtilsTest extends CouchDBTestCase {
 
-    private static final float DELTA = 0.00001f;
+    private static final float DELTA = 0.0001f;
     private static final GeometryFactory GF = new GeometryFactory();
 
     private static TronconDigue troncon;

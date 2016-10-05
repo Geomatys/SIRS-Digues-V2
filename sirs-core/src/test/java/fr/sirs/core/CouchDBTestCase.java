@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.Authenticator;
 import java.net.ProxySelector;
 import java.util.HashSet;
+import java.util.Iterator;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -35,6 +36,7 @@ import org.apache.sis.test.TestCase;
 
 
 import org.ektorp.CouchDbConnector;
+import org.ektorp.DocumentNotFoundException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -71,7 +73,7 @@ public abstract class CouchDBTestCase extends TestCase {
     protected SessionCore session;
 
     @BeforeClass
-    public static void initEnvironment() throws IOException {
+    public static synchronized void initEnvironment() throws IOException {
         // Set http proxy / authentication managers
         ProxySelector.setDefault(new SystemProxySelector());
         Authenticator.setDefault(new SIRSAuthenticator());
@@ -95,10 +97,14 @@ public abstract class CouchDBTestCase extends TestCase {
     }
 
     @AfterClass
-    public static void clearDatabases() throws IOException {
-        for (final String db : DBS_TO_DELETE) {
+    public static synchronized void clearDatabases() throws IOException {
+        final Iterator<String> it = DBS_TO_DELETE.iterator();
+        while (it.hasNext()) {
             try {
-                REGISTRY.dropDatabase(db);
+                REGISTRY.dropDatabase(it.next());
+                it.remove();
+            } catch (DocumentNotFoundException e) {
+                SirsCore.LOGGER.log(Level.FINE, "Database to delete does not exist !", e);
             } catch (Exception e) {
                 SirsCore.LOGGER.log(Level.WARNING, "A database cannot be deleted after tests !", e);
             }
@@ -109,7 +115,7 @@ public abstract class CouchDBTestCase extends TestCase {
      * Mark given database to be deleted after this class tests have been performed.
      * @param dbName Name of the database to delete.
      */
-    protected static void deleteAfterClass(final String dbName) {
+    protected static synchronized void deleteAfterClass(final String dbName) {
         DBS_TO_DELETE.add(dbName);
     }
 

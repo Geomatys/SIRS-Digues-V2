@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -63,7 +63,7 @@ public class FXOpenElementEditorAction extends FXMapAction {
     public FXOpenElementEditorAction(final FXMap map) {
         this(map, "informations sur l'élément", "Ouvre la fiche du tronçon/de l'objet du thème");
     }
-    
+
     public FXOpenElementEditorAction(final FXMap map, final String shortText, final String longText) {
         super(map, shortText, longText, SIRS.ICON_INFO_BLACK_16);
 
@@ -127,7 +127,7 @@ public class FXOpenElementEditorAction extends FXMapAction {
 
             @Override
             public void mouseClicked(MouseEvent me) {
-                SIRS.LOGGER.log(Level.FINE, "Mouse click detected.");
+                super.mouseClicked(me);
                 choice.getItems().clear();
                 choice.hide();
                 // Visitor which will perform action on selected elements.

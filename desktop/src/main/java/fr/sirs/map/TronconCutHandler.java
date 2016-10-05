@@ -1,8 +1,9 @@
+
 /**
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -27,14 +28,13 @@ import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AvecBornesTemporelles;
-import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -60,6 +60,7 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.ektorp.DocumentOperationResult;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.container.ContextContainer2D;
@@ -300,7 +301,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
 
         // On instancie une nouvelle liste pour les couches à désactiver provisoirement (le temps de l'activation de l'outil)
         toActivateBack = new ArrayList<>();
-        
+
         final ContextContainer2D cc = (ContextContainer2D) map.getCanvas().getContainer();
         final MapContext context = cc.getContext();
         for(MapLayer layer : context.layers()){
@@ -414,6 +415,8 @@ public class TronconCutHandler extends AbstractNavigationHandler {
                 } catch(TransformException | FactoryException ex) {
                     SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 }
+            } else {
+                super.handle(e);
             }
 
             if (editPane.tronconProperty().get() != null) dialog.show();
@@ -421,7 +424,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
     }
 
     /**
-     * The task which cut, recompose and update {@link TronconDigue} elements.
+     * The task cuts and updates {@link TronconDigue} elements.
      * Note : Cancel the task is not allowed, because database updates are
      * performed all along the process.
      *
@@ -454,6 +457,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
 
             final Session session = Injector.getSession();
             TronconDigue aggregate = null;
+            final LocalDate yesterday = LocalDate.now().minusDays(1);
             for (int i = 0, n = segments.size(); i < n; i++) {
 
                 updateProgress(i, n);
@@ -463,53 +467,78 @@ public class TronconCutHandler extends AbstractNavigationHandler {
                 final TronconDigue cut = TronconUtils.cutTroncon(toCut, segment.geometryProp.get(), segmentName, session);
 
                 final FXTronconCut.SegmentType type = segment.typeProp.get();
-                if (FXTronconCut.SegmentType.CONSERVER.equals(type)) {
-                    //on aggrege le morceau
-                    if (aggregate == null) {
-                        aggregate = cut;
-                    } else {
-                        aggregate = TronconUtils.mergeTroncon(aggregate, cut, session);
+                if (null != type) switch (type) {
+                    case CONSERVER:
+                        //on aggrege le morceau
+                        if (aggregate == null) {
+                            aggregate = cut;
+                        } else {
+                            aggregate = TronconUtils.mergeTroncon(aggregate, cut, session);
 
-                        //on sauvegarde les modifications
-                        session.getRepositoryForClass(TronconDigue.class).update(aggregate);
-                        session.getRepositoryForClass(TronconDigue.class).remove(cut);
-                    }
-
-                } else if (FXTronconCut.SegmentType.ARCHIVER.equals(type)) {
-                    //on marque comme terminé le troncon et ses structures
-                    cut.date_finProperty().set(LocalDate.now());
-                    for (Objet obj : TronconUtils.getObjetList(cut)) {
-                        obj.dateMajProperty().set(LocalDate.now());
-                        if (obj.getDate_fin() == null) {
-                            obj.date_finProperty().set(LocalDate.now());
+                            //on sauvegarde les modifications
+                            session.getRepositoryForClass(TronconDigue.class).update(aggregate);
+                            session.getRepositoryForClass(TronconDigue.class).remove(cut);
                         }
-                    }
-                    //on le sauvegarde
-                    session.getRepositoryForClass(TronconDigue.class).update(cut);
+                        break;
 
-                } else if (FXTronconCut.SegmentType.SECTIONNER.equals(type)) {
+                    case ARCHIVER:
+                        //on marque comme terminé le troncon et ses structures
+                        cut.setDate_fin(yesterday);
+
+                        session.getRepositoryForClass(TronconDigue.class).update(cut);
+
+                        final List<Positionable> positionableList = new ArrayList<>(TronconUtils.getPositionableList(cut));
+                        Positionable obj;
+                        final Iterator<Positionable> it = positionableList.iterator();
+                        while (it.hasNext()) {
+                            obj = it.next();
+                            if (obj instanceof AvecBornesTemporelles) {
+                                final AvecBornesTemporelles tmpObj = (AvecBornesTemporelles) obj;
+                                if (tmpObj.getDate_fin() == null || tmpObj.getDate_fin().isAfter(yesterday))
+                                    tmpObj.date_finProperty().set(yesterday);
+                                else it.remove();
+                            } else it.remove();
+                        }
+
+                        // TODO : check failures ?
+                        final List<DocumentOperationResult> result = session.executeBulk((List) positionableList);
+                        for (final DocumentOperationResult failure : result) {
+                            SirsCore.LOGGER.log(Level.WARNING, "Update failed : ".concat(failure.getError()));
+                        }
+                        break;
                     //rien a faire
-                } else {
-                    throw new IllegalArgumentException("Type de coupe inconnue : " + type);
+                    case SECTIONNER:
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Type de coupe inconnue : " + type);
                 }
             }
 
-            //on archive l'ancien troncon
+            //on archive l'ancien troncon et les objets dessus
             updateMessage("Finalisation du découpage pour "+toCut.getLibelle());
-            toCut.setDate_fin(LocalDate.now());
+            toCut.setDate_fin(yesterday);
 
             session.getRepositoryForClass(TronconDigue.class).update(toCut);
 
-            for (Positionable obj : TronconUtils.getPositionableList(toCut)) {
+            final List<Positionable> positionableList = new ArrayList<>(TronconUtils.getPositionableList(toCut));
+            Positionable obj;
+            final Iterator<Positionable> it = positionableList.iterator();
+            while (it.hasNext()) {
+                obj = it.next();
                 if (obj instanceof AvecBornesTemporelles) {
-                    ((AvecBornesTemporelles) obj).date_finProperty().set(LocalDate.now());
-                    try {
-                        AbstractSIRSRepository repo = session.getRepositoryForClass(obj.getClass());
-                        repo.update(obj);
-                    } catch (Exception e) {
-                        SirsCore.LOGGER.log(Level.WARNING, "Positioned object cannot be archived : "+obj.getId(), e);
-                    }
-                }
+                    final AvecBornesTemporelles tmpObj = (AvecBornesTemporelles) obj;
+                    if (tmpObj.getDate_fin() == null || tmpObj.getDate_fin().isAfter(yesterday))
+                        tmpObj.date_finProperty().set(yesterday);
+                    else
+                        it.remove();
+                } else
+                    it.remove();
+            }
+
+            // TODO : check failures ?
+            final List<DocumentOperationResult> result = session.executeBulk((List) positionableList);
+            for (final DocumentOperationResult failure : result) {
+                SirsCore.LOGGER.log(Level.WARNING, "Update failed : ".concat(failure.getError()));
             }
 
             return true;
