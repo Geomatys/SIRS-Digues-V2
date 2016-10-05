@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -91,12 +91,13 @@ import org.geotoolkit.referencing.operation.transform.NTv2Transform;
 import org.opengis.geometry.Envelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 
 public class SirsCore {
 
     public static final ZoneId PARIS_ZONE_ID = ZoneId.of("Europe/Paris");
-    
+
     private static final String PROJ4_RESOURCE = "/fr/sirs/core/proj4.json";
 
     /**
@@ -108,7 +109,20 @@ public class SirsCore {
     public static final String PASSWORD_ENCRYPT_ALGO="MD5";
 
     public static final String INFO_DOCUMENT_ID = "$sirs";
-    public static final Logger LOGGER = Logging.getLogger("fr.sirs");
+    public static final Logger LOGGER;
+    static {
+        LOGGER = Logging.getLogger("fr.sirs");
+        // add SLF4JBridgeHandler to j.u.l's root logger, should be done once during
+        // the initialization phase of your application
+        try {
+            SLF4JBridgeHandler.removeHandlersForRootLogger();  // (since SLF4J 1.6.5)
+            SLF4JBridgeHandler.install();
+        } catch (Exception e) {
+            SirsCore.LOGGER.log(Level.SEVERE, "Cannot initialize log dumping (logbak)", e);
+            // We allow starting program without log writing.
+        }
+    }
+
     public static final String NAME = "sirs";
 
     public static final String MODEL_PACKAGE="fr.sirs.core.model";
@@ -314,7 +328,7 @@ public class SirsCore {
 
     /**
      * Récupère le chemin absolu vers le fichier référencé par l'objet en entrée.
-     * 
+     *
      * @param ref Un objet faisant réference à un document.
      * @return Un chemin absolu vers la réference passée en paramètre.
      * @throws IllegalStateException Si aucune racine n'est configurée ou ne dénote un chemin valide.

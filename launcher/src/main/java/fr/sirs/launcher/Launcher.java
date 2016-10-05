@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -40,7 +40,6 @@ import java.util.logging.Level;
 import java.util.prefs.Preferences;
 
 import org.ektorp.DbAccessException;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -93,16 +92,6 @@ public class Launcher extends Application {
             alert.setHeight(600);
             alert.showAndWait();
             System.exit(1);
-        }
-
-        // add SLF4JBridgeHandler to j.u.l's root logger, should be done once during
-        // the initialization phase of your application
-        try {
-            SLF4JBridgeHandler.removeHandlersForRootLogger();  // (since SLF4J 1.6.5)
-            SLF4JBridgeHandler.install();
-        } catch (Exception e) {
-            SirsCore.LOGGER.log(Level.SEVERE, "Cannot initialize log dumping (logbak)", e);
-            // We allow starting program without log writing.
         }
 
         try {
@@ -297,7 +286,7 @@ public class Launcher extends Application {
             SirsCore.initEpsgDB();
 
             agreement.get();
-            
+
             updateMessage("Lancement de l'application");
             return true;
         }
@@ -322,7 +311,7 @@ public class Launcher extends Application {
     private static void acceptEULA() {
         Preferences node = Preferences.userNodeForPackage(Launcher.class).node(EULA_NODE);
         final boolean accepted = node.getBoolean(EULA_VALUE, false);
-        
+
         // Already accepted EULA
         final String appVersion = SirsCore.getVersion();
         if (accepted && (appVersion == null || appVersion.equals(node.get(EULA_VERSION, "")))) {
@@ -353,7 +342,7 @@ public class Launcher extends Application {
         area.setWrapText(true);
         area.setPrefHeight(451);
         area.setPrefWidth(777);
-        
+
         final ButtonType accept = new ButtonType("J'accepte");
         final ButtonType refuse = new ButtonType("Je refuse");
         final Alert alert = new Alert(Alert.AlertType.INFORMATION, null,refuse, accept);
