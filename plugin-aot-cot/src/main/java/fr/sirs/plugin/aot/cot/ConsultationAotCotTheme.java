@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -45,7 +45,7 @@ public final class ConsultationAotCotTheme extends AbstractPluginsButtonTheme {
     private static final Image BUTTON_IMAGE = new Image(
             ConsultationAotCotTheme.class.getResourceAsStream("images/aot-objAssocies.png"));
     public ConsultationAotCotTheme() {
-        super("Consulation AOT/COT", "Consultation AOT/COT", BUTTON_IMAGE);
+        super("Consultation AOT/COT", "Consultation AOT/COT", BUTTON_IMAGE);
     }
     
     private Element toConsultFromMap = null;
@@ -60,11 +60,11 @@ public final class ConsultationAotCotTheme extends AbstractPluginsButtonTheme {
      */
     @Override
     public boolean isCached(){return false;}
-    
+
     @Override
     public Parent createPane() {
         final BorderPane borderPane;
-        
+
         // On commence par vérifier qu'aucun objet n'est sélectionné par la carte pour traitement par ce thème.
         if(toConsultFromMap!=null){
             borderPane = new BorderPane();
@@ -72,7 +72,7 @@ public final class ConsultationAotCotTheme extends AbstractPluginsButtonTheme {
             // Réinitialisation de l'objet courant à consulter.
             toConsultFromMap=null;
         }
-        
+
         // Sinon on recherche l'objet courant sélectionné dans l'interface qui est également l'élément sélectionné pour impression.
         else{
             final Printable printable = PrintManager.printableProperty().get();
@@ -86,8 +86,8 @@ public final class ConsultationAotCotTheme extends AbstractPluginsButtonTheme {
                 }
             }
 
-            if(elements.size()==1 && 
-                    (elements.get(0) instanceof AotCotAssociable 
+            if(elements.size()==1 &&
+                    (elements.get(0) instanceof AotCotAssociable
                     || elements.get(0) instanceof Objet
                     || elements.get(0) instanceof PositionConvention)){
                 borderPane = new BorderPane();
