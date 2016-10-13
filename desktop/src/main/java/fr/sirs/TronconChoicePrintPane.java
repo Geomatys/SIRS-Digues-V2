@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -23,16 +23,15 @@ import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.PojoTable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -165,65 +164,44 @@ public abstract class TronconChoicePrintPane extends BorderPane {
         }
     }
 
+    /**
+     * Check that given object is located in one of the specified linears.
+     * @param <T>
+     */
+    final protected class LinearPredicate<T extends AvecForeignParent> implements Predicate<T> {
 
-    final protected class LocationPredicate<T extends Positionable & AvecForeignParent> implements Predicate<T>{
+        final Set<String> acceptedIds;
 
-        final List<String> tronconSelectedIds = new ArrayList<>();
-
-        public LocationPredicate(){
-            for(final Element element : tronconsTable.getSelectedItems()){
-                tronconSelectedIds.add(element.getId());
-            }
+        public LinearPredicate() {
+            acceptedIds = tronconsTable.getSelectedItems().stream().map(input -> input.getId()).collect(Collectors.toSet());
         }
 
         @Override
-        public boolean test(final T candidate) {
-            if (tronconSelectedIds.isEmpty() || candidate.getForeignParentId()==null) {
-                return false;
-            }
-
-            final String linearId = candidate.getForeignParentId();
-
-            /*
-            Sous-condition de retrait 1 : si le désordre est
-            associé à un tronçon qui n'est pas sélectionné dans
-            la liste.
-            */
-            final boolean linearNotSelected = !tronconSelectedIds.contains(linearId);
-            if (linearNotSelected) {
-                // On ne le garde pas
-                return true;
-            }
-
-            /*
-            Sous-condition de retrait 2 : si le désordre a des PRs de
-            début et de fin et si le tronçon a des PRs de début et
-            de fin (i.e. s'il a un SR par défaut qui a permi de les
-            calculer), alors on vérifie :
-            */
-            if(!Float.isNaN(candidate.getPrDebut()) && !Float.isNaN(candidate.getPrFin())
-                    && prsByTronconId.get(linearId)!=null
-                    && prsByTronconId.get(linearId)[0]!=null
-                    && prsByTronconId.get(linearId)[1]!=null
-                    && prsByTronconId.get(linearId)[0].get()!=null
-                    && prsByTronconId.get(linearId)[1].get()!=null)
-            {
-                final float prInf, prSup;
-                if(candidate.getPrDebut() < candidate.getPrFin()) {
-                    prInf=candidate.getPrDebut();
-                    prSup=candidate.getPrFin();
-                } else {
-                    prInf=candidate.getPrFin();
-                    prSup=candidate.getPrDebut();
-                }
-                return (prInf < prsByTronconId.get(linearId)[0].get().floatValue()) // Si le désordre s'achève avant le début de la zone du tronçon que l'on souhaite.
-                || (prSup > prsByTronconId.get(linearId)[1].get().floatValue()); // Si le désordre débute après la fin de la zone du tronçon que l'on souhaite.
-            } else {
-                // On le garde s'il manque des informations
-                return false;
-            }
+        public boolean test(T t) {
+            return acceptedIds.isEmpty() || (t.getForeignParentId() != null && acceptedIds.contains(t.getForeignParentId()));
         }
-
     }
 
+    /**
+     * Check that given object PRs are found in selected PRs in its parent linear.
+     * @param <T> Type of object to test.
+     */
+    final protected class PRPredicate<T extends Positionable & AvecForeignParent> implements Predicate<T> {
+
+        @Override
+        public boolean test(final T candidate) {
+            final String linearId = candidate.getForeignParentId();
+            final ObjectProperty<Number>[] userPRs;
+            if (linearId == null || (userPRs = prsByTronconId.get(linearId)) == null)
+                return false;
+
+            final float startPR = userPRs[0].get() == null ? Float.NaN : userPRs[0].get().floatValue();
+            final float endPR = userPRs[1].get() == null ? Float.NaN : userPRs[1].get().floatValue();
+
+            if (!Float.isNaN(startPR) && candidate.getPrFin() < startPR)
+                return false;
+
+            return Float.isNaN(endPR) || candidate.getPrDebut() > endPR;
+        }
+    }
 }

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -19,15 +19,13 @@
 package fr.sirs;
 
 import fr.sirs.core.model.AvecBornesTemporelles;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.LocalDate;
 import java.util.function.Predicate;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
-import org.apache.sis.measure.NumberRange;
+import org.apache.sis.measure.Range;
 
 /**
  *
@@ -77,100 +75,59 @@ public abstract class TemporalTronconChoicePrintPane extends TronconChoicePrintP
         uiOptionFinArchive.disableProperty().bind(uiOptionNonArchive.selectedProperty());
     }
 
+    /**
+     * Check miscellaneous user options related to objects temporal lifecycle.
+     */
     class TemporalPredicate implements Predicate<AvecBornesTemporelles> {
 
-        final NumberRange<Long> selectedRange;
-        final NumberRange<Long> archiveRange;
+        /**
+         * A flag which role is to tell what we should do with archived objects.
+         * There's 3 possible states :
+         * - Negative : We must exclude archived objects.
+         * - Zero : We must include all objects, archived or not.
+         * - Positive : We must include archived objects only.
+         */
+        final byte archiveOption;
+
+        final Range<LocalDate> selectedRange;
+        final Range<LocalDate> archiveRange;
 
         TemporalPredicate() {
+            if (uiOptionNonArchive.isSelected())
+                archiveOption = -1;
+            else if (uiOptionArchive.isSelected())
+                archiveOption = 1;
+            else
+                archiveOption = 0;
 
-            long minTimeSelected = Long.MIN_VALUE;
-            long maxTimeSelected = Long.MAX_VALUE;
-
-            {
-                LocalDateTime tmpTimeSelected = uiOptionDebut.getValue() == null ? null : uiOptionDebut.getValue().atTime(LocalTime.MIDNIGHT);
-                if (tmpTimeSelected != null) {
-                    minTimeSelected = Timestamp.valueOf(tmpTimeSelected).getTime();
-                }
-
-                tmpTimeSelected = uiOptionFin.getValue() == null ? null : uiOptionFin.getValue().atTime(LocalTime.MIDNIGHT);
-                if (tmpTimeSelected != null) {
-                    maxTimeSelected = Timestamp.valueOf(tmpTimeSelected).getTime();
-                }
+            LocalDate start = uiOptionDebutArchive.getValue();
+            LocalDate end = uiOptionFinArchive.getValue();
+            if (archiveOption < 0 || (start == null && end == null)) {
+                archiveRange = null;
+            } else {
+                archiveRange = new Range<>(LocalDate.class, start == null? LocalDate.MIN : start, true, end == null? LocalDate.MAX : end, true);
             }
 
-            // Intervalle de temps de présence du désordre
-            selectedRange = NumberRange.create(minTimeSelected, true, maxTimeSelected, true);
-
-            minTimeSelected = Long.MIN_VALUE;
-            maxTimeSelected = Long.MAX_VALUE;
-
-            {
-                LocalDateTime tmpTimeSelected = uiOptionDebutArchive.getValue() == null ? null : uiOptionDebutArchive.getValue().atTime(LocalTime.MIDNIGHT);
-                if (tmpTimeSelected != null) {
-                    minTimeSelected = Timestamp.valueOf(tmpTimeSelected).getTime();
-                }
-
-                tmpTimeSelected = uiOptionFinArchive.getValue() == null ? null : uiOptionFinArchive.getValue().atTime(LocalTime.MIDNIGHT);
-                if (tmpTimeSelected != null) {
-                    maxTimeSelected = Timestamp.valueOf(tmpTimeSelected).getTime();
-                }
+            start = uiOptionDebut.getValue();
+            end = uiOptionFin.getValue();
+            if (start == null && end == null) {
+                selectedRange = null;
+            } else {
+                selectedRange = new Range<>(LocalDate.class, start == null? LocalDate.MIN : start, true, end == null? LocalDate.MAX : end, true);
             }
-
-            // Intervalle d'archivage du désordre
-            archiveRange = NumberRange.create(minTimeSelected, true, maxTimeSelected, true);
         }
 
         @Override
-        public boolean test(AvecBornesTemporelles reseauFerme) {
+        public boolean test(AvecBornesTemporelles input) {
+            if (archiveOption < 0 && input.getDate_fin() != null)
+                return false;
+            else if (archiveOption > 0 && input.getDate_fin() == null)
+                return false;
 
-            /*
-             CONDITION PORTANT SUR LES OPTIONS
-             */
-            // 1- Si on a décidé de ne pas générer de fiche pour les désordres archivés.
-            final boolean excludeArchiveCondition = (uiOptionNonArchive.isSelected() && reseauFerme.getDate_fin() != null);
+            if (archiveRange != null && !archiveRange.contains(input.getDate_fin()))
+                return false;
 
-            // 2- Si le désordre n'a pas eu lieu durant la période retenue
-            final boolean periodeCondition;
-
-            long minTime = Long.MIN_VALUE;
-            long maxTime = Long.MAX_VALUE;
-            LocalDateTime tmpTime = reseauFerme.getDate_debut() == null ? null : reseauFerme.getDate_debut().atTime(LocalTime.MIDNIGHT);
-            if (tmpTime != null) {
-                minTime = Timestamp.valueOf(tmpTime).getTime();
-            }
-
-            tmpTime = reseauFerme.getDate_fin() == null ? null : reseauFerme.getDate_fin().atTime(LocalTime.MIDNIGHT);
-            if (tmpTime != null) {
-                maxTime = Timestamp.valueOf(tmpTime).getTime();
-            }
-
-            final NumberRange<Long> desordreRange = NumberRange.create(minTime, true, maxTime, true);
-            periodeCondition = !selectedRange.intersects(desordreRange);
-
-            // 3- Si on a décidé de ne générer la fiche que des désordres archivés
-            final boolean onlyArchiveCondition = (uiOptionArchive.isSelected() && reseauFerme.getDate_fin() == null);
-
-            final boolean periodeArchiveCondition;
-
-            if (!onlyArchiveCondition) {
-                long time = Long.MAX_VALUE;
-
-                tmpTime = reseauFerme.getDate_fin() == null ? null : reseauFerme.getDate_fin().atTime(LocalTime.MIDNIGHT);
-                if (tmpTime != null) {
-                    time = Timestamp.valueOf(tmpTime).getTime();
-                }
-
-                final NumberRange<Long> archiveDesordreRange = NumberRange.create(time, true, time, true);
-                periodeArchiveCondition = !archiveRange.intersects(archiveDesordreRange);
-            } else {
-                periodeArchiveCondition = false;
-            }
-
-            final boolean archiveCondition = onlyArchiveCondition || periodeArchiveCondition;
-
-            return excludeArchiveCondition || periodeCondition || archiveCondition;
+            return selectedRange == null || selectedRange.contains(input.getDate_debut());
         }
-
     }
 }

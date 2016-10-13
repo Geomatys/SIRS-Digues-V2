@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -19,24 +19,38 @@
 package fr.sirs;
 
 import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.RefUrgence;
+import fr.sirs.ui.Growl;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
-import java.util.logging.Level;
+import java.util.stream.Collectors;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Tab;
+import org.geotoolkit.util.collection.CloseableIterator;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
 public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
+
+    private static Comparator<Observation> DATE_COMPARATOR = (o1, o2) -> {
+        if (o1.getDate() == o2.getDate())
+            return 0;
+        if (o1.getDate() == null)
+            return 1;
+        if (o2.getDate() == null)
+            return -1;
+        return o1.getDate().compareTo(o2.getDate());
+    };
 
     @FXML private Tab uiDisorderTypeChoice;
     @FXML private Tab uiUrgenceTypeChoice;
@@ -58,7 +72,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
         uiUrgenceTypeChoice.setContent(urgenceTypesTable);
     }
 
-    @FXML private void cancel(){
+    @FXML private void cancel() {
 
     }
 
@@ -67,94 +81,82 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
     private void print(){
         Injector.getSession().getTaskManager().submit("Génération de fiches détaillées de désordres",
         () -> {
+            final Predicate userOptions  = new TypePredicate()
+                    .and(new TemporalPredicate())
+                    .and(new LinearPredicate<>())
+                    .and(new PRPredicate<>())
+                    .and(new UrgencePredicate());
 
-            final List<Desordre> desordres = Injector.getSession().getRepositoryForClass(Desordre.class).getAll();
-            final List<Desordre> tempDesordres = new ArrayList<>(desordres);
-
-            // On retire les désordres de la liste dans les cas suivants...
-            tempDesordres.removeIf(new LocalPredicate().or(
-                    new LocationPredicate<>().or(
-                            (Predicate) new TemporalPredicate())));
-
-            try {
-                if(!tempDesordres.isEmpty()){
-                    Injector.getSession().getPrintManager().printDesordres(tempDesordres, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionVoirie.isSelected());
+            final List<Desordre> toPrint = new ArrayList(100);
+            try (final CloseableIterator<Desordre> it = Injector.getSession().getRepositoryForClass(Desordre.class).getAllStreaming().iterator()) {
+                Desordre d;
+                while (it.hasNext()) {
+                    d = it.next();
+                    if (userOptions.test(d)) {
+                        toPrint.add(d);
+                    }
                 }
-            } catch (Exception ex) {
-                SIRS.LOGGER.log(Level.WARNING, null, ex);
             }
-        });
+
+            if (!toPrint.isEmpty())
+                Injector.getSession().getPrintManager().printDesordres(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionVoirie.isSelected());
+
+            return !toPrint.isEmpty();
+            
+        }).setOnSucceeded(evt -> Platform.runLater(() -> {
+            if (Boolean.TRUE.equals(evt.getSource().getValue())) {
+                new Growl(Growl.Type.INFO, "La fiche a été générée avec succès.").showAndFade();
+            } else {
+                new Growl(Growl.Type.WARNING, "Aucun élément trouvé pour les critères demandés.").showAndFade();
+            }
+        }));
     }
 
-    private class LocalPredicate implements Predicate<Desordre> {
+    /**
+     * Check that given {@link Desordre} object has a {@link Desordre#getTypeDesordreId() }
+     * contained in a specific input list. If user has not selected any disorder
+     * type, this predicate always return true.
+     */
+    private class TypePredicate implements Predicate<Desordre> {
 
-        final List<String> typeDesordresIds = new ArrayList<>();
-        final List<String> typeUrgencesIds = new ArrayList<>();
+        final Set<String> acceptedIds;
 
-        LocalPredicate(){
-            for(final Element element : disordreTypesTable.getSelectedItems()){
-                typeDesordresIds.add(element.getId());
-            }
-            for(final Element element : urgenceTypesTable.getSelectedItems()){
-                typeUrgencesIds.add(element.getId());
-            }
+        TypePredicate() {
+            acceptedIds = disordreTypesTable.getSelectedItems().stream()
+                    .map(e -> e.getId())
+                    .collect(Collectors.toSet());
+        }
+
+        @Override
+        public boolean test(Desordre t) {
+            return acceptedIds.isEmpty() || (t.getTypeDesordreId() != null && acceptedIds.contains(t.getTypeDesordreId()));
+        }
+    }
+
+    /**
+     * Check that the most recent observation defined on given disorder has an
+     * {@link Observation#getUrgenceId() } compatible with user choice.
+     * If user has not chosen any urgence, all disorders are accepted.
+     */
+    private class UrgencePredicate implements Predicate<Desordre> {
+
+        final Set<String> acceptedIds;
+
+        UrgencePredicate() {
+            acceptedIds = urgenceTypesTable.getSelectedItems().stream()
+                    .map(e -> e.getId())
+                    .collect(Collectors.toSet());
         }
 
         @Override
         public boolean test(final Desordre desordre) {
+            if (acceptedIds.isEmpty())
+                return true;
 
-                /*
-                On retire les désordres dont la dernière urgence ne figure pas
-                dans les urgence choisies.
-                 */
-                final boolean urgenceOption;
-
-                /*
-                Si aucune urgence n'a été choisie on ne retire aucun désordre.
-                */
-                if(typeUrgencesIds.isEmpty()){
-                    urgenceOption = false;
-                }
-                else{
-                    // Recherche de la dernière observation.
-                    final List<Observation> observations = desordre.getObservations();
-                    Observation derniereObservation = null;
-                    for(final Observation obs : observations){
-                        if(obs.getDate()!=null){
-                            if(derniereObservation==null) derniereObservation = obs;
-                            else{
-                                if(obs.getDate().isAfter(derniereObservation.getDate())) derniereObservation = obs;
-                            }
-                        }
-                    }
-
-                    /*
-                    Si le désordre a une "dernière observation", on regarde si
-                    son degré d'urgence figure dans les urgences choisies.
-                    */
-                    if(derniereObservation!=null){
-                        urgenceOption = !typeUrgencesIds.contains(derniereObservation.getUrgenceId());
-                    }
-                    /*
-                    Si on n'a pas pu déterminer de "dernière observation" :
-                    On garde le désordre (mais c'est discutable).
-                    */
-                    else urgenceOption=false;
-                }
-
-                /*
-                On retire le désordre s'il est d'un type qui n'est pas
-                sélectionné dans la liste.
-                */
-                final boolean typeSelected; // Si le type du désordre n'est pas parmi les types sélectionnés
-                // Si on n'a sélectionné aucun désordre, on laisse passer a priori quel que soit le type de désordre.
-                if (typeDesordresIds.isEmpty()) typeSelected = false;
-                // Si la liste de sélection des types de désordres n'est pas vide on vérifie de type de désordre
-                else typeSelected = (desordre.getTypeDesordreId()==null
-                        || !typeDesordresIds.contains(desordre.getTypeDesordreId()));
-
-                return typeSelected || urgenceOption;
+            return desordre.getObservations().stream()
+                    .max(DATE_COMPARATOR)
+                    .map(obs -> obs.getUrgenceId() != null && acceptedIds.contains(obs.getUrgenceId()))
+                    .orElse(false);
         }
-
     }
 }
