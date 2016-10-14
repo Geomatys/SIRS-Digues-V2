@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -28,11 +28,9 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -45,13 +43,9 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import net.sf.jasperreports.engine.JRException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.feature.Feature;
-import org.xml.sax.SAXException;
 
 /**
  *
@@ -189,7 +183,7 @@ public class PrintManager {
         return printable;
     }
 
-    public void printFocusedPrintable() {
+    public void printFocusedPrintable() throws Exception {
         final Printable tmpPrintable = PrintManager.printable.get();
         if(!tmpPrintable.print()){
             final Object candidate = tmpPrintable.getPrintableElements().get();
@@ -197,7 +191,7 @@ public class PrintManager {
         }
     }
 
-    public final void print(Object candidate){
+    public final void print(Object candidate) throws Exception {
         List<Element> elementsToPrint = null;
         FeatureCollection featuresToPrint = null;
 
@@ -219,18 +213,14 @@ public class PrintManager {
         }
     }
 
-    private void printFeatures(FeatureCollection featuresToPrint){
-        try {
+    private void printFeatures(FeatureCollection featuresToPrint) throws Exception {
             final List<String> avoidFields = new ArrayList<>();
             avoidFields.add(GEOMETRY_MODE_FIELD);
             final File fileToPrint = PrinterUtilities.print(avoidFields, featuresToPrint);
             SIRS.openFile(fileToPrint);
-        } catch (IOException | ParserConfigurationException | SAXException | JRException | TransformerException ex) {
-           SIRS.LOGGER.log(Level.WARNING, null, ex);
-        }
     }
 
-    private void printElements(List<Element> elementsToPrint){
+    private void printElements(List<Element> elementsToPrint) throws Exception {
         final List<String> avoidFields = new ArrayList<>();
         avoidFields.add(GEOMETRY_FIELD);
         avoidFields.add(DOCUMENT_ID_FIELD);
@@ -253,12 +243,8 @@ public class PrintManager {
             }
         }
 
-        try {
-            final File fileToPrint = PrinterUtilities.print(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), elementsToPrint);
-            SIRS.openFile(fileToPrint);
-        } catch (IOException | ParserConfigurationException | SAXException | JRException | TransformerException e) {
-            SIRS.LOGGER.log(Level.WARNING, null, e);
-        }
+        final File fileToPrint = PrinterUtilities.print(avoidFields, Injector.getSession().getPreviews(), new SirsStringConverter(), elementsToPrint);
+        SIRS.openFile(fileToPrint);
     }
 
     /**
@@ -269,77 +255,73 @@ public class PrintManager {
      * @param printReseauOuvrage
      * @param printVoirie
      */
-    public final void printDesordres(final List<Desordre> desordres, final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie) {
+    public final void printDesordres(final List<Desordre> desordres, final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie) throws Exception {
 
-            final List avoidDesordreFields = new ArrayList<>();
-            avoidDesordreFields.add(GEOMETRY_FIELD);
-            avoidDesordreFields.add(DOCUMENT_ID_FIELD);
-            avoidDesordreFields.add(ID_FIELD);
-            avoidDesordreFields.add(LONGITUDE_MIN_FIELD);
-            avoidDesordreFields.add(LONGITUDE_MAX_FIELD);
-            avoidDesordreFields.add(LATITUDE_MIN_FIELD);
-            avoidDesordreFields.add(LATITUDE_MAX_FIELD);
-            avoidDesordreFields.add(FOREIGN_PARENT_ID_FIELD);
-            avoidDesordreFields.add(REVISION_FIELD);
-            avoidDesordreFields.add(PARENT_FIELD);
-            avoidDesordreFields.add(COUCH_DB_DOCUMENT_FIELD);
-            avoidDesordreFields.add(OBSERVATIONS_REFERENCE);
+        final List avoidDesordreFields = new ArrayList<>();
+        avoidDesordreFields.add(GEOMETRY_FIELD);
+        avoidDesordreFields.add(DOCUMENT_ID_FIELD);
+        avoidDesordreFields.add(ID_FIELD);
+        avoidDesordreFields.add(LONGITUDE_MIN_FIELD);
+        avoidDesordreFields.add(LONGITUDE_MAX_FIELD);
+        avoidDesordreFields.add(LATITUDE_MIN_FIELD);
+        avoidDesordreFields.add(LATITUDE_MAX_FIELD);
+        avoidDesordreFields.add(FOREIGN_PARENT_ID_FIELD);
+        avoidDesordreFields.add(REVISION_FIELD);
+        avoidDesordreFields.add(PARENT_FIELD);
+        avoidDesordreFields.add(COUCH_DB_DOCUMENT_FIELD);
+        avoidDesordreFields.add(OBSERVATIONS_REFERENCE);
 
-            avoidDesordreFields.add(ECHELLE_LIMINIMETRIQUE_REFERENCE);
-            avoidDesordreFields.add(OUVRAGE_PARTICULIER_REFERENCE);
-            avoidDesordreFields.add(RESEAU_TELECOM_ENERGIE_REFERENCE);
-            avoidDesordreFields.add(OUVRAGE_TELECOM_ENERGIE_REFERENCE);
-            avoidDesordreFields.add(OUVRAGE_HYDRAULIQUE_REFERENCE);
-            avoidDesordreFields.add(RESEAU_HYDRAULIQUE_FERME_REFERENCE);
-            avoidDesordreFields.add(RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE);
-            avoidDesordreFields.add(OUVRAGE_VOIRIE_REFERENCE);
-            avoidDesordreFields.add(VOIE_DIGUE_REFERENCE);
-            avoidDesordreFields.add(PRESTATION_REFERENCE);
+        avoidDesordreFields.add(ECHELLE_LIMINIMETRIQUE_REFERENCE);
+        avoidDesordreFields.add(OUVRAGE_PARTICULIER_REFERENCE);
+        avoidDesordreFields.add(RESEAU_TELECOM_ENERGIE_REFERENCE);
+        avoidDesordreFields.add(OUVRAGE_TELECOM_ENERGIE_REFERENCE);
+        avoidDesordreFields.add(OUVRAGE_HYDRAULIQUE_REFERENCE);
+        avoidDesordreFields.add(RESEAU_HYDRAULIQUE_FERME_REFERENCE);
+        avoidDesordreFields.add(RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE);
+        avoidDesordreFields.add(OUVRAGE_VOIRIE_REFERENCE);
+        avoidDesordreFields.add(VOIE_DIGUE_REFERENCE);
+        avoidDesordreFields.add(PRESTATION_REFERENCE);
 
-            avoidDesordreFields.add(VALID_FIELD);
-            avoidDesordreFields.add(AUTHOR_FIELD);
-            avoidDesordreFields.add(DATE_MAJ_FIELD);
+        avoidDesordreFields.add(VALID_FIELD);
+        avoidDesordreFields.add(AUTHOR_FIELD);
+        avoidDesordreFields.add(DATE_MAJ_FIELD);
 
-            final List<String> observationFields = new ArrayList<>();
-            observationFields.add("designation");
-            observationFields.add("urgenceId");
-            observationFields.add("observateurId");
-            observationFields.add("nombreDesordres");
-            observationFields.add("date");
-            observationFields.add("evolution");
-            observationFields.add("suite");
+        final List<String> observationFields = new ArrayList<>();
+        observationFields.add("designation");
+        observationFields.add("urgenceId");
+        observationFields.add("observateurId");
+        observationFields.add("nombreDesordres");
+        observationFields.add("date");
+        observationFields.add("evolution");
+        observationFields.add("suite");
 
-            final List<String> prestationFields = new ArrayList<>();
-            prestationFields.add("designation");
-            prestationFields.add("libelle");
-            prestationFields.add("typePrestationId");
-            prestationFields.add("coutMetre");
-            prestationFields.add("marcheId");
-            prestationFields.add("realisationInterne");
-            prestationFields.add("date_debut");
-            prestationFields.add("date_fin");
-            prestationFields.add("commentaire");
+        final List<String> prestationFields = new ArrayList<>();
+        prestationFields.add("designation");
+        prestationFields.add("libelle");
+        prestationFields.add("typePrestationId");
+        prestationFields.add("coutMetre");
+        prestationFields.add("marcheId");
+        prestationFields.add("realisationInterne");
+        prestationFields.add("date_debut");
+        prestationFields.add("date_fin");
+        prestationFields.add("commentaire");
 
-            final List<String> reseauFields = new ArrayList<>();
-            reseauFields.add("designation");
-            reseauFields.add("libelle");
-            reseauFields.add("date_debut");
-            reseauFields.add("date_fin");
-            reseauFields.add("commentaire");
+        final List<String> reseauFields = new ArrayList<>();
+        reseauFields.add("designation");
+        reseauFields.add("libelle");
+        reseauFields.add("date_debut");
+        reseauFields.add("date_fin");
+        reseauFields.add("commentaire");
 
-        try{
-            final File fileToPrint = PrinterUtilities.printDisorders(
-                    avoidDesordreFields,
-                    observationFields,
-                    prestationFields,
-                    reseauFields,
-                    Injector.getSession().getPreviews(),
-                    new SirsStringConverter(),
-                    desordres, printPhoto, printReseauOuvrage, printVoirie);
-            SIRS.openFile(fileToPrint);
-        } catch (Exception ex) {
-            SIRS.LOGGER.log(Level.WARNING, null, ex);
-        }
+        final File fileToPrint = PrinterUtilities.printDisorders(
+                avoidDesordreFields,
+                observationFields,
+                prestationFields,
+                reseauFields,
+                Injector.getSession().getPreviews(),
+                new SirsStringConverter(),
+                desordres, printPhoto, printReseauOuvrage, printVoirie);
+        SIRS.openFile(fileToPrint);
     }
 
     /**
@@ -349,64 +331,60 @@ public class PrintManager {
      * @param printPhoto
      * @param printReseauOuvrage
      */
-    public final void printReseaux(final List<ReseauHydrauliqueFerme> reseauxFermes, final boolean printPhoto, final boolean printReseauOuvrage) {
+    public final void printReseaux(final List<ReseauHydrauliqueFerme> reseauxFermes, final boolean printPhoto, final boolean printReseauOuvrage) throws Exception {
 
-            final List avoidDesordreFields = new ArrayList<>();
-            avoidDesordreFields.add(GEOMETRY_FIELD);
-            avoidDesordreFields.add(DOCUMENT_ID_FIELD);
-            avoidDesordreFields.add(ID_FIELD);
-            avoidDesordreFields.add(LONGITUDE_MIN_FIELD);
-            avoidDesordreFields.add(LONGITUDE_MAX_FIELD);
-            avoidDesordreFields.add(LATITUDE_MIN_FIELD);
-            avoidDesordreFields.add(LATITUDE_MAX_FIELD);
-            avoidDesordreFields.add(FOREIGN_PARENT_ID_FIELD);
-            avoidDesordreFields.add(REVISION_FIELD);
-            avoidDesordreFields.add(PARENT_FIELD);
-            avoidDesordreFields.add(COUCH_DB_DOCUMENT_FIELD);
-            avoidDesordreFields.add(OBSERVATIONS_REFERENCE);
+        final List avoidDesordreFields = new ArrayList<>();
+        avoidDesordreFields.add(GEOMETRY_FIELD);
+        avoidDesordreFields.add(DOCUMENT_ID_FIELD);
+        avoidDesordreFields.add(ID_FIELD);
+        avoidDesordreFields.add(LONGITUDE_MIN_FIELD);
+        avoidDesordreFields.add(LONGITUDE_MAX_FIELD);
+        avoidDesordreFields.add(LATITUDE_MIN_FIELD);
+        avoidDesordreFields.add(LATITUDE_MAX_FIELD);
+        avoidDesordreFields.add(FOREIGN_PARENT_ID_FIELD);
+        avoidDesordreFields.add(REVISION_FIELD);
+        avoidDesordreFields.add(PARENT_FIELD);
+        avoidDesordreFields.add(COUCH_DB_DOCUMENT_FIELD);
+        avoidDesordreFields.add(OBSERVATIONS_REFERENCE);
 
-            avoidDesordreFields.add(ECHELLE_LIMINIMETRIQUE_REFERENCE);
-            avoidDesordreFields.add(OUVRAGE_PARTICULIER_REFERENCE);
-            avoidDesordreFields.add(RESEAU_TELECOM_ENERGIE_REFERENCE);
-            avoidDesordreFields.add(OUVRAGE_TELECOM_ENERGIE_REFERENCE);
-            avoidDesordreFields.add(OUVRAGE_HYDRAULIQUE_REFERENCE);
-            avoidDesordreFields.add(RESEAU_HYDRAULIQUE_FERME_REFERENCE);
-            avoidDesordreFields.add(RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE);
-            avoidDesordreFields.add(OUVRAGE_VOIRIE_REFERENCE);
-            avoidDesordreFields.add(VOIE_DIGUE_REFERENCE);
-            avoidDesordreFields.add(PRESTATION_REFERENCE);
+        avoidDesordreFields.add(ECHELLE_LIMINIMETRIQUE_REFERENCE);
+        avoidDesordreFields.add(OUVRAGE_PARTICULIER_REFERENCE);
+        avoidDesordreFields.add(RESEAU_TELECOM_ENERGIE_REFERENCE);
+        avoidDesordreFields.add(OUVRAGE_TELECOM_ENERGIE_REFERENCE);
+        avoidDesordreFields.add(OUVRAGE_HYDRAULIQUE_REFERENCE);
+        avoidDesordreFields.add(RESEAU_HYDRAULIQUE_FERME_REFERENCE);
+        avoidDesordreFields.add(RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE);
+        avoidDesordreFields.add(OUVRAGE_VOIRIE_REFERENCE);
+        avoidDesordreFields.add(VOIE_DIGUE_REFERENCE);
+        avoidDesordreFields.add(PRESTATION_REFERENCE);
 
-            avoidDesordreFields.add(VALID_FIELD);
-            avoidDesordreFields.add(AUTHOR_FIELD);
-            avoidDesordreFields.add(DATE_MAJ_FIELD);
+        avoidDesordreFields.add(VALID_FIELD);
+        avoidDesordreFields.add(AUTHOR_FIELD);
+        avoidDesordreFields.add(DATE_MAJ_FIELD);
 
-            final List<String> observationFields = new ArrayList<>();
-            observationFields.add("designation");
-            observationFields.add("urgenceId");
-            observationFields.add("observateurId");
-            observationFields.add("nombreDesordres");
-            observationFields.add("date");
-            observationFields.add("evolution");
-            observationFields.add("suite");
+        final List<String> observationFields = new ArrayList<>();
+        observationFields.add("designation");
+        observationFields.add("urgenceId");
+        observationFields.add("observateurId");
+        observationFields.add("nombreDesordres");
+        observationFields.add("date");
+        observationFields.add("evolution");
+        observationFields.add("suite");
 
-            final List<String> reseauFields = new ArrayList<>();
-            reseauFields.add("designation");
-            reseauFields.add("libelle");
-            reseauFields.add("date_debut");
-            reseauFields.add("date_fin");
-            reseauFields.add("commentaire");
+        final List<String> reseauFields = new ArrayList<>();
+        reseauFields.add("designation");
+        reseauFields.add("libelle");
+        reseauFields.add("date_debut");
+        reseauFields.add("date_fin");
+        reseauFields.add("commentaire");
 
-        try{
-            final File fileToPrint = PrinterUtilities.printReseauFerme(
-                    avoidDesordreFields,
-                    observationFields,
-                    reseauFields,
-                    Injector.getSession().getPreviews(),
-                    new SirsStringConverter(),
-                    reseauxFermes, printPhoto, printReseauOuvrage);
-            SIRS.openFile(fileToPrint);
-        } catch (Exception ex) {
-            SIRS.LOGGER.log(Level.WARNING, null, ex);
-        }
+        final File fileToPrint = PrinterUtilities.printReseauFerme(
+                avoidDesordreFields,
+                observationFields,
+                reseauFields,
+                Injector.getSession().getPreviews(),
+                new SirsStringConverter(),
+                reseauxFermes, printPhoto, printReseauOuvrage);
+        SIRS.openFile(fileToPrint);
     }
 }

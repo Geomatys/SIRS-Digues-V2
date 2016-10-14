@@ -30,10 +30,15 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Tab;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.util.collection.CloseableIterator;
 
 /**
@@ -62,6 +67,11 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
     private final TypeChoicePojoTable disordreTypesTable = new TypeChoicePojoTable(RefTypeDesordre.class, "Types de désordres");
     private final TypeChoicePojoTable urgenceTypesTable = new TypeChoicePojoTable(RefUrgence.class, "Types d'urgences");
 
+    private final ObjectProperty<Task<Boolean>> taskProperty = new SimpleObjectProperty<>();
+
+    @FXML private Button uiPrint;
+    @FXML private Button uiCancel;
+
     public FXDisorderPrintPane(){
         super(FXDisorderPrintPane.class);
         disordreTypesTable.setTableItems(()-> (ObservableList) SIRS.observableList(Injector.getSession().getRepositoryForClass(RefTypeDesordre.class).getAll()));
@@ -70,17 +80,42 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
         urgenceTypesTable.setTableItems(()-> (ObservableList) SIRS.observableList(Injector.getSession().getRepositoryForClass(RefUrgence.class).getAll()));
         urgenceTypesTable.commentAndPhotoProperty().set(false);
         uiUrgenceTypeChoice.setContent(urgenceTypesTable);
+
+        uiPrint.disableProperty().bind(uiCancel.disableProperty().not());
+        uiCancel.setDisable(true);
+        taskProperty.addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) {
+                uiCancel.disableProperty().unbind();
+                uiCancel.setDisable(true);
+            } else {
+                uiCancel.disableProperty().bind(newVal.runningProperty().not());
+                newVal.setOnSucceeded(evt -> Platform.runLater(() -> {
+                    if (Boolean.TRUE.equals(evt.getSource().getValue())) {
+                        new Growl(Growl.Type.INFO, "La fiche a été générée avec succès.").showAndFade();
+                    } else {
+                        new Growl(Growl.Type.WARNING, "Aucun élément trouvé pour les critères demandés.").showAndFade();
+                    }
+                    taskProperty.set(null);
+                }));
+                newVal.setOnFailed(evt -> Platform.runLater(() -> {
+                    new Growl(Growl.Type.ERROR, "L'impression a échouée.").showAndFade();
+                    taskProperty.set(null);
+                }));
+            }
+        });
     }
 
     @FXML private void cancel() {
-
+        final Task t = taskProperty.get();
+        if (t != null)
+            t.cancel();
     }
 
 
     @FXML
-    private void print(){
-        Injector.getSession().getTaskManager().submit("Génération de fiches détaillées de désordres",
-        () -> {
+    private void print() {
+        final Task<Boolean> printing = new TaskManager.MockTask<>("Génération de fiches détaillées de désordres", () -> {
+            final Thread t = Thread.currentThread();
             final Predicate userOptions  = new TypePredicate()
                     .and(new TemporalPredicate())
                     .and(new LinearPredicate<>())
@@ -90,7 +125,7 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
             final List<Desordre> toPrint = new ArrayList(100);
             try (final CloseableIterator<Desordre> it = Injector.getSession().getRepositoryForClass(Desordre.class).getAllStreaming().iterator()) {
                 Desordre d;
-                while (it.hasNext()) {
+                while (it.hasNext() && !t.isInterrupted()) {
                     d = it.next();
                     if (userOptions.test(d)) {
                         toPrint.add(d);
@@ -98,18 +133,15 @@ public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
                 }
             }
 
-            if (!toPrint.isEmpty())
+            if (!toPrint.isEmpty() && !t.isInterrupted())
                 Injector.getSession().getPrintManager().printDesordres(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected(), uiOptionVoirie.isSelected());
 
             return !toPrint.isEmpty();
-            
-        }).setOnSucceeded(evt -> Platform.runLater(() -> {
-            if (Boolean.TRUE.equals(evt.getSource().getValue())) {
-                new Growl(Growl.Type.INFO, "La fiche a été générée avec succès.").showAndFade();
-            } else {
-                new Growl(Growl.Type.WARNING, "Aucun élément trouvé pour les critères demandés.").showAndFade();
-            }
-        }));
+
+        });
+        taskProperty.set(printing);
+
+        TaskManager.INSTANCE.submit(printing);
     }
 
     /**

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -26,6 +26,7 @@ import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
+import fr.sirs.core.model.StationPompage;
 import static fr.sirs.util.JRDomWriterDesordreSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTO_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
@@ -47,11 +48,11 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
     public ReseauHydrauliqueFermeDataSource(final Iterable<ReseauHydrauliqueFerme> iterable, final Previews previewLabelRepository){
         super(iterable, previewLabelRepository);
     }
-    
+
     public ReseauHydrauliqueFermeDataSource(final Iterable<ReseauHydrauliqueFerme> iterable, final Previews previewLabelRepository, final SirsStringConverter stringConverter){
         super(iterable, previewLabelRepository, stringConverter);
     }
-    
+
     @Override
     public Object getFieldValue(final JRField jrf) throws JRException {
 
@@ -77,7 +78,7 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
             final List<List<? extends ObjetReseau>> retrievedLists = new ArrayList();
             retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageHydrauliqueAssocie.class).get(currentObject.getOuvrageHydrauliqueAssocieIds()));
             retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueCielOuvert.class).get(currentObject.getReseauHydrauliqueCielOuvertIds()));
-            retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).get(currentObject.getStationPompageIds()));
+            retrievedLists.add(Injector.getSession().getRepositoryForClass(StationPompage.class).get(currentObject.getStationPompageIds()));
 
             for(final List candidate : retrievedLists){
                 if(candidate!=null && !candidate.isEmpty()){
@@ -88,5 +89,5 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
         }
         else return super.getFieldValue(jrf);
     }
-    
+
 }

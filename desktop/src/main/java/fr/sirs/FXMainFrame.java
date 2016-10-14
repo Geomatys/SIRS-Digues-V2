@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -195,7 +195,7 @@ public class FXMainFrame extends BorderPane {
                 uiDesignation.getItems().add(toMenuItem(c, Choice.MODEL));
             }
         }
-        
+
         // A simple comparator to sort menu items according to their title.
         final Collator collator = Collator.getInstance();
         final Comparator<MenuItem> menuComparator = (o1, o2) -> {
@@ -213,7 +213,7 @@ public class FXMainFrame extends BorderPane {
 
         uiReference.getItems().sort(menuComparator);
         uiDesignation.getItems().sort(menuComparator);
-        
+
         uiAdmin.getItems().addAll(uiUserAdmin, uiValidation, uiReference, uiDesignation);
         uiAdmin.visibleProperty().bind(Bindings.createBooleanBinding(() -> {
             Utilisateur user = session.utilisateurProperty().get();
@@ -232,7 +232,7 @@ public class FXMainFrame extends BorderPane {
             } else uiAlertsBtn.setText(new StringBuilder().append(alertNumber).append(" alertes").toString());
         });
         numberOfAlerts.invalidate();
-        
+
         uiAlertsBtn.setGraphic(new ImageView(ICON_ALERT));
         uiAlertsBtn.managedProperty().bind(uiAlertsBtn.visibleProperty());
         uiAlertsBtn.visibleProperty().bind(AlertManager.getInstance().alertsEnabledProperty());
@@ -289,7 +289,7 @@ public class FXMainFrame extends BorderPane {
             }
         };
         PrintManager.printButton = uiPrintButton;
-        
+
         printableProperty.addListener(printListener);
         printListener.changed(printableProperty, null, printableProperty.get());
     }
@@ -312,7 +312,7 @@ public class FXMainFrame extends BorderPane {
             closeAlert.setOnAction(evt -> alerts.remove(alert));
             final HBox closeBox = new HBox(closeAlert);
             closeBox.setAlignment(Pos.TOP_RIGHT);
-            
+
             final VBox alertBox = new VBox(closeBox, label, new Label("Echéance " + alert.getDate().format(dfFormat)));
             alertBox.getStyleClass().add(CSS_POPUP_ALERT);
             if(alert.getLevel()== HIGH)
@@ -643,12 +643,10 @@ public class FXMainFrame extends BorderPane {
 
     @FXML
     private void print() throws Exception {
-        new Thread() {
-            @Override
-            public void run() {
-                session.getPrintManager().printFocusedPrintable();
-            }
-        }.start();
+        TaskManager.INSTANCE.submit("Impression", () -> {
+            session.getPrintManager().printFocusedPrintable();
+            return true;
+        });
     }
 
     @FXML

@@ -27,10 +27,15 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Tab;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.util.collection.CloseableIterator;
 
 /**
@@ -46,47 +51,73 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
 
     private final TypeChoicePojoTable conduiteTypesTable = new TypeChoicePojoTable(RefConduiteFermee.class, "Types de conduites fermées");
 
+    private final ObjectProperty<Task<Boolean>> taskProperty = new SimpleObjectProperty<>();
+
+    @FXML private Button uiPrint;
+    @FXML private Button uiCancel;
+
     public FXReseauFermePrintPane(){
         super(FXReseauFermePrintPane.class);
         conduiteTypesTable.setTableItems(()-> (ObservableList) SIRS.observableList(Injector.getSession().getRepositoryForClass(RefConduiteFermee.class).getAll()));
         conduiteTypesTable.commentAndPhotoProperty().set(false);
         uiConduiteTypeChoice.setContent(conduiteTypesTable);
+
+        uiPrint.disableProperty().bind(uiCancel.disableProperty().not());
+        uiCancel.setDisable(true);
+        taskProperty.addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) {
+                uiCancel.disableProperty().unbind();
+                uiCancel.setDisable(true);
+            } else {
+                uiCancel.disableProperty().bind(newVal.runningProperty().not());
+                newVal.setOnSucceeded(evt -> Platform.runLater(() -> {
+                    if (Boolean.TRUE.equals(evt.getSource().getValue())) {
+                        new Growl(Growl.Type.INFO, "La fiche a été générée avec succès.").showAndFade();
+                    } else {
+                        new Growl(Growl.Type.WARNING, "Aucun élément trouvé pour les critères demandés.").showAndFade();
+                    }
+                    taskProperty.set(null);
+                }));
+                newVal.setOnFailed(evt -> Platform.runLater(() -> {
+                    new Growl(Growl.Type.ERROR, "L'impression a échouée.").showAndFade();
+                    taskProperty.set(null);
+                }));
+            }
+        });
     }
 
-    @FXML private void cancel(){
-
+    @FXML private void cancel() {
+        final Task t = taskProperty.get();
+        if (t != null)
+            t.cancel();
     }
 
     @FXML
-    private void print(){
-        Injector.getSession().getTaskManager().submit("Génération de fiches détaillées de réseaux hydrauliques fermés",
-                () -> {
-                    final Predicate userOptions = new TypeConduitePredicate()
+    private void print() {
+        final Task<Boolean> printing = new TaskManager.MockTask<>("Génération de fiches détaillées de réseaux hydrauliques fermés", () -> {
+            final Thread t = Thread.currentThread();
+            final Predicate userOptions = new TypeConduitePredicate()
                     .and(new TemporalPredicate())
                     .and(new PRPredicate<>());
 
-                    final List<ReseauHydrauliqueFerme> toPrint = new ArrayList<>(100);
-                    try (final CloseableIterator<ReseauHydrauliqueFerme> it = Injector.getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).getAllStreaming().iterator()) {
-                        ReseauHydrauliqueFerme r;
-                        while (it.hasNext()) {
-                            r = it.next();
-                            if (userOptions.test(r))
-                                toPrint.add(r);
-                        }
-                    }
-
-                    if (!toPrint.isEmpty())
-                        Injector.getSession().getPrintManager().printReseaux(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected());
-
-                    return !toPrint.isEmpty();
+            final List<ReseauHydrauliqueFerme> toPrint = new ArrayList<>(100);
+            try (final CloseableIterator<ReseauHydrauliqueFerme> it = Injector.getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).getAllStreaming().iterator()) {
+                ReseauHydrauliqueFerme r;
+                while (it.hasNext() && !t.isInterrupted()) {
+                    r = it.next();
+                    if (userOptions.test(r))
+                        toPrint.add(r);
                 }
-        ).setOnSucceeded(evt -> Platform.runLater(() -> {
-            if (Boolean.TRUE.equals(evt.getSource().getValue())) {
-                new Growl(Growl.Type.INFO, "La fiche a été générée avec succès.").showAndFade();
-            } else {
-                new Growl(Growl.Type.WARNING, "Aucun élément trouvé pour les critères demandés.").showAndFade();
             }
-        }));
+
+            if (!toPrint.isEmpty() && !t.isInterrupted())
+                Injector.getSession().getPrintManager().printReseaux(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected());
+
+            return !toPrint.isEmpty();
+        });
+        taskProperty.set(printing);
+
+        TaskManager.INSTANCE.submit(printing);
     }
 
     private class TypeConduitePredicate implements Predicate<ReseauHydrauliqueFerme> {
