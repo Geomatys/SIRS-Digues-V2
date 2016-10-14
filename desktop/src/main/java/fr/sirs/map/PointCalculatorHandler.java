@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -20,8 +20,7 @@ package fr.sirs.map;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import fr.sirs.CorePlugin;
-import fr.sirs.Injector;
-import fr.sirs.Session;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.TronconDigue;
 import java.util.ArrayList;
 import java.util.List;
@@ -193,13 +192,16 @@ public class PointCalculatorHandler extends AbstractNavigationHandler {
                     final Feature feature = helperTroncon.grabFeature(e.getX(), e.getY(), false);
                     if(feature !=null){
                         Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
-                        if(bean instanceof TronconDigue){
-                            final Session session = Injector.getSession();
-                            bean = session.getRepositoryForClass(TronconDigue.class).get(((TronconDigue)bean).getDocumentId());
-                            pane.uiSourceTroncon.setValue((TronconDigue)bean);
-                            setPickType(0);
-                            pane.uiPickTroncon.setSelected(false);
-                            pane.uiPickCoord.setSelected(false);
+                        if(bean instanceof TronconDigue) {
+                            for (final Preview p : pane.uiSourceTroncon.getItems()) {
+                                if (((TronconDigue) bean).getId().equals(p.getElementId())) {
+                                    pane.uiSourceTroncon.setValue(p);
+                                    setPickType(0);
+                                    pane.uiPickTroncon.setSelected(false);
+                                    pane.uiPickCoord.setSelected(false);
+                                    break;
+                                }
+                            }
                         }
                     }
 

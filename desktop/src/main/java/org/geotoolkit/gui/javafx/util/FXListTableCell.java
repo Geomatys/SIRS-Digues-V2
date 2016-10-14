@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -20,6 +20,7 @@ package org.geotoolkit.gui.javafx.util;
 
 import fr.sirs.SIRS;
 import java.util.List;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -38,7 +39,7 @@ import javafx.util.StringConverter;
  */
 public class FXListTableCell<S, T> extends TableCell<S, T> {
 
-    private final List<T> list;
+    private final ObservableList<T> list;
     private final ComboBox<T> field = new ComboBox<>();
     private final StringConverter<T> converter;
 
@@ -47,7 +48,7 @@ public class FXListTableCell<S, T> extends TableCell<S, T> {
     }
 
     public FXListTableCell(final List<T> collection, final StringConverter<T> converter) {
-        this.list = collection;
+        this.list = SIRS.observableList(collection).sorted();
         field.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -66,14 +67,14 @@ public class FXListTableCell<S, T> extends TableCell<S, T> {
 
     @Override
     public void startEdit() {
-            field.setItems(SIRS.observableList(list));
-            T value = getItem();
-            field.setValue(value);
-            field.getSelectionModel().select(value);
-            super.startEdit();
-            setText(null);
-            setGraphic(field);
-            field.requestFocus();
+        field.setItems(list);
+        T value = getItem();
+        field.setValue(value);
+        field.getSelectionModel().select(value);
+        super.startEdit();
+        setText(null);
+        setGraphic(field);
+        field.requestFocus();
     }
 
     @Override

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -65,7 +65,7 @@ import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
  *
  * TODO : Move style rules in a CSS file
  * TODO : Do not reload all list on display update.
- * 
+ *
  * @author Alexis Manin (Geomatys)
  */
 public class FXAuthenticationWalletEditor extends BorderPane implements SaveableConfiguration {
@@ -114,11 +114,19 @@ public class FXAuthenticationWalletEditor extends BorderPane implements Saveable
         // Initialize filters
         allValues.addListener((ListChangeListener.Change<? extends Entry> c) -> {
             ObservableList<String> hosts = FXCollections.observableList(
-                    allValues.stream().map(entry -> entry.host).collect(Collectors.toList()));
+                    allValues.stream()
+                            .map(entry -> entry.host)
+                            .sorted()
+                            .collect(Collectors.toList())
+            );
             hostSearch.setItems(hosts);
 
             ObservableList<Integer> ports = FXCollections.observableList(
-                    allValues.stream().map(entry -> entry.port).collect(Collectors.toList()));
+                    allValues.stream()
+                            .map(entry -> entry.port)
+                            .sorted()
+                            .collect(Collectors.toList())
+            );
             portSearch.setItems(ports);
         });
         SIRS.initCombo(hostSearch, FXCollections.observableList(allValues.stream().map(entry -> entry.host).collect(Collectors.toList())), null);

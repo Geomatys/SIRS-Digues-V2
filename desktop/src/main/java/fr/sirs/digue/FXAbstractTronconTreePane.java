@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -69,7 +69,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Samuel Andrés (Geomatys)
  */
 public abstract class FXAbstractTronconTreePane extends SplitPane implements DocumentListener, Printable {
-    
+
     @FXML protected Label uiTitle;
     @FXML protected TreeView<? extends Element> uiTree;
     @FXML protected BorderPane uiRight;
@@ -79,12 +79,12 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
     @FXML protected MenuButton uiAdd;
 
     @Autowired protected Session session;
-    
+
     //etat de la recherche
     protected final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH_WHITE);
     protected final ProgressIndicator searchRunning = new ProgressIndicator();
     protected final StringProperty currentSearch = new SimpleStringProperty("");
-    
+
     protected final Predicate<AvecBornesTemporelles> nonArchivedPredicate = (AvecBornesTemporelles t) -> {
         return (t.getDate_fin()==null || t.getDate_fin().isAfter(LocalDate.now()));
     };
@@ -210,7 +210,7 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
         final Point2D sc = uiSearch.localToScreen(0, 0);
         popup.show(uiSearch, sc.getX(), sc.getY());
     }
-    
+
     /**
      * Affiche un éditeur pour l'élément en entrée.
      * @param obj L'élément à éditer.
@@ -274,7 +274,7 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
     /**
      * Check if current tree item or one of its children contain at least one
      * element whose ID is present into given collection.
-     * 
+     *
      * @param ids Set of Ids to search into the given tree.
      * @return True if we've found one element matching a provided ID. False otherwise.
      */
@@ -338,7 +338,7 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
             return new SimpleObjectProperty();
         }
     }
-    
+
     public static void searchExtended(TreeItem<?> ti, Set objects){
         if(ti==null) return;
         if(ti.isExpanded()){

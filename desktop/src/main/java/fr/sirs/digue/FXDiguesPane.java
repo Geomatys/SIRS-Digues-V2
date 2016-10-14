@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -29,7 +29,12 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.Theme;
+import fr.sirs.util.DefaultElementComparator;
 import fr.sirs.util.SirsStringConverter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +42,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
@@ -133,19 +139,22 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
             final TreeItem treeRootItem = new TreeItem("root");
 
             //on recupere tous les elements
-            final Iterable<SystemeEndiguement> sds = session.getRepositoryForClass(SystemeEndiguement.class).getAllStreaming();
-            final Set<Digue> digues = new HashSet<>(session.getRepositoryForClass(Digue.class).getAll());
-            final Set<TronconDigue> troncons = new HashSet<>(((TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class)).getAll());
+            final Comparator<Element> comparator = new DefaultElementComparator();
+            final List<SystemeEndiguement> sds = FXCollections.observableArrayList(session.getRepositoryForClass(SystemeEndiguement.class).getAll()).sorted((Comparator)comparator);
+            final List<Digue> digues = new ArrayList<>(session.getRepositoryForClass(Digue.class).getAll());
+            Collections.sort(digues, comparator);
+            final List<TronconDigue> troncons = new ArrayList<>(((TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class)).getAll());
+            Collections.sort(troncons, comparator);
             final Set<Digue> diguesFound = new HashSet<>();
             final Set<TronconDigue> tronconsFound = new HashSet<>();
 
-            for(final SystemeEndiguement sd : sds){
+            for(final SystemeEndiguement sd : sds) {
                 final TreeItem sdItem = new TreeItem(sd);
                 treeRootItem.getChildren().add(sdItem);
                 sdItem.setExpanded(extendeds.contains(sd));
 
                 final List<Digue> digueIds = ((DigueRepository) session.getRepositoryForClass(Digue.class)).getBySystemeEndiguement(sd);
-                for(Digue digue : digues){
+                for(Digue digue : digues) {
                     if(!digueIds.contains(digue)) continue;
                     diguesFound.add(digue);
                     final TreeItem digueItem = toNode(digue, troncons, tronconsFound, filter);
@@ -183,7 +192,7 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
         });
     }
 
-    private static TreeItem toNode(final Digue digue, final Set<TronconDigue> troncons,
+    private static TreeItem toNode(final Digue digue, final Collection<TronconDigue> troncons,
             final Set<TronconDigue> tronconsFound, final Predicate<? super TronconDigue> filter){
         final TreeItem digueItem = new TreeItem(digue);
         for(final TronconDigue td : troncons){

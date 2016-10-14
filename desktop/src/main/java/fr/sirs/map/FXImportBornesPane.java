@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -35,6 +35,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
+import java.util.Comparator;
 import java.util.EventObject;
 import java.util.List;
 import java.util.Set;
@@ -254,8 +255,10 @@ public class FXImportBornesPane extends BorderPane {
             loadedData = MapBuilder.createFeatureLayer(col, RandomStyleBuilder.createDefaultVectorStyle(fType));
             uiTable.init(loadedData);
 
+            final Comparator<PropertyType> nameComparator = (o1, o2) -> o1.getName().compareTo(o2.getName());
+
             //liste des propriétés
-            final ObservableList<PropertyType> properties = FXCollections.observableArrayList(fType.getProperties(true));
+            final ObservableList<PropertyType> properties = FXCollections.observableArrayList(fType.getProperties(true)).sorted(nameComparator);
             uiAttX.setItems(properties);
             uiAttY.setItems(properties);
 
@@ -263,12 +266,12 @@ public class FXImportBornesPane extends BorderPane {
                 return (p instanceof AttributeType)
                         && CharSequence.class.isAssignableFrom(
                                 ((AttributeType) p).getValueClass());
-            });
+            }).sorted(nameComparator);
             final ObservableList numberProperties = properties.filtered((PropertyType p) -> {
                 return (p instanceof AttributeType)
                         && Number.class.isAssignableFrom(
                                 ((AttributeType) p).getValueClass());
-            });
+            }).sorted(nameComparator);
             uiLibelleBox.setItems(stringProperties);
             uiCodeBox.setItems(stringProperties);
             uiPRBox.setItems(numberProperties);

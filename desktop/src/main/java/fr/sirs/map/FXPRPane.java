@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -27,13 +27,13 @@ import fr.sirs.Session;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
-import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
+import fr.sirs.core.model.AvecGeometrie;
 import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
-import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -43,7 +43,6 @@ import static javafx.beans.binding.Bindings.*;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -69,11 +68,10 @@ import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.referencing.LinearReferencing;
-import org.geotoolkit.referencing.LinearReferencing.SegmentInfo;
 
 /**
- * Outil de calcule de position.
- * 
+ * Outil de calcul de position.
+ *
  * @author Johann Sorel (Geomatys)
  */
 public class FXPRPane extends VBox {
@@ -84,7 +82,7 @@ public class FXPRPane extends VBox {
 
     //source
     @FXML private GridPane uiGrid;
-    @FXML ComboBox<TronconDigue> uiSourceTroncon;
+    @FXML ComboBox<Preview> uiSourceTroncon;
     @FXML private ComboBox<SystemeReperage> uiSourceSR;
     @FXML private ComboBox<SystemeReperageBorne> uiSourceBorne;
     @FXML private RadioButton uiChoosePR;
@@ -99,7 +97,7 @@ public class FXPRPane extends VBox {
 
     @FXML private Button uiCalculate;
 
-    
+
     //target
     @FXML private ComboBox<SystemeReperage> uiTargetSR;
     @FXML private TextField uiTargetPR;
@@ -132,10 +130,12 @@ public class FXPRPane extends VBox {
         uiSourceY.setMaxWidth(Double.MAX_VALUE);
         uiSourceDist.setMaxWidth(Double.MAX_VALUE);
 
-        uiSourceTroncon.setConverter(new SirsStringConverter());
-        uiSourceSR.setConverter(new SirsStringConverter());
-        uiSourceBorne.setConverter(new SirsStringConverter());
-        uiTargetSR.setConverter(new SirsStringConverter());
+        final SirsStringConverter sirsStringConverter = new SirsStringConverter();
+
+        uiSourceTroncon.setConverter(sirsStringConverter);
+        uiSourceSR.setConverter(sirsStringConverter);
+        uiSourceBorne.setConverter(sirsStringConverter);
+        uiTargetSR.setConverter(sirsStringConverter);
 
         final ToggleGroup group = new ToggleGroup();
         uiChoosePR.setToggleGroup(group);
@@ -169,8 +169,8 @@ public class FXPRPane extends VBox {
 
 
         //on remplit la liste des troncons
-        final AbstractSIRSRepository<TronconDigue> tronconRepo = Injector.getSession().getRepositoryForClass(typeClass);
-        uiSourceTroncon.setItems(FXCollections.observableArrayList(tronconRepo.getAll()));
+        final List<Preview> previews = Injector.getSession().getPreviews().getByClass(typeClass);
+        uiSourceTroncon.setItems(FXCollections.observableArrayList(previews).sorted());
         uiSourceTroncon.getSelectionModel().selectFirst();
 
         //on met a jour la decoration si le point cible change
@@ -181,14 +181,14 @@ public class FXPRPane extends VBox {
         uiPickCoord.setGraphic(new ImageView(ICON_MARKER));
         uiPickTroncon.setText(null);
         uiPickTroncon.setGraphic(new ImageView(ICON_MARKER));
-        
+
     }
 
 
-    private void tronconChange(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newValue){
+    private void tronconChange(ObservableValue<? extends Preview> observable, Preview oldValue, Preview newValue) {
         if(newValue!=null){
             final Session session = Injector.getSession();
-            final List<SystemeReperage> srs = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).getByLinear(newValue);
+            final List<SystemeReperage> srs = ((SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class)).getByLinearId(newValue.getElementId());
             uiSourceSR.setItems(FXCollections.observableArrayList(srs));
             uiTargetSR.setItems(FXCollections.observableArrayList(srs));
         }else{
@@ -217,6 +217,10 @@ public class FXPRPane extends VBox {
         }
     }
 
+    /**
+     * TODO : PERFORM ALL POSITION COMPUTING IN A TASK
+     * @param event
+     */
     @FXML
     void calculate(ActionEvent event) {
         final Session session = Injector.getSession();
@@ -237,39 +241,41 @@ public class FXPRPane extends VBox {
         }
 
         //calcule de la position dans le systeme cible
-        final SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(
-                LinearReferencing.asLineString(uiSourceTroncon.getValue().getGeometry()));
-        final LinearReferencing.ProjectedPoint pos = LinearReferencingUtilities.projectReference(segments, pt);
-        final Point projPt = GO2Utilities.JTS_FACTORY.createPoint(pos.projected);
-        projPt.setSRID(pt.getSRID());
-        projPt.setUserData(pt.getUserData());
-        targetPoint.set(projPt);
+        session.getElement(uiSourceTroncon.getValue())
+                .map(input -> ((input instanceof AvecGeometrie) ? ((AvecGeometrie) input).getGeometry() : null))
+                .map(geom -> LinearReferencingUtilities.buildSegments(LinearReferencing.asLineString(geom)))
+                .ifPresent(segments -> {
+                    LinearReferencing.ProjectedPoint pos = LinearReferencingUtilities.projectReference(segments, pt);
+                    final Point projPt = GO2Utilities.JTS_FACTORY.createPoint(pos.projected);
+                    projPt.setUserData(pt.getUserData());
 
-        uiTargetX.setText(DF.format(pos.projected.x));
-        uiTargetY.setText(DF.format(pos.projected.y));
+                    targetPoint.set(projPt);
 
-        //calcule du PR cible
-        final float targetPR = TronconUtils.computePR(segments, uiTargetSR.getValue(), pt, borneRepo);
-        uiTargetPR.setText(DF.format(targetPR));
+                    uiTargetX.setText(DF.format(pos.projected.x));
+                    uiTargetY.setText(DF.format(pos.projected.y));
 
-        //calcule de la position par rapport aux bornes
-        final StringConverter strCvt = new SirsStringConverter();
-        final Map.Entry<Double, SystemeReperageBorne>[] nearest = TronconUtils.findNearest(segments, uiTargetSR.getValue(), pt, borneRepo);
-        if(nearest[0]!=null){
-            uiTargetBorneAmont.setText(strCvt.toString(nearest[0].getValue()));
-            uiTagetBorneAmontDist.setText(DF.format(nearest[0].getKey()));
-        }else{
-            uiTargetBorneAmont.setText("");
-            uiTagetBorneAmontDist.setText("");
-        }
-        if(nearest[1]!=null){
-            uiTargetBorneAval.setText(strCvt.toString(nearest[1].getValue()));
-            uiTargetBorneAvalDist.setText(DF.format(nearest[1].getKey()));
-        }else{
-            uiTargetBorneAval.setText("");
-            uiTargetBorneAvalDist.setText("");
-        }
+                    //calcule du PR cible
+                    final float targetPR = TronconUtils.computePR(segments, uiTargetSR.getValue(), pt, borneRepo);
+                    uiTargetPR.setText(DF.format(targetPR));
 
+                    //calcule de la position par rapport aux bornes
+                    final StringConverter strCvt = new SirsStringConverter();
+                    final Map.Entry<Double, SystemeReperageBorne>[] nearest = TronconUtils.findNearest(segments, uiTargetSR.getValue(), pt, borneRepo);
+                    if (nearest[0] != null) {
+                        uiTargetBorneAmont.setText(strCvt.toString(nearest[0].getValue()));
+                        uiTagetBorneAmontDist.setText(DF.format(nearest[0].getKey()));
+                    } else {
+                        uiTargetBorneAmont.setText("");
+                        uiTagetBorneAmontDist.setText("");
+                    }
+                    if (nearest[1] != null) {
+                        uiTargetBorneAval.setText(strCvt.toString(nearest[1].getValue()));
+                        uiTargetBorneAvalDist.setText(DF.format(nearest[1].getKey()));
+                    } else {
+                        uiTargetBorneAval.setText("");
+                        uiTargetBorneAvalDist.setText("");
+                    }
+                });
     }
 
     @FXML

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -27,10 +27,8 @@ import fr.sirs.core.model.MesureLigneEauPrZ;
 import fr.sirs.core.model.PointDZ;
 import fr.sirs.core.model.PrZProfilLong;
 import fr.sirs.core.model.ProfilLong;
-import fr.sirs.core.model.Role;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
-import java.util.Collection;
 import java.util.EventObject;
 import java.util.logging.Level;
 import javafx.collections.FXCollections;
@@ -64,12 +62,12 @@ import org.opengis.util.GenericName;
  * @author Samuel Andrés (Geomatys)
  */
 public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
-    
+
     @FXML private ComboBox<PropertyType> uiAttD;
-    
+
     FXImportDZ(final PojoTable pojoTable) {
         super(pojoTable);
-        
+
         uiAttD.setConverter(stringConverter);
         uiCRS.setDisable(true);
     }
@@ -78,11 +76,11 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
     void openFeatureStore(ActionEvent event) {
         final String url = uiPath.getText();
         final File file = new File(uiPath.getText());
-        
+
         uiPaneConfig.setDisable(true);
-        
+
         selectionProperty.removeAll(selectionProperty);
-        
+
         try{
             if(url.toLowerCase().endsWith(".shp")){
                 store = new ShapefileFeatureStore(file.toURI().toURL(), "no namespace");
@@ -97,25 +95,27 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
                 alert.showAndWait();
                 return;
             }
-            
+
             final Session session = store.createSession(true);
             final GenericName typeName = store.getNames().iterator().next();
             final FeatureCollection col = session.getFeatureCollection(QueryBuilder.all(typeName));
             final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, RandomStyleBuilder.createDefaultVectorStyle(col.getFeatureType()));
             uiTable.init(layer);
-            
+
             //liste des propriétés
-            final Collection<? extends PropertyType> properties = col.getFeatureType().getProperties(true);
-            uiAttDesignation.setItems(FXCollections.observableArrayList(properties));
-            uiAttD.setItems(FXCollections.observableArrayList(properties));
-            uiAttZ.setItems(FXCollections.observableArrayList(properties));
-            
+            final ObservableList<PropertyType> properties = FXCollections
+                    .observableArrayList(col.getFeatureType().getProperties(true))
+                    .sorted((o1, o2) -> o1.getName().compareTo(o2.getName()));
+            uiAttDesignation.setItems(properties);
+            uiAttD.setItems(properties);
+            uiAttZ.setItems(properties);
+
             if(!properties.isEmpty()){
                 uiAttDesignation.getSelectionModel().clearAndSelect(0);
                 uiAttD.getSelectionModel().clearAndSelect(0);
                 uiAttZ.getSelectionModel().clearAndSelect(0);
             }
-            
+
             //on ecoute la selection
             layer.addLayerListener(new LayerListener() {
                 @Override
@@ -125,7 +125,7 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
                     if(!FeatureMapLayer.SELECTION_FILTER_PROPERTY.equals(evt.getPropertyName())) return;
-                    
+
                     selectionProperty.removeAll(selectionProperty);
                     final Id filter = layer.getSelectionFilter();
                     try {
@@ -140,7 +140,7 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
                     }
                 }
             });
-            
+
         } catch(Exception ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
             final Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage(), ButtonType.OK);
@@ -148,15 +148,15 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
             alert.showAndWait();
         }
     }
-    
+
     @Override
     protected ObservableList<PointDZ> getSelectionPoint(){
         final ObservableList<Feature> features = selectionProperty;
         final ObservableList<PointDZ> leves = FXCollections.observableArrayList();
-        
+
         for(final Feature feature : features){
             final PointDZ leve;
-            
+
             if(pojoTable.getParentElement() instanceof LeveProfilTravers){
                 leve = Injector.getSession().getElementCreator().createElement(DZLeveProfilTravers.class);
             } else if(pojoTable.getParentElement() instanceof ProfilLong){
@@ -166,13 +166,13 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
             } else {
                 throw new UnsupportedOperationException("Type d'élément parent inconnu pour les points de levé.");
             }
-            
+
             // DZ
             leve.setD(Double.valueOf(String.valueOf(feature.getPropertyValue(uiAttD.getValue().getName().tip().toString()))));
             leve.setZ(Double.valueOf(String.valueOf(feature.getPropertyValue(uiAttZ.getValue().getName().tip().toString()))));
-            
+
             leve.setDesignation(String.valueOf(feature.getPropertyValue(uiAttDesignation.getValue().getName().tip().toString())));
-            
+
             leves.add(leve);
         }
         return leves;

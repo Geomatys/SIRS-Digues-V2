@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -26,13 +26,13 @@ import fr.sirs.SIRS;
 import fr.sirs.core.model.Positionable;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
-import java.util.Collection;
 import java.util.EventObject;
 import java.util.Set;
 import java.util.logging.Level;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -69,47 +69,47 @@ import org.opengis.util.GenericName;
  * @author Johann Sorel (Geomatys)
  */
 public class FXImportCoordinate extends FXAbstractImportCoordinate {
-    
+
     @FXML private ComboBox<PropertyType> uiAttX;
     @FXML private ComboBox<PropertyType> uiAttY;
-    
+
     private final ObjectProperty<Feature> selectionProperty = new SimpleObjectProperty<>();
     private final Positionable positionable;
-    
+
     public FXImportCoordinate(Positionable pos) {
         super();
         this.positionable = pos;
-        
+
         uiAttX.setConverter(stringConverter);
         uiAttY.setConverter(stringConverter);
-        
-        uiPaneImport.disableProperty().bind(selectionProperty.isNull());        
+
+        uiPaneImport.disableProperty().bind(selectionProperty.isNull());
     }
 
     @FXML
     void openFeatureStore(ActionEvent event) {
         final String url = uiPath.getText();
         final File file = new File(uiPath.getText());
-        
+
         uiPaneConfig.setDisable(true);
-        
+
         selectionProperty.set(null);
-        
+
         try{
             if(url.toLowerCase().endsWith(".shp")){
                 store = new ShapefileFeatureStore(file.toURI().toURL(), "no namespace");
-                
+
             }else if(url.toLowerCase().endsWith(".txt") || url.toLowerCase().endsWith(".csv")){
                 final char separator = (uiSeparator.getText().isEmpty()) ? ';' : uiSeparator.getText().charAt(0);
                 store = new CSVFeatureStore(file, "no namespace", separator);
-                
+
             }else{
                 final Alert alert = new Alert(Alert.AlertType.ERROR, "Le fichier sélectionné n'est pas un shp, csv ou txt", ButtonType.OK);
                 alert.setResizable(true);
                 alert.showAndWait();
                 return;
             }
-            
+
             final Session session = store.createSession(true);
             final Set<GenericName> typeNames = store.getNames();
             if (typeNames == null || typeNames.isEmpty()) {
@@ -119,24 +119,27 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
             final FeatureCollection col = session.getFeatureCollection(QueryBuilder.all(typeName));
             final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, RandomStyleBuilder.createDefaultVectorStyle(col.getFeatureType()));
             uiTable.init(layer);
-            
+
             // Activate property choice only when no geometry field can be found.
             if (col.getFeatureType().getGeometryDescriptor() == null) {
                 uiPaneConfig.setDisable(false);
             } else {
                 uiPaneConfig.setDisable(true);
             }
-            
+
             //liste des propriétés
-            final Collection<? extends PropertyType> properties = col.getFeatureType().getProperties(true);
-            uiAttX.setItems(FXCollections.observableArrayList(properties));
-            uiAttY.setItems(FXCollections.observableArrayList(properties));
-            
+            final ObservableList<PropertyType> properties = FXCollections
+                    .observableArrayList(col.getFeatureType().getProperties(true))
+                    .sorted((o1, o2) -> o1.getName().compareTo(o2.getName()));
+
+            uiAttX.setItems(properties);
+            uiAttY.setItems(properties);
+
             if(!properties.isEmpty()){
                 uiAttX.getSelectionModel().clearAndSelect(0);
                 uiAttY.getSelectionModel().clearAndSelect(0);
             }
-            
+
             //on ecoute la selection
             layer.addLayerListener(new LayerListener() {
                 @Override
@@ -146,7 +149,7 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
                     if(!FeatureMapLayer.SELECTION_FILTER_PROPERTY.equals(evt.getPropertyName())) return;
-                    
+
                     selectionProperty.set(null);
                     final Id filter = layer.getSelectionFilter();
                     try {
@@ -162,7 +165,7 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
                     }
                 }
             });
-            
+
         }catch(Exception ex){
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
             final Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage(), ButtonType.OK);
@@ -170,9 +173,9 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
             alert.showAndWait();
             return;
         }
-        
+
     }
-    
+
     @FXML
     void importStart(ActionEvent event) {
         final Point pt = getSelectionPoint();
@@ -186,18 +189,18 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
         if(pt==null) return;
         positionable.setPositionFin(pt);
     }
-    
+
     private Point getSelectionPoint(){
         final Feature feature = selectionProperty.get();
-        
+
         Point geom;
         final CoordinateReferenceSystem dataCrs;
-                
+
         if(uiPaneConfig.isDisable()){
             //shapefile
             geom = ((Geometry)feature.getDefaultGeometryProperty().getValue()).getCentroid();
             dataCrs = feature.getType().getCoordinateReferenceSystem();
-            
+
         }else{
             //csv
             final String attX = String.valueOf(feature.getPropertyValue(uiAttX.getValue().getName().tip().toString()));
@@ -205,8 +208,8 @@ public class FXImportCoordinate extends FXAbstractImportCoordinate {
             geom = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(Double.valueOf(attX), Double.valueOf(attY)));
             dataCrs = uiCRS.getValue();
         }
-        
-        //transform to RGF93 
+
+        //transform to RGF93
         try{
             final fr.sirs.Session session = Injector.getSession();
             final MathTransform trs = CRS.findMathTransform(dataCrs, session.getProjection(), true);
