@@ -201,7 +201,7 @@ public abstract class TronconChoicePrintPane extends BorderPane {
             if (!Float.isNaN(startPR) && candidate.getPrFin() < startPR)
                 return false;
 
-            return Float.isNaN(endPR) || candidate.getPrDebut() > endPR;
+            return Float.isNaN(endPR) || candidate.getPrDebut() <= endPR;
         }
     }
 }
