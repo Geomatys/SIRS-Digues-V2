@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -38,6 +38,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import org.apache.sis.referencing.CRS;
 import org.geotoolkit.display.VisitFilter;
 import org.geotoolkit.display2d.GraphicVisitor;
 import org.geotoolkit.display2d.canvas.AbstractGraphicVisitor;
@@ -51,7 +52,6 @@ import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
-import org.geotoolkit.referencing.CRS;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
@@ -62,7 +62,7 @@ import org.opengis.util.FactoryException;
 public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
 
     private static final int CROSS_SIZE = 5;
-    
+
     private final MouseListen mouseInputListener = new MouseListen();
     private final FXGeometryLayer geomlayer= new FXGeometryLayer(){
         @Override
@@ -75,7 +75,7 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
         }
     };
     private final double zoomFactor = 2;
-    
+
      // overriden variable by init();
     protected String typeName;
     protected Class typeClass;
@@ -83,7 +83,7 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
     protected Class parentClass;
     protected boolean showRive;
     protected String parentLabel;
-    
+
     protected void init() {
         this.typeName    = "tronçon";
         this.typeClass   = TronconDigue.class;
@@ -91,8 +91,8 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
         this.parentClass = Digue.class;
         this.showRive = true;
         this.parentLabel = "à la digue";
-    }    
-    
+    }
+
     public ConvertGeomToTronconHandler(final FXMap map) {
         super();
         init();
@@ -121,7 +121,7 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
         component.removeDecoration(geomlayer);
         return true;
     }
-            
+
     private class MouseListen extends FXPanMouseListen {
 
         private final ContextMenu popup = new ContextMenu();
@@ -130,36 +130,36 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
             super(ConvertGeomToTronconHandler.this);
             popup.setAutoHide(true);
         }
-        
+
         @Override
-        public void mousePressed(final MouseEvent e) {            
+        public void mousePressed(final MouseEvent e) {
             final GraphicVisitor visitor = new AbstractGraphicVisitor() {
 
                 @Override
                 public void visit(ProjectedFeature feature, RenderingContext2D context, SearchAreaJ2D area) {
                     final Feature f = feature.getCandidate();
                     Geometry geom = (Geometry) f.getDefaultGeometryProperty().getValue();
-                    
+
                     if (geom != null) {
                         geom = LinearReferencingUtilities.asLineString(geom);
                     }
-                    
+
                     if(geom !=null) {
                         final Session session = Injector.getBean(Session.class);
                         final TronconDigue troncon = showTronconDialog(typeName, typeClass, maleGender, Digue.class, showRive, parentLabel);
                         if (troncon == null) return;
                         try{
                             //convertion from data crs to base crs
-                            geom = JTS.transform(geom, CRS.findMathTransform(
-                                    f.getDefaultGeometryProperty().getType().getCoordinateReferenceSystem(), 
-                                    session.getProjection(), true));
+                            geom = JTS.transform(geom, CRS.findOperation(
+                                    f.getDefaultGeometryProperty().getType().getCoordinateReferenceSystem(),
+                                    session.getProjection(), null).getMathTransform());
                             JTS.setCRS(geom, session.getProjection());
                             troncon.setGeometry(geom);
 
                             //save troncon
                             session.getRepositoryForClass(typeClass).add(troncon);
                             TronconUtils.updateSRElementaire(troncon,session);
-                            
+
                             map.getCanvas().repaint();
                         }catch(TransformException | FactoryException ex){
                             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);
@@ -170,10 +170,10 @@ public class ConvertGeomToTronconHandler extends AbstractNavigationHandler {
                 @Override
                 public void visit(ProjectedCoverage coverage, RenderingContext2D context, SearchAreaJ2D area) {}
             };
-            
+
             final Rectangle2D rect = new Rectangle2D.Double(getMouseX(e)-3, getMouseY(e)-3, 6, 6);
             map.getCanvas().getGraphicsIn(rect, visitor, VisitFilter.INTERSECTS);
         }
     }
-        
+
 }

@@ -73,10 +73,13 @@ public abstract class CouchDBTestCase extends TestCase {
     protected SessionCore session;
 
     @BeforeClass
-    public static synchronized void initEnvironment() throws IOException {
+    public static synchronized void initEnvironment() throws Exception {
         // Set http proxy / authentication managers
         ProxySelector.setDefault(new SystemProxySelector());
         Authenticator.setDefault(new SIRSAuthenticator());
+
+        SirsCore.initEpsgDB();
+
         // initialize fx toolkit
         new JFXPanel();
         // Create / connect to sirs database.

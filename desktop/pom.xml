@@ -82,7 +82,7 @@
     <!-- Moved out of Geotk, it does not follow the same versioning. -->
     <dependency>
       <groupId>org.geotoolkit</groupId>
-      <artifactId>geotk-feature-esri-geodb</artifactId>
+      <artifactId>geotk-esri</artifactId>
       <version>${geotoolkit.esri.version}</version>
     </dependency>
   </dependencies>

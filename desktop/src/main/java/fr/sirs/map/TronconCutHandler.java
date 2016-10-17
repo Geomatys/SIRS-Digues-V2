@@ -60,6 +60,7 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.apache.sis.referencing.CRS;
 import org.ektorp.DocumentOperationResult;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -81,7 +82,6 @@ import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.style.MutableStyleFactory;
 import org.geotoolkit.util.StringUtilities;
 import org.opengis.referencing.operation.MathTransform;
@@ -391,7 +391,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
                     //ajout d'un point de coupe
                     Point pt = helper.toJTS(startX, startY);
                     //to data crs
-                    final MathTransform ptToData =  CRS.findMathTransform(map.getCanvas().getObjectiveCRS2D(), session.getProjection());
+                    final MathTransform ptToData = CRS.findOperation(map.getCanvas().getObjectiveCRS2D(), session.getProjection(), null).getMathTransform();
                     pt = (Point) JTS.transform(pt,ptToData);
 
                     final LineString linear = LinearReferencingUtilities.asLineString(troncon.getGeometry());

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -36,7 +36,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
@@ -68,13 +67,12 @@ import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
-import org.geotoolkit.gui.javafx.render2d.navigation.AbstractMouseHandler;
 import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.referencing.CRS;
+import org.apache.sis.referencing.CRS;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
@@ -274,7 +272,7 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
             if(subHandle!=null) subHandle.keyTyped(e);
             else super.keyTyped(e);
         }
-        
+
     }
 
     private final class PickVisitor extends AbstractGraphicVisitor{
@@ -300,9 +298,9 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
                     try{
                         final Session session = Injector.getSession();
                         //convertion from data crs to base crs
-                        geom = JTS.transform(geom, CRS.findMathTransform(
+                        geom = JTS.transform(geom, CRS.findOperation(
                                 f.getDefaultGeometryProperty().getType().getCoordinateReferenceSystem(),
-                                session.getProjection(), true));
+                                session.getProjection(), null).getMathTransform());
                         JTS.setCRS(geom, session.getProjection());
 
 

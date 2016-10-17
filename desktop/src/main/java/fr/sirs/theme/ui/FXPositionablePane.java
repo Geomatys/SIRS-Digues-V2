@@ -63,9 +63,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javax.measure.unit.SI;
+import org.apache.sis.referencing.CRS;
 import org.geotoolkit.display.MeasureUtilities;
 import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.LinearReferencing;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -349,7 +349,7 @@ public class FXPositionablePane extends BorderPane {
 
             //WGS84 coord
             try {
-                final MathTransform trs = CRS.findMathTransform(baseCrs, CRS_WGS84, true);
+                final MathTransform trs = CRS.findOperation(baseCrs, CRS_WGS84, null).getMathTransform();
                 Point ptStart = (Point) JTS.transform(startPoint, trs);
                 Point ptEnd = (Point) JTS.transform(endPoint, trs);
 

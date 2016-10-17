@@ -25,9 +25,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.PlatformUtil;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.SIRSFileReference;
+import fr.sirs.util.ClosingDaemon;
+import fr.sirs.util.referencing.HackCRSFactory;
 import fr.sirs.util.property.DocumentRoots;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.SirsPreferences;
+import fr.sirs.util.referencing.HackCoordinateOperationFactory;
 import java.awt.Desktop;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -35,11 +38,14 @@ import java.beans.PropertyDescriptor;
 
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -49,6 +55,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -70,26 +77,26 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
+import javax.naming.NamingException;
 
-import javax.sql.DataSource;
 import org.apache.sis.geometry.GeneralEnvelope;
+import org.apache.sis.internal.system.DataDirectory;
+import org.apache.sis.internal.system.DefaultFactories;
 import org.apache.sis.io.wkt.Convention;
 import org.apache.sis.io.wkt.WKTFormat;
+import org.apache.sis.referencing.CRS;
 import org.apache.sis.util.ArgumentChecks;
 
 import org.apache.sis.util.logging.Logging;
-import org.geotoolkit.factory.Hints;
 import org.geotoolkit.internal.GeotkFX;
-import org.geotoolkit.internal.io.IOUtilities;
-import org.geotoolkit.internal.io.Installation;
+import org.geotoolkit.internal.io.JNDI;
 import org.geotoolkit.internal.referencing.CRSUtilities;
-import org.geotoolkit.internal.sql.DefaultDataSource;
 import org.geotoolkit.lang.Setup;
-import org.geotoolkit.referencing.CRS;
-import org.geotoolkit.referencing.factory.epsg.EpsgInstaller;
-import org.geotoolkit.referencing.operation.transform.NTv2Transform;
+import org.hsqldb.jdbc.JDBCDataSource;
 import org.opengis.geometry.Envelope;
+import org.opengis.referencing.crs.CRSFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.CoordinateOperationFactory;
 import org.opengis.util.FactoryException;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
@@ -250,6 +257,8 @@ public class SirsCore {
     public static final String REFERENCE_GET_ID = "getId";
     public static final String REFERENCE_SET_DESIGNATION = "setDesignation";
 
+    protected static final String NTV2_PATH = "/fr/sirs/ntv2";
+
     /**
      * User directory root folder.
      *
@@ -280,8 +289,10 @@ public class SirsCore {
      * à la base de données EPSG.
      * @throws IOException Si une erreur survient pendant la création / connexion
      * à la base de données.
+     * @throws javax.naming.NamingException Si il est impossible d'enregistrer
+     * la bdd EPSG auprès de JNDI.
      */
-    public static void initEpsgDB() throws FactoryException, IOException {
+    public static void initEpsgDB() throws FactoryException, IOException, NamingException {
         // create a database in user directory
         Files.createDirectories(SirsCore.EPSG_PATH);
 
@@ -290,36 +301,60 @@ public class SirsCore {
         final Properties noJavaPrefs = new Properties();
         noJavaPrefs.put("platform", "server");
         Setup.initialize(noJavaPrefs);
+
         final String url = "jdbc:hsqldb:file:" + SirsCore.EPSG_PATH.toString()+"/db";
-
-        final DataSource ds = new DefaultDataSource(url);
-        Hints.putSystemDefault(Hints.EPSG_DATA_SOURCE, ds);
-
-        final EpsgInstaller installer = new EpsgInstaller();
-        installer.setDatabase(url);
-        if (!installer.exists()) {
-            installer.call();
-        }
-
-        // work in lazy mode, do your best for lenient datum shift
-        Hints.putSystemDefault(Hints.LENIENT_DATUM_SHIFT, Boolean.TRUE);
-
-        // force loading epsg
-        CRS.decode("EPSG:3395");
+        final JDBCDataSource ds = new JDBCDataSource();
+        ds.setDatabase(url);
+        JNDI.setEPSG(ds);
 
         // On tente d'installer la grille NTV2 pour améliorer la précision du géo-réferencement.
-        final File directory = Installation.NTv2.directory(true);
-        if (!new File(directory, NTv2Transform.RGF93).isFile()) {
-            directory.mkdirs();
-            final File out = new File(directory, NTv2Transform.RGF93);
-            try {
-                out.createNewFile();
-                IOUtilities.copy(SirsCore.class.getResourceAsStream("/fr/sirs/ntv2/ntf_r93.gsb"), new FileOutputStream(out));
-            } catch (IOException ex) {
-                LOGGER.log(Level.WARNING, "NTV2 data for RGF93 cannot be installed.", ex);
-                GeotkFX.newExceptionDialog("La grille de transformation NTV2 ne peut être installée. Des erreurs de reprojection pourrait apparaître au sein de l'application.", ex).show();
+        try {
+            final URI ntv2URI = SirsCore.class.getResource(NTV2_PATH).toURI();
+            final Path gridPath;
+            if (ntv2URI.getScheme().equalsIgnoreCase("file")) {
+                gridPath = Paths.get(ntv2URI);
+            } else if (ntv2URI.getScheme().equalsIgnoreCase("jar")) {
+                final FileSystem jarFS = FileSystems.newFileSystem(ntv2URI, Collections.EMPTY_MAP);
+                gridPath = jarFS.getPath(NTV2_PATH);
+                ClosingDaemon.watchResource(gridPath, jarFS);
+            } else {
+                throw new IOException("Unknown resource scheme.");
             }
+
+            Field dirField = DataDirectory.class.getDeclaredField("directory");
+            dirField.setAccessible(true);
+            dirField.set(DataDirectory.DATUM_CHANGES, gridPath);
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "NTV2 data for RGF93 cannot be installed.", ex);
+            GeotkFX.newExceptionDialog("La grille de transformation NTV2 ne peut être installée. Des erreurs de reprojection pourraient apparaître au sein de l'application.", ex).show();
         }
+
+        try {
+            // HACK : replace default CRS factories with our own one, to manage cases
+            // where ESRI data define bad CRS WKT.
+            final Field field = DefaultFactories.class.getDeclaredField("FACTORIES");
+            field.setAccessible(true);
+            // No class check, we want it to crash if not what expected.
+            final Map factories = (Map)field.get(null);
+
+            final HackCRSFactory hackCRSFactory = new HackCRSFactory();
+            factories.put(CRSFactory.class, hackCRSFactory);
+            if (!DefaultFactories.isDefaultInstance(CRSFactory.class, hackCRSFactory)) {
+                throw new IllegalStateException("Submitted CRS factory is not the default one !");
+            }
+
+            final HackCoordinateOperationFactory hcoFactory = new HackCoordinateOperationFactory();
+            factories.put(CoordinateOperationFactory.class, hcoFactory);
+            if (!DefaultFactories.isDefaultInstance(CoordinateOperationFactory.class, hcoFactory)) {
+                throw new IllegalStateException("Submitted CRS factory is not the default one !");
+            }
+
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "Hack on CRS factory cannot be applied !", ex);
+        }
+
+        // force loading epsg
+        CRS.forCode("EPSG:3395");
     }
 
     public static String getVersion() {
@@ -640,7 +675,7 @@ public class SirsCore {
         final WKTFormat wktFormat = new WKTFormat(null, null);
         wktFormat.setConvention(Convention.WKT1_COMMON_UNITS);
         wktFormat.setIndentation(WKTFormat.SINGLE_LINE);
-        return wktFormat.format(CRS.decode(crsCode));
+        return wktFormat.format(CRS.forCode(crsCode));
     }
 
     /**

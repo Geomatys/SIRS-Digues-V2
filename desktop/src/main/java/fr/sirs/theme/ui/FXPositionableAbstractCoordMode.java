@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -55,10 +55,11 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import org.apache.sis.referencing.CRS;
+import org.apache.sis.util.Utilities;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.internal.GeotkFX;
-import org.geotoolkit.referencing.CRS;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -282,9 +283,9 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
 
         //on sauvegarde les points dans le crs de la base
         positionable.setGeometry(geometry);
-        if(!CRS.equalsIgnoreMetadata(crs, Injector.getSession().getProjection())){
+        if(!Utilities.equalsIgnoreMetadata(crs, Injector.getSession().getProjection())){
             try{
-                final MathTransform trs = CRS.findMathTransform(crs, Injector.getSession().getProjection());
+                final MathTransform trs = CRS.findOperation(crs, Injector.getSession().getProjection(), null).getMathTransform();
                 startPoint = (Point) JTS.transform(startPoint, trs);
                 endPoint = (Point) JTS.transform(endPoint, trs);
             }catch(FactoryException | MismatchedDimensionException | TransformException ex){
@@ -350,7 +351,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         // If we've got at least one valid point, we transform it. Otherwise, just return.
         if (ptStart != null || ptEnd != null) {
             try {
-                final MathTransform conversion = CRS.findMathTransform(oldValue, newValue, true);
+                final MathTransform conversion = CRS.findOperation(oldValue, newValue, null).getMathTransform();
 
                 if (ptStart != null) {
                     final Point tmpStart = (Point) JTS.transform(ptStart, conversion);

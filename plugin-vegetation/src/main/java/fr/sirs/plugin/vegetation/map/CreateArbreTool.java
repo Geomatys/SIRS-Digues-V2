@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -63,7 +63,7 @@ import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.referencing.CRS;
+import org.apache.sis.referencing.CRS;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
@@ -234,7 +234,7 @@ public class CreateArbreTool extends AbstractEditionTool{
                 JTS.setCRS(pt, map.getCanvas().getObjectiveCRS2D());
                 try {
                     //on s'assure d'etre dans le crs de la base
-                    pt = JTS.transform(pt, CRS.findMathTransform(JTS.findCoordinateReferenceSystem(pt),session.getProjection()));
+                    pt = JTS.transform(pt, CRS.findOperation(JTS.findCoordinateReferenceSystem(pt),session.getProjection(), null).getMathTransform());
                 } catch (FactoryException | TransformException ex) {
                     SIRS.LOGGER.log(Level.WARNING,ex.getMessage(),ex);
                 }

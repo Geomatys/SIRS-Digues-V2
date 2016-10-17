@@ -64,7 +64,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
@@ -76,7 +75,6 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ToggleButton;
@@ -380,20 +378,20 @@ public class FXMainFrame extends BorderPane {
      * @param pm Progress monitor to hack.
      */
     private void initProgressMonitor(ProgressMonitor pm) {
-        for (final Node n : pm.getChildren()) {
-            if (n instanceof MenuButton) {
-                final MenuButton menu = (MenuButton)n;
-                Node graphic = menu.getGraphic();
-                if (graphic instanceof ImageView && ((ImageView)graphic).getImage() == ProgressMonitor.ICON_ERROR) {
-                    final MenuItem clearList = new MenuItem("Vider la liste");
-                    clearList.setOnAction(evt -> TaskManager.INSTANCE.getTasksInError().clear());
-                    clearList.setGraphic(new ImageView(GeotkFX.ICON_DELETE));
-                    menu.getItems().add(0, clearList);
-                    menu.getItems().add(1, new SeparatorMenuItem());
-                    break;
-                }
-            }
-        }
+//        for (final Node n : pm.getChildren()) {
+//            if (n instanceof MenuButton) {
+//                final MenuButton menu = (MenuButton)n;
+//                Node graphic = menu.getGraphic();
+//                if (graphic instanceof ImageView && ((ImageView)graphic).getImage() == ProgressMonitor.ICON_ERROR) {
+//                    final MenuItem clearList = new MenuItem("Vider la liste");
+//                    clearList.setOnAction(evt -> TaskManager.INSTANCE.getTasksInError().clear());
+//                    clearList.setGraphic(new ImageView(GeotkFX.ICON_DELETE));
+//                    menu.getItems().add(0, clearList);
+//                    menu.getItems().add(1, new SeparatorMenuItem());
+//                    break;
+//                }
+//            }
+//        }
     }
 
     private enum Choice{REFERENCE, MODEL};

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -56,7 +56,6 @@ import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.internal.Loggers;
-import org.geotoolkit.referencing.CRS;
 import org.opengis.referencing.IdentifiedObject;
 import org.opengis.referencing.crs.CRSAuthorityFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -76,7 +75,7 @@ import org.opengis.util.FactoryException;
  * @author Johann Sorel (Geomatys)
  */
 public class FXCRSTable extends ScrollPane{
-    
+
     private static final Color COLOR = new Color(30, 150, 250);
     public static final Image ICON_GEO = SwingFXUtils.toFXImage(GeotkFX.getBufferedImage("proj_geo", new Dimension(16, 16)), null);
     public static final Image ICON_SQUARE = SwingFXUtils.toFXImage(GeotkFX.getBufferedImage("proj_square", new Dimension(16, 16)), null);
@@ -84,28 +83,28 @@ public class FXCRSTable extends ScrollPane{
     public static final Image ICON_UTM = SwingFXUtils.toFXImage(GeotkFX.getBufferedImage("proj_utm", new Dimension(16, 16)), null);
     public static final Image ICON_CONIC = SwingFXUtils.toFXImage(GeotkFX.getBufferedImage("proj_conic", new Dimension(16, 16)), null);
     public static final Image ICON_UNKNOWNED = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_QUESTION,16,COLOR),null);
-    
+
     private final ObjectProperty<CoordinateReferenceSystem> crsProperty = new SimpleObjectProperty<>();
     private final TableView<Code> uiTable = new TableView<>();
-    
+
     private List<Code> allValues;
-    
+
     public FXCRSTable(){
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         setContent(uiTable);
         setFitToHeight(true);
         setFitToWidth(true);
-        
+
         //add a loader while we load datas
         final ProgressIndicator loading = new ProgressIndicator();
         loading.setMaxWidth(60);
         loading.setMaxHeight(60);
-        loading.setBackground(new Background(new BackgroundFill(new javafx.scene.paint.Color(0, 0, 0, 0), CornerRadii.EMPTY, Insets.EMPTY))); 
-        loading.setProgress(-1);        
+        loading.setBackground(new Background(new BackgroundFill(new javafx.scene.paint.Color(0, 0, 0, 0), CornerRadii.EMPTY, Insets.EMPTY)));
+        loading.setProgress(-1);
         uiTable.setPlaceholder(loading);
         uiTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         uiTable.setTableMenuButtonVisible(false);
-        
+
         uiTable.getSelectionModel().getSelectedCells().addListener(new ListChangeListener<TablePosition>() {
             @Override
             public void onChanged(ListChangeListener.Change<? extends TablePosition> c) {
@@ -121,13 +120,13 @@ public class FXCRSTable extends ScrollPane{
                 }
             }
         });
-        
+
         uiTable.getColumns().add(new TypeColumn());
         uiTable.getColumns().add(new CodeColumn());
         uiTable.getColumns().add(new DescColumn());
         uiTable.getColumns().add(new WKTColumn());
-        
-        
+
+
         //load list
         new Thread(){
             @Override
@@ -143,17 +142,17 @@ public class FXCRSTable extends ScrollPane{
                 }
             }
         }.start();
-        
+
     }
-    
+
     public ObjectProperty<CoordinateReferenceSystem> crsProperty(){
         return crsProperty;
     }
-        
+
     public void searchCRS(final String searchword){
         filter(searchword);
     }
-    
+
     /**
      * Display only the CRS name that contains the specified keywords. The {@code keywords}
      * argument is a space-separated list, usually provided by the user after he pressed the
@@ -178,9 +177,9 @@ public class FXCRSTable extends ScrollPane{
         }
         uiTable.getItems().setAll(model);
     }
-    
+
     private List<Code> getCodes() throws FactoryException, IOException{
-        final CRSAuthorityFactory factory = CRS.getAuthorityFactory(Boolean.FALSE);
+        final CRSAuthorityFactory factory = org.apache.sis.referencing.CRS.getAuthorityFactory(null);
         final Set<String> strs = factory.getAuthorityCodes(CoordinateReferenceSystem.class);
         Set<String> managed = SirsCore.getProj4ManagedProjections();
         final List<Code> codes = new ArrayList<>();
@@ -191,7 +190,7 @@ public class FXCRSTable extends ScrollPane{
         }
         return codes;
     }
-    
+
     private static class TypeColumn extends TableColumn<Code, Code>{
 
         public TypeColumn() {
@@ -219,7 +218,7 @@ public class FXCRSTable extends ScrollPane{
                                         final ProjectedCRS pcrs = (ProjectedCRS) obj;
                                         final Projection proj = pcrs.getConversionFromBase();
                                         final OperationMethod method = proj.getMethod();
-                                        
+
                                         //TODO need to detect UTM and stereo
                                         if(String.valueOf(proj.getName()).toLowerCase().contains("utm")){
                                             icon = ICON_UTM;
@@ -245,9 +244,9 @@ public class FXCRSTable extends ScrollPane{
                 }
             });
         }
-        
+
     }
-    
+
     private static class CodeColumn extends TableColumn<Code, String>{
 
         public CodeColumn() {
@@ -256,9 +255,9 @@ public class FXCRSTable extends ScrollPane{
             setPrefWidth(150);
             setCellValueFactory((TableColumn.CellDataFeatures<Code, String> param) -> new SimpleObjectProperty<>(param.getValue().code));
         }
-        
+
     }
-    
+
     private static class DescColumn extends TableColumn<Code, String>{
 
         public DescColumn() {
@@ -266,7 +265,7 @@ public class FXCRSTable extends ScrollPane{
             setEditable(false);
             setCellValueFactory((TableColumn.CellDataFeatures<Code, String> param) -> new SimpleObjectProperty<>(param.getValue().getDescription()));
         }
-        
+
     }
 
     private static class WKTColumn extends TableColumn<Code, Code>{
@@ -320,5 +319,5 @@ public class FXCRSTable extends ScrollPane{
         }
 
     }
-    
+
 }

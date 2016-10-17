@@ -57,11 +57,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
+import org.apache.sis.referencing.CRS;
 import org.apache.sis.util.ArgumentChecks;
+import org.apache.sis.util.Utilities;
 import org.ektorp.DocumentOperationResult;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.LinearReferencing;
 import org.geotoolkit.referencing.LinearReferencing.ProjectedPoint;
 import org.geotoolkit.referencing.LinearReferencing.SegmentInfo;
@@ -71,7 +72,7 @@ import static org.geotoolkit.referencing.LinearReferencing.projectReference;
 import org.geotoolkit.util.collection.CloseableIterator;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.CoordinateOperation;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
@@ -1238,9 +1239,9 @@ public class TronconUtils {
                 FactoryException, MismatchedDimensionException, TransformException{
             Point point = getGeoPointStart();
             final CoordinateReferenceSystem geomCrs = JTS.findCoordinateReferenceSystem(point);
-            if(crs!=null && !CRS.equalsIgnoreMetadata(geomCrs,crs)){
-                final MathTransform trs = CRS.findMathTransform(geomCrs, crs);
-                point = (Point) JTS.transform(point, trs);
+            if(crs!=null && !Utilities.equalsIgnoreMetadata(geomCrs,crs)){
+                final CoordinateOperation trs = CRS.findOperation(geomCrs, crs, null);
+                point = (Point) JTS.transform(point, trs.getMathTransform());
             }
             return point;
         }
@@ -1301,9 +1302,9 @@ public class TronconUtils {
                 FactoryException, TransformException {
             Point point = getGeoPointEnd();
             final CoordinateReferenceSystem geomCrs = JTS.findCoordinateReferenceSystem(point);
-            if(crs!=null && !CRS.equalsIgnoreMetadata(geomCrs,crs)){
-                final MathTransform trs = CRS.findMathTransform(geomCrs, crs);
-                point = (Point) JTS.transform(point, trs);
+            if(crs!=null && !Utilities.equalsIgnoreMetadata(geomCrs,crs)){
+                final CoordinateOperation trs = CRS.findOperation(geomCrs, crs, null);
+                point = (Point) JTS.transform(point, trs.getMathTransform());
             }
             return point;
         }

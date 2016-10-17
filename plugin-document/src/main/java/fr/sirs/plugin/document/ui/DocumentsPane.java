@@ -1,8 +1,9 @@
+
 /**
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -50,7 +51,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
 import org.apache.sis.util.logging.Logging;
-import org.geotoolkit.util.FileUtilities;
 import fr.sirs.core.component.SystemeEndiguementRepository;
 import fr.sirs.core.component.DigueRepository;
 import fr.sirs.core.component.ModeleRapportRepository;
@@ -64,6 +64,7 @@ import fr.sirs.plugin.document.ODTUtils;
 
 import static fr.sirs.plugin.document.PropertiesFileUtilities.*;
 import fr.sirs.ui.Growl;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -78,6 +79,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import org.geotoolkit.nio.IOUtilities;
 
 /**
  *
@@ -367,7 +369,7 @@ public class DocumentsPane extends GridPane {
             final File directory = getSelectedFile();
             if (directory != null && directory.isDirectory()) {
                 final File newFile = new File(directory, f.getName());
-                FileUtilities.copy(f, newFile);
+                Files.copy(f.toPath(), newFile.toPath());
                 setProperty(newFile, INVENTORY_NUMBER, ipane.inventoryNumField.getText());
                 setProperty(newFile, CLASS_PLACE,      ipane.classPlaceField.getText());
 
@@ -378,7 +380,7 @@ public class DocumentsPane extends GridPane {
     }
 
     @FXML
-    public void showRemoveDialog(ActionEvent event) {
+    public void showRemoveDialog(ActionEvent event) throws IOException {
         final Dialog dialog    = new Dialog();
         final DialogPane pane  = new DialogPane();
         pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
@@ -392,7 +394,7 @@ public class DocumentsPane extends GridPane {
             final File f = getSelectedFile();
             if (f != null) {
                 if (f.isDirectory()) {
-                    FileUtilities.deleteDirectory(f);
+                    IOUtilities.deleteRecursively(f.toPath());
                 } else {
                     f.delete();
                 }

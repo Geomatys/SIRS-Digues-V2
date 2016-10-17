@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -24,7 +24,8 @@ import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
-import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 
 /**
  * A daemon which will run in background, closing all resources submitted.
@@ -63,14 +64,18 @@ public class ClosingDaemon {
         closer.start();
     }
 
-    public static void watchResource(final Object toWatch, final ObjectProperty<? extends AutoCloseable> toClose) {
+    public static void watchResource(final Object toWatch, final AutoCloseable toClose) {
+        watchResource(toWatch, new SimpleObjectProperty<>(toClose));
+    }
+
+    public static void watchResource(final Object toWatch, final ObservableValue<? extends AutoCloseable> toClose) {
         referenceCache.put(toWatch, new ResourceReference(toWatch, INSTANCE.phantomQueue, toClose));
     }
 
     private static class ResourceReference extends PhantomReference implements AutoCloseable {
 
-        private final ObjectProperty<? extends AutoCloseable> streamToClose;
-        private ResourceReference(Object referent, ReferenceQueue q, ObjectProperty<? extends AutoCloseable> objectToClose) {
+        private final ObservableValue<? extends AutoCloseable> streamToClose;
+        private ResourceReference(Object referent, ReferenceQueue q, ObservableValue<? extends AutoCloseable> objectToClose) {
             super(referent, q);
             this.streamToClose = objectToClose;
         }
@@ -78,8 +83,9 @@ public class ClosingDaemon {
         @Override
         public void close() {
             try {
-                if (streamToClose.get() != null) {
-                    streamToClose.get().close();
+                final AutoCloseable value = streamToClose.getValue();
+                if (value != null) {
+                    value.close();
                 }
             } catch (Exception e) {
                 SirsCore.LOGGER.log(Level.WARNING, "A streamed CouchDB view result cannot be closed. It's likely to cause memory leaks.", e);

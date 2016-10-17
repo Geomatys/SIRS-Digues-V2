@@ -60,6 +60,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.apache.sis.referencing.CRS;
 import org.apache.sis.storage.DataStoreException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureIterator;
@@ -78,7 +79,6 @@ import org.geotoolkit.map.LayerListener;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.style.RandomStyleBuilder;
 import org.geotoolkit.util.collection.CollectionChangeEvent;
 import org.opengis.feature.AttributeType;
@@ -214,7 +214,7 @@ public class FXImportBornesPane extends BorderPane {
                 updateTitle("Lecture d'un fichier vectoriel.");
 //            TODO : Uncomment if we want to activate back csv / txt import
 //            if(url.toLowerCase().endsWith(".shp")){
-                final FeatureStore store = new ShapefileFeatureStore(file.toURI().toURL(), "no namespace");
+                final FeatureStore store = new ShapefileFeatureStore(file.toURI(), "no namespace");
 //            }else if(url.toLowerCase().endsWith(".txt") || url.toLowerCase().endsWith(".csv")){
 //                final char separator = (uiSeparator.getText().isEmpty()) ? ';' : uiSeparator.getText().charAt(0);
 //                store = new CSVFeatureStore(file, "no namespace", separator);
@@ -391,10 +391,10 @@ public class FXImportBornesPane extends BorderPane {
                     throw new IllegalStateException("Unknown object type for parameter " + typeName);
                 }
 
-                final MathTransform trs = CRS.findMathTransform(
+                final MathTransform trs = CRS.findOperation(
                         selection.getFeatureType().getCoordinateReferenceSystem(), // TODO : replace CRS with the one in uiCRS for CSV files.
 Injector.getSession().getProjection(),
-                        true);
+                        null).getMathTransform();
                 final boolean isIdentity = trs.isIdentity();
 
                 boolean mustUpdateTroncon = false;

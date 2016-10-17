@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -37,6 +37,7 @@ import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -62,6 +63,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import org.apache.sis.referencing.CRS;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.ObjectConverters;
@@ -70,7 +72,6 @@ import org.ektorp.DocumentOperationResult;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.esrigeodb.GeoDBStore;
 import org.geotoolkit.feature.type.GeometryDescriptor;
-import org.geotoolkit.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
@@ -165,7 +166,7 @@ public class ImportContext implements ApplicationContextAware {
 
     @Autowired
     public ImportContext(final ImportParameters parameters)
-            throws FactoryException, MalformedURLException, DataStoreException {
+            throws FactoryException, MalformedURLException, DataStoreException, URISyntaxException {
 
         this.inputDb = parameters.inputDb;
         this.inputCartoDb = parameters.inputCartoDb;
@@ -185,12 +186,12 @@ public class ImportContext implements ApplicationContextAware {
         }
 
         if (crs == null) {
-            inputCRS = CRS.decode("EPSG:27593", true);
+            inputCRS = CRS.forCode("EPSG:27593");
         } else {
             inputCRS = crs;
         }
 
-        geoTransform = CRS.findMathTransform(inputCRS, outputCRS, true);
+        geoTransform = CRS.findOperation(inputCRS, outputCRS, null).getMathTransform();
 
         final long time = System.currentTimeMillis();
         errorOutput = SirsCore.IMPORT_ERROR_DIR.resolve(outputDb.getDatabaseName() + "_at_" + time);

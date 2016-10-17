@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -104,6 +104,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javax.measure.unit.NonSI;
+import org.apache.sis.referencing.CRS;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArraysExt;
@@ -122,7 +123,6 @@ import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.style.MutableFeatureTypeStyle;
 import org.geotoolkit.style.MutableRule;
 import org.geotoolkit.style.MutableStyle;
@@ -1035,7 +1035,8 @@ public class CorePlugin extends Plugin {
         try {
             //on crée un géométrie au centre de la france
             final Geometry geom = JTS.transform(DEFAULT_TRONCON_GEOM_WGS84,
-                    CRS.findMathTransform(CRS_WGS84, session.getProjection(), true));
+                    CRS.findOperation(CRS_WGS84, session.getProjection(), null).getMathTransform()
+            );
             troncon.setGeometry(geom);
         } catch (FactoryException | TransformException | MismatchedDimensionException ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(),ex);

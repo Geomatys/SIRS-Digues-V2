@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -82,6 +82,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.apache.sis.referencing.CRS;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display.VisitFilter;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -105,7 +106,6 @@ import org.geotoolkit.map.ItemListener;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.style.MutableStyle;
 import org.geotoolkit.util.collection.CollectionChangeEvent;
 import org.opengis.filter.Id;
@@ -547,7 +547,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                         try {
                             Geometry geom = EditionHelper.createLine(coord1, coord2);
                             //convertion from base crs
-                            geom = JTS.transform(geom, CRS.findMathTransform(map.getCanvas().getObjectiveCRS2D(), session.getProjection(), true));
+                            geom = JTS.transform(geom, CRS.findOperation(map.getCanvas().getObjectiveCRS2D(), session.getProjection(), null).getMathTransform());
                             JTS.setCRS(geom, session.getProjection());
                             tmpTroncon.setGeometry(geom);
 

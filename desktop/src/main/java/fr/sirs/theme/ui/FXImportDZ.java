@@ -83,7 +83,7 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
 
         try{
             if(url.toLowerCase().endsWith(".shp")){
-                store = new ShapefileFeatureStore(file.toURI().toURL(), "no namespace");
+                store = new ShapefileFeatureStore(file.toURI(), "no namespace");
                 uiPaneConfig.setDisable(true);
             }else if(url.toLowerCase().endsWith(".txt") || url.toLowerCase().endsWith(".csv")){
                 final char separator = (uiSeparator.getText().isEmpty()) ? ';' : uiSeparator.getText().charAt(0);

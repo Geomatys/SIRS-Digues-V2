@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -22,10 +22,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import fr.sirs.CorePlugin;
 import fr.sirs.FXMainFrame;
 import javafx.geometry.Insets;
-import javafx.scene.Scene;
-import javafx.scene.control.ButtonBar;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import org.geotoolkit.display2d.Canvas2DSynchronizer;
 import fr.sirs.SIRS;
 import fr.sirs.Injector;
@@ -44,7 +40,6 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.map.style.FXStyleAggregatedPane;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.odt.ODTUtils;
 import java.awt.Color;
@@ -88,7 +83,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javax.swing.SwingConstants;
 import org.apache.sis.geometry.GeneralEnvelope;
@@ -211,45 +205,7 @@ public class FXMapPane extends BorderPane implements Printable {
         uiTree = new FXMapContextTree();
         uiTree.getTreetable().getColumns().clear();
         uiTree.getTreetable().getColumns().add(new MapItemNameColumn());
-        uiTree.getTreetable().getColumns().add(new MapItemGlyphColumn(){
-            @Override
-            protected Pane createEditor(MapLayer candidate) {
-                final FXStyleAggregatedPane pane = new FXStyleAggregatedPane();
-                pane.init(candidate);
-                return pane;
-            }
-
-            @Override
-            protected void openEditor(MapLayer candidate) {
-                final Pane panel = createEditor(candidate);
-                panel.setPrefSize(900, 700);
-
-                final Stage dialog = new Stage();
-                dialog.getIcons().add(SIRS.ICON);
-                dialog.setTitle(GeotkFX.getString("org.geotoolkit.gui.javafx.contexttree.MapItemGlyphColumn.dialogTitle") + candidate.getName());
-                dialog.setResizable(true);
-                dialog.initModality(Modality.NONE);
-                dialog.initOwner(null);
-
-                final Button cancelBtn = new Button(GeotkFX.getString("org.geotoolkit.gui.javafx.contexttree.menu.LayerPropertiesItem.close"));
-                cancelBtn.setCancelButton(true);
-
-                final ButtonBar bbar = new ButtonBar();
-                bbar.setPadding(new Insets(5, 5, 5, 5));
-                bbar.getButtons().addAll(cancelBtn);
-
-                final BorderPane dialogContent = new BorderPane();
-                dialogContent.setCenter(panel);
-                dialogContent.setBottom(bbar);
-                dialog.setScene(new Scene(dialogContent));
-
-                cancelBtn.setOnAction((ActionEvent e) -> {
-                    dialog.close();
-                });
-
-                dialog.show();
-            }
-        });
+        uiTree.getTreetable().getColumns().add(new MapItemGlyphColumn());
         uiTree.getTreetable().getColumns().add(new MapItemVisibleColumn());
 
         uiTree.getTreetable().setShowRoot(false);

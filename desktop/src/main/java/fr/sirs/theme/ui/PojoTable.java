@@ -167,7 +167,6 @@ import org.apache.sis.feature.DefaultAttributeType;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.geotoolkit.data.FeatureStoreFinder;
 import org.geotoolkit.data.FileFeatureStoreFactory;
 import org.geotoolkit.data.bean.BeanFeatureSupplier;
 import org.geotoolkit.data.bean.BeanStore;
@@ -188,6 +187,7 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
+import org.geotoolkit.storage.DataStores;
 import org.odftoolkit.simple.TextDocument;
 import org.opengis.feature.PropertyType;
 import org.opengis.filter.Filter;
@@ -624,7 +624,7 @@ public class PojoTable extends BorderPane implements Printable {
                                 .getFeatureCollection(QueryBuilder.all(store.getNames().iterator().next())));
                         layer.setName(store.getNames().iterator().next().tip().toString());
 
-                        FileFeatureStoreFactory factory = (FileFeatureStoreFactory) FeatureStoreFinder.getFactoryById("csv");
+                        FileFeatureStoreFactory factory = (FileFeatureStoreFactory) DataStores.getFactoryById("csv");
                         TaskManager.INSTANCE.submit(new ExportTask(layer, folder, factory));
                     } catch (Exception ex) {
                         Dialog d = new Alert(Alert.AlertType.ERROR, "Impossible de créer le fichier CSV", ButtonType.OK);

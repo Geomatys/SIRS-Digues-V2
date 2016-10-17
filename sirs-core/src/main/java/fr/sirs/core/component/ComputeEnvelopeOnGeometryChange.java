@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -26,10 +26,11 @@ import fr.sirs.core.model.Positionable;
 import java.util.logging.Level;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import org.apache.sis.geometry.Envelopes;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.util.ArgumentChecks;
+import org.apache.sis.util.Utilities;
 import org.geotoolkit.geometry.jts.JTS;
-import org.geotoolkit.referencing.CRS;
 import org.opengis.geometry.Envelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -57,8 +58,8 @@ public class ComputeEnvelopeOnGeometryChange implements ChangeListener<Geometry>
                     geometryCRS = InjectorCore.getBean(SessionCore.class).getProjection();
                 }
                 Envelope envelope2D = JTS.getEnvelope2D(newValue.getEnvelopeInternal(), geometryCRS);
-                if (!CRS.equalsApproximatively(geometryCRS, CommonCRS.WGS84.normalizedGeographic())) {
-                    envelope2D = CRS.transform(envelope2D, CommonCRS.WGS84.normalizedGeographic());
+                if (!Utilities.equalsApproximatively(geometryCRS, CommonCRS.WGS84.normalizedGeographic())) {
+                    envelope2D = Envelopes.transform(envelope2D, CommonCRS.WGS84.normalizedGeographic());
                 }
                 target.setLongitudeMin(envelope2D.getMinimum(0));
                 target.setLongitudeMax(envelope2D.getMaximum(0));

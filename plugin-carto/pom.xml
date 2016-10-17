@@ -16,9 +16,9 @@
     </parent>
 
     <properties>
-        <plugin.core.version.min>0</plugin.core.version.min>
-        <geotoolkit.dwg.version>1.0.3</geotoolkit.dwg.version>
-        <geotoolkit.hexagon.version>1.0.4</geotoolkit.hexagon.version>
+        <plugin.core.version.min>4</plugin.core.version.min>
+        <geotoolkit.dwg.version>2.0.0-MC0003</geotoolkit.dwg.version>
+        <geotoolkit.hexagon.version>2.0.0-MC0003</geotoolkit.hexagon.version>
     </properties>
 
     <dependencies>
@@ -30,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>org.geotoolkit</groupId>
-            <artifactId>geotk-coverage-hexagon</artifactId>
+            <artifactId>geotk-hexagon</artifactId>
             <version>${geotoolkit.hexagon.version}</version>
         </dependency>
         <dependency>
@@ -45,7 +45,7 @@
         </dependency>
         <dependency>
             <groupId>org.geotoolkit</groupId>
-            <artifactId>geotk-feature-dwg</artifactId>
+            <artifactId>geotk-autocad</artifactId>
             <version>${geotoolkit.dwg.version}</version>
         </dependency>
     </dependencies>

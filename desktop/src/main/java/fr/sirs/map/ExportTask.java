@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -26,7 +26,6 @@ import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import java.io.File;
-import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.logging.Level;
 import javafx.concurrent.Task;
@@ -134,7 +133,7 @@ public class ExportTask extends Task<Boolean> {
                     file.delete();
                 }
                 //create output store
-                final FeatureStore store = factory.createDataStore(file.toURI().toURL());
+                final FeatureStore store = factory.createDataStore(file.toURI());
                 //delete feature types
                 //create output type
                 store.createFeatureType(inType.getName(), inType);
@@ -147,7 +146,7 @@ public class ExportTask extends Task<Boolean> {
                 store.close();
             }
             done();
-        } catch (MalformedURLException | DataStoreException ex) {
+        } catch (DataStoreException ex) {
             Loggers.DATA.log(Level.WARNING, ex.getMessage(), ex);
             setException(ex);
             return false;

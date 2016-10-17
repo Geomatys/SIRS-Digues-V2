@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -48,7 +48,7 @@ import javafx.scene.control.SpinnerValueFactory;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.internal.GeotkFX;
-import org.geotoolkit.referencing.CRS;
+import org.apache.sis.referencing.CRS;
 import org.geotoolkit.referencing.LinearReferencing.ProjectedPoint;
 import org.geotoolkit.referencing.LinearReferencing.SegmentInfo;
 import static org.geotoolkit.referencing.LinearReferencing.asLineString;
@@ -59,6 +59,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
+import org.apache.sis.util.Utilities;
 
 /**
  * Edition des coordonées géographique d'un {@link Positionable}.
@@ -161,7 +162,7 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
     public String getID() {
         return MODE;
     }
-    
+
     @Override
     public void updateFields(){
         setReseting(true);
@@ -340,9 +341,9 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
 
         //on sauvegarde les points dans le crs de la base
         zone.setGeometry(geometry);
-        if(!CRS.equalsIgnoreMetadata(crs, Injector.getSession().getProjection())){
+        if(!Utilities.equalsIgnoreMetadata(crs, Injector.getSession().getProjection())){
             try{
-                final MathTransform trs = CRS.findMathTransform(crs, Injector.getSession().getProjection());
+                final MathTransform trs = CRS.findOperation(crs, Injector.getSession().getProjection(), null).getMathTransform();
                 startPoint = (Point) JTS.transform(startPoint, trs);
                 endPoint = (Point) JTS.transform(endPoint, trs);
             }catch(FactoryException | MismatchedDimensionException | TransformException ex){

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,7 +55,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import org.apache.sis.util.logging.Logging;
-import org.geotoolkit.util.FileUtilities;
+import org.geotoolkit.nio.IOUtilities;
 
 /**
  * Utility class managing the properties file adding different properties to the filesystem objects.
@@ -68,7 +69,7 @@ public class PropertiesFileUtilities {
     /**
      * Extract a property in the sirs.properties file coupled to the specified file.
      *
-     * @param f A file, can be a folder correspounding to a SE, DG or TR. Or a simple file.
+     * @param f A file, can be a folder corresponding to a SE, DG or TR. Or a simple file.
      * @param property Name of the property.
      * @return
      */
@@ -80,7 +81,7 @@ public class PropertiesFileUtilities {
     /**
      * Set a property in the sirs.properties file coupled to the specified file.
      *
-     * @param f A file, can be a folder correspounding to a SE, DG or TR. Or a simple file.
+     * @param f A file, can be a folder corresponding to a SE, DG or TR. Or a simple file.
      * @param property Name of the property.
      * @param value The value to set.
      */
@@ -412,8 +413,8 @@ public class PropertiesFileUtilities {
             final File doFile    = new File(f, DOCUMENT_FOLDER);
             final File newDoFile = new File(newDir, DOCUMENT_FOLDER);
 
-            FileUtilities.copy(doFile, newDoFile);
-            FileUtilities.deleteDirectory(f);
+            Files.copy(doFile.toPath(), newDoFile.toPath());
+            IOUtilities.deleteRecursively(f.toPath());
 
             // save new properties
             final Properties newProp = getSirsProperties(newDir, true);

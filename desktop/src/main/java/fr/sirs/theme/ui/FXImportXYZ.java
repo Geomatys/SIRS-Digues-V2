@@ -41,6 +41,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import org.apache.sis.referencing.CRS;
 import org.apache.sis.storage.DataStoreException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureIterator;
@@ -56,7 +57,6 @@ import org.geotoolkit.map.LayerListener;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.style.RandomStyleBuilder;
 import org.geotoolkit.util.collection.CollectionChangeEvent;
 import org.opengis.feature.PropertyType;
@@ -94,7 +94,7 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
 
         try{
             if(url.toLowerCase().endsWith(".shp")){
-                store = new ShapefileFeatureStore(file.toURI().toURL(), "no namespace");
+                store = new ShapefileFeatureStore(file.toURI(), "no namespace");
                 uiPaneConfig.setDisable(true);
             }else if(url.toLowerCase().endsWith(".txt") || url.toLowerCase().endsWith(".csv")){
                 final char separator = (uiSeparator.getText().isEmpty()) ? ';' : uiSeparator.getText().charAt(0);
@@ -202,7 +202,7 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
 
             //transform to RGF93
             try{
-                final MathTransform trs = CRS.findMathTransform(dataCrs, sirsSession.getProjection(), true);
+                final MathTransform trs = CRS.findOperation(dataCrs, sirsSession.getProjection(), null).getMathTransform();
                 geom = (Point) JTS.transform(geom, trs);
                 JTS.setCRS(geom, sirsSession.getProjection());
 

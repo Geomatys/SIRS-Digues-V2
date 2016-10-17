@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -64,7 +64,7 @@ import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapContext;
 import org.geotoolkit.map.MapLayer;
-import org.geotoolkit.referencing.CRS;
+import org.apache.sis.referencing.CRS;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
@@ -170,7 +170,7 @@ public class ConvertGeomToTraitHandler extends AbstractNavigationHandler {
                 final Rectangle2D rect = new Rectangle2D.Double(getMouseX(e)-3, getMouseY(e)-3, 6, 6);
                 map.getCanvas().getGraphicsIn(rect, visitor, VisitFilter.INTERSECTS);
             }
-            
+
         }
     }
 
@@ -197,9 +197,9 @@ public class ConvertGeomToTraitHandler extends AbstractNavigationHandler {
                     try{
                         final Session session = Injector.getSession();
                         //convertion from data crs to base crs
-                        geom = JTS.transform(geom, CRS.findMathTransform(
+                        geom = JTS.transform(geom, CRS.findOperation(
                                 f.getDefaultGeometryProperty().getType().getCoordinateReferenceSystem(),
-                                session.getProjection(), true));
+                                session.getProjection(), null).getMathTransform());
                         JTS.setCRS(geom, session.getProjection());
 
 

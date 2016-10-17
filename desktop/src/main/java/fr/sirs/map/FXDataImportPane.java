@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -48,7 +48,6 @@ import org.apache.sis.storage.DataStore;
 import org.apache.sis.storage.DataStoreException;
 import org.geotoolkit.coverage.amended.AmendedCoverageStore;
 import org.geotoolkit.data.FeatureStoreFactory;
-import org.geotoolkit.data.FeatureStoreFinder;
 import org.geotoolkit.gui.javafx.chooser.FXLayerChooser;
 import org.geotoolkit.gui.javafx.chooser.FXStoreChooser;
 import org.geotoolkit.gui.javafx.parameter.FXParameterGroupPane;
@@ -56,8 +55,9 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.storage.DataStoreFactory;
+import org.geotoolkit.storage.DataStores;
+import org.geotoolkit.storage.coverage.CoverageStore;
 import org.geotoolkit.storage.coverage.CoverageStoreFactory;
-import org.geotoolkit.storage.coverage.CoverageStoreFinder;
 import org.opengis.parameter.ParameterValueGroup;
 
 /**
@@ -114,8 +114,9 @@ public class FXDataImportPane extends BorderPane {
         coverageStores = FXCollections.observableArrayList();
         for (final String factoryName : COVERAGE_STORES) {
             try {
-                final CoverageStoreFactory factory = CoverageStoreFinder.getFactoryById(factoryName);
-                if(factory!=null) coverageStores.add(factory);
+                final DataStoreFactory factory = DataStores.getFactoryById(factoryName);
+                if(factory instanceof CoverageStoreFactory)
+                    coverageStores.add((CoverageStoreFactory)factory);
             } catch (Exception e) {
                 SIRS.LOGGER.log(Level.FINE, "No factory available for name : "+factoryName, e);
             }
@@ -124,8 +125,9 @@ public class FXDataImportPane extends BorderPane {
         featureStores = FXCollections.observableArrayList();
         for (final String factoryName : FEATURE_STORES) {
             try {
-                final FeatureStoreFactory factory = FeatureStoreFinder.getFactoryById(factoryName);
-                if(factory!=null) featureStores.add(factory);
+                final DataStoreFactory factory = DataStores.getFactoryById(factoryName);
+                if (factory instanceof FeatureStoreFactory)
+                    featureStores.add((FeatureStoreFactory) factory);
             } catch (Exception e) {
                 SIRS.LOGGER.log(Level.FINE, "No factory available for name : "+factoryName, e);
             }
@@ -192,7 +194,7 @@ public class FXDataImportPane extends BorderPane {
             final DataStore store;
             if (selectedItem instanceof CoverageStoreFactory) {
                 final CoverageStoreFactory f = (CoverageStoreFactory) selectedItem;
-                store = new AmendedCoverageStore(f.open(parameters));
+                store = new AmendedCoverageStore((CoverageStore)f.open(parameters));
             } else if (selectedItem instanceof FeatureStoreFactory) {
                 store = ((FeatureStoreFactory) selectedItem).open(parameters);
             } else {

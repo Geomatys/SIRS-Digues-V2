@@ -89,7 +89,7 @@
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
-      <artifactId>geotk-feature-esri-geodb</artifactId>
+      <artifactId>geotk-esri</artifactId>
       <version>${geotoolkit.esri.version}</version>
     </dependency>
     <dependency>
@@ -126,11 +126,6 @@
       <artifactId>geotk-feature-shapefile</artifactId>
       <version>${geotoolkit.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.geotoolkit</groupId>
-      <artifactId>geotk-epsg</artifactId>
-      <version>${geotoolkit.version}</version>
-    </dependency>
      <dependency>
       <groupId>org.hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
@@ -139,7 +134,7 @@
     <!-- Moved out of Geotk, it does not follow the same versioning. -->
     <dependency>
       <groupId>org.geotoolkit</groupId>
-      <artifactId>geotk-feature-h2</artifactId>
+      <artifactId>geotk-h2</artifactId>
       <version>${geotoolkit.h2.version}</version>
     </dependency>
     

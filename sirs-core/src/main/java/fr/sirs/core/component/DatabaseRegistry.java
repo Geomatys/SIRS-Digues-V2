@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -30,11 +30,14 @@ import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.util.property.SirsPreferences;
 import static fr.sirs.util.property.SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.ProxySelector;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -71,7 +74,6 @@ import org.ektorp.impl.StdReplicationTask;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.Filter;
 import org.geotoolkit.gui.javafx.util.TaskManager;
-import org.geotoolkit.util.FileUtilities;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -759,7 +761,6 @@ public class DatabaseRegistry {
      */
     private static void createUserIfNotExists(final URL couchDbUrl, final String username, final String password) throws IOException {
         RestTemplate template = new RestTemplate(new StdHttpClient.Builder().url(couchDbUrl).build());
-        String userContent = FileUtilities.getStringFromStream(DatabaseRegistry.class.getResourceAsStream("/fr/sirs/launcher/user-put.json"));
 
         final String adminConfig = "/_config/admins/" + username;
         try {
@@ -779,6 +780,14 @@ public class DatabaseRegistry {
                 } catch (DbAccessException e3) {
                     SirsCore.LOGGER.log(Level.FINE, "Cannot create administrator " + username, e);
                     SirsCore.LOGGER.fine("Attempt to create simple user " + username);
+
+                    final String userContent;
+                    try (final InputStreamReader in = new InputStreamReader(DatabaseRegistry.class.getResourceAsStream("/fr/sirs/launcher/user-put.json"), StandardCharsets.UTF_8);
+                            final BufferedReader reader = new BufferedReader(in)) {
+                        final StringBuilder builder = new StringBuilder();
+                        reader.lines().forEach(builder::append);
+                        userContent = builder.toString();
+                    }
                     template.put(userConfig,
                             userContent.replaceAll("\\$ID", username)
                             .replaceAll("\\$PASSWORD", password == null ? "" : password));

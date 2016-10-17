@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -67,13 +67,13 @@ import javafx.beans.value.ObservableValue;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.sis.referencing.CRS;
+import org.apache.sis.referencing.IdentifiedObjects;
 import org.apache.sis.util.collection.Cache;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentOperationResult;
 import org.ektorp.http.StdHttpClient;
 import org.geotoolkit.gui.javafx.util.TaskManager;
-import org.geotoolkit.referencing.CRS;
-import org.geotoolkit.referencing.IdentifiedObjects;
 import org.geotoolkit.util.collection.CloseableIterator;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.FactoryException;
@@ -314,8 +314,8 @@ public class SessionCore implements ApplicationContextAware {
             try {
                 Optional<SirsDBInfo> info = DatabaseRegistry.getInfo(connector);
                 if (info.isPresent()) {
-                    projection = CRS.decode(info.get().getEpsgCode());
-                    srid = IdentifiedObjects.lookupEpsgCode(projection, true);
+                    projection = CRS.forCode(info.get().getEpsgCode());
+                    srid = IdentifiedObjects.lookupEPSG(projection);
                 }
             } catch (FactoryException e) {
                 throw new SirsCoreRuntimeException(e);

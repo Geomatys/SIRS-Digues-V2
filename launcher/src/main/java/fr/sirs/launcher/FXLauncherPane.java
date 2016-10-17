@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -56,7 +56,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -106,20 +105,18 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
-import javafx.util.Callback;
 import org.apache.sis.util.logging.Logging;
 import org.ektorp.DbAccessException;
-import org.ektorp.ReplicationStatus;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.crs.FXCRSButton;
 import org.geotoolkit.gui.javafx.util.ProgressMonitor;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
-import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.IdentifiedObjects;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.apache.sis.referencing.CRS;
 
 /**
  *
@@ -328,7 +325,7 @@ public class FXLauncherPane extends BorderPane {
         uiNewName.textProperty().addListener(dbNameFormat);
 
         try {
-            final CoordinateReferenceSystem baseCrs = CRS.decode("EPSG:2154");
+            final CoordinateReferenceSystem baseCrs = CRS.forCode("EPSG:2154");
             uiNewCRS.crsProperty().set(baseCrs);
             uiImportCRS.crsProperty().set(baseCrs);
         } catch (Exception ex) {
@@ -891,34 +888,25 @@ public class FXLauncherPane extends BorderPane {
 
         public DeleteColumn() {
             super(GeotkFX.ICON_DELETE,
-                    new Callback<CellDataFeatures<String, String>, ObservableValue<String>>() {
-                        @Override
-                        public ObservableValue<String> call(CellDataFeatures<String, String> param) {
-                            return new SimpleObjectProperty<>(param.getValue());
-                        }
-                    },
-                    new Predicate<String>() {
-                        @Override
-                        public boolean test(String t) {
-                            return t != null && !t.isEmpty();
-                        }
-                    }, new Function<String, String>() {
+                    param -> new SimpleObjectProperty(param.getValue()),
+                    t -> t != null && !t.isEmpty(),
+                    new Function<String, String>() {
+                @Override
+                public String apply(String toDelete) {
+                    final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
+                            ButtonType.NO, ButtonType.YES);
+                    alert.setResizable(true);
 
-                        public String apply(String toDelete) {
-                            final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression ?",
-                                    ButtonType.NO, ButtonType.YES);
-                            alert.setResizable(true);
-
-                            if (ButtonType.YES == alert.showAndWait().get()) {
-                                try {
-                                    deleteDatabase(toDelete);
-                                } catch (Exception ex) {
-                                    GeotkFX.newExceptionDialog("Impossible de supprimer " + toDelete, ex).show();
-                                }
-                            }
-                            return toDelete;
+                    if (ButtonType.YES == alert.showAndWait().get()) {
+                        try {
+                            deleteDatabase(toDelete);
+                        } catch (Exception ex) {
+                            GeotkFX.newExceptionDialog("Impossible de supprimer " + toDelete, ex).show();
                         }
-                    },
+                    }
+                    return toDelete;
+                }
+            },
                     "Supprimer la base locale."
             );
         }
@@ -956,7 +944,7 @@ public class FXLauncherPane extends BorderPane {
                                 if (!localRegistry.listSirsDatabases().contains(destDbName)
                                 || ButtonType.YES.equals(alert.showAndWait().get())) {
 
-                                    final TaskManager.MockTask<ReplicationStatus> copyTask = new TaskManager.MockTask("Copie de base de données", () -> {
+                                    final TaskManager.MockTask<org.ektorp.ReplicationStatus> copyTask = new TaskManager.MockTask("Copie de base de données", () -> {
                                         return localRegistry.copyDatabase(sourceDb, destDbName);
                                     });
 
@@ -972,9 +960,9 @@ public class FXLauncherPane extends BorderPane {
                                             lStage.close();
                                         }
                                     });
-                                    
+
                                     copyTask.setOnSucceeded(evt -> SIRS.fxRun(false, () -> {
-                                        final ReplicationStatus status = copyTask.getValue();
+                                        final org.ektorp.ReplicationStatus status = copyTask.getValue();
 
                                         if (status == null || !status.isOk()) {
                                             localRegistry.cancelCopy(status);

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -45,7 +45,7 @@ import org.geotoolkit.gui.javafx.render2d.AbstractNavigationHandler;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.shape.FXGeometryLayer;
-import org.geotoolkit.referencing.CRS;
+import org.apache.sis.referencing.CRS;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
 
@@ -128,9 +128,9 @@ public class DependanceTransformHandler extends AbstractNavigationHandler {
 
                         //conversion du CRS de la donnée vers le CRS de la base
                         try {
-                            geom = JTS.transform(geom, CRS.findMathTransform(
+                            geom = JTS.transform(geom, CRS.findOperation(
                                     f.getDefaultGeometryProperty().getType().getCoordinateReferenceSystem(),
-                                    session.getProjection(), true));
+                                    session.getProjection(), null).getMathTransform());
                             JTS.setCRS(geom, session.getProjection());
                         } catch (TransformException | FactoryException ex) {
                             SIRS.LOGGER.log(Level.WARNING, ex.getLocalizedMessage(), ex);
