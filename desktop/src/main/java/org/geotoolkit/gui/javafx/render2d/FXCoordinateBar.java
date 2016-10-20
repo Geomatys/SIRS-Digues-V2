@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -24,9 +24,8 @@ import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.Level;
@@ -62,21 +61,21 @@ import org.opengis.referencing.operation.TransformException;
  * @author Johann Sorel (Geomatys)
  */
 public class FXCoordinateBar extends GridPane {
-    
+
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance();
-    
+
     private final FXMap map;
     private final PropertyChangeListener listener = new PropertyChangeListener() {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             final String propertyName = evt.getPropertyName();
-            
+
             if(AbstractCanvas2D.OBJECTIVE_CRS_KEY.equals(propertyName)){
                 //update crs button
                 crsButton.crsProperty().set((CoordinateReferenceSystem)evt.getNewValue());
             }
-            
+
             //update scale box
             Platform.runLater(() -> {
                 scaleCombo.valueProperty().removeListener(action);
@@ -88,7 +87,7 @@ public class FXCoordinateBar extends GridPane {
                     Loggers.JAVAFX.log(Level.WARNING, null, ex);
                 }
             });
-                     
+
         }
     };
     private final ChangeListener action = new ChangeListener() {
@@ -104,22 +103,22 @@ public class FXCoordinateBar extends GridPane {
             }
         }
     };
-    
-    
+
+
     private final StatusBar statusBar = new StatusBar();
     private final ComboBox scaleCombo = new ComboBox();
     private final ColorPicker colorPicker = new ColorPicker(Color.WHITE);
     private final FXCRSButton crsButton = new FXCRSButton();
     private final DatePicker dateField = new DatePicker();
-    
+
     public FXCoordinateBar(FXMap map) {
         this.map = map;
-        
+
         colorPicker.setStyle("-fx-color-label-visible:false;");
-        
+
         statusBar.setMaxWidth(Double.MAX_VALUE);
         add(statusBar, 0, 1);
-        
+
         final ColumnConstraints col0 = new ColumnConstraints();
         col0.setHgrow(Priority.ALWAYS);
         final RowConstraints row0 = new RowConstraints();
@@ -128,28 +127,27 @@ public class FXCoordinateBar extends GridPane {
         row1.setVgrow(Priority.NEVER);
         getColumnConstraints().addAll(col0);
         getRowConstraints().addAll(row0,row1);
-                
-        final ChangeListener rangeListener = new ChangeListener() {
-            @Override
-            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                try {
-                    if(newValue==null){
-                        map.getCanvas().setTemporalRange(null,null);
-                    }else{
-                        final LocalDate date = dateField.valueProperty().get();
-                        final Instant time = date.atTime(LocalTime.MIDNIGHT).atZone(SirsCore.PARIS_ZONE_ID).toInstant();
-                        final Date dateBound = Date.from(time);
-                        map.getCanvas().setTemporalRange(dateBound, dateBound);
-                    }
-                } catch (TransformException ex) {
-                    Loggers.JAVAFX.log(Level.INFO, ex.getMessage(), ex);
+
+        final ChangeListener<LocalDate> rangeListener = (obs, oldValue, newValue) -> {
+            try {
+                if(newValue==null){
+                    map.getCanvas().setTemporalRange(null,null);
+                }else{
+                    final ZonedDateTime atStartOfDay = newValue.atStartOfDay(SirsCore.PARIS_ZONE_ID);
+                    final ZonedDateTime atEndOfDay = atStartOfDay.plusDays(1).minusNanos(1);
+                    map.getCanvas().setTemporalRange(
+                            Date.from(atStartOfDay.toInstant()), 
+                            Date.from(atEndOfDay.toInstant())
+                    );
                 }
+            } catch (TransformException ex) {
+                Loggers.JAVAFX.log(Level.INFO, ex.getMessage(), ex);
             }
         };
 
         dateField.valueProperty().addListener(rangeListener);
         statusBar.getLeftItems().add(dateField);
-        
+
         scaleCombo.getItems().addAll(  1000l,
                                  5000l,
                                 20000l,
@@ -158,28 +156,28 @@ public class FXCoordinateBar extends GridPane {
                                500000l);
         scaleCombo.setEditable(true);
         scaleCombo.setConverter(new LongStringConverter());
-        
+
         statusBar.getRightItems().add(scaleCombo);
         statusBar.getRightItems().add(colorPicker);
         statusBar.getRightItems().add(crsButton);
-        
+
         map.addEventHandler(MouseEvent.ANY, new myListener());
-        
+
         if (this.map != null) {
             this.map.getCanvas().addPropertyChangeListener(listener);
-        }        
-        
+        }
+
         colorPicker.setOnAction(new EventHandler() {
             public void handle(Event t) {
                 if (map != null) {
                     map.getCanvas().setBackgroundPainter(new SolidColorPainter(FXUtilities.toSwingColor(colorPicker.getValue())));
                     map.getCanvas().repaint();
-                }     
+                }
             }
         });
-        
+
         crsButton.crsProperty().setValue(map.getCanvas().getObjectiveCRS());
-        crsButton.crsProperty().addListener((ObservableValue<? extends CoordinateReferenceSystem> observable, 
+        crsButton.crsProperty().addListener((ObservableValue<? extends CoordinateReferenceSystem> observable,
                 CoordinateReferenceSystem oldValue, CoordinateReferenceSystem newValue) -> {
             try {
                 if(newValue!=null){
@@ -189,14 +187,14 @@ public class FXCoordinateBar extends GridPane {
                 Loggers.JAVAFX.log(Level.INFO, ex.getMessage(), ex);
             }
         });
-        
+
         // Set button tooltips
         statusBar.setTooltip(new Tooltip(GeotkFX.getString(FXCoordinateBar.class, "coordinateTooltip")));
         scaleCombo.setTooltip(new Tooltip(GeotkFX.getString(FXCoordinateBar.class, "scaleTooltip")));
         colorPicker.setTooltip(new Tooltip(GeotkFX.getString(FXCoordinateBar.class, "bgColorTooltip")));
         crsButton.setTooltip(new Tooltip(GeotkFX.getString(FXCoordinateBar.class, "crsTooltip")));
     }
-    
+
     public void setCrsButtonVisible(boolean visible){
         if(statusBar.getRightItems().contains(crsButton)){
             statusBar.getRightItems().remove(crsButton);
@@ -204,7 +202,7 @@ public class FXCoordinateBar extends GridPane {
             statusBar.getRightItems().add(crsButton);
         }
     }
-    
+
     public boolean isCrsButtonVisible(){
         return crsButton.isVisible();
     }
@@ -216,21 +214,21 @@ public class FXCoordinateBar extends GridPane {
     public DatePicker getDateField() {
         return dateField;
     }
-    
+
     /**
      * Set scale values displayed in the right corner combo box.
-     * 
-     * @param scales 
+     *
+     * @param scales
      */
     public void setScaleBoxValues(Long[] scales){
         scaleCombo.getItems().setAll(Arrays.asList(scales));
     }
-        
+
     private class myListener implements EventHandler<MouseEvent>{
 
         @Override
         public void handle(MouseEvent event) {
-            
+
             final Point2D pt = new Point2D.Double(event.getX(), event.getY());
             Point2D coord = new DirectPosition2D();
             try {
@@ -254,5 +252,5 @@ public class FXCoordinateBar extends GridPane {
         }
 
     }
-    
+
 }

@@ -1,0 +1,43 @@
+.geotk-progressMonitor-cancelButton {
+    -fx-background-color: transparent;
+}
+
+/*Override default css*/
+.geotk-progressMonitor-tasksInError > .arrow-button, .geotk-progressMonitor-runningTasks > .arrow-button {
+    -fx-padding: 0;
+}
+
+.geotk-progressMonitor-tasksInError > .arrow-button > .arrow, .geotk-progressMonitor-runningTasks > .arrow-button > .arrow {
+    -fx-padding: 0;
+}
+
+.geotk-progressMonitor-tasksInError, .geotk-progressMonitor-runningTasks {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.geotk-progressMonitor {
+    -fx-alignment: center;
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.geotk-progressMonitor-taskProgress {
+    -fx-alignment:CENTER_LEFT;
+    -fx-padding: 0;
+}
+
+.geotk-progressMonitor-runningTasks-graphic{
+    -fx-padding: 0;
+    -fx-text-fill: aquamarine;
+}
+
+.geotk-progressMonitor-tasksInError-graphic{
+    -fx-padding: 0;
+    -fx-text-fill: #aa0000;
+}
+
+.geotk-progressMonitor-taskProgress-graphic{
+    -fx-padding: 0;
+    -fx-text-fill: #aa0000;
+}

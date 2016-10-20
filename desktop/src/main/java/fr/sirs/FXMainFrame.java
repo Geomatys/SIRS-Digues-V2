@@ -144,6 +144,7 @@ public class FXMainFrame extends BorderPane {
     public FXMainFrame() {
         SIRS.loadFXML(this, FXMainFrame.class);
         final ProgressMonitor progressMonitor = new ProgressMonitor(TaskManager.INSTANCE);
+        progressMonitor.getStylesheets().add("/fr/sirs/ProgressMonitor.css");
         initProgressMonitor(progressMonitor);
         final ToolBar pm = new ToolBar(progressMonitor);
         pm.prefHeightProperty().bind(uiMenu.heightProperty());

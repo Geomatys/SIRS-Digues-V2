@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -32,14 +32,17 @@ import fr.sirs.core.model.Positionable;
 import static fr.sirs.core.model.Role.ADMIN;
 import fr.sirs.map.FXMapTab;
 import fr.sirs.ui.Growl;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.Level;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import org.geotoolkit.internal.GeotkFX;
@@ -57,7 +60,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
     @FXML private Label uiHeaderLabel;
     @FXML private Label uiDateMajLabel;
     @FXML private TextField uiDesignation;
-    @FXML private DatePicker date_maj;
+    @FXML private Label date_maj;
     @FXML private FXEditMode uiMode;
     @FXML private Button uiShowOnMapButton;
 
@@ -66,7 +69,6 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
     public FXElementContainerPane(final T element) {
         super();
         SIRS.loadFXML(this);
-        date_maj.setDisable(true);
         setFocusTraversable(true);
 
         uiShowOnMapButton.managedProperty().bind(uiShowOnMapButton.visibleProperty());
@@ -153,7 +155,8 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
 
     protected void initPane(ObservableValue<? extends Element> observable, Element oldValue, Element newValue) {
         // unbind all mono-directional
-        date_maj.valueProperty().unbind();
+        date_maj.textProperty().unbind();
+        uiDateMajLabel.visibleProperty().unbind();
         uiMode.validProperty().unbind();
         uiMode.authorIDProperty().unbind();
 
@@ -179,9 +182,10 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
 
             // maj
             if (newValue instanceof AvecDateMaj) {
-                date_maj.valueProperty().bind(((AvecDateMaj) newValue).dateMajProperty());
+                final ObjectProperty<LocalDate> dateMajProp = ((AvecDateMaj) newValue).dateMajProperty();
+                date_maj.textProperty().bind(Bindings.createStringBinding(() -> dateMajProp.get() == null? null : dateMajProp.get().format(DateTimeFormatter.ofPattern("dd/MM/YYYY")), dateMajProp));
                 date_maj.setVisible(true);
-                uiDateMajLabel.setVisible(true);
+                uiDateMajLabel.visibleProperty().bind(dateMajProp.isNotNull());
             } else {
                 date_maj.setVisible(false);
                 uiDateMajLabel.setVisible(false);
