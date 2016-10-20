@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -43,7 +43,6 @@ import javafx.scene.layout.VBox;
 public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndiguement> {
 
     private final Previews previewRepository;
-    private LabelMapper labelMapper;
 
     private final DiguePojoTable table = new DiguePojoTable();
 
@@ -174,15 +173,22 @@ public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndig
 
         public DiguePojoTable() {
             super(Digue.class, "Digues du système d'endiguement");
+            createNewProperty.set(false);
+            fichableProperty.set(false);
+            uiAdd.setVisible(false);
+            uiFicheMode.setVisible(false);
+            uiDelete.setVisible(false);
+            setDeletor(input -> {
+                if (input instanceof Digue) {
+                    ((Digue)input).setSystemeEndiguementId(null);
+                    session.getRepositoryForClass((Class)input.getClass()).update(input);
+                }
+            });
         }
 
         @Override
         protected Digue createPojo() {
-            Digue createdPojo = (Digue) super.createPojo();
-            if (elementProperty.get() != null) {
-                ((Digue)createdPojo).setSystemeEndiguementId(elementProperty.get().getId());
-            }
-            return createdPojo;
+            throw new UnsupportedOperationException("Vous ne devez pas créer de nouvelle digues depuis cette table !");
         }
     }
 }

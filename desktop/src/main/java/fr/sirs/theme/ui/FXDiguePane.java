@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -18,7 +18,6 @@
  */
 package fr.sirs.theme.ui;
 
-import static fr.sirs.CorePlugin.initTronconDigue;
 import fr.sirs.Injector;
 import fr.sirs.Session;
 import fr.sirs.core.component.TronconDigueRepository;
@@ -35,14 +34,14 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Samuel Andrés (Geomatys)
  */
 public class FXDiguePane extends FXDiguePaneStub {
-       
+
     @Autowired private Session session;
-    
+
     @FXML private VBox centerContent;
 
     private final TronconPojoTable table = new TronconPojoTable();
 
-    
+
     protected FXDiguePane() {
         super();
         Injector.injectDependencies(this);
@@ -57,7 +56,7 @@ public class FXDiguePane extends FXDiguePaneStub {
     }
 
     /**
-     * 
+     *
      * @param observable
      * @param oldValue
      * @param newValue
@@ -69,21 +68,27 @@ public class FXDiguePane extends FXDiguePaneStub {
             table.setTableItems(()->FXCollections.observableArrayList(((TronconDigueRepository) session.getRepositoryForClass(TronconDigue.class)).getByDigue(newValue)));
         }
     }
-    
+
     private class TronconPojoTable extends PojoTable {
-    
+
         public TronconPojoTable() {
             super(TronconDigue.class, "Tronçons de la digue");
+            createNewProperty.set(false);
+            fichableProperty.set(false);
+            uiAdd.setVisible(false);
+            uiFicheMode.setVisible(false);
+            uiDelete.setVisible(false);
+            setDeletor(input -> {
+                if (input instanceof TronconDigue) {
+                    ((TronconDigue)input).setDigueId(null);
+                    session.getRepositoryForClass((Class)input.getClass()).update(input);
+                }
+            });
         }
 
         @Override
         protected TronconDigue createPojo() {
-            final TronconDigue result = (TronconDigue) super.createPojo();
-            if(elementProperty().get()!=null){
-                result.setDigueId(elementProperty().get().getId());
-            }
-            initTronconDigue(result, Injector.getSession());
-            return result;
+            throw new UnsupportedOperationException("Vous ne devez pas créer de tronçon à partir d'ici !");
         }
     }
 }
