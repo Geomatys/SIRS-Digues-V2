@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -31,6 +31,7 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.AvecLibelle;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.SQLQueries;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.util.odt.ODTUtils;
 import fr.sirs.util.property.Internal;
@@ -38,11 +39,13 @@ import fr.sirs.util.property.Reference;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
@@ -360,19 +363,19 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
          */
         public FeatureCollection filterValues;
 
-        public PrintContext(TextDocument target, Stream<? extends Element> elements) throws SQLException, DataStoreException, InterruptedException, ExecutionException {
+        public PrintContext(TextDocument target, Stream<? extends Element> elements) throws SQLException, DataStoreException, InterruptedException, ExecutionException, IOException {
             ArgumentChecks.ensureNonNull("Target document", target);
             this.target = target;
 
-            if (getRequeteId() == null) {
+            Optional<SQLQuery> sqlQuery = SQLQueries.findQuery(getRequeteId());
+            if (!sqlQuery.isPresent()) {
                 propertyNames = null;
                 this.elements = elements;
 
             } else {
                 final SessionCore session = InjectorCore.getBean(SessionCore.class);
-
                 final Query query = QueryBuilder.language(JDBCFeatureStore.CUSTOM_SQL,
-                        session.getRepositoryForClass(SQLQuery.class).get(getRequeteId()).getSql(),
+                        sqlQuery.get().getSql(),
                         NamesExt.create("query")
                 );
 

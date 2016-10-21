@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -18,6 +18,8 @@
  */
 package fr.sirs.core.model;
 
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,11 +29,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Properties;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import org.apache.sis.util.ArgumentChecks;
+import org.ektorp.DocumentNotFoundException;
 
 /**
  * Utility class to load/save {@link SQLQuery} into property file.
@@ -40,7 +44,7 @@ import org.apache.sis.util.ArgumentChecks;
  * @author Johann Sorel
  */
 public class SQLQueries {
-    
+
     private static final char SEPARATOR = '§';
 
     /**
@@ -158,6 +162,25 @@ public class SQLQueries {
         }
         try (OutputStream out = Files.newOutputStream(outputFile)) {
             props.store(out, "");
+        }
+    }
+
+    /**
+     * Search in database for a query with the given ID. If we cannot find any,
+     * we'll search for a query in local default queries whose {@link SQLQuery#getLibelle() }
+     * is equal to given string.
+     * @param queryId Id (if stored in database) or label (if stored in default queries)
+     * of the wanted query.
+     * @return
+     * @throws IOException
+     */
+    public static Optional<SQLQuery> findQuery(final String queryId) throws IOException {
+        if (queryId == null || queryId.isEmpty())
+            return Optional.empty();
+        try {
+            return Optional.of(InjectorCore.getBean(SessionCore.class).getRepositoryForClass(SQLQuery.class).get(queryId));
+        } catch (DocumentNotFoundException e) {
+            return SQLQueries.defaultQueries().stream().filter(q -> q.getLibelle().equals(queryId)).findFirst();
         }
     }
 
