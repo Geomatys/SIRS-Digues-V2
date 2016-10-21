@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -258,7 +258,7 @@ public class SirsFilterToSQL implements FilterToSQL {
             String encoded = null;
             try {
                 encoded = ObjectConverters.convert(candidate, String.class);
-            } catch (UnconvertibleObjectException e) {
+            } catch (Exception e) {
                 Logging.recoverableException(Logging.getLogger("fr.sirs"),SirsFilterToSQL.class, "writeValue", e);
             }
             if (encoded == null) {
@@ -305,17 +305,6 @@ public class SirsFilterToSQL implements FilterToSQL {
         }
 
         return sb;
-    }
-
-    private void visitPropertyNameName(String name, StringBuilder sb){
-        int index = name.indexOf('/');
-        if(index<0){
-
-
-        }else{
-
-        }
-
     }
 
     @Override

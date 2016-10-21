@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -312,7 +312,7 @@ public class FXSearchPane extends BorderPane {
         uiAdminOptions.visibleProperty().bind(uiToggleSQL.selectedProperty().and(isAdmin).and(needsSQLExportProperty.isEqualTo(false)));
         uiAdminOptions.managedProperty().bind(uiAdminOptions.visibleProperty());
 
-        // TODO : change binding to make it visible if selected result is positionable or has geometry ?
+        uiCarto.setDisable(true);
         uiCarto.visibleProperty().bind(uiToggleSQL.selectedProperty().and(needsSQLExportProperty.isEqualTo(false)));
         uiCarto.managedProperty().bind(uiCarto.visibleProperty());
 
@@ -824,6 +824,10 @@ public class FXSearchPane extends BorderPane {
             final FeatureCollection col = h2Store.createSession(false).getFeatureCollection(fsquery);
             final FeatureMapLayer layer = MapBuilder.createFeatureLayer(col, getStyleForType(col.getFeatureType()));
             layer.setName(query);
+
+            // Deactivate map export if no geometry can be found in query result.
+            Platform.runLater(() -> uiCarto.setDisable(col.getFeatureType().getGeometryDescriptor() == null || col.isEmpty()));
+
             return layer;
         });
     }
