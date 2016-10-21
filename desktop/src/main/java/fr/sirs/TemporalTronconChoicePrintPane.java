@@ -29,7 +29,7 @@ import org.apache.sis.measure.Range;
 
 /**
  *
- * Classe abtraite permettant de restreindre la sélection d'objets à imprimer à
+ * Classe abstraite permettant de restreindre la sélection d'objets à imprimer à
  * une période de temps.
  *
  * @author Samuel Andrés (Geomatys)

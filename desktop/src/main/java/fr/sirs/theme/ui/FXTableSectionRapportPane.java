@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -20,10 +20,15 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.model.SQLQueries;
 import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.report.TableSectionRapport;
 import fr.sirs.query.FXSearchPane;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -31,7 +36,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import org.ektorp.DbAccessException;
 
 /**
  *
@@ -65,12 +69,11 @@ public class FXTableSectionRapportPane extends AbstractFXElementPane<TableSectio
         }
         if (newValue != null) {
             uiTitle.textProperty().bindBidirectional(newValue.libelleProperty());
-            if (newValue.getRequeteId() != null) {
-                try {
-                    queryProperty.set(Injector.getSession().getRepositoryForClass(SQLQuery.class).get(newValue.getRequeteId()));
-                } catch (DbAccessException e) {
-                    queryProperty.set(null);
-                }
+            try {
+                queryProperty.set(SQLQueries.findQuery(newValue.getRequeteId()).orElse(null));
+            } catch (Exception e) {
+                SIRS.LOGGER.log(Level.WARNING, "Cannot load query", e);
+                queryProperty.set(null);
             }
         } else {
             uiTitle.setText(null);
@@ -88,15 +91,18 @@ public class FXTableSectionRapportPane extends AbstractFXElementPane<TableSectio
     @Override
     public void preSave() throws Exception {
         if (queryProperty.get() != null) {
-            elementProperty.get().setRequeteId(queryProperty.get().getId());
+            elementProperty.get().setRequeteId(queryProperty.get().getId() == null? queryProperty.get().getLibelle() : queryProperty.get().getId());
         } else {
             elementProperty.get().setRequeteId(null);
         }
     }
 
     @FXML
-    private void chooseQuery(ActionEvent event) {
-        final Optional<SQLQuery> query = FXSearchPane.chooseSQLQuery(Injector.getSession().getRepositoryForClass(SQLQuery.class).getAll());
+    private void chooseQuery(ActionEvent event) throws IOException {
+        final List<SQLQuery> queries = new ArrayList<>(Injector.getSession().getRepositoryForClass(SQLQuery.class).getAll());
+        queries.addAll(SQLQueries.defaultQueries());
+
+        final Optional<SQLQuery> query = FXSearchPane.chooseSQLQuery(queries);
         if (query.isPresent())
             queryProperty.set(query.get());
     }

@@ -73,6 +73,11 @@ public abstract class TronconChoicePrintPane extends BorderPane {
             super(TronconDigue.class, "Tronçons");
             getColumns().remove(editCol);
             editableProperty.set(false);
+            createNewProperty.set(false);
+            fichableProperty.set(false);
+            uiAdd.setVisible(false);
+            uiFicheMode.setVisible(false);
+            uiDelete.setVisible(false);
             TableView table = getTable();
             table.editableProperty().unbind();
             table.setEditable(true);
@@ -161,6 +166,11 @@ public abstract class TronconChoicePrintPane extends BorderPane {
             super(clazz, title);
             getColumns().remove(editCol);
             editableProperty.set(false);
+            createNewProperty.set(false);
+            fichableProperty.set(false);
+            uiAdd.setVisible(false);
+            uiFicheMode.setVisible(false);
+            uiDelete.setVisible(false);
         }
     }
 
