@@ -23,18 +23,27 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.model.Element;
 import java.awt.geom.Rectangle2D;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Level;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Cursor;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.text.Font;
+import javafx.stage.Modality;
 import org.geotoolkit.data.bean.BeanFeature;
 import org.geotoolkit.display.VisitFilter;
 import org.geotoolkit.display2d.canvas.AbstractGraphicVisitor;
@@ -48,6 +57,7 @@ import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.FXMapAction;
 import org.geotoolkit.gui.javafx.render2d.FXPanMouseListen;
 import org.geotoolkit.gui.javafx.render2d.navigation.AbstractMouseHandler;
+import org.opengis.feature.Feature;
 
 /**
  *
@@ -134,12 +144,15 @@ public class FXOpenElementEditorAction extends FXMapAction {
                 final AbstractGraphicVisitor visitor = new AbstractGraphicVisitor() {
 
                     final HashSet<Element> foundElements = new HashSet<>();
+                    final Map<String, Feature> externalFeatures = new HashMap<>();
 
                     @Override
                     public void visit(ProjectedFeature feature, RenderingContext2D context, SearchAreaJ2D area) {
                         Object userData = feature.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
                         if (userData instanceof Element) {
                             foundElements.add((Element) userData);
+                        } else {
+                            externalFeatures.put(feature.getFeatureId().getID(), feature.getCandidate());
                         }
                     }
 
@@ -152,9 +165,9 @@ public class FXOpenElementEditorAction extends FXMapAction {
                     public void endVisit() {
                         SIRS.LOGGER.log(Level.FINE, "End of visit.");
                         super.endVisit();
-                        if (foundElements.size() == 1) {
-                            displayElement(foundElements.iterator().next());
-                        } else if (foundElements.size() > 1) {
+                        final int pickedNb = foundElements.size() + externalFeatures.size();
+                        if (pickedNb > 1) {
+                            // Show picked elements in a context menu
                             final Session session = Injector.getSession();
                             final Iterator<Element> it = foundElements.iterator();
                             ObservableList<MenuItem> items = choice.getItems();
@@ -164,7 +177,25 @@ public class FXOpenElementEditorAction extends FXMapAction {
                                 item.setOnAction((ActionEvent ae) -> displayElement(current));
                                 items.add(item);
                             }
+
+                            // Show other features in it.
+                            if (!foundElements.isEmpty() && !externalFeatures.isEmpty()) {
+                                items.add(new SeparatorMenuItem());
+                            }
+
+                            if (!externalFeatures.isEmpty()) {
+                                for (final Map.Entry<String, Feature> entry : externalFeatures.entrySet()) {
+                                    final MenuItem item = new MenuItem(entry.getKey());
+                                    item.setOnAction(ae -> displayFeature(entry.getKey(), entry.getValue()));
+                                    items.add(item);
+                                }
+                            }
+
                             choice.show(map, me.getScreenX(), me.getScreenY());
+                        } else if (foundElements.size() == 1) {
+                            displayElement(foundElements.iterator().next());
+                        } else if (externalFeatures.size() == 1) {
+
                         }
                     }
                 };
@@ -174,6 +205,31 @@ public class FXOpenElementEditorAction extends FXMapAction {
                 map.getCanvas().getGraphicsIn(searchArea, visitor, VisitFilter.INTERSECTS);
             }
         }
+
+        private void displayFeature(final String title, final Feature feature) {
+            String toString = feature.toString();
+            // Remove first lines, which displays technical information not useful for end user.
+            final int secondLineSeparator = toString.indexOf(System.lineSeparator(), toString.indexOf(System.lineSeparator()) + 1);
+            if (secondLineSeparator > 0) {
+                toString = toString.substring(secondLineSeparator + 1);
+            }
+            final TextArea content = new TextArea(toString);
+            content.setFont(Font.font("Monospaced"));
+            content.setEditable(false);
+            content.setPrefSize(700, 500);
+
+            final Dialog d = new Dialog();
+            d.initModality(Modality.NONE);
+            d.initOwner(map.getScene().getWindow());
+            d.setTitle(title);
+            final DialogPane dialogPane = new DialogPane();
+            dialogPane.setContent(content);
+            dialogPane.getButtonTypes().add(ButtonType.CLOSE);
+            d.setDialogPane(dialogPane);
+            d.setResizable(true);
+            d.show();
+        }
+
     }
 
     private static void displayElement(Element e) {
