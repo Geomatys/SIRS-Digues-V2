@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="768.0" prefWidth="1024.0" stylesheets="@/fr/sirs/theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="768.0" prefWidth="1024.0" stylesheets="@/fr/sirs/theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
     <top>
       <BorderPane>
          <top>
@@ -50,75 +57,68 @@
                           </MenuBar>
                      </children>
                   </HBox>
-                  <HBox>
+                  <HBox alignment="CENTER_LEFT" spacing="5.0">
                      <children>
-                              <ToolBar minWidth="0.0">
-                                  <items>
-                                      <Button fx:id="uiMapButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openMap" styleClass="buttonbar-button" text="%carto">
-                                          <graphic>
-                                              <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                                                  <image>
-                                                      <Image url="@images/menu-carto.png" />
-                                                  </image>
-                                              </ImageView>
-                                          </graphic>
-                                      </Button>
-                                      <Button fx:id="uiDamButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#openDigueTab" styleClass="buttonbar-button" text="%structures" textAlignment="CENTER" translateX="5.0">
-                                          <graphic>
-                                              <ImageView fitHeight="40.0" fitWidth="102.0" pickOnBounds="true" preserveRatio="true">
-                                                  <image>
-                                                      <Image url="@images/menu-digue.png" />
-                                                  </image>
-                                              </ImageView>
-                                          </graphic>
-                                      </Button>
-                                      <VBox translateX="10.0">
-                                          <children>
-                                              <MenuButton fx:id="uiThemesLocalized" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="%localizedThemes" VBox.vgrow="ALWAYS">
+                                <Button fx:id="uiMapButton" contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#openMap" styleClass="buttonbar-button" text="%carto">
+                                    <graphic>
+                                        <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                            <image>
+                                                <Image url="@images/menu-carto.png" />
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+                                <Button fx:id="uiDamButton" contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#openDigueTab" styleClass="buttonbar-button" text="%structures" textAlignment="CENTER" translateX="5.0">
+                                    <graphic>
+                                        <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                            <image>
+                                                <Image url="@images/menu-digue.png" />
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+                                <VBox translateX="10.0">
+                                    <children>
+                                        <MenuButton fx:id="uiThemesLocalized" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="%localizedThemes" VBox.vgrow="ALWAYS">
                                             
                                         </MenuButton>
-                                              <MenuButton fx:id="uiThemesUnlocalized" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="%unlocalizedThemes" VBox.vgrow="ALWAYS">
+                                        <MenuButton fx:id="uiThemesUnlocalized" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="buttonbar-button" text="%unlocalizedThemes" VBox.vgrow="ALWAYS">
                                             
                                         </MenuButton>
-                                          </children>
-                                      </VBox>
-                              <VBox prefHeight="71.0">
-                                 <children>
-                                    <MenuButton fx:id="uiPlugins" alignment="CENTER" contentDisplay="TOP" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefWidth="135.0" styleClass="buttonbar-button" text="%pluginsThemes" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" VBox.vgrow="ALWAYS">
-                                       <graphic>
-                                          <ImageView fx:id="uiPluginsImg" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@images/menu-modules.png" />
-                                             </image>
-                                          </ImageView>
-                                       </graphic></MenuButton>
-                                 </children>
-                              </VBox>
-                                  </items>
-                              </ToolBar>
-                        <ToolBar fx:id="uiToolBarPlugins" maxHeight="1.7976931348623157E308" minWidth="0.0" HBox.hgrow="ALWAYS" />
-                        <ToolBar maxHeight="1.7976931348623157E308" HBox.hgrow="NEVER">
-                           <items>
-                              <Button contentDisplay="TOP" mnemonicParsing="false" onAction="#openSearchTab" styleClass="buttonbar-button" text="%search">
+                                    </children>
+                                </VBox>
+                        <VBox prefHeight="71.0">
+                           <children>
+                              <MenuButton fx:id="uiPlugins" alignment="CENTER" contentDisplay="TOP" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefWidth="135.0" styleClass="buttonbar-button" text="%pluginsThemes" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" VBox.vgrow="ALWAYS">
                                  <graphic>
-                                    <ImageView pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fx:id="uiPluginsImg" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="@images/menu-search.png" />
+                                          <Image url="@images/menu-modules.png" />
                                        </image>
                                     </ImageView>
                                  </graphic>
-                              </Button>
-                                      <Button fx:id="uiPrintButton" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" onAction="#print" styleClass="buttonbar-button" text="%print">
-                                          <graphic>
-                                              <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                                                  <image>
-                                                      <Image url="@images/menu-print.png" />
-                                                  </image>
-                                              </ImageView>
-                                          </graphic>
-                                      </Button>
-                           </items>
-                        </ToolBar>
+                              </MenuButton>
+                           </children>
+                        </VBox>
+                        <HBox fx:id="uiToolBarPlugins" HBox.hgrow="ALWAYS" />
+                        <Button contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#openSearchTab" styleClass="buttonbar-button" text="%search">
+                           <graphic>
+                              <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@images/menu-search.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
+                                <Button fx:id="uiPrintButton" alignment="CENTER" contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#print" styleClass="buttonbar-button" text="%print">
+                                    <graphic>
+                                        <ImageView fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+                                            <image>
+                                                <Image url="@images/menu-print.png" />
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
                      </children>
                   </HBox>
                </children>
@@ -129,7 +129,7 @@
     <center>
         <BorderPane BorderPane.alignment="CENTER">
             <center>
-                <TabPane fx:id="uiTabs" prefHeight="369.0" prefWidth="635.0" BorderPane.alignment="CENTER" />
+                <TabPane fx:id="uiTabs" BorderPane.alignment="CENTER" />
             </center>
         </BorderPane>
     </center>

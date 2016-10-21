@@ -62,6 +62,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -133,7 +134,7 @@ public class FXMainFrame extends BorderPane {
     @FXML private ToggleButton uiAlertsBtn;
     @FXML Button uiPrintButton;
     @FXML private ImageView uiPluginsImg;
-    @FXML private ToolBar uiToolBarPlugins;
+    @FXML private HBox uiToolBarPlugins;
     @FXML private TabPane uiTabs;
     @FXML private MenuBar uiMenu;
 
@@ -147,6 +148,7 @@ public class FXMainFrame extends BorderPane {
         progressMonitor.getStylesheets().add("/fr/sirs/ProgressMonitor.css");
         initProgressMonitor(progressMonitor);
         final ToolBar pm = new ToolBar(progressMonitor);
+        pm.setPadding(Insets.EMPTY);
         pm.prefHeightProperty().bind(uiMenu.heightProperty());
         ((HBox) uiMenu.getParent()).getChildren().add(pm);
 
@@ -261,9 +263,9 @@ public class FXMainFrame extends BorderPane {
         //on change les boutons de la barre en fonction du plugin actif.
         activePlugin.addListener((ObservableValue<? extends Plugin> observable, Plugin oldValue, Plugin newValue) -> {
             uiPlugins.setText(newValue.getTitle().toString());
-            uiToolBarPlugins.getItems().clear();
+            uiToolBarPlugins.getChildren().clear();
             for (Theme theme : newValue.getThemes()) {
-                uiToolBarPlugins.getItems().add(toButton((AbstractPluginsButtonTheme) theme));
+                uiToolBarPlugins.getChildren().add(toButton((AbstractPluginsButtonTheme) theme));
             }
         });
 
@@ -481,8 +483,8 @@ public class FXMainFrame extends BorderPane {
         }
         if (theme.getImg() != null) {
             final ImageView imageView = new ImageView();
-            imageView.setFitHeight(40);
-            imageView.setFitWidth(40);
+            imageView.setFitHeight(32);
+            imageView.setFitWidth(32);
             imageView.setImage(theme.getImg());
             button.setGraphic(imageView);
         }
@@ -495,7 +497,7 @@ public class FXMainFrame extends BorderPane {
         button.setPrefWidth(115);
         button.setPrefHeight(USE_COMPUTED_SIZE);
         button.setMaxWidth(USE_PREF_SIZE);
-        button.setMaxHeight(USE_COMPUTED_SIZE);
+        button.setMaxHeight(Double.MAX_VALUE);
         button.setContentDisplay(ContentDisplay.TOP);
         button.setAlignment(Pos.CENTER);
         button.getStyleClass().add("buttonbar-button");
