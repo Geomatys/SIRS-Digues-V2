@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -35,6 +35,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.ReferenceTableCell;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +44,7 @@ import java.util.function.Function;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -53,6 +55,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -127,6 +130,12 @@ public class FXSystemeReperagePane extends BorderPane {
     /** A flag to indicate that selected {@link SystemeReperage} must be saved. */
     private final SimpleBooleanProperty saveSR = new SimpleBooleanProperty(false);
 
+    /**
+     * A comparator which sort bornes by apparition order (uphill to downhill) in
+     * currently selected linear.
+     */
+    private final ObjectBinding<Comparator<SystemeReperageBorne>> defaultSRBComparator;
+
     public FXSystemeReperagePane(FXMap map, final String typeName) {
         SIRS.loadFXML(this);
 
@@ -195,10 +204,12 @@ public class FXSystemeReperagePane extends BorderPane {
         final TableColumn<SystemeReperageBorne,SystemeReperageBorne> deleteCol = new DeleteColumn();
         final TableColumn<SystemeReperageBorne,SystemeReperageBorne> nameCol = new NameColumn();
         final TableColumn<SystemeReperageBorne,Number> prCol = new PRColumn();
-
         uiBorneTable.getColumns().add(deleteCol);
         uiBorneTable.getColumns().add(nameCol);
         uiBorneTable.getColumns().add(prCol);
+
+        nameCol.setSortable(true);
+        prCol.setSortable(true);
 
         // Initialize event listeners
         tronconProp.addListener(this::tronconChanged);
@@ -206,6 +217,13 @@ public class FXSystemeReperagePane extends BorderPane {
         uiSrComboBox.valueProperty().addListener(this::updateDefaultSRCheckBox);
         uiDefaultSRCheckBox.selectedProperty().addListener(this::updateTonconDefaultSR);
 
+        // Update default comparator on linear change.
+        defaultSRBComparator = Bindings.createObjectBinding(() -> {
+            final TronconDigue td = tronconProp.get();
+            if (td == null || td.getGeometry() == null)
+                return null;
+            return new SRBComparator(LinearReferencingUtilities.asLineString(td.getGeometry()));
+        }, tronconProp);
     }
 
     public void reset(){
@@ -247,7 +265,7 @@ public class FXSystemeReperagePane extends BorderPane {
         final boolean mustSaveTd = saveTD.get();
         final boolean mustSaveSr = saveSR.get();
 
-        if (mustSaveTd || mustSaveTd) {
+        if (mustSaveTd || mustSaveSr) {
             saveTD.set(false);
             saveSR.set(false);
 
@@ -417,7 +435,7 @@ public class FXSystemeReperagePane extends BorderPane {
         if (tr != null) {
             tr.getBorneIds().add(borne.getId());
         }
-        
+
         createBorne(borne);
     }
 
@@ -666,15 +684,6 @@ public class FXSystemeReperagePane extends BorderPane {
      * TABLE UTILITIES
      */
 
-    public void sortBorneTable(){
-        final TronconDigue troncon = tronconProp.get();
-        if(troncon==null) return;
-
-        final List lst = uiBorneTable.getItems();
-        final LineString linear = LinearReferencingUtilities.asLineString(troncon.getGeometry());
-        lst.sort(new SRBComparator(linear));
-    }
-
     private void updateBorneTable(ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) {
         if (oldValue != null) {
             save(oldValue, null);
@@ -689,8 +698,18 @@ public class FXSystemeReperagePane extends BorderPane {
             } else {
                 mode.set(Mode.EDIT_BORNE);
             }
-            uiBorneTable.setItems(newValue.getSystemeReperageBornes());
-            sortBorneTable();
+
+            // By default, we'll sort bornes from uphill to downhill, but alow user to sort them according to available table columns.
+            final Comparator defaultComparator = defaultSRBComparator.get();
+            final SortedList sortedItems;
+            if (defaultComparator != null) {
+                sortedItems = newValue.getSystemeReperageBornes().sorted(defaultComparator).sorted();
+            } else {
+                sortedItems = newValue.getSystemeReperageBornes().sorted();
+            }
+
+            sortedItems.comparatorProperty().bind(uiBorneTable.comparatorProperty());
+            uiBorneTable.setItems(sortedItems);
         }
     }
 

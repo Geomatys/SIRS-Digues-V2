@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -97,7 +97,7 @@ public class BorneEditHandler extends AbstractNavigationHandler {
             return new Group(h,v);
         }
     };
-    private final double zoomFactor = 2;
+
     private final Session session;
 
     //edition variables
@@ -143,7 +143,7 @@ public class BorneEditHandler extends AbstractNavigationHandler {
         final BorderPane bp = new BorderPane(editPane, null, null, footer, null);
 
         dialog.setResizable(true);
-        dialog.setOnCloseRequest(new EventHandler() {
+        dialog.setOnHidden(new EventHandler() {
             @Override
             public void handle(Event event) {
                 editPane.save();
@@ -425,8 +425,6 @@ public class BorneEditHandler extends AbstractNavigationHandler {
                 session.getRepositoryForClass(BorneDigue.class).update(borne);
                 editPane.selectSRB(null);
                 //les event vont induire le repaint de la carte
-                editPane.sortBorneTable();
-
                 final TronconDigue troncon = editPane.tronconProperty().get();
                 if(troncon!=null){
                     //on recalcule les geometries des positionables du troncon.

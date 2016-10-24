@@ -47,7 +47,7 @@ import org.geotoolkit.util.collection.CloseableIterator;
  */
 public class FXDisorderPrintPane extends TemporalTronconChoicePrintPane {
 
-    private static Comparator<Observation> DATE_COMPARATOR = (o1, o2) -> {
+    private static final Comparator<Observation> DATE_COMPARATOR = (o1, o2) -> {
         if (o1.getDate() == o2.getDate())
             return 0;
         if (o1.getDate() == null)
