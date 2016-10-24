@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -29,13 +29,18 @@ import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.StreamingIterable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.DocumentOperationResult;
+import org.ektorp.Options;
 import org.geotoolkit.referencing.LinearReferencing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -88,6 +93,7 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
     public void update(SystemeReperage entity, TronconDigue troncon) {
         ArgumentChecks.ensureNonNull("SR to update", entity);
         ArgumentChecks.ensureNonNull("Troncon bound to updated SR", troncon);
+        final SystemeReperage previousVersion = get(entity.getId(), new Options().revision(entity.getRevision()));
         super.update(entity);
         constraintBorneInTronconListBorne(entity, troncon, false);
         updatePositionsForSR(troncon, entity, entity);
@@ -280,10 +286,35 @@ public class SystemeReperageRepository extends AbstractSIRSRepository<SystemeRep
         LinearReferencing.SegmentInfo[] tronconSegments = LinearReferencingUtilities.buildSegments(LinearReferencingUtilities.asLineString(troncon.getGeometry()));
         List<Positionable> positionableList = TronconUtils.getPositionableList(troncon);
         Iterator<Positionable> iterator = positionableList.iterator();
+        final Set<String> newSrBorneIds;
+        if (newSR != null)
+            newSrBorneIds = newSR.getSystemeReperageBornes().stream()
+                    .map(borne -> borne.getId())
+                    .collect(Collectors.toSet());
+        else
+            newSrBorneIds = Collections.EMPTY_SET;
+
+        /*
+         * Before computing a new referencing for the current object, we ensure
+         * it's needed :
+         * - The object linear position uses given SR.
+         * - The new SR is different from old SR, or :
+         *      - bornes used for positioning are not found in new SR.
+         */
+        final Predicate<Positionable> updateNeeded = p -> {
+            return oldSR.getId().equals(p.getSystemeRepId()) &&
+                    (
+                        (newSR == null || !p.getSystemeRepId().equals(newSR.getId())) ||
+                        (
+                            p.getBorneDebutId() != null && !newSrBorneIds.contains(p.getBorneDebutId()) ||
+                            p.getBorneFinId() != null && !newSrBorneIds.contains(p.getBorneFinId())
+                        )
+                    );
+        };
         while (iterator.hasNext()) {
             final Positionable p = iterator.next();
-            if (oldSR.getId().equals(p.getSystemeRepId())) {
-                if (newSR != null && !newSR.getSystemeReperageBornes().isEmpty()) {
+            if (updateNeeded.test(p)) {
+                if (newSR != null && !newSrBorneIds.isEmpty()) {
                     // We must update linear information.
                     final TronconUtils.PosInfo pInfo = new TronconUtils.PosInfo(p, troncon, tronconSegments);
                     TronconUtils.PosSR forSR = pInfo.getForSR(newSR);
