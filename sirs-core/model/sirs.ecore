@@ -323,7 +323,10 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="articleIds" upperBound="-1"
         eType="#//ArticleJournal"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Observation" eSuperTypes="#//AbstractObservation"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Observation" eSuperTypes="#//AbstractObservation">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="urgenceId" eType="#//RefUrgence"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nombreDesordres" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ObjetPhotographiable" abstract="true"
       eSuperTypes="#//Objet">
     <eStructuralFeatures xsi:type="ecore:EReference" name="photos" upperBound="-1"
@@ -1447,14 +1450,12 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="date" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
       <eAnnotations source="localDate"/>
     </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nombreDesordres" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="evolution" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="suite" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="observateurId" eType="#//Contact"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="dateMaj" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate">
       <eAnnotations source="localDate"/>
     </eStructuralFeatures>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="urgenceId" eType="#//RefUrgence"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="author" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="designation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
