@@ -30,7 +30,7 @@ import fr.sirs.util.referencing.HackCRSFactory;
 import fr.sirs.util.property.DocumentRoots;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.SirsPreferences;
-import fr.sirs.util.referencing.HackCoordinateOperationFactory;
+import org.apache.sis.referencing.operation.HackCoordinateOperationFactory;
 import java.awt.Desktop;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
