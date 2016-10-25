@@ -1689,6 +1689,7 @@ public class PojoTable extends BorderPane implements Printable {
                 tmpError = e;
                 // rollback value in case of error.
                 ((WritableValue)value).setValue(oldValue);
+                event.getTableView().refresh(); // To ensure cell rendering is aware we've rollbacked data.
             }
         } else {
             tmpError = new IllegalStateException(new StringBuilder("Cannot affect read-only property in column ").append(col.getText()).append("from table ").append(titleProperty.get()).toString());
