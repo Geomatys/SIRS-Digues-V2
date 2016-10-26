@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -27,12 +27,8 @@ import fr.sirs.plugin.vegetation.map.CreateParcelleTool;
 import fr.sirs.plugin.vegetation.map.CreatePeuplementTool;
 import fr.sirs.plugin.vegetation.map.EditVegetationTool;
 import java.util.Iterator;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -48,7 +44,8 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
+import javafx.stage.Window;
+import org.apache.sis.util.collection.WeakValueHashMap;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
@@ -66,9 +63,8 @@ public class VegetationToolBar extends ToolBar {
     private static final String LEFT = "buttongroup-left";
     private static final String CENTER = "buttongroup-center";
     private static final String RIGHT = "buttongroup-right";
-    
-    private Stage dialog = null;
-    private Stage dialogRecherche = null;
+
+    private final WeakValueHashMap<Object, Stage> dialogCache = new WeakValueHashMap(Object.class);
 
     public VegetationToolBar() {
         getStylesheets().add("/org/geotoolkit/gui/javafx/buttonbar.css");
@@ -78,17 +74,7 @@ public class VegetationToolBar extends ToolBar {
         buttonParcelle.disableProperty().bind(Injector.getSession().geometryEditionProperty().not());
         buttonParcelle.setTooltip(new Tooltip("Outil d'édition de végétation"));
         buttonParcelle.getStyleClass().add(LEFT);
-        buttonParcelle.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                if(dialog==null){
-                    showEditor();
-                }else{
-                    dialog.close();
-                    dialog = null;
-                }
-            }
-        });
+        buttonParcelle.setOnAction(this::showEditor);
 
         final Button recherche = new Button(null, new ImageView(SwingFXUtils.toFXImage(IconBuilder.createImage(
                 FontAwesomeIcons.ICON_GEARS_ALIAS,16,FontAwesomeIcons.DEFAULT_COLOR),null)));
@@ -111,104 +97,65 @@ public class VegetationToolBar extends ToolBar {
         return true;
     }
 
-    private void showSearchDialog(ActionEvent act){
+    private void showSearchDialog(final ActionEvent act) {
         if(!checkPlan()) return;
-        
-        dialogRecherche = new Stage();
-        dialogRecherche.setAlwaysOnTop(true);
-        dialogRecherche.initModality(Modality.NONE);
-        dialogRecherche.initStyle(StageStyle.UTILITY);
-        dialogRecherche.setTitle("Végétation");
 
-        final FXPlanLayerPane pan = new FXPlanLayerPane();
+        final Stage d = dialogCache.computeIfAbsent(act.getSource(),
+                in -> createDialog("Recherche de végétation", new FXPlanLayerPane())
+        );
 
-        final BorderPane pane = new BorderPane(pan);
-        pane.setPadding(new Insets(10, 10, 10, 10));
-
-        final Scene scene = new Scene(pane);
-
-        dialogRecherche.setOnCloseRequest((WindowEvent evt) -> dialogRecherche = null);
-        dialogRecherche.setScene(scene);
-        dialogRecherche.setResizable(true);
-        dialogRecherche.setWidth(300);
-        dialogRecherche.setHeight(300);
-        dialogRecherche.show();
-
+        d.show();
+        d.requestFocus();
     }
 
-    private void showEditor(){
+    private Stage createDialog(final String title, final Node content) {
+        final Stage dialog = new Stage();
+        dialog.setAlwaysOnTop(true);
+        dialog.initModality(Modality.NONE);
+        final Scene toolScene = getScene();
+        final Window window;
+        if (toolScene != null && (window = toolScene.getWindow()) != null) {
+            dialog.initOwner(window);
+        }
+        dialog.initStyle(StageStyle.DECORATED);
+        dialog.setTitle(title);
+        dialog.setAlwaysOnTop(true);
+
+        final BorderPane pane = new BorderPane(content);
+        pane.setPadding(new Insets(10, 10, 10, 10));
+
+        dialog.setScene(new Scene(pane));
+        dialog.setResizable(true);
+        dialog.setWidth(400);
+        dialog.setHeight(400);
+
+        return dialog;
+    }
+
+    private void showEditor(final ActionEvent act) {
         if(!checkPlan()) return;
+
+        final Stage d = dialogCache.computeIfAbsent(act.getSource(), in -> {
 
         final FXToolBox toolbox = new FXToolBox(Injector.getSession().getFrame().getMapTab().getMap().getUiMap(), MapBuilder.createEmptyMapLayer());
-        toolbox.commitRollbackVisibleProperty().setValue(false);
-        toolbox.getToolPerRow().set(6);
-        toolbox.getTools().add(CreateParcelleTool.SPI);
-        toolbox.getTools().add(CreatePeuplementTool.SPI);
-        toolbox.getTools().add(CreateInvasiveTool.SPI);
-        toolbox.getTools().add(CreateHerbaceTool.SPI);
-        toolbox.getTools().add(CreateArbreTool.SPI);
-        toolbox.getTools().add(EditVegetationTool.SPI);
+            toolbox.commitRollbackVisibleProperty().setValue(false);
+            toolbox.getToolPerRow().set(6);
+            toolbox.getTools().add(CreateParcelleTool.SPI);
+            toolbox.getTools().add(CreatePeuplementTool.SPI);
+            toolbox.getTools().add(CreateInvasiveTool.SPI);
+            toolbox.getTools().add(CreateHerbaceTool.SPI);
+            toolbox.getTools().add(CreateArbreTool.SPI);
+            toolbox.getTools().add(EditVegetationTool.SPI);
 
-        dialog = new Stage();
-        dialog.initModality(Modality.NONE);
-        dialog.initStyle(StageStyle.UTILITY);
-        dialog.setTitle("Végétation");
-
-        toolbox.setMaxHeight(Double.MAX_VALUE);
-        toolbox.setMaxWidth(Double.MAX_VALUE);
-        final Iterator<EditionTool.Spi> ite = EditionHelper.getToolSpis();
-        while(ite.hasNext()){
-            toolbox.getTools().add(ite.next());
-        }
-
-        final FXBordeRPane pane = new FXBordeRPane(toolbox);
-
-        pane.setPadding(new Insets(10, 10, 10, 10));
-
-        final Scene scene = new Scene(pane);
-
-        dialog.setOnCloseRequest((WindowEvent evt) -> dialog = null);
-        dialog.setScene(scene);
-        dialog.setResizable(true);
-
-        //resize pane if too small
-        pane.boundsInLocalProperty().addListener(new ChangeListener<Bounds>() {
-            @Override
-            public void changed(ObservableValue<? extends Bounds> observable, Bounds oldValue, Bounds newValue) {
-                final double minWidth = pane.computeMinWidth(dialog.getHeight()) +30;
-                final double minHeight = pane.computeMinHeight(dialog.getWidth()) +30;
-                if(dialog.getHeight()<minHeight){
-                    dialog.setHeight(minHeight);
-                }
-                if(dialog.getWidth()<minWidth){
-                    dialog.setWidth(minWidth);
-                }
+            final Iterator<EditionTool.Spi> ite = EditionHelper.getToolSpis();
+            while (ite.hasNext()) {
+                toolbox.getTools().add(ite.next());
             }
+
+            return createDialog("Edition de végétation", toolbox);
         });
 
-        dialog.show();
-        dialog.requestFocus();
+        d.show();
+        d.requestFocus();
     }
-
-    private static class FXBordeRPane extends BorderPane{
-
-        public FXBordeRPane() {
-        }
-
-        public FXBordeRPane(Node center) {
-            super(center);
-        }
-        
-        @Override
-        public  double computeMinWidth(double height) {
-            return super.computeMinWidth(height);
-        }
-
-        @Override
-        public double computeMinHeight(double width) {
-            return super.computeMinHeight(width);
-        }
-    }
-
-
 }
