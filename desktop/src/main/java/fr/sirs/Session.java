@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -49,8 +49,11 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import javafx.animation.FadeTransition;
@@ -548,5 +551,33 @@ public class Session extends SessionCore {
 
             return tab;
         }
+    }
+
+    /**
+     * Try to retrieve ALREADY OPENED editors corresponding to the elements with
+     * given Ids.
+     * @param ids Ids of the elements to find an open editor for.
+     * @return A set of opened editors for the wanted elements. There's no
+     * guarantee that we will succeed to find an editor for each or any of them.
+     * Accordingly, the result can be an empty set (never null). Moreover, this
+     * result set can contain more elements than input one, because if we find
+     * an editor whose target is a sub-element (i.e {@link Element#getDocumentId() }
+     * is contained in given set) is of one of the wanted ids, it will be
+     * included in the result.
+     */
+    public Set<FXFreeTab> findEditors(Set<String> ids) {
+        final HashSet<FXFreeTab> result = new HashSet<>();
+        for (final Map.Entry<Object, FXFreeTab> entry : openEditors.entrySet()) {
+            Element e;
+            String id, docId;
+            if (entry.getKey() instanceof Element) {
+                e = (Element)entry.getKey();
+                id = e.getId();
+                if (id != null && ids.contains(id) || (docId = e.getDocumentId()) != null && ids.contains(docId))
+                    result.add(entry.getValue());
+            }
+        }
+
+        return result;
     }
 }

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -37,12 +37,14 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.Tooltip;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
+import javafx.stage.StageStyle;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
+ * @author Alexis Manin (Geomatys)
  */
 public class FXFreeTab extends Tab implements FXTextAbregeable {
 
@@ -58,6 +60,10 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
     private WeakReference<TabPane> previous;
     private final MenuItem bindAction;
 
+    /**
+     * We use a supplier to get the content of the tab. It allows us to lazily
+     * load it. I.e. we set tab content only first time it's focused.
+     */
     private final SimpleObjectProperty<Supplier<Node>> contentSupplier = new SimpleObjectProperty<>();
 
     private FXFreeTab(String text, boolean abregeable, int nbAffichable) {
@@ -66,12 +72,23 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
         setNbAffichable(nbAffichable);
         setTextAbrege(text);
 
-        bindAction = new MenuItem(UNBIND);
-        bindAction.setOnAction(this::unbind);
+        bindAction = new MenuItem();
         setContextMenu(new ContextMenu(bindAction));
+        getContextMenu().setOnShowing(evt -> {
+            final TabPane tp = previous == null? null : previous.get();
+            if (tp == null || tp.equals(getTabPane())) {
+                bindAction.setText(UNBIND);
+                bindAction.setOnAction(this::unbind);
+            } else {
+                bindAction.setText(BIND);
+                bindAction.setOnAction(this::bind);
+            }
+        });
 
         contentSupplier.addListener(this::supplierChanged);
         setOnSelectionChanged(this::selectionChanged);
+
+        tabPaneProperty().addListener(this::parentChanged);
     }
 
     public FXFreeTab(String text, int nbAffichable) {
@@ -132,41 +149,30 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
 
     private void unbind(final ActionEvent evt) {
         final TabPane tabPane = this.getTabPane();
-        previous = new WeakReference<>(tabPane);
-        tabPane.getTabs().remove(this);
 
-        final Stage stage = new Stage();
+        final Stage stage = new Stage(StageStyle.DECORATED);
+        stage.initModality(Modality.NONE);
+        stage.initOwner(null);
         stage.getIcons().add(SIRS.ICON);
         stage.titleProperty().bind(textProperty());
+
+        tabPane.getTabs().remove(this);
 
         final TabPane newPane = new TabPane(this);
         newPane.getStylesheets().add(SIRS.CSS_PATH);
         stage.setScene(new Scene(newPane));
-        stage.setOnHidden((WindowEvent event1) -> {
-            newPane.getTabs().remove(FXFreeTab.this);
-            final TabPane tmp = previous == null? null : previous.get();
-            if (tmp != null) {
-                tmp.getTabs().add(FXFreeTab.this);
-            }
-        });
-
         stage.sizeToScene();
         stage.show();
-
-        bindAction.setText(BIND);
-        bindAction.setOnAction(this::bind);
     }
 
     private void bind(final ActionEvent evt) {
-        final TabPane tmpPane = previous == null ? null : previous.get();
-        if (tmpPane == null) {
+        final TabPane oldPane = previous == null ? null : previous.get();
+        if (oldPane == null) {
             new Growl(Growl.Type.WARNING, "Le panneau d'origine n'existe plus. Impossible de raccrocher l'onglet.").showAndFade();
-            getContextMenu().getItems().remove(bindAction); // No more binding is possible now.
         } else {
             this.getTabPane().getScene().getWindow().hide();
-
-            bindAction.setText(UNBIND);
-            bindAction.setOnAction(this::unbind);
+            this.getTabPane().getTabs().remove(FXFreeTab.this);
+            oldPane.getTabs().add(FXFreeTab.this);
         }
     }
 
@@ -182,12 +188,6 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
     private void supplyContent() {
         if (isSelected() && getContent() == null && contentSupplier.get() != null) {
             Node node = contentSupplier.get().get();
-            // Made for task SYM-1305 (see comments on 2016-03-07)
-//            if (!(node instanceof ScrollPane)) {
-//                final ScrollPane sPane = new ScrollPane(node);
-//                sPane.setFitToWidth(true);
-//                node = sPane;
-//            }
             setContent(node);
         }
     }
@@ -201,5 +201,9 @@ public class FXFreeTab extends Tab implements FXTextAbregeable {
         this.contentSupplier.set(contentSupplier);
     }
 
-
+    public void parentChanged(final ObservableValue<? extends TabPane> obs, final TabPane oldValue, final TabPane newValue) {
+        if (previous == null && oldValue != null) {
+            previous = new WeakReference<>(oldValue);
+        }
+    }
 }
