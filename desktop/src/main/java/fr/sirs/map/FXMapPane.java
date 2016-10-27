@@ -621,25 +621,24 @@ public class FXMapPane extends BorderPane implements Printable {
 
             final MapLayer container = getMapLayerForElement(toFocusOn);
             if (!(container instanceof FeatureMapLayer)) {
-
-                final Growl growlInfo = new Growl(Growl.Type.WARNING, "L'objet n'est présent dans aucune couche cartographique.");
-                Platform.runLater(growlInfo::showAndFade);
-
-                if(toFocusOn instanceof AvecGeometrie){
-                    Geometry geom = ((AvecGeometrie)toFocusOn).getGeometry();
-                    if(geom!=null){
+                if (toFocusOn instanceof AvecGeometrie) {
+                    Geometry geom = ((AvecGeometrie) toFocusOn).getGeometry();
+                    if (geom != null) {
                         final JTSEnvelope2D env = JTS.toEnvelope(geom);
                         final Envelope selectionEnvelope = SIRS.pseudoBuffer(env);
                         final TaskManager.MockTask displayUpdate = new TaskManager.MockTask(() -> {
-                                uiMap1.getCanvas().setVisibleArea(selectionEnvelope);
-                                return null;
+                            uiMap1.getCanvas().setVisibleArea(selectionEnvelope);
+                            return null;
                         });
                         Platform.runLater(displayUpdate);
                         displayUpdate.get();
+                        return true;
                     }
+                } else {
+                    final Growl growlInfo = new Growl(Growl.Type.WARNING, "L'objet n'est présent dans aucune couche cartographique.");
+                    Platform.runLater(growlInfo::showAndFade);
+                    return false;
                 }
-
-                return false;
             }
 
             final FeatureMapLayer fLayer = (FeatureMapLayer) container;
