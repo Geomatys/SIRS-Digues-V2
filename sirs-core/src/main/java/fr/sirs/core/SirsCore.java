@@ -45,6 +45,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -302,7 +303,7 @@ public class SirsCore {
         noJavaPrefs.put("platform", "server");
         Setup.initialize(noJavaPrefs);
 
-        final String url = "jdbc:hsqldb:file:" + SirsCore.EPSG_PATH.toString()+"/db";
+        final String url = "jdbc:hsqldb:file:" + SirsCore.EPSG_PATH.resolve("db");
         final JDBCDataSource ds = new JDBCDataSource();
         ds.setDatabase(url);
         JNDI.setEPSG(ds);
@@ -314,7 +315,12 @@ public class SirsCore {
             if (ntv2URI.getScheme().equalsIgnoreCase("file")) {
                 gridPath = Paths.get(ntv2URI);
             } else if (ntv2URI.getScheme().equalsIgnoreCase("jar")) {
-                final FileSystem jarFS = FileSystems.newFileSystem(ntv2URI, Collections.EMPTY_MAP);
+                FileSystem jarFS;
+                try {
+                    jarFS = FileSystems.newFileSystem(ntv2URI, Collections.EMPTY_MAP);
+                } catch (FileSystemAlreadyExistsException e) {
+                    jarFS = FileSystems.getFileSystem(ntv2URI);
+                }
                 gridPath = jarFS.getPath(NTV2_PATH);
                 ClosingDaemon.watchResource(gridPath, jarFS);
             } else {
@@ -326,7 +332,9 @@ public class SirsCore {
             dirField.set(DataDirectory.DATUM_CHANGES, gridPath);
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "NTV2 data for RGF93 cannot be installed.", ex);
-            GeotkFX.newExceptionDialog("La grille de transformation NTV2 ne peut être installée. Des erreurs de reprojection pourraient apparaître au sein de l'application.", ex).show();
+            Platform.runLater(() ->
+                    GeotkFX.newExceptionDialog("La grille de transformation NTV2 ne peut être installée. Des erreurs de reprojection pourraient apparaître au sein de l'application.", ex).show()
+            );
         }
 
         try {
