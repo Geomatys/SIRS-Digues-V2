@@ -48,9 +48,11 @@ import javafx.stage.Window;
 import org.apache.sis.util.collection.WeakValueHashMap;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
+import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionHelper;
 import org.geotoolkit.gui.javafx.render2d.edition.EditionTool;
 import org.geotoolkit.gui.javafx.render2d.edition.FXToolBox;
+import org.geotoolkit.gui.javafx.render2d.navigation.FXPanHandler;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.MapBuilder;
 
@@ -110,24 +112,28 @@ public class VegetationToolBar extends ToolBar {
 
     private Stage createDialog(final String title, final Node content) {
         final Stage dialog = new Stage();
-        dialog.setAlwaysOnTop(true);
         dialog.initModality(Modality.NONE);
         final Scene toolScene = getScene();
         final Window window;
         if (toolScene != null && (window = toolScene.getWindow()) != null) {
             dialog.initOwner(window);
+        } else {
+            /*
+             * If we cannot set it as a child of main frame (making it appear
+             * above the main frame), we force its display on the first plan,
+             * to avoid user losing it.
+             */
+            dialog.setAlwaysOnTop(true);
         }
-        dialog.initStyle(StageStyle.DECORATED);
+        dialog.initStyle(StageStyle.UTILITY);
         dialog.setTitle(title);
-        dialog.setAlwaysOnTop(true);
 
         final BorderPane pane = new BorderPane(content);
         pane.setPadding(new Insets(10, 10, 10, 10));
 
         dialog.setScene(new Scene(pane));
         dialog.setResizable(true);
-        dialog.setWidth(400);
-        dialog.setHeight(400);
+        dialog.sizeToScene();
 
         return dialog;
     }
@@ -135,9 +141,12 @@ public class VegetationToolBar extends ToolBar {
     private void showEditor(final ActionEvent act) {
         if(!checkPlan()) return;
 
-        final Stage d = dialogCache.computeIfAbsent(act.getSource(), in -> {
+        final Object key = act.getSource();
 
-        final FXToolBox toolbox = new FXToolBox(Injector.getSession().getFrame().getMapTab().getMap().getUiMap(), MapBuilder.createEmptyMapLayer());
+        final Stage d = dialogCache.computeIfAbsent(key, in -> {
+            final FXMap uiMap = Injector.getSession().getFrame().getMapTab().getMap().getUiMap();
+
+        final FXToolBox toolbox = new FXToolBox(uiMap, MapBuilder.createEmptyMapLayer());
             toolbox.commitRollbackVisibleProperty().setValue(false);
             toolbox.getToolPerRow().set(6);
             toolbox.getTools().add(CreateParcelleTool.SPI);
@@ -152,9 +161,16 @@ public class VegetationToolBar extends ToolBar {
                 toolbox.getTools().add(ite.next());
             }
 
-            return createDialog("Edition de végétation", toolbox);
+            final Stage stage = createDialog("Edition de végétation", toolbox);
+            stage.setOnHidden(evt -> {
+                if (uiMap.getHandler() != null && uiMap.getHandler().getClass().getPackage().getName().contains("vegetation"))
+                    uiMap.setHandler(new FXPanHandler(true));
+            });
+
+            return stage;
         });
 
+        d.setMinHeight(360);
         d.show();
         d.requestFocus();
     }
