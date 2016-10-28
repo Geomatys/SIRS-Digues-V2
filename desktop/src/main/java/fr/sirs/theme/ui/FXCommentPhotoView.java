@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -27,7 +27,6 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Observation;
 
 import java.lang.reflect.Method;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -204,12 +203,12 @@ public class FXCommentPhotoView extends SplitPane {
             final Task<Image> loader = new TaskManager.MockTask<>("Lecture d'image",
                     () -> {
                         try {
-                            return new Image(SIRS.getDocumentAbsolutePath(selected).toUri().toURL().toExternalForm());
+                            return SIRS.getOrLoadImage(SIRS.getDocumentAbsolutePath(selected).toUri().toURL().toExternalForm());
                         } catch (IllegalStateException e) {
                             // Illegal state exception here means no root folder has been configured for photos,
                             // just use the given path for the photo.
                             SIRS.LOGGER.log(Level.INFO, e.getLocalizedMessage());
-                            return new Image(Paths.get(selected.getChemin()).toUri().toURL().toExternalForm());
+                            return SIRS.getOrLoadImage(Paths.get(selected.getChemin()).toUri().toURL().toExternalForm());
                         }
                     });
 

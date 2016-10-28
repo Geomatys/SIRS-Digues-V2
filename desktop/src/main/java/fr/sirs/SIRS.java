@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -48,10 +48,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
-import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
@@ -155,6 +152,14 @@ public final class SIRS extends SirsCore {
 
     /** Cache row factories for reference properties, preventing from creating a new one for each column. */
     private static final Cache<Class, Callback<TableColumn, TableCell>> REF_CELL_FACTORIES = new Cache<>(50, 0, false);
+
+    /**
+     * Cache photographs loaded in memory, to avoid multiple panels to load the
+     * same image concurrently. No soft reference used here, because the aim is
+     * to use as little memory as possible, so images will be garbaged as soon
+     * as possible.
+     */
+    private static final Cache<String, Image> IMAGE_CACHE = new Cache<>(16, 0, false);
 
     private static AbstractRestartableStage LAUNCHER;
     public static void setLauncher(AbstractRestartableStage currentWindow) {
@@ -533,6 +538,30 @@ public final class SIRS extends SirsCore {
             return CELL_VALUE_FACTORY.getOrCreate(pName, () -> (Callback) new PropertyValueFactory<>(pName));
         } catch (Exception e) {
             throw new SirsCoreRuntimeException(e);
+        }
+    }
+
+    /**
+     * Load image pointed by given path, or return it directly if it's already
+     * cached.
+     *
+     * /!\ Image dimension is forced to ~ 512x512 pixels to limit memory usage.
+     * However, we don't know the exact amount of memory used, as we preserve
+     * image ratio.
+     *
+     * @param uri Path to the image.
+     * @return Loaded image.
+     * @throws RuntimeException If loading fails.
+     */
+    public static Image getOrLoadImage(final String uri) {
+        try {
+            return IMAGE_CACHE.getOrCreate(uri, () ->
+                    new Image(uri, 512, 512, true, false, false)
+            );
+        } catch (RuntimeException ex) {
+            throw ex;
+        } catch (Exception e) {
+            throw new SirsCoreRuntimeException("Unloadable image", e);
         }
     }
 }

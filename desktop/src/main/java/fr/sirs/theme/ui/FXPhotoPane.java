@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -18,13 +18,13 @@
  */
 package fr.sirs.theme.ui;
 
+import fr.sirs.SIRS;
 import fr.sirs.core.model.Photo;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.image.Image;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -58,7 +58,7 @@ public class FXPhotoPane extends FXPhotoPaneStub {
         ui_photo.setPreserveRatio(true);
         ui_chemin.textProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
             if (newValue != null) {
-                ui_photo.setImage(new Image(ui_chemin.getURI().toString()));
+                ui_photo.setImage(SIRS.getOrLoadImage(ui_chemin.getURI().toString()));
                 ui_photo.minWidth(0);
                 ui_photo.minHeight(0);
                 // Compute height when parent size or padding change.

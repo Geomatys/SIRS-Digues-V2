@@ -80,6 +80,7 @@
                         <!-- Force GC. G1 can factorize string instances to save
                         some memory, which can be useful in a restrained environment as this one. -->
                         <jvmArg>-XX:+UseG1GC</jvmArg>
+                        <jvmArg>-XX:+UseStringDeduplication</jvmArg>
                         <!-- Memory management. Application cannot run with less 
                         than 256MB heap, so we forbid its use when this requirement
                         cannot be fulfilled. Another important point is that multiple 
@@ -88,6 +89,13 @@
                         512MB, we define it as maximal heap amount. -->
                         <jvmArg>-Xms256m</jvmArg>
                         <jvmArg>-Xmx512m</jvmArg>
+                        <!-- We de-activate JIT compilation to reduce code cache / class space. -->
+                        <jvmArg>-XX:-TieredCompilation</jvmArg>
+                        <jvmArg>-Xmixed</jvmArg>
+                        <!-- Well, Not sure this is useful, but using for some time didn't appear to hurt. -->
+                        <jvmArg>-XX:+AggressiveOpts</jvmArg>
+                        <!-- Reduce thread space. This is important, as ES is popping a real swarm of threads. -->
+                        <jvmArg>-Xss256k</jvmArg>
                         <!-- We delegate proxy detection to Java (Note : Use of Proxy-vole 
                         library should make this parameter obsolete, but we keep it active, 
                         in case proxy-vole is not sufficient). -->

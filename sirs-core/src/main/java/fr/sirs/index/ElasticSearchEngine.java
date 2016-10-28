@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -61,6 +61,7 @@ public class ElasticSearchEngine implements Closeable {
         // We are forced to escape backslashes, or elastic search crash on windows platforms.
         defaultConfiguration.put("path.home", SirsCore.ELASTIC_SEARCH_PATH.toString().replace("\\", "\\\\"));
         defaultConfiguration.put("index.mapping.ignore_malformed", "true");
+        defaultConfiguration.put("processors", "1"); // limit number of threads used
 
         String riverConfig = readConfig("/fr/sirs/db/riverConfig.json");
         String indexConfig = readConfig("/fr/sirs/db/indexConfig.json");
