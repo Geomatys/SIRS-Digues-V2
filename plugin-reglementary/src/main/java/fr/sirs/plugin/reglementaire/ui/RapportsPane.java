@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -54,6 +54,7 @@ import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.ui.report.FXModeleRapportsPane;
+import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.StreamingIterable;
 import fr.sirs.util.odt.ODTUtils;
@@ -173,7 +174,9 @@ public class RapportsPane extends BorderPane {
         final LocalDate date = LocalDate.now();
         uiPeriodeDebut.valueProperty().set(date.minus(10, ChronoUnit.YEARS));
         uiPeriodeFin.valueProperty().set(date);
-
+        DatePickerConverter.register(uiPeriodeDebut);
+        DatePickerConverter.register(uiPeriodeFin);
+        
         uiSystemEndiguement.valueProperty().addListener(this::systemeEndiguementChange);
         uiTroncons.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         uiTroncons.getSelectionModel().getSelectedItems().addListener(this::tronconSelectionChange);

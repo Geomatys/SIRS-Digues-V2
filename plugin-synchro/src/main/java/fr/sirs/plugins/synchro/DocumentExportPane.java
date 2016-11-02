@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -42,6 +42,7 @@ import fr.sirs.core.model.SIRSFileReference;
 import fr.sirs.core.model.SIRSReference;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.CopyTask;
+import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.DocumentRoots;
 import java.io.IOException;
@@ -219,7 +220,8 @@ public class DocumentExportPane extends StackPane {
         uiDate.valueProperty().addListener((ObservableValue<? extends Object> observable, Object oldValue, Object newValue) -> {
             updateDocumentList();
         });
-
+        DatePickerConverter.register(uiDate);
+        
         uiDesktopToMobile.setText(null);
         uiDesktopToMobile.setGraphic(new ImageView(SIRS.ICON_ARROW_RIGHT_BLACK));
         uiDelete.setText(null);

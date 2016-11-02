@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -18,6 +18,7 @@
  */
 package org.geotoolkit.gui.javafx.util;
 
+import fr.sirs.util.DatePickerConverter;
 import java.time.LocalDate;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -34,12 +35,12 @@ import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 
 /**
+ * Hack : Overrided from Geotk to provide feature depicted in JIRA SYM-1433.
+ * See {@link DatePickerConverter} for details.
  *
  * @author Samuel Andrés (Geomatys)
- * 
- * TODO : REPLACE BY THE SAME CLASS DEFINED IN GEOTOOLKIT
- * 
- * @param <S> 
+ *
+ * @param <S>
  */
 public class FXLocalDateCell<S> extends TableCell<S, LocalDate> {
     public static final Image ICON_REMOVE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TIMES_CIRCLE, 16, FontAwesomeIcons.DEFAULT_COLOR), null);
@@ -63,6 +64,7 @@ public class FXLocalDateCell<S> extends TableCell<S, LocalDate> {
         });
         del.setStyle("-fx-background-color:transparent; -fx-focus-color: transparent;");
         field.setOnAction(event -> commitEdit(field.getValue()));
+        DatePickerConverter.register(field);
     }
 
     @Override

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -26,6 +26,7 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.EtapeObligationReglementaire;
 import fr.sirs.core.model.RefEcheanceRappelObligationReglementaire;
 import fr.sirs.ui.calendar.CalendarEvent;
+import fr.sirs.util.DatePickerConverter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -174,6 +175,7 @@ public final class ObligationsCalendarEventStage extends Stage {
         lbl.setMaxHeight(Double.MAX_VALUE);
         hbox.getChildren().add(lbl);
         final DatePicker dp = new DatePicker();
+        DatePickerConverter.register(dp);
         final EtapeObligationReglementaire etape = (EtapeObligationReglementaire) event.getParent();
         if (etape.getDateRealisation() != null) {
             dp.setValue(etape.getDateRealisation());

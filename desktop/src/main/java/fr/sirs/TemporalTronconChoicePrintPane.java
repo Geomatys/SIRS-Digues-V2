@@ -19,6 +19,7 @@
 package fr.sirs;
 
 import fr.sirs.core.model.AvecBornesTemporelles;
+import fr.sirs.util.DatePickerConverter;
 import java.time.LocalDate;
 import java.util.function.Predicate;
 import javafx.beans.value.ObservableValue;
@@ -73,6 +74,11 @@ public abstract class TemporalTronconChoicePrintPane extends TronconChoicePrintP
 
         uiOptionDebutArchive.disableProperty().bind(uiOptionNonArchive.selectedProperty());
         uiOptionFinArchive.disableProperty().bind(uiOptionNonArchive.selectedProperty());
+
+        DatePickerConverter.register(uiOptionDebut);
+        DatePickerConverter.register(uiOptionFin);
+        DatePickerConverter.register(uiOptionDebutArchive);
+        DatePickerConverter.register(uiOptionFinArchive);
     }
 
     /**

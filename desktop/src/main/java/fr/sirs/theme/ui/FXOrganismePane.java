@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -22,6 +22,7 @@ import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.model.ContactOrganisme;
 import fr.sirs.core.model.Organisme;
+import fr.sirs.util.DatePickerConverter;
 import java.time.LocalDate;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -42,7 +43,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
 
     @FXML private GridPane uiDescriptionGrid;
     @FXML private GridPane uiAdresseGrid;
-    
+
     @FXML private TextField uiRaisonSocialeTextField;
     @FXML private TextField uiStatutJuridiqueTextField;
     @FXML private TextField uifaxOrgTextField;
@@ -51,12 +52,12 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
     @FXML private TextField uiAdresseTextField;
     @FXML private TextField uiCodePostalTextField;
     @FXML private TextField uiCommuneTextField;
-    
+
     @FXML private DatePicker uiDebutDatePicker;
     @FXML private DatePicker uiFinDatePicker;
-    
+
     @FXML private Tab uiContactOrganismesTab;
-    
+
     private final PojoTable contactOrganismeTable;
 
     public FXOrganismePane(Organisme organisme) {
@@ -72,15 +73,18 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
                 child.disableProperty().bind(disableFieldsProperty());
             }
         }
-        
+
         contactOrganismeTable = new PojoTable(ContactOrganisme.class, "Contacts rattachés");
         contactOrganismeTable.parentElementProperty().bind(elementProperty);
         uiContactOrganismesTab.setContent(contactOrganismeTable);
-        
+
         elementProperty.addListener(this::initPane);
         setElement(organisme);
+
+        DatePickerConverter.register(uiDebutDatePicker);
+        DatePickerConverter.register(uiFinDatePicker);
     }
-    
+
     private void initPane(ObservableValue<? extends Organisme> observable, Organisme oldValue, Organisme newValue) {
 
         if (oldValue != null) {
@@ -93,14 +97,14 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
             uiCodePostalTextField.textProperty().unbindBidirectional(oldValue.codePostalProperty());
             uiCommuneTextField.textProperty().unbindBidirectional(oldValue.communeProperty());
         }
-        
+
         final Organisme organisme;
         if (newValue == null) {
             organisme = Injector.getSession().getRepositoryForClass(Organisme.class).create();
         } else {
             organisme = newValue;
         }
-        
+
         uiRaisonSocialeTextField.textProperty().bindBidirectional(organisme.nomProperty());
         uiStatutJuridiqueTextField.textProperty().bindBidirectional(organisme.statutJuridiqueProperty());
         uifaxOrgTextField.textProperty().bindBidirectional(organisme.faxProperty());
@@ -109,7 +113,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
         uiAdresseTextField.textProperty().bindBidirectional(organisme.adresseProperty());
         uiCodePostalTextField.textProperty().bindBidirectional(organisme.codePostalProperty());
         uiCommuneTextField.textProperty().bindBidirectional(organisme.communeProperty());
-        
+
         if (organisme.getDate_debut() != null) {
             uiDebutDatePicker.valueProperty().set(organisme.getDate_debut());
         }
@@ -120,7 +124,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
                 organisme.date_debutProperty().set(newDate);
             }
         });
-        
+
         if (organisme.getDate_fin() != null) {
             uiFinDatePicker.valueProperty().set(organisme.getDate_fin());
         }
@@ -131,7 +135,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
                 organisme.date_finProperty().set(newDate);
             }
         });
-        
+
         contactOrganismeTable.setTableItems(()-> (ObservableList) organisme.contactOrganisme);
     }
 

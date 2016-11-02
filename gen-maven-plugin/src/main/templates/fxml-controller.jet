@@ -13,6 +13,7 @@ import fr.sirs.util.FXComponentField;
 import fr.sirs.util.javafx.FloatSpinnerValueFactory;
 import fr.sirs.util.StreamingIterable;
 import fr.sirs.util.FXFreeTab;
+import fr.sirs.util.DatePickerConverter;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -328,7 +329,11 @@ else if (helper.isParcelleVegetation()){
         ui_<%= eAtt.getName()  %>.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
 <%              
                     }
-                }
+                } else if ("DatePicker".equals(attEditorName)) {
+%>
+        DatePickerConverter.register(ui_<%= eAtt.getName()  %>);
+<%
+				}
             }
         }
 

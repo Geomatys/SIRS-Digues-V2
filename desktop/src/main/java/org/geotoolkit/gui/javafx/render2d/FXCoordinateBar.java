@@ -19,6 +19,7 @@
 package org.geotoolkit.gui.javafx.render2d;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.util.DatePickerConverter;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
@@ -136,7 +137,7 @@ public class FXCoordinateBar extends GridPane {
                     final ZonedDateTime atStartOfDay = newValue.atStartOfDay(SirsCore.PARIS_ZONE_ID);
                     final ZonedDateTime atEndOfDay = atStartOfDay.plusDays(1).minusNanos(1);
                     map.getCanvas().setTemporalRange(
-                            Date.from(atStartOfDay.toInstant()), 
+                            Date.from(atStartOfDay.toInstant()),
                             Date.from(atEndOfDay.toInstant())
                     );
                 }
@@ -146,6 +147,8 @@ public class FXCoordinateBar extends GridPane {
         };
 
         dateField.valueProperty().addListener(rangeListener);
+        DatePickerConverter.register(dateField);
+        
         statusBar.getLeftItems().add(dateField);
 
         scaleCombo.getItems().addAll(  1000l,

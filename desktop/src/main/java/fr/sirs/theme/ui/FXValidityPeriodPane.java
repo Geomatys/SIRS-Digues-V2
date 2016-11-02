@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -20,6 +20,7 @@ package fr.sirs.theme.ui;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.model.AvecBornesTemporelles;
+import fr.sirs.util.DatePickerConverter;
 import java.time.LocalDate;
 import java.util.function.Predicate;
 import javafx.beans.property.BooleanProperty;
@@ -61,6 +62,9 @@ public class FXValidityPeriodPane extends BorderPane {
             final LocalDate debut = uiDateDebut.valueProperty().get();
             return debut == null? true : (debut.isBefore(date) || debut.isEqual(date));
         }));
+
+        DatePickerConverter.register(uiDateDebut);
+        DatePickerConverter.register(uiDateFin);
     }
 
     private void targetChanged(ObservableValue<? extends AvecBornesTemporelles> observable, AvecBornesTemporelles oldTarget, AvecBornesTemporelles newTarget) {
