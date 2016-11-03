@@ -70,11 +70,11 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
                     final File newDoc = new File(docDir, docName);
 
                     final Task reportGenerator = generateReport(modele, getElements(troncons), newDoc.toPath(), title);
-                    reportGenerator.setOnSucceeded(event -> {
+                    Platform.runLater(() -> reportGenerator.setOnSucceeded(event -> {
                         setBooleanProperty(newDoc, DYNAMIC, true);
                         setProperty(newDoc, MODELE, modele.getId());
                         updateProgress(progress.incrementAndGet(), total);
-                    });
+                    }));
                     tasks.add(reportGenerator);
                 }
 
