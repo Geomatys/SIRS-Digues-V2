@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.prefs.Preferences;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -187,11 +188,12 @@ public class DynamicDocumentsPane extends BorderPane {
         final Task generator;
         if (onlySE) {
             final Path outputDoc = seDir.toPath().resolve(DocumentsPane.DOCUMENT_FOLDER).resolve(docName);
-            generator = ODTUtils.generateDoc(modele, getTronconList(), outputDoc.toFile(), root);
+            generator = ODTUtils.generateDoc(modele, getTronconList(), outputDoc.toFile(), root.getLibelle());
         } else {
-            generator = ODTUtils.generateDocsForDigues(docName, onlySE, modele, getTronconList(), seDir, root);
+            generator = ODTUtils.generateDocsForDigues(docName, onlySE, modele, getTronconList(), seDir, root.getLibelle());
         }
 
+        generator.setOnSucceeded(evt -> Platform.runLater(() -> root.update(false)));
         disableProperty().bind(generator.runningProperty());
         LoadingPane.showDialog(generator);
     }

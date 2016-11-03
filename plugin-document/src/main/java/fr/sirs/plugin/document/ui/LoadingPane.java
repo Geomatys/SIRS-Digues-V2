@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -22,6 +22,7 @@ import fr.sirs.SIRS;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -80,6 +81,31 @@ public class LoadingPane extends GridPane {
             uiProgress.progressProperty().bind(newValue.progressProperty());
             uiProgressLabel.textProperty().bind(newValue.messageProperty());
             uiGenerateFinish.disableProperty().bind(newValue.runningProperty());
+            newValue.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, evt -> {
+                // If bound task did not update its progress to finish state, we do it ourself.
+                if (uiProgress.getProgress() < 1) {
+                    uiProgressLabel.textProperty().unbind();
+                    uiProgressLabel.setText("");
+                    uiProgress.progressProperty().unbind();
+                    uiProgress.setProgress(1);
+                }
+            });
+
+            newValue.addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, evt -> {
+                    uiProgressLabel.textProperty().unbind();
+                    uiProgressLabel.setText("Une erreur est survenue !");
+                    uiProgressLabel.setStyle("-fx-text-fill:red");
+                    uiProgress.progressProperty().unbind();
+                    uiProgress.setProgress(0);
+            });
+
+
+            newValue.addEventHandler(WorkerStateEvent.WORKER_STATE_CANCELLED, evt -> {
+                    uiProgressLabel.textProperty().unbind();
+                    uiProgressLabel.setText("La tâche a été interrompue !");
+                    uiProgress.progressProperty().unbind();
+                    uiProgress.setProgress(0);
+            });
         }
     }
 

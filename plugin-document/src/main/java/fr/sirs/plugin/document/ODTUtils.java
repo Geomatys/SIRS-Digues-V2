@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -35,6 +35,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -52,8 +53,7 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
 
     private static final String[] TABLE_HEADERS = new String[]{"Nom", "Taille", "N° Inventaire", "Lieu classement"};
 
-    public static Task generateDocsForDigues(final String docName, boolean onlySe, final ModeleRapport modele, final Collection<TronconDigue> troncons, final File seDir,
-            final FileTreeItem root) {
+    public static Task generateDocsForDigues(final String docName, boolean onlySe, final ModeleRapport modele, final Collection<TronconDigue> troncons, final File seDir, final String title) {
         return TaskManager.INSTANCE.submit(new Task() {
 
             @Override
@@ -61,39 +61,35 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
                 updateTitle("Génération d'un rapport");
                 updateMessage("Recherche des objets du rapport...");
                 final DigueRepository digueRepo = Injector.getBean(DigueRepository.class);
-                final int total = troncons.size();
-                int i = 1;
+                final int total = troncons.size() + 1;
+                final AtomicInteger progress = new AtomicInteger(0);
                 final ArrayList<Task> tasks = new ArrayList<>();
                 for (TronconDigue troncon : troncons) {
                     final File digDir = getOrCreateDG(seDir, digueRepo.get(troncon.getDigueId()));
                     final File docDir = new File(getOrCreateTR(digDir, troncon), DocumentsPane.DOCUMENT_FOLDER);
                     final File newDoc = new File(docDir, docName);
 
-                    final Task reportGenerator = generateReport(modele, getElements(troncons), newDoc.toPath(), root.getLibelle());
-                    Platform.runLater(() -> reportGenerator.setOnSucceeded(event -> {
+                    final Task reportGenerator = generateReport(modele, getElements(troncons), newDoc.toPath(), title);
+                    reportGenerator.setOnSucceeded(event -> {
                         setBooleanProperty(newDoc, DYNAMIC, true);
                         setProperty(newDoc, MODELE, modele.getId());
-                    }));
+                        updateProgress(progress.incrementAndGet(), total);
+                    });
                     tasks.add(reportGenerator);
-
-                    i++;
                 }
+
 
                 updateMessage("rapports en cours de construction...");
                 for (final Task t : tasks) {
                     t.get();
                 }
-                updateMessage("Génération terminée");
-                updateProgress(1, 1);
 
-                // reload tree
-                root.update(false);
                 return true;
             }
         });
     }
 
-    public static Task<File> generateDoc(final ModeleRapport modele, final Collection<TronconDigue> troncons, final File outputDoc, final FileTreeItem root) {
+    public static Task<File> generateDoc(final ModeleRapport modele, final Collection<TronconDigue> troncons, final File outputDoc, final String title) {
         return TaskManager.INSTANCE.submit(new Task() {
 
             @Override
@@ -101,7 +97,7 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
                 updateTitle("Génération d'un rapport");
                 updateMessage("Recherche des objets du rapport...");
 
-                final Task reportGenerator = generateReport(modele, getElements(troncons), outputDoc.toPath(), root.getLibelle());
+                final Task reportGenerator = generateReport(modele, getElements(troncons), outputDoc.toPath(), title);
                 Platform.runLater(() -> {
                     reportGenerator.messageProperty().addListener((obs, oldValue, newValue) -> updateMessage(newValue));
                     reportGenerator.workDoneProperty().addListener((obs, oldValue, newValue) -> updateProgress(newValue.doubleValue(), reportGenerator.getTotalWork()));
@@ -111,8 +107,6 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
                 setBooleanProperty(outputDoc, DYNAMIC, true);
                 setProperty(outputDoc, MODELE, modele.getId());
 
-                updateMessage("Génération terminée");
-                updateProgress(1, 1);
                 return outputDoc;
             }
         });
@@ -131,23 +125,21 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
             protected File call() throws Exception {
                 updateTitle("Génération d'un index : "+item.getLibelle());
 
-                // Define a string which will deliver task message.
-                final StringProperty msgProperty = new SimpleStringProperty();
-                Platform.runLater(() -> msgProperty.addListener((obs, oldValue, newValue) -> updateMessage(newValue)));
-
-                msgProperty.set("Initialisation du document");
+                updateMessage("Initialisation du document");
                 final TextDocument doc = TextDocument.newTextDocument();
-                for (FileTreeItem child : item.listChildrenItem()) {
+                final List<FileTreeItem> children = item.listChildrenItem();
+                final int total = children.size() + 1;
+                int progress = 0;
+                for (FileTreeItem child : children) {
+                    updateProgress(progress++, total);
                     if (!child.getLibelle().equals(DocumentsPane.SAVE_FOLDER)) {
                         write(doc, child, false, null);
                     }
                 }
 
-                msgProperty.set("Sauvegarde du document");
+                updateMessage("Sauvegarde du document");
                 doc.save(file);
 
-                msgProperty.set("Génération terminée");
-                updateProgress(1, 1);
                 return file;
             }
         });
@@ -177,8 +169,6 @@ public class ODTUtils extends fr.sirs.util.odt.ODTUtils {
                 msgProperty.set("Sauvegarde du document");
                 doc.save(file);
 
-                msgProperty.set("Génération terminée");
-                updateProgress(1, 1);
                 return file;
             }
         });

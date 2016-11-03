@@ -74,6 +74,7 @@ import java.util.Set;
 import java.util.prefs.Preferences;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
@@ -703,7 +704,9 @@ public class DocumentsPane extends GridPane {
             if (modelId != null && !modelId.isEmpty()) {
                 final ModeleRapport modele = modelRepo.get(modelId);
                 if (modele != null) {
-                    LoadingPane.showDialog(ODTUtils.generateDoc(modele, getTronconList(), item, root));
+                    final Task<File> generator = ODTUtils.generateDoc(modele, getTronconList(), item, root.getLibelle());
+                    generator.setOnSucceeded(evt -> Platform.runLater(() -> root.update(false)));
+                    LoadingPane.showDialog(generator);
                 } else {
                     showErrorDialog("Pas de modèle disponible pour le fichier: " + item.getName());
                 }
