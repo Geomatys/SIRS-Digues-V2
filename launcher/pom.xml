@@ -92,6 +92,8 @@
                         <!-- We de-activate JIT compilation to reduce code cache / class space. -->
                         <jvmArg>-XX:-TieredCompilation</jvmArg>
                         <jvmArg>-Xmixed</jvmArg>
+                        <!-- Force GC before any attempt to increase metaspace size. -->
+                        <jvmArg>-XX:MaxMetaspaceExpansion=0</jvmArg>
                         <!-- Well, Not sure this is useful, but using for some time didn't appear to hurt. -->
                         <jvmArg>-XX:+AggressiveOpts</jvmArg>
                         <!-- Reduce thread space. This is important, as ES is popping a real swarm of threads. -->
