@@ -72,6 +72,9 @@ import org.opengis.util.FactoryException;
  * COPIED FROM GEOTOOLKIT TO PROVIDE INITIAL FILTER ON CRS. We want to keep
  * CRSs whose SIRS can provide Proj4 representation for.
  *
+ * Note : Deactivated type column, as it triggers full loading of CRSs from
+ * database, which is a really heavy operation.
+ *
  * @author Johann Sorel (Geomatys)
  */
 public class FXCRSTable extends ScrollPane{
@@ -121,7 +124,7 @@ public class FXCRSTable extends ScrollPane{
             }
         });
 
-        uiTable.getColumns().add(new TypeColumn());
+        //uiTable.getColumns().add(new TypeColumn());
         uiTable.getColumns().add(new CodeColumn());
         uiTable.getColumns().add(new DescColumn());
         uiTable.getColumns().add(new WKTColumn());

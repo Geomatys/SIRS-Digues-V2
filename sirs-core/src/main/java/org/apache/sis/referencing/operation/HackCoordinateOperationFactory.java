@@ -1,20 +1,32 @@
 package org.apache.sis.referencing.operation;
 
 import java.util.Collections;
+import java.util.logging.Level;
+import org.apache.sis.internal.util.Constants;
 import org.apache.sis.referencing.CRS;
 import org.apache.sis.referencing.IdentifiedObjects;
-import org.apache.sis.referencing.operation.CoordinateOperationContext;
-import org.apache.sis.referencing.operation.DefaultCoordinateOperationFactory;
+import static org.apache.sis.referencing.operation.DefaultCoordinateOperationFactory.USE_EPSG_FACTORY;
+import org.apache.sis.util.Utilities;
 import org.apache.sis.util.collection.Cache;
+import org.opengis.referencing.AuthorityFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.crs.DerivedCRS;
 import org.opengis.referencing.crs.ProjectedCRS;
+import org.opengis.referencing.crs.SingleCRS;
 import org.opengis.referencing.operation.CoordinateOperation;
+import org.opengis.referencing.operation.CoordinateOperationAuthorityFactory;
+import org.opengis.referencing.operation.NoninvertibleTransformException;
 import org.opengis.referencing.operation.OperationNotFoundException;
 import org.opengis.util.FactoryException;
+
+import fr.sirs.core.SirsCore;
 
 /**
  * Hacked operation factory to force NTV2 grid usage when projecting points from
  * NTF-Paris to RGF93.
+ * Another hack has been introduced : create operation from derived CRS is very
+ * time consuming, due to the fact that SIS performs a big search in EPSG db.
+ * We short this behavior here.
  *
  * @author Alexis Manin (Geomatys)
  */
@@ -76,6 +88,27 @@ public class HackCoordinateOperationFactory extends DefaultCoordinateOperationFa
 
                     return super.createConcatenatedOperation(Collections.singletonMap("name", "NTF-Paris to RGF93"), step1, step2, step3);
                 }
+            }
+
+        } else if (sourceCRS instanceof DerivedCRS) {
+            final DerivedCRS derivedCRS = (DerivedCRS)sourceCRS;
+            if (Utilities.equalsApproximatively(derivedCRS.getBaseCRS(), targetCRS)) {
+                // We cannot use the same workaround as below, or it will cause
+                // a recursive locking error.
+                final AuthorityFactory registry = USE_EPSG_FACTORY ? CRS.getAuthorityFactory(Constants.EPSG) : null;
+                try {
+                    return new CoordinateOperationFinder((registry instanceof CoordinateOperationAuthorityFactory) ?
+                            (CoordinateOperationAuthorityFactory) registry : null, this, context).inverse(derivedCRS.getConversionFromBase());
+                } catch (NoninvertibleTransformException ex) {
+                    SirsCore.LOGGER.log(Level.FINE, "Cannot apply hack on coordinate operation search", ex);
+                }
+            } else {
+                derivedCRS.getConversionFromBase();
+                final SingleCRS baseCRS = derivedCRS.getBaseCRS();
+                final CoordinateOperation step1 = super.createOperation(sourceCRS, baseCRS, context);
+                final CoordinateOperation step2 = super.createOperation(baseCRS, targetCRS, context);
+
+                return createConcatenatedOperation(Collections.singletonMap("name", "derivedToOther"), step1, step2);
             }
         }
 
