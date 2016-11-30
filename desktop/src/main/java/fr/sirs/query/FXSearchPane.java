@@ -51,7 +51,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
@@ -96,8 +95,10 @@ import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.sis.storage.DataStoreException;
@@ -108,6 +109,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStoreUtilities;
+import org.geotoolkit.data.csv.CSVFeatureStore;
 import org.geotoolkit.data.query.Query;
 import org.geotoolkit.db.FilterToSQL;
 import org.geotoolkit.db.JDBCFeatureStore;
@@ -786,7 +788,7 @@ public class FXSearchPane extends BorderPane {
             designation.equalsIgnoreCase(preview.getDesignation()));
 
         table.setTableItems(result);
-        uiNbResults.textProperty().bind(Bindings.size(result).asString().concat(" résultat(s)."));
+        uiNbResults.setText(String.valueOf(result.size()).concat(" résultat(s)."));
 
         setCenter(table);
     }
@@ -800,6 +802,31 @@ public class FXSearchPane extends BorderPane {
                 uiNbResults.setText("0 résultat.");
             } else {
                 final CustomizedFeatureTable table = new CustomizedFeatureTable(MODEL_PACKAGE + ".", Locale.getDefault(), Thread.currentThread().getContextClassLoader());
+                final Button uiExport = new Button(null, new ImageView(SIRS.ICON_EXPORT_WHITE));
+                uiExport.setTooltip(new Tooltip("Sauvegarder le résultat de la requête au format CSV"));
+                uiExport.getStyleClass().add("buttonbar");
+                uiExport.setOnAction((evt2) -> {
+                    export(layer).ifPresent(task -> {
+                        uiExport.setDisable(true);
+                        task.setOnSucceeded(e -> Platform.runLater(() -> {
+                            uiExport.setDisable(false);
+                            new Growl(Growl.Type.INFO, "L'export des résultats de la requête est terminé").showAndFade();
+                        }));
+                        task.setOnFailed(e -> Platform.runLater(() -> {
+                            uiExport.setDisable(false);
+                            new Growl(Growl.Type.ERROR, "L'export des résultats a échoué").showAndFade();
+                        }));
+                        task.setOnCancelled(e -> Platform.runLater(() -> {
+                            uiExport.setDisable(false);
+                            new Growl(Growl.Type.WARNING, "L'export des résultats a été interrompu").showAndFade();
+                        }));
+                        TaskManager.INSTANCE.submit(task);
+                    });
+                });
+                final HBox box = new HBox(uiExport);
+                box.setAlignment(Pos.BOTTOM_RIGHT);
+                HBox.setHgrow(uiExport, Priority.NEVER);
+                table.setTop(box);
                 table.setLoadAll(true);
                 table.init(layer);
                 setCenter(table);
@@ -841,6 +868,28 @@ public class FXSearchPane extends BorderPane {
         }
 
         return CorePlugin.createDefaultStyle(Color.GRAY, (geomType == null)? null : geomType.getName().toString());
+    }
+
+    private Optional<Task> export(final FeatureMapLayer layer) {
+        final FileChooser chooser = new FileChooser();
+        chooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("Comma Separated Values", "*.csv"));
+        chooser.setInitialFileName("resultat.csv");
+        File output = chooser.showSaveDialog(getScene().getWindow());
+        if (output == null)
+            return Optional.empty();
+
+        return Optional.of(new TaskManager.MockTask<>("Export CSV", () -> {
+            if (output.exists())
+                output.delete();
+
+            try (final CSVFeatureStore csvStore = new CSVFeatureStore(output.toPath(), "no namespace", ',')) {
+                final FeatureType ft = layer.getCollection().getFeatureType();
+                csvStore.createFeatureType(ft.getName(), ft);
+                csvStore.addFeatures(ft.getName(), layer.getCollection());
+            }
+
+            return output.toPath();
+        }));
     }
 
     private static class CustomizedFeatureTable extends FXFeatureTable implements Printable {
