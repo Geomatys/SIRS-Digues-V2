@@ -76,8 +76,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 import javax.naming.NamingException;
 
 import org.apache.sis.geometry.GeneralEnvelope;
@@ -85,6 +84,7 @@ import org.apache.sis.internal.system.DataDirectory;
 import org.apache.sis.internal.system.DefaultFactories;
 import org.apache.sis.io.wkt.Convention;
 import org.apache.sis.io.wkt.WKTFormat;
+import org.apache.sis.measure.Units;
 import org.apache.sis.referencing.CRS;
 import org.apache.sis.util.ArgumentChecks;
 
@@ -447,8 +447,8 @@ public class SirsCore {
 
             if (firstAxis >=0) {
                 Unit unit = crs.getCoordinateSystem().getAxis(firstAxis).getUnit();
-                if (unit != null && SI.METRE.isCompatible(unit)) {
-                    additionalDistance = SI.METRE.getConverterTo(unit).convert(1);
+                if (unit != null && Units.METRE.isCompatible(unit)) {
+                    additionalDistance = Units.METRE.getConverterTo(unit).convert(1);
                 }
 
                 final GeneralEnvelope result = new GeneralEnvelope(input);

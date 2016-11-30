@@ -62,7 +62,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
-import javax.measure.unit.SI;
+import org.apache.sis.measure.Units;
 import org.apache.sis.referencing.CRS;
 import org.geotoolkit.display.MeasureUtilities;
 import org.geotoolkit.geometry.jts.JTS;
@@ -213,12 +213,12 @@ public class FXPositionablePane extends BorderPane {
         if (geometry != null) {
             if (geometry instanceof Polygon || geometry instanceof MultiPolygon) {
                 final String surface = NumberFormat.getNumberInstance().format(
-                        MeasureUtilities.calculateArea(geometry, Injector.getSession().getProjection(), SI.SQUARE_METRE)) +" m²";
+                        MeasureUtilities.calculateArea(geometry, Injector.getSession().getProjection(), Units.SQUARE_METRE)) +" m²";
                 return "Surface : "+surface;
             } else {
                 final String longueur = NumberFormat.getNumberInstance().format(
                         MeasureUtilities.calculateLenght(geometry,
-                                Injector.getSession().getProjection(), SI.METRE)) +" m";
+                                Injector.getSession().getProjection(), Units.METRE)) +" m";
                 return "Longueur : "+longueur;
             }
         }

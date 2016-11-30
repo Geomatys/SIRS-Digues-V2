@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -46,7 +46,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.stage.Modality;
 import javafx.util.Callback;
-import javax.measure.unit.SI;
+import org.apache.sis.measure.Units;
 import org.geotoolkit.display.MeasureUtilities;
 
 /**
@@ -256,7 +256,7 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
     private static String getGeometryInfo(final Geometry geometry) {
         if (geometry != null && (geometry instanceof Polygon || geometry instanceof MultiPolygon)) {
             final String surface = NumberFormat.getNumberInstance().format(
-                    MeasureUtilities.calculateArea(geometry, Injector.getSession().getProjection(), SI.SQUARE_METRE));
+                    MeasureUtilities.calculateArea(geometry, Injector.getSession().getProjection(), Units.SQUARE_METRE));
             return surface;
         }
         else {

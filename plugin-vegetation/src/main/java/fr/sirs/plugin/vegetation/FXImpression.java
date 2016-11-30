@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -70,8 +70,8 @@ import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
-import javax.measure.unit.SI;
 import javax.swing.SwingConstants;
+import org.apache.sis.measure.Units;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.iso.SimpleInternationalString;
 import org.geotoolkit.display.PortrayalException;
@@ -138,7 +138,7 @@ public class FXImpression extends GridPane{
                             new Dimension(300,30),6,
                             false, 4, NumberFormat.getNumberInstance(),
                             Color.BLACK, Color.BLACK, Color.WHITE,
-                            3,true,false, new java.awt.Font("Serial", java.awt.Font.PLAIN, 8),true,SI.METRE);
+                            3,true,false, new java.awt.Font("Serial", java.awt.Font.PLAIN, 8),true,Units.METRE);
 
 
     @FXML private GridPane uiGrid;

@@ -73,16 +73,17 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
-import javax.measure.converter.ConversionException;
-import javax.measure.converter.UnitConverter;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
+import javax.measure.IncommensurableException;
+import javax.measure.UnconvertibleException;
+import javax.measure.Unit;
+import javax.measure.UnitConverter;
 import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.encryption.BadSecurityHandlerException;
 import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
+import org.apache.sis.measure.Units;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.data.FeatureIterator;
 import org.geotoolkit.gui.javafx.util.TaskManager;
@@ -1159,8 +1160,8 @@ public class ODTUtils {
 
         final Image newImage = Image.newImage(tmpParagraph, imagePath.toUri());
         try {
-            resizeImage(newImage, pageDim, margin, SI.MILLIMETRE, true, false);
-        } catch (ConversionException ex) {
+            resizeImage(newImage, pageDim, margin, Units.MILLIMETRE, true, false);
+        } catch (UnconvertibleException | IncommensurableException ex) {
             SirsCore.LOGGER.log(Level.WARNING, "Cannot resize an image.", ex);
         }
 
@@ -1178,7 +1179,8 @@ public class ODTUtils {
      * @param measureUnit Unit in which page dimension/margin are expressed. If null, milimeter is assumed.
      * @param keepRatio True if we should keep image Ratio, or false to distort it to fit strictly the page.
      * @param forceLower True to resize image even if the page is bigger, false to left image untouched if it already fit into page.
-     * @throws ConversionException If we cannot convert given page dimension into image rectangle unit.
+     * @throws UnconvertibleException If we cannot convert given page dimension into image rectangle unit.
+     * @throws IncommensurableException If we cannot convert units.
      */
     public static void resizeImage(
             final Image toResize,
@@ -1186,26 +1188,26 @@ public class ODTUtils {
             Insets margin,
             Unit measureUnit,
             final boolean keepRatio,
-            final boolean forceLower) throws ConversionException {
+            final boolean forceLower) throws UnconvertibleException, IncommensurableException {
 
         ArgumentChecks.ensureNonNull("Image to resize", toResize);
         final FrameRectangle rectangle = toResize.getRectangle();
-        final Unit rectUnit = Unit.valueOf(rectangle.getLinearMeasure().toString());
+        final Unit rectUnit = Units.valueOf(rectangle.getLinearMeasure().toString());
 
         if (measureUnit == null) {
-            measureUnit = SI.MILLIMETRE;
+            measureUnit = Units.MILLIMETRE;
         }
 
         final UnitConverter pageConverter, marginConverter;
         if (pageDim == null) {
             pageDim = new Dimension2D(PORTRAIT_WIDTH, PORTRAIT_HEIGHT);
-            pageConverter = SI.MILLIMETRE.getConverterToAny(rectUnit);
+            pageConverter = Units.MILLIMETRE.getConverterToAny(rectUnit);
         } else {
             pageConverter = measureUnit.getConverterTo(rectUnit);
         }
         if (margin == null) {
             margin = new Insets(DEFAULT_MARGIN);
-            marginConverter = SI.MILLIMETRE.getConverterToAny(rectUnit);
+            marginConverter = Units.MILLIMETRE.getConverterToAny(rectUnit);
         } else {
             marginConverter = measureUnit.getConverterTo(rectUnit);
         }

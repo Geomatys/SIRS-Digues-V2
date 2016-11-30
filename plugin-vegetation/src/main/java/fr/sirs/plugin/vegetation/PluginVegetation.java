@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -70,8 +70,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javax.imageio.ImageIO;
-import javax.measure.unit.NonSI;
 import javax.swing.ImageIcon;
+import org.apache.sis.measure.Units;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.bean.BeanStore;
 import org.geotoolkit.data.query.QueryBuilder;
@@ -341,8 +341,8 @@ public class PluginVegetation extends Plugin {
         final Graphic graphicEnd = SF.graphic(symbols, LITERAL_ONE_FLOAT,
                 size, rotationEnd, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
 
-        final PointSymbolizer ptStart = SF.pointSymbolizer("", FF.function("startPoint", FF.property("geometry")), null, NonSI.PIXEL, graphicStart);
-        final PointSymbolizer ptEnd = SF.pointSymbolizer("", FF.function("endPoint", FF.property("geometry")), null, NonSI.PIXEL, graphicEnd);
+        final PointSymbolizer ptStart = SF.pointSymbolizer("", FF.function("startPoint", FF.property("geometry")), null, Units.POINT, graphicStart);
+        final PointSymbolizer ptEnd = SF.pointSymbolizer("", FF.function("endPoint", FF.property("geometry")), null, Units.POINT, graphicEnd);
 
         rule.symbolizers().add(ptStart);
         rule.symbolizers().add(ptEnd);
@@ -376,8 +376,8 @@ public class PluginVegetation extends Plugin {
         final Graphic graphicEnd = SF.graphic(symbols, LITERAL_ONE_FLOAT,
                 size, rotationEnd, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
 
-        final PointSymbolizer ptStart = SF.pointSymbolizer("", FF.function("startPoint", FF.property("geometry")), null, NonSI.PIXEL, graphicStart);
-        final PointSymbolizer ptEnd = SF.pointSymbolizer("", FF.function("endPoint", FF.property("geometry")), null, NonSI.PIXEL, graphicEnd);
+        final PointSymbolizer ptStart = SF.pointSymbolizer("", FF.function("startPoint", FF.property("geometry")), null, Units.POINT, graphicStart);
+        final PointSymbolizer ptEnd = SF.pointSymbolizer("", FF.function("endPoint", FF.property("geometry")), null, Units.POINT, graphicEnd);
 
         rule.symbolizers().add(ptStart);
         rule.symbolizers().add(ptEnd);
@@ -411,7 +411,7 @@ public class PluginVegetation extends Plugin {
         final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
                 size, DEFAULT_GRAPHIC_ROTATION, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
 
-        final PointSymbolizer ptSymbol = SF.pointSymbolizer("", FF.property("geometry"), null, NonSI.PIXEL, graphic);
+        final PointSymbolizer ptSymbol = SF.pointSymbolizer("", FF.property("geometry"), null, Units.POINT, graphic);
 
         rule.symbolizers().add(ptSymbol);
         return style;

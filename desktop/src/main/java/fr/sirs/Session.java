@@ -67,7 +67,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Duration;
-import javax.measure.unit.SI;
+import org.apache.sis.measure.Units;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
 import org.apache.sis.util.iso.SimpleInternationalString;
@@ -154,7 +154,7 @@ public class Session extends SessionCore {
                             false, 4, NumberFormat.getNumberInstance(),
                             Color.DARK_GRAY, Color.GRAY, Color.WHITE,
                             10,true,false, new Font("Serial", Font.BOLD, 10),true,
-                            SI.KILOMETRE);
+                            Units.KILOMETRE);
     public static final ScaleBarTemplate SCALEBAR_METER_TEMPLATE = new DefaultScaleBarTemplate(
                             new DefaultBackgroundTemplate(
                                     new BasicStroke(1),
@@ -165,7 +165,7 @@ public class Session extends SessionCore {
                             false, 4, NumberFormat.getNumberInstance(),
                             Color.DARK_GRAY, Color.GRAY, Color.WHITE,
                             10,true,false, new Font("Serial", Font.BOLD, 10),true,
-                            SI.METRE);
+                            Units.METRE);
     public static final NorthArrowTemplate NORTH_ARROW_TEMPLATE = new DefaultNorthArrowTemplate(
                      new DefaultBackgroundTemplate(
                                     new BasicStroke(1),

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -32,8 +32,8 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.GridPane;
 import org.geotoolkit.display.MeasureUtilities;
 
-import javax.measure.unit.SI;
 import java.text.NumberFormat;
+import org.apache.sis.measure.Units;
 
 /**
  *
@@ -78,12 +78,12 @@ public class FXCheminAccesDependancePane extends FXCheminAccesDependancePaneStub
             if (geometry instanceof Polygon || geometry instanceof MultiPolygon) {
                 lblGeomSize.setText("Surface");
                 geomSize.setText(NumberFormat.getNumberInstance().format(
-                        MeasureUtilities.calculateArea(geometry, Injector.getSession().getProjection(), SI.SQUARE_METRE)) +" m2");
+                        MeasureUtilities.calculateArea(geometry, Injector.getSession().getProjection(), Units.SQUARE_METRE)) +" m2");
             } else {
                 lblGeomSize.setText("Longueur");
                 geomSize.setText(NumberFormat.getNumberInstance().format(
                         MeasureUtilities.calculateLenght(geometry,
-                                Injector.getSession().getProjection(), SI.METRE)) +" m");
+                                Injector.getSession().getProjection(), Units.METRE)) +" m");
             }
         }
     }

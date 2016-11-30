@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -70,8 +70,8 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
-import javax.measure.unit.NonSI;
 import javax.swing.ImageIcon;
+import org.apache.sis.measure.Units;
 import org.apache.sis.storage.DataStoreException;
 import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.data.FeatureCollection;
@@ -150,7 +150,7 @@ public final class VegetationSession {
         vegetationGroup = MapBuilder.createItem();
         vegetationGroup.setName("Végétation");
         vegetationGroup.setUserProperty(Session.FLAG_SIRSLAYER, Boolean.TRUE);
-        
+
         final String dbUUID;
         final Optional<SirsDBInfo> info = Injector.getBean(SirsDBInfoRepository.class).get();
         if (info.isPresent()) {
@@ -785,7 +785,7 @@ public final class VegetationSession {
             symbols.add(mark);
             final Graphic graphic = SF.graphic(symbols, LITERAL_ONE_FLOAT,
                     size, DEFAULT_GRAPHIC_ROTATION, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
-            rulePoint.symbolizers().add(SF.pointSymbolizer("", FF.property("geometry"), null, NonSI.PIXEL, graphic));
+            rulePoint.symbolizers().add(SF.pointSymbolizer("", FF.property("geometry"), null, Units.POINT, graphic));
 
             fts.rules().add(rulePoint);
 
@@ -855,8 +855,8 @@ public final class VegetationSession {
         final Graphic graphicEnd = SF.graphic(symbols, LITERAL_ONE_FLOAT,
                 size, rotationEnd, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT);
 
-        final PointSymbolizer ptStart = SF.pointSymbolizer("", FF.function("startPoint", FF.property("geometry")), null, NonSI.PIXEL, graphicStart);
-        final PointSymbolizer ptEnd = SF.pointSymbolizer("", FF.function("endPoint", FF.property("geometry")), null, NonSI.PIXEL, graphicEnd);
+        final PointSymbolizer ptStart = SF.pointSymbolizer("", FF.function("startPoint", FF.property("geometry")), null, Units.POINT, graphicStart);
+        final PointSymbolizer ptEnd = SF.pointSymbolizer("", FF.function("endPoint", FF.property("geometry")), null, Units.POINT, graphicEnd);
 
         rule.symbolizers().add(ptStart);
         rule.symbolizers().add(ptEnd);
