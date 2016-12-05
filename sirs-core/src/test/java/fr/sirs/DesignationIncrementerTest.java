@@ -2,13 +2,20 @@ package fr.sirs;
 
 import fr.sirs.core.CouchDBTestCase;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.DocumentChangeEmiter;
+import fr.sirs.core.component.DocumentListener;
 import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
+import fr.sirs.core.model.Element;
 import fr.sirs.util.DesignationIncrementer;
-import javafx.application.Platform;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Phaser;
 import javafx.concurrent.Task;
 import org.apache.sis.test.DependsOnMethod;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,6 +28,9 @@ public class DesignationIncrementerTest extends CouchDBTestCase {
     @Autowired
     DesignationIncrementer operator;
 
+    @Autowired(required = false)
+    DocumentChangeEmiter docChangeEmiter;
+
     /**
      * A simple test with an empty database, to verify our component can make
      * proper auto-increment without any existing data.
@@ -28,8 +38,8 @@ public class DesignationIncrementerTest extends CouchDBTestCase {
     @Test
     public void testEmptyDb() throws Exception {
         for (int i = 1 ; i < 1000 ; i++) {
-            final Task<Integer> t = operator.getNextDesignation(Desordre.class);
-            Platform.runLater(t);
+            final Task<Integer> t = operator.nextDesignation(Desordre.class);
+            t.run();
             Assert.assertEquals("Designation increment has failed !", i, t.get().intValue());
         }
     }
@@ -62,9 +72,63 @@ public class DesignationIncrementerTest extends CouchDBTestCase {
         repo.executeBulk(firstNumeric, secondNumeric, thirdNumeric, nonNumeric, weirdo);
 
         for (int i = maxDesignation + 1 ; i < maxDesignation + 10 ; i++) {
-            final Task<Integer> t = operator.getNextDesignation(Crete.class);
-            Platform.runLater(t);
+            final Task<Integer> t = operator.nextDesignation(Crete.class);
+            t.run();
             Assert.assertEquals("Designation increment has failed !", i, t.get().intValue());
         }
+    }
+
+    @DependsOnMethod("testFromDatabase")
+    @Test
+    public void testEventUpdate() throws Exception {
+        Assume.assumeNotNull(docChangeEmiter);
+        
+        Task<Integer> nextDesignation = operator.nextDesignation(Crete.class);
+        nextDesignation.run();
+        int higher = nextDesignation.get();
+
+        /*
+         * A simple lock. The aim is to ensure document change events are finished
+         * bedore proceeding with the test.
+         */
+        final Phaser trigger = new Phaser(2);
+        final DocumentListener listener = new DocumentListener() {
+            @Override
+            public void documentCreated(Map<Class, List<Element>> added) {
+                trigger.arrive();
+            }
+
+            @Override
+            public void documentChanged(Map<Class, List<Element>> changed) {
+                trigger.arrive();
+            }
+
+            @Override
+            public void documentDeleted(Set<String> deleted) {
+                // nothing
+            }
+        };
+        docChangeEmiter.addListener(listener);
+
+        final AbstractSIRSRepository<Crete> repo = session.getRepositoryForClass(Crete.class);
+        final Crete crete = repo.create();
+        crete.setDesignation(String.valueOf(higher - 1));
+        repo.executeBulk(crete);
+
+        trigger.arriveAndAwaitAdvance();
+
+        nextDesignation = operator.nextDesignation(Crete.class);
+        nextDesignation.run();
+        Assert.assertEquals("Increment has changed unexpectedly", higher + 1, nextDesignation.get().intValue());
+
+        final int highest  = higher + 100;
+        crete.setDesignation(String.valueOf(highest));
+        repo.executeBulk(crete);
+
+        trigger.arriveAndAwaitAdvance();
+
+        nextDesignation = operator.nextDesignation(Crete.class);
+        nextDesignation.run();
+        Assert.assertEquals("Increment has not been updated according to newly added element.", highest + 1, nextDesignation.get().intValue());
     }
 }
