@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -160,7 +160,7 @@ public class Preview implements AvecLibelle, Comparable {
                 designationComparison = other.designation == null? 0 : 1;
             } else if (other.designation != null) {
                 /* If both designation can be converted to numbers, we will
-                 * perform a algebric comparision. Otherwise, we'll compare
+                 * perform a algebric comparison. Otherwise, we'll compare
                  * directly strings.
                  */
                 try {

@@ -5,7 +5,11 @@ import fr.sirs.core.model.Element;
 import java.util.Comparator;
 
 /**
- *
+ * Compare elements by designation, then by libelle, if any.
+ * IMPORTANT : We try to convert designation into integers to compare them
+ * numerically. We perform simple string comparison only if we fail to convert
+ * them.
+ * 
  * @author Alexis Manin (Geomatys)
  */
 public class DefaultElementComparator implements Comparator<Element> {
