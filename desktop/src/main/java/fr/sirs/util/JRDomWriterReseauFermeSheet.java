@@ -67,7 +67,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
             final List<String> reseauFields,
             final boolean printPhoto, 
             final boolean printReseauOuvrage) throws ParserConfigurationException, SAXException, IOException {
-        super(ReseauHydrauliqueFerme.class, stream, avoidFields);
+        super(ReseauHydrauliqueFerme.class, stream, avoidFields, "#b2a1c7");
         
         this.observationFields = observationFields;
         this.reseauFields = reseauFields;
@@ -119,7 +119,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         TABLEAU DES OBSERVATIONS
         ----------------------------------------------------------------------*/
         currentY+=2;
-        writeSectionTitle("Observations", 15, 1, 10, 9);
+        writeSectionTitle("Observations", 14, 1, 10, 9, true, false, false);
         currentY+=2;
         writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 30);
         currentY+=2;
@@ -136,7 +136,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         ----------------------------------------------------------------------*/
         if(printReseauOuvrage){
             currentY+=2;
-            writeSectionTitle("Réseaux et ouvrages", 15, 1, 10, 9);
+            writeSectionTitle("Réseaux et ouvrages", 14, 1, 10, 9, true, false, false);
             currentY+=2;
             writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET, 30);
             currentY+=2;

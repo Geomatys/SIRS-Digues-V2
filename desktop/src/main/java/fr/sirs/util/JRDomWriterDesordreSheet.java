@@ -76,7 +76,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
             final boolean printPhoto, 
             final boolean printReseauOuvrage, 
             final boolean printVoirie) throws ParserConfigurationException, SAXException, IOException {
-        super(Desordre.class, stream, avoidFields);
+        super(Desordre.class, stream, avoidFields, "#47daff");
         
         this.observationFields = observationFields;
         this.prestationFields = prestationFields;
@@ -135,7 +135,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         TABLEAU DES OBSERVATIONS
         ----------------------------------------------------------------------*/
         currentY+=2;
-        writeSectionTitle("Observations", 15, 1, 10, 9);
+        writeSectionTitle("Observations", 14, 1, 10, 9, true, false, false);
         currentY+=2;
         writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 30);
         currentY+=2;
@@ -144,7 +144,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         TABLEAU DES PRESTATIONS
         ----------------------------------------------------------------------*/
         currentY+=2;
-        writeSectionTitle("Prestations", 15, 1, 10, 9);
+        writeSectionTitle("Prestations", 14, 1, 10, 9, true, false, false);
         currentY+=2;
         writeTable(Prestation.class, prestationFields, true, PRESTATION_TABLE_DATA_SOURCE, PRESTATION_DATASET, 30);
         currentY+=2;
@@ -162,7 +162,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         ----------------------------------------------------------------------*/
         if(printReseauOuvrage){
             currentY+=2;
-            writeSectionTitle("Réseaux et ouvrages", 15, 1, 10, 9);
+            writeSectionTitle("Réseaux et ouvrages", 14, 1, 10, 9, true, false, false);
             currentY+=2;
             writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET, 30);
             currentY+=2;
@@ -173,11 +173,13 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         ----------------------------------------------------------------------*/
         if(printVoirie){
             currentY+=2;
-            writeSectionTitle("Voiries", 15, 1, 10, 9);
+            writeSectionTitle("Voiries", 14, 1, 10, 9, true, false, false);
             currentY+=2;
             writeTable(ObjetReseau.class, reseauFields, true, VOIRIE_TABLE_DATA_SOURCE, VOIRIE_DATASET, 30);
             currentY+=2;
         }
+        
+        writeDetailPageBreak();
         
         // Sizes the detail element given to the field number.------------------
         band.setAttribute(ATT_HEIGHT, String.valueOf(currentY));

@@ -39,6 +39,7 @@ import static fr.sirs.util.JRUtils.ATT_X;
 import static fr.sirs.util.JRUtils.ATT_Y;
 import static fr.sirs.util.JRUtils.BOOLEAN_PRIMITIVE_NAME;
 import static fr.sirs.util.JRUtils.TAG_BAND;
+import static fr.sirs.util.JRUtils.TAG_BREAK;
 import static fr.sirs.util.JRUtils.TAG_COLUMN;
 import static fr.sirs.util.JRUtils.TAG_COLUMN_FOOTER;
 import static fr.sirs.util.JRUtils.TAG_COLUMN_HEADER;
@@ -101,24 +102,27 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
     protected static final int PAGE_WIDTH = 595;
     protected static final int LEFT_MARGIN = 20;
     protected static final int RIGHT_MARGIN = 20;
-    
-    private static final String SECTION_TITLE_BACKGROUND_COLOR = "#F1CF40";
 
     protected final Class<T> classToMap;
     private final List<String> avoidFields;
+    
+    // Couleur d'arrière-plan des titres des sections.
+    private final String sectionTitleBackgroundColor;
 
     public AbstractJDomWriterSingleSpecificSheet(final Class<T> classToMap) {
         super();
         avoidFields = null;
+        sectionTitleBackgroundColor = "#ffffff";
         this.classToMap = classToMap;
     }
 
     public AbstractJDomWriterSingleSpecificSheet(final Class<T> classToMap, 
-            final InputStream stream, final List<String> avoidFields)
+            final InputStream stream, final List<String> avoidFields, final String sectionTitleBackgroundColor)
             throws ParserConfigurationException, SAXException, IOException{
         super(stream);
         this.avoidFields = avoidFields;
         this.classToMap = classToMap;
+        this.sectionTitleBackgroundColor = sectionTitleBackgroundColor;
     }
 
     /**
@@ -230,11 +234,25 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         writeTitle("Fiche détaillée de ", classToMap);
     }
 
-    protected void writeSectionTitle(final String sectionTitle, final int height, final int margin, final int indent, final int textSize){
+    /**
+     * Insertion d'un titre de section.
+     * 
+     * @param sectionTitle Titre de la section.
+     * @param height Hauteur du cadre.
+     * @param margin Marge entre le cadre et le texte (haut et bas).
+     * @param indent Intentation du texte.
+     * @param textSize Taille de la police.
+     * @param bold Vrai si le texte est en gras.
+     * @param italic Vrai si le texte est en italique.
+     * @param underlined Vrai si le texte est souligné.
+     */
+    protected void writeSectionTitle(final String sectionTitle, final int height, final int margin, final int indent, 
+            final int textSize, final boolean bold, final boolean italic, final boolean underlined){
+        
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         final Element frame = document.createElement(TAG_FRAME);
         final Element frameReportElement = document.createElement(TAG_REPORT_ELEMENT);
-        frameReportElement.setAttribute(ATT_BACKCOLOR, SECTION_TITLE_BACKGROUND_COLOR);
+        frameReportElement.setAttribute(ATT_BACKCOLOR, sectionTitleBackgroundColor);
         frameReportElement.setAttribute(ATT_HEIGHT, String.valueOf(height));
         frameReportElement.setAttribute(ATT_MODE, JRUtils.Mode.OPAQUE.toString());
         frameReportElement.setAttribute(ATT_POSITION_TYPE, JRUtils.PositionType.FLOAT.toString());
@@ -253,9 +271,9 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
         final Element textElement = document.createElement(TAG_TEXT_ELEMENT);
         final Element font = document.createElement(TAG_FONT);
-        font.setAttribute(ATT_IS_BOLD, String.valueOf(true));
-        font.setAttribute(ATT_IS_ITALIC, String.valueOf(true));
-        font.setAttribute(ATT_IS_UNDERLINE, String.valueOf(true));
+        font.setAttribute(ATT_IS_BOLD, String.valueOf(bold));
+        font.setAttribute(ATT_IS_ITALIC, String.valueOf(italic));
+        font.setAttribute(ATT_IS_UNDERLINE, String.valueOf(underlined));
         font.setAttribute(ATT_SIZE, String.valueOf(textSize));
         textElement.appendChild(font);
         staticText.appendChild(textElement);
@@ -267,6 +285,24 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         frame.appendChild(staticText);
         band.appendChild(frame);
         currentY+=height;
+    }
+    
+    /**
+     * Insertion d'un saut de page.
+     */
+    protected void writeDetailPageBreak(){
+
+        final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
+        final Element pageBreak = document.createElement(TAG_BREAK);
+        final Element pageBreakReportElement = document.createElement(TAG_REPORT_ELEMENT);
+        pageBreakReportElement.setAttribute(ATT_HEIGHT, String.valueOf(1));
+        pageBreakReportElement.setAttribute(ATT_WIDTH, String.valueOf(PAGE_WIDTH-LEFT_MARGIN-RIGHT_MARGIN));
+        pageBreakReportElement.setAttribute(ATT_X, String.valueOf(0));
+        pageBreakReportElement.setAttribute(ATT_Y, String.valueOf(currentY));
+        
+        currentY++;
+        pageBreak.appendChild(pageBreakReportElement);
+        band.appendChild(pageBreak);
     }
 
     /**
@@ -485,7 +521,6 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         textField.appendChild(detailTextElement);
 
         final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);
-
 
         textFieldExpression.appendChild(cellSupplier.get());
 

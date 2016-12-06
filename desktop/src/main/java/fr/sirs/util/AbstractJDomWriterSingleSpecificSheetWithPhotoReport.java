@@ -42,6 +42,8 @@ import org.xml.sax.SAXException;
 /**
  *
  * @author Samuel Andrés (Geomatys)
+ * @param <T>
+ * 
  */
 public abstract class AbstractJDomWriterSingleSpecificSheetWithPhotoReport<T extends fr.sirs.core.model.Element> extends AbstractJDomWriterSingleSpecificSheet<T> {
 
@@ -50,9 +52,9 @@ public abstract class AbstractJDomWriterSingleSpecificSheetWithPhotoReport<T ext
     }
 
     public AbstractJDomWriterSingleSpecificSheetWithPhotoReport(final Class<T> classToMap,
-            final InputStream stream, final List<String> avoidFields)
+            final InputStream stream, final List<String> avoidFields, final String sectionTitleBackgroundColor)
             throws ParserConfigurationException, SAXException, IOException{
-        super(classToMap, stream, avoidFields);
+        super(classToMap, stream, avoidFields, sectionTitleBackgroundColor);
     }
 
     protected void includePhotoSubreport(final int height){

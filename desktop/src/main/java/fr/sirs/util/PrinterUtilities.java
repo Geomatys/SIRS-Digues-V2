@@ -95,7 +95,7 @@ public class PrinterUtilities {
     ////////////////////////////////////////////////////////////////////////////
     private static final String META_TEMPLATE_RESEAU_FERME = "/fr/sirs/jrxml/metaTemplateReseauFerme.jrxml";
 
-    public static File printReseauFerme(final List<String> avoidDesordreFields,
+    public static File printReseauFerme(final List<String> avoidReseauFields,
             final List<String> avoidObservationFields,
             final List<String> reseauFields,
             final Previews previewLabelRepository,
@@ -113,7 +113,7 @@ public class PrinterUtilities {
                 final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS)){
             final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(
                     metaTemplateStream,
-                    avoidDesordreFields, avoidObservationFields,
+                    avoidReseauFields, avoidObservationFields,
                     reseauFields, printPhoto, printReseauOuvrage);
             templateWriter.setOutput(templateFile);
             templateWriter.write();
