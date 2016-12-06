@@ -287,11 +287,11 @@ public class PrintManager {
         avoidDesordreFields.add(DATE_MAJ_FIELD);
 
         final List<String> observationFields = new ArrayList<>();
+        observationFields.add("date");
         observationFields.add("designation");
         observationFields.add("urgenceId");
         observationFields.add("observateurId");
         observationFields.add("nombreDesordres");
-        observationFields.add("date");
         observationFields.add("evolution");
         observationFields.add("suite");
 
@@ -363,9 +363,9 @@ public class PrintManager {
         avoidReseauFields.add(DATE_MAJ_FIELD);
 
         final List<String> observationFields = new ArrayList<>();
+        observationFields.add("date");
         observationFields.add("designation");
         observationFields.add("observateurId");
-        observationFields.add("date");
         observationFields.add("evolution");
         observationFields.add("suite");
 
