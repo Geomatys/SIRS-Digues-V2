@@ -134,11 +134,18 @@ public abstract class AbstractJDomWriterSingleSheet extends AbstractJDomWriter {
      */
     protected void writeTitle(final String titlePrefix, final Class classToMap) {
 
+        if(title==null) return;
+        
         // Looks for the title content.-----------------------------------------
         final Element band = (Element) title.getElementsByTagName(TAG_BAND).item(0);
+        if(band==null) return;
+        
         final Element staticText = (Element) band.getElementsByTagName(TAG_STATIC_TEXT).item(0);
+        if(staticText==null) return;
+        
         final Element text = (Element) staticText.getElementsByTagName(TAG_TEXT).item(0);
-
+        if(text==null) return;
+        
         // Sets the title.------------------------------------------------------
         final String className;
         final ResourceBundle resourceBundle = ResourceBundle.getBundle(classToMap.getName(), Locale.getDefault(),
