@@ -104,7 +104,7 @@ public class PrinterUtilities {
             final boolean printPhoto, final boolean printReseauOuvrage) throws IOException, ParserConfigurationException, SAXException, TransformerException, JRException {
 
         // Creates the Jasper Reports specific template from the generic template.
-        final File templateFile = File.createTempFile(Desordre.class.getName(), JRXML_EXTENSION);
+        final File templateFile = File.createTempFile(ReseauHydrauliqueFerme.class.getName(), JRXML_EXTENSION);
         templateFile.deleteOnExit();
 
         final JasperPrint print;
@@ -178,8 +178,6 @@ public class PrinterUtilities {
             final JRDataSource source = new DesordreDataSource(FXCollections.observableList(desordres).sorted((Comparator)new PRComparator()), previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
-
-            parameters.put("logo", logoStream);
 
             final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(photoTemplateStream);
             parameters.put(PHOTOS_SUBREPORT, photosReport);
