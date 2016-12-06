@@ -40,6 +40,7 @@ public class JRUtils {
     public static final String TAG_BOTTOM_MARGIN = "bottomMargin";
     public static final String TAG_BOTTOM_PEN = "bottomPen";
     public static final String TAG_BOX = "box";
+    public static final String TAG_BREAK = "break";
     public static final String TAG_COLUMN = "column";
     public static final String TAG_COLUMN_FOOTER = "columnFooter";
     public static final String TAG_COLUMN_HEADER = "columnHeader";
