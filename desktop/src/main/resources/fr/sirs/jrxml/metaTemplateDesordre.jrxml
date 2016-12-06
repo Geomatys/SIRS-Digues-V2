@@ -331,7 +331,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{borne_debut_distance}==null ? " - " : $F{borne_debut_distance}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{borne_debut_distance}==null ? " - " : ($F{borne_debut_distance} + " m")]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -362,7 +362,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{borne_fin_distance}==null ? " - " : $F{borne_fin_distance}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{borne_fin_distance}==null ? " - " : ($F{borne_fin_distance} + " m")]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
