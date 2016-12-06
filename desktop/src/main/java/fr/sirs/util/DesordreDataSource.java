@@ -41,6 +41,7 @@ import static fr.sirs.util.JRDomWriterDesordreSheet.RESEAU_OUVRAGE_TABLE_DATA_SO
 import static fr.sirs.util.JRDomWriterDesordreSheet.VOIRIE_TABLE_DATA_SOURCE;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.collections.ObservableList;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 
@@ -77,7 +78,13 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
             return new ObjectDataSource<>(photos, previewRepository, stringConverter);
         }
         else if(OBSERVATION_TABLE_DATA_SOURCE.equals(name)){
-            return new ObjectDataSource<>(currentObject.getObservations(), previewRepository, stringConverter);
+            final ObservableList<Observation> observations = currentObject.getObservations();
+            observations.sort((o1, o2) -> {
+                if(o1==null && o2==null) return 0;
+                else if(o1==null || o2==null) return (o1==null) ? -1 : 1;
+                else return o1.getDate().compareTo(o2.getDate());
+            });
+            return new ObjectDataSource<>(observations, previewRepository, stringConverter);
         }
         else if(PRESTATION_TABLE_DATA_SOURCE.equals(name)){
             return new ObjectDataSource<>(Injector.getSession().getRepositoryForClass(Prestation.class).get(currentObject.getPrestationIds()), previewRepository, stringConverter);
