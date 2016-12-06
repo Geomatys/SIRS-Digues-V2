@@ -333,40 +333,38 @@ public class PrintManager {
      */
     public final void printReseaux(final List<ReseauHydrauliqueFerme> reseauxFermes, final boolean printPhoto, final boolean printReseauOuvrage) throws Exception {
 
-        final List avoidDesordreFields = new ArrayList<>();
-        avoidDesordreFields.add(GEOMETRY_FIELD);
-        avoidDesordreFields.add(DOCUMENT_ID_FIELD);
-        avoidDesordreFields.add(ID_FIELD);
-        avoidDesordreFields.add(LONGITUDE_MIN_FIELD);
-        avoidDesordreFields.add(LONGITUDE_MAX_FIELD);
-        avoidDesordreFields.add(LATITUDE_MIN_FIELD);
-        avoidDesordreFields.add(LATITUDE_MAX_FIELD);
-        avoidDesordreFields.add(FOREIGN_PARENT_ID_FIELD);
-        avoidDesordreFields.add(REVISION_FIELD);
-        avoidDesordreFields.add(PARENT_FIELD);
-        avoidDesordreFields.add(COUCH_DB_DOCUMENT_FIELD);
-        avoidDesordreFields.add(OBSERVATIONS_REFERENCE);
+        final List avoidReseauFields = new ArrayList<>();
+        avoidReseauFields.add(GEOMETRY_FIELD);
+        avoidReseauFields.add(DOCUMENT_ID_FIELD);
+        avoidReseauFields.add(ID_FIELD);
+        avoidReseauFields.add(LONGITUDE_MIN_FIELD);
+        avoidReseauFields.add(LONGITUDE_MAX_FIELD);
+        avoidReseauFields.add(LATITUDE_MIN_FIELD);
+        avoidReseauFields.add(LATITUDE_MAX_FIELD);
+        avoidReseauFields.add(FOREIGN_PARENT_ID_FIELD);
+        avoidReseauFields.add(REVISION_FIELD);
+        avoidReseauFields.add(PARENT_FIELD);
+        avoidReseauFields.add(COUCH_DB_DOCUMENT_FIELD);
+        avoidReseauFields.add(OBSERVATIONS_REFERENCE);
 
-        avoidDesordreFields.add(ECHELLE_LIMINIMETRIQUE_REFERENCE);
-        avoidDesordreFields.add(OUVRAGE_PARTICULIER_REFERENCE);
-        avoidDesordreFields.add(RESEAU_TELECOM_ENERGIE_REFERENCE);
-        avoidDesordreFields.add(OUVRAGE_TELECOM_ENERGIE_REFERENCE);
-        avoidDesordreFields.add(OUVRAGE_HYDRAULIQUE_REFERENCE);
-        avoidDesordreFields.add(RESEAU_HYDRAULIQUE_FERME_REFERENCE);
-        avoidDesordreFields.add(RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE);
-        avoidDesordreFields.add(OUVRAGE_VOIRIE_REFERENCE);
-        avoidDesordreFields.add(VOIE_DIGUE_REFERENCE);
-        avoidDesordreFields.add(PRESTATION_REFERENCE);
+        avoidReseauFields.add(ECHELLE_LIMINIMETRIQUE_REFERENCE);
+        avoidReseauFields.add(OUVRAGE_PARTICULIER_REFERENCE);
+        avoidReseauFields.add(RESEAU_TELECOM_ENERGIE_REFERENCE);
+        avoidReseauFields.add(OUVRAGE_TELECOM_ENERGIE_REFERENCE);
+        avoidReseauFields.add(OUVRAGE_HYDRAULIQUE_REFERENCE);
+        avoidReseauFields.add(RESEAU_HYDRAULIQUE_FERME_REFERENCE);
+        avoidReseauFields.add(RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE);
+        avoidReseauFields.add(OUVRAGE_VOIRIE_REFERENCE);
+        avoidReseauFields.add(VOIE_DIGUE_REFERENCE);
+        avoidReseauFields.add(PRESTATION_REFERENCE);
 
-        avoidDesordreFields.add(VALID_FIELD);
-        avoidDesordreFields.add(AUTHOR_FIELD);
-        avoidDesordreFields.add(DATE_MAJ_FIELD);
+        avoidReseauFields.add(VALID_FIELD);
+        avoidReseauFields.add(AUTHOR_FIELD);
+        avoidReseauFields.add(DATE_MAJ_FIELD);
 
         final List<String> observationFields = new ArrayList<>();
         observationFields.add("designation");
-        observationFields.add("urgenceId");
         observationFields.add("observateurId");
-        observationFields.add("nombreDesordres");
         observationFields.add("date");
         observationFields.add("evolution");
         observationFields.add("suite");
@@ -378,8 +376,7 @@ public class PrintManager {
         reseauFields.add("date_fin");
         reseauFields.add("commentaire");
 
-        final File fileToPrint = PrinterUtilities.printReseauFerme(
-                avoidDesordreFields,
+        final File fileToPrint = PrinterUtilities.printReseauFerme(avoidReseauFields,
                 observationFields,
                 reseauFields,
                 Injector.getSession().getPreviews(),
