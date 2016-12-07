@@ -18,6 +18,7 @@
  */
 package fr.sirs.util;
 
+import fr.sirs.core.SirsCore;
 import static fr.sirs.util.AbstractJDomWriter.NULL_REPLACEMENT;
 import static fr.sirs.util.JRUtils.ATT_BACKCOLOR;
 import static fr.sirs.util.JRUtils.ATT_CLASS;
@@ -76,6 +77,7 @@ import java.util.ResourceBundle;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -307,15 +309,30 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
     /**
      *
-     * @param clazz
-     * @param fields
-     * @param print
-     * @param datasourceParameter
+     * @param clazz Type d'objets contenus dans le tableau. 
+     * @param fields Liste de noms de champs. Il peut s'agir d'une liste restrictive des noms de champs à énumérer
+     * dans le tableau à l'exclusion des autres champs. Il peut également s'agir d'une liste de champs à exclure du 
+     * tableau. Dans le premier cas uniquement, l'ordre dans lequel sont énumérés les noms de champs détermine l'ordre 
+     * des colonnes dans le tableau. Dans tous les cas, les noms de champs doivent être cohérents avec le type d'objet 
+     * du tableau.
+     * @param print Détermine si les noms de champs énumérés doivent être considérés comme une liste restrictive (vrai) 
+     * ou comme une liste de champs à éviter (faux).
+     * @param datasourceParameter Nom de la source de données, tel que connu par JasperReports.
      * @param datasetName
      * @param height
+     * @param widthCoeffs Suite de coefficients de pondération de largeur à appliquer à chaque champ dans l'ordre de leur
+     * mention dans la liste de leurs noms. Le coefficient de pondération de base d'une colonne vaut 1.f. Si les 
+     * coefficients de toutes les colonnes sont identiques (quelle que soit leur valeur), toutes les colonnes auront la 
+     * même largeur. Si le coefficient d'une colonne A vaut 1.f, celui d'une colonne B vaut .25f et celui d'une colonne C
+     * vaut 2.f, la colonne C sera environ deux fois plus large que la colonne A et huit fois plus large que la colonne B.
+     * Les coefficients ne sont pris en compte que lorsque la liste des noms de champs doivent être considérés comme des
+     * champs à afficher exclusivement ; ils sont ignorés si la liste contient des noms de champs à exclure. Lorsque la 
+     * tailles de la liste des coefficients de pondération en correspond pas à la taille de la liste des noms de champs,
+     * les coefficients supplémentaires sont ignorés et les coefficients manquants sont implicitement affectés par la 
+     * valeur 1.f. Si aucune liste n'est fournie, tous les coefficients de pondération valent 1.f.
      */
-    protected void writeTable(final Class clazz, final List<String> fields,
-            final boolean print, final String datasourceParameter, final String datasetName, final int height){
+    protected void writeTable(final Class clazz, final List<String> fields, final boolean print, 
+            final String datasourceParameter, final String datasetName, final int height, final float[] widthCoeffs){
 
         final Predicate<String> printPredicate = print
                 ? (String fieldName) -> fields==null || fields.contains(fieldName)
@@ -353,7 +370,10 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         // COMPUTE NUMBER OF COLUMNS AND COLUMN WIDTH
         ////////////////////////////////////////////////////////////////////////
         int nbColumns=0;
-        // Si la liste des champs contient les champs à imprimer et non pas à éviter alors le nombre de champs est directement donnée par la taille de la liste.
+        /*
+        Si la liste des champs contient les champs à imprimer et non pas à éviter alors le nombre de champs est 
+        directement donnée par la taille de la liste.
+        */
         if(print) {
             nbColumns=fields.size();
         }
@@ -374,9 +394,27 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
             nbColumns++;
         }
 
-        // Calcul de la largeur d'une colonne en fonction du nombre
-        final int columnWidth = (PAGE_WIDTH - (LEFT_MARGIN+LEFT_MARGIN))/nbColumns;
-
+        // Calcul de la largeur de base d'une colonne en fonction du nombre, sans tenir compte des coefficients de largeur.
+        final int baseColumnWidth = (PAGE_WIDTH - (LEFT_MARGIN+LEFT_MARGIN))/nbColumns;
+        
+        // Calcul des coefficients à appliquer aux colonnes.
+        // On commencer par calculer la somme des coefficients s'il y en a.
+        // On ne peut paramettrer les largeurs de colonnes que si on construit le tableau à l'aide de colonnes connues à l'avance.
+        float coeffSum = 0.f;
+        if(print && widthCoeffs!=null){
+            // On vérifie la cohérence du nombre de coefficients par rapport au nombre de colonnes.
+            if(widthCoeffs.length<nbColumns){
+                SirsCore.LOGGER.info("Le nombre de coefficients de largeur est inférieur au nombre de colonnes. La valeur par défaut 1 sera appliquée aux coefficients manquants.");
+                coeffSum+=(nbColumns-widthCoeffs.length);
+            }
+            else if(widthCoeffs.length>nbColumns){
+                SirsCore.LOGGER.info("Le nombre de coefficients de largeur est supérieur au nombre de colonnes. Les coefficients supplémentaires seront ignorés.");
+            }
+            
+            for(float widthCoeff : widthCoeffs){
+                coeffSum+=widthCoeff;
+            }
+        }
 
         ////////////////////////////////////////////////////////////////////////
         // FUNCTIONAL PARAMETERS TO FILL COLUMNS
@@ -386,7 +424,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
             final String fieldName = getFieldNameFromSetter(setter);
             final Class fieldClass = setter.getParameterTypes()[0];
 
-            Supplier<CDATASection> fromMethodSupplier = () -> {
+            final Supplier<CDATASection> fromMethodSupplier = () -> {
 
                 final CDATASection valueField;
                 if(fieldClass==Boolean.class || (fieldClass!=null && BOOLEAN_PRIMITIVE_NAME.equals(fieldClass.getName()))){
@@ -407,14 +445,17 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         if(Modifier.isAbstract(clazz.getModifiers())){
             writeColumn("Type",
                     () -> document.createCDATASection("$F{class}==null ? \""+NULL_REPLACEMENT+"\" : java.util.ResourceBundle.getBundle($F{class}.getName()).getString(\"class\")"),
-                    markupFromFieldName.apply("class"), table, columnWidth, 7, 1, 20, 10);
+                    markupFromFieldName.apply("class"), table, baseColumnWidth, 7, 1, 20, 10);
         }
 
         ////////////////////////////////////////////////////////////////////////
         // BUILD COLUMNS
         ////////////////////////////////////////////////////////////////////////
         final ResourceBundle rb = ResourceBundle.getBundle(clazz.getName());
-        // Si la liste des champs contient les champs à imprimer et non pas à éviter on se base sur l'ordre de la liste pour générer l'ordre des colonnes.
+        /* 
+        Si la liste des champs contient les champs à imprimer et non pas à éviter on se base sur l'ordre de la liste 
+        pour générer l'ordre des colonnes.
+        */
         if(print){
             // Indexation des initialiseurs par les noms de champs.
             final Map<String, Method> settersByFieldName = new HashMap<>();
@@ -423,18 +464,35 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
                     settersByFieldName.put(getFieldNameFromSetter(method), method);
                 }
             }
+            
+            int c = 0; // Numéro de colonne.
             for(final String fieldName : fields){
-                writeColumn(rb.getString(fieldName), getFromMethodSupplier.apply(settersByFieldName.get(fieldName)), markupFromFieldName.apply(fieldName), table, columnWidth, 7, 1, 20, 10);
+                final float coeff;
+                if(coeffSum!=0.f && widthCoeffs!=null && widthCoeffs.length>c) {
+                    coeff = widthCoeffs[c]*nbColumns/coeffSum;
+                    SirsCore.LOGGER.log(Level.FINEST, "raw coeff = {0}", widthCoeffs[c]);
+                    c++;
+                }
+                else {
+                    coeff = 1.f;
+                }
+                SirsCore.LOGGER.log(Level.FINEST, "c = {0} sum = {1} width coeff = {2}", new Object[]{c, coeffSum, coeff});
+                writeColumn(rb.getString(fieldName), getFromMethodSupplier.apply(settersByFieldName.get(fieldName)), 
+                        markupFromFieldName.apply(fieldName), table, Math.round(baseColumnWidth*coeff), 7, 1, 20, 10);
             }
         }
-        // Sinon on n'a pas d'ordre particulier sur lequel se baser et on parcours donc en premier les méthodes pour trouver les noms des champs à imprimer.
+        /*
+        Sinon, on n'a pas d'ordre particulier sur lequel se baser et on parcours donc en premier les méthodes pour trouver 
+        les noms des champs à imprimer. Dans ce cas, on ne peut pas paramettrer les noms de colonnes
+        */
         else{
             for(final Method method : clazz.getMethods()){
                 if(PrinterUtilities.isSetter(method)){
                     // Retrives the field name from the setter name.----------------
                     final String fieldName = getFieldNameFromSetter(method);
                     if(printPredicate.test(fieldName)){
-                        writeColumn(rb.getString(fieldName), getFromMethodSupplier.apply(method), markupFromFieldName.apply(fieldName), table, columnWidth, 7, 1, 20, 10);
+                        writeColumn(rb.getString(fieldName), getFromMethodSupplier.apply(method), 
+                                markupFromFieldName.apply(fieldName), table, baseColumnWidth, 7, 1, 20, 10);
                     }
                 }
             }

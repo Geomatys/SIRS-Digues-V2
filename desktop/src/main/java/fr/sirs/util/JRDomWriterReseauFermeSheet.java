@@ -121,7 +121,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         currentY+=2;
         writeSectionTitle("Observations", 14, 1, 10, 9, true, false, false);
         currentY+=2;
-        writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 30);
+        writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 30, null);
         currentY+=2;
         
         /*----------------------------------------------------------------------
@@ -138,7 +138,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
             currentY+=2;
             writeSectionTitle("Réseaux et ouvrages", 14, 1, 10, 9, true, false, false);
             currentY+=2;
-            writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET, 30);
+            writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET, 30, null);
             currentY+=2;
         }
         

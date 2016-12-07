@@ -52,7 +52,9 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
     public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
     
     private final List<String> observationFields;
+    private final float[] observationWidths;
     private final List<String> prestationFields;
+    private final float[] prestationWidths;
     private final List<String> reseauFields;
     
     private final boolean printPhoto;
@@ -63,7 +65,9 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         super(classToMap);
         
         observationFields = null;
+        observationWidths = null;
         prestationFields = null;
+        prestationWidths = null;
         reseauFields = null;
         printPhoto = printReseauOuvrage = printVoirie = true;
     }
@@ -71,7 +75,9 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
     public JRDomWriterDesordreSheet(final InputStream stream,
             final List<String> avoidFields,
             final List<String> observationFields,
+            final float[] observationWidths,
             final List<String> prestationFields,
+            final float[] prestationWidths,
             final List<String> reseauFields,
             final boolean printPhoto, 
             final boolean printReseauOuvrage, 
@@ -79,7 +85,9 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         super(Desordre.class, stream, avoidFields, "#47daff");
         
         this.observationFields = observationFields;
+        this.observationWidths = observationWidths;
         this.prestationFields = prestationFields;
+        this.prestationWidths = prestationWidths;
         this.reseauFields = reseauFields;
         this.printPhoto = printPhoto;
         this.printReseauOuvrage = printReseauOuvrage;
@@ -137,7 +145,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         currentY+=2;
         writeSectionTitle("Observations", 14, 1, 10, 9, true, false, false);
         currentY+=2;
-        writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 30);
+        writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 30, observationWidths);
         currentY+=2;
         
         /*----------------------------------------------------------------------
@@ -146,7 +154,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         currentY+=2;
         writeSectionTitle("Prestations", 14, 1, 10, 9, true, false, false);
         currentY+=2;
-        writeTable(Prestation.class, prestationFields, true, PRESTATION_TABLE_DATA_SOURCE, PRESTATION_DATASET, 30);
+        writeTable(Prestation.class, prestationFields, true, PRESTATION_TABLE_DATA_SOURCE, PRESTATION_DATASET, 30, prestationWidths);
         currentY+=2;
         
         /*----------------------------------------------------------------------
@@ -164,7 +172,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
             currentY+=2;
             writeSectionTitle("Réseaux et ouvrages", 14, 1, 10, 9, true, false, false);
             currentY+=2;
-            writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET, 30);
+            writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET, 30, null);
             currentY+=2;
         }
         
@@ -175,7 +183,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
             currentY+=2;
             writeSectionTitle("Voiries", 14, 1, 10, 9, true, false, false);
             currentY+=2;
-            writeTable(ObjetReseau.class, reseauFields, true, VOIRIE_TABLE_DATA_SOURCE, VOIRIE_DATASET, 30);
+            writeTable(ObjetReseau.class, reseauFields, true, VOIRIE_TABLE_DATA_SOURCE, VOIRIE_DATASET, 30, null);
             currentY+=2;
         }
         

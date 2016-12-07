@@ -288,20 +288,16 @@ public class PrintManager {
 
         final List<String> observationFields = new ArrayList<>();
         observationFields.add("date");
-        observationFields.add("designation");
-        observationFields.add("urgenceId");
         observationFields.add("observateurId");
         observationFields.add("nombreDesordres");
+        observationFields.add("urgenceId");
         observationFields.add("evolution");
         observationFields.add("suite");
 
         final List<String> prestationFields = new ArrayList<>();
         prestationFields.add("designation");
         prestationFields.add("libelle");
-        prestationFields.add("typePrestationId");
-        prestationFields.add("coutMetre");
-        prestationFields.add("marcheId");
-        prestationFields.add("realisationInterne");
+        prestationFields.add("intervenantsIds");
         prestationFields.add("date_debut");
         prestationFields.add("date_fin");
         prestationFields.add("commentaire");
@@ -316,7 +312,9 @@ public class PrintManager {
         final File fileToPrint = PrinterUtilities.printDisorders(
                 avoidDesordreFields,
                 observationFields,
+                new float[]{1.f, 1.f, 1.f, 1.f, 2.f, 3.f},
                 prestationFields,
+                new float[]{.7f, 1.f, 1.f, .7f, .7f, 3.f},
                 reseauFields,
                 Injector.getSession().getPreviews(),
                 new SirsStringConverter(),

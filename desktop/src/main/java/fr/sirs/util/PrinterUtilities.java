@@ -148,8 +148,10 @@ public class PrinterUtilities {
     private static final String META_TEMPLATE_DESORDRE = "/fr/sirs/jrxml/metaTemplateDesordre.jrxml";
 
     public static File printDisorders(final List<String> avoidDesordreFields,
-            final List<String> avoidObservationFields,
-            final List<String> avoidPrestationFields,
+            final List<String> observationFields,
+            final float[] observationWidths,
+            final List<String> prestationFields,
+            final float[] prestationWidths,
             final List<String> reseauFields,
             final Previews previewLabelRepository,
             final SirsStringConverter stringConverter,
@@ -162,13 +164,12 @@ public class PrinterUtilities {
         templateFile.deleteOnExit();
 
         final JasperPrint print;
-        try(final InputStream logoStream = PrinterUtilities.class.getResourceAsStream(LOGO_PATH);
-                final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE);
+        try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE);
                 final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS)){
 
             final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(
                     metaTemplateStream,
-                    avoidDesordreFields, avoidObservationFields, avoidPrestationFields,
+                    avoidDesordreFields, observationFields, observationWidths, prestationFields, prestationWidths,
                     reseauFields, printPhoto, printReseauOuvrage, printVoirie);
             templateWriter.setOutput(templateFile);
             templateWriter.write();
