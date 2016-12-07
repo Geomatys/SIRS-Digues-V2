@@ -26,6 +26,7 @@ import fr.sirs.core.model.Crete;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.util.DesignationIncrementer;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +39,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- *
+ * Note : We use deprecated constructors here, to avoid automatic designation
+ * setting.
+ * 
  * @author Alexis Manin (Geomatys)
  */
 public class DesignationIncrementerTest extends CouchDBTestCase {
@@ -75,19 +78,18 @@ public class DesignationIncrementerTest extends CouchDBTestCase {
         final int maxDesignation = 69;
 
         // Create test set
-        final AbstractSIRSRepository<Crete> repo = session.getRepositoryForClass(Crete.class);
-        final Crete firstNumeric = repo.create();
+        final Crete firstNumeric = new Crete();
         firstNumeric.setDesignation(String.valueOf(maxDesignation));
-        final Crete secondNumeric = repo.create();
+        final Crete secondNumeric = new Crete();
         secondNumeric.setDesignation(String.valueOf(7));
-        final Crete thirdNumeric = repo.create();
+        final Crete thirdNumeric = new Crete();
         thirdNumeric.setDesignation(String.valueOf(19));
-        final Crete nonNumeric = repo.create();
+        final Crete nonNumeric = new Crete();
         nonNumeric.setDesignation("I'm not a number");
-        final Crete weirdo = repo.create();
+        final Crete weirdo = new Crete();
         weirdo.setDesignation(" #\"\"  @ 1à& \n é SELECT * FROM \"TronconDigue\"  )çè &) ! §");
 
-        repo.executeBulk(firstNumeric, secondNumeric, thirdNumeric, nonNumeric, weirdo);
+        session.executeBulk(Arrays.asList(firstNumeric, secondNumeric, thirdNumeric, nonNumeric, weirdo));
 
         for (int i = maxDesignation + 1 ; i < maxDesignation + 10 ; i++) {
             final Task<Integer> t = operator.nextDesignation(Crete.class);
@@ -129,7 +131,7 @@ public class DesignationIncrementerTest extends CouchDBTestCase {
         docChangeEmiter.addListener(listener);
 
         final AbstractSIRSRepository<Crete> repo = session.getRepositoryForClass(Crete.class);
-        final Crete crete = repo.create();
+        final Crete crete = new Crete();
         crete.setDesignation(String.valueOf(higher - 1));
         repo.executeBulk(crete);
 
