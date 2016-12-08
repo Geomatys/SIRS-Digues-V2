@@ -57,6 +57,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 public class SirsStringConverter extends StringConverter {
 
     private final WeakHashMap<String, Object> FROM_STRING = new WeakHashMap<>();
+    
+    public static final String LABEL_SEPARATOR = " : ";
+    public static final String DESIGNATION_SEPARATOR = " - ";
 
     /**
      * Find a simple name for input object.
@@ -93,7 +96,7 @@ public class SirsStringConverter extends StringConverter {
         if (item instanceof Contact) {
             final Contact c = (Contact) item;
             if (c.getNom() != null && !c.getNom().isEmpty()) {
-                if (text.length() > 0) text.append(" : ");
+                if (text.length() > 0) text.append(LABEL_SEPARATOR);
                 text.append(c.getNom());
             }
             if (c.getPrenom() != null && !c.getPrenom().isEmpty()) {
@@ -103,7 +106,7 @@ public class SirsStringConverter extends StringConverter {
         } else if (item instanceof Organisme) {
             final Organisme o = (Organisme)item;
             if (o.getNom() != null && !o.getNom().isEmpty()) {
-                if (text.length() > 0) text.append(" : ");
+                if (text.length() > 0) text.append(LABEL_SEPARATOR);
                 text.append(o.getNom());
             }
         } else if (item instanceof ElementHit) {
@@ -137,7 +140,7 @@ public class SirsStringConverter extends StringConverter {
             final AvecLibelle libelle = (AvecLibelle) item;
             if (libelle.getLibelle() != null
                     && !libelle.getLibelle().isEmpty()) {
-                if (text.length() > 0) text.append(" : ");
+                if (text.length() > 0) text.append(LABEL_SEPARATOR);
                 text.append(libelle.getLibelle());
             }
         }
@@ -159,7 +162,7 @@ public class SirsStringConverter extends StringConverter {
         String prefixedDesignation = (labelMapper == null) ? "" : labelMapper.mapPropertyName(BUNDLE_KEY_CLASS_ABREGE);
         if(source.getDesignation()!=null){
             if(!"".equals(prefixedDesignation)){
-                prefixedDesignation+=" - ";
+                prefixedDesignation+=DESIGNATION_SEPARATOR;
             }
             prefixedDesignation+=source.getDesignation();
         }
@@ -182,7 +185,7 @@ public class SirsStringConverter extends StringConverter {
         String prefixedDesignation = (labelMapper == null) ? "" : labelMapper.mapPropertyName(BUNDLE_KEY_CLASS_ABREGE);
         if(source.getDesignation()!=null){
             if(!"".equals(prefixedDesignation)){
-                prefixedDesignation+=" - ";
+                prefixedDesignation+=DESIGNATION_SEPARATOR;
             }
             prefixedDesignation+=source.getDesignation();
         }
