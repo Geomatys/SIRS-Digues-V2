@@ -65,8 +65,11 @@ import static fr.sirs.util.JRUtils.URI_JRXML;
 import static fr.sirs.util.JRUtils.URI_JRXML_COMPONENTS;
 import static fr.sirs.util.JRUtils.getCanonicalName;
 import static fr.sirs.util.PrinterUtilities.getFieldNameFromSetter;
+import fr.sirs.util.property.Reference;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -78,6 +81,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.beans.property.StringProperty;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -416,36 +421,10 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
             }
         }
 
-        ////////////////////////////////////////////////////////////////////////
-        // FUNCTIONAL PARAMETERS TO FILL COLUMNS
-        ////////////////////////////////////////////////////////////////////////
-        final Function<Method, Supplier<CDATASection>> getFromMethodSupplier = (Method setter) -> {
-
-            final String fieldName = getFieldNameFromSetter(setter);
-            final Class fieldClass = setter.getParameterTypes()[0];
-
-            final Supplier<CDATASection> fromMethodSupplier = () -> {
-
-                final CDATASection valueField;
-                if(fieldClass==Boolean.class || (fieldClass!=null && BOOLEAN_PRIMITIVE_NAME.equals(fieldClass.getName()))){
-                    valueField = document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : ($F{"+fieldName+"} ? \""+TRUE_REPLACEMENT+"\" : \""+FALSE_REPLACEMENT+"\")");
-                }
-                else{
-                    valueField = document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+fieldName+"}");
-                }
-                return valueField;
-            };
-
-            return fromMethodSupplier;
-        };
-
-        final Function<String, JRUtils.Markup> markupFromFieldName = (String fieldName) ->
-                (fieldName.contains("escript") || fieldName.contains("omment")) ? JRUtils.Markup.HTML : JRUtils.Markup.NONE;
-
         if(Modifier.isAbstract(clazz.getModifiers())){
             writeColumn("Type",
                     () -> document.createCDATASection("$F{class}==null ? \""+NULL_REPLACEMENT+"\" : java.util.ResourceBundle.getBundle($F{class}.getName()).getString(\"class\")"),
-                    markupFromFieldName.apply("class"), table, baseColumnWidth, 7, 1, 20, 10);
+                    markupFromFieldName("class"), table, baseColumnWidth, 7, 1, 20, 10);
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -477,8 +456,8 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
                     coeff = 1.f;
                 }
                 SirsCore.LOGGER.log(Level.FINEST, "c = {0} sum = {1} width coeff = {2}", new Object[]{c, coeffSum, coeff});
-                writeColumn(rb.getString(fieldName), getFromMethodSupplier.apply(settersByFieldName.get(fieldName)), 
-                        markupFromFieldName.apply(fieldName), table, Math.round(baseColumnWidth*coeff), 7, 1, 20, 10);
+                writeColumn(rb.getString(fieldName), getCDATASupplierFromSetter(settersByFieldName.get(fieldName)), 
+                        markupFromFieldName(fieldName), table, Math.round(baseColumnWidth*coeff), 7, 1, 20, 10);
             }
         }
         /*
@@ -491,8 +470,8 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
                     // Retrives the field name from the setter name.----------------
                     final String fieldName = getFieldNameFromSetter(method);
                     if(printPredicate.test(fieldName)){
-                        writeColumn(rb.getString(fieldName), getFromMethodSupplier.apply(method), 
-                                markupFromFieldName.apply(fieldName), table, baseColumnWidth, 7, 1, 20, 10);
+                        writeColumn(rb.getString(fieldName), getCDATASupplierFromSetter(method), 
+                                markupFromFieldName(fieldName), table, baseColumnWidth, 7, 1, 20, 10);
                     }
                 }
             }
@@ -504,6 +483,58 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         band.appendChild(componentElement);
         currentY+=height;
     }
+    
+    private Supplier<CDATASection> getCDATASupplierFromSetter(final Method setter) {
+
+        final String fieldName = getFieldNameFromSetter(setter);
+        final Class fieldClass = setter.getParameterTypes()[0];
+
+        return () -> {
+
+            if(fieldClass==Boolean.class || (fieldClass!=null && BOOLEAN_PRIMITIVE_NAME.equals(fieldClass.getName()))){
+                return document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : ($F{"+fieldName+"} ? \""+TRUE_REPLACEMENT+"\" : \""+FALSE_REPLACEMENT+"\")");
+            }
+            else {
+                try {
+                    // Récupération du champ
+                    //final Field field = setter.getDeclaringClass().getDeclaredField(fieldName);
+                    final Class declaringClass = setter.getDeclaringClass();
+
+                    // On vérifie s'il s'agit d'un identifiant de référence. L'annotation est portée par le getter (pas par le champ ni par le setter).
+                    final Method getter = declaringClass.getMethod(setter.getName().replaceFirst("set", "get"));
+                    if(fieldClass!=null && getter!=null && getter.getDeclaredAnnotation(Reference.class)!=null){
+                        // Si c'est en fait une liste de références.
+                        if(Iterable.class.isAssignableFrom(fieldClass)){
+                            return document.createCDATASection(JRXMLUtil.dynamicDisplayLabels(fieldName));
+                        }
+                        // Si c'est une référence unique.
+                        else if(String.class.isAssignableFrom(fieldClass)) {
+                            return document.createCDATASection(JRXMLUtil.dynamicDisplayLabel(fieldName));
+                        }
+                    }
+
+                    // S'il ne s'agit pas d'une référence : 
+                    return document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+fieldName+"}");
+                } catch (NoSuchMethodException | SecurityException ex) {
+                    // Si pour une raison quelconque l'analyse du champ échoue, on utilise un comportement par défaut.
+                    SirsCore.LOGGER.log(Level.INFO, "Impossible d''analyser le champ {0}. On utilisera le comportement par d\u00e9faut.", fieldName);
+                    return document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+fieldName+"}");
+                }
+            }
+        };
+    };
+
+    /**
+     * Détermine le type de {@link JRUtils.Markup} à partir du nom de champ. Sert à déterminer quels sont les champs
+     * correspondant à des commentaires qui doivent supporter une mise en forme HTML du texte.
+     * 
+     * @param fieldName
+     * @return 
+     */
+    private JRUtils.Markup markupFromFieldName(final String fieldName){
+        return (fieldName.contains("escript") || fieldName.contains("omment")) ? JRUtils.Markup.HTML : JRUtils.Markup.NONE;
+    }
+
 
     private void writeColumn(final String header, final Supplier<CDATASection> cellSupplier,
             final JRUtils.Markup markup, final Element table, final int columnWidth,

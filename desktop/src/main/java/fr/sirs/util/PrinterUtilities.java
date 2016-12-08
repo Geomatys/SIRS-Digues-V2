@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -411,6 +412,37 @@ JasperViewer.viewReport(jp1,false);
         }
 
         return PrinterUtilities.class.getResourceAsStream(IMG_NOT_FOUND_PATH);
+    }
+    
+    public static final String ORDERED_SEPARATOR = ") ";
+    
+    /**
+     * Construit une chaîne de caractères énumérant le contenu d'un {@link Iterable}.
+     * 
+     * @param <E>
+     * @param iterable
+     * @param ordered
+     * @param startIndex
+     * @return 
+     */
+    public static <E> String printList(final Iterable<E> iterable, final boolean ordered, int startIndex){
+        
+        final Iterator<E> it = iterable.iterator();
+        if (! it.hasNext())
+            return "";
+
+        final StringBuilder sb = new StringBuilder();
+
+        for (;;) {
+            final E e = it.next();
+            if(ordered){
+                sb.append(startIndex++);
+                sb.append(ORDERED_SEPARATOR);
+            }
+            sb.append(e == iterable ? "(this Iterable)" : e);
+            if (! it.hasNext()) return sb.toString();
+            else sb.append('\n');
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////
