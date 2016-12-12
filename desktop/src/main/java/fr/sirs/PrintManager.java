@@ -312,9 +312,9 @@ public class PrintManager {
         final File fileToPrint = PrinterUtilities.printDisorders(
                 avoidDesordreFields,
                 observationFields,
-                new float[]{1.f, 1.f, 1.f, 1.f, 2.f, 3.f},
+                new float[]{1.1f, .8f, .8f, 1.f, 2.f, 2.5f},
                 prestationFields,
-                new float[]{.7f, 1.f, 1.f, .7f, .7f, 3.f},
+                new float[]{.7f, 1.f, 1.f, .7f, .7f, 2.5f},
                 reseauFields,
                 Injector.getSession().getPreviews(),
                 new SirsStringConverter(),
