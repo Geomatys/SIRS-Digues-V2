@@ -28,6 +28,7 @@ import static fr.sirs.util.JRUtils.TAG_SUB_DATASET;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -47,8 +48,8 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
     public static final String PHOTO_DATA_SOURCE = "PHOTO_DATA_SOURCE";
     public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
     
-    private final List<String> observationFields;
-    private final List<String> reseauFields;
+    private final List<JRColumnParameter> observationFields;
+    private final List<JRColumnParameter> reseauFields;
     
     private final boolean printPhoto;
     private final boolean printReseauOuvrage;
@@ -63,8 +64,8 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
     
     public JRDomWriterReseauFermeSheet(final InputStream stream,
             final List<String> avoidFields,
-            final List<String> observationFields,
-            final List<String> reseauFields,
+            final List<JRColumnParameter> observationFields,
+            final List<JRColumnParameter> reseauFields,
             final boolean printPhoto, 
             final boolean printReseauOuvrage) throws ParserConfigurationException, SAXException, IOException {
         super(ReseauHydrauliqueFerme.class, stream, avoidFields, "#b2a1c7");
@@ -81,8 +82,8 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
     @Override
     protected void writeObject() {
         
-        writeSubDataset(ObservationReseauHydrauliqueFerme.class, observationFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(0));
-        writeSubDataset(ObjetReseau.class, reseauFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(1));
+        writeSubDataset(ObservationReseauHydrauliqueFerme.class, observationFields.stream().map(p -> p.getFieldName()).collect(Collectors.toList()), true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(0));
+        writeSubDataset(ObjetReseau.class, reseauFields.stream().map(p -> p.getFieldName()).collect(Collectors.toList()), true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(1));
         
         // Sets the initial fields used by the template.------------------------
         writeFields();
@@ -119,16 +120,17 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         TABLEAU DES OBSERVATIONS
         ----------------------------------------------------------------------*/
         currentY+=2;
-        writeSectionTitle("Observations", 14, 1, 10, 9, true, false, false);
+        writeSectionTitle("Observations", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
         currentY+=2;
-        writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 30, null);
+        writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 
+                TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
         currentY+=2;
         
         /*----------------------------------------------------------------------
         SOUS-RAPPORTS DES PHOTOS
         ----------------------------------------------------------------------*/
         if(printPhoto){
-            includePhotoSubreport(64);
+            includePhotoSubreport(0);
         }
         
         /*----------------------------------------------------------------------
@@ -136,9 +138,10 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         ----------------------------------------------------------------------*/
         if(printReseauOuvrage){
             currentY+=2;
-            writeSectionTitle("Réseaux et ouvrages", 14, 1, 10, 9, true, false, false);
+            writeSectionTitle("Réseaux et ouvrages", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
             currentY+=2;
-            writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET, 30, null);
+            writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET,
+                    TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
             currentY+=2;
         }
         

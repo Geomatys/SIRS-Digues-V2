@@ -28,6 +28,7 @@ import static fr.sirs.util.JRUtils.TAG_SUB_DATASET;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -51,11 +52,9 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
     public static final String PHOTO_DATA_SOURCE = "PHOTO_DATA_SOURCE";
     public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
     
-    private final List<String> observationFields;
-    private final float[] observationWidths;
-    private final List<String> prestationFields;
-    private final float[] prestationWidths;
-    private final List<String> reseauFields;
+    private final List<JRColumnParameter> observationFields;
+    private final List<JRColumnParameter> prestationFields;
+    private final List<JRColumnParameter> reseauFields;
     
     private final boolean printPhoto;
     private final boolean printReseauOuvrage;
@@ -65,29 +64,23 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         super(classToMap);
         
         observationFields = null;
-        observationWidths = null;
         prestationFields = null;
-        prestationWidths = null;
         reseauFields = null;
         printPhoto = printReseauOuvrage = printVoirie = true;
     }
     
     public JRDomWriterDesordreSheet(final InputStream stream,
             final List<String> avoidFields,
-            final List<String> observationFields,
-            final float[] observationWidths,
-            final List<String> prestationFields,
-            final float[] prestationWidths,
-            final List<String> reseauFields,
+            final List<JRColumnParameter> observationFields,
+            final List<JRColumnParameter> prestationFields,
+            final List<JRColumnParameter> reseauFields,
             final boolean printPhoto, 
             final boolean printReseauOuvrage, 
             final boolean printVoirie) throws ParserConfigurationException, SAXException, IOException {
         super(Desordre.class, stream, avoidFields, "#47daff");
         
         this.observationFields = observationFields;
-        this.observationWidths = observationWidths;
         this.prestationFields = prestationFields;
-        this.prestationWidths = prestationWidths;
         this.reseauFields = reseauFields;
         this.printPhoto = printPhoto;
         this.printReseauOuvrage = printReseauOuvrage;
@@ -100,10 +93,10 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
     @Override
     protected void writeObject() {
         
-        writeSubDataset(Observation.class, observationFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(0));
-        writeSubDataset(Prestation.class, prestationFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(1));
-        writeSubDataset(ObjetReseau.class, reseauFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(2));
-        writeSubDataset(ObjetReseau.class, reseauFields, true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(3));
+        writeSubDataset(Observation.class, observationFields.stream().map(p -> p.getFieldName()).collect(Collectors.toList()), true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(0));
+        writeSubDataset(Prestation.class, prestationFields.stream().map(p -> p.getFieldName()).collect(Collectors.toList()), true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(1));
+        writeSubDataset(ObjetReseau.class, reseauFields.stream().map(p -> p.getFieldName()).collect(Collectors.toList()), true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(2));
+        writeSubDataset(ObjetReseau.class, reseauFields.stream().map(p -> p.getFieldName()).collect(Collectors.toList()), true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(3));
         
         
         // Sets the initial fields used by the template.------------------------
@@ -142,37 +135,40 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         /*----------------------------------------------------------------------
         TABLEAU DES OBSERVATIONS
         ----------------------------------------------------------------------*/
+        currentY+=24;
+        writeSectionTitle("Observations", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
         currentY+=2;
-        writeSectionTitle("Observations", 14, 1, 10, 9, true, false, false);
-        currentY+=2;
-        writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 30, observationWidths);
+        writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 
+                TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
         currentY+=2;
         
         /*----------------------------------------------------------------------
         TABLEAU DES PRESTATIONS
         ----------------------------------------------------------------------*/
+        currentY+=24;
+        writeSectionTitle("Prestations", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
         currentY+=2;
-        writeSectionTitle("Prestations", 14, 1, 10, 9, true, false, false);
-        currentY+=2;
-        writeTable(Prestation.class, prestationFields, true, PRESTATION_TABLE_DATA_SOURCE, PRESTATION_DATASET, 30, prestationWidths);
+        writeTable(Prestation.class, prestationFields, true, PRESTATION_TABLE_DATA_SOURCE, PRESTATION_DATASET, 
+                TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
         currentY+=2;
         
         /*----------------------------------------------------------------------
         SOUS-RAPPORTS DES PHOTOS
         ----------------------------------------------------------------------*/
         if(printPhoto){
-            currentY+=2;
-            includePhotoSubreport(64);
+            currentY+=24;
+            includePhotoSubreport(0);
         }
         
         /*----------------------------------------------------------------------
         TABLEAU DES OUVRAGES ET RÉSEAUX
         ----------------------------------------------------------------------*/
         if(printReseauOuvrage){
+            currentY+=24;
+            writeSectionTitle("Réseaux et ouvrages", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
             currentY+=2;
-            writeSectionTitle("Réseaux et ouvrages", 14, 1, 10, 9, true, false, false);
-            currentY+=2;
-            writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET, 30, null);
+            writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET, 
+                    TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
             currentY+=2;
         }
         
@@ -180,10 +176,11 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         TABLEAU DES VOIRIES
         ----------------------------------------------------------------------*/
         if(printVoirie){
+            currentY+=24;
+            writeSectionTitle("Voiries", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
             currentY+=2;
-            writeSectionTitle("Voiries", 14, 1, 10, 9, true, false, false);
-            currentY+=2;
-            writeTable(ObjetReseau.class, reseauFields, true, VOIRIE_TABLE_DATA_SOURCE, VOIRIE_DATASET, 30, null);
+            writeTable(ObjetReseau.class, reseauFields, true, VOIRIE_TABLE_DATA_SOURCE, VOIRIE_DATASET, 
+                    TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
             currentY+=2;
         }
         

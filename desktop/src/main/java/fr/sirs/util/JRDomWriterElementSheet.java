@@ -81,7 +81,6 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
     private int fields_interline;
 
     // Static template parameters.
-    private static final String FIELDS_VERTICAL_ALIGNMENT = "Middle";
     private static final String FIELDS_FONT_NAME = "Serif";
     private static final int FIELDS_FONT_SIZE = 8;
     private static final int FIELDS_HEIGHT = 13;
@@ -317,7 +316,7 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
         staticTextReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
 
         final Element staticTextTextElement = this.document.createElement(TAG_TEXT_ELEMENT);
-        staticTextTextElement.setAttribute(ATT_VERTICAL_ALIGNMENT, FIELDS_VERTICAL_ALIGNMENT);
+        staticTextTextElement.setAttribute(ATT_VERTICAL_ALIGNMENT, JRUtils.VerticalAlignment.MIDDLE.toString());
         staticTextTextElement.setAttribute(ATT_TEXT_ALIGNMENT, TextAlignment.LEFT.toString());
 
         final Element staticTextFont = this.document.createElement(TAG_FONT);
@@ -369,11 +368,12 @@ public class JRDomWriterElementSheet extends AbstractJDomWriterSingleSheet {
         textFieldReportElement.setAttribute(ATT_POSITION_TYPE, PositionType.FLOAT.toString());
 
         final Element textFieldTextElement = document.createElement(TAG_TEXT_ELEMENT);
-        textFieldTextElement.setAttribute(ATT_VERTICAL_ALIGNMENT, FIELDS_VERTICAL_ALIGNMENT);
+        textFieldTextElement.setAttribute(ATT_VERTICAL_ALIGNMENT, JRUtils.VerticalAlignment.MIDDLE.toString());
         textFieldTextElement.setAttribute(ATT_TEXT_ALIGNMENT, TextAlignment.JUSTIFIED.toString());
-        if(markup!=null && markup!=Markup.NONE)
+        if(markup!=null && markup!=Markup.NONE) {
             textFieldTextElement.setAttribute(ATT_MARKUP, markup.toString());
-
+        }
+        
         final Element textFieldFont = document.createElement(TAG_FONT);
         textFieldFont.setAttribute(ATT_FONT_NAME, FIELDS_FONT_NAME);
         textFieldFont.setAttribute(ATT_SIZE, String.valueOf(FIELDS_FONT_SIZE));

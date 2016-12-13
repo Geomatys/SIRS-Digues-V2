@@ -19,6 +19,7 @@
 package fr.sirs.util;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.model.ReferenceType;
 import static fr.sirs.util.AbstractJDomWriter.NULL_REPLACEMENT;
 import static fr.sirs.util.JRUtils.ATT_BACKCOLOR;
 import static fr.sirs.util.JRUtils.ATT_CLASS;
@@ -35,6 +36,7 @@ import static fr.sirs.util.JRUtils.ATT_POSITION_TYPE;
 import static fr.sirs.util.JRUtils.ATT_SIZE;
 import static fr.sirs.util.JRUtils.ATT_STYLE;
 import static fr.sirs.util.JRUtils.ATT_SUB_DATASET;
+import static fr.sirs.util.JRUtils.ATT_VERTICAL_ALIGNMENT;
 import static fr.sirs.util.JRUtils.ATT_WIDTH;
 import static fr.sirs.util.JRUtils.ATT_X;
 import static fr.sirs.util.JRUtils.ATT_Y;
@@ -68,21 +70,18 @@ import static fr.sirs.util.PrinterUtilities.getFieldNameFromSetter;
 import fr.sirs.util.property.Reference;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.beans.property.StringProperty;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -109,6 +108,13 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
     protected static final int PAGE_WIDTH = 595;
     protected static final int LEFT_MARGIN = 20;
     protected static final int RIGHT_MARGIN = 20;
+    protected static final int UTIL_WIDTH = PAGE_WIDTH - LEFT_MARGIN - RIGHT_MARGIN;
+    
+    // Doit être cohérent avec les paddings indiqués dans les styles des en-têtes et cellules des tableaux dans les .jrxml.
+    protected static final int TABLE_CELL_PADDING_H = 4;
+    protected static final int TABLE_CELL_PADDING_V = 4;
+    protected static final int TABLE_HEAD_PADDING_H = 3;
+    protected static final int TABLE_HEAD_PADDING_V = 5;
 
     protected final Class<T> classToMap;
     private final List<String> avoidFields;
@@ -263,7 +269,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         frameReportElement.setAttribute(ATT_HEIGHT, String.valueOf(height));
         frameReportElement.setAttribute(ATT_MODE, JRUtils.Mode.OPAQUE.toString());
         frameReportElement.setAttribute(ATT_POSITION_TYPE, JRUtils.PositionType.FLOAT.toString());
-        frameReportElement.setAttribute(ATT_WIDTH, String.valueOf(PAGE_WIDTH-LEFT_MARGIN-RIGHT_MARGIN));
+        frameReportElement.setAttribute(ATT_WIDTH, String.valueOf(UTIL_WIDTH));
         frameReportElement.setAttribute(ATT_X, String.valueOf(0));
         frameReportElement.setAttribute(ATT_Y, String.valueOf(currentY));
         frame.appendChild(frameReportElement);
@@ -271,12 +277,13 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         final Element staticText = document.createElement(TAG_STATIC_TEXT);
         final Element staticTextReportElement = document.createElement(TAG_REPORT_ELEMENT);
         staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(height-2*margin));
-        staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(PAGE_WIDTH-LEFT_MARGIN-RIGHT_MARGIN-indent));
+        staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(UTIL_WIDTH-indent));
         staticTextReportElement.setAttribute(ATT_X, String.valueOf(indent));
         staticTextReportElement.setAttribute(ATT_Y, String.valueOf(margin));
         staticText.appendChild(staticTextReportElement);
 
         final Element textElement = document.createElement(TAG_TEXT_ELEMENT);
+        textElement.setAttribute(ATT_VERTICAL_ALIGNMENT, JRUtils.VerticalAlignment.MIDDLE.toString());
         final Element font = document.createElement(TAG_FONT);
         font.setAttribute(ATT_IS_BOLD, String.valueOf(bold));
         font.setAttribute(ATT_IS_ITALIC, String.valueOf(italic));
@@ -303,7 +310,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         final Element pageBreak = document.createElement(TAG_BREAK);
         final Element pageBreakReportElement = document.createElement(TAG_REPORT_ELEMENT);
         pageBreakReportElement.setAttribute(ATT_HEIGHT, String.valueOf(1));
-        pageBreakReportElement.setAttribute(ATT_WIDTH, String.valueOf(PAGE_WIDTH-LEFT_MARGIN-RIGHT_MARGIN));
+        pageBreakReportElement.setAttribute(ATT_WIDTH, String.valueOf(UTIL_WIDTH));
         pageBreakReportElement.setAttribute(ATT_X, String.valueOf(0));
         pageBreakReportElement.setAttribute(ATT_Y, String.valueOf(currentY));
         
@@ -324,41 +331,64 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
      * ou comme une liste de champs à éviter (faux).
      * @param datasourceParameter Nom de la source de données, tel que connu par JasperReports.
      * @param datasetName
-     * @param height
-     * @param widthCoeffs Suite de coefficients de pondération de largeur à appliquer à chaque champ dans l'ordre de leur
-     * mention dans la liste de leurs noms. Le coefficient de pondération de base d'une colonne vaut 1.f. Si les 
-     * coefficients de toutes les colonnes sont identiques (quelle que soit leur valeur), toutes les colonnes auront la 
-     * même largeur. Si le coefficient d'une colonne A vaut 1.f, celui d'une colonne B vaut .25f et celui d'une colonne C
-     * vaut 2.f, la colonne C sera environ deux fois plus large que la colonne A et huit fois plus large que la colonne B.
-     * Les coefficients ne sont pris en compte que lorsque la liste des noms de champs doivent être considérés comme des
-     * champs à afficher exclusivement ; ils sont ignorés si la liste contient des noms de champs à exclure. Lorsque la 
-     * tailles de la liste des coefficients de pondération en correspond pas à la taille de la liste des noms de champs,
-     * les coefficients supplémentaires sont ignorés et les coefficients manquants sont implicitement affectés par la 
-     * valeur 1.f. Si aucune liste n'est fournie, tous les coefficients de pondération valent 1.f.
+     * @param height Hauteur réservée pour le tableau.
+     * @param fontSize Taille de police dans le tableau.
+     * @param headerHeight Hauteur des en-têtes de colonnes.
+     * @param detailCellHeight Hauteur des cellules.
+     * @param fillWidth Détermine si la dernière colonne doit exploiter le maximum d'espace disponible.
      */
-    protected void writeTable(final Class clazz, final List<String> fields, final boolean print, 
-            final String datasourceParameter, final String datasetName, final int height, final float[] widthCoeffs){
+    protected void writeTable(final Class clazz, final Collection<JRColumnParameter> fields, final boolean print, 
+            final String datasourceParameter, final String datasetName, final int height, 
+            final int fontSize, final int headerHeight, final int detailCellHeight, 
+            final boolean fillWidth){
+        
+        // Extraction des noms de champs et des largeurs de colonnes.
+        final Collection<String> fieldNames = new ArrayList<>();
+        
+        /*
+        Suite de coefficients de pondération de largeur à appliquer à chaque champ dans l'ordre de leur mention. 
+        
+        1- Le coefficient de pondération de base d'une colonne vaut 1.f par défaut. 
+        
+        2- Si les coefficients de toutes les colonnes sont identiques (quelle que soit leur valeur), toutes les colonnes 
+        auront la même largeur. 
+        
+        3- Si le coefficient d'une colonne A vaut 1.f, celui d'une colonne B vaut .25f et celui d'une colonne C vaut 2.f, 
+        la colonne C sera environ deux fois plus large que la colonne A et huit fois plus large que la colonne B.
+        
+        4- Les coefficients ne sont pris en compte que lorsque la liste des champs spécifie ceux qui doivent affichés 
+        exclusivement ; ils sont ignorés si la liste contient des champs à exclure.
+        */
+        final float[] widthCoeffs = new float[fields.size()];
+        float coeffSum = 0.f;
+        int i = 0;
+        for(final JRColumnParameter fieldParam : fields){
+            fieldNames.add(fieldParam.getFieldName());
+            widthCoeffs[i] = fieldParam.getColumnWidthCoeff();
+            coeffSum+=widthCoeffs[i];
+            i++;
+        }
 
         final Predicate<String> printPredicate = print
-                ? (String fieldName) -> fields==null || fields.contains(fieldName)
-                : (String fieldName) -> fields==null || !fields.contains(fieldName);
+                ? (String fieldName) -> fieldNames.contains(fieldName)
+                : (String fieldName) -> !fieldNames.contains(fieldName);
 
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
 
         final Element componentElement = document.createElement(TAG_COMPONENT_ELEMENT);
         final Element componentElementReportElement = document.createElement(TAG_REPORT_ELEMENT);
         componentElementReportElement.setAttribute(ATT_KEY, "table");
-        componentElementReportElement.setAttribute(ATT_STYLE, "table");
+//        componentElementReportElement.setAttribute(ATT_STYLE, "table");
         componentElementReportElement.setAttribute(ATT_X, String.valueOf(0));
         componentElementReportElement.setAttribute(ATT_Y, String.valueOf(currentY));
-//        componentElementReportElement.setAttribute(ATT_Y, String.valueOf(0));
-        componentElementReportElement.setAttribute(ATT_WIDTH, String.valueOf(802));
+        componentElementReportElement.setAttribute(ATT_WIDTH, String.valueOf(UTIL_WIDTH));
         componentElementReportElement.setAttribute(ATT_HEIGHT, String.valueOf(height));
         componentElementReportElement.setAttribute(ATT_POSITION_TYPE, JRUtils.PositionType.FLOAT.toString());
 //        componentElementReportElement.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, String.valueOf(true));
 
         // Set the table element
         final Element table = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE);
+        int cumulatedWidth = 0;
 
         final Element datasetRun = document.createElementNS(URI_JRXML, TAG_DATASET_RUN);
         datasetRun.setAttribute(ATT_SUB_DATASET, datasetName);
@@ -380,7 +410,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         directement donnée par la taille de la liste.
         */
         if(print) {
-            nbColumns=fields.size();
+            nbColumns=fieldNames.size();
         }
         // Sinon il faut faire un premier parcours pour calculer le nombre de colonnes
         else {
@@ -388,8 +418,9 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
                 if(PrinterUtilities.isSetter(method)){
                     // Retrives the field name from the setter name.----------------
                     final String fieldName = getFieldNameFromSetter(method);
-                    if(printPredicate.test(fieldName))
+                    if(printPredicate.test(fieldName)) {
                         nbColumns++;
+                    }
                 }
             }
         }
@@ -400,31 +431,14 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         }
 
         // Calcul de la largeur de base d'une colonne en fonction du nombre, sans tenir compte des coefficients de largeur.
-        final int baseColumnWidth = (PAGE_WIDTH - (LEFT_MARGIN+LEFT_MARGIN))/nbColumns;
-        
-        // Calcul des coefficients à appliquer aux colonnes.
-        // On commencer par calculer la somme des coefficients s'il y en a.
-        // On ne peut paramettrer les largeurs de colonnes que si on construit le tableau à l'aide de colonnes connues à l'avance.
-        float coeffSum = 0.f;
-        if(print && widthCoeffs!=null){
-            // On vérifie la cohérence du nombre de coefficients par rapport au nombre de colonnes.
-            if(widthCoeffs.length<nbColumns){
-                SirsCore.LOGGER.info("Le nombre de coefficients de largeur est inférieur au nombre de colonnes. La valeur par défaut 1 sera appliquée aux coefficients manquants.");
-                coeffSum+=(nbColumns-widthCoeffs.length);
-            }
-            else if(widthCoeffs.length>nbColumns){
-                SirsCore.LOGGER.info("Le nombre de coefficients de largeur est supérieur au nombre de colonnes. Les coefficients supplémentaires seront ignorés.");
-            }
-            
-            for(float widthCoeff : widthCoeffs){
-                coeffSum+=widthCoeff;
-            }
-        }
+        final int baseColumnWidth = UTIL_WIDTH/nbColumns;
 
         if(Modifier.isAbstract(clazz.getModifiers())){
+            coeffSum+=1.f;
+            cumulatedWidth+=baseColumnWidth;
             writeColumn("Type",
                     () -> document.createCDATASection("$F{class}==null ? \""+NULL_REPLACEMENT+"\" : java.util.ResourceBundle.getBundle($F{class}.getName()).getString(\"class\")"),
-                    markupFromFieldName("class"), table, baseColumnWidth, 7, 1, 20, 10);
+                    markupFromFieldName("class"), table, baseColumnWidth, fontSize, headerHeight, detailCellHeight);
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -444,20 +458,33 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
                 }
             }
             
-            int c = 0; // Numéro de colonne.
-            for(final String fieldName : fields){
+            int coeffIndex = 0; // Index dans le tableau des coefficients de pondération des largeurs de colonnes.
+            int fieldIndex = 0;
+            for(final JRColumnParameter field : fields){
+                fieldIndex++;
+                final String fieldName = field.getFieldName();
+                final JRColumnParameter.DisplayPolicy displayPolicy = field.getDisplayPolicy();
                 final float coeff;
-                if(coeffSum!=0.f && widthCoeffs!=null && widthCoeffs.length>c) {
-                    coeff = widthCoeffs[c]*nbColumns/coeffSum;
-                    SirsCore.LOGGER.log(Level.FINEST, "raw coeff = {0}", widthCoeffs[c]);
-                    c++;
+                if(coeffSum!=0.f) {
+                    coeff = widthCoeffs[coeffIndex]*nbColumns/coeffSum;
+                    SirsCore.LOGGER.log(Level.FINEST, "raw coeff = {0}", widthCoeffs[coeffIndex]);
+                    coeffIndex++;
                 }
                 else {
                     coeff = 1.f;
                 }
-                SirsCore.LOGGER.log(Level.FINEST, "c = {0} sum = {1} width coeff = {2}", new Object[]{c, coeffSum, coeff});
-                writeColumn(rb.getString(fieldName), getCDATASupplierFromSetter(settersByFieldName.get(fieldName)), 
-                        markupFromFieldName(fieldName), table, Math.round(baseColumnWidth*coeff), 7, 1, 20, 10);
+                SirsCore.LOGGER.log(Level.FINEST, "c = {0} sum = {1} width coeff = {2}", new Object[]{coeffIndex, coeffSum, coeff});
+                
+                /*
+                On calcule la largeur de la colonne.
+                Dans le cas général, le calcul est obtenu avec le coefficient, mais pour la dernière colonne, on ajuste 
+                à la largeur de la page si cela est demandé.
+                */
+                final int ajustedColumnWidth = (fillWidth && fieldIndex==fieldNames.size()) ? (UTIL_WIDTH-cumulatedWidth) : Math.round(baseColumnWidth*coeff);
+                
+                cumulatedWidth+=ajustedColumnWidth;
+                writeColumn(rb.getString(fieldName), getCDATASupplierFromSetter(settersByFieldName.get(fieldName), displayPolicy), 
+                        markupFromFieldName(fieldName), table, ajustedColumnWidth, fontSize, headerHeight, detailCellHeight);
             }
         }
         /*
@@ -470,12 +497,16 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
                     // Retrives the field name from the setter name.----------------
                     final String fieldName = getFieldNameFromSetter(method);
                     if(printPredicate.test(fieldName)){
-                        writeColumn(rb.getString(fieldName), getCDATASupplierFromSetter(method), 
-                                markupFromFieldName(fieldName), table, baseColumnWidth, 7, 1, 20, 10);
+                        cumulatedWidth+=baseColumnWidth;
+                        writeColumn(rb.getString(fieldName), getCDATASupplierFromSetter(method, JRColumnParameter.DisplayPolicy.LABEL), 
+                                markupFromFieldName(fieldName), table, baseColumnWidth, fontSize, headerHeight, detailCellHeight);
                     }
                 }
             }
         }
+        
+        // Centrage de la table
+        componentElementReportElement.setAttribute(ATT_X, String.valueOf(Math.round((UTIL_WIDTH - cumulatedWidth)/2.f)));
 
         componentElement.appendChild(componentElementReportElement);
         componentElement.appendChild(table);
@@ -484,7 +515,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         currentY+=height;
     }
     
-    private Supplier<CDATASection> getCDATASupplierFromSetter(final Method setter) {
+    private Supplier<CDATASection> getCDATASupplierFromSetter(final Method setter, final JRColumnParameter.DisplayPolicy displayPolicy) {
 
         final String fieldName = getFieldNameFromSetter(setter);
         final Class fieldClass = setter.getParameterTypes()[0];
@@ -496,20 +527,29 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
             }
             else {
                 try {
-                    // Récupération du champ
-                    //final Field field = setter.getDeclaringClass().getDeclaredField(fieldName);
+                    // Récupération de la classe dans laquelle le champ est déclaré.
                     final Class declaringClass = setter.getDeclaringClass();
 
                     // On vérifie s'il s'agit d'un identifiant de référence. L'annotation est portée par le getter (pas par le champ ni par le setter).
                     final Method getter = declaringClass.getMethod(setter.getName().replaceFirst("set", "get"));
-                    if(fieldClass!=null && getter!=null && getter.getDeclaredAnnotation(Reference.class)!=null){
-                        // Si c'est en fait une liste de références.
-                        if(Iterable.class.isAssignableFrom(fieldClass)){
-                            return document.createCDATASection(JRXMLUtil.dynamicDisplayLabels(fieldName));
-                        }
-                        // Si c'est une référence unique.
-                        else if(String.class.isAssignableFrom(fieldClass)) {
-                            return document.createCDATASection(JRXMLUtil.dynamicDisplayLabel(fieldName));
+                    if(getter!=null && fieldClass!=null){
+                        final Reference annotation = getter.getDeclaredAnnotation(Reference.class);
+                        if(annotation!=null){
+                            // Si c'est en fait une collection de références.
+                            if(Iterable.class.isAssignableFrom(fieldClass)){
+                                return document.createCDATASection(JRXMLUtil.dynamicDisplayLabels(fieldName));
+                            }
+                            // Si c'est une référence unique.
+                            else if(String.class.isAssignableFrom(fieldClass)) {
+                                switch(displayPolicy){
+                                    case LABEL_AND_CODE: 
+                                        if(ReferenceType.class.isAssignableFrom(annotation.ref())){
+                                            return document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+fieldName+"}");
+                                        }
+                                    default:
+                                        return document.createCDATASection(JRXMLUtil.dynamicDisplayLabel(fieldName));
+                                }
+                            }
                         }
                     }
 
@@ -538,8 +578,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
     private void writeColumn(final String header, final Supplier<CDATASection> cellSupplier,
             final JRUtils.Markup markup, final Element table, final int columnWidth,
-            final int fontSize, final int padding,
-            final int headerHeight, final int detailCellHeight){
+            final int fontSize, final int headerHeight, final int detailCellHeight){
 
 
         final Element column = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN);
@@ -547,11 +586,9 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
         // Table header and footer
         final Element tableHeader = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE_HEADER);
-        tableHeader.setAttribute(ATT_STYLE, "table_TH");
         tableHeader.setAttribute(ATT_HEIGHT, String.valueOf(0));
 
         final Element tableFooter = document.createElementNS(URI_JRXML_COMPONENTS, TAG_TABLE_FOOTER);
-        tableFooter.setAttribute(ATT_STYLE, "table_TH");
         tableFooter.setAttribute(ATT_HEIGHT, String.valueOf(0));
 
         // Column header
@@ -562,10 +599,10 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         final Element staticText = document.createElementNS(URI_JRXML, TAG_STATIC_TEXT);
 
         final Element staticTextReportElement = document.createElementNS(URI_JRXML, TAG_REPORT_ELEMENT);
-        staticTextReportElement.setAttribute(ATT_X, String.valueOf(padding));
-        staticTextReportElement.setAttribute(ATT_Y, String.valueOf(padding));
-        staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-2*padding));
-        staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(headerHeight-2*padding));
+        staticTextReportElement.setAttribute(ATT_X, String.valueOf(0));
+        staticTextReportElement.setAttribute(ATT_Y, String.valueOf(0));
+        staticTextReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-2*TABLE_HEAD_PADDING_H));
+        staticTextReportElement.setAttribute(ATT_HEIGHT, String.valueOf(headerHeight-2*TABLE_HEAD_PADDING_V));
         staticText.appendChild(staticTextReportElement);
 
         final Element textElement = document.createElement(TAG_TEXT_ELEMENT);
@@ -596,10 +633,10 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         textField.setAttribute(ATT_IS_STRETCH_WITH_OVERFLOW, String.valueOf(true));
 
         final Element textFieldReportElement = document.createElement(TAG_REPORT_ELEMENT);
-        textFieldReportElement.setAttribute(ATT_X, String.valueOf(padding));
-        textFieldReportElement.setAttribute(ATT_Y, String.valueOf(padding));
-        textFieldReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-2*padding));
-        textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(detailCellHeight-2*padding));
+        textFieldReportElement.setAttribute(ATT_X, String.valueOf(0));
+        textFieldReportElement.setAttribute(ATT_Y, String.valueOf(0));
+        textFieldReportElement.setAttribute(ATT_WIDTH, String.valueOf(columnWidth-2*TABLE_CELL_PADDING_H));
+        textFieldReportElement.setAttribute(ATT_HEIGHT, String.valueOf(detailCellHeight-2*TABLE_CELL_PADDING_V));
         textField.appendChild(textFieldReportElement);
 
         final Element detailTextElement = document.createElement(TAG_TEXT_ELEMENT);

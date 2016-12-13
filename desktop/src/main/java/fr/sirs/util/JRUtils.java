@@ -79,7 +79,6 @@ public class JRUtils {
     public static final String TAG_TEXT_FIELD = "textField";
     public static final String TAG_TEXT_FIELD_EXPRESSION = "textFieldExpression";
     public static final String TAG_TITLE = "title";
-    public static final String TAG_TOP_MARGIN = "topMargin";
     
     // Jasper Reports attributes.
     public static final String ATT_MODE = "mode";
@@ -97,17 +96,8 @@ public class JRUtils {
     public static final String ATT_BACKCOLOR = "backcolor";
     public static final String ATT_NAME = "name";
     
-    public static final String ATT_TEXT_ALIGNMENT = "textAlignment";
-    public enum TextAlignment {
-        LEFT("Left"), CENTER("Center"), RIGHT("Right"), JUSTIFIED("Justified");
-        private final String textAlignment;
-        private TextAlignment(final String textAlignment){this.textAlignment=textAlignment;}
-        
-        @Override
-        public String toString(){return textAlignment;}
-    }; 
-    
     public static final String ATT_BOTTOM_MARGIN = "bottomMargin";
+    public static final String ATT_BOTTOM_PADDING = "bottomPadding";
     public static final String ATT_CLASS = "class";
     public static final String ATT_COLUMN_WIDTH = "columnWidth";
     public static final String ATT_FONT_NAME = "fontName";
@@ -127,6 +117,7 @@ public class JRUtils {
     }; 
     public static final String ATT_LANGUAGE = "language";
     public static final String ATT_LEFT_MARGIN = "leftMargin";
+    public static final String ATT_LEFT_PADDING = "leftPadding";
     public static final String ATT_MARKUP = "markup";
     public enum Markup {
         NONE("none"), STYLED("styled"), HTML("html"), RTF("rtf");
@@ -138,6 +129,7 @@ public class JRUtils {
     public static final String ATT_PAGE_WIDTH = "pageWidth";
     public static final String ATT_POSITION_TYPE = "positionType";
     public static final String ATT_RIGHT_MARGIN = "rightMargin";
+    public static final String ATT_RIGHT_PADDING = "rightPadding";
     public static final String ATT_STRETCH_TYPE = "stretchType";
     public enum StretchType {
         NO_STRETCH("NoStretch"), RELATIVE_TO_TALLEST_OBJECT("RelativeToTallestObject"), RELATIVE_TO_BAND_HEIGHT("RelativeToBandHeight");
@@ -147,9 +139,25 @@ public class JRUtils {
     };
     public static final String ATT_STYLE = "style";
     public static final String ATT_SUB_DATASET = "subDataset";
+    public static final String ATT_TEXT_ALIGNMENT = "textAlignment";
+    public enum TextAlignment {
+        LEFT("Left"), CENTER("Center"), RIGHT("Right"), JUSTIFIED("Justified");
+        private final String textAlignment;
+        private TextAlignment(final String textAlignment){this.textAlignment=textAlignment;}
+        
+        @Override
+        public String toString(){return textAlignment;}
+    }; 
     public static final String ATT_TOP_MARGIN = "topMargin";
+    public static final String ATT_TOP_PADDING = "topPadding";
     public static final String ATT_UUID = "uuid";
     public static final String ATT_VERTICAL_ALIGNMENT = "verticalAlignment";
+    public enum VerticalAlignment {
+        TOP("Top"), MIDDLE("Middle"), BOTTOM("Bottom");
+        private final String verticalAlignment;
+        private VerticalAlignment(final String verticalAlignment){this.verticalAlignment = verticalAlignment;}
+        @Override public String toString(){return verticalAlignment;}
+    }
     public static final String ATT_WIDTH = "width";
     public static final String ATT_X = "x";
     public static final String ATT_Y = "y";

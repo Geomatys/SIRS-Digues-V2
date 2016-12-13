@@ -25,6 +25,7 @@ import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.JRColumnParameter;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
 import java.io.File;
@@ -286,35 +287,33 @@ public class PrintManager {
         avoidDesordreFields.add(AUTHOR_FIELD);
         avoidDesordreFields.add(DATE_MAJ_FIELD);
 
-        final List<String> observationFields = new ArrayList<>();
-        observationFields.add("date");
-        observationFields.add("observateurId");
-        observationFields.add("nombreDesordres");
-        observationFields.add("urgenceId");
-        observationFields.add("evolution");
-        observationFields.add("suite");
+        final List<JRColumnParameter> observationFields = new ArrayList<>();
+        observationFields.add(new JRColumnParameter("date", 1.1f));
+        observationFields.add(new JRColumnParameter("observateurId", .8f));
+        observationFields.add(new JRColumnParameter("nombreDesordres",.8f));
+        observationFields.add(new JRColumnParameter("urgenceId", 1.f, JRColumnParameter.DisplayPolicy.LABEL_AND_CODE));
+        observationFields.add(new JRColumnParameter("evolution", 2.f));
+        observationFields.add(new JRColumnParameter("suite", 2.5f));
 
-        final List<String> prestationFields = new ArrayList<>();
-        prestationFields.add("designation");
-        prestationFields.add("libelle");
-        prestationFields.add("intervenantsIds");
-        prestationFields.add("date_debut");
-        prestationFields.add("date_fin");
-        prestationFields.add("commentaire");
+        final List<JRColumnParameter> prestationFields = new ArrayList<>();
+        prestationFields.add(new JRColumnParameter("designation", .7f));
+        prestationFields.add(new JRColumnParameter("libelle", 1.f));
+        prestationFields.add(new JRColumnParameter("intervenantsIds", 1.f));
+        prestationFields.add(new JRColumnParameter("date_debut", .7f));
+        prestationFields.add(new JRColumnParameter("date_fin", .7f));
+        prestationFields.add(new JRColumnParameter("commentaire", 2.5f));
 
-        final List<String> reseauFields = new ArrayList<>();
-        reseauFields.add("designation");
-        reseauFields.add("libelle");
-        reseauFields.add("date_debut");
-        reseauFields.add("date_fin");
-        reseauFields.add("commentaire");
+        final List<JRColumnParameter> reseauFields = new ArrayList<>();
+        reseauFields.add(new JRColumnParameter("designation"));
+        reseauFields.add(new JRColumnParameter("libelle"));
+        reseauFields.add(new JRColumnParameter("date_debut"));
+        reseauFields.add(new JRColumnParameter("date_fin"));
+        reseauFields.add(new JRColumnParameter("commentaire", 2.f));
 
         final File fileToPrint = PrinterUtilities.printDisorders(
                 avoidDesordreFields,
                 observationFields,
-                new float[]{1.1f, .8f, .8f, 1.f, 2.f, 2.5f},
                 prestationFields,
-                new float[]{.7f, 1.f, 1.f, .7f, .7f, 2.5f},
                 reseauFields,
                 Injector.getSession().getPreviews(),
                 new SirsStringConverter(),
@@ -360,19 +359,19 @@ public class PrintManager {
         avoidReseauFields.add(AUTHOR_FIELD);
         avoidReseauFields.add(DATE_MAJ_FIELD);
 
-        final List<String> observationFields = new ArrayList<>();
-        observationFields.add("date");
-        observationFields.add("designation");
-        observationFields.add("observateurId");
-        observationFields.add("evolution");
-        observationFields.add("suite");
+        final List<JRColumnParameter> observationFields = new ArrayList<>();
+        observationFields.add(new JRColumnParameter("date"));
+        observationFields.add(new JRColumnParameter("designation"));
+        observationFields.add(new JRColumnParameter("observateurId"));
+        observationFields.add(new JRColumnParameter("evolution"));
+        observationFields.add(new JRColumnParameter("suite"));
 
-        final List<String> reseauFields = new ArrayList<>();
-        reseauFields.add("designation");
-        reseauFields.add("libelle");
-        reseauFields.add("date_debut");
-        reseauFields.add("date_fin");
-        reseauFields.add("commentaire");
+        final List<JRColumnParameter> reseauFields = new ArrayList<>();
+        reseauFields.add(new JRColumnParameter("designation"));
+        reseauFields.add(new JRColumnParameter("libelle"));
+        reseauFields.add(new JRColumnParameter("date_debut"));
+        reseauFields.add(new JRColumnParameter("date_fin"));
+        reseauFields.add(new JRColumnParameter("commentaire"));
 
         final File fileToPrint = PrinterUtilities.printReseauFerme(avoidReseauFields,
                 observationFields,

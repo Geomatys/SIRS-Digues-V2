@@ -77,28 +77,25 @@ public class PrinterUtilities {
     private static final String JRXML_EXTENSION = ".jrxml";
     private static final String PDF_EXTENSION = ".pdf";
     private static final String LOGO_PATH = "/fr/sirs/images/icon-sirs.png";
-    private static final String IMG_NOT_FOUND_PATH = "/fr/sirs/images/imgNotFound.png";
+    private static final String ORDERED_SEPARATOR = ") ";
 
-    private static final List<String> falseGetter = new ArrayList<>();
+    private static final List<String> FALSE_GETTERS = new ArrayList<>();
     static{
-        falseGetter.add("getClass");
-        falseGetter.add("isNew");
-        falseGetter.add("getAttachments");
-        falseGetter.add("getRevisions");
-        falseGetter.add("getConflicts");
-        falseGetter.add("getDocumentId");
+        FALSE_GETTERS.add("getClass");
+        FALSE_GETTERS.add("isNew");
+        FALSE_GETTERS.add("getAttachments");
+        FALSE_GETTERS.add("getRevisions");
+        FALSE_GETTERS.add("getConflicts");
+        FALSE_GETTERS.add("getDocumentId");
     }
-
-    private static final String TEMPLATE_PHOTOS = "/fr/sirs/jrxml/photoTemplate.jrxml";
 
     ////////////////////////////////////////////////////////////////////////////
     // FICHES DÉTAILLÉES DE DESORDRES
     ////////////////////////////////////////////////////////////////////////////
-    private static final String META_TEMPLATE_RESEAU_FERME = "/fr/sirs/jrxml/metaTemplateReseauFerme.jrxml";
 
     public static File printReseauFerme(final List<String> avoidReseauFields,
-            final List<String> avoidObservationFields,
-            final List<String> reseauFields,
+            final List<JRColumnParameter> avoidObservationFields,
+            final List<JRColumnParameter> reseauFields,
             final Previews previewLabelRepository,
             final SirsStringConverter stringConverter,
             final List<ReseauHydrauliqueFerme> reseaux,
@@ -110,8 +107,8 @@ public class PrinterUtilities {
 
         final JasperPrint print;
         try(final InputStream logoStream = PrinterUtilities.class.getResourceAsStream(LOGO_PATH);
-                final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_RESEAU_FERME);
-                final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS)){
+                final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateReseauFerme.jrxml");
+                final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplate.jrxml")){
             final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(
                     metaTemplateStream,
                     avoidReseauFields, avoidObservationFields,
@@ -146,14 +143,11 @@ public class PrinterUtilities {
     ////////////////////////////////////////////////////////////////////////////
     // FICHES DÉTAILLÉES DE DESORDRES
     ////////////////////////////////////////////////////////////////////////////
-    private static final String META_TEMPLATE_DESORDRE = "/fr/sirs/jrxml/metaTemplateDesordre.jrxml";
 
     public static File printDisorders(final List<String> avoidDesordreFields,
-            final List<String> observationFields,
-            final float[] observationWidths,
-            final List<String> prestationFields,
-            final float[] prestationWidths,
-            final List<String> reseauFields,
+            final List<JRColumnParameter> observationFields,
+            final List<JRColumnParameter> prestationFields,
+            final List<JRColumnParameter> reseauFields,
             final Previews previewLabelRepository,
             final SirsStringConverter stringConverter,
             final List<Desordre> desordres,
@@ -165,12 +159,12 @@ public class PrinterUtilities {
         templateFile.deleteOnExit();
 
         final JasperPrint print;
-        try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_DESORDRE);
-                final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream(TEMPLATE_PHOTOS)){
+        try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateDesordre.jrxml");
+                final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplateDesordre.jrxml")){
 
             final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(
                     metaTemplateStream,
-                    avoidDesordreFields, observationFields, observationWidths, prestationFields, prestationWidths,
+                    avoidDesordreFields, observationFields, prestationFields,
                     reseauFields, printPhoto, printReseauOuvrage, printVoirie);
             templateWriter.setOutput(templateFile);
             templateWriter.write();
@@ -200,7 +194,6 @@ public class PrinterUtilities {
     ////////////////////////////////////////////////////////////////////////////
     // FICHES DE RESULTATS DE REQUETES
     ////////////////////////////////////////////////////////////////////////////
-    private static final String META_TEMPLATE_QUERY = "/fr/sirs/jrxml/metaTemplateQuery.jrxml";
 
     /**
      *
@@ -220,7 +213,7 @@ public class PrinterUtilities {
 
         // Creates the Jasper Reports specific template from the generic template.
         final File template;
-        try(final InputStream templateInputStream =PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_QUERY)){
+        try(final InputStream templateInputStream =PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateQuery.jrxml")){
             final JRDomWriterQueryResultSheet writer = new JRDomWriterQueryResultSheet(templateInputStream);
             writer.setFieldsInterline(2);
             template = File.createTempFile(featureCollection.getFeatureType().getName().tip().toString(), JRXML_EXTENSION);
@@ -253,7 +246,6 @@ public class PrinterUtilities {
     ////////////////////////////////////////////////////////////////////////////
     // FICHES SYNOPTIQUES D'ELEMENTS DU MODELE
     ////////////////////////////////////////////////////////////////////////////
-    private static final String META_TEMPLATE_ELEMENT = "/fr/sirs/jrxml/metaTemplateElement.jrxml";
 
     /**
      * <p>Generate the specific Jasper Reports template for a given class.
@@ -283,7 +275,7 @@ public class PrinterUtilities {
         final File templateFile = File.createTempFile(elements.get(0).getClass().getSimpleName(), JRXML_EXTENSION);
         templateFile.deleteOnExit();
 
-        final JRDomWriterElementSheet templateWriter = new JRDomWriterElementSheet(PrinterUtilities.class.getResourceAsStream(META_TEMPLATE_ELEMENT));
+        final JRDomWriterElementSheet templateWriter = new JRDomWriterElementSheet(PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateElement.jrxml"));
         templateWriter.setFieldsInterline(2);
         templateWriter.setOutput(templateFile);
         templateWriter.write(elements.get(0).getClass(), avoidFields);
@@ -372,7 +364,7 @@ JasperViewer.viewReport(jp1,false);
             return (method.getName().startsWith("get")
                 || method.getName().startsWith("is"))
                 && method.getParameterTypes().length == 0
-                && !falseGetter.contains(method.getName());
+                && !FALSE_GETTERS.contains(method.getName());
     }
 
     /**
@@ -402,7 +394,7 @@ JasperViewer.viewReport(jp1,false);
      * @return The found file, as a stream.
      */
     public static InputStream getPhotoStream(final String inputText) {
-        Optional<Path> root = DocumentRoots.getRoot(AbstractPhoto.class, false);
+        final Optional<Path> root = DocumentRoots.getRoot(AbstractPhoto.class, false);
         if (root.isPresent()) {
             try {
                 return Files.newInputStream(SIRS.concatenatePaths(root.get(), inputText));
@@ -411,10 +403,8 @@ JasperViewer.viewReport(jp1,false);
             }
         }
 
-        return PrinterUtilities.class.getResourceAsStream(IMG_NOT_FOUND_PATH);
+        return PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/imgNotFound.png");
     }
-    
-    public static final String ORDERED_SEPARATOR = ") ";
     
     /**
      * Construit une chaîne de caractères énumérant le contenu d'un {@link Iterable}.
@@ -455,7 +445,7 @@ JasperViewer.viewReport(jp1,false);
     private static class PRComparator implements Comparator<Positionable> {
 
         @Override
-        public int compare(Positionable o1, Positionable o2) {
+        public int compare(final Positionable o1, final Positionable o2) {
             if (o1 == null || Float.isNaN(o1.getPrDebut())) {
                 return 1;
             } else if (o2 == null || Float.isNaN(o2.getPrDebut())) {

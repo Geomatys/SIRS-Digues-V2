@@ -51,11 +51,12 @@ public class JRXMLUtil {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     static String extractDesignation(final String input){
-        return input.substring(input.indexOf(SirsStringConverter.DESIGNATION_SEPARATOR)+3, input.indexOf(SirsStringConverter.LABEL_SEPARATOR));
+        return input.substring(input.indexOf(SirsStringConverter.DESIGNATION_SEPARATOR)+SirsStringConverter.DESIGNATION_SEPARATOR.length(), 
+                input.indexOf(SirsStringConverter.LABEL_SEPARATOR));
     }
     
     static String extractLabel(final String input){
-        return input.substring(input.indexOf(SirsStringConverter.LABEL_SEPARATOR)+3);
+        return input.substring(input.indexOf(SirsStringConverter.LABEL_SEPARATOR)+SirsStringConverter.LABEL_SEPARATOR.length());
     }
     
     /**
