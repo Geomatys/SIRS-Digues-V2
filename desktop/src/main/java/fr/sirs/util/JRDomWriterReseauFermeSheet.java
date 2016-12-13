@@ -119,7 +119,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         /*----------------------------------------------------------------------
         TABLEAU DES OBSERVATIONS
         ----------------------------------------------------------------------*/
-        currentY+=2;
+        currentY+=24;
         writeSectionTitle("Observations", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
         currentY+=2;
         writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 
@@ -130,6 +130,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         SOUS-RAPPORTS DES PHOTOS
         ----------------------------------------------------------------------*/
         if(printPhoto){
+            currentY+=24;
             includePhotoSubreport(0);
         }
         
@@ -137,13 +138,15 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         TABLEAU DES OUVRAGES ET RÉSEAUX
         ----------------------------------------------------------------------*/
         if(printReseauOuvrage){
-            currentY+=2;
+            currentY+=24;
             writeSectionTitle("Réseaux et ouvrages", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
             currentY+=2;
             writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET,
                     TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
             currentY+=2;
         }
+        
+        writeDetailPageBreak();
         
         // Sizes the detail element given to the field number.------------------
         band.setAttribute(ATT_HEIGHT, String.valueOf(currentY));

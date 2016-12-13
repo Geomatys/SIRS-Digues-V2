@@ -106,9 +106,8 @@ public class PrinterUtilities {
         templateFile.deleteOnExit();
 
         final JasperPrint print;
-        try(final InputStream logoStream = PrinterUtilities.class.getResourceAsStream(LOGO_PATH);
-                final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateReseauFerme.jrxml");
-                final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplate.jrxml")){
+        try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateReseauFerme.jrxml");
+                final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplateReseauFerme.jrxml")){
             final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(
                     metaTemplateStream,
                     avoidReseauFields, avoidObservationFields,
@@ -121,8 +120,6 @@ public class PrinterUtilities {
             final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
-
-            parameters.put("logo", logoStream);
 
             final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(photoTemplateStream);
             parameters.put(PHOTOS_SUBREPORT, photosReport);
