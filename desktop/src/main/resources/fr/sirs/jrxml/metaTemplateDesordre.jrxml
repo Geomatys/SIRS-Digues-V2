@@ -24,13 +24,13 @@
 	<subDataset name="Voirie Dataset" uuid="dafa0e8d-c219-44fe-9097-387a54fe781d"/>
 	<parameter name="PHOTO_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport"/>
 	<title>
-		<band height="2"/>
+		<band />
 	</title>
 	<pageHeader>
-		<band height="2"/>
+		<band />
 	</pageHeader>
 	<columnHeader>
-		<band height="2" splitType="Stretch"/>
+		<band />
 	</columnHeader>
 	<detail>
 		<band height="224" splitType="Stretch">

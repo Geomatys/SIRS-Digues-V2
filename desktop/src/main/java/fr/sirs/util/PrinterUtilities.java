@@ -108,10 +108,9 @@ public class PrinterUtilities {
         final JasperPrint print;
         try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateReseauFerme.jrxml");
                 final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplateReseauFerme.jrxml")){
-            final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(
-                    metaTemplateStream,
-                    avoidReseauFields, avoidObservationFields,
-                    reseauFields, printPhoto, printReseauOuvrage);
+            
+            final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(metaTemplateStream,
+                    avoidReseauFields, avoidObservationFields, reseauFields, printPhoto, printReseauOuvrage);
             templateWriter.setOutput(templateFile);
             templateWriter.write();
 
@@ -120,9 +119,7 @@ public class PrinterUtilities {
             final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
-
-            final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(photoTemplateStream);
-            parameters.put(PHOTOS_SUBREPORT, photosReport);
+            parameters.put(PHOTOS_SUBREPORT, net.sf.jasperreports.engine.JasperCompileManager.compileReport(photoTemplateStream));
 
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
         }
@@ -159,21 +156,17 @@ public class PrinterUtilities {
         try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateDesordre.jrxml");
                 final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplateDesordre.jrxml")){
 
-            final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(
-                    metaTemplateStream,
-                    avoidDesordreFields, observationFields, prestationFields,
-                    reseauFields, printPhoto, printReseauOuvrage, printVoirie);
+            final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(metaTemplateStream, avoidDesordreFields, 
+                    observationFields, prestationFields, reseauFields, printPhoto, printReseauOuvrage, printVoirie);
             templateWriter.setOutput(templateFile);
             templateWriter.write();
 
             final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
 
-            final JRDataSource source = new DesordreDataSource(FXCollections.observableList(desordres).sorted((Comparator)new PRComparator()), previewLabelRepository, stringConverter);
+            final JRDataSource source = new DesordreDataSource(FXCollections.observableList(desordres).sorted(new PRComparator()), previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
-
-            final JasperReport photosReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(photoTemplateStream);
-            parameters.put(PHOTOS_SUBREPORT, photosReport);
+            parameters.put(PHOTOS_SUBREPORT, net.sf.jasperreports.engine.JasperCompileManager.compileReport(photoTemplateStream));
 
             print = JasperFillManager.fillReport(jasperReport, parameters, source);
         }
@@ -439,10 +432,10 @@ JasperViewer.viewReport(jp1,false);
      * Compare objects according to their PRs. They're sorted by ascending order
      * of their {@link Positionable#getPrDebut() } value, and then by {@link Positionable#getPrFin() } (length).
      */
-    private static class PRComparator implements Comparator<Positionable> {
+    private static class PRComparator<P extends Positionable> implements Comparator<P> {
 
         @Override
-        public int compare(final Positionable o1, final Positionable o2) {
+        public int compare(final P o1, final P o2) {
             if (o1 == null || Float.isNaN(o1.getPrDebut())) {
                 return 1;
             } else if (o2 == null || Float.isNaN(o2.getPrDebut())) {

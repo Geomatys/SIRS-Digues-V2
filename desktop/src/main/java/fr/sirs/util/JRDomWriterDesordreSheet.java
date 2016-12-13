@@ -48,6 +48,8 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
     public static final String RESEAU_OUVRAGE_TABLE_DATA_SOURCE = "RESEAU_OUVRAGE_TABLE_DATA_SOURCE";
     public static final String VOIRIE_DATASET = "Voirie Dataset";
     public static final String VOIRIE_TABLE_DATA_SOURCE = "VOIRIE_TABLE_DATA_SOURCE";
+    public static final String DESORDRE_DATASET = "";
+    public static final String DESORDRE_TABLE_DATA_SOURCE = "";
     
     public static final String PHOTO_DATA_SOURCE = "PHOTO_DATA_SOURCE";
     public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
@@ -187,7 +189,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         writeDetailPageBreak();
         
         // Sizes the detail element given to the field number.------------------
-        band.setAttribute(ATT_HEIGHT, String.valueOf(currentY));
+        band.setAttribute(ATT_HEIGHT, String.valueOf(DETAIL_HEIGHT));
         
         // Builds the DOM tree.-------------------------------------------------
         root.appendChild(detail);

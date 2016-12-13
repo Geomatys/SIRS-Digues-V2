@@ -21,10 +21,12 @@ package fr.sirs.util;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.Previews;
+import fr.sirs.core.model.AbstractObservation;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.util.property.Reference;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -128,4 +130,10 @@ public class ObjectDataSource<T> implements JRDataSource {
             return ObjectConverters.convert(propertyValue, outputClass);
         }
     }
+    
+    public static final Comparator<AbstractObservation> OBSERVATION_COMPARATOR = (o1, o2) -> {
+        if(o1==null && o2==null) return 0;
+        else if(o1==null || o2==null) return (o1==null) ? -1 : 1;
+        else return o1.getDate().compareTo(o2.getDate());
+    };
 }

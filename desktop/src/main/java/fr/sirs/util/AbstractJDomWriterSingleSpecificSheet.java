@@ -106,9 +106,15 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
     // Static template parameters.
     protected static final int PAGE_WIDTH = 595;
+    protected static final int PAGE_HEIGHT = 842;
     protected static final int LEFT_MARGIN = 20;
     protected static final int RIGHT_MARGIN = 20;
+    protected static final int TOP_MARGIN = 20;
+    protected static final int BOTTOM_MARGIN = 20;
     protected static final int UTIL_WIDTH = PAGE_WIDTH - LEFT_MARGIN - RIGHT_MARGIN;
+    protected static final int UTIL_HEIGTH = PAGE_HEIGHT - TOP_MARGIN - BOTTOM_MARGIN;
+    protected static final int FOOTER_HEIGHT = 12;
+    protected static final int DETAIL_HEIGHT = UTIL_HEIGTH-FOOTER_HEIGHT;
     
     // Doit être cohérent avec les paddings indiqués dans les styles des en-têtes et cellules des tableaux dans les .jrxml.
     protected static final int TABLE_CELL_PADDING_H = 4;

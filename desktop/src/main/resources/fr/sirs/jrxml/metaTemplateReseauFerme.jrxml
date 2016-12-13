@@ -19,18 +19,16 @@
 		</conditionalStyle>
 	</style>
 	<subDataset name="Observation Dataset" uuid="f87f5cd0-3234-40c4-9ea3-250724f36d5e"/>
-	<subDataset name="Prestation Dataset" uuid="df00eaba-db68-4b08-8235-09c8aa0b6e8c"/>
-	<subDataset name="ReseauOuvrage Dataset" uuid="ac0fddac-67df-47b9-83cb-4b6fb7d9d014"/>
-	<subDataset name="Voirie Dataset" uuid="dafa0e8d-c219-44fe-9097-387a54fe781d"/>
+	<subDataset name="ReseauOuvrage Dataset" uuid="df00eaba-db68-4b08-8235-09c8aa0b6e8c"/>
 	<parameter name="PHOTO_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport"/>
 	<title>
-		<band height="2"/>
+		<band />
 	</title>
 	<pageHeader>
-		<band height="2"/>
+		<band />
 	</pageHeader>
 	<columnHeader>
-		<band height="2" splitType="Stretch"/>
+		<band />
 	</columnHeader>
 	<detail>
 		<band height="248" splitType="Stretch">

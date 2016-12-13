@@ -360,18 +360,17 @@ public class PrintManager {
         avoidReseauFields.add(DATE_MAJ_FIELD);
 
         final List<JRColumnParameter> observationFields = new ArrayList<>();
-        observationFields.add(new JRColumnParameter("date"));
-        observationFields.add(new JRColumnParameter("designation"));
-        observationFields.add(new JRColumnParameter("observateurId"));
-        observationFields.add(new JRColumnParameter("evolution"));
-        observationFields.add(new JRColumnParameter("suite"));
+        observationFields.add(new JRColumnParameter("date", 1.1f));
+        observationFields.add(new JRColumnParameter("observateurId", .8f));
+        observationFields.add(new JRColumnParameter("evolution", 2.f));
+        observationFields.add(new JRColumnParameter("suite", 2.5f));
 
         final List<JRColumnParameter> reseauFields = new ArrayList<>();
         reseauFields.add(new JRColumnParameter("designation"));
         reseauFields.add(new JRColumnParameter("libelle"));
         reseauFields.add(new JRColumnParameter("date_debut"));
         reseauFields.add(new JRColumnParameter("date_fin"));
-        reseauFields.add(new JRColumnParameter("commentaire"));
+        reseauFields.add(new JRColumnParameter("commentaire", 2.f));
 
         final File fileToPrint = PrinterUtilities.printReseauFerme(avoidReseauFields,
                 observationFields,

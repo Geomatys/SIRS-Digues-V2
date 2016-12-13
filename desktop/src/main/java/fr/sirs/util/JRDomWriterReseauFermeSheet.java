@@ -19,7 +19,6 @@
 package fr.sirs.util;
 
 import fr.sirs.core.model.ObjetReseau;
-import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import static fr.sirs.util.JRUtils.ATT_HEIGHT;
@@ -122,7 +121,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         currentY+=24;
         writeSectionTitle("Observations", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
         currentY+=2;
-        writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 
+        writeTable(ObservationReseauHydrauliqueFerme.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 
                 TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
         currentY+=2;
         
@@ -149,7 +148,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         writeDetailPageBreak();
         
         // Sizes the detail element given to the field number.------------------
-        band.setAttribute(ATT_HEIGHT, String.valueOf(currentY));
+        band.setAttribute(ATT_HEIGHT, String.valueOf(DETAIL_HEIGHT));
         
         // Builds the DOM tree.-------------------------------------------------
         root.appendChild(detail);

@@ -46,7 +46,8 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 
 /**
- *
+ * Source de données de remplissage des fiches de désordre.
+ * 
  * @author Samuel Andrés (Geomatys)
  */
 public class DesordreDataSource extends ObjectDataSource<Desordre> {
@@ -79,11 +80,7 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
         }
         else if(OBSERVATION_TABLE_DATA_SOURCE.equals(name)){
             final ObservableList<Observation> observations = currentObject.getObservations();
-            observations.sort((o1, o2) -> {
-                if(o1==null && o2==null) return 0;
-                else if(o1==null || o2==null) return (o1==null) ? -1 : 1;
-                else return o1.getDate().compareTo(o2.getDate());
-            });
+            observations.sort(OBSERVATION_COMPARATOR);
             return new ObjectDataSource<>(observations, previewRepository, stringConverter);
         }
         else if(PRESTATION_TABLE_DATA_SOURCE.equals(name)){
@@ -91,7 +88,6 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
         }
         else if(RESEAU_OUVRAGE_TABLE_DATA_SOURCE.equals(name)){
 
-            final List<ObjetReseau> reseauOuvrageList = new ArrayList<>();
             final List<List<? extends ObjetReseau>> retrievedLists = new ArrayList();
             retrievedLists.add(Injector.getSession().getRepositoryForClass(EchelleLimnimetrique.class).get(currentObject.getEchelleLimnimetriqueIds()));
             retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageParticulier.class).get(currentObject.getOuvrageParticulierIds()));
@@ -101,7 +97,8 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
             retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueCielOuvert.class).get(currentObject.getReseauHydrauliqueCielOuvertIds()));
             retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).get(currentObject.getReseauHydrauliqueFermeIds()));
 
-            for(final List candidate : retrievedLists){
+            final List<ObjetReseau> reseauOuvrageList = new ArrayList<>();
+            for(final List<? extends ObjetReseau> candidate : retrievedLists){
                 if(candidate!=null && !candidate.isEmpty()){
                     reseauOuvrageList.addAll(candidate);
                 }

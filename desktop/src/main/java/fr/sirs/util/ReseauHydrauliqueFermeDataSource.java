@@ -27,15 +27,18 @@ import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.StationPompage;
+import static fr.sirs.util.JRDomWriterDesordreSheet.DESORDRE_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTO_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.collections.ObservableList;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 
 /**
+ * Source de données de remplissage des fiches de réseaux hydrauliques fermés.
  *
  * @author Samuel Andrés (Geomatys)
  */
@@ -71,22 +74,28 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
             return new ObjectDataSource<>(photos, previewRepository, stringConverter);
         }
         else if(OBSERVATION_TABLE_DATA_SOURCE.equals(name)){
-            return new ObjectDataSource<>(currentObject.getObservations(), previewRepository, stringConverter);
+            final ObservableList<ObservationReseauHydrauliqueFerme> observations = currentObject.getObservations();
+            observations.sort(OBSERVATION_COMPARATOR);
+            return new ObjectDataSource<>(observations, previewRepository, stringConverter);
         }
         else if(RESEAU_OUVRAGE_TABLE_DATA_SOURCE.equals(name)){
-            final List<ObjetReseau> reseauOuvrageList = new ArrayList<>();
+            
             final List<List<? extends ObjetReseau>> retrievedLists = new ArrayList();
             retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageHydrauliqueAssocie.class).get(currentObject.getOuvrageHydrauliqueAssocieIds()));
             retrievedLists.add(Injector.getSession().getRepositoryForClass(ReseauHydrauliqueCielOuvert.class).get(currentObject.getReseauHydrauliqueCielOuvertIds()));
             retrievedLists.add(Injector.getSession().getRepositoryForClass(StationPompage.class).get(currentObject.getStationPompageIds()));
 
-            for(final List candidate : retrievedLists){
+            final List<ObjetReseau> reseauOuvrageList = new ArrayList<>();
+            for(final List<? extends ObjetReseau> candidate : retrievedLists){
                 if(candidate!=null && !candidate.isEmpty()){
                     reseauOuvrageList.addAll(candidate);
                 }
             }
             return new ObjectDataSource<>(reseauOuvrageList, previewRepository, stringConverter);
         }
+//        else if(DESORDRE_TABLE_DATA_SOURCE.equals(name)){
+//            return null;
+//        }
         else return super.getFieldValue(jrf);
     }
 
