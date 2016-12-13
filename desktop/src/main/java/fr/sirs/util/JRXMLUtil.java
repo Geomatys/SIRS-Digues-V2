@@ -19,6 +19,8 @@
 package fr.sirs.util;
 
 import static fr.sirs.util.AbstractJDomWriter.NULL_REPLACEMENT;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -43,6 +45,8 @@ import java.util.Collection;
  * @author Samuel Andrés (Geomatys) <samuel.andres at geomatys.com>
  */
 public class JRXMLUtil {
+    
+    private static final NumberFormat PR_FORMAT = new DecimalFormat("#.##");
     
     private JRXMLUtil(){}
     
@@ -122,6 +126,10 @@ public class JRXMLUtil {
     
     public static String displayDistance(final Double distance){
         return distance==null ? NULL_REPLACEMENT : (distance + " m");
+    }
+    
+    public static String displayPR(final Double pr){
+        return pr==null ? NULL_REPLACEMENT : PR_FORMAT.format(pr);
     }
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -215,7 +215,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{prDebut}==null ? " - " : $F{prDebut}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayPR($F{prDebut})]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement positionType="Float" x="330" y="0" width="100" height="12" uuid="0e1215e7-a658-48e4-b0ce-2c4d045c6c73"/>
@@ -229,7 +229,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{prFin}==null ? " - " : $F{prFin}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayPR($F{prFin})]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
