@@ -415,7 +415,7 @@
 				</box>
 				<staticText>
 					<reportElement x="0" y="0" width="68" height="12" uuid="7a9a2a25-dcdf-495a-a6b9-86cd79c9ea05"/>
-					<textElement textAlignment="Left">
+					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
 					<text><![CDATA[SIRS Digues v2]]></text>
@@ -429,14 +429,14 @@
 				</textField>
 				<textField>
 					<reportElement x="466" y="0" width="50" height="12" uuid="fd135700-f76f-4940-8342-3b56ac4bd1dc"/>
-					<textElement textAlignment="Right">
+					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" / "]]></textFieldExpression>
 				</textField>
 				<textField evaluationTime="Report">
 					<reportElement x="515" y="0" width="40" height="12" uuid="f89bacc3-3034-42f7-950b-08461d07d0c1"/>
-					<textElement>
+					<textElement verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[" "+$V{PAGE_NUMBER}]]></textFieldExpression>
