@@ -98,6 +98,7 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
             final Thread t = Thread.currentThread();
             final Predicate userOptions = new TypeConduitePredicate()
                     .and(new TemporalPredicate())
+                    .and(new LinearPredicate<>())
                     .and(new PRPredicate<>());
 
             final List<ReseauHydrauliqueFerme> toPrint = new ArrayList<>(100);
@@ -105,14 +106,16 @@ public class FXReseauFermePrintPane extends TemporalTronconChoicePrintPane {
                 ReseauHydrauliqueFerme r;
                 while (it.hasNext() && !t.isInterrupted()) {
                     r = it.next();
-                    if (userOptions.test(r))
+                    if (userOptions.test(r)){
                         toPrint.add(r);
+                    }
                 }
             }
 
-            if (!toPrint.isEmpty() && !t.isInterrupted())
+            if (!toPrint.isEmpty() && !t.isInterrupted()) {
                 Injector.getSession().getPrintManager().printReseaux(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected());
-
+            }
+            
             return !toPrint.isEmpty();
         });
         taskProperty.set(printing);

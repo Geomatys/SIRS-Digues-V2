@@ -88,7 +88,7 @@ public abstract class TemporalTronconChoicePrintPane extends TronconChoicePrintP
 
         /**
          * A flag which role is to tell what we should do with archived objects.
-         * There's 3 possible states :
+         * There're 3 possible states :
          * - Negative : We must exclude archived objects.
          * - Zero : We must include all objects, archived or not.
          * - Positive : We must include archived objects only.

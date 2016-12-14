@@ -78,7 +78,8 @@ public abstract class TronconChoicePrintPane extends BorderPane {
             uiAdd.setVisible(false);
             uiFicheMode.setVisible(false);
             uiDelete.setVisible(false);
-            TableView table = getTable();
+            
+            final TableView table = getTable();
             table.editableProperty().unbind();
             table.setEditable(true);
             for(final Object o : table.getColumns()){
@@ -88,6 +89,7 @@ public abstract class TronconChoicePrintPane extends BorderPane {
                     c.setEditable(false);
                 }
             }
+            
             getColumns().add(new SelectPRColumn("PR début", ExtremiteTroncon.DEBUT));
             getColumns().add(new SelectPRColumn("PR fin", ExtremiteTroncon.FIN));
         }
@@ -106,7 +108,7 @@ public abstract class TronconChoicePrintPane extends BorderPane {
 
                 @Override
                 public TableCell<TronconDigue, Number> call(TableColumn<TronconDigue, Number> param) {
-                    TableCell<TronconDigue, Number> tableCell = new FXNumberCell(Float.class);
+                    final TableCell<TronconDigue, Number> tableCell = new FXNumberCell(Float.class);
                     tableCell.setEditable(true);
                     return tableCell;
                 }
