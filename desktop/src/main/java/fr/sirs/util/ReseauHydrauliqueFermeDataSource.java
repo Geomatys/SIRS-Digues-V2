@@ -19,18 +19,21 @@
 package fr.sirs.util;
 
 import fr.sirs.Injector;
+import fr.sirs.core.component.DesordreRepository;
 import fr.sirs.core.component.Previews;
+import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.ObjetReseau;
+import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.StationPompage;
-import static fr.sirs.util.JRDomWriterDesordreSheet.DESORDRE_TABLE_DATA_SOURCE;
-import static fr.sirs.util.JRDomWriterDesordreSheet.OBSERVATION_TABLE_DATA_SOURCE;
-import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTO_DATA_SOURCE;
-import static fr.sirs.util.JRDomWriterDesordreSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterReseauFermeSheet.DESORDRE_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterReseauFermeSheet.OBSERVATION_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterReseauFermeSheet.PHOTO_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterReseauFermeSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.collections.ObservableList;
@@ -93,9 +96,20 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
             }
             return new ObjectDataSource<>(reseauOuvrageList, previewRepository, stringConverter);
         }
-//        else if(DESORDRE_TABLE_DATA_SOURCE.equals(name)){
-//            return null;
-//        }
+        else if(DESORDRE_TABLE_DATA_SOURCE.equals(name)){
+            final DesordreRepository desordreRepository = (DesordreRepository) Injector.getSession().getRepositoryForClass(Desordre.class);
+            final List<Desordre> all = desordreRepository.getAll();
+            final List<JRDesordreTableRow> desordreRows = new ArrayList<>();
+            for(final Desordre des : all){
+                if(des.getReseauHydrauliqueFermeIds().contains(currentObject.getId())){
+                    final List<Observation> observations = des.getObservations();
+                    for(final Observation obs : observations){
+                        desordreRows.add(new JRDesordreTableRow(obs.getDate(), obs.getDesignation(), des.getDesignation(), obs.getUrgenceId(), des.getCommentaire()));
+                    }
+                }
+            }
+            return new ObjectDataSource<>(desordreRows, previewRepository, stringConverter);
+        }
         else return super.getFieldValue(jrf);
     }
 

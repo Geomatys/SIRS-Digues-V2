@@ -94,8 +94,9 @@ public class PrinterUtilities {
     ////////////////////////////////////////////////////////////////////////////
 
     public static File printReseauFerme(final List<String> avoidReseauFields,
-            final List<JRColumnParameter> avoidObservationFields,
+            final List<JRColumnParameter> observationFields,
             final List<JRColumnParameter> reseauFields,
+            final List<JRColumnParameter> desordreFields,
             final Previews previewLabelRepository,
             final SirsStringConverter stringConverter,
             final List<ReseauHydrauliqueFerme> reseaux,
@@ -110,7 +111,7 @@ public class PrinterUtilities {
                 final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplateReseauFerme.jrxml")){
             
             final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(metaTemplateStream,
-                    avoidReseauFields, avoidObservationFields, reseauFields, printPhoto, printReseauOuvrage);
+                    avoidReseauFields, observationFields, reseauFields, desordreFields, printPhoto, printReseauOuvrage);
             templateWriter.setOutput(templateFile);
             templateWriter.write();
 

@@ -48,8 +48,6 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
     public static final String RESEAU_OUVRAGE_TABLE_DATA_SOURCE = "RESEAU_OUVRAGE_TABLE_DATA_SOURCE";
     public static final String VOIRIE_DATASET = "Voirie Dataset";
     public static final String VOIRIE_TABLE_DATA_SOURCE = "VOIRIE_TABLE_DATA_SOURCE";
-    public static final String DESORDRE_DATASET = "";
-    public static final String DESORDRE_TABLE_DATA_SOURCE = "";
     
     public static final String PHOTO_DATA_SOURCE = "PHOTO_DATA_SOURCE";
     public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
@@ -95,19 +93,19 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
     @Override
     protected void writeObject() {
         
-        writeSubDataset(Observation.class, observationFields.stream().map(p -> p.getFieldName()).collect(Collectors.toList()), true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(0));
-        writeSubDataset(Prestation.class, prestationFields.stream().map(p -> p.getFieldName()).collect(Collectors.toList()), true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(1));
-        writeSubDataset(ObjetReseau.class, reseauFields.stream().map(p -> p.getFieldName()).collect(Collectors.toList()), true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(2));
-        writeSubDataset(ObjetReseau.class, reseauFields.stream().map(p -> p.getFieldName()).collect(Collectors.toList()), true, (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(3));
+        writeSubDataset(Observation.class, observationFields, true,0);
+        writeSubDataset(Prestation.class, prestationFields, true, 1);
+        writeSubDataset(ObjetReseau.class, reseauFields, true, 2);
+        writeSubDataset(ObjetReseau.class, reseauFields, true, 3);
         
         
         // Sets the initial fields used by the template.------------------------
         writeFields();
-        writeField(ObjectDataSource.class, PHOTO_DATA_SOURCE, "Source de données des photos");
+        if(printPhoto) writeField(ObjectDataSource.class, PHOTO_DATA_SOURCE, "Source de données des photos");
         writeField(ObjectDataSource.class, OBSERVATION_TABLE_DATA_SOURCE, "Source de données des observations");
         writeField(ObjectDataSource.class, PRESTATION_TABLE_DATA_SOURCE, "Source de données des prestations");
-        writeField(ObjectDataSource.class, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, "Source de données des réseaux");
-        writeField(ObjectDataSource.class, VOIRIE_TABLE_DATA_SOURCE, "Source de données des voiries");
+        if(printReseauOuvrage) writeField(ObjectDataSource.class, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, "Source de données des réseaux");
+        if(printVoirie) writeField(ObjectDataSource.class, VOIRIE_TABLE_DATA_SOURCE, "Source de données des voiries");
 
         // Modifies the title block.--------------------------------------------
         writeTitle();
@@ -157,7 +155,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         /*----------------------------------------------------------------------
         SOUS-RAPPORTS DES PHOTOS
         ----------------------------------------------------------------------*/
-        if(printPhoto){
+        if(printPhoto) {
             currentY+=24;
             includePhotoSubreport(0);
         }
@@ -165,7 +163,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         /*----------------------------------------------------------------------
         TABLEAU DES OUVRAGES ET RÉSEAUX
         ----------------------------------------------------------------------*/
-        if(printReseauOuvrage){
+        if(printReseauOuvrage) {
             currentY+=24;
             writeSectionTitle("Réseaux et ouvrages", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
             currentY+=2;
@@ -177,7 +175,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         /*----------------------------------------------------------------------
         TABLEAU DES VOIRIES
         ----------------------------------------------------------------------*/
-        if(printVoirie){
+        if(printVoirie) {
             currentY+=24;
             writeSectionTitle("Voiries", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
             currentY+=2;

@@ -20,6 +20,7 @@
 	</style>
 	<subDataset name="Observation Dataset" uuid="f87f5cd0-3234-40c4-9ea3-250724f36d5e"/>
 	<subDataset name="ReseauOuvrage Dataset" uuid="df00eaba-db68-4b08-8235-09c8aa0b6e8c"/>
+	<subDataset name="Desordre Dataset"/>
 	<parameter name="PHOTO_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport"/>
 	<title>
 		<band />
@@ -39,7 +40,7 @@
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font fontName="Serif" size="16" isBold="false"/>
 					</textElement>
-					<text><![CDATA[Fiche de détaillée de réseau hydraulique fermé]]></text>
+					<text><![CDATA[Fiche détaillée de réseau hydraulique fermé]]></text>
 				</staticText>
 			</frame>
 			<frame>

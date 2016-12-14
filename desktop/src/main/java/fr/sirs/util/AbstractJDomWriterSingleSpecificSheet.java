@@ -19,6 +19,7 @@
 package fr.sirs.util;
 
 import fr.sirs.core.SirsCore;
+import static fr.sirs.core.SirsCore.BUNDLE_KEY_CLASS;
 import fr.sirs.core.model.ReferenceType;
 import static fr.sirs.util.AbstractJDomWriter.NULL_REPLACEMENT;
 import static fr.sirs.util.JRUtils.ATT_BACKCOLOR;
@@ -56,6 +57,7 @@ import static fr.sirs.util.JRUtils.TAG_FONT;
 import static fr.sirs.util.JRUtils.TAG_FRAME;
 import static fr.sirs.util.JRUtils.TAG_REPORT_ELEMENT;
 import static fr.sirs.util.JRUtils.TAG_STATIC_TEXT;
+import static fr.sirs.util.JRUtils.TAG_SUB_DATASET;
 import static fr.sirs.util.JRUtils.TAG_TABLE;
 import static fr.sirs.util.JRUtils.TAG_TABLE_FOOTER;
 import static fr.sirs.util.JRUtils.TAG_TABLE_HEADER;
@@ -79,9 +81,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -121,6 +125,10 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
     protected static final int TABLE_CELL_PADDING_V = 4;
     protected static final int TABLE_HEAD_PADDING_H = 3;
     protected static final int TABLE_HEAD_PADDING_V = 5;
+    protected static final boolean TABLE_HEAD_BOLD = true;
+    
+    protected static final Function<JRColumnParameter, String> FIELD_MAPPER = p -> p.getFieldName();
+    protected static final String CLASS_SUB_DATASET_FIELD = BUNDLE_KEY_CLASS;
 
     protected final Class<T> classToMap;
     private final List<String> avoidFields;
@@ -189,29 +197,34 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
     /**
      *
      * @param elementClass The class to explore fields.
-     * @param fields The field list
+     * @param fieldParameters The field list
      * @param print If true, print the field list, if false print all the fields but the ones contained into given field list
-     * @param subDataset
+     * @param subDatasetItemNb
      */
-    protected void writeSubDataset(final Class<? extends fr.sirs.core.model.Element> elementClass,
-            final List<String> fields, final boolean print, final Element subDataset) {
+    protected void writeSubDataset(final Class elementClass, final List<JRColumnParameter> fieldParameters, final boolean print, final int subDatasetItemNb) {
 
+        // Extraction des noms de champs.
+        final List<String> fields = fieldParameters.stream().map(FIELD_MAPPER).collect(Collectors.toList());
+        
+        // Détermination du prédicat à utiliser.
         final Predicate<String> printPredicate = print
                 ? (String fieldName) -> fields==null || fields.contains(fieldName)
                 : (String fieldName) -> fields==null || !fields.contains(fieldName);
 
+        // Écriture des champs.
+        final Element subDatasetItem = (Element) root.getElementsByTagName(TAG_SUB_DATASET).item(subDatasetItemNb);
         final Method[] methods = elementClass.getMethods();
         for (final Method method : methods){
             if(PrinterUtilities.isSetter(method)){
                 final String fieldName = getFieldNameFromSetter(method);
                 if (printPredicate.test(fieldName)) {
-                    writeSubDatasetField(method, subDataset);
+                    writeSubDatasetField(method, subDatasetItem);
                 }
             }
         }
 
         // Écriture d'un champ supplémentaire pour la classe de l'objet.
-        writeSubDatasetField("class", Class.class, subDataset);
+        writeSubDatasetField(CLASS_SUB_DATASET_FIELD, Class.class, subDatasetItem);
     }
 
     /**
@@ -443,8 +456,8 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
             coeffSum+=1.f;
             cumulatedWidth+=baseColumnWidth;
             writeColumn("Type",
-                    () -> document.createCDATASection("$F{class}==null ? \""+NULL_REPLACEMENT+"\" : java.util.ResourceBundle.getBundle($F{class}.getName()).getString(\"class\")"),
-                    markupFromFieldName("class"), table, baseColumnWidth, fontSize, headerHeight, detailCellHeight);
+                    () -> document.createCDATASection("$F{class}==null ? \""+NULL_REPLACEMENT+"\" : java.util.ResourceBundle.getBundle($F{class}.getName()).getString(\""+BUNDLE_KEY_CLASS+"\")"),
+                    markupFromFieldName(CLASS_SUB_DATASET_FIELD), table, baseColumnWidth, fontSize, TABLE_HEAD_BOLD, true, headerHeight, detailCellHeight);
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -490,7 +503,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
                 
                 cumulatedWidth+=ajustedColumnWidth;
                 writeColumn(rb.getString(fieldName), getCDATASupplierFromSetter(settersByFieldName.get(fieldName), displayPolicy), 
-                        markupFromFieldName(fieldName), table, ajustedColumnWidth, fontSize, headerHeight, detailCellHeight);
+                        markupFromFieldName(fieldName), table, ajustedColumnWidth, fontSize, TABLE_HEAD_BOLD, field.isBold(), headerHeight, detailCellHeight);
             }
         }
         /*
@@ -505,7 +518,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
                     if(printPredicate.test(fieldName)){
                         cumulatedWidth+=baseColumnWidth;
                         writeColumn(rb.getString(fieldName), getCDATASupplierFromSetter(method, JRColumnParameter.DisplayPolicy.LABEL), 
-                                markupFromFieldName(fieldName), table, baseColumnWidth, fontSize, headerHeight, detailCellHeight);
+                                markupFromFieldName(fieldName), table, baseColumnWidth, fontSize, TABLE_HEAD_BOLD, false, headerHeight, detailCellHeight);
                     }
                 }
             }
@@ -548,9 +561,13 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
                             // Si c'est une référence unique.
                             else if(String.class.isAssignableFrom(fieldClass)) {
                                 switch(displayPolicy){
-                                    case LABEL_AND_CODE: 
+                                    case REFERENCE_LABEL_AND_CODE: 
                                         if(ReferenceType.class.isAssignableFrom(annotation.ref())){
                                             return document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+fieldName+"}");
+                                        }
+                                    case REFERENCE_CODE: 
+                                        if(ReferenceType.class.isAssignableFrom(annotation.ref())){
+                                            return document.createCDATASection(JRXMLUtil.dynamicDisplayReferenceCode(fieldName));
                                         }
                                     default:
                                         return document.createCDATASection(JRXMLUtil.dynamicDisplayLabel(fieldName));
@@ -584,7 +601,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
     private void writeColumn(final String header, final Supplier<CDATASection> cellSupplier,
             final JRUtils.Markup markup, final Element table, final int columnWidth,
-            final int fontSize, final int headerHeight, final int detailCellHeight){
+            final int fontSize, final boolean headerBold, final boolean cellBold, final int headerHeight, final int detailCellHeight){
 
 
         final Element column = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN);
@@ -613,6 +630,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
         final Element textElement = document.createElement(TAG_TEXT_ELEMENT);
         final Element font = document.createElement(TAG_FONT);
+        font.setAttribute(ATT_IS_BOLD, String.valueOf(headerBold));
         font.setAttribute(ATT_SIZE, String.valueOf(fontSize));
         textElement.appendChild(font);
         staticText.appendChild(textElement);
@@ -647,6 +665,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
         final Element detailTextElement = document.createElement(TAG_TEXT_ELEMENT);
         final Element detailFont = document.createElement(TAG_FONT);
+        detailFont.setAttribute(ATT_IS_BOLD, String.valueOf(cellBold));
         detailFont.setAttribute(ATT_SIZE, String.valueOf(fontSize));
         detailTextElement.appendChild(detailFont);
         detailTextElement.setAttribute(ATT_MARKUP, (markup==null ? JRUtils.Markup.NONE : markup).toString());

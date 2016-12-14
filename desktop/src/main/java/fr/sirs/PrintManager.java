@@ -29,6 +29,7 @@ import fr.sirs.util.JRColumnParameter;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,9 +45,13 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import net.sf.jasperreports.engine.JRException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.feature.Feature;
+import org.xml.sax.SAXException;
 
 /**
  *
@@ -258,7 +263,7 @@ public class PrintManager {
      */
     public final void printDesordres(final List<Desordre> desordres, final boolean printPhoto, final boolean printReseauOuvrage, final boolean printVoirie) throws Exception {
 
-        final List avoidDesordreFields = new ArrayList<>();
+        final List<String> avoidDesordreFields = new ArrayList<>();
         avoidDesordreFields.add(GEOMETRY_FIELD);
         avoidDesordreFields.add(DOCUMENT_ID_FIELD);
         avoidDesordreFields.add(ID_FIELD);
@@ -288,15 +293,15 @@ public class PrintManager {
         avoidDesordreFields.add(DATE_MAJ_FIELD);
 
         final List<JRColumnParameter> observationFields = new ArrayList<>();
-        observationFields.add(new JRColumnParameter("date", 1.1f));
+        observationFields.add(new JRColumnParameter("date", 1.2f, true));
         observationFields.add(new JRColumnParameter("observateurId", .8f));
-        observationFields.add(new JRColumnParameter("nombreDesordres",.8f));
-        observationFields.add(new JRColumnParameter("urgenceId", 1.f, JRColumnParameter.DisplayPolicy.LABEL_AND_CODE));
+        observationFields.add(new JRColumnParameter("nombreDesordres",.9f));
+        observationFields.add(new JRColumnParameter("urgenceId", .9f, JRColumnParameter.DisplayPolicy.REFERENCE_LABEL_AND_CODE));
         observationFields.add(new JRColumnParameter("evolution", 2.f));
-        observationFields.add(new JRColumnParameter("suite", 2.5f));
+        observationFields.add(new JRColumnParameter("suite", 2f));
 
         final List<JRColumnParameter> prestationFields = new ArrayList<>();
-        prestationFields.add(new JRColumnParameter("designation", .7f));
+        prestationFields.add(new JRColumnParameter("designation", .7f, true));
         prestationFields.add(new JRColumnParameter("libelle", 1.f));
         prestationFields.add(new JRColumnParameter("intervenantsIds", 1.f));
         prestationFields.add(new JRColumnParameter("date_debut", .7f));
@@ -304,7 +309,7 @@ public class PrintManager {
         prestationFields.add(new JRColumnParameter("commentaire", 2.5f));
 
         final List<JRColumnParameter> reseauFields = new ArrayList<>();
-        reseauFields.add(new JRColumnParameter("designation"));
+        reseauFields.add(new JRColumnParameter("designation", true));
         reseauFields.add(new JRColumnParameter("libelle"));
         reseauFields.add(new JRColumnParameter("date_debut"));
         reseauFields.add(new JRColumnParameter("date_fin"));
@@ -330,7 +335,7 @@ public class PrintManager {
      */
     public final void printReseaux(final List<ReseauHydrauliqueFerme> reseauxFermes, final boolean printPhoto, final boolean printReseauOuvrage) throws Exception {
 
-        final List avoidReseauFields = new ArrayList<>();
+        final List<String> avoidReseauFields = new ArrayList<>();
         avoidReseauFields.add(GEOMETRY_FIELD);
         avoidReseauFields.add(DOCUMENT_ID_FIELD);
         avoidReseauFields.add(ID_FIELD);
@@ -360,21 +365,29 @@ public class PrintManager {
         avoidReseauFields.add(DATE_MAJ_FIELD);
 
         final List<JRColumnParameter> observationFields = new ArrayList<>();
-        observationFields.add(new JRColumnParameter("date", 1.1f));
+        observationFields.add(new JRColumnParameter("date", 1.1f, true));
         observationFields.add(new JRColumnParameter("observateurId", .8f));
         observationFields.add(new JRColumnParameter("evolution", 2.f));
         observationFields.add(new JRColumnParameter("suite", 2.5f));
 
         final List<JRColumnParameter> reseauFields = new ArrayList<>();
-        reseauFields.add(new JRColumnParameter("designation"));
+        reseauFields.add(new JRColumnParameter("designation", true));
         reseauFields.add(new JRColumnParameter("libelle"));
         reseauFields.add(new JRColumnParameter("date_debut"));
         reseauFields.add(new JRColumnParameter("date_fin"));
         reseauFields.add(new JRColumnParameter("commentaire", 2.f));
+        
+        final List<JRColumnParameter> desordreFields = new ArrayList<>();
+        desordreFields.add(new JRColumnParameter("observationDate", true));
+        desordreFields.add(new JRColumnParameter("observationDesignation", .7f));
+        desordreFields.add(new JRColumnParameter("desordreDesignation", .7f));
+        desordreFields.add(new JRColumnParameter("observationUrgence", .7f,  JRColumnParameter.DisplayPolicy.REFERENCE_CODE));
+        desordreFields.add(new JRColumnParameter("desordreDescription", 2.5f));
 
         final File fileToPrint = PrinterUtilities.printReseauFerme(avoidReseauFields,
                 observationFields,
                 reseauFields,
+                desordreFields,
                 Injector.getSession().getPreviews(),
                 new SirsStringConverter(),
                 reseauxFermes, printPhoto, printReseauOuvrage);

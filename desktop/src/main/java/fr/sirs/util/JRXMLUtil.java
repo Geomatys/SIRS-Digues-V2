@@ -63,6 +63,10 @@ public class JRXMLUtil {
         return input.substring(input.indexOf(SirsStringConverter.LABEL_SEPARATOR)+SirsStringConverter.LABEL_SEPARATOR.length());
     }
     
+    static String extractReferenceCode(final String input){
+        return input.substring(0, input.indexOf(SirsStringConverter.LABEL_SEPARATOR));
+    }
+    
     /**
      * Affichage d'un champ récupéré comme {@link PrintableArrayList}.
      * 
@@ -100,6 +104,17 @@ public class JRXMLUtil {
      */
     public static String displayLabel(final String input){
         return input==null ? NULL_REPLACEMENT : extractLabel(input);
+    }
+    
+    /**
+     * 
+     * @param input
+     * @return 
+     * 
+     * @see JRXMLUtil#dynamicDisplayReferenceCode(java.lang.String) Pour écrire dynamiquement cette méthode dans les patrons JRXML.
+     */
+    public static String displayReferenceCode(final String input){
+        return input==null ? NULL_REPLACEMENT : extractReferenceCode(input);
     }
     
     /**
@@ -156,5 +171,15 @@ public class JRXMLUtil {
      */
     public static String dynamicDisplayLabel(final String fieldName){
         return "fr.sirs.util.JRXMLUtil.displayLabel($F{"+fieldName+"})";
+    }
+    
+    /**
+     * 
+     * @param fieldName
+     * @return 
+     * @see JRXMLUtil#displayReferenceCode(java.lang.String) 
+     */
+    public static String dynamicDisplayReferenceCode(final String fieldName){
+        return "fr.sirs.util.JRXMLUtil.displayReferenceCode($F{"+fieldName+"})";
     }
 }
