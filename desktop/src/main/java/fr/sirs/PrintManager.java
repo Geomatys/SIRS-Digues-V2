@@ -371,7 +371,7 @@ public class PrintManager {
         observationFields.add(new JRColumnParameter("suite", 2.5f));
 
         final List<JRColumnParameter> reseauFields = new ArrayList<>();
-        reseauFields.add(new JRColumnParameter("designation", true));
+        reseauFields.add(new JRColumnParameter("designation"));
         reseauFields.add(new JRColumnParameter("libelle"));
         reseauFields.add(new JRColumnParameter("date_debut"));
         reseauFields.add(new JRColumnParameter("date_fin"));
