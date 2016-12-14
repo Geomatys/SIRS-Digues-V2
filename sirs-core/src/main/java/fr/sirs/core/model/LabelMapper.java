@@ -18,6 +18,7 @@
  */
 package fr.sirs.core.model;
 
+import static fr.sirs.core.SirsCore.BUNDLE_KEY_CLASS;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -81,7 +82,7 @@ public class LabelMapper {
     public String mapClassName() {
         String name = null;
         try{
-            name = bundle.getString("class");
+            name = bundle.getString(BUNDLE_KEY_CLASS);
         }catch(MissingResourceException ex){
             //not important
         }
