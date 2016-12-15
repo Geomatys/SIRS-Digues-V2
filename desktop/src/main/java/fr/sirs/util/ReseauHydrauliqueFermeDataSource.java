@@ -34,7 +34,9 @@ import static fr.sirs.util.JRDomWriterReseauFermeSheet.DESORDRE_TABLE_DATA_SOURC
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.PHOTO_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import javafx.collections.ObservableList;
 import net.sf.jasperreports.engine.JRException;
@@ -46,6 +48,25 @@ import net.sf.jasperreports.engine.JRField;
  * @author Samuel Andrés (Geomatys)
  */
 public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHydrauliqueFerme> {
+    
+    /**
+     * Groupe par désignation de désordre et classe par date décroissante à l'intérieur de chaque groupe.
+     */
+    static final Comparator<JRDesordreTableRow> DESORDRE_RESEAU_COMPARATOR = (JRDesordreTableRow d1, JRDesordreTableRow d2)->{
+                final LocalDate date1 = d1.getObservationDate();
+                final String des1 = d1.getDesordreDesignation();
+                final LocalDate date2 = d2.getObservationDate();
+                final String des2 = d2.getDesordreDesignation();
+                if(des1==null && des2==null) return 0;
+                else if(des1==null || des2==null) return (des1==null) ? -2 : 2;
+                else {
+                    final int compareTo = des1.compareTo(des2);
+                    if (compareTo!=0) return compareTo;
+                    else if(date1==null && date2==null) return 0;
+                    else if(date1==null || date2==null) return (date1==null) ? 1 : -1;
+                    else return -date1.compareTo(date2); // On regroupe par désignation de désordre.
+                }
+            };
 
     public ReseauHydrauliqueFermeDataSource(Iterable<ReseauHydrauliqueFerme> iterable) {
         super(iterable);
@@ -74,6 +95,7 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
             if(currentObject.getPhotos()!=null && !currentObject.getPhotos().isEmpty()){
                 photos.addAll(currentObject.getPhotos());
             }
+            photos.sort(PHOTO_COMPARATOR);
             return new ObjectDataSource<>(photos, previewRepository, stringConverter);
         }
         else if(OBSERVATION_TABLE_DATA_SOURCE.equals(name)){
@@ -94,6 +116,8 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
                     reseauOuvrageList.addAll(candidate);
                 }
             }
+            
+            reseauOuvrageList.sort(ELEMENT_COMPARATOR);
             return new ObjectDataSource<>(reseauOuvrageList, previewRepository, stringConverter);
         }
         else if(DESORDRE_TABLE_DATA_SOURCE.equals(name)){
@@ -108,6 +132,7 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
                     }
                 }
             }
+            desordreRows.sort(DESORDRE_RESEAU_COMPARATOR);
             return new ObjectDataSource<>(desordreRows, previewRepository, stringConverter);
         }
         else return super.getFieldValue(jrf);

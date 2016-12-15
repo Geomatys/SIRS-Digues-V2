@@ -23,15 +23,17 @@ import static fr.sirs.core.SirsCore.*;
 import static fr.sirs.core.SirsCore.DesordreFields.*;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.JRColumnParameter;
 import fr.sirs.util.PrinterUtilities;
 import fr.sirs.util.SirsStringConverter;
 import java.io.File;
-import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -45,13 +47,9 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import net.sf.jasperreports.engine.JRException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStoreUtilities;
 import org.geotoolkit.feature.Feature;
-import org.xml.sax.SAXException;
 
 /**
  *
@@ -393,4 +391,6 @@ public class PrintManager {
                 reseauxFermes, printPhoto, printReseauOuvrage);
         SIRS.openFile(fileToPrint);
     }
+    
+    
 }

@@ -76,6 +76,7 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
                     photos.addAll(observation.photos);
                 }
             }
+            photos.sort(PHOTO_COMPARATOR);
             return new ObjectDataSource<>(photos, previewRepository, stringConverter);
         }
         else if(OBSERVATION_TABLE_DATA_SOURCE.equals(name)){
@@ -84,7 +85,9 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
             return new ObjectDataSource<>(observations, previewRepository, stringConverter);
         }
         else if(PRESTATION_TABLE_DATA_SOURCE.equals(name)){
-            return new ObjectDataSource<>(Injector.getSession().getRepositoryForClass(Prestation.class).get(currentObject.getPrestationIds()), previewRepository, stringConverter);
+            final List<Prestation> prestationList = Injector.getSession().getRepositoryForClass(Prestation.class).get(currentObject.getPrestationIds());
+            prestationList.sort(ELEMENT_COMPARATOR);
+            return new ObjectDataSource<>(prestationList, previewRepository, stringConverter);
         }
         else if(RESEAU_OUVRAGE_TABLE_DATA_SOURCE.equals(name)){
 
@@ -104,21 +107,23 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
                 }
             }
 
+            reseauOuvrageList.sort(ELEMENT_COMPARATOR);
             return new ObjectDataSource<>(reseauOuvrageList, previewRepository, stringConverter);
         }
         else if(VOIRIE_TABLE_DATA_SOURCE.equals(name)){
 
-            final List<ObjetReseau> voirieList = new ArrayList<>();
             final List<List<? extends ObjetReseau>> retrievedLists = new ArrayList();
             retrievedLists.add(Injector.getSession().getRepositoryForClass(OuvrageVoirie.class).get(currentObject.getOuvrageVoirieIds()));
             retrievedLists.add(Injector.getSession().getRepositoryForClass(VoieDigue.class).get(currentObject.getVoieDigueIds()));
 
+            final List<ObjetReseau> voirieList = new ArrayList<>();
             for(final List candidate : retrievedLists){
                 if(candidate!=null && !candidate.isEmpty()){
                     voirieList.addAll(candidate);
                 }
             }
 
+            voirieList.sort(ELEMENT_COMPARATOR);
             return new ObjectDataSource<>(voirieList, previewRepository, stringConverter);
         }
         else return super.getFieldValue(jrf);

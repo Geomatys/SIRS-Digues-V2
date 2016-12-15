@@ -23,6 +23,7 @@ import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTOS_SUBREPORT;
@@ -117,6 +118,7 @@ public class PrinterUtilities {
 
             final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
 
+            reseaux.sort(OBJET_COMPARATOR);
             final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
@@ -164,7 +166,8 @@ public class PrinterUtilities {
 
             final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
 
-            final JRDataSource source = new DesordreDataSource(FXCollections.observableList(desordres).sorted(new PRComparator()), previewLabelRepository, stringConverter);
+            desordres.sort(OBJET_LINEAR_GROUPER.thenComparing(new PRComparator()));
+            final JRDataSource source = new DesordreDataSource(desordres, previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
             parameters.put(PHOTOS_SUBREPORT, net.sf.jasperreports.engine.JasperCompileManager.compileReport(photoTemplateStream));
@@ -451,4 +454,35 @@ JasperViewer.viewReport(jp1,false);
             }
         }
     }
+    
+    
+    /**
+     * Groupe par tronçon et classe par désignation croissante selon l'ordre alphabétique à l'intérieur de chaque groupe.
+     */
+    static final Comparator<Objet> OBJET_LINEAR_GROUPER = (Objet d1, Objet d2)->{
+        final String lin1 = d1.getLinearId();
+        final String lin2 = d2.getLinearId();
+        if(lin1==null && lin2==null) return 0; // Ne devrait jamais se produire pour un objet.
+        else if(lin1==null || lin2==null) return (lin1==null) ? 1 : -1; // Ne devrait jamais se produire pour un objet. 
+        else return lin1.compareTo(lin2);
+    };
+    
+    /**
+     * Groupe par tronçon et classe par désignation croissante selon l'ordre alphabétique à l'intérieur de chaque groupe.
+     */
+    static final Comparator<Objet> OBJET_COMPARATOR = (Objet d1, Objet d2)->{
+        final String des1 = d1.getDesignation();
+        final String lin1 = d1.getLinearId();
+        final String des2 = d2.getDesignation();
+        final String lin2 = d2.getLinearId();
+        if(lin1==null && lin2==null) return 0; // Ne devrait jamais se produire pour un objet.
+        else if(lin1==null || lin2==null) return (lin1==null) ? 1 : -1; // Ne devrait jamais se produire pour un objet. 
+        else {
+            final int compareTo = lin1.compareTo(lin2);
+            if (compareTo!=0) return compareTo;
+            else if(des1==null && des2==null) return 0;
+            else if(des1==null || des2==null) return (des1==null) ? 1 : -1;
+            else return des1.compareTo(des2); // On regroupe par tronçon.
+        }
+    };
 }

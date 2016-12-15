@@ -18,137 +18,95 @@
  */
 package fr.sirs.util;
 
-import fr.sirs.core.component.DigueRepository;
-import fr.sirs.core.component.TronconDigueRepository;
-import fr.sirs.core.model.BorneDigue;
-import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.ElementCreator;
-import fr.sirs.core.model.TronconDigue;
+import fr.sirs.core.model.Desordre;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.lang.reflect.Method;
-import java.time.LocalDate;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  *
  * @author Samuel Andrés (Geomatys)
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:/spring/test-context.xml")
 public class PrinterUtilitiesTest {
-
-    @Autowired
-    DigueRepository digueRepository;
-
-    @Autowired
-    TronconDigueRepository tronconRepository;
-
-    public PrinterUtilitiesTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
-    /**
-     * Test of print method for Digue, of class PrinterUtilities.
-     * @throws java.lang.Exception
-     */
+    
     @Test
-    @Ignore
-    public void testPrintDigue() throws Exception {
-        System.out.println("Test print Digue.");
-        final Digue digue = digueRepository.getAll().get(0);
-//        print(digue, null);
-    }
-
-    /**
-     * Test of print method for TronconGestionDigue, of class PrinterUtilities.
-     * @throws java.lang.Exception
-     */
-    @Test
-    @Ignore
-    public void testPrintTronconGestionDigue() throws Exception {
-        System.out.println("Test print TronconGestionDigue.");
-        final TronconDigue tronconGestionDigue = tronconRepository.getAll().get(0);
-//        print(tronconGestionDigue, null);
-    }
-
-    /**
-     * Test of print method for BorneDigue, of class PrinterUtilities.
-     * @throws java.lang.Exception
-     */
-    @Test
-    @Ignore
-    public void testPrintBorneDigue() throws Exception {
-        System.out.println("Test print BorneDigue.");
-        final BorneDigue borneDigue = ElementCreator.createAnonymValidElement(BorneDigue.class);
-        //borneDigue.setIdBorne(1);
-        borneDigue.setCommentaire("Cette borne n'est pas une borne fictive.");
-        borneDigue.setDate_debut(LocalDate.now());
-        borneDigue.setDate_fin(LocalDate.now());
-        borneDigue.setFictive(false);
-        //borneDigue.setIdTronconGestion(2);
-        borneDigue.setLibelle("Borne principale");
-        //borneDigue.setXPoint(1.3);
-        //borneDigue.setYPoint(1.4);
-        //borneDigue.setZPoint(1.5);
-        //borneDigue.setXPointOrigine(1.6);
-        //borneDigue.setYPointOrigine(1.7);
-
-//        print(borneDigue, null);
-    }
-
-    /**
-     * Test of isGetter method, of class PrinterUtilities.
-     */
-    @Test @Ignore
-    public void testIsGetter() {
-        System.out.println("isGetter");
-        Method method = null;
-        boolean expResult = false;
-        boolean result = PrinterUtilities.isGetter(method);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        //fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of isSetter method, of class PrinterUtilities.
-     */
-    @Test @Ignore
-    public void testIsSetter() {
-        System.out.println("isSetter");
-        Method method = null;
-        boolean expResult = false;
-        boolean result = PrinterUtilities.isSetter(method);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        //fail("The test case is a prototype.");
+    public void test_objetComparator(){
+        final List<Desordre> des = new ArrayList<>();
+        
+        final Desordre d11 = new Desordre();
+        d11.setLinearId("lin2");
+        d11.setDesignation(null);
+        des.add(d11);
+        final Desordre d12 = new Desordre();
+        d12.setLinearId(null);
+        d12.setDesignation(null);
+        des.add(d12);
+        final Desordre d13 = new Desordre();
+        d13.setLinearId(null);
+        d13.setDesignation("d13");
+        des.add(d13);
+        
+        
+        final Desordre d1 = new Desordre();
+        d1.setLinearId("lin3");
+        d1.setDesignation("d1");
+        des.add(d1);
+        final Desordre d2 = new Desordre();
+        d2.setLinearId("lin3");
+        d2.setDesignation("d2");
+        des.add(d2);
+        final Desordre d3= new Desordre();
+        d3.setLinearId("lin1");
+        d3.setDesignation("d3");
+        des.add(d3);
+        final Desordre d4= new Desordre();
+        d4.setLinearId("lin2");
+        d4.setDesignation("d4");
+        des.add(d4);
+        final Desordre d5 = new Desordre();
+        d5.setLinearId("lin3");
+        d5.setDesignation("d5");
+        des.add(d5);
+        final Desordre d6 = new Desordre();
+        d6.setLinearId("lin2");
+        d6.setDesignation("d6");
+        des.add(d6);
+        final Desordre d7 = new Desordre();
+        d7.setLinearId("lin1");
+        d7.setDesignation("d7");
+        des.add(d7);
+        final Desordre d8 = new Desordre();
+        d8.setLinearId("lin3");
+        d8.setDesignation("d8");
+        des.add(d8);
+        final Desordre d9 = new Desordre();
+        d9.setLinearId("lin1");
+        d9.setDesignation("d9");
+        des.add(d9);
+        final Desordre d10 = new Desordre();
+        d10.setLinearId("lin3");
+        d10.setDesignation("d10");
+        des.add(d10);
+        
+        des.sort(PrinterUtilities.OBJET_COMPARATOR);
+        
+        assertTrue(des.indexOf(d3)==0);
+        assertTrue(des.indexOf(d7)==1);
+        assertTrue(des.indexOf(d9)==2);
+        assertTrue(des.indexOf(d4)==3);
+        assertTrue(des.indexOf(d6)==4);
+        assertTrue(des.indexOf(d11)==5);
+        assertTrue(des.indexOf(d1)==6);
+        
+        assertTrue(des.indexOf(d10)==7);
+        assertTrue(des.indexOf(d2)==8);
+        assertTrue(des.indexOf(d5)==9);
+        assertTrue(des.indexOf(d8)==10);
+        assertTrue(des.indexOf(d13)==11 || des.indexOf(d13)==12);
+        assertTrue(des.indexOf(d12)==11 || des.indexOf(d12)==12);
     }
 }
