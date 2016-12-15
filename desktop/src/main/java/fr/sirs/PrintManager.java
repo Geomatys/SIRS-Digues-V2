@@ -66,7 +66,7 @@ public class PrintManager {
         if (nodes == null || nodes.isEmpty())
             return null;
 
-        final ArrayList<Node> children = new ArrayList<>();
+        final List<Node> children = new ArrayList<>();
         for (final Node n : nodes) {
             if (n.isDisabled() || n.isMouseTransparent() || !n.isVisible()) {
                 continue;
@@ -304,7 +304,7 @@ public class PrintManager {
         prestationFields.add(new JRColumnParameter("commentaire", 2.5f));
 
         final List<JRColumnParameter> reseauFields = new ArrayList<>();
-        reseauFields.add(new JRColumnParameter("designation", true));
+        reseauFields.add(new JRColumnParameter("designation"));
         reseauFields.add(new JRColumnParameter("libelle"));
         reseauFields.add(new JRColumnParameter("date_debut"));
         reseauFields.add(new JRColumnParameter("date_fin"));
