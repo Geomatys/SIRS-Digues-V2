@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -30,19 +30,21 @@ import java.util.Properties;
 
 /**
  * Définit les préférences liées à l'installation locale de l'application.
- * 
+ *
  * @author Alexis Manin (Geomatys)
  */
 public class SirsPreferences extends Properties {
-    
+
     private static final Path PREFERENCES_PATH = CONFIGURATION_PATH.resolve("preferences.properties");
     private static final String COMMENTS = null;
-    
+
     public static enum PROPERTIES {
         REFERENCE_URL("Adresse des références", "Url à laquelle se trouvent les différents fichiers centralisés des références de l'application.", "http://sirs-digues.info/wp-content/tablesReferences/"),
         UPDATE_CORE_URL("Mise à jour de l'application", "Url à laquelle se trouve le service de mise à jour de l'application.", "http://sirs-digues.info/wp-content/updates/core.json"),
         UPDATE_PLUGINS_URL("Mise à jour des plugins", "Url à laquelle se trouve le service de mise à jour des plugins.", "http://sirs-digues.info/wp-content/updates/plugins.json"),
-        COUCHDB_LOCAL_ADDR("Addresse de la base CouchDB locale", "Addresse d'accès à la base CouchDB locale, pour les réplications sur le poste.", "http://127.0.0.1:5984/");
+        COUCHDB_LOCAL_ADDR("Addresse de la base CouchDB locale", "Addresse d'accès à la base CouchDB locale, pour les réplications sur le poste.", "http://127.0.0.1:5984/"),
+        DESIGNATION_AUTO_INCREMENT("Auto-incrément des désignations", "Lorsqu'un nouvel élément sera créé, sa désignation sera automatiquement remplie avec une valeur numérique"
+                + " déterminée à partir de l'objet du même type ayant une déisgnation de forme numérique la plus haute trouvée dans la base de données, + 1.", Boolean.FALSE.toString());
 
         public final String title;
         public final String description;
@@ -52,7 +54,7 @@ public class SirsPreferences extends Properties {
             this.description = description;
             this.defaultValue = defaultValue;
         }
-        
+
         public String getDefaultValue(){return defaultValue;}
     }
 
@@ -68,7 +70,7 @@ public class SirsPreferences extends Properties {
         }
         reload();
     }
-    
+
     /**
      * L'instance unique à utiliser pour travailler avec les propriétés.
      */
@@ -80,7 +82,7 @@ public class SirsPreferences extends Properties {
             throw new ExceptionInInitializerError(e);
         }
     }
-    
+
     /**
      * Recharge les propriétés depuis le disque.
      * @throws IOException Si on échoue à lire le fichier contenant les propriétés.
@@ -89,7 +91,7 @@ public class SirsPreferences extends Properties {
         try (final InputStream stream = Files.newInputStream(PREFERENCES_PATH, StandardOpenOption.READ)) {
             this.load(stream);
         }
-        
+
         for (final PROPERTIES prop : PROPERTIES.values()) {
             try {
                 getProperty(prop);
@@ -100,7 +102,7 @@ public class SirsPreferences extends Properties {
             }
         }
     }
-    
+
     /**
      * Ecris les propriétés courantes sur le disque.
      * @throws IOException Si on échoue à écrire le fichier contenant les propriétés.
@@ -110,10 +112,10 @@ public class SirsPreferences extends Properties {
             store(propertyFile, COMMENTS);
         }
     }
-    
+
     /**
      * Enregistre les préferences données dans le fichier de propriétés lié.
-     * 
+     *
      * @param values Une table dont les clés sont les propriétés à mettre à jour,
      * accompagnées de leur valeur.
      * @throws IOException Si une erreur survient lors de la persistence des prpriétés.
@@ -122,11 +124,11 @@ public class SirsPreferences extends Properties {
         for (final Map.Entry<PROPERTIES, String> entry : values.entrySet()) {
             setProperty(entry.getKey().name(), entry.getValue());
         }
-        
+
         store();
         reload();
     }
-    
+
     /**
      * Override {@link java.util.Properties#getProperty(String)} method to forbid returning null or empty value.
      * @param key key of the value to retrieve.
@@ -152,7 +154,7 @@ public class SirsPreferences extends Properties {
     public String getProperty(PROPERTIES key) throws IllegalStateException {
         return getProperty(key.name());
     }
-    
+
     /**
      * @param key key of the value to retrieve.
      * @return The value stored for queried property. Can be null or empty.

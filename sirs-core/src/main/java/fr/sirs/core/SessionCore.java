@@ -118,7 +118,8 @@ public class SessionCore implements ApplicationContextAware {
     private final ObjectProperty<Role> role = new SimpleObjectProperty();
     public Role getRole(){return role.get();}
 
-    private final ElementCreator elementCreator;
+    @Autowired
+    ElementCreator elementCreator;
 
     public ElementCreator getElementCreator(){return elementCreator;}
 
@@ -266,7 +267,6 @@ public class SessionCore implements ApplicationContextAware {
         }
 
         referenceUsageRepository = new ReferenceUsageRepository(connector);
-        elementCreator = new ElementCreator(this);
 
         // Listen on user change
         utilisateurProperty.addListener(

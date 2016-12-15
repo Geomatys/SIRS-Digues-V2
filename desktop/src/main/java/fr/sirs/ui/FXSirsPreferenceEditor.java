@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -61,7 +61,9 @@ public class FXSirsPreferenceEditor extends ScrollPane implements SaveableConfig
      * with a personalized component.
      */
     private static final HashMap<SirsPreferences.PROPERTIES, Node> EDITOR_OVERRIDES = new HashMap<>();
-
+    static {
+        EDITOR_OVERRIDES.put(SirsPreferences.PROPERTIES.DESIGNATION_AUTO_INCREMENT, new IncrementCheckBox());
+    }
 
     final ObservableMap<SirsPreferences.PROPERTIES, String> editedProperties = FXCollections.observableHashMap();
 
