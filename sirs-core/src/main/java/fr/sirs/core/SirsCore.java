@@ -197,6 +197,7 @@ public class SirsCore {
     public static final String COUCH_DB_DOCUMENT_FIELD = "couchDBDocument";
 
     public static final String LINEAR_ID_FIELD = "linearId";
+    public static final String DIGUE_ID_FIELD = "digueId";
     public static final String FOREIGN_PARENT_ID_FIELD = "foreignParentId";
 
     public static final String PR_DEBUT_FIELD = "prDebut";
