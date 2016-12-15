@@ -18,6 +18,7 @@
  */
 package fr.sirs.util;
 
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
@@ -92,6 +93,7 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         
         // Sets the initial fields used by the template.------------------------
         writeFields();
+        writeField(String.class, SirsCore.DIGUE_ID_FIELD, "Champ ajouté de force pour prendre en compte l'intitulé de la digue.");// Ajout d'un champ pour l'intitulé de la digue.
         if(printPhoto) writeField(ObjectDataSource.class, PHOTO_DATA_SOURCE, "Source de données des photos");
         writeField(ObjectDataSource.class, OBSERVATION_TABLE_DATA_SOURCE, "Source de données des observations");
         if(printReseauOuvrage) writeField(ObjectDataSource.class, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, "Source de données des réseaux");

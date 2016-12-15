@@ -18,17 +18,16 @@
  */
 package fr.sirs.util;
 
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.Prestation;
 import static fr.sirs.util.JRUtils.ATT_HEIGHT;
 import static fr.sirs.util.JRUtils.TAG_BAND;
-import static fr.sirs.util.JRUtils.TAG_SUB_DATASET;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -101,6 +100,7 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         
         // Sets the initial fields used by the template.------------------------
         writeFields();
+        writeField(String.class, SirsCore.DIGUE_ID_FIELD, "Champ ajouté de force pour prendre en compte l'intitulé de la digue.");// Ajout d'un champ pour l'intitulé de la digue.
         if(printPhoto) writeField(ObjectDataSource.class, PHOTO_DATA_SOURCE, "Source de données des photos");
         writeField(ObjectDataSource.class, OBSERVATION_TABLE_DATA_SOURCE, "Source de données des observations");
         writeField(ObjectDataSource.class, PRESTATION_TABLE_DATA_SOURCE, "Source de données des prestations");

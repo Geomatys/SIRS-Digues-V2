@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
-import javafx.collections.FXCollections;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import net.sf.jasperreports.engine.JRDataSource;

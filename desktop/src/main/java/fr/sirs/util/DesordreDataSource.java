@@ -19,8 +19,10 @@
 package fr.sirs.util;
 
 import fr.sirs.Injector;
+import static fr.sirs.core.SirsCore.DIGUE_ID_FIELD;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
+import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.EchelleLimnimetrique;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Observation;
@@ -33,6 +35,7 @@ import fr.sirs.core.model.Prestation;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.ReseauTelecomEnergie;
+import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieDigue;
 import static fr.sirs.util.JRDomWriterDesordreSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTO_DATA_SOURCE;
@@ -69,7 +72,16 @@ public class DesordreDataSource extends ObjectDataSource<Desordre> {
 
         final String name = jrf.getName();
 
-        if(PHOTO_DATA_SOURCE.equals(name)){
+        if(DIGUE_ID_FIELD.equals(name)){
+            if(currentObject!=null&&currentObject.getLinearId()!=null){
+                final TronconDigue troncon = Injector.getSession().getRepositoryForClass(TronconDigue.class).get(currentObject.getLinearId());
+                if(troncon!=null&&troncon.getDigueId()!=null){
+                    return parsePropertyValue(troncon.getDigueId(), Digue.class, String.class);
+                }
+            }
+            return null;
+        }
+        else if(PHOTO_DATA_SOURCE.equals(name)){
             final List<Photo> photos = new ArrayList<>();
             for(final Observation observation : currentObject.observations){
                 if(observation.photos!=null && !observation.photos.isEmpty()){

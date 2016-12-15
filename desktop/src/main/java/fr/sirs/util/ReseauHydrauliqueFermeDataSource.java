@@ -19,9 +19,11 @@
 package fr.sirs.util;
 
 import fr.sirs.Injector;
+import static fr.sirs.core.SirsCore.DIGUE_ID_FIELD;
 import fr.sirs.core.component.DesordreRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
+import fr.sirs.core.model.Digue;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
@@ -30,6 +32,7 @@ import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.StationPompage;
+import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.DESORDRE_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.PHOTO_DATA_SOURCE;
@@ -85,7 +88,16 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
 
         final String name = jrf.getName();
 
-        if(PHOTO_DATA_SOURCE.equals(name)){
+        if(DIGUE_ID_FIELD.equals(name)){
+            if(currentObject!=null&&currentObject.getLinearId()!=null){
+                final TronconDigue troncon = Injector.getSession().getRepositoryForClass(TronconDigue.class).get(currentObject.getLinearId());
+                if(troncon!=null&&troncon.getDigueId()!=null){
+                    return parsePropertyValue(troncon.getDigueId(), Digue.class, String.class);
+                }
+            }
+            return null;
+        }
+        else if(PHOTO_DATA_SOURCE.equals(name)){
             final List<Photo> photos = new ArrayList<>();
             for(final ObservationReseauHydrauliqueFerme observation : currentObject.getObservations()){
                 if(observation.getPhotos()!=null && !observation.getPhotos().isEmpty()){

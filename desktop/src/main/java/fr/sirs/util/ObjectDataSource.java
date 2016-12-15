@@ -103,7 +103,7 @@ public class ObjectDataSource<T> implements JRDataSource {
      * @param outputClass The type of object to return.
      * @return Extracted information, or null if analysis failed.
      */
-    private Object parsePropertyValue(Object propertyValue, final Class refClass, final Class outputClass) {
+    protected Object parsePropertyValue(Object propertyValue, final Class refClass, final Class outputClass) {
         if (propertyValue instanceof Collection) {
             final PrintableArrayList resultList = new PrintableArrayList(propertyValue instanceof List);
             for (final Object data : (Collection) propertyValue) {

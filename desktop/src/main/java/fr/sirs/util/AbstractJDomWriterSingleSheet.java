@@ -90,7 +90,7 @@ public abstract class AbstractJDomWriterSingleSheet extends AbstractJDomWriter {
         // Builds the name of the field.----------------------------------------
         final String fieldName = method.getName().substring(3, 4).toLowerCase()
                         + method.getName().substring(4);
-        writeField(method.getParameterTypes()[0], fieldName, "Mettre ici une description du champ.");
+        writeField(method.getParameterTypes()[0], fieldName, "Champ ajouté par introspection.");
     }
 
     protected void writeField(final Class type, final String name, final String description){

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="jasper_report_template" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="10e7ad18-cce4-4b7d-832d-94e5135fe8c0">
-	<property name="ireport.zoom" value="1.9487171000000172"/>
-	<property name="ireport.x" value="96"/>
-	<property name="ireport.y" value="58"/>
+	<property name="ireport.zoom" value="1.7715610000000155"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
 	<style name="table_CH" mode="Opaque" backcolor="#FFFFFF">
 		<box topPadding="5" leftPadding="3" bottomPadding="5" rightPadding="3">
 			<pen lineWidth="0.5" lineColor="#B2A1C7"/>
@@ -20,31 +20,38 @@
 	</style>
 	<subDataset name="Observation Dataset" uuid="f87f5cd0-3234-40c4-9ea3-250724f36d5e"/>
 	<subDataset name="ReseauOuvrage Dataset" uuid="df00eaba-db68-4b08-8235-09c8aa0b6e8c"/>
-	<subDataset name="Desordre Dataset"/>
+	<subDataset name="Desordre Dataset" uuid="50a50ee9-90dd-41b1-aabc-cdfdecbccc33"/>
 	<parameter name="PHOTO_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport"/>
 	<title>
-		<band />
+		<band/>
 	</title>
 	<pageHeader>
-		<band />
+		<band/>
 	</pageHeader>
 	<columnHeader>
-		<band />
+		<band/>
 	</columnHeader>
 	<detail>
-		<band height="248" splitType="Stretch">
+		<band height="268" splitType="Stretch">
 			<frame>
-				<reportElement mode="Opaque" x="0" y="0" width="555" height="28" uuid="7e90d220-3a9a-4a61-b736-a6cad2b30566"/>
+				<reportElement mode="Opaque" x="0" y="0" width="555" height="48" uuid="7e90d220-3a9a-4a61-b736-a6cad2b30566"/>
 				<staticText>
-					<reportElement x="0" y="0" width="555" height="26" uuid="89c68cdb-b022-43cc-858f-04690206436b"/>
+					<reportElement x="0" y="0" width="555" height="22" uuid="89c68cdb-b022-43cc-858f-04690206436b"/>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font fontName="Serif" size="16" isBold="false"/>
 					</textElement>
 					<text><![CDATA[Fiche détaillée de réseau hydraulique fermé]]></text>
 				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement  positionType="Float" x="0" y="22" width="555" height="16" />
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Serif" size="12"/>
+					</textElement>
+					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{digueId})]]></textFieldExpression>
+				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="28" width="555" height="14" backcolor="#B2A1C7" uuid="e9515967-8551-4baf-9ece-675713572d85"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="48" width="555" height="14" backcolor="#B2A1C7" uuid="e9515967-8551-4baf-9ece-675713572d85"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="1" width="545" height="12" uuid="f2e8836c-b61f-4ad0-aac7-590cd453e6e5"/>
 					<textElement verticalAlignment="Middle">
@@ -54,7 +61,7 @@
 				</staticText>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="42" width="555" height="12" backcolor="#FFFFFF" uuid="b0a96719-0ed1-44d4-8762-38ac9bcc34fa"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="62" width="555" height="12" backcolor="#FFFFFF" uuid="b0a96719-0ed1-44d4-8762-38ac9bcc34fa"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="459226d2-85bf-4a43-ada4-b175ccaa4983"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -85,7 +92,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="54" width="555" height="12" backcolor="#DFD8E8" uuid="02d9c324-3ac0-42d0-aa9e-0b401f14863d"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="74" width="555" height="12" backcolor="#DFD8E8" uuid="02d9c324-3ac0-42d0-aa9e-0b401f14863d"/>
 				<staticText>
 					<reportElement positionType="Float" x="130" y="0" width="100" height="12" uuid="9caf9b0d-875c-40bd-bd75-4cd689980517"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -116,7 +123,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="66" width="555" height="12" backcolor="#FFFFFF" uuid="0e5f620d-ae56-4464-a0d2-b9d3ac85412b"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="86" width="555" height="12" backcolor="#FFFFFF" uuid="0e5f620d-ae56-4464-a0d2-b9d3ac85412b"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="a9c8b115-9926-4cb9-bf49-5fd53252f997"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -147,7 +154,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="78" width="555" height="12" backcolor="#DFD8E8" uuid="02d9c324-3ac0-42d0-aa9e-0b401f14863d"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="98" width="555" height="12" backcolor="#DFD8E8" uuid="02d9c324-3ac0-42d0-aa9e-0b401f14863d"/>
 				<staticText>
 					<reportElement positionType="Float" x="130" y="0" width="100" height="12" uuid="9caf9b0d-875c-40bd-bd75-4cd689980517"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -178,7 +185,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="90" width="555" height="12" backcolor="#FFFFFF" uuid="e423bc72-aff4-4491-b057-3140660fd441"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="110" width="555" height="12" backcolor="#FFFFFF" uuid="e423bc72-aff4-4491-b057-3140660fd441"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="120" height="12" uuid="d7da9cd0-dc97-4465-ac0f-45871b6a9d3a"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -195,7 +202,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="102" width="555" height="12" backcolor="#DFD8E8" uuid="c22aaddd-a331-4518-82ac-464fd37a289c"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="122" width="555" height="12" backcolor="#DFD8E8" uuid="c22aaddd-a331-4518-82ac-464fd37a289c"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="120" height="12" uuid="05f85007-63da-4cf2-a91d-370c6f08e7cf"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -212,7 +219,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="138" width="555" height="14" backcolor="#B2A1C7" uuid="62e862ef-7bf7-4e55-82f0-e1ecb659c0f1"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="158" width="555" height="14" backcolor="#B2A1C7" uuid="62e862ef-7bf7-4e55-82f0-e1ecb659c0f1"/>
 				<staticText>
 					<reportElement x="10" y="1" width="545" height="12" uuid="cd0f4df6-f9f6-40c0-884e-053ad25fcb32"/>
 					<textElement verticalAlignment="Middle">
@@ -222,7 +229,7 @@
 				</staticText>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="152" width="555" height="12" backcolor="#FFFFFF" uuid="9a5c9dcb-362d-4582-b623-e2dc4851a4d3"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="172" width="555" height="12" backcolor="#FFFFFF" uuid="9a5c9dcb-362d-4582-b623-e2dc4851a4d3"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="47354525-ae0e-4bfa-99b0-a8a5ff298881"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -246,7 +253,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="164" width="555" height="12" backcolor="#DFD8E8" uuid="cb3f6e9a-e5eb-4fdf-89c9-f8d4caf5bebf"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="184" width="555" height="12" backcolor="#DFD8E8" uuid="cb3f6e9a-e5eb-4fdf-89c9-f8d4caf5bebf"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="120" height="12" uuid="902a6a79-d700-4b9d-8629-de83910b379d"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -263,7 +270,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="176" width="555" height="12" backcolor="#FFFFFF" uuid="eb6e93f0-e640-48be-b20b-2ea7290d6109"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="196" width="555" height="12" backcolor="#FFFFFF" uuid="eb6e93f0-e640-48be-b20b-2ea7290d6109"/>
 				<staticText>
 					<reportElement positionType="Float" x="130" y="0" width="100" height="12" uuid="df6998e9-1d13-4ad0-badc-cb7a2026a600"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -294,7 +301,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="188" width="555" height="12" backcolor="#DFD8E8" uuid="67b2fbed-89e0-4d70-b400-57e0de20b423"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="208" width="555" height="12" backcolor="#DFD8E8" uuid="67b2fbed-89e0-4d70-b400-57e0de20b423"/>
 				<staticText>
 					<reportElement positionType="Float" x="130" y="0" width="100" height="12" uuid="f9df8c90-3cab-4c1d-a240-4aac3b97d602"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -325,7 +332,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="200" width="555" height="12" backcolor="#FFFFFF" uuid="76fe1118-6c07-4f81-aa6c-d365abebad59"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="220" width="555" height="12" backcolor="#FFFFFF" uuid="76fe1118-6c07-4f81-aa6c-d365abebad59"/>
 				<staticText>
 					<reportElement positionType="Float" x="130" y="0" width="100" height="12" uuid="4d154de6-156c-4ad5-bacb-e4203e816aab"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -356,7 +363,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="212" width="555" height="12" backcolor="#DFD8E8" uuid="cb205cc8-4443-44de-8e90-4da41022d5f6"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="232" width="555" height="12" backcolor="#DFD8E8" uuid="cb205cc8-4443-44de-8e90-4da41022d5f6"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="0696493d-99fc-413a-a5f6-2e67e21ff935"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -387,7 +394,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="224" width="555" height="12" backcolor="#FFFFFF" uuid="0e1acf57-eccd-4210-8f1d-62cff5a475f1"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="244" width="555" height="12" backcolor="#FFFFFF" uuid="0e1acf57-eccd-4210-8f1d-62cff5a475f1"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="d1bc4e45-b009-45da-974f-911164385de5"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
@@ -418,7 +425,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="236" width="555" height="12" backcolor="#DFD8E8" uuid="0e5f620d-ae56-4464-a0d2-b9d3ac85412b"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="256" width="555" height="12" backcolor="#DFD8E8" uuid="0e5f620d-ae56-4464-a0d2-b9d3ac85412b"/>
 				<staticText>
 					<reportElement positionType="Float" x="10" y="0" width="70" height="12" uuid="a9c8b115-9926-4cb9-bf49-5fd53252f997"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
