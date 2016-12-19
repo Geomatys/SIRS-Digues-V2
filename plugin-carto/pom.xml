@@ -17,8 +17,8 @@
 
     <properties>
         <plugin.core.version.min>4</plugin.core.version.min>
-        <geotoolkit.dwg.version>2.0-SNAPSHOT</geotoolkit.dwg.version>
-        <geotoolkit.hexagon.version>2.0-SNAPSHOT</geotoolkit.hexagon.version>
+        <geotoolkit.dwg.version>2.0.0-MC0004</geotoolkit.dwg.version>
+        <geotoolkit.hexagon.version>2.0.0-MC0004</geotoolkit.hexagon.version>
     </properties>
 
     <dependencies>
