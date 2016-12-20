@@ -58,7 +58,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 /**
- *
+ * NOTE : Overriden from Geotoolkit, because we've replaced timeline with a
+ * simple date picker.
+ * 
  * @author Johann Sorel (Geomatys)
  */
 public class FXCoordinateBar extends GridPane {
@@ -148,7 +150,7 @@ public class FXCoordinateBar extends GridPane {
 
         dateField.valueProperty().addListener(rangeListener);
         DatePickerConverter.register(dateField);
-        
+
         statusBar.getLeftItems().add(dateField);
 
         scaleCombo.getItems().addAll(  1000l,
