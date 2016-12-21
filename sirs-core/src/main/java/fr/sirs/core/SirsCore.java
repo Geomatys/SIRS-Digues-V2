@@ -170,6 +170,8 @@ public class SirsCore {
 
     public static final Path IMPORT_ERROR_DIR = CONFIGURATION_PATH.resolve("importErrors");
 
+    public static final Path NTV2_PATH = CONFIGURATION_PATH.resolve("ntv2").resolve("gr3df97a.txt");
+    
     //--------------------------------------------------------------------------
     // Champs spéciaux des classes utilisés dans le code
     //--------------------------------------------------------------------------
@@ -259,7 +261,7 @@ public class SirsCore {
     public static final String REFERENCE_GET_ID = "getId";
     public static final String REFERENCE_SET_DESIGNATION = "setDesignation";
 
-    protected static final String NTV2_PATH = "/fr/sirs/ntv2";
+    protected static final String NTV2_RESOURCE = "/fr/sirs/ntv2/gr3df97a.txt";
 
     /**
      * User directory root folder.
@@ -304,33 +306,38 @@ public class SirsCore {
         noJavaPrefs.put("platform", "server");
         Setup.initialize(noJavaPrefs);
 
-        final String url = "jdbc:hsqldb:file:" + SirsCore.EPSG_PATH.resolve("db");
+        final String url = "jdbc:hsqldb:" + SirsCore.EPSG_PATH.resolve("db").toUri();
         final JDBCDataSource ds = new JDBCDataSource();
         ds.setDatabase(url);
         JNDI.setEPSG(ds);
 
         // On tente d'installer la grille NTV2 pour améliorer la précision du géo-réferencement.
         try {
-            final URI ntv2URI = SirsCore.class.getResource(NTV2_PATH).toURI();
-            final Path gridPath;
-            if (ntv2URI.getScheme().equalsIgnoreCase("file")) {
-                gridPath = Paths.get(ntv2URI);
-            } else if (ntv2URI.getScheme().equalsIgnoreCase("jar")) {
-                FileSystem jarFS;
-                try {
-                    jarFS = FileSystems.newFileSystem(ntv2URI, Collections.EMPTY_MAP);
-                } catch (FileSystemAlreadyExistsException e) {
-                    jarFS = FileSystems.getFileSystem(ntv2URI);
-                }
-                gridPath = jarFS.getPath(NTV2_PATH);
-                ClosingDaemon.watchResource(gridPath, jarFS);
-            } else {
-                throw new IOException("Unknown resource scheme.");
-            }
+            if (!Files.exists(NTV2_PATH)) {
+                Files.createDirectories(NTV2_PATH.getParent());
 
+                final URI ntv2URI = SirsCore.class.getResource(NTV2_RESOURCE).toURI();
+                final Path gridPath;
+                if (ntv2URI.getScheme().equalsIgnoreCase("file")) {
+                    gridPath = Paths.get(ntv2URI);
+                } else if (ntv2URI.getScheme().equalsIgnoreCase("jar")) {
+                    FileSystem jarFS;
+                    try {
+                        jarFS = FileSystems.newFileSystem(ntv2URI, Collections.EMPTY_MAP);
+                    } catch (FileSystemAlreadyExistsException e) {
+                        jarFS = FileSystems.getFileSystem(ntv2URI);
+                    }
+                    gridPath = jarFS.getPath(NTV2_RESOURCE);
+                    ClosingDaemon.watchResource(gridPath, jarFS);
+                } else {
+                    throw new IOException("Unknown resource scheme.");
+                }
+
+                Files.copy(gridPath, NTV2_PATH);
+            }
             Field dirField = DataDirectory.class.getDeclaredField("directory");
             dirField.setAccessible(true);
-            dirField.set(DataDirectory.DATUM_CHANGES, gridPath);
+            dirField.set(DataDirectory.DATUM_CHANGES, NTV2_PATH.getParent());
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "NTV2 data for RGF93 cannot be installed.", ex);
             Platform.runLater(() ->
