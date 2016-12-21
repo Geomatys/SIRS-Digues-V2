@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -35,6 +35,7 @@ import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -443,7 +444,7 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      * @param repo Connecteur à la base de données permettant de récupérer les bornes dans la base de données.
      * @return Segment contenant le point décrit, avec la distance entre le point et le debut du segment.
      */
-    public static Entry<LineString, Double> buildSegmentFromBorne(final LineString tronconLineString, 
+    public static Entry<LineString, Double> buildSegmentFromBorne(final LineString tronconLineString,
             final String borneId, final boolean borneAval, final double borneDistance,
             final AbstractSIRSRepository<BorneDigue> repo) {
 
@@ -480,19 +481,44 @@ public final class LinearReferencingUtilities extends LinearReferencing {
      * @param segments An array of segments composing a line string.
      * @param distance Distance to the wanted segment, from the start of the segment array.
      * @return Extracted segment for given distance, and distance between segment start and given distance along reference line string.
+     * @throws ArrayIndexOutOfBoundsException If given array is empty.
      */
-    public static Entry<SegmentInfo, Double> getSegmentAndDistance(SegmentInfo[] segments, double distance){
-        SegmentInfo segment = segments[0];
-        double distanceToSegmentStart=0.;
-        for(int i=1;i<segments.length;i++){
-            if(segments[i].startDistance < distance){
-                segment = segments[i];
-                distanceToSegmentStart=distance-segments[i].startDistance;
-            }else{
-                break;
+    public static Entry<SegmentInfo, Double> getSegmentAndDistance(SegmentInfo[] segments, final double distance) {
+        // First, we check extremums. So we eliminate any edge case.
+        final SegmentInfo segment;
+        if (segments[0].endDistance >= distance) {
+            segment = segments[0];
+        } else if (segments[segments.length -1].startDistance <= distance) {
+            segment = segments[segments.length -1];
+        } else {
+            /* Make a binary search based on distances to speed up segment search.
+             * Extremums are ignored as they've been fully tested above.
+             */
+            int lower = 1;
+            int upper = segments.length - 2;
+            int middle = 0;
+            while (upper >= lower) {
+                // We've not found a segment matching requirements, but we've only one possibility left.
+                if (lower == upper) {
+                    middle = lower;
+                    break;
+                }
+
+                middle = lower + (upper - lower) / 2;
+                if (segments[middle].endDistance < distance) {
+                    // Checked segment ends before source distance
+                    lower = middle + 1;
+                } else if (segments[middle].startDistance > distance) {
+                    // Checked segment starts after given distance
+                    upper = middle - 1;
+                } else
+                    break;
             }
+
+            segment = segments[middle];
         }
-        return new HashMap.SimpleEntry<>(segment, distanceToSegmentStart);
+
+        return new AbstractMap.SimpleEntry<>(segment, distance - segment.startDistance);
     }
 
     /**
