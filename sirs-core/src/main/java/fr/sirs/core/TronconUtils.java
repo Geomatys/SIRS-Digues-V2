@@ -917,6 +917,11 @@ public class TronconUtils {
      */
     public static void computePRs(final Positionable targetPos, final SessionCore session) {
         ArgumentChecks.ensureNonNull("Input position to compute PR for.", targetPos);
+        computePRs(new PosInfo(targetPos), session);
+    }
+
+    public static void computePRs(final PosInfo targetPos, final SessionCore session) {
+        ArgumentChecks.ensureNonNull("Input position to compute PR for.", targetPos);
         ArgumentChecks.ensureNonNull("Database connection.", session);
 
         /* To be able to compute a PR, we need at least a valid linear position,
@@ -924,18 +929,17 @@ public class TronconUtils {
          * The borne must be contained in the current positionable target.
          * We also need the linear on which the object is projected.
          */
-        final PosInfo objInfo = new PosInfo(targetPos);
-        LinearReferencing.SegmentInfo[] linearSegments = objInfo.getTronconSegments(false);
+        LinearReferencing.SegmentInfo[] linearSegments = targetPos.getTronconSegments(false);
         ArgumentChecks.ensureNonNull("Linear for position projection.", linearSegments);
 
-        final String srid = objInfo.getTroncon().getSystemeRepDefautId();
+        final String srid = targetPos.getTroncon().getSystemeRepDefautId();
         ArgumentChecks.ensureNonEmpty("SRID ", srid);
 
         BorneDigueRepository borneRepo = (BorneDigueRepository) session.getRepositoryForClass(BorneDigue.class);
         SystemeReperage currentSR = session.getRepositoryForClass(SystemeReperage.class).get(srid);
 
-        targetPos.setPrDebut(computePR(linearSegments, currentSR, objInfo.getGeoPointStart(), borneRepo));
-        targetPos.setPrFin(computePR(linearSegments, currentSR, objInfo.getGeoPointEnd(), borneRepo));
+        targetPos.pos.setPrDebut(computePR(linearSegments, currentSR, targetPos.getGeoPointStart(), borneRepo));
+        targetPos.pos.setPrFin(computePR(linearSegments, currentSR, targetPos.getGeoPointEnd(), borneRepo));
     }
 
     /**

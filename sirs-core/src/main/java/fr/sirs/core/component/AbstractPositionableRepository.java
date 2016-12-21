@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -18,10 +18,15 @@
  */
 package fr.sirs.core.component;
 
+import fr.sirs.core.InjectorCore;
+import fr.sirs.core.SessionCore;
+import fr.sirs.core.SirsCore;
+import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.StreamingIterable;
 import java.util.List;
+import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
 
@@ -31,7 +36,7 @@ import org.ektorp.CouchDbConnector;
  * @param <T> Type of object managed by this repository.
  */
 public abstract class AbstractPositionableRepository<T extends Positionable> extends AbstractSIRSRepository<T> {
-    
+
     public AbstractPositionableRepository(Class<T> type, CouchDbConnector db) {
         super(type, db);
     }
@@ -54,5 +59,26 @@ public abstract class AbstractPositionableRepository<T extends Positionable> ext
     public StreamingIterable<T> getByLinearIdStreaming(final String linearId) {
         ArgumentChecks.ensureNonNull("Linear", linearId);
         return new StreamingViewIterable(globalRepo.createByLinearIdQuery(type, linearId));
+    }
+
+    @Override
+    protected T onLoad(T loaded) {
+        loaded = super.onLoad(loaded);
+        if (loaded.getGeometry() == null)
+            updateGeometryAndPRs(loaded);
+        return loaded;
+    }
+
+    private void updateGeometryAndPRs(final T target) {
+        try {
+            final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(target);
+            if (posInfo.getTroncon() != null) {
+                posInfo.getGeometry();
+                // Try computing PRs on default SR
+                TronconUtils.computePRs(posInfo, InjectorCore.getBean(SessionCore.class));
+            }
+        } catch (Exception e) {
+            SirsCore.LOGGER.log(Level.WARNING, "Cannot update geometry for newly loaded positionable object.", e);
+        }
     }
 }
