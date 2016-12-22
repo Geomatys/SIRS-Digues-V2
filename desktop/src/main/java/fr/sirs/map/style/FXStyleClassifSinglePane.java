@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -33,7 +33,7 @@ import org.opengis.filter.expression.PropertyName;
  *
  * @author Johann Sorel (Geomatys)
  */
-public class FXStyleClassifSinglePane extends org.geotoolkit.gui.javafx.layer.style.FXStyleClassifSinglePane{
+public class FXStyleClassifSinglePane extends org.geotoolkit.gui.javafx.layer.style.FXStyleClassifSinglePane {
 
     public FXStyleClassifSinglePane(){
         super();
@@ -50,7 +50,7 @@ public class FXStyleClassifSinglePane extends org.geotoolkit.gui.javafx.layer.st
         } catch (DocumentNotFoundException e) {
             SirsCore.LOGGER.log(Level.FINE, "No document found for id : " + desc, e);
         }
-        
+
         final MutableStyleFactory sf = GeotkFX.getStyleFactory();
         final FilterFactory ff = GeotkFX.getFilterFactory();
 

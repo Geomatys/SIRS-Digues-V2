@@ -83,6 +83,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javax.swing.SwingConstants;
 import org.apache.sis.geometry.GeneralEnvelope;
@@ -205,7 +206,15 @@ public class FXMapPane extends BorderPane implements Printable {
         uiTree = new FXMapContextTree();
         uiTree.getTreetable().getColumns().clear();
         uiTree.getTreetable().getColumns().add(new MapItemNameColumn());
-        uiTree.getTreetable().getColumns().add(new MapItemGlyphColumn());
+        uiTree.getTreetable().getColumns().add(new MapItemGlyphColumn() {
+            // Hack : Replace som style panels with overriden ones
+            @Override
+            protected Pane createEditor(MapLayer candidate) {
+                fr.sirs.map.style.FXStyleAggregatedPane pane = new fr.sirs.map.style.FXStyleAggregatedPane();
+                pane.init(candidate);
+                return pane;
+            }
+        });
         uiTree.getTreetable().getColumns().add(new MapItemVisibleColumn());
 
         uiTree.getTreetable().setShowRoot(false);
