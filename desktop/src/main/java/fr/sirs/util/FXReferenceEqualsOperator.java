@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -132,7 +132,7 @@ public class FXReferenceEqualsOperator implements FXFilterOperator {
         }
 
         return GO2Utilities.FILTER_FACTORY.equals(toApplyOn,
-                GO2Utilities.FILTER_FACTORY.literal(((Preview) choice).getElementId()));
+                GO2Utilities.FILTER_FACTORY.literal(choiceId));
     }
 
     private static Class getReferenceClass(PropertyType propertyType) {
