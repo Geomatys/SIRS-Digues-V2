@@ -491,9 +491,9 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                         @Override
                         public void visit(ProjectedFeature feature, RenderingContext2D context, SearchAreaJ2D area) {
                             Object userData = feature.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
-                            if (userData instanceof TronconDigue) {
+                            if (userData instanceof TronconDigue && session.editionAuthorized((TronconDigue) userData)) {
                                 //on recupere le troncon complet, celui ci n'est qu'une mise a plat
-                                final TronconDigue trc = session.getRepositoryForClass(TronconDigue.class).get(((TronconDigue)userData).getDocumentId());
+                                final TronconDigue trc = session.getRepositoryForClass(TronconDigue.class).get(((TronconDigue) userData).getDocumentId());
                                 foundElements.add(trc);
                             }
                         }
@@ -515,7 +515,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                                 items.clear();
                                 while (it.hasNext()) {
                                     final TronconDigue current = it.next();
-                                    final MenuItem item = new MenuItem(session.generateElementTitle(current));
+                                    final MenuItem item = new MenuItem(Session.generateElementTitle(current));
                                     item.setOnAction((ActionEvent ae) -> tronconProperty.set(current));
                                     items.add(item);
                                 }
@@ -716,5 +716,4 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
             }
         }
     }
-
 }

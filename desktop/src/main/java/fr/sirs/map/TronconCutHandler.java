@@ -379,7 +379,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
                     final Feature feature = helper.grabFeature(e.getX(), e.getY(), false);
                     if(feature !=null){
                         Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
-                        if(bean instanceof TronconDigue){
+                        if(bean instanceof TronconDigue && session.editionAuthorized((TronconDigue)bean)) {
                             //on recupere le troncon complet, celui ci n'est qu'une mise a plat
                             bean = session.getRepositoryForClass(TronconDigue.class).get(((TronconDigue)bean).getDocumentId());
                             editPane.tronconProperty().set((TronconDigue)bean);

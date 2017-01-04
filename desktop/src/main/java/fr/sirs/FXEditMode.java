@@ -80,7 +80,15 @@ public class FXEditMode extends VBox {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
 
-        uiEdit.disableProperty().bind(session.nonGeometryEditionProperty().not());
+        authorIDProperty = new SimpleStringProperty();
+        validProperty = new SimpleBooleanProperty();
+        validProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                resetValidUIs(newValue);
+            });
+        validProperty.set(true);
+
+        final BooleanBinding editionProhibited = session.needValidationProperty().and(validProperty.or(authorIDProperty.isNotEqualTo(session.getUtilisateur().getId())));
+        uiEdit.disableProperty().bind(editionProhibited);
         final BooleanBinding editBind = uiEdit.selectedProperty().not();
         uiSave.disableProperty().bind(editBind);
 
@@ -89,18 +97,11 @@ public class FXEditMode extends VBox {
         uiEdit.setToggleGroup(group);
         group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
             // We check that user has enough rights
-            if (!session.nonGeometryEditionProperty().get())
+            if (editionProhibited.get())
                 group.selectToggle(uiConsult);
             else if (newValue==null)
                 group.selectToggle(oldValue);
             });
-
-        authorIDProperty = new SimpleStringProperty();
-        validProperty = new SimpleBooleanProperty();
-        validProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                resetValidUIs(newValue);
-            });
-        validProperty.set(true);
     }
 
     private void resetValidUIs(final boolean valid){

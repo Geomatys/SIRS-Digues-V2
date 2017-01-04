@@ -128,9 +128,7 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
 
         uiDelete.setGraphic(new ImageView(SIRS.ICON_TRASH_WHITE));
         uiDelete.setOnAction(this::deleteSelection);
-        uiDelete.setDisable(!session.nonGeometryEditionProperty().get());
         uiAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
-        uiAdd.setDisable(!session.nonGeometryEditionProperty().get());
 
         //listen to changes in the db to update tree
         Injector.getDocumentChangeEmiter().addListener(this);

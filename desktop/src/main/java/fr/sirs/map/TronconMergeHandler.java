@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -234,10 +234,10 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
                 final Feature feature = helper.grabFeature(e.getX(), e.getY(), false);
                 if(feature !=null){
                     Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
-                    if(bean instanceof TronconDigue){
+                    if (bean instanceof TronconDigue && session.editionAuthorized((TronconDigue)bean)) {
                         //on recupere le troncon complet, celui ci n'est qu'une mise a plat
                         bean = session.getRepositoryForClass(TronconDigue.class).get(((TronconDigue) bean).getDocumentId());
-                        if(!editPane.getTroncons().contains(bean)){
+                        if(!editPane.getTroncons().contains(bean)) {
                             editPane.getTroncons().add((TronconDigue)bean);
                         }
                     }

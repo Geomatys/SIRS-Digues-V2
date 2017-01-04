@@ -109,10 +109,20 @@ public class SessionCore implements ApplicationContextAware {
     }
 
     private final BooleanProperty geometryEditionProperty = new SimpleBooleanProperty(false);
+    /**
+     *
+     * @return A flag indicating if current user can modify geometries (true) or
+     * not (false).
+     */
     public BooleanProperty geometryEditionProperty() {return geometryEditionProperty;}
-    private final BooleanProperty nonGeometryEditionProperty = new SimpleBooleanProperty(false);
-    public BooleanProperty nonGeometryEditionProperty() {return nonGeometryEditionProperty;}
+
     private final BooleanProperty needValidationProperty = new SimpleBooleanProperty(true);
+    /**
+     *
+     * @return A flag indicating if current user's work must be marked as 'not
+     * validated yet'. It means that this user won't be able to modify any data
+     * already validated, and it won't be able to edit work of other users.
+     */
     public BooleanProperty needValidationProperty() {return needValidationProperty;}
 
     private final ObjectProperty<Role> role = new SimpleObjectProperty();
@@ -280,19 +290,15 @@ public class SessionCore implements ApplicationContextAware {
                     // reset rights to most restricted, then unlock authorization regarding user role.
                     needValidationProperty.set(true);
                     geometryEditionProperty.set(false);
-                    nonGeometryEditionProperty.set(false);
                     switch (role.get()) {
                         case USER:
-                            nonGeometryEditionProperty.set(true);
                             needValidationProperty.set(false);
                             break;
                         case ADMIN:
-                            nonGeometryEditionProperty.set(true);
                             geometryEditionProperty.set(true);
                             needValidationProperty.set(false);
                             break;
                         case EXTERN:
-                            nonGeometryEditionProperty.set(true);
                             geometryEditionProperty.set(true);
                     }
                 });
@@ -700,5 +706,14 @@ public class SessionCore implements ApplicationContextAware {
 
     public H2Helper getH2Helper() {
         return applicationContext.getBean(H2Helper.class);
+    }
+
+    /**
+     * Check that given user has modification rights over given element.
+     * @param input The element to check modification rights for.
+     * @return True if current session owner can edit it, false otherwise.
+     */
+    public boolean editionAuthorized(final Element input) {
+        return !needValidationProperty().get() || (!input.getValid() && getUtilisateur().getId().equals(input.getAuthor()));
     }
 }

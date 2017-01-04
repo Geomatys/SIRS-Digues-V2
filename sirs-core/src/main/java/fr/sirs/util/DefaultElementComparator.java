@@ -9,7 +9,7 @@ import java.util.Comparator;
  * IMPORTANT : We try to convert designation into integers to compare them
  * numerically. We perform simple string comparison only if we fail to convert
  * them.
- * 
+ *
  * @author Alexis Manin (Geomatys)
  */
 public class DefaultElementComparator implements Comparator<Element> {
@@ -26,7 +26,7 @@ public class DefaultElementComparator implements Comparator<Element> {
              */
             try {
                 designationComparison = Integer.decode(o1.getDesignation()).compareTo(Integer.decode(o2.getDesignation()));
-            } catch (NumberFormatException e) {
+            } catch (Exception e) {
                 designationComparison = o1.getDesignation().compareTo(o2.getDesignation());
             }
         }

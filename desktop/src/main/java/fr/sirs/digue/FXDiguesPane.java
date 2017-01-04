@@ -18,7 +18,6 @@
  */
 package fr.sirs.digue;
 
-import static fr.sirs.CorePlugin.initTronconDigue;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractTronconDigueRepository;
@@ -230,23 +229,6 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
             updateTree();
     }
 
-    private class NewTronconMenuItem extends MenuItem {
-
-        public NewTronconMenuItem(TreeItem parent) {
-            super("Créer un nouveau tronçon",new ImageView(SIRS.ICON_ADD_WHITE));
-            this.setOnAction((ActionEvent t) -> {
-                final TronconDigue troncon = session.getElementCreator().createElement(TronconDigue.class);
-                troncon.setLibelle("Tronçon vide");
-                final Digue digue = parent==null ? null : (Digue) parent.getValue();
-                if(digue!=null){
-                    troncon.setDigueId(digue.getId());
-                }
-                session.getRepositoryForClass(TronconDigue.class).add(troncon);
-                initTronconDigue(troncon, session);
-            });
-        }
-    }
-
     private class NewDigueMenuItem extends MenuItem {
 
         public NewDigueMenuItem(TreeItem parent) {
@@ -300,8 +282,8 @@ public class FXDiguesPane extends FXAbstractTronconTreePane {
             final boolean isDigue = obj instanceof Digue;
             if (isSE || isDigue) {
                 this.setText(new StringBuilder(converter.toString(obj)).append(" (").append(getTreeItem().getChildren().size()).append(")").toString());
-                if(session.nonGeometryEditionProperty().get()){
-                    addMenu.getItems().add(isSE? new NewDigueMenuItem(getTreeItem()) : new NewTronconMenuItem(getTreeItem()));
+                if (isSE) {
+                    addMenu.getItems().add(new NewDigueMenuItem(getTreeItem()));
                     setContextMenu(addMenu);
                 }
             } else if (obj instanceof TronconDigue) {

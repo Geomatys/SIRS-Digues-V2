@@ -29,6 +29,7 @@ import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.component.TraitBergeRepository;
 import fr.sirs.core.model.Berge;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.TraitBerge;
 import fr.sirs.plugin.berge.PluginBerge;
 import java.awt.geom.Rectangle2D;
@@ -281,6 +282,8 @@ public class TraitBergeEditHandler extends AbstractNavigationHandler {
         public void visit(ProjectedFeature feature, RenderingContext2D context, SearchAreaJ2D area) {
             final Feature f = feature.getCandidate();
             final Object bean = feature.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
+            if (!(bean instanceof Element) || !Injector.getSession().editionAuthorized((Element)bean))
+                return;
 
             if(pane.bergeProperty().get()==null){
                 //on selectionne uniquement un object de type berge.
