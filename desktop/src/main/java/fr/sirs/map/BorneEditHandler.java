@@ -346,14 +346,13 @@ public class BorneEditHandler extends AbstractNavigationHandler {
                     final Feature feature = helperTroncon.grabFeature(e.getX(), e.getY(), false);
                     if(feature !=null){
                         Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
-                        if(bean instanceof TronconDigue){
+                        if (bean instanceof TronconDigue && session.editionAuthorized((TronconDigue)bean)) {
                             bean = session.getRepositoryForClass(TronconDigue.class).get(((TronconDigue)bean).getDocumentId());
                             editPane.tronconProperty().set((TronconDigue)bean);
                         }
                     }
                 }
             }else if(FXSystemeReperagePane.Mode.EDIT_BORNE.equals(mode)){
-                final TronconDigue troncon = editPane.tronconProperty().get();
                 final SystemeReperage sr = editPane.systemeReperageProperty().get();
 
                 if(borne==null || editGeometry.selectedNode[0] < 0){
@@ -361,7 +360,7 @@ public class BorneEditHandler extends AbstractNavigationHandler {
                     final Feature feature = helperBorne.grabFeature(e.getX(), e.getY(), false);
                     if(feature !=null){
                         final Object bean = feature.getUserData().get(BeanFeature.KEY_BEAN);
-                        if(bean instanceof BorneDigue){
+                        if(bean instanceof BorneDigue && session.editionAuthorized((BorneDigue)bean)){
                             final BorneDigue candidate = (BorneDigue) bean;
                             final String candidateId = candidate.getDocumentId();
 
