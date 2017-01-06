@@ -19,14 +19,14 @@ public class DefaultElementComparator implements Comparator<Element> {
         int designationComparison = -1;
         if (o1.getDesignation() == null) {
             designationComparison = o2.getDesignation() == null ? 0 : 1;
-        } else if (o1.getDesignation() != null) {
+        } else if (o2.getDesignation() != null) {
             /* If both designation can be converted to numbers, we will
-                 * perform a algebric comparision. Otherwise, we'll compare
-                 * directly strings.
+             * perform a algebric comparision. Otherwise, we'll compare
+             * directly strings.
              */
             try {
                 designationComparison = Integer.decode(o1.getDesignation()).compareTo(Integer.decode(o2.getDesignation()));
-            } catch (Exception e) {
+            } catch (NumberFormatException e) {
                 designationComparison = o1.getDesignation().compareTo(o2.getDesignation());
             }
         }
