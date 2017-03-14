@@ -134,7 +134,8 @@ public class FXPlanTable extends BorderPane{
         int dateEnd = Math.min(plan.getAnneeFin(), dateStart+20);
 
         //nom des types
-        final Label lblYear = new Label("Parcelle | Année");
+        // On ajoute des espaces pour tripler la largeur de la première colonne (demande de David du 13/03/2017 [SYM-1543])                
+        final Label lblYear = new Label("                Parcelle | Année                ");
         final Label lblSum;
         if(mode==PLANIFICATION){
             lblSum  = new Label("Somme*");
@@ -143,7 +144,7 @@ public class FXPlanTable extends BorderPane{
         }
         lblYear.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         lblYear.getStyleClass().add("pojotable-header");
-        lblSum .setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        lblSum.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         lblSum.getStyleClass().add("pojotable-header");
 
         //ecouteur sur les composants de la premiere ligne
@@ -295,7 +296,7 @@ public class FXPlanTable extends BorderPane{
     private void updateColumnWidth(){
         gridCenter.getColumnConstraints().clear();
         gridBottom.getColumnConstraints().clear();
-
+        
         for(int i=0;i<headerNodes.length;i++){
             gridCenter.getColumnConstraints().add(new ColumnConstraints(USE_PREF_SIZE,headerNodes[i].getWidth(),USE_PREF_SIZE,Priority.NEVER,HPos.CENTER,true));
             gridBottom.getColumnConstraints().add(new ColumnConstraints(USE_PREF_SIZE,headerNodes[i].getWidth(),USE_PREF_SIZE,Priority.NEVER,HPos.CENTER,true));
