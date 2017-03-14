@@ -223,11 +223,11 @@ public class FXPlanVegetationPane extends BorderPane {
                         disponible ou affecté.
                         */
                         if(traitement.getTypeTraitementPonctuelId()!=null){
-                            candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTypeTraitementPonctuelId(), traitement.getSousTypeTraitementPonctuelId(), true));
+                            candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTypeTraitementPonctuelId(), traitement.getSousTypeTraitementPonctuelId()));
                             candidateCoutsToAdd.add(toParamCout(traitement.getTypeTraitementPonctuelId(), traitement.getSousTypeTraitementPonctuelId()));
                         }
                         if(traitement.getTypeTraitementId()!=null){
-                            candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTypeTraitementId(), traitement.getSousTypeTraitementId(), false));
+                            candidateFrequencesToAdd.add(toParamFrequence(type, typeVegetation, traitement.getTypeTraitementId(), traitement.getSousTypeTraitementId()));
                             candidateCoutsToAdd.add(toParamCout(traitement.getTypeTraitementId(), traitement.getSousTypeTraitementId()));
                         }
                     }
@@ -304,7 +304,7 @@ public class FXPlanVegetationPane extends BorderPane {
         uiVBox.getChildren().addAll(uiCoutTable, uiFrequenceTable);
     }
 
-    private static ParamFrequenceTraitementVegetation toParamFrequence(final Class type, final String typeVegetationId, final String traitementId, final String sousTraitementId, final boolean ponctuel){
+    private static ParamFrequenceTraitementVegetation toParamFrequence(final Class type, final String typeVegetationId, final String traitementId, final String sousTraitementId){
         final ParamFrequenceTraitementVegetation param = Injector.getSession().getElementCreator().createElement(ParamFrequenceTraitementVegetation.class);
         param.setType(type);
         param.setTypeVegetationId(typeVegetationId);
