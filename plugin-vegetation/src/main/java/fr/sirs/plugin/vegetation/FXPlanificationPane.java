@@ -35,14 +35,18 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 
 /**
+ * Panneau de planification des parcelles du plan, ouvert lors de la sélection d'un plan dans la liste proposée au chemin suivant :
+ * 
+ * "Plan de gestion" > "planification"
  *
  * @author Johann Sorel (Geomatys)
  * @author Samuel Andrés (Geomatys)
+ * 
+ * @see FXPlanTable
  */
 public class FXPlanificationPane extends BorderPane {
 
     @FXML private GridPane uiHeader;
-    private final Session session = Injector.getSession();
 
     public FXPlanificationPane() {
         SIRS.loadFXML(this);
@@ -52,8 +56,6 @@ public class FXPlanificationPane extends BorderPane {
     private void initialize() {
 
         setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-
-        // Choix du tronçon
 
         final Session session = Injector.getSession();
 

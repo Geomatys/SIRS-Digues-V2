@@ -59,6 +59,9 @@ import org.geotoolkit.gui.javafx.util.FXListTableCell;
 
 
 /**
+ * Panneau de paramétrage du plan, ouvert lors de la sélection d'un plan dans la liste proposée au chemin suivant :
+ * 
+ * "Plan de gestion" > "paramétrage"
  *
  * @author Johann Sorel (Geomatys)
  * @author Samuel Andrés (Geomatys)
@@ -314,7 +317,8 @@ public class FXPlanVegetationPane extends BorderPane {
         if(!Objects.equals(p1.getType(), p2.getType())) return false;
         else if(!Objects.equals(p1.getTypeTraitementId(), p2.getTypeTraitementId())) return false;
         else if(!Objects.equals(p1.getSousTypeTraitementId(), p2.getSousTypeTraitementId())) return false;
-        else return (!Objects.equals(p1.getTypeVegetationId(), p2.getTypeVegetationId()));
+        else if(!Objects.equals(p1.getTypeVegetationId(), p2.getTypeVegetationId())) return false;
+        else return true;
     }
 
     private static ParamCoutTraitementVegetation toParamCout(final String traitementId, final String sousTraitementId){

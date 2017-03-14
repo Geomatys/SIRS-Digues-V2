@@ -78,8 +78,13 @@ import javafx.stage.Stage;
 import org.elasticsearch.common.base.Objects;
 
 /**
+ * Tableau de représentation des parcelles utilisé dans les interfaces de planification et d'exploitation. Ce tableau 
+ * est utilisé dans les interfaces de planification et d'exploitation.
  *
  * @author Johann Sorel (Geomatys)
+ * 
+ * @see FXPlanificationPane
+ * @see FXExploitationPane
  */
 public class FXPlanTable extends BorderPane{
 

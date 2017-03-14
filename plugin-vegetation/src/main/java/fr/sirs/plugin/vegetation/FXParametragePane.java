@@ -57,9 +57,16 @@ import org.elasticsearch.common.joda.time.LocalDate;
 
 
 /**
+ * Panneau de paramétrage des plans après sélection dans une liste des plans disponibles. Ce panneau est accessible par :
+ * 
+ * "Plan de gestion" > "paramétrage"
+ * 
+ * La sélection d'un {@link PlanVegetation} dans la liste provoque l'édition du plan dans un panneau {@link FXPlanVegetationPane}.
  *
  * @author Johann Sorel (Geomatys)
  * @author Samuel Andrés (Geomatys)
+ * 
+ * @see FXPlanVegetationPane
  */
 public class FXParametragePane extends SplitPane {
 
