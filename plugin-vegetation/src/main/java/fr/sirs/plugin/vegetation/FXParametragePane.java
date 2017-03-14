@@ -100,7 +100,7 @@ public class FXParametragePane extends SplitPane {
             @Override
             public void changed(ObservableValue<? extends PlanVegetation> observable, PlanVegetation oldValue, PlanVegetation newValue) {
                 if(newValue!=null){
-                    pane.setCenter(new FXPlanVegetationPane(newValue));
+                    SIRS.fxRun(false, ()->pane.setCenter(new FXPlanVegetationPane(newValue)));
                 }
             }
         });
