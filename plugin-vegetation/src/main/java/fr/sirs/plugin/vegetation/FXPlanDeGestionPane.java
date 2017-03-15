@@ -38,8 +38,9 @@ public class FXPlanDeGestionPane extends BorderPane {
         setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
     }
 
+    // Cette méthode initialize() sans argument est appelée par le FXLoader par réflexion… 
     public void initialize() {
-        tabPlanification.setContent(new FXPlanificationPane());
+        tabPlanification.setContent(new FXPlanificationPane());// Long à charger…
         tabParametrage.setContent(new FXParametragePane());
     }
 }

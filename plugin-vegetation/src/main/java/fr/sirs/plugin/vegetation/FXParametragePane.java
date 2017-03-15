@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -44,6 +45,7 @@ import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -325,13 +327,26 @@ public class FXParametragePane extends SplitPane {
         @Override
         protected void updateItem(final PlanVegetation item, boolean empty) {
             super.updateItem(item, empty);
-
+            
+            graphicProperty().unbind();
             textProperty().unbind();
             if(item!=null){
-                if(item.equals(VegetationSession.INSTANCE.planProperty().get())){
-                    setGraphic(new ImageView(SIRS.ICON_CHECK));
-                }
-                else setGraphic(null);
+                
+                graphicProperty().bind(new ObjectBinding<Node>(){
+                    
+                    {
+                        bind(VegetationSession.INSTANCE.planProperty());
+                    }
+                    
+                    @Override
+                    protected Node computeValue() {
+                        if(item.equals(VegetationSession.INSTANCE.planProperty().get())){
+                             return new ImageView(SIRS.ICON_CHECK);
+                        }
+                        else return null;
+                    }
+                    
+                });
 
                 textProperty().bind(new ObjectBinding<String>() {
 
