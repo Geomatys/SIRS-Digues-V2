@@ -118,7 +118,7 @@ public abstract class AbstractZoneVegetationRepository<T extends ZoneVegetation>
         Si on n'a rien trouvé, on renvoie une liste vide.
         */
         if(result==null)
-            return FXCollections.emptyObservableList();
+            return FXCollections.observableArrayList();
         else return result;
     }
 }
