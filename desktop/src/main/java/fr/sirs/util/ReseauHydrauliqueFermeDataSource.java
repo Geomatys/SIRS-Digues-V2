@@ -54,22 +54,35 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
     
     /**
      * Groupe par désignation de désordre et classe par date décroissante à l'intérieur de chaque groupe.
+     * Inutilisé (était utilisé pour ordonner les lignes du tableau des observations/désordres).
      */
     static final Comparator<JRDesordreTableRow> DESORDRE_RESEAU_COMPARATOR = (JRDesordreTableRow d1, JRDesordreTableRow d2)->{
-                final LocalDate date1 = d1.getObservationDate();
-                final String des1 = d1.getDesordreDesignation();
-                final LocalDate date2 = d2.getObservationDate();
-                final String des2 = d2.getDesordreDesignation();
-                if(des1==null && des2==null) return 0;
-                else if(des1==null || des2==null) return (des1==null) ? -2 : 2;
-                else {
-                    final int compareTo = des1.compareTo(des2);
-                    if (compareTo!=0) return compareTo;
-                    else if(date1==null && date2==null) return 0;
-                    else if(date1==null || date2==null) return (date1==null) ? 1 : -1;
-                    else return -date1.compareTo(date2); // On regroupe par désignation de désordre.
-                }
-            };
+        final LocalDate date1 = d1.getObservationDate();
+        final String des1 = d1.getDesordreDesignation();
+        final LocalDate date2 = d2.getObservationDate();
+        final String des2 = d2.getDesordreDesignation();
+        if(des1==null && des2==null) return 0;
+        else if(des1==null || des2==null) return (des1==null) ? -2 : 2; // On regroupe par désignation de désordre.
+        else {
+            final int compareTo = des1.compareTo(des2);
+            if (compareTo!=0) return compareTo;
+            else if(date1==null && date2==null) return 0;
+            else if(date1==null || date2==null) return (date1==null) ? 1 : -1;
+            else return -date1.compareTo(date2); // Par date décroissante : la plus récente en tête.
+        }
+    };
+    
+    /**
+     * Compare par date de "désordre" (lesquels sont en réalité des hybrides entre des désordres et des observations.
+     * Demande SYM-1496, commentaire de Jordan Perrin du 21 mars 2017.
+     */
+    static final Comparator<JRDesordreTableRow> DESORDRE_RESEAU_DATE_COMPARATOR = (JRDesordreTableRow d1, JRDesordreTableRow d2)->{
+        final LocalDate date1 = d1.getObservationDate();
+        final LocalDate date2 = d2.getObservationDate();
+        if(date1==null && date2==null) return 0;
+        else if(date1==null || date2==null) return (date1==null) ? 1 : -1;
+        else return -date1.compareTo(date2); // Par date décroissante : la plus récente en tête.
+    };
 
     public ReseauHydrauliqueFermeDataSource(Iterable<ReseauHydrauliqueFerme> iterable) {
         super(iterable);
@@ -140,11 +153,11 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
                 if(des.getReseauHydrauliqueFermeIds().contains(currentObject.getId())){
                     final List<Observation> observations = des.getObservations();
                     for(final Observation obs : observations){
-                        desordreRows.add(new JRDesordreTableRow(obs.getDate(), obs.getDesignation(), des.getDesignation(), obs.getUrgenceId(), des.getCommentaire()));
+                        desordreRows.add(new JRDesordreTableRow(obs.getDate(), des.getDesignation(), obs.getDesignation(), obs.getUrgenceId(), des.getCommentaire()));
                     }
                 }
             }
-            desordreRows.sort(DESORDRE_RESEAU_COMPARATOR);
+            desordreRows.sort(DESORDRE_RESEAU_DATE_COMPARATOR);
             return new ObjectDataSource<>(desordreRows, previewRepository, stringConverter);
         }
         else return super.getFieldValue(jrf);
