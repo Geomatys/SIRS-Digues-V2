@@ -35,11 +35,11 @@ public class JRDesordreTableRow {
     private String observationUrgence;
     private String desordreDescription;
     
-    public JRDesordreTableRow(final LocalDate observationDate, final String desordreDesignation, final String desordreLabel, 
+    public JRDesordreTableRow(final LocalDate observationDate, final String desordreDesignation, final String observationDesignation, 
             final String observationUrgence, final String desordreDescription){
         this.observationDate = observationDate;
         this.desordreDesignation = desordreDesignation;
-        this.observationDesignation = desordreLabel;
+        this.observationDesignation = observationDesignation;
         this.observationUrgence = observationUrgence;
         this.desordreDescription = desordreDescription;
     }
