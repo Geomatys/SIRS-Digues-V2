@@ -58,7 +58,7 @@ import static org.geotoolkit.referencing.LinearReferencing.asLineString;
  */
 public class FXPositionableLinearAreaMode extends FXPositionableAbstractLinearMode {
 
-    private static final String MODE = "LINEAR_AREA";
+    public static final String MODE = "LINEAR_AREA";
 
     //area
     @FXML private Spinner<Double> uiStartNear;
