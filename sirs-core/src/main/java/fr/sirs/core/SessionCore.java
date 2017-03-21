@@ -21,11 +21,11 @@ package fr.sirs.core;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DatabaseRegistry;
-import fr.sirs.core.component.PositionProfilTraversRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.UtilisateurRepository;
 import fr.sirs.core.component.ReferenceUsageRepository;
 import fr.sirs.core.h2.H2Helper;
+import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.AbstractPositionDocument;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.AvecPhotos;
@@ -35,10 +35,7 @@ import fr.sirs.core.model.ElementCreator;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.Identifiable;
 import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.ObjetPhotographiable;
 import fr.sirs.core.model.Observation;
-import fr.sirs.core.model.Photo;
-import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProprieteTroncon;
@@ -378,29 +375,8 @@ public class SessionCore implements ApplicationContextAware {
         return positions;
     }
 
-    public List<Photo> getPhotoList(final String linearId) {
-        final List<Photo> photos = new ArrayList<>();
-        final StreamingIterable<PositionProfilTravers> positions = InjectorCore.getBean(PositionProfilTraversRepository.class).getByLinearIdStreaming(linearId);
-        try (CloseableIterator<PositionProfilTravers> iterator = positions.iterator()) {
-            while (iterator.hasNext()) {
-                final List<Photo> p = iterator.next().getPhotos();
-                if (p != null && !p.isEmpty())
-                    photos.addAll(p);
-            }
-        }
-
-        final List<Objet> objets = getObjetsByTronconId(linearId);
-        for(final Objet objet : objets){
-            if (objet instanceof ObjetPhotographiable){
-                final List<Photo> p = ((ObjetPhotographiable) objet).getPhotos();
-                if(p!=null && !p.isEmpty()) photos.addAll(p);
-            } else if (objet instanceof Desordre){
-                for (final Observation observation : ((Desordre) objet).getObservations()){
-                    final List<Photo> p = observation.getPhotos();
-                    if(p!=null && !p.isEmpty()) photos.addAll(p);
-                }
-            }
-        }
+    public List<? extends AbstractPhoto> getPhotoList(final String linearId) {
+        final List<AbstractPhoto> photos = new ArrayList<>();
 
         final Collection<AbstractSIRSRepository> repos = getRepositoriesForClass(AvecPhotos.class);
         for (final AbstractSIRSRepository repo : repos) {
@@ -413,7 +389,7 @@ public class SessionCore implements ApplicationContextAware {
                 }
             } else {
                 for (final Object photoContainer : repo.getAllStreaming()) {
-                    for (final Photo photo : ((AvecPhotos<Photo>)photoContainer).getPhotos()) {
+                    for (final AbstractPhoto photo : ((AvecPhotos<? extends AbstractPhoto>)photoContainer).getPhotos()) {
                         Element parent = photo.getParent();
                         while (parent != null) {
                             if (parent instanceof AvecForeignParent && linearId.equalsIgnoreCase(((AvecForeignParent)parent).getForeignParentId())) {
@@ -446,7 +422,11 @@ public class SessionCore implements ApplicationContextAware {
         for (final AbstractPositionableRepository repo : applicationContext.getBeansOfType(AbstractPositionableRepository.class).values()) {
             positionables.addAll(repo.getByLinearId(linearId));
         }
-        positionables.addAll(getPhotoList(linearId));
+        final List<? extends AbstractPhoto> photos = getPhotoList(linearId);
+        for (final AbstractPhoto photo : photos) {
+            if (photo instanceof Positionable)
+                positionables.add((Positionable)photo);
+        }
 
         return positionables;
     }
