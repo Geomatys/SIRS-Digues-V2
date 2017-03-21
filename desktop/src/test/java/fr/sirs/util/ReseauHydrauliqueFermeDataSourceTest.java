@@ -74,4 +74,48 @@ public class ReseauHydrauliqueFermeDataSourceTest {
         assertTrue(obs.indexOf(oB01)==10 || obs.indexOf(oB01)==11);
         assertTrue(obs.indexOf(oB02)==10 || obs.indexOf(oB02)==11);
     }
+    
+    @Test
+    public void test_observationDateComparator(){
+        final List<JRDesordreTableRow> obs = new ArrayList<>();
+        final JRDesordreTableRow oB2 = new JRDesordreTableRow(LocalDate.now().minusDays(1), "d2", "", "", "");
+        obs.add(oB2);
+        final JRDesordreTableRow oA01 = new JRDesordreTableRow(null, "d1", "", "", "");
+        obs.add(oA01);
+        final JRDesordreTableRow oA1 = new JRDesordreTableRow(LocalDate.now(), "d1", "", "", "");
+        obs.add(oA1);
+        final JRDesordreTableRow oB01 = new JRDesordreTableRow(null, "d2", "", "", "");
+        obs.add(oB01);
+        final JRDesordreTableRow oB02 = new JRDesordreTableRow(null, "d2", "", "", "");
+        obs.add(oB02);
+        final JRDesordreTableRow oA4 = new JRDesordreTableRow(LocalDate.now().plusDays(2), "d1", "", "", "");
+        obs.add(oA4);
+        final JRDesordreTableRow oA02 = new JRDesordreTableRow(null, "d1", "", "", "");
+        obs.add(oA02);
+        final JRDesordreTableRow oA2 = new JRDesordreTableRow(LocalDate.now().minusDays(1), "d1", "", "", "");
+        obs.add(oA2);
+        final JRDesordreTableRow oB3 = new JRDesordreTableRow(LocalDate.now().plusDays(1), "d2", "", "", "");
+        obs.add(oB3);
+        final JRDesordreTableRow oA3 = new JRDesordreTableRow(LocalDate.now().plusDays(1), "d1", "", "", "");
+        obs.add(oA3);
+        final JRDesordreTableRow oB4 = new JRDesordreTableRow(LocalDate.now().plusDays(2), "d2", "", "", "");
+        obs.add(oB4);
+        final JRDesordreTableRow oB1 = new JRDesordreTableRow(LocalDate.now(), "d2", "", "", "");
+        obs.add(oB1);
+        
+        obs.sort(ReseauHydrauliqueFermeDataSource.DESORDRE_RESEAU_DATE_COMPARATOR);
+        
+        assertTrue(obs.indexOf(oB4)==0 || obs.indexOf(oB4)==1);
+        assertTrue(obs.indexOf(oA4)==0 || obs.indexOf(oA4)==1);
+        assertTrue(obs.indexOf(oB3)==2 || obs.indexOf(oB3)==3);
+        assertTrue(obs.indexOf(oA3)==2 || obs.indexOf(oA3)==3);
+        assertTrue(obs.indexOf(oA1)==4 || obs.indexOf(oA1)==5);
+        assertTrue(obs.indexOf(oB1)==4 || obs.indexOf(oB1)==5);
+        assertTrue(obs.indexOf(oB2)==6 || obs.indexOf(oB2)==7);
+        assertTrue(obs.indexOf(oA2)==6 || obs.indexOf(oA2)==7);
+        assertTrue(obs.indexOf(oA01)==8 || obs.indexOf(oA01)==9 || obs.indexOf(oA01)==10 || obs.indexOf(oA01)==11);
+        assertTrue(obs.indexOf(oB01)==8 || obs.indexOf(oB01)==9 || obs.indexOf(oB01)==10 || obs.indexOf(oB01)==11);
+        assertTrue(obs.indexOf(oA02)==8 || obs.indexOf(oA02)==9 || obs.indexOf(oA02)==10 || obs.indexOf(oA02)==11);
+        assertTrue(obs.indexOf(oB02)==8 || obs.indexOf(oB02)==9 || obs.indexOf(oB02)==10 || obs.indexOf(oB02)==11);
+    }
 }
