@@ -335,10 +335,12 @@ public class FXMapPane extends BorderPane implements Printable {
 
             MapContext tmpCtx = null;
             Exception error = null;
-            final String previousXmlContext = FXContextChooser.getPreviousPath();
+            final String previousXmlContext = FXContextChooser.getPreviousFile();
             if (previousXmlContext != null) {
                 try {
-                    tmpCtx = OwcXmlIO.read(Paths.get(previousXmlContext).toFile());
+                    final Path xmlPath = Paths.get(previousXmlContext);
+                    if (Files.isRegularFile(xmlPath))
+                        tmpCtx = OwcXmlIO.read(xmlPath.toFile());
                 } catch (Exception e) {
                     error = e;
                     SIRS.LOGGER.log(Level.WARNING, "Cannot load XML map context from file : ".concat(previousXmlContext), e);

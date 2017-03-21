@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -18,7 +18,7 @@
  */
 package fr.sirs.util;
 
-import com.btr.proxy.search.ProxySearch;
+import com.github.markusbernhardt.proxy.ProxySearch;
 import com.sun.javafx.PlatformUtil;
 import fr.sirs.core.SirsCore;
 import java.io.IOException;
@@ -34,15 +34,15 @@ import java.util.regex.Pattern;
 /**
  * A proxy selector which uses power of Proxy-vole library to detect proxies defined
  * on underlying system and configure JVM to use them.
- * 
+ *
  * @author Alexis Manin (Geomatys)
  */
 public class SystemProxySelector extends ProxySelector {
-    
+
         private static final Pattern NO_PROXY = Pattern.compile("(?i)(localhost)|(127.0.0.1)");
-        
+
         private final ProxySelector source;
-        
+
         public SystemProxySelector() {
             ProxySearch ps = ProxySearch.getDefaultProxySearch();
             ps.setPacCacheSettings(32, 300000); // keep at most 32 uri configuration in cache for 5 minutes max.
@@ -59,10 +59,10 @@ public class SystemProxySelector extends ProxySelector {
 
             ps.addStrategy(ProxySearch.Strategy.FIREFOX);
             ps.addStrategy(ProxySearch.Strategy.JAVA);
-            
+
             source = ps.getProxySelector();
         }
-        
+
         @Override
         public List<Proxy> select(final URI uri) {
             if (source == null || NO_PROXY.matcher(uri.getHost()).matches()) {
