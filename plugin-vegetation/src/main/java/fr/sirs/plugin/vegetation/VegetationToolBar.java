@@ -45,7 +45,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
-import org.apache.sis.util.collection.WeakValueHashMap;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
@@ -66,8 +65,6 @@ public class VegetationToolBar extends ToolBar {
     private static final String CENTER = "buttongroup-center";
     private static final String RIGHT = "buttongroup-right";
 
-    private final WeakValueHashMap<Object, Stage> dialogCache = new WeakValueHashMap(Object.class);
-
     public VegetationToolBar() {
         getStylesheets().add("/org/geotoolkit/gui/javafx/buttonbar.css");
         getItems().add(new Label("Végétation"));
@@ -87,9 +84,15 @@ public class VegetationToolBar extends ToolBar {
         getItems().add(new HBox(buttonParcelle,recherche));
     }
 
+    /**
+     * Vérifie s'il existe un plan de végétation actif et avertit l'utilisateur au moyen d'une fenêtre informative dans 
+     * le cas contraire.
+     * 
+     * @return Vrai si la session de vététation indique un plan de gestion actif. Faux dans le cas contraire. 
+     */
     private boolean checkPlan(){
-        //on vérifie qu'il y a une plan de gestion actif
-        PlanVegetation plan = VegetationSession.INSTANCE.planProperty().get();
+        //on vérifie qu'il y a un plan de gestion actif
+        final PlanVegetation plan = VegetationSession.INSTANCE.planProperty().get();
         if(plan==null){
             final Dialog dialog = new Alert(Alert.AlertType.INFORMATION);
             dialog.setContentText("Veuillez activer un plan de gestion avant de commencer l'édition.");
@@ -101,10 +104,8 @@ public class VegetationToolBar extends ToolBar {
 
     private void showSearchDialog(final ActionEvent act) {
         if(!checkPlan()) return;
-
-        final Stage d = dialogCache.computeIfAbsent(act.getSource(),
-                in -> createDialog("Recherche de végétation", new FXPlanLayerPane())
-        );
+        
+        final Stage d = createDialog("Recherche de végétation", new FXPlanLayerPane());
 
         d.show();
         d.requestFocus();
@@ -140,34 +141,28 @@ public class VegetationToolBar extends ToolBar {
 
     private void showEditor(final ActionEvent act) {
         if(!checkPlan()) return;
-
-        final Object key = act.getSource();
-
-        final Stage d = dialogCache.computeIfAbsent(key, in -> {
-            final FXMap uiMap = Injector.getSession().getFrame().getMapTab().getMap().getUiMap();
+        
+        final FXMap uiMap = Injector.getSession().getFrame().getMapTab().getMap().getUiMap();
 
         final FXToolBox toolbox = new FXToolBox(uiMap, MapBuilder.createEmptyMapLayer());
-            toolbox.commitRollbackVisibleProperty().setValue(false);
-            toolbox.getToolPerRow().set(6);
-            toolbox.getTools().add(CreateParcelleTool.SPI);
-            toolbox.getTools().add(CreatePeuplementTool.SPI);
-            toolbox.getTools().add(CreateInvasiveTool.SPI);
-            toolbox.getTools().add(CreateHerbaceTool.SPI);
-            toolbox.getTools().add(CreateArbreTool.SPI);
-            toolbox.getTools().add(EditVegetationTool.SPI);
+        toolbox.commitRollbackVisibleProperty().setValue(false);
+        toolbox.getToolPerRow().set(6);
+        toolbox.getTools().add(CreateParcelleTool.SPI);
+        toolbox.getTools().add(CreatePeuplementTool.SPI);
+        toolbox.getTools().add(CreateInvasiveTool.SPI);
+        toolbox.getTools().add(CreateHerbaceTool.SPI);
+        toolbox.getTools().add(CreateArbreTool.SPI);
+        toolbox.getTools().add(EditVegetationTool.SPI);
 
-            final Iterator<EditionTool.Spi> ite = EditionHelper.getToolSpis();
-            while (ite.hasNext()) {
-                toolbox.getTools().add(ite.next());
-            }
+        final Iterator<EditionTool.Spi> ite = EditionHelper.getToolSpis();
+        while (ite.hasNext()) {
+            toolbox.getTools().add(ite.next());
+        }
 
-            final Stage stage = createDialog("Edition de végétation", toolbox);
-            stage.setOnHidden(evt -> {
-                if (uiMap.getHandler() != null && uiMap.getHandler().getClass().getPackage().getName().contains("vegetation"))
-                    uiMap.setHandler(new FXPanHandler(true));
-            });
-
-            return stage;
+        final Stage d = createDialog("Edition de végétation", toolbox);
+        d.setOnHidden(evt -> {
+            if (uiMap.getHandler() != null && uiMap.getHandler().getClass().getPackage().getName().contains("vegetation"))
+                uiMap.setHandler(new FXPanHandler(true));
         });
 
         d.setMinHeight(360);

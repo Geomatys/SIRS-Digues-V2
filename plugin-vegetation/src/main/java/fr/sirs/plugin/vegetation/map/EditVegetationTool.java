@@ -22,9 +22,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
-import fr.sirs.Injector;
 import static fr.sirs.SIRS.CSS_PATH;
-import fr.sirs.Session;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PositionableVegetation;
 import fr.sirs.theme.ui.FXPositionableExplicitMode;
@@ -95,7 +93,6 @@ public class EditVegetationTool extends AbstractEditionTool{
     };
 
     //session and repo
-    private final Session session;
     private final MouseListen mouseInputListener = new MouseListen();
     private final BorderPane wizard = new BorderPane();
     private final FXPositionableForm form = new FXPositionableForm();
@@ -116,8 +113,6 @@ public class EditVegetationTool extends AbstractEditionTool{
         wizard.getStyleClass().add("blue-light");
         lblMessage.getStyleClass().add("label-header");
         lblMessage.setWrapText(true);
-
-        session = Injector.getSession();
 
         //refresh geometry on change
         selection.geometry.addListener((ObservableValue<? extends Geometry> observable, Geometry oldValue, Geometry newValue) ->  refreshDecoration() );
@@ -320,8 +315,5 @@ public class EditVegetationTool extends AbstractEditionTool{
                 modified = true;
             }
         }
-
-
     }
-
 }
