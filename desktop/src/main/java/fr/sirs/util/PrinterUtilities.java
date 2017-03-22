@@ -117,7 +117,7 @@ public class PrinterUtilities {
 
             final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
 
-            reseaux.sort(OBJET_COMPARATOR);
+            reseaux.sort(OBJET_LINEAR_GROUPER.thenComparing(new PRComparator()));
             final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
@@ -456,7 +456,7 @@ JasperViewer.viewReport(jp1,false);
     
     
     /**
-     * Groupe par tronçon et classe par désignation croissante selon l'ordre alphabétique à l'intérieur de chaque groupe.
+     * Groupe par tronçon.
      */
     static final Comparator<Objet> OBJET_LINEAR_GROUPER = (Objet d1, Objet d2)->{
         final String lin1 = d1.getLinearId();

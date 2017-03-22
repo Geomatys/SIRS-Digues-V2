@@ -132,7 +132,6 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         currentY+=2;
         writeTable(ObservationReseauHydrauliqueFerme.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 
                 TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
-        currentY+=2;
         
         /*----------------------------------------------------------------------
         SOUS-RAPPORTS DES PHOTOS
@@ -150,7 +149,6 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
         currentY+=2;
         writeTable(JRDesordreTableRow.class, desordreFields, true, DESORDRE_TABLE_DATA_SOURCE, DESORDRE_DATASET, 
                 TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
-        currentY+=2;
         
         /*----------------------------------------------------------------------
         TABLEAU DES OUVRAGES ET RÉSEAUX
@@ -161,10 +159,9 @@ public class JRDomWriterReseauFermeSheet extends AbstractJDomWriterSingleSpecifi
             currentY+=2;
             writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET,
                     TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
-            currentY+=2;
         }
         
-        writeDetailPageBreak();
+//        writeDetailPageBreak();
         
         // Sizes the detail element given to the field number.------------------
         band.setAttribute(ATT_HEIGHT, String.valueOf(DETAIL_HEIGHT));

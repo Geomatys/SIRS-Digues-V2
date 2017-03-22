@@ -140,7 +140,6 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         currentY+=2;
         writeTable(Observation.class, observationFields, true, OBSERVATION_TABLE_DATA_SOURCE, OBSERVATION_DATASET, 
                 TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
-        currentY+=2;
         
         /*----------------------------------------------------------------------
         TABLEAU DES PRESTATIONS
@@ -150,7 +149,6 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
         currentY+=2;
         writeTable(Prestation.class, prestationFields, true, PRESTATION_TABLE_DATA_SOURCE, PRESTATION_DATASET, 
                 TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
-        currentY+=2;
         
         /*----------------------------------------------------------------------
         SOUS-RAPPORTS DES PHOTOS
@@ -169,7 +167,6 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
             currentY+=2;
             writeTable(ObjetReseau.class, reseauFields, true, RESEAU_OUVRAGE_TABLE_DATA_SOURCE, RESEAU_OUVRAGE_DATASET, 
                     TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
-            currentY+=2;
         }
         
         /*----------------------------------------------------------------------
@@ -181,10 +178,9 @@ public class JRDomWriterDesordreSheet extends AbstractJDomWriterSingleSpecificSh
             currentY+=2;
             writeTable(ObjetReseau.class, reseauFields, true, VOIRIE_TABLE_DATA_SOURCE, VOIRIE_DATASET, 
                     TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
-            currentY+=2;
         }
         
-        writeDetailPageBreak();
+//        writeDetailPageBreak();
         
         // Sizes the detail element given to the field number.------------------
         band.setAttribute(ATT_HEIGHT, String.valueOf(DETAIL_HEIGHT));
