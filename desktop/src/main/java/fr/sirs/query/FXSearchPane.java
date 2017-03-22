@@ -882,7 +882,7 @@ public class FXSearchPane extends BorderPane {
             if (output.exists())
                 output.delete();
 
-            try (final CSVFeatureStore csvStore = new CSVFeatureStore(output.toPath(), "no namespace", ',')) {
+            try (final CSVFeatureStore csvStore = new CSVFeatureStore(output.toPath(), "no namespace", ';')) {
                 final FeatureType ft = layer.getCollection().getFeatureType();
                 csvStore.createFeatureType(ft.getName(), ft);
                 csvStore.addFeatures(ft.getName(), layer.getCollection());
