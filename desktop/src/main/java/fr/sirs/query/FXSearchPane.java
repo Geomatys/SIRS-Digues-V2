@@ -743,7 +743,7 @@ public class FXSearchPane extends BorderPane {
     private void searchText(){
 
         final ElasticSearchEngine engine = Injector.getElasticSearchEngine();
-        final QueryBuilder qb = QueryBuilders.queryString(uiElasticKeywords.getText());
+        final QueryBuilder qb = QueryBuilders.simpleQueryStringQuery("*"+uiElasticKeywords.getText()+"*").analyzeWildcard(true).lenient(true);
 
         final SearchResponse response = engine.search(qb);
         final SearchHits hits = response.getHits();

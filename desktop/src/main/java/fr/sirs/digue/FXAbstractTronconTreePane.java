@@ -144,7 +144,7 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
         if (textSearchFilter == null) {
             final String text = currentSearch.get();
             if (text != null && !text.isEmpty()) {
-                SearchResponse response = Injector.getElasticSearchEngine().search(QueryBuilders.simpleQueryStringQuery(text));
+                SearchResponse response = Injector.getElasticSearchEngine().search(QueryBuilders.simpleQueryStringQuery("*"+text+"*").analyzeWildcard(true).lenient(true));
                 final Iterator<SearchHit> it = response.getHits().iterator();
                 final HashSet<String> filterIds = new HashSet<>();
                 while (it.hasNext()) {
