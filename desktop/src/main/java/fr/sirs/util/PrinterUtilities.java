@@ -117,7 +117,7 @@ public class PrinterUtilities {
 
             final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
 
-            reseaux.sort(OBJET_LINEAR_GROUPER.thenComparing(new PRComparator()));
+            reseaux.sort(OBJET_COMPARATOR.thenComparing(new PRComparator()));
             final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
@@ -165,7 +165,7 @@ public class PrinterUtilities {
 
             final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
 
-            desordres.sort(OBJET_LINEAR_GROUPER.thenComparing(new PRComparator()));
+            desordres.sort(OBJET_COMPARATOR.thenComparing(new PRComparator()));
             final JRDataSource source = new DesordreDataSource(desordres, previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
