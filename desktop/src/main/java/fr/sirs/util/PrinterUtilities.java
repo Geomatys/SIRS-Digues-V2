@@ -18,7 +18,10 @@
  */
 package fr.sirs.util;
 
+import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.Desordre;
@@ -26,6 +29,7 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
+import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTOS_SUBREPORT;
 import fr.sirs.util.property.DocumentRoots;
 import java.io.File;
@@ -36,6 +40,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -117,7 +122,7 @@ public class PrinterUtilities {
 
             final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
 
-            reseaux.sort(OBJET_COMPARATOR.thenComparing(new PRComparator()));
+            reseaux.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
             final JRDataSource source = new ReseauHydrauliqueFermeDataSource(reseaux, previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
@@ -165,7 +170,7 @@ public class PrinterUtilities {
 
             final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
 
-            desordres.sort(OBJET_COMPARATOR.thenComparing(new PRComparator()));
+            desordres.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
             final JRDataSource source = new DesordreDataSource(desordres, previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
@@ -467,21 +472,26 @@ JasperViewer.viewReport(jp1,false);
     };
     
     /**
-     * Groupe par tronçon et classe par désignation croissante selon l'ordre alphabétique à l'intérieur de chaque groupe.
+     * Groupe par tronçon en classant par désignation croissante de tronçon selon l'ordre alphabétique.
+     * Si la désignation n'est pas disponible, on groupe par identifiant.
      */
-    static final Comparator<Objet> OBJET_COMPARATOR = (Objet d1, Objet d2)->{
-        final String des1 = d1.getDesignation();
+    static final Comparator<Objet> OBJET_LINEAR_COMPARATOR = (Objet d1, Objet d2) -> {
         final String lin1 = d1.getLinearId();
-        final String des2 = d2.getDesignation();
         final String lin2 = d2.getLinearId();
         if(lin1==null && lin2==null) return 0; // Ne devrait jamais se produire pour un objet.
-        else if(lin1==null || lin2==null) return (lin1==null) ? 1 : -1; // Ne devrait jamais se produire pour un objet. 
+        else if(lin1==null || lin2==null) return (lin1==null) ? 1 : -1; // Ne devrait jamais se produire pour un objet.
         else {
-            final int compareTo = lin1.compareTo(lin2);
-            if (compareTo!=0) return compareTo;
-            else if(des1==null && des2==null) return 0;
+            final TronconDigue troncon1 = Injector.getSession().getRepositoryForClass(TronconDigue.class).get(lin1);
+            final TronconDigue troncon2 = Injector.getSession().getRepositoryForClass(TronconDigue.class).get(lin2);
+            
+            if(troncon1==null || troncon2==null)
+                throw new SirsCoreRuntimeException("Un des tronçons est null : "+lin1+" ou "+lin2+".");
+            
+            final String des1 = troncon1.getDesignation();
+            final String des2 = troncon2.getDesignation();
+            if(des1==null && des2==null) return 0;
             else if(des1==null || des2==null) return (des1==null) ? 1 : -1;
-            else return des1.compareTo(des2); // On regroupe par tronçon.
+            else return des1.compareTo(des2);
         }
     };
 }
