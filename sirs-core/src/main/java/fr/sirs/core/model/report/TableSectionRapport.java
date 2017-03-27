@@ -23,8 +23,13 @@ import fr.sirs.core.model.ElementCreator;
 import fr.sirs.util.odt.ODTUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.Spliterators;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.geotoolkit.data.FeatureIterator;
+import org.geotoolkit.data.FeatureStoreRuntimeException;
+import org.geotoolkit.feature.Feature;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -64,13 +69,76 @@ public class TableSectionRapport extends AbstractSectionRapport {
 
     @Override
     protected void printSection(final PrintContext ctx) throws Exception {
-        final List<String> properties = ctx.propertyNames == null? null : new ArrayList<>(ctx.propertyNames);
-        if (ctx.elements != null) {
-            ODTUtils.appendTable(ctx.target, Spliterators.iterator(ctx.elements.spliterator()), properties);
-        } else if (ctx.filterValues != null) {
+        // HACK : For tables, filter is considered to be data, and elements only
+        // serve to filter request data by Ids.
+        if (ctx.filterValues != null) {
+            final List<String> properties = ctx.filterValues.getFeatureType().getProperties(true).stream()
+                    .map(p -> p.getName().tip().toString())
+                    .collect(Collectors.toList());
+
+            boolean idPresent = properties.remove("id");
+            final Set<String> idFilter;
+            if (ctx.elements != null && idPresent) {
+                idFilter = ctx.elements
+                        .map(elt -> elt.getId())
+                        .filter(id -> id != null)
+                        .collect(Collectors.toSet());
+            } else idFilter = null;
+
             try (final FeatureIterator it = ctx.filterValues.iterator()) {
-                ODTUtils.appendTable(ctx.target, it, properties);
+                final FeatureIterator tmpIt;
+                if (idFilter != null)
+                    tmpIt = new FilteredFeatureIterator(it, f -> idFilter.contains(f.getPropertyValue("id")));
+                else
+                    tmpIt = it;
+                ODTUtils.appendTable(ctx.target, tmpIt, properties);
             }
+
+            // If there's no SQL query, we try to print elements
+        } else if (ctx.elements != null) {
+            final List<String> properties = ctx.propertyNames == null? null : new ArrayList<>(ctx.propertyNames);
+            ODTUtils.appendTable(ctx.target, Spliterators.iterator(ctx.elements.spliterator()), properties);
+        }
+    }
+
+    private static class FilteredFeatureIterator implements FeatureIterator {
+
+        private final FeatureIterator source;
+        private final Predicate<Feature> filter;
+
+        private Feature next;
+
+        public FilteredFeatureIterator(FeatureIterator source, Predicate<Feature> filter) {
+            this.source = source;
+            this.filter = filter;
+        }
+
+        @Override
+        public Feature next() throws FeatureStoreRuntimeException {
+            if (hasNext()) {
+                final Feature tmpNext = next;
+                next = null;
+                return tmpNext;
+            }
+
+            throw new FeatureStoreRuntimeException("No more elements !");
+        }
+
+        @Override
+        public boolean hasNext() throws FeatureStoreRuntimeException {
+            while (next == null && source.hasNext()) {
+                next = source.next();
+                if (!filter.test(next)) {
+                    next = null;
+                }
+            }
+
+            return next != null;
+        }
+
+        @Override
+        public void close() {
+            source.close();
         }
     }
 }

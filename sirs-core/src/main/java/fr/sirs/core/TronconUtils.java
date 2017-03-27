@@ -37,7 +37,6 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.GardeTroncon;
 import fr.sirs.core.model.Objet;
-import fr.sirs.core.model.Photo;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ProprieteTroncon;
 import fr.sirs.core.model.SystemeReperage;
@@ -451,16 +450,6 @@ public class TronconUtils {
     }
 
     /**
-     * Retrieve the list of photographs contained in objects or profil en
-     * travers positions linked to a linear which id is given as a parameter.
-     * @param linearId Id of the {@link TronconDigue} to get bound {@link Photo} for.
-     * @return List of {@link Photo} bound to the given {@link TronconDigue}.
-     */
-    public static List<Photo> getPhotoList(final String linearId){
-        return InjectorCore.getBean(SessionCore.class).getPhotoList(linearId);
-    }
-
-    /**
      * Return the positionable included, linked or included into linked elements
      * for the linar given as a parameter.
      * @param linear {@link TronconDigue} to get bound {@link Positionable} for.
@@ -480,16 +469,6 @@ public class TronconUtils {
      */
     public static List<Positionable> getPositionableList(final String linearId) {
         return InjectorCore.getBean(SessionCore.class).getPositionableByLinearId(linearId);
-    }
-
-    /**
-     * Retrieve the list of photographs contained in objects or profil en
-     * travers positions linked to a linear given as a parameter.
-     * @param linear {@link TronconDigue} to get bound {@link Photo} for.
-     * @return List of {@link Photo} bound to the given {@link TronconDigue}.
-     */
-    public static List<Photo> getPhotoList(final TronconDigue linear) {
-        return getPhotoList(linear.getId());
     }
 
     /**

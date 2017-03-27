@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -41,10 +41,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
 import org.ektorp.BulkDeleteDocument;
@@ -56,7 +54,6 @@ import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 import org.ektorp.support.CouchDbRepositorySupport;
-import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.util.collection.CloseableIterator;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -176,7 +173,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     public List<T> get(final String... ids) {
         return get(Arrays.asList(ids));
     }
-    
+
     /**
      * Retrieve the elements of the given parameter class which Ids are provided
      * as parameters.
@@ -203,6 +200,9 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
             final List<T> bulkLoaded = db.queryView(q, getModelClass());
 
             for (T loaded : bulkLoaded) {
+                // Note : It seems queried view returns null objects sometime...
+                if (loaded == null)
+                    continue;
                 loaded = onLoad(loaded);
                 cache.put(loaded.getId(), loaded);
                 result.add(loaded);
@@ -394,7 +394,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         if (!cache.isEmpty()) {
             return cache.values().iterator().next();
         }
-        
+
         try (final CloseableIterator<T> it = getAllStreaming().iterator()) {
             if (it.hasNext()) {
                 return it.next();
