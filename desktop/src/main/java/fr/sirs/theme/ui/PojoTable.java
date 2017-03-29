@@ -41,6 +41,7 @@ import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.Repository;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractObservation;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.AvecBornesTemporelles;
@@ -67,6 +68,7 @@ import fr.sirs.theme.ui.PojoTablePointBindings.PRXYZBinding;
 import fr.sirs.theme.ui.PojoTablePointBindings.PRZBinding;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.FXReferenceEqualsOperator;
+import fr.sirs.util.LabelComparator;
 import fr.sirs.util.SEClassementEqualsOperator;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.odt.ODTUtils;
@@ -1625,6 +1627,21 @@ public class PojoTable extends BorderPane implements Printable {
                 } catch (Exception ex) {
                     setCellValueFactory(SIRS.getOrCreateCellValueFactory(name));
                 }
+
+                // HACK : Needed to avoid comparison on ids.
+                final Previews previews = session.getPreviews();
+                final LabelComparator<Object> labelComparator = new LabelComparator<>(false);
+                setComparator((o1, o2) -> {
+                    if (o1 != null && o2 != null) {
+                        final List<Preview> tmpPreviews = previews.get(new String[]{o1.toString(), o2.toString()});
+                        if (tmpPreviews.size() == 2) {
+                            o1 = tmpPreviews.get(0);
+                            o2 = tmpPreviews.get(1);
+                        }
+                    }
+
+                    return labelComparator.compare(o1, o2);
+                });
 
             } else {
                 setCellValueFactory(SIRS.getOrCreateCellValueFactory(name));
