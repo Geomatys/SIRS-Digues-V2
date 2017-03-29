@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import java.lang.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@/fr/sirs/theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@/fr/sirs/theme.css" type="BorderPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <GridPane hgap="10.0" vgap="10.0" BorderPane.alignment="CENTER">
         <columnConstraints>
@@ -21,7 +25,7 @@
          <children>
             <Button mnemonicParsing="false" onAction="#chooseQuery" text="Choisir" GridPane.columnIndex="3" GridPane.rowIndex="1" />
             <Label text="Titre" />
-            <Label text="Filtre" GridPane.rowIndex="1" />
+            <Label text="Contenu" GridPane.rowIndex="1" />
             <Label fx:id="uiQueryTitle" text="N/A" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <TextField fx:id="uiTitle" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" />
             <Button mnemonicParsing="false" onAction="#deleteQuery" text="Supprimer" GridPane.columnIndex="2" GridPane.rowIndex="1" />

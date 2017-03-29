@@ -32,6 +32,7 @@ import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.LabelComparator;
 import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.ReferenceTableCell;
@@ -750,6 +751,7 @@ public class FXSystemeReperagePane extends BorderPane {
                 }
             });
 
+            final SirsStringConverter sirsStringConverter = new SirsStringConverter();
             setCellFactory((TableColumn<SystemeReperageBorne, SystemeReperageBorne> param) -> {
                 final FXTableCell<SystemeReperageBorne, SystemeReperageBorne> tableCell = new FXTableCell<SystemeReperageBorne, SystemeReperageBorne>() {
 
@@ -761,7 +763,7 @@ public class FXSystemeReperagePane extends BorderPane {
                             setGraphic(null);
                         } else {
                             setGraphic(new ImageView(ReferenceTableCell.ICON_LINK));
-                            setText(new SirsStringConverter().toString(item));
+                            setText(sirsStringConverter.toString(item));
                         }
                     }
 
@@ -769,6 +771,8 @@ public class FXSystemeReperagePane extends BorderPane {
                 tableCell.setEditable(false);
                 return tableCell;
             });
+
+            setComparator(new LabelComparator());
         }
     }
 
