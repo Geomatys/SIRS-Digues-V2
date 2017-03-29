@@ -467,6 +467,7 @@ public class FXSystemeReperagePane extends BorderPane {
      * Note : Once suppression is confirmed, we're forced to check all {@link SystemeReperage}
      * defined on the currently edited {@link TronconDigue}, and update them if
      * they use chosen bornes.
+     *
      * @param e Event fired when deletion button has been fired.
      */
     @FXML
@@ -496,17 +497,22 @@ public class FXSystemeReperagePane extends BorderPane {
         stage.setScene(new Scene(content));
 
         deleteButton.setOnAction(event -> {
-            final BorneDigue[] selectedItems = borneList.getSelectionModel().getSelectedItems().toArray(new BorneDigue[0]);
-            if (checkBorneSuppression(selectedItems)) {
-                final TaskManager.MockTask deletor = new TaskManager.MockTask("Suppression de bornes", () -> {
-                    InjectorCore.getBean(BorneDigueRepository.class).remove(selectedItems);
-                });
+            final Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, "Attention, les bornes séléctionnées seront effacées définitivement. Si elles sont utilisées par un système de repérage, cela entrainera le recalul des positions liées à ce dernier. Continuer ?", ButtonType.NO, ButtonType.YES);
+            confirmation.setResizable(true);
+            final ButtonType userDecision = confirmation.showAndWait().orElse(ButtonType.NO);
+            if (ButtonType.YES.equals(userDecision)) {
+                final BorneDigue[] selectedItems = borneList.getSelectionModel().getSelectedItems().toArray(new BorneDigue[0]);
+                if (checkBorneSuppression(selectedItems)) {
+                    final TaskManager.MockTask deletor = new TaskManager.MockTask("Suppression de bornes", () -> {
+                        InjectorCore.getBean(BorneDigueRepository.class).remove(selectedItems);
+                    });
 
-                deletor.setOnSucceeded(evt -> Platform.runLater(() -> borneList.getItems().removeAll(selectedItems)));
-                deletor.setOnFailed(evt -> Platform.runLater(() -> GeotkFX.newExceptionDialog("Une erreur est survenue lors de la suppression des bornes.", deletor.getException()).show()));
-                content.disableProperty().bind(deletor.runningProperty());
+                    deletor.setOnSucceeded(evt -> Platform.runLater(() -> borneList.getItems().removeAll(selectedItems)));
+                    deletor.setOnFailed(evt -> Platform.runLater(() -> GeotkFX.newExceptionDialog("Une erreur est survenue lors de la suppression des bornes.", deletor.getException()).show()));
+                    content.disableProperty().bind(deletor.runningProperty());
 
-                TaskManager.INSTANCE.submit(deletor);
+                    TaskManager.INSTANCE.submit(deletor);
+                }
             }
         });
 
