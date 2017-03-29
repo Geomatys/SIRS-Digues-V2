@@ -19,12 +19,12 @@
 package fr.sirs.util;
 
 import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.Photo;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Assert;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -33,6 +33,28 @@ import org.junit.Test;
  * @author Samuel Andrés (Geomatys) <samuel.andres at geomatys.com>
  */
 public class ObjectDataSourceTest {
+    
+    @Test
+    public void test_forceArialFontFace(){
+        final String comment = "<html dir=\"ltr\">"
+                + "<head></head>"
+                + "<body contenteditable=\"true\">"
+                + "<p><font face=\"Segoe UI\">Crue ponctuelle sur certains cours d'eau.</font></p>"
+                + "<p><font face=\"Segoe UI\">Certains ouvrages ont pu être mis en charge ponctuellement</font></p>"
+                + "</body>"
+                + "</html>";
+        final String result = ObjectDataSource.forceArialFontFace(comment);
+        
+        final String expected = "<html dir=\"ltr\">"
+                + "<head></head>"
+                + "<body contenteditable=\"true\">"
+                + "<p><font face=\"Arial\">Crue ponctuelle sur certains cours d'eau.</font></p>"
+                + "<p><font face=\"Arial\">Certains ouvrages ont pu être mis en charge ponctuellement</font></p>"
+                + "</body>"
+                + "</html>";
+        
+        Assert.assertEquals(expected, result);
+    }
     
     @Test
     public void test_observationComparator(){

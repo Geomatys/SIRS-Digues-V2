@@ -104,6 +104,8 @@ public class ObjectDataSource<T> implements JRDataSource {
      * @return Extracted information, or null if analysis failed.
      */
     protected Object parsePropertyValue(Object propertyValue, final Class refClass, final Class outputClass) {
+        
+        // 0- Cas des collections : on renvoie une liste imprimable constituée à partir du traitement de chaque élément de la collection.
         if (propertyValue instanceof Collection) {
             final PrintableArrayList resultList = new PrintableArrayList(propertyValue instanceof List);
             for (final Object data : (Collection) propertyValue) {
@@ -113,6 +115,7 @@ public class ObjectDataSource<T> implements JRDataSource {
             return resultList;
         }
 
+        // 1- Cas des "références" et des prévisualisations : il faut un traitement préalable pour récupérer la vraie valeur.
         if (refClass != null) {
             if (!refClass.isAssignableFrom(propertyValue.getClass()) && (propertyValue instanceof String)) {
                 if (ReferenceType.class.isAssignableFrom(refClass)) {
@@ -123,14 +126,36 @@ public class ObjectDataSource<T> implements JRDataSource {
             }
         }
 
-        if (outputClass.isAssignableFrom(propertyValue.getClass()))
-            return propertyValue;
+        // 2a- Cas général des propriétés simples  : le type demandé correspond au type du champ.
+        if (outputClass.isAssignableFrom(propertyValue.getClass())){
+            // Si la valeur est une chaîne de caractères, on force le remplacement de la police de caractères au cas où il s'agirait de HTML.
+            if(propertyValue instanceof String){
+                return forceArialFontFace((String) propertyValue);
+            }
+            else {
+                return propertyValue;
+            }
+        }
 
+        // 2b- Cas des "références" et des prévisualisations : on confie la conversion en chaîne de caractères au convertisseur du SIRS.
         if (String.class.isAssignableFrom(outputClass)) {
             return stringConverter.toString(propertyValue);
-        } else {
+        } 
+        
+        // 2c- ? 
+        else {
             return ObjectConverters.convert(propertyValue, outputClass);
         }
+    }
+    
+    /**
+     * Force la police de caractère indiquée dans les champs formatés en HTML à utiliser la fonte Arial partout où elle est précisée.
+     * 
+     * @param value
+     * @return 
+     */
+    static String forceArialFontFace(final String value){
+        return value.replaceAll("font face=\"[^\"]*\"", "font face=\"Arial\"");
     }
     
     /**
