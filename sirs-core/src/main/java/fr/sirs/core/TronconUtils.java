@@ -716,6 +716,7 @@ public class TronconUtils {
                     return Float.compare(first.getKey(), second.getKey());// On trie suivant la valeurs des PR qui est en clef.
                 }).toArray((int size) -> {return new Map.Entry[size];});
 
+        // On recherche les bornes entre lesquelles se situe le point à convertir, en se basant sur les PRs dans le SR de départ.
         Map.Entry<Float, String> nearestInitialSRBorne = orderedInitialSRBornes[0];
         Map.Entry<Float, String> followingInitialSRBorne = orderedInitialSRBornes[1];
         int borneCnt = 1;
@@ -724,8 +725,10 @@ public class TronconUtils {
             followingInitialSRBorne=orderedInitialSRBornes[borneCnt];
         }
 
+        // Calcul du ratio de distance du point à convertir, entre les deux bornes trouvées.
         final double initialRatio = (initialPR-nearestInitialSRBorne.getKey())/(followingInitialSRBorne.getKey()-nearestInitialSRBorne.getKey());
 
+        // Récupération des deux bornes.
         final BorneDigue nearestInitialSRBorneDigue = borneRepo.get(nearestInitialSRBorne.getValue());
         final BorneDigue followingInitialSRBorneDigue = borneRepo.get(followingInitialSRBorne.getValue());
 
@@ -739,7 +742,7 @@ public class TronconUtils {
         //=> distance sur le troncon du point dont le PR est initialPR :
         final double distanceOrigineTroncon = nearestInitialSRBorneProj.distanceAlongLinear + (followingInitialSRBorneProj.distanceAlongLinear - nearestInitialSRBorneProj.distanceAlongLinear)*initialRatio;
 
-        // On parcourt les segments
+        // On parcourt les segments pour rechercher celui sur lequel se situe le point et à quelle distance sur ce segment.
         SegmentInfo bonSegment = null;
         double distanceSurLeBonSegment = distanceOrigineTroncon;
         for (final SegmentInfo segmentInfo : refLinear){
@@ -751,7 +754,10 @@ public class TronconUtils {
         }
 
         if(bonSegment!=null){
+            // Calcul des coordonnées du point à convertir.
             final Point initialPointPR = GO2Utilities.JTS_FACTORY.createPoint(bonSegment.getPoint(distanceSurLeBonSegment, 0));
+            
+            // Conversion des coordonnées du point à convertir vers le SR demandé.
             return computePR(refLinear, targetSR, initialPointPR, borneRepo);
         }
         else{

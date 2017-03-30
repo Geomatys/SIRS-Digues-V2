@@ -53,12 +53,35 @@ public class ElementCreator {
      * on user's privileges of the session.
      *
      * Do not add the element to the database.
+     * 
+     * Try to use autoincrement if this feature is activated.
      *
      * @param <T> Type of the object to create.
      * @param clazz Type of the object to create.
      * @return A new, empty element of queried class.
+     * @see ElementCreator#createElement(java.lang.Class, boolean) 
+     * @see SirsPreferences.PROPERTIES#DESIGNATION_AUTO_INCREMENT
      */
     public <T extends Element> T createElement(final Class<T> clazz){
+        return createElement(clazz, true);
+    }
+    
+    /**
+     * Create a new element of type T.
+     *
+     * If possible, this method sets the correct validity and author dependant
+     * on user's privileges of the session.
+     *
+     * Do not add the element to the database.
+     * 
+     * Try to use autoincrement if this feature is activated.
+     *
+     * @param <T> Type of the object to create.
+     * @param clazz Type of the object to create.
+     * @param tryAutoIncrement True to use autoincrement if this feature is activated. False to skip autoincremented designations.
+     * @return A new, empty element of queried class.
+     */
+    public <T extends Element> T createElement(final Class<T> clazz, final boolean tryAutoIncrement){
         try {
             final Constructor<T> constructor = clazz.getConstructor();
             constructor.setAccessible(true);
@@ -70,21 +93,23 @@ public class ElementCreator {
                 element.setAuthor(utilisateur.getId());
             }
 
-            // Determine an auto-incremented value for designation
-            try {
-                final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.DESIGNATION_AUTO_INCREMENT);
-                if (Boolean.TRUE.equals(Boolean.valueOf(propertyStr))) {
-                    final Task<Integer> nextDesignation = incrementer.nextDesignation(clazz);
-                    nextDesignation.setOnSucceeded(evt -> Platform.runLater(() -> {
-                        final Integer result = nextDesignation.getValue();
-                        if (result != null)
-                            element.setDesignation(String.valueOf(result));
-                    }));
+            if(tryAutoIncrement){
+                // Determine an auto-incremented value for designation
+                try {
+                    final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.DESIGNATION_AUTO_INCREMENT);
+                    if (Boolean.TRUE.equals(Boolean.valueOf(propertyStr))) {
+                        final Task<Integer> nextDesignation = incrementer.nextDesignation(clazz);
+                        nextDesignation.setOnSucceeded(evt -> Platform.runLater(() -> {
+                            final Integer result = nextDesignation.getValue();
+                            if (result != null)
+                                element.setDesignation(String.valueOf(result));
+                        }));
 
-                    TaskManager.INSTANCE.submit(nextDesignation);
+                        TaskManager.INSTANCE.submit(nextDesignation);
+                    }
+                } catch (IllegalStateException e) {
+                    // If the property is not set, we consider it deactivated.
                 }
-            } catch (IllegalStateException e) {
-                // If the property is not set, we consider it deactivated.
             }
             return element;
 

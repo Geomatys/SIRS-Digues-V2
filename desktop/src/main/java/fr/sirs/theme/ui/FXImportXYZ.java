@@ -174,11 +174,11 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
             final fr.sirs.Session sirsSession = Injector.getSession();
 
             if(pojoTable.getParentElement() instanceof LeveProfilTravers){
-                leve = sirsSession.getElementCreator().createElement(XYZLeveProfilTravers.class);
+                leve = sirsSession.getElementCreator().createElement(XYZLeveProfilTravers.class, false);
             } else if(pojoTable.getParentElement() instanceof ProfilLong){
-                leve = sirsSession.getElementCreator().createElement(XYZProfilLong.class);
+                leve = sirsSession.getElementCreator().createElement(XYZProfilLong.class, false);
             } else if(pojoTable.getParentElement() instanceof LigneEau){
-                leve = sirsSession.getElementCreator().createElement(MesureLigneEauXYZ.class);
+                leve = sirsSession.getElementCreator().createElement(MesureLigneEauXYZ.class, false);
             } else {
                 throw new UnsupportedOperationException("Type d'élément parent inconnu pour les points de levé.");
             }
