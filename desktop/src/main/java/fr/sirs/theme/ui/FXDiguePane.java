@@ -45,7 +45,7 @@ public class FXDiguePane extends FXDiguePaneStub {
     protected FXDiguePane() {
         super();
         Injector.injectDependencies(this);
-        table.editableProperty().bind(disableFieldsProperty().not());
+        table.editableProperty().set(false);
         table.parentElementProperty().bind(elementProperty);
         centerContent.getChildren().add(table);
     }
