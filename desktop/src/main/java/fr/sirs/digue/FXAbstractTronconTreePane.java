@@ -25,6 +25,7 @@ import fr.sirs.Session;
 import fr.sirs.core.component.DocumentListener;
 import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.Role;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.AbstractFXElementPane;
 import java.time.LocalDate;
@@ -128,7 +129,9 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
 
         uiDelete.setGraphic(new ImageView(SIRS.ICON_TRASH_WHITE));
         uiDelete.setOnAction(this::deleteSelection);
+        uiDelete.disableProperty().bind(session.role.isEqualTo(Role.GUEST)); // Correctif demande SYM-1585 : l'invité ne doit pas pouvoir créer ni modifier quoi que ce soit.
         uiAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
+        uiAdd.disableProperty().bind(session.role.isEqualTo(Role.GUEST)); // Correctif demande SYM-1585 : l'invité ne doit pas pouvoir créer ni modifier quoi que ce soit.
 
         //listen to changes in the db to update tree
         Injector.getDocumentChangeEmiter().addListener(this);

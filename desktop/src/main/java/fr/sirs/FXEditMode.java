@@ -44,6 +44,7 @@ import javafx.scene.paint.Color;
 import org.apache.sis.util.ArgumentChecks;
 
 /**
+ * Composant de controle de l'édition des fiches.
  *
  * @author Johann Sorel (Geomatys)
  */
@@ -87,7 +88,7 @@ public class FXEditMode extends VBox {
             });
         validProperty.set(true);
 
-        final BooleanBinding editionProhibited = session.needValidationProperty().and(validProperty.or(authorIDProperty.isNotEqualTo(session.getUtilisateur().getId())));
+        final BooleanBinding editionProhibited = getEditionProhibition();
         uiEdit.disableProperty().bind(editionProhibited);
         final BooleanBinding editBind = uiEdit.selectedProperty().not();
         uiSave.disableProperty().bind(editBind);
@@ -103,7 +104,31 @@ public class FXEditMode extends VBox {
                 group.selectToggle(oldValue);
             });
     }
+    
+    /**
+     * Détermine la condition sous laquelle le passage en mode édition est interdit.
+     * 
+     * Dans le cas général des fiches, on interdit l'édition des fiches si :
+     *  - la session indique que les éléments créés sont dans un état "invalidé" (role "externe").
+     *  ET 
+     *  (
+     *  - l'état de l'élément consulté est "validé" (le role "externe" n'a plus la main sur les éléments "validés", qu'il en soit l'auteur ou non).
+     *  OU
+     *  - l'utilisateur connecté n'est pas l'auteur de l'élément créé (parmi les éléments "invalidés", le role "externe" n'a la main que sur ceux dont il l'utilisateur courant est l'auteur).
+     *  )
+     * 
+     * @return  Le binding de contrôle du bouton d'édition.
+     */
+    protected BooleanBinding getEditionProhibition(){
+        return session.needValidationProperty().and(validProperty.or(
+                authorIDProperty.isNotEqualTo(session.getUtilisateur().getId())));
+    }
 
+    /**
+     * Mise à jour de l'indication de validité.
+     * 
+     * @param valid 
+     */
     private void resetValidUIs(final boolean valid){
         if(valid){
             uiImageValid.setImage(ICON_CHECK_CIRCLE);

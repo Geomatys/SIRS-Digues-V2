@@ -19,8 +19,13 @@
 package fr.sirs.util;
 
 import fr.sirs.FXEditMode;
+import fr.sirs.Injector;
+import fr.sirs.Session;
+import fr.sirs.core.model.Role;
+import javafx.beans.binding.BooleanBinding;
 
 /**
+ * Composant de controle de l'édition des panneaux de thèmes ?
  *
  * @author Alexis Manin (Geomatys)
  */
@@ -31,5 +36,17 @@ public class SimpleFXEditMode extends FXEditMode {
         uiValidationBox.setManaged(false);
         uiSave.setVisible(false);
         uiSave.setManaged(false);
+    }
+    
+    /**
+     * Dans le cas général des thèmes de tronçon, on interdit l'édition du panneau seulement si l'utilisateur est un invité 
+     * (afin que les utilisateurs "externes" puissent ajouter des objets sur les tronçons). 
+     * (Voir la demande de correctif SYM-1585.)
+     * 
+     * @return Le binding de contrôle du bouton d'édition.
+     */
+    @Override
+    protected BooleanBinding getEditionProhibition(){
+        return Injector.getSession().role.isEqualTo(Role.GUEST);
     }
 }
