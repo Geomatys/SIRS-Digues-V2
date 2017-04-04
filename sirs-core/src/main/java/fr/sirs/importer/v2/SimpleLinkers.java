@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -41,6 +41,7 @@ import static fr.sirs.importer.DbImporter.TableName.LAISSE_CRUE_JOURNAL;
 import static fr.sirs.importer.DbImporter.TableName.LIGNE_EAU_JOURNAL;
 import static fr.sirs.importer.DbImporter.TableName.MARCHE_FINANCEUR;
 import static fr.sirs.importer.DbImporter.TableName.MONTEE_DES_EAUX_JOURNAL;
+import static fr.sirs.importer.DbImporter.TableName.PRESTATION_INTERVENANT;
 import static fr.sirs.importer.DbImporter.TableName.PRESTATION_EVENEMENT_HYDRAU;
 import static fr.sirs.importer.DbImporter.TableName.ELEMENT_RESEAU_AUTRE_OUVRAGE_HYDRAU;
 import static fr.sirs.importer.DbImporter.TableName.ELEMENT_RESEAU_CONDUITE_FERMEE;
@@ -135,7 +136,7 @@ public class SimpleLinkers extends Static {
     public static class PrestationIntervenantLinker extends JoinTableLinker<Contact, Prestation> {
 
         public PrestationIntervenantLinker() {
-            super(PRESTATION_EVENEMENT_HYDRAU.name(), Contact.class, Prestation.class, "ID_INTERVENANT", "ID_PRESTATION");
+            super(PRESTATION_INTERVENANT.name(), Contact.class, Prestation.class, "ID_INTERVENANT", "ID_PRESTATION");
         }
     }
 

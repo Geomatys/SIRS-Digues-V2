@@ -94,7 +94,7 @@ public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndig
         this();
         this.elementProperty().set(systemeEndiguement);
 
-        table.editableProperty().bind(disableFieldsProperty().not());
+        table.editableProperty().set(false);
         table.parentElementProperty().bind(elementProperty);
         tabs.getTabs().add(new Tab("Digues", table));
     }
