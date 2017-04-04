@@ -122,7 +122,7 @@ public class SessionCore implements ApplicationContextAware {
      */
     public BooleanProperty needValidationProperty() {return needValidationProperty;}
 
-    private final ObjectProperty<Role> role = new SimpleObjectProperty();
+    public final ObjectProperty<Role> role = new SimpleObjectProperty();
     public Role getRole(){return role.get();}
 
     @Autowired
