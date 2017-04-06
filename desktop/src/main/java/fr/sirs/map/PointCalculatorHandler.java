@@ -207,9 +207,7 @@ public class PointCalculatorHandler extends AbstractNavigationHandler {
 
                 }else if(pickType==2){
                     //on prend la coordonnée du click
-                    final Coordinate coord = helperTroncon.toCoord(e.getX(), e.getY());
-                    pane.uiSourceX.getValueFactory().setValue(coord.x);
-                    pane.uiSourceY.getValueFactory().setValue(coord.y);
+                    pane.setPosition(helperTroncon.toCoord(e.getX(), e.getY()));
                     setPickType(0);
                     pane.uiPickTroncon.setSelected(false);
                     pane.uiPickCoord.setSelected(false);
