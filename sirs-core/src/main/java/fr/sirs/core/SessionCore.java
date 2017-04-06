@@ -56,9 +56,11 @@ import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.logging.Level;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import org.apache.http.conn.ClientConnectionManager;
@@ -105,24 +107,29 @@ public class SessionCore implements ApplicationContextAware {
         utilisateurProperty.set(utilisateur);
     }
 
-    private final BooleanProperty geometryEditionProperty = new SimpleBooleanProperty(false);
+    private final ReadOnlyBooleanWrapper geometryEditionProperty = new ReadOnlyBooleanWrapper(false);
     /**
      *
      * @return A flag indicating if current user can modify geometries (true) or
      * not (false).
      */
-    public BooleanProperty geometryEditionProperty() {return geometryEditionProperty;}
+    public ReadOnlyBooleanProperty geometryEditionProperty() {return geometryEditionProperty.getReadOnlyProperty();}
 
-    private final BooleanProperty needValidationProperty = new SimpleBooleanProperty(true);
+    private final ReadOnlyBooleanWrapper needValidationProperty = new ReadOnlyBooleanWrapper(true);
     /**
      *
      * @return A flag indicating if current user's work must be marked as 'not
      * validated yet'. It means that this user won't be able to modify any data
      * already validated, and it won't be able to edit work of other users.
      */
-    public BooleanProperty needValidationProperty() {return needValidationProperty;}
+    public ReadOnlyBooleanProperty needValidationProperty() {return needValidationProperty;}
 
-    public final ObjectProperty<Role> role = new SimpleObjectProperty();
+    private final ReadOnlyObjectWrapper<Role> role = new ReadOnlyObjectWrapper<>();
+
+    public ReadOnlyObjectProperty<Role> roleProperty() {
+        return role.getReadOnlyProperty();
+    }
+
     public Role getRole(){return role.get();}
 
     @Autowired

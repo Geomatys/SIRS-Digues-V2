@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -20,7 +20,6 @@ package fr.sirs.util;
 
 import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
-import fr.sirs.Session;
 import fr.sirs.core.model.Role;
 import javafx.beans.binding.BooleanBinding;
 
@@ -37,16 +36,16 @@ public class SimpleFXEditMode extends FXEditMode {
         uiSave.setVisible(false);
         uiSave.setManaged(false);
     }
-    
+
     /**
-     * Dans le cas général des thèmes de tronçon, on interdit l'édition du panneau seulement si l'utilisateur est un invité 
-     * (afin que les utilisateurs "externes" puissent ajouter des objets sur les tronçons). 
+     * Dans le cas général des thèmes de tronçon, on interdit l'édition du panneau seulement si l'utilisateur est un invité
+     * (afin que les utilisateurs "externes" puissent ajouter des objets sur les tronçons).
      * (Voir la demande de correctif SYM-1585.)
-     * 
+     *
      * @return Le binding de contrôle du bouton d'édition.
      */
     @Override
     protected BooleanBinding getEditionProhibition(){
-        return Injector.getSession().role.isEqualTo(Role.GUEST);
+        return Injector.getSession().roleProperty().isEqualTo(Role.GUEST);
     }
 }
