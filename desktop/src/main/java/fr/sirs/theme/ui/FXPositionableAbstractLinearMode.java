@@ -32,7 +32,6 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
-import static fr.sirs.theme.ui.FXPositionableMode.computeLinearFromGeo;
 import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -123,11 +122,11 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         uiAvalEnd.setSelected(true);
 
         final StringConverter conv= new ThreeDecimalsConverter();
-        SpinnerValueFactory.DoubleSpinnerValueFactory valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1);
+        SpinnerValueFactory.DoubleSpinnerValueFactory valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1);
         valueFactory.setConverter(conv);
         uiDistanceStart.setValueFactory(valueFactory);
 
-        valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1);
+        valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1);
         valueFactory.setConverter(conv);
         uiDistanceEnd.setValueFactory(valueFactory);
 
@@ -194,70 +193,75 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
     @Override
     public void updateFields(){
         reseting = true;
+        try {
+            final Positionable pos = posProperty.get();
+            final String mode = pos.getGeometryMode();
 
-        final Positionable pos = posProperty.get();
-        final String mode = pos.getGeometryMode();
+            final TronconDigue t = FXPositionableMode.getTronconFromPositionable(pos);
+            final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
+            final SystemeReperage defaultSR;
+            boolean sameSR = false;
+            if (pos.getSystemeRepId() != null) {
+                defaultSR = srRepo.get(pos.getSystemeRepId());
+                sameSR = true;
+            } else if (t.getSystemeRepDefautId() != null) {
+                defaultSR = srRepo.get(t.getSystemeRepDefautId());
+            } else {
+                defaultSR = null;
+            }
+            uiSRs.setValue(defaultSR);
 
-        final TronconDigue t = FXPositionableMode.getTronconFromPositionable(pos);
-        final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
-        final SystemeReperage defaultSR;
-        if (pos.getSystemeRepId() != null) {
-            defaultSR = srRepo.get(pos.getSystemeRepId());
-        } else if (t.getSystemeRepDefautId() != null) {
-            defaultSR = srRepo.get(t.getSystemeRepDefautId());
-        } else {
-            defaultSR = null;
-        }
-        uiSRs.setValue(defaultSR);
-
-        /*
+            /*
         Init list of bornes and SRs : must be done all the time to allow the user
         to change/choose the positionable SR and bornes among list elements.
-        */
-        final Map<String, BorneDigue> borneMap = initSRBorneLists(t, defaultSR);
+             */
+            final Map<String, BorneDigue> borneMap = initSRBorneLists(t, defaultSR);
 
-        if(mode == null || getID().equals(mode)){
-            //on assigne les valeurs sans changement
-            uiAmontStart.setSelected(pos.getBorne_debut_aval());
-            uiAvalStart.setSelected(!pos.getBorne_debut_aval());
-            uiAmontEnd.setSelected(pos.getBorne_fin_aval());
-            uiAvalEnd.setSelected(!pos.getBorne_fin_aval());
+            if ((mode == null || getID().equals(mode)) && sameSR) {
+                //on assigne les valeurs sans changement
+                uiAmontStart.setSelected(pos.getBorne_debut_aval());
+                uiAvalStart.setSelected(!pos.getBorne_debut_aval());
+                uiAmontEnd.setSelected(pos.getBorne_fin_aval());
+                uiAvalEnd.setSelected(!pos.getBorne_fin_aval());
 
-            uiDistanceStart.getValueFactory().setValue(pos.getBorne_debut_distance());
-            uiDistanceEnd.getValueFactory().setValue(pos.getBorne_fin_distance());
+                uiDistanceStart.getValueFactory().setValue(pos.getBorne_debut_distance());
+                uiDistanceEnd.getValueFactory().setValue(pos.getBorne_fin_distance());
 
-            uiBorneStart.valueProperty().set(borneMap.get(pos.borneDebutIdProperty().get()));
-            uiBorneEnd.valueProperty().set(borneMap.get(pos.borneFinIdProperty().get()));
+                uiBorneStart.valueProperty().set(borneMap.get(pos.borneDebutIdProperty().get()));
+                uiBorneEnd.valueProperty().set(borneMap.get(pos.borneFinIdProperty().get()));
 
-        }else if(pos.getGeometry()!=null){
-            //on calcule les valeurs en fonction des points de debut et fin
-            final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
-            final TronconUtils.PosSR rp = ps.getForSR(defaultSR);
+            } else {
+                try {
+                    //on calcule les valeurs en fonction des points de debut et fin
+                    final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
+                    final TronconUtils.PosSR rp = ps.getForSR(defaultSR);
 
-            uiAvalStart.setSelected(!rp.startAval);
-            uiAmontStart.setSelected(rp.startAval);
-            uiDistanceStart.getValueFactory().setValue(rp.distanceStartBorne);
-            uiBorneStart.getSelectionModel().select(rp.borneDigueStart);
+                    uiAvalStart.setSelected(!rp.startAval);
+                    uiAmontStart.setSelected(rp.startAval);
+                    uiDistanceStart.getValueFactory().setValue(rp.distanceStartBorne);
+                    uiBorneStart.getSelectionModel().select(rp.borneDigueStart);
 
-            uiAvalEnd.setSelected(!rp.endAval);
-            uiAmontEnd.setSelected(rp.endAval);
-            uiDistanceEnd.getValueFactory().setValue(rp.distanceEndBorne);
-            uiBorneEnd.getSelectionModel().select(rp.borneDigueEnd);
+                    uiAvalEnd.setSelected(!rp.endAval);
+                    uiAmontEnd.setSelected(rp.endAval);
+                    uiDistanceEnd.getValueFactory().setValue(rp.distanceEndBorne);
+                    uiBorneEnd.getSelectionModel().select(rp.borneDigueEnd);
+                } catch (Exception e) {
+                    //pas de geometrie
+                    uiAvalStart.setSelected(true);
+                    uiAmontStart.setSelected(false);
+                    uiDistanceStart.getValueFactory().setValue(0.0);
+                    uiBorneStart.getSelectionModel().clearSelection();
 
-        }else{
-            //pas de geometrie
-            uiAvalStart.setSelected(true);
-            uiAmontStart.setSelected(false);
-            uiDistanceStart.getValueFactory().setValue(0.0);
-            uiBorneStart.getSelectionModel().selectFirst();
+                    uiAvalEnd.setSelected(true);
+                    uiAmontEnd.setSelected(false);
+                    uiDistanceEnd.getValueFactory().setValue(0.0);
+                    uiBorneEnd.getSelectionModel().clearSelection();
+                }
+            }
 
-            uiAvalEnd.setSelected(true);
-            uiAmontEnd.setSelected(false);
-            uiDistanceEnd.getValueFactory().setValue(0.0);
-            uiBorneEnd.getSelectionModel().selectFirst();
+        } finally {
+            reseting = false;
         }
-
-        reseting = false;
     }
 
     /**
@@ -297,8 +301,6 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
      */
     @Override
     public void buildGeometry(){
-
-
         //sauvegarde des propriétés
         final Positionable positionable = posProperty.get();
 
@@ -316,23 +318,28 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         positionable.setBorne_debut_distance(uiDistanceStart.getValue());
         positionable.setBorne_fin_distance(uiDistanceEnd.getValue());
 
-        //on recalculate la geometrie
-        final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
-        final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-        final LineString geometry = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), positionable, borneRepo);
+        //on recalcule la geometrie uniquement si on peut la dédduire des bornes.
+        if (startBorne != null || endBorne != null) {
+            final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
+            final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
+            final LineString geometry = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), positionable, borneRepo);
 
-        //sauvegarde de la geometrie
-        positionable.geometryModeProperty().set(getID());
-        positionable.geometryProperty().set(geometry);
-        positionable.setPositionDebut(TronconUtils.getPointFromGeometry(positionable.getGeometry(), getSourceLinear(sr), Injector.getSession().getProjection(), false));
-        positionable.setPositionFin(TronconUtils.getPointFromGeometry(positionable.getGeometry(), getSourceLinear(sr), Injector.getSession().getProjection(), true));
+            //sauvegarde de la geometrie
+            positionable.geometryProperty().set(geometry);
+
+            positionable.setPositionDebut(geometry.getStartPoint());
+            positionable.setPositionFin(geometry.getEndPoint());
+        }
     }
 
     protected void coordChange(){
         if(reseting) return;
         reseting = true;
-        buildGeometry();
-        reseting = false;
+        try {
+            buildGeometry();
+        } finally {
+            reseting = false;
+        }
     }
 
     protected void srsChange(ObservableValue<? extends SystemeReperage> observable,
@@ -340,51 +347,54 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         if(reseting) return;
 
         reseting = true;
-
-        final Positionable positionable = posProperty.get();
-
-        // Mise à jour de la liste des bornes
-        final ArrayList<BorneDigue> bornes = new ArrayList<>();
-        final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-//        BorneDigue defaultBorneStart = null;
-//        BorneDigue defaultBorneEnd = null;
-        for (final SystemeReperageBorne srb : newSR.systemeReperageBornes) {
-            final BorneDigue bd = borneRepo.get(srb.getBorneId());
-            if (bd != null) {
-                bornes.add(bd);
-//                if(bd.getId().equals(positionable.getBorneDebutId())){
-//                    defaultBorneStart = bd;
-//                }
-//                if(bd.getId().equals(positionable.getBorneFinId())){
-//                    defaultBorneEnd = bd;
-//                }
+        try {
+            // Mise à jour de la liste des bornes
+            final ArrayList<BorneDigue> bornes = new ArrayList<>();
+            final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
+            for (final SystemeReperageBorne srb : newSR.systemeReperageBornes) {
+                final BorneDigue bd = borneRepo.get(srb.getBorneId());
+                if (bd != null) {
+                    bornes.add(bd);
+                }
             }
+
+            final ObservableList<BorneDigue> observableBornes = FXCollections.observableList(bornes).sorted(new BorneComparator());
+            uiBorneStart.setItems(observableBornes);
+            uiBorneEnd.setItems(observableBornes);
+
+            //calcul de la position relative dans le nouveau SR
+                try {
+                    //on calcule les valeurs en fonction des points de debut et fin
+                    final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(positionableProperty().get());
+                    final TronconUtils.PosSR rp = ps.getForSR(newSR);
+
+                    uiAvalStart.setSelected(!rp.startAval);
+                    uiAmontStart.setSelected(rp.startAval);
+                    uiDistanceStart.getValueFactory().setValue(rp.distanceStartBorne);
+                    uiBorneStart.getSelectionModel().select(rp.borneDigueStart);
+
+                    uiAvalEnd.setSelected(!rp.endAval);
+                    uiAmontEnd.setSelected(rp.endAval);
+                    uiDistanceEnd.getValueFactory().setValue(rp.distanceEndBorne);
+                    uiBorneEnd.getSelectionModel().select(rp.borneDigueEnd);
+                } catch (Exception e) {
+                    //pas de geometrie
+                    uiAvalStart.setSelected(true);
+                    uiAmontStart.setSelected(false);
+                    uiDistanceStart.getValueFactory().setValue(0.0);
+                    uiBorneStart.getSelectionModel().clearSelection();
+
+                    uiAvalEnd.setSelected(true);
+                    uiAmontEnd.setSelected(false);
+                    uiDistanceEnd.getValueFactory().setValue(0.0);
+                    uiBorneEnd.getSelectionModel().clearSelection();
+                }
+
+            buildGeometry();
+        } finally {
+            reseting = false;
         }
-
-        uiBorneStart.setItems(FXCollections.observableList(bornes));
-        uiBorneEnd.setItems(FXCollections.observableList(bornes));
-
-
-        //calcul de la position relative dans le nouveau SR
-        final Point ptStart = computeGeoFromLinear(uiDistanceStart.getValue(), uiBorneStart.getValue(), uiAvalStart.isSelected());
-        final Point ptEnd   = computeGeoFromLinear(uiDistanceEnd.getValue(), uiBorneEnd.getValue(), uiAvalEnd.isSelected());
-        final LinearReferencing.SegmentInfo[] segments = getSourceLinear(newSR);
-        Map.Entry<BorneDigue, Double> relStart = computeLinearFromGeo(segments, newSR, ptStart);
-        Map.Entry<BorneDigue, Double> relEnd = computeLinearFromGeo(segments, newSR, ptEnd);
-
-        uiAvalStart.setSelected(relStart.getValue() < 0);
-        uiDistanceStart.getValueFactory().setValue(StrictMath.abs(relStart.getValue()));
-        uiBorneStart.getSelectionModel().select(relStart.getKey());
-
-        uiAvalEnd.setSelected(relEnd.getValue() < 0);
-        uiDistanceEnd.getValueFactory().setValue(StrictMath.abs(relEnd.getValue()));
-        uiBorneEnd.getSelectionModel().select(relEnd.getKey());
-
-
-        buildGeometry();
-        reseting = false;
     }
-
 
     /**
      * Return the Linear geometry on which the input {@link SystemeReperage} is based on.
