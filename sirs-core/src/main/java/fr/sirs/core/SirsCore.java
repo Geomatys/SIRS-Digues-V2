@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.PlatformUtil;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.core.model.SIRSFileReference;
-import fr.sirs.util.ClosingDaemon;
 import fr.sirs.util.referencing.HackCRSFactory;
 import fr.sirs.util.property.DocumentRoots;
 import fr.sirs.util.property.Internal;
@@ -42,11 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystemAlreadyExistsException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -56,6 +51,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -170,8 +166,12 @@ public class SirsCore {
 
     public static final Path IMPORT_ERROR_DIR = CONFIGURATION_PATH.resolve("importErrors");
 
-    public static final Path NTV2_PATH = CONFIGURATION_PATH.resolve("ntv2").resolve("gr3df97a.txt");
-    
+    public static final Path NTV2_DIR = CONFIGURATION_PATH.resolve("ntv2");
+    public static List<String> NTV2_FILES = Collections.unmodifiableList(Arrays.asList(new String[]{
+        "gr3df97a.txt",
+        "rgf93_ntf.gsb"
+    }));
+
     //--------------------------------------------------------------------------
     // Champs spéciaux des classes utilisés dans le code
     //--------------------------------------------------------------------------
@@ -261,7 +261,7 @@ public class SirsCore {
     public static final String REFERENCE_GET_ID = "getId";
     public static final String REFERENCE_SET_DESIGNATION = "setDesignation";
 
-    protected static final String NTV2_RESOURCE = "/fr/sirs/ntv2/gr3df97a.txt";
+    protected static final String NTV2_RESOURCE = "/fr/sirs/ntv2/";
 
     /**
      * User directory root folder.
@@ -313,35 +313,23 @@ public class SirsCore {
 
         // On tente d'installer la grille NTV2 pour améliorer la précision du géo-réferencement.
         try {
-            if (!Files.exists(NTV2_PATH)) {
-                Files.createDirectories(NTV2_PATH.getParent());
-
-                final URI ntv2URI = SirsCore.class.getResource(NTV2_RESOURCE).toURI();
-                final Path gridPath;
-                if (ntv2URI.getScheme().equalsIgnoreCase("file")) {
-                    gridPath = Paths.get(ntv2URI);
-                } else if (ntv2URI.getScheme().equalsIgnoreCase("jar")) {
-                    FileSystem jarFS;
-                    try {
-                        jarFS = FileSystems.newFileSystem(ntv2URI, Collections.EMPTY_MAP);
-                    } catch (FileSystemAlreadyExistsException e) {
-                        jarFS = FileSystems.getFileSystem(ntv2URI);
-                    }
-                    gridPath = jarFS.getPath(NTV2_RESOURCE);
-                    ClosingDaemon.watchResource(gridPath, jarFS);
-                } else {
-                    throw new IOException("Unknown resource scheme.");
+            Files.createDirectories(NTV2_DIR);
+            for (final String file : NTV2_FILES) {
+                final Path ntv2File = NTV2_DIR.resolve(file);
+                if (Files.exists(ntv2File))
+                    continue;
+                try (final InputStream resource = SirsCore.class.getResourceAsStream(NTV2_RESOURCE.concat(file))) {
+                    Files.copy(resource, ntv2File);
                 }
-
-                Files.copy(gridPath, NTV2_PATH);
             }
+
             Field dirField = DataDirectory.class.getDeclaredField("directory");
             dirField.setAccessible(true);
-            dirField.set(DataDirectory.DATUM_CHANGES, NTV2_PATH.getParent());
+            dirField.set(DataDirectory.DATUM_CHANGES, NTV2_DIR);
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "NTV2 data for RGF93 cannot be installed.", ex);
-            Platform.runLater(() ->
-                    GeotkFX.newExceptionDialog("La grille de transformation NTV2 ne peut être installée. Des erreurs de reprojection pourraient apparaître au sein de l'application.", ex).show()
+            Platform.runLater(()
+                    -> GeotkFX.newExceptionDialog("La grille de transformation NTV2 ne peut être installée. Des erreurs de reprojection pourraient apparaître au sein de l'application.", ex).show()
             );
         }
 
