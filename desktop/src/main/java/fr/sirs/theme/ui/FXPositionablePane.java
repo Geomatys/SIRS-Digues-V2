@@ -19,6 +19,7 @@
 package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -241,12 +242,20 @@ public class FXPositionablePane extends BorderPane {
             sr = null;
         }
 
-        if(sr!=null && pos.getGeometry()!=null){
+        if (sr!=null) {
             final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr);
             final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(pos, troncon, segments);
 
-            final Point startPoint = posInfo.getGeoPointStart();
-            final Point endPoint = posInfo.getGeoPointEnd();
+            final Geometry geometry = posInfo.getGeometry();
+            final Point startPoint, endPoint;
+            if (geometry instanceof LineString) {
+                LineString ls = (LineString) geometry;
+                startPoint = ls.getStartPoint();
+                endPoint = ls.getEndPoint();
+            } else {
+                startPoint = posInfo.getGeoPointStart();
+                endPoint = posInfo.getGeoPointEnd();
+            }
 
             final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
             final float startPr = TronconUtils.computePR(segments, sr, startPoint, borneRepo);
