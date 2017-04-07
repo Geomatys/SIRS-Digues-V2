@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -44,7 +44,6 @@ import fr.sirs.theme.AbstractTheme.ThemeManager;
 import fr.sirs.theme.TronconTheme;
 import java.util.ArrayList;
 import java.util.List;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -356,10 +355,6 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
 //                });
                 setTableItems(() -> (ObservableList) group.getExtractor().apply(newValue));
             }
-        }
-
-        public BooleanProperty getEditableProperty() {
-            return editableProperty;
         }
     }
 }

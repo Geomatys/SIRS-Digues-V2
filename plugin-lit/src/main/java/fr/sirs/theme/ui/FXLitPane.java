@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -37,27 +37,26 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class FXLitPane extends FXLitPaneStub {
     @Autowired private Session session;
-    
+
     @FXML protected VBox contentBox;
 
     private final TronconLitPojoTable table = new TronconLitPojoTable();
 
     /**
-     * Constructor. Initialize part of the UI which will not require update when 
+     * Constructor. Initialize part of the UI which will not require update when
      * element edited change.
      */
     protected FXLitPane() {
         super();
         Injector.injectDependencies(this);
-        table.editableProperty().bind(disableFieldsProperty().not());
         table.parentElementProperty().bind(elementProperty);
         contentBox.getChildren().add(table);
     }
-    
+
     public FXLitPane(final Lit lit){
         this();
         this.elementProperty().set(lit);
-    }     
+    }
 
     /**
      * Initialize fields at element setting.
@@ -73,11 +72,13 @@ public class FXLitPane extends FXLitPaneStub {
                 ((TronconLitRepository) session.getRepositoryForClass(TronconLit.class)).getByLit(newElement)));
         }
     }
-    
+
     private class TronconLitPojoTable extends PojoTable {
-    
+
         public TronconLitPojoTable() {
             super(TronconLit.class, "Tronçon du lit");
+            editableProperty().unbind();
+            editableProperty().set(false);
         }
 
         @Override
