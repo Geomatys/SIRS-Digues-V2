@@ -66,6 +66,13 @@ public class FXEditMode extends VBox {
 
     private Runnable saveAction;
 
+    /**
+     * A binding defining if current user is not allowed to edit current element.
+     * True : read-only
+     * False : read-write
+     */
+    private final BooleanBinding editionProhibited;
+
     public FXEditMode() {
         final Class cdtClass = FXEditMode.class;
         final String fxmlpath = "/"+cdtClass.getName().replace('.', '/')+".fxml";
@@ -88,7 +95,11 @@ public class FXEditMode extends VBox {
             });
         validProperty.set(true);
 
-        final BooleanBinding editionProhibited = getEditionProhibition();
+        editionProhibited = initEditionProhibition();
+        editionProhibited.addListener(obs -> {
+            if (editionProhibited.get())
+                uiEdit.setSelected(false);
+        });
         uiEdit.disableProperty().bind(editionProhibited);
         final BooleanBinding editBind = uiEdit.selectedProperty().not();
         uiSave.disableProperty().bind(editBind);
@@ -104,38 +115,37 @@ public class FXEditMode extends VBox {
                 group.selectToggle(oldValue);
             });
     }
-    
+
     /**
      * Détermine la condition sous laquelle le passage en mode édition est interdit.
-     * 
+     *
      * Dans le cas général des fiches, on interdit l'édition des fiches si :
      *  - la session indique que les éléments créés sont dans un état "invalidé" (role "externe").
-     *  ET 
+     *  ET
      *  (
      *  - l'état de l'élément consulté est "validé" (le role "externe" n'a plus la main sur les éléments "validés", qu'il en soit l'auteur ou non).
      *  OU
      *  - l'utilisateur connecté n'est pas l'auteur de l'élément créé (parmi les éléments "invalidés", le role "externe" n'a la main que sur ceux dont il l'utilisateur courant est l'auteur).
      *  )
-     * 
+     *
      * @return  Le binding de contrôle du bouton d'édition.
      */
-    protected BooleanBinding getEditionProhibition(){
+    protected BooleanBinding initEditionProhibition() {
         return session.needValidationProperty().and(validProperty.or(
                 authorIDProperty.isNotEqualTo(session.getUtilisateur().getId())));
     }
 
     /**
      * Mise à jour de l'indication de validité.
-     * 
-     * @param valid 
+     *
+     * @param valid
      */
     private void resetValidUIs(final boolean valid){
         if(valid){
             uiImageValid.setImage(ICON_CHECK_CIRCLE);
             uiLabelValid.setText(VALID_TEXT);
             uiLabelValid.setTextFill(Color.WHITE);
-        }
-        else {
+        } else {
             uiImageValid.setImage(ICON_EXCLAMATION_CIRCLE);
             uiLabelValid.setText(INVALID_TEXT);
             uiLabelValid.setTextFill(Color.valueOf(COLOR_INVALID_ICON));

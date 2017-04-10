@@ -45,7 +45,7 @@ public class SimpleFXEditMode extends FXEditMode {
      * @return Le binding de contrôle du bouton d'édition.
      */
     @Override
-    protected BooleanBinding getEditionProhibition(){
+    protected BooleanBinding initEditionProhibition(){
         return Injector.getSession().roleProperty().isEqualTo(Role.GUEST);
     }
 }

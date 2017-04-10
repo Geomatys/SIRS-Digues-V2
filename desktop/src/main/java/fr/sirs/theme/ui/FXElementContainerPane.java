@@ -64,7 +64,12 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
     @FXML private FXEditMode uiMode;
     @FXML private Button uiShowOnMapButton;
 
-    private Element couchDbDocument;
+    /**
+     * Keep a reference of the document at element initialization. We need it,
+     * because if the element parent is switched, we have to update both
+     * old and new parent at save.
+     */
+    private Element originCouchDbDocument;
 
     public FXElementContainerPane(final T element) {
         super();
@@ -119,14 +124,14 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
             }
 
             final AbstractSIRSRepository repo = session.getRepositoryForClass(elementDocument.getClass());
-            if (couchDbDocument == null) {
-                couchDbDocument = elementDocument;
-            } else if (!couchDbDocument.equals(elementDocument)) {
-                repo.update(couchDbDocument);
-                couchDbDocument = elementDocument;
+            if (originCouchDbDocument == null) {
+                originCouchDbDocument = elementDocument;
+            } else if (!originCouchDbDocument.equals(elementDocument)) {
+                repo.update(originCouchDbDocument);
+                originCouchDbDocument = elementDocument;
             }
 
-            repo.update(couchDbDocument);
+            repo.update(originCouchDbDocument);
 
             final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
             growlInfo.showAndFade();
@@ -178,7 +183,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
                 uiHeaderLabel.setText("Informations sur un ouvrage");
             }
             // Keep parent reference, so we can now if it has been switched at save.
-            couchDbDocument = newValue.getCouchDBDocument();
+            originCouchDbDocument = newValue.getCouchDBDocument();
 
             // maj
             if (newValue instanceof AvecDateMaj) {

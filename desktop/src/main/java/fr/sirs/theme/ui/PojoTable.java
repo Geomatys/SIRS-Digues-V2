@@ -59,7 +59,6 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.PrZPointImporter;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ProfilLong;
-import fr.sirs.core.model.Role;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.map.ExportTask;
 import fr.sirs.map.FXMapTab;
@@ -104,6 +103,7 @@ import java.util.logging.Level;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -216,7 +216,7 @@ public class PojoTable extends BorderPane implements Printable {
     };
 
     /** Design rows for {@link Element} objects, making its look change according to {@link Element#validProperty() } */
-    private static final Callback<TableView<Element>, TableRow<Element>> ROW_FACTORY = (TableView<Element> param) ->  new ValidityRow();
+    private final Callback<TableView<Element>, TableRow<Element>> rowFactory = (TableView<Element> param) ->  new ValidityRow();
 
     protected final Class pojoClass;
     protected final AbstractSIRSRepository repo;
@@ -364,7 +364,7 @@ public class PojoTable extends BorderPane implements Printable {
         uiImport.managedProperty().bind(uiImport.visibleProperty());
         uiExport.managedProperty().bind(uiExport.visibleProperty());
 
-        uiTable.setRowFactory(ROW_FACTORY);
+        uiTable.setRowFactory(rowFactory);
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         /* We cannot bind visible properties of those columns, because TableView
@@ -375,10 +375,7 @@ public class PojoTable extends BorderPane implements Printable {
                     deleteColumn.setVisible(newValue);
                     //editCol.setVisible(newValue && detaillableProperty.get());
                 });
-        if (Role.ADMIN.equals(session.getRole()) || Role.USER.equals(session.getRole()))
-            cellEditableProperty.bind(editableProperty);
-        else
-            cellEditableProperty.set(false);
+        cellEditableProperty.bind(editableProperty);
 
         detaillableProperty.addListener(
                 (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
@@ -1660,10 +1657,11 @@ public class PojoTable extends BorderPane implements Printable {
                 }
             }
 
-            setEditable(isEditable);
             if (isEditable) {
                 editableProperty().bind(cellEditableProperty);
                 setOnEditCommit(PojoTable.this::setOnPropertyCommit);
+            } else {
+                setEditable(false);
             }
         }
 
@@ -1833,7 +1831,7 @@ public class PojoTable extends BorderPane implements Printable {
                 } else {
                     button.setTooltip(unlinkTooltip);
                 }
-                
+
                 return button;
             });
         }
@@ -1954,7 +1952,21 @@ public class PojoTable extends BorderPane implements Printable {
     /**
      * Change row style according to input {@link Element#validProperty() }.
      */
-    private static class ValidityRow extends TableRow<Element> {
+    private class ValidityRow extends TableRow<Element> {
+
+        final BooleanBinding authorizedBinding;
+        final BooleanBinding editableAndAuthorized;
+        final BooleanBinding editableButNotAuthorized;
+
+        ValidityRow() {
+            authorizedBinding = Bindings.createBooleanBinding(() -> getItem() == null? false : session.editionAuthorized(getItem()), itemProperty());
+            editableAndAuthorized = cellEditableProperty.and(authorizedBinding);
+            this.editableProperty().bind(editableAndAuthorized);
+            // Hack : Apparently, forbidding row editability is not enough to prevent
+            // the contained cells to be edited, so we have to force disability on thes cases.
+            editableButNotAuthorized = cellEditableProperty.and(authorizedBinding.not());
+            this.disableProperty().bind(editableButNotAuthorized);
+        }
 
         @Override
         protected void updateItem(Element item, boolean empty) {
