@@ -49,8 +49,7 @@ public class Preview implements AvecLibelle, Comparable {
     @JsonProperty("valid")
     private boolean valid;
 
-    @JsonProperty("designation")
-    private String designation;
+    private final SimpleStringProperty designationProperty = new SimpleStringProperty();
 
     private final SimpleStringProperty libelleProperty = new SimpleStringProperty();
 
@@ -109,17 +108,22 @@ public class Preview implements AvecLibelle, Comparable {
         this.valid = valid;
     }
 
+    @JsonProperty("designation")
     public String getDesignation() {
-        return designation;
+        return designationProperty.get();
     }
 
     public void setDesignation(String designation) {
-        this.designation = designation;
+        this.designationProperty.set(designation);
+    }
+
+    public StringProperty designationProperty() {
+        return designationProperty;
     }
 
     @Override
     public String toString() {
-        return "Preview{" + "docId=" + docId + ", docClass=" + docClass + ", elementId=" + elementId + ", elementClass=" + elementClass + ", author=" + author + ", valid=" + valid + ", designation=" + designation + ", label=" + libelleProperty.get() + '}';
+        return "Preview{" + "docId=" + docId + ", docClass=" + docClass + ", elementId=" + elementId + ", elementClass=" + elementClass + ", author=" + author + ", valid=" + valid + ", designation=" + designationProperty + ", label=" + libelleProperty.get() + '}';
     }
 
     @Override
@@ -156,17 +160,19 @@ public class Preview implements AvecLibelle, Comparable {
             }
 
             int designationComparison = -1;
+            final String designation = getDesignation();
+            final String otherDesignation = other.getDesignation();
             if (designation == null) {
-                designationComparison = other.designation == null? 0 : 1;
-            } else if (other.designation != null) {
+                designationComparison = otherDesignation == null? 0 : 1;
+            } else if (otherDesignation != null) {
                 /* If both designation can be converted to numbers, we will
                  * perform a algebric comparison. Otherwise, we'll compare
                  * directly strings.
                  */
                 try {
-                    designationComparison = Integer.decode(designation).compareTo(Integer.decode(other.designation));
+                    designationComparison = Integer.decode(designation).compareTo(Integer.decode(otherDesignation));
                 } catch (NumberFormatException e) {
-                    designationComparison = designation.compareTo(other.designation);
+                    designationComparison = designation.compareTo(otherDesignation);
                 }
             }
 

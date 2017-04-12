@@ -1252,8 +1252,6 @@ public class PojoTable extends BorderPane implements Printable {
 
         if (repo != null) {
             result = (Element) repo.create();
-            if(foreignParent!=null && result instanceof AvecForeignParent) ((AvecForeignParent) result).setForeignParentId(foreignParent.getId());
-            repo.add(result);
         } else if (pojoClass != null) {
             try {
                 result = session.getElementCreator().createElement(pojoClass);
@@ -1264,7 +1262,9 @@ public class PojoTable extends BorderPane implements Printable {
             }
         }
 
-        // TODO : check and set date début
+        if(foreignParent!=null && result instanceof AvecForeignParent)
+            ((AvecForeignParent) result).setForeignParentId(foreignParent.getId());
+
         if (result instanceof Element) {
             final Element newlyCreated = (Element) result;
 
@@ -1280,7 +1280,6 @@ public class PojoTable extends BorderPane implements Printable {
                 newlyCreated.setParent(parent);
                 if (parent instanceof AvecBornesTemporelles) {
                     timePeriod = (AvecBornesTemporelles) parent;
-
                 }
             }
 
@@ -1328,6 +1327,24 @@ public class PojoTable extends BorderPane implements Printable {
                             }
                         }
                     });
+                }
+            }
+
+            /*
+             * If we've got the repository, we create the document immediately
+             * in database.
+             * HACK : we wait for a short moment to allow potential end-user to
+             * get creation event and eventually update item list by himself.
+             */
+            if (repo != null)  {
+                repo.add(result);
+                synchronized (this) {
+                    try {
+                        wait(100);
+                    } catch (InterruptedException ex) {
+                        SirsCore.LOGGER.log(Level.FINE, "Interrupted while waiting", ex);
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
 

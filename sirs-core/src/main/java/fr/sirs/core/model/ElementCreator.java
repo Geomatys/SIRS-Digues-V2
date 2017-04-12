@@ -19,12 +19,15 @@
 package fr.sirs.core.model;
 
 import fr.sirs.core.SessionCore;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.util.DesignationIncrementer;
 import fr.sirs.util.property.SirsPreferences;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import javafx.application.Platform;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import javafx.concurrent.Task;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,19 +56,19 @@ public class ElementCreator {
      * on user's privileges of the session.
      *
      * Do not add the element to the database.
-     * 
+     *
      * Try to use autoincrement if this feature is activated.
      *
      * @param <T> Type of the object to create.
      * @param clazz Type of the object to create.
      * @return A new, empty element of queried class.
-     * @see ElementCreator#createElement(java.lang.Class, boolean) 
+     * @see ElementCreator#createElement(java.lang.Class, boolean)
      * @see SirsPreferences.PROPERTIES#DESIGNATION_AUTO_INCREMENT
      */
     public <T extends Element> T createElement(final Class<T> clazz){
         return createElement(clazz, true);
     }
-    
+
     /**
      * Create a new element of type T.
      *
@@ -73,7 +76,7 @@ public class ElementCreator {
      * on user's privileges of the session.
      *
      * Do not add the element to the database.
-     * 
+     *
      * Try to use autoincrement if this feature is activated.
      *
      * @param <T> Type of the object to create.
@@ -93,29 +96,53 @@ public class ElementCreator {
                 element.setAuthor(utilisateur.getId());
             }
 
-            if(tryAutoIncrement){
+            if (tryAutoIncrement) {
                 // Determine an auto-incremented value for designation
-                try {
-                    final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.DESIGNATION_AUTO_INCREMENT);
-                    if (Boolean.TRUE.equals(Boolean.valueOf(propertyStr))) {
-                        final Task<Integer> nextDesignation = incrementer.nextDesignation(clazz);
-                        nextDesignation.setOnSucceeded(evt -> Platform.runLater(() -> {
-                            final Integer result = nextDesignation.getValue();
-                            if (result != null)
-                                element.setDesignation(String.valueOf(result));
-                        }));
-
-                        TaskManager.INSTANCE.submit(nextDesignation);
+                tryAutoIncrement(element.getClass()).ifPresent(t -> {
+                    TaskManager.INSTANCE.submit(t);
+                    try {
+                        final Integer value = t.get();
+                        if (value != null) {
+                            element.setDesignation(value.toString());
+                            //SirsCore.fxRunAndWait(() -> element.setDesignation(value.toString()));
+                        }
+                    } catch (InterruptedException ex) {
+                        SirsCore.LOGGER.log(Level.FINE, "Interruption while auto-incrementing value", ex);
+                        Thread.currentThread().interrupt();
+                    } catch (ExecutionException ex) {
+                        SirsCore.LOGGER.log(Level.WARNING, "Cannot compute auto-increment value", ex);
                     }
-                } catch (IllegalStateException e) {
-                    // If the property is not set, we consider it deactivated.
-                }
+                });
             }
+
             return element;
 
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             throw new SirsCoreRuntimeException(ex.getMessage());
         }
+    }
+
+    /**
+     * Try to compute and affect an auto-incremented designation value for given
+     * element.
+     *
+     * @param target The element to set an increment for.
+     * @return A task ready to be startd, which will compute the increment. An
+     * empty optional will be returned if user deactivated auto-increment from
+     * application preferences.
+     */
+    public Optional<Task<Integer>> tryAutoIncrement(final Class<? extends Element> target) {
+        try {
+            final String propertyStr = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.DESIGNATION_AUTO_INCREMENT);
+            if (Boolean.TRUE.equals(Boolean.valueOf(propertyStr))) {
+                return Optional.of(incrementer.nextDesignation(target));
+            }
+        } catch (IllegalStateException e) {
+            // If the property is not set, we consider it deactivated.
+            SirsCore.LOGGER.log(Level.FINE, "Cannot determine an auto-increment", e);
+        }
+
+        return Optional.empty();
     }
 
     /**

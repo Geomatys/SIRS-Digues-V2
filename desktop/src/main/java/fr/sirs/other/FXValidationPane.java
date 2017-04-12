@@ -67,6 +67,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.util.StringConverter;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 
 /**
@@ -343,12 +344,18 @@ public class FXValidationPane extends BorderPane {
                         final boolean isValid = element.getValid();
                         element.setValid(!isValid);
                         if (!isValid && (element.getDesignation() == null || element.getDesignation().isEmpty())) {
-                            final Optional<Task<Integer>> incrementTask = session.getElementCreator().tryAutoIncrement(element);
+                            final Optional<Task<Integer>> incrementTask = session.getElementCreator().tryAutoIncrement(element.getClass());
                             incrementTask.ifPresent(task -> {
                                 try {
+                                    TaskManager.INSTANCE.submit(task);
                                     final Integer newDesignation = task.get();
-                                    if (newDesignation != null)
-                                        vSummary.setDesignation(Integer.toString(newDesignation));
+                                    if (newDesignation != null) {
+                                        final String designationToSet = newDesignation.toString();
+                                        SirsCore.fxRunAndWait(() -> {
+                                            element.setDesignation(designationToSet);
+                                            vSummary.setDesignation(designationToSet);
+                                        });
+                                    }
                                 } catch (Exception ex) {
                                     SirsCore.LOGGER.log(Level.WARNING, "Cannot determine an auto-increment", ex);
                                 }
