@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -21,19 +21,25 @@ package fr.sirs.theme.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.BookMark;
-import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.Role;
+import fr.sirs.plugin.carto.PluginCarto;
 import fr.sirs.ui.Growl;
+import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.logging.Level;
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -42,6 +48,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -49,23 +56,15 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import org.apache.sis.storage.DataStoreException;
+import javafx.util.StringConverter;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
-import org.geotoolkit.map.CoverageMapLayer;
-import org.geotoolkit.map.MapBuilder;
-import org.geotoolkit.map.MapItem;
+import org.geotoolkit.gui.javafx.util.TaskManager;
+import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.map.MapLayer;
 import org.geotoolkit.security.BasicAuthenticationSecurity;
 import org.geotoolkit.security.ClientSecurity;
-import org.geotoolkit.storage.coverage.CoverageReference;
-import org.geotoolkit.storage.coverage.CoverageStore;
-import org.geotoolkit.wms.WebMapClient;
-import org.geotoolkit.wms.xml.WMSVersion;
-import org.geotoolkit.wmts.WebMapTileClient;
-import org.geotoolkit.wmts.xml.WMTSVersion;
-import org.opengis.util.GenericName;
 
 /**
  *
@@ -73,15 +72,29 @@ import org.opengis.util.GenericName;
  * @author Alexis Manin (Geomatys)
  */
 public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
-    private static final Image ICON_SHOWONMAP = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GLOBE, 16, FontAwesomeIcons.DEFAULT_COLOR),null);
+    private static final Image ICON_SHOWONMAP = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GLOBE, 16, FontAwesomeIcons.DEFAULT_COLOR), null);
 
-    private static final String WMS_110 = "WMS - 1.1.1";
-    private static final String WMS_130 = "WMS - 1.3.0";
-    private static final String WMTS_100 = "WMTS - 1.0.0";
+    /**
+     * Convert service type into string. DESIGNED FOR VALUE SETTING ONLY. Another
+     * converter is used for display.
+     */
+    private static final StringConverter<PluginCarto.SERVICE> SERVICE_CONVERTER = new StringConverter<PluginCarto.SERVICE>() {
+        @Override
+        public String toString(PluginCarto.SERVICE object) {
+            if (object == null)
+                return null;
+            return object.name();
+        }
 
-    protected final Previews previewRepository;
-    protected LabelMapper labelMapper;
-    
+        @Override
+        public PluginCarto.SERVICE fromString(String string) {
+            if (string == null || string.isEmpty())
+                return null;
+            else
+                return PluginCarto.SERVICE.valueOf(string);
+        }
+    };
+
     // Propriétés de BookMark
     @FXML private PasswordField ui_motDePasse;
     @FXML private TextField ui_identifiant;
@@ -89,23 +102,26 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
     @FXML private TextField ui_parametres;
     @FXML private TextArea ui_description;
     @FXML private TextField ui_titre;
-    @FXML private ChoiceBox<String> ui_service;
+    @FXML private ChoiceBox<PluginCarto.SERVICE> ui_service;
     @FXML private Label ui_identifiantLbl;
     @FXML private Label ui_motDePasseLbl;
     @FXML private Label ui_authLbl;
+    @FXML private Button ui_refresh;
+    @FXML private ProgressIndicator ui_progress;
 
-    public FXBookMarkPane(final BookMark bookMark){
+    final BooleanBinding refreshDisabled;
+
+    public FXBookMarkPane(final BookMark bookMark) {
         this();
         this.elementProperty().set(bookMark);
     }
 
     /**
-     * Constructor. Initialize part of the UI which will not require update when 
+     * Constructor. Initialize part of the UI which will not require update when
      * element edited change.
      */
     protected FXBookMarkPane() {
         SIRS.loadFXML(this, BookMark.class);
-        previewRepository = Injector.getBean(Session.class).getPreviews();
         elementProperty().addListener(this::initFields);
 
         /*
@@ -117,19 +133,38 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
         ui_identifiant.disableProperty().bind(disableFieldsProperty());
         ui_motDePasse.disableProperty().bind(disableFieldsProperty());
         ui_service.disableProperty().bind(disableFieldsProperty());
-        ui_service.setItems(FXCollections.observableArrayList(WMS_110,WMS_130,WMTS_100));
+        ui_service.setItems(FXCollections.observableList(Arrays.asList(PluginCarto.SERVICE.values())));
+        ui_service.setConverter(new StringConverter<PluginCarto.SERVICE>() {
+            @Override
+            public String toString(PluginCarto.SERVICE object) {
+                if (object == null)
+                    return null;
+                return object.title;
+            }
+
+            @Override
+            public PluginCarto.SERVICE fromString(String string) {
+                return PluginCarto.SERVICE.findValue(string);
+            }
+        });
 
         ui_table.getColumns().add(new NameColumn());
         ui_table.getColumns().add(new ViewColumn());
         ui_table.setPlaceholder(new Label(""));
         FXUtilities.hideTableHeader(ui_table);
 
+        refreshDisabled = disableFieldsProperty()
+                .or(ui_service.valueProperty().isNull())
+                .or(ui_parametres.textProperty().isEmpty())
+                .or(ui_progress.visibleProperty());
+
+        ui_refresh.disableProperty().bind(refreshDisabled);
     }
 
     public BookMark getElement() {
         return elementProperty.get();
     }
-    
+
     /**
      * Initialize fields at element setting.
      */
@@ -142,30 +177,29 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
             ui_parametres.textProperty().unbindBidirectional(oldElement.parametresProperty());
             ui_identifiant.textProperty().unbindBidirectional(oldElement.identifiantProperty());
             ui_motDePasse.textProperty().unbindBidirectional(oldElement.motDePasseProperty());
-            ui_service.valueProperty().unbindBidirectional(oldElement.typeServiceProperty());
+            Bindings.unbindBidirectional(oldElement.typeServiceProperty(), ui_service.valueProperty());
         }
-
-        final Session session = Injector.getBean(Session.class);        
 
         /*
          * Bind control properties to Element ones.
          */
-        // Propriétés de BookMark
-        // * description
-        ui_description.textProperty().bindBidirectional(newElement.descriptionProperty());
-        // * titre
-        ui_titre.textProperty().bindBidirectional(newElement.titreProperty());
-        // * parametres
-        ui_parametres.textProperty().bindBidirectional(newElement.parametresProperty());
-        // * identifiant
-        ui_identifiant.textProperty().bindBidirectional(newElement.identifiantProperty());
-        // * motDePasse
-        ui_motDePasse.textProperty().bindBidirectional(newElement.motDePasseProperty());
+        if (newElement != null) {
+            // Propriétés de BookMark
+            // * description
+            ui_description.textProperty().bindBidirectional(newElement.descriptionProperty());
+            // * titre
+            ui_titre.textProperty().bindBidirectional(newElement.titreProperty());
+            // * parametres
+            ui_parametres.textProperty().bindBidirectional(newElement.parametresProperty());
+            // * identifiant
+            ui_identifiant.textProperty().bindBidirectional(newElement.identifiantProperty());
+            // * motDePasse
+            ui_motDePasse.textProperty().bindBidirectional(newElement.motDePasseProperty());
 
-        ui_service.valueProperty().bindBidirectional(newElement.typeServiceProperty());
+            Bindings.bindBidirectional(newElement.typeServiceProperty(), ui_service.valueProperty(), SERVICE_CONVERTER);
+        }
 
-
-        final Role role = session.getRole();
+        final Role role = Injector.getBean(Session.class).getRole();
         if(!Role.ADMIN.equals(role)){
             ui_identifiant.setVisible(false);
             ui_motDePasse.setVisible(false);
@@ -174,114 +208,55 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
             ui_authLbl.setVisible(false);
         }
     }
-    @Override
-    public void preSave() {
-        final Session session = Injector.getBean(Session.class);
-        final BookMark element = (BookMark) elementProperty().get();
 
-        Object cbValue;
-    }
+    @Override
+    public void preSave() {}
 
 
     @FXML
     void refreshList(ActionEvent event) {
+        final BookMark bookmark = getElement();
+        Task<List<MapLayer>> loader = new TaskManager.MockTask<>(() -> PluginCarto.listLayers(bookmark));
+        ui_progress.visibleProperty().bind(loader.runningProperty());
 
-        final String service = ui_service.getValue();
-        final URL url;
-        try {
-            url = new URL(ui_parametres.getText());
-        } catch (MalformedURLException ex) {
-            final Growl successGrowl = new Growl(Growl.Type.ERROR, "URL mal formée");
-            successGrowl.showAndFade();
-            return;
-        }
+        loader.setOnFailed(evt -> Platform.runLater(() -> {
+            final String errorMsg;
+            final Throwable ex = evt.getSource().getException();
+            if (ex instanceof MalformedURLException)
+                errorMsg = "L'URL renseignée n'est pas valide.";
+            else if (ex instanceof IOException)
+                errorMsg = "La connection au service a échouée.";
+            else
+                errorMsg = ex.getLocalizedMessage();
 
-        ClientSecurity security = null;
-        if(!ui_motDePasse.getText().trim().isEmpty() && !ui_identifiant.getText().trim().isEmpty()){
-            security = new BasicAuthenticationSecurity(ui_identifiant.getText(), ui_motDePasse.getText());
-        }
+            SIRS.LOGGER.log(Level.WARNING, "Bookmark connection failed", ex);
+            ui_table.setPlaceholder(new Label(errorMsg));
+            GeotkFX.newExceptionDialog(errorMsg, ex).show();
+        }));
 
-        CoverageStore store = null;
-        if(WMS_110.equals(service)){
-            store = new WebMapClient(url, security, WMSVersion.v111);
-        }else if(WMS_130.equals(service)){
-            store = new WebMapClient(url, security, WMSVersion.v130);
-        }else if(WMTS_100.equals(service)){
-            store = new WebMapTileClient(url, security, WMTSVersion.v100);
-        }
+        loader.setOnSucceeded(evt -> Platform.runLater(() -> {
+            final List<MapLayer> layers = (List<MapLayer>) evt.getSource().getValue();
+            if (layers.isEmpty())
+                ui_table.setPlaceholder(new Label("Aucune donnée trouvée pour le service parametré."));
 
-        final List<MapLayer> layers = new ArrayList<>();
-        String error = null;
-        if(store!=null){
-            try{
-                for(GenericName n : store.getNames()){
-                    final CoverageReference cref = store.getCoverageReference(n);
-                    final CoverageMapLayer layer = MapBuilder.createCoverageLayer(cref);
-                    layer.setName(n.tip().toString());
-                    layers.add(layer);
-                }
-            }catch(Throwable ex){
-                error = "Echec de connection\n"+ex.getMessage();
-                final Growl successGrowl = new Growl(Growl.Type.ERROR, error);
-                successGrowl.showAndFade();
-            }
-        }
+            ui_table.setItems(FXCollections.observableList(layers));
+        }));
 
-        if(error!=null){
-            ui_table.setPlaceholder(new Label(error));
-        } else if(layers.isEmpty() && store!=null){
-            ui_table.setPlaceholder(new Label("Absence de données"));
-        } else {
-            ui_table.setPlaceholder(new Label(""));
-        }
+        loader.setOnCancelled(evt -> Platform.runLater(() -> {
+            ui_table.setPlaceholder(new Label("Connexion annulée"));
+            new Growl(Growl.Type.WARNING, "La connexion au service a été annulée.").showAndFade();
+        }));
 
-        ui_table.setItems(FXCollections.observableArrayList(layers));
+        TaskManager.INSTANCE.submit(loader);
     }
 
-    public static List<MapLayer> listLayers(BookMark bm){
+    public static Optional<ClientSecurity> parseSecurityParameters(String login, String password) {
+        if (login == null || (login = login.trim()).isEmpty())
+            return Optional.empty();
 
-        final String service = bm.getTypeService();
-        final URL url;
-        try {
-            url = new URL(bm.getParametres());
-        } catch (MalformedURLException ex) {
-            final Growl successGrowl = new Growl(Growl.Type.ERROR, "URL mal formée");
-            successGrowl.showAndFade();
-            return null;
-        }
-
-        ClientSecurity security = null;
-        if(!bm.getMotDePasse().trim().isEmpty() && !bm.getIdentifiant().trim().isEmpty()){
-            security = new BasicAuthenticationSecurity(bm.getIdentifiant(), bm.getIdentifiant());
-        }
-
-        CoverageStore store = null;
-        if(WMS_110.equals(service)){
-            store = new WebMapClient(url, security, WMSVersion.v111);
-        }else if(WMS_130.equals(service)){
-            store = new WebMapClient(url, security, WMSVersion.v130);
-        }else if(WMTS_100.equals(service)){
-            store = new WebMapTileClient(url, security, WMTSVersion.v100);
-        }
-
-        final List<MapLayer> layers = new ArrayList<>();
-        String error = null;
-        if(store!=null){
-            try{
-                for(GenericName n : store.getNames()){
-                    final CoverageReference cref = store.getCoverageReference(n);
-                    final CoverageMapLayer layer = MapBuilder.createCoverageLayer(cref);
-                    layer.setName(n.tip().toString());
-                    layers.add(layer);
-                }
-            }catch(Throwable ex){
-                error = "Echec de connection\n"+ex.getMessage();
-                final Growl successGrowl = new Growl(Growl.Type.ERROR, error);
-                successGrowl.showAndFade();
-            }
-        }
-
-        return layers;
+        if (password == null)
+            password = "";
+        return Optional.of(new BasicAuthenticationSecurity(login, password));
     }
 
     private static class NameColumn extends TableColumn<MapLayer, String>{
@@ -292,9 +267,8 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
             setResizable(true);
             setMaxWidth(Double.MAX_VALUE);
         }
-
     }
-    
+
     private class ViewColumn extends TableColumn<MapLayer, MapLayer>{
 
         public ViewColumn() {
@@ -308,7 +282,6 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
             setEditable(true);
             setMaxWidth(Double.MAX_VALUE);
         }
-
     }
 
     private class ViewCell extends TableCell<MapLayer, MapLayer>{
@@ -322,32 +295,13 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
             button.setOnAction(this::showOnMap);
         }
 
-        private void showOnMap(ActionEvent event){
+        private void showOnMap(ActionEvent event) {
             final MapLayer layer = getItem();
-            if(layer==null) return;
-            final Session session = Injector.getSession();
+            if(layer==null)
+                return;
             final BookMark bookmark = FXBookMarkPane.this.getElement();
-            final String titre = bookmark.getTitre();
 
-            MapItem parent = null;
-            for(MapItem mi : session.getMapContext().items()){
-                if(titre.equals(mi.getName())){
-                    parent = mi;
-                    break;
-                }
-            }
-            if(parent == null){
-                parent = MapBuilder.createItem();
-                parent.setName(titre);
-                session.getMapContext().items().add(parent);
-            }
-            
-            parent.items().add(layer);
-            session.getFrame().getMapTab().show();
+            PluginCarto.showOnMap(bookmark.getTitre(), Collections.singleton(layer));
         }
-
     }
-
-
-
 }
