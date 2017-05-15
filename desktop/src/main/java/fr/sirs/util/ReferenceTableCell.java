@@ -75,7 +75,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> implements Cha
 
     public static final Image ICON_LINK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_LINK,16,FontAwesomeIcons.DEFAULT_COLOR),null);
 
-    private static final String OBJECT_DELETED = "Objet supprimé !";
+    public static final String OBJECT_DELETED = "Objet supprimé !";
 
     /**
      * A cache whose key is the ID of the referenced object, and value is the label
