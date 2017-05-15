@@ -2,26 +2,22 @@
 
 package fr.sirs.core.model;
 
-import fr.sirs.core.model.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.vividsolutions.jts.geom.Geometry;
+import fr.sirs.Injector;
+import fr.sirs.core.component.SystemeEndiguementRepository;
+import fr.sirs.util.ReferenceTableCell;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.Reference;
-import java.io.*;
-import java.time.LocalDate;
 import java.util.*;
 import javafx.beans.property.*;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import org.ektorp.*;
 import org.ektorp.support.*;
 import org.ektorp.util.*;
@@ -336,6 +332,21 @@ public class ObligationReglementaire
         
     public void setAnnee(int annee){
         this.annee.set(annee);
+    }
+    
+    public String getClassement(){
+        final String seId = getSystemeEndiguementId();
+        if(seId!=null && !seId.isEmpty()){
+            try{
+            final SystemeEndiguement se = Injector.getSession().getRepositoryForClass(SystemeEndiguement.class).get(getSystemeEndiguementId());
+            if(se!=null){
+                return se.getClassement();
+            }
+            }catch(DocumentNotFoundException e){
+                return ReferenceTableCell.OBJECT_DELETED;
+            }
+        }
+        return "";
     }
 
     @Reference(ref=SystemeEndiguement.class)  
