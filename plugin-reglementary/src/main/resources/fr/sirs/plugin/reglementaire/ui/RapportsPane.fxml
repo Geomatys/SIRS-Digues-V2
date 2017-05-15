@@ -56,7 +56,7 @@
                   <ComboBox fx:id="uiTypeEtape" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.rowIndex="7" />
                   <ComboBox fx:id="uiSystemEndiguement" maxWidth="1.7976931348623157E308" prefWidth="150.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
                   <ComboBox fx:id="uiTypeObligation" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.rowIndex="6" />
-                  <Label text="Type de l'obigation" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                  <Label text="Type de l'obligation" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                   <Label text="Type de l'étape" GridPane.columnIndex="1" GridPane.rowIndex="7" />
                   <Button fx:id="uiGenerate" mnemonicParsing="false" onAction="#generateReport" styleClass="btn-single" text="Générer" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.rowSpan="2" GridPane.valignment="CENTER" />
                   <Label fx:id="uiProgressLabel" alignment="CENTER" visible="false" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="9">
