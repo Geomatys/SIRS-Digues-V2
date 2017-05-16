@@ -338,11 +338,12 @@ public class ObligationReglementaire
         final String seId = getSystemeEndiguementId();
         if(seId!=null && !seId.isEmpty()){
             try{
-            final SystemeEndiguement se = Injector.getSession().getRepositoryForClass(SystemeEndiguement.class).get(getSystemeEndiguementId());
-            if(se!=null){
-                return se.getClassement();
+                final SystemeEndiguement se = Injector.getSession().getRepositoryForClass(SystemeEndiguement.class).get(getSystemeEndiguementId());
+                if(se!=null){
+                    return se.getClassement();
+                }
             }
-            }catch(DocumentNotFoundException e){
+            catch(DocumentNotFoundException e){
                 return ReferenceTableCell.OBJECT_DELETED;
             }
         }
