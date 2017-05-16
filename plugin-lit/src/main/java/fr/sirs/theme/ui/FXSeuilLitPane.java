@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -187,7 +187,7 @@ public class FXSeuilLitPane  extends AbstractFXElementPane<SeuilLit> {
         ui_commune.disableProperty().bind(disableFieldsProperty());
         ui_anneeConstruction.disableProperty().bind(disableFieldsProperty());
         ui_anneeConstruction.setEditable(true);
-        ui_anneeConstruction.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
+        ui_anneeConstruction.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 2100));
         ui_penteRampant.disableProperty().bind(disableFieldsProperty());
         ui_penteRampant.setEditable(true);
         ui_penteRampant.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE));

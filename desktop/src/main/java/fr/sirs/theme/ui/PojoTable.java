@@ -103,6 +103,7 @@ import java.util.logging.Level;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -215,7 +216,7 @@ public class PojoTable extends BorderPane implements Printable {
     };
 
     /** Design rows for {@link Element} objects, making its look change according to {@link Element#validProperty() } */
-    private static final Callback<TableView<Element>, TableRow<Element>> ROW_FACTORY = (TableView<Element> param) ->  new ValidityRow();
+    private final Callback<TableView<Element>, TableRow<Element>> rowFactory = (TableView<Element> param) ->  new ValidityRow();
 
     protected final Class pojoClass;
     protected final AbstractSIRSRepository repo;
@@ -363,7 +364,7 @@ public class PojoTable extends BorderPane implements Printable {
         uiImport.managedProperty().bind(uiImport.visibleProperty());
         uiExport.managedProperty().bind(uiExport.visibleProperty());
 
-        uiTable.setRowFactory(ROW_FACTORY);
+        uiTable.setRowFactory(rowFactory);
         uiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         /* We cannot bind visible properties of those columns, because TableView
@@ -375,6 +376,7 @@ public class PojoTable extends BorderPane implements Printable {
                     //editCol.setVisible(newValue && detaillableProperty.get());
                 });
         cellEditableProperty.bind(editableProperty);
+
         detaillableProperty.addListener(
                 (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
                     editCol.setVisible(newValue);
@@ -1157,26 +1159,6 @@ public class PojoTable extends BorderPane implements Printable {
         tableUpdaterProperty.set(TaskManager.INSTANCE.submit("Recherche...", updater));
     }
 
-//    protected final Lock lock = new ReentrantReadWriteLock().readLock();
-    /**
-     * Check if the input element can be deleted by current user. If not, an
-     * alert is displyed on screen.
-     * @param pojo The element we want to delete.
-     * @return True if we can delete the element in parameter, false otherwise.
-     */
-    protected boolean authoriseElementDeletion(final Element pojo) {
-        if (Boolean.TRUE.equals(session.needValidationProperty().get())) {
-            if (session.getUtilisateur() == null || session.getUtilisateur().getId() == null || !session.getUtilisateur().getId().equals(pojo.getAuthor())
-                    || pojo.getValid()) {
-                final Alert alert = new Alert(Alert.AlertType.INFORMATION, "En tant qu'utilisateur externe, vous ne pouvez supprimer que des éléments invalidés dont vous êtes l'auteur.", ButtonType.OK);
-                alert.setResizable(true);
-                alert.showAndWait();
-                return false;
-            }
-        }
-        return true;
-    }
-
     /**
      * Delete the elements given in parameter. They are suppressed from the table
      * list, and if a {@link Repository} exists for the current table, elements
@@ -1187,14 +1169,21 @@ public class PojoTable extends BorderPane implements Printable {
      */
     protected void deletePojos(Element... pojos) {
         final ObservableList<Element> items = getAllValues();
+        boolean unauthorized = false;
         for (Element pojo : pojos) {
             // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de
             // l'élément et que celui-ci soit invalide, sinon, on court-circuite
             // la suppression.
-            if(authoriseElementDeletion(pojo)){
+            if(session.editionAuthorized(pojo)){
                 deletor.accept(pojo);
                 items.remove(pojo);
+            } else {
+                unauthorized = true;
             }
+        }
+
+        if (unauthorized) {
+            new Growl(Growl.Type.WARNING, "Certains éléments n'ont pas été supprimés car vous n'avez pas les droits nécessaires.").showAndFade();
         }
     }
 
@@ -1263,8 +1252,6 @@ public class PojoTable extends BorderPane implements Printable {
 
         if (repo != null) {
             result = (Element) repo.create();
-            if(foreignParent!=null && result instanceof AvecForeignParent) ((AvecForeignParent) result).setForeignParentId(foreignParent.getId());
-            repo.add(result);
         } else if (pojoClass != null) {
             try {
                 result = session.getElementCreator().createElement(pojoClass);
@@ -1275,7 +1262,9 @@ public class PojoTable extends BorderPane implements Printable {
             }
         }
 
-        // TODO : check and set date début
+        if(foreignParent!=null && result instanceof AvecForeignParent)
+            ((AvecForeignParent) result).setForeignParentId(foreignParent.getId());
+
         if (result instanceof Element) {
             final Element newlyCreated = (Element) result;
 
@@ -1291,7 +1280,6 @@ public class PojoTable extends BorderPane implements Printable {
                 newlyCreated.setParent(parent);
                 if (parent instanceof AvecBornesTemporelles) {
                     timePeriod = (AvecBornesTemporelles) parent;
-
                 }
             }
 
@@ -1339,6 +1327,24 @@ public class PojoTable extends BorderPane implements Printable {
                             }
                         }
                     });
+                }
+            }
+
+            /*
+             * If we've got the repository, we create the document immediately
+             * in database.
+             * HACK : we wait for a short moment to allow potential end-user to
+             * get creation event and eventually update item list by himself.
+             */
+            if (repo != null)  {
+                repo.add(result);
+                synchronized (this) {
+                    try {
+                        wait(100);
+                    } catch (InterruptedException ex) {
+                        SirsCore.LOGGER.log(Level.FINE, "Interrupted while waiting", ex);
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
 
@@ -1668,10 +1674,11 @@ public class PojoTable extends BorderPane implements Printable {
                 }
             }
 
-            setEditable(isEditable);
             if (isEditable) {
                 editableProperty().bind(cellEditableProperty);
                 setOnEditCommit(PojoTable.this::setOnPropertyCommit);
+            } else {
+                setEditable(false);
             }
         }
 
@@ -1841,6 +1848,7 @@ public class PojoTable extends BorderPane implements Printable {
                 } else {
                     button.setTooltip(unlinkTooltip);
                 }
+
                 return button;
             });
         }
@@ -1961,7 +1969,21 @@ public class PojoTable extends BorderPane implements Printable {
     /**
      * Change row style according to input {@link Element#validProperty() }.
      */
-    private static class ValidityRow extends TableRow<Element> {
+    private class ValidityRow extends TableRow<Element> {
+
+        final BooleanBinding authorizedBinding;
+        final BooleanBinding editableAndAuthorized;
+        final BooleanBinding editableButNotAuthorized;
+
+        ValidityRow() {
+            authorizedBinding = Bindings.createBooleanBinding(() -> getItem() == null? false : session.editionAuthorized(getItem()), itemProperty());
+            editableAndAuthorized = cellEditableProperty.and(authorizedBinding);
+            this.editableProperty().bind(editableAndAuthorized);
+            // Hack : Apparently, forbidding row editability is not enough to prevent
+            // the contained cells to be edited, so we have to force disability on thes cases.
+            editableButNotAuthorized = cellEditableProperty.and(authorizedBinding.not());
+            this.disableProperty().bind(editableButNotAuthorized);
+        }
 
         @Override
         protected void updateItem(Element item, boolean empty) {

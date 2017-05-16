@@ -129,9 +129,9 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
 
         uiDelete.setGraphic(new ImageView(SIRS.ICON_TRASH_WHITE));
         uiDelete.setOnAction(this::deleteSelection);
-        uiDelete.disableProperty().bind(session.role.isEqualTo(Role.GUEST)); // Correctif demande SYM-1585 : l'invité ne doit pas pouvoir créer ni modifier quoi que ce soit.
+        uiDelete.disableProperty().bind(session.roleProperty().isEqualTo(Role.GUEST)); // Correctif demande SYM-1585 : l'invité ne doit pas pouvoir créer ni modifier quoi que ce soit.
         uiAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
-        uiAdd.disableProperty().bind(session.role.isEqualTo(Role.GUEST)); // Correctif demande SYM-1585 : l'invité ne doit pas pouvoir créer ni modifier quoi que ce soit.
+        uiAdd.disableProperty().bind(session.roleProperty().isEqualTo(Role.GUEST)); // Correctif demande SYM-1585 : l'invité ne doit pas pouvoir créer ni modifier quoi que ce soit.
 
         //listen to changes in the db to update tree
         Injector.getDocumentChangeEmiter().addListener(this);

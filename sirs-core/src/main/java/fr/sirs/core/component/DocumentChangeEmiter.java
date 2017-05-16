@@ -109,18 +109,18 @@ public class DocumentChangeEmiter {
         }
     }
 
-    public boolean addListener(DocumentListener listener) {
+    public synchronized boolean addListener(DocumentListener listener) {
         return listeners.add(listener);
     }
 
-    public boolean removeListener(DocumentListener listener) {
+    public synchronized boolean removeListener(DocumentListener listener) {
         return listeners.remove(listener);
     }
 
     /**
      * @return a view of all listeners currently active. Never null, but can be empty.
      */
-    public List<DocumentListener> getListenersUnmodifiable() {
+    public synchronized List<DocumentListener> getListenersUnmodifiable() {
         return Collections.unmodifiableList(listeners);
     }
 
@@ -154,7 +154,7 @@ public class DocumentChangeEmiter {
         final Map<Class, List<Element>> changedElements = Collections.unmodifiableMap(tmpChangedElements);
         removedElements = Collections.unmodifiableSet(removedElements);
 
-        for (DocumentListener listener : listeners) {
+        for (DocumentListener listener : getListenersUnmodifiable()) {
             if (!addedElements.isEmpty()) {
                 listener.documentCreated(addedElements);
             }
@@ -179,5 +179,4 @@ public class DocumentChangeEmiter {
     private void log(Exception e) {
         SirsCore.LOGGER.log(Level.WARNING, e.getMessage(), e);
     }
-
 }

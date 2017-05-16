@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -235,19 +235,27 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
         @Override
         protected void deletePojos(Element... pojos) {
             final List<Organisme> modifiedOrganisms = new ArrayList<>();
-            for(final Element pojo : pojos){
+            boolean unauthorized = false;
+            for (final Element pojo : pojos) {
                 // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de
                 // l'élément et que celui-ci soit invalide, sinon, on court-circuite
                 // la suppression.
-                if(authoriseElementDeletion(pojo)) {
+                if (session.editionAuthorized(pojo)) {
                     final Organisme org = (Organisme) pojo.getParent();
                     org.removeChild(pojo);
-                    if(!modifiedOrganisms.contains(org)) modifiedOrganisms.add(org);
+                    if (!modifiedOrganisms.contains(org))
+                        modifiedOrganisms.add(org);
                     orgsOfContact.remove(pojo);
+                } else {
+                    unauthorized = true;
                 }
             }
 
             session.getRepositoryForClass(Organisme.class).executeBulk(modifiedOrganisms);
+
+            if (unauthorized) {
+                new Growl(Growl.Type.WARNING, "Certains éléments n'ont pas été supprimés car vous n'avez pas les droits nécessaires.").showAndFade();
+            }
         }
 
         @Override

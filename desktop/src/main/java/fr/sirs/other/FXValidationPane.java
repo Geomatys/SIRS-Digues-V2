@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -29,6 +29,7 @@ import static fr.sirs.SIRS.PREVIEW_BUNDLE_KEY_DOC_CLASS;
 import static fr.sirs.SIRS.PREVIEW_BUNDLE_KEY_ELEMENT_CLASS;
 import static fr.sirs.SIRS.PREVIEW_BUNDLE_KEY_LIBELLE;
 import fr.sirs.Session;
+import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.INFO_DOCUMENT_ID;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
@@ -43,10 +44,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -64,6 +67,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.util.StringConverter;
 import org.geotoolkit.gui.javafx.util.ButtonTableCell;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 
 /**
@@ -76,11 +80,20 @@ public class FXValidationPane extends BorderPane {
     private final Session session = Injector.getSession();
     private final Previews repository = session.getPreviews();
     private final ChoiceBox<Choice> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(Choice.values()));
-    
+
     private List<Preview> previews;
     private final Map<String, ResourceBundle> bundles = new HashMap<>();
-    
-    private enum Choice{VALID, INVALID, ALL};
+
+    private static enum Choice {
+        VALID("Éléments validés"),
+        INVALID("Éléments invalidés"),
+        ALL("Tous les états");
+
+        private final String label;
+        private Choice(final String label) {
+            this.label = label;
+        }
+    };
 
     public FXValidationPane() {
         final ResourceBundle previewBundle = ResourceBundle.getBundle(Preview.class.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
@@ -122,7 +135,7 @@ public class FXValidationPane extends BorderPane {
                 }
             });
         table.getColumns().add(docClassColumn);
-        
+
         final TableColumn<Preview, String> elementClassColumn = new TableColumn<>(previewBundle.getString(PREVIEW_BUNDLE_KEY_ELEMENT_CLASS));
         elementClassColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                     return new SimpleStringProperty(param.getValue().getElementClass());
@@ -157,12 +170,10 @@ public class FXValidationPane extends BorderPane {
             });
         table.getColumns().add(elementClassColumn);
 
-        final TableColumn<Preview, String> propertyColumn = new TableColumn<>(previewBundle.getString(PREVIEW_BUNDLE_KEY_DESIGNATION));
-        propertyColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
-                return new SimpleObjectProperty<>(param.getValue().getDesignation());
-            });
-        table.getColumns().add(propertyColumn);
-        
+        final TableColumn<Preview, String> designationColumn = new TableColumn<>(previewBundle.getString(PREVIEW_BUNDLE_KEY_DESIGNATION));
+        designationColumn.setCellValueFactory(param -> param.getValue().designationProperty());
+        table.getColumns().add(designationColumn);
+
         final TableColumn<Preview, String> labelColumn = new TableColumn<>(previewBundle.getString(PREVIEW_BUNDLE_KEY_LIBELLE));
         labelColumn.setCellValueFactory((TableColumn.CellDataFeatures<Preview, String> param) -> {
                 return new SimpleObjectProperty(param.getValue().getLibelle());
@@ -186,29 +197,29 @@ public class FXValidationPane extends BorderPane {
 
             @Override
             public String toString(Choice object) {
-                final String result;
-                switch(object){
-                    case VALID: result = "Éléments validés"; break;
-                    case INVALID: result = "Éléments invalidés"; break;
-                    case ALL:
-                    default: result="Tous les états";
-                }
-                return result;
+                if (object == null)
+                    return Choice.ALL.label;
+                return object.label;
             }
 
             @Override
             public Choice fromString(String string) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                if (string == null)
+                    return null;
+                for (final Choice choice : Choice.values())
+                    if (string.equals(choice.label))
+                        return choice;
+                return null;
             }
         });
         choiceBox.setValue(Choice.INVALID);
         choiceBox.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends Choice> observable, Choice oldValue, Choice newValue) -> {
                 fillTable();
         });
-        
+
         final Button reload = new Button("Recharger", new ImageView(SIRS.ICON_ROTATE_LEFT_ALIAS));
         reload.setOnAction((ActionEvent e) -> {fillTable();});
-        
+
         final HBox hBox = new HBox(choiceBox, reload);
         hBox.setAlignment(Pos.CENTER);
         hBox.setPadding(new Insets(20));
@@ -216,7 +227,7 @@ public class FXValidationPane extends BorderPane {
 
         setTop(hBox);
     }
-    
+
     private void fillTable(){
         final List<Preview> requiredList;
         switch(choiceBox.getSelectionModel().getSelectedItem()){
@@ -237,23 +248,23 @@ public class FXValidationPane extends BorderPane {
         }
         return bundles.get(type);
     }
-    
+
 
     private class DeleteColumn extends TableColumn<Preview, Preview>{
-        
+
         public DeleteColumn() {
-            super("Suppression");            
+            super("Suppression");
             setSortable(false);
             setResizable(false);
             setPrefWidth(24);
             setMinWidth(24);
             setMaxWidth(24);
             setGraphic(new ImageView(GeotkFX.ICON_DELETE));
-            
+
             setCellValueFactory((TableColumn.CellDataFeatures<Preview, Preview> param) -> {
                     return new SimpleObjectProperty<>(param.getValue());
                 });
-            
+
 
             setCellFactory((TableColumn<Preview, Preview> param) -> {
                     return new ButtonTableCell<>(
@@ -300,7 +311,7 @@ public class FXValidationPane extends BorderPane {
                             return vSummary;
                         });
                 });
-        }  
+        }
     }
 
     private class ValidButtonTableCell extends TableCell<Preview, Preview> {
@@ -319,17 +330,40 @@ public class FXValidationPane extends BorderPane {
                         final AbstractSIRSRepository repo = session.getRepositoryForType(vSummary.getDocClass());
                         final Element document = (Element) repo.get(vSummary.getDocId());
 
-                        // Si l'elementid est null, c'est que l'élément est le document lui-même
+                        final Element element;
+                        /* Si l'elementid est null, c'est que l'élément est le
+                         * document lui-même. Sinon, c'est que l'élément est
+                         * inclus quelque part dans le document et il faut le
+                         * rechercher.
+                         */
                         if (vSummary.getElementId() == null) {
-                            document.setValid(!document.getValid());
-                        } 
-                        // Sinon, c'est que l'élément est inclus quelque part dans le document et il faut le rechercher.
-                        else {
-                            final Element elt = document.getChildById(vSummary.getElementId());
-                            elt.setValid(!elt.getValid());
+                            element = document;
+                        } else {
+                            element = document.getChildById(vSummary.getElementId());
                         }
+                        final boolean isValid = element.getValid();
+                        element.setValid(!isValid);
+                        if (!isValid && (element.getDesignation() == null || element.getDesignation().isEmpty())) {
+                            final Optional<Task<Integer>> incrementTask = session.getElementCreator().tryAutoIncrement(element.getClass());
+                            incrementTask.ifPresent(task -> {
+                                try {
+                                    TaskManager.INSTANCE.submit(task);
+                                    final Integer newDesignation = task.get();
+                                    if (newDesignation != null) {
+                                        final String designationToSet = newDesignation.toString();
+                                        SirsCore.fxRunAndWait(() -> {
+                                            element.setDesignation(designationToSet);
+                                            vSummary.setDesignation(designationToSet);
+                                        });
+                                    }
+                                } catch (Exception ex) {
+                                    SirsCore.LOGGER.log(Level.WARNING, "Cannot determine an auto-increment", ex);
+                                }
+                            });
+                        }
+
                         repo.update(document);
-                        
+
                         vSummary.setValid(!vSummary.getValid());
                         updateButton(vSummary.getValid());
                     }

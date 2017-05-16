@@ -19,6 +19,7 @@
 package fr.sirs.theme.ui;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -39,7 +40,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 import javafx.beans.property.BooleanProperty;
@@ -87,7 +88,6 @@ public class FXPositionablePane extends BorderPane {
     private final List<FXPositionableMode> modes = new ArrayList<>();
 
     @FXML private Button uiView;
-    @FXML private BorderPane uiContainer;
     @FXML private HBox uiExtraContainer;
     @FXML private HBox uiModeContainer;
 
@@ -133,7 +133,7 @@ public class FXPositionablePane extends BorderPane {
         group.selectedToggleProperty().addListener((ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) -> {
             if(oldValue!=null){
                 final FXPositionableMode mode = (FXPositionableMode) oldValue.getUserData();
-                uiContainer.setCenter(null);
+                setCenter(null);
                 uiExtraContainer.getChildren().clear();
                 mode.disablingProperty().unbind();
                 mode.positionableProperty().unbind();
@@ -143,7 +143,7 @@ public class FXPositionablePane extends BorderPane {
                 group.selectToggle(group.getToggles().get(0));
             }else{
                 final FXPositionableMode mode = (FXPositionableMode) newValue.getUserData();
-                uiContainer.setCenter(mode.getFXNode());
+                setCenter(mode.getFXNode());
                 uiExtraContainer.getChildren().addAll(mode.getExtraButton());
                 mode.disablingProperty().bind(disableFieldsProperty);
                 mode.positionableProperty().bind(posProperty);
@@ -227,7 +227,7 @@ public class FXPositionablePane extends BorderPane {
         }
     }
 
-    private void updateSRAndPRInfo(){
+    private void updateSRAndPRInfo() {
         final Positionable pos = getPositionable();
 
         final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
@@ -241,12 +241,20 @@ public class FXPositionablePane extends BorderPane {
             sr = null;
         }
 
-        if(sr!=null && pos.getGeometry()!=null){
+        if (sr!=null) {
             final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr);
             final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(pos, troncon, segments);
 
-            final Point startPoint = posInfo.getGeoPointStart();
-            final Point endPoint = posInfo.getGeoPointEnd();
+            final Geometry geometry = posInfo.getGeometry();
+            final Point startPoint, endPoint;
+            if (geometry instanceof LineString) {
+                LineString ls = (LineString) geometry;
+                startPoint = ls.getStartPoint();
+                endPoint = ls.getEndPoint();
+            } else {
+                startPoint = posInfo.getGeoPointStart();
+                endPoint = posInfo.getGeoPointEnd();
+            }
 
             final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
             final float startPr = TronconUtils.computePR(segments, sr, startPoint, borneRepo);
@@ -371,7 +379,7 @@ public class FXPositionablePane extends BorderPane {
             //pour chaque systeme de reperage
             for (SystemeReperage sr : srs) {
                 final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr);
-                Entry<BorneDigue, Double> computedLinear = FXPositionableMode.computeLinearFromGeo(segments, sr, startPoint);
+                Map.Entry<BorneDigue, Double> computedLinear = FXPositionableMode.computeLinearFromGeo(segments, sr, startPoint);
                 boolean aval = true;
                 double distanceBorne = computedLinear.getValue();
                 if (distanceBorne < 0) {

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -26,13 +26,19 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.BookMark;
 import fr.sirs.core.model.Role;
 import fr.sirs.theme.ui.AbstractFXElementPane;
-import fr.sirs.theme.ui.FXBookMarkPane;
+import fr.sirs.ui.Growl;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -41,6 +47,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -52,8 +59,7 @@ import javafx.scene.layout.GridPane;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.util.FXUtilities;
-import org.geotoolkit.map.MapBuilder;
-import org.geotoolkit.map.MapItem;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.map.MapLayer;
 
 /**
@@ -112,7 +118,7 @@ public class FXBookMarks extends GridPane {
             uiConfig.setCenter(null);
             refreshList();
         }
-        
+
     }
 
     @FXML
@@ -175,7 +181,6 @@ public class FXBookMarks extends GridPane {
             setCellFactory((TableColumn<BookMark, BookMark> param) -> new ViewCell());
             setEditable(true);
         }
-
     }
 
     private class ViewCell extends TableCell<BookMark, BookMark>{
@@ -189,34 +194,53 @@ public class FXBookMarks extends GridPane {
             button.setOnAction(this::showOnMap);
         }
 
-        private void showOnMap(ActionEvent event){
+        private void showOnMap(ActionEvent event) {
             BookMark bookmark = getItem();
 
-            if(bookmark==null) return;
+            if (bookmark == null)
+                return;
 
-            List<MapLayer> layers = FXBookMarkPane.listLayers(bookmark);
+            button.setGraphic(new ProgressIndicator());
+            Task<List<MapLayer>> loader = new TaskManager.MockTask<>(() -> PluginCarto.listLayers(bookmark));
+            loader.setOnFailed(evt -> Platform.runLater(() -> {
+                final Throwable ex = evt.getSource().getException();
+                final String errorMsg;
+                if (ex instanceof MalformedURLException)
+                    errorMsg = "L'URL renseignée dans le favori n'est pas valide. Cause :\n" + ex.getLocalizedMessage();
+                else if (ex instanceof IOException)
+                    errorMsg = "La connexion au service a échouée. Cause :\n" + ex.getLocalizedMessage();
+                else
+                    errorMsg = ex.getLocalizedMessage();
 
-            final Session session = Injector.getSession();
-            final String titre = bookmark.getTitre();
+                new Growl(Growl.Type.ERROR, errorMsg).showAndFade();
+            }));
 
-            MapItem parent = null;
-            for(MapItem mi : session.getMapContext().items()){
-                if(titre.equals(mi.getName())){
-                    parent = mi;
-                    break;
+            loader.setOnSucceeded(evt -> Platform.runLater(() -> {
+                try {
+                    PluginCarto.showOnMap(bookmark.getTitre(), (List) evt.getSource().getValue());
+                } catch (Exception ex) {
+                    final String errorMsg;
+                    if (ex instanceof MalformedURLException)
+                        errorMsg = "L'URL renseignée dans le favoris n'est pas valide. Cause :\n" + ex.getLocalizedMessage();
+                    else if (ex instanceof IOException)
+                        errorMsg = "La connexion au service a échouée. Cause :\n" + ex.getLocalizedMessage();
+                    else
+                        errorMsg = ex.getLocalizedMessage();
+
+                    new Growl(Growl.Type.ERROR, errorMsg).showAndFade();
                 }
-            }
-            if(parent == null){
-                parent = MapBuilder.createItem();
-                parent.setName(titre);
-                session.getMapContext().items().add(parent);
-            }
+            }));
 
-            parent.items().addAll(layers);
-            session.getFrame().getMapTab().show();
+            loader.setOnCancelled(evt -> Platform.runLater(() -> {
+                    new Growl(Growl.Type.ERROR, "Le chargement des couches a été interrompu").showAndFade();
+            }));
+
+            final EventHandler handler = evt -> SIRS.fxRun(false, () -> button.setGraphic(new ImageView(ICON_SHOWONMAP)));
+            loader.addEventHandler(WorkerStateEvent.WORKER_STATE_CANCELLED, handler);
+            loader.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, handler);
+            loader.addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, handler);
+
+            TaskManager.INSTANCE.submit(loader);
         }
-
     }
-
-
 }

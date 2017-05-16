@@ -124,27 +124,24 @@
       <url>http://maven.geotoolkit.org</url>
     </repository>
     <repository>
-      <id>geomatys1</id>
+      <id>geomatys.public</id>
       <name>Builds from Geomatys</name>
-      <url>http://maven.geomatys.com</url>
+      <url>http://nexus.geomatys.com/repository/maven-public</url>
     </repository>
     <repository>
-      <id>geomatys</id>
-      <url>http://dev.geomatys.com/nexus/content/groups/public/</url>
+      <id>geomatys.private</id>
+      <url>http://nexus.geomatys.com/repository/maven-private</url>
       <releases>
         <enabled />
       </releases>
-      <snapshots>
-        <enabled />
-      </snapshots>
     </repository>
   </repositories>
 
   <pluginRepositories>
     <pluginRepository>
-      <id>geomatys</id>
+      <id>geomatys.public</id>
       <name>geomatys</name>
-      <url>http://dev.geomatys.com/nexus/content/groups/public/</url>
+      <url>http://nexus.geomatys.com/repository/maven-public</url>
     </pluginRepository>
   </pluginRepositories>
 

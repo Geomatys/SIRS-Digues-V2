@@ -51,6 +51,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Spinner;
@@ -78,6 +79,11 @@ public class FXPRPane extends VBox {
 
     public static final Image ICON_MARKER = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_MAP_MARKER,16,FontAwesomeIcons.DEFAULT_COLOR),null);
 
+    public static enum Direction {
+        Amont,
+        Aval
+    }
+
     private final NumberFormat DF = new DecimalFormat("0.###");
 
     //source
@@ -90,10 +96,11 @@ public class FXPRPane extends VBox {
     @FXML private RadioButton uiChooseBorne;
     @FXML ToggleButton uiPickCoord;
     @FXML ToggleButton uiPickTroncon;
-    private final Spinner<Double> uiSourcePR = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE,0));
-    final Spinner<Double> uiSourceX = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE,0));
-    final Spinner<Double> uiSourceY = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE,0));
-    private final Spinner<Double> uiSourceDist = new Spinner<>(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE,0));
+    @FXML private Spinner<Double> uiSourcePR;
+    @FXML private Spinner<Double> uiSourceX;
+    @FXML private Spinner<Double> uiSourceY;
+    @FXML private Spinner<Double> uiSourceDist;
+    @FXML private ChoiceBox uiSourceAmontAval;
 
     @FXML private Button uiCalculate;
 
@@ -115,20 +122,14 @@ public class FXPRPane extends VBox {
     public FXPRPane(PointCalculatorHandler handler, Class typeClass) {
         SIRS.loadFXML(this, Positionable.class);
 
-        this.handler = handler;
-        uiGrid.add(uiSourcePR, 1, 4);
-        uiGrid.add(uiSourceX, 1, 5);
-        uiGrid.add(uiSourceY, 2, 5);
-        uiGrid.add(uiSourceDist, 2, 6);
+        uiSourcePR.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE,0));
+        uiSourceX.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE,0));
+        uiSourceY.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE,0));
+        uiSourceDist.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE,0));
+        uiSourceAmontAval.setItems(FXCollections.unmodifiableObservableList(FXCollections.observableArrayList(Direction.values())));
+        uiSourceAmontAval.setValue(Direction.Aval);
 
-        uiSourcePR.setEditable(true);
-        uiSourceX.setEditable(true);
-        uiSourceY.setEditable(true);
-        uiSourceDist.setEditable(true);
-        uiSourcePR.setMaxWidth(Double.MAX_VALUE);
-        uiSourceX.setMaxWidth(Double.MAX_VALUE);
-        uiSourceY.setMaxWidth(Double.MAX_VALUE);
-        uiSourceDist.setMaxWidth(Double.MAX_VALUE);
+        this.handler = handler;
 
         final SirsStringConverter sirsStringConverter = new SirsStringConverter();
 
@@ -143,11 +144,14 @@ public class FXPRPane extends VBox {
         uiChooseBorne.setToggleGroup(group);
 
         uiSourcePR.disableProperty().bind(uiChoosePR.selectedProperty().not());
-        uiSourceX.disableProperty().bind(uiChooseCoord.selectedProperty().not());
-        uiSourceY.disableProperty().bind(uiChooseCoord.selectedProperty().not());
-        uiPickCoord.disableProperty().bind(uiChooseCoord.selectedProperty().not());
-        uiSourceBorne.disableProperty().bind(uiChooseBorne.selectedProperty().not());
-        uiSourceDist.disableProperty().bind(uiChooseBorne.selectedProperty().not());
+        final BooleanBinding coordNotSelected = uiChooseCoord.selectedProperty().not();
+        uiSourceX.disableProperty().bind(coordNotSelected);
+        uiSourceY.disableProperty().bind(coordNotSelected);
+        uiPickCoord.disableProperty().bind(coordNotSelected);
+        final BooleanBinding borneNotSelected = uiChooseBorne.selectedProperty().not();
+        uiSourceBorne.disableProperty().bind(borneNotSelected);
+        uiSourceDist.disableProperty().bind(borneNotSelected);
+        uiSourceAmontAval.disableProperty().bind(borneNotSelected);
 
         final BooleanBinding canCalculate = and(
                         and(uiSourceTroncon.valueProperty().isNotNull(),
@@ -228,14 +232,22 @@ public class FXPRPane extends VBox {
 
         //calcule de la position geographique dans le systeme source
         final Point pt;
-        if(uiChoosePR.isSelected()){
+        if (uiChoosePR.isSelected()) {
             pt = TronconUtils.computeCoordinate(uiSourceSR.getValue(), uiSourcePR.getValue());
-        }else if(uiChooseCoord.isSelected()){
+        } else if (uiChooseCoord.isSelected()) {
             pt = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(uiSourceX.getValue(), uiSourceY.getValue()));
             JTS.setCRS(pt, session.getProjection());
-        }else if(uiChooseBorne.isSelected()){
-            pt = TronconUtils.computeCoordinate(uiSourceSR.getValue(), uiSourceBorne.getValue(), uiSourceDist.getValue());
-        }else{
+        } else if (uiChooseBorne.isSelected()) {
+            final double distance;
+            final Double valueObj = uiSourceDist.getValue();
+            if (valueObj == null || !Double.isFinite(valueObj)) {
+                distance = 0;
+            } else {
+                final int coef = Direction.Amont.equals(uiSourceAmontAval.getValue()) ? -1 : 1;
+                distance = valueObj * coef;
+            }
+            pt = TronconUtils.computeCoordinate(uiSourceSR.getValue(), uiSourceBorne.getValue(), distance);
+        } else {
             pt = GO2Utilities.JTS_FACTORY.createPoint(new Coordinate(0, 0));
             JTS.setCRS(pt, session.getProjection());
         }
@@ -298,4 +310,8 @@ public class FXPRPane extends VBox {
         }
     }
 
+    public void setPosition(Coordinate position) {
+        uiSourceX.getValueFactory().setValue(position.x);
+        uiSourceY.getValueFactory().setValue(position.y);
+    }
 }
