@@ -102,7 +102,8 @@ public class FXModeleRapportsPane extends BorderPane {
 
     @FXML
     void addReport(ActionEvent event) {
-        ModeleRapport newModele = repo.create();
+        final ModeleRapport newModele = repo.create();
+        newModele.setLibelle("Nouveau modèle");
         repo.add(newModele);
 
         final Preview p = new Preview();
