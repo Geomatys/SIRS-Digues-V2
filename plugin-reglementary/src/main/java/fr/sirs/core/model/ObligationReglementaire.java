@@ -334,6 +334,13 @@ public class ObligationReglementaire
         this.annee.set(annee);
     }
     
+    /**
+     * "classement" est un champ calculé. 
+     * Le getter est nécessaire à la génération de la colonne correspondante dans les tableaux des obligations 
+     * réglementaires (UI et impression .odt). C'est lui qui calcule la valeur à la volée quand elle est demandée.
+     * 
+     * @return Le classement de l'obligation réglementaire, qui correspond au classement de son système d'endiguement.
+     */
     public String getClassement(){
         final String seId = getSystemeEndiguementId();
         if(seId!=null && !seId.isEmpty()){
@@ -349,6 +356,17 @@ public class ObligationReglementaire
         }
         return "";
     }
+    
+    /**
+     * "classement" est un champ calculé.
+     * L'implémentation d'un setter est nécessaire à l'inclusion du champ correspondant dans les fiches imprimables des
+     * obligations réglementaires.
+     * 
+     * Ce setter n'a pas d'action réelle, le champ étant calculé à la volée par le getter.
+     * 
+     * @param classement 
+     */
+    public void setClassement(String classement){};
 
     @Reference(ref=SystemeEndiguement.class)  
     public String getSystemeEndiguementId(){
