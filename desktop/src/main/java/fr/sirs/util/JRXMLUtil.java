@@ -18,11 +18,13 @@
  */
 package fr.sirs.util;
 
+import fr.sirs.core.SirsCore;
 import static fr.sirs.util.AbstractJDomWriter.NULL_REPLACEMENT;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Level;
 
 /**
  * Classe utilitaire réservée aux méthodes utilisées depuis les fichiers JRXML.
@@ -60,7 +62,14 @@ public class JRXMLUtil {
     }
     
     static String extractLabel(final String input){
-        return input.substring(input.indexOf(SirsStringConverter.LABEL_SEPARATOR)+SirsStringConverter.LABEL_SEPARATOR.length());
+        final int index = input.indexOf(SirsStringConverter.LABEL_SEPARATOR);
+        if(index>-1){
+            return input.substring(index+SirsStringConverter.LABEL_SEPARATOR.length());
+        }
+        else {
+            SirsCore.LOGGER.log(Level.WARNING, "Label separator not found : {0}", input);
+            return input;
+        }
     }
     
     static String extractReferenceCode(final String input){
