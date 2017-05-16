@@ -20,11 +20,13 @@ package fr.sirs.util;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractObservation;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ReferenceType;
+import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.property.Reference;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -83,7 +85,15 @@ public class ObjectDataSource<T> implements JRDataSource {
             final Object propertyValue = getter.invoke(currentObject);
             if (propertyValue != null) {
                 final Reference ref = getter.getAnnotation(Reference.class);
-                return parsePropertyValue(propertyValue, ref == null ? null : ref.ref(), jrf.getValueClass());
+                if(ref!=null){
+                    return parsePropertyValue(propertyValue, ref.ref(), jrf.getValueClass());
+                }
+                else if(SirsCore.AUTHOR_FIELD.equals(name) && propertyValue instanceof String){
+                    return Injector.getSession().getRepositoryForClass(Utilisateur.class).get((String)propertyValue).getLogin();
+                }
+                else {
+                    return parsePropertyValue(propertyValue, null, jrf.getValueClass());
+                }
             }
         } catch (Exception ex) {
             SIRS.LOGGER.log(Level.WARNING, "Impossible to print a field value.", ex);

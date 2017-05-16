@@ -27,6 +27,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import org.apache.sis.util.ArgumentChecks;
+import org.ektorp.DocumentNotFoundException;
 import org.opengis.feature.Feature;
 
 /**
@@ -73,7 +74,12 @@ class DefaultPrinter extends PropertyPrinter {
             if (value == null) {
               return "N/A";
             } else if (refClass != null && (value instanceof String)) {
-                return previews.get((String) value).getLibelle();
+                try {
+                    return previews.get((String) value).getLibelle();
+                } catch (DocumentNotFoundException ex) {
+                    // La preview n'a pas pu être trouvée, ce qui indique que l'objet pointé a été supprimé.
+                    return "Objet supprimé !";
+                }
             } else if (refClass == null) {
                 return value.toString(); // TODO : better string conversion ?
             } else {
