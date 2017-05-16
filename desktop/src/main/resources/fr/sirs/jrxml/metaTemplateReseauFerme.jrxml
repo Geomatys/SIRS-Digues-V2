@@ -43,7 +43,7 @@
 					<text><![CDATA[Fiche détaillée de réseau hydraulique fermé]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
-					<reportElement  positionType="Float" x="0" y="22" width="555" height="16" />
+					<reportElement positionType="Float" x="0" y="22" width="555" height="16" uuid="9c71dc15-9929-4e78-bd37-dfb88d7e8c7c"/>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
 						<font fontName="Serif" size="12"/>
 					</textElement>
@@ -129,28 +129,28 @@
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font fontName="Serif" size="8" isBold="true"/>
 					</textElement>
-					<text><![CDATA[Côté]]></text>
+					<text><![CDATA[Libellé]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="80" y="0" width="185" height="12" uuid="edb278aa-9d56-40fb-a2d1-a6e647a3235a"/>
+					<reportElement positionType="Float" x="80" y="0" width="150" height="12" uuid="edb278aa-9d56-40fb-a2d1-a6e647a3235a"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{coteId})]]></textFieldExpression>
+					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{libelle})]]></textFieldExpression>
 				</textField>
 				<staticText>
-					<reportElement positionType="Float" x="265" y="0" width="70" height="12" uuid="07f91b3c-882f-4f9d-bc50-1c7e23969d43"/>
+					<reportElement positionType="Float" x="230" y="0" width="105" height="12" uuid="07f91b3c-882f-4f9d-bc50-1c7e23969d43"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font fontName="Serif" size="8" isBold="true"/>
 					</textElement>
-					<text><![CDATA[Position]]></text>
+					<text><![CDATA[Utilisation du réseau]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="335" y="0" width="185" height="12" uuid="d9b019ce-21cd-4632-a9dc-bfead597cc51"/>
+					<reportElement positionType="Float" x="335" y="0" width="195" height="12" uuid="d9b019ce-21cd-4632-a9dc-bfead597cc51"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{positionId})]]></textFieldExpression>
+					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{utilisationConduiteId})]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -448,7 +448,7 @@
 					<text><![CDATA[Position]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="335" y="0" width="185" height="12" uuid="d9b019ce-21cd-4632-a9dc-bfead597cc51"/>
+					<reportElement positionType="Float" x="335" y="0" width="195" height="12" uuid="d9b019ce-21cd-4632-a9dc-bfead597cc51"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
