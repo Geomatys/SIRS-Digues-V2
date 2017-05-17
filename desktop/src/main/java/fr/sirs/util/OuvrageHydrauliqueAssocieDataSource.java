@@ -137,10 +137,8 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
             return new ObjectDataSource<>(reseauOuvrageList, previewRepository, stringConverter);
         }
         else if(DESORDRE_TABLE_DATA_SOURCE.equals(name)){
-            final DesordreRepository desordreRepository = (DesordreRepository) Injector.getSession().getRepositoryForClass(Desordre.class);
-            final List<Desordre> all = desordreRepository.getAll();
             final List<JRDesordreTableRow> desordreRows = new ArrayList<>();
-            for(final Desordre des : all){
+            for(final Desordre des : Injector.getSession().getRepositoryForClass(Desordre.class).getAll()){
                 if(des.getOuvrageHydrauliqueAssocieIds().contains(currentObject.getId())){
                     final List<Observation> observations = des.getObservations();
                     for(final Observation obs : observations){
