@@ -18,9 +18,8 @@
  */
 package fr.sirs;
 
-import fr.sirs.core.model.RefConduiteFermee;
+import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.RefOuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.ui.Growl;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +47,7 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
     @FXML private Tab uiOuvrageTypeChoice;
 
     @FXML private CheckBox uiOptionPhoto;
-    @FXML private CheckBox uiOptionReseauOuvrage;
+    @FXML private CheckBox uiOptionReseauxFermes;
 
     private final TypeChoicePojoTable ouvrageTypesTable = new TypeChoicePojoTable(RefOuvrageHydrauliqueAssocie.class, "Types d'ouvrages associés");
 
@@ -102,9 +101,9 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
                     .and(new LinearPredicate<>())
                     .and(new PRPredicate<>());
 
-            final List<ReseauHydrauliqueFerme> toPrint = new ArrayList<>(100);
-            try (final CloseableIterator<ReseauHydrauliqueFerme> it = Injector.getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).getAllStreaming().iterator()) {
-                ReseauHydrauliqueFerme r;
+            final List<OuvrageHydrauliqueAssocie> toPrint = new ArrayList<>(100);
+            try (final CloseableIterator<OuvrageHydrauliqueAssocie> it = Injector.getSession().getRepositoryForClass(OuvrageHydrauliqueAssocie.class).getAllStreaming().iterator()) {
+                OuvrageHydrauliqueAssocie r;
                 while (it.hasNext() && !t.isInterrupted()) {
                     r = it.next();
                     if (userOptions.test(r)){
@@ -114,7 +113,7 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
             }
 
             if (!toPrint.isEmpty() && !t.isInterrupted()) {
-                Injector.getSession().getPrintManager().printReseaux(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauOuvrage.isSelected());
+                Injector.getSession().getPrintManager().printOuvragesAssocies(toPrint, uiOptionPhoto.isSelected(), uiOptionReseauxFermes.isSelected());
             }
             
             return !toPrint.isEmpty();
@@ -124,7 +123,7 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
         TaskManager.INSTANCE.submit(printing);
     }
 
-    private class TypeOuvragePredicate implements Predicate<ReseauHydrauliqueFerme> {
+    private class TypeOuvragePredicate implements Predicate<OuvrageHydrauliqueAssocie> {
 
         final Set<String> acceptedIds;
 
@@ -135,8 +134,8 @@ public class FXOuvrageAssociePrintPane extends TemporalTronconChoicePrintPane {
         }
 
         @Override
-        public boolean test(ReseauHydrauliqueFerme t) {
-            return acceptedIds.isEmpty() || (t.getTypeConduiteFermeeId() != null && acceptedIds.contains(t.getTypeConduiteFermeeId()));
+        public boolean test(OuvrageHydrauliqueAssocie t) {
+            return acceptedIds.isEmpty() || (t.getTypeOuvrageHydroAssocieId()!= null && acceptedIds.contains(t.getTypeOuvrageHydroAssocieId()));
         }
     }
 }

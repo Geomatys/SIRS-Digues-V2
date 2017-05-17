@@ -23,6 +23,7 @@ import static fr.sirs.core.SirsCore.*;
 import static fr.sirs.core.SirsCore.DesordreFields.*;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
+import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.util.JRColumnParameter;
@@ -322,7 +323,7 @@ public class PrintManager {
     }
 
     /**
-     * Génère un rapport PDF des désordres requis.
+     * Génère un rapport PDF des réseaux hydrauliques fermés requis.
      *
      * @param reseauxFermes
      * @param printPhoto
@@ -387,6 +388,74 @@ public class PrintManager {
                 new SirsStringConverter(),
                 reseauxFermes, printPhoto, printReseauOuvrage);
         SIRS.openFile(fileToPrint);
+    }
+
+    /**
+     * Génère un rapport PDF des réseaux hydrauliques fermés requis.
+     *
+     * @param ouvrages
+     * @param printPhoto
+     * @param printReseauxFermes
+     */
+    public final void printOuvragesAssocies(final List<OuvrageHydrauliqueAssocie> ouvrages, final boolean printPhoto, final boolean printReseauxFermes) throws Exception {
+
+        final List<String> avoidReseauFields = new ArrayList<>();
+        avoidReseauFields.add(GEOMETRY_FIELD);
+        avoidReseauFields.add(DOCUMENT_ID_FIELD);
+        avoidReseauFields.add(ID_FIELD);
+        avoidReseauFields.add(LONGITUDE_MIN_FIELD);
+        avoidReseauFields.add(LONGITUDE_MAX_FIELD);
+        avoidReseauFields.add(LATITUDE_MIN_FIELD);
+        avoidReseauFields.add(LATITUDE_MAX_FIELD);
+        avoidReseauFields.add(FOREIGN_PARENT_ID_FIELD);
+        avoidReseauFields.add(REVISION_FIELD);
+        avoidReseauFields.add(PARENT_FIELD);
+        avoidReseauFields.add(COUCH_DB_DOCUMENT_FIELD);
+        avoidReseauFields.add(OBSERVATIONS_REFERENCE);
+
+        avoidReseauFields.add(ECHELLE_LIMINIMETRIQUE_REFERENCE);
+        avoidReseauFields.add(OUVRAGE_PARTICULIER_REFERENCE);
+        avoidReseauFields.add(RESEAU_TELECOM_ENERGIE_REFERENCE);
+        avoidReseauFields.add(OUVRAGE_TELECOM_ENERGIE_REFERENCE);
+        avoidReseauFields.add(OUVRAGE_HYDRAULIQUE_REFERENCE);
+        avoidReseauFields.add(RESEAU_HYDRAULIQUE_FERME_REFERENCE);
+        avoidReseauFields.add(RESEAU_HYDRAULIQUE_CIEL_OUVERT_REFERENCE);
+        avoidReseauFields.add(OUVRAGE_VOIRIE_REFERENCE);
+        avoidReseauFields.add(VOIE_DIGUE_REFERENCE);
+        avoidReseauFields.add(PRESTATION_REFERENCE);
+
+        avoidReseauFields.add(VALID_FIELD);
+        avoidReseauFields.add(AUTHOR_FIELD);
+        avoidReseauFields.add(DATE_MAJ_FIELD);
+
+        final List<JRColumnParameter> observationFields = new ArrayList<>();
+        observationFields.add(new JRColumnParameter("date", 1.1f, true));
+        observationFields.add(new JRColumnParameter("observateurId", .8f));
+        observationFields.add(new JRColumnParameter("evolution", 2.f));
+        observationFields.add(new JRColumnParameter("suite", 2.5f));
+
+        final List<JRColumnParameter> reseauFields = new ArrayList<>();
+        reseauFields.add(new JRColumnParameter("designation"));
+        reseauFields.add(new JRColumnParameter("libelle"));
+        reseauFields.add(new JRColumnParameter("date_debut"));
+        reseauFields.add(new JRColumnParameter("date_fin"));
+        reseauFields.add(new JRColumnParameter("commentaire", 2.f));
+        
+        final List<JRColumnParameter> desordreFields = new ArrayList<>();
+        desordreFields.add(new JRColumnParameter("observationDate", true));
+        desordreFields.add(new JRColumnParameter("observationDesignation", .7f));
+        desordreFields.add(new JRColumnParameter("desordreDesignation", .7f));
+        desordreFields.add(new JRColumnParameter("observationUrgence", .7f,  JRColumnParameter.DisplayPolicy.REFERENCE_CODE));
+        desordreFields.add(new JRColumnParameter("desordreDescription", 2.5f));
+
+//        final File fileToPrint = PrinterUtilities.printReseauFerme(avoidReseauFields,
+//                observationFields,
+//                reseauFields,
+//                desordreFields,
+//                Injector.getSession().getPreviews(),
+//                new SirsStringConverter(),
+//                ouvrages, printPhoto, printReseauxFermes);
+//        SIRS.openFile(fileToPrint);
     }
     
     
