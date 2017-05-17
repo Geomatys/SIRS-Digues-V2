@@ -661,6 +661,11 @@ public class FXMainFrame extends BorderPane {
     }
 
     @FXML
+    private void ouvrageAssociePrint(){
+        addTab(session.getOrCreatePrintTab(Session.PrintTab.OUVRAGE_ASSOCIE, "Fiches détaillées d'ouvrages associés"));
+    }
+
+    @FXML
     private void elementModelPrint(){
         addTab(session.getOrCreatePrintTab(Session.PrintTab.TEMPLATE, "Edition des modèles de fiche"));
     }

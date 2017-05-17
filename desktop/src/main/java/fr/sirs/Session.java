@@ -126,7 +126,7 @@ public class Session extends SessionCore {
 
     public enum AdminTab{VALIDATION, USERS}
 
-    public enum PrintTab{DESORDRE, RESEAU_FERME, TEMPLATE, REPORT}
+    public enum PrintTab{DESORDRE, RESEAU_FERME, OUVRAGE_ASSOCIE, TEMPLATE, REPORT}
 
     //generate a template for the legend
     final DefaultLegendTemplate legendTemplate = new DefaultLegendTemplate(

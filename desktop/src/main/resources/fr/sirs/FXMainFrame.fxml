@@ -36,8 +36,9 @@
                                   </Menu>
                               <Menu mnemonicParsing="false" text="%print">
                                 <items>
-                                  <MenuItem mnemonicParsing="false" onAction="#disorderPrint" text="%disorderPrint" />
+                                    <MenuItem mnemonicParsing="false" onAction="#disorderPrint" text="%disorderPrint" />
                                     <MenuItem mnemonicParsing="false" onAction="#reseauFermePrint" text="%reseauFermePrint" />
+                                    <MenuItem mnemonicParsing="false" onAction="#ouvrageAssociePrint" text="%ouvrageAssociePrint" />
                                     <Menu mnemonicParsing="false" text="%templatesPrint">
                                       <items>
                                         <MenuItem mnemonicParsing="false" onAction="#elementModelPrint" text="%elementModels" />
