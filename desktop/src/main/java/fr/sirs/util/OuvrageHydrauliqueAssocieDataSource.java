@@ -137,7 +137,7 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
             final List<Desordre> all = desordreRepository.getAll();
             final List<JRDesordreTableRow> desordreRows = new ArrayList<>();
             for(final Desordre des : all){
-                if(des.getReseauHydrauliqueFermeIds().contains(currentObject.getId())){
+                if(des.getOuvrageHydrauliqueAssocieIds().contains(currentObject.getId())){
                     final List<Observation> observations = des.getObservations();
                     for(final Observation obs : observations){
                         desordreRows.add(new JRDesordreTableRow(obs.getDate(), des.getDesignation(), obs.getDesignation(), obs.getUrgenceId(), des.getCommentaire()));
