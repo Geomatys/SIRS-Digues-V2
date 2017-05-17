@@ -372,25 +372,39 @@
 					<text><![CDATA[Borne début]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="80" y="0" width="100" height="12" uuid="85f7f084-05ec-4e25-ae2e-c76f46689324"/>
+					<reportElement positionType="Float" x="80" y="0" width="70" height="12" uuid="85f7f084-05ec-4e25-ae2e-c76f46689324"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{borneDebutId})]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="180" y="0" width="100" height="12" uuid="b7fd2eea-1058-4ea7-9d62-66bb7058e328"/>
+					<reportElement positionType="Float" x="150" y="0" width="70" height="12" uuid="b7fd2eea-1058-4ea7-9d62-66bb7058e328"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayAmontAval($F{borne_debut_aval})]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="280" y="0" width="100" height="12" uuid="f15736be-6875-44cd-97d6-5dfc2f5270f0"/>
+					<reportElement positionType="Float" x="220" y="0" width="70" height="12" uuid="f15736be-6875-44cd-97d6-5dfc2f5270f0"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayDistance($F{borne_debut_distance})]]></textFieldExpression>
+				</textField>
+                                <staticText>
+					<reportElement positionType="Float" x="290" y="0" width="70" height="12" />
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="Serif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Longueur]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true">
+					<reportElement positionType="Float" x="360" y="0" width="70" height="12" />
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font fontName="Serif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{ouvrage_hydraulique_associe_length}]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
@@ -403,21 +417,21 @@
 					<text><![CDATA[Borne fin]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="80" y="0" width="100" height="12" uuid="53aa79d6-951f-4974-b8ee-a4f0a9f6678e"/>
+					<reportElement positionType="Float" x="80" y="0" width="70" height="12" uuid="53aa79d6-951f-4974-b8ee-a4f0a9f6678e"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{borneFinId})]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="180" y="0" width="100" height="12" uuid="f36f745d-620a-43af-8536-03eeb78cc14b"/>
+					<reportElement positionType="Float" x="150" y="0" width="70" height="12" uuid="f36f745d-620a-43af-8536-03eeb78cc14b"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayAmontAval($F{borne_fin_aval})]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true">
-					<reportElement positionType="Float" x="280" y="0" width="100" height="12" uuid="3c66c3a1-0077-4434-b690-0ed0104abd7f"/>
+					<reportElement positionType="Float" x="220" y="0" width="70" height="12" uuid="3c66c3a1-0077-4434-b690-0ed0104abd7f"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>

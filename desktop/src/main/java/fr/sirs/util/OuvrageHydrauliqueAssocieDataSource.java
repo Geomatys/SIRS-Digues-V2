@@ -32,6 +32,7 @@ import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.RESEAU_FERME_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.DESORDRE_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.LENGTH_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.PHOTO_DATA_SOURCE;
 import java.time.LocalDate;
@@ -106,6 +107,9 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
                 }
             }
             return null;
+        }
+        else if(LENGTH_FIELD.equals(name)){
+            return -1.f;
         }
         else if(PHOTO_DATA_SOURCE.equals(name)){
             final List<Photo> photos = new ArrayList<>();

@@ -49,6 +49,8 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
     
     public static final String PHOTO_DATA_SOURCE = "PHOTO_DATA_SOURCE";
     public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
+
+    public static final String LENGTH_FIELD = "ouvrage_hydraulique_associe_length";
     
     private final List<JRColumnParameter> observationFields;
     private final List<JRColumnParameter> reseauFermeFields;
@@ -81,7 +83,8 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
         this.printReseauFerme = printReseauFerme;
         this.desordreFields = desordreFields;
     }
-
+        
+        
     /**
      * <p>This method modifies the body of the DOM.</p>
      */
@@ -95,6 +98,7 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
         // Sets the initial fields used by the template.------------------------
         writeFields();
         writeField(String.class, SirsCore.DIGUE_ID_FIELD, "Champ ajouté de force pour prendre en compte l'intitulé de la digue.");// Ajout d'un champ pour l'intitulé de la digue.
+        writeField(Double.class, LENGTH_FIELD, "Champ calculé pour la longueur de l'ouvrage hydraulique associé.");
         if(printPhoto) writeField(ObjectDataSource.class, PHOTO_DATA_SOURCE, "Source de données des photos");
         writeField(ObjectDataSource.class, OBSERVATION_TABLE_DATA_SOURCE, "Source de données des observations");
         if(printReseauFerme) writeField(ObjectDataSource.class, RESEAU_FERME_TABLE_DATA_SOURCE, "Source de données des réseaux fermés");
