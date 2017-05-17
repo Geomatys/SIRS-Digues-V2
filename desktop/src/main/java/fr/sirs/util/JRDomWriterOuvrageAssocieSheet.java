@@ -22,6 +22,7 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
+import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import static fr.sirs.util.JRUtils.ATT_HEIGHT;
 import static fr.sirs.util.JRUtils.TAG_BAND;
 import java.io.IOException;
@@ -96,7 +97,7 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
         writeField(String.class, SirsCore.DIGUE_ID_FIELD, "Champ ajouté de force pour prendre en compte l'intitulé de la digue.");// Ajout d'un champ pour l'intitulé de la digue.
         if(printPhoto) writeField(ObjectDataSource.class, PHOTO_DATA_SOURCE, "Source de données des photos");
         writeField(ObjectDataSource.class, OBSERVATION_TABLE_DATA_SOURCE, "Source de données des observations");
-        if(printReseauFerme) writeField(ObjectDataSource.class, RESEAU_FERME_TABLE_DATA_SOURCE, "Source de données des réseaux");
+        if(printReseauFerme) writeField(ObjectDataSource.class, RESEAU_FERME_TABLE_DATA_SOURCE, "Source de données des réseaux fermés");
         writeField(ObjectDataSource.class, DESORDRE_TABLE_DATA_SOURCE, "Source de données des désordres");
         
         // Modifies the title block.--------------------------------------------
@@ -155,9 +156,9 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
         ----------------------------------------------------------------------*/
         if(printReseauFerme){
             currentY+=24;
-            writeSectionTitle("Réseaux et ouvrages", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
+            writeSectionTitle("Réseaux hydrauliques fermés", TITLE_SECTION_BG_HEIGHT, TITLE_SECTION_MARGIN_V, TITLE_SECTION_INDENT, TITLE_SECTION_FONT_SIZE, true, false, false);
             currentY+=2;
-            writeTable(ObjetReseau.class, reseauFermeFields, true, RESEAU_FERME_TABLE_DATA_SOURCE, RESEAU_FERME_DATASET,
+            writeTable(ReseauHydrauliqueFerme.class, reseauFermeFields, true, RESEAU_FERME_TABLE_DATA_SOURCE, RESEAU_FERME_DATASET,
                     TABLE_HEIGHT, TABLE_FONT_SIZE, TABLE_HEADER_HEIGHT, TABLE_CELL_HEIGHT, TABLE_FILL_WIDTH);
         }
         
