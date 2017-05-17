@@ -20,13 +20,13 @@ package fr.sirs.util;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
-import fr.sirs.core.SirsCore;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
+import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.TronconDigue;
@@ -40,7 +40,6 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -95,7 +94,54 @@ public class PrinterUtilities {
     }
 
     ////////////////////////////////////////////////////////////////////////////
-    // FICHES DÉTAILLÉES DE DESORDRES
+    // FICHES DÉTAILLÉES DE RÉSEAUX HYDRAULIQUES FERMÉS
+    ////////////////////////////////////////////////////////////////////////////
+
+    public static File printOuvrageAssocie(final List<String> avoidReseauFields,
+            final List<JRColumnParameter> observationFields,
+            final List<JRColumnParameter> reseauFields,
+            final List<JRColumnParameter> desordreFields,
+            final Previews previewLabelRepository,
+            final SirsStringConverter stringConverter,
+            final List<OuvrageHydrauliqueAssocie> ouvrages,
+            final boolean printPhoto, final boolean printReseauFerme) throws IOException, ParserConfigurationException, SAXException, TransformerException, JRException {
+
+        // Creates the Jasper Reports specific template from the generic template.
+        final File templateFile = File.createTempFile(ReseauHydrauliqueFerme.class.getName(), JRXML_EXTENSION);
+        templateFile.deleteOnExit();
+
+        final JasperPrint print;
+        try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateReseauFerme.jrxml");
+                final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplateReseauFerme.jrxml")){
+            
+            final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(metaTemplateStream,
+                    avoidReseauFields, observationFields, reseauFields, desordreFields, printPhoto, printReseauFerme);
+            templateWriter.setOutput(templateFile);
+            templateWriter.write();
+
+            final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
+
+            ouvrages.sort(OBJET_LINEAR_COMPARATOR.thenComparing(new PRComparator()));
+            final JRDataSource source = new OuvrageHydrauliqueAssocieDataSource(ouvrages, previewLabelRepository, stringConverter);
+
+            final Map<String, Object> parameters = new HashMap<>();
+            parameters.put(PHOTOS_SUBREPORT, net.sf.jasperreports.engine.JasperCompileManager.compileReport(photoTemplateStream));
+
+            print = JasperFillManager.fillReport(jasperReport, parameters, source);
+        }
+
+        // Generate the report -------------------------------------------------
+        final File fout = File.createTempFile("RESEAU_HYDRAULIQUE_FERME_OBSERVATION", PDF_EXTENSION);
+        fout.deleteOnExit();
+        try (final FileOutputStream outStream = new FileOutputStream(fout)) {
+            final OutputDef output = new OutputDef(JasperReportService.MIME_PDF, outStream);
+            JasperReportService.generate(print, output);
+        }
+        return fout;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // FICHES DÉTAILLÉES DE RÉSEAUX HYDRAULIQUES FERMÉS
     ////////////////////////////////////////////////////////////////////////////
 
     public static File printReseauFerme(final List<String> avoidReseauFields,

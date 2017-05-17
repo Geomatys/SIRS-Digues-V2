@@ -448,14 +448,14 @@ public class PrintManager {
         desordreFields.add(new JRColumnParameter("observationUrgence", .7f,  JRColumnParameter.DisplayPolicy.REFERENCE_CODE));
         desordreFields.add(new JRColumnParameter("desordreDescription", 2.5f));
 
-//        final File fileToPrint = PrinterUtilities.printReseauFerme(avoidReseauFields,
-//                observationFields,
-//                reseauFields,
-//                desordreFields,
-//                Injector.getSession().getPreviews(),
-//                new SirsStringConverter(),
-//                ouvrages, printPhoto, printReseauxFermes);
-//        SIRS.openFile(fileToPrint);
+        final File fileToPrint = PrinterUtilities.printOuvrageAssocie(avoidReseauFields,
+                observationFields,
+                reseauFields,
+                desordreFields,
+                Injector.getSession().getPreviews(),
+                new SirsStringConverter(),
+                ouvrages, printPhoto, printReseauxFermes);
+        SIRS.openFile(fileToPrint);
     }
     
     
