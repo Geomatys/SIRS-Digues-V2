@@ -111,8 +111,8 @@ public class PrinterUtilities {
         templateFile.deleteOnExit();
 
         final JasperPrint print;
-        try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateReseauFerme.jrxml");
-                final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplateReseauFerme.jrxml")){
+        try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateOuvrageAssocie.jrxml");
+                final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplateOuvrageAssocie.jrxml")){
             
             final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(metaTemplateStream,
                     avoidReseauFields, observationFields, reseauFields, desordreFields, printPhoto, printReseauFerme);
