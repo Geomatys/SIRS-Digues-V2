@@ -89,7 +89,7 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
     protected void writeObject() {
         
         writeSubDataset(ObservationReseauHydrauliqueFerme.class, observationFields, true, 0);
-        writeSubDataset(ObjetReseau.class, reseauFermeFields, true, 1);
+        writeSubDataset(ReseauHydrauliqueFerme.class, reseauFermeFields, true, 1);
         writeSubDataset(JRDesordreTableRow.class, desordreFields, true, 2);
         
         // Sets the initial fields used by the template.------------------------

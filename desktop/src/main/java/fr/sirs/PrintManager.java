@@ -435,11 +435,12 @@ public class PrintManager {
         observationFields.add(new JRColumnParameter("suite", 2.5f));
 
         final List<JRColumnParameter> reseauFields = new ArrayList<>();
-        reseauFields.add(new JRColumnParameter("designation"));
-        reseauFields.add(new JRColumnParameter("libelle"));
+        reseauFields.add(new JRColumnParameter("typeConduiteFermeeId", 2.3f, true));
+        reseauFields.add(new JRColumnParameter("designation", .9f));
+        reseauFields.add(new JRColumnParameter("libelle", .9f));
         reseauFields.add(new JRColumnParameter("date_debut"));
         reseauFields.add(new JRColumnParameter("date_fin"));
-        reseauFields.add(new JRColumnParameter("commentaire", 2.f));
+        reseauFields.add(new JRColumnParameter("commentaire", 2.6f));
         
         final List<JRColumnParameter> desordreFields = new ArrayList<>();
         desordreFields.add(new JRColumnParameter("observationDate", true));
