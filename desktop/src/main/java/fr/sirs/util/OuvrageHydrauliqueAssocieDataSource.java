@@ -24,20 +24,16 @@ import fr.sirs.core.component.DesordreRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Digue;
-import fr.sirs.core.model.ObjetReseau;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.ObservationOuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.ObservationReseauHydrauliqueFerme;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.Photo;
-import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
-import fr.sirs.core.model.StationPompage;
 import fr.sirs.core.model.TronconDigue;
-import static fr.sirs.util.JRDomWriterReseauFermeSheet.DESORDRE_TABLE_DATA_SOURCE;
-import static fr.sirs.util.JRDomWriterReseauFermeSheet.OBSERVATION_TABLE_DATA_SOURCE;
-import static fr.sirs.util.JRDomWriterReseauFermeSheet.PHOTO_DATA_SOURCE;
-import static fr.sirs.util.JRDomWriterReseauFermeSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.RESEAU_FERME_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.DESORDRE_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OBSERVATION_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.PHOTO_DATA_SOURCE;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -129,7 +125,7 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
             observations.sort(OBSERVATION_COMPARATOR);
             return new ObjectDataSource<>(observations, previewRepository, stringConverter);
         }
-        else if(RESEAU_OUVRAGE_TABLE_DATA_SOURCE.equals(name)){
+        else if(RESEAU_FERME_TABLE_DATA_SOURCE.equals(name)){
 
             final List<ReseauHydrauliqueFerme> reseauOuvrageList = Injector.getSession().getRepositoryForClass(ReseauHydrauliqueFerme.class).get(currentObject.getReseauHydrauliqueFermeIds());
             

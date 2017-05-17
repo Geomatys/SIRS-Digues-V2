@@ -114,7 +114,7 @@ public class PrinterUtilities {
         try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateOuvrageAssocie.jrxml");
                 final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplateOuvrageAssocie.jrxml")){
             
-            final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(metaTemplateStream,
+            final JRDomWriterOuvrageAssocieSheet templateWriter = new JRDomWriterOuvrageAssocieSheet(metaTemplateStream,
                     avoidReseauFields, observationFields, reseauFields, desordreFields, printPhoto, printReseauFerme);
             templateWriter.setOutput(templateFile);
             templateWriter.write();
