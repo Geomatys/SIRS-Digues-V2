@@ -20,7 +20,6 @@ package fr.sirs.util;
 
 import fr.sirs.Injector;
 import static fr.sirs.core.SirsCore.DIGUE_ID_FIELD;
-import fr.sirs.core.component.DesordreRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Digue;
@@ -35,6 +34,8 @@ import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.DESORDRE_TABLE_DATA_SO
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.LENGTH_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.PHOTO_DATA_SOURCE;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,6 +43,8 @@ import java.util.List;
 import javafx.collections.ObservableList;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
+import org.apache.sis.measure.Units;
+import org.geotoolkit.display.MeasureUtilities;
 
 /**
  * Source de données de remplissage des fiches de réseaux hydrauliques fermés.
@@ -49,6 +52,8 @@ import net.sf.jasperreports.engine.JRField;
  * @author Samuel Andrés (Geomatys)
  */
 public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<OuvrageHydrauliqueAssocie> {
+    
+    private static final NumberFormat DISTANCE_FORMAT = new DecimalFormat("0.00");
     
     /**
      * Groupe par désignation de désordre et classe par date décroissante à l'intérieur de chaque groupe.
@@ -109,7 +114,8 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
             return null;
         }
         else if(LENGTH_FIELD.equals(name)){
-            return -1.f;
+            return DISTANCE_FORMAT.format(MeasureUtilities.calculateLenght(currentObject.getGeometry(),
+                                Injector.getSession().getProjection(), Units.METRE));
         }
         else if(PHOTO_DATA_SOURCE.equals(name)){
             final List<Photo> photos = new ArrayList<>();

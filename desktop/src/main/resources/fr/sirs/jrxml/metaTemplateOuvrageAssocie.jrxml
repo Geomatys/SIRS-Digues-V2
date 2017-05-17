@@ -404,7 +404,7 @@
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{ouvrage_hydraulique_associe_length}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{ouvrage_hydraulique_associe_length}+" m"]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>
