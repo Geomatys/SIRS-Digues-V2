@@ -322,6 +322,9 @@ public class Session extends SessionCore {
                 case RESEAU_FERME:
                     tab.setContent(new FXReseauFermePrintPane());
                     break;
+                case OUVRAGE_ASSOCIE:
+                    tab.setContent(new FXOuvrageAssociePrintPane());
+                    break;
                 case TEMPLATE:
                     tab.setContent(new ModeleElementTable());
                     break;
