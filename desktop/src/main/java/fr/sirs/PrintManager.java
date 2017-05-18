@@ -379,6 +379,7 @@ public class PrintManager {
         desordreFields.add(new JRColumnParameter("desordreDesignation", .7f));
         desordreFields.add(new JRColumnParameter("observationUrgence", .7f,  JRColumnParameter.DisplayPolicy.REFERENCE_CODE));
         desordreFields.add(new JRColumnParameter("desordreDescription", 2.5f));
+        desordreFields.add(new JRColumnParameter("desordreEnded", .4f));
 
         final File fileToPrint = PrinterUtilities.printReseauFerme(avoidReseauFields,
                 observationFields,
