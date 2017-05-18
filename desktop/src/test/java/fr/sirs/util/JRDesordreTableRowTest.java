@@ -20,6 +20,7 @@ package fr.sirs.util;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -28,7 +29,7 @@ import org.junit.Test;
  *
  * @author Samuel Andrés (Geomatys) <samuel.andres at geomatys.com>
  */
-public class ReseauHydrauliqueFermeDataSourceTest {
+public class JRDesordreTableRowTest {
     
     @Test
     public void test_observationComparator(){
@@ -103,7 +104,7 @@ public class ReseauHydrauliqueFermeDataSourceTest {
         final JRDesordreTableRow oB1 = new JRDesordreTableRow(LocalDate.now(), "d2", "", "", "");
         obs.add(oB1);
         
-        obs.sort(ReseauHydrauliqueFermeDataSource.DESORDRE_RESEAU_DATE_COMPARATOR);
+        Collections.sort(obs);
         
         assertTrue(obs.indexOf(oB4)==0 || obs.indexOf(oB4)==1);
         assertTrue(obs.indexOf(oA4)==0 || obs.indexOf(oA4)==1);

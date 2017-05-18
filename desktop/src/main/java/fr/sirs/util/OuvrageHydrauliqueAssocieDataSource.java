@@ -41,10 +41,10 @@ import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.MANAGER_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OBSERVATION_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OWNER_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.PHOTO_DATA_SOURCE;
-import static fr.sirs.util.ReseauHydrauliqueFermeDataSource.DESORDRE_RESEAU_DATE_COMPARATOR;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javafx.collections.ObservableList;
 import net.sf.jasperreports.engine.JRException;
@@ -197,7 +197,7 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
                     }
                 }
             }
-            desordreRows.sort(DESORDRE_RESEAU_DATE_COMPARATOR);
+            Collections.sort(desordreRows);
             return new ObjectDataSource<>(desordreRows, previewRepository, stringConverter);
         }
         else return super.getFieldValue(jrf);

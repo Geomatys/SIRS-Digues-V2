@@ -38,6 +38,7 @@ import static fr.sirs.util.JRDomWriterReseauFermeSheet.PHOTO_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterReseauFermeSheet.RESEAU_OUVRAGE_TABLE_DATA_SOURCE;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import javafx.collections.ObservableList;
@@ -69,18 +70,6 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
             else if(date1==null || date2==null) return (date1==null) ? 1 : -1;
             else return -date1.compareTo(date2); // Par date décroissante : la plus récente en tête.
         }
-    };
-    
-    /**
-     * Compare par date de "désordre" (lesquels sont en réalité des hybrides entre des désordres et des observations.
-     * Demande SYM-1496, commentaire de Jordan Perrin du 21 mars 2017.
-     */
-    static final Comparator<JRDesordreTableRow> DESORDRE_RESEAU_DATE_COMPARATOR = (JRDesordreTableRow d1, JRDesordreTableRow d2)->{
-        final LocalDate date1 = d1.getObservationDate();
-        final LocalDate date2 = d2.getObservationDate();
-        if(date1==null && date2==null) return 0;
-        else if(date1==null || date2==null) return (date1==null) ? 1 : -1;
-        else return -date1.compareTo(date2); // Par date décroissante : la plus récente en tête.
     };
 
     public ReseauHydrauliqueFermeDataSource(Iterable<ReseauHydrauliqueFerme> iterable) {
@@ -154,7 +143,7 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
                     }
                 }
             }
-            desordreRows.sort(DESORDRE_RESEAU_DATE_COMPARATOR);
+            Collections.sort(desordreRows);
             return new ObjectDataSource<>(desordreRows, previewRepository, stringConverter);
         }
         else return super.getFieldValue(jrf);

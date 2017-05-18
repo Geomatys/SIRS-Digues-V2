@@ -27,7 +27,7 @@ import java.time.LocalDate;
  * 
  * @author Samuel Andrés (Geomatys) <samuel.andres at geomatys.com>
  */
-public class JRDesordreTableRow {
+public class JRDesordreTableRow implements Comparable<JRDesordreTableRow> {
     
     private LocalDate observationDate;
     private String desordreDesignation;
@@ -83,6 +83,15 @@ public class JRDesordreTableRow {
 
     public void setDesordreDescription(String desordreDescription) {
         this.desordreDescription = desordreDescription;
+    }
+
+    @Override
+    public int compareTo(JRDesordreTableRow other) {
+        final LocalDate date1 = this.getObservationDate();
+        final LocalDate date2 = other.getObservationDate();
+        if(date1==null && date2==null) return 0;
+        else if(date1==null || date2==null) return (date1==null) ? 1 : -1;
+        else return -date1.compareTo(date2); // Par date décroissante : la plus récente en tête.
     }
     
 }
