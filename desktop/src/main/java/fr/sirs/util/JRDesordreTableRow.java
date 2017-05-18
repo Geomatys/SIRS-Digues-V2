@@ -34,14 +34,16 @@ public class JRDesordreTableRow implements Comparable<JRDesordreTableRow> {
     private String observationDesignation;
     private String observationUrgence;
     private String desordreDescription;
+    private boolean desordreEnded;
     
     public JRDesordreTableRow(final LocalDate observationDate, final String desordreDesignation, final String observationDesignation, 
-            final String observationUrgence, final String desordreDescription){
+            final String observationUrgence, final String desordreDescription, final boolean desordreEnded){
         this.observationDate = observationDate;
         this.desordreDesignation = desordreDesignation;
         this.observationDesignation = observationDesignation;
         this.observationUrgence = observationUrgence;
         this.desordreDescription = desordreDescription;
+        this.desordreEnded = desordreEnded;
     }
     
     public void setDesordreDesignation(final String desordreDesignation){
@@ -83,6 +85,14 @@ public class JRDesordreTableRow implements Comparable<JRDesordreTableRow> {
 
     public void setDesordreDescription(String desordreDescription) {
         this.desordreDescription = desordreDescription;
+    }
+    
+    public boolean getDesordreEnded(){
+        return desordreEnded;
+    }
+    
+    public void setDesordreEnded(boolean desordreEnded){
+        this.desordreEnded = desordreEnded;
     }
 
     @Override

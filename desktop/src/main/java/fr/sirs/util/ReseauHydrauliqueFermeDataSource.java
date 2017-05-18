@@ -139,7 +139,7 @@ public class ReseauHydrauliqueFermeDataSource extends ObjectDataSource<ReseauHyd
                 if(des.getReseauHydrauliqueFermeIds().contains(currentObject.getId())){
                     final List<Observation> observations = des.getObservations();
                     for(final Observation obs : observations){
-                        desordreRows.add(new JRDesordreTableRow(obs.getDate(), des.getDesignation(), obs.getDesignation(), obs.getUrgenceId(), des.getCommentaire()));
+                        desordreRows.add(new JRDesordreTableRow(obs.getDate(), des.getDesignation(), obs.getDesignation(), obs.getUrgenceId(), des.getCommentaire(), des.getDate_fin()!=null));
                     }
                 }
             }

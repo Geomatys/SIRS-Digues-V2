@@ -193,7 +193,7 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
                 if(des.getOuvrageHydrauliqueAssocieIds().contains(currentObject.getId())){
                     final List<Observation> observations = des.getObservations();
                     for(final Observation obs : observations){
-                        desordreRows.add(new JRDesordreTableRow(obs.getDate(), des.getDesignation(), obs.getDesignation(), obs.getUrgenceId(), des.getCommentaire()));
+                        desordreRows.add(new JRDesordreTableRow(obs.getDate(), des.getDesignation(), obs.getDesignation(), obs.getUrgenceId(), des.getCommentaire(), des.getDate_fin()!=null));
                     }
                 }
             }

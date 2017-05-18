@@ -34,29 +34,29 @@ public class JRDesordreTableRowTest {
     @Test
     public void test_observationComparator(){
         final List<JRDesordreTableRow> obs = new ArrayList<>();
-        final JRDesordreTableRow oB2 = new JRDesordreTableRow(LocalDate.now().minusDays(1), "d2", "", "", "");
+        final JRDesordreTableRow oB2 = new JRDesordreTableRow(LocalDate.now().minusDays(1), "d2", "", "", "", false);
         obs.add(oB2);
-        final JRDesordreTableRow oA01 = new JRDesordreTableRow(null, "d1", "", "", "");
+        final JRDesordreTableRow oA01 = new JRDesordreTableRow(null, "d1", "", "", "", false);
         obs.add(oA01);
-        final JRDesordreTableRow oA1 = new JRDesordreTableRow(LocalDate.now(), "d1", "", "", "");
+        final JRDesordreTableRow oA1 = new JRDesordreTableRow(LocalDate.now(), "d1", "", "", "", false);
         obs.add(oA1);
-        final JRDesordreTableRow oB01 = new JRDesordreTableRow(null, "d2", "", "", "");
+        final JRDesordreTableRow oB01 = new JRDesordreTableRow(null, "d2", "", "", "", false);
         obs.add(oB01);
-        final JRDesordreTableRow oB02 = new JRDesordreTableRow(null, "d2", "", "", "");
+        final JRDesordreTableRow oB02 = new JRDesordreTableRow(null, "d2", "", "", "", false);
         obs.add(oB02);
-        final JRDesordreTableRow oA4 = new JRDesordreTableRow(LocalDate.now().plusDays(2), "d1", "", "", "");
+        final JRDesordreTableRow oA4 = new JRDesordreTableRow(LocalDate.now().plusDays(2), "d1", "", "", "", false);
         obs.add(oA4);
-        final JRDesordreTableRow oA02 = new JRDesordreTableRow(null, "d1", "", "", "");
+        final JRDesordreTableRow oA02 = new JRDesordreTableRow(null, "d1", "", "", "", false);
         obs.add(oA02);
-        final JRDesordreTableRow oA2 = new JRDesordreTableRow(LocalDate.now().minusDays(1), "d1", "", "", "");
+        final JRDesordreTableRow oA2 = new JRDesordreTableRow(LocalDate.now().minusDays(1), "d1", "", "", "", false);
         obs.add(oA2);
-        final JRDesordreTableRow oB3 = new JRDesordreTableRow(LocalDate.now().plusDays(1), "d2", "", "", "");
+        final JRDesordreTableRow oB3 = new JRDesordreTableRow(LocalDate.now().plusDays(1), "d2", "", "", "", false);
         obs.add(oB3);
-        final JRDesordreTableRow oA3 = new JRDesordreTableRow(LocalDate.now().plusDays(1), "d1", "", "", "");
+        final JRDesordreTableRow oA3 = new JRDesordreTableRow(LocalDate.now().plusDays(1), "d1", "", "", "", false);
         obs.add(oA3);
-        final JRDesordreTableRow oB4 = new JRDesordreTableRow(LocalDate.now().plusDays(2), "d2", "", "", "");
+        final JRDesordreTableRow oB4 = new JRDesordreTableRow(LocalDate.now().plusDays(2), "d2", "", "", "", false);
         obs.add(oB4);
-        final JRDesordreTableRow oB1 = new JRDesordreTableRow(LocalDate.now(), "d2", "", "", "");
+        final JRDesordreTableRow oB1 = new JRDesordreTableRow(LocalDate.now(), "d2", "", "", "", false);
         obs.add(oB1);
         
         obs.sort(ReseauHydrauliqueFermeDataSource.DESORDRE_RESEAU_COMPARATOR);
@@ -79,29 +79,29 @@ public class JRDesordreTableRowTest {
     @Test
     public void test_observationDateComparator(){
         final List<JRDesordreTableRow> obs = new ArrayList<>();
-        final JRDesordreTableRow oB2 = new JRDesordreTableRow(LocalDate.now().minusDays(1), "d2", "", "", "");
+        final JRDesordreTableRow oB2 = new JRDesordreTableRow(LocalDate.now().minusDays(1), "d2", "", "", "", false);
         obs.add(oB2);
-        final JRDesordreTableRow oA01 = new JRDesordreTableRow(null, "d1", "", "", "");
+        final JRDesordreTableRow oA01 = new JRDesordreTableRow(null, "d1", "", "", "", false);
         obs.add(oA01);
-        final JRDesordreTableRow oA1 = new JRDesordreTableRow(LocalDate.now(), "d1", "", "", "");
+        final JRDesordreTableRow oA1 = new JRDesordreTableRow(LocalDate.now(), "d1", "", "", "", false);
         obs.add(oA1);
-        final JRDesordreTableRow oB01 = new JRDesordreTableRow(null, "d2", "", "", "");
+        final JRDesordreTableRow oB01 = new JRDesordreTableRow(null, "d2", "", "", "", false);
         obs.add(oB01);
-        final JRDesordreTableRow oB02 = new JRDesordreTableRow(null, "d2", "", "", "");
+        final JRDesordreTableRow oB02 = new JRDesordreTableRow(null, "d2", "", "", "", false);
         obs.add(oB02);
-        final JRDesordreTableRow oA4 = new JRDesordreTableRow(LocalDate.now().plusDays(2), "d1", "", "", "");
+        final JRDesordreTableRow oA4 = new JRDesordreTableRow(LocalDate.now().plusDays(2), "d1", "", "", "", false);
         obs.add(oA4);
-        final JRDesordreTableRow oA02 = new JRDesordreTableRow(null, "d1", "", "", "");
+        final JRDesordreTableRow oA02 = new JRDesordreTableRow(null, "d1", "", "", "", false);
         obs.add(oA02);
-        final JRDesordreTableRow oA2 = new JRDesordreTableRow(LocalDate.now().minusDays(1), "d1", "", "", "");
+        final JRDesordreTableRow oA2 = new JRDesordreTableRow(LocalDate.now().minusDays(1), "d1", "", "", "", false);
         obs.add(oA2);
-        final JRDesordreTableRow oB3 = new JRDesordreTableRow(LocalDate.now().plusDays(1), "d2", "", "", "");
+        final JRDesordreTableRow oB3 = new JRDesordreTableRow(LocalDate.now().plusDays(1), "d2", "", "", "", false);
         obs.add(oB3);
-        final JRDesordreTableRow oA3 = new JRDesordreTableRow(LocalDate.now().plusDays(1), "d1", "", "", "");
+        final JRDesordreTableRow oA3 = new JRDesordreTableRow(LocalDate.now().plusDays(1), "d1", "", "", "", false);
         obs.add(oA3);
-        final JRDesordreTableRow oB4 = new JRDesordreTableRow(LocalDate.now().plusDays(2), "d2", "", "", "");
+        final JRDesordreTableRow oB4 = new JRDesordreTableRow(LocalDate.now().plusDays(2), "d2", "", "", "", false);
         obs.add(oB4);
-        final JRDesordreTableRow oB1 = new JRDesordreTableRow(LocalDate.now(), "d2", "", "", "");
+        final JRDesordreTableRow oB1 = new JRDesordreTableRow(LocalDate.now(), "d2", "", "", "", false);
         obs.add(oB1);
         
         Collections.sort(obs);
