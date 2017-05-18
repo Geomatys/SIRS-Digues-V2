@@ -21,24 +21,30 @@ package fr.sirs.util;
 import fr.sirs.Injector;
 import static fr.sirs.core.SirsCore.DIGUE_ID_FIELD;
 import fr.sirs.core.component.Previews;
+import fr.sirs.core.model.Contact;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.GestionObjet;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.ObservationOuvrageHydrauliqueAssocie;
+import fr.sirs.core.model.Organisme;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.Photo;
+import fr.sirs.core.model.ProprieteObjet;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.TronconDigue;
+import static fr.sirs.util.AbstractJDomWriter.NULL_REPLACEMENT;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.RESEAU_FERME_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.DESORDRE_TABLE_DATA_SOURCE;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.LENGTH_FIELD;
+import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.MANAGER_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OBSERVATION_TABLE_DATA_SOURCE;
+import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.OWNER_FIELD;
 import static fr.sirs.util.JRDomWriterOuvrageAssocieSheet.PHOTO_DATA_SOURCE;
+import static fr.sirs.util.ReseauHydrauliqueFermeDataSource.DESORDRE_RESEAU_DATE_COMPARATOR;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import javafx.collections.ObservableList;
 import net.sf.jasperreports.engine.JRException;
@@ -55,37 +61,6 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
     
     private static final NumberFormat DISTANCE_FORMAT = new DecimalFormat("0.00");
     
-    /**
-     * Groupe par désignation de désordre et classe par date décroissante à l'intérieur de chaque groupe.
-     * Inutilisé (était utilisé pour ordonner les lignes du tableau des observations/désordres).
-     */
-    static final Comparator<JRDesordreTableRow> DESORDRE_RESEAU_COMPARATOR = (JRDesordreTableRow d1, JRDesordreTableRow d2)->{
-        final LocalDate date1 = d1.getObservationDate();
-        final String des1 = d1.getDesordreDesignation();
-        final LocalDate date2 = d2.getObservationDate();
-        final String des2 = d2.getDesordreDesignation();
-        if(des1==null && des2==null) return 0;
-        else if(des1==null || des2==null) return (des1==null) ? -2 : 2; // On regroupe par désignation de désordre.
-        else {
-            final int compareTo = des1.compareTo(des2);
-            if (compareTo!=0) return compareTo;
-            else if(date1==null && date2==null) return 0;
-            else if(date1==null || date2==null) return (date1==null) ? 1 : -1;
-            else return -date1.compareTo(date2); // Par date décroissante : la plus récente en tête.
-        }
-    };
-    
-    /**
-     * Compare par date de "désordre" (lesquels sont en réalité des hybrides entre des désordres et des observations.
-     * Demande SYM-1496, commentaire de Jordan Perrin du 21 mars 2017.
-     */
-    static final Comparator<JRDesordreTableRow> DESORDRE_RESEAU_DATE_COMPARATOR = (JRDesordreTableRow d1, JRDesordreTableRow d2)->{
-        final LocalDate date1 = d1.getObservationDate();
-        final LocalDate date2 = d2.getObservationDate();
-        if(date1==null && date2==null) return 0;
-        else if(date1==null || date2==null) return (date1==null) ? 1 : -1;
-        else return -date1.compareTo(date2); // Par date décroissante : la plus récente en tête.
-    };
 
     public OuvrageHydrauliqueAssocieDataSource(Iterable<OuvrageHydrauliqueAssocie> iterable) {
         super(iterable);
@@ -116,6 +91,76 @@ public class OuvrageHydrauliqueAssocieDataSource extends ObjectDataSource<Ouvrag
         else if(LENGTH_FIELD.equals(name)){
             return DISTANCE_FORMAT.format(MeasureUtilities.calculateLenght(currentObject.getGeometry(),
                                 Injector.getSession().getProjection(), Units.METRE));
+        }
+        else if(MANAGER_FIELD.equals(name)){
+            
+            // Recherche d'une période de gestion actuelle.
+            GestionObjet todayManagemnt = null;
+            final ObservableList<GestionObjet> objectManagemnts = currentObject.getGestions();
+            if(objectManagemnts!=null){
+                for(final GestionObjet currentManagemnt : objectManagemnts){
+                    if(currentManagemnt.getDate_fin()==null // Pour être une potentielle période de gestion actuelle, la période de gestion courante ne doit pas avoir de date de fin. 
+                            && (todayManagemnt==null // Si aucune période potentielle de gestion actuelle n'a été affectée, on affecte la période courante d'office.
+                            || (todayManagemnt.getDate_debut()==null && currentManagemnt.getDate_debut()!=null) // Si on a affecté une période de gestion sans date de début, on la remplace dès qu'on trouve une période de gestion qui en a une (de manière à pouvoir l'utiliser pour comparer).
+                            || (todayManagemnt.getDate_debut()!=null && currentManagemnt.getDate_debut()!=null 
+                                    && todayManagemnt.getDate_debut().isAfter(todayManagemnt.getDate_debut())) // Sinon, on compare les dates de début si possible pour affecter la période la plus récente.
+                            )){
+                        todayManagemnt = currentManagemnt;
+                    }
+                }
+            }
+            
+            // Si une période de gestion actuelle a été détectée, on recherche le nom de l'organisme correspondant.
+            if(todayManagemnt!=null && todayManagemnt.getOrganismeId()!=null){
+                final Organisme organisme = Injector.getSession().getRepositoryForClass(Organisme.class).get(todayManagemnt.getOrganismeId());
+                if(organisme!=null && organisme.getNom()!=null){
+                    return organisme.getNom();
+                }
+            }
+            return NULL_REPLACEMENT;
+        }
+        else if(OWNER_FIELD.equals(name)){
+            
+            // Recherche d'une période de propriété actuelle.
+            ProprieteObjet todayProperty = null;
+            final ObservableList<ProprieteObjet> objectProperties = currentObject.getProprietes();
+            if(objectProperties!=null){
+                for(final ProprieteObjet currentProperty : objectProperties){
+                    if(currentProperty.getDate_fin()==null // Pour être une potentielle période de propriété actuelle, la période de propriété courante ne doit pas avoir de date de fin. 
+                            && (todayProperty==null // Si aucune période potentielle de propriété actuelle n'a été affectée, on affecte la période courante d'office.
+                            || (todayProperty.getDate_debut()==null && currentProperty.getDate_debut()!=null) // Si on a affecté une période de propriété sans date de début, on la remplace dès qu'on trouve une période de propriété qui en a une (de manière à pouvoir l'utiliser pour comparer).
+                            || (todayProperty.getDate_debut()!=null && currentProperty.getDate_debut()!=null 
+                                    && todayProperty.getDate_debut().isAfter(todayProperty.getDate_debut())) // Sinon, on compare les dates de début si possible pour affecter la période la plus récente.
+                            )){
+                        todayProperty = currentProperty;
+                    }
+                }
+            }
+            
+            // Si une période de propriété actuelle a été détectée, on recherche le nom de l'organisme ou du contact correspondant.
+            if(todayProperty!=null){
+                if(todayProperty.getOrganismeId()!=null){
+                    final Organisme organisme = Injector.getSession().getRepositoryForClass(Organisme.class).get(todayProperty.getOrganismeId());
+                    if(organisme!=null && organisme.getNom()!=null){
+                        return organisme.getNom();
+                    }
+                }
+                else if(todayProperty.getContactId()!=null){
+                    final Contact contact = Injector.getSession().getRepositoryForClass(Contact.class).get(todayProperty.getContactId());
+                    if(contact!=null){
+                        String result = "";
+                        if(contact.getPrenom()!=null){
+                            result+=contact.getPrenom();
+                        }
+                        if(contact.getNom()!=null){
+                            if(!result.isEmpty()) result+=" "; 
+                            result+=contact.getNom();
+                        }
+                        if(!result.isEmpty()) return result;
+                    }
+                }
+            }
+            return NULL_REPLACEMENT;
         }
         else if(PHOTO_DATA_SOURCE.equals(name)){
             final List<Photo> photos = new ArrayList<>();

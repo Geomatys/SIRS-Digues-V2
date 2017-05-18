@@ -160,28 +160,28 @@
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font fontName="Serif" size="8" isBold="true"/>
 					</textElement>
-					<text><![CDATA[Diamètre (mm)]]></text>
+					<text><![CDATA[Gestionnaire]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
 					<reportElement positionType="Float" x="230" y="0" width="100" height="12" uuid="03d7cc2a-93c3-44da-8bda-a6e22c997ff2"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[" - "]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{ouvrage_hydraulique_associe_manager}]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement positionType="Float" x="330" y="0" width="100" height="12" uuid="b1da5310-7da5-4a2a-8d9d-3689b5ad86ea"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font fontName="Serif" size="8" isBold="true"/>
 					</textElement>
-					<text><![CDATA[Autorisé]]></text>
+					<text><![CDATA[Propriétaire]]></text>
 				</staticText>
 				<textField isStretchWithOverflow="true">
 					<reportElement positionType="Float" x="430" y="0" width="100" height="12" uuid="8d9d6fc2-d4e8-497e-a20e-f70310e0b6ba"/>
 					<textElement textAlignment="Justified" verticalAlignment="Middle">
 						<font fontName="Serif" size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[" - "]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{ouvrage_hydraulique_associe_owner}]]></textFieldExpression>
 				</textField>
 			</frame>
 			<frame>

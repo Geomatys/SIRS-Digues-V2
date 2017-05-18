@@ -20,7 +20,6 @@ package fr.sirs.util;
 
 import fr.sirs.Injector;
 import static fr.sirs.core.SirsCore.DIGUE_ID_FIELD;
-import fr.sirs.core.component.DesordreRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Digue;

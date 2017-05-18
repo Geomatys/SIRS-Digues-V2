@@ -51,6 +51,8 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
     public static final String PHOTOS_SUBREPORT = "PHOTO_SUBREPORT";
 
     public static final String LENGTH_FIELD = "ouvrage_hydraulique_associe_length";
+    public static final String MANAGER_FIELD = "ouvrage_hydraulique_associe_manager";
+    public static final String OWNER_FIELD = "ouvrage_hydraulique_associe_owner";
     
     private final List<JRColumnParameter> observationFields;
     private final List<JRColumnParameter> reseauFermeFields;
@@ -99,6 +101,8 @@ public class JRDomWriterOuvrageAssocieSheet extends AbstractJDomWriterSingleSpec
         writeFields();
         writeField(String.class, SirsCore.DIGUE_ID_FIELD, "Champ ajouté de force pour prendre en compte l'intitulé de la digue.");// Ajout d'un champ pour l'intitulé de la digue.
         writeField(String.class, LENGTH_FIELD, "Champ calculé pour la longueur de l'ouvrage hydraulique associé.");
+        writeField(String.class, MANAGER_FIELD, "Champ calculé pour le gestionnaire de l'ouvrage hydraulique associé.");
+        writeField(String.class, OWNER_FIELD, "Champ calculé pour le propriétaire de l'ouvrage hydraulique associé.");
         if(printPhoto) writeField(ObjectDataSource.class, PHOTO_DATA_SOURCE, "Source de données des photos");
         writeField(ObjectDataSource.class, OBSERVATION_TABLE_DATA_SOURCE, "Source de données des observations");
         if(printReseauFerme) writeField(ObjectDataSource.class, RESEAU_FERME_TABLE_DATA_SOURCE, "Source de données des réseaux fermés");
