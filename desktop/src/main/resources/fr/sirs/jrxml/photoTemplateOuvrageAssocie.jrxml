@@ -122,7 +122,7 @@
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" mode="Opaque" x="230" y="48" width="325" height="12" backcolor="#D6D8BC" uuid="0e5f620d-ae56-4464-a0d2-b9d3ac85412b"/>
+				<reportElement positionType="Float" mode="Opaque" x="230" y="48" width="325" height="12" backcolor="#D6E3BC" uuid="0e5f620d-ae56-4464-a0d2-b9d3ac85412b"/>
 				<staticText>
 					<reportElement x="0" y="0" width="70" height="12" uuid="a403b664-3480-4251-a3bd-b762bafe0375"/>
 					<textElement verticalAlignment="Middle">
