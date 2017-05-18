@@ -34,7 +34,7 @@ public class JRDesordreTableRow implements Comparable<JRDesordreTableRow> {
     private String observationDesignation;
     private String observationUrgence;
     private String desordreDescription;
-    private boolean desordreEnded;
+    private boolean desordreEnded; // Information sur le traitement du désordre, déduite de la présence d'une date de fin dans le cas d'un désordre traité (spécifié par Jordan Perrin dans la demande SYM-1613 du 18/05/2017 à 10:02). 
     
     public JRDesordreTableRow(final LocalDate observationDate, final String desordreDesignation, final String observationDesignation, 
             final String observationUrgence, final String desordreDescription, final boolean desordreEnded){
