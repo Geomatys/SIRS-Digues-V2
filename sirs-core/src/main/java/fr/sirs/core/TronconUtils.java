@@ -141,6 +141,49 @@ public class TronconUtils {
 
         return tdCopy;
     }
+    
+    /**
+     * Méthode d'archivage des tronçons de digue et des objets s'y référant dotés d'une validité temporelle (c'est à dire
+     * implémentant l'interface {@link AvecBornesTemporelles}).
+     * 
+     * La procédure d'achivage consiste à affecter une date de fin au tronçon de digue et aux objets archivables qui s'y 
+     * réfèrent, à condition qu'ils n'aient pas déjà une date de fin ou que cette date de fin soit postérieure à la date
+     * d'archivage.
+     * 
+     * Cette méthode est implémentée ici de manière à ce que le code d'archivage puisse être capitalisé au fur et à mesure.
+     * 
+     * @param section 
+     * @param session 
+     * @param archiveDate 
+     */
+    public static void archiveSectionWithTemporalObjects(final TronconDigue section, final SessionCore session, final LocalDate archiveDate){
+        
+        section.date_finProperty().set(archiveDate);
+        session.getRepositoryForClass(TronconDigue.class).update(section);
+
+        final Collection toSave = new ArrayList<>();
+        for (final Positionable obj : TronconUtils.getPositionableList(section)) {
+            if (((Element)obj).getParent() != null)
+                continue;
+
+            if (obj instanceof AvecBornesTemporelles) {
+                final AvecBornesTemporelles dated = (AvecBornesTemporelles) obj;
+                
+                /* On n'affecte une date de fin qu'aux objets qui n'en on pas déjà une SAUF si cette dernière est 
+                 * postérieure à la date d'archivage. Cette condition provient du code initial récupéré de la fusion de
+                 * tronçons, avec une date d'archivage fixée à la veille de la date à laquelle est réalisée la fusion.
+                 * Mais quelle est la raison pratique de cette condition… ? Difficile à dire.
+                 */
+                if (dated.getDate_fin() == null 
+                        || dated.getDate_fin().isAfter(archiveDate)){
+                    dated.setDate_fin(archiveDate);
+                    toSave.add(dated);
+                }
+            }
+        }
+
+        session.executeBulk(toSave);
+    }
 
     /**
      * Crée une copie du tronçon en entrée, dont la géométrie se limite à la polyligne donnée.
