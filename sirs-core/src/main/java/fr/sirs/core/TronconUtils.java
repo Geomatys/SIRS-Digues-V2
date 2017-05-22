@@ -88,6 +88,12 @@ public class TronconUtils {
     public static final String SR_ELEMENTAIRE = "Elémentaire";
 
     private static final GeometryFactory GF = GO2Utilities.JTS_FACTORY;
+    
+    //==================================================================================================================
+    // UTILITAIRES DU CONTRÔLE DE L'ARCHIVAGE DES TRONÇONS ET DES OBJETS QUI LES RÉFÉRENCENT.
+    //==================================================================================================================
+    
+    public enum ArchiveMode {UNCHANGED, ARCHIVE, UNARCHIVE, UPDATE_ARCHIVE}
 
     /**
      * Copy a {@link TronconDigue} and all bound data, i.e linear referencing
@@ -158,7 +164,7 @@ public class TronconUtils {
      */
     public static void archiveSectionWithTemporalObjects(final TronconDigue section, final SessionCore session, final LocalDate archiveDate){
         
-        section.date_finProperty().set(archiveDate);
+        section.setDate_fin(archiveDate);
         session.getRepositoryForClass(TronconDigue.class).update(section);
 
         final Collection toSave = new ArrayList<>();
@@ -184,6 +190,78 @@ public class TronconUtils {
 
         session.executeBulk(toSave);
     }
+    
+    /**
+     * Méthode de mise à jour de l'archivage d'un tronçon avec les objets qui le référencent.
+     * 
+     * D'après la demande explicite de Jordan Perrin (SYM-1444), les objets dont la date de fin est identique à l'ancienne
+     * date d'archivage du tronçon, voient alors leur nouvelle date de fin modifiée de manière à suivre celle du tronçon
+     * (voir commentaire du 22/05/2017 15:10).
+     * 
+     * @param section
+     * @param session
+     * @param oldArchiveDate
+     * @param archiveDate 
+     */
+    public static void updateArchiveSectionWithTemporalObjects(final TronconDigue section, final SessionCore session, 
+            final LocalDate oldArchiveDate, final LocalDate archiveDate){
+        
+        section.setDate_fin(archiveDate);
+        session.getRepositoryForClass(TronconDigue.class).update(section);
+
+        final Collection toSave = new ArrayList<>();
+        for (final Positionable obj : TronconUtils.getPositionableList(section)) {
+            if (((Element)obj).getParent() != null)
+                continue;
+
+            if (obj instanceof AvecBornesTemporelles) {
+                final AvecBornesTemporelles dated = (AvecBornesTemporelles) obj;
+                
+                if (dated.getDate_fin()==null || dated.getDate_fin().isEqual(oldArchiveDate)){
+                    dated.setDate_fin(archiveDate);
+                    toSave.add(dated);
+                }
+            }
+        }
+
+        session.executeBulk(toSave);
+    }
+    
+    /**
+     * 
+     * @param section
+     * @param session 
+     * @param initialArchiveDate 
+     */
+    public static void unarchiveSectionWithTemporalObjects(final TronconDigue section, final SessionCore session, final LocalDate initialArchiveDate){
+        
+        section.setDate_fin(null);
+        session.getRepositoryForClass(TronconDigue.class).update(section);
+
+        final Collection toSave = new ArrayList<>();
+        for (final Positionable obj : TronconUtils.getPositionableList(section)) {
+            if (((Element)obj).getParent() != null)
+                continue;
+
+            if (obj instanceof AvecBornesTemporelles) {
+                final AvecBornesTemporelles dated = (AvecBornesTemporelles) obj;
+                
+                if (dated.getDate_fin() != null 
+                        && dated.getDate_fin().isEqual(initialArchiveDate)){
+                    dated.setDate_fin(null);
+                    toSave.add(dated);
+                }
+            }
+        }
+
+        session.executeBulk(toSave);
+    }
+    
+    
+    //==================================================================================================================
+    // UTILITAIRES DE DÉCOUPAGE DE TRONÇON
+    //==================================================================================================================
+    
 
     /**
      * Crée une copie du tronçon en entrée, dont la géométrie se limite à la polyligne donnée.
@@ -415,6 +493,12 @@ public class TronconUtils {
 
         return tronconCp;
     }
+    
+    
+    //==================================================================================================================
+    // UTILITAIRES DE RÉCUPÉRATION D'ENTITÉS POSITIONNÉES SUR LE TRONÇON
+    //==================================================================================================================
+    
 
     /**
      * Retrieve the list of owners  of a linear whose id is given as parameter.
@@ -513,6 +597,12 @@ public class TronconUtils {
     public static List<Positionable> getPositionableList(final String linearId) {
         return InjectorCore.getBean(SessionCore.class).getPositionableByLinearId(linearId);
     }
+    
+    
+    //==================================================================================================================
+    // UTILITAIRES DE FUSION DE TRONÇON
+    //==================================================================================================================
+    
 
     /**
      * On ajoute / copie les propriétés du second tronçon (incluant les structures) dans le premier.
