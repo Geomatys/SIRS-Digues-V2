@@ -229,6 +229,10 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
         elementProperty.set(element);
     }
 
+    /**
+     * Ici, on se contente d'appeler la méthode {@link FXElementPane#preSave() } du panneau spécifique à l'élément.
+     * @throws Exception 
+     */
     @Override
     public void preSave() throws Exception {
         if (specificThemePane != null) {

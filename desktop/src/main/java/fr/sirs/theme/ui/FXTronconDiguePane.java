@@ -21,6 +21,8 @@ package fr.sirs.theme.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
+import fr.sirs.core.TronconUtils;
+import fr.sirs.core.TronconUtils.ArchiveMode;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.Digue;
@@ -34,8 +36,10 @@ import fr.sirs.core.model.RefTypeTroncon;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.digue.FXSystemeReperagePane;
+import java.time.LocalDate;
 import java.util.List;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -90,6 +94,11 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     private final ForeignParentPojoTable<ProprieteTroncon> uiProprietesTable = new ForeignParentPojoTable<>(ProprieteTroncon.class, "Période de propriété");
     @FXML private Tab uiGardesTab;
     private final ForeignParentPojoTable<GardeTroncon> uiGardesTable = new ForeignParentPojoTable<>(GardeTroncon.class, "Période de gardiennage");
+    
+    // Booleen déterminant s'il est nécessaire de calculer l'état d'archivage du tronçon et des objets qui s'y réfèrent lors de l'enregistrement.
+    protected LocalDate initialArchiveDate;
+    protected ArchiveMode computeArchive = ArchiveMode.UNCHANGED;
+    protected final ObjectProperty<LocalDate> endProperty = new SimpleObjectProperty<>();
 
     public FXTronconDiguePane(final TronconDigue troncon) {
         SIRS.loadFXML(this, TronconDigue.class);
@@ -128,6 +137,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         // Troncon change listener
         elementProperty.addListener(this::initFields);
         setElement(troncon);
+        initialArchiveDate = troncon.getDate_fin();
 
         // Layout
         uiSrTab.setCenter(srController);
@@ -163,6 +173,31 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         uiGestionsTab.setContent(uiGestionsTable);
         uiProprietesTab.setContent(uiProprietesTable);
         uiGardesTab.setContent(uiGardesTable);
+        
+        // On surveille la date de fin du tronçon pour déterminer si l'archivage du tronçon doit être mis à jour.
+        endProperty.bind(troncon.date_finProperty());
+        endProperty.addListener(new ChangeListener<LocalDate>() {
+            @Override
+            public void changed(ObservableValue<? extends LocalDate> observable, LocalDate oldValue, LocalDate newValue) {
+                // Si le tronçon n'était pas archivé, mais le devient.
+                if(initialArchiveDate==null && newValue!=null){
+                    computeArchive = ArchiveMode.ARCHIVE;
+                }
+                // Si le tronçon était archivé et devient désarchivé.
+                else if(initialArchiveDate!=null && newValue==null){
+                    computeArchive = ArchiveMode.UNARCHIVE;
+                }
+                // À ce stade, soit les deux dates sont nulles, soit aucune des deux.
+                else if((initialArchiveDate==null && newValue==null) || initialArchiveDate.isEqual(newValue)){
+                    computeArchive = ArchiveMode.UNCHANGED;
+                }
+                // Cas du changement de date d'archivage : les deux dates diffèrent.
+                else if(initialArchiveDate!=null && newValue!=null){
+                    // Dans ce cas, la demande explicite de Jordan Perrin est de modifier l'archivage.
+                    computeArchive = ArchiveMode.UPDATE_ARCHIVE;
+                }
+            }
+        });
     }
 
     public ObjectProperty<TronconDigue> tronconProperty(){
@@ -314,9 +349,24 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             element.setSystemeRepDefautId(null);
         }
         srController.save();
+        
+        // Si on a détecté que la date d'archivage du tronçon a changé d'une manière ou d'une autre.
+        switch(computeArchive){
+            case UNARCHIVE:
+                TronconUtils.unarchiveSectionWithTemporalObjects(element, session, initialArchiveDate);
+                break;
+            case ARCHIVE:
+                TronconUtils.archiveSectionWithTemporalObjects(element, session, element.getDate_fin());
+                break;
+            case UPDATE_ARCHIVE:
+                TronconUtils.updateArchiveSectionWithTemporalObjects(element, session, initialArchiveDate, element.getDate_fin());
+        }
+        // Réinitialisation du processus d'archivage.
+        computeArchive = ArchiveMode.UNCHANGED;
+        initialArchiveDate = element.getDate_fin();
     }
 
-    private final class GestionsTable extends PojoTable{
+    private final class GestionsTable extends PojoTable {
 
         public GestionsTable() {
             super(GestionTroncon.class, "Périodes de gestion");
