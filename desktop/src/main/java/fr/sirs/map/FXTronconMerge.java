@@ -163,31 +163,9 @@ public class FXTronconMerge extends VBox {
             }
 
             // Merge succeeded, we must now archive old ones.
-            Iterator<TronconDigue> it = troncons.iterator();
+            final Iterator<TronconDigue> it = troncons.iterator();
             while (it.hasNext()) {
-                final TronconDigue current = it.next();
-                LocalDate yesterday = LocalDate.now().minusDays(1);
-                current.date_finProperty().set(yesterday);
-                tronconRepo.update(current);
-
-                final Collection toSave = new ArrayList<>();
-                for (Positionable obj : TronconUtils.getPositionableList(current)) {
-                    if (((Element)obj).getParent() != null)
-                        continue;
-
-                    if (obj instanceof AvecBornesTemporelles) {
-                        final AvecBornesTemporelles dated = (AvecBornesTemporelles) obj;
-                        if (dated.getDate_fin() != null && !dated.getDate_fin().isAfter(yesterday))
-                            continue;
-
-                        dated.setDate_fin(yesterday);
-                        toSave.add(dated);
-                    }
-                }
-
-                session.executeBulk(toSave);
-                // Remplacer par :
-                //TronconUtils.archiveSectionWithTemporalObjects(current, session, yesterday, true);
+                TronconUtils.archiveSectionWithTemporalObjects(it.next(), session, LocalDate.now().minusDays(1), true);
             }
 
             try {
