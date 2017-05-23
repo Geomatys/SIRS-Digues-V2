@@ -53,4 +53,10 @@ public interface FXElementPane<T extends Element> {
      * @throws java.lang.Exception If an error happened while updating element attributes.
      */
     void preSave() throws Exception;
+    
+    /**
+     * Action to do before removing the pane.
+     * Default : nothing.
+     */
+    default void preRemove() {}
 }

@@ -28,6 +28,7 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Role;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.AbstractFXElementPane;
+import fr.sirs.theme.ui.FXElementPane;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -101,6 +102,10 @@ public abstract class FXAbstractTronconTreePane extends SplitPane implements Doc
 
         uiTree.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
             if (newValue == null || !(newValue.getValue() instanceof Element)) {
+                final Node node = uiRight.getCenter();
+                if(node instanceof FXElementPane){
+                    ((FXElementPane)node).preRemove();
+                }
                 uiRight.setCenter(null);
             } else {
                 editElement(newValue.getValue());

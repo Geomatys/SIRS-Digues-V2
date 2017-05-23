@@ -186,6 +186,8 @@ public class FXTronconMerge extends VBox {
                 }
 
                 session.executeBulk(toSave);
+                // Remplacer par :
+                //TronconUtils.archiveSectionWithTemporalObjects(current, session, yesterday, true);
             }
 
             try {

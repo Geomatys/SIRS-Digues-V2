@@ -213,6 +213,14 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
                         if (specificThemePane instanceof FXUtilisateurPane) {
                             ((FXUtilisateurPane) specificThemePane).setAdministrable(ADMIN.equals(session.getRole()));
                         }
+                        
+                        // If there was a previous FXElementPane, we run the method previous discard.
+                        final Node previousPane = getCenter();
+                        if(previousPane instanceof FXElementPane){
+                            ((FXElementPane) previousPane).preRemove();
+                        }
+                        
+                        // Set the new pane at center place.
                         setCenter((Node) specificThemePane);
                     } catch (Exception ex) {
                         throw new UnsupportedOperationException("Failed to load panel : " + ex.getMessage(), ex);
@@ -237,6 +245,16 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
     public void preSave() throws Exception {
         if (specificThemePane != null) {
             specificThemePane.preSave();
+        }
+    }
+    
+
+    /**
+     * Ici, on se contente d'appeler la méthode {@link FXElementPane#preRemove() } du panneau spécifique à l'élément.
+     */
+    public void preRemove() {
+        if(specificThemePane!=null){
+            specificThemePane.preRemove();
         }
     }
 }

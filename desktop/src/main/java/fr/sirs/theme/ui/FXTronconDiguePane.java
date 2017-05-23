@@ -38,6 +38,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.digue.FXSystemeReperagePane;
 import java.time.LocalDate;
 import java.util.List;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -99,6 +100,32 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     protected LocalDate initialArchiveDate;
     protected ArchiveMode computeArchive = ArchiveMode.UNCHANGED;
     protected final ObjectProperty<LocalDate> endProperty = new SimpleObjectProperty<>();
+    
+    protected ChangeListener<LocalDate> changeListener = new ChangeListener<LocalDate>() {
+            @Override
+            public void changed(ObservableValue<? extends LocalDate> observable, LocalDate oldValue, LocalDate newValue) {
+                // Si le tronçon n'était pas archivé, mais le devient.
+                if(initialArchiveDate==null && newValue!=null){
+                    Platform.runLater(() -> new Alert(Alert.AlertType.INFORMATION, "Le tronçon sera archivé avec ses objets.", ButtonType.OK).showAndWait());
+                    computeArchive = ArchiveMode.ARCHIVE;
+                }
+                // Si le tronçon était archivé et devient désarchivé.
+                else if(initialArchiveDate!=null && newValue==null){
+                    Platform.runLater(() -> new Alert(Alert.AlertType.INFORMATION, "Le tronçon archivé au "+initialArchiveDate.toString()+" sera désarchivé, ainsi que les objets archivés à cette date.", ButtonType.OK).showAndWait());
+                    computeArchive = ArchiveMode.UNARCHIVE;
+                }
+                // À ce stade, soit les deux dates sont nulles, soit aucune des deux.
+                else if((initialArchiveDate==null && newValue==null) || initialArchiveDate.isEqual(newValue)){
+                    computeArchive = ArchiveMode.UNCHANGED;
+                }
+                // Cas du changement de date d'archivage : les deux dates diffèrent.
+                // Dans ce cas, la demande explicite de Jordan Perrin est de modifier l'archivage (commentaire du 22/05/2017 15:10).
+                else if(initialArchiveDate!=null && newValue!=null){
+                    Platform.runLater(() -> new Alert(Alert.AlertType.INFORMATION, "La date d'archivage du "+initialArchiveDate.toString()+" sera modifiée pour le tronçon et ses objets archivés le même jour.", ButtonType.OK).showAndWait());
+                    computeArchive = ArchiveMode.UPDATE_ARCHIVE;
+                }
+            }
+        };
 
     public FXTronconDiguePane(final TronconDigue troncon) {
         SIRS.loadFXML(this, TronconDigue.class);
@@ -176,28 +203,13 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         
         // On surveille la date de fin du tronçon pour déterminer si l'archivage du tronçon doit être mis à jour.
         endProperty.bind(troncon.date_finProperty());
-        endProperty.addListener(new ChangeListener<LocalDate>() {
-            @Override
-            public void changed(ObservableValue<? extends LocalDate> observable, LocalDate oldValue, LocalDate newValue) {
-                // Si le tronçon n'était pas archivé, mais le devient.
-                if(initialArchiveDate==null && newValue!=null){
-                    computeArchive = ArchiveMode.ARCHIVE;
-                }
-                // Si le tronçon était archivé et devient désarchivé.
-                else if(initialArchiveDate!=null && newValue==null){
-                    computeArchive = ArchiveMode.UNARCHIVE;
-                }
-                // À ce stade, soit les deux dates sont nulles, soit aucune des deux.
-                else if((initialArchiveDate==null && newValue==null) || initialArchiveDate.isEqual(newValue)){
-                    computeArchive = ArchiveMode.UNCHANGED;
-                }
-                // Cas du changement de date d'archivage : les deux dates diffèrent.
-                else if(initialArchiveDate!=null && newValue!=null){
-                    // Dans ce cas, la demande explicite de Jordan Perrin est de modifier l'archivage.
-                    computeArchive = ArchiveMode.UPDATE_ARCHIVE;
-                }
-            }
-        });
+        // Un écouteur met à jour le scénario d'archivage au fur et à mesure des modifications de la date de fin du tronçon.
+        endProperty.addListener(changeListener);
+    }
+    
+    @Override
+    public void preRemove() {
+        endProperty.removeListener(changeListener);
     }
 
     public ObjectProperty<TronconDigue> tronconProperty(){
@@ -350,13 +362,17 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         }
         srController.save();
         
+        //==============================================================================================================
+        // Gestion de l'archivage.
+        //==============================================================================================================
+        
         // Si on a détecté que la date d'archivage du tronçon a changé d'une manière ou d'une autre.
         switch(computeArchive){
             case UNARCHIVE:
                 TronconUtils.unarchiveSectionWithTemporalObjects(element, session, initialArchiveDate);
                 break;
             case ARCHIVE:
-                TronconUtils.archiveSectionWithTemporalObjects(element, session, element.getDate_fin());
+                TronconUtils.archiveSectionWithTemporalObjects(element, session, element.getDate_fin(), false);
                 break;
             case UPDATE_ARCHIVE:
                 TronconUtils.updateArchiveSectionWithTemporalObjects(element, session, initialArchiveDate, element.getDate_fin());

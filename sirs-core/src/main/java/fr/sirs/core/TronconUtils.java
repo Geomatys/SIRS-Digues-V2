@@ -93,7 +93,28 @@ public class TronconUtils {
     // UTILITAIRES DU CONTRÔLE DE L'ARCHIVAGE DES TRONÇONS ET DES OBJETS QUI LES RÉFÉRENCENT.
     //==================================================================================================================
     
-    public enum ArchiveMode {UNCHANGED, ARCHIVE, UNARCHIVE, UPDATE_ARCHIVE}
+    /**
+     * Description des scénarios d'évolution de l'archivage d'un tronçon.
+     */
+    public enum ArchiveMode {
+        /**
+         * L'état d'archivage reste inchangé. 
+         * Le tronçon archivé reste archivé à date constante. Le tronçon non archivé reste non archivé.
+         */
+        UNCHANGED, 
+        /**
+         * Un tronçon non archivé est archivé.
+         */
+        ARCHIVE, 
+        /**
+         * Un tronçon archivé est désarchivé.
+         */
+        UNARCHIVE, 
+        /**
+         * La date d'archivage d'un tronçon est modifiée.
+         */
+        UPDATE_ARCHIVE
+    }
 
     /**
      * Copy a {@link TronconDigue} and all bound data, i.e linear referencing
@@ -152,24 +173,30 @@ public class TronconUtils {
      * Méthode d'archivage des tronçons de digue et des objets s'y référant dotés d'une validité temporelle (c'est à dire
      * implémentant l'interface {@link AvecBornesTemporelles}).
      * 
-     * La procédure d'achivage consiste à affecter une date de fin au tronçon de digue et aux objets archivables qui s'y 
-     * réfèrent, à condition qu'ils n'aient pas déjà une date de fin ou que cette date de fin soit postérieure à la date
-     * d'archivage.
+     * La procédure d'archivage consiste à affecter une date de fin au tronçon de digue et aux objets archivables qui s'y 
+     * réfèrent, à condition qu'ils n'aient pas déjà une date de fin ou, éventuellement, que cette date de fin soit 
+     * postérieure à la date d'archivage. Cette dernière condition doit être volontairement activée.
      * 
      * Cette méthode est implémentée ici de manière à ce que le code d'archivage puisse être capitalisé au fur et à mesure.
      * 
      * @param section 
      * @param session 
-     * @param archiveDate 
+     * @param archiveDate Date d'archivage du tronçon et des objets.
+     * @param includeAfter Vrai pour activer l'archivage des objets dont la date
+     * @return Rapports de mise à jour en base du tronçon et des objets.
      */
-    public static void archiveSectionWithTemporalObjects(final TronconDigue section, final SessionCore session, final LocalDate archiveDate){
+    public static List<DocumentOperationResult> archiveSectionWithTemporalObjects(final TronconDigue section, 
+            final SessionCore session, final LocalDate archiveDate, final boolean includeAfter){
         
         section.setDate_fin(archiveDate);
-        session.getRepositoryForClass(TronconDigue.class).update(section);
 
         final Collection toSave = new ArrayList<>();
+        toSave.add(section);
+        
         for (final Positionable obj : TronconUtils.getPositionableList(section)) {
-            if (((Element)obj).getParent() != null)
+            
+            // Condition sur l'absence de parent (à l'origine implémentée dans la procédure de fusion mais pas dans le découpage…).
+            if (obj.getParent() != null)
                 continue;
 
             if (obj instanceof AvecBornesTemporelles) {
@@ -179,16 +206,19 @@ public class TronconUtils {
                  * postérieure à la date d'archivage. Cette condition provient du code initial récupéré de la fusion de
                  * tronçons, avec une date d'archivage fixée à la veille de la date à laquelle est réalisée la fusion.
                  * Mais quelle est la raison pratique de cette condition… ? Difficile à dire.
+                 *
+                 * Afin de pouvoir paramétrer ce comportement, la condition de postériorité de la date doit donc être
+                 * volontairement activée.
                  */
                 if (dated.getDate_fin() == null 
-                        || dated.getDate_fin().isAfter(archiveDate)){
+                        || (includeAfter && dated.getDate_fin().isAfter(archiveDate))){
                     dated.setDate_fin(archiveDate);
                     toSave.add(dated);
                 }
             }
         }
 
-        session.executeBulk(toSave);
+        return session.executeBulk(toSave);
     }
     
     /**
@@ -202,14 +232,16 @@ public class TronconUtils {
      * @param session
      * @param oldArchiveDate
      * @param archiveDate 
+     * @return Rapports de mise à jour en base du tronçon et des objets.
      */
-    public static void updateArchiveSectionWithTemporalObjects(final TronconDigue section, final SessionCore session, 
-            final LocalDate oldArchiveDate, final LocalDate archiveDate){
+    public static List<DocumentOperationResult> updateArchiveSectionWithTemporalObjects(final TronconDigue section, 
+            final SessionCore session, final LocalDate oldArchiveDate, final LocalDate archiveDate){
         
         section.setDate_fin(archiveDate);
-        session.getRepositoryForClass(TronconDigue.class).update(section);
 
         final Collection toSave = new ArrayList<>();
+        toSave.add(section);
+        
         for (final Positionable obj : TronconUtils.getPositionableList(section)) {
             if (((Element)obj).getParent() != null)
                 continue;
@@ -224,21 +256,24 @@ public class TronconUtils {
             }
         }
 
-        session.executeBulk(toSave);
+        return session.executeBulk(toSave);
     }
     
     /**
+     * Méthode de désarchivage d'un tronçon et des objets qui le référencent.
      * 
      * @param section
      * @param session 
-     * @param initialArchiveDate 
+     * @param initialArchiveDate Date d'archivage des objets référençant le tronçon qui doivent être désarchivés.
+     * @return Rapports de mise à jour en base du tronçon et des objets.
      */
-    public static void unarchiveSectionWithTemporalObjects(final TronconDigue section, final SessionCore session, final LocalDate initialArchiveDate){
+    public static List<DocumentOperationResult> unarchiveSectionWithTemporalObjects(final TronconDigue section, final SessionCore session, final LocalDate initialArchiveDate){
         
         section.setDate_fin(null);
-        session.getRepositoryForClass(TronconDigue.class).update(section);
 
         final Collection toSave = new ArrayList<>();
+        toSave.add(section);
+        
         for (final Positionable obj : TronconUtils.getPositionableList(section)) {
             if (((Element)obj).getParent() != null)
                 continue;
@@ -254,7 +289,7 @@ public class TronconUtils {
             }
         }
 
-        session.executeBulk(toSave);
+        return session.executeBulk(toSave);
     }
     
     
