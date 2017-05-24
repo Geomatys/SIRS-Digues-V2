@@ -225,14 +225,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         endProperty.addListener(changeListener);
     }
 
-//    public ObjectProperty<TronconDigue> tronconProperty(){
-//        return elementProperty;
-//    }
-
-//    public TronconDigue getTroncon(){
-//        return elementProperty.get();
-//    }
-
     @FXML
     private void srAdd(ActionEvent event) {
         final SystemeReperageRepository repo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
@@ -253,8 +245,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         final SystemeReperage sr = uiSRList.getSelectionModel().getSelectedItem();
         if(sr==null) return;
 
-        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression ?",
-                ButtonType.NO, ButtonType.YES);
+        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION,"Confirmer la suppression ?", ButtonType.NO, ButtonType.YES);
         alert.setResizable(true);
 
         final ButtonType res = alert.showAndWait().get();
@@ -270,28 +261,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         final List<SystemeReperage> srs = repo.getByLinear(troncon);
         uiSRList.setItems(SIRS.observableList(srs));
     }
-
-//    @FXML
-//    private void showOnMap() {
-//        final FXMapTab tab = session.getFrame().getMapTab();
-//
-//        tab.getMap().focusOnElement(elementProperty.get());
-//        tab.show();
-//    }
-//
-//    private void save(){
-//        try {
-//            preSave();
-//            session.getRepositoryForClass(TronconDigue.class).update(getTroncon());
-//            final Growl growlInfo = new Growl(Growl.Type.INFO, "Enregistrement effectué.");
-//            growlInfo.showAndFade();
-//        } catch (Exception e) {
-//            final Growl growlError = new Growl(Growl.Type.ERROR, "Erreur survenue pendant l'enregistrement.");
-//            growlError.showAndFade();
-//            GeotkFX.newExceptionDialog("L'élément ne peut être sauvegardé.", e).show();
-//            SIRS.LOGGER.log(Level.WARNING, e.getMessage(), e);
-//        }
-//    }
 
     private void initFields(ObservableValue<? extends TronconDigue> observable, TronconDigue oldValue, TronconDigue newElement) {
 
