@@ -25,6 +25,8 @@ import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.LinearReferencingUtilities;
+import static fr.sirs.core.LinearReferencingUtilities.asLineString;
+import static fr.sirs.core.SirsCore.SR_ELEMENTAIRE;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
@@ -39,6 +41,7 @@ import fr.sirs.util.ReferenceTableCell;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -94,6 +97,10 @@ import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
+import org.geotoolkit.referencing.LinearReferencing.ProjectedPoint;
+import org.geotoolkit.referencing.LinearReferencing.SegmentInfo;
+import static org.geotoolkit.referencing.LinearReferencing.buildSegments;
+import static org.geotoolkit.referencing.LinearReferencing.projectReference;
 import org.geotoolkit.util.StringUtilities;
 
 /**
@@ -177,7 +184,7 @@ public class FXSystemeReperagePane extends BorderPane {
         uiCreateBorne.setOnAction(this::startCreateBorne);
         uiAddSr.setOnAction(this::createSystemeReperage);
         uiDeleteSR.setOnAction(this::deleteSystemeReperage);
-        uiProject.setOnAction(this::projectPoints);
+        uiProject.setOnAction(this::reprojectBorneToSection);
 
         // Affichage du libellé du tronçon
         uiTronconLabel.textProperty().bind(Bindings.createStringBinding(()->tronconProp.get()==null?"":tronconProp.get().getLibelle(),tronconProp));
@@ -295,7 +302,9 @@ public class FXSystemeReperagePane extends BorderPane {
      */
 
     /**
-     *
+     * Constuit un composant graphique listant les bornes du tronçon.
+     * 
+     * @param toExclude Liste des identifiants de bornes à exclure de la liste.
      * @return A list view of all bornes bound to currently selected troncon, or
      * null if no troncon is selected.
      */
@@ -303,7 +312,7 @@ public class FXSystemeReperagePane extends BorderPane {
         final TronconDigue troncon = tronconProperty().get();
         if (troncon == null) return null;
 
-        final AbstractSIRSRepository<BorneDigue> repo = session.getRepositoryForClass(BorneDigue.class);
+        // Construction de la liste définitive des identifiants des bornes à afficher.
         final ObservableList<String> borneIds;
         if (toExclude != null && !toExclude.isEmpty()) {
             borneIds = FXCollections.observableArrayList(troncon.getBorneIds());
@@ -311,7 +320,9 @@ public class FXSystemeReperagePane extends BorderPane {
         } else {
             borneIds = troncon.getBorneIds();
         }
-        final List<BorneDigue> bornes = repo.get(borneIds);
+        
+        // Récupération et tri des bornes.
+        final List<BorneDigue> bornes = session.getRepositoryForClass(BorneDigue.class).get(borneIds);
         bornes.sort((BorneDigue b1, BorneDigue b2) -> {
             if (b1.getLibelle() == null) {
                 return 1;
@@ -319,6 +330,7 @@ public class FXSystemeReperagePane extends BorderPane {
             return b1.getLibelle().compareToIgnoreCase(b2.getLibelle());
         });
 
+        // Construction du composant graphique.
         final ListView<BorneDigue> bornesView = new ListView<>();
         bornesView.setItems(FXCollections.observableArrayList(bornes));
         bornesView.setCellFactory(TextFieldListCell.forListView(new SirsStringConverter()));
@@ -327,29 +339,36 @@ public class FXSystemeReperagePane extends BorderPane {
         return bornesView;
     }
 
+    /**
+     * Ajout au SR d'une borne existante sur le tronçon.
+     * 
+     * @param evt 
+     */
     private void startAddBorne(ActionEvent evt){
         final TronconDigue troncon = tronconProperty().get();
         final SystemeReperage csr = systemeReperageProperty().get();
         if(csr==null || troncon==null) return;
 
         // Do not show bornes already present in selected SR.
-        final HashSet<String> borneIdsAlreadyInSR = new HashSet<>();
+        final Set<String> borneIdsAlreadyInSR = new HashSet<>();
         for (final SystemeReperageBorne srb : csr.systemeReperageBornes) {
             borneIdsAlreadyInSR.add(srb.getBorneId());
         }
+        
+        // Construction et affichage du composant graphique de choix des bornes à ajouter.
         final ListView<BorneDigue> bornesView = buildBorneList(borneIdsAlreadyInSR);
-
         final Dialog dialog = new Dialog();
         final DialogPane pane = new DialogPane();
         pane.setContent(bornesView);
-        pane.getButtonTypes().addAll(ButtonType.OK,ButtonType.CANCEL);
+        pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         dialog.setDialogPane(pane);
+        
+        // Récupération des bornes sélectionnées et ajout dans le SR.
         final Object res = dialog.showAndWait().get();
-
         if(ButtonType.OK.equals(res)){
             final ObservableList<BorneDigue> selectedItems = bornesView.getSelectionModel().getSelectedItems();
             for(BorneDigue bd : selectedItems){
-                createBorne(bd);
+                addBorneToSR(bd);
             }
         }
 
@@ -364,20 +383,28 @@ public class FXSystemeReperagePane extends BorderPane {
         }
     }
 
-    private void projectPoints(ActionEvent evt){
+    /**
+     * Projection des bornes sélectionnées, sur le tronçon.
+     * 
+     * @param evt 
+     */
+    private void reprojectBorneToSection(ActionEvent evt){
+        
+        // Récupération du tronçon et du SR.
         final TronconDigue troncon = tronconProp.get();
         final SystemeReperage sr = systemeReperageProperty().get();
         if(troncon==null || sr==null) return;
 
         final LineString linear = LinearReferencingUtilities.asLineString(troncon.getGeometry());
         final LinearReferencingUtilities.SegmentInfo[] segments = LinearReferencingUtilities.buildSegments(linear);
+        
         final AbstractSIRSRepository<BorneDigue> repo = session.getRepositoryForClass(BorneDigue.class);
-
+        
+        // Parcours des bornes sélectionnées, projection de la géométrie sur la géométrie du tronçon et mise à jour de la borne en base.
         final ObservableList<SystemeReperageBorne> lst = uiBorneTable.getSelectionModel().getSelectedItems();
-
-        for(SystemeReperageBorne srb : lst){
-            final String borneId = srb.getBorneId();
-            final BorneDigue borne = repo.get(borneId);
+        for(final SystemeReperageBorne srb : lst){
+            
+            final BorneDigue borne = repo.get(srb.getBorneId());
             final Point point = borne.getGeometry();
 
             final LinearReferencingUtilities.ProjectedPoint proj = LinearReferencingUtilities.projectReference(segments, point);
@@ -416,7 +443,14 @@ public class FXSystemeReperagePane extends BorderPane {
         uiSrComboBox.getSelectionModel().clearAndSelect(uiSrComboBox.getItems().indexOf(sr));
     }
 
-    public void createBorne(Point geom){
+    /**
+     * Création d'une borne à partir d'un point.
+     * 
+     * @param geom 
+     */
+    public void createBorne(final Point geom){
+        
+        // Formulaire de renseignement du libellé de la borne.
         final TextInputDialog dialog = new TextInputDialog("");
         dialog.getEditor().setPromptText("borne ...");
         dialog.setTitle("Nouvelle borne");
@@ -432,19 +466,25 @@ public class FXSystemeReperagePane extends BorderPane {
         borne.setLibelle(borneLbl);
         borne.setGeometry(geom);
         session.getRepositoryForClass(BorneDigue.class).add(borne);
-        TronconDigue tr = tronconProp.get();
+        final TronconDigue tr = tronconProp.get();
         if (tr != null) {
             tr.getBorneIds().add(borne.getId());
         }
 
-        createBorne(borne);
+        // Ajout de la borne au SR.
+        addBorneToSR(borne);
     }
 
-    public void createBorne(BorneDigue borne) {
+    /**
+     * Ajout d'une borne au système de repérage.
+     * 
+     * @param borne Borne à ajouter au système de repérage.
+     */
+    private void addBorneToSR(final BorneDigue borne) {
         final SystemeReperage sr = systemeReperageProperty().get();
 
         //on vérifie que la borne n'est pas deja dans la liste
-        for(SystemeReperageBorne srb : sr.getSystemeReperageBornes()){
+        for(final SystemeReperageBorne srb : sr.getSystemeReperageBornes()){
             if(borne.getDocumentId().equals(srb.borneIdProperty().get())){
                 //la borne fait deja partie de ce SR
                 return;
@@ -454,8 +494,16 @@ public class FXSystemeReperagePane extends BorderPane {
         //reference dans le SR
         final SystemeReperageBorne srb = Injector.getSession().getElementCreator().createElement(SystemeReperageBorne.class);
         srb.borneIdProperty().set(borne.getDocumentId());
-        srb.valeurPRProperty().set(0);
-
+        
+        // Si on est dans le SR élémentaire, il faut calculer le PR de la borne de manière automatique (SYM-1429).
+        if(tronconProp.get()!=null && SR_ELEMENTAIRE.equals(sr.getLibelle())){
+            final ProjectedPoint proj = projectReference(buildSegments(asLineString(tronconProp.get().getGeometry())), borne.getGeometry());
+            srb.setValeurPR((float) proj.distanceAlongLinear);
+        }
+        else {
+            srb.setValeurPR(0.f);
+        }
+        
         //sauvegarde du SR
         saveSR.set(sr.systemeReperageBornes.add(srb));
     }

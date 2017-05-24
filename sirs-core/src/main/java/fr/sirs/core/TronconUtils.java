@@ -26,6 +26,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import static fr.sirs.core.LinearReferencingUtilities.asLineString;
 import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
+import static fr.sirs.core.SirsCore.SR_ELEMENTAIRE;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
@@ -84,8 +85,6 @@ import org.opengis.util.FactoryException;
  * @author Alexis Manin (Geomatys)
  */
 public class TronconUtils {
-
-    public static final String SR_ELEMENTAIRE = "Elémentaire";
 
     private static final GeometryFactory GF = GO2Utilities.JTS_FACTORY;
     
@@ -348,7 +347,7 @@ public class TronconUtils {
         final LineString sourceLine = asLineString(troncon.getGeometry());
         final SegmentInfo[] sourceTronconSegments = buildSegments(sourceLine);
         final ListIterator<BorneDigue> borneIt = bdRepo.get(tronconCp.getBorneIds()).listIterator();
-        final HashSet<String> keptBornes = new HashSet<>();
+        final Set<String> keptBornes = new HashSet<>();
         while (borneIt.hasNext()) {
             final BorneDigue borne = borneIt.next();
             final ProjectedPoint proj = projectReference(sourceTronconSegments, borne.getGeometry());
@@ -367,7 +366,7 @@ public class TronconUtils {
          * réference vers le SR original, pour pouvoir mettre à jour la position
          * des structures.
          */
-        final HashMap<String, SystemeReperage> newSRs = new HashMap<>();
+        final Map<String, SystemeReperage> newSRs = new HashMap<>();
         final StreamingIterable<SystemeReperage> srs = srRepo.getByLinearStreaming(troncon);
         try (final CloseableIterator<SystemeReperage> srIt = srs.iterator()) {
             while (srIt.hasNext()) {

@@ -214,6 +214,11 @@ public class SirsCore {
     public static final String SIRSDOCUMENT_REFERENCE = "sirsdocument";
     public static final String BORNE_IDS_REFERENCE = "borneIds";
 
+    /**
+     * Dénomination du système de repérage élémentaire.
+     */
+    public static final String SR_ELEMENTAIRE = "Elémentaire";
+
     //--------------------------------------------------------------------------
     // Champs particuliers aux désordres
     //--------------------------------------------------------------------------
