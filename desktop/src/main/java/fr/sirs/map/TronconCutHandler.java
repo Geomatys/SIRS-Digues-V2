@@ -483,25 +483,8 @@ public class TronconCutHandler extends AbstractNavigationHandler {
 
                     case ARCHIVER:
                         //on marque comme terminé le troncon et ses structures
-                        cut.setDate_fin(yesterday);
-
-                        session.getRepositoryForClass(TronconDigue.class).update(cut);
-
-                        final List<Positionable> positionableList = new ArrayList<>(TronconUtils.getPositionableList(cut));
-                        Positionable obj;
-                        final Iterator<Positionable> it = positionableList.iterator();
-                        while (it.hasNext()) {
-                            obj = it.next();
-                            if (obj instanceof AvecBornesTemporelles) {
-                                final AvecBornesTemporelles tmpObj = (AvecBornesTemporelles) obj;
-                                if (tmpObj.getDate_fin() == null || tmpObj.getDate_fin().isAfter(yesterday))
-                                    tmpObj.date_finProperty().set(yesterday);
-                                else it.remove();
-                            } else it.remove();
-                        }
-
                         // TODO : check failures ?
-                        final List<DocumentOperationResult> result = session.executeBulk((List) positionableList);
+                        final List<DocumentOperationResult> result = TronconUtils.archiveSectionWithTemporalObjects(cut, session, yesterday, true, false);
                         for (final DocumentOperationResult failure : result) {
                             SirsCore.LOGGER.log(Level.WARNING, "Update failed : ".concat(failure.getError()));
                         }
@@ -516,27 +499,9 @@ public class TronconCutHandler extends AbstractNavigationHandler {
 
             //on archive l'ancien troncon et les objets dessus
             updateMessage("Finalisation du découpage pour "+toCut.getLibelle());
-            toCut.setDate_fin(yesterday);
-
-            session.getRepositoryForClass(TronconDigue.class).update(toCut);
-
-            final List<Positionable> positionableList = new ArrayList<>(TronconUtils.getPositionableList(toCut));
-            Positionable obj;
-            final Iterator<Positionable> it = positionableList.iterator();
-            while (it.hasNext()) {
-                obj = it.next();
-                if (obj instanceof AvecBornesTemporelles) {
-                    final AvecBornesTemporelles tmpObj = (AvecBornesTemporelles) obj;
-                    if (tmpObj.getDate_fin() == null || tmpObj.getDate_fin().isAfter(yesterday))
-                        tmpObj.date_finProperty().set(yesterday);
-                    else
-                        it.remove();
-                } else
-                    it.remove();
-            }
-
+            
             // TODO : check failures ?
-            final List<DocumentOperationResult> result = session.executeBulk((List) positionableList);
+            final List<DocumentOperationResult> result = TronconUtils.archiveSectionWithTemporalObjects(toCut, session, yesterday, true, false);
             for (final DocumentOperationResult failure : result) {
                 SirsCore.LOGGER.log(Level.WARNING, "Update failed : ".concat(failure.getError()));
             }

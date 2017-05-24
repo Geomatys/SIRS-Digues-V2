@@ -165,7 +165,7 @@ public class FXTronconMerge extends VBox {
             // Merge succeeded, we must now archive old ones.
             final Iterator<TronconDigue> it = troncons.iterator();
             while (it.hasNext()) {
-                TronconUtils.archiveSectionWithTemporalObjects(it.next(), session, LocalDate.now().minusDays(1), true);
+                TronconUtils.archiveSectionWithTemporalObjects(it.next(), session, LocalDate.now().minusDays(1), true, true);
             }
 
             try {

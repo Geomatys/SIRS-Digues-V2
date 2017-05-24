@@ -101,6 +101,10 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     protected ArchiveMode computeArchive = ArchiveMode.UNCHANGED;
     protected final ObjectProperty<LocalDate> endProperty = new SimpleObjectProperty<>();
     
+    /**
+     * Écouteur destiné à déterminer l'opération d'archivage à exécuter lors de l'enregistrement, ainsi que d'informer
+     * l'utilisateur des conséquences de la modification de la date de fin du tronçon.
+     */
     protected ChangeListener<LocalDate> changeListener = new ChangeListener<LocalDate>() {
             @Override
             public void changed(ObservableValue<? extends LocalDate> observable, LocalDate oldValue, LocalDate newValue) {
@@ -164,7 +168,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         // Troncon change listener
         elementProperty.addListener(this::initFields);
         setElement(troncon);
-        initialArchiveDate = troncon.getDate_fin();
 
         // Layout
         uiSrTab.setCenter(srController);
@@ -201,10 +204,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         uiProprietesTab.setContent(uiProprietesTable);
         uiGardesTab.setContent(uiGardesTable);
         
-        // On surveille la date de fin du tronçon pour déterminer si l'archivage du tronçon doit être mis à jour.
-        endProperty.bind(troncon.date_finProperty());
-        // Un écouteur met à jour le scénario d'archivage au fur et à mesure des modifications de la date de fin du tronçon.
-        endProperty.addListener(changeListener);
     }
     
     @Override
@@ -212,13 +211,27 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         endProperty.removeListener(changeListener);
     }
 
-    public ObjectProperty<TronconDigue> tronconProperty(){
-        return elementProperty;
+    @Override
+    final public void setElement(TronconDigue element) {
+        super.setElement(element);
+        initialArchiveDate = element.getDate_fin();
+        computeArchive = ArchiveMode.UNCHANGED;
+        
+        endProperty.removeListener(changeListener); // On enlève l'écouteur éventuellement présent avant de manipuler la propriété surveillant la date de fin.
+        // On surveille la date de fin du tronçon pour déterminer si l'archivage du tronçon doit être mis à jour.
+        endProperty.unbind();// On arrête la surveillance de la date de fin de l'éventuel élément affiché dans le panneau.
+        endProperty.bind(element.date_finProperty());
+        // Un écouteur met à jour le scénario d'archivage au fur et à mesure des modifications de la date de fin du tronçon.
+        endProperty.addListener(changeListener);
     }
 
-    public TronconDigue getTroncon(){
-        return elementProperty.get();
-    }
+//    public ObjectProperty<TronconDigue> tronconProperty(){
+//        return elementProperty;
+//    }
+
+//    public TronconDigue getTroncon(){
+//        return elementProperty.get();
+//    }
 
     @FXML
     private void srAdd(ActionEvent event) {
@@ -372,7 +385,8 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
                 TronconUtils.unarchiveSectionWithTemporalObjects(element, session, initialArchiveDate);
                 break;
             case ARCHIVE:
-                TronconUtils.archiveSectionWithTemporalObjects(element, session, element.getDate_fin(), false);
+                // On s'aligne sur l'algorithme de fusion utilisé pour la fusion en évitant d'archiver les objets qui ne sont pas des documents CouchDB.
+                TronconUtils.archiveSectionWithTemporalObjects(element, session, element.getDate_fin(), false, true);
                 break;
             case UPDATE_ARCHIVE:
                 TronconUtils.updateArchiveSectionWithTemporalObjects(element, session, initialArchiveDate, element.getDate_fin());

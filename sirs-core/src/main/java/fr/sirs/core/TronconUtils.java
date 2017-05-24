@@ -182,11 +182,12 @@ public class TronconUtils {
      * @param section 
      * @param session 
      * @param archiveDate Date d'archivage du tronçon et des objets.
-     * @param includeAfter Vrai pour activer l'archivage des objets dont la date
+     * @param includeAfter Vrai pour forcer l'archivage des objets dont la date est postérieure à la date d'archive.
+     * @param skipWithParent Vrai pour éviter la mise à jour de la date de fin des objets qui ont un parent (c'est à dire qui ne sont pas des documents CouchDB).
      * @return Rapports de mise à jour en base du tronçon et des objets.
      */
     public static List<DocumentOperationResult> archiveSectionWithTemporalObjects(final TronconDigue section, 
-            final SessionCore session, final LocalDate archiveDate, final boolean includeAfter){
+            final SessionCore session, final LocalDate archiveDate, final boolean includeAfter, final boolean skipWithParent){
         
         section.setDate_fin(archiveDate);
 
@@ -196,7 +197,7 @@ public class TronconUtils {
         for (final Positionable obj : TronconUtils.getPositionableList(section)) {
             
             // Condition sur l'absence de parent (à l'origine implémentée dans la procédure de fusion mais pas dans le découpage…).
-            if (obj.getParent() != null)
+            if (skipWithParent && obj.getParent() != null)
                 continue;
 
             if (obj instanceof AvecBornesTemporelles) {
