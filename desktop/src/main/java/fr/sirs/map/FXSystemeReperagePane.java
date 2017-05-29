@@ -41,7 +41,6 @@ import fr.sirs.util.ReferenceTableCell;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -98,7 +97,6 @@ import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.geotoolkit.referencing.LinearReferencing.ProjectedPoint;
-import org.geotoolkit.referencing.LinearReferencing.SegmentInfo;
 import static org.geotoolkit.referencing.LinearReferencing.buildSegments;
 import static org.geotoolkit.referencing.LinearReferencing.projectReference;
 import org.geotoolkit.util.StringUtilities;
@@ -768,7 +766,11 @@ public class FXSystemeReperagePane extends BorderPane {
         }
     }
 
-    public class DeleteColumn extends SimpleButtonColumn<SystemeReperageBorne, SystemeReperageBorne> {
+    
+    /**
+     * Colonne de suppression d'une borne d'un système de repérage.
+     */
+    private class DeleteColumn extends SimpleButtonColumn<SystemeReperageBorne, SystemeReperageBorne> {
 
         public DeleteColumn() {
             super(GeotkFX.ICON_UNLINK,
@@ -776,13 +778,13 @@ public class FXSystemeReperagePane extends BorderPane {
                     (SystemeReperageBorne t) -> true,
                     new Function<SystemeReperageBorne, SystemeReperageBorne>() {
 
-                        public SystemeReperageBorne apply(SystemeReperageBorne t) {
+                        public SystemeReperageBorne apply(SystemeReperageBorne srb) {
                             final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la suppression (seule l'association entre la borne et le système de repérage est brisée) ?",
                                     ButtonType.NO, ButtonType.YES);
                             alert.setResizable(true);
                             final ButtonType res = alert.showAndWait().get();
                             if (ButtonType.YES == res) {
-                                saveSR.set(systemeReperageProperty().get().getSystemeReperageBornes().remove(t));
+                                saveSR.set(systemeReperageProperty().get().getSystemeReperageBornes().remove(srb));
                             }
                             return null;
                         }
@@ -792,7 +794,11 @@ public class FXSystemeReperagePane extends BorderPane {
         }
     }
 
-    public class NameColumn extends TableColumn<SystemeReperageBorne,SystemeReperageBorne>{
+    
+    /**
+     * Colonne d'affichage et de mise à jour du nom d'une borne.
+     */
+    private static class NameColumn extends TableColumn<SystemeReperageBorne,SystemeReperageBorne>{
 
         public NameColumn() {
             super("Nom");
@@ -830,7 +836,11 @@ public class FXSystemeReperagePane extends BorderPane {
         }
     }
 
-    public class PRColumn extends TableColumn<SystemeReperageBorne, Number>{
+    
+    /**
+     * Colonne d'affichage et de mise à jour du PR d'une borne dans un SR.
+     */
+    private class PRColumn extends TableColumn<SystemeReperageBorne, Number>{
 
         public PRColumn() {
             super("PR");
@@ -860,6 +870,4 @@ public class FXSystemeReperagePane extends BorderPane {
             });
         }
     }
-
-
 }
