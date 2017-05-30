@@ -27,6 +27,8 @@ import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import static fr.sirs.core.LinearReferencingUtilities.asLineString;
 import static fr.sirs.core.LinearReferencingUtilities.buildGeometry;
 import static fr.sirs.core.SirsCore.SR_ELEMENTAIRE;
+import static fr.sirs.core.SirsCore.SR_ELEMENTAIRE_END_BORNE;
+import static fr.sirs.core.SirsCore.SR_ELEMENTAIRE_START_BORNE;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
@@ -757,6 +759,33 @@ public class TronconUtils {
      * @param troncon Tronçon à analyser.
      * @param session La session applicative en cours.
      */
+    public static void updateSRElementaireIfExists(TronconDigue troncon, SessionCore session){
+
+        final SystemeReperageRepository srRepo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
+        final AbstractSIRSRepository<BorneDigue> bdRepo = session.getRepositoryForClass(BorneDigue.class);
+
+        SystemeReperage sr = null;
+        final StreamingIterable<SystemeReperage> srs = srRepo.getByLinearStreaming(troncon);
+        try (final CloseableIterator<SystemeReperage> srIt = srs.iterator()) {
+            while (srIt.hasNext()) {
+                final SystemeReperage csr = srIt.next();
+                if (SR_ELEMENTAIRE.equalsIgnoreCase(csr.getLibelle())) {
+                    sr = csr;
+                    break;
+                }
+            }
+        }
+        
+        if(sr!=null) updateSRElementaire(troncon, session);
+    }
+
+
+    /**
+     * Creation ou mise a jour du systeme de reperage elementaire .
+     *
+     * @param troncon Tronçon à analyser.
+     * @param session La session applicative en cours.
+     */
     public static void updateSRElementaire(TronconDigue troncon, SessionCore session){
 
         final SystemeReperageRepository srRepo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
@@ -782,14 +811,26 @@ public class TronconUtils {
             srRepo.add(sr,troncon);
         }
 
+        // On cherche les bornes de début et de fin du SR élémentaire : on se base pour cela sur les libellés de bornes.
         SystemeReperageBorne srbStart = null;
         SystemeReperageBorne srbEnd = null;
-
-        if(sr.systemeReperageBornes.size()>0){
-            srbStart = sr.systemeReperageBornes.get(0);
-        }
-        if(sr.systemeReperageBornes.size()>1){
-            srbEnd = sr.systemeReperageBornes.get(sr.systemeReperageBornes.size()-1);
+        
+        // On parcours les bornes du SR élémentaire…
+        final BorneDigueRepository bdr = (BorneDigueRepository) session.getRepositoryForClass(BorneDigue.class);
+        final List<BorneDigue> tronconBornes = bdr.get(troncon.getBorneIds());
+        for(final SystemeReperageBorne srb : sr.getSystemeReperageBornes()){
+            
+            // On cherche pour chaque borne du SR élémentaire s'il s'agit de la borne de début ou de la borne de fin.
+            for(final BorneDigue bd : tronconBornes){
+                if(bd.getId().equals(srb.getBorneId())){
+                    if(SR_ELEMENTAIRE_START_BORNE.equals(bd.getLibelle())){
+                        srbStart = srb;
+                    }
+                    else if(SR_ELEMENTAIRE_END_BORNE.equals(bd.getLibelle())){
+                        srbEnd = srb;
+                    }
+                }
+            }
         }
 
         BorneDigue bdStart = null;
@@ -797,7 +838,7 @@ public class TronconUtils {
         if(srbStart==null){
             //creation de la borne de début
             bdStart = bdRepo.create();
-            bdStart.setLibelle("Début du tronçon");
+            bdStart.setLibelle(SR_ELEMENTAIRE_START_BORNE);
             bdRepo.add(bdStart);
 
             srbStart = session.getElementCreator().createElement(SystemeReperageBorne.class);
@@ -810,7 +851,7 @@ public class TronconUtils {
         if(srbEnd==null){
             //creation de la borne de fin
             bdEnd = bdRepo.create();
-            bdEnd.setLibelle("Fin du tronçon");
+            bdEnd.setLibelle(SR_ELEMENTAIRE_END_BORNE);
             bdRepo.add(bdEnd);
 
             srbEnd = session.getElementCreator().createElement(SystemeReperageBorne.class);
@@ -825,6 +866,7 @@ public class TronconUtils {
         final double length = troncon.getGeometry().getLength();
         final Coordinate[] coords = troncon.getGeometry().getCoordinates();
 
+        // On réajuste la postion des bornes de début et de fin aux extrémités du tronçon.
         bdStart.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(coords[0]));
         bdEnd.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(coords[coords.length-1]));
 
