@@ -843,6 +843,10 @@ public class TronconUtils {
 
             srbStart = session.getElementCreator().createElement(SystemeReperageBorne.class);
             srbStart.setBorneId(bdStart.getDocumentId());
+            
+            // On initialise le PR de la borne de départ à 0. lors de sa création uniquement car sa valeur, quand elle 
+            // est non nulle, sert d'offset aux autres valeurs de PR calculées dans le SR élémentaire.
+            srbStart.setValeurPR(0);
             sr.systemeReperageBornes.add(srbStart);
         }else{
             bdStart = bdRepo.get(srbStart.getBorneId());
@@ -861,19 +865,17 @@ public class TronconUtils {
             bdEnd = bdRepo.get(srbEnd.getBorneId());
         }
 
+        // Dans tous les cas, on force le PR de la borne de fin à s'aligner sur la valeur du PR de la borne de début
+        // augmentée de la longueur du tronçon.
+        srbEnd.setValeurPR((float)troncon.getGeometry().getLength()+srbStart.getValeurPR());
 
-        //calcul des nouvelles valeurs pour les bornes
-        final double length = troncon.getGeometry().getLength();
-        final Coordinate[] coords = troncon.getGeometry().getCoordinates();
-
+        
         // On réajuste la postion des bornes de début et de fin aux extrémités du tronçon.
+        final Coordinate[] coords = troncon.getGeometry().getCoordinates();
         bdStart.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(coords[0]));
         bdEnd.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(coords[coords.length-1]));
 
         bdRepo.executeBulk(bdStart, bdEnd);
-
-        srbStart.setValeurPR(0);
-        srbEnd.setValeurPR((float)length);
 
         srRepo.update(sr,troncon);
     }
