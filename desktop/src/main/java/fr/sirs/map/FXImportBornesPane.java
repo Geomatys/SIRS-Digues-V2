@@ -258,7 +258,7 @@ public class FXImportBornesPane extends BorderPane {
             final Comparator<PropertyType> nameComparator = (o1, o2) -> o1.getName().compareTo(o2.getName());
 
             //liste des propriétés
-            final ObservableList<PropertyType> properties = FXCollections.observableArrayList(fType.getProperties(true)).sorted(nameComparator);
+            final ObservableList<PropertyType> properties = FXCollections.observableArrayList(fType.getProperties(true)).sorted((Comparator)nameComparator);
             uiAttX.setItems(properties);
             uiAttY.setItems(properties);
 
