@@ -26,7 +26,9 @@ import fr.sirs.Session;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.LinearReferencingUtilities;
 import static fr.sirs.core.LinearReferencingUtilities.asLineString;
+import fr.sirs.core.SirsCore;
 import static fr.sirs.core.SirsCore.SR_ELEMENTAIRE;
+import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
@@ -90,12 +92,14 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.gui.javafx.util.FXTableCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
+import org.geotoolkit.referencing.LinearReferencing;
 import org.geotoolkit.referencing.LinearReferencing.ProjectedPoint;
 import static org.geotoolkit.referencing.LinearReferencing.buildSegments;
 import static org.geotoolkit.referencing.LinearReferencing.projectReference;
@@ -460,6 +464,13 @@ public class FXSystemeReperagePane extends BorderPane {
 
         //creation de la borne
         final String borneLbl = opt.get();
+        
+        // On vérifie que le libellé renseigné pour la borne ne fait pas partie des libellés utilisés par le SR élémentaire.
+        if(SirsCore.SR_ELEMENTAIRE_START_BORNE.equals(borneLbl) || SirsCore.SR_ELEMENTAIRE_END_BORNE.equals(borneLbl)){
+            new Alert(Alert.AlertType.ERROR, "Le libellé de borne \""+borneLbl+"\" est réservé au SR élémentaire.", ButtonType.CLOSE).showAndWait();
+            return;
+        }
+        
         final BorneDigue borne = session.getRepositoryForClass(BorneDigue.class).create();
         borne.setLibelle(borneLbl);
         borne.setGeometry(geom);
@@ -706,6 +717,9 @@ public class FXSystemeReperagePane extends BorderPane {
             newValue.systemeRepDefautIdProperty().addListener((ObservableValue<? extends String> srObservable, String oldSR, String newSR) -> {
                 uiDefaultSRCheckBox.setSelected(newSR == null? false : newSR.equals(uiSrComboBox.getValue() == null? null : uiSrComboBox.getValue().getId()));
             });
+            
+            // On met à jour le SR élémentaire s'il esxiste.
+            TronconUtils.updateSRElementaireIfExists(newValue, session);
         }
     }
 
@@ -866,6 +880,22 @@ public class FXSystemeReperagePane extends BorderPane {
                 if (srb != null) {
                     srb.setValeurPR(((Number) event.getNewValue()).floatValue());
                     saveSR.set(true);
+                    
+                    // Si on est dans le SR par défaut, on veut positionner la borne sur le tronçon en fonction de son PR.
+                    if(SR_ELEMENTAIRE.equals(systemeReperageProperty().get().getLibelle())){
+                        // Dans le SR élémentaire, la valeur du PR équivaut à la distance depuis la borne de début.
+                        final LinearReferencing.SegmentInfo[] buildSegments = buildSegments(asLineString(tronconProp.get().getGeometry()));
+                        final Point computeCoordinate = LinearReferencingUtilities.computeCoordinate(buildSegments, 
+                                GO2Utilities.JTS_FACTORY.createPoint(buildSegments[0].segmentCoords[0]), srb.getValeurPR(), 0.);
+                        final BorneDigue bd = Injector.getSession().getRepositoryForClass(BorneDigue.class).get(srb.getBorneId());
+                        if(bd!=null){
+                            bd.setGeometry(computeCoordinate);
+                            Injector.getSession().getRepositoryForClass(BorneDigue.class).update(bd);
+                        }
+                        else {
+                            throw new IllegalStateException("Aucune borne n'a été trouvée pour l'identifiant "+srb.getBorneId());
+                        }
+                    }
                 }
             });
         }
