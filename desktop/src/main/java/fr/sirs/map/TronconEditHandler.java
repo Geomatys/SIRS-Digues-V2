@@ -45,6 +45,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -487,7 +488,7 @@ public class TronconEditHandler extends AbstractNavigationHandler implements Ite
                 if (mousebutton == MouseButton.PRIMARY) {
                     //selection d'un troncon
                     final AbstractGraphicVisitor visitor = new AbstractGraphicVisitor() {
-                        final HashSet<TronconDigue> foundElements = new HashSet<>();
+                        final Set<TronconDigue> foundElements = new HashSet<>();
                         @Override
                         public void visit(ProjectedFeature feature, RenderingContext2D context, SearchAreaJ2D area) {
                             Object userData = feature.getCandidate().getUserData().get(BeanFeature.KEY_BEAN);
