@@ -959,42 +959,17 @@ public class FXSystemeReperagePane extends BorderPane {
     }
     
     /**
-     * Méthode de recherche de la borne de début du SR élémentaire d'un tronçon.
+     * Méthode de recherche du PR de la borne de début du SR élémentaire d'un tronçon.
      * 
      * Cette méthode s'appuie sur l'étiquette définie par {@link SirsCore#SR_ELEMENTAIRE_START_BORNE}.
      * 
      * @param troncon Le tronçon utilisé pour la recherche des bornes.
      * @param sr Le SR dont on recherche la borne de début, qui doit être un SR élémentaire et relatif au tronçon donné en premier argument.
      * @param session Session utilisée pour la connexion à la base.
-     * @return La borne de début du SR élémentaire.
-     */
-    private static BorneDigue getBorneStart(final TronconDigue troncon, final SystemeReperage sr, final SessionCore session){
-        BorneDigue borneDebut = null;
-        final List<BorneDigue> tronconBornes = session.getRepositoryForClass(BorneDigue.class).get(troncon.getBorneIds());
-        for(final SystemeReperageBorne currentSrb : sr.getSystemeReperageBornes()){
-            for(final BorneDigue currentBorne : tronconBornes){
-                if(currentBorne.getId().equals(currentSrb.getBorneId()) && SirsCore.SR_ELEMENTAIRE_START_BORNE.equals(currentBorne.getLibelle())){
-                    borneDebut = currentBorne;
-                    break;
-                }
-            }
-            if(borneDebut!=null) break;
-        }
-        return borneDebut;
-    }
-    
-    /**
-     * Méthode de recherche de la borne de début du SR élémentaire d'un tronçon.
-     * 
-     * Cette méthode s'appuie sur l'étiquette définie par {@link SirsCore#SR_ELEMENTAIRE_START_BORNE}.
-     * 
-     * @param troncon Le tronçon utilisé pour la recherche des bornes.
-     * @param sr Le SR dont on recherche la borne de début, qui doit être un SR élémentaire et relatif au tronçon donné en premier argument.
-     * @param session Session utilisée pour la connexion à la base.
-     * @return La borne de début du SR élémentaire.
+     * @return Le PR de la borne de début du SR élémentaire.
      */
     private static float getPRStart(final TronconDigue troncon, final SystemeReperage sr, final SessionCore session){
-        BorneDigue borneDebut = null;
+        
         final List<BorneDigue> tronconBornes = session.getRepositoryForClass(BorneDigue.class).get(troncon.getBorneIds());
         for(final SystemeReperageBorne currentSrb : sr.getSystemeReperageBornes()){
             for(final BorneDigue currentBorne : tronconBornes){
