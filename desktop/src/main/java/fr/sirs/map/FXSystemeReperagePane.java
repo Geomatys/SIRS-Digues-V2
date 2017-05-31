@@ -512,7 +512,7 @@ public class FXSystemeReperagePane extends BorderPane {
             final ProjectedPoint proj = projectReference(buildSegments(asLineString(tronconProp.get().getGeometry())), borne.getGeometry());
             
             // Pour obtenir le PR calculé dans le SR élémentaire, il faut ajouter le PR de la borne de départ à la distance du point projeté sur le linéaire.
-            srb.setValeurPR((float) proj.distanceAlongLinear+getPRStart(tronconProp.get(), sr, session));
+            srb.setValeurPR((float) proj.distanceAlongLinear + TronconUtils.getPRStart(tronconProp.get(), sr, session));
         }
         else {
             srb.setValeurPR(0.f);
@@ -904,7 +904,7 @@ public class FXSystemeReperagePane extends BorderPane {
                                 début lorsque son PR est édité.
                                 En revanche, il faut mettre à jour les PRs de toutes les bornes dans ce SR.
                                 */
-                                final double offset = getPRStart(tronconProp.get(), systemeReperageProperty().get(), session);
+                                final double offset = TronconUtils.getPRStart(tronconProp.get(), systemeReperageProperty().get(), session);
                                 final List<BorneDigue> tronconBornes = session.getRepositoryForClass(BorneDigue.class).get(tronconProp.get().getBorneIds());
                                 for(final SystemeReperageBorne currentSRB : systemeReperageProperty().get().getSystemeReperageBornes()){
                                     for(final BorneDigue currentBorne : tronconBornes){
@@ -932,7 +932,7 @@ public class FXSystemeReperagePane extends BorderPane {
                                         + "\nde la géométrie du tronçon et du PR de \nla borne de début.", ButtonType.CLOSE);
                                     alert.setResizable(true);
                                     alert.showAndWait();
-                                    final double offset = getPRStart(tronconProp.get(), systemeReperageProperty().get(), session);
+                                    final double offset = TronconUtils.getPRStart(tronconProp.get(), systemeReperageProperty().get(), session);
                                     srb.setValeurPR((float)(tronconProp.get().getGeometry().getLength()+offset));
                                 });
                                 
@@ -942,7 +942,7 @@ public class FXSystemeReperagePane extends BorderPane {
                                 // de la borne sur le tronçon en cohérence avec son PR modifié.
                                 
                                 // On a besoin du PR de la borne de début.
-                                final double offset = getPRStart(tronconProp.get(), systemeReperageProperty().get(), session);
+                                final double offset = TronconUtils.getPRStart(tronconProp.get(), systemeReperageProperty().get(), session);
                                 
                                 /*
                                 On vérifie que le PR modifié d'une borne intermédiaire est bien inclus entre celui de la 
@@ -1002,28 +1002,5 @@ public class FXSystemeReperagePane extends BorderPane {
                 }
             });
         }
-    }
-    
-    /**
-     * Méthode de recherche du PR de la borne de début du SR élémentaire d'un tronçon.
-     * 
-     * Cette méthode s'appuie sur l'étiquette définie par {@link SirsCore#SR_ELEMENTAIRE_START_BORNE}.
-     * 
-     * @param troncon Le tronçon utilisé pour la recherche des bornes.
-     * @param sr Le SR dont on recherche la borne de début, qui doit être un SR élémentaire et relatif au tronçon donné en premier argument.
-     * @param session Session utilisée pour la connexion à la base.
-     * @return Le PR de la borne de début du SR élémentaire.
-     */
-    private static float getPRStart(final TronconDigue troncon, final SystemeReperage sr, final SessionCore session){
-        
-        final List<BorneDigue> tronconBornes = session.getRepositoryForClass(BorneDigue.class).get(troncon.getBorneIds());
-        for(final SystemeReperageBorne currentSrb : sr.getSystemeReperageBornes()){
-            for(final BorneDigue currentBorne : tronconBornes){
-                if(currentBorne.getId().equals(currentSrb.getBorneId()) && SirsCore.SR_ELEMENTAIRE_START_BORNE.equals(currentBorne.getLibelle())){
-                    return currentSrb.getValeurPR();
-                }
-            }
-        }
-        throw new IllegalStateException("Le système de repérage "+sr.getLibelle()+" n'a pas de borne \""+SirsCore.SR_ELEMENTAIRE_START_BORNE+"\".");
     }
 }
