@@ -876,6 +876,23 @@ public class TronconUtils {
         bdEnd.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(coords[coords.length-1]));
 
         bdRepo.executeBulk(bdStart, bdEnd);
+        
+        
+        // Mise à jour des PRs des autres bornes du SR élémentaire au cas où la géométrie du tronçon aurait changé.
+        final SegmentInfo[] buildSegments = buildSegments(asLineString(troncon.getGeometry()));
+        for(final SystemeReperageBorne currentSrb : sr.getSystemeReperageBornes()){
+            // Le PR de la borne de début ne doit pas être calculé et celui de la borne de fin a déjà été calculé.
+            if(currentSrb!=srbStart && currentSrb!=srbEnd){
+                // On a besoin de la borne correspondante
+                for(final BorneDigue bd : tronconBornes){
+                    if(bd.getId().equals(currentSrb.getBorneId())){
+                        final ProjectedPoint proj = projectReference(buildSegments, bd.getGeometry());
+                        currentSrb.setValeurPR((float) proj.distanceAlongLinear);
+                        break;
+                    }
+                }
+            }
+        }
 
         srRepo.update(sr,troncon);
     }
