@@ -510,7 +510,9 @@ public class FXSystemeReperagePane extends BorderPane {
         // Si on est dans le SR élémentaire, il faut calculer le PR de la borne de manière automatique (SYM-1429).
         if(tronconProp.get()!=null && SR_ELEMENTAIRE.equals(sr.getLibelle())){
             final ProjectedPoint proj = projectReference(buildSegments(asLineString(tronconProp.get().getGeometry())), borne.getGeometry());
-            srb.setValeurPR((float) proj.distanceAlongLinear);
+            
+            // Pour obtenir le PR calculé dans le SR élémentaire, il faut ajouter le PR de la borne de départ à la distance du point projeté sur le linéaire.
+            srb.setValeurPR((float) proj.distanceAlongLinear+getPRStart(tronconProp.get(), sr, session));
         }
         else {
             srb.setValeurPR(0.f);
