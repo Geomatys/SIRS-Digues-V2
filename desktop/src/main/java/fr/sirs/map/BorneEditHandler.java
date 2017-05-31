@@ -143,13 +143,6 @@ public class BorneEditHandler extends AbstractNavigationHandler {
         final BorderPane bp = new BorderPane(editPane, null, null, footer, null);
 
         dialog.setResizable(true);
-        dialog.setOnHidden(new EventHandler() {
-            @Override
-            public void handle(Event event) {
-                editPane.save();
-                dialog.hide();
-            }
-        });
         dialog.initModality(Modality.NONE);
         dialog.initOwner(map.getScene().getWindow());
         dialog.setScene(new Scene(bp));
@@ -211,6 +204,7 @@ public class BorneEditHandler extends AbstractNavigationHandler {
                 //on recalcule les geometries des positionables du troncon.
                 TronconUtils.updatePositionableGeometry(troncon, session);
             }
+            editPane.save();
             editPane.reset();
         });
 
