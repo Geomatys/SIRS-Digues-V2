@@ -559,7 +559,7 @@ public class FXSystemeReperagePane extends BorderPane {
         stage.setScene(new Scene(content));
 
         deleteButton.setOnAction(event -> {
-            final Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, "Attention, les bornes séléctionnées seront effacées définitivement. Si elles sont utilisées par un système de repérage, cela entrainera le recalul des positions liées à ce dernier. Continuer ?", ButtonType.NO, ButtonType.YES);
+            final Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, "Attention, les bornes séléctionnées seront effacées définitivement. Si elles sont utilisées par un système de repérage, cela entrainera le recalcul des positions liées à ce dernier. Continuer ?", ButtonType.NO, ButtonType.YES);
             confirmation.setResizable(true);
             final ButtonType userDecision = confirmation.showAndWait().orElse(ButtonType.NO);
             if (ButtonType.YES.equals(userDecision)) {
