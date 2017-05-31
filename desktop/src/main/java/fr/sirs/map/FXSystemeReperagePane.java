@@ -882,6 +882,8 @@ public class FXSystemeReperagePane extends BorderPane {
                 final SystemeReperageBorne srb = event.getRowValue();
                 if (srb != null) {
                     
+                    final float oldValue = srb.getValeurPR();
+                    
                     // On met à jour le PR de la borne modifiée dans le SR sélectionné.
                     srb.setValeurPR(((Number) event.getNewValue()).floatValue());
                     
@@ -940,11 +942,53 @@ public class FXSystemeReperagePane extends BorderPane {
                                 // On a besoin du PR de la borne de début.
                                 final double offset = getPRStart(tronconProp.get(), systemeReperageProperty().get(), session);
                                 
-                                final LinearReferencing.SegmentInfo[] buildSegments = buildSegments(asLineString(tronconProp.get().getGeometry()));
-                                final Point computeCoordinate = LinearReferencingUtilities.computeCoordinate(buildSegments, 
-                                        GO2Utilities.JTS_FACTORY.createPoint(buildSegments[0].segmentCoords[0]), srb.getValeurPR()-offset, 0.);
-                                    bd.setGeometry(computeCoordinate);
-                                    Injector.getSession().getRepositoryForClass(BorneDigue.class).update(bd);
+                                /*
+                                On vérifie que le PR modifié d'une borne intermédiaire est bien inclus entre celui de la 
+                                borne de début et celui de la borne de fin.
+                                
+                                Ce choix est dû au fait qu'une fois le PR d'une borne modifié dans le SR élémentaire, celle-ci
+                                est reprojetée sur le tronçon de manière à ce que sa position reste cohérente avec son PR.
+                                
+                                Le mécanisme de projection n'empêche pas de projeter un point en-deçà ni au-delà des
+                                extrémités du tronçon. : le point projeté est alors positionné dans le prolongement du 
+                                premier ou du dernier segment.
+                                
+                                Néanmoins, il se pose ensuite un problème de cohérence car le PR calculé de ces points 
+                                se base non pas sur leur position mais sur leur projection sur le tronçon qui sont respectivement
+                                les points de début et de fin.
+                                
+                                Ainsi, on pourrait provoquer des situations étranges pour l'utilisateur. Par exemple, sur 
+                                tronçon de 4000m dont les PRs des bornes de début et de fin seraient respectivement de 
+                                1500 et 1500+4000=5500.
+                                
+                                On peut créer une borne intermédiare dont le PR est 3000. Si on modifiait ensuite le PR de
+                                cette borne à 7000, elle irait se placer dans le prolongement du dernier segment du tronçon,
+                                au-delà de la fin de la géométrie.
+                                
+                                Mais à la première occasion à laquelle le PR de cette borne serait recalculé, sa valeur
+                                deviendrait alors 5500 (soit le PR de l'extrémité de fin).
+                                
+                                Il semble ainsi plus raisonable d'éviter ces incohérences en restreignant la modification
+                                du PR des bornes intermédiaires à des valeurs qui ne diffèreront pas des calculs automatiques
+                                ultérieurs.
+                                */
+                                if(srb.getValeurPR()<offset || srb.getValeurPR()>tronconProp.get().getGeometry().getLength()+offset){
+                                    Platform.runLater(()-> {
+                                        final Alert alert = new Alert(Alert.AlertType.ERROR, "Le PR d'une borne intermédiaire\n"
+                                                + " dans le SR élémentaire doit obligatoirement\n être supérieur au PR de la borne de début\n"
+                                                + " et inférieur à la longueur du tronçon.");
+                                        alert.setResizable(true);
+                                        alert.showAndWait();
+                                        srb.setValeurPR(oldValue);
+                                    });
+                                }
+                                else {
+                                    final LinearReferencing.SegmentInfo[] buildSegments = buildSegments(asLineString(tronconProp.get().getGeometry()));
+                                    final Point computeCoordinate = LinearReferencingUtilities.computeCoordinate(buildSegments, 
+                                            GO2Utilities.JTS_FACTORY.createPoint(buildSegments[0].segmentCoords[0]), srb.getValeurPR()-offset, 0.);
+                                        bd.setGeometry(computeCoordinate);
+                                        Injector.getSession().getRepositoryForClass(BorneDigue.class).update(bd);
+                                }
                             }
                         }
                         else {
