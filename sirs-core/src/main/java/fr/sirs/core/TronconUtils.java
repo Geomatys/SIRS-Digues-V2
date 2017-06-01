@@ -682,7 +682,7 @@ public class TronconUtils {
          * les deux tronçons originaux, puis en fait un seul comportant les bornes
          * des deux. Pour le reste, on fait une simple copie des SR.
          */
-        final HashMap<String, String> modifiedSRs = new HashMap<>();
+        final Map<String, String> modifiedSRs = new HashMap<>();
 
         final StreamingIterable<SystemeReperage> srs = srRepo.getByLinearStreaming(mergeParam);
         try (final CloseableIterator<SystemeReperage> srIt = srs.iterator()) {
