@@ -23,6 +23,7 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.CRS_WGS84;
+import fr.sirs.core.SirsCore;
 
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -110,6 +112,7 @@ public class FXImportBornesPane extends BorderPane {
     @FXML private FXFeatureTable uiTable;
     @FXML private ComboBox uiLibelleBox;
     @FXML private ComboBox<SystemeReperage> uiSRBox;
+    @FXML private Label uiPRLabel;
     @FXML private ComboBox<PropertyType> uiPRBox;
     @FXML private ComboBox<PropertyType> uiCodeBox;
     @FXML private ComboBox<Preview> uiTronconBox;
@@ -122,6 +125,8 @@ public class FXImportBornesPane extends BorderPane {
 
     private final String typeName;
     private final Class<? extends TronconDigue> typeClass;
+    
+    private final BooleanBinding prVisibilityBinding;
 
     public FXImportBornesPane(final String typeName, final Class typeClass) {
         SIRS.loadFXML(this);
@@ -138,6 +143,22 @@ public class FXImportBornesPane extends BorderPane {
         uiLibelleBox.setConverter(stringConverter);
         uiSRBox.setConverter(stringConverter);
         uiPRBox.setConverter(stringConverter);
+        
+        prVisibilityBinding = new BooleanBinding() {
+            
+            {bind(uiSRBox.valueProperty());}
+            
+            @Override
+            protected boolean computeValue() {
+                return uiSRBox.getValue()==null || !SirsCore.SR_ELEMENTAIRE.equals(uiSRBox.getValue().getLibelle());
+            }
+        };
+        
+        uiPRLabel.managedProperty().bind(prVisibilityBinding);
+        uiPRBox.managedProperty().bind(prVisibilityBinding);
+        uiPRLabel.visibleProperty().bind(prVisibilityBinding);
+        uiPRBox.visibleProperty().bind(prVisibilityBinding);
+        
         uiCodeBox.setConverter(stringConverter);
 
         // TODO : make visible if we activate back csv import.
