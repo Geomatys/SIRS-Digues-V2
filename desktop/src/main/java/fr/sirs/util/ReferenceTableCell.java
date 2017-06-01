@@ -29,6 +29,7 @@ import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Identifiable;
+import fr.sirs.core.model.LeveProfilTravers;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
@@ -81,7 +82,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> implements Cha
      * A cache whose key is the ID of the referenced object, and value is the label
      * to display for it.
      */
-    private static final WeakHashMap<String, StringProperty> CACHED_VALUES = new WeakHashMap<>();
+    private static final Map<String, StringProperty> CACHED_VALUES = new WeakHashMap<>();
     private static final LibelleUpdater LIBELLE_UPDATER = new LibelleUpdater();
 
     private final Class refClass;
@@ -173,7 +174,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> implements Cha
         if (sr == null) {
             return SIRS.observableList(repo.getAll());
         } else {
-            final HashSet<String> borneIds = new HashSet<>(sr.systemeReperageBornes.size());
+            final Set<String> borneIds = new HashSet<>(sr.systemeReperageBornes.size());
             sr.systemeReperageBornes.stream().forEach(srb -> borneIds.add(srb.getBorneId()));
             return SIRS.observableList(repo.get(borneIds.toArray(new String[0])));
         }
@@ -218,15 +219,23 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> implements Cha
             if (text == null) {
                 // On essaye de récupérer le preview label, car l'objet en entrée doit être un ID.
                 try {
-                    final Preview tmpPreview = getPreview((String) item);
-                    if (tmpPreview != null) {
-                        text = tmpPreview.libelleProperty();
-                        if (text.get() == null) {
-                            // Si l'objet pointé n'a pas de libellé, une valeur par défaut est nécessaire
-                            // afin de montrer qu'une liaison existe réellement.
-                            text.setValue("Objet sans libellé");
-                        }
+                    // Cas spécifique aux références vers les levés de profil en travers (depuis les tableaux de LevePositionProfilTravers) : on veut afficher la date (SYM-1587)
+                    if(LeveProfilTravers.class.equals(refClass)){
+                        final LeveProfilTravers lpt = Injector.getSession().getRepositoryForClass(LeveProfilTravers.class).get(item);
+                        text = new SimpleStringProperty(lpt.getDateLeve().toString());
                         CACHED_VALUES.put(item, text);
+                    }
+                    else {
+                        final Preview tmpPreview = getPreview((String) item);
+                        if (tmpPreview != null) {
+                            text = tmpPreview.libelleProperty();
+                            if (text.get() == null) {
+                                // Si l'objet pointé n'a pas de libellé, une valeur par défaut est nécessaire
+                                // afin de montrer qu'une liaison existe réellement.
+                                text.setValue("Objet sans libellé");
+                            }
+                            CACHED_VALUES.put(item, text);
+                        }
                     }
                 } catch (DocumentNotFoundException ex) {
                     // La preview n'a pas pu être trouvée, ce qui indique que l'objet pointé a été supprimé.
@@ -247,9 +256,7 @@ public class ReferenceTableCell<S> extends FXTableCell<S, String> implements Cha
     }
 
     private static Preview getPreview(final String elementId) throws DocumentNotFoundException {
-        final Session session = Injector.getSession();
-        final Previews previews = session.getPreviews();
-        return previews.get(elementId);
+        return Injector.getSession().getPreviews().get(elementId);
     }
 
     @Override
