@@ -23,7 +23,9 @@ import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import static fr.sirs.SIRS.CRS_WGS84;
+import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.TronconUtils;
 
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
@@ -81,6 +83,8 @@ import org.geotoolkit.map.LayerListener;
 import org.geotoolkit.map.MapBuilder;
 import org.geotoolkit.map.MapItem;
 import org.geotoolkit.map.MapLayer;
+import org.geotoolkit.referencing.LinearReferencing;
+import org.geotoolkit.referencing.LinearReferencing.ProjectedPoint;
 import org.geotoolkit.style.RandomStyleBuilder;
 import org.geotoolkit.util.collection.CollectionChangeEvent;
 import org.opengis.feature.AttributeType;
@@ -150,6 +154,7 @@ public class FXImportBornesPane extends BorderPane {
             
             @Override
             protected boolean computeValue() {
+                // Si le SR sélectionné est le SR élémentaire, on n'affichera pas le choix de la colonne pour le PR car ce dernier sera calculé.
                 return uiSRBox.getValue()==null || !SirsCore.SR_ELEMENTAIRE.equals(uiSRBox.getValue().getLibelle());
             }
         };
@@ -383,16 +388,19 @@ public class FXImportBornesPane extends BorderPane {
         }
 
         final SystemeReperage sr = uiSRBox.getValue();
-        if (sr != null && prProperty == null) {
-            final Alert alert = new Alert(
-                    Alert.AlertType.WARNING,
-                    "Vous allez affecter les bornes importées à un système de repérage sans leur associer de PR. Êtes-vous sûr ?",
-                    ButtonType.NO, ButtonType.YES);
-            alert.setResizable(true);
+        if (sr != null){
+            if(prProperty == null && !SirsCore.SR_ELEMENTAIRE.equals(sr.getLibelle())){
+                final Alert alert = new Alert(
+                        Alert.AlertType.WARNING,
+                        "Vous allez affecter les bornes importées à un système de repérage sans leur associer de PR. Êtes-vous sûr ?",
+                        ButtonType.NO, ButtonType.YES);
+                alert.setResizable(true);
 
-            // Prevent import if no PR property is chosen, and user did not click on yes button (cancelled or quit alert).
-            if (!ButtonType.YES.equals(alert.showAndWait().orElse(null))) {
-                return;
+                // Prevent import if no PR property is chosen, and user did not click on yes button (cancelled or quit alert).
+                // L'alerte est lancée uniquement si le SR sélectionné n'est pas le SR élémentaire.
+                if (!ButtonType.YES.equals(alert.showAndWait().orElse(null))) {
+                    return;
+                }
             }
         }
 
@@ -411,7 +419,15 @@ public class FXImportBornesPane extends BorderPane {
                 } else {
                     throw new IllegalStateException("Unknown object type for parameter " + typeName);
                 }
-
+                
+                // Le cas échéant, on calcule les paramètres nécessaires à la détermination des PRs dans le SR Elémentaire.
+                LinearReferencing.SegmentInfo[] buildSegments = null;
+                float prStart = 0.f;
+                if(sr!=null && SirsCore.SR_ELEMENTAIRE.equals(sr.getLibelle())){
+                    buildSegments = LinearReferencing.buildSegments(LinearReferencingUtilities.asLineString(troncon.getGeometry()));
+                    prStart  = TronconUtils.getPRStart(troncon, sr, session);
+                }
+                
                 final MathTransform trs = CRS.findOperation(
                         selection.getFeatureType().getCoordinateReferenceSystem(), // TODO : replace CRS with the one in uiCRS for CSV files.
 Injector.getSession().getProjection(),
@@ -449,12 +465,26 @@ Injector.getSession().getProjection(),
                             borneRepo.add(newBorn);
                             mustUpdateTroncon = (troncon.getBorneIds().add(newBorn.getId()) || mustUpdateTroncon);
 
-                            if(sr!=null && prProperty!=null){
-                                //reference dans le SR
-                                final SystemeReperageBorne srb = session.getElementCreator().createElement(SystemeReperageBorne.class);
-                                srb.borneIdProperty().set(newBorn.getDocumentId());
-                                srb.setValeurPR(((Number)current.getPropertyValue(prProperty)).floatValue());
-                                sr.systemeReperageBornes.add(srb);
+                            if(sr!=null){
+                                // Dans le cas du SR élémentaire, on calcule le PR de la borne automatiquement
+                                if(SirsCore.SR_ELEMENTAIRE.equals(sr.getLibelle())){
+                                    final SystemeReperageBorne srb = session.getElementCreator().createElement(SystemeReperageBorne.class);
+                                    srb.borneIdProperty().set(newBorn.getDocumentId());
+                                    
+                                    final ProjectedPoint proj = LinearReferencing.projectReference(buildSegments, newBorn.getGeometry());
+
+                                    // Pour obtenir le PR calculé dans le SR élémentaire, il faut ajouter le PR de la borne de départ à la distance du point projeté sur le linéaire.
+                                    srb.setValeurPR((float) proj.distanceAlongLinear + prStart);
+                                    
+                                    sr.systemeReperageBornes.add(srb);
+                                } 
+                                else if(prProperty!=null){
+                                    //reference dans le SR
+                                    final SystemeReperageBorne srb = session.getElementCreator().createElement(SystemeReperageBorne.class);
+                                    srb.borneIdProperty().set(newBorn.getDocumentId());
+                                    srb.setValeurPR(((Number)current.getPropertyValue(prProperty)).floatValue());
+                                    sr.systemeReperageBornes.add(srb);
+                                }
                             }
 
                         } else {
