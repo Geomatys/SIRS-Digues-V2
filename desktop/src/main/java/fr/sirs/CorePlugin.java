@@ -78,6 +78,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.VoieAcces;
 import fr.sirs.core.model.VoieDigue;
 import fr.sirs.digue.DiguesTab;
+import fr.sirs.migration.HtmlRemoval;
 import fr.sirs.theme.ContactsTheme;
 import fr.sirs.theme.DocumentTheme;
 import fr.sirs.theme.EvenementsHydrauliquesTheme;
@@ -99,6 +100,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.MenuItem;
@@ -108,6 +110,7 @@ import org.apache.sis.referencing.CRS;
 import org.apache.sis.referencing.CommonCRS;
 import org.apache.sis.storage.DataStoreException;
 import org.apache.sis.util.ArraysExt;
+import org.ektorp.CouchDbConnector;
 import org.geotoolkit.cql.CQLException;
 import org.geotoolkit.data.FeatureCollection;
 import org.geotoolkit.data.FeatureStore;
@@ -1064,5 +1067,14 @@ public class CorePlugin extends Plugin {
         if (suppliers.isEmpty()) {
             loadDataSuppliers();
         }
+    }
+
+    @Override
+    public Optional<Task> findUpgradeTask(int fromMajor, int fromMinor, CouchDbConnector dbConnector) {
+        if (fromMajor < 2 || (fromMajor == 2 && fromMinor < 7)) {
+            return Optional.of(new HtmlRemoval(dbConnector, "commentaire"));
+        }
+
+        return super.findUpgradeTask(fromMajor, fromMinor, dbConnector);
     }
 }

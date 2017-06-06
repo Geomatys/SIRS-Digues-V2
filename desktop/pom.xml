@@ -91,6 +91,20 @@
         <artifactId>jasperreports-fonts</artifactId>
         <version>6.0.0</version>
     </dependency>
+    
+    <!-- Introduit suite aux demandes concernant le formattage HTML des commentaires. 
+         Le client désire supprimer toute mise en forme HTML pour conserver du 
+         texte simple partout. On utilise donc JSoup pour supprimer tout formattage
+         HTML dans les documents en bdd. 
+         Réf @ https://jira.geomatys.com/browse/SYM-1592
+    -->
+    <dependency>
+        <!-- jsoup HTML parser library @ http://jsoup.org/ -->
+        <groupId>org.jsoup</groupId>
+        <artifactId>jsoup</artifactId>
+        <version>1.10.2</version>
+    </dependency>
+
   </dependencies>
 
   <build>
