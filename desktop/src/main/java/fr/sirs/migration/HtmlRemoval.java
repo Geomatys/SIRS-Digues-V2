@@ -18,8 +18,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 import javafx.concurrent.Task;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.CouchDbConnector;
@@ -28,7 +30,10 @@ import org.ektorp.StreamingViewResult;
 import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 import org.jsoup.parser.Parser;
-import org.jsoup.examples.HtmlToPlainText;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.select.NodeTraversor;
+import org.jsoup.select.NodeVisitor;
 
 /**
  *
@@ -36,16 +41,17 @@ import org.jsoup.examples.HtmlToPlainText;
  */
 public class HtmlRemoval extends Task {
 
+    private static final Pattern NEW_LINE_MARK = Pattern.compile("(br)|(h\\d)|p|(d(d|t))|(tr)", Pattern.CASE_INSENSITIVE);
+
     private static final int BULK_SIZE = 100;
 
     final CouchDbConnector connector;
     final Set<String> fields;
     final boolean recursive;
 
-    // Prepared Jsoup related processors
-    final HtmlToPlainText formatter;
-
     final ArrayBlockingQueue bulkQueue;
+
+    final AtomicLong updateCount;
 
     public HtmlRemoval(final CouchDbConnector connector, final String... fieldsToUpdate) {
         this(connector, true, fieldsToUpdate);
@@ -59,9 +65,8 @@ public class HtmlRemoval extends Task {
         this.recursive = recursive;
         fields = new HashSet<>(Arrays.asList(fieldsToUpdate));
 
-        formatter = new HtmlToPlainText();
-
         bulkQueue = new ArrayBlockingQueue<>(BULK_SIZE);
+        updateCount = new AtomicLong();
     }
 
     @Override
@@ -71,16 +76,16 @@ public class HtmlRemoval extends Task {
         final ViewQuery allDocs = new ViewQuery().allDocs().includeDocs(true);
 
         final ExecutorService executor = Executors.newCachedThreadPool();
-        final AtomicInteger currentProgress = new AtomicInteger();
 
         updateMessage("Connexion à la base de données");
         try (StreamingViewResult result = connector.queryForStreamingView(allDocs)) {
             int docCount = result.getTotalRows();
             final Consumer progressIncrementer;
             if (docCount < 0) {
-                progressIncrementer = in -> currentProgress.incrementAndGet();
+                progressIncrementer = in -> {};
                 updateProgress(-1, -1);
             } else {
+                final AtomicInteger currentProgress = new AtomicInteger();
                 if (docCount <= 100) {
                     progressIncrementer = in -> updateProgress(currentProgress.incrementAndGet(), docCount);
                 } else {
@@ -88,7 +93,7 @@ public class HtmlRemoval extends Task {
                 }
             }
 
-            updateMessage("Analyse des éléments");
+            updateMessage("Analyse des éléments/Suppression des textes HTML");
             final Iterator<ViewResult.Row> it = result.iterator();
             while (it.hasNext()) {
                 final ViewResult.Row next = it.next();
@@ -112,13 +117,15 @@ public class HtmlRemoval extends Task {
 
         executor.shutdown();
         if (executor.awaitTermination(1, TimeUnit.DAYS)) {
-            updateMessage("Mise à jour finale");
-            consumeBulkErrors(executeBulk());
+            updateMessage("Mise à jour de la base de données");
+            final ArrayList bulk = new ArrayList(BULK_SIZE);
+            bulkQueue.drainTo(bulk);
+            consumeBulkErrors(executeBulk(bulk));
         } else {
             throw new RuntimeException("upgrade takes too much time to complete.");
         }
 
-        SirsCore.LOGGER.info(String.format("HTML REMOVAL : %d documents updated.", currentProgress.get()));
+        SirsCore.LOGGER.info(String.format("HTML REMOVAL : %d documents updated.", updateCount.get()));
         return true;
     }
 
@@ -141,8 +148,7 @@ public class HtmlRemoval extends Task {
                 final ArrayList bulk = new ArrayList(BULK_SIZE + 1);
                 bulkQueue.drainTo(bulk);
                 if (!bulk.isEmpty()) {
-                    bulk.add(doc);
-                    return connector.executeBulk(bulk);
+                    return executeBulk(bulk);
                 }
             }
         }
@@ -150,11 +156,11 @@ public class HtmlRemoval extends Task {
         return Collections.EMPTY_LIST;
     }
 
-    private List<DocumentOperationResult> executeBulk() {
-        final ArrayList bulk = new ArrayList(BULK_SIZE);
-        bulkQueue.drainTo(bulk);
+    private List<DocumentOperationResult> executeBulk(final Collection bulk) {
         if (!bulk.isEmpty()) {
-            return connector.executeBulk(bulk);
+            final List<DocumentOperationResult> errors = connector.executeBulk(bulk);
+            updateCount.addAndGet(bulk.size() - errors.size());
+            return errors;
         }
 
         return Collections.EMPTY_LIST;
@@ -182,11 +188,19 @@ public class HtmlRemoval extends Task {
                         + "Revision : %s%n"
                         + "Error : %s%n"
                         + "Reason : %s%n",
-                r.getId(), r.getRevision(), r.getError(), r.getReason());
+                r.getId(), r.getRevision(), r.getError(), r.getReason()
+        );
     }
 
-    protected String removeHtml(final String htmlText) {
-        return formatter.getPlainText(Parser.parse(htmlText, ""));
+    protected String removeHtml(String htmlText) {
+        htmlText = htmlText.trim();
+        if (htmlText.isEmpty())
+            return htmlText;
+
+        final Formatter formatter = new Formatter();
+        new NodeTraversor(formatter)
+                .traverse(Parser.parse(htmlText, ""));
+        return formatter.toString();
     }
 
     /**
@@ -217,10 +231,11 @@ public class HtmlRemoval extends Task {
         for (final Map.Entry<String, Object> entry : entries) {
             final Object value = entry.getValue();
             if (value instanceof Map) {
-                change |= recursiveStrategy((Map)value);
+                change |= recursiveStrategy((Map) value);
             } else if (value instanceof String && fields.contains(entry.getKey())) {
-                final String removeHtml = removeHtml((String)value);
+                final String removeHtml = removeHtml((String) value);
                 if (!removeHtml.equals(value)) {
+                    SirsCore.LOGGER.info(String.format("%noriginal: |%s|%nrefactored: |%s|", value, removeHtml));
                     entry.setValue(removeHtml);
                     change = true;
                 }
@@ -248,6 +263,7 @@ public class HtmlRemoval extends Task {
             if (value instanceof String) {
                 final String changedField = removeHtml((String)value);
                 if (!changedField.equals(value)) {
+                    SirsCore.LOGGER.fine(String.format("%noriginal: |%s|%nrefactored: |%s|", value, changedField));
                     document.put(key, changedField);
                     change = true;
                 }
@@ -257,5 +273,38 @@ public class HtmlRemoval extends Task {
         }
 
         return change;
+    }
+
+    private static class Formatter implements NodeVisitor {
+
+        /**
+         * Contains refactored text.
+         */
+        private final StringBuilder formatted = new StringBuilder();
+
+        @Override
+        public void head(Node node, int depth) {
+            String name = node.nodeName();
+            if (node instanceof TextNode)
+                formatted.append(((TextNode) node).getWholeText());
+            else if (name.equals("li"))
+                formatted.append(System.lineSeparator()).append(" - ");
+            else if (NEW_LINE_MARK.matcher(name).matches())
+                formatted.append(System.lineSeparator());
+        }
+
+        @Override
+        public void tail(Node node, int depth) {
+            String name = node.nodeName();
+            if (NEW_LINE_MARK.matcher(name).matches())
+                formatted.append(System.lineSeparator());
+            else if (name.equals("a"))
+                formatted.append(" (lien : ").append(node.attr("href")).append(")");
+        }
+
+        @Override
+        public String toString() {
+            return formatted.toString();
+        }
     }
 }
