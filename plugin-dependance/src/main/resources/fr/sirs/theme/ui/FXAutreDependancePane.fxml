@@ -51,7 +51,7 @@
               </padding>
             </GridPane>
 
-            <TextArea fx:id="ui_commentaire" maxHeight="-Infinity"  prefHeight="200.0" styleClass="gray-light" />
+            <TextArea fx:id="ui_commentaire" maxHeight="-Infinity"  prefHeight="200.0" />
 
             </children>
             <padding>

@@ -29,7 +29,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.web.HTMLEditor;
 import javafx.event.ActionEvent;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
@@ -47,7 +46,7 @@ public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndig
     private final DiguePojoTable table = new DiguePojoTable();
 
     // Propriétés de SystemeEndiguement
-    @FXML HTMLEditor ui_commentaire;
+    @FXML TextArea ui_commentaire;
     @FXML TextField ui_libelle;
     @FXML Spinner ui_populationProtegee;
     @FXML TextField ui_classement;
@@ -108,6 +107,7 @@ public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndig
         if (oldElement != null) {
         // Propriétés de SystemeEndiguement
             ui_libelle.textProperty().unbindBidirectional(oldElement.libelleProperty());
+            ui_commentaire.textProperty().unbindBidirectional(oldElement.commentaireProperty());
 
             ui_populationProtegee.getValueFactory().valueProperty().unbindBidirectional(oldElement.populationProtegeeProperty());
             ui_classement.textProperty().unbindBidirectional(oldElement.classementProperty());
@@ -115,40 +115,45 @@ public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndig
             ui_niveauProtection.getValueFactory().valueProperty().unbindBidirectional(oldElement.niveauProtectionProperty());
         }
 
-        final Session session = Injector.getBean(Session.class);
+        if (newElement == null) {
+            ui_libelle.setText(null);
+            ui_commentaire.setText(null);
+            ui_classement.setText(null);
+            table.setTableItems(null);
 
-        /*
+        } else {
+            final Session session = Injector.getBean(Session.class);
+
+            /*
          * Bind control properties to Element ones.
-         */
-        // Propriétés de SystemeEndiguement
-        // * commentaire
-        ui_commentaire.setHtmlText(newElement.getCommentaire());
-        // * libelle
-        ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
-        // * populationProtegee
-        ui_populationProtegee.getValueFactory().valueProperty().bindBidirectional(newElement.populationProtegeeProperty());
-        // * classement
-        ui_classement.textProperty().bindBidirectional(newElement.classementProperty());
-        // * niveauProtection
-        ui_niveauProtection.getValueFactory().valueProperty().bindBidirectional(newElement.niveauProtectionProperty());
+             */
+            // Propriétés de SystemeEndiguement
+            // * commentaire
+            ui_commentaire.textProperty().bindBidirectional(newElement.commentaireProperty());
+            // * libelle
+            ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
+            // * populationProtegee
+            ui_populationProtegee.getValueFactory().valueProperty().bindBidirectional(newElement.populationProtegeeProperty());
+            // * classement
+            ui_classement.textProperty().bindBidirectional(newElement.classementProperty());
+            // * niveauProtection
+            ui_niveauProtection.getValueFactory().valueProperty().bindBidirectional(newElement.niveauProtectionProperty());
 
-        table.setTableItems(()-> (ObservableList) SIRS.observableList(
-                ((DigueRepository) session.getRepositoryForClass(Digue.class)).getBySystemeEndiguement(newElement)));
+            table.setTableItems(() -> (ObservableList) SIRS.observableList(
+                    ((DigueRepository) session.getRepositoryForClass(Digue.class)).getBySystemeEndiguement(newElement)));
 
-        SIRS.initCombo(ui_gestionnaireDecretId, SIRS.observableList(
-            previewRepository.getByClass(Organisme.class)).sorted(),
-            newElement.getGestionnaireDecretId() == null? null : previewRepository.get(newElement.getGestionnaireDecretId()));
-        SIRS.initCombo(ui_gestionnaireTechniqueId, SIRS.observableList(
-            previewRepository.getByClass(Organisme.class)).sorted(),
-            newElement.getGestionnaireTechniqueId() == null? null : previewRepository.get(newElement.getGestionnaireTechniqueId()));
+            SIRS.initCombo(ui_gestionnaireDecretId, SIRS.observableList(
+                    previewRepository.getByClass(Organisme.class)).sorted(),
+                    newElement.getGestionnaireDecretId() == null ? null : previewRepository.get(newElement.getGestionnaireDecretId()));
+            SIRS.initCombo(ui_gestionnaireTechniqueId, SIRS.observableList(
+                    previewRepository.getByClass(Organisme.class)).sorted(),
+                    newElement.getGestionnaireTechniqueId() == null ? null : previewRepository.get(newElement.getGestionnaireTechniqueId()));
+        }
     }
+
     @Override
     public void preSave() {
         final SystemeEndiguement element = (SystemeEndiguement) elementProperty().get();
-
-
-        element.setCommentaire(ui_commentaire.getHtmlText());
-
 
         Object cbValue;
         cbValue = ui_gestionnaireDecretId.getValue();

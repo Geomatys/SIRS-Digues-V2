@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -55,10 +55,10 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -74,7 +74,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     // Onglet "Information"
     @FXML FXValidityPeriodPane uiValidityPeriod;
     @FXML TextField ui_libelle;
-    @FXML HTMLEditor ui_commentaire;
+    @FXML TextArea ui_commentaire;
     @FXML ComboBox ui_digueId;
     @FXML protected Button ui_digueId_link;
     @FXML ComboBox ui_typeRiveId;
@@ -95,12 +95,12 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     private final ForeignParentPojoTable<ProprieteTroncon> uiProprietesTable = new ForeignParentPojoTable<>(ProprieteTroncon.class, "Période de propriété");
     @FXML private Tab uiGardesTab;
     private final ForeignParentPojoTable<GardeTroncon> uiGardesTable = new ForeignParentPojoTable<>(GardeTroncon.class, "Période de gardiennage");
-    
+
     // Booleen déterminant s'il est nécessaire de calculer l'état d'archivage du tronçon et des objets qui s'y réfèrent lors de l'enregistrement.
     protected LocalDate initialArchiveDate;
     protected ArchiveMode computeArchive = ArchiveMode.UNCHANGED;
     protected final ObjectProperty<LocalDate> endProperty = new SimpleObjectProperty<>();
-    
+
     /**
      * Écouteur destiné à déterminer l'opération d'archivage à exécuter lors de l'enregistrement, ainsi que d'informer
      * l'utilisateur des conséquences de la modification de la date de fin du tronçon.
@@ -203,9 +203,9 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         uiGestionsTab.setContent(uiGestionsTable);
         uiProprietesTab.setContent(uiProprietesTable);
         uiGardesTab.setContent(uiGardesTable);
-        
+
     }
-    
+
     @Override
     public void preRemove() {
         endProperty.removeListener(changeListener);
@@ -216,7 +216,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         super.setElement(element);
         initialArchiveDate = element.getDate_fin();
         computeArchive = ArchiveMode.UNCHANGED;
-        
+
         endProperty.removeListener(changeListener); // On enlève l'écouteur éventuellement présent avant de manipuler la propriété surveillant la date de fin.
         // On surveille la date de fin du tronçon pour déterminer si l'archivage du tronçon doit être mis à jour.
         endProperty.unbind();// On arrête la surveillance de la date de fin de l'éventuel élément affiché dans le panneau.
@@ -268,13 +268,13 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         if (oldValue != null) {
         // Propriétés de TronconDigue
             ui_libelle.textProperty().unbindBidirectional(oldValue.libelleProperty());
+            ui_commentaire.textProperty().unbindBidirectional(oldValue.commentaireProperty());
         }
 
         if (newElement != null) {
-
             ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
             // * commentaire
-            ui_commentaire.setHtmlText(newElement.getCommentaire());
+            ui_commentaire.textProperty().bindBidirectional(newElement.commentaireProperty());
 
             SIRS.initCombo(ui_digueId, SIRS.observableList(
                     previewRepository.getByClass(Digue.class)).sorted(),
@@ -307,7 +307,6 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
     @Override
     public void preSave() {
         final TronconDigue element = (TronconDigue) elementProperty().get();
-        element.setCommentaire(ui_commentaire.getHtmlText());
 
         Object cbValue;
         cbValue = ui_digueId.getValue();
@@ -343,11 +342,11 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             element.setSystemeRepDefautId(null);
         }
         srController.save();
-        
+
         //==============================================================================================================
         // Gestion de l'archivage.
         //==============================================================================================================
-        
+
         // Si on a détecté que la date d'archivage du tronçon a changé d'une manière ou d'une autre.
         switch(computeArchive){
             case UNARCHIVE:

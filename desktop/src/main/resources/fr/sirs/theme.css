@@ -237,15 +237,32 @@
 // Set disabled texts fully opaque to ease "consultation" mode.
 .label:disabled,
 .text-input:disabled, 
+.text-input > .scroll-pane:disabled,
+.text-area:disabled,
 .choice-box:disabled,
 .combo-box:disabled,
-.date-cell:disabled > * /* This is set on children so border is not affected. */
+.date-picker:disabled,
+.date-cell:disabled,
+.spinner:disabled
 {
-    -fx-opacity: 1.0
+    -fx-opacity: 1.0;
 }
 
+.text-area {
+    -fx-background-color: #FFFFFF;
+}
 
+.text-area .scroll-pane {
+    -fx-background-color: transparent;
+}
 
+.text-area .scroll-pane .viewport{
+    -fx-background-color: transparent;
+}
+
+.text-area .scroll-pane .content{
+    -fx-background-color: transparent;
+}
 
 .deprecatedReferenceRow {
     -fx-background-color: #FFE4C4;

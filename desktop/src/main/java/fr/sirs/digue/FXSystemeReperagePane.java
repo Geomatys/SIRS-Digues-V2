@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -36,9 +36,9 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.web.HTMLEditor;
 
 /**
  *
@@ -47,7 +47,7 @@ import javafx.scene.web.HTMLEditor;
 public class FXSystemeReperagePane extends BorderPane {
 
     @FXML private TextField uiNom;
-    @FXML private HTMLEditor uiComment;
+    @FXML private TextArea uiComment;
     @FXML private DatePicker uiDate;
 
     private final ObjectProperty<SystemeReperage> srProperty = new SimpleObjectProperty<>();
@@ -81,6 +81,7 @@ public class FXSystemeReperagePane extends BorderPane {
     private void updateFields(ObservableValue<? extends SystemeReperage> observable, SystemeReperage oldValue, SystemeReperage newValue) {
         if (oldValue != null) {
             uiNom.textProperty().unbindBidirectional(oldValue.libelleProperty());
+            uiComment.textProperty().unbindBidirectional(oldValue.commentaireProperty());
             uiDate.valueProperty().unbindBidirectional(oldValue.dateMajProperty());
             borneTable.getUiTable().setItems(FXCollections.emptyObservableList());
         }
@@ -88,7 +89,7 @@ public class FXSystemeReperagePane extends BorderPane {
         if(newValue==null) return;
         uiNom.textProperty().bindBidirectional(newValue.libelleProperty());
         uiDate.valueProperty().bindBidirectional(newValue.dateMajProperty());
-        uiComment.setHtmlText(newValue.getCommentaire());
+        uiComment.textProperty().bindBidirectional(newValue.commentaireProperty());
 
         borneTable.getUiTable().setItems(newValue.systemeReperageBornes);
     }
@@ -97,7 +98,6 @@ public class FXSystemeReperagePane extends BorderPane {
         final SystemeReperage sr = srProperty.get();
         if(sr==null) return;
 
-        sr.setCommentaire(uiComment.getHtmlText());
         final Session session = Injector.getBean(Session.class);
         final SystemeReperageRepository repo = (SystemeReperageRepository) session.getRepositoryForClass(SystemeReperage.class);
 

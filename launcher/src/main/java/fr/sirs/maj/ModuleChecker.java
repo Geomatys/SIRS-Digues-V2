@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
 import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
@@ -89,15 +88,14 @@ public class ModuleChecker extends Task<Boolean> {
 
     private void upgrade() throws InterruptedException, ExecutionException {
         final ChangeListener<String> msgListener = (obs, oldMsg, newMsg) -> updateMessage(newMsg);
-        final String title = new StringBuilder("Mise à jour ").append("0").append(" sur ").append(upgrades.size()).toString();
-        final Pattern numbPat = Pattern.compile("\\d+");
+        final String titleFormat = "Mise à jour %d sur %d";
         SirsDBInfo info = DatabaseRegistry.getInfo(connector).orElse(null);
         if (info == null) {
             // should never happen...
             throw new IllegalStateException("Chosen database is not SIRS database !");
         }
         for (int i = 0; i < upgrades.size(); i++) {
-            updateTitle(numbPat.matcher(title).replaceFirst(String.valueOf(i+1)));
+            updateTitle(String.format(titleFormat, i+1, upgrades.size()));
             final Upgrade upgrade = upgrades.get(i);
             final Task t = upgrade.upgradeTask;
             final ChangeListener<Number> progressListener = (obs, oldValue, newValue) -> {
@@ -148,7 +146,17 @@ public class ModuleChecker extends Task<Boolean> {
             return alert.showAndWait().orElse(ButtonType.CANCEL);
         });
 
-        return ButtonType.OK.equals(result) && isAdmin();
+        if (ButtonType.OK.equals(result)) {
+            updateMessage("Vérification des droits de l'utilisateur");
+            boolean isAdmin = isAdmin();
+            if (!isAdmin) {
+                SIRS.fxRun(false, () -> new Alert(Alert.AlertType.ERROR, "Echec d'identification, ou droits insuffisants.", ButtonType.OK).show());
+            }
+            updateMessage("");
+            return isAdmin;
+        }
+
+        return false;
     }
 
     /**
@@ -321,7 +329,7 @@ public class ModuleChecker extends Task<Boolean> {
             alert.setWidth(400);
             alert.setHeight(400);
             alert.setResizable(true);
-            return ButtonType.OK.equals(alert.showAndWait().orElse(null));        
+            return ButtonType.OK.equals(alert.showAndWait().orElse(null));
         });
 
         if (accepted) {

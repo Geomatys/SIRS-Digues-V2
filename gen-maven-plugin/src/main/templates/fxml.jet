@@ -257,7 +257,7 @@ for(final EClass eClass : helper.getTypeTree() ) {
 
    if(helper.isAvecCommentaire()) { 
 %>
-            <TextArea fx:id="<%=Helper.COMMENTAIRE_UI%>" maxHeight="-Infinity"  prefHeight="200.0" styleClass="gray-light" />
+            <TextArea fx:id="<%=Helper.COMMENTAIRE_UI%>" maxHeight="-Infinity"  prefHeight="200.0" />
 <% } 
 
     if(helper.isPhoto()){
