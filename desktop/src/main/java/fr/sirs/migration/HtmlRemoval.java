@@ -72,6 +72,8 @@ public class HtmlRemoval extends Task {
 
         final ExecutorService executor = Executors.newCachedThreadPool();
         final AtomicInteger currentProgress = new AtomicInteger();
+
+        updateMessage("Connexion à la base de données");
         try (StreamingViewResult result = connector.queryForStreamingView(allDocs)) {
             int docCount = result.getTotalRows();
             final Consumer progressIncrementer;
@@ -86,6 +88,7 @@ public class HtmlRemoval extends Task {
                 }
             }
 
+            updateMessage("Analyse des éléments");
             final Iterator<ViewResult.Row> it = result.iterator();
             while (it.hasNext()) {
                 final ViewResult.Row next = it.next();
@@ -109,6 +112,7 @@ public class HtmlRemoval extends Task {
 
         executor.shutdown();
         if (executor.awaitTermination(1, TimeUnit.DAYS)) {
+            updateMessage("Mise à jour finale");
             consumeBulkErrors(executeBulk());
         } else {
             throw new RuntimeException("upgrade takes too much time to complete.");
@@ -129,7 +133,7 @@ public class HtmlRemoval extends Task {
     protected List<DocumentOperationResult> addToBulk(final Map doc) {
         if (doc == null)
             return Collections.EMPTY_LIST;
-        
+
         boolean over = false;
         while (!over) {
             over = bulkQueue.offer(doc);
