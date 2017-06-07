@@ -26,7 +26,7 @@
             <Label text="Nom" />
             <Label text="Mise à jour" GridPane.columnIndex="2" />
             <Label text="Commentaire" GridPane.columnSpan="4" GridPane.rowIndex="1" GridPane.valignment="TOP" />
-            <HTMLEditor fx:id="uiComment" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="200.0" prefWidth="506.0" GridPane.columnSpan="4" GridPane.rowIndex="2" />
+            <TextArea fx:id="uiComment" prefHeight="200.0" prefWidth="506.0" GridPane.columnSpan="4" GridPane.rowIndex="2" />
             <TextField fx:id="uiNom" GridPane.columnIndex="1" />
             <DatePicker fx:id="uiDate" GridPane.columnIndex="3" />
          </children>

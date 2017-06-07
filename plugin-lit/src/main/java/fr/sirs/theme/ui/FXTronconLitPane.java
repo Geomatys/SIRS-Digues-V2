@@ -57,11 +57,11 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.web.HTMLEditor;
 import javafx.util.Callback;
 
 /**
@@ -69,6 +69,7 @@ import javafx.util.Callback;
  * @author Olivier Nouguier (Geomatys)
  * @author Alexis Manin (Geomatys)
  */
+
 public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
 
     protected final Previews previewRepository;
@@ -79,7 +80,7 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
 
     // Propriétés de TronconDigue
     @FXML protected TextField ui_libelle;
-    @FXML protected HTMLEditor ui_commentaire;
+    @FXML protected TextArea ui_commentaire;
     @FXML protected ComboBox ui_litId;
     @FXML protected Button ui_litId_link;
     @FXML protected ComboBox ui_systemeRepDefautId;
@@ -173,6 +174,7 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         // Propriétés de AvecGeometrie
         // Propriétés de TronconDigue
             ui_libelle.textProperty().unbindBidirectional(oldElement.libelleProperty());
+            ui_commentaire.textProperty().unbindBidirectional(oldElement.commentaireProperty());
         }
 
         final Session session = Injector.getBean(Session.class);
@@ -189,7 +191,7 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
         // * libelle
         ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
         // * commentaire
-        ui_commentaire.setHtmlText(newElement.getCommentaire());
+        ui_commentaire.textProperty().bindBidirectional(newElement.commentaireProperty());
 
         final SystemeReperageRepository srRepo = Injector.getBean(SystemeReperageRepository.class);
         final SystemeReperage defaultSR = newElement.getSystemeRepDefautId() == null? null : srRepo.get(newElement.getSystemeRepDefautId());;
@@ -306,10 +308,6 @@ public class FXTronconLitPane extends AbstractFXElementPane<TronconLit> {
     public void preSave() {
         final Session session = Injector.getBean(Session.class);
         final TronconLit element = (TronconLit) elementProperty().get();
-
-
-        element.setCommentaire(ui_commentaire.getHtmlText());
-
 
         Object cbValue;
         cbValue = ui_litId.getValue();

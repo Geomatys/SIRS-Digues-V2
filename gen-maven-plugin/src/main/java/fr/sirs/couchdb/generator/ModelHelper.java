@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -383,12 +383,15 @@ public class ModelHelper extends Helper {
         if(eAtt instanceof EAttribute){
             if(eAtt.isMany()) return null;
             else {
-                if (COMMENTAIRE_FIELD_NAME.equals(eAtt.getName())) {
-                    return "HTMLEditor";
-                } else if (CHEMIN_FIELD_NAME.equals(eAtt.getName())) {
-                    return "FXFileTextField";
-                } else if (SUITE_FIELD_NAME.equals(eAtt.getName()) || EVOLUTION_FIELD_NAME.equals(eAtt.getName())) {
-                    return "TextArea";
+                if (null != eAtt.getName()) switch (eAtt.getName()) {
+                    case CHEMIN_FIELD_NAME:
+                        return "FXFileTextField";
+                    case COMMENTAIRE_FIELD_NAME:
+                    case SUITE_FIELD_NAME:
+                    case EVOLUTION_FIELD_NAME:
+                        return "TextArea";
+                    default:
+                        break;
                 }
                 switch (eAtt.getEType().getName()) {
                 case "java.lang.Integer":

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -29,7 +29,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.web.HTMLEditor;
 import javafx.event.ActionEvent;
 import javafx.scene.image.ImageView;
 import java.util.List;
@@ -44,7 +43,7 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
 
     protected final Previews previewRepository;
     protected LabelMapper labelMapper;
-    
+
     @FXML private FXValidityPeriodPane uiValidityPeriod;
 
     // Propriétés de Berge
@@ -53,7 +52,7 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
 
     // Propriétés de TronconDigue
     @FXML protected TextField ui_libelle;
-    @FXML protected HTMLEditor ui_commentaire;
+    @FXML protected TextArea ui_commentaire;
     @FXML protected ComboBox ui_typeRiveId;
     @FXML protected Button ui_typeRiveId_link;
     @FXML protected ComboBox ui_systemeRepDefautId;
@@ -66,7 +65,7 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
     protected final PojoTable traitsTable;
 
     /**
-     * Constructor. Initialize part of the UI which will not require update when 
+     * Constructor. Initialize part of the UI which will not require update when
      * element edited change.
      */
     protected FXBergePane() {
@@ -87,7 +86,7 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
         ui_systemeRepDefautId.disableProperty().bind(disableFieldsProperty());
         ui_systemeRepDefautId_link.disableProperty().bind(ui_systemeRepDefautId.getSelectionModel().selectedItemProperty().isNull());
         ui_systemeRepDefautId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
-        ui_systemeRepDefautId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_systemeRepDefautId.getSelectionModel().getSelectedItem()));       
+        ui_systemeRepDefautId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_systemeRepDefautId.getSelectionModel().getSelectedItem()));
         borneIdsTable = new ListeningPojoTable(BorneDigue.class, null);
         borneIdsTable.editableProperty().bind(disableFieldsProperty().not());
         borneIdsTable.createNewProperty().set(false);
@@ -103,11 +102,11 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
         ui_traits.setClosable(false);
 
     }
-    
+
     public FXBergePane(final Berge berge){
         this();
-        this.elementProperty().set(berge);  
-    }     
+        this.elementProperty().set(berge);
+    }
 
     /**
      * Initialize fields at element setting.
@@ -119,44 +118,48 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
         // Propriétés de AvecGeometrie
         // Propriétés de TronconDigue
             ui_libelle.textProperty().unbindBidirectional(oldElement.libelleProperty());
+            ui_commentaire.textProperty().unbindBidirectional(oldElement.commentaireProperty());
+            ui_commentaire.setText(null);
         }
 
-        final Session session = Injector.getBean(Session.class);        
+        final Session session = Injector.getBean(Session.class);
 
-        /*
-         * Bind control properties to Element ones.
-         */
-        // Propriétés de Berge
-        // Propriétés de AvecGeometrie
-        // Propriétés de TronconDigue
-        // * libelle
-        ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
-        // * commentaire
-        ui_commentaire.setHtmlText(newElement.getCommentaire());
-        SIRS.initCombo(ui_typeRiveId, FXCollections.observableList(
-            previewRepository.getByClass(RefRive.class)), 
-            newElement.getTypeRiveId() == null? null : previewRepository.get(newElement.getTypeRiveId()));
-        SIRS.initCombo(ui_systemeRepDefautId, FXCollections.observableList(
-            previewRepository.getByClass(SystemeReperage.class)), 
-            newElement.getSystemeRepDefautId() == null? null : previewRepository.get(newElement.getSystemeRepDefautId()));
-        borneIdsTable.setParentElement(null);
-        final AbstractSIRSRepository<BorneDigue> borneIdsRepo = session.getRepositoryForClass(BorneDigue.class);
-        borneIdsTable.setTableItems(()-> SIRS.toElementList(newElement.getBorneIds(), borneIdsRepo));
-        gestionsTable.setParentElement(newElement);
-        gestionsTable.setTableItems(()-> (ObservableList) newElement.getGestions());
-        traitsTable.setParentElement(newElement);
-        final TraitBergeRepository traitrepo = (TraitBergeRepository)session.getRepositoryForClass(TraitBerge.class);
-        traitsTable.setTableItems(()-> FXCollections.observableArrayList(traitrepo.getByBergeId(newElement.getId())));
-        borneIdsTable.setObservableListToListen(newElement.getBorneIds());
+        if (newElement == null) {
+                ui_typeRiveId.setItems(null);
+                ui_systemeRepDefautId.setItems(null);
+        } else {
+            /*
+             * Bind control properties to Element ones.
+             */
+            // Propriétés de Berge
+            // Propriétés de AvecGeometrie
+            // Propriétés de TronconDigue
+            // * libelle
+            ui_libelle.textProperty().bindBidirectional(newElement.libelleProperty());
+            // * commentaire
+            ui_commentaire.textProperty().bindBidirectional(newElement.commentaireProperty());
+
+            SIRS.initCombo(ui_typeRiveId, FXCollections.observableList(
+                    previewRepository.getByClass(RefRive.class)),
+                    newElement.getTypeRiveId() == null ? null : previewRepository.get(newElement.getTypeRiveId()));
+            SIRS.initCombo(ui_systemeRepDefautId, FXCollections.observableList(
+                    previewRepository.getByClass(SystemeReperage.class)),
+                    newElement.getSystemeRepDefautId() == null ? null : previewRepository.get(newElement.getSystemeRepDefautId()));
+            borneIdsTable.setParentElement(null);
+            final AbstractSIRSRepository<BorneDigue> borneIdsRepo = session.getRepositoryForClass(BorneDigue.class);
+            borneIdsTable.setTableItems(() -> SIRS.toElementList(newElement.getBorneIds(), borneIdsRepo));
+            gestionsTable.setParentElement(newElement);
+            gestionsTable.setTableItems(() -> (ObservableList) newElement.getGestions());
+            traitsTable.setParentElement(newElement);
+            final TraitBergeRepository traitrepo = (TraitBergeRepository) session.getRepositoryForClass(TraitBerge.class);
+            traitsTable.setTableItems(() -> FXCollections.observableArrayList(traitrepo.getByBergeId(newElement.getId())));
+            borneIdsTable.setObservableListToListen(newElement.getBorneIds());
+        }
     }
     @Override
     public void preSave() {
         final Session session = Injector.getBean(Session.class);
         final Berge element = (Berge) elementProperty().get();
-
-
-        element.setCommentaire(ui_commentaire.getHtmlText());
-
 
         Object cbValue;
         cbValue = ui_typeRiveId.getValue();
@@ -182,7 +185,7 @@ public class FXBergePane extends AbstractFXElementPane<Berge> {
             currentBorneDigueIdsList.add(borneDigue.getId());
         }
         element.setBorneIds(currentBorneDigueIdsList);
-        
+
     }
 
     private static final class TraitTable extends PojoTable{

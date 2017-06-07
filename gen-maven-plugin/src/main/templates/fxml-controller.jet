@@ -22,7 +22,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.geometry.*;
-import javafx.scene.web.HTMLEditor;
 import javafx.event.ActionEvent;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -850,7 +849,7 @@ else if (helper.isParcelleVegetation()){
 <% } %>
 
 <% if(helper.isAvecCommentaire()) { %>
-        element.setCommentaire(<%=Helper.COMMENTAIRE_UI%>.getHtmlText());
+        element.setCommentaire(<%=Helper.COMMENTAIRE_UI%>.getText());
 <% } %>
 
 <% if(helper.isPositionable() ) { %>

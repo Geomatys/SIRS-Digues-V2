@@ -224,7 +224,7 @@ for(final EClass eClass : helper.getTypeTree() ) {
     }
 
     for(final EReference eRef: comboRefs) {
-        //Cas de la liste des SR/dZ des profils en long : on n'affiche pas de combobox pour cette référence qui est traitée à part dans la pojoTable
+        //Cas de la liste des SR/dZ des profils en long : on n'affiche pas de combobox pour cette rï¿½fï¿½rence qui est traitï¿½e ï¿½ part dans la pojoTable
         if(!(helper.isProfilLong() && Helper.SYSTEME_REP_DZ_PROFIL_EN_LONG_REF.equals(eRef.getName()))
             && !(helper.isLigneEau() && Helper.SYSTEME_REP_DZ_LIGNE_EAU_REF.equals(eRef.getName()))){
 %>
@@ -257,7 +257,7 @@ for(final EClass eClass : helper.getTypeTree() ) {
 
    if(helper.isAvecCommentaire()) { 
 %>
-            <HTMLEditor fx:id="<%=Helper.COMMENTAIRE_UI%>" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contentediTable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" maxHeight="-Infinity"  prefHeight="200.0" styleClass="gray-light" />
+            <TextArea fx:id="<%=Helper.COMMENTAIRE_UI%>" maxHeight="-Infinity"  prefHeight="200.0" styleClass="gray-light" />
 <% } 
 
     if(helper.isPhoto()){
@@ -296,7 +296,7 @@ for(final EClass eClass : helper.getTypeTree() ) {
     /*
     Onglets particuliers :
     - positions de documents pour les documents
-    - zones de végétation pour les parcelles
+    - zones de vï¿½gï¿½tation pour les parcelles
     */
     if(helper.isSIRSDocument()){
 %>

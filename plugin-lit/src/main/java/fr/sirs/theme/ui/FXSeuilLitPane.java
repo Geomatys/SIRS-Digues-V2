@@ -67,9 +67,9 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
-import javafx.scene.web.HTMLEditor;
 import org.geotoolkit.util.collection.CloseableIterator;
 
 /**
@@ -150,7 +150,7 @@ public class FXSeuilLitPane  extends AbstractFXElementPane<SeuilLit> {
     // Propriétés de AvecGeometrie
 
     // Propriétés de Objet
-    @FXML protected HTMLEditor ui_commentaire;
+    @FXML protected TextArea ui_commentaire;
     @FXML protected ComboBox ui_linearId;
     @FXML protected Button ui_linearId_link;
 
@@ -361,6 +361,7 @@ public class FXSeuilLitPane  extends AbstractFXElementPane<SeuilLit> {
             ui_passeSportEauVive.selectedProperty().unbindBidirectional(oldElement.passeSportEauViveProperty());
             ui_passePoisson.selectedProperty().unbindBidirectional(oldElement.passePoissonProperty());
             ui_surfaceRempantEntretien.getValueFactory().valueProperty().unbindBidirectional(oldElement.surfaceRempantEntretienProperty());
+            ui_commentaire.textProperty().unbindBidirectional(oldElement.commentaireProperty());
         }
 
         final Session session = Injector.getBean(Session.class);
@@ -457,7 +458,7 @@ public class FXSeuilLitPane  extends AbstractFXElementPane<SeuilLit> {
         couchesTable.setParentElement(newElement);
         couchesTable.setTableItems(()-> (ObservableList) newElement.getCouches());
         // * commentaire
-        ui_commentaire.setHtmlText(newElement.getCommentaire());
+        ui_commentaire.textProperty().bindBidirectional(newElement.commentaireProperty());
         SIRS.initCombo(ui_linearId, SIRS.observableList(
             previewRepository.getByClass(TronconDigue.class)).sorted(),
             newElement.getLinearId() == null? null : previewRepository.get(newElement.getLinearId()));
@@ -493,9 +494,6 @@ public class FXSeuilLitPane  extends AbstractFXElementPane<SeuilLit> {
     public void preSave() {
         final Session session = Injector.getBean(Session.class);
         final SeuilLit element = (SeuilLit) elementProperty().get();
-
-
-        element.setCommentaire(ui_commentaire.getHtmlText());
 
         uiPositionable.preSave();
 

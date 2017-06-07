@@ -52,7 +52,7 @@
                                     <RowConstraints />
                                  </rowConstraints>
                </GridPane>
-               <HTMLEditor fx:id="ui_commentaire" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contentediTable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" maxHeight="-Infinity" prefHeight="200.0" styleClass="gray-light" />
+               <TextArea fx:id="ui_commentaire" maxHeight="-Infinity" prefHeight="200.0" styleClass="gray-light" />
    
                </children>
                <padding>
