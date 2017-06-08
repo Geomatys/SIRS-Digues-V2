@@ -354,11 +354,15 @@ public class FXMapPane extends BorderPane implements Printable {
                 context = tmpCtx;
             }
 
+            // Do it now to avoid useless map update
+            replaceCoverageLayers(context);
+
             SirsCore.fxRunAndWait(() -> {
-                uiMap1.getContainer().setContext(context);
                 uiMap1.getCanvas().setObjectiveCRS(Injector.getSession().getProjection());
                 uiMap1.getCanvas().setVisibleArea(context.getAreaOfInterest());
                 setTemporalRange(LocalDate.now(), null);
+                // Set context at the end to avoid useless repaint while we parameterize the view.
+                uiMap1.getContainer().setContext(context);
                 return true;
             });
 
