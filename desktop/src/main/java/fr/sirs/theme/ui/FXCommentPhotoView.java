@@ -36,8 +36,10 @@ import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -47,7 +49,6 @@ import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.web.WebView;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
@@ -59,7 +60,7 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
 public class FXCommentPhotoView extends SplitPane {
 
     @FXML private ScrollBar uiPhotoScroll;
-    @FXML private WebView uiCommentArea;
+    @FXML private Label uiCommentArea;
     @FXML private ImageView uiPhotoView;
     @FXML private Label uiPhotoLibelle;
     @FXML private Label uiPhotoDate;
@@ -95,14 +96,22 @@ public class FXCommentPhotoView extends SplitPane {
     }
 
     private void elementSet(ObservableValue<? extends Element> observable, Element oldValue, Element newValue) {
-        final String comment;
-        if (newValue instanceof AvecCommentaire) {
-            comment = ((AvecCommentaire)newValue).getCommentaire();
-        } else {
-            comment = null;
+        if (oldValue instanceof AvecCommentaire) {
+            uiCommentArea.textProperty().unbind();
         }
 
-        uiCommentArea.getEngine().loadContent(comment == null? "" : comment);
+        if (newValue instanceof AvecCommentaire) {
+            final StringProperty comProperty = ((AvecCommentaire)newValue).commentaireProperty();
+            final StringBinding binding = Bindings.createStringBinding(() -> {
+                final String value = comProperty.get();
+                if (value == null || value.trim().isEmpty())
+                    return "Aucun commentaire";
+                return value;
+            }, comProperty);
+            uiCommentArea.textProperty().bind(binding);
+        } else {
+            uiCommentArea.setText("Aucun commentaire");
+        }
 
         final ArrayList<AbstractPhoto> tmpPhotos = new ArrayList<>();
         if (newValue instanceof AvecPhotos) {
