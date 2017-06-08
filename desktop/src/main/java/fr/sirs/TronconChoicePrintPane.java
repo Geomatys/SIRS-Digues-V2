@@ -57,13 +57,13 @@ import org.geotoolkit.referencing.LinearReferencing;
 public abstract class TronconChoicePrintPane extends BorderPane {
 
     @FXML protected Tab uiTronconChoice;
-    
+
     // Garde en cache les PRs de début et de fin de sections de tronçons imprimables (ajustables pour limiter l'impression à des parties de tronçons seulement).
     protected final Map<String, ObjectProperty<Number>[]> ajustedPrsByTronconId = new HashMap<>();
-    
+
     // Garde en cache les PRs de début et de fin des tronçons (non ajustables, mais gardés à titre indicatif).
     protected final Map<String, ObjectProperty<Number>[]> originalPrsByTronconId = new HashMap<>();
-    
+
     protected final TronconChoicePojoTable tronconsTable = new TronconChoicePojoTable();
 
     public TronconChoicePrintPane(final Class forBundle) {
@@ -84,7 +84,7 @@ public abstract class TronconChoicePrintPane extends BorderPane {
             uiAdd.setVisible(false);
             uiFicheMode.setVisible(false);
             uiDelete.setVisible(false);
-            
+
             final TableView table = getTable();
             table.editableProperty().unbind();
             table.setEditable(true);
@@ -95,7 +95,7 @@ public abstract class TronconChoicePrintPane extends BorderPane {
                     c.setEditable(false);
                 }
             }
-            
+
             getColumns().add(new EditablePRColumn("PR début sélectionné", ExtremiteTroncon.DEBUT));
             getColumns().add(new EditablePRColumn("PR fin sélectionné", ExtremiteTroncon.FIN));
             getColumns().add(new OriginalPRColumn("PR minimum existant", ExtremiteTroncon.DEBUT));
@@ -180,9 +180,9 @@ public abstract class TronconChoicePrintPane extends BorderPane {
             });
         }
     }
-    
+
     private ObjectProperty<Number> getOrComputePR(final TronconDigue troncon, final ExtremiteTroncon extremite, final Map<String, ObjectProperty<Number>[]> prCache){
-        
+
         // Si on est à la fin du tronçon le pr se trouve à l'index 1 du tableau, sinon, par défaut on se place au début et on met l'index à 0
         final int index = extremite==ExtremiteTroncon.FIN ? 1:0;
         final ObjectProperty<Number> prProperty;
@@ -256,9 +256,14 @@ public abstract class TronconChoicePrintPane extends BorderPane {
         @Override
         public boolean test(final T candidate) {
             final String linearId = candidate.getForeignParentId();
-            final ObjectProperty<Number>[] userPRs;
-            if (linearId == null || (userPRs = ajustedPrsByTronconId.get(linearId)) == null)
+            if (linearId == null)
                 return false;
+
+            final ObjectProperty<Number>[] userPRs = ajustedPrsByTronconId.get(linearId);
+            // Note : Can happen if user has not visualized the entire linear table,
+            // because the PRs parameters are populated lazily.
+            if (userPRs == null)
+                return true;
 
             final float startPR = userPRs[0].get() == null ? Float.NaN : userPRs[0].get().floatValue();
             final float endPR = userPRs[1].get() == null ? Float.NaN : userPRs[1].get().floatValue();

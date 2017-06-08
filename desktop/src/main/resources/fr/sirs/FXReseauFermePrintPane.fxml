@@ -5,6 +5,7 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -140,6 +141,11 @@
          <children>
             <Button fx:id="uiPrint" mnemonicParsing="false" onAction="#print" text="%print" />
             <Button fx:id="uiCancel" mnemonicParsing="false" onAction="#cancel" text="%cancel" />
+            <Label fx:id="uiCountLabel">
+               <graphic>
+                  <ProgressIndicator fx:id="uiCountProgress" minWidth="10.0" prefWidth="30.0" />
+               </graphic>
+            </Label>
          </children>
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
