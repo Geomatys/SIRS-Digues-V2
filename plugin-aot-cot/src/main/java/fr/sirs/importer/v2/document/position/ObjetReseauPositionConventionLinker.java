@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -20,6 +20,7 @@ package fr.sirs.importer.v2.document.position;
 
 import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
+import com.vividsolutions.jts.geom.Geometry;
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
@@ -164,7 +165,9 @@ public class ObjetReseauPositionConventionLinker implements Linker<ObjetReseau, 
         } else {
             final TronconUtils.PosInfo posPosition = new TronconUtils.PosInfo(pos);
             final TronconUtils.PosInfo objPosition = new TronconUtils.PosInfo(obj);
-            if (objPosition.getGeometry().contains(posPosition.getGeometry())) {
+            final Geometry g1 = objPosition.getGeometry();
+            final Geometry g2 = posPosition.getGeometry();
+            if (g1 != null && g2 != null && g1.contains(g2)) {
                 pos.setObjetId(obj.getId());
                 return true;
             } else if (objPosition.getGeoPointStart().equals(posPosition.getGeoPointStart())

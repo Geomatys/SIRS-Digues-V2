@@ -89,28 +89,28 @@ import org.opengis.util.FactoryException;
 public class TronconUtils {
 
     private static final GeometryFactory GF = GO2Utilities.JTS_FACTORY;
-    
+
     //==================================================================================================================
     // UTILITAIRES DU CONTRÔLE DE L'ARCHIVAGE DES TRONÇONS ET DES OBJETS QUI LES RÉFÉRENCENT.
     //==================================================================================================================
-    
+
     /**
      * Description des scénarios d'évolution de l'archivage d'un tronçon.
      */
     public enum ArchiveMode {
         /**
-         * L'état d'archivage reste inchangé. 
+         * L'état d'archivage reste inchangé.
          * Le tronçon archivé reste archivé à date constante. Le tronçon non archivé reste non archivé.
          */
-        UNCHANGED, 
+        UNCHANGED,
         /**
          * Un tronçon non archivé est archivé.
          */
-        ARCHIVE, 
+        ARCHIVE,
         /**
          * Un tronçon archivé est désarchivé.
          */
-        UNARCHIVE, 
+        UNARCHIVE,
         /**
          * La date d'archivage d'un tronçon est modifiée.
          */
@@ -169,42 +169,42 @@ public class TronconUtils {
 
         return tdCopy;
     }
-    
+
     /**
      * Méthode d'archivage des tronçons de digue et des objets s'y référant dotés d'une validité temporelle (c'est à dire
      * implémentant l'interface {@link AvecBornesTemporelles}).
-     * 
-     * La procédure d'archivage consiste à affecter une date de fin au tronçon de digue et aux objets archivables qui s'y 
-     * réfèrent, à condition qu'ils n'aient pas déjà une date de fin ou, éventuellement, que cette date de fin soit 
+     *
+     * La procédure d'archivage consiste à affecter une date de fin au tronçon de digue et aux objets archivables qui s'y
+     * réfèrent, à condition qu'ils n'aient pas déjà une date de fin ou, éventuellement, que cette date de fin soit
      * postérieure à la date d'archivage. Cette dernière condition doit être volontairement activée.
-     * 
+     *
      * Cette méthode est implémentée ici de manière à ce que le code d'archivage puisse être capitalisé au fur et à mesure.
-     * 
-     * @param section 
-     * @param session 
+     *
+     * @param section
+     * @param session
      * @param archiveDate Date d'archivage du tronçon et des objets.
      * @param includeAfter Vrai pour forcer l'archivage des objets dont la date est postérieure à la date d'archive.
      * @param skipWithParent Vrai pour éviter la mise à jour de la date de fin des objets qui ont un parent (c'est à dire qui ne sont pas des documents CouchDB).
      * @return Rapports de mise à jour en base du tronçon et des objets.
      */
-    public static List<DocumentOperationResult> archiveSectionWithTemporalObjects(final TronconDigue section, 
+    public static List<DocumentOperationResult> archiveSectionWithTemporalObjects(final TronconDigue section,
             final SessionCore session, final LocalDate archiveDate, final boolean includeAfter, final boolean skipWithParent){
-        
+
         section.setDate_fin(archiveDate);
 
         final Collection toSave = new ArrayList<>();
         toSave.add(section);
-        
+
         for (final Positionable obj : TronconUtils.getPositionableList(section)) {
-            
+
             // Condition sur l'absence de parent (à l'origine implémentée dans la procédure de fusion mais pas dans le découpage…).
             if (skipWithParent && obj.getParent() != null)
                 continue;
 
             if (obj instanceof AvecBornesTemporelles) {
                 final AvecBornesTemporelles dated = (AvecBornesTemporelles) obj;
-                
-                /* On n'affecte une date de fin qu'aux objets qui n'en on pas déjà une SAUF si cette dernière est 
+
+                /* On n'affecte une date de fin qu'aux objets qui n'en on pas déjà une SAUF si cette dernière est
                  * postérieure à la date d'archivage. Cette condition provient du code initial récupéré de la fusion de
                  * tronçons, avec une date d'archivage fixée à la veille de la date à laquelle est réalisée la fusion.
                  * Mais quelle est la raison pratique de cette condition… ? Difficile à dire.
@@ -212,7 +212,7 @@ public class TronconUtils {
                  * Afin de pouvoir paramétrer ce comportement, la condition de postériorité de la date doit donc être
                  * volontairement activée.
                  */
-                if (dated.getDate_fin() == null 
+                if (dated.getDate_fin() == null
                         || (includeAfter && dated.getDate_fin().isAfter(archiveDate))){
                     dated.setDate_fin(archiveDate);
                     toSave.add(dated);
@@ -222,35 +222,35 @@ public class TronconUtils {
 
         return session.executeBulk(toSave);
     }
-    
+
     /**
      * Méthode de mise à jour de l'archivage d'un tronçon avec les objets qui le référencent.
-     * 
+     *
      * D'après la demande explicite de Jordan Perrin (SYM-1444), les objets dont la date de fin est identique à l'ancienne
      * date d'archivage du tronçon, voient alors leur nouvelle date de fin modifiée de manière à suivre celle du tronçon
      * (voir commentaire du 22/05/2017 15:10).
-     * 
+     *
      * @param section
      * @param session
      * @param oldArchiveDate
-     * @param archiveDate 
+     * @param archiveDate
      * @return Rapports de mise à jour en base du tronçon et des objets.
      */
-    public static List<DocumentOperationResult> updateArchiveSectionWithTemporalObjects(final TronconDigue section, 
+    public static List<DocumentOperationResult> updateArchiveSectionWithTemporalObjects(final TronconDigue section,
             final SessionCore session, final LocalDate oldArchiveDate, final LocalDate archiveDate){
-        
+
         section.setDate_fin(archiveDate);
 
         final Collection toSave = new ArrayList<>();
         toSave.add(section);
-        
+
         for (final Positionable obj : TronconUtils.getPositionableList(section)) {
             if (((Element)obj).getParent() != null)
                 continue;
 
             if (obj instanceof AvecBornesTemporelles) {
                 final AvecBornesTemporelles dated = (AvecBornesTemporelles) obj;
-                
+
                 if (dated.getDate_fin()==null || dated.getDate_fin().isEqual(oldArchiveDate)){
                     dated.setDate_fin(archiveDate);
                     toSave.add(dated);
@@ -260,30 +260,30 @@ public class TronconUtils {
 
         return session.executeBulk(toSave);
     }
-    
+
     /**
      * Méthode de désarchivage d'un tronçon et des objets qui le référencent.
-     * 
+     *
      * @param section
-     * @param session 
+     * @param session
      * @param initialArchiveDate Date d'archivage des objets référençant le tronçon qui doivent être désarchivés.
      * @return Rapports de mise à jour en base du tronçon et des objets.
      */
     public static List<DocumentOperationResult> unarchiveSectionWithTemporalObjects(final TronconDigue section, final SessionCore session, final LocalDate initialArchiveDate){
-        
+
         section.setDate_fin(null);
 
         final Collection toSave = new ArrayList<>();
         toSave.add(section);
-        
+
         for (final Positionable obj : TronconUtils.getPositionableList(section)) {
             if (((Element)obj).getParent() != null)
                 continue;
 
             if (obj instanceof AvecBornesTemporelles) {
                 final AvecBornesTemporelles dated = (AvecBornesTemporelles) obj;
-                
-                if (dated.getDate_fin() != null 
+
+                if (dated.getDate_fin() != null
                         && dated.getDate_fin().isEqual(initialArchiveDate)){
                     dated.setDate_fin(null);
                     toSave.add(dated);
@@ -293,12 +293,12 @@ public class TronconUtils {
 
         return session.executeBulk(toSave);
     }
-    
-    
+
+
     //==================================================================================================================
     // UTILITAIRES DE DÉCOUPAGE DE TRONÇON
     //==================================================================================================================
-    
+
 
     /**
      * Crée une copie du tronçon en entrée, dont la géométrie se limite à la polyligne donnée.
@@ -530,12 +530,12 @@ public class TronconUtils {
 
         return tronconCp;
     }
-    
-    
+
+
     //==================================================================================================================
     // UTILITAIRES DE RÉCUPÉRATION D'ENTITÉS POSITIONNÉES SUR LE TRONÇON
     //==================================================================================================================
-    
+
 
     /**
      * Retrieve the list of owners  of a linear whose id is given as parameter.
@@ -634,12 +634,12 @@ public class TronconUtils {
     public static List<Positionable> getPositionableList(final String linearId) {
         return InjectorCore.getBean(SessionCore.class).getPositionableByLinearId(linearId);
     }
-    
-    
+
+
     //==================================================================================================================
     // UTILITAIRES DE FUSION DE TRONÇON
     //==================================================================================================================
-    
+
 
     /**
      * On ajoute / copie les propriétés du second tronçon (incluant les structures) dans le premier.
@@ -775,7 +775,7 @@ public class TronconUtils {
                 }
             }
         }
-        
+
         if(sr!=null) updateSRElementaire(troncon, session);
     }
 
@@ -814,12 +814,12 @@ public class TronconUtils {
         // On cherche les bornes de début et de fin du SR élémentaire : on se base pour cela sur les libellés de bornes.
         SystemeReperageBorne srbStart = null;
         SystemeReperageBorne srbEnd = null;
-        
+
         // On parcours les bornes du SR élémentaire…
         final BorneDigueRepository bdr = (BorneDigueRepository) session.getRepositoryForClass(BorneDigue.class);
         final List<BorneDigue> tronconBornes = bdr.get(troncon.getBorneIds());
         for(final SystemeReperageBorne srb : sr.getSystemeReperageBornes()){
-            
+
             // On cherche pour chaque borne du SR élémentaire s'il s'agit de la borne de début ou de la borne de fin.
             for(final BorneDigue bd : tronconBornes){
                 if(bd.getId().equals(srb.getBorneId())){
@@ -843,8 +843,8 @@ public class TronconUtils {
 
             srbStart = session.getElementCreator().createElement(SystemeReperageBorne.class);
             srbStart.setBorneId(bdStart.getDocumentId());
-            
-            // On initialise le PR de la borne de départ à 0. lors de sa création uniquement car sa valeur, quand elle 
+
+            // On initialise le PR de la borne de départ à 0. lors de sa création uniquement car sa valeur, quand elle
             // est non nulle, sert d'offset aux autres valeurs de PR calculées dans le SR élémentaire.
             srbStart.setValeurPR(0);
             sr.systemeReperageBornes.add(srbStart);
@@ -870,15 +870,15 @@ public class TronconUtils {
         final float prStart = srbStart.getValeurPR();
         srbEnd.setValeurPR((float)troncon.getGeometry().getLength()+prStart);
 
-        
+
         // On réajuste la postion des bornes de début et de fin aux extrémités du tronçon.
         final Coordinate[] coords = troncon.getGeometry().getCoordinates();
         bdStart.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(coords[0]));
         bdEnd.setGeometry(GO2Utilities.JTS_FACTORY.createPoint(coords[coords.length-1]));
 
         bdRepo.executeBulk(bdStart, bdEnd);
-        
-        
+
+
         // Mise à jour des PRs des autres bornes du SR élémentaire au cas où la géométrie du tronçon aurait changé.
         final SegmentInfo[] buildSegments = buildSegments(asLineString(troncon.getGeometry()));
         for(final SystemeReperageBorne currentSrb : sr.getSystemeReperageBornes()){
@@ -897,19 +897,19 @@ public class TronconUtils {
 
         srRepo.update(sr,troncon);
     }
-    
+
     /**
      * Méthode de recherche du PR de la borne de début du SR élémentaire d'un tronçon.
-     * 
+     *
      * Cette méthode s'appuie sur l'étiquette définie par {@link SirsCore#SR_ELEMENTAIRE_START_BORNE}.
-     * 
+     *
      * @param troncon Le tronçon utilisé pour la recherche des bornes.
      * @param sr Le SR dont on recherche la borne de début, qui doit être un SR élémentaire et relatif au tronçon donné en premier argument.
      * @param session Session utilisée pour la connexion à la base.
      * @return Le PR de la borne de début du SR élémentaire.
      */
     public static float getPRStart(final TronconDigue troncon, final SystemeReperage sr, final SessionCore session){
-        
+
         final List<BorneDigue> tronconBornes = session.getRepositoryForClass(BorneDigue.class).get(troncon.getBorneIds());
         for(final SystemeReperageBorne currentSrb : sr.getSystemeReperageBornes()){
             for(final BorneDigue currentBorne : tronconBornes){
@@ -1009,7 +1009,7 @@ public class TronconUtils {
         if(bonSegment!=null){
             // Calcul des coordonnées du point à convertir.
             final Point initialPointPR = GO2Utilities.JTS_FACTORY.createPoint(bonSegment.getPoint(distanceSurLeBonSegment, 0));
-            
+
             // Conversion des coordonnées du point à convertir vers le SR demandé.
             return computePR(refLinear, targetSR, initialPointPR, borneRepo);
         }
@@ -1616,13 +1616,21 @@ public class TronconUtils {
         }
 
         /**
-         * @return geometry of the input positionable. If it has no geometry, it's computed and affected to the positionable object.
+         * @return geometry of the input positionable. If it has no geometry,
+         * it's computed and affected to the positionable object. If we cannot
+         * deduce a geometry (no linear associated, etc.), a null value is returned.
          */
         public Geometry getGeometry() {
             Geometry geometry = pos.getGeometry();
             if (geometry == null) {
-                geometry = buildGeometry(getTronconLinear(), getTronconSegments(false), pos, session.getRepositoryForClass(BorneDigue.class));
-                pos.setGeometry(geometry);
+                final LineString tmpLinear = getTronconLinear();
+                if (tmpLinear != null) {
+                    final SegmentInfo[] segments = getTronconSegments(false);
+                    if (segments != null) {
+                        geometry = buildGeometry(tmpLinear, segments, pos, session.getRepositoryForClass(BorneDigue.class));
+                        pos.setGeometry(geometry);
+                    }
+                }
             }
             return geometry;
         }
