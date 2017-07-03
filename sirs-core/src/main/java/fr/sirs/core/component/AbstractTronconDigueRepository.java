@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -33,6 +33,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -111,19 +112,19 @@ public class AbstractTronconDigueRepository<T extends TronconDigue> extends Abst
 
     @Override
     public void update(T entity) {
-        checkPRUpdate(entity);
+        checkPRUpdate(Collections.singleton(entity));
         super.update(entity);
     }
 
     @Override
     public List<DocumentOperationResult> executeBulk(T... bulkList) {
-        checkPRUpdate(bulkList);
+        checkPRUpdate(Arrays.asList(bulkList));
         return super.executeBulk(bulkList);
     }
 
     @Override
     public List<DocumentOperationResult> executeBulk(Collection<T> bulkList) {
-        checkPRUpdate((T[]) bulkList.toArray());
+        checkPRUpdate(bulkList);
         return super.executeBulk(bulkList);
     }
 
@@ -241,11 +242,11 @@ public class AbstractTronconDigueRepository<T extends TronconDigue> extends Abst
      * positioned amongst it), and launch it.
      * @param toCheck The {@link TronconDigue} objects to check.
      */
-    private void checkPRUpdate(final T... toCheck) {
-        if (toCheck == null || toCheck.length < 1)
+    private void checkPRUpdate(final Collection<T> toCheck) {
+        if (toCheck == null || toCheck.size() < 1)
             return;
 
-        final HashSet<T> trs = new HashSet<>(Arrays.asList(toCheck));
+        final HashSet<T> trs = new HashSet<>(toCheck);
         synchronized (prUpdates) {
             final Iterator<WeakReference<T>> it = prUpdates.iterator();
             while (it.hasNext()) {
