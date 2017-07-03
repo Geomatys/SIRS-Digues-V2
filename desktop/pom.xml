@@ -76,6 +76,11 @@
     </dependency>
     <dependency>
       <groupId>org.geotoolkit</groupId>
+      <artifactId>geotk-client-wms</artifactId>
+      <version>${geotoolkit.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geotoolkit</groupId>
       <artifactId>geotk-feature-sql</artifactId>
       <version>${geotoolkit.version}</version>
     </dependency>
