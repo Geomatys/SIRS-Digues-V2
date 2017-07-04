@@ -459,7 +459,9 @@ public class Session extends SessionCore {
         try {
             return openEditors.getOrCreate(target, () -> {
                 final FXFreeTab newTab = tabCreator.call();
-                newTab.setOnClosed(event -> openEditors.remove(target));
+                if (newTab != null) {
+                    newTab.setOnClosed(event -> openEditors.remove(target));
+                }
                 return newTab;
             });
         } catch (Exception e) {
