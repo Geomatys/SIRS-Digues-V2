@@ -37,7 +37,7 @@
 			<staticText>
 				<reportElement x="153" y="17" width="371" height="22" />
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="Serif" size="14" isBold="true" isUnderline="true"/>
+					<font  size="14" isBold="true" isUnderline="true"/>
 				</textElement>
 				<text><![CDATA[Titre]]></text>
 			</staticText>
