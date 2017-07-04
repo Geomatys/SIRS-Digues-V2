@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -26,14 +26,18 @@ import fr.sirs.core.model.AbstractObservation;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ReferenceType;
+import fr.sirs.core.model.SIRSFileReference;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.property.Reference;
+import java.awt.Image;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
+import javafx.embed.swing.SwingFXUtils;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
@@ -52,15 +56,17 @@ public class ObjectDataSource<T> implements JRDataSource {
     protected final Previews previewRepository;
     protected final SirsStringConverter stringConverter;
 
-    public ObjectDataSource(final Iterable<T> iterable){
+    protected boolean isPhoto = false;
+
+    public ObjectDataSource(final Iterable<T> iterable) {
         this(iterable, null);
     }
 
-    public ObjectDataSource(final Iterable<T> iterable, final Previews previewLabelRepository){
+    public ObjectDataSource(final Iterable<T> iterable, final Previews previewLabelRepository) {
         this(iterable, previewLabelRepository, null);
     }
 
-    public ObjectDataSource(final Iterable<T> iterable, final Previews previewsRepository, final SirsStringConverter stringConverter){
+    public ObjectDataSource(final Iterable<T> iterable, final Previews previewsRepository, final SirsStringConverter stringConverter) {
         ArgumentChecks.ensureNonNull("iterable", iterable);
         iterator = iterable.iterator();
         this.previewRepository = previewsRepository;
@@ -69,8 +75,9 @@ public class ObjectDataSource<T> implements JRDataSource {
 
     @Override
     public boolean next() throws JRException {
-        if(iterator.hasNext()){
+        if(iterator.hasNext()) {
             currentObject = iterator.next();
+            isPhoto = (currentObject instanceof AbstractPhoto);
             return true;
         } else {
             return false;
@@ -81,6 +88,12 @@ public class ObjectDataSource<T> implements JRDataSource {
     public Object getFieldValue(final JRField jrf) throws JRException {
         final String name = jrf.getName();
         try {
+            if (isPhoto && Image.class.isAssignableFrom(jrf.getValueClass())) {
+                final Path docPath = SirsCore.getDocumentAbsolutePath((SIRSFileReference)currentObject);
+
+                return SwingFXUtils.fromFXImage(SIRS.getOrLoadImage(docPath.toUri().toString()), null);
+            }
+
             final Method getter = currentObject.getClass().getMethod("get" + name.substring(0, 1).toUpperCase() + name.substring(1));
             final Object propertyValue = getter.invoke(currentObject);
             if (propertyValue != null) {
@@ -114,7 +127,7 @@ public class ObjectDataSource<T> implements JRDataSource {
      * @return Extracted information, or null if analysis failed.
      */
     protected Object parsePropertyValue(Object propertyValue, final Class refClass, final Class outputClass) {
-        
+
         // 0- Cas des collections : on renvoie une liste imprimable constituée à partir du traitement de chaque élément de la collection.
         if (propertyValue instanceof Collection) {
             final PrintableArrayList resultList = new PrintableArrayList(propertyValue instanceof List);
@@ -150,24 +163,24 @@ public class ObjectDataSource<T> implements JRDataSource {
         // 2b- Cas des "références" et des prévisualisations : on confie la conversion en chaîne de caractères au convertisseur du SIRS.
         if (String.class.isAssignableFrom(outputClass)) {
             return stringConverter.toString(propertyValue);
-        } 
-        
-        // 2c- ? 
+        }
+
+        // 2c- ?
         else {
             return ObjectConverters.convert(propertyValue, outputClass);
         }
     }
-    
+
     /**
      * Force la police de caractère indiquée dans les champs formatés en HTML à utiliser la fonte Arial partout où elle est précisée.
-     * 
+     *
      * @param value
-     * @return 
+     * @return
      */
     static String forceArialFontFace(final String value){
         return value.replaceAll("font face=\"[^\"]*\"", "font face=\"Arial\"");
     }
-    
+
     /**
      * Pour le classement des observations de la plus récente à la plus ancienne.
      */
@@ -178,7 +191,7 @@ public class ObjectDataSource<T> implements JRDataSource {
         else if(o1.getDate()==null || o2.getDate()==null) return (o1.getDate()==null) ? 1 : -1;
         else return -o1.getDate().compareTo(o2.getDate());
     };
-    
+
     /**
      * Pour le classement des photographies de la plus récente à la plus ancienne.
      */
@@ -189,7 +202,7 @@ public class ObjectDataSource<T> implements JRDataSource {
         else if(p1.getDate()==null || p2.getDate()==null) return (p1.getDate()==null) ? 1 : -1;
         else return -p1.getDate().compareTo(p2.getDate());
     };
-    
+
     /**
      * Pour le classement des éléments par désignation (ordre alphabétique).
      */

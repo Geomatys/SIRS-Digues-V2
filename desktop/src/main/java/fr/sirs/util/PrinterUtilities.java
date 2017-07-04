@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -19,10 +19,8 @@
 package fr.sirs.util;
 
 import fr.sirs.Injector;
-import fr.sirs.SIRS;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.component.Previews;
-import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Objet;
@@ -31,7 +29,6 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.ReseauHydrauliqueFerme;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.util.JRDomWriterDesordreSheet.PHOTOS_SUBREPORT;
-import fr.sirs.util.property.DocumentRoots;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -46,8 +43,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.logging.Level;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import net.sf.jasperreports.engine.JRDataSource;
@@ -113,7 +108,7 @@ public class PrinterUtilities {
         final JasperPrint print;
         try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateOuvrageAssocie.jrxml");
                 final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplateOuvrageAssocie.jrxml")){
-            
+
             final JRDomWriterOuvrageAssocieSheet templateWriter = new JRDomWriterOuvrageAssocieSheet(metaTemplateStream,
                     avoidReseauFields, observationFields, reseauFields, desordreFields, printPhoto, printReseauFerme);
             templateWriter.setOutput(templateFile);
@@ -160,7 +155,7 @@ public class PrinterUtilities {
         final JasperPrint print;
         try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateReseauFerme.jrxml");
                 final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplateReseauFerme.jrxml")){
-            
+
             final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(metaTemplateStream,
                     avoidReseauFields, observationFields, reseauFields, desordreFields, printPhoto, printReseauOuvrage);
             templateWriter.setOutput(templateFile);
@@ -209,7 +204,7 @@ public class PrinterUtilities {
         try(final InputStream metaTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateDesordre.jrxml");
                 final InputStream photoTemplateStream = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/photoTemplateDesordre.jrxml")){
 
-            final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(metaTemplateStream, avoidDesordreFields, 
+            final JRDomWriterDesordreSheet templateWriter = new JRDomWriterDesordreSheet(metaTemplateStream, avoidDesordreFields,
                     observationFields, prestationFields, reseauFields, printPhoto, printReseauOuvrage, printVoirie);
             templateWriter.setOutput(templateFile);
             templateWriter.write();
@@ -316,22 +311,30 @@ public class PrinterUtilities {
             throws IOException, ParserConfigurationException, SAXException, JRException, TransformerException {
 
         // Creates the Jasper Reports specific template from the generic template.
-        final File templateFile = File.createTempFile(elements.get(0).getClass().getSimpleName(), JRXML_EXTENSION);
-        templateFile.deleteOnExit();
+        final JasperReport jasperReport;
+        final Path templatePath = Files.createTempFile("printableElement", JRXML_EXTENSION);
+        final File templateFile = templatePath.toFile();
+        try {
+            final JRDomWriterElementSheet templateWriter;
+            try (final InputStream template = PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateElement.jrxml")) {
+                templateWriter = new JRDomWriterElementSheet(template);
+            }
+            templateWriter.setFieldsInterline(2);
+            templateWriter.setOutput(templateFile);
+            templateWriter.write(elements.get(0).getClass(), avoidFields);
 
-        final JRDomWriterElementSheet templateWriter = new JRDomWriterElementSheet(PrinterUtilities.class.getResourceAsStream("/fr/sirs/jrxml/metaTemplateElement.jrxml"));
-        templateWriter.setFieldsInterline(2);
-        templateWriter.setOutput(templateFile);
-        templateWriter.write(elements.get(0).getClass(), avoidFields);
+            jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
+        } finally {
+            Files.delete(templatePath);
+        }
 
-        final JasperReport jasperReport = JasperCompileManager.compileReport(JRXmlLoader.load(templateFile));
 
         JasperPrint finalPrint = null;
         for(final Element element : elements){
             final JRDataSource source = new ObjectDataSource(Collections.singletonList(element), previewLabelRepository, stringConverter);
 
             final Map<String, Object> parameters = new HashMap<>();
-            parameters.put("logo", PrinterUtilities.class.getResourceAsStream(LOGO_PATH));
+            parameters.put("logo", PrinterUtilities.class.getResource(LOGO_PATH));
             final JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, source);
             if(finalPrint==null) finalPrint=print;
             else{
@@ -431,36 +434,16 @@ JasperViewer.viewReport(jp1,false);
     }
 
     /**
-     * Find photograph pointed by given path (must be relative to configured
-     * {@link DocumentRoots#getPhotoRoot(java.lang.Class, boolean) }.
-     * Note : Used in .jrxml files.
-     * @param inputText Relative path to the wanted image.
-     * @return The found file, as a stream.
-     */
-    public static InputStream getPhotoStream(final String inputText) {
-        final Optional<Path> root = DocumentRoots.getRoot(AbstractPhoto.class, false);
-        if (root.isPresent()) {
-            try {
-                return Files.newInputStream(SIRS.concatenatePaths(root.get(), inputText));
-            } catch (Exception e) {
-                SIRS.LOGGER.log(Level.WARNING, "Cannot access a photograph file.", e);
-            }
-        }
-
-        return PrinterUtilities.class.getResourceAsStream("/fr/sirs/images/imgNotFound.png");
-    }
-    
-    /**
      * Construit une chaîne de caractères énumérant le contenu d'un {@link Iterable}.
-     * 
+     *
      * @param <E>
      * @param iterable
      * @param ordered
      * @param startIndex
-     * @return 
+     * @return
      */
     public static <E> String printList(final Iterable<E> iterable, final boolean ordered, int startIndex){
-        
+
         final Iterator<E> it = iterable.iterator();
         if (! it.hasNext())
             return "";
@@ -504,8 +487,8 @@ JasperViewer.viewReport(jp1,false);
             }
         }
     }
-    
-    
+
+
     /**
      * Groupe par tronçon.
      */
@@ -513,10 +496,10 @@ JasperViewer.viewReport(jp1,false);
         final String lin1 = d1.getLinearId();
         final String lin2 = d2.getLinearId();
         if(lin1==null && lin2==null) return 0; // Ne devrait jamais se produire pour un objet.
-        else if(lin1==null || lin2==null) return (lin1==null) ? 1 : -1; // Ne devrait jamais se produire pour un objet. 
+        else if(lin1==null || lin2==null) return (lin1==null) ? 1 : -1; // Ne devrait jamais se produire pour un objet.
         else return lin1.compareTo(lin2);
     };
-    
+
     /**
      * Groupe par tronçon en classant par désignation croissante de tronçon selon l'ordre alphabétique.
      * Si la désignation n'est pas disponible, on groupe par identifiant.
@@ -529,10 +512,10 @@ JasperViewer.viewReport(jp1,false);
         else {
             final TronconDigue troncon1 = Injector.getSession().getRepositoryForClass(TronconDigue.class).get(lin1);
             final TronconDigue troncon2 = Injector.getSession().getRepositoryForClass(TronconDigue.class).get(lin2);
-            
+
             if(troncon1==null || troncon2==null)
                 throw new SirsCoreRuntimeException("Un des tronçons est null : "+lin1+" ou "+lin2+".");
-            
+
             final String des1 = troncon1.getDesignation();
             final String des2 = troncon2.getDesignation();
             if(des1==null && des2==null) return 0;

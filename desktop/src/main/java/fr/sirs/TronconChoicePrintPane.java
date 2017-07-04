@@ -265,8 +265,8 @@ public abstract class TronconChoicePrintPane extends BorderPane {
             if (userPRs == null)
                 return true;
 
-            final float startPR = userPRs[0].get() == null ? Float.NaN : userPRs[0].get().floatValue();
-            final float endPR = userPRs[1].get() == null ? Float.NaN : userPRs[1].get().floatValue();
+            final float startPR = (userPRs[0] == null || userPRs[0].get() == null) ? Float.NaN : userPRs[0].get().floatValue();
+            final float endPR = (userPRs[1] == null || userPRs[1].get() == null) ? Float.NaN : userPRs[1].get().floatValue();
 
             if (!Float.isNaN(startPR) && candidate.getPrFin() < startPR)
                 return false;

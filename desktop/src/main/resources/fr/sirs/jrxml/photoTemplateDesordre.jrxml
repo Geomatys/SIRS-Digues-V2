@@ -6,6 +6,7 @@
 	<field name="designation" class="java.lang.String"/>
 	<field name="libelle" class="java.lang.String"/>
 	<field name="chemin" class="java.lang.String"/>
+	<field name="photo" class="java.awt.Image"/>
 	<field name="prDebut" class="java.lang.Double"/>
 	<field name="prFin" class="java.lang.Double"/>
 	<field name="date" class="java.time.LocalDate"/>
@@ -40,7 +41,7 @@
 		<band height="160" splitType="Stretch">
 			<image>
 				<reportElement x="5" y="5" width="220" height="150" uuid="072d6ffa-5b23-4566-a9ef-ea6ac8c4c115"/>
-				<imageExpression><![CDATA[fr.sirs.util.PrinterUtilities.getPhotoStream($F{chemin})]]></imageExpression>
+				<imageExpression><![CDATA[$F{photo}]]></imageExpression>
 			</image>
 			<frame>
 				<reportElement positionType="Float" mode="Opaque" x="230" y="12" width="325" height="12" uuid="0e5f620d-ae56-4464-a0d2-b9d3ac85412b"/>
