@@ -31,6 +31,7 @@ import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.property.Reference;
 import java.awt.Image;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Comparator;
@@ -90,8 +91,11 @@ public class ObjectDataSource<T> implements JRDataSource {
         try {
             if (isPhoto && Image.class.isAssignableFrom(jrf.getValueClass())) {
                 final Path docPath = SirsCore.getDocumentAbsolutePath((SIRSFileReference)currentObject);
-
-                return SwingFXUtils.fromFXImage(SIRS.getOrLoadImage(docPath.toUri().toString()), null);
+                if (Files.isReadable(docPath)) {
+                    return SwingFXUtils.fromFXImage(SIRS.getOrLoadImage(docPath.toUri().toString()), null);
+                } else {
+                    return javax.imageio.ImageIO.read(ObjectDataSource.class.getResource("/fr/sirs/images/imgNotFound.png"));
+                }
             }
 
             final Method getter = currentObject.getClass().getMethod("get" + name.substring(0, 1).toUpperCase() + name.substring(1));
