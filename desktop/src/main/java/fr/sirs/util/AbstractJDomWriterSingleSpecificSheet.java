@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -30,7 +30,6 @@ import static fr.sirs.util.JRUtils.ATT_IS_ITALIC;
 import static fr.sirs.util.JRUtils.ATT_IS_STRETCH_WITH_OVERFLOW;
 import static fr.sirs.util.JRUtils.ATT_IS_UNDERLINE;
 import static fr.sirs.util.JRUtils.ATT_KEY;
-import static fr.sirs.util.JRUtils.ATT_MARKUP;
 import static fr.sirs.util.JRUtils.ATT_MODE;
 import static fr.sirs.util.JRUtils.ATT_NAME;
 import static fr.sirs.util.JRUtils.ATT_POSITION_TYPE;
@@ -119,20 +118,20 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
     protected static final int UTIL_HEIGTH = PAGE_HEIGHT - TOP_MARGIN - BOTTOM_MARGIN;
     protected static final int FOOTER_HEIGHT = 12;
     protected static final int DETAIL_HEIGHT = UTIL_HEIGTH-FOOTER_HEIGHT;
-    
+
     // Doit être cohérent avec les paddings indiqués dans les styles des en-têtes et cellules des tableaux dans les .jrxml.
     protected static final int TABLE_CELL_PADDING_H = 4;
     protected static final int TABLE_CELL_PADDING_V = 4;
     protected static final int TABLE_HEAD_PADDING_H = 3;
     protected static final int TABLE_HEAD_PADDING_V = 5;
     protected static final boolean TABLE_HEAD_BOLD = true;
-    
+
     protected static final Function<JRColumnParameter, String> FIELD_MAPPER = p -> p.getFieldName();
     protected static final String CLASS_SUB_DATASET_FIELD = BUNDLE_KEY_CLASS;
 
     protected final Class<T> classToMap;
     private final List<String> avoidFields;
-    
+
     // Couleur d'arrière-plan des titres des sections.
     private final String sectionTitleBackgroundColor;
 
@@ -143,7 +142,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         this.classToMap = classToMap;
     }
 
-    public AbstractJDomWriterSingleSpecificSheet(final Class<T> classToMap, 
+    public AbstractJDomWriterSingleSpecificSheet(final Class<T> classToMap,
             final InputStream stream, final List<String> avoidFields, final String sectionTitleBackgroundColor)
             throws ParserConfigurationException, SAXException, IOException{
         super(stream);
@@ -154,7 +153,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
     /**
      * <p>This method writes a Jasper Reports template mapping the parameter class.</p>
-     * 
+     *
      * @throws TransformerException
      */
     public void write() throws TransformerException {
@@ -180,7 +179,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
     }
 
     /**
-     * 
+     *
      */
     protected void writeFields(){
         final Method[] methods = classToMap.getMethods();
@@ -205,7 +204,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
         // Extraction des noms de champs.
         final List<String> fields = fieldParameters.stream().map(FIELD_MAPPER).collect(Collectors.toList());
-        
+
         // Détermination du prédicat à utiliser.
         final Predicate<String> printPredicate = print
                 ? (String fieldName) -> fields==null || fields.contains(fieldName)
@@ -268,7 +267,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
     /**
      * Insertion d'un titre de section.
-     * 
+     *
      * @param sectionTitle Titre de la section.
      * @param height Hauteur du cadre.
      * @param margin Marge entre le cadre et le texte (haut et bas).
@@ -278,9 +277,9 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
      * @param italic Vrai si le texte est en italique.
      * @param underlined Vrai si le texte est souligné.
      */
-    protected void writeSectionTitle(final String sectionTitle, final int height, final int margin, final int indent, 
+    protected void writeSectionTitle(final String sectionTitle, final int height, final int margin, final int indent,
             final int textSize, final boolean bold, final boolean italic, final boolean underlined){
-        
+
         final Element band = (Element) detail.getElementsByTagName(TAG_BAND).item(0);
         final Element frame = document.createElement(TAG_FRAME);
         final Element frameReportElement = document.createElement(TAG_REPORT_ELEMENT);
@@ -319,7 +318,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         band.appendChild(frame);
         currentY+=height;
     }
-    
+
     /**
      * Insertion d'un saut de page.
      */
@@ -332,7 +331,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         pageBreakReportElement.setAttribute(ATT_WIDTH, String.valueOf(UTIL_WIDTH));
         pageBreakReportElement.setAttribute(ATT_X, String.valueOf(0));
         pageBreakReportElement.setAttribute(ATT_Y, String.valueOf(currentY));
-        
+
         currentY++;
         pageBreak.appendChild(pageBreakReportElement);
         band.appendChild(pageBreak);
@@ -340,13 +339,13 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
 
     /**
      *
-     * @param clazz Type d'objets contenus dans le tableau. 
+     * @param clazz Type d'objets contenus dans le tableau.
      * @param fields Liste de noms de champs. Il peut s'agir d'une liste restrictive des noms de champs à énumérer
-     * dans le tableau à l'exclusion des autres champs. Il peut également s'agir d'une liste de champs à exclure du 
-     * tableau. Dans le premier cas uniquement, l'ordre dans lequel sont énumérés les noms de champs détermine l'ordre 
-     * des colonnes dans le tableau. Dans tous les cas, les noms de champs doivent être cohérents avec le type d'objet 
+     * dans le tableau à l'exclusion des autres champs. Il peut également s'agir d'une liste de champs à exclure du
+     * tableau. Dans le premier cas uniquement, l'ordre dans lequel sont énumérés les noms de champs détermine l'ordre
+     * des colonnes dans le tableau. Dans tous les cas, les noms de champs doivent être cohérents avec le type d'objet
      * du tableau.
-     * @param print Détermine si les noms de champs énumérés doivent être considérés comme une liste restrictive (vrai) 
+     * @param print Détermine si les noms de champs énumérés doivent être considérés comme une liste restrictive (vrai)
      * ou comme une liste de champs à éviter (faux).
      * @param datasourceParameter Nom de la source de données, tel que connu par JasperReports.
      * @param datasetName
@@ -356,26 +355,26 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
      * @param detailCellHeight Hauteur des cellules.
      * @param fillWidth Détermine si la dernière colonne doit exploiter le maximum d'espace disponible.
      */
-    protected void writeTable(final Class clazz, final Collection<JRColumnParameter> fields, final boolean print, 
-            final String datasourceParameter, final String datasetName, final int height, 
-            final int fontSize, final int headerHeight, final int detailCellHeight, 
+    protected void writeTable(final Class clazz, final Collection<JRColumnParameter> fields, final boolean print,
+            final String datasourceParameter, final String datasetName, final int height,
+            final int fontSize, final int headerHeight, final int detailCellHeight,
             final boolean fillWidth){
-        
+
         // Extraction des noms de champs et des largeurs de colonnes.
         final Collection<String> fieldNames = new ArrayList<>();
-        
+
         /*
-        Suite de coefficients de pondération de largeur à appliquer à chaque champ dans l'ordre de leur mention. 
-        
-        1- Le coefficient de pondération de base d'une colonne vaut 1.f par défaut. 
-        
-        2- Si les coefficients de toutes les colonnes sont identiques (quelle que soit leur valeur), toutes les colonnes 
-        auront la même largeur. 
-        
-        3- Si le coefficient d'une colonne A vaut 1.f, celui d'une colonne B vaut .25f et celui d'une colonne C vaut 2.f, 
+        Suite de coefficients de pondération de largeur à appliquer à chaque champ dans l'ordre de leur mention.
+
+        1- Le coefficient de pondération de base d'une colonne vaut 1.f par défaut.
+
+        2- Si les coefficients de toutes les colonnes sont identiques (quelle que soit leur valeur), toutes les colonnes
+        auront la même largeur.
+
+        3- Si le coefficient d'une colonne A vaut 1.f, celui d'une colonne B vaut .25f et celui d'une colonne C vaut 2.f,
         la colonne C sera environ deux fois plus large que la colonne A et huit fois plus large que la colonne B.
-        
-        4- Les coefficients ne sont pris en compte que lorsque la liste des champs spécifie ceux qui doivent affichés 
+
+        4- Les coefficients ne sont pris en compte que lorsque la liste des champs spécifie ceux qui doivent affichés
         exclusivement ; ils sont ignorés si la liste contient des champs à exclure.
         */
         final float[] widthCoeffs = new float[fields.size()];
@@ -425,7 +424,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         ////////////////////////////////////////////////////////////////////////
         int nbColumns=0;
         /*
-        Si la liste des champs contient les champs à imprimer et non pas à éviter alors le nombre de champs est 
+        Si la liste des champs contient les champs à imprimer et non pas à éviter alors le nombre de champs est
         directement donnée par la taille de la liste.
         */
         if(print) {
@@ -457,15 +456,15 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
             cumulatedWidth+=baseColumnWidth;
             writeColumn("Type",
                     () -> document.createCDATASection("$F{class}==null ? \""+NULL_REPLACEMENT+"\" : java.util.ResourceBundle.getBundle($F{class}.getName()).getString(\""+BUNDLE_KEY_CLASS+"\")"),
-                    markupFromFieldName(CLASS_SUB_DATASET_FIELD), table, baseColumnWidth, fontSize, TABLE_HEAD_BOLD, true, headerHeight, detailCellHeight);
+                    table, baseColumnWidth, fontSize, TABLE_HEAD_BOLD, true, headerHeight, detailCellHeight);
         }
 
         ////////////////////////////////////////////////////////////////////////
         // BUILD COLUMNS
         ////////////////////////////////////////////////////////////////////////
         final ResourceBundle rb = ResourceBundle.getBundle(clazz.getName());
-        /* 
-        Si la liste des champs contient les champs à imprimer et non pas à éviter on se base sur l'ordre de la liste 
+        /*
+        Si la liste des champs contient les champs à imprimer et non pas à éviter on se base sur l'ordre de la liste
         pour générer l'ordre des colonnes.
         */
         if(print){
@@ -476,7 +475,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
                     settersByFieldName.put(getFieldNameFromSetter(method), method);
                 }
             }
-            
+
             int coeffIndex = 0; // Index dans le tableau des coefficients de pondération des largeurs de colonnes.
             int fieldIndex = 0;
             for(final JRColumnParameter field : fields){
@@ -493,21 +492,21 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
                     coeff = 1.f;
                 }
                 SirsCore.LOGGER.log(Level.FINEST, "c = {0} sum = {1} width coeff = {2}", new Object[]{coeffIndex, coeffSum, coeff});
-                
+
                 /*
                 On calcule la largeur de la colonne.
-                Dans le cas général, le calcul est obtenu avec le coefficient, mais pour la dernière colonne, on ajuste 
+                Dans le cas général, le calcul est obtenu avec le coefficient, mais pour la dernière colonne, on ajuste
                 à la largeur de la page si cela est demandé.
                 */
                 final int ajustedColumnWidth = (fillWidth && fieldIndex==fieldNames.size()) ? (UTIL_WIDTH-cumulatedWidth) : Math.round(baseColumnWidth*coeff);
-                
+
                 cumulatedWidth+=ajustedColumnWidth;
-                writeColumn(rb.getString(fieldName), getCDATASupplierFromSetter(settersByFieldName.get(fieldName), displayPolicy), 
-                        markupFromFieldName(fieldName), table, ajustedColumnWidth, fontSize, TABLE_HEAD_BOLD, field.isBold(), headerHeight, detailCellHeight);
+                writeColumn(rb.getString(fieldName), getCDATASupplierFromSetter(settersByFieldName.get(fieldName), displayPolicy),
+                        table, ajustedColumnWidth, fontSize, TABLE_HEAD_BOLD, field.isBold(), headerHeight, detailCellHeight);
             }
         }
         /*
-        Sinon, on n'a pas d'ordre particulier sur lequel se baser et on parcours donc en premier les méthodes pour trouver 
+        Sinon, on n'a pas d'ordre particulier sur lequel se baser et on parcours donc en premier les méthodes pour trouver
         les noms des champs à imprimer. Dans ce cas, on ne peut pas paramettrer les noms de colonnes
         */
         else{
@@ -517,13 +516,13 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
                     final String fieldName = getFieldNameFromSetter(method);
                     if(printPredicate.test(fieldName)){
                         cumulatedWidth+=baseColumnWidth;
-                        writeColumn(rb.getString(fieldName), getCDATASupplierFromSetter(method, JRColumnParameter.DisplayPolicy.LABEL), 
-                                markupFromFieldName(fieldName), table, baseColumnWidth, fontSize, TABLE_HEAD_BOLD, false, headerHeight, detailCellHeight);
+                        writeColumn(rb.getString(fieldName), getCDATASupplierFromSetter(method, JRColumnParameter.DisplayPolicy.LABEL),
+                                table, baseColumnWidth, fontSize, TABLE_HEAD_BOLD, false, headerHeight, detailCellHeight);
                     }
                 }
             }
         }
-        
+
         // Centrage de la table
         componentElementReportElement.setAttribute(ATT_X, String.valueOf(Math.round((UTIL_WIDTH - cumulatedWidth)/2.f)));
 
@@ -533,7 +532,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         band.appendChild(componentElement);
         currentY+=height;
     }
-    
+
     private Supplier<CDATASection> getCDATASupplierFromSetter(final Method setter, final JRColumnParameter.DisplayPolicy displayPolicy) {
 
         final String fieldName = getFieldNameFromSetter(setter);
@@ -561,11 +560,11 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
                             // Si c'est une référence unique.
                             else if(String.class.isAssignableFrom(fieldClass)) {
                                 switch(displayPolicy){
-                                    case REFERENCE_LABEL_AND_CODE: 
+                                    case REFERENCE_LABEL_AND_CODE:
                                         if(ReferenceType.class.isAssignableFrom(annotation.ref())){
                                             return document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+fieldName+"}");
                                         }
-                                    case REFERENCE_CODE: 
+                                    case REFERENCE_CODE:
                                         if(ReferenceType.class.isAssignableFrom(annotation.ref())){
                                             return document.createCDATASection(JRXMLUtil.dynamicDisplayReferenceCode(fieldName));
                                         }
@@ -576,7 +575,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
                         }
                     }
 
-                    // S'il ne s'agit pas d'une référence : 
+                    // S'il ne s'agit pas d'une référence :
                     return document.createCDATASection("$F{"+fieldName+"}==null ? \""+NULL_REPLACEMENT+"\" : $F{"+fieldName+"}");
                 } catch (NoSuchMethodException | SecurityException ex) {
                     // Si pour une raison quelconque l'analyse du champ échoue, on utilise un comportement par défaut.
@@ -587,22 +586,9 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         };
     };
 
-    /**
-     * Détermine le type de {@link JRUtils.Markup} à partir du nom de champ. Sert à déterminer quels sont les champs
-     * correspondant à des commentaires qui doivent supporter une mise en forme HTML du texte.
-     * 
-     * @param fieldName
-     * @return 
-     */
-    private JRUtils.Markup markupFromFieldName(final String fieldName){
-        return (fieldName.contains("escript") || fieldName.contains("omment")) ? JRUtils.Markup.HTML : JRUtils.Markup.NONE;
-    }
 
-
-    private void writeColumn(final String header, final Supplier<CDATASection> cellSupplier,
-            final JRUtils.Markup markup, final Element table, final int columnWidth,
-            final int fontSize, final boolean headerBold, final boolean cellBold, final int headerHeight, final int detailCellHeight){
-
+    private void writeColumn(final String header, final Supplier<CDATASection> cellSupplier, final Element table, final int columnWidth,
+            final int fontSize, final boolean headerBold, final boolean cellBold, final int headerHeight, final int detailCellHeight) {
 
         final Element column = document.createElementNS(URI_JRXML_COMPONENTS, TAG_COLUMN);
         column.setAttribute(ATT_WIDTH, String.valueOf(columnWidth));
@@ -668,7 +654,7 @@ public abstract class AbstractJDomWriterSingleSpecificSheet<T extends fr.sirs.co
         detailFont.setAttribute(ATT_IS_BOLD, String.valueOf(cellBold));
         detailFont.setAttribute(ATT_SIZE, String.valueOf(fontSize));
         detailTextElement.appendChild(detailFont);
-        detailTextElement.setAttribute(ATT_MARKUP, (markup==null ? JRUtils.Markup.NONE : markup).toString());
+        //detailTextElement.setAttribute(ATT_MARKUP, (markup==null ? JRUtils.Markup.NONE : markup).toString());
         textField.appendChild(detailTextElement);
 
         final Element textFieldExpression = document.createElement(TAG_TEXT_FIELD_EXPRESSION);

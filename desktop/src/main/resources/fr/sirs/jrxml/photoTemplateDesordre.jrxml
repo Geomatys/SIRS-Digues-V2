@@ -200,7 +200,7 @@
 				</staticText>
 				<textField isStretchWithOverflow="true">
 					<reportElement x="70" y="0" width="250" height="12" uuid="dec6f66c-96fc-46ce-b1e9-cd4912d1aac3"/>
-					<textElement verticalAlignment="Middle" markup="html">
+					<textElement verticalAlignment="Middle" >
 						<font size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{commentaire}==null?" - ":$F{commentaire}]]></textFieldExpression>

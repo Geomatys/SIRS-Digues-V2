@@ -195,7 +195,7 @@
 				</staticText>
 				<textField isStretchWithOverflow="true">
 					<reportElement positionType="Float" x="130" y="0" width="400" height="12" uuid="f3bfaffb-0ba0-4cbd-a94e-4cebad331bfd"/>
-					<textElement textAlignment="Justified" verticalAlignment="Middle" markup="html">
+					<textElement textAlignment="Justified" verticalAlignment="Middle" >
 						<font fontName="Serif" size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[fr.sirs.util.JRXMLUtil.displayLabel($F{sourceId})]]></textFieldExpression>
@@ -212,7 +212,7 @@
 				</staticText>
 				<textField isStretchWithOverflow="true">
 					<reportElement positionType="Float" x="130" y="0" width="400" height="12" uuid="6d4e5282-40d5-422c-9283-86b8e423382e"/>
-					<textElement textAlignment="Justified" verticalAlignment="Middle" markup="html">
+					<textElement textAlignment="Justified" verticalAlignment="Middle" >
 						<font fontName="Serif" size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{commentaire}==null ? " - " : $F{commentaire}]]></textFieldExpression>
