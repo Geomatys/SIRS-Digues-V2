@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -29,7 +29,7 @@ import java.util.Base64;
  *
  * @author Alexis Manin (Geomatys)
  */
-class PasswordSerializer extends JsonSerializer<String> {
+public class PasswordSerializer extends JsonSerializer<String> {
 
     @Override
     public void serialize(String value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
@@ -39,5 +39,5 @@ class PasswordSerializer extends JsonSerializer<String> {
             throw new IOException("Cannot encode string.", ex);
         }
     }
-    
+
 }
