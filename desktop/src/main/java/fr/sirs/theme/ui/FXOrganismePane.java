@@ -76,6 +76,7 @@ public class FXOrganismePane extends AbstractFXElementPane<Organisme> {
 
         contactOrganismeTable = new PojoTable(ContactOrganisme.class, "Contacts rattachés");
         contactOrganismeTable.parentElementProperty().bind(elementProperty);
+        contactOrganismeTable.editableProperty().bind(disableFieldsProperty().not().and(elementProperty.isNotNull()));
         uiContactOrganismesTab.setContent(contactOrganismeTable);
 
         elementProperty.addListener(this::initPane);
