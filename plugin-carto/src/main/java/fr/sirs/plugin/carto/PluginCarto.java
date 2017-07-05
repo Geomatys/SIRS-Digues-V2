@@ -22,6 +22,7 @@ import fr.sirs.Injector;
 import fr.sirs.Plugin;
 import fr.sirs.Session;
 import fr.sirs.core.model.BookMark;
+import fr.sirs.map.FXMapTab;
 import static fr.sirs.theme.ui.FXBookMarkPane.parseSecurityParameters;
 import java.io.IOException;
 import java.io.InputStream;
@@ -186,9 +187,11 @@ public class PluginCarto extends Plugin {
             groupName = "";
 
         final Session session = Injector.getSession();
+        final FXMapTab mapTab = session.getFrame().getMapTab();
+        final Collection<MapItem> root = mapTab.getMap().getUiMap().getContainer().getContext().items();
 
         MapItem parent = null;
-        for (MapItem mi : session.getMapContext().items()) {
+        for (MapItem mi : root) {
             if (groupName.equals(mi.getName())) {
                 parent = mi;
                 break;
@@ -197,10 +200,10 @@ public class PluginCarto extends Plugin {
         if (parent == null) {
             parent = MapBuilder.createItem();
             parent.setName(groupName);
-            session.getMapContext().items().add(parent);
+            root.add(parent);
         }
 
         parent.items().addAll(layers);
-        session.getFrame().getMapTab().show();
+        mapTab.show();
     }
 }

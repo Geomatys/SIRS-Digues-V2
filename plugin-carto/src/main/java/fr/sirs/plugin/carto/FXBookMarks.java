@@ -33,7 +33,6 @@ import java.util.List;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.embed.swing.SwingFXUtils;
@@ -93,7 +92,6 @@ public class FXBookMarks extends GridPane {
         uiTable.getColumns().add(col);
         uiTable.getColumns().add(new ViewColumn());
         FXUtilities.hideTableHeader(uiTable);
-        refreshList();
 
         final Session session = Injector.getSession();
         final Role role = session.getRole();
@@ -101,6 +99,8 @@ public class FXBookMarks extends GridPane {
             uiDelete.setVisible(false);
             uiAdd.setVisible(false);
         }
+
+        uiTable.setItems(SIRS.observableList(repo.getAll()));
     }
 
     @FXML
@@ -116,9 +116,7 @@ public class FXBookMarks extends GridPane {
         if (res == ButtonType.YES) {
             repo.remove(bookmark);
             uiConfig.setCenter(null);
-            refreshList();
         }
-
     }
 
     @FXML
@@ -128,7 +126,6 @@ public class FXBookMarks extends GridPane {
         bookmark.setDesignation("");
         bookmark.setTitre("pas de nom");
         repo.add(bookmark);
-        refreshList();
     }
 
     private void selectionChanged(ObservableValue<? extends BookMark> observable, BookMark oldValue, BookMark newValue){
@@ -148,11 +145,6 @@ public class FXBookMarks extends GridPane {
 
             uiConfig.setCenter(editPane);
         }
-    }
-
-    private void refreshList(){
-        final List<BookMark> all = repo.getAll();
-        uiTable.setItems(FXCollections.observableArrayList(all));
     }
 
     private static FXEditMode searchEditMode(Node node){

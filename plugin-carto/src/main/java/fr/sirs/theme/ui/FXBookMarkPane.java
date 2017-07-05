@@ -196,6 +196,9 @@ public class FXBookMarkPane extends AbstractFXElementPane<BookMark> {
             // * motDePasse
             ui_motDePasse.textProperty().bindBidirectional(newElement.motDePasseProperty());
 
+            ui_service.setValue(
+                SERVICE_CONVERTER.fromString(newElement.typeServiceProperty().get())
+            );
             Bindings.bindBidirectional(newElement.typeServiceProperty(), ui_service.valueProperty(), SERVICE_CONVERTER);
         }
 
