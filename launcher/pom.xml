@@ -77,10 +77,19 @@
                     <mainClass>fr.sirs.launcher.Launcher</mainClass>
                     <needMenu>true</needMenu>
                     <jvmArgs>
-                        <!-- Force GC. G1 can factorize string instances to save
-                        some memory, which can be useful in a restrained environment as this one. -->
-                        <jvmArg>-XX:+UseG1GC</jvmArg>
-                        <jvmArg>-XX:+UseStringDeduplication</jvmArg>
+                        <!-- 
+                        Force GC. After multiple tests, it appears that serial
+                        GC uses less native memory (< 2MB) than Parallel (~ 25MB) 
+                        and G1 (> 60MB !). Moreover, even if the GC activity is a 
+                        little more intrusive with the serial one, it keeps the 
+                        heap lighter over time. 
+                        -->
+                        <jvmArg>-XX:+UseSerialGC</jvmArg>
+                        <!-- 
+                        Force to keep a tiny youg generation. It allows GC to clean
+                        memory more often but with less "Stop the world" steps.
+                        --> 
+                        <jvmArg>-XX:NewRatio=4</jvmArg>
                         <!-- Memory management. Application cannot run with less 
                         than 256MB heap, so we forbid its use when this requirement
                         cannot be fulfilled. Another important point is that multiple 
