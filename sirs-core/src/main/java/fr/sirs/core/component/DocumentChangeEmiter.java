@@ -50,6 +50,12 @@ import java.util.regex.Pattern;
  */
 public class DocumentChangeEmiter {
 
+    /**
+     * Group all events spaced by less than specified bulk time in a single event shot.
+     */
+    private static final long BULK_TIME = 1;
+    private static final TimeUnit BULK_UNIT = TimeUnit.SECONDS;
+
     private static final char[] BUFFER = new char[4096];
 
     /** A pattern to identify new elements. They must have a revision number equal to 1 */
@@ -58,12 +64,6 @@ public class DocumentChangeEmiter {
     // TODO : Transform to Observable list ?
     private final List<DocumentListener> listeners = new ArrayList<>();
     private final CouchDbConnector connector;
-
-    /**
-     * Group all events spaced by less than specified bulk time in a single event shot.
-     */
-    public volatile long bulkTime = 1;
-    public volatile TimeUnit bulkUnit = TimeUnit.SECONDS;
 
     public DocumentChangeEmiter(CouchDbConnector connector) {
         this.connector = connector;
@@ -132,7 +132,7 @@ public class DocumentChangeEmiter {
         Set<String> removedElements = new HashSet<>();
 
         while (!currentThread.isInterrupted()) {
-            final DocumentChange change = feed.next(bulkTime, bulkUnit);
+            final DocumentChange change = feed.next(BULK_TIME, BULK_UNIT);
             if (change == null)
                 break;
 

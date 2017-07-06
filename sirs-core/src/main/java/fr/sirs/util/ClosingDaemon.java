@@ -44,7 +44,8 @@ public class ClosingDaemon {
 
     private ClosingDaemon() {
         final Thread closer = new Thread(() -> {
-            while (true) {
+            final Thread t = Thread.currentThread();
+            while (!t.isInterrupted()) {
                 try {
                     Reference removed = phantomQueue.remove();
                     if (removed instanceof AutoCloseable) {
@@ -53,8 +54,9 @@ public class ClosingDaemon {
 
                 } catch (InterruptedException e) {
                     SirsCore.LOGGER.log(Level.WARNING, "Resource closer has been interrupted ! It could cause memory leaks.");
+                    t.interrupt();
                     return;
-                } catch (Throwable t) {
+                } catch (Exception e) {
                     SirsCore.LOGGER.log(Level.WARNING, "Some resource cannot be released. It's likely to cause memory leaks !");
                 }
             }

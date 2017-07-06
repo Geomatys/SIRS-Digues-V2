@@ -833,8 +833,8 @@ public class TronconUtils {
             }
         }
 
-        BorneDigue bdStart = null;
-        BorneDigue bdEnd = null;
+        final BorneDigue bdStart;
+        final BorneDigue bdEnd;
         if(srbStart==null){
             //creation de la borne de début
             bdStart = bdRepo.create();

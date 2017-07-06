@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -107,7 +107,7 @@ public class ProfilLongMapper extends AbstractMapper<ProfilLong> {
         final Integer srid = input.getInt(Columns.ID_SYSTEME_REP_DZ.toString());
         if (srid != null) {
             final String newSrid = srImporter.getImportedId(srid);
-            if (srid == null) {
+            if (newSrid == null) {
                 throw new AccessDbImporterException("No SR imported for ID " + srid);
             }
             output.setSystemeRepDzId(newSrid);

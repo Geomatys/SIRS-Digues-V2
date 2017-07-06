@@ -361,7 +361,7 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
         /**
          * Features which have been used for element filtering. Can be null.
          */
-        public FeatureCollection filterValues;
+        protected final FeatureCollection filterValues;
 
         public PrintContext(TextDocument target, Stream<? extends Element> elements) throws SQLException, DataStoreException, InterruptedException, ExecutionException, IOException {
             ArgumentChecks.ensureNonNull("Target document", target);
@@ -371,6 +371,7 @@ public abstract class AbstractSectionRapport implements Element , AvecLibelle {
             if (!sqlQuery.isPresent()) {
                 propertyNames = null;
                 this.elements = elements;
+                filterValues = null;
 
             } else {
                 final SessionCore session = InjectorCore.getBean(SessionCore.class);

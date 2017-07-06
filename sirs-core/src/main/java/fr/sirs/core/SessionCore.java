@@ -271,6 +271,7 @@ public class SessionCore implements ApplicationContextAware {
                         Thread.sleep(5000);
                     } catch (InterruptedException ex) {
                         SirsCore.LOGGER.log(Level.WARNING, "Stat thread interrupted !", ex);
+                        t.interrupt();
                     }
                 }
             });

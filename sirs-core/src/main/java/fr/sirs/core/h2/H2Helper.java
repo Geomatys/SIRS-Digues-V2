@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -271,9 +271,9 @@ public class H2Helper {
 
             synchronized (H2Helper.this) {
                 if (store != null) {
-                    try {
-                        Connection cnx = store.getDataSource().getConnection();
-                        cnx.createStatement().executeUpdate("SHUTDOWN");
+                    try (final Connection cnx = store.getDataSource().getConnection();
+                            final Statement statement = cnx.createStatement()) {
+                        statement.executeUpdate("SHUTDOWN");
                     } finally {
                         store.close();
                         store = null;
@@ -402,7 +402,7 @@ public class H2Helper {
     public static class StatementPool {
 
         private static final HashMap<Connection, StatementContainer> STATEMENTS = new HashMap<>(2);
-        
+
         public static PreparedStatement getOrPrepareStatement(final Connection conn, final String sql) throws SQLException {
             return STATEMENTS.computeIfAbsent(conn, (key) -> new StatementContainer(key))
                     .getOrPrepareStatement(sql);

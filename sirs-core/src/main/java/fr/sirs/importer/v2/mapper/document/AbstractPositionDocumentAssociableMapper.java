@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -66,7 +66,7 @@ public class AbstractPositionDocumentAssociableMapper extends AbstractMapper<Abs
                 String importedId = context.importers.get(ProfilTravers.class).getImportedId(ptId);
                 output.setSirsdocument(importedId);
             }
-        } else if (output instanceof AbstractPositionDocumentAssociable) {
+        } else if (output != null) {
             final Object typeDoc = input.get(Columns.ID_TYPE_DOCUMENT.name());
             if (typeDoc == null) {
                 context.reportError(new ErrorReport(null, input, tableName, Columns.ID_TYPE_DOCUMENT.name(), output, "documentId", "No valid document type associated.", CorruptionLevel.RELATION));

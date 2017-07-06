@@ -167,7 +167,7 @@ public class SirsCore {
     public static final Path IMPORT_ERROR_DIR = CONFIGURATION_PATH.resolve("importErrors");
 
     public static final Path NTV2_DIR = CONFIGURATION_PATH.resolve("ntv2");
-    public static List<String> NTV2_FILES = Collections.unmodifiableList(Arrays.asList(new String[]{
+    public static final List<String> NTV2_FILES = Collections.unmodifiableList(Arrays.asList(new String[]{
         "gr3df97a.txt",
         "rgf93_ntf.gsb"
     }));
@@ -216,10 +216,10 @@ public class SirsCore {
 
     /** Dénomination du système de repérage élémentaire. */
     public static final String SR_ELEMENTAIRE = "Elémentaire";
-    
+
     /** Libellé de la borne de départ du SR élémentaire. */
     public static final String SR_ELEMENTAIRE_START_BORNE = "Début du tronçon";
-    
+
     /** Libellé de la borne de fin du SR élémentaire. */
     public static final String SR_ELEMENTAIRE_END_BORNE = "Fin du tronçon";
 

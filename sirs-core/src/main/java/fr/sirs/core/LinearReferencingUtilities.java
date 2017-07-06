@@ -31,13 +31,11 @@ import fr.sirs.core.component.BorneDigueRepository;
 import fr.sirs.core.model.BorneDigue;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
-import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -54,16 +52,6 @@ import org.geotoolkit.referencing.LinearReferencing;
  * @author Johann Sorel (Geomatys)
  */
 public final class LinearReferencingUtilities extends LinearReferencing {
-
-    public static Comparator<SystemeReperageBorne> SR_BORNES_COMPARATOR = (SystemeReperageBorne b1, SystemeReperageBorne b2) -> {
-        if (b1.getValeurPR() > b2.getValeurPR()) {
-            return 1;
-        } else if (b1.getValeurPR() < b2.getValeurPR()) {
-            return -1;
-        } else {
-            return 0;
-        }
-    };
 
     /**
      * Overload method from LinearReferencing to for a LineString and forbid LinearRing.

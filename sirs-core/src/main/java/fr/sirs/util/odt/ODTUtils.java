@@ -62,6 +62,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
@@ -1425,7 +1426,8 @@ public class ODTUtils {
             @Override
             protected Object call() throws Exception {
                 updateTitle("Génération de rapport" + (titre != null ? " (" + titre + ")" : ""));
-                final long totalWork = elements == null? -1 : elements.size() * report.sections.size();
+                final ObservableList<AbstractSectionRapport> sections = report.getSections();
+                final long totalWork = elements == null? -1 : elements.size() * sections.size();
                 final AtomicLong currentWork = new AtomicLong(-1);
 
                 // on crée le document de rapport
@@ -1438,8 +1440,8 @@ public class ODTUtils {
                     // on aggrege chaque section
                     AbstractSectionRapport section;
                     long expectedWork;
-                    for (int i = 0; i < report.sections.size(); i++) {
-                        section = report.sections.get(i);
+                    for (int i = 0; i < sections.size(); i++) {
+                        section = sections.get(i);
                         String libelle = section.getLibelle();
                         if (libelle == null || libelle.isEmpty()) {
                             libelle = "sans nom";
@@ -1452,7 +1454,7 @@ public class ODTUtils {
                             try (final Stream dataStream = elements.stream().peek(input -> updateProgress(currentWork.incrementAndGet(), totalWork))) {
                                 section.print(headerDoc, dataStream);
                                 // In case section printing has not used provided stream, we have to update progress manually.
-                                expectedWork = (i + 1) * elements.size() - 1;
+                                expectedWork = ((long)i + 1) * elements.size() - 1;
                                 if (currentWork.get() != expectedWork) {
                                     currentWork.set(expectedWork);
                                     updateProgress(expectedWork, totalWork);

@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 class TypeOuvrageParticulierImporter extends GenericTypeReferenceImporter<RefOuvrageParticulier> {
 
     // Identifiant des échelles limnimetriques
-    public static int ECHELLE_LIMNIMETRIQUE = 5;
+    public static final int ECHELLE_LIMNIMETRIQUE = 5;
 
     @Override
     public String getTableName() {

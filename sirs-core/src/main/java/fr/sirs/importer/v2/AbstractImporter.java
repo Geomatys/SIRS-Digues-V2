@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -18,7 +18,6 @@
  */
 package fr.sirs.importer.v2;
 
-import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import fr.sirs.core.SessionCore;
@@ -38,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -359,150 +357,5 @@ public abstract class AbstractImporter<T extends Element> implements WorkMeasura
         });
 
         return names;
-    }
-
-    /**
-     * Check all the columns used by the importer exists in the table.
-     *
-     * @return all declared fields which cannot be found in access table.
-     */
-    private List<String> getErroneousUsedFields() throws IOException {
-        final List<String> erroneousUsedColumn = new ArrayList<>();
-        final Table tmpTable = context.inputDb.getTable(getTableName());
-
-        // Check all used columns
-        this.getUsedColumns().stream().forEach((usedColumnName) -> {
-            boolean isPresent = false;
-            for (final Column column : tmpTable.getColumns()) {
-
-                if (column.getName().equals(usedColumnName)) {
-                    isPresent = true;
-                    break;
-                }
-            }
-            if (!isPresent) {
-                erroneousUsedColumn.add(usedColumnName);
-            }
-
-        });
-        return erroneousUsedColumn;
-    }
-
-    /**
-     *
-     * @return The list of column names used by the importer which are empty.
-     * @throws IOException If an error occurs while connecting to database.
-     */
-    private List<String> getEmptyUsedFields() throws IOException {
-        /*
-         * Debug purpose. List all columns present in input table, with a flag
-         * specifiying if it is usable (needed for the mapping and not empty) for
-         * import.
-         */
-        final HashMap<String, Boolean> columnDataFlags = new HashMap<>();
-        final List<String> usedColumns = getUsedColumns();
-
-        // Set the data flags to false for all the columns used by the importer.
-        usedColumns.stream().forEach((column) -> {
-            columnDataFlags.put(column, Boolean.FALSE);
-        });
-
-        final List<String> emptyFields = new ArrayList<>();
-        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
-
-        // For each table row
-        while (it.hasNext()) {
-            final Row row = it.next();
-
-            // For eache table column
-            usedColumns.stream().forEach((column) -> {
-
-                // Look for data in the cell if the data flag of the column is
-                // false. If there is data, set the flag to true.
-                if (!columnDataFlags.get(column) && row.get(column) != null)
-                    columnDataFlags.put(column, Boolean.TRUE);
-            });
-
-            // If all the columns contains data, do not continue to look for data
-            // in the following rows and break the loop.
-            if (!columnDataFlags.containsValue(Boolean.FALSE))
-                break;
-        }
-
-        // List the column names detected to not contain data.
-        usedColumns.stream().forEach((column) -> {
-            if (!columnDataFlags.get(column))
-                emptyFields.add(column);
-        });
-        return emptyFields;
-    }
-
-    /**
-     *
-     * @return The list of table columns names ignored by the importer but
-     * containing data.
-     * @throws IOException If an error occurs while connecting to database.
-     */
-    private List<String> getForgottenFields() throws IOException {
-        final List<String> forgottenFields = new ArrayList<>();
-        final Iterator<Row> it = context.inputDb.getTable(getTableName()).iterator();
-        final List<String> potentialForgottenFields = this.getTableColumns();
-        potentialForgottenFields.removeAll(this.getUsedColumns());
-
-        // For each table row
-        while (it.hasNext()) {
-            final Row row = it.next();
-
-            // For eache table column
-            this.getTableColumns().stream().forEach((column) -> {
-
-                if (potentialForgottenFields.contains(column) && row.get(column) != null) {
-                    forgottenFields.add(column);
-                    potentialForgottenFields.remove(column);
-                }
-            });
-
-            if (potentialForgottenFields.isEmpty())
-                break;
-        }
-
-        return forgottenFields;
-    }
-
-    private void checkTable() {
-        SirsCore.LOGGER.log(Level.FINE, "=================================================");
-        SirsCore.LOGGER.log(Level.FINE, "======== IMPORTER CHECK for table : " + getTableName() + "====");
-        try {
-            // Detect the empty fields.
-            final List<String> emptyFields = this.getEmptyUsedFields();
-            if (!emptyFields.isEmpty()) {
-                SirsCore.LOGGER.log(Level.FINE, "Empty used fields for table " + getTableName() + " : ");
-                emptyFields.stream().forEach((field) -> {
-                    SirsCore.LOGGER.log(Level.FINE, field);
-                });
-            }
-
-            // Detect the coluns used by the importer that do not exist in the table.
-            final List<String> erroneousFields = this.getErroneousUsedFields();
-            if (!erroneousFields.isEmpty()) {
-                SirsCore.LOGGER.log(Level.FINE, "Erroneous fields for table " + getTableName() + " : ");
-                erroneousFields.stream().forEach((field) -> {
-                    SirsCore.LOGGER.log(Level.FINE, field);
-                });
-            }
-
-            // Detect the coluns forgotten by the importer but containing data;
-            final List<String> forgottenFields = this.getForgottenFields();
-            if (!forgottenFields.isEmpty()) {
-                SirsCore.LOGGER.log(Level.FINE, "Forgotten fields for table " + getTableName() + " : ");
-                forgottenFields.stream().forEach((field) -> {
-                    SirsCore.LOGGER.log(Level.FINE, field);
-                });
-            }
-
-        } catch (IOException ex) {
-            SirsCore.LOGGER.log(Level.FINE, "An error occurred while analyzing table " + getTableName(), ex);
-        }
-        SirsCore.LOGGER.log(Level.FINE, "*************************************************\n");
     }
 }
