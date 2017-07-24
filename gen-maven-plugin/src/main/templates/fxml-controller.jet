@@ -305,6 +305,11 @@ else if (helper.isParcelleVegetation()){
         ui_<%= eAtt.getName()  %>.refProperty.bind(elementProperty);
         ui_<%= eAtt.getName()  %>.disableFieldsProperty.bind(disableFieldsProperty());
 <%    		
+            } else if("TextArea".equals(attEditorName)) { 
+%>
+        ui_<%= eAtt.getName()  %>.setWrapText(true);
+        ui_<%= eAtt.getName()  %>.editableProperty().bind(disableFieldsProperty().not());
+<%    		
             } else if(attEditorName!=null) { 
 %>
         ui_<%= eAtt.getName()  %>.disableProperty().bind(disableFieldsProperty());
