@@ -32,9 +32,9 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.util.FormattedDoubleConverter;
 import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -58,7 +58,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.util.StringConverter;
 import org.geotoolkit.gui.javafx.util.ComboBoxCompletion;
-import org.geotoolkit.gui.javafx.util.FXNumberCell;
 import org.geotoolkit.referencing.LinearReferencing;
 
 /**
@@ -121,7 +120,13 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         uiAvalEnd.setToggleGroup(groupEnd);
         uiAvalEnd.setSelected(true);
 
-        final StringConverter conv= new ThreeDecimalsConverter();
+        /*
+         * A converter displaying 3 decimals for numbers. Hack because of hard-coded
+         * and unmodifiable decimal formats in both {@link Spinner} and {@link FXNumberCell}.
+         *
+         * Jira task : SYM-1133
+         */
+        final StringConverter conv= new FormattedDoubleConverter(new DecimalFormat("#.###"));
         SpinnerValueFactory.DoubleSpinnerValueFactory valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE, 0,1);
         valueFactory.setConverter(conv);
         uiDistanceStart.setValueFactory(valueFactory);
@@ -436,53 +441,6 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
             return LinearReferencingUtilities.computeCoordinate(t.getGeometry(), bornePoint, dist, 0);
         } else {
             return null;
-        }
-    }
-
-    /**
-     * A converter displaying 3 decimals for numbers. Hack because of hard-coded
-     * and unmodifiable decimal formats in both {@link Spinner} and {@link FXNumberCell}.
-     *
-     * Jira task : SYM-1133
-     */
-    private static class ThreeDecimalsConverter extends StringConverter<Double> {
-
-        private final DecimalFormat df = new DecimalFormat("#.###");
-
-        @Override
-        public String toString(Double value) {
-            // If the specified value is null, return a zero-length String
-            if (value == null) {
-                return "";
-            }
-
-            return df.format(value);
-        }
-
-        @Override
-        public Double fromString(String value) {
-            try {
-                // If the specified value is null or zero-length, return null
-                if (value == null) {
-                    return null;
-                }
-
-                value = value.trim();
-
-                if (value.length() < 1) {
-                    return null;
-                }
-
-                // Perform the requested parsing
-                return df.parse(value).doubleValue();
-            } catch (ParseException ex) {
-                try {
-                    return Double.valueOf(value);
-                } catch (NumberFormatException e1) {
-                    ex.addSuppressed(e1);
-                }
-                throw new RuntimeException(ex);
-            }
         }
     }
 

@@ -126,14 +126,11 @@
     <repository>
       <id>geomatys.public</id>
       <name>Builds from Geomatys</name>
-      <url>http://nexus.geomatys.com/repository/maven-public</url>
+      <url>https://nexus.geomatys.com/repository/maven-public</url>
     </repository>
     <repository>
       <id>geomatys.private</id>
-      <url>http://nexus.geomatys.com/repository/maven-private</url>
-      <releases>
-        <enabled />
-      </releases>
+      <url>https://nexus.geomatys.com/repository/maven-private</url>
     </repository>
   </repositories>
 

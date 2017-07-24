@@ -36,6 +36,7 @@ import static fr.sirs.plugin.vegetation.PluginVegetation.computeRatio;
 import static fr.sirs.plugin.vegetation.PluginVegetation.toPoint;
 import static fr.sirs.plugin.vegetation.PluginVegetation.toPolygon;
 import java.util.Map;
+import java.util.stream.Stream;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -355,5 +356,13 @@ public class FXPositionableCoordAreaMode extends FXPositionableAbstractCoordMode
         zone.setPositionFin(endPoint);
         zone.geometryModeProperty().set(getID());
         zone.geometryProperty().set(geometry);
+    }
+
+    @Override
+    protected Stream<Spinner> getSpinners() {
+        return Stream.concat(
+                super.getSpinners(),
+                Stream.of(uiStartNear, uiStartFar, uiEndNear, uiEndFar)
+        );
     }
 }

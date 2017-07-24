@@ -31,10 +31,15 @@ import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.theme.ui.FXPositionableMode.fxNumberValue;
+import fr.sirs.util.FormattedDoubleConverter;
 import fr.sirs.util.SirsStringConverter;
+import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 import javafx.application.Platform;
+import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -55,6 +60,8 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.util.StringConverter;
+import org.apache.sis.measure.Units;
 import org.apache.sis.referencing.CRS;
 import org.apache.sis.util.Utilities;
 import org.geotoolkit.display2d.GO2Utilities;
@@ -62,6 +69,8 @@ import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.internal.GeotkFX;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.crs.SingleCRS;
+import org.opengis.referencing.cs.CoordinateSystemAxis;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
@@ -72,6 +81,9 @@ import org.opengis.util.FactoryException;
  * @author Johann Sorel (Geomatys)
  */
 public abstract class FXPositionableAbstractCoordMode extends BorderPane implements FXPositionableMode {
+
+    private static final StringConverter<Double> SEVEN_DIGITS_CONVERTER = new FormattedDoubleConverter(new DecimalFormat("#.#######"));
+    private static final StringConverter<Double> TWO_DIGITS_CONVERTER = new FormattedDoubleConverter(new DecimalFormat("#.##"));
 
     private final CoordinateReferenceSystem baseCrs = Injector.getSession().getProjection();
 
@@ -100,15 +112,6 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         uiImport.setOnAction(this::importCoord);
         uiImport.visibleProperty().bind(disableProperty.not());
 
-        //liste par défaut des systemes de coordonnées
-        final ObservableList<CoordinateReferenceSystem> crss = FXCollections.observableArrayList();
-        crss.add(CRS_WGS84);
-        crss.add(baseCrs);
-        uiCRSs.setItems(crss);
-        uiCRSs.getSelectionModel().clearAndSelect(1);
-        uiCRSs.disableProperty().bind(disableProperty);
-        uiCRSs.setConverter(new SirsStringConverter());
-
         uiLongitudeStart.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
         uiLatitudeStart.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
         uiLongitudeEnd.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0,1));
@@ -122,6 +125,21 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         uiLongitudeEnd.disableProperty().bind(disableProperty);
         uiLatitudeEnd.disableProperty().bind(disableProperty);
 
+        //liste par défaut des systemes de coordonnées
+        ObservableList<CoordinateReferenceSystem> crss = FXCollections.unmodifiableObservableList(
+                FXCollections.observableList(
+                        Arrays.asList(CRS_WGS84, baseCrs)
+                )
+        );
+
+        uiCRSs.setItems(crss);
+
+        // JIRA SYM-1638 : adapt decimal representation to provide consistent precision.
+        uiCRSs.valueProperty().addListener(this::replaceConverter);
+
+        uiCRSs.getSelectionModel().select(baseCrs);
+        uiCRSs.disableProperty().bind(disableProperty);
+        uiCRSs.setConverter(new SirsStringConverter());
 
         final ChangeListener<Geometry> geomListener = new ChangeListener<Geometry>() {
             @Override
@@ -157,7 +175,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         uiLongitudeEnd.valueProperty().addListener(valListener);
         uiLatitudeEnd.valueProperty().addListener(valListener);
 
-        uiCRSs.getSelectionModel().selectedItemProperty().addListener(this::crsChange);
+        uiCRSs.valueProperty().addListener(this::crsChange);
     }
 
     @Override
@@ -198,52 +216,45 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
     }
 
     @Override
-    public void updateFields(){
-
+    public void updateFields() {
         reseting = true;
-
-        //selectionner RGF93 par defaut
-        uiCRSs.getSelectionModel().clearAndSelect(1);
 
         final Positionable pos = posProperty.get();
         final String mode = pos.getGeometryMode();
-
-        if(mode == null || getID().equals(mode)){
+        Point startPoint, endPoint;
+        if (mode == null || getID().equals(mode)) {
             //on peut réutiliser les points enregistré dans la position
-            final Point startPos = pos.getPositionDebut();
-            final Point endPos = pos.getPositionFin();
-            if (startPos != null) {
-                uiLongitudeStart.getValueFactory().valueProperty().set(startPos.getX());
-                uiLatitudeStart.getValueFactory().valueProperty().set(startPos.getY());
-            }else{
-                uiLongitudeStart.getValueFactory().setValue(null);
-                uiLatitudeStart.getValueFactory().setValue(null);
-            }
-            if (endPos != null) {
-                uiLongitudeEnd.getValueFactory().valueProperty().set(endPos.getX());
-                uiLatitudeEnd.getValueFactory().valueProperty().set(endPos.getY());
-            }else{
-                uiLongitudeEnd.getValueFactory().setValue(null);
-                uiLatitudeEnd.getValueFactory().setValue(null);
-            }
-        }else if(pos.getGeometry()!=null){
+            startPoint = pos.getPositionDebut();
+            endPoint = pos.getPositionFin();
+
+        } else if (pos.getGeometry() != null) {
             //on refait les points a partir de la géométrie
             final TronconDigue t = FXPositionableMode.getTronconFromPositionable(pos);
             final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
-            final Point geoPointStart = ps.getGeoPointStart();
-            final Point geoPointEnd = ps.getGeoPointEnd();
+            startPoint = ps.getGeoPointStart();
+            endPoint = ps.getGeoPointEnd();
 
-            uiLongitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getX());
-            uiLatitudeStart.getValueFactory().setValue(geoPointStart==null ? null : geoPointStart.getY());
-            uiLongitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getX());
-            uiLatitudeEnd.getValueFactory().setValue(geoPointEnd==null ? null : geoPointEnd.getY());
-        }else{
-            //pas de geometrie
-            uiLongitudeStart.getValueFactory().setValue(null);
-            uiLatitudeStart.getValueFactory().setValue(null);
-            uiLongitudeEnd.getValueFactory().setValue(null);
-            uiLatitudeEnd.getValueFactory().setValue(null);
+        } else {
+            startPoint = endPoint = null;
         }
+
+        final CoordinateReferenceSystem crs = uiCRSs.getValue();
+        if (baseCrs != crs) {
+            try {
+                final MathTransform tr = CRS.findOperation(baseCrs, crs, null).getMathTransform();
+                startPoint = JTS.transform(startPoint, tr).getInteriorPoint();
+                endPoint = JTS.transform(endPoint, tr).getInteriorPoint();
+
+            } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
+                GeotkFX.newExceptionDialog("La conversion des positions a échouée.", ex).show();
+                throw new RuntimeException("La conversion des positions a échouée.", ex);
+            }
+        }
+
+        uiLongitudeStart.getValueFactory().setValue(startPoint == null ? null : startPoint.getX());
+        uiLatitudeStart.getValueFactory().setValue(startPoint == null ? null : startPoint.getY());
+        uiLongitudeEnd.getValueFactory().setValue(endPoint == null ? null : endPoint.getX());
+        uiLatitudeEnd.getValueFactory().setValue(endPoint == null ? null : endPoint.getY());
 
         reseting = false;
     }
@@ -257,7 +268,7 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         if(!getID().equals(positionable.getGeometryMode())) return;
 
         // Si un CRS est défini, on essaye de récupérer les positions géographiques depuis le formulaire.
-        final CoordinateReferenceSystem crs = uiCRSs.getSelectionModel().getSelectedItem();
+        final CoordinateReferenceSystem crs = uiCRSs.getValue();
         if(crs==null) return;
 
         Point startPoint = null;
@@ -278,28 +289,29 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         if(startPoint==null) startPoint = endPoint;
         if(endPoint==null) endPoint = startPoint;
 
-        final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
-        final LineString geometry = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), startPoint, endPoint);
-
         //on sauvegarde les points dans le crs de la base
-        positionable.setGeometry(geometry);
-        if(!Utilities.equalsIgnoreMetadata(crs, Injector.getSession().getProjection())){
-            try{
-                final MathTransform trs = CRS.findOperation(crs, Injector.getSession().getProjection(), null).getMathTransform();
+        if (!Utilities.equalsIgnoreMetadata(crs, baseCrs)) {
+            try {
+                final MathTransform trs = CRS.findOperation(crs, baseCrs, null).getMathTransform();
                 startPoint = (Point) JTS.transform(startPoint, trs);
                 endPoint = (Point) JTS.transform(endPoint, trs);
-            }catch(FactoryException | MismatchedDimensionException | TransformException ex){
+
+                final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
+                final LineString geometry = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), startPoint, endPoint);
+
+                positionable.setPositionDebut(startPoint);
+                positionable.setPositionFin(endPoint);
+                positionable.geometryModeProperty().set(getID());
+                positionable.setGeometry(geometry);
+
+            } catch(FactoryException | MismatchedDimensionException | TransformException ex) {
                 GeotkFX.newExceptionDialog("La conversion des positions a échouée.", ex).show();
                 throw new RuntimeException("La conversion des positions a échouée.", ex);
             }
         }
-        positionable.setPositionDebut(startPoint);
-        positionable.setPositionFin(endPoint);
-        positionable.geometryModeProperty().set(getID());
-        positionable.geometryProperty().set(geometry);
     }
 
-    protected void coordChange(){
+    protected void coordChange() {
         if(reseting) return;
         reseting = true;
         buildGeometry();
@@ -377,4 +389,24 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         reseting = false;
     }
 
+    private void replaceConverter(final Observable obs, final CoordinateReferenceSystem oldValue, final CoordinateReferenceSystem newValue) {
+        boolean isMeter = false;
+        if (newValue != null) {
+            final SingleCRS hcrs = CRS.getHorizontalComponent(newValue);
+            final CoordinateSystemAxis axis = hcrs.getCoordinateSystem().getAxis(0);
+            if (Units.METRE.equals(axis.getUnit())) {
+                isMeter = true;
+            }
+        }
+
+        // If we express meter coordinates, we keep JavaFX default behavior, cause two decimal are enough (cm precision)
+        final StringConverter<Double> converter = isMeter ? TWO_DIGITS_CONVERTER : SEVEN_DIGITS_CONVERTER;
+        getSpinners()
+                .map(Spinner::getValueFactory)
+                .forEach(vf -> vf.setConverter(converter));
+    }
+
+    protected Stream<Spinner> getSpinners() {
+        return Stream.of(uiLongitudeStart, uiLongitudeEnd, uiLatitudeStart, uiLatitudeEnd);
+    }
 }
