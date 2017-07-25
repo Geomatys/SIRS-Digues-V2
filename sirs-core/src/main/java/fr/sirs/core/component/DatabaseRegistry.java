@@ -113,7 +113,7 @@ public class DatabaseRegistry {
 
     // Httpd related configurations
     private static final String HTTPD_SECTION = "httpd";
-    private static final String SOCKET_OPTION = "socket_options";
+    private static final String SOCKET_OPTIONS = "socket_options";
     private static final String NO_DELAY_KEY = "nodelay";
     private static final String BIND_ADDRESS_OPTION = "bind_address";
     private static final String ENABLE_CORS_OPTION = "enable_cors";
@@ -127,6 +127,9 @@ public class DatabaseRegistry {
     // Authentication options
     private static final String AUTH_SECTION = "couch_httpd_auth";
     private static final String REQUIRE_USER_OPTION = "require_valid_user";
+
+    // Replication related configurations
+    final static String REPLICATOR_SECTION = "replicator";
 
     /** Check if a given string is a database URL (i.e not a path / url). */
     private static final Pattern DB_NAME = Pattern.compile("^[a-z][\\w-]+/?");
@@ -233,7 +236,8 @@ public class DatabaseRegistry {
                 setAuthenticationRequired();
                 setOpenWorld();
                 setCorsUseless();
-                ensureNoDelay();
+                ensureNoDelay(HTTPD_SECTION);
+                ensureNoDelay(REPLICATOR_SECTION);
             } catch (DbAccessException e) {
                 SirsCore.LOGGER.log(Level.WARNING, "CouchDB configuration cannot be overriden !", e);
             }
@@ -639,10 +643,10 @@ public class DatabaseRegistry {
          */
         final ReplicationCommand cmd;
         if (info.isPresent() || continuous) {
-            // Post required filter if it doesn't exists.
+            // Post required filter if it doesn't exist.
             new SirsFilterRepository(srcConnector);
 
-            // Post required filter if it doesn't exists.
+            // Post required filter if it doesn't exist.
             new SirsFilterRepository(dstConnector);
 
             cmd = new ReplicationCommand.Builder()
@@ -796,12 +800,12 @@ public class DatabaseRegistry {
         }
     }
 
-    private void ensureNoDelay() {
+    private void ensureNoDelay(final String section) {
         try {
             String socketConfig;
             // Catch exception at read because if property does not exists, an error is thrown.
             try {
-                socketConfig = couchDbInstance.getConfiguration(HTTPD_SECTION, SOCKET_OPTION);
+                socketConfig = couchDbInstance.getConfiguration(section, SOCKET_OPTIONS);
             } catch (DbAccessException e) {
                 socketConfig = null;
             }
@@ -823,7 +827,7 @@ public class DatabaseRegistry {
             }
 
             SirsCore.LOGGER.info("SOCKET configuration about to be SET");
-            couchDbInstance.setConfiguration(HTTPD_SECTION, SOCKET_OPTION, socketConfig);
+            couchDbInstance.setConfiguration(section, SOCKET_OPTIONS, socketConfig);
 
             // Do not make application fail because of an optimisation.
         } catch (Exception e) {
