@@ -21,20 +21,18 @@ package fr.sirs.map;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
-import fr.sirs.core.SirsCore;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.AvecBornesTemporelles;
-import fr.sirs.core.model.Element;
-import fr.sirs.core.model.Positionable;
+import fr.sirs.ui.Growl;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.logging.Level;
+import java.util.List;
+import java.util.stream.Collectors;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -46,6 +44,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.gui.javafx.render2d.FXMap;
 import org.geotoolkit.gui.javafx.util.FXDeleteTableColumn;
 import org.geotoolkit.gui.javafx.util.FXMoveDownTableColumn;
@@ -63,7 +62,6 @@ public class FXTronconMerge extends VBox {
     @FXML private Label nameLabel;
 
     private final ObservableList<TronconDigue> troncons = FXCollections.observableArrayList();
-    private final MergeTask task = new MergeTask();
     private final FXMap map;
     private final String typeName;
     private final boolean maleGender;
@@ -97,22 +95,51 @@ public class FXTronconMerge extends VBox {
     }
 
     public void processMerge() {
-
         final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Voulez-vous vraiment fusionner les " + typeName + "s ? Si oui, vos modifications seront enregistrées.", ButtonType.YES, ButtonType.NO);
         confirm.setResizable(true);
         confirm.showAndWait();
         final ButtonType result = confirm.getResult();
-        if(result==ButtonType.YES){
-            if (!task.isDone() || !task.isRunning()) {
-                TaskManager.INSTANCE.submit(task);
-            }
+        if(result==ButtonType.YES) {
+            final MergeTask mergeTask = new MergeTask(uiLinearName.getText(), typeName, maleGender, troncons);
+            mergeTask.setOnSucceeded(evt -> Platform.runLater(()
+                    -> new Growl(Growl.Type.INFO, "Fusion terminée avec succès").showAndFade()
+            ));
+            mergeTask.setOnFailed(evt -> Platform.runLater(()
+                    -> new Growl(Growl.Type.ERROR, "La fusion a échouée").showAndFade()
+            ));
+            TaskManager.INSTANCE.submit(mergeTask);
         }
     }
 
     /**
      * A task whose job is to perform fusion of {@link TronconDigue} selected via merge tool.
      */
-    private class MergeTask extends Task<Boolean> {
+    private static class MergeTask extends Task<Boolean> {
+
+        final String mergeName;
+        final String typeName;
+        final boolean maleGender;
+        final List<TronconDigue> troncons;
+
+        MergeTask(String outputName, String typeName, final boolean maleGender, List<TronconDigue> toMerge) {
+            ArgumentChecks.ensureNonNull("List of data to merge", toMerge);
+            if (toMerge.isEmpty()) {
+                throw new IllegalArgumentException("No data to merge");
+            }
+            // defensive copy
+            troncons = new ArrayList<>(toMerge);
+
+            if (outputName == null || (outputName = outputName.trim()).isEmpty()) {
+                mergeName = toMerge.stream()
+                        .map(TronconDigue::getLibelle)
+                        .collect(Collectors.joining(" + "));
+            } else {
+                mergeName = outputName;
+            }
+
+            this.typeName = typeName;
+            this.maleGender = maleGender;
+        }
 
         @Override
         protected Boolean call() throws Exception {
@@ -128,7 +155,6 @@ public class FXTronconMerge extends VBox {
             final TronconDigue merge = TronconUtils.copyTronconAndRelative(troncons.get(0), session);
             final AbstractSIRSRepository<TronconDigue> tronconRepo = (AbstractSIRSRepository<TronconDigue>) session.getRepositoryForClass(merge.getClass());
             try {
-                final StringBuilder sb = new StringBuilder(troncons.get(0).getLibelle());
                 for (int i = 1, n = troncons.size(); i < n; i++) {
                     if (Thread.currentThread().isInterrupted()) throw new InterruptedException("La fusion de " + typeName + " a été interrompue.");
 
@@ -141,13 +167,9 @@ public class FXTronconMerge extends VBox {
                     }
 
                     TronconUtils.mergeTroncon(merge, current, session);
-                    sb.append(" + ").append(current.getLibelle());
                 }
 
-                final String mergedName;
-                if(uiLinearName.getText()==null || uiLinearName.getText().equals("")) mergedName = sb.toString();
-                else mergedName = uiLinearName.getText();
-                merge.setLibelle(mergedName);
+                merge.setLibelle(mergeName);
                 session.executeBulk(Collections.singleton(merge));
 
             } catch (Exception e) {
@@ -166,12 +188,6 @@ public class FXTronconMerge extends VBox {
             final Iterator<TronconDigue> it = troncons.iterator();
             while (it.hasNext()) {
                 TronconUtils.archiveSectionWithTemporalObjects(it.next(), session, LocalDate.now().minusDays(1), true, true);
-            }
-
-            try {
-                Injector.getSession().getFrame().getMapTab().getMap().setTemporalRange(LocalDate.now(), map);
-            } catch (Exception ex) {
-                SirsCore.LOGGER.log(Level.WARNING, "Map temporal range cannot be updated.", ex);
             }
 
             return true;

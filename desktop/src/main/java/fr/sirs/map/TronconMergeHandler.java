@@ -143,10 +143,10 @@ public class TronconMergeHandler extends AbstractNavigationHandler {
      */
     @Override
     public boolean uninstall(final FXMap component) {
-        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode édition.",
+        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Confirmer la fin du mode \"fuesion de tronçons\".",
                         ButtonType.YES,ButtonType.NO);
         alert.setResizable(true);
-        if(editPane.getTroncons().isEmpty() ||
+        if(tronconLayer == null || tronconLayer.getSelectionFilter() == null || editPane.getTroncons().isEmpty() ||
                 ButtonType.YES.equals(alert.showAndWait().get())){
             super.uninstall(component);
             if (toActivateBack != null) {

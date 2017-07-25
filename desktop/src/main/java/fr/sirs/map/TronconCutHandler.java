@@ -28,13 +28,10 @@ import fr.sirs.Session;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.TronconUtils;
-import fr.sirs.core.model.AvecBornesTemporelles;
-import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -209,7 +206,6 @@ public class TronconCutHandler extends AbstractNavigationHandler {
                     d.show();
                 });
 
-                // TODO : show a popup on success.
                 submitted.setOnSucceeded(event -> {
                     final Alert alert = new Alert(Alert.AlertType.INFORMATION,
                             "Le découpage " + prefix + typeName + " \"" + troncon.getLibelle() + "\" s'est terminé avec succcès.",
@@ -499,7 +495,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
 
             //on archive l'ancien troncon et les objets dessus
             updateMessage("Finalisation du découpage pour "+toCut.getLibelle());
-            
+
             // TODO : check failures ?
             final List<DocumentOperationResult> result = TronconUtils.archiveSectionWithTemporalObjects(toCut, session, yesterday, true, false);
             for (final DocumentOperationResult failure : result) {
