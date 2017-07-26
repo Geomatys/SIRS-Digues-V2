@@ -305,19 +305,19 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
                 startPoint = (Point) JTS.transform(startPoint, trs);
                 endPoint = (Point) JTS.transform(endPoint, trs);
 
-                final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
-                final LineString geometry = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), startPoint, endPoint);
-
-                positionable.setPositionDebut(startPoint);
-                positionable.setPositionFin(endPoint);
-                positionable.geometryModeProperty().set(getID());
-                positionable.setGeometry(geometry);
-
             } catch(FactoryException | MismatchedDimensionException | TransformException ex) {
                 GeotkFX.newExceptionDialog("La conversion des positions a échouée.", ex).show();
                 throw new RuntimeException("La conversion des positions a échouée.", ex);
             }
         }
+
+        final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
+        final LineString geometry = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), startPoint, endPoint);
+
+        positionable.setPositionDebut(startPoint);
+        positionable.setPositionFin(endPoint);
+        positionable.geometryModeProperty().set(getID());
+        positionable.setGeometry(geometry);
     }
 
     protected void coordChange() {
