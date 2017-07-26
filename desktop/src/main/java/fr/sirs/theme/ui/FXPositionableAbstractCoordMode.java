@@ -27,7 +27,6 @@ import fr.sirs.SIRS;
 import static fr.sirs.SIRS.CRS_WGS84;
 import static fr.sirs.SIRS.ICON_IMPORT_WHITE;
 import fr.sirs.core.LinearReferencingUtilities;
-import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.TronconDigue;
 import static fr.sirs.theme.ui.FXPositionableMode.fxNumberValue;
@@ -226,24 +225,34 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
             //on peut réutiliser les points enregistré dans la position
             startPoint = pos.getPositionDebut();
             endPoint = pos.getPositionFin();
-
-        } else if (pos.getGeometry() != null) {
-            //on refait les points a partir de la géométrie
-            final TronconDigue t = FXPositionableMode.getTronconFromPositionable(pos);
-            final TronconUtils.PosInfo ps = new TronconUtils.PosInfo(pos, t);
-            startPoint = ps.getGeoPointStart();
-            endPoint = ps.getGeoPointEnd();
-
         } else {
             startPoint = endPoint = null;
         }
 
+        if (startPoint == null && endPoint == null) {
+            final Geometry geom = pos.getGeometry();
+            //on refait les points a partir de la géométrie
+            if (geom != null) {
+                Coordinate[] coords = geom.getCoordinates();
+                if (coords.length > 0) {
+                    startPoint = GO2Utilities.JTS_FACTORY.createPoint(coords[0]);
+                }
+                if (coords.length > 1) {
+                    endPoint = GO2Utilities.JTS_FACTORY.createPoint(coords[coords.length - 1]);
+                }
+            }
+        }
+
         final CoordinateReferenceSystem crs = uiCRSs.getValue();
-        if (baseCrs != crs) {
+        if (baseCrs != crs && (startPoint != null || endPoint != null)) {
             try {
                 final MathTransform tr = CRS.findOperation(baseCrs, crs, null).getMathTransform();
-                startPoint = JTS.transform(startPoint, tr).getInteriorPoint();
-                endPoint = JTS.transform(endPoint, tr).getInteriorPoint();
+                if (startPoint != null) {
+                    startPoint = JTS.transform(startPoint, tr).getInteriorPoint();
+                }
+                if (endPoint != null) {
+                    endPoint = JTS.transform(endPoint, tr).getInteriorPoint();
+                }
 
             } catch (FactoryException | MismatchedDimensionException | TransformException ex) {
                 GeotkFX.newExceptionDialog("La conversion des positions a échouée.", ex).show();
