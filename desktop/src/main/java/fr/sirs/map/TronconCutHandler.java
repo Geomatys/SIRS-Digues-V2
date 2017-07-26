@@ -480,7 +480,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
                     case ARCHIVER:
                         //on marque comme terminé le troncon et ses structures
                         // TODO : check failures ?
-                        final List<DocumentOperationResult> result = TronconUtils.archiveSectionWithTemporalObjects(cut, session, yesterday, true, false);
+                        final List<DocumentOperationResult> result = TronconUtils.archiveSectionWithTemporalObjects(cut, session, yesterday, true);
                         for (final DocumentOperationResult failure : result) {
                             SirsCore.LOGGER.log(Level.WARNING, "Update failed : ".concat(failure.getError()));
                         }
@@ -497,7 +497,7 @@ public class TronconCutHandler extends AbstractNavigationHandler {
             updateMessage("Finalisation du découpage pour "+toCut.getLibelle());
 
             // TODO : check failures ?
-            final List<DocumentOperationResult> result = TronconUtils.archiveSectionWithTemporalObjects(toCut, session, yesterday, true, false);
+            final List<DocumentOperationResult> result = TronconUtils.archiveSectionWithTemporalObjects(toCut, session, yesterday, true);
             for (final DocumentOperationResult failure : result) {
                 SirsCore.LOGGER.log(Level.WARNING, "Update failed : ".concat(failure.getError()));
             }

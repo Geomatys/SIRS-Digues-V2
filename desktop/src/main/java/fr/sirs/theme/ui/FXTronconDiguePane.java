@@ -38,7 +38,6 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.digue.FXSystemeReperagePane;
 import java.time.LocalDate;
 import java.util.List;
-import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -109,13 +108,21 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
             @Override
             public void changed(ObservableValue<? extends LocalDate> observable, LocalDate oldValue, LocalDate newValue) {
                 // Si le tronçon n'était pas archivé, mais le devient.
-                if(initialArchiveDate==null && newValue!=null){
-                    Platform.runLater(() -> new Alert(Alert.AlertType.INFORMATION, "Le tronçon sera archivé avec ses objets.", ButtonType.OK).showAndWait());
+                if(initialArchiveDate==null && newValue!=null) {
+                    SIRS.fxRun(false, () -> {
+                        final Alert alert = new Alert(Alert.AlertType.INFORMATION, "En affectant une date de fin, vous activez l'archivage du tronçon et de tous les objets liés (bornes, ouvrages, etc.) au moment de la sauvegarde.", ButtonType.OK);
+                        alert.setResizable(true);
+                        alert.show();
+                    });
                     computeArchive = ArchiveMode.ARCHIVE;
                 }
                 // Si le tronçon était archivé et devient désarchivé.
                 else if(initialArchiveDate!=null && newValue==null){
-                    Platform.runLater(() -> new Alert(Alert.AlertType.INFORMATION, "Le tronçon archivé au "+initialArchiveDate.toString()+" sera désarchivé, ainsi que les objets archivés à cette date.", ButtonType.OK).showAndWait());
+                    SIRS.fxRun(false, () -> {
+                        final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Vous supprimez la date de fin ("+initialArchiveDate+"). L'archivage du tronçon et tous les objets qui lui sont lié et ont été archivés le même jour seront annulés lors de la sauvegarde.", ButtonType.OK);
+                        alert.setResizable(true);
+                        alert.show();
+                    });
                     computeArchive = ArchiveMode.UNARCHIVE;
                 }
                 // À ce stade, soit les deux dates sont nulles, soit aucune des deux.
@@ -125,7 +132,11 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
                 // Cas du changement de date d'archivage : les deux dates diffèrent.
                 // Dans ce cas, la demande explicite de Jordan Perrin est de modifier l'archivage (commentaire du 22/05/2017 15:10).
                 else if(initialArchiveDate!=null && newValue!=null){
-                    Platform.runLater(() -> new Alert(Alert.AlertType.INFORMATION, "La date d'archivage du "+initialArchiveDate.toString()+" sera modifiée pour le tronçon et ses objets archivés le même jour.", ButtonType.OK).showAndWait());
+                    SIRS.fxRun(false, () -> {
+                        final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Lors de la sauvegarde, la date d'archivage du "+initialArchiveDate.toString()+" sera modifiée pour le tronçon et ses objets archivés le même jour.", ButtonType.OK);
+                        alert.setResizable(true);
+                        alert.show();
+                    });
                     computeArchive = ArchiveMode.UPDATE_ARCHIVE;
                 }
             }
@@ -353,8 +364,7 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
                 TronconUtils.unarchiveSectionWithTemporalObjects(element, session, initialArchiveDate);
                 break;
             case ARCHIVE:
-                // On s'aligne sur l'algorithme de fusion utilisé pour la fusion en évitant d'archiver les objets qui ne sont pas des documents CouchDB.
-                TronconUtils.archiveSectionWithTemporalObjects(element, session, element.getDate_fin(), false, true);
+                TronconUtils.archiveSectionWithTemporalObjects(element, session, element.getDate_fin(), false);
                 break;
             case UPDATE_ARCHIVE:
                 TronconUtils.updateArchiveSectionWithTemporalObjects(element, session, initialArchiveDate, element.getDate_fin());
