@@ -468,7 +468,7 @@ public class DatabaseRegistry {
         }
 
         // Update local database information : remote db.
-        new SirsDBInfoRepository(localConnector).setRemoteDatabase(distant);
+        new SirsDBInfoRepository(localConnector).setRemoteDatabase(removeAuthenticationInformation(distant));
     }
 
     /**
@@ -971,6 +971,19 @@ public class DatabaseRegistry {
             }
         } catch (Exception e) {
             SirsCore.LOGGER.log(Level.FINE, "Cannot add authentication information", e);
+        }
+
+        return str;
+    }
+
+    private static String removeAuthenticationInformation(final String str) {
+        try {
+            final URL url = toURL(str);
+            if (url.getUserInfo() != null) {
+                return new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile()).toExternalForm();
+            }
+        } catch (Exception e) {
+            SirsCore.LOGGER.log(Level.WARNING, "Cannot remove authentication information", e);
         }
 
         return str;
