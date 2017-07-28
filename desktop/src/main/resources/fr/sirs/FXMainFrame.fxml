@@ -27,7 +27,12 @@
                                       <items>
                                           <MenuItem fx:id="uiPref" mnemonicParsing="false" onAction="#openPref" text="%preferences" />
                                     <MenuItem mnemonicParsing="false" onAction="#clearCache" text="%clearCache" />
-                                    <MenuItem mnemonicParsing="false" onAction="#checkReferences" text="%checkReferences" />
+                                    <Menu mnemonicParsing="false" text="%synchroMenu">
+                                      <items>
+                                          <MenuItem mnemonicParsing="false" onAction="#checkReferences" text="%checkReferences" />
+                                        <MenuItem fx:id="uiSynchroDb" mnemonicParsing="false" text="%checkDistantDb" />
+                                      </items>
+                                    </Menu>
                                     <MenuItem fx:id="uiCompte" mnemonicParsing="false" onAction="#openCompte" text="%count" />
                                     <MenuItem mnemonicParsing="false" onAction="#changeUser" text="%changeUser" />
                                     <MenuItem fx:id="uiDeconnect" mnemonicParsing="false" onAction="#deconnect" text="%changeDB" />

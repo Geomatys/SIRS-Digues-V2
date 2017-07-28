@@ -19,7 +19,10 @@
 package fr.sirs;
 
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.component.DatabaseRegistry;
+import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
 import fr.sirs.core.model.ReferenceType;
@@ -58,6 +61,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableSet;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -137,6 +141,7 @@ public class FXMainFrame extends BorderPane {
     @FXML private HBox uiToolBarPlugins;
     @FXML private TabPane uiTabs;
     @FXML private MenuBar uiMenu;
+    @FXML private MenuItem uiSynchroDb;
 
     private FXMapTab mapTab;
     private DiguesTab diguesTab;
@@ -293,6 +298,32 @@ public class FXMainFrame extends BorderPane {
 
         printableProperty.addListener(printListener);
         printListener.changed(printableProperty, null, printableProperty.get());
+
+        SirsDBInfoRepository infoRepo = session.getApplicationContext().getBean(SirsDBInfoRepository.class);
+        Optional<String> remoteDb = infoRepo.get()
+                .map(SirsDBInfo::getRemoteDatabase);
+
+        if (remoteDb.isPresent()) {
+            final String distant = remoteDb.get();
+            final String localDb = session.getConnector().getDatabaseName();
+            final DatabaseRegistry registry = session.getApplicationContext().getBean(DatabaseRegistry.class);
+            uiSynchroDb.setOnAction(evt -> {
+                uiSynchroDb.setDisable(true);
+                final Task t = new TaskManager.MockTask("Synchronisation", () -> {
+                    try {
+                        registry.cancelAllSynchronizations(localDb);
+                        registry.synchronizeSirsDatabases(distant, localDb, true);
+                        return true;
+                    } finally {
+                        SIRS.fxRun(false, () -> uiSynchroDb.setDisable(false));
+                    }
+                });
+
+                TaskManager.INSTANCE.submit(t);
+            });
+        } else {
+            uiSynchroDb.setVisible(false);
+        }
     }
 
     /**

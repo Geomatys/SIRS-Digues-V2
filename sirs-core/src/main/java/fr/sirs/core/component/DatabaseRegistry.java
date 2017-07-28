@@ -366,6 +366,8 @@ public class DatabaseRegistry {
             parentFactory.registerSingleton(ElasticSearchEngine.class.getSimpleName(), elasticEngine);
         }
 
+        parentFactory.registerSingleton(DatabaseRegistry.class.getSimpleName(), this);
+        
         return new ClassPathXmlApplicationContext(new String[]{SirsCore.SPRING_CONTEXT}, parentContext);
     }
 
