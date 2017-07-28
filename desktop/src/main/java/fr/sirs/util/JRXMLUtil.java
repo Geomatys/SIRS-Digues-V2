@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -28,39 +28,39 @@ import java.util.logging.Level;
 
 /**
  * Classe utilitaire réservée aux méthodes utilisées depuis les fichiers JRXML.
- * 
+ *
  * Afin de ne pas modifier involontairement le résultat des fiches imprimées avec Jasperreport, il est préférable de
  * ne pas utiliser ces méthodes dans du code Java.
- * 
+ *
  * Attention toutefois : ces méthodes, dont les signatures sont écrites en dur dans les fichiers JRXML, sont susceptibles
  * d'une double utilisation.
- * 
+ *
  * 1- Elles peuvent être utilisées de manière statique dans les fichiers JRXML écrits en dur.
- * 
- * 2- Elles peuvent également être utilisées indirectement (écrites en dur sous forme de chaînes de caractères) par les 
- * méthodes modifiant dynamiquement les patrons JRXML (telles que par exemple dans la classe 
+ *
+ * 2- Elles peuvent également être utilisées indirectement (écrites en dur sous forme de chaînes de caractères) par les
+ * méthodes modifiant dynamiquement les patrons JRXML (telles que par exemple dans la classe
  * {@link AbstractJDomWriterSingleSpecificSheet}). Ceci expose à un risque d'éparpillement d'écriture en dur des signatures
- * de es méthodes. Pour limiter le risque d'utilisation de ces noms de fonction à l'extérieur de cette classe, il est 
- * recommandé de passer par des méthodes spécifiques ({@link JRXMLUtil#dynamicDisplayLabel(java.lang.String)} , 
+ * de es méthodes. Pour limiter le risque d'utilisation de ces noms de fonction à l'extérieur de cette classe, il est
+ * recommandé de passer par des méthodes spécifiques ({@link JRXMLUtil#dynamicDisplayLabel(java.lang.String)} ,
  * {@link JRXMLUtil#dynamicDisplayLabels(java.lang.String) }…).
- * 
+ *
  * @author Samuel Andrés (Geomatys) <samuel.andres at geomatys.com>
  */
 public class JRXMLUtil {
-    
+
     private static final NumberFormat PR_FORMAT = new DecimalFormat("#.##");
-    
+
     private JRXMLUtil(){}
-    
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // MÉTHODES CŒUR DES FONCTIONNALITÉS.                                                                             //
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
+
     static String extractDesignation(final String input){
-        return input.substring(input.indexOf(SirsStringConverter.DESIGNATION_SEPARATOR)+SirsStringConverter.DESIGNATION_SEPARATOR.length(), 
+        return input.substring(input.indexOf(SirsStringConverter.DESIGNATION_SEPARATOR)+SirsStringConverter.DESIGNATION_SEPARATOR.length(),
                 input.indexOf(SirsStringConverter.LABEL_SEPARATOR));
     }
-    
+
     static String extractLabel(final String input){
         final int index = input.indexOf(SirsStringConverter.LABEL_SEPARATOR);
         if(index>-1){
@@ -71,23 +71,23 @@ public class JRXMLUtil {
             return input;
         }
     }
-    
+
     static String extractReferenceCode(final String input){
         return input.substring(0, input.indexOf(SirsStringConverter.LABEL_SEPARATOR));
     }
-    
+
     /**
      * Affichage d'un champ récupéré comme {@link PrintableArrayList}.
-     * 
+     *
      * @param inputList
      * @param ordered
      * @param startIndex
-     * @return 
+     * @return
      */
     static String extractLabels(final String inputList, final boolean ordered, final int startIndex){
-        
+
         if(inputList==null || inputList.isEmpty()) return NULL_REPLACEMENT;
-        
+
         final String[] split = inputList.split("\n");
         final Collection<String> output = new ArrayList<>();
         for(int i = 0; i<split.length; i++){
@@ -95,98 +95,98 @@ public class JRXMLUtil {
         }
         return PrinterUtilities.printList(output, ordered, startIndex);
     }
-    
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // MÉTHODES DESTINÉES À UNE ÉCRITURE STATIQUE DANS LES FICHIERS JRXML.                                            //
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
+
     public static String displayField(final String input){
         return input==null ? NULL_REPLACEMENT : input;
     }
-    
+
     /**
-     * 
+     *
      * @param input
      * @return
-     * 
+     *
      * @see JRXMLUtil#dynamicDisplayLabel(java.lang.String) Pour écrire dynamiquement cette méthode dans les patrons JRXML.
      */
     public static String displayLabel(final String input){
         return input==null ? NULL_REPLACEMENT : extractLabel(input);
     }
-    
+
     /**
-     * 
+     *
      * @param input
-     * @return 
-     * 
+     * @return
+     *
      * @see JRXMLUtil#dynamicDisplayReferenceCode(java.lang.String) Pour écrire dynamiquement cette méthode dans les patrons JRXML.
      */
     public static String displayReferenceCode(final String input){
         return input==null ? NULL_REPLACEMENT : extractReferenceCode(input);
     }
-    
+
     /**
      * Affichage d'un champ récupéré comme {@link PrintableArrayList}.
-     * 
+     *
      * @param inputList
      * @param ordered
      * @param startIndex
      * @return
-     * 
+     *
      * @see JRXMLUtil#dynamicDisplayLabels(java.lang.String) Pour écrire dynamiquement cette méthode dans les patrons JRXML.
      */
     public static String displayLabels(final String inputList, final Boolean ordered, final Integer startIndex){
         return inputList==null ? NULL_REPLACEMENT : extractLabels(inputList, ordered, startIndex);
     }
-    
+
     public static String displayDesignation(final String input){
         return input==null ? NULL_REPLACEMENT : extractDesignation(input);
     }
-    
+
     public static String displayAmontAval(final Boolean input){
         return input==null ? NULL_REPLACEMENT : input ? "Amont" : "Aval";
     }
-    
+
     public static String displayDistance(final Double distance){
-        return distance==null ? NULL_REPLACEMENT : (distance + " m");
+        return distance==null ? NULL_REPLACEMENT : (PR_FORMAT.format(distance) + " m");
     }
-    
+
     public static String displayPR(final Double pr){
         return pr==null ? NULL_REPLACEMENT : PR_FORMAT.format(pr);
     }
-    
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // MÉTHODES À UTILISER POUR ÉCRIRE DYNAMIQUEMENT DANS LES PATRONS JRXML AFIN DE CENTRALISER LES MODIFICATIONS LE  //
     // CAS ÉCHÉANT.                                                                                                   //
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
+
     /**
      * Affichage d'un champ récupéré comme {@link PrintableArrayList}.
-     * 
+     *
      * @param fieldName
-     * @return 
-     * @see JRXMLUtil#displayLabels(java.lang.String, java.lang.Boolean, java.lang.Integer) 
+     * @return
+     * @see JRXMLUtil#displayLabels(java.lang.String, java.lang.Boolean, java.lang.Integer)
      */
     public static String dynamicDisplayLabels(final String fieldName){
         return "($F{"+fieldName+"}==null) ? \""+NULL_REPLACEMENT+"\" : fr.sirs.util.JRXMLUtil.displayLabels($F{"+fieldName+"}.toString(), true, 1)";
     }
-    
+
     /**
-     * 
+     *
      * @param fieldName
      * @return
-     * @see JRXMLUtil#displayLabel(java.lang.String) 
+     * @see JRXMLUtil#displayLabel(java.lang.String)
      */
     public static String dynamicDisplayLabel(final String fieldName){
         return "fr.sirs.util.JRXMLUtil.displayLabel($F{"+fieldName+"})";
     }
-    
+
     /**
-     * 
+     *
      * @param fieldName
-     * @return 
-     * @see JRXMLUtil#displayReferenceCode(java.lang.String) 
+     * @return
+     * @see JRXMLUtil#displayReferenceCode(java.lang.String)
      */
     public static String dynamicDisplayReferenceCode(final String fieldName){
         return "fr.sirs.util.JRXMLUtil.displayReferenceCode($F{"+fieldName+"})";
