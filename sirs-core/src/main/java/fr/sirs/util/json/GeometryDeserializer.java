@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -30,18 +30,28 @@ import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
+import fr.sirs.core.SirsCore;
+import java.util.logging.Level;
 
 
 import org.geotoolkit.geometry.jts.JTS;
 
 public class GeometryDeserializer extends JsonDeserializer<Geometry> {
-    
+
     @Override
     public Geometry deserialize(JsonParser parser, DeserializationContext arg1) throws IOException, JsonProcessingException {
-        if(parser.getText()==null || parser.getText().isEmpty()) return null;
+        if (parser.getText() == null || parser.getText().isEmpty())
+            return null;
         try {
             Geometry value = new WKTReader().read(parser.getText());
-            JTS.setCRS(value, InjectorCore.getBean(SessionCore.class).getProjection());
+            try {
+                final SessionCore session = InjectorCore.getBean(SessionCore.class);
+                if (session != null) {
+                    JTS.setCRS(value, session.getProjection());
+                }
+            } catch (Exception e) {
+                SirsCore.LOGGER.log(Level.FINE, "Cannot set CRS on geometry", e);
+            }
             return value;
         } catch (ParseException e) {
             throw new IOException(e);
