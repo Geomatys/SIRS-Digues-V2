@@ -37,16 +37,38 @@ public class FXDesordrePane extends FXDesordrePaneStub {
     public FXDesordrePane(final Desordre desordre){
         super(desordre);
 
+        // Demande SYM-1117 : la sélection d'une catégorie détermine la liste des types de désordres 
         // Update available types according to chosen category.
         final AbstractSIRSRepository<RefTypeDesordre> typeRepo = Injector.getSession().getRepositoryForClass(RefTypeDesordre.class);
         ui_categorieDesordreId.getSelectionModel().selectedItemProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
 
             final ObservableList<RefTypeDesordre> typeList = SIRS.observableList(typeRepo.getAll());
             if (newValue instanceof RefCategorieDesordre) {
-                final FilteredList fList = typeList.filtered(type -> type.getCategorieId().equals(((RefCategorieDesordre) newValue).getId()));
+                final FilteredList<RefTypeDesordre> fList = typeList.filtered(type -> type.getCategorieId().equals(((RefCategorieDesordre) newValue).getId()));
                 ui_typeDesordreId.setItems(fList);
             } else {
                 ui_typeDesordreId.setItems(typeList);
+            }
+        });
+        
+        // Demande SYM-1669 : la sélection d'un type de désordre doit contraintre la catégorie
+        ui_typeDesordreId.getSelectionModel().selectedItemProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
+            
+            if(newValue!=null){
+                final RefTypeDesordre selectedType = (RefTypeDesordre) newValue;
+                final String newCategoryId = selectedType.getCategorieId();
+                if(newCategoryId!=null){
+                    final RefCategorieDesordre oldCategory = (RefCategorieDesordre) ui_categorieDesordreId.getSelectionModel().getSelectedItem();
+                    if(oldCategory==null || (oldCategory!=null && !newCategoryId.equals(oldCategory.getId()))){
+                        final ObservableList<RefCategorieDesordre> items = ui_categorieDesordreId.getItems();
+                        for(final RefCategorieDesordre category : items){
+                            if(newCategoryId.equals(category.getId())){
+                                ui_categorieDesordreId.getSelectionModel().select(category);
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         });
     }
