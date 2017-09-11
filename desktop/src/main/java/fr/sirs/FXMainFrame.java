@@ -595,7 +595,7 @@ public class FXMainFrame extends BorderPane {
     @FXML
     void openCompte(ActionEvent event){
         if (session.getUtilisateur()!=null) {
-            addTab(session.getOrCreateElementTab(session.getUtilisateur()));
+            addTab(session.getOrCreateElementTab(session.getUtilisateur(), SIRS.CONSULTATION_PREDICATE));
         }
     }
 

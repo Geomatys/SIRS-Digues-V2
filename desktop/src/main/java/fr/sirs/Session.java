@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
@@ -299,7 +300,20 @@ public class Session extends SessionCore {
     // GESTION DES PANNEAUX
     ////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * 
+     * @param object The object the edition tab is requested for.
+     */
     public void showEditionTab(final Object object) {
+        showEditionTab(object, SIRS.CONSULTATION_PREDICATE);
+    }
+    
+    /**
+     * 
+     * @param object The object the edition tab is requested for.
+     * @param editionPredicate Prédicat d'édition du panneau à l'ouverture
+     */
+    public void showEditionTab(final Object object, final Predicate<Element> editionPredicate) {
         final Optional<? extends Element> element = getElement(object);
         if (element.isPresent()){
             if(element.get() instanceof ReferenceType) {
@@ -307,7 +321,7 @@ public class Session extends SessionCore {
                 alert.setResizable(true);
                 alert.showAndWait();
             } else {
-                getFrame().addTab(getOrCreateElementTab(element.get()));
+                getFrame().addTab(getOrCreateElementTab(element.get(), editionPredicate));
             }
         }
     }
@@ -443,7 +457,7 @@ public class Session extends SessionCore {
         });
     }
 
-    public FXFreeTab getOrCreateElementTab(final Element element) {
+    public FXFreeTab getOrCreateElementTab(final Element element, final Predicate<Element> editionPredicate) {
         // On commence par regarder si un plugin spécifie une ouverture particulière.
         for(final Plugin plugin : Plugins.getPlugins()){
             if(plugin.handleTronconType(element.getClass())){
@@ -452,7 +466,7 @@ public class Session extends SessionCore {
         }
 
         // Si on a affaire à un élément qui n'est pas un tronçon, ou bien d'un type de tronçon qu'aucun plugin n'ouvre de manière particulière, on ouvre l'élément de manière standard.
-        return getOrCreateTab(element, new ElementTabCreator(element));
+        return getOrCreateTab(element, new ElementTabCreator(element, editionPredicate));
     }
 
     public FXFreeTab getOrCreateTab(final Object target, final Callable<FXFreeTab> tabCreator) {
@@ -509,10 +523,12 @@ public class Session extends SessionCore {
     private static class ElementTabCreator implements Callable<FXFreeTab> {
 
         private final Element target;
+        private final Predicate<Element> editionPredicate;
 
-        public ElementTabCreator(Element target) {
+        public ElementTabCreator(final Element target, final Predicate<Element> editionPredicate) {
             ArgumentChecks.ensureNonNull("Target element", target);
             this.target = target;
+            this.editionPredicate = editionPredicate;
         }
 
         @Override
@@ -527,7 +543,7 @@ public class Session extends SessionCore {
             tab.setContent(content);
 
             Injector.getSession().getTaskManager().submit(() -> {
-                Node edit = (Node) SIRS.generateEditionPane(target);
+                Node edit = (Node) SIRS.generateEditionPane(target, editionPredicate);
                 if (edit == null) {
                     edit = new BorderPane(new Label("Pas d'éditeur pour le type : " + target.getClass().getSimpleName()));
                 }

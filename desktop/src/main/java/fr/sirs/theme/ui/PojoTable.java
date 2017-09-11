@@ -479,7 +479,7 @@ public class PojoTable extends BorderPane implements Printable {
             if(createNewProperty.get()){
                 p = createPojo();
                 if (p != null && openEditorOnNewProperty.get()) {
-                    editPojo(p);
+                    editPojo(p, SIRS.EDITION_PREDICATE);
                 }
             }
             else {
@@ -1212,13 +1212,24 @@ public class PojoTable extends BorderPane implements Printable {
     /**
      * Try to find and display a form to edit input object.
      * @param pojo The object we want to edit.
+     * @return 
      */
     protected Object editPojo(Object pojo) {
+        return editPojo(pojo, SIRS.CONSULTATION_PREDICATE);
+    }
+    
+    /**
+     * 
+     * @param pojo
+     * @param editionPredicate
+     * @return 
+     */
+    protected Object editPojo(Object pojo, Predicate<Element> editionPredicate) {
         final int index;
         if (uiFicheMode.isSelected() && (index = uiTable.getItems().indexOf(pojo)) >= 0) {
             uiTable.getSelectionModel().select(index);
         } else {
-            editElement(pojo);
+            editElement(pojo, editionPredicate);
         }
         return pojo;
     }
@@ -1377,9 +1388,14 @@ public class PojoTable extends BorderPane implements Printable {
         return (Element) result;
     }
 
-    public static void editElement(Object pojo) {
+    /**
+     * 
+     * @param pojo The object the edition is requested for.
+     * @param editionPredicate Prédicat d'étition du panneau à l'ouverture
+     */
+    public static void editElement(Object pojo, Predicate<Element> editionPredicate) {
         try {
-            Injector.getSession().showEditionTab(pojo);
+            Injector.getSession().showEditionTab(pojo, editionPredicate);
         } catch (Exception ex) {
             Dialog d = new Alert(Alert.AlertType.ERROR, "Impossible d'afficher un éditeur", ButtonType.OK);
             d.setResizable(true);

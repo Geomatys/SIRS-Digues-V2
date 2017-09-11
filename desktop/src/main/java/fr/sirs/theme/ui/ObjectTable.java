@@ -324,7 +324,7 @@ public class ObjectTable extends BorderPane {
      * @param pojo The object we want to edit.
      */
     protected void editPojo(Object pojo){
-        editElement(pojo);
+        editElement(pojo, SIRS.CONSULTATION_PREDICATE);
     }
 
     protected Optional<TableColumn> getPropertyColumn(final PropertyDescriptor desc) {

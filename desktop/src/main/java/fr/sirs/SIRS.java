@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -160,6 +161,9 @@ public final class SIRS extends SirsCore {
      * as possible.
      */
     private static final Cache<String, Image> IMAGE_CACHE = new Cache<>(16, 0, false);
+    
+    public static final Predicate<Element> CONSULTATION_PREDICATE = e -> false;
+    public static final Predicate<Element> EDITION_PREDICATE = e -> true;
 
     private static AbstractRestartableStage LAUNCHER;
     public static void setLauncher(AbstractRestartableStage currentWindow) {
@@ -262,6 +266,7 @@ public final class SIRS extends SirsCore {
             return observableList(repo.get(sourceList));
         }
     }
+    
 
     /**
      * Tente de trouver un éditeur d'élément compatible avec l'objet passé en paramètre.
@@ -273,7 +278,21 @@ public final class SIRS extends SirsCore {
      * trouvé. L'éditeur aura déjà été initialisé avec l'objet en paramètre.
      */
     public static AbstractFXElementPane generateEditionPane(final Element pojo) {
-        return new FXElementContainerPane((Element) pojo);
+        return generateEditionPane(pojo, CONSULTATION_PREDICATE);
+    }
+
+    /**
+     * Tente de trouver un éditeur d'élément compatible avec l'objet passé en paramètre.
+     * Contrairement à la méthode {@link #createFXPaneForElement(fr.sirs.core.model.Element) }, l'éditeur
+     * retourné ici est décoré avec un bandeau pour la sauvegarde.
+     *
+     * @param pojo L'objet pour lequel trouver un éditeur.
+     * @param editionPredicate Prédicat d'édition du panneau à l'ouverture
+     * @return Un éditeur pour l'objet d'entrée, ou null si aucun ne peut être
+     * trouvé. L'éditeur aura déjà été initialisé avec l'objet en paramètre.
+     */
+    public static AbstractFXElementPane generateEditionPane(final Element pojo, final Predicate<Element> editionPredicate) {
+        return new FXElementContainerPane((Element) pojo, editionPredicate);
     }
 
     /**

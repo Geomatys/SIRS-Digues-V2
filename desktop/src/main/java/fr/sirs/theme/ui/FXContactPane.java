@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -220,6 +221,17 @@ public class FXContactPane extends AbstractFXElementPane<Contact> {
                 }
             });
             return super.editPojo(pojo);
+        }
+
+        @Override
+        protected Object editPojo(Object pojo, final Predicate<Element> editionPredicate) {
+            final ContactOrganisme co = (ContactOrganisme) pojo;
+            co.contactIdProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+                if (!elementProperty.get().getId().equals(newValue)) {
+                    orgsOfContact.remove(co);
+                }
+            });
+            return super.editPojo(pojo, editionPredicate);
         }
 
         @Override

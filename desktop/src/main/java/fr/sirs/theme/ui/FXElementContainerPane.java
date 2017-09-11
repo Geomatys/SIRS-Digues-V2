@@ -34,6 +34,7 @@ import fr.sirs.map.FXMapTab;
 import fr.sirs.ui.Growl;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -71,7 +72,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
      */
     private Element originCouchDbDocument;
 
-    public FXElementContainerPane(final T element) {
+    public FXElementContainerPane(final T element, final Predicate<Element> newlyCreated) {
         super();
         SIRS.loadFXML(this);
         setFocusTraversable(true);
@@ -94,7 +95,7 @@ public class FXElementContainerPane<T extends Element> extends AbstractFXElement
         });
 
         if (element != null) {
-            uiMode.requireEditionForElement(element);
+            uiMode.requireEditionForElement(element, newlyCreated);
             setElement((T) element);
             if (uiMode.editionState().get())
                 uiDesignation.requestFocus();

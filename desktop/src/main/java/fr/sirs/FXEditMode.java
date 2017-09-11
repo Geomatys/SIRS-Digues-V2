@@ -23,6 +23,7 @@ import static fr.sirs.SIRS.ICON_CHECK_CIRCLE;
 import static fr.sirs.SIRS.ICON_EXCLAMATION_CIRCLE;
 import fr.sirs.core.model.Element;
 import java.io.IOException;
+import java.util.function.Predicate;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -161,9 +162,9 @@ public class FXEditMode extends VBox {
         }
     }
 
-    public void requireEditionForElement(final Element element){
+    public void requireEditionForElement(final Element element, final Predicate<Element> editionPredicate){
         ArgumentChecks.ensureNonNull("element", element);
-        if(element.getDesignation()==null || "".equals(element.getDesignation())){
+        if(editionPredicate.test(element)){
             requireEdition();
         }
     }
