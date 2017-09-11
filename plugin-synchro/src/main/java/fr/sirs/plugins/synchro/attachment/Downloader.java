@@ -14,7 +14,6 @@ public class Downloader {
     @Autowired
     Session session;
 
-
     public AttachmentInputStream download(final AttachmentReference ref) {
         ArgumentChecks.ensureNonNull("Attachment reference", ref);
         ArgumentChecks.ensureNonEmpty("Document id", ref.getParentId());

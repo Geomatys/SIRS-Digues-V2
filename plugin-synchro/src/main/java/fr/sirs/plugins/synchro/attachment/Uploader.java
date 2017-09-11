@@ -19,6 +19,17 @@ public class Uploader {
         this.connector = connector;
     }
 
+    /**
+     * Send a file to CouchDB server as an attachment.
+     *
+     * @param ref The reference object specifies on which document we should
+     * attach the uploaded file. It is mandatory, and the parent id must not be
+     * null. However, if no identifier is specified for the attachment, we will
+     * use the name of the provided file.
+     * @param data The file to send content to CouchDb.
+     * @throws IOException If an error occurs while analyzing or sending given
+     * file content.
+     */
     public void upload(final AttachmentReference ref, final Path data) throws IOException {
         ArgumentChecks.ensureNonNull("Attachment reference", ref);
         ArgumentChecks.ensureNonNull("File to upload", data);
