@@ -180,8 +180,7 @@ public class Preview implements AvecLibelle, Comparable {
                 return designationComparison;
             }
 
-            return getLibelle() == null?
-                    other.getLibelle() == null? 0 : 1
+            return getLibelle() == null || other.getLibelle() == null ? 0 
                     : getLibelle().compareTo(other.getLibelle());
         }
 
