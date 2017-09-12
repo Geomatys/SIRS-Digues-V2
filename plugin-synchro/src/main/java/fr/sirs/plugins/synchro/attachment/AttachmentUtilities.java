@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.activation.MimetypesFileTypeMap;
+import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.AttachmentInputStream;
+import org.ektorp.CouchDbConnector;
 
 /**
  *
@@ -100,5 +102,20 @@ public class AttachmentUtilities {
 
     private static String cTypeFromJavax(final Path input) {
         return MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(input.toFile());
+    }
+
+    public static AttachmentInputStream download(final CouchDbConnector connector, final AttachmentReference ref) {
+        ArgumentChecks.ensureNonNull("Attachment reference", ref);
+        ArgumentChecks.ensureNonEmpty("Document id", ref.getParentId());
+        ArgumentChecks.ensureNonEmpty("Attachment id", ref.getId());
+
+        final AttachmentInputStream stream;
+        if (ref.getRevision() == null || ref.getRevision().isEmpty()) {
+            stream = connector.getAttachment(ref.getParentId(), ref.getId());
+        } else {
+            stream = connector.getAttachment(ref.getParentId(), ref.getId(), ref.getRevision());
+        }
+
+        return stream;
     }
 }
