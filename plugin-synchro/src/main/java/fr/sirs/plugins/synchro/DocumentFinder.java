@@ -44,6 +44,8 @@ public class DocumentFinder extends Task<List<SIRSFileReference>> {
 
     @Override
     protected List<SIRSFileReference> call() throws Exception {
+        updateTitle("Recherche de documents");
+        updateMessage("Analyse des tronçons");
         final List<TronconDigue> selectedTroncons = session
                 .getRepositoryForClass(TronconDigue.class)
                 .get(tronconIds);
@@ -53,6 +55,7 @@ public class DocumentFinder extends Task<List<SIRSFileReference>> {
             tdStream = tdStream.filter(this::intersectsDate);
         }
 
+        updateMessage("Fouille de la base de données");
         Stream<Preview> docPreviews = tdStream
                 .flatMap(this::getDocumentPreviews);
 
@@ -70,8 +73,9 @@ public class DocumentFinder extends Task<List<SIRSFileReference>> {
                         )
                 );
 
+        updateMessage("Collecte des documents");
         Stream<?> documents = docsByType.entrySet().stream()
-                .map(this::getDocuments);
+                .flatMap(this::getDocuments);
         if (dateFilter != null) {
             documents = ((Stream<AvecBornesTemporelles>)documents
                     .filter(AvecBornesTemporelles.class::isInstance))
@@ -129,13 +133,13 @@ public class DocumentFinder extends Task<List<SIRSFileReference>> {
         for (final AbstractPositionDocument docPosition : docPositions) {
             if (docPosition instanceof SIRSFileReference) {
                 docIds.add(docPosition.getId());
+            } else if (docPosition instanceof PositionProfilTravers) {
+                levePositionIds.addAll(((PositionProfilTravers)docPosition).getLevePositionIds());
             } else if (docPosition instanceof AbstractPositionDocumentAssociable) {
                 final String docId = ((AbstractPositionDocumentAssociable)docPosition).getSirsdocument();
                 if (docId != null && !docId.isEmpty()) {
                     docIds.add(docId);
                 }
-            } else if (docPosition instanceof PositionProfilTravers) {
-                levePositionIds.addAll(((PositionProfilTravers)docPosition).getLevePositionIds());
             }
         }
 
