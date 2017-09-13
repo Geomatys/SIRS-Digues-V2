@@ -1,20 +1,27 @@
 package fr.sirs.plugins.synchro.attachment;
 
+import fr.sirs.SIRS;
+import fr.sirs.core.model.SIRSFileReference;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.logging.Level;
 import javax.activation.MimetypesFileTypeMap;
+import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.AttachmentInputStream;
 import org.ektorp.CouchDbConnector;
+import static org.ektorp.util.Documents.setRevision;
 
 /**
  *
@@ -50,8 +57,9 @@ public class AttachmentUtilities {
             identifier = input.getFileName().toString();
         }
         final InputStream fileInput = Files.newInputStream(input);
+        Base64InputStream stream64 = new Base64InputStream(fileInput, true);
         try {
-            return new AttachmentInputStream(identifier, fileInput, mime, fileSize);
+            return new AttachmentInputStream(identifier, stream64, mime, fileSize);
         } catch (Exception e) {
             try {
                 fileInput.close();
@@ -117,5 +125,61 @@ public class AttachmentUtilities {
         }
 
         return stream;
+    }
+
+    /**
+     * Send a file to CouchDB server as an attachment.
+     *
+     * @param connector Database connection to use for upload.
+     * @param ref The reference object specifies on which document we should
+     * attach the uploaded file. It is mandatory, and the parent id must not be
+     * null. However, if no identifier is specified for the attachment, we will
+     * use the name of the provided file.
+     * @param data The file to send content to CouchDb.
+     * @return The revision created.
+     * @throws IOException If an error occurs while analyzing or sending given
+     * file content.
+     */
+    public static String upload(final CouchDbConnector connector, final AttachmentReference ref, final Path data) throws IOException {
+        ArgumentChecks.ensureNonNull("Attachment reference", ref);
+        ArgumentChecks.ensureNonNull("File to upload", data);
+        try (final AttachmentInputStream ath = AttachmentUtilities.create(ref.getId(), data)) {
+            if (ref.getRevision() == null || ref.getRevision().isEmpty()) {
+                return connector.createAttachment(ref.getParentId(), ath);
+            } else {
+                return connector.createAttachment(ref.getParentId(), ref.getRevision(), ath);
+            }
+        }
+    }
+
+    public static void upload(final CouchDbConnector connector, final SIRSFileReference data) throws IOException {
+        final Path file = SIRS.getDocumentAbsolutePath(data);
+        final String revision = upload(connector, new AttachmentReference(data.getDocumentId(), getRevision(data).orElse(null), file.getFileName().toString()), file);
+        setRevision(data, revision);
+    }
+
+    private static Optional<String> getRevision(final Object input) {
+        try {
+            return Optional.ofNullable(input.getClass().getMethod("getRevision").invoke(input))
+                    .map(Object::toString);
+        } catch (SecurityException|ReflectiveOperationException ex) {
+            SIRS.LOGGER.log(Level.FINE, "No revision available", ex);
+        }
+
+        return Optional.empty();
+    }
+
+    public static void delete(final CouchDbConnector connector, final SIRSFileReference ref) {
+        String fileName;
+        try {
+            fileName = SIRS.getDocumentAbsolutePath(ref).getFileName().toString();
+        } catch (IllegalStateException|InvalidPathException e) {
+            SIRS.LOGGER.log(Level.FINE, "Cannot retrieve document file.", e);
+            fileName = Paths.get(ref.getChemin()).getFileName().toString();
+        }
+
+        String revision = getRevision(ref).orElseThrow(() -> new IllegalArgumentException("Cannot find a valid revision to delete attachment."));
+        revision = connector.deleteAttachment(ref.getDocumentId(), revision, fileName);
+        setRevision(ref, revision);
     }
 }

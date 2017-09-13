@@ -87,7 +87,7 @@ public class DocumentFinder extends Task<List<SIRSFileReference>> {
                 .collect(Collectors.toList());
     }
 
-    private static boolean isFileAvailable(final SIRSFileReference fileRef) {
+    public static boolean isFileAvailable(final SIRSFileReference fileRef) {
         final String chemin = fileRef.getChemin();
         return chemin != null &&
                 !chemin.isEmpty() &&

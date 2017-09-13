@@ -2,19 +2,27 @@ package fr.sirs.plugins.synchro.ui;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.model.SIRSFileReference;
+import fr.sirs.plugins.synchro.DocumentFinder;
 import fr.sirs.plugins.synchro.attachment.AttachmentReference;
 import fr.sirs.plugins.synchro.attachment.AttachmentUtilities;
+import fr.sirs.plugins.synchro.concurrent.AsyncPool;
+import fr.sirs.ui.Growl;
+import fr.sirs.util.SirsStringConverter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletionException;
+import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -52,6 +60,8 @@ public class LocalDistantView extends SplitPane {
 
     private final CouchDbConnector connector;
     private final ObservableList<SIRSFileReference> documents;
+
+    private final AsyncPool pool = new AsyncPool(7);
 
     public LocalDistantView(final CouchDbConnector connector, final ObservableList<SIRSFileReference> documents) {
         this.connector = connector;
@@ -93,9 +103,81 @@ public class LocalDistantView extends SplitPane {
         if (selectedItems.isEmpty())
             return;
 
-        // We cannot just get removed list and put it back in desktop list, because
-        // filter could have changed multiple times.
-        uiMobileList.getItems().removeAll(selectedItems);
+        final List<SIRSFileReference> selection = new ArrayList<>(selectedItems);
+        final UnaryOperator<SIRSFileReference> delete = ref -> {
+            try {
+                AttachmentUtilities.delete(connector, ref);
+            } catch (Exception e) {
+                throw new ParameterizedException(ref, e.getLocalizedMessage(), e);
+            }
+
+            return ref;
+        };
+
+        final Task<Void> deletor = pool.prepare(delete)
+                .setTarget(new ArrayList<>(selectedItems).iterator())
+                .setWhenComplete(this::handleDeletionResult)
+                .build();
+
+        // TODO : better management of synchronous tasks.
+        TaskManager.INSTANCE.submit(deletor);
+    }
+
+    private void handleDeletionResult(final SIRSFileReference ref, final Throwable error) {
+        if (error == null) {
+            SIRS.fxRun(false, () -> {
+                uiMobileList.getItems().remove(ref);
+                if (DocumentFinder.isFileAvailable(ref))
+                    uiDesktopList.getItems().add(ref);
+            });
+        } else if (error instanceof Error) {
+            throw (Error) error;
+        } else {
+            Throwable search = error;
+            while (search != null && !(search instanceof ParameterizedException)) {
+                search = search.getCause();
+            }
+
+            final String msg;
+            if (search instanceof ParameterizedException) {
+                SIRS.LOGGER.log(Level.WARNING, search, () -> "Cannot delete attachment for " + ref);
+                msg = String.format("Impossible de supprimer le document en base.%nDocument : %s%nCause : %s",
+                        new SirsStringConverter().toString(ref), search.getLocalizedMessage());
+            } else {
+                SIRS.LOGGER.log(Level.WARNING, error, () -> "Cannot delete an attachment");
+                msg = String.format("Impossible de supprimer un document de la base de données.%nCause : %s", error.getLocalizedMessage());
+            }
+
+            SIRS.fxRun(false, () -> new Growl(Growl.Type.ERROR, msg).showAndFade());
+        }
+    }
+
+    private void handleUploadResult(final SIRSFileReference ref, final Throwable error) {
+        if (error == null) {
+            SIRS.fxRun(false, () -> {
+                uiDesktopList.getItems().remove(ref);
+                uiMobileList.getItems().add(ref);
+            });
+        } else if (error instanceof Error) {
+            throw (Error) error;
+        } else {
+            Throwable search = error;
+            while (search != null && !(search instanceof ParameterizedException)) {
+                search = search.getCause();
+            }
+
+            final String msg;
+            if (search instanceof ParameterizedException) {
+                SIRS.LOGGER.log(Level.WARNING, search, () -> "Cannot upload attachment for " + ref);
+                msg = String.format("Impossible d'envoyer le document en base.%nDocument : %s%nCause : %s",
+                        new SirsStringConverter().toString(ref), search.getLocalizedMessage());
+            } else {
+                SIRS.LOGGER.log(Level.WARNING, error, () -> "Cannot upload an attachment");
+                msg = String.format("Impossible d'envoyer un document vers la base de données.%nCause : %s", error.getLocalizedMessage());
+            }
+
+            SIRS.fxRun(false, () -> new Growl(Growl.Type.ERROR, msg).showAndFade());
+        }
     }
 
     @FXML
@@ -104,8 +186,20 @@ public class LocalDistantView extends SplitPane {
         if (selectedItems.isEmpty())
             return;
 
-        uiMobileList.getItems().addAll(selectedItems);
-        uiDesktopList.getItems().removeAll(selectedItems);
+        final UnaryOperator<SIRSFileReference> upload = ref -> {
+            try {
+                AttachmentUtilities.upload(connector, ref);
+            } catch (Exception e) {
+                throw new ParameterizedException(ref, e.getLocalizedMessage(), e);
+            }
+            return ref;
+        };
+
+        Task<Void> uploader = pool.prepare(upload)
+                .setTarget(new ArrayList<>(selectedItems).iterator())
+                .setWhenComplete(this::handleUploadResult)
+                .build();
+        TaskManager.INSTANCE.submit(uploader);
     }
 
     private void updateLists() {
@@ -145,6 +239,25 @@ public class LocalDistantView extends SplitPane {
         } else {
             final AttachmentInputStream in = AttachmentUtilities.download(connector, new AttachmentReference(ref.getId(), doc.getFileName().toString()));
             return in.getContentLength();
+        }
+    }
+
+    private static class ParameterizedException extends CompletionException {
+        final SIRSFileReference input;
+
+        public ParameterizedException(SIRSFileReference input, String message) {
+            super(message);
+            this.input = input;
+        }
+
+        public ParameterizedException(SIRSFileReference input, String message, Throwable cause) {
+            super(message, cause);
+            this.input = input;
+        }
+
+        public ParameterizedException(SIRSFileReference input, Throwable cause) {
+            super(cause);
+            this.input = input;
         }
     }
 }
