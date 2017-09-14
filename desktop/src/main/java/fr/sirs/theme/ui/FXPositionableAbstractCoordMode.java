@@ -81,6 +81,8 @@ import org.opengis.util.FactoryException;
  */
 public abstract class FXPositionableAbstractCoordMode extends BorderPane implements FXPositionableMode {
 
+    private static final double BUFFER_DISTANCE = 0.001;
+
     private static final StringConverter<Double> SEVEN_DIGITS_CONVERTER = new FormattedDoubleConverter(new DecimalFormat("#.#######"));
     private static final StringConverter<Double> TWO_DIGITS_CONVERTER = new FormattedDoubleConverter(new DecimalFormat("#.##"));
 
@@ -312,7 +314,27 @@ public abstract class FXPositionableAbstractCoordMode extends BorderPane impleme
         }
 
         final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
-        final LineString geometry = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), startPoint, endPoint);
+        LineString geometry = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), startPoint, endPoint);
+
+        /* SYM-1658 : If user has inverted start and end point, we must try to
+         * detect it and reverse his seizure. To do so, we ensure that user typed
+         * two distinct point (not overlapping), and that the generated geometry
+         * consists of a single point. If so, we inverse start and end point,
+         * then ask back geometry computing.
+         */
+        final Geometry proximityBuf = startPoint.buffer(BUFFER_DISTANCE);
+        if (!proximityBuf.contains(endPoint)) {
+            if (geometry.getNumPoints() < 3) {
+                final Point geomStart = geometry.getStartPoint();
+                final Point geomEnd = geometry.getEndPoint();
+                if (geomStart.equals(geomEnd) || geomStart.buffer(BUFFER_DISTANCE).contains(geomEnd)) {
+                    final Point tmp = startPoint;
+                    startPoint = endPoint;
+                    endPoint = tmp;
+                    geometry = LinearReferencingUtilities.buildGeometryFromGeo(troncon.getGeometry(), startPoint, endPoint);
+                }
+            }
+        }
 
         positionable.setPositionDebut(startPoint);
         positionable.setPositionFin(endPoint);
