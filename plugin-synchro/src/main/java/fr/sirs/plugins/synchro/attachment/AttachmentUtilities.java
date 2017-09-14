@@ -1,6 +1,7 @@
 package fr.sirs.plugins.synchro.attachment;
 
 import fr.sirs.SIRS;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SIRSFileReference;
 import java.io.IOException;
 import java.io.InputStream;
@@ -154,8 +155,13 @@ public class AttachmentUtilities {
 
     public static void upload(final CouchDbConnector connector, final SIRSFileReference data) throws IOException {
         final Path file = SIRS.getDocumentAbsolutePath(data);
-        final String revision = upload(connector, new AttachmentReference(data.getDocumentId(), getRevision(data).orElse(null), file.getFileName().toString()), file);
-        setRevision(data, revision);
+        final Element e = data.getCouchDBDocument();
+        if (e == null)
+            throw new IOException("Cannot upload an attachment for a document which does not exists in database.");
+        String revision = getRevision(e)
+                .orElseThrow(() -> new IOException("Cannot find a valid revision to uplad data"));
+        revision = upload(connector, new AttachmentReference(e.getId(), revision, file.getFileName().toString()), file);
+        setRevision(e, revision);
     }
 
     private static Optional<String> getRevision(final Object input) {
@@ -178,8 +184,12 @@ public class AttachmentUtilities {
             fileName = Paths.get(ref.getChemin()).getFileName().toString();
         }
 
-        String revision = getRevision(ref).orElseThrow(() -> new IllegalArgumentException("Cannot find a valid revision to delete attachment."));
-        revision = connector.deleteAttachment(ref.getDocumentId(), revision, fileName);
-        setRevision(ref, revision);
+        final Element e = ref.getCouchDBDocument();
+        if (e == null)
+            throw new IllegalArgumentException("Cannot delete an attachment for a document which does not exists in database.");
+
+        String revision = getRevision(e).orElseThrow(() -> new IllegalArgumentException("Cannot find a valid revision to delete attachment."));
+        revision = connector.deleteAttachment(e.getId(), revision, fileName);
+        setRevision(e, revision);
     }
 }

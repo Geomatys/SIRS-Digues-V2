@@ -221,7 +221,7 @@ public class DocumentExportPane extends StackPane {
             updateDocumentList();
         });
         DatePickerConverter.register(uiDate);
-        
+
         uiDesktopToMobile.setText(null);
         uiDesktopToMobile.setGraphic(new ImageView(SIRS.ICON_ARROW_RIGHT_BLACK));
         uiDelete.setText(null);
@@ -773,7 +773,7 @@ public class DocumentExportPane extends StackPane {
     /**
      * A convinient converter to display number of photograph to export to user.
      */
-    private static class PhotoNumberConverter extends StringConverter<Integer> {
+    public static class PhotoNumberConverter extends StringConverter<Integer> {
 
         protected static final String ALL = "Toutes";
         protected static final String LAST = "La dernière";
@@ -834,9 +834,9 @@ public class DocumentExportPane extends StackPane {
      * A comparator which aim is to put most recent photo at the beginning of a
      * sorted list, to keep only new photos when we truncate photo list.
      */
-    private static class PhotoDateComparator implements Comparator<Photo> {
+    public static class PhotoDateComparator implements Comparator<AbstractPhoto> {
         @Override
-        public int compare(Photo o1, Photo o2) {
+        public int compare(AbstractPhoto o1, AbstractPhoto o2) {
             if ((o1 == null || o1.getDate() == null) && (o2 == null || o2.getDate() == null)) {
                 return 0;
             } else if (o1 == null  || o1.getDate() == null) {

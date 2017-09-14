@@ -9,10 +9,11 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SIRSFileReference;
 import fr.sirs.core.model.SIRSReference;
 import fr.sirs.core.model.TronconDigue;
-import fr.sirs.plugins.synchro.DocumentFinder;
+import fr.sirs.plugins.synchro.common.DocumentFinder;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.SirsStringConverter;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.MissingResourceException;
 import java.util.Set;
@@ -102,6 +103,14 @@ public class DocumentSelector extends StackPane {
 
         uiConfigPane.disableProperty().bind(uiLoadingPane.visibleProperty());
         searchTask.addListener(this::manageTask);
+    }
+
+    public LocalDate getDateFilter() {
+        return uiDate.getValue();
+    }
+
+    public ObservableList<Preview> getSelectedTroncons() {
+        return uiTronconList.getSelectionModel().getSelectedItems();
     }
 
     public ObservableList<SIRSFileReference> getDocuments() {

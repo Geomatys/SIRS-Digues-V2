@@ -1,6 +1,5 @@
-package fr.sirs.plugins.synchro;
+package fr.sirs.plugins.synchro.common;
 
-import fr.sirs.SIRS;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
@@ -12,7 +11,6 @@ import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SIRSFileReference;
 import fr.sirs.core.model.TronconDigue;
-import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
@@ -83,30 +81,12 @@ public class DocumentFinder extends Task<List<SIRSFileReference>> {
         }
 
         return ((Stream<SIRSFileReference>)documents)
-                .filter(DocumentFinder::isFileAvailable)
+                .filter(DocumentUtilities::isFileAvailable)
                 .collect(Collectors.toList());
     }
 
-    public static boolean isFileAvailable(final SIRSFileReference fileRef) {
-        final String chemin = fileRef.getChemin();
-        return chemin != null &&
-                !chemin.isEmpty() &&
-                Files.isRegularFile(SIRS.getDocumentAbsolutePath(fileRef));
-    }
-
     private boolean intersectsDate(final AvecBornesTemporelles target) {
-        final LocalDate start = target.getDate_debut();
-        final LocalDate end = target.getDate_fin();
-        if (start == null && end == null)
-            return false;
-        else if (start == null) {
-            return end.isEqual(dateFilter) || end.isAfter(dateFilter);
-        } else if (end == null) {
-            return start.isEqual(dateFilter) || start.isBefore(dateFilter);
-        } else {
-            return (start.isEqual(dateFilter) || start.isBefore(dateFilter)) &&
-                    (end.isEqual(dateFilter) || end.isAfter(dateFilter));
-        }
+        return DocumentUtilities.intersectsDate(target, dateFilter);
     }
 
     /**

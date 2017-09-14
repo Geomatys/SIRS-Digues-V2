@@ -2,9 +2,9 @@ package fr.sirs.plugins.synchro.ui;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.model.SIRSFileReference;
-import fr.sirs.plugins.synchro.DocumentFinder;
 import fr.sirs.plugins.synchro.attachment.AttachmentReference;
 import fr.sirs.plugins.synchro.attachment.AttachmentUtilities;
+import fr.sirs.plugins.synchro.common.DocumentUtilities;
 import fr.sirs.plugins.synchro.concurrent.AsyncPool;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.SirsStringConverter;
@@ -13,7 +13,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletionException;
 import java.util.function.UnaryOperator;
 import java.util.logging.Level;
@@ -103,7 +102,6 @@ public class LocalDistantView extends SplitPane {
         if (selectedItems.isEmpty())
             return;
 
-        final List<SIRSFileReference> selection = new ArrayList<>(selectedItems);
         final UnaryOperator<SIRSFileReference> delete = ref -> {
             try {
                 AttachmentUtilities.delete(connector, ref);
@@ -115,7 +113,7 @@ public class LocalDistantView extends SplitPane {
         };
 
         final Task<Void> deletor = pool.prepare(delete)
-                .setTarget(new ArrayList<>(selectedItems).iterator())
+                .setTarget(new ArrayList<>(selectedItems).stream())
                 .setWhenComplete(this::handleDeletionResult)
                 .build();
 
@@ -127,7 +125,7 @@ public class LocalDistantView extends SplitPane {
         if (error == null) {
             SIRS.fxRun(false, () -> {
                 uiMobileList.getItems().remove(ref);
-                if (DocumentFinder.isFileAvailable(ref))
+                if (DocumentUtilities.isFileAvailable(ref))
                     uiDesktopList.getItems().add(ref);
             });
         } else if (error instanceof Error) {
@@ -196,7 +194,7 @@ public class LocalDistantView extends SplitPane {
         };
 
         Task<Void> uploader = pool.prepare(upload)
-                .setTarget(new ArrayList<>(selectedItems).iterator())
+                .setTarget(new ArrayList<>(selectedItems).stream())
                 .setWhenComplete(this::handleUploadResult)
                 .build();
         TaskManager.INSTANCE.submit(uploader);
@@ -242,7 +240,7 @@ public class LocalDistantView extends SplitPane {
         }
     }
 
-    private static class ParameterizedException extends CompletionException {
+    public static class ParameterizedException extends CompletionException {
         final SIRSFileReference input;
 
         public ParameterizedException(SIRSFileReference input, String message) {

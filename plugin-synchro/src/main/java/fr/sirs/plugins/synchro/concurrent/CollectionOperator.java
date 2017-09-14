@@ -1,15 +1,17 @@
 package fr.sirs.plugins.synchro.concurrent;
 
 import fr.sirs.SIRS;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.concurrent.Task;
 
 /**
@@ -18,14 +20,15 @@ import javafx.concurrent.Task;
  */
 public class CollectionOperator<I, O> extends Task<Void> {
 
+    final String title;
     final Executor pool;
-    final Iterator<I> input;
+    final Stream<I> dataStream;
 
     final Function<I, CompletableFuture<O>> executorBuilder;
 
-    CollectionOperator(Executor pool, Iterator<I> input, Function<I, O> op, BiConsumer<O, Throwable> whenComplete) {
+    CollectionOperator(Executor pool, Stream<I> dataStream, Function<I, O> op, BiConsumer<O, Throwable> whenComplete, String title) {
         this.pool = pool;
-        this.input = input;
+        this.dataStream = dataStream;
 
         final Function<I, CompletableFuture<O>> baseFutureBuilder = in -> CompletableFuture.supplyAsync(() -> op.apply(in), pool);
         if (whenComplete == null) {
@@ -33,15 +36,25 @@ public class CollectionOperator<I, O> extends Task<Void> {
         } else {
             executorBuilder = baseFutureBuilder.andThen(future -> future.whenComplete(whenComplete));
         }
+
+        if (title == null || (title = title.trim()).isEmpty()) {
+            this.title = "Opération sur flux de données";
+        } else {
+            this.title = title;
+        }
     }
 
     @Override
     protected Void call() throws Exception {
-        final List<CompletableFuture<O>> futures = new ArrayList<>();
-        while (!isCancelled() && input.hasNext()) {
-            final I next = input.next();
-            futures.add(executorBuilder.apply(next));
-        }
+        updateTitle(title);
+        final List<CompletableFuture<O>> futures = dataStream
+                .peek(data -> {
+                    if (isCancelled()) {
+                        throw new CancellationException();
+                    }
+                })
+                .map(executorBuilder::apply)
+                .collect(Collectors.toList());
 
         final Iterator<CompletableFuture<O>> futureIt = futures.iterator();
         while (!isCancelled() && futureIt.hasNext()) {
