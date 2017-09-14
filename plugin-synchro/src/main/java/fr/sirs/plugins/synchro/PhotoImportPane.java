@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -110,7 +110,7 @@ public class PhotoImportPane extends StackPane {
 
     public static final Image ICON_TRASH_BLACK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TRASH_O,16,Color.BLACK),null);
 
-    private static enum DIRECTION {
+    public static enum DIRECTION {
         UP,
         DOWN;
     }
@@ -208,7 +208,7 @@ public class PhotoImportPane extends StackPane {
         uiCopyMessage.visibleProperty().bind(uiCopyMessage.textProperty().isNotEmpty());
 
         uiImportProgress.visibleProperty().bind(taskProperty.isNotNull());
-        
+
         // prefix composition UIs
         final ObservableList<Character> prefixSeparators = FXCollections.observableArrayList();
         prefixSeparators.addAll(' ', '.', '-', '_');
@@ -511,7 +511,7 @@ public class PhotoImportPane extends StackPane {
      * @param source The list view to work with
      * @param direction Direction to move selected elements to (up or down).
      */
-    static void moveSelectedElements(final ListView source, final DIRECTION direction) {
+    public static void moveSelectedElements(final ListView source, final DIRECTION direction) {
         ArgumentChecks.ensureNonNull("Input list", source);
         ArgumentChecks.ensureNonNull("Movement direction", direction);
 
@@ -713,7 +713,7 @@ public class PhotoImportPane extends StackPane {
     /**
      * A cell displaying proper title for a given property descriptor.
      */
-    private static class PrefixCell extends ListCell<PropertyDescriptor> {
+    public static class PrefixCell extends ListCell<PropertyDescriptor> {
 
         final LabelMapper mapper = LabelMapper.get(AbstractPhoto.class);
 
@@ -731,7 +731,7 @@ public class PhotoImportPane extends StackPane {
     /**
      * A converter displaying proper title for a given property descriptor.
      */
-    private static class DescriptorConverter extends StringConverter<PropertyDescriptor> {
+    public static class DescriptorConverter extends StringConverter<PropertyDescriptor> {
 
         final WeakHashMap<String, PropertyDescriptor> fromString = new WeakHashMap<>();
 
