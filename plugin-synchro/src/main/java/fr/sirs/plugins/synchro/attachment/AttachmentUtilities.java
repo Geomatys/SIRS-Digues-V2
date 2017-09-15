@@ -8,9 +8,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URLConnection;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -22,6 +20,7 @@ import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.AttachmentInputStream;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.DocumentNotFoundException;
 import static org.ektorp.util.Documents.setRevision;
 
 /**
@@ -113,6 +112,29 @@ public class AttachmentUtilities {
         return MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(input.toFile());
     }
 
+    public static boolean isAvailable(final CouchDbConnector connector, final SIRSFileReference document) {
+        try (final AttachmentInputStream in = AttachmentUtilities.download(connector, document)) {
+            return true;
+        } catch (DocumentNotFoundException e) {
+            SIRS.LOGGER.log(Level.FINEST, e, () -> String.format("No attachment available for document%n%s", document));
+        } catch (IOException e) {
+            SIRS.LOGGER.log(Level.WARNING, "An http resource cannot be closed.", e);
+        }
+
+        return false;
+    }
+
+    public static AttachmentInputStream download(final CouchDbConnector connector, final SIRSFileReference document) {
+        final Element realDoc = document.getCouchDBDocument();
+        if (realDoc == null) {
+            throw new DocumentNotFoundException("No Root document for given object.");
+        }
+
+        final String revision = getRevision(realDoc)
+                .orElseThrow(() -> new DocumentNotFoundException("No valid reference found."));
+        return AttachmentUtilities.download(connector, new AttachmentReference(realDoc.getId(), revision, document.getId()));
+    }
+
     public static AttachmentInputStream download(final CouchDbConnector connector, final AttachmentReference ref) {
         ArgumentChecks.ensureNonNull("Attachment reference", ref);
         ArgumentChecks.ensureNonEmpty("Document id", ref.getParentId());
@@ -160,7 +182,7 @@ public class AttachmentUtilities {
             throw new IOException("Cannot upload an attachment for a document which does not exists in database.");
         String revision = getRevision(e)
                 .orElseThrow(() -> new IOException("Cannot find a valid revision to uplad data"));
-        revision = upload(connector, new AttachmentReference(e.getId(), revision, file.getFileName().toString()), file);
+        revision = upload(connector, new AttachmentReference(e.getId(), revision, data.getId()), file);
         setRevision(e, revision);
     }
 
@@ -176,20 +198,27 @@ public class AttachmentUtilities {
     }
 
     public static void delete(final CouchDbConnector connector, final SIRSFileReference ref) {
-        String fileName;
-        try {
-            fileName = SIRS.getDocumentAbsolutePath(ref).getFileName().toString();
-        } catch (IllegalStateException|InvalidPathException e) {
-            SIRS.LOGGER.log(Level.FINE, "Cannot retrieve document file.", e);
-            fileName = Paths.get(ref.getChemin()).getFileName().toString();
-        }
-
         final Element e = ref.getCouchDBDocument();
         if (e == null)
             throw new IllegalArgumentException("Cannot delete an attachment for a document which does not exists in database.");
 
         String revision = getRevision(e).orElseThrow(() -> new IllegalArgumentException("Cannot find a valid revision to delete attachment."));
-        revision = connector.deleteAttachment(e.getId(), revision, fileName);
+        revision = connector.deleteAttachment(e.getId(), revision, ref.getId());
         setRevision(e, revision);
+    }
+
+    public static long size(final CouchDbConnector connector, final SIRSFileReference doc) {
+        final AttachmentInputStream in = download(connector, doc);
+        try {
+            return in.getContentLength();
+        } finally {
+            // Use finally here, because bad closing is not a real problem as long
+            // as we've got the size.
+            try {
+                in.close();
+            } catch (IOException ex) {
+                SIRS.LOGGER.log(Level.WARNING, "A resource cannot be closed properly.", ex);
+            }
+        }
     }
 }

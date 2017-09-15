@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileStore;
 import java.nio.file.Path;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -46,6 +48,8 @@ public class PhotoDestination extends StackPane {
      */
     private final SimpleObjectProperty<Path> subDirProperty = new SimpleObjectProperty<>();
 
+    private final ObjectBinding<Path> destination;
+
     public PhotoDestination() {
         SIRS.loadFXML(this);
 
@@ -57,6 +61,23 @@ public class PhotoDestination extends StackPane {
         subDirProperty.addListener(this::destinationChanged);
 
         rootDirProperty.set(DocumentRoots.getPhotoRoot(null, false).orElse(null));
+
+        destination = Bindings.createObjectBinding(() -> {
+            final Path root = rootDirProperty.get();
+            if (root == null)
+                return null;
+            final Path subDir = subDirProperty.get();
+            if (subDir == null) {
+                return root;
+            }
+
+            return root.resolve(subDir);
+
+        }, rootDirProperty, subDirProperty);
+    }
+
+    public ObjectBinding<Path> getDestination() {
+        return destination;
     }
 
     @FXML

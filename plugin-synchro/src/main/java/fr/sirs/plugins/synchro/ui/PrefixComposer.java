@@ -2,12 +2,18 @@ package fr.sirs.plugins.synchro.ui;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.model.AbstractPhoto;
+import fr.sirs.core.model.SIRSFileReference;
 import fr.sirs.plugins.synchro.PhotoImportPane;
 import static fr.sirs.plugins.synchro.PhotoImportPane.ICON_TRASH_BLACK;
 import static fr.sirs.plugins.synchro.PhotoImportPane.moveSelectedElements;
+import fr.sirs.plugins.synchro.common.PrefixBuilder;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -51,6 +57,8 @@ public class PrefixComposer extends StackPane {
 
     private final ObservableList<PropertyDescriptor> availablePrefixes = FXCollections.observableArrayList();
 
+    private final ObjectBinding<Function<SIRSFileReference, String>> prefixBuilder;
+
     public PrefixComposer() {
         SIRS.loadFXML(this);
 
@@ -79,7 +87,21 @@ public class PrefixComposer extends StackPane {
             setVisible(false);
             setManaged(false);
         }
+
+        prefixBuilder = Bindings.createObjectBinding(() -> {
+            if (uiPrefixListView.getItems().isEmpty()) {
+                return null;
+            }
+            final Character separator = uiSeparatorChoice.getValue();
+            return new PrefixBuilder(uiPrefixListView.getItems().stream().distinct().collect(Collectors.toList()), separator == null? "_":separator.toString());
+        }, uiPrefixListView.getItems(), uiSeparatorChoice.valueProperty());
     }
+
+    public ObjectBinding<Function<SIRSFileReference, String>> getPrefixBuilder() {
+        return prefixBuilder;
+    }
+
+
 
     @FXML
     void addPrefix(ActionEvent event) {

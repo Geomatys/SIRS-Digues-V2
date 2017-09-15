@@ -7,6 +7,7 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SIRSFileReference;
 import fr.sirs.plugins.synchro.DocumentExportPane;
 import fr.sirs.plugins.synchro.attachment.AttachmentUtilities;
+import fr.sirs.plugins.synchro.common.DocumentUtilities;
 import fr.sirs.plugins.synchro.common.PhotoFinder;
 import fr.sirs.plugins.synchro.concurrent.AsyncPool;
 import fr.sirs.ui.Growl;
@@ -197,6 +198,14 @@ public class PhotoExport extends StackPane {
                 .map(Preview::getElementId)
                 .collect(Collectors.toSet());
 
-        return new PhotoFinder(session, tdIds, dateFilter, photoNumber.get()).get();
+        final Stream<AbstractPhoto> photos = new PhotoFinder(session)
+                .setTronconIds(tdIds)
+                .setDocDateFilter(dateFilter)
+                .get();
+
+        return photos
+                .filter(DocumentUtilities::isFileAvailable)
+                .sorted(new DocumentExportPane.PhotoDateComparator())
+                .limit(photoNumber.get());
     }
 }

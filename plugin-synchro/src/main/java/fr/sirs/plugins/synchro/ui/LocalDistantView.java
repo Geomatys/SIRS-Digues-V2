@@ -2,7 +2,6 @@ package fr.sirs.plugins.synchro.ui;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.model.SIRSFileReference;
-import fr.sirs.plugins.synchro.attachment.AttachmentReference;
 import fr.sirs.plugins.synchro.attachment.AttachmentUtilities;
 import fr.sirs.plugins.synchro.common.DocumentUtilities;
 import fr.sirs.plugins.synchro.concurrent.AsyncPool;
@@ -28,9 +27,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SplitPane;
-import org.ektorp.AttachmentInputStream;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.DocumentNotFoundException;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
@@ -205,14 +202,14 @@ public class LocalDistantView extends SplitPane {
         final ArrayList<SIRSFileReference> localList = new ArrayList<>();
         final ArrayList<SIRSFileReference> distantList = new ArrayList<>();
         for (final SIRSFileReference ref : defCopy) {
-            final String fileName = SIRS.getDocumentAbsolutePath(ref).getFileName().toString();
-            try (final AttachmentInputStream in
-                    = AttachmentUtilities.download(connector, new AttachmentReference(ref.getId(), fileName))) {
-                distantList.add(ref);
-            } catch (DocumentNotFoundException e) {
-                localList.add(ref);
-            } catch (IOException e) {
-                SIRS.LOGGER.log(Level.WARNING, "An http resource cannot be closed.", e);
+            try {
+                if (AttachmentUtilities.isAvailable(connector, ref)) {
+                    distantList.add(ref);
+                } else if (DocumentUtilities.isFileAvailable(ref)) {
+                    localList.add(ref);
+                }
+            } catch (Exception e) {
+                SIRS.LOGGER.log(Level.WARNING, "An document cannot be analyzed properly.", e);
             }
         }
 
@@ -234,10 +231,7 @@ public class LocalDistantView extends SplitPane {
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
-        } else {
-            final AttachmentInputStream in = AttachmentUtilities.download(connector, new AttachmentReference(ref.getId(), doc.getFileName().toString()));
-            return in.getContentLength();
-        }
+        } else return AttachmentUtilities.size(connector, ref);
     }
 
     public static class ParameterizedException extends CompletionException {

@@ -2,12 +2,12 @@ package fr.sirs.plugins.synchro.common;
 
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractPositionableRepository;
+import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Observation;
-import fr.sirs.plugins.synchro.DocumentExportPane;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -15,6 +15,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.beans.property.ObjectProperty;
+import org.apache.sis.util.ArgumentChecks;
 
 /**
  * Note : No computing is done here, we simply wrap operators in a stream. It
@@ -29,21 +30,34 @@ import javafx.beans.property.ObjectProperty;
 public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
 
     final Session session;
-    final Collection<String> tronconIds;
-    final LocalDate dateFilter;
-    final int limitByDoc;
+    Collection<String> tronconIds;
+    LocalDate docDateFilter;
 
-    public PhotoFinder(Session session, Collection<String> tronconIds, LocalDate dateFilter, int limitByDoc) {
+    public PhotoFinder(Session session) {
+        ArgumentChecks.ensureNonNull("Session", session);
         this.session = session;
+    }
+
+    public Collection<String> getTronconIds() {
+        return tronconIds;
+    }
+
+    public PhotoFinder setTronconIds(Collection<String> tronconIds) {
         this.tronconIds = tronconIds;
-        this.dateFilter = dateFilter;
-        this.limitByDoc = limitByDoc;
+        return this;
+    }
+
+    public LocalDate getDocDateFilter() {
+        return docDateFilter;
+    }
+
+    public PhotoFinder setDocDateFilter(LocalDate docDateFilter) {
+        this.docDateFilter = docDateFilter;
+        return this;
     }
 
     @Override
     public Stream<AbstractPhoto> get() {
-        if (tronconIds.isEmpty())
-            return Stream.empty();
         return getPhotoContainers()
                 .flatMap(this::filter);
     }
@@ -52,25 +66,22 @@ public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
         return Stream.of(session)
                 .flatMap(source -> {
                     return Stream.concat(
-                            getDisorderContainers(source),
-                            getNativeContainers(source)
+                            stream(source, Desordre.class)
+                                    .map(DesordreWrapper::new),
+                            stream(source, AvecPhotos.class)
                     );
                 });
     }
 
-    private Stream<AvecPhotos> getNativeContainers(final Session source) {
-        return source.getRepositoriesForClass(AvecPhotos.class).stream()
-                .filter(AbstractPositionableRepository.class::isInstance)
-                .map(AbstractPositionableRepository.class::cast)
-                .flatMap(this::getForTroncons);
-    }
-
-    private Stream<AvecPhotos> getDisorderContainers(final Session source) {
-        return source.getRepositoriesForClass(Desordre.class).stream()
-                .filter(AbstractPositionableRepository.class::isInstance)
-                .map(AbstractPositionableRepository.class::cast)
-                .<Desordre>flatMap(this::getForTroncons)
-                .map(DesordreWrapper::new);
+    private <T> Stream<T> stream(final Session session, final Class<T> docType) {
+        Stream<AbstractSIRSRepository> stream = session.getRepositoriesForClass(docType).stream();
+        if (tronconIds == null || tronconIds.isEmpty()) {
+            return stream.flatMap(repo -> repo.getAll().stream());
+        } else {
+            return stream.filter(AbstractPositionableRepository.class::isInstance)
+                    .map(AbstractPositionableRepository.class::cast)
+                    .flatMap(this::getForTroncons);
+        }
     }
 
     private Stream getForTroncons(final AbstractPositionableRepository repo) {
@@ -80,17 +91,31 @@ public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
 
     private Stream<AbstractPhoto> filter(final AvecPhotos<AbstractPhoto> container) {
         Stream<AvecPhotos<AbstractPhoto>> source = Stream.of(container);
-        if (dateFilter != null) {
+        if (docDateFilter != null) {
             source = source
                     .filter(AvecBornesTemporelles.class::isInstance)
-                    .filter(obj -> DocumentUtilities.intersectsDate((AvecBornesTemporelles) obj, dateFilter));
+                    .filter(obj -> DocumentUtilities.intersectsDate((AvecBornesTemporelles) obj, docDateFilter));
         }
 
-        return source
-                .flatMap(ap -> ap.getPhotos().stream())
-                .filter(DocumentUtilities::isFileAvailable)
-                .sorted(new DocumentExportPane.PhotoDateComparator())
-                .limit(limitByDoc);
+        return source.flatMap(ap -> ap.getPhotos().stream());
+//        if (photoDateFilter != null) {
+//            final LocalDate searched = photoDateFilter;
+//            photos = photos.filter(photo -> photo.getDate() != null && searched.isEqual(photo.getDate()));
+//        }
+//        if (locallyAvailable) {
+//            photos = photos.filter(DocumentUtilities::isFileAvailable);
+//        }
+//        if (databaseAvailable) {
+//            final CouchDbConnector connector = session.getConnector();
+//            photos = photos.filter(photo -> AttachmentUtilities.isAvailable(connector, photo));
+//        }
+//
+//        photos = photos.sorted(new DocumentExportPane.PhotoDateComparator());
+//
+//        if (limitByDoc < 0)
+//            return photos;
+//
+//        return photos.limit(limitByDoc);
     }
 
     /**
