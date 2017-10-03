@@ -45,3 +45,11 @@
     -fx-border-color : #AAAAAA;
     -fx-background-color : #DDDDDD;
 }
+
+.split-pane {
+    -fx-box-border: transparent;
+}
+
+.split-pane > * > * {
+    -fx-box-border: lightgrey;
+}

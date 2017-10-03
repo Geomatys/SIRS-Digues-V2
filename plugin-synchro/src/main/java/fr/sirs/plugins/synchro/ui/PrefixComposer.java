@@ -101,8 +101,6 @@ public class PrefixComposer extends StackPane {
         return prefixBuilder;
     }
 
-
-
     @FXML
     void addPrefix(ActionEvent event) {
         ComboBox<PropertyDescriptor> choices = new ComboBox<>();

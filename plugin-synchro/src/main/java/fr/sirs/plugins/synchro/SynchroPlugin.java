@@ -20,6 +20,7 @@ package fr.sirs.plugins.synchro;
 
 import fr.sirs.Plugin;
 import fr.sirs.SIRS;
+import fr.sirs.plugins.synchro.concurrent.AsyncPool;
 import java.awt.Color;
 import java.io.File;
 import java.nio.file.FileStore;
@@ -57,11 +58,14 @@ public class SynchroPlugin extends Plugin {
     public static final Path DOCUMENT_FOLDER = Paths.get("files", "documents");
     public static final Path PHOTO_FOLDER = Paths.get("files", "medias");
 
+    final AsyncPool executor;
+
     public SynchroPlugin() {
         name = NAME;
         loadingMessage.set("Chargement du module pour la synchronisation bureau/mobile");
-        themes.add(new DocumentExportTheme());
-        themes.add(new PhotoImportTheme());
+        executor = new AsyncPool(7);
+        themes.add(new DocumentExportTheme(this));
+        themes.add(new PhotoImportTheme(this));
     }
 
     @Override
@@ -77,6 +81,10 @@ public class SynchroPlugin extends Plugin {
     @Override
     public Image getImage() {
         return PLUGIN_ICON;
+    }
+
+    public AsyncPool getExecutor() {
+        return executor;
     }
 
     /**

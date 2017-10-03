@@ -74,8 +74,7 @@ public class PhotoExport extends StackPane implements TaskProvider {
     private final ObservableList<Preview> troncons;
     private final LocalDate dateFilter;
 
-    // TODO : take as parameter
-    private final AsyncPool pool = new AsyncPool(7);
+    private final AsyncPool pool;
 
     private final LongProperty estimatedSize = new SimpleLongProperty(-1);
 
@@ -83,9 +82,10 @@ public class PhotoExport extends StackPane implements TaskProvider {
 
     private final ReadOnlyObjectWrapper<Task> exportTaskProperty = new ReadOnlyObjectWrapper<>();
 
-    public PhotoExport(final Session session, final ObservableList<Preview> troncons, final LocalDate dateFilter) {
+    public PhotoExport(final Session session, final AsyncPool pool, final ObservableList<Preview> troncons, final LocalDate dateFilter) {
         SIRS.loadFXML(this);
         this.session = session;
+        this.pool = pool;
         this.troncons = troncons;
         this.dateFilter = dateFilter;
 

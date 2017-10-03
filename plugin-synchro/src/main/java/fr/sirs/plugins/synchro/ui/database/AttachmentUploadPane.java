@@ -2,6 +2,7 @@ package fr.sirs.plugins.synchro.ui.database;
 
 import fr.sirs.Session;
 import fr.sirs.plugins.synchro.common.TaskProvider;
+import fr.sirs.plugins.synchro.concurrent.AsyncPool;
 import fr.sirs.plugins.synchro.ui.DocumentSelector;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -28,11 +29,11 @@ public class AttachmentUploadPane extends StackPane {
 
     final ObjectBinding<Task[]> tasks;
 
-    public AttachmentUploadPane(final Session session) {
+    public AttachmentUploadPane(final Session session, final AsyncPool executor) {
         ArgumentChecks.ensureNonNull("Session", session);
         docSelector = new DocumentSelector(session);
-        ldList = new LocalDistantView(session.getConnector(), docSelector.getDocuments());
-        photoPane = new PhotoExport(session, docSelector.getSelectedTroncons(), docSelector.getDateFilter());
+        ldList = new LocalDistantView(session.getConnector(), executor, docSelector.getDocuments());
+        photoPane = new PhotoExport(session, executor, docSelector.getSelectedTroncons(), docSelector.getDateFilter());
 
         tasks = Bindings.createObjectBinding(() -> {
             return Stream.of(docSelector, ldList, photoPane)

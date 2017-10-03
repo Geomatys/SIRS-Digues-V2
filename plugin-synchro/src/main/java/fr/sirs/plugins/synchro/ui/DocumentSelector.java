@@ -11,9 +11,9 @@ import fr.sirs.core.model.SIRSReference;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugins.synchro.common.DocumentFinder;
 import fr.sirs.plugins.synchro.common.TaskProvider;
+import fr.sirs.plugins.synchro.common.TextCell;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.DatePickerConverter;
-import fr.sirs.util.SirsStringConverter;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.MissingResourceException;
@@ -31,7 +31,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.BorderPane;
@@ -170,24 +169,6 @@ public class DocumentSelector extends StackPane implements TaskProvider {
     @Override
     public Task getTask() {
         return searchTask.get();
-    }
-
-    /**
-     * Cell to display label of input element.
-     */
-    public static class TextCell extends ListCell {
-
-        final SirsStringConverter strConverter = new SirsStringConverter();
-
-        @Override
-        protected void updateItem(Object item, boolean empty) {
-            super.updateItem(item, empty);
-            if (item == null || isEmpty()) {
-                setText(null);
-            } else {
-                setText(strConverter.toString(item));
-            }
-        }
     }
 
     /**

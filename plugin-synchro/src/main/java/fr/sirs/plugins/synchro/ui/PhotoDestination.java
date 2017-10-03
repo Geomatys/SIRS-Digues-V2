@@ -74,6 +74,14 @@ public class PhotoDestination extends StackPane {
         rootDirProperty.set(DocumentRoots.getPhotoRoot(null, false).orElse(null));
     }
 
+    public Path getRoot() {
+        return rootDirProperty.get();
+    }
+
+    public Path getSubDir() {
+        return subDirProperty.get();
+    }
+
     public ObjectBinding<Path> getDestination() {
         return destination;
     }

@@ -5,8 +5,8 @@ import fr.sirs.core.model.SIRSFileReference;
 import fr.sirs.plugins.synchro.attachment.AttachmentUtilities;
 import fr.sirs.plugins.synchro.common.DocumentUtilities;
 import fr.sirs.plugins.synchro.common.TaskProvider;
+import fr.sirs.plugins.synchro.common.TextCell;
 import fr.sirs.plugins.synchro.concurrent.AsyncPool;
-import fr.sirs.plugins.synchro.ui.DocumentSelector;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.SirsStringConverter;
 import java.io.IOException;
@@ -61,18 +61,19 @@ public class LocalDistantView extends SplitPane implements TaskProvider {
     private final CouchDbConnector connector;
     private final ObservableList<SIRSFileReference> documents;
 
-    private final AsyncPool pool = new AsyncPool(7);
+    private final AsyncPool pool;
 
     private final ReadOnlyObjectWrapper<Task> taskProperty = new ReadOnlyObjectWrapper<>();
 
-    public LocalDistantView(final CouchDbConnector connector, final ObservableList<SIRSFileReference> documents) {
+    public LocalDistantView(final CouchDbConnector connector, final AsyncPool pool, final ObservableList<SIRSFileReference> documents) {
         this.connector = connector;
+        this.pool = pool;
         this.documents = documents;
 
         SIRS.loadFXML(this);
 
-        uiDesktopList.setCellFactory((param) -> new DocumentSelector.TextCell());
-        uiMobileList.setCellFactory((param) -> new DocumentSelector.TextCell());
+        uiDesktopList.setCellFactory((param) -> new TextCell());
+        uiMobileList.setCellFactory((param) -> new TextCell());
 
         uiDelete.disableProperty().bind(uiMobileList.getSelectionModel().selectedItemProperty().isNull());
         uiDesktopToMobile.disableProperty().bind(uiDesktopList.getSelectionModel().selectedItemProperty().isNull());
