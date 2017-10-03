@@ -46,6 +46,10 @@
     -fx-background-color : #DDDDDD;
 }
 
+.scroll-pane {
+    -fx-background-color:transparent;
+}
+
 .split-pane {
     -fx-box-border: transparent;
 }

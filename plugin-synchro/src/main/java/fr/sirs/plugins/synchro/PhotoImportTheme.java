@@ -21,11 +21,13 @@ package fr.sirs.plugins.synchro;
 import fr.sirs.plugins.synchro.ui.database.PhotoImport;
 import fr.sirs.plugins.synchro.ui.mount.PhotoImportPane;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
@@ -50,6 +52,9 @@ public class PhotoImportTheme extends AbstractPluginsButtonTheme {
     @Override
     public Parent createPane() {
         final BorderPane container = new BorderPane();
+        container.setPadding(new Insets(20));
+        container.setPrefWidth(600);
+        container.setMaxWidth(800);
         initDatabase(container);
         return container;
     }
@@ -61,7 +66,10 @@ public class PhotoImportTheme extends AbstractPluginsButtonTheme {
         hBox.setAlignment(Pos.CENTER_LEFT);
 
         container.setBottom(new VBox(5, new Separator(Orientation.HORIZONTAL), hBox));
-        container.setCenter(new PhotoImport(plugin.getSession(), plugin.getExecutor()));
+        final ScrollPane scroll = new ScrollPane(new PhotoImport(plugin.getSession(), plugin.getExecutor()));
+        scroll.setStyle("-fx-background-color:transparent;");
+        scroll.setFitToWidth(true);
+        container.setCenter(scroll);
     }
 
     private void initUSB(final BorderPane container) {
@@ -71,6 +79,9 @@ public class PhotoImportTheme extends AbstractPluginsButtonTheme {
         hBox.setAlignment(Pos.CENTER_LEFT);
 
         container.setBottom(new VBox(5, new Separator(Orientation.HORIZONTAL), hBox));
-        container.setCenter(new PhotoImportPane());
+        final ScrollPane scroll = new ScrollPane(new PhotoImportPane());
+        scroll.setStyle("-fx-background-color:transparent;");
+        scroll.setFitToWidth(true);
+        container.setCenter(scroll);
     }
 }
