@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import javax.activation.MimetypesFileTypeMap;
-import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.AttachmentInputStream;
 import org.ektorp.CouchDbConnector;
@@ -57,9 +56,8 @@ public class AttachmentUtilities {
             identifier = input.getFileName().toString();
         }
         final InputStream fileInput = Files.newInputStream(input);
-        Base64InputStream stream64 = new Base64InputStream(fileInput, true);
         try {
-            return new AttachmentInputStream(identifier, stream64, mime, fileSize);
+            return new AttachmentInputStream(identifier, fileInput, mime, fileSize);
         } catch (Exception e) {
             try {
                 fileInput.close();

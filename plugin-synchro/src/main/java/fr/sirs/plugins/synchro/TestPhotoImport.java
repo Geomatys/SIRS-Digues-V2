@@ -8,7 +8,7 @@ import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.SIRSFileReference;
 import fr.sirs.plugins.synchro.concurrent.AsyncPool;
 import fr.sirs.plugins.synchro.ui.PhotoDestination;
-import fr.sirs.plugins.synchro.ui.PhotoDownload;
+import fr.sirs.plugins.synchro.ui.database.PhotoDownload;
 import fr.sirs.plugins.synchro.ui.PrefixComposer;
 import java.net.Authenticator;
 import java.nio.file.Path;
@@ -34,7 +34,7 @@ public class TestPhotoImport extends Application {
     public void init() throws Exception {
         Authenticator.setDefault(new SIRSAuthenticator());
         DatabaseRegistry dbReg = new DatabaseRegistry();
-        ctx = dbReg.connectToSirsDatabase("test_isere", false, false, false);
+        ctx = dbReg.connectToSirsDatabase("test_hilmi", false, false, false);
     }
 
     @Override
@@ -50,7 +50,12 @@ public class TestPhotoImport extends Application {
                 return null;
             Function<SIRSFileReference, String> prefixer = photoDest.getPrefixBuilder().get();
             if (prefixer == null) {
-                prefixer = file -> Paths.get(file.getChemin()).getFileName().toString();
+                prefixer = file -> {
+                    final String chemin = file.getChemin();
+                    if (chemin == null) {
+                        return file.getId();
+                    }
+                    return Paths.get(chemin).getFileName().toString();};
             }
             final Function<SIRSFileReference, String> finalPrefixer = prefixer;
 

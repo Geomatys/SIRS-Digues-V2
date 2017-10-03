@@ -9,8 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-
-<fx:root dividerPositions="0.5" stylesheets="@../MobilePluginStyle.css" type="SplitPane" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root dividerPositions="0.5" stylesheets="@../../MobilePluginStyle.css" type="SplitPane" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
    <items>
       <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="30.0" minWidth="10.0" spacing="5.0">
          <children>

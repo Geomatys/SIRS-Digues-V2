@@ -57,11 +57,6 @@ public class PhotoDestination extends StackPane {
         uiChooseSubDir.disableProperty().bind(noRootConfigured);
         uiSubDirLabel.disableProperty().bind(noRootConfigured);
 
-        rootDirProperty.addListener(this::destinationChanged);
-        subDirProperty.addListener(this::destinationChanged);
-
-        rootDirProperty.set(DocumentRoots.getPhotoRoot(null, false).orElse(null));
-
         destination = Bindings.createObjectBinding(() -> {
             final Path root = rootDirProperty.get();
             if (root == null)
@@ -74,6 +69,9 @@ public class PhotoDestination extends StackPane {
             return root.resolve(subDir);
 
         }, rootDirProperty, subDirProperty);
+        destination.addListener(this::destinationChanged);
+
+        rootDirProperty.set(DocumentRoots.getPhotoRoot(null, false).orElse(null));
     }
 
     public ObjectBinding<Path> getDestination() {
@@ -115,24 +113,21 @@ public class PhotoDestination extends StackPane {
      * @param newValue
      */
     private void destinationChanged(final ObservableValue<? extends Path> obs, final Path oldValue, final Path newValue) {
-        if (rootDirProperty.get() == null) {
+        if (newValue == null) {
             uiRootLabel.setText("N/A");
             uiSubDirLabel.setText("N/A");
             uiDestSpaceProgress.setProgress(0);
         } else {
             uiRootLabel.setText(rootDirProperty.get().toString());
             final Path subDir = subDirProperty.get();
-            final Path absolutePath;
             if (subDir == null || subDir.toString().isEmpty()) {
                 uiSubDirLabel.setText("N/A");
-                absolutePath = rootDirProperty.get();
             } else {
                 uiSubDirLabel.setText(subDir.toString());
-                absolutePath = rootDirProperty.get().resolve(subDir);
             }
 
             try {
-                final FileStore fileStore = newValue.getFileSystem().provider().getFileStore(absolutePath);
+                final FileStore fileStore = newValue.getFileSystem().provider().getFileStore(newValue);
 
                 final long usableSpace = fileStore.getUsableSpace();
                 final long totalSpace = fileStore.getTotalSpace();

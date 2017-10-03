@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -53,9 +53,9 @@ public class SynchroPlugin extends Plugin {
 
     private static final Image PLUGIN_ICON = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_MOBILE, 100, Color.BLACK), null);
 
-    static final Path MOBILE_APP_DIR = Paths.get("Android/data/com.rdardie.sirsMobile");
-    static final Path DOCUMENT_FOLDER = Paths.get("files", "documents");
-    static final Path PHOTO_FOLDER = Paths.get("files", "medias");
+    public static final Path MOBILE_APP_DIR = Paths.get("Android/data/com.rdardie.sirsMobile");
+    public static final Path DOCUMENT_FOLDER = Paths.get("files", "documents");
+    public static final Path PHOTO_FOLDER = Paths.get("files", "medias");
 
     public SynchroPlugin() {
         name = NAME;
@@ -93,7 +93,7 @@ public class SynchroPlugin extends Plugin {
      * @param suffix The path which will form the
      * @return
      */
-    static Path resolvePath(final Path prefix, final Path suffix) {
+    public static Path resolvePath(final Path prefix, final Path suffix) {
         Iterator<Path> fragments = suffix.iterator();
         Path searchedEnd = Paths.get("");
         while (fragments.hasNext()) {
@@ -120,7 +120,7 @@ public class SynchroPlugin extends Plugin {
      * @return The path to SIRS mobile application in chosen media, or null if no media
      * has been chosen, or if we cannot find mobile application in it.
      */
-    static Path chooseMedia(final Window fileChooserOwner) {
+    public static Path chooseMedia(final Window fileChooserOwner) {
         final DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Choisir un périphérique portable.");
         chooser.setInitialDirectory(FileSystems.getDefault().getRootDirectories().iterator().next().toFile());

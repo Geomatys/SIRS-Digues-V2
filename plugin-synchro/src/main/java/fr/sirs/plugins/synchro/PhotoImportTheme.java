@@ -18,6 +18,7 @@
  */
 package fr.sirs.plugins.synchro;
 
+import fr.sirs.plugins.synchro.ui.mount.PhotoImportPane;
 import fr.sirs.theme.ui.AbstractPluginsButtonTheme;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;

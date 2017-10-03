@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
-package fr.sirs.plugins.synchro;
+package fr.sirs.plugins.synchro.ui.mount;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
@@ -27,6 +27,7 @@ import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.plugins.synchro.SynchroPlugin;
 import fr.sirs.util.CopyTask;
 import fr.sirs.util.property.DocumentRoots;
 import fr.sirs.util.property.SirsPreferences;

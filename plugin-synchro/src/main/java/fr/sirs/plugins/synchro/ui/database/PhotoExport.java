@@ -1,14 +1,15 @@
-package fr.sirs.plugins.synchro.ui;
+package fr.sirs.plugins.synchro.ui.database;
 
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SIRSFileReference;
-import fr.sirs.plugins.synchro.DocumentExportPane;
+import fr.sirs.plugins.synchro.ui.mount.DocumentExportPane;
 import fr.sirs.plugins.synchro.attachment.AttachmentUtilities;
 import fr.sirs.plugins.synchro.common.DocumentUtilities;
 import fr.sirs.plugins.synchro.common.PhotoFinder;
+import fr.sirs.plugins.synchro.common.TaskProvider;
 import fr.sirs.plugins.synchro.concurrent.AsyncPool;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.SirsStringConverter;
@@ -27,7 +28,10 @@ import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
 import javafx.beans.property.LongProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -37,6 +41,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.StackPane;
@@ -47,7 +52,7 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
  *
  * @author Alexis Manin (Geomatys)
  */
-public class PhotoExport extends StackPane {
+public class PhotoExport extends StackPane implements TaskProvider {
 
     @FXML
     private Button uiExportBtn;
@@ -61,6 +66,9 @@ public class PhotoExport extends StackPane {
     @FXML
     private Spinner<Integer> uiPhotoSpinner;
 
+    @FXML
+    private ProgressIndicator uiProgress;
+
     final IntegerBinding photoNumber;
     private final Session session;
     private final ObservableList<Preview> troncons;
@@ -70,6 +78,10 @@ public class PhotoExport extends StackPane {
     private final AsyncPool pool = new AsyncPool(7);
 
     private final LongProperty estimatedSize = new SimpleLongProperty(-1);
+
+    private final ObjectProperty<Task<Long>> estimateTaskProperty = new SimpleObjectProperty<>();
+
+    private final ReadOnlyObjectWrapper<Task> exportTaskProperty = new ReadOnlyObjectWrapper<>();
 
     public PhotoExport(final Session session, final ObservableList<Preview> troncons, final LocalDate dateFilter) {
         SIRS.loadFXML(this);
@@ -106,12 +118,17 @@ public class PhotoExport extends StackPane {
         );
 
         // Activate export button only if at least one photo should be send.
-        uiExportBtn.disableProperty().bind(photoNumber.greaterThan(0).and(Bindings.isEmpty(troncons)));
+        uiExportBtn.disableProperty().bind(photoNumber.lessThan(1).or(Bindings.isEmpty(troncons)));
         uiRemainingSpace.textProperty().bind(Bindings.createStringBinding(() -> {
             final long size = estimatedSize.get();
             return size < 0? "inconnu" : SIRS.toReadableSize(size);
         }, estimatedSize));
         troncons.addListener(this::sourceChanged);
+        photoNumber.addListener(this::sourceChanged);
+
+        estimateTaskProperty.addListener(this::estimateTaskUpdated);
+        exportTaskProperty.addListener(this::exportTaskUpdated);
+        disableProperty().bind(uiProgress.visibleProperty());
     }
 
     @FXML
@@ -135,8 +152,7 @@ public class PhotoExport extends StackPane {
                 .setTarget(find())
                 .setWhenComplete(this::handleUploadResult)
                 .build();
-        TaskManager.INSTANCE.submit(uploader);
-        // TODO : follow task state
+        exportTaskProperty.set(uploader);
     }
 
 
@@ -172,15 +188,7 @@ public class PhotoExport extends StackPane {
                         .sum()
         );
 
-        sizeComputer.setOnSucceeded(evt -> Platform.runLater(() -> estimatedSize.set(sizeComputer.getValue())));
-        sizeComputer.setOnFailed(evt -> {
-            SIRS.LOGGER.log(Level.WARNING, "Cannot estimate size for photographs to export.", sizeComputer.getException());
-            Platform.runLater(()
-                    -> new Growl(Growl.Type.ERROR, "Impossible d'estimer la taille des photos poue envoi")
-                            .showAndFade());
-        });
-
-        TaskManager.INSTANCE.submit(sizeComputer);
+        estimateTaskProperty.set(sizeComputer);
     }
 
     private static long size(final AbstractPhoto photo) {
@@ -207,5 +215,63 @@ public class PhotoExport extends StackPane {
                 .filter(DocumentUtilities::isFileAvailable)
                 .sorted(new DocumentExportPane.PhotoDateComparator())
                 .limit(photoNumber.get());
+    }
+
+    private void estimateTaskUpdated(final ObservableValue obs, final Task<Long> oldValue, final Task<Long> newValue) {
+        if (oldValue != null) {
+            oldValue.cancel(true);
+            uiRemainingSpace.getGraphic().visibleProperty().unbind();
+            uiRemainingSpace.getGraphic().setVisible(false);
+        }
+
+        if (newValue != null) {
+            newValue.setOnSucceeded(evt -> Platform.runLater(() -> estimatedSize.set(newValue.getValue())));
+            newValue.setOnCancelled(evt -> Platform.runLater(() -> estimatedSize.set(-1)));
+            newValue.setOnFailed(evt -> {
+                SIRS.LOGGER.log(Level.WARNING, "Cannot estimate size for photographs to export.", newValue.getException());
+                Platform.runLater(() -> {
+                    estimatedSize.set(-1);
+                    new Growl(Growl.Type.ERROR, "Impossible d'estimer la taille des photos poue envoi")
+                            .showAndFade();
+                });
+            });
+            uiRemainingSpace.getGraphic().visibleProperty().bind(newValue.runningProperty());
+
+            TaskManager.INSTANCE.submit(newValue);
+        }
+    }
+
+
+    private void exportTaskUpdated(final ObservableValue obs, final Task oldValue, final Task newValue) {
+        if (oldValue != null) {
+            oldValue.cancel(true);
+            uiProgress.visibleProperty().unbind();
+            uiProgress.setVisible(false);
+        }
+
+        if (newValue != null) {
+            // We cancel size estimation, it's not needed anymore
+            estimateTaskProperty.set(null);
+            newValue.setOnSucceeded(evt -> Platform.runLater(() -> new Growl(Growl.Type.INFO, "Images téléversées avec succès").showAndFade()));
+            newValue.setOnFailed(evt -> {
+                SIRS.LOGGER.log(Level.WARNING, "Cannot upload photographs.", newValue.getException());
+                Platform.runLater(()
+                        -> new Growl(Growl.Type.ERROR, "Impossible d'envoyer les images en base de données")
+                                .showAndFade());
+            });
+
+            uiProgress.visibleProperty().bind(newValue.runningProperty());
+            TaskManager.INSTANCE.submit(newValue);
+        }
+    }
+
+    @Override
+    public ObservableValue<Task> taskProperty() {
+        return exportTaskProperty.getReadOnlyProperty();
+    }
+
+    @Override
+    public Task<Void> getTask() {
+        return exportTaskProperty.get();
     }
 }

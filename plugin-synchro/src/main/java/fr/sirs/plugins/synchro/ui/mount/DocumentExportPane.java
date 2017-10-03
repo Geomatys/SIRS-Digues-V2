@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
-package fr.sirs.plugins.synchro;
+package fr.sirs.plugins.synchro.ui.mount;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.Injector;
@@ -41,6 +41,7 @@ import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.SIRSFileReference;
 import fr.sirs.core.model.SIRSReference;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.plugins.synchro.SynchroPlugin;
 import fr.sirs.util.CopyTask;
 import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.SirsStringConverter;

@@ -1,4 +1,4 @@
-package fr.sirs.plugins.synchro.ui;
+package fr.sirs.plugins.synchro.ui.database;
 
 import fr.sirs.SIRS;
 import fr.sirs.Session;
@@ -36,7 +36,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.AttachmentInputStream;
 import org.ektorp.CouchDbConnector;
@@ -204,11 +203,10 @@ public class PhotoDownload extends StackPane {
         }
     }
 
-    private static void download(final CouchDbConnector connector, final AbstractPhoto photo, final Path destination) throws IOException {
+    private static void download(final CouchDbConnector connector, final AbstractPhoto photo, Path destination) throws IOException {
         final Path tmpFile = Files.createTempFile(photo.getId(), ".img");
-        try (final AttachmentInputStream stream = AttachmentUtilities.download(connector, photo);
-                final Base64InputStream decoded = new Base64InputStream(stream, false)) {
-            Files.copy(decoded, tmpFile, StandardCopyOption.REPLACE_EXISTING);
+        try (final AttachmentInputStream stream = AttachmentUtilities.download(connector, photo)) {
+            Files.copy(stream, tmpFile, StandardCopyOption.REPLACE_EXISTING);
             Files.move(tmpFile, destination, StandardCopyOption.REPLACE_EXISTING);
             final Optional<Path> root = DocumentRoots.getRoot(photo);
             if (root.isPresent()) {

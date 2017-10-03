@@ -1,10 +1,12 @@
-package fr.sirs.plugins.synchro.ui;
+package fr.sirs.plugins.synchro.ui.database;
 
 import fr.sirs.SIRS;
 import fr.sirs.core.model.SIRSFileReference;
 import fr.sirs.plugins.synchro.attachment.AttachmentUtilities;
 import fr.sirs.plugins.synchro.common.DocumentUtilities;
+import fr.sirs.plugins.synchro.common.TaskProvider;
 import fr.sirs.plugins.synchro.concurrent.AsyncPool;
+import fr.sirs.plugins.synchro.ui.DocumentSelector;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.SirsStringConverter;
 import java.io.IOException;
@@ -18,6 +20,8 @@ import java.util.logging.Level;
 import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.beans.Observable;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -34,7 +38,7 @@ import org.geotoolkit.gui.javafx.util.TaskManager;
  *
  * @author Alexis Manin (Geomatys)
  */
-public class LocalDistantView extends SplitPane {
+public class LocalDistantView extends SplitPane implements TaskProvider {
 
     @FXML
     private ListView<SIRSFileReference> uiDesktopList;
@@ -58,6 +62,8 @@ public class LocalDistantView extends SplitPane {
     private final ObservableList<SIRSFileReference> documents;
 
     private final AsyncPool pool = new AsyncPool(7);
+
+    private final ReadOnlyObjectWrapper<Task> taskProperty = new ReadOnlyObjectWrapper<>();
 
     public LocalDistantView(final CouchDbConnector connector, final ObservableList<SIRSFileReference> documents) {
         this.connector = connector;
@@ -232,6 +238,16 @@ public class LocalDistantView extends SplitPane {
                 throw new UncheckedIOException(e);
             }
         } else return AttachmentUtilities.size(connector, ref);
+    }
+
+    @Override
+    public ObservableValue<Task> taskProperty() {
+        return taskProperty.getReadOnlyProperty();
+    }
+
+    @Override
+    public Task getTask() {
+        return taskProperty.get();
     }
 
     public static class ParameterizedException extends CompletionException {

@@ -10,6 +10,7 @@ import fr.sirs.core.model.SIRSFileReference;
 import fr.sirs.core.model.SIRSReference;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.plugins.synchro.common.DocumentFinder;
+import fr.sirs.plugins.synchro.common.TaskProvider;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.DatePickerConverter;
 import fr.sirs.util.SirsStringConverter;
@@ -19,8 +20,7 @@ import java.util.MissingResourceException;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -44,7 +44,7 @@ import org.geotoolkit.internal.GeotkFX;
  *
  * @author Alexis Manin (Geomatys)
  */
-public class DocumentSelector extends StackPane {
+public class DocumentSelector extends StackPane implements TaskProvider {
 
     @FXML
     private BorderPane uiConfigPane;
@@ -64,7 +64,7 @@ public class DocumentSelector extends StackPane {
     @FXML
     private Label uiLoadingLabel;
 
-    private final ObjectProperty<Task> searchTask = new SimpleObjectProperty<>();
+    private final ReadOnlyObjectWrapper<Task> searchTask = new ReadOnlyObjectWrapper<>();
 
     private final ObservableList<SIRSFileReference> documents;
 
@@ -160,6 +160,16 @@ public class DocumentSelector extends StackPane {
 
             TaskManager.INSTANCE.submit(newTask);
         }
+    }
+
+    @Override
+    public ObservableValue<Task> taskProperty() {
+        return searchTask.getReadOnlyProperty();
+    }
+
+    @Override
+    public Task getTask() {
+        return searchTask.get();
     }
 
     /**
