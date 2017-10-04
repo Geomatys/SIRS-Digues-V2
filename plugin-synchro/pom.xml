@@ -19,7 +19,7 @@
     </parent>
 
     <properties>
-        <plugin.core.version.min>4</plugin.core.version.min>
+        <plugin.core.version.min>8</plugin.core.version.min>
     </properties>
 
     <dependencies>
@@ -28,7 +28,7 @@
             <artifactId>desktop</artifactId>
             <!-- SIRS application version is defined at archetype generation goal -->
             <version>2.x-SNAPSHOT</version>
-            <!--scope>provided</scope-->
+            <scope>provided</scope>
         </dependency>
         
         <dependency>
