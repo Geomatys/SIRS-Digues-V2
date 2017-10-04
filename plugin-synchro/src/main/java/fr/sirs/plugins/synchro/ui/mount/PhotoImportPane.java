@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
-package fr.sirs.plugins.synchro;
+package fr.sirs.plugins.synchro.ui.mount;
 
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
@@ -27,15 +27,14 @@ import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.SIRSFileReference;
+import fr.sirs.plugins.synchro.SynchroPlugin;
+import fr.sirs.plugins.synchro.ui.PhotoDestination;
+import fr.sirs.plugins.synchro.ui.PrefixComposer;
 import fr.sirs.util.CopyTask;
-import fr.sirs.util.property.DocumentRoots;
-import fr.sirs.util.property.SirsPreferences;
 import java.awt.Color;
-import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
-import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.nio.file.FileStore;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -48,7 +47,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
@@ -59,10 +57,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
@@ -72,21 +68,16 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.DirectoryChooser;
 import javafx.util.StringConverter;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.font.FontAwesomeIcons;
@@ -110,7 +101,7 @@ public class PhotoImportPane extends StackPane {
 
     public static final Image ICON_TRASH_BLACK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_TRASH_O,16,Color.BLACK),null);
 
-    private static enum DIRECTION {
+    public static enum DIRECTION {
         UP,
         DOWN;
     }
@@ -131,33 +122,7 @@ public class PhotoImportPane extends StackPane {
     private ProgressIndicator uiSoureSpaceProgress;
 
     @FXML
-    private Label uiRootLabel;
-
-    @FXML
-    private Hyperlink uiChooseSubDir;
-
-    @FXML
-    private Label uiSubDirLabel;
-
-    @FXML
-    private ProgressIndicator uiDestSpaceProgress;
-
-    @FXML
     private ComboBox<Character> uiSeparatorChoice;
-    @FXML
-    private ListView<PropertyDescriptor> uiPrefixListView;
-
-    @FXML
-    private Button uiAddPrefixBtn;
-
-    @FXML
-    private Button uiMoveUpBtn;
-
-    @FXML
-    private Button uiMoveDownBtn;
-
-    @FXML
-    private Button uiDeletePrefixBtn;
 
     @FXML
     private ProgressBar uiImportProgress;
@@ -166,10 +131,8 @@ public class PhotoImportPane extends StackPane {
     private Button uiImportBtn;
 
     @FXML
-    private TitledPane uiPrefixTitledPane;
-
-    @FXML
     private Label uiCopyMessage;
+
     private final Tooltip copyMessageTooltip = new Tooltip();
 
     /**
@@ -177,66 +140,26 @@ public class PhotoImportPane extends StackPane {
      */
     private final SimpleObjectProperty<Path> sourceDirProperty = new SimpleObjectProperty<>();
 
-    /**
-     * Destination root path, as it should be defined in {@link SirsPreferences.PROPERTIES#DOCUMENT_ROOT}.
-     */
-    private final SimpleObjectProperty<Path> rootDirProperty = new SimpleObjectProperty<>();
-
-    /**
-     * A sub-directory of {@link #rootDirProperty} to put imported photos into.
-     */
-    private final SimpleObjectProperty<Path> subDirProperty = new SimpleObjectProperty<>();
-
     private final SimpleObjectProperty<Task> taskProperty = new SimpleObjectProperty<>();
 
-    private final ObservableList<PropertyDescriptor> availablePrefixes = FXCollections.observableArrayList();
+    private final PhotoDestination destPane;
+    private final PrefixComposer prefixPane;
 
     public PhotoImportPane() {
         super();
         SIRS.loadFXML(this);
 
-        final BooleanBinding noRootConfigured = rootDirProperty.isNull();
-        uiChooseSubDir.disableProperty().bind(noRootConfigured);
-        uiSubDirLabel.disableProperty().bind(noRootConfigured);
-
         sourceDirProperty.addListener(this::sourceChanged);
-        rootDirProperty.addListener(this::destinationChanged);
-        subDirProperty.addListener(this::destinationChanged);
         taskProperty.addListener(this::taskUpdate);
 
         uiCopyMessage.managedProperty().bind(uiCopyMessage.visibleProperty());
         uiCopyMessage.visibleProperty().bind(uiCopyMessage.textProperty().isNotEmpty());
 
         uiImportProgress.visibleProperty().bind(taskProperty.isNotNull());
-        
-        // prefix composition UIs
-        final ObservableList<Character> prefixSeparators = FXCollections.observableArrayList();
-        prefixSeparators.addAll(' ', '.', '-', '_');
-        SIRS.initCombo(uiSeparatorChoice, prefixSeparators, '.');
 
-        uiPrefixListView.setItems(FXCollections.observableArrayList());
-        uiPrefixListView.setCellFactory(param -> new PrefixCell());
-        uiPrefixListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
-        // Set button icons
-        uiAddPrefixBtn.setGraphic(new ImageView(SIRS.ICON_ADD_BLACK));
-        uiAddPrefixBtn.setText(null);
-        uiMoveUpBtn.setGraphic(new ImageView(SIRS.ICON_CARET_UP_BLACK));
-        uiMoveUpBtn.setText(null);
-        uiMoveDownBtn.setGraphic(new ImageView(SIRS.ICON_CARET_DOWN_BLACK));
-        uiMoveDownBtn.setText(null);
-        uiDeletePrefixBtn.setGraphic(new ImageView(ICON_TRASH_BLACK));
-        uiDeletePrefixBtn.setText(null);
-
-        rootDirProperty.set(DocumentRoots.getPhotoRoot(null, false).orElse(null));
-
-        try {
-            availablePrefixes.addAll(SIRS.listSimpleProperties(AbstractPhoto.class).values());
-        } catch (IntrospectionException ex) {
-            SIRS.LOGGER.log(Level.WARNING, "Cannot identify available prefixes.", ex);
-            uiPrefixTitledPane.setVisible(false);
-            uiPrefixTitledPane.setManaged(false);
-        }
+        destPane = new PhotoDestination();
+        prefixPane = new PrefixComposer();
+        uiParameterContainer.getChildren().addAll(destPane, prefixPane);
     }
 
     private void sourceChanged(final ObservableValue<? extends Path> obs, final Path oldValue, final Path newValue) {
@@ -263,120 +186,9 @@ public class PhotoImportPane extends StackPane {
         }
     }
 
-    /**
-     * Compute back destination usable space each time root or subdirectory change.
-     * We do it for both elements, in case sub-directory is not on the same filestore.
-     * Ex : root is /media, and sub-directory is myUsbKey/photos
-     * @param obs
-     * @param oldValue
-     * @param newValue
-     */
-    private void destinationChanged(final ObservableValue<? extends Path> obs, final Path oldValue, final Path newValue) {
-        if (rootDirProperty.get() == null) {
-            uiRootLabel.setText("N/A");
-            uiSubDirLabel.setText("N/A");
-            uiDestSpaceProgress.setProgress(0);
-        } else {
-            uiRootLabel.setText(rootDirProperty.get().toString());
-            final Path subDir = subDirProperty.get();
-            final Path absolutePath;
-            if (subDir == null) {
-                uiSubDirLabel.setText("N/A");
-                absolutePath = rootDirProperty.get();
-            } else {
-                uiSubDirLabel.setText(subDir.toString());
-                absolutePath = rootDirProperty.get().resolve(subDir);
-            }
-
-            try {
-                final FileStore fileStore = newValue.getFileSystem().provider().getFileStore(absolutePath);
-
-                final long usableSpace = fileStore.getUsableSpace();
-                final long totalSpace = fileStore.getTotalSpace();
-                // HACK : Never set to 1 to avoid message print.
-                uiDestSpaceProgress.setProgress(totalSpace <= 0 || usableSpace <= 0? 0.99999 : 1 - ((double)usableSpace / totalSpace));
-            } catch (IOException e) {
-                GeotkFX.newExceptionDialog("L'analyse du dossier destination a échoué. Veuillez choisir un autre dossier destination.", e);
-            }
-        }
-    }
-
-    /*
-     * UI ACTIONS
-     */
-
-    @FXML
-    void addPrefix(ActionEvent event) {
-        ComboBox<PropertyDescriptor> choices = new ComboBox<>();
-        SIRS.initCombo(choices, availablePrefixes, null);
-        choices.setConverter(new DescriptorConverter());
-
-        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION, null, ButtonType.CANCEL, ButtonType.OK);
-        alert.setResizable(true);
-        alert.setWidth(400);
-        alert.getDialogPane().setContent(choices);
-        alert.setHeaderText("Choisissez un attribut à utiliser comme préfixe");
-
-        ButtonType result = alert.showAndWait().orElse(ButtonType.CANCEL);
-        if (ButtonType.OK.equals(result)) {
-            PropertyDescriptor value = choices.getValue();
-            if (value != null) {
-                uiPrefixListView.getItems().add(value);
-                availablePrefixes.remove(value);
-            }
-        }
-    }
-
-    @FXML
-    void deletePrefix(ActionEvent event) {
-        final MultipleSelectionModel<PropertyDescriptor> selectionModel = uiPrefixListView.getSelectionModel();
-        final ObservableList<PropertyDescriptor> selected = selectionModel.getSelectedItems();
-        if (!selected.isEmpty()) {
-            uiPrefixListView.getItems().removeAll(selected);
-            availablePrefixes.addAll(selected);
-        }
-        selectionModel.clearSelection();
-    }
-
-    @FXML
-    void movePrefixDown(ActionEvent event) {
-        moveSelectedElements(uiPrefixListView, DIRECTION.DOWN);
-    }
-
-    @FXML
-    void movePrefixUp(ActionEvent event) {
-        moveSelectedElements(uiPrefixListView, DIRECTION.UP);
-    }
-
     @FXML
     void chooseSource(ActionEvent event) {
         sourceDirProperty.set(SynchroPlugin.chooseMedia(getScene().getWindow()));
-    }
-
-    @FXML
-    void chooseSubDirectory(ActionEvent event) {
-        final DirectoryChooser chooser = new DirectoryChooser();
-        chooser.setTitle("Répertoire destination");
-        final Path root = rootDirProperty.get();
-        chooser.setInitialDirectory(root.toFile());
-        File chosen = chooser.showDialog(getScene().getWindow());
-        if (chosen != null) {
-            subDirProperty.set(root.relativize(chosen.toPath()));
-        }
-    }
-
-    @FXML
-    void configureRoot(ActionEvent event) {
-        final DirectoryChooser chooser = new DirectoryChooser();
-        chooser.setTitle("Choisir un répertoire racine : ");
-        if (rootDirProperty.get() != null) {
-            chooser.setInitialDirectory(rootDirProperty.get().toFile());
-        }
-        File chosen = chooser.showDialog(getScene().getWindow());
-        if (chosen != null) {
-            rootDirProperty.set(chosen.toPath().toAbsolutePath());
-            DocumentRoots.setDefaultPhotoRoot(rootDirProperty.get());
-        }
     }
 
     /**
@@ -427,7 +239,7 @@ public class PhotoImportPane extends StackPane {
 
         // Check destination is configured
         final Path source = tmpSource;
-        final Path root = rootDirProperty.get();
+        final Path root = destPane.getRoot();
         if (root == null || !Files.isDirectory(root)) {
             warning("aucun dossier de sortie valide spécifié. Veuillez vérifiez vos paramètres d'import.");
             return;
@@ -468,7 +280,7 @@ public class PhotoImportPane extends StackPane {
 
     private void copyPhotos(final Collection<Path> filesToCopy, final Path root) {
         // Build destination path
-        final Path subDir = subDirProperty.get();
+        final Path subDir = destPane.getSubDir();
         final Path destination = subDir == null ? root : root.resolve(subDir);
         if (!Files.exists(destination)) {
             try {
@@ -486,8 +298,7 @@ public class PhotoImportPane extends StackPane {
         /* We give root directory as destination. sub-directory will be managed by
          * the resolver, because we have to update CouchDB documents accordingly.
          */
-        final LinkedHashSet prefixes = new LinkedHashSet(uiPrefixListView.getItems());
-        final PathResolver resolver = new PathResolver(subDir, prefixes, uiSeparatorChoice.getValue());
+        final PathResolver resolver = new PathResolver(subDir, prefixPane.getPrefixBuilder().get(), uiSeparatorChoice.getValue());
         final CopyTask cpTask = new CopyTask(filesToCopy, root, resolver);
         taskProperty.set(cpTask);
 
@@ -511,7 +322,7 @@ public class PhotoImportPane extends StackPane {
      * @param source The list view to work with
      * @param direction Direction to move selected elements to (up or down).
      */
-    static void moveSelectedElements(final ListView source, final DIRECTION direction) {
+    public static void moveSelectedElements(final ListView source, final DIRECTION direction) {
         ArgumentChecks.ensureNonNull("Input list", source);
         ArgumentChecks.ensureNonNull("Movement direction", direction);
 
@@ -611,16 +422,16 @@ public class PhotoImportPane extends StackPane {
         private final Session session;
 
         private final Path rootRelativeDir;
-        private final LinkedHashSet<PropertyDescriptor> prefixes;
+        private final Function<SIRSFileReference, String> prefixBuilder;
         private final char separator;
 
         private final boolean noOp;
 
-        public PathResolver(Path rootRelativeDir, LinkedHashSet<PropertyDescriptor> prefixes, Character separator) {
+        public PathResolver(Path rootRelativeDir, final Function<SIRSFileReference, String> prefixBuilder, Character separator) {
             session = Injector.getSession();
             this.rootRelativeDir = rootRelativeDir;
-            this.prefixes = prefixes;
-            noOp = rootRelativeDir == null && (prefixes == null || prefixes.isEmpty());
+            this.prefixBuilder = prefixBuilder;
+            noOp = rootRelativeDir == null && prefixBuilder == null;
 
             this.separator = separator == null? '.' : separator;
         }
@@ -671,27 +482,15 @@ public class PhotoImportPane extends StackPane {
             }
 
             final String newName;
-            if (prefixes == null || prefixes.isEmpty()) {
+            if (prefixBuilder == null) {
                 newName = t.getFileName().toString();
             } else {
-                final StringBuilder nameBuilder = new StringBuilder();
-                Object prefixValue;
-                for (final PropertyDescriptor desc : prefixes) {
-                    Method readMethod = desc.getReadMethod();
-                    if (readMethod != null) {
-                        try {
-                            prefixValue = readMethod.invoke(photo);
-                            if (prefixValue != null) {
-                                nameBuilder.append(prefixValue).append(separator);
-                            }
-                        } catch (Exception ex) {
-                            warning("Le préfixe "+LabelMapper.mapPropertyName(AbstractPhoto.class, desc.getName())+" ne peut être ajouté. L'import est annulé.");
-                            SirsCore.LOGGER.log(Level.WARNING, "Photo import : cannot add following prefix in file name : "+desc.getDisplayName(), ex);
-                        }
-                    }
+                final String prefix = prefixBuilder.apply(photo);
+                if (prefix == null) {
+                    newName = t.getFileName().toString();
+                } else {
+                    newName = prefix.concat(t.getFileName().toString());
                 }
-                nameBuilder.append(t.getFileName().toString());
-                newName = nameBuilder.toString();
             }
 
             final Path result;
@@ -713,7 +512,7 @@ public class PhotoImportPane extends StackPane {
     /**
      * A cell displaying proper title for a given property descriptor.
      */
-    private static class PrefixCell extends ListCell<PropertyDescriptor> {
+    public static class PrefixCell extends ListCell<PropertyDescriptor> {
 
         final LabelMapper mapper = LabelMapper.get(AbstractPhoto.class);
 
@@ -731,7 +530,7 @@ public class PhotoImportPane extends StackPane {
     /**
      * A converter displaying proper title for a given property descriptor.
      */
-    private static class DescriptorConverter extends StringConverter<PropertyDescriptor> {
+    public static class DescriptorConverter extends StringConverter<PropertyDescriptor> {
 
         final WeakHashMap<String, PropertyDescriptor> fromString = new WeakHashMap<>();
 

@@ -16,34 +16,25 @@
  * You should have received a copy of the GNU General Public License along with
  * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
-package fr.sirs.plugins.synchro;
+package fr.sirs.plugins.synchro.ui.mount;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import fr.sirs.core.SirsCore;
-import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DesordreRepository;
 import fr.sirs.core.model.AbstractPhoto;
-import fr.sirs.core.model.AbstractPositionDocument;
-import fr.sirs.core.model.AbstractPositionDocumentAssociable;
-import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.AvecPhotos;
-import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.LevePositionProfilTravers;
 import fr.sirs.core.model.Photo;
-import fr.sirs.core.model.PositionProfilTravers;
 import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.SIRSFileReference;
-import fr.sirs.core.model.SIRSReference;
-import fr.sirs.core.model.TronconDigue;
+import fr.sirs.plugins.synchro.SynchroPlugin;
+import fr.sirs.plugins.synchro.common.TextCell;
+import fr.sirs.plugins.synchro.ui.DocumentSelector;
 import fr.sirs.util.CopyTask;
-import fr.sirs.util.DatePickerConverter;
-import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.property.DocumentRoots;
 import java.io.IOException;
 import java.nio.file.FileStore;
@@ -54,27 +45,21 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.MissingResourceException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.concurrent.Task;
@@ -86,10 +71,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
@@ -99,7 +81,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.util.StringConverter;
-import org.apache.sis.measure.NumberRange;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,15 +106,6 @@ public class DocumentExportPane extends StackPane {
 
     @FXML
     private Button uiDesktopToMobile;
-
-    @FXML
-    private ListView<Preview> uiTronconList;
-
-    @FXML
-    private DatePicker uiDate;
-
-    @FXML
-    private ComboBox<Class> uiDocumentType;
 
     @FXML
     private Button uiExportBtn;
@@ -185,43 +157,26 @@ public class DocumentExportPane extends StackPane {
 
     private final ObservableMap<Class, AbstractSIRSRepository<SIRSFileReference>> repositories = FXCollections.observableHashMap();
 
+    private final DocumentSelector selector;
+
     public DocumentExportPane() {
         super();
         SIRS.loadFXML(this);
         Injector.injectDependencies(this);
 
+        selector = new DocumentSelector(session);
+        uiConfigPane.setTop(selector);
+
         // Prevent actions when a copy or a loading is running.
         FocusListener focusListener = new FocusListener();
         uiCopyPane.visibleProperty().addListener(focusListener);
         uiLoadingPane.visibleProperty().addListener(focusListener);
-
-        uiDocumentType.setConverter(new ClassNameConverter());
-
-        uiTronconList.setItems(FXCollections.observableList(session.getPreviews().getByClass(TronconDigue.class)));
-        uiTronconList.setCellFactory((previews) -> new TextCell());
-        uiTronconList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
         uiDesktopList.setCellFactory(list -> new TextCell());
         uiDesktopList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        uiDesktopList.setItems(selector.getDocuments().filtered(obj -> !uiMobileList.getItems().contains(obj)));
         uiMobileList.setCellFactory(list -> new TextCell());
         uiMobileList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        initRepositories();
-        final ObservableList<Class> availableTypes = FXCollections.observableArrayList(repositories.keySet());
-        availableTypes.add(0, SIRSFileReference.class);
-        uiDocumentType.setItems(availableTypes);
-
-        uiTronconList.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends Preview> c) -> {
-            updateDocumentList();
-        });
-        uiDocumentType.valueProperty().addListener((ObservableValue<? extends Object> observable, Object oldValue, Object newValue) -> {
-            updateDocumentList();
-        });
-        uiDate.valueProperty().addListener((ObservableValue<? extends Object> observable, Object oldValue, Object newValue) -> {
-            updateDocumentList();
-        });
-        DatePickerConverter.register(uiDate);
-        
         uiDesktopToMobile.setText(null);
         uiDesktopToMobile.setGraphic(new ImageView(SIRS.ICON_ARROW_RIGHT_BLACK));
         uiDelete.setText(null);
@@ -249,170 +204,11 @@ public class DocumentExportPane extends StackPane {
     }
 
     /**
-     * Initialize map of available document providers from Spring context.
-     */
-    private final void initRepositories() {
-        repositories.clear();
-        final Collection<AbstractSIRSRepository> registeredRepositories = session.getRepositoriesForClass(SIRSFileReference.class);
-        for (final AbstractSIRSRepository repo : registeredRepositories) {
-            repositories.put(repo.getModelClass(), repo);
-        }
-    }
-
-    /**
      * Open a directory chooser to allow user to specify wanted output drive.
      */
     @FXML
     private void chooseOutputDir() {
         mobileDocumentDir.set(SynchroPlugin.chooseMedia(getScene().getWindow()));
-    }
-
-    /**
-     * Build list of available documents in desktop application when a filter
-     * change.
-     */
-    private Task updateDocumentList() {
-        uiLoadingPane.setVisible(true);
-        uiLoadingLabel.setText("Recherche de documents");
-
-        final Task updater = TaskManager.INSTANCE.submit("Recherche de documents", () -> {
-            final Class docClass = uiDocumentType.getValue() == null ? SIRSFileReference.class : uiDocumentType.getValue();
-            final ObservableList<Preview> selectedItems = uiTronconList.getSelectionModel().getSelectedItems();
-            if (selectedItems == null || selectedItems.isEmpty()) {
-                return false;
-            }
-            final List<TronconDigue> selectedTroncons = session.getRepositoryForClass(TronconDigue.class).get(
-                    selectedItems.stream().map(p -> p.getElementId()).collect(Collectors.toList()));
-
-            // Use an hash set to avoid doublons.
-            final HashSet<SIRSFileReference> items = new HashSet();
-
-            // A filter which check that a given document really points on a file reference
-            final Predicate fileFilter = element -> {
-                if (element instanceof SIRSFileReference) {
-                    final SIRSFileReference fileRef = (SIRSFileReference)element;
-                    String chemin = fileRef.getChemin();
-                    if (chemin != null && !chemin.isEmpty()) {
-                        return Files.isRegularFile(SIRS.getDocumentAbsolutePath(fileRef));
-                    }
-                }
-                return false;
-            };
-
-            // Prepare temporal filter
-            final LocalDate date = uiDate.getValue();
-            final Long dateMilli = date == null ? null : Timestamp.valueOf(date.atStartOfDay()).getTime();
-            final Predicate temporalFilter = dateMilli == null ? null : e -> {
-                if (e instanceof AvecBornesTemporelles) {
-                    AvecBornesTemporelles temp = (AvecBornesTemporelles) e;
-                    final Long start = temp.getDate_debut() == null ? Long.MIN_VALUE : Timestamp.valueOf(temp.getDate_debut().atStartOfDay()).getTime();
-                    final Long end = temp.getDate_fin() == null ? Long.MIN_VALUE : Timestamp.valueOf(temp.getDate_fin().atStartOfDay()).getTime();
-                    final NumberRange range = new NumberRange(Long.class, start, true, end, true);
-                    return range.contains(dateMilli);
-                } else {
-                    return false;
-                }
-            };
-
-            /*
-            * We will browse each troncon to get back all of its documents of queried
-            * type and at the selected date.
-            */
-            for (final TronconDigue troncon : selectedTroncons) {
-                // First, we test if the current troncon is in the wanted time period.
-                if (temporalFilter != null && !temporalFilter.test(troncon)) {
-                    continue;
-                }
-
-                final List<Preview> docPreviews = getDocumentPreviews(troncon);
-
-                // utility container whose key is a type of elements, and value is the id of all elements found for this type.
-                final HashMap<String, HashSet<String>> docs = new HashMap();
-                for (final Preview docPreview : docPreviews) {
-                    // If a document type filter is set, we filter directly on previews to avoid unnecessary queries.
-                    if (SIRSFileReference.class.equals(docClass) || docClass.getCanonicalName().equals(docPreview.getElementClass())) {
-                        HashSet<String> ids = docs.get(docPreview.getElementClass());
-                        if (ids == null) {
-                            ids = new HashSet();
-                            docs.put(docPreview.getElementClass(), ids);
-                        }
-                        ids.add(docPreview.getElementId());
-                    }
-                }
-
-                for (final Map.Entry<String, HashSet<String>> docGroup : docs.entrySet()) {
-                    final AbstractSIRSRepository repo = session.getRepositoryForType(docGroup.getKey());
-                    if (repo == null)
-                        continue;
-                    final List elements = repo.get(docGroup.getValue().toArray(new String[0]));
-                    if (temporalFilter != null) {
-                        items.addAll((Collection) elements.stream().filter(temporalFilter).filter(fileFilter).collect(Collectors.toList()));
-                    } else {
-                        items.addAll((Collection) elements.stream().filter(fileFilter).collect(Collectors.toList()));
-                    }
-                }
-            }
-
-            TaskManager.MockTask uiUpdate = new TaskManager.MockTask(() -> uiDesktopList.setItems(FXCollections.observableArrayList(items)));
-            Platform.runLater(uiUpdate);
-            uiUpdate.get();
-            return true;
-        });
-
-        updater.runningProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-            if (Boolean.FALSE.equals(newValue)) {
-                final Runnable r = () -> uiLoadingPane.setVisible(false);
-                if (Platform.isFxApplicationThread()) {
-                    r.run();
-                } else {
-                    Platform.runLater(r);
-                }
-            }
-        });
-
-        return updater;
-    }
-
-    /**
-     * Analyse all {@link AbstractPositionDocument} placed on input {@link TronconDigue}
-     * to retrieve associated {@link SIRSFileReference}. The aim is to perform a minimum amount
-     * of queries to avoid IO/CPU overhead.
-     *
-     * There's 3 cases here :
-     * - {@link AbstractPositionDocumentAssociable} : document position contains
-     * an id of another document which is the wanted {@link SIRSFileReference}
-     * - {@link AbstractPositionDocument} which are {@link SIRSFileReference} themselves
-     * (Ex: {@link ProfilLong}.
-     * - {@link PositionProfilTravers}, which contains a link to multiple {@link LevePositionProfilTravers},
-     * each of them being associatded to one wanted {@link SIRSFileReference}
-     *
-     * @param troncon The linear we have to find documents for.
-     * @return a preview of each document found.
-     */
-    private List<Preview> getDocumentPreviews(final TronconDigue troncon) {
-        final HashSet<String> docIds = new HashSet<>();
-        // Store ids found for leves, to perform a single query to retrieve all.
-        final HashSet<String> levePositionIds = new HashSet<>();
-        final List<AbstractPositionDocument> docPositions = TronconUtils.getPositionDocumentList(troncon.getId());
-        for (final AbstractPositionDocument docPosition : docPositions) {
-            if (docPosition instanceof SIRSFileReference) {
-                docIds.add(docPosition.getId());
-            } else if (docPosition instanceof AbstractPositionDocumentAssociable) {
-                final String docId = ((AbstractPositionDocumentAssociable)docPosition).getSirsdocument();
-                if (docId != null && !docId.isEmpty()) {
-                    docIds.add(docId);
-                }
-            } else if (docPosition instanceof PositionProfilTravers) {
-                levePositionIds.addAll(((PositionProfilTravers)docPosition).getLevePositionIds());
-            }
-        }
-
-        if (!levePositionIds.isEmpty()) {
-            AbstractSIRSRepository<LevePositionProfilTravers> repo = session.getRepositoryForClass(LevePositionProfilTravers.class);
-            docIds.addAll(repo.get(levePositionIds.toArray(new String[0])).stream().map(tmpLeve -> tmpLeve.getLeveId()).collect(Collectors.toSet()));
-        }
-
-        return session.getPreviews().get(docIds.toArray(new String[0]));
     }
 
     /**
@@ -474,7 +270,7 @@ public class DocumentExportPane extends StackPane {
             return;
 
         uiMobileList.getItems().addAll(selectedItems);
-        uiDesktopList.getItems().removeAll(selectedItems);
+        uiDesktopList.setItems(selector.getDocuments().filtered(obj -> !uiMobileList.getItems().contains(obj)));
     }
 
     @FXML
@@ -483,14 +279,8 @@ public class DocumentExportPane extends StackPane {
         if (selectedItems.isEmpty())
             return;
 
-        // We cannot just get removed list and put it back in desktop list, because
-        // filter could have changed multiple times.
         uiMobileList.getItems().removeAll(selectedItems);
-        updateDocumentList().runningProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-            if (Boolean.FALSE.equals(newValue) && Boolean.TRUE.equals(oldValue)) {
-                final Runnable r = () -> uiDesktopList.getItems().removeAll(uiMobileList.getItems());
-            }
-        });
+        uiDesktopList.setItems(selector.getDocuments().filtered(obj -> !uiMobileList.getItems().contains(obj)));
     }
 
     @FXML
@@ -541,7 +331,7 @@ public class DocumentExportPane extends StackPane {
         // Before launching copy, we check if user has selected troncons for photo export.
         final Integer photoNumber = uiPhotoChoice.getValue() < 0 ? uiPhotoSpinner.getValue() : uiPhotoChoice.getValue();
         if (photoNumber > 0) {
-            ObservableList<Preview> tronconItems = uiTronconList.getSelectionModel().getSelectedItems();
+            ObservableList<Preview> tronconItems = selector.getSelectedTroncons();
             if (tronconItems.isEmpty()) {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Aucun tronçon sélectionné. Les photos ne seront pas exportées. Êtes-vous sûr ?", ButtonType.NO, ButtonType.YES);
                 alert.setResizable(true);
@@ -583,7 +373,7 @@ public class DocumentExportPane extends StackPane {
             if (photoNumber > 0) {
                 final ValidPhotoPredicate photoFilter = new ValidPhotoPredicate();
                 final PhotoDateComparator photoComparator = new PhotoDateComparator();
-                ObservableList<Preview> tronconItems = uiTronconList.getSelectionModel().getSelectedItems();
+                ObservableList<Preview> tronconItems = selector.getSelectedTroncons();
                 if (!tronconItems.isEmpty()) {
                     final List<AbstractPhoto> photos = new ArrayList<>();
                     List<AbstractPositionableRepository> repos = (List) session.getRepositoriesForClass(AvecPhotos.class)
@@ -722,58 +512,9 @@ public class DocumentExportPane extends StackPane {
     }
 
     /**
-     * Cell to display label of input element.
-     */
-    private static class TextCell extends ListCell {
-
-        final SirsStringConverter strConverter = new SirsStringConverter();
-
-        @Override
-        protected void updateItem(Object item, boolean empty) {
-            super.updateItem(item, empty);
-            if (item == null || isEmpty()) {
-                setText(null);
-            } else {
-                setText(strConverter.toString(item));
-            }
-        }
-    }
-
-    /**
-     * Give a proper title for a given class name.
-     */
-    private static class ClassNameConverter extends StringConverter<Class> {
-
-        static final String ALL_DOCS = "Tous";
-
-        @Override
-        public String toString(Class object) {
-            if (object == null)
-                return "";
-            else if (SIRSFileReference.class.equals(object))
-                return ALL_DOCS;
-            else
-                try {
-                    LabelMapper mapper = LabelMapper.get(object);
-                    return mapper.mapClassName();
-                } catch (MissingResourceException e) {
-                    return object.getSimpleName();
-                }
-        }
-
-        @Override
-        public Class fromString(String string) {
-            if (ALL_DOCS.equalsIgnoreCase(string))
-                return SIRSReference.class;
-            else
-                return null;
-        }
-    }
-
-    /**
      * A convinient converter to display number of photograph to export to user.
      */
-    private static class PhotoNumberConverter extends StringConverter<Integer> {
+    public static class PhotoNumberConverter extends StringConverter<Integer> {
 
         protected static final String ALL = "Toutes";
         protected static final String LAST = "La dernière";
@@ -834,9 +575,9 @@ public class DocumentExportPane extends StackPane {
      * A comparator which aim is to put most recent photo at the beginning of a
      * sorted list, to keep only new photos when we truncate photo list.
      */
-    private static class PhotoDateComparator implements Comparator<Photo> {
+    public static class PhotoDateComparator implements Comparator<AbstractPhoto> {
         @Override
-        public int compare(Photo o1, Photo o2) {
+        public int compare(AbstractPhoto o1, AbstractPhoto o2) {
             if ((o1 == null || o1.getDate() == null) && (o2 == null || o2.getDate() == null)) {
                 return 0;
             } else if (o1 == null  || o1.getDate() == null) {

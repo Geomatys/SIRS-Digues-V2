@@ -45,3 +45,15 @@
     -fx-border-color : #AAAAAA;
     -fx-background-color : #DDDDDD;
 }
+
+.scroll-pane {
+    -fx-background-color:transparent;
+}
+
+.split-pane {
+    -fx-box-border: transparent;
+}
+
+.split-pane > * > * {
+    -fx-box-border: lightgrey;
+}
