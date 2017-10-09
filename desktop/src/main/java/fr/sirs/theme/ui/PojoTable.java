@@ -612,10 +612,7 @@ public class PojoTable extends BorderPane implements Printable {
 
         uiExport.getStyleClass().add(BUTTON_STYLE);
         uiExport.disableProperty().bind(Bindings.isNull(uiTable.getSelectionModel().selectedItemProperty()));
-        uiExport.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
+        uiExport.setOnAction(event -> {
                 final DirectoryChooser chooser = new DirectoryChooser();
                 chooser.setTitle(GeotkFX.getString(org.geotoolkit.gui.javafx.contexttree.menu.ExportItem.class, "folder"));
                 final File folder = chooser.showDialog(null);
@@ -637,7 +634,6 @@ public class PojoTable extends BorderPane implements Printable {
                         throw new UnsupportedOperationException("Failed to create csv store : " + ex.getMessage(), ex);
                     }
                 }
-            }
         });
 
 
@@ -1439,16 +1435,32 @@ public class PojoTable extends BorderPane implements Printable {
 
         return new SimpleObjectProperty(selection.isEmpty()? new ArrayList<>(filteredValues) : new ArrayList(selection));
     }
+    
+    /**
+     * Control of the columns to print into the ODT document.
+     * @return a list of property names to print
+     * @see PojoTable#print()
+     */
+    protected List<String> propertyNamesToPrint(){
+        
+        final List<String> propertyNames = new ArrayList<>();
+        for (final TableColumn column : getColumns()) {
+            if (column.isVisible()){
+                if(column instanceof PropertyColumn){
+                    propertyNames.add(((PropertyColumn) column).name);
+                }
+                else if(column instanceof EnumColumn) {
+                    propertyNames.add(((EnumColumn) column).name);
+                }
+            }
+        }
+        return propertyNames;
+    }
 
     @Override
     public boolean print() {
         boolean nothingToPrint = filteredValues.isEmpty();
-        final ArrayList<String> propertyNames = new ArrayList<>();
-        for (final TableColumn c : getColumns()) {
-            if (c.isVisible() && (c instanceof PropertyColumn)) {
-                propertyNames.add(((PropertyColumn) c).name);
-            }
-        }
+        final List<String> propertyNames = propertyNamesToPrint();
 
         nothingToPrint = nothingToPrint || propertyNames.isEmpty();
         if (nothingToPrint) {
@@ -1522,9 +1534,13 @@ public class PojoTable extends BorderPane implements Printable {
 ////////////////////////////////////////////////////////////////////////////////
 
     private class EnumColumn extends TableColumn<Element, Object> {
+        private final String name;
+
+        public String getName(){return name;}
 
         private EnumColumn(final PropertyDescriptor desc) {
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
+            this.name = desc.getName();
             setEditable(false);
             setCellValueFactory(SIRS.getOrCreateCellValueFactory(desc.getName()));
             setCellFactory((TableColumn<Element, Object> param) -> {
