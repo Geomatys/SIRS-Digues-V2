@@ -92,6 +92,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -1456,6 +1457,10 @@ public class PojoTable extends BorderPane implements Printable {
         }
         return propertyNames;
     }
+    
+    protected Map<String, Function<Element, String>> getPrintMapping(){
+        return Collections.emptyMap();
+    }
 
     @Override
     public boolean print() {
@@ -1495,7 +1500,7 @@ public class PojoTable extends BorderPane implements Printable {
 
                     final long totalWork = filteredValues.size();
                     final AtomicLong work = new AtomicLong(0);
-                    ODTUtils.appendTable(doc, filteredValues.stream().peek(e -> updateProgress(work.getAndIncrement(), totalWork)).iterator(), propertyNames);
+                    ODTUtils.appendTable(doc, filteredValues.stream().peek(e -> updateProgress(work.getAndIncrement(), totalWork)).iterator(), propertyNames, getPrintMapping());
 
                     try (final OutputStream out = Files.newOutputStream(outputFile)) {
                         doc.save(out);

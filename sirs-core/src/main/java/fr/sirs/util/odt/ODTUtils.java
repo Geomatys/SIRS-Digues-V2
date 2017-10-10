@@ -58,6 +58,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1258,7 +1259,9 @@ public class ODTUtils {
      * @throws java.lang.ReflectiveOperationException If an error occurs while
      * accessing an element property.
      */
-    public static void appendTable(final TableContainer target, final Iterator<Element> data, final List<String> propertyNames) throws IntrospectionException, ReflectiveOperationException {
+    public static void appendTable(final TableContainer target, final Iterator<Element> data, final List<String> propertyNames, final Map<String, Function<Element, String>> printMapping) 
+            throws IntrospectionException, ReflectiveOperationException {
+        
         ArgumentChecks.ensureNonNull("Target document", target);
         if (data == null || !data.hasNext()) {
             return; // No elements, do not create table
@@ -1271,13 +1274,12 @@ public class ODTUtils {
         descriptorsByClass.put(elementClass.getCanonicalName(), elementProperties);
 
         final List<String> headers;
-        final Set<String> pKeys = elementProperties.keySet();
+        //final Set<String> pKeys = elementProperties.keySet();
         if (propertyNames == null) {
-            headers = new ArrayList<>(pKeys);
+            headers = new ArrayList<>(elementProperties.keySet());
         } else {
             headers = propertyNames;
-            headers.retainAll(pKeys);
-            pKeys.retainAll(headers);
+            //headers.retainAll(elementProperties.keySet());
         }
 
         // Create table and headers
@@ -1288,12 +1290,13 @@ public class ODTUtils {
         } else {
             headerStyle = null;
         }
-        LabelMapper lMapper = LabelMapper.get(elementClass);
-        Row dataRow = table.getRowByIndex(0);
+        
+        final LabelMapper lMapper_0 = LabelMapper.get(elementClass);
+        final Row dataRow_0 = table.getRowByIndex(0);
         Cell currentCell;
         for (int i = 0; i < headers.size(); i++) {
-            currentCell = dataRow.getCellByIndex(i);
-            currentCell.addParagraph(lMapper.mapPropertyName(headers.get(i)))
+            currentCell = dataRow_0.getCellByIndex(i);
+            currentCell.addParagraph(lMapper_0.mapPropertyName(headers.get(i)))
                     .getFont().setFontStyle(StyleTypeDefinitions.FontStyle.BOLD);
             if (headerStyle != null) {
                 currentCell.setCellStyleName(headerStyle.getStyleNameAttribute());
@@ -1301,19 +1304,27 @@ public class ODTUtils {
         }
 
         // Fill first line
-        dataRow = table.appendRow();
-        String propertyName;
+        final Row dataRow_1 = table.appendRow();
         for (int i = 0; i < headers.size(); i++) {
-            propertyName = headers.get(i);
-            dataRow.getCellByIndex(i).addParagraph(
-                    Printers.getPrinter(propertyName).print(element, elementProperties.get(propertyName)));
+            final String propertyName = headers.get(i);
+            final PropertyDescriptor desc = elementProperties.get(propertyName);
+            final PropertyPrinter printer = Printers.getPrinter(propertyName);
+            if (desc != null) {
+                dataRow_1.getCellByIndex(i).addParagraph(printer.print(element, desc));
+            }
+            else if(printMapping.get(propertyName)!=null){
+                dataRow_1.getCellByIndex(i).addParagraph(printer.print(element, propertyName, printMapping.get(propertyName)));
+            }
+            else {
+                SirsCore.LOGGER.log(Level.INFO, "Cannot hangle {0} column (first line)", propertyName);
+            }
         }
 
         // Fill remaining lines
         while (data.hasNext()) {
             element = data.next();
             elementClass = element.getClass();
-            lMapper = LabelMapper.get(elementClass);
+            final LabelMapper lMapper = LabelMapper.get(elementClass);
             /*
              * If current object is a new type of element, we retrieve its properties
              * and add necessary columns in case none have been specified as input.
@@ -1332,20 +1343,23 @@ public class ODTUtils {
                                     .getFont().setFontStyle(StyleTypeDefinitions.FontStyle.BOLD);
                         }
                     }
-                } else {
-                    elementProperties.keySet().retainAll(headers);
                 }
             }
 
             // Fill data
-            dataRow = table.appendRow();
-            PropertyDescriptor desc;
+            final Row dataRow = table.appendRow();
             for (int i = 0; i < headers.size(); i++) {
-                propertyName = headers.get(i);
-                desc = elementProperties.get(propertyName);
+                final String propertyName = headers.get(i);
+                final PropertyDescriptor desc = elementProperties.get(propertyName);
+                final PropertyPrinter printer = Printers.getPrinter(propertyName);
                 if (desc != null) {
-                    dataRow.getCellByIndex(i).addParagraph(
-                            Printers.getPrinter(propertyName).print(element, elementProperties.get(propertyName)));
+                    dataRow.getCellByIndex(i).addParagraph(printer.print(element, desc));
+                }
+                else if(printMapping.get(propertyName)!=null){
+                    dataRow.getCellByIndex(i).addParagraph(printer.print(element, propertyName, printMapping.get(propertyName)));
+                }
+                else {
+                    SirsCore.LOGGER.log(Level.INFO, "Cannot handle {0} column", propertyName);
                 }
             }
         }

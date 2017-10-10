@@ -22,6 +22,7 @@ import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.util.odt.ODTUtils;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.Spliterators;
@@ -97,7 +98,7 @@ public class TableSectionRapport extends AbstractSectionRapport {
             // If there's no SQL query, we try to print elements
         } else if (ctx.elements != null) {
             final List<String> properties = ctx.propertyNames == null? null : new ArrayList<>(ctx.propertyNames);
-            ODTUtils.appendTable(ctx.target, Spliterators.iterator(ctx.elements.spliterator()), properties);
+            ODTUtils.appendTable(ctx.target, Spliterators.iterator(ctx.elements.spliterator()), properties, Collections.emptyMap());
         }
     }
 
