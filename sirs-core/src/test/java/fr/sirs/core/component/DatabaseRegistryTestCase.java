@@ -53,7 +53,7 @@ public class DatabaseRegistryTestCase extends CouchDBTestCase {
     @DependsOnMethod("initDatabaseFromRemote")
     @Test
     public void getReplicationTasks() throws IOException {
-        Assert.assertFalse("No replication task found !", REGISTRY.getReplicationTasks().isEmpty());
+        Assert.assertTrue("No replication task found !", REGISTRY.getReplicationTasks().findAny().isPresent());
     }
 
     @DependsOnMethod("getReplicationTasks")

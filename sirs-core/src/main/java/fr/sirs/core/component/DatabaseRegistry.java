@@ -18,6 +18,8 @@
  */
 package fr.sirs.core.component;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,29 +30,36 @@ import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.authentication.AuthenticationWallet;
 import fr.sirs.index.ElasticSearchEngine;
+import fr.sirs.util.ClosingDaemon;
 import fr.sirs.util.property.SirsPreferences;
 import static fr.sirs.util.property.SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.ProxySelector;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Spliterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -367,7 +376,7 @@ public class DatabaseRegistry {
         }
 
         parentFactory.registerSingleton(DatabaseRegistry.class.getSimpleName(), this);
-        
+
         return new ClassPathXmlApplicationContext(new String[]{SirsCore.SPRING_CONTEXT}, parentContext);
     }
 
@@ -407,11 +416,12 @@ public class DatabaseRegistry {
      * @param distant The source database name if it's in current service, complete URL otherwise.
      * @param local Name of target database. It have to be in current service.
      * @param continuous True if we must keep databases synchronized over time. False for one shot synchronization.
+     * @return Information about all initiated replications. Can be empty, but never null.
      * @throws IOException If an error occurs while trying to connect to one database.
      * @throws IllegalArgumentException If databases are incompatible (different SRID, or distant bdd is not a SIRS one).
      * @throws DbAccessException If an error occcurs during replication.
      */
-    public void synchronizeSirsDatabases(String distant, final String local, boolean continuous) throws IOException {
+    public List<ReplicationStatus> synchronizeSirsDatabases(String distant, final String local, boolean continuous) throws IOException {
         Optional<SirsDBInfo> distantInfo = getInfo(distant);
         if (!distantInfo.isPresent()) {
             throw new IllegalArgumentException(new StringBuilder("Impossible de trouver une base de données à l'adresse suivante : ")
@@ -419,11 +429,14 @@ public class DatabaseRegistry {
                     .append("Vérifier l'hôte, le port, et le nom de la base de données dans l'adresse entrée.").toString());
         }
 
+        final String distantNoAuth = removeAuthenticationInformation(distant);
         final CouchDbConnector localConnector = createConnector(local, DatabaseConnectionBehavior.CREATE_IF_NOT_EXISTS);
         Optional<SirsDBInfo> info = getInfo(localConnector);
+        boolean sameDistant = false;
         if (info.isPresent()) {
             SirsDBInfo localInfo = info.get();
-            if (localInfo.getRemoteDatabase() != null && !localInfo.getRemoteDatabase().equals(distant)) {
+            sameDistant = distant.equals(localInfo.getRemoteDatabase()) || distantNoAuth.equals(localInfo.getRemoteDatabase());
+            if (localInfo.getRemoteDatabase() != null && !sameDistant) {
                 final TaskManager.MockTask<Optional<ButtonType>> confirmation = new TaskManager.MockTask<>(() -> {
                     final Alert alert = new Alert(
                             Alert.AlertType.WARNING,
@@ -448,7 +461,7 @@ public class DatabaseRegistry {
                 if (showAndWait.isPresent() && showAndWait.get().equals(ButtonType.OK)) {
                     cancelAllSynchronizations(localConnector.getDatabaseName());
                 } else {
-                    return;
+                    return Collections.EMPTY_LIST;
                 }
             }
         }
@@ -457,20 +470,25 @@ public class DatabaseRegistry {
         // because a connection should have been opened already to retrieve SIRS information.
         distant = addAuthenticationInformation(distant);
 
+        final ReplicationStatus[] result = new ReplicationStatus[2];
         try {
-            copyDatabase(distant, local, continuous);
+            result[0] = copyDatabase(distant, local, continuous);
         } catch (DbAccessException e) {
             checkReplicationError(e, distant, local);
         }
 
         try {
-            copyDatabase(local, distant, continuous);
+            result[1] = copyDatabase(local, distant, continuous);
         } catch (DbAccessException e) {
             checkReplicationError(e, local, distant);
         }
 
         // Update local database information : remote db.
-        new SirsDBInfoRepository(localConnector).setRemoteDatabase(removeAuthenticationInformation(distant));
+        if (!sameDistant) {
+            new SirsDBInfoRepository(localConnector).setRemoteDatabase(distantNoAuth);
+        }
+
+        return Arrays.asList(result);
     }
 
     /**
@@ -489,7 +507,7 @@ public class DatabaseRegistry {
         final String tmpSource = cleanDatabaseName(sourceDb);
         final String tmpTarget = cleanDatabaseName(targetDb);
         try {
-            count = getReplicationTasks().stream()
+            count = getReplicationTasks()
                     .filter(status -> {
                         return cleanDatabaseName(status.getSourceDatabaseName()).equals(tmpSource)
                                 && cleanDatabaseName(status.getTargetDatabaseName()).equals(tmpTarget);
@@ -716,30 +734,83 @@ public class DatabaseRegistry {
      * @return All replications found on current CouchDb service.
      * @throws IOException If an error happens while connecting to couchdb, or while reading a replication status.
      */
-    ArrayList<ReplicationTask> getReplicationTasks() throws IOException {
+    public Stream<ReplicationTask> getReplicationTasks() throws IOException {
         HttpResponse httpResponse = couchDbInstance.getConnection().get("/_active_tasks");
-
-        final ArrayList<ReplicationTask> result = new ArrayList();
 
         final ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        JsonNode tasks = mapper.readTree(httpResponse.getContent());
-        if (tasks.isArray()) {
-            Iterator<JsonNode> elements = tasks.elements();
-            while (elements.hasNext()) {
-                final JsonNode next = elements.next();
-                if (next.has("type") && "replication".equals(next.get("type").asText())) {
-                    result.add(mapper.treeToValue(next, StdReplicationTask.class));
-                }
-            }
-        }
 
-        return result;
+        final InputStream in = httpResponse.getContent();
+        final Stream<ReplicationTask> stream;
+        try {
+            final JsonParser parser = mapper.getFactory().createParser(in);
+            final JsonNode tasks = parser.readValueAsTree();
+
+            if (!tasks.isArray()) {
+                parser.close();
+                in.close();
+                return Stream.empty();
+            }
+
+            final Iterator<JsonNode> elements = tasks.elements();
+            Spliterator<ReplicationTask> spliterator = new Spliterator<ReplicationTask>() {
+                @Override
+                public boolean tryAdvance(Consumer<? super ReplicationTask> action) {
+                    while (elements.hasNext()) {
+                        final JsonNode next = elements.next();
+                        if (next.has("type") && "replication".equals(next.get("type").asText())) {
+                            try {
+                                action.accept(mapper.treeToValue(next, StdReplicationTask.class));
+                            } catch (JsonProcessingException ex) {
+                                throw new UncheckedIOException(ex);
+                            }
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+
+                @Override
+                public Spliterator<ReplicationTask> trySplit() {
+                    return null;
+                }
+
+                @Override
+                public long estimateSize() {
+                    return Long.MAX_VALUE;
+                }
+
+                @Override
+                public int characteristics() {
+                    return Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL;
+                }
+            };
+
+            stream = StreamSupport.stream(spliterator, false);
+            stream.onClose(() -> {
+                try {
+                    parser.close();
+                    in.close();
+                } catch (IOException ex) {
+                    SirsCore.LOGGER.log(Level.WARNING, "An http response stream cannot be closed.", ex);
+                }
+            });
+            ClosingDaemon.watchResource(stream, in);
+        } catch (Exception e) {
+            try {
+                in.close();
+            } catch (Exception bis) {
+                e.addSuppressed(bis);
+            }
+            throw e;
+        }
+        return stream;
     }
 
-    Stream<ReplicationTask> getReplicationTasksBySourceOrTarget(final String dst) throws IOException {
+    public Stream<ReplicationTask> getReplicationTasksBySourceOrTarget(final String dst) throws IOException {
         final String cleanedDst = cleanDatabaseName(dst);
-        return getReplicationTasks().stream().filter(
+        return getReplicationTasks().filter(
                 t -> (cleanDatabaseName(t.getSourceDatabaseName()).equals(cleanedDst)
                         || cleanDatabaseName(t.getTargetDatabaseName()).equals(cleanedDst)));
     }
