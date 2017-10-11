@@ -23,6 +23,7 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
+import fr.sirs.StructBeanSupplier;
 import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.ArbreVegetation;
@@ -39,6 +40,7 @@ import static fr.sirs.plugin.vegetation.PluginVegetation.DEFAULT_PEUPLEMENT_VEGE
 import static fr.sirs.plugin.vegetation.PluginVegetation.paramTraitement;
 import fr.sirs.util.SirsStringConverter;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,6 +147,10 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
         getTable().getColumns().add(6, (TableColumn) new VegetationAreaColumm());
     }
     
+    @Override
+    protected StructBeanSupplier getStructBeanSupplier(){
+        return new StructBeanSupplier(pojoClass, "documentId", () -> new ArrayList(uiTable.getSelectionModel().getSelectedItems()));
+    }
     
     /**
      * Control of the columns to print into the ODT document.

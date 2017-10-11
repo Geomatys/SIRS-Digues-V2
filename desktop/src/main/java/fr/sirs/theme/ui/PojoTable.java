@@ -222,7 +222,7 @@ public class PojoTable extends BorderPane implements Printable {
     protected final Class pojoClass;
     protected final AbstractSIRSRepository repo;
     protected final Session session = Injector.getBean(Session.class);
-    private final TableView<Element> uiTable = new FXTableView<>();
+    protected final TableView<Element> uiTable = new FXTableView<>();
     private final LabelMapper labelMapper;
 
     /**
@@ -620,7 +620,7 @@ public class PojoTable extends BorderPane implements Printable {
 
                 if(folder!=null){
                     try{
-                        final BeanFeatureSupplier sup = new StructBeanSupplier(pojoClass, () -> new ArrayList(uiTable.getSelectionModel().getSelectedItems()));
+                        final BeanFeatureSupplier sup = getStructBeanSupplier();
                         final BeanStore store = new BeanStore(sup);
                         final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(false)
                                 .getFeatureCollection(QueryBuilder.all(store.getNames().iterator().next())));
@@ -703,6 +703,10 @@ public class PojoTable extends BorderPane implements Printable {
         uiFilter.setTooltip(new Tooltip("Filtrer les données"));
 
         updateView();
+    }
+    
+    protected StructBeanSupplier getStructBeanSupplier(){
+        return new StructBeanSupplier(pojoClass, () -> new ArrayList(uiTable.getSelectionModel().getSelectedItems()));
     }
 
     public StringProperty titleProperty() {
