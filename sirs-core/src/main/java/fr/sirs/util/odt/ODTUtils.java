@@ -49,7 +49,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -1269,17 +1268,15 @@ public class ODTUtils {
 
         Element element = data.next();
         Class<? extends Element> elementClass = element.getClass();
-        LinkedHashMap<String, PropertyDescriptor> elementProperties = SirsCore.listSimpleProperties(elementClass);
-        final HashMap<String, LinkedHashMap<String, PropertyDescriptor>> descriptorsByClass = new HashMap<>();
+        Map<String, PropertyDescriptor> elementProperties = SirsCore.listSimpleProperties(elementClass);
+        final Map<String, Map<String, PropertyDescriptor>> descriptorsByClass = new HashMap<>();
         descriptorsByClass.put(elementClass.getCanonicalName(), elementProperties);
 
         final List<String> headers;
-        //final Set<String> pKeys = elementProperties.keySet();
         if (propertyNames == null) {
             headers = new ArrayList<>(elementProperties.keySet());
         } else {
             headers = propertyNames;
-            //headers.retainAll(elementProperties.keySet());
         }
 
         // Create table and headers
@@ -1385,9 +1382,8 @@ public class ODTUtils {
             headerStyle = null;
         }
         Row dataRow = table.getRowByIndex(0);
-        Cell currentCell;
         for (int i = 0; i < propertyNames.size(); i++) {
-            currentCell = dataRow.getCellByIndex(i);
+            final Cell currentCell = dataRow.getCellByIndex(i);
             currentCell.setStringValue(propertyNames.get(i));
             if (headerStyle != null) {
                 currentCell.setCellStyleName(headerStyle.getStyleNameAttribute());
@@ -1399,8 +1395,7 @@ public class ODTUtils {
         String propertyName;
         for (int i = 0; i < propertyNames.size(); i++) {
             propertyName = propertyNames.get(i);
-            dataRow.getCellByIndex(i).setStringValue(
-                    Printers.getPrinter(propertyName).print(next, propertyName));
+            dataRow.getCellByIndex(i).setStringValue(Printers.getPrinter(propertyName).print(next, propertyName));
         }
 
         // remaining lines
@@ -1409,8 +1404,7 @@ public class ODTUtils {
             dataRow = table.appendRow();
             for (int i = 0; i < propertyNames.size(); i++) {
                 propertyName = propertyNames.get(i);
-                dataRow.getCellByIndex(i).setStringValue(
-                        Printers.getPrinter(propertyName).print(next, propertyName));
+                dataRow.getCellByIndex(i).setStringValue(Printers.getPrinter(propertyName).print(next, propertyName));
             }
         }
     }

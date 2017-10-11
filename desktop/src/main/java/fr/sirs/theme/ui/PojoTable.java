@@ -72,6 +72,7 @@ import fr.sirs.util.LabelComparator;
 import fr.sirs.util.SEClassementEqualsOperator;
 import fr.sirs.util.SirsStringConverter;
 import fr.sirs.util.odt.ODTUtils;
+import fr.sirs.util.property.Computed;
 import fr.sirs.util.property.Internal;
 import fr.sirs.util.property.Reference;
 import java.beans.BeanInfo;
@@ -1692,7 +1693,12 @@ public class PojoTable extends BorderPane implements Printable {
 
             } else {
                 setCellValueFactory(SIRS.getOrCreateCellValueFactory(name));
-                final Class type = desc.getReadMethod().getReturnType();
+                final Method readMethod = desc.getReadMethod();
+                
+                // On conditionne a priori l'édition au fait que la méthode de lecture n'est pas indiquée comme autocalculée. 
+                isEditable = !readMethod.isAnnotationPresent(Computed.class);
+                
+                final Class type = readMethod.getReturnType();
                 if (Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());
                 } else if (String.class.isAssignableFrom(type)) {

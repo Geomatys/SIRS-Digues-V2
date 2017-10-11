@@ -109,7 +109,7 @@ public class StructBeanSupplier extends BeanFeatureSupplier implements DocumentL
         if (elements == null || elements.isEmpty()) {
             return null;
         }
-        final HashSet<FeatureId> fIds = new HashSet<>();
+        final Set<FeatureId> fIds = new HashSet<>();
         for (Element e : elements) {
             fIds.add(FF.featureId(e.getId()));
         }
@@ -117,7 +117,7 @@ public class StructBeanSupplier extends BeanFeatureSupplier implements DocumentL
     }
 
     private Id getIdFilter(final Set<String> elements) {
-        final HashSet<FeatureId> fIds = new HashSet<>();
+        final Set<FeatureId> fIds = new HashSet<>();
         for (String id : elements) {
             fIds.add(FF.featureId(id));
         }
