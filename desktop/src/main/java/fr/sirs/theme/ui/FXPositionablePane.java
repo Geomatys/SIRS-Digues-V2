@@ -225,9 +225,9 @@ public class FXPositionablePane extends BorderPane {
         else {
             return "";
         }
-    }
+    }      
 
-    private void updateSRAndPRInfo() {
+    public final void updateSRAndPRInfo() {
         final Positionable pos = getPositionable();
 
         final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
