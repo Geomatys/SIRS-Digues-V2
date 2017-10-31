@@ -25,7 +25,6 @@ import java.lang.reflect.Method;
 import java.util.WeakHashMap;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -34,8 +33,8 @@ import javafx.concurrent.Task;
 
 /**
  *
- * This is a special kind of PojoTable that listen one specific property of its
- * items in order to know if they had to be removed from the table view.
+ * This is a special kind of PojoTable which listens one specific property of its
+ * items in order to know if they must be removed from the table view.
  *
  * This table is useful for links without opposite in order to detect an object
  * that were associated to the "virtual container" of the table list is no
@@ -100,7 +99,7 @@ public class ListenPropertyPojoTable<T> extends PojoTable {
         try {
             propertyMethodToListen = pojoClass.getMethod(propertyToListen);
         } catch (NoSuchMethodException | SecurityException ex) {
-            Logger.getLogger(ListenPropertyPojoTable.class.getName()).log(Level.SEVERE, null, ex);
+            SIRS.LOGGER.log(Level.WARNING, "No such property "+propertyToListen+" to listen…", ex);
         }
         this.propertyReference = propertyReference;
     }
@@ -115,6 +114,7 @@ public class ListenPropertyPojoTable<T> extends PojoTable {
         try {
             final Property<T> property = (Property<T>) propertyMethodToListen.invoke(element);
             if(listeners.get(element)==null){
+                
                 final ChangeListener<T> changeListener = new ChangeListener<T>() {
                     @Override
                     public void changed(ObservableValue<? extends T> observable, T oldValue, T newValue) {
