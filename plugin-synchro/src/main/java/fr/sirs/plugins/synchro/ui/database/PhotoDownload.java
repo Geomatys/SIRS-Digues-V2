@@ -8,14 +8,10 @@ import fr.sirs.plugins.synchro.common.DocumentUtilities;
 import fr.sirs.plugins.synchro.common.PhotoFinder;
 import fr.sirs.plugins.synchro.concurrent.AsyncPool;
 import fr.sirs.ui.Growl;
-import fr.sirs.util.property.DocumentRoots;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -37,7 +33,6 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.apache.sis.util.ArgumentChecks;
-import org.ektorp.AttachmentInputStream;
 import org.ektorp.CouchDbConnector;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 
@@ -204,29 +199,16 @@ public class PhotoDownload extends StackPane {
     }
 
     private static void download(final CouchDbConnector connector, final AbstractPhoto photo, Path destination) throws IOException {
-        final Path tmpFile = Files.createTempFile(photo.getId(), ".img");
-        try (final AttachmentInputStream stream = AttachmentUtilities.download(connector, photo)) {
-            Files.copy(stream, tmpFile, StandardCopyOption.REPLACE_EXISTING);
-            Files.move(tmpFile, destination, StandardCopyOption.REPLACE_EXISTING);
-            final Optional<Path> root = DocumentRoots.getRoot(photo);
-            if (root.isPresent()) {
-                photo.setChemin(root.get().relativize(destination).toString());
-            } else {
-                photo.setChemin(destination.toString());
-            }
-            connector.update(photo.getCouchDBDocument());
+        AttachmentUtilities.download(connector, photo, destination);
 
-            /* Once we've downloaded the image, we'll try to delete it from database.
-             * Note : If this operation fails, we still consider operation as a
-             * success, because the image is available locally.
-             */
-            try {
-                AttachmentUtilities.delete(connector, photo);
-            } catch (Exception e) {
-                SIRS.LOGGER.log(Level.WARNING, "Cannot delete image from database", e);
-            }
-        } finally {
-            Files.deleteIfExists(tmpFile); // In case of error, we clear the unmoved temporary file.
+        /* Once we've downloaded the image, we'll try to delete it from database.
+         * Note : If this operation fails, we still consider operation as a
+         * success, because the image is available locally.
+         */
+        try {
+            AttachmentUtilities.delete(connector, photo);
+        } catch (Exception e) {
+            SIRS.LOGGER.log(Level.WARNING, "Cannot delete image from database", e);
         }
     }
 }

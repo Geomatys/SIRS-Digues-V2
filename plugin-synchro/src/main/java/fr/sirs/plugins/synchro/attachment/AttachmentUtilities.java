@@ -3,15 +3,18 @@ package fr.sirs.plugins.synchro.attachment;
 import fr.sirs.SIRS;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SIRSFileReference;
+import fr.sirs.util.property.DocumentRoots;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -122,7 +125,7 @@ public class AttachmentUtilities {
         return false;
     }
 
-    public static AttachmentInputStream download(final CouchDbConnector connector, final SIRSFileReference document) {
+    private static AttachmentInputStream download(final CouchDbConnector connector, final SIRSFileReference document) {
         final Element realDoc = document.getCouchDBDocument();
         if (realDoc == null) {
             throw new DocumentNotFoundException("No Root document for given object.");
@@ -133,7 +136,7 @@ public class AttachmentUtilities {
         return AttachmentUtilities.download(connector, new AttachmentReference(realDoc.getId(), revision, document.getId()));
     }
 
-    public static AttachmentInputStream download(final CouchDbConnector connector, final AttachmentReference ref) {
+    private static AttachmentInputStream download(final CouchDbConnector connector, final AttachmentReference ref) {
         ArgumentChecks.ensureNonNull("Attachment reference", ref);
         ArgumentChecks.ensureNonEmpty("Document id", ref.getParentId());
         ArgumentChecks.ensureNonEmpty("Attachment id", ref.getId());
@@ -146,6 +149,25 @@ public class AttachmentUtilities {
         }
 
         return stream;
+    }
+
+    public static void download(final CouchDbConnector connector, final SIRSFileReference doc, final Path destination) throws IOException {
+        final Path tmpFile = Files.createTempFile(doc.getId(), ".img");
+        try (final AttachmentInputStream stream = AttachmentUtilities.download(connector, doc)) {
+            Files.copy(stream, tmpFile, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(tmpFile, destination, StandardCopyOption.REPLACE_EXISTING);
+            final Optional<Path> root = DocumentRoots.getRoot(doc);
+            synchronized (doc.getCouchDBDocument()) {
+                if (root.isPresent()) {
+                    doc.setChemin(root.get().relativize(destination).toString());
+                } else {
+                    doc.setChemin(destination.toString());
+                }
+                connector.update(doc.getCouchDBDocument());
+            }
+        } finally {
+            Files.deleteIfExists(tmpFile); // In case of error, we clear the unmoved temporary file.
+        }
     }
 
     /**
@@ -161,7 +183,7 @@ public class AttachmentUtilities {
      * @throws IOException If an error occurs while analyzing or sending given
      * file content.
      */
-    public static String upload(final CouchDbConnector connector, final AttachmentReference ref, final Path data) throws IOException {
+    private static String upload(final CouchDbConnector connector, final AttachmentReference ref, final Path data) throws IOException {
         ArgumentChecks.ensureNonNull("Attachment reference", ref);
         ArgumentChecks.ensureNonNull("File to upload", data);
         try (final AttachmentInputStream ath = AttachmentUtilities.create(ref.getId(), data)) {
@@ -178,10 +200,15 @@ public class AttachmentUtilities {
         final Element e = data.getCouchDBDocument();
         if (e == null)
             throw new IOException("Cannot upload an attachment for a document which does not exists in database.");
-        String revision = getRevision(e)
-                .orElseThrow(() -> new IOException("Cannot find a valid revision to uplad data"));
-        revision = upload(connector, new AttachmentReference(e.getId(), revision, data.getId()), file);
-        setRevision(e, revision);
+        /* If multiple uploads are launched on the same document, there would be
+         * a revision conflict. To avoid so, we synchronize uploads by document.
+         */
+        synchronized (e) {
+            String revision = getRevision(e)
+                .orElseThrow(() -> new IOException("Cannot find a valid revision to upload data"));
+            revision = upload(connector, new AttachmentReference(e.getId(), revision, data.getId()), file);
+            setRevision(e, revision);
+        }
     }
 
     private static Optional<String> getRevision(final Object input) {
@@ -199,10 +226,25 @@ public class AttachmentUtilities {
         final Element e = ref.getCouchDBDocument();
         if (e == null)
             throw new IllegalArgumentException("Cannot delete an attachment for a document which does not exists in database.");
-
-        String revision = getRevision(e).orElseThrow(() -> new IllegalArgumentException("Cannot find a valid revision to delete attachment."));
-        revision = connector.deleteAttachment(e.getId(), revision, ref.getId());
-        setRevision(e, revision);
+        /* If multiple modifications are launched on the same document, there
+         * would be a revision conflict. To avoid so, we synchronize by document.
+         */
+        synchronized (e) {
+            String revision = getRevision(e).orElseThrow(() -> new IllegalArgumentException("Cannot find a valid revision to delete attachment."));
+            revision = connector.deleteAttachment(e.getId(), revision, ref.getId());
+            // HACK : deleting attachments from database does not update in-memory
+            // attachment map, so we have to do it manually, because if the object
+            // is used and send back to database, we'll be in trouble.
+            try {
+                final Object obj = e.getClass().getMethod("getAttachments").invoke(e);
+                if (obj instanceof Map) {
+                    ((Map)obj).remove(ref.getId());
+                }
+            } catch (ReflectiveOperationException ex) {
+                SIRS.LOGGER.log(Level.WARNING, "Cannot update attachments", ex);
+            }
+            setRevision(e, revision);
+        }
     }
 
     public static long size(final CouchDbConnector connector, final SIRSFileReference doc) {
