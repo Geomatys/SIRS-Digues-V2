@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -23,6 +23,7 @@ import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCoreRuntimeException;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.AvecPhotos;
+import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ElementCreator;
 import fr.sirs.util.odt.ODTUtils;
@@ -33,6 +34,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -172,7 +174,7 @@ public class FicheSectionRapport extends AbstractSectionRapport {
                 final int nbPhotosToPrint = nbPhotos.get();
 
                 ODTUtils.append(ctx.target, doc);
-                
+
                 if (isElement) {
                     printPhotos(ctx.target, (Element)first, nbPhotosToPrint);
                 }
@@ -201,19 +203,28 @@ public class FicheSectionRapport extends AbstractSectionRapport {
     }
 
     private static void printPhotos(final TextDocument holder, final Element source, int nbPhotosToPrint) {
-        if (nbPhotosToPrint > 0 && source instanceof AvecPhotos) {
-            final List<? extends AbstractPhoto> photos = ((AvecPhotos<? extends AbstractPhoto>) source).getPhotos();
-            photos.sort(new PhotoComparator());
-
-            AbstractPhoto photo;
-            for (int i = 0; i < nbPhotosToPrint && i < photos.size(); i++) {
-                photo = photos.get(i);
-                try {
-                    ODTUtils.appendImage(holder, null, photo, false);
-                } catch (IllegalArgumentException e) {
-                    holder.addParagraph("Impossible de retrouver l'image ".concat(photo.getChemin()));
-                }
+        if (nbPhotosToPrint > 0) {
+            final Stream<? extends AbstractPhoto> photos;
+            if (source instanceof AvecPhotos) {
+                photos = ((AvecPhotos<? extends AbstractPhoto>) source).getPhotos().stream()
+                        ;
+            } else if (source instanceof Desordre) {
+                photos = ((Desordre) source).observations.stream()
+                        .flatMap(obs -> obs.getPhotos() == null? Stream.empty() : obs.getPhotos().stream());
+            } else {
+                return;
             }
+
+            photos
+                    .sorted(new PhotoComparator())
+                    .limit(nbPhotosToPrint)
+                    .forEachOrdered(photo -> {
+                        try {
+                            ODTUtils.appendImage(holder, null, photo, false);
+                        } catch (IllegalArgumentException e) {
+                            holder.addParagraph("Impossible de retrouver l'image ".concat(photo.getChemin()));
+                        }
+                    });
         }
     }
 
