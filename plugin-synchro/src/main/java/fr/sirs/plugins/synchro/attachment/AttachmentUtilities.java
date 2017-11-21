@@ -11,19 +11,24 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.stream.Stream;
+import javafx.concurrent.Task;
 import javax.activation.MimetypesFileTypeMap;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.AttachmentInputStream;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
 import static org.ektorp.util.Documents.setRevision;
+import org.geotoolkit.gui.javafx.util.TaskManager;
 
 /**
  *
@@ -260,5 +265,29 @@ public class AttachmentUtilities {
                 SIRS.LOGGER.log(Level.WARNING, "A resource cannot be closed properly.", ex);
             }
         }
+    }
+
+    public static Task<Map.Entry<Long, Long>> estimateSize(final CouchDbConnector connector, final Stream<? extends SIRSFileReference> attachments) {
+        return new TaskManager.MockTask("Estimation...", () -> {
+            final Thread th = Thread.currentThread();
+            try {
+                final AtomicLong count = new AtomicLong();
+                final long size = attachments
+                        .peek(ath -> {
+                            if (th.isInterrupted())
+                                throw new RuntimeException(new InterruptedException());
+                        })
+                        .peek(ath -> count.incrementAndGet())
+                        .mapToLong(ath -> AttachmentUtilities.size(connector, ath))
+                        .sum();
+                return new AbstractMap.SimpleEntry<>(count.get(), size);
+            } catch (RuntimeException e) {
+                if (e.getCause() instanceof InterruptedException) {
+                    throw (InterruptedException) e.getCause();
+                } else {
+                    throw e;
+                }
+            }
+        });
     }
 }

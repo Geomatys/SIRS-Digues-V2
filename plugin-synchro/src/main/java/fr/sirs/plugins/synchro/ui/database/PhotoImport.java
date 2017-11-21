@@ -51,6 +51,8 @@ public class PhotoImport extends VBox {
 
         final PhotoDownload downloadPane = new PhotoDownload(executor, session, destBuilder);
 
-        getChildren().addAll(photoDestination, prefixPane, downloadPane);
+        final PhotoPurge photoPurge = new PhotoPurge(executor, session);
+
+        getChildren().addAll(photoDestination, prefixPane, downloadPane, photoPurge);
     }
 }
