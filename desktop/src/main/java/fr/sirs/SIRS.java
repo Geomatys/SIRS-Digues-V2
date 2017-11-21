@@ -161,7 +161,7 @@ public final class SIRS extends SirsCore {
      * as possible.
      */
     private static final Cache<String, Image> IMAGE_CACHE = new Cache<>(16, 0, false);
-    
+
     public static final Predicate<Element> CONSULTATION_PREDICATE = e -> false;
     public static final Predicate<Element> EDITION_PREDICATE = e -> true;
 
@@ -266,7 +266,7 @@ public final class SIRS extends SirsCore {
             return observableList(repo.get(sourceList));
         }
     }
-    
+
 
     /**
      * Tente de trouver un éditeur d'élément compatible avec l'objet passé en paramètre.
@@ -574,9 +574,13 @@ public final class SIRS extends SirsCore {
      */
     public static Image getOrLoadImage(final String uri) {
         try {
-            return IMAGE_CACHE.getOrCreate(uri, () ->
-                    new Image(uri, 512, 512, true, false, false)
-            );
+            return IMAGE_CACHE.getOrCreate(uri, () -> {
+                final Image img = new Image(uri, 512, 512, true, false, false);
+                if (img.isError()) {
+                    return null;
+                }
+                return img;
+            });
         } catch (RuntimeException ex) {
             throw ex;
         } catch (Exception e) {

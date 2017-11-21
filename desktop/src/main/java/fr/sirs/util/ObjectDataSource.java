@@ -91,8 +91,15 @@ public class ObjectDataSource<T> implements JRDataSource {
         try {
             if (isPhoto && Image.class.isAssignableFrom(jrf.getValueClass())) {
                 final Path docPath = SirsCore.getDocumentAbsolutePath((SIRSFileReference)currentObject);
+                final javafx.scene.image.Image img;
                 if (Files.isReadable(docPath)) {
-                    return SwingFXUtils.fromFXImage(SIRS.getOrLoadImage(docPath.toUri().toString()), null);
+                    img = SIRS.getOrLoadImage(docPath.toUri().toString());
+                } else {
+                    img = null;
+                }
+
+                if (img != null) {
+                    return SwingFXUtils.fromFXImage(img, null);
                 } else {
                     return javax.imageio.ImageIO.read(ObjectDataSource.class.getResource("/fr/sirs/images/imgNotFound.png"));
                 }
