@@ -73,9 +73,10 @@ public abstract class AbstractPositionableRepository<T extends Positionable> ext
         try {
             final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(target);
             if (posInfo.getTroncon() != null) {
-                posInfo.getGeometry();
-                // Try computing PRs on default SR
-                TronconUtils.computePRs(posInfo, InjectorCore.getBean(SessionCore.class));
+                if (posInfo.getGeometry() != null) {
+                    // Try computing PRs on default SR
+                    TronconUtils.computePRs(posInfo, InjectorCore.getBean(SessionCore.class));
+                }
             }
         } catch (Exception e) {
             SirsCore.LOGGER.log(Level.WARNING, "Cannot update geometry for newly loaded positionable object.", e);
