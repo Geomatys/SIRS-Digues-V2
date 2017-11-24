@@ -43,7 +43,6 @@ import java.net.ProxySelector;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -470,15 +469,21 @@ public class DatabaseRegistry {
         // because a connection should have been opened already to retrieve SIRS information.
         distant = addAuthenticationInformation(distant);
 
-        final ReplicationStatus[] result = new ReplicationStatus[2];
+        final List<ReplicationStatus> result = new ArrayList<>(2);
         try {
-            result[0] = copyDatabase(distant, local, continuous);
+            final ReplicationStatus status = copyDatabase(distant, local, continuous);
+            if (status != null) {
+                result.add(status);
+            }
         } catch (DbAccessException e) {
             checkReplicationError(e, distant, local);
         }
 
         try {
-            result[1] = copyDatabase(local, distant, continuous);
+            final ReplicationStatus status = copyDatabase(local, distant, continuous);
+            if (status != null) {
+                result.add(status);
+            }
         } catch (DbAccessException e) {
             checkReplicationError(e, local, distant);
         }
@@ -488,7 +493,7 @@ public class DatabaseRegistry {
             new SirsDBInfoRepository(localConnector).setRemoteDatabase(distantNoAuth);
         }
 
-        return Arrays.asList(result);
+        return Collections.unmodifiableList(result);
     }
 
     /**
@@ -563,7 +568,8 @@ public class DatabaseRegistry {
      * @param dbToCopy Database to copy. Only its name if it's in current service, complete URL otherwise.
      * @param dbToPasteInto Database to paste content into. Only its name if it's in current service, complete URL otherwise.
      * @param continuous If true, target database will continuously retrieve changes happening in source database. If not, it's one shot copy.
-     * @return A status of started replication task.
+     * @return A status of started replication task. Can be null if we failed
+     * getting it from the server, but the replication looks like it's going fine.
      * @throws java.io.IOException If an error occurs while connecting to the databases.
      */
     public ReplicationStatus copyDatabase(String dbToCopy, String dbToPasteInto, final boolean continuous) throws IOException {
@@ -686,6 +692,10 @@ public class DatabaseRegistry {
                 status = couchDbInstance.replicate(cmd);
             } catch (DbAccessException e) {
                 checkReplicationError(e, dbToCopy, dbToPasteInto);
+                // If the error has not been thrown back, it means it was not
+                // related to a replication execution. It can be an exception
+                // related to status parsing failing, for example.
+                SirsCore.LOGGER.log(Level.WARNING, "An error happened while submitting replication", e);
             }
         }
 
