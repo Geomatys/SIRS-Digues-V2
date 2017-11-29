@@ -4,6 +4,7 @@ import fr.sirs.SIRS;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.SIRSFileReference;
 import fr.sirs.util.property.DocumentRoots;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -17,18 +18,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 import javafx.concurrent.Task;
 import javax.activation.MimetypesFileTypeMap;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
 import org.apache.sis.util.ArgumentChecks;
 import org.ektorp.AttachmentInputStream;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
 import static org.ektorp.util.Documents.setRevision;
 import org.geotoolkit.gui.javafx.util.TaskManager;
+import org.geotoolkit.image.io.XImageIO;
 
 /**
  *
@@ -160,7 +166,7 @@ public class AttachmentUtilities {
         final Path tmpFile = Files.createTempFile(doc.getId(), ".img");
         try (final AttachmentInputStream stream = AttachmentUtilities.download(connector, doc)) {
             Files.copy(stream, tmpFile, StandardCopyOption.REPLACE_EXISTING);
-            Files.move(tmpFile, destination, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(tmpFile, destination);
             final Optional<Path> root = DocumentRoots.getRoot(doc);
             synchronized (doc.getCouchDBDocument()) {
                 if (root.isPresent()) {
@@ -191,12 +197,26 @@ public class AttachmentUtilities {
     private static String upload(final CouchDbConnector connector, final AttachmentReference ref, final Path data) throws IOException {
         ArgumentChecks.ensureNonNull("Attachment reference", ref);
         ArgumentChecks.ensureNonNull("File to upload", data);
-        try (final AttachmentInputStream ath = AttachmentUtilities.create(ref.getId(), data)) {
+
+        final long fileSize = Files.size(data);
+        Path tmpFile = null;boolean useTmpFile = false;
+        if (fileSize > 1e6) {
+            tmpFile = data.getParent().resolve("subsample"+UUID.randomUUID().toString()+".jpg");
+            // HACK : There's a problem with PouchDB (js db for mobile devices):
+            // it does not support attachments superior to 1MB. So, as a
+            // workaround, we try to compress all images over this size before
+            // sending them.
+            useTmpFile = subsample(data, tmpFile);
+        }
+
+        try (final AttachmentInputStream ath = AttachmentUtilities.create(ref.getId(), useTmpFile? tmpFile : data)) {
             if (ref.getRevision() == null || ref.getRevision().isEmpty()) {
                 return connector.createAttachment(ref.getParentId(), ath);
             } else {
                 return connector.createAttachment(ref.getParentId(), ref.getRevision(), ath);
             }
+        } finally {
+            Files.deleteIfExists(tmpFile);
         }
     }
 
@@ -289,5 +309,27 @@ public class AttachmentUtilities {
                 }
             }
         });
+    }
+
+    private static boolean subsample(final Path source, final Path destination) {
+        try {
+            final ImageReader reader = XImageIO.getReader(source, false, true);
+            int subsample = 1;
+            final int sourceWidth = reader.getWidth(0);
+            final int sourceHeight = reader.getHeight(0);
+            if (sourceWidth > 1024 || sourceHeight > 1024) {
+                final int subsampleX = (sourceWidth + 1023) / 1024;
+                final int subsampleY = (sourceHeight + 1023) / 1024;
+                subsample = Math.max(subsampleX, subsampleY);
+            }
+            final ImageReadParam readParam = new ImageReadParam();
+            readParam.setSourceSubsampling(subsample, subsample, 0, 0);
+            final BufferedImage img = reader.read(0, readParam);
+            return ImageIO.write(img, "JPEG", destination.toFile());
+        } catch (Exception e) {
+            SIRS.LOGGER.log(Level.WARNING, "Cannot subsample image", e);
+        }
+
+        return false;
     }
 }
