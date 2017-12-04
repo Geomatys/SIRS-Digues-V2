@@ -42,6 +42,8 @@ import org.geotoolkit.image.io.XImageIO;
  */
 public class AttachmentUtilities {
 
+    private static final double MAX_IMAGE_SIZE = 1e6;
+
     private static final List<Function<Path, String>> MIME_STRATEGIES = Arrays.asList(
             AttachmentUtilities::cTypeFromNio,
             AttachmentUtilities::cTypeFromURL,
@@ -200,13 +202,22 @@ public class AttachmentUtilities {
 
         final long fileSize = Files.size(data);
         Path tmpFile = null;boolean useTmpFile = false;
-        if (fileSize > 1e6) {
-            tmpFile = data.getParent().resolve("subsample"+UUID.randomUUID().toString()+".jpg");
-            // HACK : There's a problem with PouchDB (js db for mobile devices):
-            // it does not support attachments superior to 1MB. So, as a
-            // workaround, we try to compress all images over this size before
-            // sending them.
-            useTmpFile = subsample(data, tmpFile);
+        int limitSize = 4096;
+        // HACK : There's a problem with PouchDB (js db for mobile devices):
+        // it does not support attachments superior to 1MB. So, as a
+        // workaround, we try to compress all images over this size before
+        // sending them.
+        if (fileSize > MAX_IMAGE_SIZE) {
+            final String outputName = "subsample"+UUID.randomUUID().toString();
+            int retry = 0;
+            // Make it progressively. We subsample our image until it reach
+            // expected size.
+            do {
+                limitSize /= 2;
+                final Optional<Path> subsampled = subsample(data, outputName, limitSize);
+                useTmpFile = subsampled.isPresent();
+                tmpFile = subsampled.orElse(null);
+            } while (++retry < 3 && useTmpFile && Files.size(tmpFile) > MAX_IMAGE_SIZE);
         }
 
         try (final AttachmentInputStream ath = AttachmentUtilities.create(ref.getId(), useTmpFile? tmpFile : data)) {
@@ -216,7 +227,9 @@ public class AttachmentUtilities {
                 return connector.createAttachment(ref.getParentId(), ref.getRevision(), ath);
             }
         } finally {
-            Files.deleteIfExists(tmpFile);
+            if (tmpFile != null) {
+                Files.deleteIfExists(tmpFile);
+            }
         }
     }
 
@@ -311,25 +324,54 @@ public class AttachmentUtilities {
         });
     }
 
-    private static boolean subsample(final Path source, final Path destination) {
+    /**
+     * Subsample input image to ensure its dimension are less than given size.
+     * This method will keep aspect ratio. Note that we'll try to write jpeg
+     * image if no alpha canal is detected. Otherwise, png format is selected.
+     * Also, given limit size won't be perfectly fit. We'll determine a subsample
+     * parameter allowing to reduce image size under given limit size.
+     * 
+     * @param source The source image to subsample.
+     * @param outName Name of the output image, without extension.
+     * @param limitSize The maximum width or height autorized.
+     * @return If we were able to write the image, path to the subsampled image
+     * file. Otherwise, an empty optional. Write failure can be caused by
+     * missing image driver (currently,  png or jpeg used), or if an error
+     * happens while writing.
+     */
+    private static Optional<Path> subsample(final Path source, final String outName, final int limitSize) {
         try {
             final ImageReader reader = XImageIO.getReader(source, false, true);
             int subsample = 1;
             final int sourceWidth = reader.getWidth(0);
             final int sourceHeight = reader.getHeight(0);
-            if (sourceWidth > 1024 || sourceHeight > 1024) {
-                final int subsampleX = (sourceWidth + 1023) / 1024;
-                final int subsampleY = (sourceHeight + 1023) / 1024;
+            if (sourceWidth > limitSize || sourceHeight > limitSize) {
+                final int subsampleX = (sourceWidth + limitSize - 1) / limitSize;
+                final int subsampleY = (sourceHeight + limitSize -1) / limitSize;
                 subsample = Math.max(subsampleX, subsampleY);
             }
             final ImageReadParam readParam = new ImageReadParam();
             readParam.setSourceSubsampling(subsample, subsample, 0, 0);
             final BufferedImage img = reader.read(0, readParam);
-            return ImageIO.write(img, "JPEG", destination.toFile());
+            final String outFormat;
+            final Path destination;
+            if (img.getColorModel().hasAlpha()) {
+                outFormat = "PNG";
+                destination = source.getParent().resolve(outName+".png");
+            } else {
+                outFormat = "JPEG";
+                destination = source.getParent().resolve(outName+".jpg");
+            }
+            final boolean isPresent = ImageIO.write(img, outFormat, destination.toFile());
+            if (isPresent) {
+                return Optional.of(destination);
+            } else {
+                return Optional.empty();
+            }
         } catch (Exception e) {
             SIRS.LOGGER.log(Level.WARNING, "Cannot subsample image", e);
         }
 
-        return false;
+        return Optional.empty();
     }
 }
