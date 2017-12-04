@@ -19,7 +19,9 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
@@ -125,7 +127,28 @@ public class PhotoPurge extends StackPane {
 
         uiCancel.setOnAction(evt -> delete.cancel(true));
 
+        delete.setOnSucceeded(evt -> Platform.runLater(this::askForCompaction));
+
         TaskManager.INSTANCE.submit(delete);
+    }
+
+    /**
+     * Displays an alert to the user to query for a database compaction (see {@link CouchDbConnector#compact()
+     * }.). If user confirms, we launch a compaction asynchronously.
+     */
+    private void askForCompaction() {
+        final Alert ask = new Alert(Alert.AlertType.CONFIRMATION,
+                "Les photographies ont été supprimées de la base de données. "
+                + "Voulez-vous compacter cette dernière ?"
+                + System.lineSeparator()
+                + "Note : Cette opération supprimera d'éventuels relicats de documents "
+                + "supprimés de la base de données, afin d'en optimiser le stockage.",
+                ButtonType.YES, ButtonType.NO);
+        ask.setResizable(true);
+        final ButtonType choice = ask.showAndWait().orElse(ButtonType.NO);
+        if (ButtonType.YES.equals(choice)) {
+            TaskManager.INSTANCE.submit("Nettoyage de la base de données", () -> session.getConnector().compact());
+        }
     }
 
     private void handleResult(final LongProperty count, final Throwable error) {
