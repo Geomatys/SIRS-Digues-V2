@@ -11,7 +11,9 @@ import fr.sirs.core.model.Observation;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.beans.property.ObjectProperty;
@@ -32,6 +34,8 @@ public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
     final Session session;
     Collection<String> tronconIds;
     LocalDate docDateFilter;
+
+    UnaryOperator<Stream<AbstractPhoto>> preProcessor;
 
     public PhotoFinder(Session session) {
         ArgumentChecks.ensureNonNull("Session", session);
@@ -56,10 +60,18 @@ public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
         return this;
     }
 
+    public UnaryOperator<Stream<AbstractPhoto>> getPreProcessor() {
+        return preProcessor;
+    }
+
+    public PhotoFinder setPreProcessor(UnaryOperator<Stream<AbstractPhoto>> preProcessor) {
+        this.preProcessor = preProcessor;
+        return this;
+    }
+
     @Override
     public Stream<AbstractPhoto> get() {
-        return getPhotoContainers()
-                .flatMap(this::filter);
+        return filter(getPhotoContainers());
     }
 
     private Stream<AvecPhotos> getPhotoContainers() {
@@ -89,33 +101,19 @@ public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
                 .flatMap(id -> repo.getByLinearId(id).stream());
     }
 
-    private Stream<AbstractPhoto> filter(final AvecPhotos<AbstractPhoto> container) {
-        Stream<AvecPhotos<AbstractPhoto>> source = Stream.of(container);
+    private Stream<AbstractPhoto> filter(Stream<AvecPhotos> containers) {
         if (docDateFilter != null) {
-            source = source
+            containers = containers
                     .filter(AvecBornesTemporelles.class::isInstance)
                     .filter(obj -> DocumentUtilities.intersectsDate((AvecBornesTemporelles) obj, docDateFilter));
         }
 
-        return source.flatMap(ap -> ap.getPhotos().stream());
-//        if (photoDateFilter != null) {
-//            final LocalDate searched = photoDateFilter;
-//            photos = photos.filter(photo -> photo.getDate() != null && searched.isEqual(photo.getDate()));
-//        }
-//        if (locallyAvailable) {
-//            photos = photos.filter(DocumentUtilities::isFileAvailable);
-//        }
-//        if (databaseAvailable) {
-//            final CouchDbConnector connector = session.getConnector();
-//            photos = photos.filter(photo -> AttachmentUtilities.isAvailable(connector, photo));
-//        }
-//
-//        photos = photos.sorted(new DocumentExportPane.PhotoDateComparator());
-//
-//        if (limitByDoc < 0)
-//            return photos;
-//
-//        return photos.limit(limitByDoc);
+        Function<AvecPhotos, Stream<AbstractPhoto>> photoExtractor = ap -> ap.getPhotos().stream();
+        if (preProcessor != null) {
+            photoExtractor = photoExtractor.andThen(preProcessor);
+        }
+
+        return containers.flatMap(photoExtractor);
     }
 
     /**
