@@ -27,10 +27,13 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.ui.Growl;
+import fr.sirs.util.SirsStringConverter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -190,24 +193,30 @@ public abstract class TronconChoicePrintPane extends BorderPane {
         if(prCache.get(troncon.getId())==null) prCache.put(troncon.getId(), new ObjectProperty[2]);
 
         // Si le PR de l'extrémité voulue du tronçon n'a pas encore été calculé.
-        if(prCache.get(troncon.getId())[index]==null){
+        if (prCache.get(troncon.getId())[index]==null) {
             prProperty = new SimpleObjectProperty<>();
-            final SystemeReperage sr = Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(troncon.getSystemeRepDefautId());
-            final LinearReferencing.SegmentInfo[] tronconSegments = LinearReferencingUtilities.buildSegments(LinearReferencing.asLineString(troncon.getGeometry()));
+            try {
+                final SystemeReperage sr = Injector.getSession().getRepositoryForClass(SystemeReperage.class).get(troncon.getSystemeRepDefautId());
+                final LinearReferencing.SegmentInfo[] tronconSegments = LinearReferencingUtilities.buildSegments(LinearReferencing.asLineString(troncon.getGeometry()));
 
-            final Point point;
-            switch(extremite){
-                case FIN:
-                    final LinearReferencing.SegmentInfo lastSegment = tronconSegments[tronconSegments.length-1];
-                    point = GO2Utilities.JTS_FACTORY.createPoint(lastSegment.getPoint(lastSegment.length, 0));
-                    break;
-                case DEBUT:
-                default:
-                    point = GO2Utilities.JTS_FACTORY.createPoint(tronconSegments[0].getPoint(0, 0));
-                    break;
+                final Point point;
+                switch (extremite) {
+                    case FIN:
+                        final LinearReferencing.SegmentInfo lastSegment = tronconSegments[tronconSegments.length - 1];
+                        point = GO2Utilities.JTS_FACTORY.createPoint(lastSegment.getPoint(lastSegment.length, 0));
+                        break;
+                    case DEBUT:
+                    default:
+                        point = GO2Utilities.JTS_FACTORY.createPoint(tronconSegments[0].getPoint(0, 0));
+                        break;
+                }
+                prProperty.set(TronconUtils.computePR(tronconSegments, sr, point, Injector.getSession().getRepositoryForClass(BorneDigue.class)));
+                prCache.get(troncon.getId())[index] = prProperty;
+            } catch (Exception e) {
+                SIRS.LOGGER.log(Level.WARNING, "Cannot compute PR for linear " + troncon.getId(), e);// SYM-1700
+                final String tronconTitle = new SirsStringConverter().toString(troncon);
+                new Growl(Growl.Type.WARNING, "Impossible de calculer les PRs du tronçon "+tronconTitle+". Veuillez vérifier les informations de référencement linéaire.").showAndFade();
             }
-            prProperty.set(TronconUtils.computePR(tronconSegments, sr, point, Injector.getSession().getRepositoryForClass(BorneDigue.class)));
-            prCache.get(troncon.getId())[index] = prProperty;
         }
         else {
             prProperty = prCache.get(troncon.getId())[index];
