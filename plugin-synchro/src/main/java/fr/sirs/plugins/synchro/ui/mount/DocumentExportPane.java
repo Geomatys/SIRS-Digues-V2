@@ -585,7 +585,7 @@ public class DocumentExportPane extends StackPane {
             } else if (o2 == null || o2.getDate() == null) {
                 return -1;
             } else {
-                return o1.getDate().compareTo(o2.getDate());
+                return -o1.getDate().compareTo(o2.getDate());
             }
         }
     }
