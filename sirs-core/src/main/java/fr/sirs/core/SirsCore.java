@@ -83,6 +83,7 @@ import org.apache.sis.io.wkt.WKTFormat;
 import org.apache.sis.measure.Units;
 import org.apache.sis.referencing.CRS;
 import org.apache.sis.util.ArgumentChecks;
+import org.apache.sis.util.Version;
 
 import org.apache.sis.util.logging.Logging;
 import org.geotoolkit.internal.GeotkFX;
@@ -524,18 +525,28 @@ public class SirsCore {
      */
     public static Task<UpdateInfo> checkUpdate() {
         return TaskManager.INSTANCE.submit("Vérification des mises à jour", () -> {
-            String localVersion = getVersion();
+            final String localVersion = getVersion();
             if (localVersion == null || localVersion.isEmpty())
                 throw new IllegalStateException("La version locale de l'application est illisible !");
             final String updateAddr = SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.UPDATE_CORE_URL);
             try {
                 final URL updateURL = new URL(updateAddr);
-                Map config = new ObjectMapper().readValue(updateURL, Map.class);
+                final Map config = new ObjectMapper().readValue(updateURL, Map.class);
                 final Object distantVersion = config.get("version");
-                if (distantVersion instanceof String && localVersion.compareTo((String) distantVersion) < 0) {
-                    final Object packageUrl = config.get("url");
-                    if (packageUrl instanceof String) {
-                        return new UpdateInfo(localVersion, (String) distantVersion, new URL((String) packageUrl));
+                if (distantVersion instanceof String) {
+                    boolean updateAvailable = false;
+                    try {
+                        final Version currentVersion = new Version(localVersion);
+                        final Version availableVersion = new Version((String) distantVersion);
+                        updateAvailable = availableVersion.compareTo(currentVersion) > 0;
+                    } catch (Exception e) {
+                        LOGGER.log(Level.WARNING, "Cannot determine if an update is available. Bad version syntax ?", e);
+                    }
+                    if (updateAvailable) {
+                        final Object packageUrl = config.get("url");
+                        if (packageUrl instanceof String) {
+                            return new UpdateInfo(localVersion, (String) distantVersion, new URL((String) packageUrl));
+                        }
                     }
                 }
             } catch (IOException e) {
