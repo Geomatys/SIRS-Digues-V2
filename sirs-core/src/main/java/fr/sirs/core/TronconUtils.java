@@ -239,6 +239,33 @@ public class TronconUtils {
 
         final Consumer<AvecBornesTemporelles> setArchiveDate = dated -> dated.setDate_fin(archiveDate);
 
+        
+        final List<TronconDigue> allTroncons = session.getRepositoryForClass(TronconDigue.class).getAll();
+        
+        final Consumer<BorneDigue> archiveBorne = new Consumer<BorneDigue>() {
+            @Override
+            public void accept(BorneDigue borne) {
+                boolean referencedByUnarchivedSection = false;
+                
+                sectionLoop:
+                for(final TronconDigue section : allTroncons){
+                    // We search an unarchived section referencing the current milestone
+                    if(section.getDate_fin()==null || section.getDate_fin().isAfter(archiveDate)){
+                        for(final String borneId : section.getBorneIds()){
+                            if(borneId.equals(borne.getId())){
+                                referencedByUnarchivedSection = true;
+                                break sectionLoop;
+                            }
+                        }
+                    }
+                }
+                
+                if(!referencedByUnarchivedSection){
+                    setArchiveDate.accept(borne);
+                }
+            }
+        };
+        
         /* To avoid memory nor processing overload, we manually process and update
          * objects by type. Another approach would be to use getPositionableList
          * to get all objects to update, but it put all of them in memory, and the
@@ -268,7 +295,7 @@ public class TronconUtils {
         // big performance loss, for a case which is possible but has never been encountered yet.
         final List<BorneDigue> bornes = borneRepo.get(section.getBorneIds()).stream()
                 .filter(updateCondition)
-                .peek(setArchiveDate)
+                .peek(archiveBorne)
                 .collect(Collectors.toList());
         updateResponses.addAll(borneRepo.executeBulk(bornes));
 
