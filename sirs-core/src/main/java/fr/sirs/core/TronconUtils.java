@@ -242,6 +242,7 @@ public class TronconUtils {
         
         final List<TronconDigue> allTroncons = session.getRepositoryForClass(TronconDigue.class).getAll();
         
+        // [SYM-1692] requires explicitly the milestones only linked to an archived section to be archived too.
         final Consumer<BorneDigue> archiveBorne = new Consumer<BorneDigue>() {
             @Override
             public void accept(BorneDigue borne) {
@@ -293,6 +294,7 @@ public class TronconUtils {
         final AbstractSIRSRepository<BorneDigue> borneRepo = session.getRepositoryForClass(BorneDigue.class);
         // TODO : check if bornes are used by another linear ? Doing it would cause a
         // big performance loss, for a case which is possible but has never been encountered yet.
+        // Maj : Explicitly required by SYM-1692 and implemented.
         final List<BorneDigue> bornes = borneRepo.get(section.getBorneIds()).stream()
                 .filter(updateCondition)
                 .peek(archiveBorne)
