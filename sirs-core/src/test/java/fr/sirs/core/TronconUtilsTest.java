@@ -300,6 +300,16 @@ public class TronconUtilsTest extends CouchDBTestCase {
     @Test
     @DependsOnMethod("dataIntegrityTest")
     public void archive() {
+        
+        // Initial state : check all the archive dates to be null.
+        assertNull("End date of \"TronconDigue\" differs from queried one", troncon.getDate_fin());
+        assertNull("End date of \"Crete\" differs from queried one", crete.getDate_fin());
+        final List<BorneDigue> bornes = session.getRepositoryForClass(BorneDigue.class).get(troncon.getBorneIds());
+        Assume.assumeFalse("No borne to test archive operation on.", bornes.isEmpty());
+        for (final BorneDigue b : bornes) {
+            assertNull("End date of \"Borne\" differs from queried one", b.getDate_fin());
+        }
+        
         // First, we test that we can archive objects with no end date.
         final LocalDate now = LocalDate.now();
         List<DocumentOperationResult> errors = TronconUtils.archiveSectionWithTemporalObjects(troncon, session, now, false);
@@ -318,7 +328,6 @@ public class TronconUtilsTest extends CouchDBTestCase {
         assertNull("End date of updated \"TronconDigue\" differs from queried one", troncon.getDate_fin());
         assertNull("End date of updated \"Crete\" differs from queried one", crete.getDate_fin());
 
-        final List<BorneDigue> bornes = session.getRepositoryForClass(BorneDigue.class).get(troncon.getBorneIds());
         Assume.assumeFalse("No borne to test archive operation on.", bornes.isEmpty());
         for (final BorneDigue b : bornes) {
             assertNull("End date of updated \"Borne\" differs from queried one", b.getDate_fin());

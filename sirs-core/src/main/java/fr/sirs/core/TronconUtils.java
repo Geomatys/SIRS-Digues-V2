@@ -242,30 +242,6 @@ public class TronconUtils {
         
         final List<TronconDigue> allTroncons = session.getRepositoryForClass(TronconDigue.class).getAll();
         
-        // [SYM-1692] requires explicitly the milestones only linked to an archived section to be archived too.
-        final Consumer<BorneDigue> archiveBorne = new Consumer<BorneDigue>() {
-            @Override
-            public void accept(BorneDigue borne) {
-                boolean referencedByUnarchivedSection = false;
-                
-                sectionLoop:
-                for(final TronconDigue section : allTroncons){
-                    // We search an unarchived section referencing the current milestone
-                    if(section.getDate_fin()==null || section.getDate_fin().isAfter(archiveDate)){
-                        for(final String borneId : section.getBorneIds()){
-                            if(borneId.equals(borne.getId())){
-                                referencedByUnarchivedSection = true;
-                                break sectionLoop;
-                            }
-                        }
-                    }
-                }
-                
-                if(!referencedByUnarchivedSection){
-                    setArchiveDate.accept(borne);
-                }
-            }
-        };
         
         /* To avoid memory nor processing overload, we manually process and update
          * objects by type. Another approach would be to use getPositionableList
@@ -291,13 +267,50 @@ public class TronconUtils {
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
 
+        
+        /*
+        Predicate over milestones must always return true when unarchiving, 
+        because the rule is to archive the milestone if and only if all the 
+        sections which it is referenced by are themselves archived.
+        An archive date 'null' means a section is currently being unarchived and 
+        so, the referenced milestones MUST all be unarchived.
+        */
+        final Predicate<BorneDigue> unarchive = (BorneDigue t) -> archiveDate==null;
+        
+        // [SYM-1692] requires explicitly the milestones only linked to an archived section to be archived too.
+        // Prédicate over milestones to filter referenced ones by unarchived sections.
+        final Predicate<BorneDigue> referencedByUnarchivedSection = new Predicate<BorneDigue>(){
+            @Override
+            public boolean test(BorneDigue borne) {
+                /*
+                A milestone must be archived if and only if there is 
+                no more unarchived section referencing it.
+                
+                This predicate checks the current milestone is referenced by an 
+                unarchived section.
+                */
+                for(final TronconDigue section : allTroncons){
+                    // We search an unarchived section referencing the current milestone
+                    if(section.getDate_fin()==null || section.getDate_fin().isAfter(archiveDate)){
+                        for(final String borneId : section.getBorneIds()){
+                            if(borneId.equals(borne.getId())){
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+        };
+        
         final AbstractSIRSRepository<BorneDigue> borneRepo = session.getRepositoryForClass(BorneDigue.class);
         // TODO : check if bornes are used by another linear ? Doing it would cause a
         // big performance loss, for a case which is possible but has never been encountered yet.
         // Maj : Explicitly required by SYM-1692 and implemented.
         final List<BorneDigue> bornes = borneRepo.get(section.getBorneIds()).stream()
                 .filter(updateCondition)
-                .peek(archiveBorne)
+                .filter(unarchive.or(referencedByUnarchivedSection.negate()))
+                .peek(setArchiveDate)
                 .collect(Collectors.toList());
         updateResponses.addAll(borneRepo.executeBulk(bornes));
 
