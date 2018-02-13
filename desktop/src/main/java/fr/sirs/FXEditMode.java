@@ -98,8 +98,13 @@ public class FXEditMode extends VBox {
 
         editionProhibited = initEditionProhibition();
         editionProhibited.addListener(obs -> {
-            if (editionProhibited.get())
+            if (editionProhibited.get()){
                 uiEdit.setSelected(false);
+            }
+            // Specific case for edition control of invalid elemenents (SYM-1705).
+            else if(!validProperty.get()){
+                uiEdit.setSelected(true);
+            }
         });
         uiEdit.disableProperty().bind(editionProhibited);
         final BooleanBinding editBind = uiEdit.selectedProperty().not();
@@ -114,6 +119,9 @@ public class FXEditMode extends VBox {
                 group.selectToggle(uiConsult);
             else if (newValue==null)
                 group.selectToggle(oldValue);
+            // Specific case for edition control of invalid elemenents (SYM-1705).
+            else if (!validProperty.get())
+                group.selectToggle(uiEdit);
             });
     }
 
@@ -132,7 +140,8 @@ public class FXEditMode extends VBox {
      * @return  Le binding de contrôle du bouton d'édition.
      */
     protected BooleanBinding initEditionProhibition() {
-        return session.needValidationProperty().and(validProperty.or(
+        return session.needValidationProperty().and(
+                validProperty.or(
                 authorIDProperty.isNotEqualTo(session.getUtilisateur().getId())));
     }
 
