@@ -21,6 +21,8 @@ package fr.sirs.util;
 import fr.sirs.FXEditMode;
 import fr.sirs.Injector;
 import fr.sirs.core.model.Role;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.binding.BooleanBinding;
 
 /**
@@ -47,5 +49,18 @@ public class SimpleFXEditMode extends FXEditMode {
     @Override
     protected BooleanBinding initEditionProhibition(){
         return Injector.getSession().roleBinding().isEqualTo(Role.GUEST);
+    }
+    
+    /**
+     * Dans le cas des panneaux de thèmes, on bloque l'édition dès que la
+     * propriété d'interdiction d'édition s'invalide.
+     * 
+     * @return 
+     */
+    @Override
+    protected InvalidationListener editionListener(){
+        return (Observable observable) -> {
+                setToConsult();
+            };
     }
 }
