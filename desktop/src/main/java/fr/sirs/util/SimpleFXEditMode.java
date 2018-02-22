@@ -46,6 +46,6 @@ public class SimpleFXEditMode extends FXEditMode {
      */
     @Override
     protected BooleanBinding initEditionProhibition(){
-        return Injector.getSession().roleProperty().isEqualTo(Role.GUEST);
+        return Injector.getSession().roleBinding().isEqualTo(Role.GUEST);
     }
 }
