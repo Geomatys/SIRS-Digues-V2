@@ -53,11 +53,16 @@ public class ModeleElementTable extends PojoTable {
         ficheModeVisibleProperty().set(false);
         filterVisibleProperty().set(false);
 
+        /*
+        On autorise l'ajout uniquement pour les roles "administrateur, "utilisateur"
+        et "externe" (pas pour les invités).
+        On désactive donc les boutons d'ajout si l'utilisateur courant n'est pas dans un de ces rôles.
+        */
         uiAdd.disableProperty().unbind();
-        uiAdd.setDisable(false);
+        uiAdd.disableProperty().bind(Injector.getSession().adminOrUserOrExtern().not());
 
         uiDelete.disableProperty().unbind();
-        uiDelete.setDisable(false);
+        uiDelete.disableProperty().bind(Injector.getSession().adminOrUserOrExtern().not());
 
         for(TableColumn col : getColumns()) {
             if("Désignation".equalsIgnoreCase(col.getText())){
@@ -75,6 +80,7 @@ public class ModeleElementTable extends PojoTable {
 
         setRight(new BorderPane());
     }
+    
 
     @Override
     protected Object editPojo(Object pojo) {
