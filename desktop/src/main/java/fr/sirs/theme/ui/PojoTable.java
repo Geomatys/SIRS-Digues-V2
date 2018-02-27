@@ -1965,17 +1965,6 @@ public class PojoTable extends BorderPane implements Printable {
         }
     }
 
-
-    /* Rechercher les objets dans un tronçon donné (sert uniquement si on ne
-    crée pas les objets à l'ajout, mais si on cherche des objets préexisants.
-    Cette propriété sert alors à limiter la recherche à un tronçon donné (de
-    manière à ne relier entre eux que des "objets" du même tronçon.*/
-    protected final StringProperty tronconSourceProperty = new SimpleStringProperty(null);
-
-    public StringProperty tronconSourceProperty() {
-        return tronconSourceProperty;
-    }
-
     private class ChoiceStage extends PojoTableComboBoxChoiceStage<Element, Preview> {
 
 
@@ -2001,13 +1990,7 @@ public class PojoTable extends BorderPane implements Printable {
             super();
             setTitle("Choix de l'élément");
 
-            if(tronconSourceProperty.get()==null){
-                comboBox.setItems(SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted());
-            }
-            else{
-                comboBox.setItems(SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted()
-                        .filtered((Preview t) -> { return tronconSourceProperty.get().equals(t.getDocId());}));
-            }
+            comboBox.setItems(SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted());
 
             retrievedElement.bind(elementBinding);
         }
