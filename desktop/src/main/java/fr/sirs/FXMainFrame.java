@@ -707,7 +707,7 @@ public class FXMainFrame extends BorderPane {
     @FXML
     public void showUserGuide() {
         try {
-            SIRS.browseURL(new URL("https://www.sirs-digues.info/documentation/"), "Guide utilisateur");
+            SIRS.browseURL(new URL("http://sirs-digues.info/documents/"), "Guide utilisateur");
         } catch (MalformedURLException ex) {
             SirsCore.LOGGER.log(Level.WARNING, null, ex);
             GeotkFX.newExceptionDialog("L'URL demandée est invalide.", ex).show();
