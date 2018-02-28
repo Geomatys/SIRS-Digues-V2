@@ -103,18 +103,22 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
             });
             getColumns().add(1, idCol);
             
-            final ObservableList allItems = FXCollections.observableArrayList(repo.getAll());
-            if(serverInstanceNotLocal!=null && !serverInstanceNotLocal.isEmpty()){
-                final List<Element> newServerInstances = new ArrayList<>();
-                for(final Object asObject : serverInstanceNotLocal){
-                    if(asObject instanceof Element){
-                        newServerInstances.add((Element) asObject);
-                    }
-                }
-                allItems.addAll(newServerInstances);
-            }
             
-            setTableItems(() -> {return allItems;});
+            setTableItems(() -> {
+                
+                final ObservableList allItems = FXCollections.observableArrayList(repo.getAll());
+                if(serverInstanceNotLocal!=null && !serverInstanceNotLocal.isEmpty()){
+                    final List<Element> newServerInstances = new ArrayList<>();
+                    for(final Object asObject : serverInstanceNotLocal){
+                        if(asObject instanceof Element){
+                            newServerInstances.add((Element) asObject);
+                        }
+                    }
+                    allItems.addAll(newServerInstances);
+                }
+                
+                return allItems;
+            });
         }
 
         private class ReferenceTableRow extends TableRow<Element>{
