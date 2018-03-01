@@ -32,7 +32,10 @@ import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.SystemeReperageRepository;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Identifiable;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.Positionable;
+import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import java.text.DecimalFormat;
@@ -227,8 +230,73 @@ public class FXPositionablePane extends BorderPane {
         }
     }      
     
+    /**
+     * Méthode de changement de linéaire sur lequel est situé le positionable.
+     * 
+     * @param linear nouveau linéaire à affecter au positionable (on attend un {@link Preview}
+     */
     public void updateLinear(Object linear){
         
+        // Cas du Preview (type normalement renvoyé par la liste déroulante de l'UI)
+        if(linear instanceof Preview){
+            final Preview preview = (Preview) linear;
+            SIRS.LOGGER.log(Level.FINE, "changement de linéaire pour {0}", preview);
+            
+            // On vérifie qu'on a bien toutes les informations nécessaires pour éviter les NPE etc.
+            if(preview.getElementId()!=null && preview.getElementClass()!=null){
+                
+                // On prévient les éventuels problèmes de chargement de classe qui ne devraient pas se produire
+                try {
+                    final Class elementClass = Class.forName(preview.getElementClass());
+                    final Identifiable identifiable = Injector.getSession().getRepositoryForClass(elementClass).get(preview.getElementId());
+                        
+                    // On s'assure qu'on obtient bien un tronçon de digue et on opère le changement
+                    if(identifiable instanceof TronconDigue){
+                        changeTroncon((TronconDigue) identifiable);                  
+                    }
+                    else {
+                        SIRS.LOGGER.log(Level.WARNING, "type de linéaire inattendu pour {0}", identifiable);
+                    }
+                } catch (ClassNotFoundException ex) {
+                    // On loggue ET on propage cette exception importante
+                    SIRS.LOGGER.log(Level.WARNING, "impossible de trouver la classe correspondant à {0}", preview);
+                    throw new IllegalStateException(ex);
+                }
+            }
+            else {
+                SIRS.LOGGER.log(Level.WARNING, "tous les éléments ne sont pas disponibles pour un changement de linéaire : {0}", preview);
+            }
+        }
+        else {
+            SIRS.LOGGER.log(Level.WARNING, "changement de linéaire non supporté pour {0}", linear);
+        }
+    }
+    
+    /**
+     * Méthode d'affectation d'un nouveau {@link TronconDigue} au {@link Positionable}
+     * @param troncon nouveau {@link TronconDigue}
+     */
+    private void changeTroncon(final TronconDigue troncon){
+        final Positionable positionable = posProperty.get();
+                            
+        if(positionable instanceof Objet){
+
+            final Objet objet = (Objet) positionable;
+            
+            // On ne peut pas deviner la nouvelle géométrie de l'objet.
+            // On lui affecte celle du nouveau tronçon.
+            objet.setGeometry(troncon.getGeometry());
+            
+            // On ne peut pas deviner non plus le nouveau SR
+            // On lui affecte celui du nouveau tronçon.
+            objet.setSystemeRepId(troncon.getSystemeRepDefautId());
+
+            updateSRAndPRInfo();
+
+        }
+        else{
+            SIRS.LOGGER.log(Level.WARNING, "élément positionable inattendu {0}", positionable);
+        }
     }
 
     public final void updateSRAndPRInfo() {
