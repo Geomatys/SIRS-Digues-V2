@@ -483,6 +483,14 @@ else if (helper.isParcelleVegetation()){
         <%=Helper.ZONE_VEGETATION_UI%>.setClosable(false);
 <%
     }
+
+    if(helper.extendsObjet()){
+%>
+
+        // Prise en compte du changement de tronçon.
+        <%=Helper.LINEAR_ID_UI%>.setOnAction((event) -> uiPositionable.updateLinear(ui_linearId.getValue()));
+<%
+    }
 %>
     }
     

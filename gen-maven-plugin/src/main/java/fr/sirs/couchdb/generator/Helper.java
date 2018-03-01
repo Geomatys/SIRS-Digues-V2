@@ -109,6 +109,9 @@ public class  Helper {
     
     public static final String ZONE_VEGETATION_UI = "ui_zoneVegetation";
     
+    public static final String OBJET_TYPE = "Objet";
+    public static final String LINEAR_ID_UI = "ui_"+LINEAR_ID_FIELD_NAME;
+    
     protected String pakage;
 
     protected Map<String, String> propertyDeclarations = new HashMap<>();
