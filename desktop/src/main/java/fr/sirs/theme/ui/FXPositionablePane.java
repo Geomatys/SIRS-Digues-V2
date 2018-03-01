@@ -276,29 +276,66 @@ public class FXPositionablePane extends BorderPane {
      * Méthode d'affectation d'un nouveau {@link TronconDigue} au {@link Positionable}
      * @param troncon nouveau {@link TronconDigue}
      */
-    private void changeTroncon(final TronconDigue troncon){
+    protected void changeTroncon(final TronconDigue troncon){
         final Positionable positionable = posProperty.get();
                             
         if(positionable instanceof Objet){
-
-            final Objet objet = (Objet) positionable;
             
-            // On ne peut pas deviner la nouvelle géométrie de l'objet.
-            // On lui affecte celle du nouveau tronçon.
-            objet.setGeometry(troncon.getGeometry());
+            // Modification du tronçon référencé
+            ((Objet) positionable).setLinearId(troncon.getId());
             
-            // On ne peut pas deviner non plus le nouveau SR
-            // On lui affecte celui du nouveau tronçon.
-            objet.setSystemeRepId(troncon.getSystemeRepDefautId());
+            // Réinitialisation de la géométrie du positionable à celle du tronçon
+            resetToLinearGeometry(positionable, troncon);
 
+            // Mise à jour de l'affichage du SR et des PRs
             updateSRAndPRInfo();
+            
+            // Mise à jour des différents modes de positionnement géographiques
+            for(final FXPositionableMode mode : modes){
+                mode.updateFields();
+            }
 
         }
         else{
             SIRS.LOGGER.log(Level.WARNING, "élément positionable inattendu {0}", positionable);
         }
     }
+    
+    /**
+     * Réinitialise la géométrie d'un positionnable à celle du tronçon indiqué.
+     * 
+     * @param positionable
+     * @param troncon 
+     */
+    protected void resetToLinearGeometry(final Positionable positionable, final TronconDigue troncon){
+        
+        // Annulation de toute autre information spatiale
+        positionable.setBorneDebutId(null);
+        positionable.setBorne_debut_aval(true);
+        positionable.setBorne_debut_distance(0.);
+        positionable.setPositionDebut(null);
+        positionable.setBorneFinId(null);
+        positionable.setBorne_fin_aval(true);
+        positionable.setBorne_fin_distance(0.);
+        positionable.setPositionFin(null);
 
+        /*On ne peut pas deviner non plus le nouveau SR
+        On lui affecte celui du nouveau tronçon.
+        Attention : il faut initialiser cette propritété AVANT la mise à jour de 
+        la géométrie car les panneaux d'affichage des différents modes sont 
+        susceptibles de mettre des écouteurs sur la géométrie qui relancent
+        le calcul des champs. Or, ce calcul utilise le SR du positionnable.
+        */
+        positionable.setSystemeRepId(troncon.getSystemeRepDefautId());
+
+        // On ne peut pas deviner la nouvelle géométrie de l'objet.
+        // On lui affecte celle du nouveau tronçon.
+        positionable.setGeometry(troncon.getGeometry());
+    }
+
+    /**
+     * Mise à jour de l'affichage du SR et des PRs sur le bandeau informatif.
+     */
     public final void updateSRAndPRInfo() {
         final Positionable pos = getPositionable();
 
