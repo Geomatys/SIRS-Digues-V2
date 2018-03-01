@@ -226,6 +226,10 @@ public class FXPositionablePane extends BorderPane {
             return "";
         }
     }      
+    
+    public void updateLinear(Object linear){
+        
+    }
 
     public final void updateSRAndPRInfo() {
         final Positionable pos = getPositionable();
