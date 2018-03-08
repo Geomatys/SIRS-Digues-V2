@@ -26,7 +26,7 @@ import javafx.collections.WeakListChangeListener;
 
 /**
  *
- * This is a special kind of PojoTable that listen the list property of the 
+ * This is a special kind of PojoTable that listens the list property of the 
  * container of the list displayed on the table.
  * 
  * This table is usefull for bidirectionnal links based on ids instead of 
