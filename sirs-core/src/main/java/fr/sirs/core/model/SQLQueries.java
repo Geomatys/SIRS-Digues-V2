@@ -27,7 +27,9 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
@@ -75,7 +77,7 @@ public class SQLQueries {
      * @param props Propriétés à lire.
      * @return Une liste de requêtes SQL lues depuis les propriétés données.
      */
-    public static List<SQLQuery> propertiesToQueries(final Properties props){
+    private static List<SQLQuery> propertiesToQueries(final Properties props){
 
         final List<SQLQuery> queries = new ArrayList<>();
         for (Entry entry : props.entrySet()) {
@@ -97,6 +99,55 @@ public class SQLQueries {
         return queries;
 
     }
+    
+    // clef indiquant le libellé d'une requête préprogrammée
+    private static final String PRE_QUERY_TITLE = "title";
+    // clef indiquant la description d'une requête préprogrammée
+    private static final String PRE_QUERY_DESCRIPTION = "description";
+    // clef indiquant le corps d'une requête préprogrammée
+    private static final String PRE_QUERY_QUERY = "query";
+    
+    /**
+     * Interprétationd des properties des requêtes préprogrammées.
+     * 
+     * Chaque requête préprogrammée est représentée par trois propriétés dont la sépantique en fonction des suffixes
+     * est la suivante :
+     * [propertyPrefix].title : libellé de la requête
+     * [propertyPrefix].query : corps de la requête en SQL
+     * [propertyPrefix].description : descriptif de la requête
+     * 
+     * @param props
+     * @return 
+     */
+    private static List<SQLQuery> propertiesToPreprogrammedQueries(final Properties props){
+
+        final Map<String, SQLQuery> queries = new HashMap<>();
+        for (final Entry entry : props.entrySet()) {
+            
+            // Récupération de la clef properties
+            final String key=(String)entry.getKey();
+            final int idx = key.lastIndexOf('.');
+            
+            // Récupération de la partie identifiant de la requête : jusqu'au dernier point
+            final String queryId = key.substring(0, idx);
+            // Récupération de la partie descriptive de la requête : titre, description ou corps de la requête
+            final String entryType = key.substring(idx+1);
+            
+            if(!queries.containsKey(queryId)){
+                queries.put(queryId, new SQLQuery());
+            }
+            
+            final SQLQuery query = queries.get(queryId);
+            switch(entryType){
+                case PRE_QUERY_TITLE: query.setLibelle((String)entry.getValue()); break;
+                case PRE_QUERY_DESCRIPTION: query.setDescription((String)entry.getValue()); break;
+                case PRE_QUERY_QUERY: query.setSql((String)entry.getValue()); break;
+                default:
+                    SirsCore.LOGGER.warning("type d'entrée inconnu dans le fichier de requêtes préprogrammées.");
+            }
+        }
+        return new ArrayList<>(queries.values());
+    }
 
     /**
      * Chargement des requêtes préprogrammées.
@@ -106,10 +157,10 @@ public class SQLQueries {
      */
     public static List<SQLQuery> defaultQueries() throws IOException {
         final Properties props = new Properties();
-        try (final InputStream in = SQLQueries.class.getResourceAsStream("defaultQueries")) {
+        try (final InputStream in = SQLQueries.class.getResourceAsStream("preprogrammedQueries.properties")) {
             props.load(in);
         }
-        return propertiesToQueries(props);
+        return propertiesToPreprogrammedQueries(props);
     }
 
     private static String getValueString(final SQLQuery query){
