@@ -27,6 +27,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,7 +147,14 @@ public class SQLQueries {
                     SirsCore.LOGGER.warning("type d'entrée inconnu dans le fichier de requêtes préprogrammées.");
             }
         }
-        return new ArrayList<>(queries.values());
+        final List<SQLQuery> queryList = new ArrayList<>(queries.values());
+        queryList.sort((SQLQuery o1, SQLQuery o2) -> {
+            if(o1.getLibelle()!=null && o2.getLibelle()!=null){
+                return o1.getLibelle().compareTo(o2.getLibelle());
+            }
+            else return 0;
+        });
+        return queryList;
     }
 
     /**
