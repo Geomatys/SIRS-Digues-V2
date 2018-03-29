@@ -52,10 +52,11 @@ public class FXQueryPane extends GridPane {
     public FXQueryPane(SQLQuery query) {
         SIRS.loadFXML(this);
         setSQLQuery(query);
-        uiDesc.editableProperty().bind(modifiableProperty());
+        
+        uiLibelle.editableProperty().bind(modifiableProperty());
         
         /*
-        Pour permettre la lecture des longues descriptions même lorsque le fenêtre est figée (cas des requêtes préprogrammées)
+        Pour permettre la lecture des longues descriptions d'un coup d'œil
         on branche et on synchronyse un tooltip sur la description.
         */
         uiDesc.tooltipProperty().bind(new ObjectBinding<Tooltip>() {
@@ -67,8 +68,22 @@ public class FXQueryPane extends GridPane {
                 return new Tooltip(uiDesc.getText());
             }
         });
+        uiDesc.editableProperty().bind(modifiableProperty());
+        
+        /*
+        Pour permettre la lecture des longues requêtes d'un coup d'œil
+        on branche et on synchronyse un tooltip sur le texte de la requête.
+        */
+        uiSql.tooltipProperty().bind(new ObjectBinding<Tooltip>() {
+            
+            {bind(uiSql.textProperty());}
+            
+            @Override
+            protected Tooltip computeValue() {
+                return new Tooltip(uiSql.getText());
+            }
+        });
         uiSql.editableProperty().bind(modifiableProperty());
-        uiLibelle.editableProperty().bind(modifiableProperty());
     }
     
     public SQLQuery getSQLQuery() {
