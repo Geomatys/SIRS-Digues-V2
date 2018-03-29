@@ -34,10 +34,12 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
@@ -58,7 +60,7 @@ import org.geotoolkit.internal.GeotkFX;
  */
 public class FXQueryTable extends BorderPane{
 
-    public final TableView<SQLQuery> table = new FXTableView<>();
+    private final TableView<SQLQuery> table = new FXTableView<>();
     /** A button to import queries from a chosen properties file. */
     private final Button uiImportQueries = new Button("Importer");
     /** A button to export queries to a chosen properties file. */
@@ -81,6 +83,23 @@ public class FXQueryTable extends BorderPane{
             public ObservableValue<String> call(TableColumn.CellDataFeatures<SQLQuery, String> param) {
                 return param.getValue().libelleProperty();
             }
+        });
+        
+        // On ajoute une cell factory modifiée pour affichier le titre de la requête en tooltip
+        nameCol.setCellFactory((param) -> {
+            
+            final TableCell<SQLQuery,String> tableCell = new TableCell<SQLQuery,String>() {
+                @Override protected void updateItem(String item, boolean empty) {
+                    if (item == getItem()) return;
+
+                    super.updateItem(item, empty);
+                    super.setText(item);
+                    
+                    // Ajout du titre comme tooltip
+                    setTooltip(new Tooltip(item));
+                }
+            };
+            return tableCell;
         });
 
         table.getColumns().add(nameCol);
