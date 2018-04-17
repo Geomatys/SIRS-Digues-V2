@@ -57,8 +57,22 @@ public class JRXMLUtil {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static String extractDesignation(final String input){
-        return input.substring(input.indexOf(SirsStringConverter.DESIGNATION_SEPARATOR)+SirsStringConverter.DESIGNATION_SEPARATOR.length(),
-                input.indexOf(SirsStringConverter.LABEL_SEPARATOR));
+        if(input==null || input.isEmpty()){
+            SirsCore.LOGGER.log(Level.WARNING, "aucune donnée de laquelle extraire une désignation");
+            return "";
+        }
+        else{
+            try{
+                SirsCore.LOGGER.log(Level.FINEST, "extraction de la désignation de : {0}", input);
+                return input.substring(input.indexOf(SirsStringConverter.DESIGNATION_SEPARATOR)+SirsStringConverter.DESIGNATION_SEPARATOR.length(),
+                        input.indexOf(SirsStringConverter.LABEL_SEPARATOR));
+            }
+            catch(Exception e){
+                // SYM-1734 : sécurité dans le cas d'une désignation impossible à extraire
+                SirsCore.LOGGER.log(Level.WARNING, "un problème a été rencontré lors de l'extraction de la désination à partir de "+input, e);
+                return "(?)";
+            }
+        }
     }
 
     static String extractLabel(final String input){
