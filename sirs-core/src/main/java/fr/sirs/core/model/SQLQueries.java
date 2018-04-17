@@ -21,13 +21,14 @@ package fr.sirs.core.model;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -163,12 +164,16 @@ public class SQLQueries {
      * @return La liste des requêtes par défaut dans l'application.
      * @throws IOException Si les requêtes ne peuvent être lues depuis les ressources.
      */
-    public static List<SQLQuery> defaultQueries() throws IOException {
-        final Properties props = new Properties();
-        try (final InputStream in = SQLQueries.class.getResourceAsStream("preprogrammedQueries.properties")) {
-            props.load(in);
+    public static List<SQLQuery> preprogrammedQueries() throws IOException {
+        final File localPreprogrammedFile = SirsCore.PREPROGRAMMED_QUERIES_PATH.toFile();
+        if(localPreprogrammedFile.exists() && Files.isRegularFile(SirsCore.PREPROGRAMMED_QUERIES_PATH)){
+            final Properties props = new Properties();
+            try (final InputStream in = new FileInputStream(localPreprogrammedFile)) {
+                props.load(in);
+            }
+            return propertiesToPreprogrammedQueries(props);
         }
-        return propertiesToPreprogrammedQueries(props);
+        throw new IllegalStateException("le fichier des requêtes préprogrammées ne semble pas exister ou être dans un état inattendu.");
     }
 
     private static String getValueString(final SQLQuery query){
@@ -239,7 +244,7 @@ public class SQLQueries {
         try {
             return Optional.of(InjectorCore.getBean(SessionCore.class).getRepositoryForClass(SQLQuery.class).get(queryId));
         } catch (DocumentNotFoundException e) {
-            return SQLQueries.defaultQueries().stream().filter(q -> q.getLibelle().equals(queryId)).findFirst();
+            return SQLQueries.preprogrammedQueries().stream().filter(q -> q.getLibelle().equals(queryId)).findFirst();
         }
     }
 

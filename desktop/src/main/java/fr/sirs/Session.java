@@ -112,10 +112,12 @@ public class Session extends SessionCore {
     public static String FLAG_SIRSLAYER = "SirsLayer";
 
     ////////////////////////////////////////////////////////////////////////////
-    // GESTION DES REFERENCES
+    // GESTION et MISE À JOUR DES REFERENCES ET DES REQUÊTES PRÉPROGRAMMÉES
     ////////////////////////////////////////////////////////////////////////////
     private final ReferenceChecker referenceChecker;
     public ReferenceChecker getReferenceChecker(){return referenceChecker;}
+    private final QueryChecker queryChecker;
+    public QueryChecker getQueryChecker(){return queryChecker;}
 
     ////////////////////////////////////////////////////////////////////////////
     private MapContext mapContext;
@@ -175,18 +177,18 @@ public class Session extends SessionCore {
                                     new Insets(4, 4, 4, 4), 500),
                     DecorationXMLParser.class.getResource("/org/geotoolkit/icon/boussole.svg"),
                     new Dimension(100,100));
+    
+    
 
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
         super(couchDbConnector);
-        final String referenceUrl;
-        if(SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.REFERENCE_URL)!=null){
-            referenceUrl = SirsPreferences.INSTANCE.getPropertySafe(SirsPreferences.PROPERTIES.REFERENCE_URL);
-        }
-        else {
-            referenceUrl = SirsPreferences.PROPERTIES.REFERENCE_URL.getDefaultValue();
-        }
-        referenceChecker = new ReferenceChecker(referenceUrl);
+        referenceChecker = new ReferenceChecker(
+            SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.REFERENCE_URL)
+        );
+        queryChecker = new QueryChecker(
+            SirsPreferences.INSTANCE.getPropertySafeOrDefault(SirsPreferences.PROPERTIES.PREPROGRAMMED_QUERIES_URL)
+        );
         printManager = new PrintManager();
     }
 

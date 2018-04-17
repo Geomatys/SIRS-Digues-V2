@@ -165,6 +165,16 @@ public class SirsCore {
 
     public static final Path LOCAL_QUERIES_PATH = CONFIGURATION_PATH.resolve("queries.properties");
 
+    /**
+     * Les requêtes préprogrammées de référence sont désormatis enregistrées sur le serveur de France-Digues et sont 
+     * téléchargées à chaque nouvelle connexion lorsque le réseau est disponible.
+     * 
+     * Mais afin que les requêtes préprogrammées soient utilisables même hors-ligne (du moins dans leur dernière version
+     * connue), ce n'est pas le fichier distant qui est directement utilisé pour la lecture et l'exécution des 
+     * requêtes, mais une copie locale mise à jour à chaque nouvelle connexion avec le contenu du fichier distant.
+     */
+    public static final Path PREPROGRAMMED_QUERIES_PATH = CONFIGURATION_PATH.resolve("preprogrammedQueries.properties");
+
     public static final Path IMPORT_ERROR_DIR = CONFIGURATION_PATH.resolve("importErrors");
 
     public static final Path NTV2_DIR = CONFIGURATION_PATH.resolve("ntv2");

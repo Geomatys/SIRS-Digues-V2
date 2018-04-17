@@ -100,7 +100,7 @@ public class FXTableSectionRapportPane extends AbstractFXElementPane<TableSectio
     @FXML
     private void chooseQuery(ActionEvent event) throws IOException {
         final List<SQLQuery> queries = new ArrayList<>(Injector.getSession().getRepositoryForClass(SQLQuery.class).getAll());
-        queries.addAll(SQLQueries.defaultQueries());
+        queries.addAll(SQLQueries.preprogrammedQueries());
 
         final Optional<SQLQuery> query = FXSearchPane.chooseSQLQuery(queries);
         if (query.isPresent())

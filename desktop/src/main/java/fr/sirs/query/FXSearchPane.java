@@ -426,7 +426,7 @@ public class FXSearchPane extends BorderPane {
     private void openDefaultSQLQuery(ActionEvent event){
         final List<SQLQuery> queries;
         try {
-            queries = SQLQueries.defaultQueries();
+            queries = SQLQueries.preprogrammedQueries();
         } catch (IOException ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             GeotkFX.newExceptionDialog("Une erreur s'est produite pendant le chargement des requêtes préprogrammées.", ex).show();

@@ -40,6 +40,7 @@ public class SirsPreferences extends Properties {
 
     public static enum PROPERTIES {
         REFERENCE_URL("Adresse des références", "Url à laquelle se trouvent les différents fichiers centralisés des références de l'application.", "http://sirs-digues.info/wp-content/tablesReferences/"),
+        PREPROGRAMMED_QUERIES_URL("Adresse des requêtes préprogrammées", "Url du fichier des requêtes préprogrammées.", "http://sirs-digues.info/wp-content/requetesPreprogrammees/preprogrammedQueries.properties"),
         UPDATE_CORE_URL("Mise à jour de l'application", "Url à laquelle se trouve le service de mise à jour de l'application.", "http://sirs-digues.info/wp-content/updates/core.json"),
         UPDATE_PLUGINS_URL("Mise à jour des plugins", "Url à laquelle se trouve le service de mise à jour des plugins.", "http://sirs-digues.info/wp-content/updates/plugins.json"),
         COUCHDB_LOCAL_ADDR("Addresse de la base CouchDB locale", "Addresse d'accès à la base CouchDB locale, pour les réplications sur le poste.", "http://127.0.0.1:5984/"),
@@ -56,6 +57,20 @@ public class SirsPreferences extends Properties {
         }
 
         public String getDefaultValue(){return defaultValue;}
+    }
+    
+    /**
+     * Retourne la valeur de la propriété indiquée en paramètre, ou, en son absence, sa valeur par défaut.
+     * @param property propriété
+     * @return valeur de la propriété si elle existe ou valeur par défaut dans le cas contraire.
+     */
+    public String getPropertySafeOrDefault(SirsPreferences.PROPERTIES property){
+        if(SirsPreferences.INSTANCE.getPropertySafe(property)!=null){
+            return SirsPreferences.INSTANCE.getPropertySafe(property);
+        }
+        else {
+            return property.getDefaultValue();
+        }
     }
 
     /**
