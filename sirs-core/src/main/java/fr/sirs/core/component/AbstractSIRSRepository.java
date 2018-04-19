@@ -441,7 +441,7 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
     private class StreamingViewIterator implements CloseableIterator<T> {
 
         private final ViewQuery query;
-        private final SimpleObjectProperty<StreamingViewResult> result = new SimpleObjectProperty<>();
+        private StreamingViewResult result;
         private Iterator<ViewResult.Row> iterator;
 
         // Will be created only if we can effectively iterate on results.
@@ -459,11 +459,10 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
             // No element cached, we analyze input stream
             if (next == null) {
                 // Open connection on first call.
-                if (result.get() == null) {
-                    final StreamingViewResult viewResult = db.queryForStreamingView(query);
-                    result.set(viewResult);
-                    if (viewResult.getTotalRows() > 0) {
-                        this.iterator = viewResult.iterator();
+                if (result == null) {
+                    result = db.queryForStreamingView(query);
+                    if (result.getTotalRows() > 0) {
+                        this.iterator = result.iterator();
                         objectReader = new ObjectMapper().reader(type);
                     } else {
                         this.iterator = null;
@@ -518,9 +517,9 @@ public abstract class AbstractSIRSRepository<T extends Identifiable> extends Cou
         public void close() {
             try {
                 iterator = null;
-                if (result.get() != null) {
-                    result.get().close();
-                    result.set(null);
+                if (result != null) {
+                    result.close();
+                    result = null;
                 }
             } catch (Exception e) {
                 SirsCore.LOGGER.log(Level.WARNING, "A streamed CouchDB view result cannot be closed. It's likely to cause memory leaks.", e);
