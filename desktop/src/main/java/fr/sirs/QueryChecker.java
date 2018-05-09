@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import static java.util.logging.Level.WARNING;
 import javafx.concurrent.Task;
@@ -70,7 +71,7 @@ public class QueryChecker extends Task<Void> {
 
         final URLConnection connection = url.openConnection();
         try{
-            try (final InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream())) {
+            try (final InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream(), StandardCharsets.ISO_8859_1)) {
 
                 final File localFile = SirsCore.PREPROGRAMMED_QUERIES_PATH.toFile();
                 
@@ -88,7 +89,7 @@ public class QueryChecker extends Task<Void> {
                     SIRS.LOGGER.info("le fichier local des requêtes préprogrammées n'existe pas encore");
                 }
                 
-                try(final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(localFile))){
+                try(final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(localFile), StandardCharsets.ISO_8859_1)){
                     int r;
                     while (true) {
                         r = inputStreamReader.read();
