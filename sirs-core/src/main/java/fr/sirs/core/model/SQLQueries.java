@@ -21,6 +21,7 @@ package fr.sirs.core.model;
 import fr.sirs.core.InjectorCore;
 import fr.sirs.core.SessionCore;
 import fr.sirs.core.SirsCore;
+import fr.sirs.core.component.SQLQueryRepository;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,12 +30,15 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
@@ -50,12 +54,21 @@ import org.ektorp.DocumentNotFoundException;
 public class SQLQueries {
 
     private static final char SEPARATOR = '§';
+    
+    public static final Comparator<SQLQuery> QUERY_COMPARATOR = (SQLQuery o1, SQLQuery o2) -> {
+            if(o1.getLibelle()!=null && o2.getLibelle()!=null){
+                return o1.getLibelle().compareTo(o2.getLibelle());
+            }
+            else return 0;
+        };
 
     /**
      * Open a file containing SQL queries, and put them in memory.
      *
      * Note : no syntax check is done on loaded requests, so every query even if
      * it's malformed, is loaded.
+     * 
+     * Les requêtes sont triées par ordre alphabétique du libellé.
      *
      * @param queryFile The property file containing wanted requests.
      * @return A list of all queries listed in input file. Never null, but can
@@ -72,6 +85,18 @@ public class SQLQueries {
         }
         return propertiesToQueries(props);
     }
+    
+    /**
+     * Retourne les requêtes enregistrées en base, triées par ordre alphabétique du libellé.
+     * 
+     * @return une liste des requêtes enregistrées en base, triées par ordre alphabétique du libellé.
+     */
+    public static List<SQLQuery> dbQueries(){
+        final SQLQueryRepository queryRepo = (SQLQueryRepository) InjectorCore.getBean(SessionCore.class).getRepositoryForClass(SQLQuery.class);
+        final ObservableList<SQLQuery> dbQueries = FXCollections.observableArrayList(queryRepo.getAll());
+        dbQueries.sort(SQLQueries.QUERY_COMPARATOR);
+        return dbQueries;
+    }
 
     /**
      * Lecture d'une propriété de fichier de requête : transformation d'une
@@ -82,7 +107,7 @@ public class SQLQueries {
     private static List<SQLQuery> propertiesToQueries(final Properties props){
 
         final List<SQLQuery> queries = new ArrayList<>();
-        for (Entry entry : props.entrySet()) {
+        for (final Entry entry : props.entrySet()) {
             final SQLQuery query = new SQLQuery();
             query.setLibelle((String) entry.getKey());
 
@@ -97,7 +122,7 @@ public class SQLQueries {
             }
             queries.add(query);
         }
-
+        queries.sort(QUERY_COMPARATOR);
         return queries;
 
     }
@@ -149,12 +174,7 @@ public class SQLQueries {
             }
         }
         final List<SQLQuery> queryList = new ArrayList<>(queries.values());
-        queryList.sort((SQLQuery o1, SQLQuery o2) -> {
-            if(o1.getLibelle()!=null && o2.getLibelle()!=null){
-                return o1.getLibelle().compareTo(o2.getLibelle());
-            }
-            else return 0;
-        });
+        queryList.sort(QUERY_COMPARATOR);
         return queryList;
     }
 

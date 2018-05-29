@@ -440,8 +440,8 @@ public class FXSearchPane extends BorderPane {
         final List<SQLQuery> queries;
         try {
             queries = SQLQueries.getLocalQueries();
-            final SQLQueryRepository repo = (SQLQueryRepository) Injector.getSession().getRepositoryForClass(SQLQuery.class);
-            queries.addAll(repo.getAll());
+            queries.addAll(SQLQueries.dbQueries());
+            queries.sort(SQLQueries.QUERY_COMPARATOR);
         } catch (IOException ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
             GeotkFX.newExceptionDialog("Une erreur s'est produite pendant la création de la liste des requêtes.", ex).show();
