@@ -143,7 +143,9 @@ public class SQLQueries {
      * [propertyPrefix].query : corps de la requête en SQL
      * [propertyPrefix].description : descriptif de la requête
      * 
-     * @param props
+     * Les requêtes sont triées par ordre alphabétique des libellés.
+     * 
+     * @param props contenu du fichier .properties des requêtes préprogrammées.
      * @return 
      */
     private static List<SQLQuery> propertiesToPreprogrammedQueries(final Properties props){
@@ -180,6 +182,8 @@ public class SQLQueries {
 
     /**
      * Chargement des requêtes préprogrammées.
+     * 
+     * Les requêtes sont triées par ordre alphabétique des libellés.
      *
      * @return La liste des requêtes par défaut dans l'application.
      * @throws IOException Si les requêtes ne peuvent être lues depuis les ressources.

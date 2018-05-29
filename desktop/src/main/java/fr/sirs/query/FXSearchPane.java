@@ -422,6 +422,13 @@ public class FXSearchPane extends BorderPane {
         }
     }
 
+    /**
+     * Ouverture du panneau des requêtes préprogrammées.
+     * 
+     * Les requêtes sont triées par ordre alphabétique des libellés.
+     * 
+     * @param event 
+     */
     @FXML
     private void openDefaultSQLQuery(ActionEvent event){
         final List<SQLQuery> queries;
@@ -435,12 +442,21 @@ public class FXSearchPane extends BorderPane {
         showQueryTable(queries, false);
     }
 
+    /**
+     * Ouverture du panneau des requêtes utilisateur enregistrées soit localement soit en base document.
+     * 
+     * Les requêtes sont triées par ordre alphabétique des libellés.
+     * 
+     * @param event 
+     */
     @FXML
     private void openSQLQuery(ActionEvent event){
         final List<SQLQuery> queries;
         try {
             queries = SQLQueries.getLocalQueries();
             queries.addAll(SQLQueries.dbQueries());
+            
+            // il faut refaire un tri général des requêtes
             queries.sort(SQLQueries.QUERY_COMPARATOR);
         } catch (IOException ex) {
             SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
