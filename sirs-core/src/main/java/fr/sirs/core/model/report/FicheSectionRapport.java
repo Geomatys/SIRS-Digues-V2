@@ -35,8 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.odftoolkit.simple.TextDocument;
@@ -55,22 +53,14 @@ import org.w3c.dom.Text;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class FicheSectionRapport extends AbstractSectionRapport {
 
-    private final SimpleIntegerProperty nbPhotos = new SimpleIntegerProperty(0);
+    private int nbPhotos = 0;
 
-    /**
-     *
-     * @return The number of photos to print for a given element.
-     */
-    public IntegerProperty nbPhotosProperty() {
+    public int getNbPhotos() {
         return nbPhotos;
     }
 
-    public int getNbPhotos() {
-        return nbPhotos.get();
-    }
-
     public void setNbPhotos(int newValue) {
-        nbPhotos.set(newValue);
+        nbPhotos = newValue;
     }
 
     private final SimpleStringProperty modeleElementId = new SimpleStringProperty();
@@ -122,7 +112,7 @@ public class FicheSectionRapport extends AbstractSectionRapport {
 
     @Override
     public void printSection(final PrintContext ctx) throws Exception {
-        if (ctx.elements == null && ctx.filterValues == null) {
+        if (ctx.elements == null && ctx.queryResult == null) {
             return;
         }
 
@@ -149,7 +139,7 @@ public class FicheSectionRapport extends AbstractSectionRapport {
             }
         } else {
             // No elements available. Print filter values.
-            iterator = ctx.filterValues.iterator();
+            iterator = ctx.queryResult.iterator();
         }
 
         /**
@@ -171,12 +161,11 @@ public class FicheSectionRapport extends AbstractSectionRapport {
 
                 // Forced to do it to avoid variable erasing at concatenation
                 final Map<String, List<Text>> replaced = ODTUtils.replaceUserVariablesWithText(doc);
-                final int nbPhotosToPrint = nbPhotos.get();
 
                 ODTUtils.append(ctx.target, doc);
 
                 if (isElement) {
-                    printPhotos(ctx.target, (Element)first, nbPhotosToPrint);
+                    printPhotos(ctx.target, (Element)first, nbPhotos);
                 }
 
                 // For next elements, we replace directly text attributes we've put instead of variables, to avoid reloading original template.
@@ -190,7 +179,7 @@ public class FicheSectionRapport extends AbstractSectionRapport {
 
                         ODTUtils.append(ctx.target, doc);
                         if (isElement) {
-                            printPhotos(ctx.target, (Element)next, nbPhotosToPrint);
+                            printPhotos(ctx.target, (Element)next, nbPhotos);
                         }
                     } catch (RuntimeException ex) {
                         throw ex;

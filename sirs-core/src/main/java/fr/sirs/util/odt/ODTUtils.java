@@ -371,8 +371,8 @@ public class ODTUtils {
                     n.setTextContent(" - ");
                 }
             } else for (final Node n : entry.getValue()) {
-                    n.setTextContent(Printers.getPrinter(entry.getKey()).print(candidate, entry.getKey()));
-                }
+                n.setTextContent(Printers.getPrinter(entry.getKey()).print(candidate, entry.getKey()));
+            }
         }
     }
 
@@ -1253,12 +1253,14 @@ public class ODTUtils {
      * @param propertyNames List of properties (as returned by {@link PropertyDescriptor#getName()
      * } to use for table columns. If null or empty, all properties of input
      * objects will be used.
+     * @param printMapping
      * @throws java.beans.IntrospectionException If an error occurs while
      * analyzing properties of an element.
      * @throws java.lang.ReflectiveOperationException If an error occurs while
      * accessing an element property.
      */
-    public static void appendTable(final TableContainer target, final Iterator<Element> data, final List<String> propertyNames, final Map<String, Function<Element, String>> printMapping) 
+    public static void appendTable(final TableContainer target, final Iterator<Element> data, final List<String> propertyNames, 
+            final Map<String, Function<Element, String>> printMapping) 
             throws IntrospectionException, ReflectiveOperationException {
         
         ArgumentChecks.ensureNonNull("Target document", target);
