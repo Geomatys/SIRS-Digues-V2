@@ -47,7 +47,6 @@ public abstract class AbstractPositionableRepository<T extends Positionable> ext
     }
 
     public List<T> getByLinearId(final String linearId) {
-        ArgumentChecks.ensureNonNull("Linear", linearId);
         return cacheList(globalRepo.getByLinearId(type, linearId));
     }
 

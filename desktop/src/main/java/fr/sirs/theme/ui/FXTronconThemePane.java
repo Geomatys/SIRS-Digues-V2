@@ -27,6 +27,7 @@ import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.AbstractTheme;
 import fr.sirs.theme.TronconTheme;
 import fr.sirs.util.SimpleFXEditMode;
+import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
@@ -48,6 +49,14 @@ import javafx.scene.layout.Priority;
  * @author Johann Sorel (Geomatys)
  */
 public class FXTronconThemePane extends BorderPane {
+    
+    // Préview spécifique pour l'affichage des objets n'ayant pas pas d'identifiant de tronçon.(SYM-1765)
+    private static final Preview EMPTY_PREVIEW = new Preview();
+    
+    static {
+        EMPTY_PREVIEW.setElementClass(TronconDigue.class.getCanonicalName());
+        EMPTY_PREVIEW.setLibelle("   Pas de tronçon de rattachement - objets orphelins   ");
+    }
 
     @FXML private BorderPane uiCenter;
     @FXML private ComboBox<Preview> uiLinearChoice;
@@ -86,8 +95,12 @@ public class FXTronconThemePane extends BorderPane {
             }
         });
         
-        final ObservableList<Preview> linearPreviews = SIRS.observableList(session.getPreviews().getByClass(TronconDigue.class)).sorted();
-        SIRS.initCombo(uiLinearChoice, linearPreviews, linearPreviews.isEmpty()? null : linearPreviews.get(0));
+        final List<Preview> byClass = session.getPreviews().getByClass(TronconDigue.class);
+        if(!byClass.contains(EMPTY_PREVIEW)){
+            byClass.add(EMPTY_PREVIEW);
+        }
+        final ObservableList<Preview> linearPreviews = SIRS.observableList(byClass).sorted();
+        SIRS.initCombo(uiLinearChoice, linearPreviews, linearPreviews.isEmpty() ? null : linearPreviews.get(0));
 
     }
 
@@ -102,7 +115,7 @@ public class FXTronconThemePane extends BorderPane {
         }
 
         private void updateTable(ObservableValue<? extends String> observable, String oldValue, String newValue){
-            if(newValue==null || group==null) {
+            if(group==null) {
                 setTableItems(FXCollections::emptyObservableList);
             } else {
                 setTableItems(() -> (ObservableList) group.getExtractor().apply(newValue));
