@@ -274,7 +274,6 @@ public class PojoTable extends BorderPane implements Printable {
     protected final HBox searchEditionToolbar = new HBox(uiRefresh, uiFicheMode, uiImport, uiExport, uiSearch, uiAdd, uiDelete, uiFilter);
 
     // Barre de gauche : navigation dans le parcours de fiches
-    protected FXElementPane elementPane = null;
     private final Button uiPrevious = new Button("",new ImageView(SIRS.ICON_CARET_LEFT));
     private final Button uiNext = new Button("",new ImageView(SIRS.ICON_CARET_RIGHT));
     private final Button uiCurrent = new Button();
@@ -560,6 +559,7 @@ public class PojoTable extends BorderPane implements Printable {
         uiPrevious.getStyleClass().add(BUTTON_STYLE);
         uiPrevious.setOnAction((ActionEvent event) -> {
             uiTable.getSelectionModel().selectPrevious();
+            updateFiche();
         });
 
         uiNext.getStyleClass().add(BUTTON_STYLE);
@@ -570,6 +570,7 @@ public class PojoTable extends BorderPane implements Printable {
             } else {
                 sModel.selectNext();
             }
+            updateFiche();
         });
         navigationToolbar.visibleProperty().bind(uiFicheMode.selectedProperty());
 
@@ -729,30 +730,29 @@ public class PojoTable extends BorderPane implements Printable {
     protected final TableView<Element> getTable() {
         return uiTable;
     }
+    
+    /** 
+     * Mise à jour de l'interface en mode "fiche".
+     * 
+     * SYM-1764 : On crée un nouveau panneau à chaque fois qu'on change de fiche. 
+     * Sinon le rechargement des positions provoque des anomalies de recalcul des positions.
+     */
+    private void updateFiche(){
+        if (uiTable.getSelectionModel().getSelectedIndex() < 0) {
+            uiTable.getSelectionModel().select(0);
+        }
+
+        setCenter(SIRS.generateEditionPane(uiTable.getSelectionModel().getSelectedItem()));
+
+        uiCurrent.setText("" + (uiTable.getSelectionModel().getSelectedIndex()+1) + " / " + uiTable.getItems().size());
+    }
 
     private void updateView(){
 
         if(uiFicheMode.isSelected()){
-            // If there's no selection, initialize on first element.
-            if (uiTable.getSelectionModel().getSelectedIndex() < 0) {
-                uiTable.getSelectionModel().select(0);
-            }
-
-            // Prepare editor and bind its content to selection model.
-            if (elementPane == null) {
-                elementPane = SIRS.generateEditionPane(uiTable.getSelectionModel().getSelectedItem());
-            }
-            elementPane.elementProperty().bind(uiTable.getSelectionModel().selectedItemProperty());
-
             uiFicheMode.setTooltip(new Tooltip("Passer en mode de tableau synoptique."));
-
-            uiCurrent.setText("" + (uiTable.getSelectionModel().getSelectedIndex()+1) + " / " + uiTable.getItems().size());
-            setCenter((Node) elementPane);
+            updateFiche();
         }else{
-            // Disconnect editor.
-            if (elementPane != null) {
-                elementPane.elementProperty().unbind();
-            }
             uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
 
             if(commentPhotoView != null) {
