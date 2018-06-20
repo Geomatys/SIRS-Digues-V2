@@ -35,6 +35,7 @@ import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.Previews;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
+import fr.sirs.core.model.SQLQuery;
 import fr.sirs.core.model.Utilisateur;
 import fr.sirs.util.FXPreviewToElementTableColumn;
 import fr.sirs.util.ReferenceTableCell;
@@ -190,8 +191,13 @@ public class FXValidationPane extends BorderPane {
         table.getColumns().add(new ValidColumn());
 
         setCenter(table);
+        
+        final List<Preview> allByValidationState = repository.getAllByValidationState(false);
+        
+        // retrait de la liste des éléments pour lesquels la validation n'a pas d'importance (SYM-1767)
+        allByValidationState.removeIf(p -> SQLQuery.class.getCanonicalName().equals(p.getElementClass()));
 
-        table.setItems(FXCollections.observableArrayList(repository.getAllByValidationState(false)));
+        table.setItems(FXCollections.observableArrayList(allByValidationState));
 
         choiceBox.setConverter(new StringConverter<Choice>() {
 
@@ -234,8 +240,10 @@ public class FXValidationPane extends BorderPane {
             case VALID: requiredList = repository.getAllByValidationState(true); break;
             case INVALID: requiredList = repository.getAllByValidationState(false); break;
             case ALL:
-            default: requiredList= repository.getValidation();
+            default: requiredList = repository.getValidation();
         }
+        // retrait de la liste des éléments pour lesquels la validation n'a pas d'importance (SYM-)
+        requiredList.removeIf(p -> SQLQuery.class.getCanonicalName().equals(p.getElementClass()));
         table.setItems(FXCollections.observableArrayList(requiredList));
     }
 
