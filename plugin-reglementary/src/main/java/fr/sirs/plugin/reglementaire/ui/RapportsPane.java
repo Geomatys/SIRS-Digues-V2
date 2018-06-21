@@ -255,6 +255,7 @@ public class RapportsPane extends BorderPane {
         final Path previous = getPreviousPath();
         if (previous != null) {
             chooser.setInitialDirectory(previous.toFile());
+            chooser.setInitialFileName(".odt");
         }
         final File file = chooser.showSaveDialog(null);
         if(file==null) return;
