@@ -110,11 +110,22 @@ public class FicheSectionRapport extends AbstractSectionRapport {
         return null;
     }
 
+    /**
+     * 
+     * @param ctx
+     * @throws Exception 
+     */
     @Override
     public void printSection(final PrintContext ctx) throws Exception {
+        
         if (ctx.elements == null && ctx.queryResult == null) {
             return;
         }
+        
+        
+        /*
+        A- récupération du modèle de fiche
+        =================================*/
 
         // Find ODT template
         if (modeleElementId.get() == null)
@@ -127,6 +138,11 @@ public class FicheSectionRapport extends AbstractSectionRapport {
             throw new IllegalStateException("No ODT template available.");
         }
 
+        
+        /*
+        B- détermination des éléments à imprimer
+        =======================================*/
+        
         final Iterator iterator;
         if (ctx.elements != null) {
             // Print only elements managed by underlying model.

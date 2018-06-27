@@ -1424,45 +1424,94 @@ public class ODTUtils {
         return style;
     }
 
-    public static Task generateReport(final ModeleRapport report, final Collection<? extends Element> elements, final Path output, String title) {
+    /**
+     * Génération d'un rapport.
+     * 
+     * @param reportModel modèle de rapport contenant la description des différentes sections à inclure
+     * @param elements éléments candidats à l'inclusion dans le rapport
+     * @param output
+     * @param title titre du rapport, si le titre est null ou vide, c'est le titre du modèle de rapport qui sera utilisé
+     * @return 
+     */
+    public static Task generateReport(final ModeleRapport reportModel, final Collection<? extends Element> elements, final Path output, String title) {
+        
+        /*
+        A- détermination d'un titre
+        ===========================*/
+        
         final String titre;
         if (title == null || title.isEmpty()) {
-            titre = report.getLibelle();
+            titre = reportModel.getLibelle();
         } else {
             titre = title;
         }
 
+        
+        /*
+        B- construction et lancement de la tâche de génération
+        =====================================================*/
+        
         return TaskManager.INSTANCE.submit(new Task() {
             @Override
             protected Object call() throws Exception {
+                
+                
                 updateTitle("Génération de rapport" + (titre != null ? " (" + titre + ")" : ""));
-                final ObservableList<AbstractSectionRapport> sections = report.getSections();
+                
+                
+                /*
+                1- récupération des différentes sections du rapport
+                --------------------------------------------------*/
+                
+                final ObservableList<AbstractSectionRapport> sections = reportModel.getSections();
+                
+                
+                /*
+                2- initialisation des paramètres de suivi de la progression de la tâche
+                -----------------------------------------------------------------------*/
                 final long totalWork = elements == null? -1 : elements.size() * sections.size();
                 final AtomicLong currentWork = new AtomicLong(-1);
 
+                
+                /*
+                3- création et remplissage du document section par section
+                ---------------------------------------------------------*/
+                
                 // on crée le document de rapport
                 try (final TextDocument headerDoc = TextDocument.newTextDocument()) {
+                    
+                    // a- titre du rapport
                     if (titre != null && !titre.isEmpty()) {
                         final Paragraph paragraph = headerDoc.addParagraph(titre);
                         paragraph.applyHeading();
                     }
 
+                    // b- parcours des sections pour impression au fur et à mesure
                     // on aggrege chaque section
                     AbstractSectionRapport section;
                     long expectedWork;
                     for (int i = 0; i < sections.size(); i++) {
+                        
+                        // récupération de la i-ème section
                         section = sections.get(i);
+                        
+                        // mise à jour du message d'information indiquant l'impression de la section en cours
                         String libelle = section.getLibelle();
                         if (libelle == null || libelle.isEmpty()) {
                             libelle = "sans nom";
                         }
                         updateMessage("Génération de la section : " + libelle);
 
+                        // impression des éléments par la section : l'impression est gérée au cas par cas par le type de section
                         if (elements == null || elements.isEmpty()) {
+                            // cas particulier : on force à null si aucun élément n'est fourni
                             section.print(headerDoc, null);
                         } else {
                             try (final Stream dataStream = elements.stream().peek(input -> updateProgress(currentWork.incrementAndGet(), totalWork))) {
+                                
+                                // délégaton de l'impression au type de section
                                 section.print(headerDoc, dataStream);
+                                
                                 // In case section printing has not used provided stream, we have to update progress manually.
                                 expectedWork = ((long)i + 1) * elements.size() - 1;
                                 if (currentWork.get() != expectedWork) {
