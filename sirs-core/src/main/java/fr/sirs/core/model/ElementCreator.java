@@ -90,7 +90,7 @@ public class ElementCreator {
             constructor.setAccessible(true);
             final T element = constructor.newInstance();
 
-            element.setValid(!ownableSession.needValidationProperty().get());
+            element.setValid(ownableSession.createValidDocuments().get());
             final Utilisateur utilisateur = ownableSession.getUtilisateur();
             if (ownableSession.getUtilisateur() != null) {
                 element.setAuthor(utilisateur.getId());

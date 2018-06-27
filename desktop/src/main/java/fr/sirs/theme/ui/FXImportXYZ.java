@@ -221,7 +221,7 @@ public class FXImportXYZ extends FXAbstractImportPointLeve<PointXYZ> {
             leve.setDesignation(String.valueOf(feature.getPropertyValue(uiAttDesignation.getValue().getName().tip().toString())));
 
             leve.setAuthor(sirsSession.getUtilisateur() == null? null : sirsSession.getUtilisateur().getId());
-            leve.setValid(!sirsSession.needValidationProperty().get());
+            leve.setValid(sirsSession.createValidDocuments().get());
             leves.add(leve);
         }
         return leves;

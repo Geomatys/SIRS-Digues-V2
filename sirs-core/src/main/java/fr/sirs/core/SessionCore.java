@@ -130,7 +130,7 @@ public class SessionCore implements ApplicationContextAware {
      * @return A flag indicating if current user's work must be marked as 'not
      * validated yet'. It means that this user won't be able to modify any data
      * already validated, and it won't be able to edit work of other users.
-     * @deprecated {@link SessionCore#validDocuments().not()}
+     * @deprecated {@link SessionCore#createValidDocuments().not()}
      */
     @Deprecated
     public ReadOnlyBooleanProperty needValidationProperty() {return needValidationProperty;}
@@ -801,6 +801,7 @@ public class SessionCore implements ApplicationContextAware {
      * @return True if current session owner can edit it, false otherwise.
      */
     public boolean editionAuthorized(final Element input) {
-        return !needValidationProperty().get() || (!input.getValid() && getUtilisateur().getId().equals(input.getAuthor()));
+        // les utilisateurs qui peuvent éditer un élément sont ceux qui peuvent en créer de valides OU ceux qui sont l'auteur d'un document invalide.
+        return createValidDocuments().get() || (!input.getValid() && getUtilisateur().getId().equals(input.getAuthor()));
     }
 }
