@@ -246,11 +246,20 @@ public class RapportsPane extends BorderPane {
         }
     }
 
+    /**
+     * Méthode de génération du rapport.
+     * 
+     * @param event 
+     */
     @FXML
     private void generateReport(ActionEvent event) {
         final ModeleRapport report = modelProperty.get();
         if (report == null) return;
 
+        /*
+        A- détermination de l'emplacement du fichier de sortie
+        ======================================================*/
+        
         final FileChooser chooser = new FileChooser();
         final Path previous = getPreviousPath();
         if (previous != null) {
@@ -262,12 +271,23 @@ public class RapportsPane extends BorderPane {
 
         final Path output = file.toPath();
         setPreviousPath(output.getParent());
+        
+        
+        
+        /*
+        B- détermination des paramètres de création de l'obligation réglementaire, le cas échéant
+        =========================================================================================*/
+        
         final RefTypeObligationReglementaire typeObligation = uiTypeObligation.valueProperty().get();
         final RefEtapeObligationReglementaire typeEtape = uiTypeEtape.valueProperty().get();
         final Preview sysEndi = uiSystemEndiguement.valueProperty().get();
         final String titre = uiTitre.getText();
-
-        // Filters
+        
+        
+        /*
+        C- détermination des paramètres de filtrage des éléments sur le tronçon
+        ======================================================================*/
+        
         final LocalDate periodeDebut = uiPeriodeDebut.getValue();
         final LocalDate periodeFin = uiPeriodeFin.getValue();
         final NumberRange dateRange;
@@ -288,12 +308,22 @@ public class RapportsPane extends BorderPane {
             prRange = NumberRange.create(Math.min(prDebut, prFin), true, Math.max(prDebut, prFin), true);
         }
 
+        
+        /*
+        D- création de la tâche générale de création du rapport
+        ======================================================*/
+        
         final Task task;
         task = new Task() {
 
             @Override
             protected Object call() throws Exception {
                 updateTitle("Création d'un rapport");
+                
+                
+                /*
+                1- détermination de la liste des éléments à inclure dans le rapport
+                ------------------------------------------------------------------*/
 
                 // on liste tous les elements a générer
                 updateMessage("Recherche des objets du rapport...");
@@ -333,6 +363,11 @@ public class RapportsPane extends BorderPane {
                         }
                     }
                 }
+                
+                
+                /*
+                2- génération du rapport
+                -----------------------*/
 
                 final Task reportGenerator = ODTUtils.generateReport(report, troncons.isEmpty()? null : elements, output, titre);
                 Platform.runLater(() -> {
@@ -341,6 +376,11 @@ public class RapportsPane extends BorderPane {
                 });
                 reportGenerator.get();
 
+                
+                /*
+                3- création de l'obligation réglementaire
+                ----------------------------------------*/
+                
                 updateProgress(-1, -1);
                 if (uiCreateObligation.isSelected()) {
                     updateMessage("Création de l'obligation réglementaire");
@@ -351,17 +391,20 @@ public class RapportsPane extends BorderPane {
                     final LocalDate date = LocalDate.now();
                     obligation.setAnnee(date.getYear());
                     obligation.setLibelle(titre);
-                    if (sysEndi != null)
+                    if (sysEndi != null){
                         obligation.setSystemeEndiguementId(sysEndi.getElementId());
-                    if (typeObligation != null)
+                    }
+                    if (typeObligation != null){
                         obligation.setTypeId(typeObligation.getId());
+                    }
                     rep.add(obligation);
 
                     final EtapeObligationReglementaire etape = eorr.create();
                     etape.setDateRealisation(date);
                     etape.setObligationReglementaireId(obligation.getId());
-                    if (typeEtape != null)
+                    if (typeEtape != null){
                         etape.setTypeEtapeId(typeEtape.getId());
+                    }
                     eorr.add(etape);
                 }
                 return true;
