@@ -58,6 +58,7 @@ import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.theme.ColumnOrder;
 import fr.sirs.theme.ui.pojotable.ChoiceStage;
 import fr.sirs.theme.ui.pojotable.DeleteColumn;
+import fr.sirs.theme.ui.pojotable.Deletor;
 import fr.sirs.theme.ui.pojotable.DistanceComputedPropertyColumn;
 import fr.sirs.theme.ui.pojotable.EditColumn;
 import fr.sirs.theme.ui.pojotable.ExportAction;
@@ -301,6 +302,9 @@ public class PojoTable extends BorderPane implements Printable {
     protected final StackPane notifier = new StackPane();
 
     protected final StringProperty titleProperty = new SimpleStringProperty();
+    
+    // Default deletor
+    private Consumer deletor;
 
     public PojoTable(final Class pojoClass, final String title) {
         this(pojoClass, title, null);
@@ -340,6 +344,8 @@ public class PojoTable extends BorderPane implements Printable {
         } else {
             this.repo = repo;
         }
+        deletor = new Deletor(createNewProperty, parentElementProperty, ownerElementProperty, this.repo);
+        
         searchRunning.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         searchRunning.setPrefSize(22, 22);
         searchRunning.setStyle("-fx-progress-color: white;");
@@ -1145,23 +1151,6 @@ public class PojoTable extends BorderPane implements Printable {
             new Growl(Growl.Type.WARNING, "Certains éléments n'ont pas été supprimés car vous n'avez pas les droits nécessaires.").showAndFade();
         }
     }
-
-    // Default deletor
-    private Consumer deletor = new Consumer<Element>() {
-
-        @Override
-        public void accept(Element pojo) {
-            if (repo != null && createNewProperty.get()) {
-                repo.remove(pojo);
-            }
-
-            if (parentElementProperty.get() != null) {
-                parentElementProperty.get().removeChild(pojo);
-            }else if(ownerElementProperty.get() != null){
-                ownerElementProperty.get().removeChild(pojo);
-            }
-        }
-    };
 
     // Change the default deletor
     public void setDeletor(final Consumer deletor){
