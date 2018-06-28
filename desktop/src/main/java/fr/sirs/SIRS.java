@@ -100,9 +100,13 @@ public final class SIRS extends SirsCore {
         JTS.setCRS(DEFAULT_TRONCON_GEOM_WGS84, CRS_WGS84);
     }
 
+    public static final String COLOR_INVALID_ICON = "#aa0000";
+    public static final String COLOR_VALID_ICON = "#00aa00";
+    
     public static final Image ICON = new Image(SirsCore.class.getResource("/fr/sirs/icon.png").toString());
 
     public static final Image ICON_ADD_WHITE    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.WHITE),null);
+    public static final Image ICON_ADD_RED    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.decode(COLOR_INVALID_ICON)),null);
     public static final Image ICON_COPY_WHITE   = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COPY_ALIAS,22,Color.WHITE),null);
     public static final Image ICON_ADD_BLACK    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,16,Color.BLACK),null);
     public static final Image ICON_ARROW_RIGHT_BLACK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_ARROW_RIGHT,16,Color.BLACK),null);
@@ -131,9 +135,7 @@ public final class SIRS extends SirsCore {
     public static final Image ICON_VIEWOTHER_WHITE  = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_BARS,22,Color.WHITE),null);
     public static final Image ICON_FILTER_WHITE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_FILTER,22,Color.WHITE),null);
 
-    public static final String COLOR_INVALID_ICON = "#aa0000";
     public static final Image ICON_EXCLAMATION_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_CIRCLE, 16, Color.decode(COLOR_INVALID_ICON)),null);
-    public static final String COLOR_VALID_ICON = "#00aa00";
     public static final Image ICON_CHECK_CIRCLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CHECK_CIRCLE, 16, Color.decode(COLOR_VALID_ICON)),null);
     public static final String COLOR_WARNING_ICON = "#EEB422";
     public static final Image ICON_EXCLAMATION_TRIANGLE = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_EXCLAMATION_TRIANGLE, 16, Color.decode(COLOR_WARNING_ICON)),null);

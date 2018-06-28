@@ -21,12 +21,13 @@ package fr.sirs.theme.ui;
 import fr.sirs.Injector;
 import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.AbstractObservation;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.RefCategorieDesordre;
 import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.core.model.Role;
-import javafx.beans.binding.BooleanBinding;
+import fr.sirs.theme.ui.pojotable.PojoTableExternalAddable;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -75,7 +76,6 @@ public class FXDesordrePane extends FXDesordrePaneStub {
             }
         });
         
-        
         /*
         
         /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\
@@ -83,23 +83,13 @@ public class FXDesordrePane extends FXDesordrePaneStub {
         SYM-1727 : on souhaite que le rôle externe puisse ajouter des observations
         même dans les désordres dont il n'est pas l'auteur.
         
-        Pour cela, il faut commencer par surcharger la création du tableau définie
+        Pour cela, il faut surcharger la création du tableau définie
         dans le constructeur de la classe-mère.
         */
         
         ui_observations.setContent(() -> {
-            observationsTable = new PojoTable(Observation.class, null);
-            /*
-            Dans cette surcharge, on utilise un nouveau binding qui rend le 
-            tableau des observations éditable en permanence quand on est externe. 
-            En effet, dans ce cas on est contraint que le tableau soit éditable 
-            en permanence car de toutes façons le contrôleur d'édition de la 
-            fiche d'un désordre dont l'utilisateur externe courant n'est pas 
-            propriétaire est figé par définition car il ne faut pas qu'il ait la
-            possibilité de rendre la fiche éditable.
-            */
-            final BooleanBinding editableBinding = disableFieldsProperty().not().or(Injector.getSession().roleBinding().isEqualTo(Role.EXTERN));
-            observationsTable.editableProperty().bind(editableBinding);
+            observationsTable = new PojoTableExternalAddable(Observation.class);
+            observationsTable.editableProperty().bind(disableFieldsProperty().not());
             updateObservationsTable(Injector.getSession(), elementProperty.get());
             return observationsTable;
         });

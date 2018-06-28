@@ -51,21 +51,19 @@ import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
-import fr.sirs.core.model.LigneEau;
-import fr.sirs.core.model.PointDZ;
-import fr.sirs.core.model.PointXYZ;
 import fr.sirs.core.model.PointZ;
 import fr.sirs.core.model.Positionable;
-import fr.sirs.core.model.PrZPointImporter;
 import fr.sirs.core.model.Preview;
-import fr.sirs.core.model.ProfilLong;
 import fr.sirs.core.model.SystemeEndiguement;
-import fr.sirs.map.ExportTask;
-import fr.sirs.map.FXMapTab;
 import fr.sirs.theme.ColumnOrder;
-import fr.sirs.theme.ui.PojoTablePointBindings.DXYZBinding;
-import fr.sirs.theme.ui.PojoTablePointBindings.PRXYZBinding;
-import fr.sirs.theme.ui.PojoTablePointBindings.PRZBinding;
+import fr.sirs.theme.ui.pojotable.ChoiceStage;
+import fr.sirs.theme.ui.pojotable.DeleteColumn;
+import fr.sirs.theme.ui.pojotable.DistanceComputedPropertyColumn;
+import fr.sirs.theme.ui.pojotable.EditColumn;
+import fr.sirs.theme.ui.pojotable.ExportAction;
+import fr.sirs.theme.ui.pojotable.ImportAction;
+import fr.sirs.theme.ui.pojotable.ShowOnMapColumn;
+import fr.sirs.theme.ui.pojotable.SimpleCell;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.FXReferenceEqualsOperator;
 import fr.sirs.util.LabelComparator;
@@ -106,7 +104,6 @@ import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
@@ -135,7 +132,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -160,7 +156,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.util.Callback;
@@ -172,15 +167,10 @@ import org.apache.sis.feature.DefaultAttributeType;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.geotoolkit.data.FileFeatureStoreFactory;
-import org.geotoolkit.data.bean.BeanFeatureSupplier;
-import org.geotoolkit.data.bean.BeanStore;
-import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.feature.FeatureTypeBuilder;
 import org.geotoolkit.font.FontAwesomeIcons;
 import org.geotoolkit.font.IconBuilder;
 import org.geotoolkit.gui.javafx.filter.FXFilterBuilder;
-import org.geotoolkit.gui.javafx.util.ButtonTableCell;
 import org.geotoolkit.gui.javafx.util.FXBooleanCell;
 import org.geotoolkit.gui.javafx.util.FXEnumTableCell;
 import org.geotoolkit.gui.javafx.util.FXLocalDateCell;
@@ -190,9 +180,6 @@ import org.geotoolkit.gui.javafx.util.FXStringCell;
 import org.geotoolkit.gui.javafx.util.FXTableView;
 import org.geotoolkit.gui.javafx.util.TaskManager;
 import org.geotoolkit.internal.GeotkFX;
-import org.geotoolkit.map.FeatureMapLayer;
-import org.geotoolkit.map.MapBuilder;
-import org.geotoolkit.storage.DataStores;
 import org.odftoolkit.simple.TextDocument;
 import org.opengis.feature.PropertyType;
 import org.opengis.filter.Filter;
@@ -260,16 +247,16 @@ public class PojoTable extends BorderPane implements Printable {
     private final Button applyFilterBtn = new Button("Filtrer");
 
     // Icônes de la barre d'action
+    protected final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH_WHITE);
 
     // Barre de droite : manipulation du tableau et passage en mode parcours de fiche
     protected final Button uiRefresh = new Button(null, new ImageView(SIRS.ICON_REFRESH_WHITE));
     protected final ToggleButton uiFicheMode = new ToggleButton(null, new ImageView(SIRS.ICON_FILE_WHITE));
-    protected final ImageView searchNone = new ImageView(SIRS.ICON_SEARCH_WHITE);
+    protected final Button uiImport = new Button(null, new ImageView(SIRS.ICON_IMPORT_WHITE));
+    protected final Button uiExport = new Button(null, new ImageView(SIRS.ICON_EXPORT_WHITE));
     protected final Button uiSearch = new Button(null, searchNone);
     protected final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
     protected final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH_WHITE));
-    protected final Button uiImport = new Button(null, new ImageView(SIRS.ICON_IMPORT_WHITE));
-    protected final Button uiExport = new Button(null, new ImageView(SIRS.ICON_EXPORT_WHITE));
     protected final ToggleButton uiFilter = new ToggleButton(null, new ImageView(SIRS.ICON_FILTER_WHITE));
     protected final HBox searchEditionToolbar = new HBox(uiRefresh, uiFicheMode, uiImport, uiExport, uiSearch, uiAdd, uiDelete, uiFilter);
 
@@ -296,8 +283,8 @@ public class PojoTable extends BorderPane implements Printable {
     private final VBox filterContent;
 
     // Colonnes de suppression et d'ouverture d'éditeur.
-    protected final DeleteColumn deleteColumn = new DeleteColumn();
-    protected final EditColumn editCol = new EditColumn(this::editPojo);
+    protected final DeleteColumn deleteColumn = new DeleteColumn(createNewProperty, this::deletePojos, DEFAULT_VALUE_FACTORY, DEFAULT_VISIBLE_PREDICATE);
+    protected final EditColumn editCol = new EditColumn(DEFAULT_VALUE_FACTORY, this::editPojo, DEFAULT_VISIBLE_PREDICATE);
 
     /** The element to set as parent for any created element using {@linkplain #createPojo() }. */
     protected final ObjectProperty<Element> parentElementProperty = new SimpleObjectProperty<>();
@@ -385,29 +372,28 @@ public class PojoTable extends BorderPane implements Printable {
 
         uiTable.getColumns().add(deleteColumn);
         uiTable.getColumns().add((TableColumn) editCol);
-//        uiTable.getColumns().add((TableColumn) new DuplicateColumn());
 
         if(AvecGeometrie.class.isAssignableFrom(pojoClass)){
-            uiTable.getColumns().add(new ShowOnMapColumn());
+            uiTable.getColumns().add(new ShowOnMapColumn(DEFAULT_VALUE_FACTORY, ICON_SHOWONMAP, DEFAULT_VISIBLE_PREDICATE));
         }
 
         try {
             //contruction des colonnes editable
-            final HashMap<String, PropertyDescriptor> properties = SIRS.listSimpleProperties(this.pojoClass);
+            final Map<String, PropertyDescriptor> properties = SIRS.listSimpleProperties(this.pojoClass);
 
             // On enlève les propriétés inutiles pour l'utilisateur
             for (final String key : COLUMNS_TO_IGNORE) {
                 properties.remove(key);
             }
 
-            final ArrayList<String> colNames = new ArrayList<>(properties.keySet());
+            final List<String> colNames = new ArrayList<>(properties.keySet());
             final List<TableColumn> cols = new ArrayList<>();
 
             // On donne toutes les informations de position.
             if (Positionable.class.isAssignableFrom(this.pojoClass)) {
                 final Set<String> positionableKeys = SIRS.listSimpleProperties(Positionable.class).keySet();
                 positionableKeys.remove(SIRS.DESIGNATION_FIELD);
-                final ArrayList<TableColumn> positionColumns = new ArrayList<>();
+                final List<TableColumn> positionColumns = new ArrayList<>();
                 for (final String key : positionableKeys) {
                     getPropertyColumn(properties.remove(key)).ifPresent(column -> {
                         cols.add(column);
@@ -474,8 +460,10 @@ public class PojoTable extends BorderPane implements Printable {
         uiRefresh.getStyleClass().add(BUTTON_STYLE);
         uiRefresh.setOnAction((ActionEvent event) -> updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get()));
 
-        uiAdd.getStyleClass().add(BUTTON_STYLE);
-        uiAdd.setOnAction((ActionEvent event) -> {
+        final EventHandler<ActionEvent> addHandler = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                
             final Element p;
             if(createNewProperty.get()){
                 p = createPojo();
@@ -484,7 +472,8 @@ public class PojoTable extends BorderPane implements Printable {
                 }
             }
             else {
-                final PojoTableChoiceStage<Element> stage = new ChoiceStage();
+                final PojoTableChoiceStage<Element> stage = new ChoiceStage(
+                        PojoTable.this.repo, SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted());
                 stage.showAndWait();
                 p = stage.getRetrievedElement().get();
                 if (p!=null) {
@@ -501,7 +490,11 @@ public class PojoTable extends BorderPane implements Printable {
                     alert.showAndWait();
                 }
             }
-        });
+            }
+        };
+        
+        uiAdd.getStyleClass().add(BUTTON_STYLE);
+        uiAdd.setOnAction(addHandler);
         uiAdd.disableProperty().bind(editableProperty.not());
 
         uiDelete.getStyleClass().add(BUTTON_STYLE);
@@ -597,51 +590,15 @@ public class PojoTable extends BorderPane implements Printable {
         uiImport.disableProperty().bind(editableProperty.not());
         uiImport.visibleProperty().bind(importPointProperty);
         uiImport.managedProperty().bind(importPointProperty);
-        uiImport.setOnAction(event -> {
-            final FXAbstractImportPointLeve importCoord;
-            if(PointXYZ.class.isAssignableFrom(pojoClass)) importCoord = new FXImportXYZ(PojoTable.this);
-            else importCoord = new FXImportDZ(PojoTable.this);
-
-            final Dialog dialog = new Dialog();
-            final DialogPane pane = new DialogPane();
-            pane.getButtonTypes().add(ButtonType.CLOSE);
-            pane.setContent(importCoord);
-            dialog.setDialogPane(pane);
-            dialog.setResizable(true);
-            dialog.setTitle("Import de points");
-            dialog.setOnCloseRequest(event1 -> dialog.hide());
-            dialog.show();
-        });
+        uiImport.setOnAction(new ImportAction(pojoClass, this));
 
         uiExport.getStyleClass().add(BUTTON_STYLE);
         uiExport.disableProperty().bind(Bindings.isNull(uiTable.getSelectionModel().selectedItemProperty()));
-        uiExport.setOnAction(event -> {
-                final DirectoryChooser chooser = new DirectoryChooser();
-                chooser.setTitle(GeotkFX.getString(org.geotoolkit.gui.javafx.contexttree.menu.ExportItem.class, "folder"));
-                final File folder = chooser.showDialog(null);
-
-                if(folder!=null){
-                    try{
-                        final BeanFeatureSupplier sup = getStructBeanSupplier();
-                        final BeanStore store = new BeanStore(sup);
-                        final FeatureMapLayer layer = MapBuilder.createFeatureLayer(store.createSession(false)
-                                .getFeatureCollection(QueryBuilder.all(store.getNames().iterator().next())));
-                        layer.setName(store.getNames().iterator().next().tip().toString());
-
-                        FileFeatureStoreFactory factory = (FileFeatureStoreFactory) DataStores.getFactoryById("csv");
-                        TaskManager.INSTANCE.submit(new ExportTask(layer, folder, factory));
-                    } catch (Exception ex) {
-                        Dialog d = new Alert(Alert.AlertType.ERROR, "Impossible de créer le fichier CSV", ButtonType.OK);
-                        d.setResizable(true);
-                        d.showAndWait();
-                        throw new UnsupportedOperationException("Failed to create csv store : " + ex.getMessage(), ex);
-                    }
-                }
-        });
+        uiExport.setOnAction(new ExportAction(getStructBeanSupplier()));
 
 
         if(PointZ.class.isAssignableFrom(pojoClass)){
-            uiTable.getColumns().add(new DistanceComputedPropertyColumn());
+            uiTable.getColumns().add(new DistanceComputedPropertyColumn(DOUBLE_CELL_FACTORY, parentElementProperty, uiTable));
         }
 
         final HBox titleBoxing = new HBox(uiTitle);
@@ -1566,71 +1523,8 @@ public class PojoTable extends BorderPane implements Printable {
         }
     }
 
-    private static class SimpleCell extends TableCell<Element, Object> {
-
-        private final SirsStringConverter converter = new SirsStringConverter();
-
-        @Override
-        protected void updateItem(Object item, boolean empty) {
-            super.updateItem(item, empty);
-            if (empty || item == null) {
-                setText(null);
-            } else if (item instanceof String) {
-                setText((String) item);
-            } else {
-                setText(converter.toString(item));
-            }
-        }
-    }
-
     private static final Callback<TableColumn<Element, Double>, TableCell<Element, Double>> DOUBLE_CELL_FACTORY = param -> new FXNumberCell(Double.class);
 
-    private class DistanceComputedPropertyColumn extends TableColumn<Element, Double>{
-
-        private boolean titleSet = false;
-
-        public DistanceComputedPropertyColumn(){
-            setCellFactory(DOUBLE_CELL_FACTORY);
-            setEditable(false);
-            setText("Valeur calculée");
-            setCellValueFactory((CellDataFeatures<Element, Double> param) -> {
-                if(param.getValue() instanceof PointXYZ){
-                    // Cas des XYZ de profils en long et des lignes d'eau avec PR calculé
-                    if(parentElementProperty().get() instanceof ProfilLong
-                            || parentElementProperty().get() instanceof LigneEau){
-                        if(!titleSet){setText("PR calculé");titleSet=true;}
-                        return new PRXYZBinding((PointXYZ) param.getValue(), (Positionable) parentElementProperty().get()).asObject();
-                    }
-                    // Cas des XYZ de levés de profils en travers avec distance calculée
-                    else {
-                        final Element origine = getTableView().getItems().get(0);
-                        if(origine instanceof PointXYZ){
-                            if(!titleSet){setText("Distance calculée");titleSet=true;}
-                            return new DXYZBinding((PointXYZ) param.getValue(), (PointXYZ) origine).asObject();
-                        }
-                        else{
-                            // Sinon la colonne ne sert à rien et on la retire dès que possible.
-                            if(uiTable.getColumns().contains(DistanceComputedPropertyColumn.this)) uiTable.getColumns().remove(DistanceComputedPropertyColumn.this);
-                            return null;
-                        }
-                    }
-                }
-
-                // Das des PrZ de profils en long ou lignes d'eau avec PR saisi converti en PR calculé dans le SR par défaut
-                else if(param.getValue() instanceof PointDZ
-                        && parentElementProperty().get() instanceof PrZPointImporter
-                        && parentElementProperty().get() instanceof Positionable){
-                    if(!titleSet){setText("PR calculé"); titleSet=true;}
-                    return new PRZBinding((PointDZ) param.getValue(), (Positionable) parentElementProperty().get()).asObject();
-                }
-                else {
-                    // Sinon la colonne ne sert à rien et on la retire dès que possible.
-                    if(uiTable.getColumns().contains(DistanceComputedPropertyColumn.this)) uiTable.getColumns().remove(DistanceComputedPropertyColumn.this);
-                    return null;
-                }
-            });
-        }
-    }
 
     /**
      * Column used to display / edit simple attributes or references of an element.
@@ -1815,204 +1709,17 @@ public class PojoTable extends BorderPane implements Printable {
         transition.play();
     }
 
-    public class DuplicateColumn<T extends Element> extends TableColumn<T, T> {
-
-        public DuplicateColumn() {
-            super("Dupliquer");
-            setSortable(false);
-            setResizable(false);
-            setPrefWidth(24);
-            setMinWidth(24);
-            setMaxWidth(24);
-            setGraphic(new ImageView(GeotkFX.ICON_DUPLICATE));
-
-            setCellValueFactory((Callback) DEFAULT_VALUE_FACTORY);
-
-            if(pojoClass!=null && repo!=null){
-                setCellFactory(new Callback<TableColumn<T, T>, TableCell<T, T>>() {
-
-                    @Override
-                    public TableCell call(TableColumn param) {
-                        return new ButtonTableCell(
-                                false, new ImageView(GeotkFX.ICON_DUPLICATE),
-                                DEFAULT_VISIBLE_PREDICATE, (Object t) -> {
-                                    if (pojoClass.isAssignableFrom(t.getClass())) {
-                                        final Element newElement = ((T) t).copy();
-                                        repo.add(newElement);
-                                    }
-                                    return t;
-                                });
-                    }
-                });
-            }
-            else setVisible(false);
-        }
-    }
-
-    /**
-     * A column allowing to delete the {@link Element} of a row. Two modes possible :
-     * - Concrete deletion, which remove the element from database
-     * - unlink mode, which dereference element from current list and parent element.
-     */
-    public class DeleteColumn extends TableColumn<Element,Element>{
-
-        public DeleteColumn() {
-            super("Suppression");
-            setSortable(false);
-            setResizable(false);
-            setPrefWidth(24);
-            setMinWidth(24);
-            setMaxWidth(24);
-            setGraphic(new ImageView(GeotkFX.ICON_DELETE));
-
-            final Tooltip deleteTooltip = new Tooltip("Supprimer l'élement");
-            final Tooltip unlinkTooltip = new Tooltip("Dissocier l'élement");
-            setCellValueFactory((Callback)DEFAULT_VALUE_FACTORY);
-            setCellFactory((TableColumn<Element, Element> param) -> {
-                final boolean realDelete = createNewProperty.get();
-                final ButtonTableCell<Element, Element> button = new ButtonTableCell<>(false,
-                        realDelete ? new ImageView(GeotkFX.ICON_DELETE) : new ImageView(GeotkFX.ICON_UNLINK),
-                        DEFAULT_VISIBLE_PREDICATE,
-                        (Element t) -> {
-                            final Alert confirm;
-                            if (realDelete) {
-                                confirm = new Alert(Alert.AlertType.WARNING, "Vous allez supprimer DEFINITIVEMENT l'entrée de la base de données. Êtes-vous sûr ?", ButtonType.NO, ButtonType.YES);
-                            } else {
-                                confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer le lien ?", ButtonType.NO, ButtonType.YES);
-                            }
-                            confirm.setResizable(true);
-                            final Optional<ButtonType> res = confirm.showAndWait();
-                            if (res.isPresent() && ButtonType.YES.equals(res.get())) {
-                                deletePojos(t);
-                                return null;
-                            } else {
-                                return t;
-                            }
-                        });
-
-                if (realDelete) {
-                    button.setTooltip(deleteTooltip);
-                } else {
-                    button.setTooltip(unlinkTooltip);
-                }
-
-                return button;
-            });
-        }
-    }
-
-    /**
-     * A column allowing to show the {@link Element} of a row on the map
-     */
-    public static class ShowOnMapColumn extends TableColumn<Element,Element> {
-
-        public ShowOnMapColumn() {
-            super("Afficher sur la carte");
-            setSortable(false);
-            setResizable(false);
-            setPrefWidth(24);
-            setMinWidth(24);
-            setMaxWidth(24);
-            setGraphic(new ImageView(ICON_SHOWONMAP));
-
-            final Tooltip tooltip = new Tooltip("Voir l'élément sur la carte");
-            setCellValueFactory((Callback)DEFAULT_VALUE_FACTORY);
-            setCellFactory((TableColumn<Element, Element> param) -> {
-                final ButtonTableCell<Element, Element> button = new ButtonTableCell<>(
-                        false,
-                        new ImageView(ICON_SHOWONMAP),
-                        DEFAULT_VISIBLE_PREDICATE,
-                        ShowOnMapColumn::showOnMap);
-                button.setTooltip(tooltip);
-                return button;
-            });
-        }
-
-        public static Element showOnMap(final Element e) {
-            final FXMapTab tab = Injector.getSession().getFrame().getMapTab();
-            tab.getMap().focusOnElement(e);
-            tab.show();
-            return e;
-        }
-    }
-
-    public static class EditColumn extends TableColumn {
-
-        public EditColumn(Function editFct) {
-            super("Edition");
-            setSortable(false);
-            setResizable(false);
-            setPrefWidth(24);
-            setMinWidth(24);
-            setMaxWidth(24);
-            setGraphic(new ImageView(SIRS.ICON_EDIT_BLACK));
-
-            final Tooltip tooltip = new Tooltip("Ouvrir la fiche de l'élément");
-
-            setCellValueFactory(DEFAULT_VALUE_FACTORY);
-
-            setCellFactory(new Callback<TableColumn, TableCell>() {
-
-                @Override
-                public TableCell call(TableColumn param) {
-                    ButtonTableCell button = new ButtonTableCell(
-                            false, new ImageView(SIRS.ICON_EDIT_BLACK),
-                            DEFAULT_VISIBLE_PREDICATE, editFct);
-                    button.setTooltip(tooltip);
-                    return button;
-                }
-            });
-        }
-    }
-
-    private class ChoiceStage extends PojoTableComboBoxChoiceStage<Element, Preview> {
-
-
-        private final ObjectBinding<Element> elementBinding = new ObjectBinding<Element>() {
-
-            {
-                bind(comboBox.getSelectionModel().selectedItemProperty());
-            }
-
-            @Override
-            protected Element computeValue() {
-                if(comboBox.valueProperty()!=null){
-                    final Preview preview = comboBox.valueProperty().get();
-                    if(preview!=null){
-                        return (Element) repo.get(preview.getDocId());
-                    }
-                }
-                return null;
-            }
-        };
-
-        private ChoiceStage(){
-            super();
-            setTitle("Choix de l'élément");
-
-            comboBox.setItems(SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted());
-
-            retrievedElement.bind(elementBinding);
-        }
-    }
-
     /**
      * Change row style according to input {@link Element#validProperty() }.
      */
     private class ValidityRow extends TableRow<Element> {
 
-        final BooleanBinding authorizedBinding;
-        final BooleanBinding editableAndAuthorized;
-        final BooleanBinding editableButNotAuthorized;
-
         ValidityRow() {
-            authorizedBinding = Bindings.createBooleanBinding(() -> getItem() == null? false : session.editionAuthorized(getItem()), itemProperty());
-            editableAndAuthorized = cellEditableProperty.and(authorizedBinding);
-            this.editableProperty().bind(editableAndAuthorized);
+            final BooleanBinding authorizedBinding = Bindings.createBooleanBinding(() -> getItem() == null? false : session.editionAuthorized(getItem()), itemProperty());
+            this.editableProperty().bind(cellEditableProperty.and(authorizedBinding));
             // Hack : Apparently, forbidding row editability is not enough to prevent
             // the contained cells to be edited, so we have to force disability on thes cases.
-            editableButNotAuthorized = cellEditableProperty.and(authorizedBinding.not());
-            this.disableProperty().bind(editableButNotAuthorized);
+            this.disableProperty().bind(cellEditableProperty.and(authorizedBinding.not()));
         }
 
         @Override

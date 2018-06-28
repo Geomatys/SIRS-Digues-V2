@@ -27,6 +27,7 @@ import fr.sirs.Session;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.ReferenceType;
 import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.theme.ui.pojotable.DeleteColumn;
 import fr.sirs.util.FXFreeTab;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,10 +85,7 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
             serverInstanceNotLocal = referenceChecker.getServerInstancesNotLocal().get(pojoClass);
             localInstancesNotOnTheServer = referenceChecker.getLocalInstancesNotOnTheServer().get(pojoClass);
             
-            getColumns().replaceAll((TableColumn<Element, ?> t) -> {
-                    if(t instanceof DeleteColumn) return new StateColumn();
-                    else return t;
-                });
+            getColumns().replaceAll(t ->  t instanceof DeleteColumn ? new StateColumn() : t);
             
             getTable().setRowFactory((TableView<Element> param) -> {
                     return new ReferenceTableRow();

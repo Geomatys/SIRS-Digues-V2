@@ -65,7 +65,7 @@ public class FXImportDZ extends FXAbstractImportPointLeve<PointDZ> {
 
     @FXML private ComboBox<PropertyType> uiAttD;
 
-    FXImportDZ(final PojoTable pojoTable) {
+    public FXImportDZ(final PojoTable pojoTable) {
         super(pojoTable);
 
         uiAttD.setConverter(stringConverter);
