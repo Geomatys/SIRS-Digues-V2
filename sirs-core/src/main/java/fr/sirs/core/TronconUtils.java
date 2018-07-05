@@ -60,7 +60,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -177,56 +176,17 @@ public class TronconUtils {
     }
 
     /**
-     * Méthode d'archivage des tronçons de digue et des objets s'y référant dotés d'une validité temporelle (c'est à dire
-     * implémentant l'interface {@link AvecBornesTemporelles}).
-     *
-     * La procédure d'archivage consiste à affecter une date de fin au tronçon de digue et aux objets archivables qui s'y
-     * réfèrent, à condition qu'ils n'aient pas déjà une date de fin ou, éventuellement, que cette date de fin soit
-     * postérieure à la date d'archivage. Cette dernière condition doit être volontairement activée.
-     *
-     * Cette méthode est implémentée ici de manière à ce que le code d'archivage puisse être capitalisé au fur et à mesure.
-     *
-     * @param section Le tronçon à archiver.
-     * @param session La session à utiliser pour interagir avec la bdd.
-     * @param archiveDate Date d'archivage du tronçon et des objets. Ne doit pas être nul.
-     * @param includeAfter Vrai pour forcer l'archivage des objets dont la date est postérieure à la date d'archive.
-     * @return Rapports d'erreur pour les objets qui n'ont pu être mis à jour en base.
-     * @throws DbAccessException Si le tronçon à mettre à jour ne peut être sauvegardé.
-     */
-    public static List<DocumentOperationResult> archiveSectionWithTemporalObjects(final TronconDigue section,
-            final SessionCore session, final LocalDate archiveDate, final boolean includeAfter) {
-        ArgumentChecks.ensureNonNull("Tronçon à archiver", section);
-        ArgumentChecks.ensureNonNull("Date d'archivage (de fin)", archiveDate);
-        ArgumentChecks.ensureNonNull("Session de données", session);
-
-        /* On n'affecte une date de fin qu'aux objets qui n'en on pas déjà une SAUF si cette dernière est
-         * postérieure à la date d'archivage. Cette condition provient du code initial récupéré de la fusion de
-         * tronçons, avec une date d'archivage fixée à la veille de la date à laquelle est réalisée la fusion.
-         * Mais quelle est la raison pratique de cette condition… ? Difficile à dire.
-         *
-         * Afin de pouvoir paramétrer ce comportement, la condition de postériorité de la date doit donc être
-         * volontairement activée.
-         */
-        final Predicate<AvecBornesTemporelles> updateCondition = input -> {
-            final LocalDate endDate = input.getDate_fin();
-            return endDate == null || (includeAfter && endDate.isAfter(archiveDate));
-        };
-
-        return archiveSectionWithTemporalObjects(section, session, archiveDate, updateCondition);
-    }
-
-    /**
      *
      * @param section The linear object to archive.
      * @param session The session to use for database connection.
      * @param archiveDate Archive date to set (as {@link AvecBornesTemporelles#setDate_fin(java.time.LocalDate) }. If null, the linear and
      * its related data will be unarchived.
-     * @param updateCondition Update only objects matching this predicate (for which {@link Predicate#test(java.lang.Object) } is true.
+     * @param filter Update only objects matching this predicate (for which {@link Predicate#test(java.lang.Object) } is true.
      * @return The list of update failures. Not that if the linear itself cannot be updated, an exception will be thrown.
      * @throws DbAccessException If the given linear object cannot be updated.
      */
     public static List<DocumentOperationResult> archiveSectionWithTemporalObjects(final TronconDigue section,
-            final SessionCore session, final LocalDate archiveDate, final Predicate<AvecBornesTemporelles> updateCondition) {
+            final SessionCore session, final LocalDate archiveDate, final Predicate<AvecBornesTemporelles> filter) {
 
         // First we update linear object. If it fails, it's no use to continue.
         section.setDate_fin(archiveDate);
@@ -236,11 +196,6 @@ public class TronconUtils {
         } else {
             tdRepo.update(section);
         }
-
-        final Consumer<AvecBornesTemporelles> setArchiveDate = dated -> dated.setDate_fin(archiveDate);
-
-        
-        final List<TronconDigue> allTroncons = session.getRepositoryForClass(TronconDigue.class).getAll();
         
         
         /* To avoid memory nor processing overload, we manually process and update
@@ -248,25 +203,26 @@ public class TronconUtils {
          * to get all objects to update, but it put all of them in memory, and the
          * session bulk is forced to sort them before updating them in database.
          */
-        final String linearId = section.getId();
-        final Function<
-                AbstractPositionableRepository,
-                Map.Entry<AbstractPositionableRepository, List<? extends AvecBornesTemporelles>>
-                > extractAndUpdate = repo -> {
-            final List linears = repo.getByLinearId(linearId);
-            linears.removeIf(updateCondition.negate());
-            linears.forEach(setArchiveDate);
-            return new AbstractMap.SimpleEntry<>(repo, linears);
-        };
-
-        List updateResponses = session.getRepositoriesForClass(AvecBornesTemporelles.class).stream()
+        return session.getRepositoriesForClass(AvecBornesTemporelles.class).stream()
                 .filter(AbstractPositionableRepository.class::isInstance)
                 .map(AbstractPositionableRepository.class::cast)
-                .map(extractAndUpdate)
-                .map(entry -> entry.getKey().executeBulk(entry.getValue()))
-                .flatMap(List::stream)
+                .map(repo -> {
+                    final List linears = repo.getByLinearId(section.getId());
+                    linears.removeIf(filter.negate());
+                    linears.forEach(dated -> ((AvecBornesTemporelles)dated).setDate_fin(archiveDate));
+                    return repo.executeBulk(linears);
+                })
+                .flatMap(List<DocumentOperationResult>::stream)
                 .collect(Collectors.toList());
-
+    }
+    
+    public static List<DocumentOperationResult> archiveBornes(final Collection<String> borneIds,
+            final SessionCore session, final LocalDate archiveDate, final Predicate<AvecBornesTemporelles> updateCondition) {
+        
+        
+        final List<TronconDigue> allTroncons = session.getRepositoryForClass(TronconDigue.class).getAll();
+        
+        final Consumer<AvecBornesTemporelles> setArchiveDate = dated -> dated.setDate_fin(archiveDate);
         
         /*
         Predicate over milestones must always return true when unarchiving, 
@@ -304,56 +260,14 @@ public class TronconUtils {
         };
         
         final AbstractSIRSRepository<BorneDigue> borneRepo = session.getRepositoryForClass(BorneDigue.class);
-        // TODO : check if bornes are used by another linear ? Doing it would cause a
-        // big performance loss, for a case which is possible but has never been encountered yet.
-        // Maj : Explicitly required by SYM-1692 and implemented.
-        final List<BorneDigue> bornes = borneRepo.get(section.getBorneIds()).stream()
+        
+        final List<BorneDigue> bornes = borneRepo.get(borneIds).stream()
                 .filter(updateCondition)
                 .filter(unarchive.or(referencedByUnarchivedSection.negate()))
                 .peek(setArchiveDate)
                 .collect(Collectors.toList());
-        updateResponses.addAll(borneRepo.executeBulk(bornes));
-
-        return updateResponses;
-    }
-
-    /**
-     * Méthode de mise à jour de l'archivage d'un tronçon avec les objets qui le référencent.
-     *
-     * D'après la demande explicite de Jordan Perrin (SYM-1444), les objets dont la date de fin est identique à l'ancienne
-     * date d'archivage du tronçon, voient alors leur nouvelle date de fin modifiée de manière à suivre celle du tronçon
-     * (voir commentaire du 22/05/2017 15:10).
-     *
-     * @param section
-     * @param session
-     * @param oldArchiveDate
-     * @param archiveDate
-     * @return Rapports de mise à jour en base du tronçon et des objets.
-     */
-    public static List<DocumentOperationResult> updateArchiveSectionWithTemporalObjects(final TronconDigue section,
-            final SessionCore session, final LocalDate oldArchiveDate, final LocalDate archiveDate){
-
-        final Predicate<AvecBornesTemporelles> updateCondition = dated
-                -> dated.getDate_fin()==null || dated.getDate_fin().isEqual(oldArchiveDate);
-        return archiveSectionWithTemporalObjects(section, session, archiveDate, updateCondition);
-    }
-
-    /**
-     * Méthode de désarchivage d'un tronçon et des objets qui le référencent.
-     *
-     * @param section
-     * @param session
-     * @param initialArchiveDate Date d'archivage des objets référençant le tronçon qui doivent être désarchivés.
-     * @return Rapports de mise à jour en base du tronçon et des objets.
-     */
-    public static List<DocumentOperationResult> unarchiveSectionWithTemporalObjects(final TronconDigue section, final SessionCore session, final LocalDate initialArchiveDate) {
-        ArgumentChecks.ensureNonNull("Date d'archivage (de fin) initiale (à supprimer)", initialArchiveDate);
-        final Predicate<AvecBornesTemporelles> updateCondition = dated -> {
-            final LocalDate date = dated.getDate_fin();
-            return date != null && date.isEqual(initialArchiveDate);
-        };
-
-        return archiveSectionWithTemporalObjects(section, session, null, updateCondition);
+        
+        return borneRepo.executeBulk(bornes);
     }
 
 

@@ -24,7 +24,6 @@ import fr.sirs.Printable;
 import fr.sirs.SIRS;
 import fr.sirs.Session;
 import static fr.sirs.core.SirsCore.MODEL_PACKAGE;
-import fr.sirs.core.component.SQLQueryRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.ReferenceType;
