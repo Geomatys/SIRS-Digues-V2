@@ -94,6 +94,7 @@ import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,6 +122,7 @@ import org.geotoolkit.data.query.QueryBuilder;
 import org.geotoolkit.display2d.GO2Utilities;
 import org.geotoolkit.display2d.ext.graduation.GraduationSymbolizer;
 import org.geotoolkit.filter.DefaultLiteral;
+import org.geotoolkit.filter.DefaultPropertyName;
 import org.geotoolkit.geometry.jts.JTS;
 import org.geotoolkit.map.FeatureMapLayer;
 import org.geotoolkit.map.MapBuilder;
@@ -910,6 +912,16 @@ public class CorePlugin extends Plugin {
     public static MutableStyle createDefaultStyle(Color col) {
         return createDefaultStyle(col, null);
     }
+    
+    // règle de style pour les points de début et de fin
+    // test et préparation pour SYM-1776
+    private static MutableRule createExactPositinRule(final String name, final String geometryProperty, final Color col, final Expression wellKnownName){
+        return SF.rule(SF.pointSymbolizer(name, geometryProperty, DEFAULT_DESCRIPTION, Units.POINT, 
+                SF.graphic(Arrays.asList(SF.mark(wellKnownName, SF.fill(Color.WHITE), SF.stroke(col, 4))), 
+                        LITERAL_ONE_FLOAT, GO2Utilities.FILTER_FACTORY.literal(20), LITERAL_ONE_FLOAT, DEFAULT_ANCHOR_POINT, DEFAULT_DISPLACEMENT)),
+                SF.textSymbolizer(SF.fill(col), DEFAULT_FONT, SF.halo(Color.WHITE, 2), FF.property("designation"), 
+                        StyleConstants.DEFAULT_POINTPLACEMENT, geometryProperty));
+    }
 
     public static MutableStyle createDefaultStyle(Color col, final String geometryName) {
         final Stroke line1Stroke = SF.stroke(SF.literal(col),LITERAL_ONE_FLOAT,GO2Utilities.FILTER_FACTORY.literal(8),
@@ -922,7 +934,11 @@ public class CorePlugin extends Plugin {
                 STROKE_JOIN_BEVEL, STROKE_CAP_ROUND, null,LITERAL_ZERO_FLOAT);
         final LineSymbolizer line2 = SF.lineSymbolizer("symbol",
                 geometryName,DEFAULT_DESCRIPTION,Units.POINT,line2Stroke,LITERAL_ZERO_FLOAT);
-
+        
+        // test et préparation pour SYM-1776
+        final MutableRule start = createExactPositinRule("start", "positionDebut", col, StyleConstants.MARK_CIRCLE);
+        final MutableRule end = createExactPositinRule("end", "positionFin", col, StyleConstants.MARK_CIRCLE);
+        
         //the visual element
         final Expression size = GO2Utilities.FILTER_FACTORY.literal(16);
 
@@ -953,6 +969,9 @@ public class CorePlugin extends Plugin {
         );
 
         final MutableFeatureTypeStyle fts = SF.featureTypeStyle();
+        // test et préparation pour SYM-1776
+//        fts.rules().add(start);
+//        fts.rules().add(end);
         fts.rules().add(ruleLongObjects);
         fts.rules().add(ruleSmallObjects);
 
