@@ -207,6 +207,7 @@ public class FXParameterGroupPane extends BorderPane {
      */
     protected Optional<Node> getValueEditor(final ParameterValue value) {
         final ParameterDescriptor descriptor = value.getDescriptor();
+        System.out.println("C'EST MOI QUI M'OUVRE ET PAS GEOTK !!!!!!");
 
         Optional<FXValueEditor> opt = FXValueEditorSpi.findEditor(descriptor);
         if (opt.isPresent()) {
