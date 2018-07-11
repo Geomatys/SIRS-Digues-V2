@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import org.apache.sis.util.ArgumentChecks;
 import org.apache.sis.util.collection.Cache;
