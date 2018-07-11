@@ -704,8 +704,8 @@ public class PojoTable extends BorderPane implements Printable {
         if (uiTable.getSelectionModel().getSelectedIndex() < 0) {
             uiTable.getSelectionModel().select(0);
         }
-
-        setCenter(SIRS.generateEditionPane(uiTable.getSelectionModel().getSelectedItem()));
+        
+        setCenter(SIRS.generateEditionPane(uiTable.getSelectionModel().getSelectedItem(), SIRS.EDITION_PREDICATE));
 
         uiCurrent.setText("" + (uiTable.getSelectionModel().getSelectedIndex()+1) + " / " + uiTable.getItems().size());
     }
