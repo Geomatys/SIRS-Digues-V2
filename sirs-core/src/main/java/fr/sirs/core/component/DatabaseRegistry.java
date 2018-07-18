@@ -429,7 +429,7 @@ public class DatabaseRegistry {
      * @throws IllegalArgumentException If databases are incompatible (different SRID, or distant bdd is not a SIRS one).
      * @throws DbAccessException If an error occcurs during replication.
      */
-    public List<ReplicationStatus> synchronizeSirsDatabases(String remoteDb, final String localDb, boolean continuous) throws IOException {
+    public List<ReplicationStatus> synchronizeSirsDatabases(final String remoteDb, final String localDb, boolean continuous) throws IOException {
         Optional<SirsDBInfo> distantInfo = getInfo(remoteDb);
         if (!distantInfo.isPresent()) {
             throw new IllegalArgumentException(new StringBuilder("Impossible de trouver une base de données à l'adresse suivante : ")
@@ -476,25 +476,26 @@ public class DatabaseRegistry {
 
         // Force authentication on distant database. We can rely on wallet information
         // because a connection should have been opened already to retrieve SIRS information.
-        remoteDb = addAuthenticationInformation(remoteDb);
+        final String remoteAuthDb = addAuthenticationInformation(remoteDb);
+        final String localAuthDb = addAuthenticationInformation(localDb);
 
         final List<ReplicationStatus> result = new ArrayList<>(2);
         try {
-            final ReplicationStatus status = copyDatabase(remoteDb, localDb, continuous);
+            final ReplicationStatus status = copyDatabase(remoteAuthDb, localAuthDb, continuous);
             if (status != null) {
                 result.add(status);
             }
         } catch (DbAccessException e) {
-            checkReplicationError(e, remoteDb, localDb);
+            checkReplicationError(e, remoteAuthDb, localAuthDb);
         }
 
         try {
-            final ReplicationStatus status = copyDatabase(localDb, remoteDb, continuous);
+            final ReplicationStatus status = copyDatabase(localAuthDb, remoteAuthDb, continuous);
             if (status != null) {
                 result.add(status);
             }
         } catch (DbAccessException e) {
-            checkReplicationError(e, localDb, remoteDb);
+            checkReplicationError(e, localAuthDb, remoteAuthDb);
         }
 
         // Update local database information : remote db.
@@ -535,7 +536,7 @@ public class DatabaseRegistry {
         if (count < 1) {
             throw e;
         } else {
-            SirsCore.LOGGER.log(Level.FINE, e, () -> new StringBuilder("An error occured during a replication from ").append(sourceDb).append(" to ").append(targetDb).toString());
+            SirsCore.LOGGER.log(Level.FINE, e, () -> String.format("An error occured during a replication from %s to %s", sourceDb, targetDb));
         }
     }
 

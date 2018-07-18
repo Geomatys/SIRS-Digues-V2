@@ -68,7 +68,7 @@ public class DatabaseRegistryTestCase extends CouchDBTestCase {
     public void getSynchronizationTask() throws IOException, InterruptedException {
         Thread.sleep(4000l);
         final List<ReplicationTask> collect = REGISTRY.getSynchronizationTasks(SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR)+REPLICATION_DEST).collect(Collectors.toList());
-        Assert.assertEquals(1, collect.size());
+        Assert.assertEquals(2, collect.size());
     }
 
     @DependsOnMethod("getSynchronizationTask")
