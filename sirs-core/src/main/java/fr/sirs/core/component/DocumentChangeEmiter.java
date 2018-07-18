@@ -132,20 +132,22 @@ public class DocumentChangeEmiter {
         Set<String> removedElements = new HashSet<>();
 
         while (!currentThread.isInterrupted()) {
-            final DocumentChange change = feed.next(BULK_TIME, BULK_UNIT);
-            if (change == null)
-                break;
+            if(feed.isAlive()){
+                final DocumentChange change = feed.next(BULK_TIME, BULK_UNIT);
+                if (change == null)
+                    break;
 
-            try {
-                if (change.isDeleted()) {
-                    removedElements.add(change.getId());
-                } else if (FIRST_REVISION.matcher(change.getRevision()).find()) {
-                    DocHelper.toElement(change.getDoc()).ifPresent((Element e) -> putElement(e, tmpAddedElements));
-                } else {
-                    DocHelper.toElement(change.getDoc()).ifPresent((Element e) -> putElement(e, tmpChangedElements));
+                try {
+                    if (change.isDeleted()) {
+                        removedElements.add(change.getId());
+                    } else if (FIRST_REVISION.matcher(change.getRevision()).find()) {
+                        DocHelper.toElement(change.getDoc()).ifPresent((Element e) -> putElement(e, tmpAddedElements));
+                    } else {
+                        DocHelper.toElement(change.getDoc()).ifPresent((Element e) -> putElement(e, tmpChangedElements));
+                    }
+                } catch (Exception e) {
+                    SirsCore.LOGGER.log(Level.WARNING, "An error occurred while analyzing a database change. Change will be ignored.", e);
                 }
-            } catch (Exception e) {
-                SirsCore.LOGGER.log(Level.WARNING, "An error occurred while analyzing a database change. Change will be ignored.", e);
             }
         }
 
