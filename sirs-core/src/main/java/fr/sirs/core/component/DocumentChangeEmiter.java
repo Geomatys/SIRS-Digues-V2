@@ -127,8 +127,8 @@ public class DocumentChangeEmiter {
     private void handleChanges(ChangesFeed feed) throws InterruptedException {
 
         final Thread currentThread = Thread.currentThread();
-        final HashMap<Class, List<Element>> tmpAddedElements = new HashMap<>();
-        final HashMap<Class, List<Element>> tmpChangedElements = new HashMap<>();
+        final Map<Class, List<Element>> tmpAddedElements = new HashMap<>();
+        final Map<Class, List<Element>> tmpChangedElements = new HashMap<>();
         Set<String> removedElements = new HashSet<>();
 
         while (!currentThread.isInterrupted()) {

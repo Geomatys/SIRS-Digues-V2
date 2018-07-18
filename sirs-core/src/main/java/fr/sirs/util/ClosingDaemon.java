@@ -24,8 +24,6 @@ import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 
 /**
  * A daemon which will run in background, closing all resources submitted.

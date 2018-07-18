@@ -402,6 +402,4 @@ public class ObjectTable extends BorderPane {
             });
         }
     }
-
-
 }

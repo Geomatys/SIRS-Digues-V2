@@ -20,6 +20,7 @@ package fr.sirs;
 
 import fr.sirs.core.SirsDBInfo;
 import fr.sirs.core.component.DatabaseRegistry;
+import fr.sirs.util.property.SirsPreferences;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -88,7 +89,8 @@ public class FXSplashscreen {
 
         TaskManager.INSTANCE.submit(task);
 
-        TaskManager.MockTask<Set<String>> task2 = new TaskManager.MockTask<>("", () -> registry.getSynchronizationTasks(databaseName)
+        TaskManager.MockTask<Set<String>> task2 = new TaskManager.MockTask<>("", () -> 
+                registry.getSynchronizationTasks(SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR)+databaseName)
                 .map(status -> {
                     if (status.getSourceDatabaseName().equals(databaseName)) {
                         return DatabaseRegistry.cleanDatabaseName(status.getTargetDatabaseName());

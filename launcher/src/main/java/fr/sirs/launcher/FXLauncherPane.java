@@ -159,11 +159,11 @@ public class FXLauncherPane extends BorderPane {
 
     // onglet base distantes
     @FXML
-    private TextField uiDistantName;
-    @FXML
     private TextField uiDistantUrl;
     @FXML
     private CheckBox uiDistantSync;
+    @FXML
+    private TextField uiLocalName;
     @FXML
     private VBox uiSynchroRunning;
 
@@ -320,7 +320,7 @@ public class FXLauncherPane extends BorderPane {
             }
         });
 
-        uiDistantName.textProperty().addListener(dbNameFormat);
+        uiLocalName.textProperty().addListener(dbNameFormat);
         uiImportName.textProperty().addListener(dbNameFormat);
         uiNewName.textProperty().addListener(dbNameFormat);
 
@@ -456,16 +456,16 @@ public class FXLauncherPane extends BorderPane {
 
     @FXML
     void connectDistant(ActionEvent event) {
-        if (uiDistantName.getText().trim().isEmpty()) {
+        if (uiLocalName.getText().trim().isEmpty()) {
             final Alert alert = new Alert(Alert.AlertType.ERROR, "Veuillez remplir le nom de la base de donnée.", ButtonType.OK);
             alert.setResizable(true);
             alert.showAndWait();
             return;
         }
 
-        final String distantUrl = uiDistantUrl.getText();
         final Task t = new TaskManager.MockTask("", () -> {
-            localRegistry.synchronizeSirsDatabases(distantUrl, uiDistantName.getText(), uiDistantSync.isSelected());
+            localRegistry.synchronizeSirsDatabases(uiDistantUrl.getText(), 
+                    SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR)+uiLocalName.getText(), uiDistantSync.isSelected());
             return true;
         });
 
@@ -945,7 +945,7 @@ public class FXLauncherPane extends BorderPane {
                                 || ButtonType.YES.equals(alert.showAndWait().get())) {
 
                                     final TaskManager.MockTask<org.ektorp.ReplicationStatus> copyTask = new TaskManager.MockTask("Copie de base de données", () -> {
-                                        return localRegistry.copyDatabase(sourceDb, destDbName);
+                                        return localRegistry.copyDatabase(sourceDb, destDbName, false);
                                     });
 
                                     final FXLoadingPane loading = new FXLoadingPane(copyTask);
