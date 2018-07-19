@@ -140,10 +140,13 @@ public class DocumentChangeEmiter {
                 try {
                     if (change.isDeleted()) {
                         removedElements.add(change.getId());
-                    } else if (FIRST_REVISION.matcher(change.getRevision()).find()) {
+                    } else if (change.getRevision()!=null && FIRST_REVISION.matcher(change.getRevision()).find()) {
                         DocHelper.toElement(change.getDoc()).ifPresent((Element e) -> putElement(e, tmpAddedElements));
-                    } else {
+                    } else if(change.getDoc()!=null) {
                         DocHelper.toElement(change.getDoc()).ifPresent((Element e) -> putElement(e, tmpChangedElements));
+                    }
+                    else {
+                        SirsCore.LOGGER.log(Level.WARNING, String.format("Unknown change detected that is neither deletion, creation or document update"));
                     }
                 } catch (Exception e) {
                     SirsCore.LOGGER.log(Level.WARNING, "An error occurred while analyzing a database change. Change will be ignored.", e);
