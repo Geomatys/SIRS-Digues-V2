@@ -21,13 +21,16 @@ package fr.sirs.couchdb2;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.ektorp.ReplicationTask;
 import org.ektorp.impl.StdActiveTask;
+import org.ektorp.impl.StdReplicationTask;
 
 /**
+ * Remplacement de la tâche de réplication de couchDB 1 par une nouvelle implémentation supportant l'API REST de couchDB 2.
  *
  * @author Samuel Andrés (Geomatys)
+ * @see StdReplicationTask
  */
 public class Couchdb2ReplicationTask extends StdActiveTask implements ReplicationTask {
-
+    
     private String replicationId;
     private String replicationDocumentId;
     private boolean isContinuous;
@@ -38,9 +41,9 @@ public class Couchdb2ReplicationTask extends StdActiveTask implements Replicatio
     private long totalRevisionsChecked;
     private String sourceDatabase;
     private String targetDatabase;
-    private String sourceSequenceId;
+    private String sourceSequenceId; // nouveau type dans couchDB 2 : chaîne de caractères à la place d'un entier
     private Long checkpointInterval;
-    private String checkpointedSourceSequenceId;
+    private String checkpointedSourceSequenceId; // nouveau type dans couchDB 2 : chaîne de caractères à la place d'un entier
 
     @Override
     public String getReplicationId() {
@@ -172,11 +175,11 @@ public class Couchdb2ReplicationTask extends StdActiveTask implements Replicatio
 
     @Override
     public Long getCheckpointInterval() {
-            return checkpointInterval;
+        return checkpointInterval;
     }
 
     @JsonProperty(required = false, value = "checkpoint_interval")
     public void setCheckpointInterval(Long checkpointInterval) {
-            this.checkpointInterval = checkpointInterval;
+        this.checkpointInterval = checkpointInterval;
     }
 }

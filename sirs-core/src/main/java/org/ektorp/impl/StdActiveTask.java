@@ -11,15 +11,17 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import fr.sirs.couchdb2.Couchdb2ReplicationTask;
 
 /**
+ * Branchement de la réplication sur une tâche spécifiquement implémentée pour le support de couchDB 2.
  * 
- * @author Samuel Andrés (override)
+ * @author Samuel Andrés (Geomatys) [surcharge de la classe correspondante d'Ektorp]
+ * @see Couchdb2ReplicationTask
  */
 @JsonTypeInfo(
    use = JsonTypeInfo.Id.NAME,
    include = JsonTypeInfo.As.PROPERTY,
    property = "type")
 @JsonSubTypes({
-   @Type(value = Couchdb2ReplicationTask.class, name = "replication"),
+   @Type(value = Couchdb2ReplicationTask.class, name = "replication"), // implémentation spécifique aux tâches de réplication
    @Type(value = StdIndexerTask.class, name = "indexer"),
    @Type(value = StdDatabaseCompactionTask.class, name = "database_compaction"),
    @Type(value = StdViewCompactionTask.class, name = "view_compaction") })
