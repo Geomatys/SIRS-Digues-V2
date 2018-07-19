@@ -268,6 +268,15 @@ public class DatabaseRegistry {
             hostPattern = Pattern.compile("(?i)^([A-Za-z]+://)?([^@]+@)?"+couchDbUrl.getHost()+"(:"+portToUse+")?");
         }
     }
+    
+    public CouchSGBD getSGBDInfo(){
+        if(couchDbInstance!=null){
+        return ((StdCouchDb2Instance) couchDbInstance).getSGBDInfo();
+        }
+        else {
+            throw new IllegalStateException("aucune instance de CouchDB n'est connectée");
+        }
+    }
 
     /**
      * @return User name used to log in current CouchDb service. Can be null or empty.
@@ -325,7 +334,7 @@ public class DatabaseRegistry {
         couchDbInstance = new StdCouchDb2Instance(builder.build(), SirsPreferences.INSTANCE.getProperty(NODE_NAME));
         couchDbInstance.getAllDatabases();
     }
-
+    
     /**
      * List SIRS application databases found on current CouchDb server.
      * @return The name of all databases which contain SIRS data.

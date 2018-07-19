@@ -1,3 +1,21 @@
+/**
+ * This file is part of SIRS-Digues 2.
+ *
+ * Copyright (C) 2016, FRANCE-DIGUES,
+ *
+ * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
+ */
 package org.ektorp.impl;
 
 import static java.lang.String.*;
@@ -8,6 +26,7 @@ import java.util.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.sirs.core.component.CouchSGBD;
 
 import org.ektorp.*;
 import org.ektorp.http.*;
@@ -27,142 +46,162 @@ import org.slf4j.*;
  */
 public class StdCouchDb2Instance implements CouchDbInstance {
 
-	private final static Logger LOG = LoggerFactory.getLogger(StdCouchDb2Instance.class);
-	private final static TypeReference<List<String>> STRING_LIST_TYPE_DEF = new TypeReference<List<String>>() {};
+    private final static Logger LOG = LoggerFactory.getLogger(StdCouchDb2Instance.class);
+    private final static TypeReference<List<String>> STRING_LIST_TYPE_DEF = new TypeReference<List<String>>() {};
 
-	private final HttpClient client;
-	private final RestTemplate restTemplate;
-	private final ObjectMapper objectMapper;
-	private final ObjectMapperFactory objectMapperFactory;
-        private final String nodeName;
+    private final HttpClient client;
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
+    private final ObjectMapperFactory objectMapperFactory;
+    private final String nodeName;
 
-	public StdCouchDb2Instance(HttpClient client, String nodeName) {
-		this(client, new StdObjectMapperFactory(), nodeName);
-	}
+    public StdCouchDb2Instance(HttpClient client, String nodeName) {
+            this(client, new StdObjectMapperFactory(), nodeName);
+    }
 
-	public StdCouchDb2Instance(HttpClient client, ObjectMapperFactory of, String nodeName) {
-            Assert.notNull(client, "HttpClient may not be null");
-            Assert.notNull(of, "ObjectMapperFactory may not be null");
-            this.client = client;
-            this.restTemplate = new RestTemplate(client);
-            this.objectMapper = of.createObjectMapper();
-            this.objectMapperFactory = of;
-            this.nodeName = nodeName;
-	}
+    public StdCouchDb2Instance(HttpClient client, ObjectMapperFactory of, String nodeName) {
+        Assert.notNull(client, "HttpClient may not be null");
+        Assert.notNull(of, "ObjectMapperFactory may not be null");
+        this.client = client;
+        this.restTemplate = new RestTemplate(client);
+        this.objectMapper = of.createObjectMapper();
+        this.objectMapperFactory = of;
+        this.nodeName = nodeName;
+    }
 
-	public ObjectMapperFactory getObjectMapperFactory() {
-            return objectMapperFactory;
-	}
-
-        @Override
-	public void createDatabase(String path) {
-            createDatabase(DbPath.fromString(path));
-	}
-
-        @Override
-	public void createDatabase(DbPath db) {
-            if (!createDatabaseIfNotExists(db)) {
-                throw new DbAccessException(format("A database with path %s already exists", db.getPath()));
+    public ObjectMapperFactory getObjectMapperFactory() {
+        return objectMapperFactory;
+    }
+    
+    /**
+     * Récupération des informations du SGBD.
+     * 
+     * @return 
+     */
+    public CouchSGBD getSGBDInfo(){
+        return restTemplate.get("", new StdResponseHandler<CouchSGBD>() {
+            @Override
+            public CouchSGBD success(HttpResponse hr)
+                    throws Exception {
+                return objectMapper.readValue(hr.getContent(), CouchSGBD.class);
             }
-	}
+            
+        });
+    }
 
-        @Override
-	public boolean createDatabaseIfNotExists(String path) {
-            return createDatabaseIfNotExists(DbPath.fromString(path));
-	}
+    @Override
+    public void createDatabase(String path) {
+        createDatabase(DbPath.fromString(path));
+    }
 
-        @Override
-	public boolean createDatabaseIfNotExists(final DbPath db) {
-            boolean databaseAlreadyExists = checkIfDbExists(db);
-            if (databaseAlreadyExists) {
-                    return false;
-            }
-            LOG.debug("creating db path: {}", db.getPath());
-            return restTemplate.put(db.getPath(), new StdResponseHandler<Boolean>() {
-                    @Override
-                    public Boolean error(HttpResponse hr) {
-                            if (hr.getCode() == HttpStatus.PRECONDITION_FAILED) {
-                                    // 412 indicates existing database
-                                    // see http://docs.couchdb.org/en/latest/api/database/common.html#put--db
-                                    LOG.debug("database at db path {} already exists.", db.getPath());
-                                    return false;
-                            }
-                            throw StdResponseHandler.createDbAccessException(hr);
-                    }
-                    @Override
-                    public Boolean success(HttpResponse hr) throws Exception {
-                            return checkResponseBodyOkAndReturnDefaultValue(hr, true, objectMapper);
-                    }
-            });
-	}
+    @Override
+    public void createDatabase(DbPath db) {
+        if (!createDatabaseIfNotExists(db)) {
+            throw new DbAccessException(format("A database with path %s already exists", db.getPath()));
+        }
+    }
 
-        @Override
-	public void deleteDatabase(String path) {
-            Assert.notNull(path);
-            restTemplate.delete(DbPath.fromString(path).getPath());
-	}
+    @Override
+    public boolean createDatabaseIfNotExists(String path) {
+        return createDatabaseIfNotExists(DbPath.fromString(path));
+    }
 
-	@Override
-	public boolean checkIfDbExists(String path) {
-	    return checkIfDbExists(DbPath.fromString(path));
-	}
-
-	@Override
-	public boolean checkIfDbExists(DbPath db) {
-	    return restTemplate.head(db.getPath(), new StdResponseHandler<Boolean>() {
-		@Override
-		public Boolean error(HttpResponse hr) {
-			if(hr.getCode() == HttpStatus.NOT_FOUND) {
-				// only 404 is a valid response, anything else is an error
-				// see http://docs.couchdb.org/en/latest/api/database/common.html#head--db
-				return false;
-			}
-			throw StdResponseHandler.createDbAccessException(hr);
-		}
-		@Override
-		public Boolean success(HttpResponse hr) throws Exception {
-			return true;
-		}
-	    });
-	}
-
-        @Override
-	public List<String> getAllDatabases() {
-            return restTemplate.get("/_all_dbs", new StdResponseHandler<List<String>>(){
+    @Override
+    public boolean createDatabaseIfNotExists(final DbPath db) {
+        boolean databaseAlreadyExists = checkIfDbExists(db);
+        if (databaseAlreadyExists) {
+                return false;
+        }
+        LOG.debug("creating db path: {}", db.getPath());
+        return restTemplate.put(db.getPath(), new StdResponseHandler<Boolean>() {
                 @Override
-                public List<String> success(HttpResponse hr) throws Exception {
-                    return objectMapper.readValue(hr.getContent(), STRING_LIST_TYPE_DEF);
+                public Boolean error(HttpResponse hr) {
+                        if (hr.getCode() == HttpStatus.PRECONDITION_FAILED) {
+                                // 412 indicates existing database
+                                // see http://docs.couchdb.org/en/latest/api/database/common.html#put--db
+                                LOG.debug("database at db path {} already exists.", db.getPath());
+                                return false;
+                        }
+                        throw StdResponseHandler.createDbAccessException(hr);
+                }
+                @Override
+                public Boolean success(HttpResponse hr) throws Exception {
+                        return checkResponseBodyOkAndReturnDefaultValue(hr, true, objectMapper);
+                }
+        });
+    }
+
+    @Override
+    public void deleteDatabase(String path) {
+        Assert.notNull(path);
+        restTemplate.delete(DbPath.fromString(path).getPath());
+    }
+
+    @Override
+    public boolean checkIfDbExists(String path) {
+        return checkIfDbExists(DbPath.fromString(path));
+    }
+
+    @Override
+    public boolean checkIfDbExists(DbPath db) {
+        return restTemplate.head(db.getPath(), new StdResponseHandler<Boolean>() {
+            @Override
+            public Boolean error(HttpResponse hr) {
+                    if(hr.getCode() == HttpStatus.NOT_FOUND) {
+                            // only 404 is a valid response, anything else is an error
+                            // see http://docs.couchdb.org/en/latest/api/database/common.html#head--db
+                            return false;
+                    }
+                    throw StdResponseHandler.createDbAccessException(hr);
+            }
+            @Override
+            public Boolean success(HttpResponse hr) throws Exception {
+                    return true;
+            }
+        });
+    }
+
+    @Override
+    public List<String> getAllDatabases() {
+        return restTemplate.get("/_all_dbs", new StdResponseHandler<List<String>>(){
+            @Override
+            public List<String> success(HttpResponse hr) throws Exception {
+                return objectMapper.readValue(hr.getContent(), STRING_LIST_TYPE_DEF);
+            }
+        });
+    }
+
+    @Override
+    public ReplicationStatus replicate(ReplicationCommand cmd) {
+        try {
+            return restTemplate.post("/_replicate", objectMapper.writeValueAsString(cmd), new StdResponseHandler<ReplicationStatus>() {
+                @Override
+                public ReplicationStatus success(HttpResponse hr)
+                        throws Exception {
+                    return objectMapper.readValue(hr.getContent(), ReplicationStatus.class);
                 }
             });
-	}
+        } catch (IOException e) {
+            throw Exceptions.propagate(e);
+        }
+    }
 
-        @Override
-	public ReplicationStatus replicate(ReplicationCommand cmd) {
-            try {
-                return restTemplate.post("/_replicate", objectMapper.writeValueAsString(cmd), new StdResponseHandler<ReplicationStatus>() {
-                    @Override
-                    public ReplicationStatus success(HttpResponse hr)
-                            throws Exception {
-                        return objectMapper.readValue(hr.getContent(), ReplicationStatus.class);
-                    }
-                });
-            } catch (IOException e) {
-                throw Exceptions.propagate(e);
-            }
-	}
+    @Override
+    public HttpClient getConnection() {
+        return client;
+    }
+    
+    public RestTemplate getRestTemplate(){
+        return restTemplate;
+    }
 
-        @Override
-	public HttpClient getConnection() {
-            return client;
-	}
-
-        @Override
-	public CouchDbConnector createConnector(String path,
-			boolean createIfNotExists) {
-            CouchDbConnector db = new StdCouchDbConnector(path, this, objectMapperFactory);
-            if (createIfNotExists) db.createDatabaseIfNotExists();
-            return db;
-	}
+    @Override
+    public CouchDbConnector createConnector(String path,
+                    boolean createIfNotExists) {
+        CouchDbConnector db = new StdCouchDbConnector(path, this, objectMapperFactory);
+        if (createIfNotExists) db.createDatabaseIfNotExists();
+        return db;
+    }
 
     @Override
     public CouchDbConnector getReplicatorConnector()

@@ -29,6 +29,7 @@ import static fr.sirs.SIRS.binaryMD5;
 import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
 import fr.sirs.core.CacheRules;
+import fr.sirs.core.component.CouchSGBD;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
 import fr.sirs.core.component.UtilisateurRepository;
@@ -117,6 +118,7 @@ import org.geotoolkit.referencing.IdentifiedObjects;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.apache.sis.referencing.CRS;
+import org.ektorp.impl.StdCouchDb2Instance;
 
 /**
  *
@@ -232,6 +234,14 @@ public class FXLauncherPane extends BorderPane {
         uiProgressPlugins.setVisible(false);
 
         localRegistry = new DatabaseRegistry();
+        
+        CouchSGBD sgbdInfo = localRegistry.getSGBDInfo();
+        
+        if(!sgbdInfo.getVersion().startsWith("2.")){
+            new Alert(AlertType.ERROR, "Une version de CouchDB 2.x.x est requise."+System.lineSeparator()+"La version trouvée est actuellement "+sgbdInfo.getVersion(), ButtonType.OK).showAndWait();
+            System.exit(0);
+        }
+        
 
         errorLabel.setTextFill(Color.RED);
         errorLabel.visibleProperty().bind(errorLabel.textProperty().isNotEmpty());
