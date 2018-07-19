@@ -34,6 +34,7 @@ import fr.sirs.index.ElasticSearchEngine;
 import fr.sirs.util.ClosingDaemon;
 import fr.sirs.util.property.SirsPreferences;
 import static fr.sirs.util.property.SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR;
+import static fr.sirs.util.property.SirsPreferences.PROPERTIES.NODE_NAME;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,7 +80,7 @@ import org.ektorp.http.HttpResponse;
 import org.ektorp.http.PreemptiveAuthRequestInterceptor;
 import org.ektorp.http.RestTemplate;
 import org.ektorp.http.StdHttpClient;
-import org.ektorp.impl.StdCouchDbInstance;
+import org.ektorp.impl.StdCouchDb2Instance;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.Filter;
 import org.geotoolkit.gui.javafx.util.TaskManager;
@@ -321,7 +322,7 @@ public class DatabaseRegistry {
                 .socketTimeout(SOCKET_TIMEOUT)
                 .relaxedSSLSettings(true);
 
-        couchDbInstance = new StdCouchDbInstance(builder.build());
+        couchDbInstance = new StdCouchDb2Instance(builder.build(), SirsPreferences.INSTANCE.getProperty(NODE_NAME));
         couchDbInstance.getAllDatabases();
     }
 
