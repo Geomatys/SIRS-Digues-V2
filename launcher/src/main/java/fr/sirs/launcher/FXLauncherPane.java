@@ -945,7 +945,9 @@ public class FXLauncherPane extends BorderPane {
                                 || ButtonType.YES.equals(alert.showAndWait().get())) {
 
                                     final TaskManager.MockTask<org.ektorp.ReplicationStatus> copyTask = new TaskManager.MockTask("Copie de base de données", () -> {
-                                        return localRegistry.copyDatabase(sourceDb, destDbName, false);
+                                        return localRegistry.copyDatabase(
+                                                DatabaseRegistry.addAuthenticationInformation(SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + sourceDb), 
+                                                DatabaseRegistry.addAuthenticationInformation(SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + destDbName), false);
                                     });
 
                                     final FXLoadingPane loading = new FXLoadingPane(copyTask);

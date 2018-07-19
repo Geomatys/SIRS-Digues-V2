@@ -562,33 +562,25 @@ public class DatabaseRegistry {
      * be copied. However, if given databases both exist, it will be analyzed to
      * ensure databases are compatibles (same srid, application / modules versions, etc.)
      *
-     * @param dbToCopy Database to copy. Only its name if it's in current service, complete URL otherwise.
-     * @param dbToPasteInto Database to paste content into. Only its name if it's in current service, complete URL otherwise.
+     * @param sourceDb url complète de la base source de la copie, incluant les paramètres d'authentification
+     * @param targetDb url complète de la base cible de la copie, incluant les paramètres d'authentification
      * @param continuous If true, target database will continuously retrieve changes happening in source database. If not, it's one shot copy.
      * @return A status of started replication task. Can be null if we failed
      * getting it from the server, but the replication looks like it's going fine.
      * @throws java.io.IOException If an error occurs while connecting to the databases.
      */
-    public ReplicationStatus copyDatabase(String dbToCopy, String dbToPasteInto, final boolean continuous) throws IOException {
+    public ReplicationStatus copyDatabase(final String sourceDb, final String targetDb, final boolean continuous) throws IOException {
+        
         // Ensure database to copy is valid.
-        final CouchDbConnector srcConnector = createConnector(dbToCopy, DatabaseConnectionBehavior.FAIL_IF_NOT_EXISTS);
+        final CouchDbConnector srcConnector = createConnector(sourceDb, DatabaseConnectionBehavior.FAIL_IF_NOT_EXISTS);
         Optional<SirsDBInfo> info = getInfo(srcConnector);
-        // If database to copy is a distant one, we have to add authentication information, or CouchDB won't be able to replicate any data.
-        if (!isLocal(dbToCopy)) {
-            dbToCopy = addAuthenticationInformation(dbToCopy);
-        }
-        final String toCopyNoAuth = cleanDatabaseName(dbToCopy);
 
         /* Check if target database exists/ can be created, and if we have to
          * add authentication information. We don't create database now. We'll
          * do it later, reducing chances of keeping an empty database if an
          * error occurs.
          */
-        final CouchDbConnector dstConnector = createConnector(dbToPasteInto, DatabaseConnectionBehavior.DEFAULT);
-        if (!isLocal(dbToPasteInto)) {
-            dbToPasteInto = addAuthenticationInformation(dbToPasteInto);
-        }
-        final String targetNoAuth = cleanDatabaseName(dbToPasteInto);
+        final CouchDbConnector tgtConnector = createConnector(targetDb, DatabaseConnectionBehavior.DEFAULT);
 
         // If no info is found, the database is not a SIRS db. We cannot make any analysis.
         Map<String, ModuleDescription> modules = null;
@@ -596,14 +588,15 @@ public class DatabaseRegistry {
         if (info.isPresent()) {
             final SirsDBInfo srcInfo = info.get();
             final String srcSRID = srcInfo.getEpsgCode();
-            info = getInfo(dstConnector);
+            info = getInfo(tgtConnector);
+            
             if (info.isPresent()) {
                 final SirsDBInfo dstInfo = info.get();
                 final String dstSRID = dstInfo.getEpsgCode();
                 if (srcSRID == null ? dstSRID != null : !srcSRID.equals(dstSRID)) {
                     throw new IllegalArgumentException(String.format(Locale.FRANCE, 
                             "Impossible de synchroniser les bases de données car elles n'utilisent pas le même système de projection : (%s : %s) => (%s : %s)",
-                            toCopyNoAuth, srcSRID, targetNoAuth, dstSRID));
+                            cleanDatabaseName(sourceDb), srcSRID, cleanDatabaseName(targetDb), dstSRID));
                 }
 
                 final Map<String, ModuleDescription> srcModules = srcInfo.getModuleDescriptions();
@@ -612,7 +605,9 @@ public class DatabaseRegistry {
 
                 if (dstModules == null && srcModules != null) {
                     modules = srcModules;
-                } else if (srcModules != null && dstModules != null) {
+                } 
+                else if (srcModules != null && dstModules != null) {
+                    
                     final StringBuilder moduleError = new StringBuilder("Les bases de données ne peuvent être synchronisées"
                             + " car elles travaillent avec des versions différentes des modules suivants : ");
                     boolean throwException = false;
@@ -620,30 +615,31 @@ public class DatabaseRegistry {
                      Also, as $sirs will not be copied, but we have to merge
                      module descriptions, we make an union of the two databases.
                      */
-                    ModuleDescription desc;
                     for (final Map.Entry<String, ModuleDescription> entry : srcModules.entrySet()) {
-                        desc = dstModules.get(entry.getKey());
+                        final ModuleDescription desc = dstModules.get(entry.getKey());
                         if (desc == null) {
                             dstModules.put(entry.getKey(), entry.getValue());
-                        } else if (!desc.getVersion().equals(entry.getValue().getVersion())) {
+                        } 
+                        else if (!desc.getVersion().equals(entry.getValue().getVersion())) {
                             throwException = true;
                             moduleError.append(System.lineSeparator())
                                     .append(desc.title.get())
                                     .append(" : ")
                                     .append(desc.getVersion())
                                     .append(" (")
-                                    .append(targetNoAuth)
+                                    .append(cleanDatabaseName(targetDb))
                                     .append(") / ")
                                     .append(entry.getValue().getVersion())
                                     .append(" (")
-                                    .append(toCopyNoAuth)
-                                    .append(")");
+                                    .append(cleanDatabaseName(sourceDb))
+                                    .append(')');
                         }
                     }
 
                     if (throwException) {
                         throw new IllegalArgumentException(moduleError.toString());
-                    } else if (dstModuleListSize < dstModules.size()) {
+                    } 
+                    else if (dstModuleListSize < dstModules.size()) {
                         // module description have changed, we must trigger its update.
                         modules = dstModules;
                     }
@@ -655,7 +651,7 @@ public class DatabaseRegistry {
 
         // We're now sure that replication can be launched (source exists, etc.).
         // We create destination if it does not exists yet, and proceed.
-        dstConnector.createDatabaseIfNotExists();
+        tgtConnector.createDatabaseIfNotExists();
 
         /*
          * If we're initiating a continuous copy, or the two databases already
@@ -669,15 +665,15 @@ public class DatabaseRegistry {
             new SirsFilterRepository(srcConnector);
 
             // Post required filter if it doesn't exist.
-            new SirsFilterRepository(dstConnector);
+            new SirsFilterRepository(tgtConnector);
 
             cmd = new ReplicationCommand.Builder()
-                    .continuous(continuous).source(dbToCopy).target(dbToPasteInto)
+                    .continuous(continuous).source(sourceDb).target(targetDb)
                     .filter(SirsFilters.class.getSimpleName().concat("/").concat(SIRS_FILTER_NAME)) // Filter $sirs document.
                     .createTarget(true).build();
         } else {
             cmd = new ReplicationCommand.Builder()
-                    .continuous(continuous).source(dbToCopy).target(dbToPasteInto)
+                    .continuous(continuous).source(sourceDb).target(targetDb)
                     .createTarget(true).build();
         }
 
@@ -687,7 +683,7 @@ public class DatabaseRegistry {
             try {
                 status = couchDbInstance.replicate(cmd);
             } catch (DbAccessException e) {
-                checkReplicationError(e, dbToCopy, dbToPasteInto);
+                checkReplicationError(e, sourceDb, targetDb);
                 // If the error has not been thrown back, it means it was not
                 // related to a replication execution. It can be an exception
                 // related to status parsing failing, for example.
@@ -697,7 +693,7 @@ public class DatabaseRegistry {
 
         // update $sirs if the two databases didn't used the same modules.
         if (modules != null || sridToSet != null) {
-            final SirsDBInfoRepository infoRepo = new SirsDBInfoRepository(dstConnector);
+            final SirsDBInfoRepository infoRepo = new SirsDBInfoRepository(tgtConnector);
             if (modules != null) {
                 infoRepo.updateModuleDescriptions(modules);
             }
@@ -1036,7 +1032,7 @@ public class DatabaseRegistry {
      * @return Input string if no authentication information can be found. An URL
      * with basic authentication information otherwise.
      */
-    private static String addAuthenticationInformation(final String str) {
+    public static String addAuthenticationInformation(final String str) {
         // Force authentication on distant database. We can rely on wallet information
         // if a connection has already been opened to retrieve SIRS information.
         try {
@@ -1052,6 +1048,9 @@ public class DatabaseRegistry {
                     }
                     return distantURL.toExternalForm().replaceFirst("(^\\w+://)", "$1" + userInfo);
                 }
+            }
+            else {
+                SirsCore.LOGGER.log(Level.FINE, "Les paramètres d'authentification sont déjà présents");
             }
         } catch (Exception e) {
             SirsCore.LOGGER.log(Level.FINE, "Cannot add authentication information", e);

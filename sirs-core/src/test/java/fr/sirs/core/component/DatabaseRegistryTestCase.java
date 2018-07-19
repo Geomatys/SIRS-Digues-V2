@@ -52,8 +52,8 @@ public class DatabaseRegistryTestCase extends CouchDBTestCase {
     @Test
     public void initDatabaseFromRemote() throws IOException {
         REGISTRY.synchronizeSirsDatabases(
-                SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR)+DB_NAME, 
-                SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR)+REPLICATION_DEST, true);
+                SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + DB_NAME, 
+                SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + REPLICATION_DEST, true);
     }
 
     @DependsOnMethod("initDatabaseFromRemote")
