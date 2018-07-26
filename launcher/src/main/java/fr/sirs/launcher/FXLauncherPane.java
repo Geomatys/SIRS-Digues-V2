@@ -29,6 +29,7 @@ import static fr.sirs.SIRS.binaryMD5;
 import static fr.sirs.SIRS.hexaMD5;
 import fr.sirs.Session;
 import fr.sirs.core.CacheRules;
+import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.CouchSGBD;
 import fr.sirs.core.component.DatabaseRegistry;
 import fr.sirs.core.component.SirsDBInfoRepository;
@@ -43,8 +44,10 @@ import fr.sirs.maj.PluginInstaller;
 import fr.sirs.maj.PluginList;
 import fr.sirs.util.SimpleButtonColumn;
 import fr.sirs.util.property.SirsPreferences;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -56,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -89,6 +93,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
@@ -118,7 +123,6 @@ import org.geotoolkit.referencing.IdentifiedObjects;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.apache.sis.referencing.CRS;
-import org.ektorp.impl.StdCouchDb2Instance;
 
 /**
  *
@@ -237,9 +241,8 @@ public class FXLauncherPane extends BorderPane {
         
         CouchSGBD sgbdInfo = localRegistry.getSGBDInfo();
         
-        if(!sgbdInfo.getVersion().startsWith("2.")){
-            new Alert(AlertType.ERROR, "Une version de CouchDB 2.x.x est requise."+System.lineSeparator()+"La version trouvée est actuellement "+sgbdInfo.getVersion(), ButtonType.OK).showAndWait();
-            System.exit(0);
+        if(!sgbdInfo.getVersion().startsWith("2.") && Boolean.valueOf(SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.CHECK_COUCHDB_VERSION))){
+            alertCouchDBVersion(sgbdInfo);
         }
         
 
@@ -1157,5 +1160,74 @@ public class FXLauncherPane extends BorderPane {
                 LOGGER.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
             }
         }
+    }
+    
+    /**
+     * Affichage de l'alerte de version de CouchDB.
+     * 
+     * @param sgbdInfo
+     * @throws IOException 
+     */
+    private void alertCouchDBVersion(CouchSGBD sgbdInfo) throws IOException{
+        
+        // 1- énumération des bases de données
+        final StringJoiner list = new StringJoiner(System.lineSeparator());
+        for(final String db : localRegistry.listSirsDatabases()){
+            list.add(db);
+        }
+
+        // 2- préparation du contenu de l'avertissement à l'utilisateur : formatage de l'en-tête avec les information locales
+        final StringBuilder textContent = new StringBuilder(String.format(
+                          "           CHANGEMENT DE VERSION DU SGBD COUCHDB DU SIRSv2           " + System.lineSeparator()
+                        + "                    de CouchDB 1 vers CouchDB 2                      " + System.lineSeparator()
+                        + System.lineSeparator()
+                        + "Une version de CouchDB 2.x.x est dorénavant requise pour héberger les" + System.lineSeparator()
+                        + "données de la version courante du SIRSv2.                            " + System.lineSeparator()
+                        + System.lineSeparator()
+                        + "La version de CouchDB trouvée sur le système est actuellement %s.               " + System.lineSeparator()
+                        + System.lineSeparator()
+                        + "Merci de mettre à niveau votre SGBD CouchDB vers une version CouchDB 2"+ System.lineSeparator()
+                        + "en prenant soin de sauvegarder les fichiers de données de vos bases."  + System.lineSeparator()
+                        + System.lineSeparator()
+                        + "Si vous disposez déjà d'un système CouchDB 2, local, veuillez        " + System.lineSeparator()
+                        + "paramétrer la préférence %s en conséquence dans la configuration de  " + System.lineSeparator()
+                        + "l'application (%s). Sa valeur est actuellement la suivante :         " + System.lineSeparator()
+                        + System.lineSeparator()
+                        + "%s=%s                                                                " + System.lineSeparator()
+                        + System.lineSeparator()
+                        + "À titre indicatif, votre système CouchDB recense les bases suivantes :"+ System.lineSeparator()
+                        + System.lineSeparator()
+                        + "%s" + System.lineSeparator()
+                        + System.lineSeparator(),
+                sgbdInfo.getVersion(), 
+                SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR.name(), 
+                SirsCore.CONFIGURATION_PATH.toString(), 
+                SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR.name(), 
+                SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR.name()), 
+                list.toString()));
+
+        // 3- Indications de migration des données
+        try(final BufferedReader reader = new BufferedReader(new InputStreamReader(FXLauncherPane.class.getResourceAsStream("couchDB1ToCouchDB2.txt")))){
+            String line;
+            while((line = reader.readLine()) != null){
+                textContent.append(line).append(System.lineSeparator());
+            }
+        }
+
+        // 4- Paramétrage de l'affichage du texte
+        final TextArea area = new TextArea(textContent.toString());
+        area.setEditable(false);
+        area.setWrapText(true);
+        area.setPrefHeight(451);
+        area.setPrefWidth(777);
+
+        // 5- Ouverture de la fenêtre
+        final ButtonType exit = new ButtonType("Quitter");
+        final Alert alert = new Alert(Alert.AlertType.INFORMATION, null, exit);
+        alert.setHeaderText("Le système CouchDB détecté doit être mis à jour.");
+        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.getDialogPane().setContent(area);
+        alert.showAndWait();
+        System.exit(0);
     }
 }
