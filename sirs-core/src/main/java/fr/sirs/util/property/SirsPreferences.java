@@ -44,7 +44,15 @@ public class SirsPreferences extends Properties {
         UPDATE_CORE_URL("Mise à jour de l'application", "Url à laquelle se trouve le service de mise à jour de l'application.", "http://sirs-digues.info/wp-content/updates/core.json"),
         UPDATE_PLUGINS_URL("Mise à jour des plugins", "Url à laquelle se trouve le service de mise à jour des plugins.", "http://sirs-digues.info/wp-content/updates/plugins.json"),
         COUCHDB_LOCAL_ADDR("Addresse de la base CouchDB locale", "Addresse d'accès à la base CouchDB locale, pour les réplications sur le poste.", "http://127.0.0.1:5984/"),
+        /*
+        On initialise par défaut le nom du nœud local à nonode@nohost, nom qui semble utilisé par défaut par couchDB.
+        Mais cela peut provoquer des erreurs lorsqu'on s'adresse à un nœud qui porte un autre nom (cela arrive par exemple avec le serveur distant de Geomatys
+        dont le nœud se nomme : couchdb@couchdb-couchdb-0.couchdb-couchdb.demos.svc.cluster.local
+        Or, http://docs.couchdb.org/en/stable/api/server/configuration.html précise que le nom du nœud local peut être
+        remplacé de façon générique par "_local"
         NODE_NAME("Nom du nœud de l'instance CouchDB", "Nom du nœud utilisé pour la configuration dans l'instance CouchDB.", "nonode@nohost"),
+        */
+        NODE_NAME("Nom du nœud de l'instance CouchDB", "Nom du nœud utilisé pour la configuration dans l'instance CouchDB.", "_local"),
         CHECK_COUCHDB_VERSION("Vérifie la version de CouchDB", "Permet de vérifier ou d'ignorer la version de CouchDB au lancement de l'application.", Boolean.TRUE.toString()),
         DESIGNATION_AUTO_INCREMENT("Auto-incrément des désignations", "Lorsqu'un nouvel élément sera créé, sa désignation sera automatiquement remplie avec une valeur numérique"
                 + " déterminée à partir de l'objet du même type ayant une déisgnation de forme numérique la plus haute trouvée dans la base de données, + 1.", Boolean.FALSE.toString());
