@@ -75,11 +75,11 @@ public class FXTronconMerge extends VBox {
         this.maleGender = maleGender;
 
         if (maleGender) {
-            infoLabel.setText("Nom du " + typeName + " résultant de la fusion :");
+            nameLabel.setText("Nom du " + typeName + " résultant de la fusion :");
         } else {
-            infoLabel.setText("Nom de la " + typeName + " résultante de la fusion :");
+            nameLabel.setText("Nom de la " + typeName + " résultante de la fusion :");
         }
-        nameLabel.setText("Les " + typeName + "s avant fusion seront archivés.");
+        infoLabel.setText("Les " + typeName + "s avant fusion seront archivés.");
         final TableColumn<TronconDigue,String> col = new TableColumn<>("Nom");
         col.setEditable(false);
         col.setCellValueFactory((TableColumn.CellDataFeatures<TronconDigue, String> param) -> param.getValue().libelleProperty());
