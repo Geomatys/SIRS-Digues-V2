@@ -508,6 +508,17 @@ public class FXLauncherPane extends BorderPane {
 
         t.setOnSucceeded(evt -> Platform.runLater(() -> {
             //aller au panneau principal
+            /*
+            HACK : on attend que CouchDB ait eu le temps de mettre à jour la liste des tâches de réplication en cours
+            afin que la colonne d'arrêt/reprise de réplication rende bien compte de l'état réel des bases en cours de
+            synchronisation (en particulier pour la base qui vient d'être répliquée). Voir SYM-1808.
+            */
+            try {
+                LOGGER.log(Level.FINE, "Attente de la mise à jour des synchronisations en cours par CouchDB");
+                Thread.sleep(5000l);
+            } catch (InterruptedException ex) {
+                LOGGER.log(Level.FINE, "Cannot update distant plugin list !", ex);
+            }
             updateLocalDbList();
             uiTabPane.getSelectionModel().clearAndSelect(0);
         }));

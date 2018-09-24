@@ -86,7 +86,7 @@ public class SynchronizationColumn extends TableColumn<String, Task> {
                 return null;
             } else {
                 
-                final String dbUrl = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR)+dbName;
+                final String dbUrl = SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + dbName;
                 
                 try {
                     if (dbRegistry.getSynchronizationTasks(dbUrl).count() > 0) {
