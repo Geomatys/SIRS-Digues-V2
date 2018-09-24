@@ -477,8 +477,24 @@ public class FXLauncherPane extends BorderPane {
         }
 
         final Task t = new TaskManager.MockTask("", () -> {
-            localRegistry.synchronizeSirsDatabases(uiDistantUrl.getText(), 
-                    SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR)+uiLocalName.getText(), uiDistantSync.isSelected());
+            
+            final String distantUrl = uiDistantUrl.getText();
+            final String localUrl = SirsPreferences.INSTANCE.getProperty(
+                            SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + uiLocalName.getText();
+            
+            localRegistry.synchronizeSirsDatabases(distantUrl, localUrl, false);
+            
+            /*
+            HACK : par pricipe, la réponse à une requête de réplication non continue est synchrone alors que la réponse
+            à une requête de réplicatoin continue est asynchrone (SYM-1820).
+            MAIS le client souhaite attendre la "fin" de la réplication dans tous les cas avant de passer à l'onglet de
+            connexion aux bases locales. Comme la "fin" d'une réplication continue n'a pas de sens, on commence par
+            réaliser une réplication non continue, on attend la fin, puis on renouvelle la requête pour la transformer 
+            en réplication continue.
+            */
+            if (uiDistantSync.isSelected()) {
+                localRegistry.synchronizeSirsDatabases(distantUrl, localUrl, true);
+            }
             return true;
         });
 
