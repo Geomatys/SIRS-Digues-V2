@@ -40,6 +40,7 @@ import fr.sirs.ui.AlertManager;
 import fr.sirs.ui.Growl;
 import fr.sirs.util.FXFreeTab;
 import fr.sirs.util.SynchroTask;
+import fr.sirs.util.property.SirsPreferences;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
@@ -308,14 +309,15 @@ public class FXMainFrame extends BorderPane {
 
         if (remoteDb.isPresent()) {
             final String distant = remoteDb.get();
-            final String localDb = session.getConnector().getDatabaseName();
+            final String localDb =  SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.COUCHDB_LOCAL_ADDR) + session.getConnector().getDatabaseName();
             final DatabaseRegistry registry = session.getApplicationContext().getBean(DatabaseRegistry.class);
             uiSynchroDb.setOnAction(clic -> {
                 uiSynchroDb.setDisable(true);
                 final Task t = new SynchroTask(registry, localDb, distant, true);
 
                 t.setOnSucceeded(evt -> Platform.runLater(() -> uiSynchroDb.setDisable(false)));
-                t.setOnFailed(evt -> Platform.runLater(() -> new Growl(Growl.Type.ERROR, "La synchronisation n'a pu aboutir. Vérifiez l'état de la tâche (voir ci-dessus) pour plus d'informations.").showAndFade()));
+                t.setOnFailed(evt -> Platform.runLater(() -> new Growl(Growl.Type.ERROR,
+                        "La synchronisation n'a pu aboutir. Vérifiez l'état de la tâche (voir ci-dessus) pour plus d'informations.").showAndFade()));
 
                 TaskManager.INSTANCE.submit(t);
             });

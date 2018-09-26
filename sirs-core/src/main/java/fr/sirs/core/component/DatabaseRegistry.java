@@ -678,13 +678,15 @@ public class DatabaseRegistry {
             new SirsFilterRepository(tgtConnector);
 
             cmd = new ReplicationCommand.Builder()
-                    .continuous(continuous).source(sourceDb).target(targetDb)
+                    .source(sourceDb).target(targetDb)
+                    .continuous(continuous)
                     .filter(SirsFilters.class.getSimpleName().concat("/").concat(SIRS_FILTER_NAME)) // Filter $sirs document.
-                    .createTarget(true).build();
+                    .build();
         } else {
             cmd = new ReplicationCommand.Builder()
-                    .continuous(continuous).source(sourceDb).target(targetDb)
-                    .createTarget(true).build();
+                    .source(sourceDb).target(targetDb)
+                    .continuous(continuous)
+                    .build();
         }
 
         ReplicationStatus status = null;
