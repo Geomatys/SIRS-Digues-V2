@@ -767,10 +767,17 @@ else if (helper.isParcelleVegetation()){
             SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(<%= eRef.getName()%>Repo.getAll()), newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null? null : <%= eRef.getName()%>Repo.get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>()));
 <%
                 } else {
+        
+        /*Ce cas est celui des objets positionnés sur des tronçons qui peuvent être de natures différentes.
+        On cherche alors à se positionner sur des objets de nature constante :
+        rester sur un tronçon de digue si on était sur un tronçon de digue, un tronçon de lit si on était sur un tronçon de lit,
+        un tronçon de berge si on était sur un tronçon de berge etc.*/        
 %>
-        SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(
-            previewRepository.getByClass(<%= helper.getClassName(eRef) %>.class)).sorted(), 
-            newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null? null : previewRepository.get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>()));
+        {
+            final Preview linearPreview = newElement.get<%= Helper.ucFirst(eRef.getName())  %>() == null ? null : previewRepository.get(newElement.get<%= Helper.ucFirst(eRef.getName())  %>());
+            SIRS.initCombo(ui_<%= eRef.getName()  %>, SIRS.observableList(
+                previewRepository.getByClass(linearPreview == null ? <%= helper.getClassName(eRef) %>.class : linearPreview.getJavaClassOr(<%= helper.getClassName(eRef) %>.class))).sorted(), linearPreview);
+        }
 <% 
                 }
         } 
