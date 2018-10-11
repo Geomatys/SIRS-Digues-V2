@@ -59,6 +59,7 @@ public class BergesPojoTable extends PojoTable {
 
         createNewProperty().set(false);
         uiAdd.visibleProperty().set(false);
+        setDeletor(b -> repo.remove(b));
     }
     
     @Override
