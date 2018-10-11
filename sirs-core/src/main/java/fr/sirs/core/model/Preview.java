@@ -20,6 +20,10 @@ package fr.sirs.core.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import fr.sirs.core.SirsCore;
+import fr.sirs.core.authentication.SIRSAuthenticator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -119,6 +123,15 @@ public class Preview implements AvecLibelle, Comparable {
 
     public StringProperty designationProperty() {
         return designationProperty;
+    }
+    
+    public Class<?> getJavaClassOr(final Class<?> defaultClass) {
+        try {
+            return Class.forName(getElementClass(), false, Thread.currentThread().getContextClassLoader());
+        } catch (ClassNotFoundException ex) {
+            SirsCore.LOGGER.warning(String.format("unexpected class name %s. Replace by %s.", getElementClass(), defaultClass.getCanonicalName()));
+            return defaultClass;
+        }
     }
 
     @Override
