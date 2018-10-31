@@ -57,6 +57,7 @@ import fr.sirs.core.component.ModeleRapportRepository;
 import fr.sirs.core.component.TronconDigueRepository;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.core.model.Digue;
+import fr.sirs.core.model.Role;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.core.model.report.ModeleRapport;
 import fr.sirs.plugin.document.DynamicDocumentTheme;
@@ -74,6 +75,7 @@ import java.util.Set;
 import java.util.prefs.Preferences;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -351,6 +353,24 @@ public class DocumentsPane extends GridPane {
             addFolderButton.disableProperty().set(true);
             listButton .disableProperty().set(true);
         }
+
+
+        final BooleanBinding guestOrExtern = new BooleanBinding() {
+
+            {
+                bind(Injector.getSession().roleBinding());
+            }
+
+            @Override
+            protected boolean computeValue() {
+                final Role userRole = Injector.getSession().roleBinding().get();
+                return Role.GUEST.equals(userRole)
+                        || Role.EXTERN.equals(userRole);
+            }
+        };
+
+        setFolderButton.disableProperty().bind(guestOrExtern);
+        deleteDocButton.disableProperty().bind(guestOrExtern);
     }
 
     @FXML
