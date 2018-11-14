@@ -124,7 +124,12 @@ public class Preview implements AvecLibelle, Comparable {
     public StringProperty designationProperty() {
         return designationProperty;
     }
-    
+
+    /**
+     * Récupération de la classe de l'élément, ou bien en cas de problème (ClassNotFoundException) la classe indiquée en paramètre.
+     * @param defaultClass
+     * @return
+     */
     public Class<?> getJavaClassOr(final Class<?> defaultClass) {
         try {
             return Class.forName(getElementClass(), false, Thread.currentThread().getContextClassLoader());
@@ -193,7 +198,7 @@ public class Preview implements AvecLibelle, Comparable {
                 return designationComparison;
             }
 
-            return getLibelle() == null || other.getLibelle() == null ? 0 
+            return getLibelle() == null || other.getLibelle() == null ? 0
                     : getLibelle().compareTo(other.getLibelle());
         }
 
