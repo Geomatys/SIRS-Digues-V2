@@ -143,9 +143,11 @@ public class FXPositionDocumentPane extends AbstractFXElementPane<PositionDocume
             newElement.getSirsdocument() == null ? null : previewRepository.get(newElement.getSirsdocument()));
         // Propriétés de AvecGeometrie
         // Propriétés de AbstractPositionDocument
-        SIRS.initCombo(ui_linearId, FXCollections.observableList(
-            previewRepository.getByClass(TronconDigue.class)).sorted(), 
-            newElement.getLinearId() == null? null : previewRepository.get(newElement.getLinearId()));
+        {
+            final Preview linearPreview = newElement.getLinearId() == null ? null : previewRepository.get(newElement.getLinearId());
+            SIRS.initCombo(ui_linearId, SIRS.observableList(
+                previewRepository.getByClass(linearPreview == null ? TronconDigue.class : linearPreview.getJavaClassOr(TronconDigue.class))).sorted(), linearPreview);
+        }
         // Propriétés de AbstractPositionDocumentAssociable
         }
 
