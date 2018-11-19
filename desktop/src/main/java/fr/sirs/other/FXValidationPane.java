@@ -191,9 +191,9 @@ public class FXValidationPane extends BorderPane {
         table.getColumns().add(new ValidColumn());
 
         setCenter(table);
-        
+
         final List<Preview> allByValidationState = repository.getAllByValidationState(false);
-        
+
         // retrait de la liste des éléments pour lesquels la validation n'a pas d'importance (SYM-1767)
         allByValidationState.removeIf(p -> SQLQuery.class.getCanonicalName().equals(p.getElementClass()));
 
@@ -282,8 +282,8 @@ public class FXValidationPane extends BorderPane {
                                 final AbstractSIRSRepository repo = session.getRepositoryForType(vSummary.getDocClass());
                                 final Element docu = (Element) repo.get(vSummary.getDocId() == null ? vSummary.getElementId() : vSummary.getDocId());
 
-                                // Si l'elementid est null, c'est que l'élément est le document lui-même
-                                if (vSummary.getElementId() == null) {
+                                if (vSummary.getElementId() == null || vSummary.getElementId().equals(vSummary.getDocId())) {
+                                    // Si l'elementid est null, c'est que l'élément est le document lui-même
                                     if(!docu.getValid()){
                                         final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer l'élément ?", ButtonType.NO, ButtonType.YES);
                                         confirm.setResizable(true);
@@ -292,13 +292,14 @@ public class FXValidationPane extends BorderPane {
                                             repo.remove(docu);
                                             table.getItems().remove(vSummary);
                                         }
-                                    }else{
+                                    } else {
                                         final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez supprimer que les éléments invalides.", ButtonType.OK);
                                         alert.setResizable(true);
                                         alert.showAndWait();
                                     }
-                                } // Sinon, c'est que l'élément est inclus quelque part dans le document et il faut le rechercher.
+                                }
                                 else {
+                                    // Sinon, c'est que l'élément est inclus quelque part dans le document et il faut le rechercher.
                                     final Element elt = docu.getChildById(vSummary.getElementId());
                                     if(!elt.getValid()){
                                         final Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer l'élément ?", ButtonType.NO, ButtonType.YES);
@@ -309,7 +310,7 @@ public class FXValidationPane extends BorderPane {
                                             repo.update(docu);
                                             table.getItems().remove(vSummary);
                                         }
-                                    } else{
+                                    } else {
                                         final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Vous ne pouvez supprimer que les éléments invalides.", ButtonType.OK);
                                         alert.setResizable(true);
                                         alert.showAndWait();
