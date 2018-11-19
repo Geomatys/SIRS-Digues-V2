@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -19,17 +19,9 @@
 package fr.sirs.theme.ui;
 
 import fr.sirs.Injector;
-import fr.sirs.SIRS;
-import fr.sirs.core.component.AbstractSIRSRepository;
-import fr.sirs.core.model.Observation;
 import fr.sirs.core.model.ObservationOuvrageHydrauliqueAssocie;
 import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
-import fr.sirs.core.model.RefCategorieDesordre;
-import fr.sirs.core.model.RefTypeDesordre;
 import fr.sirs.theme.ui.pojotable.PojoTableExternalAddable;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 
 /**
  *
@@ -39,20 +31,20 @@ public class FXOuvrageHydrauliqueAssociePane extends FXOuvrageHydrauliqueAssocie
 
     public FXOuvrageHydrauliqueAssociePane(final OuvrageHydrauliqueAssocie ouvrage){
         super(ouvrage);
-        
+
         /*
-        
+
         /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\
-        
+
         SYM-1756 : on souhaite ajouter le même hack que SYM-1727 pour les tableaux d'observations de désordres.
         */
-        
+
         ui_observations.setContent(() -> {
-            observationsTable = new PojoTableExternalAddable(ObservationOuvrageHydrauliqueAssocie.class);
+            observationsTable = new PojoTableExternalAddable(ObservationOuvrageHydrauliqueAssocie.class, elementProperty());
             observationsTable.editableProperty().bind(disableFieldsProperty().not());
             updateObservationsTable(Injector.getSession(), elementProperty.get());
             return observationsTable;
         });
-        
+
     }
 }

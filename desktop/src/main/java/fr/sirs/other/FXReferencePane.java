@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.function.Function;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -56,15 +57,15 @@ import org.geotoolkit.gui.javafx.util.ButtonTableCell;
  * @param <T>
  */
 public class FXReferencePane<T extends ReferenceType> extends BorderPane {
-    
+
     private final ReferencePojoTable references;
     private final Session session = Injector.getSession();
     private final ReferenceChecker referenceChecker;
-        
+
     public FXReferencePane(final Class<T> type) {
         final ResourceBundle bundle = ResourceBundle.getBundle(type.getName(), Locale.getDefault(), Thread.currentThread().getContextClassLoader());
         referenceChecker = session.getReferenceChecker();
-        references = new ReferencePojoTable(type, bundle.getString(BUNDLE_KEY_CLASS)+" (type : "+type.getSimpleName()+")");
+        references = new ReferencePojoTable(type, bundle.getString(BUNDLE_KEY_CLASS)+" (type : "+type.getSimpleName()+")", (ObjectProperty<? extends Element>) null);
         references.editableProperty().set(false);
         references.fichableProperty().set(false);
         references.detaillableProperty().set(false);
@@ -72,25 +73,25 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
         references.commentAndPhotoProperty().set(false);
         this.setCenter(references);
     }
-    
-    
+
+
     private class ReferencePojoTable extends PojoTable{
-        
+
         private final List<? extends ReferenceType> serverInstanceNotLocal;
         private final List<ReferenceType> localInstancesNotOnTheServer;
 
-        public ReferencePojoTable(Class<T> pojoClass, String title) {
-            super(pojoClass, title);
-            
+        public ReferencePojoTable(Class<T> pojoClass, String title, final ObjectProperty<? extends Element> container) {
+            super(pojoClass, title, container);
+
             serverInstanceNotLocal = referenceChecker.getServerInstancesNotLocal().get(pojoClass);
             localInstancesNotOnTheServer = referenceChecker.getLocalInstancesNotOnTheServer().get(pojoClass);
-            
+
             getColumns().replaceAll(t ->  t instanceof DeleteColumn ? new StateColumn() : t);
-            
+
             getTable().setRowFactory((TableView<Element> param) -> {
                     return new ReferenceTableRow();
                 });
-            
+
             TableColumn<Element, String> idCol = new TableColumn<>("Identifiant");
             idCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, String>, ObservableValue<String>>() {
 
@@ -100,10 +101,10 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
                 }
             });
             getColumns().add(1, idCol);
-            
-            
+
+
             setTableItems(() -> {
-                
+
                 final ObservableList allItems = FXCollections.observableArrayList(repo.getAll());
                 if(serverInstanceNotLocal!=null && !serverInstanceNotLocal.isEmpty()){
                     final List<Element> newServerInstances = new ArrayList<>();
@@ -114,7 +115,7 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
                     }
                     allItems.addAll(newServerInstances);
                 }
-                
+
                 return allItems;
             });
         }
@@ -124,17 +125,17 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
             @Override
             protected void updateItem(Element item, boolean empty) {
                 super.updateItem(item, empty);
-                
+
                 if(item!=null){
                     // La mise à jour des références nouvelles et incohérentes est automatique.
 //                    if(incoherentReferences!=null
 //                            && incoherentReferences.get(item)!=null){
 //                        getStyleClass().add("incoherentReferenceRow");
-//                        
+//
 //                    } else if(serverInstanceNotLocal!=null
 //                            && serverInstanceNotLocal.contains(item)){
 //                        getStyleClass().add("newReferenceRow");
-//                    } else 
+//                    } else
                         if(localInstancesNotOnTheServer!=null
                             && localInstancesNotOnTheServer.contains(item)){
                         getStyleClass().add("deprecatedReferenceRow");
@@ -145,7 +146,7 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
                 }
             }
         }
-        
+
         private class StateButtonTableCell extends ButtonTableCell<Element, ReferenceType>{
 
             private final Node defaultGraphic;
@@ -172,23 +173,23 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
 
             @Override
             protected void updateItem(ReferenceType item, boolean empty) {
-                super.updateItem(item, empty); 
-                
+                super.updateItem(item, empty);
+
                 if(item!=null){
                     // La mise à jour des références incohérentes et nouvelles est automatique.
-//                    if(incoherentReferences!=null 
+//                    if(incoherentReferences!=null
 //                            && incoherentReferences.get(item)!=null){
 //                        button.setGraphic(new ImageView(ICON_EXCLAMATION_TRIANGLE));
 //                        button.setText("Incohérente");
 //                        decorate(true);
-//                    } 
+//                    }
 //                    else if(serverInstanceNotLocal!=null
 //                            && serverInstanceNotLocal.contains(item)){
 //                        button.setGraphic(new ImageView(ICON_DOWNLOAD));
 //                        button.setText("Nouvelle");
 //                        decorate(false);
-//                    } 
-//                    else 
+//                    }
+//                    else
                         if(localInstancesNotOnTheServer!=null
                             && localInstancesNotOnTheServer.contains(item)){
                         button.setGraphic(new ImageView(ICON_EXCLAMATION_CIRCLE));
@@ -201,34 +202,34 @@ public class FXReferencePane<T extends ReferenceType> extends BorderPane {
                 }
             }
         }
-        
-        
-    
+
+
+
     private class StateColumn extends TableColumn<Element, ReferenceType>{
 
         public StateColumn() {
-            super("État");     
+            super("État");
             setEditable(false);
             setSortable(false);
             setResizable(true);
             setPrefWidth(70);
-            
+
             setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Element, ReferenceType>, ObservableValue<ReferenceType>>() {
                 @Override
                 public ObservableValue<ReferenceType> call(TableColumn.CellDataFeatures<Element, ReferenceType> param) {
                     return new SimpleObjectProperty<>((ReferenceType)param.getValue());
                 }
             });
-            
+
             setCellFactory(new Callback<TableColumn<Element, ReferenceType>, TableCell<Element, ReferenceType>>() {
 
                 @Override
                 public TableCell<Element, ReferenceType> call(TableColumn<Element,ReferenceType> param) {
-                    
-                    return new StateButtonTableCell(new ImageView(ICON_CHECK_CIRCLE)); 
+
+                    return new StateButtonTableCell(new ImageView(ICON_CHECK_CIRCLE));
                 }
             });
-        }  
+        }
     }
     }
 }

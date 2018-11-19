@@ -24,6 +24,7 @@ import fr.sirs.Injector;
 import fr.sirs.core.component.*;
 import fr.sirs.core.model.*;
 import fr.sirs.util.javafx.FloatSpinnerValueFactory;
+import javafx.beans.property.ObjectProperty;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -43,7 +44,7 @@ public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndig
 
     private final Previews previewRepository;
 
-    private final DiguePojoTable table = new DiguePojoTable();
+    private final DiguePojoTable table;
 
     // Propriétés de SystemeEndiguement
     @FXML TextArea ui_commentaire;
@@ -87,6 +88,9 @@ public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndig
         ui_gestionnaireTechniqueId_link.disableProperty().bind(ui_gestionnaireTechniqueId.getSelectionModel().selectedItemProperty().isNull());
         ui_gestionnaireTechniqueId_link.setGraphic(new ImageView(SIRS.ICON_LINK));
         ui_gestionnaireTechniqueId_link.setOnAction((ActionEvent e)->Injector.getSession().showEditionTab(ui_gestionnaireTechniqueId.getSelectionModel().getSelectedItem()));
+
+
+        table = new DiguePojoTable(elementProperty());
     }
 
     public FXSystemeEndiguementPane(final SystemeEndiguement systemeEndiguement){
@@ -176,8 +180,8 @@ public class FXSystemeEndiguementPane extends AbstractFXElementPane<SystemeEndig
 
     private class DiguePojoTable extends PojoTable {
 
-        public DiguePojoTable() {
-            super(Digue.class, "Digues du système d'endiguement");
+        public DiguePojoTable(final ObjectProperty<? extends Element> container) {
+            super(Digue.class, "Digues du système d'endiguement", container);
             createNewProperty.set(false);
             fichableProperty.set(false);
             uiAdd.setVisible(false);

@@ -23,6 +23,7 @@ import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.model.AvecForeignParent;
 import fr.sirs.core.model.BorneDigue;
+import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
@@ -79,7 +80,7 @@ public abstract class TronconChoicePrintPane extends BorderPane {
     protected class TronconChoicePojoTable extends PojoTable {
 
         public TronconChoicePojoTable() {
-            super(TronconDigue.class, "Tronçons");
+            super(TronconDigue.class, "Tronçons", (ObjectProperty<Element>) null);
             getColumns().remove(editCol);
             editableProperty.set(false);
             createNewProperty.set(false);
@@ -227,7 +228,7 @@ public abstract class TronconChoicePrintPane extends BorderPane {
     protected class TypeChoicePojoTable extends PojoTable {
 
         public TypeChoicePojoTable(final Class clazz, final String title) {
-            super(clazz, title);
+            super(clazz, title, (ObjectProperty<Element>) null);
             getColumns().remove(editCol);
             editableProperty.set(false);
             createNewProperty.set(false);

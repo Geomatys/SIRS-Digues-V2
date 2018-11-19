@@ -34,6 +34,7 @@ import static fr.sirs.plugin.vegetation.PluginVegetation.DEFAULT_PEUPLEMENT_VEGE
 import static fr.sirs.plugin.vegetation.PluginVegetation.paramTraitement;
 import java.util.ArrayList;
 import java.util.function.Consumer;
+import javafx.beans.property.ObjectProperty;
 import javafx.scene.control.TableColumn;
 import javafx.stage.Modality;
 
@@ -43,8 +44,8 @@ import javafx.stage.Modality;
  */
 public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
 
-    public ZoneVegetationPojoTable(String title) {
-        super(ZoneVegetation.class, title);
+    public ZoneVegetationPojoTable(String title, final ObjectProperty<? extends Element> container) {
+        super(ZoneVegetation.class, title, container);
         setDeletor(new Consumer<Element>() {
 
             @Override
@@ -53,7 +54,7 @@ public class ZoneVegetationPojoTable extends ListenPropertyPojoTable<String> {
             }
         });
     }
-    
+
     @Override
     protected StructBeanSupplier getStructBeanSupplier(){
         return new StructBeanSupplier(pojoClass, "documentId", () -> new ArrayList(uiTable.getSelectionModel().getSelectedItems()));

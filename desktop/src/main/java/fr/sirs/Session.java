@@ -59,6 +59,7 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -177,8 +178,8 @@ public class Session extends SessionCore {
                                     new Insets(4, 4, 4, 4), 500),
                     DecorationXMLParser.class.getResource("/org/geotoolkit/icon/boussole.svg"),
                     new Dimension(100,100));
-    
-    
+
+
 
     @Autowired
     public Session(CouchDbConnector couchDbConnector) {
@@ -303,15 +304,15 @@ public class Session extends SessionCore {
     ////////////////////////////////////////////////////////////////////////////
 
     /**
-     * 
+     *
      * @param object The object the edition tab is requested for.
      */
     public void showEditionTab(final Object object) {
         showEditionTab(object, SIRS.CONSULTATION_PREDICATE);
     }
-    
+
     /**
-     * 
+     *
      * @param object The object the edition tab is requested for.
      * @param editionPredicate Prédicat d'édition du panneau à l'ouverture
      */
@@ -361,7 +362,7 @@ public class Session extends SessionCore {
             case USERS:
                 return getOrCreateTab(AdminTab.USERS, () -> {
                     final FXFreeTab tab = new FXFreeTab(title);
-                    final PojoTable usersTable = new PojoTable(getRepositoryForClass(Utilisateur.class), "Table des utilisateurs") {
+                    final PojoTable usersTable = new PojoTable(getRepositoryForClass(Utilisateur.class), "Table des utilisateurs", (ObjectProperty<? extends Element>) null) {
                         @Override
                         protected void deletePojos(final Element... pojos) {
                             final List<Element> pojoList = new ArrayList<>();

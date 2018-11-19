@@ -101,6 +101,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -302,22 +304,42 @@ public class PojoTable extends BorderPane implements Printable {
     protected final StackPane notifier = new StackPane();
 
     protected final StringProperty titleProperty = new SimpleStringProperty();
-    
+
     // Default deletor
     private Consumer deletor;
 
+    /*
+    Objet auquel sont rattachés les éléments de la pojoTable.
+    On utilise une référence différente de ownerElementProperty et parentProperty car ces deux attributs sont déjà utilisés à des fins spécifiques
+    et on risque de créer des dysfonctionnement si on leur affecte une valeur quand ils n'en ont pas jusqu'à présent.
+    La propriété "container" est particulièrement destinée à être capable de déterminer l'entité dans laquelle est incluse
+    la PojoTable afin de filter les éléments à ajouter sur un tronçon identique.
+    */
+    private final ObjectProperty<? extends Element> container;
+
+    public PojoTable(final Class pojoClass, final String title, final ObjectProperty<? extends Element> container) {
+        this(pojoClass, title, container, null);
+    }
+
+    public PojoTable(final AbstractSIRSRepository repo, final String title, final ObjectProperty<? extends Element> container) {
+        this(repo.getModelClass(), title, container, repo);
+    }
+
     public PojoTable(final Class pojoClass, final String title) {
-        this(pojoClass, title, null);
+        this(pojoClass, title, (ObjectProperty<? extends Element>) null);
     }
 
     public PojoTable(final AbstractSIRSRepository repo, final String title) {
-        this(repo.getModelClass(), title, repo);
+        this(repo, title, (ObjectProperty<? extends Element>) null);
     }
 
-    private PojoTable(final Class pojoClass, final String title, final AbstractSIRSRepository repo) {
+
+    private PojoTable(final Class pojoClass, final String title, final ObjectProperty<? extends Element> container, final AbstractSIRSRepository repo) {
         if (pojoClass == null && repo == null) {
             throw new IllegalArgumentException("Pojo class to expose and Repository parameter are both null. At least one of them must be valid.");
         }
+
+        this.container = container;
 
         SIRS.setColumnResize(uiTable);
 
@@ -345,7 +367,7 @@ public class PojoTable extends BorderPane implements Printable {
             this.repo = repo;
         }
         deletor = new Deletor(createNewProperty, parentElementProperty, ownerElementProperty, this.repo);
-        
+
         searchRunning.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         searchRunning.setPrefSize(22, 22);
         searchRunning.setStyle("-fx-progress-color: white;");
@@ -469,7 +491,7 @@ public class PojoTable extends BorderPane implements Printable {
         final EventHandler<ActionEvent> addHandler = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                
+
             final Element p;
             if(createNewProperty.get()){
                 p = createPojo();
@@ -498,7 +520,7 @@ public class PojoTable extends BorderPane implements Printable {
             }
             }
         };
-        
+
         uiAdd.getStyleClass().add(BUTTON_STYLE);
         uiAdd.setOnAction(addHandler);
         uiAdd.disableProperty().bind(editableProperty.not());
@@ -669,7 +691,7 @@ public class PojoTable extends BorderPane implements Printable {
 
         updateView();
     }
-    
+
     protected StructBeanSupplier getStructBeanSupplier(){
         return new StructBeanSupplier(pojoClass, () -> new ArrayList(uiTable.getSelectionModel().getSelectedItems()));
     }
@@ -693,18 +715,18 @@ public class PojoTable extends BorderPane implements Printable {
     protected final TableView<Element> getTable() {
         return uiTable;
     }
-    
-    /** 
+
+    /**
      * Mise à jour de l'interface en mode "fiche".
-     * 
-     * SYM-1764 : On crée un nouveau panneau à chaque fois qu'on change de fiche. 
+     *
+     * SYM-1764 : On crée un nouveau panneau à chaque fois qu'on change de fiche.
      * Sinon le rechargement des positions provoque des anomalies de recalcul des positions.
      */
     private void updateFiche(){
         if (uiTable.getSelectionModel().getSelectedIndex() < 0) {
             uiTable.getSelectionModel().select(0);
         }
-        
+
         setCenter(SIRS.generateEditionPane(uiTable.getSelectionModel().getSelectedItem(), SIRS.EDITION_PREDICATE));
 
         uiCurrent.setText("" + (uiTable.getSelectionModel().getSelectedIndex()+1) + " / " + uiTable.getItems().size());
@@ -1160,17 +1182,17 @@ public class PojoTable extends BorderPane implements Printable {
     /**
      * Try to find and display a form to edit input object.
      * @param pojo The object we want to edit.
-     * @return 
+     * @return
      */
     protected Object editPojo(Object pojo) {
         return editPojo(pojo, SIRS.CONSULTATION_PREDICATE);
     }
-    
+
     /**
-     * 
+     *
      * @param pojo
      * @param editionPredicate
-     * @return 
+     * @return
      */
     protected Object editPojo(Object pojo, Predicate<Element> editionPredicate) {
         final int index;
@@ -1337,7 +1359,7 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     /**
-     * 
+     *
      * @param pojo The object the edition is requested for.
      * @param editionPredicate Prédicat d'étition du panneau à l'ouverture
      */
@@ -1387,14 +1409,14 @@ public class PojoTable extends BorderPane implements Printable {
 
         return new SimpleObjectProperty(selection.isEmpty()? new ArrayList<>(filteredValues) : new ArrayList(selection));
     }
-    
+
     /**
      * Control of the columns to print into the ODT document.
      * @return a list of property names to print
      * @see PojoTable#print()
      */
     protected List<String> propertyNamesToPrint(){
-        
+
         final List<String> propertyNames = new ArrayList<>();
         for (final TableColumn column : getColumns()) {
             if (column.isVisible()){
@@ -1408,7 +1430,7 @@ public class PojoTable extends BorderPane implements Printable {
         }
         return propertyNames;
     }
-    
+
     protected Map<String, Function<Element, String>> getPrintMapping(){
         return Collections.emptyMap();
     }
@@ -1577,10 +1599,10 @@ public class PojoTable extends BorderPane implements Printable {
             } else {
                 setCellValueFactory(SIRS.getOrCreateCellValueFactory(name));
                 final Method readMethod = desc.getReadMethod();
-                
-                // On conditionne a priori l'édition au fait que la méthode de lecture n'est pas indiquée comme autocalculée. 
+
+                // On conditionne a priori l'édition au fait que la méthode de lecture n'est pas indiquée comme autocalculée.
                 isEditable = !readMethod.isAnnotationPresent(Computed.class);
-                
+
                 final Class type = readMethod.getReturnType();
                 if (Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)) {
                     setCellFactory((TableColumn<Element, Object> param) -> new FXBooleanCell());

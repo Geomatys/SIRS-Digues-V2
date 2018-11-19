@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -41,7 +41,7 @@ public class FXDesordrePane extends FXDesordrePaneStub {
     public FXDesordrePane(final Desordre desordre){
         super(desordre);
 
-        // Demande SYM-1117 : la sélection d'une catégorie détermine la liste des types de désordres 
+        // Demande SYM-1117 : la sélection d'une catégorie détermine la liste des types de désordres
         // Update available types according to chosen category.
         final AbstractSIRSRepository<RefTypeDesordre> typeRepo = Injector.getSession().getRepositoryForClass(RefTypeDesordre.class);
         ui_categorieDesordreId.getSelectionModel().selectedItemProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
@@ -54,10 +54,10 @@ public class FXDesordrePane extends FXDesordrePaneStub {
                 ui_typeDesordreId.setItems(typeList);
             }
         });
-        
+
         // Demande SYM-1669 : la sélection d'un type de désordre doit contraintre la catégorie
         ui_typeDesordreId.getSelectionModel().selectedItemProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
-            
+
             if(newValue!=null){
                 final RefTypeDesordre selectedType = (RefTypeDesordre) newValue;
                 final String newCategoryId = selectedType.getCategorieId();
@@ -75,24 +75,24 @@ public class FXDesordrePane extends FXDesordrePaneStub {
                 }
             }
         });
-        
+
         /*
-        
+
         /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\
-        
+
         SYM-1727 : on souhaite que le rôle externe puisse ajouter des observations
         même dans les désordres dont il n'est pas l'auteur.
-        
+
         Pour cela, il faut surcharger la création du tableau définie
         dans le constructeur de la classe-mère.
         */
-        
+
         ui_observations.setContent(() -> {
-            observationsTable = new PojoTableExternalAddable(Observation.class);
+            observationsTable = new PojoTableExternalAddable(Observation.class, elementProperty());
             observationsTable.editableProperty().bind(disableFieldsProperty().not());
             updateObservationsTable(Injector.getSession(), elementProperty.get());
             return observationsTable;
         });
-        
+
     }
 }

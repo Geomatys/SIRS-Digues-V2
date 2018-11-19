@@ -91,11 +91,11 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
 
     // Onglet "Contacts"
     @FXML private Tab uiGestionsTab;
-    private final GestionsTable uiGestionsTable = new GestionsTable();
+    private final GestionsTable uiGestionsTable;
     @FXML private Tab uiProprietesTab;
-    private final ForeignParentPojoTable<ProprieteTroncon> uiProprietesTable = new ForeignParentPojoTable<>(ProprieteTroncon.class, "Période de propriété");
+    private final ForeignParentPojoTable<ProprieteTroncon> uiProprietesTable;
     @FXML private Tab uiGardesTab;
-    private final ForeignParentPojoTable<GardeTroncon> uiGardesTable = new ForeignParentPojoTable<>(GardeTroncon.class, "Période de gardiennage");
+    private final ForeignParentPojoTable<GardeTroncon> uiGardesTable;
 
     // Booleen déterminant s'il est nécessaire de calculer l'état d'archivage du tronçon et des objets qui s'y réfèrent lors de l'enregistrement.
     protected LocalDate initialArchiveDate;
@@ -174,8 +174,11 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
         uiSRDelete.disableProperty().set(true);
         uiSRDelete.setVisible(false);
 
+        uiGestionsTable = new GestionsTable(elementProperty());
         uiGestionsTable.editableProperty().bind(disableFieldsProperty().not());
+        uiProprietesTable = new ForeignParentPojoTable<>(ProprieteTroncon.class, "Période de propriété", elementProperty());
         uiProprietesTable.editableProperty().bind(disableFieldsProperty().not());
+        uiGardesTable = new ForeignParentPojoTable<>(GardeTroncon.class, "Période de gardiennage", elementProperty());
         uiGardesTable.editableProperty().bind(disableFieldsProperty().not());
 
         // Troncon change listener
@@ -384,8 +387,8 @@ public class FXTronconDiguePane extends AbstractFXElementPane<TronconDigue> {
 
     private final class GestionsTable extends PojoTable {
 
-        public GestionsTable() {
-            super(GestionTroncon.class, "Périodes de gestion");
+        public GestionsTable(ObjectProperty<? extends Element> container) {
+            super(GestionTroncon.class, "Périodes de gestion", container);
         }
 
         @Override

@@ -126,6 +126,22 @@ public class FXBookMarks extends GridPane {
         bookmark.setDesignation("");
         bookmark.setTitre("pas de nom");
         repo.add(bookmark);
+
+        // on sélectionne dans la liste le favori qui vient d'être créé
+        uiTable.getSelectionModel().select(bookmark);
+
+        // On rend le favori éditable si on est admin
+        final Session session = Injector.getSession();
+        final Role role = session.getRole();
+        final Node editPane = uiConfig.getCenter();
+
+        // Seul l'admin doit pouvoir éditer
+        if(Role.ADMIN.equals(role) && editPane != null){
+            final FXEditMode searchEditMode = searchEditMode(editPane);
+            if(searchEditMode!=null){
+                searchEditMode.editionState().set(true);
+            }
+        }
     }
 
     private void selectionChanged(ObservableValue<? extends BookMark> observable, BookMark oldValue, BookMark newValue){

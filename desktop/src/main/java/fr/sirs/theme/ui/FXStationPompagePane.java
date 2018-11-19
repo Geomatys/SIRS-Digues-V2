@@ -2,7 +2,7 @@
  * This file is part of SIRS-Digues 2.
  *
  * Copyright (C) 2016, FRANCE-DIGUES,
- * 
+ *
  * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
@@ -31,20 +31,20 @@ public class FXStationPompagePane extends FXStationPompagePaneStub {
 
     public FXStationPompagePane(final StationPompage ouvrage){
         super(ouvrage);
-        
+
         /*
-        
+
         /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\ HACK /!\/!\/!\
-        
+
         SYM-1756 : on souhaite ajouter le même hack que SYM-1727 pour les tableaux d'observations de désordres.
         */
-        
+
         ui_observations.setContent(() -> {
-            observationsTable = new PojoTableExternalAddable(ObservationStationPompage.class);
+            observationsTable = new PojoTableExternalAddable(ObservationStationPompage.class, elementProperty());
             observationsTable.editableProperty().bind(disableFieldsProperty().not());
             updateObservationsTable(Injector.getSession(), elementProperty.get());
             return observationsTable;
         });
-        
+
     }
 }
