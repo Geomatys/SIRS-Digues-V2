@@ -51,6 +51,7 @@ import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Desordre;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.LabelMapper;
+import fr.sirs.core.model.Objet;
 import fr.sirs.core.model.PointZ;
 import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
@@ -102,7 +103,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -500,8 +500,48 @@ public class PojoTable extends BorderPane implements Printable {
                 }
             }
             else {
+                final ObservableList<Preview> choices;
+                final Element cont = PojoTable.this.container.get();
+                if(Objet.class.isAssignableFrom(pojoClass) && cont instanceof Objet) {
+
+                    // récupération de tous les éléments du type compatible avec le tableau courant
+                    final List<Preview> possiblePreviews = new ArrayList<>(session.getPreviews().getByClass(pojoClass));
+
+                    // récupération des identifiants
+                    final List<String> possibleIds = possiblePreviews.stream().map(e -> e.getElementId()).collect(Collectors.toList());
+
+                    // recupération des objets correspondant aux identifiants
+                    final List<Objet> entities = PojoTable.this.session.getRepositoryForClass(pojoClass).get(possibleIds);
+
+                    // retrait des entités qui ne sont pas sur le même tronçon que le "conteneur"
+                    entities.removeIf(new Predicate<Objet>() {
+                        @Override
+                        public boolean test(Objet t) {
+                            return !((Objet) cont).getLinearId().equals(t.getLinearId());
+                        }
+                    });
+
+                    // récupération des identifiants des éléments sur le même tronçon
+                    final List<String> sameContainerIds = entities.stream().map(o -> o.getId()).collect(Collectors.toList());
+
+                    // filtrage des previews correspondants
+                    possiblePreviews.removeIf(new Predicate<Preview>() {
+                        @Override
+                        public boolean test(Preview t) {
+                            return !sameContainerIds.contains(t.getElementId());
+                        }
+                    });
+
+                    choices = SIRS.observableList(possiblePreviews);
+
+                    System.out.println("positionables");
+                }
+                else {
+                    choices = SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted();
+                }
+                
                 final PojoTableChoiceStage<Element> stage = new ChoiceStage(
-                        PojoTable.this.repo, SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted());
+                        PojoTable.this.repo, choices);
                 stage.showAndWait();
                 p = stage.getRetrievedElement().get();
                 if (p!=null) {
