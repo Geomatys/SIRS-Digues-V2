@@ -82,6 +82,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import org.apache.sis.measure.NumberRange;
 import org.geotoolkit.nio.IOUtilities;
 
 /**
@@ -146,6 +147,8 @@ public class DocumentsPane extends GridPane {
     public static final String DYNAMIC          = "dynamic";
     public static final String MODELE           = "modele";
     public static final String HIDDEN           = "hidden";
+    public static final String DATE_RANGE_MIN   = "dateRangeMin";
+    public static final String DATE_RANGE_MAX   = "dateRangeMax";
 
     public static final String SE = "se";
     public static final String TR = "tr";
@@ -721,10 +724,20 @@ public class DocumentsPane extends GridPane {
         private void regenerateDynamicDocument(final File item) {
             final ModeleRapportRepository modelRepo = Injector.getBean(ModeleRapportRepository.class);
             String modelId = getProperty(item, MODELE);
+            final String dateRangeMin = getProperty(item, DocumentsPane.DATE_RANGE_MIN);
+            final String dateRangeMax = getProperty(item, DocumentsPane.DATE_RANGE_MAX);
+
+            final NumberRange dateRange;
+            if(dateRangeMin.isEmpty() && dateRangeMax.isEmpty()) {
+                dateRange = null;
+            } else {
+                dateRange = NumberRange.create(dateRangeMin.isEmpty() ? 0 : Long.parseLong(dateRangeMin), true,
+                        dateRangeMax.isEmpty() ? Long.MAX_VALUE : Long.parseLong(dateRangeMax), true);
+            }
             if (modelId != null && !modelId.isEmpty()) {
                 final ModeleRapport modele = modelRepo.get(modelId);
                 if (modele != null) {
-                    final Task<File> generator = ODTUtils.generateDoc(modele, getTronconList(), item, root.getLibelle());
+                    final Task<File> generator = ODTUtils.generateDoc(modele, getTronconList(), item, root.getLibelle(), dateRange);
                     generator.setOnSucceeded(evt -> Platform.runLater(() -> root.update(false)));
                     LoadingPane.showDialog(generator);
                 } else {
