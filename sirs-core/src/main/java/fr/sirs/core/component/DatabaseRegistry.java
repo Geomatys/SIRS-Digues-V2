@@ -143,10 +143,10 @@ public class DatabaseRegistry {
 
     /** Check if a given string is a database URL (i.e not a path / url). */
     private static final Pattern DB_NAME = Pattern.compile("^[a-z][\\w-]+/?");
-    
+
     /**
      * Détection des départs d'URLs éventuellement suivis de paramètres d'authentification sur l'hôte
-     * 
+     *
      * Exemples :
      * http://localhost:5984
      * http://user:password@localhost:5984
@@ -268,7 +268,7 @@ public class DatabaseRegistry {
             hostPattern = Pattern.compile("(?i)^([A-Za-z]+://)?([^@]+@)?"+couchDbUrl.getHost()+"(:"+portToUse+")?");
         }
     }
-    
+
     public CouchSGBD getSGBDInfo(){
         if(couchDbInstance!=null){
         return ((StdCouchDb2Instance) couchDbInstance).getSGBDInfo();
@@ -334,7 +334,7 @@ public class DatabaseRegistry {
         couchDbInstance = new StdCouchDb2Instance(builder.build(), SirsPreferences.INSTANCE.getProperty(NODE_NAME));
         couchDbInstance.getAllDatabases();
     }
-    
+
     /**
      * List SIRS application databases found on current CouchDb server.
      * @return The name of all databases which contain SIRS data.
@@ -580,7 +580,7 @@ public class DatabaseRegistry {
      * @throws java.io.IOException If an error occurs while connecting to the databases.
      */
     public ReplicationStatus copyDatabase(final String sourceDb, final String targetDb, final boolean continuous) throws IOException {
-        
+
         // Ensure database to copy is valid.
         final CouchDbConnector srcConnector = createConnector(sourceDb, DatabaseConnectionBehavior.FAIL_IF_NOT_EXISTS);
         Optional<SirsDBInfo> info = getInfo(srcConnector);
@@ -599,12 +599,12 @@ public class DatabaseRegistry {
             final SirsDBInfo srcInfo = info.get();
             final String srcSRID = srcInfo.getEpsgCode();
             info = getInfo(tgtConnector);
-            
+
             if (info.isPresent()) {
                 final SirsDBInfo dstInfo = info.get();
                 final String dstSRID = dstInfo.getEpsgCode();
                 if (srcSRID == null ? dstSRID != null : !srcSRID.equals(dstSRID)) {
-                    throw new IllegalArgumentException(String.format(Locale.FRANCE, 
+                    throw new IllegalArgumentException(String.format(Locale.FRANCE,
                             "Impossible de synchroniser les bases de données car elles n'utilisent pas le même système de projection : (%s : %s) => (%s : %s)",
                             cleanDatabaseName(sourceDb), srcSRID, cleanDatabaseName(targetDb), dstSRID));
                 }
@@ -615,9 +615,9 @@ public class DatabaseRegistry {
 
                 if (dstModules == null && srcModules != null) {
                     modules = srcModules;
-                } 
+                }
                 else if (srcModules != null && dstModules != null) {
-                    
+
                     final StringBuilder moduleError = new StringBuilder("Les bases de données ne peuvent être synchronisées"
                             + " car elles travaillent avec des versions différentes des modules suivants : ");
                     boolean throwException = false;
@@ -629,7 +629,7 @@ public class DatabaseRegistry {
                         final ModuleDescription desc = dstModules.get(entry.getKey());
                         if (desc == null) {
                             dstModules.put(entry.getKey(), entry.getValue());
-                        } 
+                        }
                         else if (!desc.getVersion().equals(entry.getValue().getVersion())) {
                             throwException = true;
                             moduleError.append(System.lineSeparator())
@@ -648,7 +648,7 @@ public class DatabaseRegistry {
 
                     if (throwException) {
                         throw new IllegalArgumentException(moduleError.toString());
-                    } 
+                    }
                     else if (dstModuleListSize < dstModules.size()) {
                         // module description have changed, we must trigger its update.
                         modules = dstModules;
@@ -772,7 +772,7 @@ public class DatabaseRegistry {
 
             final Iterator<JsonNode> elements = tasks.elements();
             Spliterator<ReplicationTask> spliterator = new Spliterator<ReplicationTask>() {
-                
+
                 @Override
                 public boolean tryAdvance(Consumer<? super ReplicationTask> action) {
                     while (elements.hasNext()) {
@@ -858,7 +858,8 @@ public class DatabaseRegistry {
     private static void createUserIfNotExists(final URL couchDbUrl, final String username, final String password) throws IOException {
         RestTemplate template = new RestTemplate(new StdHttpClient.Builder().url(couchDbUrl).build());
 
-        final String adminConfig = "/_config/admins/" + username;
+        final String adminConfig = String.format("/_node/%s/_config/admins/%s",
+                SirsPreferences.INSTANCE.getProperty(SirsPreferences.PROPERTIES.NODE_NAME), username);
         try {
             template.getUncached(adminConfig);
         } catch (Exception e) {
@@ -1123,14 +1124,14 @@ public class DatabaseRegistry {
     public CouchDbConnector createConnector(final String dbNameOrPath, final DatabaseConnectionBehavior behavior) throws IOException, IllegalArgumentException {
         final boolean create = DatabaseConnectionBehavior.CREATE_IF_NOT_EXISTS.equals(behavior);
         final boolean fail = DatabaseConnectionBehavior.FAIL_IF_NOT_EXISTS.equals(behavior);
-        
+
         if (DB_NAME.matcher(dbNameOrPath).matches()) {
             if (fail && !couchDbInstance.checkIfDbExists(dbNameOrPath)) {
                 throw new IllegalArgumentException(String.format("La base de donnée %s n'existe pas !", dbNameOrPath));
             } else {
                 return couchDbInstance.createConnector(dbNameOrPath, create);
             }
-        } 
+        }
         else {
             final Matcher matcher = hostPattern.matcher(dbNameOrPath);
             if (matcher.find()) {
