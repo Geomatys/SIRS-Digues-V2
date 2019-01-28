@@ -26,6 +26,10 @@ import fr.sirs.core.SirsCore;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.component.DesordreRepository;
+import fr.sirs.core.component.OuvrageHydrauliqueAssocieRepository;
+import fr.sirs.core.component.ReseauHydrauliqueCielOuvertRepository;
+import fr.sirs.core.component.ReseauHydrauliqueFermeRepository;
+import fr.sirs.core.component.StationPompageRepository;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Photo;
@@ -148,6 +152,18 @@ public class DocumentExportPane extends StackPane {
 
     @Autowired
     private DesordreRepository desordreRepo;
+
+    @Autowired
+    private OuvrageHydrauliqueAssocieRepository ouvrageHydrauliqueAssocieRepository;
+
+    @Autowired
+    private ReseauHydrauliqueFermeRepository reseauHydrauliqueFermeRepository;
+
+    @Autowired
+    private ReseauHydrauliqueCielOuvertRepository reseauHydrauliqueCielOuvertRepository;
+
+    @Autowired
+    private StationPompageRepository stationPompageRepository;
 
     private final Tooltip copyMessageTooltip = new Tooltip();
 
@@ -382,6 +398,50 @@ public class DocumentExportPane extends StackPane {
                     for (final Preview tdPreview : tronconItems) {
                         final String linearId = tdPreview.getElementId();
                         photos.addAll(desordreRepo.getByLinearId(linearId).stream()
+                                .flatMap(dd -> dd.observations.stream())
+                                // for each object, we take the keep only valid
+                                // photo, and keep only the most recent ones.
+                                .flatMap(obs -> obs.photos.stream()
+                                        .filter(photoFilter)
+                                        .sorted(photoComparator)
+                                        .limit(photoNumber))
+                                .limit(photoNumber)
+                                .collect(Collectors.toList())
+                        );
+                        photos.addAll(ouvrageHydrauliqueAssocieRepository.getByLinearId(linearId).stream()
+                                .flatMap(dd -> dd.observations.stream())
+                                // for each object, we take the keep only valid
+                                // photo, and keep only the most recent ones.
+                                .flatMap(obs -> obs.photos.stream()
+                                        .filter(photoFilter)
+                                        .sorted(photoComparator)
+                                        .limit(photoNumber))
+                                .limit(photoNumber)
+                                .collect(Collectors.toList())
+                        );
+                        photos.addAll(reseauHydrauliqueFermeRepository.getByLinearId(linearId).stream()
+                                .flatMap(dd -> dd.observations.stream())
+                                // for each object, we take the keep only valid
+                                // photo, and keep only the most recent ones.
+                                .flatMap(obs -> obs.photos.stream()
+                                        .filter(photoFilter)
+                                        .sorted(photoComparator)
+                                        .limit(photoNumber))
+                                .limit(photoNumber)
+                                .collect(Collectors.toList())
+                        );
+                        photos.addAll(reseauHydrauliqueCielOuvertRepository.getByLinearId(linearId).stream()
+                                .flatMap(dd -> dd.observations.stream())
+                                // for each object, we take the keep only valid
+                                // photo, and keep only the most recent ones.
+                                .flatMap(obs -> obs.photos.stream()
+                                        .filter(photoFilter)
+                                        .sorted(photoComparator)
+                                        .limit(photoNumber))
+                                .limit(photoNumber)
+                                .collect(Collectors.toList())
+                        );
+                        photos.addAll(stationPompageRepository.getByLinearId(linearId).stream()
                                 .flatMap(dd -> dd.observations.stream())
                                 // for each object, we take the keep only valid
                                 // photo, and keep only the most recent ones.

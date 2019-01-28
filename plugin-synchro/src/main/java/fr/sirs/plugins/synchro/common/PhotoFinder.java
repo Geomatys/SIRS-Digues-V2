@@ -3,11 +3,15 @@ package fr.sirs.plugins.synchro.common;
 import fr.sirs.Session;
 import fr.sirs.core.component.AbstractPositionableRepository;
 import fr.sirs.core.component.AbstractSIRSRepository;
+import fr.sirs.core.model.AbstractObservation;
 import fr.sirs.core.model.AbstractPhoto;
 import fr.sirs.core.model.AvecBornesTemporelles;
 import fr.sirs.core.model.AvecPhotos;
 import fr.sirs.core.model.Desordre;
-import fr.sirs.core.model.Observation;
+import fr.sirs.core.model.OuvrageHydrauliqueAssocie;
+import fr.sirs.core.model.ReseauHydrauliqueCielOuvert;
+import fr.sirs.core.model.ReseauHydrauliqueFerme;
+import fr.sirs.core.model.StationPompage;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -76,12 +80,18 @@ public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
 
     private Stream<AvecPhotos> getPhotoContainers() {
         return Stream.of(session)
-                .flatMap(source -> {
-                    return Stream.concat(
-                            stream(source, Desordre.class)
+                .flatMap((Session source) -> {
+                    return Stream.concat(stream(source, OuvrageHydrauliqueAssocie.class)
+                                    .map(OuvrageHydrauliqueAssocieWrapper::new),
+                            Stream.concat(stream(source, ReseauHydrauliqueFerme.class)
+                                    .map(ReseauHydrauliqueFermeWrapper::new),
+                            Stream.concat(stream(source, ReseauHydrauliqueCielOuvert.class)
+                                    .map(ReseauHydrauliqueCielOuvertWrapper::new),
+                            Stream.concat(stream(source, StationPompage.class)
+                                    .map(StationPompageWrapper::new),
+                            Stream.concat(stream(source, Desordre.class)
                                     .map(DesordreWrapper::new),
-                            stream(source, AvecPhotos.class)
-                    );
+                            stream(source, AvecPhotos.class))))));
                 });
     }
 
@@ -119,7 +129,7 @@ public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
     /**
      * Compare observations by date, descending order (most recent to oldest).
      */
-    private static int compare(final Observation o1, final Observation o2) {
+    private static int compare(final AbstractObservation o1, final AbstractObservation o2) {
         final LocalDate date1 = o1.getDate();
         final LocalDate date2 = o2.getDate();
 
@@ -133,17 +143,65 @@ public class PhotoFinder implements Supplier<Stream<AbstractPhoto>> {
         return -date1.compareTo(date2);
     }
 
-    private class DesordreWrapper implements AvecPhotos<AbstractPhoto>, AvecBornesTemporelles {
-
-        public final Desordre source;
+    private static class DesordreWrapper extends ObservationContainerWrapper<Desordre> {
 
         public DesordreWrapper(Desordre source) {
+            super(source, source.observations);
+        }
+    }
+
+    private static class OuvrageHydrauliqueAssocieWrapper extends ObservationContainerWrapper<OuvrageHydrauliqueAssocie> {
+
+        public OuvrageHydrauliqueAssocieWrapper(OuvrageHydrauliqueAssocie source) {
+            super(source, source.observations);
+        }
+    }
+
+    private static class ReseauHydrauliqueFermeWrapper extends ObservationContainerWrapper<ReseauHydrauliqueFerme> {
+
+        public ReseauHydrauliqueFermeWrapper(ReseauHydrauliqueFerme source) {
+            super(source, source.observations);
+        }
+    }
+
+    private static class ReseauHydrauliqueCielOuvertWrapper extends ObservationContainerWrapper<ReseauHydrauliqueCielOuvert> {
+
+        public ReseauHydrauliqueCielOuvertWrapper(ReseauHydrauliqueCielOuvert source) {
+            super(source, source.observations);
+        }
+    }
+
+    private static class StationPompageWrapper extends ObservationContainerWrapper<StationPompage> {
+
+        public StationPompageWrapper(StationPompage source) {
+            super(source, source.observations);
+        }
+    }
+
+    /**
+     * Encapsule des conteneurs d'observations en implémentations de "AvecPhotos" renvoyant les photos de leurs
+     * observations.
+     *
+     * @param <OC> type de conteneur d'observations (désordres etc.)
+     */
+    private static abstract class ObservationContainerWrapper<OC extends AvecBornesTemporelles>
+            implements AvecPhotos<AbstractPhoto>, AvecBornesTemporelles {
+
+        private final OC source;
+        private final List<? extends AbstractObservation> observations;
+
+        public ObservationContainerWrapper(final OC source, List<? extends AbstractObservation> observations) {
             this.source = source;
+            this.observations = observations;
         }
 
+        /**
+         * Cette méthode doit renvoyer les photos des observations du conteneur.
+         * @return
+         */
         @Override
         public List<AbstractPhoto> getPhotos() {
-            return source.observations.stream()
+            return observations.stream()
                     .sorted(PhotoFinder::compare)
                     .flatMap(o -> o.getPhotos().stream())
                     .collect(Collectors.toList());
