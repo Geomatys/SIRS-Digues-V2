@@ -319,6 +319,12 @@ public class DatabaseRegistry {
                     username = authEntry.login;
                     userPass = authEntry.password;
                 }
+                else if (username!=null && userPass!=null) {
+                    final String host = couchDbUrl.getHost();
+                    final int port = (couchDbUrl.getPort() < 0)? couchDbUrl.getDefaultPort() : couchDbUrl.getPort();
+                    
+                    wallet.put(new AuthenticationWallet.Entry(host, port, username, userPass));
+                }
             }
         }
 
