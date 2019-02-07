@@ -141,6 +141,7 @@ public class RapportsPane extends BorderPane {
     @FXML private Label uiProgressLabel;
     @FXML private BorderPane uiListPane;
     @FXML private BorderPane uiEditorPane;
+    @FXML private CheckBox uiPeriod;
 
     private final BooleanProperty running = new SimpleBooleanProperty(false);
 
@@ -171,12 +172,25 @@ public class RapportsPane extends BorderPane {
         uiGrid.add(uiPrDebut, 1, 3);
         uiGrid.add(uiPrFin, 3, 3);
 
-        final LocalDate date = LocalDate.now();
-        uiPeriodeDebut.valueProperty().set(date.minus(10, ChronoUnit.YEARS));
-        uiPeriodeFin.valueProperty().set(date);
+        uiPeriod.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                final LocalDate date = LocalDate.now();
+                if (uiPeriodeDebut.getValue() == null) {
+                    uiPeriodeDebut.valueProperty().set(date.minus(10, ChronoUnit.YEARS));
+                }
+                if (uiPeriodeFin.getValue() == null) {
+                    uiPeriodeFin.setValue(date);
+                }
+            }
+        });
+
+        uiPeriodeDebut.disableProperty().bind(uiPeriod.selectedProperty().not());
+        uiPeriodeDebut.editableProperty().bind(uiPeriod.selectedProperty());
+        uiPeriodeFin.disableProperty().bind(uiPeriod.selectedProperty().not());
+        uiPeriodeFin.editableProperty().bind(uiPeriod.selectedProperty());
         DatePickerConverter.register(uiPeriodeDebut);
         DatePickerConverter.register(uiPeriodeFin);
-        
+
         uiSystemEndiguement.valueProperty().addListener(this::systemeEndiguementChange);
         uiTroncons.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         uiTroncons.getSelectionModel().getSelectedItems().addListener(this::tronconSelectionChange);
@@ -248,8 +262,8 @@ public class RapportsPane extends BorderPane {
 
     /**
      * Méthode de génération du rapport.
-     * 
-     * @param event 
+     *
+     * @param event
      */
     @FXML
     private void generateReport(ActionEvent event) {
@@ -259,7 +273,7 @@ public class RapportsPane extends BorderPane {
         /*
         A- détermination de l'emplacement du fichier de sortie
         ======================================================*/
-        
+
         final FileChooser chooser = new FileChooser();
         final Path previous = getPreviousPath();
         if (previous != null) {
@@ -271,25 +285,25 @@ public class RapportsPane extends BorderPane {
 
         final Path output = file.toPath();
         setPreviousPath(output.getParent());
-        
-        
-        
+
+
+
         /*
         B- détermination des paramètres de création de l'obligation réglementaire, le cas échéant
         =========================================================================================*/
-        
+
         final RefTypeObligationReglementaire typeObligation = uiTypeObligation.valueProperty().get();
         final RefEtapeObligationReglementaire typeEtape = uiTypeEtape.valueProperty().get();
         final Preview sysEndi = uiSystemEndiguement.valueProperty().get();
         final String titre = uiTitre.getText();
-        
-        
+
+
         /*
         C- détermination des paramètres de filtrage des éléments sur le tronçon
         ======================================================================*/
-        
-        final LocalDate periodeDebut = uiPeriodeDebut.getValue();
-        final LocalDate periodeFin = uiPeriodeFin.getValue();
+
+        final LocalDate periodeDebut = uiPeriod.isSelected() ? uiPeriodeDebut.getValue() : null;
+        final LocalDate periodeFin = uiPeriod.isSelected() ? uiPeriodeFin.getValue() : null;
         final NumberRange dateRange;
         if (periodeDebut == null && periodeFin == null) {
             dateRange = null;
@@ -308,19 +322,19 @@ public class RapportsPane extends BorderPane {
             prRange = NumberRange.create(Math.min(prDebut, prFin), true, Math.max(prDebut, prFin), true);
         }
 
-        
+
         /*
         D- création de la tâche générale de création du rapport
         ======================================================*/
-        
+
         final Task task;
         task = new Task() {
 
             @Override
             protected Object call() throws Exception {
                 updateTitle("Création d'un rapport");
-                
-                
+
+
                 /*
                 1- détermination de la liste des éléments à inclure dans le rapport
                 ------------------------------------------------------------------*/
@@ -363,8 +377,8 @@ public class RapportsPane extends BorderPane {
                         }
                     }
                 }
-                
-                
+
+
                 /*
                 2- génération du rapport
                 -----------------------*/
@@ -376,11 +390,11 @@ public class RapportsPane extends BorderPane {
                 });
                 reportGenerator.get();
 
-                
+
                 /*
                 3- création de l'obligation réglementaire
                 ----------------------------------------*/
-                
+
                 updateProgress(-1, -1);
                 if (uiCreateObligation.isSelected()) {
                     updateMessage("Création de l'obligation réglementaire");
