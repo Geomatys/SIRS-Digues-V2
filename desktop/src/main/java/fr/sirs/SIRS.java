@@ -102,10 +102,11 @@ public final class SIRS extends SirsCore {
 
     public static final String COLOR_INVALID_ICON = "#aa0000";
     public static final String COLOR_VALID_ICON = "#00aa00";
-    
+
     public static final Image ICON = new Image(SirsCore.class.getResource("/fr/sirs/icon.png").toString());
 
     public static final Image ICON_ADD_WHITE    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,22,Color.WHITE),null);
+    public static final Image ICON_CHAIN_WHITE    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_CHAIN_ALIAS,22,Color.WHITE),null);
     public static final Image ICON_COPY_WHITE   = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_COPY_ALIAS,22,Color.WHITE),null);
     public static final Image ICON_ADD_BLACK    = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_PLUS,16,Color.BLACK),null);
     public static final Image ICON_ARROW_RIGHT_BLACK = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_ARROW_RIGHT,16,Color.BLACK),null);

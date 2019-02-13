@@ -339,6 +339,15 @@ public class PojoTable extends BorderPane implements Printable {
             throw new IllegalArgumentException("Pojo class to expose and Repository parameter are both null. At least one of them must be valid.");
         }
 
+        createNewProperty.addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                uiAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
+            }
+            else {
+                uiAdd.setGraphic(new ImageView(SIRS.ICON_CHAIN_WHITE));
+            }
+        });
+
         this.container = container;
 
         SIRS.setColumnResize(uiTable);
@@ -539,7 +548,7 @@ public class PojoTable extends BorderPane implements Printable {
                 else {
                     choices = SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted();
                 }
-                
+
                 final PojoTableChoiceStage<Element> stage = new ChoiceStage(
                         PojoTable.this.repo, choices);
                 stage.showAndWait();
