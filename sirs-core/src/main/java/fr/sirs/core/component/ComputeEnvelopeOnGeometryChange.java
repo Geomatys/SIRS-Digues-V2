@@ -66,7 +66,7 @@ public class ComputeEnvelopeOnGeometryChange implements ChangeListener<Geometry>
                 }
                 
                 if(geometryCRS!=null){
-                    SirsCore.LOGGER.log(Level.INFO, "calcul d'une enveloppe de géométrie");
+                    SirsCore.LOGGER.log(Level.FINE, "calcul d'une enveloppe de géométrie");
                     Envelope envelope2D = JTS.getEnvelope2D(newValue.getEnvelopeInternal(), geometryCRS);
                     if (!Utilities.equalsApproximatively(geometryCRS, CommonCRS.WGS84.normalizedGeographic())) {
                         envelope2D = Envelopes.transform(envelope2D, CommonCRS.WGS84.normalizedGeographic());

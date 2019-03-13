@@ -73,6 +73,8 @@ public class FXQueryTable extends BorderPane{
         table.columnResizePolicyProperty().set(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setPrefSize(200, 400);
         FXUtilities.hideTableHeader(table);
+        
+        //Partie lattérale du panneau "Liste des requêtes". Liste des requêtes pré-enregistrées.
         setLeft(table);
 
         table.setItems(SIRS.observableList(queries));
@@ -113,6 +115,7 @@ public class FXQueryTable extends BorderPane{
             public void onChanged(ListChangeListener.Change<? extends SQLQuery> c) {
                 final SQLQuery sqlq = table.getSelectionModel().getSelectedItem();
                 if(sqlq !=null){
+                    //Partie centrale du panneau "Liste des requêtes". Libellé ; Description ; Requête;
                     final FXQueryPane queryPane = new FXQueryPane(sqlq);
                     queryPane.modifiableProperty().bind(modifiableProperty());
                     setCenter(queryPane);
