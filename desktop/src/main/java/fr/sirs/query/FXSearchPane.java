@@ -504,6 +504,7 @@ public class FXSearchPane extends SplitPane {
             pane.setContent(table);
             dia.setDialogPane(pane);
             dia.setTitle("Liste des requêtes");
+            dia.setResizable(true);
 
             final Optional res = dia.showAndWait();
             if (editable) {

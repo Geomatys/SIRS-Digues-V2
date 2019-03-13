@@ -30,13 +30,14 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 
 /**
  *
  * @author Johann Sorel (Geomatys)
  * @author Alexis Manin (Geomatys)
  */
-public class FXQueryPane extends GridPane {
+public class FXQueryPane extends VBox {
 
     @FXML private TextArea uiDesc;
     @FXML private TextArea uiSql;
