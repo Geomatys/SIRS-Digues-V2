@@ -91,7 +91,7 @@ public class PrinterUtilities {
     }
 
     ////////////////////////////////////////////////////////////////////////////
-    // FICHES DÉTAILLÉES DE RÉSEAUX HYDRAULIQUES FERMÉS
+    // FICHES DÉTAILLÉES D'OUVRAGE HYDRAULIQUE ASSOCIE
     ////////////////////////////////////////////////////////////////////////////
 
     public static File printOuvrageAssocie(final List<String> avoidReseauFields,
@@ -161,6 +161,7 @@ public class PrinterUtilities {
 
             final JRDomWriterReseauFermeSheet templateWriter = new JRDomWriterReseauFermeSheet(metaTemplateStream,
                     avoidReseauFields, observationFields, reseauFields, desordreFields, printPhoto, printReseauOuvrage);
+            
             templateWriter.setOutput(templateFile);
             templateWriter.write();
 
