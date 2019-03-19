@@ -38,6 +38,7 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -291,9 +292,11 @@ public class ObjectDataSource<T> implements JRDataSource {
      * @return
      */
     static final String lastObservation(ObservableList<? extends AbstractObservation> observations) {
-        if (observations.size() > 0) {
-            observations.sort(OBSERVATION_COMPARATOR);
-            AbstractObservation lastObservation = observations.get(0);
+        if ((observations!=null) && (observations.size() > 0)) {
+            
+             //min car OBSERVATION_COMPARATOR classe les observations dans l'ordre inverse des dates (LocalDate)
+            AbstractObservation lastObservation = Collections.min(observations, OBSERVATION_COMPARATOR);
+            
             Optional<LocalDate> observationDate = Optional.ofNullable(lastObservation.getDate());
             Optional<String> observationEvolution = Optional.ofNullable(lastObservation.getEvolution());
 
@@ -303,6 +306,10 @@ public class ObjectDataSource<T> implements JRDataSource {
                         + obsDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                         + " : " + observationEvolution.get())
                         .orElse("Observation : " + observationEvolution.get());
+            }else if(observationDate.isPresent()){
+                return "Observation du "
+                        + observationDate.get().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                        + " : pas d'évolution renseignée.";
             }
         }
 
