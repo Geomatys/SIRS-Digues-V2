@@ -58,10 +58,12 @@ import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeEndiguement;
 import fr.sirs.theme.ColumnOrder;
 import fr.sirs.theme.ui.pojotable.ChoiceStage;
+import fr.sirs.theme.ui.pojotable.CopyElementException;
 import fr.sirs.theme.ui.pojotable.DeleteColumn;
 import fr.sirs.theme.ui.pojotable.Deletor;
 import fr.sirs.theme.ui.pojotable.DistanceComputedPropertyColumn;
 import fr.sirs.theme.ui.pojotable.EditColumn;
+import fr.sirs.theme.ui.pojotable.ElementCopier;
 import fr.sirs.theme.ui.pojotable.ExportAction;
 import fr.sirs.theme.ui.pojotable.ImportAction;
 import fr.sirs.theme.ui.pojotable.ShowOnMapColumn;
@@ -199,7 +201,7 @@ public class PojoTable extends BorderPane implements Printable {
     private static final Predicate DEFAULT_VISIBLE_PREDICATE = o -> o != null;
 
     protected static final String BUTTON_STYLE = "buttonbar-button";
-    private static final Image ICON_SHOWONMAP = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GLOBE, 16, FontAwesomeIcons.DEFAULT_COLOR),null);
+    private static final Image ICON_SHOWONMAP = SwingFXUtils.toFXImage(IconBuilder.createImage(FontAwesomeIcons.ICON_GLOBE, 16, FontAwesomeIcons.DEFAULT_COLOR), null);
 
     public static final String[] COLUMNS_TO_IGNORE = new String[]{
         AUTHOR_FIELD, VALID_FIELD, FOREIGN_PARENT_ID_FIELD, LONGITUDE_MIN_FIELD,
@@ -207,8 +209,11 @@ public class PojoTable extends BorderPane implements Printable {
         COMMENTAIRE_FIELD, GEOMETRY_MODE_FIELD, REVISION_FIELD, ID_FIELD, NEW_FIELD
     };
 
-    /** Design rows for {@link Element} objects, making its look change according to {@link Element#validProperty() } */
-    private final Callback<TableView<Element>, TableRow<Element>> rowFactory = (TableView<Element> param) ->  new ValidityRow();
+    /**
+     * Design rows for {@link Element} objects, making its look change according
+     * to {@link Element#validProperty() }
+     */
+    private final Callback<TableView<Element>, TableRow<Element>> rowFactory = (TableView<Element> param) -> new ValidityRow();
 
     protected final Class pojoClass;
     protected final AbstractSIRSRepository repo;
@@ -217,19 +222,29 @@ public class PojoTable extends BorderPane implements Printable {
     private final LabelMapper labelMapper;
 
     /**
-     * Editabilité du tableau (possibilité d'ajout et de suppression des éléments
-     * via la barre d'action sur la droite, plus édition des cellules)
+     * Editabilité du tableau (possibilité d'ajout et de suppression des
+     * éléments via la barre d'action sur la droite, plus édition des cellules)
      */
     protected final BooleanProperty editableProperty = new SimpleBooleanProperty(true);
-    /** Editabilité des cellules tableau */
+    /**
+     * Editabilité des cellules tableau
+     */
     protected final BooleanProperty cellEditableProperty = new SimpleBooleanProperty();
-    /** Parcours fiche par fiche */
+    /**
+     * Parcours fiche par fiche
+     */
     protected final BooleanProperty fichableProperty = new SimpleBooleanProperty(true);
-    /** Accès à la fiche détaillée d'un élément particulier */
+    /**
+     * Accès à la fiche détaillée d'un élément particulier
+     */
     protected final BooleanProperty detaillableProperty = new SimpleBooleanProperty(true);
-    /** Possibilité de faire une recherche sur le contenu de la table */
+    /**
+     * Possibilité de faire une recherche sur le contenu de la table
+     */
     protected final BooleanProperty searchableProperty = new SimpleBooleanProperty(true);
-    /** Ouvrir l'editeur sur creation d'un nouvel objet */
+    /**
+     * Ouvrir l'editeur sur creation d'un nouvel objet
+     */
     protected final BooleanProperty openEditorOnNewProperty = new SimpleBooleanProperty(true);
     /**
      * Créer un nouvel objet à l'ajout.
@@ -240,10 +255,15 @@ public class PojoTable extends BorderPane implements Printable {
      * de liens vers des objets préexistants.
      */
     protected final BooleanProperty createNewProperty = new SimpleBooleanProperty(true);
-    /** Importer des points. Default : false */
+    /**
+     * Importer des points. Default : false
+     */
     protected final BooleanProperty importPointProperty = new SimpleBooleanProperty(false);
 
-    /** Composant de filtrage. Propose de filtrer la liste d'objets actuels en éditant des contraintes sur leur propriété. */
+    /**
+     * Composant de filtrage. Propose de filtrer la liste d'objets actuels en
+     * éditant des contraintes sur leur propriété.
+     */
     protected FXFilterBuilder uiFilterBuilder;
 //    protected final TitledPane uiFilterPane = new TitledPane();
     private final Button resetFilterBtn = new Button("Réinitialiser");
@@ -259,22 +279,30 @@ public class PojoTable extends BorderPane implements Printable {
     protected final Button uiExport = new Button(null, new ImageView(SIRS.ICON_EXPORT_WHITE));
     protected final Button uiSearch = new Button(null, searchNone);
     protected final Button uiAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));
+    protected final ToggleButton uiCopyTo = new ToggleButton(null, new ImageView(SIRS.ICON_COPY_WHITE));
     protected final Button uiDelete = new Button(null, new ImageView(SIRS.ICON_TRASH_WHITE));
     protected final ToggleButton uiFilter = new ToggleButton(null, new ImageView(SIRS.ICON_FILTER_WHITE));
-    protected final HBox searchEditionToolbar = new HBox(uiRefresh, uiFicheMode, uiImport, uiExport, uiSearch, uiAdd, uiDelete, uiFilter);
+    protected final HBox searchEditionToolbar = new HBox(uiRefresh, uiFicheMode, uiImport, uiExport, uiSearch, uiAdd, uiCopyTo, uiDelete, uiFilter);
 
     // Barre de gauche : navigation dans le parcours de fiches
-    private final Button uiPrevious = new Button("",new ImageView(SIRS.ICON_CARET_LEFT));
-    private final Button uiNext = new Button("",new ImageView(SIRS.ICON_CARET_RIGHT));
+    private final Button uiPrevious = new Button("", new ImageView(SIRS.ICON_CARET_LEFT));
+    private final Button uiNext = new Button("", new ImageView(SIRS.ICON_CARET_RIGHT));
     private final Button uiCurrent = new Button();
     protected final HBox navigationToolbar = new HBox(uiPrevious, uiCurrent, uiNext);
 
     protected final ProgressIndicator searchRunning = new ProgressIndicator();
-    /** Supplier providing table data. Returned list will be used to set {@link #allValues}*/
+    /**
+     * Supplier providing table data. Returned list will be used to set
+     * {@link #allValues}
+     */
     private final SimpleObjectProperty<Supplier<ObservableList<Element>>> dataSupplierProperty = new SimpleObjectProperty<>();
-    /** Brut values returned by {@link #dataSupplier}. */
+    /**
+     * Brut values returned by {@link #dataSupplier}.
+     */
     private ObservableList<Element> allValues;
-    /** Values from {@link #allValues}, after applying text/property filters. */
+    /**
+     * Values from {@link #allValues}, after applying text/property filters.
+     */
     private ObservableList<Element> filteredValues;
     //Cette liste est uniquement pour de la visualisation, elle peut contenir un enregistrement en plus
     //afin d'afficher la barre de scroll horizontale.
@@ -289,16 +317,25 @@ public class PojoTable extends BorderPane implements Printable {
     protected final DeleteColumn deleteColumn = new DeleteColumn(createNewProperty, this::deletePojos, DEFAULT_VALUE_FACTORY, DEFAULT_VISIBLE_PREDICATE);
     protected final EditColumn editCol = new EditColumn(DEFAULT_VALUE_FACTORY, this::editPojo, DEFAULT_VISIBLE_PREDICATE);
 
-    /** The element to set as parent for any created element using {@linkplain #createPojo() }. */
+    /**
+     * The element to set as parent for any created element using {@linkplain #createPojo()
+     * }.
+     */
     protected final ObjectProperty<Element> parentElementProperty = new SimpleObjectProperty<>();
-    /** The element to set as owner for any created element using {@linkplain #createPojo() }.
-     On the contrary to the parent, the owner purpose is not to contain the created pojo, but to reference it.*/
+    /**
+     * The element to set as owner for any created element using {@linkplain #createPojo()
+     * }. On the contrary to the parent, the owner purpose is not to contain the
+     * created pojo, but to reference it.
+     */
     protected final ObjectProperty<Element> ownerElementProperty = new SimpleObjectProperty<>();
 
     //Partie basse pour les commentaires et photos
     private final FXCommentPhotoView commentPhotoView;
 
-    /** Task object designed for asynchronous update of the elements contained in the table. */
+    /**
+     * Task object designed for asynchronous update of the elements contained in
+     * the table.
+     */
     protected final SimpleObjectProperty<Task> tableUpdaterProperty = new SimpleObjectProperty<>();
 
     protected final StackPane notifier = new StackPane();
@@ -307,6 +344,8 @@ public class PojoTable extends BorderPane implements Printable {
 
     // Default deletor
     private Consumer deletor;
+    
+    protected ElementCopier elementCopier;
 
     /*
     Objet auquel sont rattachés les éléments de la pojoTable.
@@ -314,7 +353,7 @@ public class PojoTable extends BorderPane implements Printable {
     et on risque de créer des dysfonctionnement si on leur affecte une valeur quand ils n'en ont pas jusqu'à présent.
     La propriété "container" est particulièrement destinée à être capable de déterminer l'entité dans laquelle est incluse
     la PojoTable afin de filter les éléments à ajouter sur un tronçon identique.
-    */
+     */
     private final ObjectProperty<? extends Element> container;
 
     public PojoTable(final Class pojoClass, final String title, final ObjectProperty<? extends Element> container) {
@@ -333,7 +372,6 @@ public class PojoTable extends BorderPane implements Printable {
         this(repo, title, (ObjectProperty<? extends Element>) null);
     }
 
-
     private PojoTable(final Class pojoClass, final String title, final ObjectProperty<? extends Element> container, final AbstractSIRSRepository repo) {
         if (pojoClass == null && repo == null) {
             throw new IllegalArgumentException("Pojo class to expose and Repository parameter are both null. At least one of them must be valid.");
@@ -342,8 +380,7 @@ public class PojoTable extends BorderPane implements Printable {
         createNewProperty.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 uiAdd.setGraphic(new ImageView(SIRS.ICON_ADD_WHITE));
-            }
-            else {
+            } else {
                 uiAdd.setGraphic(new ImageView(SIRS.ICON_CHAIN_WHITE));
             }
         });
@@ -385,6 +422,7 @@ public class PojoTable extends BorderPane implements Printable {
         uiFicheMode.managedProperty().bind(uiFicheMode.visibleProperty());
         uiSearch.managedProperty().bind(uiSearch.visibleProperty());
         uiAdd.managedProperty().bind(uiAdd.visibleProperty());
+        uiCopyTo.managedProperty().bind(uiCopyTo.visibleProperty());
         uiDelete.managedProperty().bind(uiDelete.visibleProperty());
         uiImport.managedProperty().bind(uiImport.visibleProperty());
         uiExport.managedProperty().bind(uiExport.visibleProperty());
@@ -397,9 +435,9 @@ public class PojoTable extends BorderPane implements Printable {
          */
         editableProperty.addListener((
                 ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                    deleteColumn.setVisible(newValue);
-                    //editCol.setVisible(newValue && detaillableProperty.get());
-                });
+            deleteColumn.setVisible(newValue);
+            //editCol.setVisible(newValue && detaillableProperty.get());
+        });
         cellEditableProperty.bind(editableProperty);
 
         detaillableProperty.addListener(
@@ -410,7 +448,7 @@ public class PojoTable extends BorderPane implements Printable {
         uiTable.getColumns().add(deleteColumn);
         uiTable.getColumns().add((TableColumn) editCol);
 
-        if(AvecGeometrie.class.isAssignableFrom(pojoClass)){
+        if (AvecGeometrie.class.isAssignableFrom(pojoClass)) {
             uiTable.getColumns().add(new ShowOnMapColumn(DEFAULT_VALUE_FACTORY, ICON_SHOWONMAP, DEFAULT_VISIBLE_PREDICATE));
         }
 
@@ -443,7 +481,9 @@ public class PojoTable extends BorderPane implements Printable {
                 final ToggleButton uiPositionVisibility = new ToggleButton(null, viewOn);
                 uiPositionVisibility.setSelected(true); // Prepare to be forced to change.
                 uiPositionVisibility.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                    if (newValue == null) return;
+                    if (newValue == null) {
+                        return;
+                    }
                     for (final TableColumn col : positionColumns) {
                         col.setVisible(newValue);
                     }
@@ -465,10 +505,12 @@ public class PojoTable extends BorderPane implements Printable {
             }
 
             //on trie les colonnes
-            final List<String> order = ColumnOrder.sort(this.pojoClass.getSimpleName(),colNames);
-            for(String colName : order){
+            final List<String> order = ColumnOrder.sort(this.pojoClass.getSimpleName(), colNames);
+            for (String colName : order) {
                 final TableColumn column = getColumn(colName, cols);
-                if(column!=null) uiTable.getColumns().add(column);
+                if (column != null) {
+                    uiTable.getColumns().add(column);
+                }
             }
 
         } catch (IntrospectionException ex) {
@@ -486,7 +528,7 @@ public class PojoTable extends BorderPane implements Printable {
         uiSearch.getStyleClass().add("label-header");
         uiSearch.disableProperty().bind(searchableProperty.not());
 
-        titleProperty.set(title==null? labelMapper == null? null : labelMapper.mapClassName() : title);
+        titleProperty.set(title == null ? labelMapper == null ? null : labelMapper.mapClassName() : title);
         final Label uiTitle = new Label();
         uiTitle.textProperty().bind(titleProperty);
         uiTitle.getStyleClass().add("pojotable-header");
@@ -501,78 +543,118 @@ public class PojoTable extends BorderPane implements Printable {
             @Override
             public void handle(ActionEvent event) {
 
-            final Element p;
-            if(createNewProperty.get()){
-                p = createPojo();
-                if (p != null && openEditorOnNewProperty.get()) {
-                    editPojo(p, SIRS.EDITION_PREDICATE);
-                }
-            }
-            else {
-                final ObservableList<Preview> choices;
-                final Element cont = PojoTable.this.container.get();
-                if(Objet.class.isAssignableFrom(pojoClass) && cont instanceof Objet) {
-
-                    // récupération de tous les éléments du type compatible avec le tableau courant
-                    final List<Preview> possiblePreviews = new ArrayList<>(session.getPreviews().getByClass(pojoClass));
-
-                    // récupération des identifiants
-                    final List<String> possibleIds = possiblePreviews.stream().map(e -> e.getElementId()).collect(Collectors.toList());
-
-                    // recupération des objets correspondant aux identifiants
-                    final List<Objet> entities = PojoTable.this.session.getRepositoryForClass(pojoClass).get(possibleIds);
-
-                    // retrait des entités qui ne sont pas sur le même tronçon que le "conteneur"
-                    entities.removeIf(new Predicate<Objet>() {
-                        @Override
-                        public boolean test(Objet t) {
-                            return !((Objet) cont).getLinearId().equals(t.getLinearId());
-                        }
-                    });
-
-                    // récupération des identifiants des éléments sur le même tronçon
-                    final List<String> sameContainerIds = entities.stream().map(o -> o.getId()).collect(Collectors.toList());
-
-                    // filtrage des previews correspondants
-                    possiblePreviews.removeIf(new Predicate<Preview>() {
-                        @Override
-                        public boolean test(Preview t) {
-                            return !sameContainerIds.contains(t.getElementId());
-                        }
-                    });
-
-                    choices = SIRS.observableList(possiblePreviews);
-
-                    System.out.println("positionables");
-                }
-                else {
-                    choices = SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted();
-                }
-
-                final PojoTableChoiceStage<Element> stage = new ChoiceStage(
-                        PojoTable.this.repo, choices);
-                stage.showAndWait();
-                p = stage.getRetrievedElement().get();
-                if (p!=null) {
-                    if(getAllValues().contains(p)){
-                        final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le lien que vous souhaitez ajouter est déjà présent dans la table.");
-                        alert.setResizable(true);
-                        alert.showAndWait();
-                    } else {
-                        getAllValues().add(p);
+                final Element p;
+                if (createNewProperty.get()) {
+                    p = createPojo();
+                    if (p != null && openEditorOnNewProperty.get()) {
+                        editPojo(p, SIRS.EDITION_PREDICATE);
                     }
                 } else {
-                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
-                    alert.setResizable(true);
-                    alert.showAndWait();
+                    final ObservableList<Preview> choices;
+                    final Element cont = PojoTable.this.container.get();
+                    if (Objet.class.isAssignableFrom(pojoClass) && cont instanceof Objet) {
+
+                        // récupération de tous les éléments du type compatible avec le tableau courant
+                        final List<Preview> possiblePreviews = new ArrayList<>(session.getPreviews().getByClass(pojoClass));
+
+                        // récupération des identifiants
+                        final List<String> possibleIds = possiblePreviews.stream().map(e -> e.getElementId()).collect(Collectors.toList());
+
+                        // recupération des objets correspondant aux identifiants
+                        final List<Objet> entities = PojoTable.this.session.getRepositoryForClass(pojoClass).get(possibleIds);
+
+                        // retrait des entités qui ne sont pas sur le même tronçon que le "conteneur"
+                        entities.removeIf(new Predicate<Objet>() {
+                            @Override
+                            public boolean test(Objet t) {
+                                return !((Objet) cont).getLinearId().equals(t.getLinearId());
+                            }
+                        });
+
+                        // récupération des identifiants des éléments sur le même tronçon
+                        final List<String> sameContainerIds = entities.stream().map(o -> o.getId()).collect(Collectors.toList());
+
+                        // filtrage des previews correspondants
+                        possiblePreviews.removeIf(new Predicate<Preview>() {
+                            @Override
+                            public boolean test(Preview t) {
+                                return !sameContainerIds.contains(t.getElementId());
+                            }
+                        });
+
+                        choices = SIRS.observableList(possiblePreviews);
+
+                        System.out.println("positionables");
+                    } else {
+                        choices = SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted();
+                    }
+
+                    final PojoTableChoiceStage<Element> stage = new ChoiceStage(
+                            PojoTable.this.repo, choices, null, "Choix de l'élément", "Ajouter");
+                    stage.showAndWait();
+                    p = stage.getRetrievedElement().get();
+                    if (p != null) {
+                        if (getAllValues().contains(p)) {
+                            final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Le lien que vous souhaitez ajouter est déjà présent dans la table.");
+                            alert.setResizable(true);
+                            alert.showAndWait();
+                        } else {
+                            getAllValues().add(p);
+                        }
+                    } else {
+                        final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Aucune entrée ne peut être créée.");
+                        alert.setResizable(true);
+                        alert.showAndWait();
+                    }
                 }
-            }
             }
         };
 
         uiAdd.getStyleClass().add(BUTTON_STYLE);
         uiAdd.setOnAction(addHandler);
         uiAdd.disableProperty().bind(editableProperty.not());
+
+        elementCopier = new ElementCopier(pojoClass, container, session, this.repo);
+
+        // Copie des éléments sélectionnés.
+        uiCopyTo.getStyleClass().add(BUTTON_STYLE);
+        uiCopyTo.setOnAction((ActionEvent event) -> {
+            final Element[] elements = ((List<Element>) uiTable.getSelectionModel().getSelectedItems()).toArray(new Element[0]);
+            if (elements.length > 0) {
+                try {
+
+                    //Choix du destinataire de la copie.
+                    Element target = elementCopier.askForCopyTarget();
+
+                    System.out.println("Demande de Copie dans PojoTable.java pour " + elements.length + " éléments."); //A SUPPRIMER DEBBUG ou mettre en log
+                    System.out.println("Vers :\n" + target.toString());
+
+                    //Copie des éléments sélectionnés vers la cible identifiée.
+                    this.elementCopier.copyPojosTo(target, elements);
+                    
+                    if (elementCopier.getAvecForeignParent()){
+                        //On rafraîchie les éléments du tableau.
+                        updateTableItems(dataSupplierProperty, null, dataSupplierProperty.get());
+                    }
+
+                    final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Eléments copiés avec succès");
+                    alert.setResizable(true);
+                    alert.showAndWait();
+
+                } catch (CopyElementException e) {
+                    e.openAlertWindow();
+                    SIRS.LOGGER.log(Level.WARNING, "CopyElementException lors de la copie d'éléments !", e);
+                } catch (Exception e) {
+                    SIRS.LOGGER.log(Level.WARNING, "Exception inattendue lors de la copie d'éléments !", e);
+                }
+
+            } else {
+                final Alert alert = new Alert(Alert.AlertType.INFORMATION, "Copie impossible, aucun élément sélectionné.");
+                alert.setResizable(true);
+                alert.showAndWait();
+            }
+        });
+        uiCopyTo.disableProperty().bind(editableProperty.not());
 
         uiDelete.getStyleClass().add(BUTTON_STYLE);
         uiDelete.setOnAction((ActionEvent event) -> {
@@ -599,7 +681,7 @@ public class PojoTable extends BorderPane implements Printable {
         uiTable.setTableMenuButtonVisible(true);
         // Load all elements only if the user gave us the repository.
         if (repo != null) {
-            setTableItems(()-> SIRS.observableList(this.repo.getAll()));
+            setTableItems(() -> SIRS.observableList(this.repo.getAll()));
         }
 
         if (AvecPhotos.class.isAssignableFrom(this.pojoClass) || AbstractPhoto.class.isAssignableFrom(this.pojoClass) || Desordre.class.isAssignableFrom(this.pojoClass)) {
@@ -648,7 +730,7 @@ public class PojoTable extends BorderPane implements Printable {
 
         // Update counter when we change selected element.
         final ChangeListener<Number> selectedIndexListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            uiCurrent.setText(""+(newValue.intValue()+1) + " / " + uiTable.getItems().size());
+            uiCurrent.setText("" + (newValue.intValue() + 1) + " / " + uiTable.getItems().size());
         };
         uiFicheMode.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
@@ -673,15 +755,13 @@ public class PojoTable extends BorderPane implements Printable {
         uiExport.disableProperty().bind(Bindings.isNull(uiTable.getSelectionModel().selectedItemProperty()));
         uiExport.setOnAction(new ExportAction(getStructBeanSupplier()));
 
-
-        if(PointZ.class.isAssignableFrom(pojoClass)){
+        if (PointZ.class.isAssignableFrom(pojoClass)) {
             uiTable.getColumns().add(new DistanceComputedPropertyColumn(DOUBLE_CELL_FACTORY, parentElementProperty, uiTable));
         }
 
         final HBox titleBoxing = new HBox(uiTitle);
         titleBoxing.setAlignment(Pos.CENTER);
         final VBox titleAndFilterBox = new VBox(titleBoxing);
-
 
         uiFilter.getStyleClass().add(BUTTON_STYLE);
         uiFilter.managedProperty().bind(uiFilter.visibleProperty());
@@ -726,7 +806,7 @@ public class PojoTable extends BorderPane implements Printable {
         uiPrevious.setTooltip(new Tooltip("Fiche précédente"));
         uiNext.setTooltip(new Tooltip("Fiche suivante"));
         uiRefresh.setTooltip(new Tooltip("Recharger la table"));
-        uiAdd.setTooltip(new Tooltip(createNewProperty.get()? "Créer un nouvel élément" : "Ajouter un élément existant"));
+        uiAdd.setTooltip(new Tooltip(createNewProperty.get() ? "Créer un nouvel élément" : "Ajouter un élément existant"));
         createNewProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             if (newValue) {
                 uiAdd.setTooltip(new Tooltip("Créer un nouvel élément"));
@@ -734,6 +814,7 @@ public class PojoTable extends BorderPane implements Printable {
                 uiAdd.setTooltip(new Tooltip("Ajouter un élément existant"));
             }
         });
+        uiCopyTo.setTooltip(new Tooltip("Copier vers..."));
         uiCurrent.setTooltip(new Tooltip("Aller au numéro..."));
         uiDelete.setTooltip(new Tooltip("Supprimer les éléments sélectionnés"));
         uiFilter.setTooltip(new Tooltip("Filtrer les données"));
@@ -741,7 +822,7 @@ public class PojoTable extends BorderPane implements Printable {
         updateView();
     }
 
-    protected StructBeanSupplier getStructBeanSupplier(){
+    protected StructBeanSupplier getStructBeanSupplier() {
         return new StructBeanSupplier(pojoClass, () -> new ArrayList(uiTable.getSelectionModel().getSelectedItems()));
     }
 
@@ -749,15 +830,15 @@ public class PojoTable extends BorderPane implements Printable {
         return titleProperty;
     }
 
-    protected final ObservableList<TableColumn<Element, ?>> getColumns(){
+    protected final ObservableList<TableColumn<Element, ?>> getColumns() {
         return uiTable.getColumns();
     }
 
-    public final ObservableList<Element> getSelectedItems(){
+    public final ObservableList<Element> getSelectedItems() {
         return uiTable.getSelectionModel().getSelectedItems();
     }
 
-    public final ReadOnlyObjectProperty<? extends Element> selectedItemProperty(){
+    public final ReadOnlyObjectProperty<? extends Element> selectedItemProperty() {
         return getTable().getSelectionModel().selectedItemProperty();
     }
 
@@ -768,47 +849,50 @@ public class PojoTable extends BorderPane implements Printable {
     /**
      * Mise à jour de l'interface en mode "fiche".
      *
-     * SYM-1764 : On crée un nouveau panneau à chaque fois qu'on change de fiche.
-     * Sinon le rechargement des positions provoque des anomalies de recalcul des positions.
+     * SYM-1764 : On crée un nouveau panneau à chaque fois qu'on change de
+     * fiche. Sinon le rechargement des positions provoque des anomalies de
+     * recalcul des positions.
      */
-    private void updateFiche(){
+    private void updateFiche() {
         if (uiTable.getSelectionModel().getSelectedIndex() < 0) {
             uiTable.getSelectionModel().select(0);
         }
 
         setCenter(SIRS.generateEditionPane(uiTable.getSelectionModel().getSelectedItem(), SIRS.EDITION_PREDICATE));
 
-        uiCurrent.setText("" + (uiTable.getSelectionModel().getSelectedIndex()+1) + " / " + uiTable.getItems().size());
+        uiCurrent.setText("" + (uiTable.getSelectionModel().getSelectedIndex() + 1) + " / " + uiTable.getItems().size());
     }
 
-    private void updateView(){
+    private void updateView() {
 
-        if(uiFicheMode.isSelected()){
+        if (uiFicheMode.isSelected()) {
             uiFicheMode.setTooltip(new Tooltip("Passer en mode de tableau synoptique."));
             updateFiche();
-        }else{
+        } else {
             uiFicheMode.setTooltip(new Tooltip("Passer en mode de parcours des fiches."));
 
-            if(commentPhotoView != null) {
+            if (commentPhotoView != null) {
                 final SplitPane sPane = new SplitPane();
                 sPane.setOrientation(Orientation.VERTICAL);
                 sPane.getItems().addAll(uiTable, commentPhotoView);
                 sPane.setDividerPositions(0.9);
                 setCenter(sPane);
-            }else{
+            } else {
                 setCenter(uiTable);
             }
         }
     }
 
     /**
-     * Définit l'élément en paramètre comme parent de tout élément créé via cette table.
+     * Définit l'élément en paramètre comme parent de tout élément créé via
+     * cette table.
      *
      * Note : Ineffectif dans le cas où les éléments de la PojoTable sont créés
      * et listés directement depuis un repository couchDB, ou que l'élément créé
      * est déjà un CouchDB document.
-     * @param parentElement L'élément qui doit devenir le parent de tout objet créé via
-     * la PojoTable.
+     *
+     * @param parentElement L'élément qui doit devenir le parent de tout objet
+     * créé via la PojoTable.
      */
     public void setParentElement(final Element parentElement) {
         parentElementProperty.set(parentElement);
@@ -826,17 +910,18 @@ public class PojoTable extends BorderPane implements Printable {
     /**
      *
      * @return La propriété contenant l'élément à affecter en tant que parent de
-     *  tout élément créé via cette table. Jamais nulle, mais peut-être vide.
+     * tout élément créé via cette table. Jamais nulle, mais peut-être vide.
      */
     public ObjectProperty<Element> parentElementProperty() {
         return parentElementProperty;
     }
 
     /**
-     * Définit l'élément en paramètre comme principal référent de tout élément créé via cette table.
+     * Définit l'élément en paramètre comme principal référent de tout élément
+     * créé via cette table.
      *
-     * @param parentElement L'élément qui doit devenir le principal référent de tout objet créé via
-     * la PojoTable.
+     * @param parentElement L'élément qui doit devenir le principal référent de
+     * tout objet créé via la PojoTable.
      */
     public void setOwnerElement(final Element parentElement) {
         ownerElementProperty.set(parentElement);
@@ -844,8 +929,8 @@ public class PojoTable extends BorderPane implements Printable {
 
     /**
      *
-     * @return L'élément principal référent de tout élément créé via
-     * cette table. Peut être nul.
+     * @return L'élément principal référent de tout élément créé via cette
+     * table. Peut être nul.
      */
     public Element getOwnerElement() {
         return ownerElementProperty.get();
@@ -853,53 +938,65 @@ public class PojoTable extends BorderPane implements Printable {
 
     /**
      *
-     * @return La propriété contenant l'élément à affecter en tant que principal référent de
-     *  tout élément créé via cette table. Jamais nulle, mais peut-être vide.
+     * @return La propriété contenant l'élément à affecter en tant que principal
+     * référent de tout élément créé via cette table. Jamais nulle, mais
+     * peut-être vide.
      */
     public ObjectProperty<Element> ownerElementProperty() {
         return ownerElementProperty;
     }
 
-    public synchronized ObservableList<Element> getAllValues(){
+    public synchronized ObservableList<Element> getAllValues() {
         return allValues;
     }
 
-    public BooleanProperty editableProperty(){
+    public BooleanProperty editableProperty() {
         return editableProperty;
     }
-    public BooleanProperty cellEditableProperty(){
+
+    public BooleanProperty cellEditableProperty() {
         return cellEditableProperty;
     }
-    public BooleanProperty detaillableProperty(){
+
+    public BooleanProperty detaillableProperty() {
         return detaillableProperty;
     }
-    public BooleanProperty fichableProperty(){
+
+    public BooleanProperty fichableProperty() {
         return fichableProperty;
     }
-    public BooleanProperty searchableProperty(){
+
+    public BooleanProperty searchableProperty() {
         return searchableProperty;
     }
+
     public BooleanProperty openEditorOnNewProperty() {
         return openEditorOnNewProperty;
     }
+
     public BooleanProperty createNewProperty() {
         return createNewProperty;
     }
+
     public BooleanProperty importPointProperty() {
         return importPointProperty;
     }
+
     public BooleanProperty commentAndPhotoProperty() {
         if (commentPhotoView == null) {
             return new ReadOnlyBooleanWrapper(false);
         }
         return commentPhotoView.visibleProperty();
     }
+
     public BooleanProperty exportVisibleProperty() {
         return uiExport.visibleProperty();
     }
+
     public BooleanProperty searchVisibleProperty() {
         return uiSearch.visibleProperty();
     }
+
     public BooleanProperty ficheModeVisibleProperty() {
         return uiFicheMode.visibleProperty();
     }
@@ -908,11 +1005,11 @@ public class PojoTable extends BorderPane implements Printable {
         return uiFilter.visibleProperty();
     }
 
-    public ObjectProperty<Supplier<ObservableList<Element>>> dataSupplierProperty(){
+    public ObjectProperty<Supplier<ObservableList<Element>>> dataSupplierProperty() {
         return dataSupplierProperty;
     }
 
-    public VBox getFilterUI(){
+    public VBox getFilterUI() {
         return filterContent;
     }
 
@@ -921,7 +1018,9 @@ public class PojoTable extends BorderPane implements Printable {
             uiFilterBuilder = new FXFilterBuilder() {
                 @Override
                 protected String getTitle(PropertyType candidate) {
-                    if (candidate == null || candidate.getName() == null || candidate.getName().head() == null) return "";
+                    if (candidate == null || candidate.getName() == null || candidate.getName().head() == null) {
+                        return "";
+                    }
 
                     if (new SEClassementEqualsOperator().canHandle(candidate)) {
                         return "classe";
@@ -949,8 +1048,9 @@ public class PojoTable extends BorderPane implements Printable {
 
                     // Do not filter on java standard property like getClass(), etc.
                     if (readMethod.getAnnotation(Internal.class) != null
-                            || readMethod.getDeclaringClass().equals(Object.class))
+                            || readMethod.getDeclaringClass().equals(Object.class)) {
                         continue;
+                    }
 
                     final HashMap identification = new HashMap(1);
                     identification.put(AbstractIdentifiedType.NAME_KEY, desc.getName());
@@ -981,11 +1081,11 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     /**
-     * Called when user click on the search icon. Prepare the popup with the textfield
-     * to type research into.
+     * Called when user click on the search icon. Prepare the popup with the
+     * textfield to type research into.
      */
-    protected void searchText(){
-        if(uiSearch.getGraphic()!= searchNone){
+    protected void searchText() {
+        if (uiSearch.getGraphic() != searchNone) {
             //une recherche est deja en cours
             return;
         }
@@ -1006,7 +1106,7 @@ public class PojoTable extends BorderPane implements Printable {
         popup.show(uiSearch, sc.getX(), sc.getY());
     }
 
-    protected void goTo(ActionEvent event){
+    protected void goTo(ActionEvent event) {
         final Popup popup = new Popup();
         NumberField indexEditor = new NumberField(NumberField.NumberType.Integer);
 
@@ -1056,8 +1156,8 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     /**
-     * Get the filter which will be applied on the pojo table values. Subclasses can override this method
-     * to extend the filter used.
+     * Get the filter which will be applied on the pojo table values. Subclasses
+     * can override this method to extend the filter used.
      *
      * @return The filter to use, or {@code null} if none.
      */
@@ -1068,15 +1168,16 @@ public class PojoTable extends BorderPane implements Printable {
             try {
                 tmpFilter = uiFilterBuilder.getFilter();
             } catch (Exception e) {
-                SIRS.LOGGER.log(Level.FINE, "No filter can be built for pojo table on "+pojoClass, e);
+                SIRS.LOGGER.log(Level.FINE, "No filter can be built for pojo table on " + pojoClass, e);
             }
         }
         return tmpFilter;
     }
 
     /**
-     * Start an asynchronous task which will update table content with the elements
-     * provided by input supplier.
+     * Start an asynchronous task which will update table content with the
+     * elements provided by input supplier.
+     *
      * @param producer Data provider.
      */
     public void setTableItems(Supplier<ObservableList<Element>> producer) {
@@ -1092,7 +1193,7 @@ public class PojoTable extends BorderPane implements Printable {
             tableUpdaterProperty.get().cancel();
         }
 
-        final Task updater = new TaskManager.MockTask("Recherche...", (Runnable)() -> {
+        final Task updater = new TaskManager.MockTask("Recherche...", (Runnable) () -> {
             synchronized (PojoTable.this) {
                 try {
                     if (newSupplier == null) {
@@ -1131,7 +1232,7 @@ public class PojoTable extends BorderPane implements Printable {
                 filteredValues = allValues.filtered((Element t) -> true);
             } else {
                 final Set<String> result = new HashSet<>();
-                SearchResponse search = Injector.getElasticSearchEngine().search(QueryBuilders.simpleQueryStringQuery("*"+str+"*").analyzeWildcard(true).lenient(true));
+                SearchResponse search = Injector.getElasticSearchEngine().search(QueryBuilders.simpleQueryStringQuery("*" + str + "*").analyzeWildcard(true).lenient(true));
                 Iterator<SearchHit> iterator = search.getHits().iterator();
                 while (iterator.hasNext() && !currentThread.isInterrupted()) {
                     result.add(iterator.next().getId());
@@ -1152,7 +1253,7 @@ public class PojoTable extends BorderPane implements Printable {
                 filteredValues = allValues.filtered(filterPredicate);
             }
 
-                //list contenant zero ou un element null en fonction du contenue de la liste filtrée
+            //list contenant zero ou un element null en fonction du contenue de la liste filtrée
             //NOTE : bug javafx ici, la premiere ligne n'est plus editable a cause de ca
             // probleme avec la selection/focus qui cause trop d'événement
             //            final ObservableList<Element> emptyRecord = FXCollections.observableArrayList();
@@ -1172,7 +1273,6 @@ public class PojoTable extends BorderPane implements Printable {
             decoratedValues.comparatorProperty().bind(uiTable.comparatorProperty());
         });
 
-
         updater.stateProperty().addListener((ObservableValue observable, Object oldValue, Object newValue) -> {
             if (Worker.State.SUCCEEDED.equals(newValue)) {
                 Platform.runLater(() -> {
@@ -1181,7 +1281,7 @@ public class PojoTable extends BorderPane implements Printable {
                 });
             } else if (Worker.State.FAILED.equals(newValue) || Worker.State.CANCELLED.equals(newValue)) {
                 final Throwable ex = updater.getException();
-                if(ex!=null){
+                if (ex != null) {
                     SIRS.LOGGER.log(Level.WARNING, ex.getMessage(), ex);
                 }
                 Platform.runLater(() -> {
@@ -1196,11 +1296,12 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     /**
-     * Delete the elements given in parameter. They are suppressed from the table
-     * list, and if a {@link Repository} exists for the current table, elements
-     * are also suppressed from database. If a parent element has been set using
-     * {@linkplain #setParentElement(fr.sirs.core.model.Element) } method, we will
-     * try to remove them from the parent as well.
+     * Delete the elements given in parameter. They are suppressed from the
+     * table list, and if a {@link Repository} exists for the current table,
+     * elements are also suppressed from database. If a parent element has been
+     * set using {@linkplain #setParentElement(fr.sirs.core.model.Element) }
+     * method, we will try to remove them from the parent as well.
+     *
      * @param pojos The {@link Element}s to delete.
      */
     protected void deletePojos(Element... pojos) {
@@ -1210,7 +1311,7 @@ public class PojoTable extends BorderPane implements Printable {
             // Si l'utilisateur est un externe, il faut qu'il soit l'auteur de
             // l'élément et que celui-ci soit invalide, sinon, on court-circuite
             // la suppression.
-            if(session.editionAuthorized(pojo)){
+            if (session.editionAuthorized(pojo)) {
                 deletor.accept(pojo);
                 items.remove(pojo);
             } else {
@@ -1224,12 +1325,13 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     // Change the default deletor
-    public void setDeletor(final Consumer deletor){
+    public void setDeletor(final Consumer deletor) {
         this.deletor = deletor;
     }
 
     /**
      * Try to find and display a form to edit input object.
+     *
      * @param pojo The object we want to edit.
      * @return
      */
@@ -1256,21 +1358,25 @@ public class PojoTable extends BorderPane implements Printable {
     /**
      * A method called when an element displayed in the table has been modified
      * in the table.
+     *
      * @param event The table event refering to the edition action.
      */
-    protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event){
+    protected void elementEdited(TableColumn.CellEditEvent<Element, Object> event) {
         if (repo != null) {
             final Element obj = event.getRowValue();
-            if(obj == null) return;
+            if (obj == null) {
+                return;
+            }
             repo.update(obj);
         }
     }
 
     /**
-     * Create a new element and add it to table items. If the table {@link Repository}
-     * is not null, we also add the element to the database. We also set its parent
-     * if it's not a contained element and the table {@linkplain #parentElementProperty}
-     * is set.
+     * Create a new element and add it to table items. If the table
+     * {@link Repository} is not null, we also add the element to the database.
+     * We also set its parent if it's not a contained element and the table
+     * {@linkplain #parentElementProperty} is set.
+     *
      * @return The newly created object.
      */
     protected Element createPojo() {
@@ -1292,8 +1398,9 @@ public class PojoTable extends BorderPane implements Printable {
             }
         }
 
-        if(foreignParent!=null && result instanceof AvecForeignParent)
+        if (foreignParent != null && result instanceof AvecForeignParent) {
             ((AvecForeignParent) result).setForeignParentId(foreignParent.getId());
+        }
 
         if (result instanceof Element) {
             final Element newlyCreated = (Element) result;
@@ -1311,13 +1418,10 @@ public class PojoTable extends BorderPane implements Printable {
                 if (parent instanceof AvecBornesTemporelles) {
                     timePeriod = (AvecBornesTemporelles) parent;
                 }
-            }
-
-            /* Mais dans le cas où on a un référant principal, il faut faire un
+            } /* Mais dans le cas où on a un référant principal, il faut faire un
             addChild(), car la liste des éléments de la table n'est pas une
             liste d'éléments enfants. Le référant principal n'a qu'une liste
-            d'identifiants qu'il convient de mettre à jour avec addChild().*/
-            else if(owner != null){
+            d'identifiants qu'il convient de mettre à jour avec addChild().*/ else if (owner != null) {
                 owner.addChild(newlyCreated);
                 if (owner instanceof AvecBornesTemporelles) {
                     timePeriod = (AvecBornesTemporelles) owner;
@@ -1336,7 +1440,7 @@ public class PojoTable extends BorderPane implements Printable {
                         }
                     });
                     child.date_finProperty().addListener((obs, oldValue, newValue) -> {
-                        if (newValue != null && fTimePeriod.getDate_debut()!= null && fTimePeriod.getDate_debut().isAfter(newValue)) {
+                        if (newValue != null && fTimePeriod.getDate_debut() != null && fTimePeriod.getDate_debut().isAfter(newValue)) {
                             child.setDate_debut(oldValue);
                             SIRS.fxRun(false, () -> new Growl(Growl.Type.WARNING, "Impossible d'affecter une date de fin antérieure à la validité du parent.").showAndFade());
                         }
@@ -1366,7 +1470,7 @@ public class PojoTable extends BorderPane implements Printable {
              * HACK : we wait for a short moment to allow potential end-user to
              * get creation event and eventually update item list by himself.
              */
-            if (repo != null)  {
+            if (repo != null) {
                 repo.add(result);
                 synchronized (this) {
                     try {
@@ -1395,8 +1499,9 @@ public class PojoTable extends BorderPane implements Printable {
                             break;
                         }
                     }
-                    if (mustAdd)
+                    if (mustAdd) {
                         allValues.add(newlyCreated);
+                    }
                 }
             }
         } else {
@@ -1424,8 +1529,8 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     private static TableColumn getColumn(final String name, Collection<TableColumn> cols) {
-        for(TableColumn col : cols){
-            if(name.equals(col.getId())){
+        for (TableColumn col : cols) {
+            if (name.equals(col.getId())) {
                 return col;
             }
         }
@@ -1433,8 +1538,9 @@ public class PojoTable extends BorderPane implements Printable {
     }
 
     public Optional<TableColumn> getPropertyColumn(final PropertyDescriptor desc) {
-        if (desc == null)
+        if (desc == null) {
             return Optional.empty();
+        }
 
         final TableColumn col;
         if (desc.getReadMethod().getReturnType().isEnum()) {
@@ -1456,23 +1562,23 @@ public class PojoTable extends BorderPane implements Printable {
     public ObjectProperty getPrintableElements() {
         final List selection = uiTable.getSelectionModel().getSelectedItems();
 
-        return new SimpleObjectProperty(selection.isEmpty()? new ArrayList<>(filteredValues) : new ArrayList(selection));
+        return new SimpleObjectProperty(selection.isEmpty() ? new ArrayList<>(filteredValues) : new ArrayList(selection));
     }
 
     /**
      * Control of the columns to print into the ODT document.
+     *
      * @return a list of property names to print
      * @see PojoTable#print()
      */
-    protected List<String> propertyNamesToPrint(){
+    protected List<String> propertyNamesToPrint() {
 
         final List<String> propertyNames = new ArrayList<>();
         for (final TableColumn column : getColumns()) {
-            if (column.isVisible()){
-                if(column instanceof PropertyColumn){
+            if (column.isVisible()) {
+                if (column instanceof PropertyColumn) {
                     propertyNames.add(((PropertyColumn) column).name);
-                }
-                else if(column instanceof EnumColumn) {
+                } else if (column instanceof EnumColumn) {
                     propertyNames.add(((EnumColumn) column).name);
                 }
             }
@@ -1480,7 +1586,7 @@ public class PojoTable extends BorderPane implements Printable {
         return propertyNames;
     }
 
-    protected Map<String, Function<Element, String>> getPrintMapping(){
+    protected Map<String, Function<Element, String>> getPrintMapping() {
         return Collections.emptyMap();
     }
 
@@ -1510,9 +1616,9 @@ public class PojoTable extends BorderPane implements Printable {
             }
         });
 
-        if (outputFile == null)
+        if (outputFile == null) {
             return true; // Printing aborted. Return true to avoid another component to print instead of us.
-
+        }
         final Task<Boolean> printTask = new Task() {
             @Override
             protected Object call() throws Exception {
@@ -1559,11 +1665,13 @@ public class PojoTable extends BorderPane implements Printable {
 // INTERNAL CLASSES
 //
 ////////////////////////////////////////////////////////////////////////////////
-
     private class EnumColumn extends TableColumn<Element, Object> {
+
         private final String name;
 
-        public String getName(){return name;}
+        public String getName() {
+            return name;
+        }
 
         private EnumColumn(final PropertyDescriptor desc) {
             super(labelMapper.mapPropertyName(desc.getDisplayName()));
@@ -1585,26 +1693,29 @@ public class PojoTable extends BorderPane implements Printable {
 
     private static final Callback<TableColumn<Element, Double>, TableCell<Element, Double>> DOUBLE_CELL_FACTORY = param -> new FXNumberCell(Double.class);
 
-
     /**
-     * Column used to display / edit simple attributes or references of an element.
+     * Column used to display / edit simple attributes or references of an
+     * element.
      */
-    public final class PropertyColumn extends TableColumn<Element, Object>{
+    public final class PropertyColumn extends TableColumn<Element, Object> {
 
         private final Reference ref;
         private final String name;
 
-        public String getName(){return name;}
+        public String getName() {
+            return name;
+        }
 
         public PropertyColumn(final PropertyDescriptor desc) {
             super();
             this.name = desc.getName();
 
             String pName = labelMapper == null ? null : labelMapper.mapPropertyName(name);
-            if (pName != null)
+            if (pName != null) {
                 setText(pName);
-            else
+            } else {
                 setText(name);
+            }
 
             //choix de l'editeur en fonction du type de données
             boolean isEditable = true;
@@ -1613,16 +1724,16 @@ public class PojoTable extends BorderPane implements Printable {
                 //reference vers un autre objet
                 setCellFactory(SIRS.getOrCreateTableCellFactory(ref));
                 try {
-                    final Method propertyAccessor = ref.ref().getMethod(name+"Property");
+                    final Method propertyAccessor = ref.ref().getMethod(name + "Property");
                     setCellValueFactory((CellDataFeatures<Element, Object> param) -> {
-                        if(param!=null && param.getValue()!=null && propertyAccessor!=null){
+                        if (param != null && param.getValue() != null && propertyAccessor != null) {
                             try {
                                 return (ObservableValue) propertyAccessor.invoke(param.getValue());
                             } catch (Exception ex) {
                                 SirsCore.LOGGER.log(Level.WARNING, null, ex);
                                 return null;
                             }
-                        }else{
+                        } else {
                             return null;
                         }
                     });
@@ -1697,8 +1808,9 @@ public class PojoTable extends BorderPane implements Printable {
          */
         Exception tmpError = null;
         final Object rowElement = event.getRowValue();
-        if (rowElement == null)
+        if (rowElement == null) {
             return;
+        }
 
         // Check / update value
         TablePosition<Element, Object> pos = event.getTablePosition();
@@ -1707,13 +1819,13 @@ public class PojoTable extends BorderPane implements Printable {
         if (value instanceof WritableValue) {
             final Object oldValue = value.getValue();
             try {
-                ((WritableValue)value).setValue(event.getNewValue());
+                ((WritableValue) value).setValue(event.getNewValue());
                 elementEdited(event);
             } catch (Exception e) {
                 SIRS.LOGGER.log(Level.WARNING, "Cannot update field.", e);
                 tmpError = e;
                 // rollback value in case of error.
-                ((WritableValue)value).setValue(oldValue);
+                ((WritableValue) value).setValue(oldValue);
                 event.getTableView().refresh(); // To ensure cell rendering is aware we've rollbacked data.
             }
         } else {
@@ -1742,18 +1854,21 @@ public class PojoTable extends BorderPane implements Printable {
     /**
      * Display input node into the notification popup. All previous content will
      * be removed from popup.
+     *
      * @param toShow The node to show in notification popup.
      */
     public void showNotification(final Node toShow) {
-        if (toShow == null)
+        if (toShow == null) {
             showNotification(Collections.EMPTY_LIST);
-        else
+        } else {
             showNotification(Collections.singletonList(toShow));
+        }
     }
 
     /**
-     * Display input nodes into a popup stack pane. All previous content will
-     * be removed from popup.
+     * Display input nodes into a popup stack pane. All previous content will be
+     * removed from popup.
+     *
      * @param toShow nodes to display in notification popup.
      */
     public void showNotification(final List<Node> toShow) {
@@ -1775,7 +1890,7 @@ public class PojoTable extends BorderPane implements Printable {
     private class ValidityRow extends TableRow<Element> {
 
         ValidityRow() {
-            final BooleanBinding authorizedBinding = Bindings.createBooleanBinding(() -> getItem() == null? false : session.editionAuthorized(getItem()), itemProperty());
+            final BooleanBinding authorizedBinding = Bindings.createBooleanBinding(() -> getItem() == null ? false : session.editionAuthorized(getItem()), itemProperty());
             this.editableProperty().bind(cellEditableProperty.and(authorizedBinding));
             // Hack : Apparently, forbidding row editability is not enough to prevent
             // the contained cells to be edited, so we have to force disability on thes cases.

@@ -18,6 +18,7 @@
  */
 package fr.sirs.theme.ui.pojotable;
 
+import fr.sirs.SIRS;
 import fr.sirs.core.component.AbstractSIRSRepository;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Preview;
@@ -26,16 +27,25 @@ import javafx.beans.binding.ObjectBinding;
 import javafx.collections.ObservableList;
 
 /**
- *
+ * 
  * @author Samuel Andrés (Geomatys) [extraction de la PojoTable]
  */
 public class ChoiceStage extends PojoTableComboBoxChoiceStage<Element, Preview> {
 
-    public ChoiceStage(AbstractSIRSRepository repo, ObservableList<Preview> items){
-        super();
-        setTitle("Choix de l'élément");
+    /**
+     * Constructeur de ChoiceStage.
+     * 
+     * @param repo : Répositorie de l'élément sélectionné.
+     * @param items : Elements sélectionnable.
+     * @param defaultSelection : Sélection par defaut
+     * @param windowTitle : Titre de la fenêtre d'interface ouverte.
+     * @param okButtonLabel : Label du bouton de validation.
+     */
+    public ChoiceStage(final AbstractSIRSRepository repo,final ObservableList<Preview> items, final Object defaultSelection, final String windowTitle, final String okButtonLabel){
+        super(okButtonLabel);
+        setTitle(windowTitle);
 
-        comboBox.setItems(items);
+        SIRS.initCombo(comboBox, items, defaultSelection);
         retrievedElement.bind(new ObjectBinding<Element>() {
 
             {
@@ -46,7 +56,7 @@ public class ChoiceStage extends PojoTableComboBoxChoiceStage<Element, Preview> 
             protected Element computeValue() {
                 if(comboBox.valueProperty()!=null){
                     final Preview preview = comboBox.valueProperty().get();
-                    if(preview!=null){
+                    if((preview!=null)&&(repo!=null)){
                         return (Element) repo.get(preview.getDocId());
                     }
                 }
