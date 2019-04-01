@@ -94,7 +94,7 @@ public class ForeignParentPojoTable<T extends AvecForeignParent> extends PojoTab
             try {
                 repo.add(created);
             } catch (NullPointerException e) {
-                SIRS.LOGGER.log(Level.FINE, "Repository introuvable", e);
+                SIRS.LOGGER.log(Level.WARNING, "Repository introuvable", e);
             }
             getAllValues().add(created);
         }
