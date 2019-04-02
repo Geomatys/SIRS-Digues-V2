@@ -52,7 +52,7 @@ import javafx.scene.layout.Priority;
  */
 public class FXTronconThemePane extends BorderPane {
 
-    // Préview spécifique pour l'affichage des objets n'ayant pas pas d'identifiant de tronçon.(SYM-1765)
+    // Préview spécifique pour l'affichage des objets n'ayant pas d'identifiant de tronçon.(SYM-1765)
     private static final Preview EMPTY_PREVIEW = new Preview();
 
     static {
@@ -126,17 +126,21 @@ public class FXTronconThemePane extends BorderPane {
     }
 
     protected Parent createContent(AbstractTheme.ThemeManager manager) {
+        
+        //Composant : Consultation/Edition
         final Separator separator = new Separator();
         separator.setVisible(false);
         final SimpleFXEditMode editMode = new SimpleFXEditMode();
         final HBox topPane = new HBox(separator, editMode);
         HBox.setHgrow(separator, Priority.ALWAYS);
 
+        //Création de la TronconThemePojoTable
         final TronconThemePojoTable table = new TronconThemePojoTable(manager, (ObjectProperty<? extends Element>) null);
         table.setDeletor(manager.getDeletor());
         table.editableProperty.bind(editMode.editionState());
         table.foreignParentProperty().bindBidirectional(linearIdProperty);
 
+        // Remplissage du BorderPane parent (englobant) (center, top, right, bottom, left). 
         return new BorderPane(table, topPane, null, null, null);
     }
 }

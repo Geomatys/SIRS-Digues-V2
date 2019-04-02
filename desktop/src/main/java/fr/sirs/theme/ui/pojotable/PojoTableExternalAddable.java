@@ -24,6 +24,10 @@ import fr.sirs.core.model.AbstractObservation;
 import fr.sirs.core.model.Element;
 import fr.sirs.core.model.Role;
 import fr.sirs.theme.ui.PojoTable;
+import fr.sirs.ui.Growl;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -38,10 +42,12 @@ import javafx.scene.image.ImageView;
  *
  * @author Samuel Andrés (Geomatys)
  */
-public class PojoTableExternalAddable extends PojoTable {
+public class PojoTableExternalAddable<T extends AbstractObservation> extends PojoTable {
+
     /**
-     * Contrôle de l'éditabilité du tableau spécifique, même lorsqu'on n'est pas en mode éditable en général. Faux a priori,
-     * doit être mis à vrai pour être activé.
+     * Contrôle de l'éditabilité du tableau spécifique, même lorsqu'on n'est pas
+     * en mode éditable en général. Faux a priori, doit être mis à vrai pour
+     * être activé.
      */
     private final BooleanProperty externEditableProperty = new SimpleBooleanProperty(false);
     protected final Button uiExternAdd = new Button(null, new ImageView(SIRS.ICON_ADD_WHITE));// bouton d'ajout spécifique aux utilisateurs externes
@@ -52,10 +58,8 @@ public class PojoTableExternalAddable extends PojoTable {
 
         externEditableProperty.bind(Injector.getSession().roleBinding().isEqualTo(Role.EXTERN));
 
-
         // A- ajout
         //==============================================================================================================
-
         uiAdd.visibleProperty().bind(externEditableProperty.not().or(editableProperty));
         uiExternAdd.managedProperty().bind(uiExternAdd.visibleProperty());
         uiExternAdd.visibleProperty().bind(externEditableProperty.and(uiAdd.disabledProperty()));
@@ -63,7 +67,7 @@ public class PojoTableExternalAddable extends PojoTable {
         uiExternAdd.getStyleClass().add(BUTTON_STYLE);
         uiExternAdd.setOnAction(uiAdd.getOnAction());// même action que le bouton d'ajout classique
 
-        uiExternAdd.setTooltip(new Tooltip(createNewProperty.get()? "Créer un nouvel élément (externe)" : "Ajouter un élément existant (externe)"));
+        uiExternAdd.setTooltip(new Tooltip(createNewProperty.get() ? "Créer un nouvel élément (externe)" : "Ajouter un élément existant (externe)"));
         createNewProperty.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             if (newValue) {
                 uiExternAdd.setTooltip(new Tooltip("Créer un nouvel élément (externe)"));
@@ -72,10 +76,8 @@ public class PojoTableExternalAddable extends PojoTable {
             }
         });
 
-
         // B- retrait
         //==============================================================================================================
-
         uiDelete.visibleProperty().bind(externEditableProperty.not().or(editableProperty));
         uiExternDelete.managedProperty().bind(uiExternDelete.visibleProperty());
         uiExternDelete.visibleProperty().bind(externEditableProperty.and(uiDelete.disabledProperty()));
@@ -85,12 +87,10 @@ public class PojoTableExternalAddable extends PojoTable {
 
         uiExternDelete.setTooltip(new Tooltip("Supprimer les éléments sélectionnés (externe)"));
 
-
         // C- insertion dans la barre d'outils
         //==============================================================================================================
-
         final ObservableList<Node> toolbarButtons = searchEditionToolbar.getChildren();
-        toolbarButtons.add(toolbarButtons.indexOf(uiAdd)+1, uiExternAdd); // On insère le bouton d'ajout
-        toolbarButtons.add(toolbarButtons.indexOf(uiDelete)+1, uiExternDelete); // On insère le bouton d'ajout
+        toolbarButtons.add(toolbarButtons.indexOf(uiAdd) + 1, uiExternAdd); // On insère le bouton d'ajout
+        toolbarButtons.add(toolbarButtons.indexOf(uiDelete) + 1, uiExternDelete); // On insère le bouton d'ajout
     }
 }
