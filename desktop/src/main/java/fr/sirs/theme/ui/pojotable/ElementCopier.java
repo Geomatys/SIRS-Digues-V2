@@ -1,7 +1,20 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * This file is part of SIRS-Digues 2.
+ *
+ * Copyright (C) 2019, FRANCE-DIGUES,
+ *
+ * SIRS-Digues 2 is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * SIRS-Digues 2 is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * SIRS-Digues 2. If not, see <http://www.gnu.org/licenses/>
  */
 package fr.sirs.theme.ui.pojotable;
 
@@ -20,36 +33,34 @@ import java.util.Optional;
 import java.util.logging.Level;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
+import org.apache.sis.util.ArgumentChecks;
 
 /**
  *
- * @author matthieu
+ * @author Matthieu Bastianelli (Geomatys)
  */
 public class ElementCopier {
 
     // Repository 
     protected AbstractSIRSRepository currentPojoRepo;
     protected AbstractSIRSRepository targetRepo;
-    protected Session session;
+    final protected Session session;
 
     // Classe des éléments de la pojotable associée
-    private Class pojoClass;
+    final private Class pojoClass;
 
-    protected Boolean avecForeignParent;
-    protected Boolean isAbstractObservation;
+    final protected Boolean avecForeignParent;
+    final protected Boolean isAbstractObservation;
 
     ObjectProperty<? extends Element> container;
 
     //Class vers laquelle on souhaite faire la copie des éléments sélectionnés.
-    private Optional<Class> targetCLass;
+    private Optional<Class> targetClass;
 
     public ElementCopier(Class pojoClass, ObjectProperty<? extends Element> container, Session session, AbstractSIRSRepository pojoRepo) {
+        ArgumentChecks.ensureNonNull("Pojo class", pojoClass);
+        ArgumentChecks.ensureNonNull("Session", session);
 
         this.pojoClass = pojoClass;
         this.avecForeignParent = AvecForeignParent.class.isAssignableFrom(pojoClass);
@@ -65,23 +76,23 @@ public class ElementCopier {
             currentPojoRepo = pojoRepo;
 
             try {
-                this.targetCLass = Optional.of(AvecForeignParent.getForeignParentClass(pojoClass));
+                this.targetClass = Optional.of(AvecForeignParent.getForeignParentClass(pojoClass));
             } catch (Exception e) {
-                this.targetCLass = Optional.empty();
+                this.targetClass = Optional.empty();
             }
         } else if (isAbstractObservation) { //On priorise la classe du ForeignParent pour la target classe.
             try {
-                this.targetCLass = Optional.of(container.getValue().getClass());
+                this.targetClass = Optional.of(container.getValue().getClass());
             } catch (NullPointerException e) {
-                this.targetCLass = Optional.empty();
+                this.targetClass = Optional.empty();
             }
         } else {
-            this.targetCLass = Optional.empty();
+            this.targetClass = Optional.empty();
         }
 
         //Si on a trouvé une classe cible, on récupère son repositorie.
-        if (targetCLass.isPresent()) {
-            this.targetRepo = session.getRepositoryForClass(targetCLass.get());
+        if (targetClass.isPresent()) {
+            this.targetRepo = session.getRepositoryForClass(targetClass.get());
         }
     }
 
@@ -115,9 +126,9 @@ public class ElementCopier {
         //le ForeignParent sur le container.
         if (avecForeignParent || isAbstractObservation) {
 
-            if (targetCLass.isPresent()) {
+            if (targetClass.isPresent()) {
                 // récupération de tous les éléments de la classe identifiée
-                choices = SIRS.observableList(new ArrayList<>(session.getPreviews().getByClass(targetCLass.get())));
+                choices = SIRS.observableList(new ArrayList<>(session.getPreviews().getByClass(targetClass.get())));
             } else {
                 throw new CopyElementException("Copie impossible, aucune cible identifiée pour la copie.");
             }
@@ -156,11 +167,10 @@ public class ElementCopier {
 
         } else if (this.isAbstractObservation) {
 
-
             final Alert alert = new Alert(Alert.AlertType.WARNING, "Attention les éléments copiés sont susceptibles de ne pas respecter les bornes temporelles de l'élément de destination! Vous devrez les mettre à jour manuellement.");
             alert.setResizable(true);
             alert.showAndWait();
-            
+
             return copyPojosToContainer(targetedElement, pojosToCopy);
         }
 
@@ -310,8 +320,8 @@ public class ElementCopier {
         return container;
     }
 
-    public Optional<Class> getTargetCLass() {
-        return targetCLass;
+    public Optional<Class> getTargetClass() {
+        return targetClass;
     }
 
 }

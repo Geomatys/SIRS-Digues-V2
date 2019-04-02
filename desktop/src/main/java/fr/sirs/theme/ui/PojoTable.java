@@ -584,7 +584,6 @@ public class PojoTable extends BorderPane implements Printable {
 
                         choices = SIRS.observableList(possiblePreviews);
 
-                        System.out.println("positionables");
                     } else {
                         choices = SIRS.observableList(session.getPreviews().getByClass(pojoClass)).sorted();
                     }
@@ -625,9 +624,6 @@ public class PojoTable extends BorderPane implements Printable {
 
                     //Choix du destinataire de la copie.
                     Element target = elementCopier.askForCopyTarget();
-
-                    System.out.println("Demande de Copie dans PojoTable.java pour " + elements.length + " éléments."); //A SUPPRIMER DEBBUG ou mettre en log
-                    System.out.println("Vers :\n" + target.toString());
 
                     //Copie des éléments sélectionnés vers la cible identifiée.
                     this.elementCopier.copyPojosTo(target, elements);
