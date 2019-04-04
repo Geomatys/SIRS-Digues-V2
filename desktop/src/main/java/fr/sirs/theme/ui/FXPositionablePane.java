@@ -38,6 +38,7 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.Preview;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.theme.ui.calculcoordinates.ConvertPositionableCoordinates;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -201,9 +202,7 @@ public class FXPositionablePane extends BorderPane {
     }
 
     private LinearReferencing.SegmentInfo[] getSourceLinear(final SystemeReperage source) {
-        final Positionable positionable = posProperty.get();
-        final TronconDigue t = FXPositionableMode.getTronconFromPositionable(positionable);
-        return LinearReferencingUtilities.getSourceLinear(t, source);
+        return ConvertPositionableCoordinates.getSourceLinear(source, posProperty.get());
     }
 
     /**
@@ -425,7 +424,7 @@ public class FXPositionablePane extends BorderPane {
 
         //calcul de la position geographique
         final Positionable pos = getPositionable();
-        final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(getPositionable());
+        final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(pos);
         final SystemeReperageRepository srRepo = (SystemeReperageRepository) Injector.getSession().getRepositoryForClass(SystemeReperage.class);
 
         final SystemeReperage defaultSr;
@@ -488,7 +487,7 @@ public class FXPositionablePane extends BorderPane {
             //pour chaque systeme de reperage
             for (SystemeReperage sr : srs) {
                 final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr);
-                Map.Entry<BorneDigue, Double> computedLinear = FXPositionableMode.computeLinearFromGeo(segments, sr, startPoint);
+                Map.Entry<BorneDigue, Double> computedLinear = ConvertPositionableCoordinates.computeLinearFromGeo(segments, sr, startPoint);
                 boolean aval = true;
                 double distanceBorne = computedLinear.getValue();
                 if (distanceBorne < 0) {
@@ -506,7 +505,7 @@ public class FXPositionablePane extends BorderPane {
                 page.append("<br/>");
 
                 if (!startPoint.equals(endPoint)) {
-                    computedLinear = FXPositionableMode.computeLinearFromGeo(segments, sr, endPoint);
+                    computedLinear = ConvertPositionableCoordinates.computeLinearFromGeo(segments, sr, endPoint);
                     aval = true;
                     distanceBorne = computedLinear.getValue();
                     if (distanceBorne < 0) {

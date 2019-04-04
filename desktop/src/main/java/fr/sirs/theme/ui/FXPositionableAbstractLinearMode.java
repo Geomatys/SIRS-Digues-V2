@@ -32,6 +32,7 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.SystemeReperageBorne;
 import fr.sirs.core.model.TronconDigue;
+import fr.sirs.theme.ui.calculcoordinates.ConvertPositionableCoordinates;
 import fr.sirs.util.FormattedDoubleConverter;
 import fr.sirs.util.SirsStringConverter;
 import java.text.DecimalFormat;
@@ -323,18 +324,8 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
         positionable.setBorne_debut_distance(uiDistanceStart.getValue());
         positionable.setBorne_fin_distance(uiDistanceEnd.getValue());
 
-        //on recalcule la geometrie uniquement si on peut la dédduire des bornes.
-        if (startBorne != null || endBorne != null) {
-            final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionable);
-            final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-            final LineString geometry = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), positionable, borneRepo);
-
-            //sauvegarde de la geometrie
-            positionable.geometryProperty().set(geometry);
-
-            positionable.setPositionDebut(geometry.getStartPoint());
-            positionable.setPositionFin(geometry.getEndPoint());
-        }
+        //on recalcule la geométrie et les coordonnées Géo du positionable.
+        ConvertPositionableCoordinates.computePositionableGeometryAndCoord(positionable);
     }
 
     protected void coordChange(){
@@ -414,34 +405,6 @@ public abstract class FXPositionableAbstractLinearMode extends BorderPane implem
             tronconSegments = LinearReferencingUtilities.getSourceLinear(t, source);
         }
         return tronconSegments;
-    }
-
-    /**
-     * Compute current positionable point using linear referencing information
-     * defined in the form. Returned point is expressed with Database CRS.
-     *
-     * @param distance
-     * @param borneProperty
-     * @param amont
-     * @return The point computed from starting borne. If we cannot, we return null.
-     */
-    protected Point computeGeoFromLinear(final Number distance,
-            final BorneDigue borneProperty, final boolean amont) {
-
-        final Positionable positionable = posProperty.get();
-        final TronconDigue t = FXPositionableMode.getTronconFromPositionable(positionable);
-
-        if (distance != null && borneProperty != null && t != null) {
-            //calcul à partir des bornes
-            final Point bornePoint = borneProperty.getGeometry();
-            double dist = distance.doubleValue();
-            if (amont) {
-                dist *= -1;
-            }
-            return LinearReferencingUtilities.computeCoordinate(t.getGeometry(), bornePoint, dist, 0);
-        } else {
-            return null;
-        }
     }
 
     private static class BorneComparator implements Comparator<BorneDigue> {
