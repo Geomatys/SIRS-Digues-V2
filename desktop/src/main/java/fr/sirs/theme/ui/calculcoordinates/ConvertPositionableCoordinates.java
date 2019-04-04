@@ -21,6 +21,7 @@ package fr.sirs.theme.ui.calculcoordinates;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import fr.sirs.Injector;
+import fr.sirs.SIRS;
 import fr.sirs.core.LinearReferencingUtilities;
 import fr.sirs.core.TronconUtils;
 import fr.sirs.core.component.AbstractSIRSRepository;
@@ -29,6 +30,7 @@ import fr.sirs.core.model.Positionable;
 import fr.sirs.core.model.SystemeReperage;
 import fr.sirs.core.model.TronconDigue;
 import fr.sirs.theme.ui.FXPositionableMode;
+import java.util.logging.Level;
 import org.apache.sis.util.ArgumentChecks;
 import org.geotoolkit.referencing.LinearReferencing;
 
@@ -38,72 +40,79 @@ import org.geotoolkit.referencing.LinearReferencing;
  */
 public class ConvertPositionableCoordinates {
 
-    //===============================
-    //  Compute Geo from Linear.
-    //===============================
+//    //===============================
+//    //  Compute Geo from Linear.
+//    //===============================
+//    /**
+//     * Compute current positionable point using linear referencing information
+//     * defined in the form. Returned point is expressed with Database CRS.
+//     *
+//     * Méthode extraite de FXPositionableAbstractLinearMode.java
+//     *
+//     * @param distance
+//     * @param borneProperty
+//     * @param amont
+//     * @param positionable
+//     * @return The point computed from starting borne. If we cannot, we return
+//     * null.
+//     */
+//    public static Point computeGeoFromLinear(final Number distance,
+//            final BorneDigue borneProperty, final boolean amont, final Positionable positionable) {
+//
+////        final Positionable positionable = posProperty.get();
+//        final TronconDigue t = FXPositionableMode.getTronconFromPositionable(positionable);
+//
+//        if (distance != null && borneProperty != null && t != null) {
+//            //calcul à partir des bornes
+//            final Point bornePoint = borneProperty.getGeometry();
+//            double dist = distance.doubleValue();
+//            if (amont) {
+//                dist *= -1;
+//            }
+//            return LinearReferencingUtilities.computeCoordinate(t.getGeometry(), bornePoint, dist, 0);
+//        } else {
+//            return null;
+//        }
+//    }
     /**
-     * Compute current positionable point using linear referencing information
-     * defined in the form. Returned point is expressed with Database CRS.
+     * Calcule de la géométrie et des coordonnées d'un positionable à partir de
+     * ses coordonnées linéaires.
      *
-     * Méthode extraite de FXPositionableAbstractLinearMode.java
-     *
-     * @param distance
-     * @param borneProperty
-     * @param amont
-     * @param positionable
-     * @return The point computed from starting borne. If we cannot, we return
-     * null.
+     * @param positionableWithLinearCoord
      */
-    public static Point computeGeoFromLinear(final Number distance,
-            final BorneDigue borneProperty, final boolean amont, final Positionable positionable) {
-
-//        final Positionable positionable = posProperty.get();
-        final TronconDigue t = FXPositionableMode.getTronconFromPositionable(positionable);
-
-        if (distance != null && borneProperty != null && t != null) {
-            //calcul à partir des bornes
-            final Point bornePoint = borneProperty.getGeometry();
-            double dist = distance.doubleValue();
-            if (amont) {
-                dist *= -1;
-            }
-            return LinearReferencingUtilities.computeCoordinate(t.getGeometry(), bornePoint, dist, 0);
-        } else {
-            return null;
-        }
-    }
-
     public static void computePositionableGeometryAndCoord(Positionable positionableWithLinearCoord) {
         ArgumentChecks.ensureNonNull("Borne de début du Positionable", positionableWithLinearCoord.getBorneDebutId());
         ArgumentChecks.ensureNonNull("Borne de fin du Positionable", positionableWithLinearCoord.getBorneFinId());
         ArgumentChecks.ensureNonNull("Distance borne début du Positionable", positionableWithLinearCoord.getBorne_debut_distance());
         ArgumentChecks.ensureNonNull("Distance borne fin du Positionable", positionableWithLinearCoord.getBorne_fin_distance());
 
-        final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionableWithLinearCoord);
-        final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-        final LineString geometry = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), positionableWithLinearCoord, borneRepo);
+        try {
 
-        //sauvegarde de la geometrie
-        positionableWithLinearCoord.geometryProperty().set(geometry);
+            final TronconDigue troncon = FXPositionableMode.getTronconFromPositionable(positionableWithLinearCoord);
+            final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
+            final LineString geometry = LinearReferencingUtilities.buildGeometryFromBorne(troncon.getGeometry(), positionableWithLinearCoord, borneRepo);
 
-        // Affectation des coordonnées calculées.
-        positionableWithLinearCoord.setPositionDebut(geometry.getStartPoint());
-        positionableWithLinearCoord.setPositionFin(geometry.getEndPoint());
+            //sauvegarde de la geometrie
+            positionableWithLinearCoord.geometryProperty().set(geometry);
 
-        // On indique que les coordonnées Géographique du Positionable n'ont pas été éditées.
-        positionableWithLinearCoord.setEditedGeoCoordinate(Boolean.FALSE);
+            // Affectation des coordonnées calculées.
+            positionableWithLinearCoord.setPositionDebut(geometry.getStartPoint());
+            positionableWithLinearCoord.setPositionFin(geometry.getEndPoint());
+
+            // On indique que les coordonnées Géographique du Positionable n'ont pas été éditées.
+            positionableWithLinearCoord.setEditedGeoCoordinate(Boolean.FALSE);
+        } catch (RuntimeException re) {
+            SIRS.LOGGER.log(Level.WARNING, "Echec du calcul de géométrie pour le positionable :\n"+
+                    positionableWithLinearCoord.getDesignation(), re);
+
+        }
 
     }
 
     //===============================
     //  Compute Linear from Geo
     //===============================
-    public static LinearReferencing.SegmentInfo[] getSourceLinear(final SystemeReperage source, final Positionable positionable) {
-        final TronconDigue t = FXPositionableMode.getTronconFromPositionable(positionable);
-        return LinearReferencingUtilities.getSourceLinear(t, source);
-    }
     //--------------------------------------------------------------------------
-
     /**
      * Calcul des coordonnées linéaires et mise à jour d'un Positionable à
      * partir de ses coordonnées Géométriques.
@@ -118,46 +127,55 @@ public class ConvertPositionableCoordinates {
         ArgumentChecks.ensureNonNull("Système de repérage", sr);
         ArgumentChecks.ensureNonNull("Positionable", positionableWithGeo);
 
-        //Vérification que le Positionable dispose bien d'une géométrie
-        final Point startPoint = positionableWithGeo.getPositionDebut();
-        final Point endPoint = positionableWithGeo.getPositionFin();
+        try {
 
-        if (startPoint == null || endPoint == null) {
-            throw new IllegalArgumentException("The attributes 'positionDebut' and 'positionFin' of the method's Positionable input must be provided to compute the linear coordinates");
+            //Vérification que le Positionable dispose bien d'une géométrie
+            final Point startPoint = positionableWithGeo.getPositionDebut();
+            final Point endPoint = positionableWithGeo.getPositionFin();
+
+            if (startPoint == null || endPoint == null) {
+                throw new IllegalArgumentException("The attributes 'positionDebut' and 'positionFin' of the method's Positionable input must be provided to compute the linear coordinates");
+            }
+
+            //Initialisation
+            final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
+            final TronconDigue tronconFromPositionable = FXPositionableMode.getTronconFromPositionable(positionableWithGeo);
+            final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr, positionableWithGeo);
+            final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(positionableWithGeo, tronconFromPositionable, segments);
+
+            if ((!startPoint.equals(posInfo.getGeoPointStart())) || (!endPoint.equals(posInfo.getGeoPointEnd()))) {
+                throw new AssertionError("The same starting and ending points must be found for the Positionable positionableWithGeo.");
+            }
+
+            //Calcule des coordonnées linéaires
+            final TronconUtils.PosSR posSR = posInfo.getForSR(sr);
+            //Mise à jour du positionable avec ces coordonnées et l'identifiant du Système de représentation
+            posInfo.setPosSRToPositionable(posSR);
+
+            //Calcule des PR (Position Relative) dans le Système de représentation :
+            float computedPR = TronconUtils.computePR(segments, sr, startPoint, borneRepo);
+            positionableWithGeo.setPrDebut(computedPR);
+            // Calcul duPr du point de fin du Positionable si différent du points de départ.
+            if (!startPoint.equals(endPoint)) {
+                computedPR = TronconUtils.computePR(getSourceLinear(sr, positionableWithGeo), sr, endPoint, borneRepo);
+            }
+            positionableWithGeo.setPrFin(computedPR);
+
+            // On indique que les coordonnées Géographique du Positionable ont été éditées.
+            if ((positionableWithGeo.getEditedGeoCoordinate() == null) || (!positionableWithGeo.getEditedGeoCoordinate())) {
+                positionableWithGeo.setEditedGeoCoordinate(Boolean.TRUE);
+            }
+        } catch (RuntimeException re) {
+            SIRS.LOGGER.log(Level.WARNING, "Echec du calcul de coordonnées linéaires pour le positionable :\n "
+                    + positionableWithGeo.getDesignation() + "\n Dans le Système de représentation :\n" + sr.getLibelle(), re);
+
         }
 
-        //Initialisation
-        final AbstractSIRSRepository<BorneDigue> borneRepo = Injector.getSession().getRepositoryForClass(BorneDigue.class);
-        final TronconDigue tronconFromPositionable = FXPositionableMode.getTronconFromPositionable(positionableWithGeo);
-        final LinearReferencing.SegmentInfo[] segments = getSourceLinear(sr, positionableWithGeo);
-        final TronconUtils.PosInfo posInfo = new TronconUtils.PosInfo(positionableWithGeo, tronconFromPositionable, segments);
+    }
 
-        if( (!startPoint.equals(posInfo.getGeoPointStart())) || (!endPoint.equals(posInfo.getGeoPointEnd())) ){
-            throw new AssertionError("The same starting and ending points must be found for the Positionable positionableWithGeo.");
-        }
-
-        
-        //Calcule des coordonnées linéaires
-        final TronconUtils.PosSR posSR = posInfo.getForSR(sr);
-        //Mise à jour du positionable avec ces coordonnées et l'identifiant du Système de représentation
-        posInfo.setPosSRToPositionable(posSR);
-        
-        
-        //Calcule des PR (Position Relative) dans le Système de représentation :
-        float computedPR = TronconUtils.computePR(segments, sr, startPoint, borneRepo);
-        positionableWithGeo.setPrDebut(computedPR);
-        // Calcul duPr du point de fin du Positionable si différent du points de départ.
-        if (!startPoint.equals(endPoint)) {
-            computedPR = TronconUtils.computePR(getSourceLinear(sr, positionableWithGeo), sr, endPoint, borneRepo);
-        }
-        positionableWithGeo.setPrFin(computedPR);
-
-        
-        // On indique que les coordonnées Géographique du Positionable ont été éditées.
-        if ((positionableWithGeo.getEditedGeoCoordinate() == null) || (!positionableWithGeo.getEditedGeoCoordinate())) {
-            positionableWithGeo.setEditedGeoCoordinate(Boolean.TRUE);
-        }
-
+    public static LinearReferencing.SegmentInfo[] getSourceLinear(final SystemeReperage source, final Positionable positionable) {
+        final TronconDigue t = FXPositionableMode.getTronconFromPositionable(positionable);
+        return LinearReferencingUtilities.getSourceLinear(t, source);
     }
 
     //=====================================================================
